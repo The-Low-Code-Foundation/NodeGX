@@ -112,7 +112,14 @@ for (const category of nodeLibrary.nodeIndex.coreNodes) {
   }
 }
 
-const catalog = buildCatalog(records, { typecasts, packageVersions, nodePickerTypes });
+// The child/parent rules each type exports (P107 s89): the browser library first, then the cloud one for the types
+// only the cloud runtime registers — the same export the editor receives.
+const exportedTypes = new Map();
+for (const lib of [nodeLibrary, generateNodeLibrary(cloudRuntime.context.nodeRegister)]) {
+  for (const t of lib.nodetypes) if (!exportedTypes.has(t.name)) exportedTypes.set(t.name, t);
+}
+
+const catalog = buildCatalog(records, { typecasts, packageVersions, nodePickerTypes, exportedTypes });
 
 // SUB-013 criterion 3 — the documented worked examples must still be authorable against the
 // encodings this run just derived. Checked here rather than in a separate script so that a

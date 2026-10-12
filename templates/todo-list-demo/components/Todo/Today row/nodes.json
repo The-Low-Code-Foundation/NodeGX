@@ -1,0 +1,309 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9f57195d-03bd-5d69-84d8-03546004a95e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "yrIn",
+      "type": "Component Inputs",
+      "label": "The line",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "targetId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isRoutine",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "heading",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "showHeading",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "time",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasTime",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "meta",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasMeta",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "metaColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bg",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "yrOut",
+      "type": "Component Outputs",
+      "label": "What you did to it",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "close",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "check",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "targetId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "yrRoot",
+      "type": "Group",
+      "label": "Today line",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "yrHeading",
+        "yrRow"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "yrHeading",
+      "type": "Text",
+      "label": "Section",
+      "parent": "yrRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "marginTop": "var(--space-4)",
+        "marginBottom": "var(--space-1)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "yrRow",
+      "type": "Group",
+      "label": "Row",
+      "parent": "yrRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "yrTime",
+        "yrMain",
+        "yrTick"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "yrTime",
+      "type": "Text",
+      "label": "Time",
+      "parent": "yrRow",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 44,
+          "unit": "px"
+        },
+        "fontVariantNumeric": "tabular-nums"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "yrMain",
+      "type": "Group",
+      "label": "Title and when",
+      "parent": "yrRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0-5)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "children": [
+        "yrTitle",
+        "yrMeta"
+      ],
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "yrTitle",
+      "type": "Text",
+      "label": "Title",
+      "parent": "yrMain",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "yrMeta",
+      "type": "Text",
+      "label": "How late or soon",
+      "parent": "yrMain",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "yrTick",
+      "type": "net.noodl.controls.button",
+      "label": "Tick it off",
+      "parent": "yrRow",
+      "parameters": {
+        "label": "✓",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--border-control)",
+        "backgroundColor": "transparent",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-2)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-full)",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 26,
+          "unit": "px"
+        },
+        "height": {
+          "value": 26,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)",
+        "marginLeft": "var(--space-1)"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "yrWhich",
+      "type": "Condition",
+      "label": "Something that repeats, or a task?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 470,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "yrRoot"
+  ]
+}

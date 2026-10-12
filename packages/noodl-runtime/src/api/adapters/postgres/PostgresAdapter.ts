@@ -34,6 +34,7 @@
  */
 
 import { declaredProperties, inferType } from '../local-sql/schemaCommon';
+import { SERIES_RAISE_SQL, SERIES_TABLE_DDL, SERIES_TAKE_SQL, formatSeries, seriesColumns, seriesName, seriesNow, seriesPeriod, seriesRaises } from '../series';
 import { translatePgError } from './errors';
 import { PgSchemaManager } from './PgSchemaManager';
 import { DEFAULT_DATA_POOL_MAX, PgConnectionPool, type PgPoolSaturation } from './pool';
@@ -375,6 +376,24 @@ export class PostgresAdapter {
     return this.pool;
   }
 
+  /** P116 ONT-015: `_Series`, made once per connection; a failure is retried by the next create. */
+  private _seriesReady: Promise<void> | null = null;
+  private _seriesTable(): Promise<void> {
+    if (!this._seriesReady)
+      this._seriesReady = this._pool()
+        .run(SERIES_TABLE_DDL)
+        .then(
+          () => undefined,
+          (e: unknown) => {
+            // Two backends making it at once: the loser's IF NOT EXISTS is a duplicate in pg_type, and the table is there.
+            if (/already exists|duplicate key/i.test(e instanceof Error ? e.message : String(e))) return undefined;
+            this._seriesReady = null;
+            throw e;
+          }
+        );
+    return this._seriesReady;
+  }
+
   /** Auto-create the table if allowed, then wait for every queued schema change. */
   private async _ready(collection: string): Promise<void> {
     const sm = this._sm();
@@ -401,7 +420,7 @@ export class PostgresAdapter {
   private _columnScope(collection: string): QueryBuilder.ColumnScope | undefined {
     const present = this._sm().tableColumns(collection);
     if (present.size === 0) return undefined;
-    return { present, absent: new Set<string>() };
+    return { present, absent: new Set<string>(), arrays: QueryBuilder.arrayColumns(this._sm().getTableSchema(collection)) };
   }
 
   private _reportAbsentColumns(collection: string, scope: QueryBuilder.ColumnScope | undefined): void {
@@ -415,6 +434,16 @@ export class PostgresAdapter {
           'carried that property, so it is read as empty. If the name is a typo, nothing else will say so.'
       );
     }
+  }
+
+  /** P116 ONT-004: the same lookup `LocalSQLAdapter._pathLookup` gives a `$path`, over this engine's schema model. */
+  private _pathLookup(): QueryBuilder.CollectionLookup {
+    return (collection: string) => {
+      const properties = declaredProperties(this._getSchema(collection));
+      const scope = this._columnScope(collection);
+      if (!properties && !scope) return null;
+      return { properties, present: scope?.present };
+    };
   }
 
   private _getSchema(collection: string): AdapterSchema | null {
@@ -477,13 +506,13 @@ export class PostgresAdapter {
       await this._ready(options.collection);
       const schema = this._getSchema(options.collection);
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildSelect(options, schema, scope, 'postgres');
+      const { sql, params } = QueryBuilder.buildSelect({ ...options, lookup: this._pathLookup() }, schema, scope, 'postgres');
       const rows = await this._pool().query<AdapterRecord>(sql, params);
       const results = rows.map((row) => this._rowToRecord(row, options.collection));
 
       let count: number | undefined;
       if (options.count) {
-        const built = QueryBuilder.buildCount(options, schema, scope, 'postgres');
+        const built = QueryBuilder.buildCount({ ...options, lookup: this._pathLookup() }, schema, scope, 'postgres');
         const countRow = await this._pool().queryOne<{ count?: number }>(built.sql, built.params);
         count = Number(countRow?.count || 0);
       }
@@ -518,7 +547,7 @@ export class PostgresAdapter {
       const schema = this._getSchema(options.collection);
       const scope = this._columnScope(options.collection);
       const withFields = { ...options, fields };
-      const { sql, params } = QueryBuilder.buildSearchSelect(withFields, schema, scope, 'postgres');
+      const { sql, params } = QueryBuilder.buildSearchSelect({ ...withFields, lookup: this._pathLookup() }, schema, scope, 'postgres');
       const rows = await this._pool().query<AdapterRecord>(sql, params);
       const results = rows.map((row) => {
         const { _rank, _snippet, ...rest } = row;
@@ -532,7 +561,7 @@ export class PostgresAdapter {
 
       let count: number | undefined;
       if (options.count) {
-        const built = QueryBuilder.buildSearchCount(withFields, schema, scope, 'postgres');
+        const built = QueryBuilder.buildSearchCount({ ...withFields, lookup: this._pathLookup() }, schema, scope, 'postgres');
         const countRow = await this._pool().queryOne<{ count?: number }>(built.sql, built.params);
         count = Number(countRow?.count || 0);
       }
@@ -549,7 +578,11 @@ export class PostgresAdapter {
       let sql = `SELECT * FROM ${QueryBuilder.escapeTable(options.collection)} WHERE "objectId" = ?`;
       // Row-level read check: an unreadable row answers exactly like a missing
       // one (existence hiding).
-      const aclClause = QueryBuilder.buildAclPredicate(options.collection, options.acl, params, 'postgres');
+      const aclClause = QueryBuilder.buildAclPredicate(options.collection, options.acl, params, 'postgres', {
+        collection: options.collection,
+        acl: options.acl,
+        lookup: this._pathLookup()
+      });
       if (aclClause) sql += ` AND ${aclClause}`;
       const recordId = params[0] as string;
       const row = await this._pool().queryOne<AdapterRecord>(sql, params);
@@ -585,8 +618,45 @@ export class PostgresAdapter {
       }
 
       const recordId = hasClientId ? (requestedId as string) : generateUUID();
-      const { sql, params } = QueryBuilder.buildInsert({ collection: options.collection, data }, recordId);
-      await this._pool().run(sql, params);
+      // P116 ONT-015: as on SQLite — a gap-free number is taken in the insert's transaction, where the
+      // counter row's lock makes two creates at once wait for each other; the rest are taken first.
+      const insert = async (q: { run(sql: string, params?: readonly unknown[]): Promise<number> }): Promise<void> => {
+        const { sql, params } = QueryBuilder.buildInsert({ collection: options.collection, data }, recordId);
+        await q.run(sql, params);
+      };
+      // A carried number in the series' own look raises the counter in the insert's transaction
+      // (SERIESCARRY); a handed-out number that collides is named in the refusal (SERIESMSG).
+      const tableSchema = this._sm().getTableSchema(options.collection);
+      const series = seriesColumns(tableSchema).filter((c) => {
+        const v = data[c.name];
+        return v === undefined || v === null || v === '';
+      });
+      const raises = seriesRaises(tableSchema, options.collection, data);
+      if (!series.length && !raises.length) await insert(this._pool());
+      else {
+        await this._seriesTable();
+        const at = seriesNow();
+        const filled: Record<string, unknown> = {};
+        const take = async (q: { queryOne<T>(sql: string, params?: readonly unknown[]): Promise<T | undefined> }, c: (typeof series)[number]): Promise<void> => {
+          const row = await q.queryOne<{ issued: string | number }>(SERIES_TAKE_SQL, [seriesName(options.collection, c.name), seriesPeriod(c.series, at)]);
+          data[c.name] = filled[c.name] = formatSeries(c.series, Number(row!.issued), at);
+        };
+        for (const c of series) if (!c.series.gapFree) await take(this._pool(), c);
+        const held = series.filter((c) => c.series.gapFree);
+        try {
+          if (held.length || raises.length)
+            await this._pool().transaction(async (tx) => {
+              for (const c of held) await take(tx, c);
+              for (const r of raises) await tx.run(SERIES_RAISE_SQL, [r.name, r.period, r.next]);
+              await insert(tx);
+            });
+          else await insert(this._pool());
+        } catch (e) {
+          const err = translatePgError(e);
+          err.message = QueryBuilder.uniqueConstraintWithValues(err.message, filled);
+          throw err;
+        }
+      }
 
       const createdRow = await this._selectById(options.collection, recordId);
       const record = this._rowToRecord(createdRow, options.collection);
@@ -609,7 +679,7 @@ export class PostgresAdapter {
       await this._sm().barrier();
 
       const recordId = options.id || options.objectId;
-      const { sql, params } = QueryBuilder.buildUpdate(options, 'postgres');
+      const { sql, params } = QueryBuilder.buildUpdate({ ...options, lookup: this._pathLookup() }, 'postgres');
       let changed: number;
       try {
         changed = await this._pool().run(sql, params);
@@ -622,18 +692,27 @@ export class PostgresAdapter {
       // HLT-016 — see LocalSQLAdapter.save: the probe carries the ACL, so a forbidden row still
       // answers "not found", and a precondition failure is never an existence oracle.
       if (options.expect && changed === 0) {
-        const probe = QueryBuilder.buildRowExists(options.collection, recordId, options.acl, 'postgres');
+        const probe = QueryBuilder.buildRowExists(options.collection, recordId, options.acl, 'postgres', this._pathLookup());
         const exists = await this._pool().queryOne(probe.sql, probe.params);
         options.error(exists ? QueryBuilder.PRECONDITION_FAILED : 'Object not found');
         return;
       }
 
-      // With an ACL context, 0 rows changed means not-found or forbidden —
-      // deliberately indistinguishable (the write predicate is compiled into
-      // the UPDATE itself, so there is no read-then-write race).
-      if (options.acl && changed === 0) {
+      // P109 ISL-039 (P99-HLT016-NOACL): 0 rows changed is "not found" with or without an ACL.
+      // With one it is also "forbidden", deliberately indistinguishable (the write predicate is
+      // compiled into the statement, so there is no read-then-write race). With none — the admin,
+      // the master key, a cloud function — it used to answer success, store nothing, and announce
+      // a change.
+      if (changed === 0) {
         options.error('Object not found');
         return;
+      }
+
+      // P116-S22-SERIESCARRY: as on SQLite — a number edited into the series' own look raises its counter.
+      const raises = seriesRaises(this._sm().getTableSchema(options.collection), options.collection, options.data);
+      if (raises.length) {
+        await this._seriesTable();
+        for (const r of raises) await this._pool().run(SERIES_RAISE_SQL, [r.name, r.period, r.next]);
       }
 
       const updatedRow = await this._selectById(options.collection, recordId);
@@ -657,9 +736,10 @@ export class PostgresAdapter {
         removedRecord = null;
       }
 
-      const { sql, params } = QueryBuilder.buildDelete(options, 'postgres');
+      const { sql, params } = QueryBuilder.buildDelete({ ...options, lookup: this._pathLookup() }, 'postgres');
       const changed = await this._pool().run(sql, params);
-      if (options.acl && changed === 0) {
+      // P109 ISL-039: with or without an ACL (see save).
+      if (changed === 0) {
         options.error('Object not found');
         return;
       }
@@ -679,7 +759,7 @@ export class PostgresAdapter {
       await this._ready(options.collection);
       const schema = this._getSchema(options.collection);
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildCount(options, schema, scope, 'postgres');
+      const { sql, params } = QueryBuilder.buildCount({ ...options, lookup: this._pathLookup() }, schema, scope, 'postgres');
       const row = await this._pool().queryOne<{ count?: number }>(sql, params);
       this._reportAbsentColumns(options.collection, scope);
       options.success(Number(row?.count || 0));
@@ -690,7 +770,7 @@ export class PostgresAdapter {
     this._run('aggregate', options, async () => {
       await this._ready(options.collection);
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildAggregate(options, scope, 'postgres');
+      const { sql, params } = QueryBuilder.buildAggregate({ ...options, lookup: this._pathLookup() }, scope, 'postgres');
       const row = await this._pool().queryOne<AdapterRecord>(sql, params);
       this._reportAbsentColumns(options.collection, scope);
 
@@ -708,7 +788,7 @@ export class PostgresAdapter {
     this._run('distinct', options, async () => {
       await this._ready(options.collection);
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildDistinct(options, scope, 'postgres');
+      const { sql, params } = QueryBuilder.buildDistinct({ ...options, lookup: this._pathLookup() }, scope, 'postgres');
       const rows = await this._pool().query<AdapterRecord>(sql, params);
       this._reportAbsentColumns(options.collection, scope);
       options.success(rows.map((r) => r[options.property]));
@@ -718,9 +798,10 @@ export class PostgresAdapter {
   increment(options: IncrementOptions): void {
     this._run('increment', options, async () => {
       await this._ready(options.collection);
-      const { sql, params } = QueryBuilder.buildIncrement(options, 'postgres');
+      const { sql, params } = QueryBuilder.buildIncrement({ ...options, lookup: this._pathLookup() }, 'postgres');
       const changed = await this._pool().run(sql, params);
-      if (options.acl && changed === 0) {
+      // P109 ISL-039: with or without an ACL (see save).
+      if (changed === 0) {
         options.error('Object not found');
         return;
       }

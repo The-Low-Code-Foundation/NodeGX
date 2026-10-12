@@ -24,8 +24,10 @@ import { RenderLedger } from './renderVerdict';
 import { registerAuthorTools } from './tools/author';
 import { createPlanRegistry, registerPlanTools } from './tools/planTools';
 import { registerBackendReadTools, registerBackendWriteTools } from './tools/backendTools';
+import { registerWorldReadTools, registerWorldWriteTools } from './tools/worldTools';
 import { registerCatalogTools } from './tools/catalogTools';
 import { registerDocsReadTools, registerDocsWriteTools } from './tools/docsTools';
+import { registerScriptReadTools, registerScriptWriteTools } from './tools/scriptTools';
 import { registerImportReportTool } from './tools/importReportTool';
 import { registerReadTools } from './tools/read';
 import { registerRenderTools } from './tools/renderTools';
@@ -40,14 +42,17 @@ import { registerExportReactTools } from './tools/exportReact';
 import { registerOpenInEditorTools } from './tools/openInEditor';
 import { registerSessionStatusTools } from './tools/sessionStatus';
 import { registerKitTools } from './tools/kitTools';
+import { registerProjectSettingsTools } from './tools/projectSettingsTools';
 import { registerLibraryTools } from './tools/libraryTools';
 import { registerLessonTools } from './tools/lessonTools';
 import { ToolDisclosure, recordTools, registerFindTools } from './tools/disclosure';
+import { refuseUnknownArguments } from './tools/unknownArguments';
+import type { ReproducibleOutput } from './project/writeClock';
 
 /**
  * The version this server reports in its MCP handshake.
  *
- * 🔴 **It used to be `@noodl/mcp`'s own `package.json` version, which has read `0.1.0` in every
+ * 🔴 **It used to be `@nodegx/mcp`'s own `package.json` version, which has read `0.1.0` in every
  * release ever cut.** So the handshake said `noodl-mcp 0.1.0` whether the bundle came from 0.1.0
  * or 0.2.4, and "my MCP server is stuck on an old version" was a report nobody — user or
  * maintainer — could confirm or refute. The bundle carries no other version marker either: the
@@ -82,6 +87,13 @@ export interface ServerOptions {
    * surface exactly.
    */
   deferTools?: boolean;
+  /**
+   * P109 ISL-019 — reproducible output, chosen by whoever starts the server (a template
+   * generator, CI): component ids from this namespace and every stamp the epoch. Absent, ids are
+   * still derived (from the project's own id) and stamps are the wall clock. Never a tool
+   * parameter: the model does not choose it.
+   */
+  reproducible?: ReproducibleOutput;
 }
 
 export interface CreatedServer {
@@ -111,7 +123,7 @@ export function createServer(options: ServerOptions): CreatedServer {
     );
   }
 
-  const binding = new ProjectBinding(options.projectDir); // throws early on non-v2 targets
+  const binding = new ProjectBinding(options.projectDir, { reproducible: options.reproducible }); // throws early on non-v2 targets
   const deferTools = options.deferTools !== false;
   const store = binding.peek();
 
@@ -143,6 +155,9 @@ export function createServer(options: ServerOptions): CreatedServer {
     }
   );
 
+  // P109-S12 — a key no tool declares is refused by name before any handler runs (zod would strip it without a word).
+  refuseUnknownArguments(server);
+
   // AWP-006 — every registration below goes through the recorder, which keeps
   // the SDK's handle so a group can be hidden at startup and revealed later.
   // The recorder forwards `registerTool` and nothing else, because that is the
@@ -173,7 +188,10 @@ export function createServer(options: ServerOptions): CreatedServer {
   registerValidateTools(rec, binding, renderLedger);
   registerStyleReadTools(rec, binding);
   registerDocsReadTools(rec, binding);
+  // P109 ISL-005 — the project's script files. Deferred (the `project` group): 0 resident tokens.
+  registerScriptReadTools(rec, binding);
   registerBackendReadTools(rec);
+  registerWorldReadTools(rec, binding);
   // AIX-010 — read-only: assembles the docs-retrofit context. The caller drafts
   // and writes back through write_project_doc.
   registerReviewTools(rec, binding);
@@ -232,7 +250,9 @@ export function createServer(options: ServerOptions): CreatedServer {
     registerPlanTools(rec, binding, planRegistry, exampleBudget, renderLedger, disclosure);
     registerStyleWriteTools(rec, binding);
     registerDocsWriteTools(rec, binding);
+    registerScriptWriteTools(rec, binding);
     registerBackendWriteTools(rec);
+    registerWorldWriteTools(rec, binding);
     // AAQ-011/F13. Write-gated, and it is the strongest write in the server: it
     // starts a process and creates a database. Read-only callers get the
     // diagnosis (checkBackendRequirements says a graph needs a backend) without
@@ -266,6 +286,9 @@ export function createServer(options: ServerOptions): CreatedServer {
     // the project this server is pointed at, which is also why it is refused
     // outright on an unbound server rather than asking for a directory.
     registerKitTools(rec, binding);
+    // P109 ISL-016 — the project file's name, settings and home. Takes the binding: it writes
+    // into the project this server is pointed at.
+    registerProjectSettingsTools(rec, binding);
   }
   // AWP-006 — last, and it has to be: the handles do not all exist until every
   // registration has run, and disabling a group before its tools are registered

@@ -54,8 +54,8 @@
     {
       "fromId": "lr_who",
       "fromProperty": "out-tabTitle",
-      "toId": "lr_tab_title",
-      "toProperty": "in-title"
+      "toId": "lr_page",
+      "toProperty": "title"
     },
     {
       "fromId": "lr_who",

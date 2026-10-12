@@ -1,0 +1,3571 @@
+[
+  {
+    "name": "the Class written: ONE query at the frame end; the rows become Items, Success",
+    "because": "dbcollectionnode2.ts — the Class setter schedules; the frame's one query; the success publishes",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "nothing written: no query, ever; Items undefined, Is Empty true, Count 0",
+    "because": "no setter ran, nothing scheduled",
+    "params": {},
+    "steps": [
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Do with nothing written queries anyway — collection undefined",
+    "because": "storageFetch → scheduleFetch, no guard; the editor's warning only",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Class, Search, a filter and its parameter in one frame: one query carrying all of them",
+    "because": "scheduleFetch coalesces; the neutral filter on the wire",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "search",
+        "value": "ada"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "n",
+              "operator": "greaterThan",
+              "valueSource": "connected",
+              "valuePortName": "qp-min"
+            }
+          ]
+        }
+      },
+      {
+        "set": "qp-min",
+        "value": 3
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the same Class again does not re-query (DEF-046); Do does",
+    "because": "setCollectionName compares; storageFetch does not",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the visual filter written again with the same value re-queries — no comparison on the panel's two editors",
+    "because": "setVisualFilter / setVisualSorting ask only the Query settings box",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "n",
+              "operator": "greaterThan",
+              "valueSource": "connected",
+              "valuePortName": "qp-min"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "n",
+              "operator": "greaterThan",
+              "valueSource": "connected",
+              "valuePortName": "qp-min"
+            }
+          ]
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Use limit with no Limit or Skip: limit 10, skip 0; Limit 2 then narrows",
+    "because": "getStorageLimit / getStorageSkip — `|| 10`, `|| 0`",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "storageEnableLimit",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "storageLimit",
+        "value": 2
+      },
+      {
+        "set": "storageSkip",
+        "value": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Limit without Use limit is not sent",
+    "because": "getStorageLimit returns nothing unless Use limit is on",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "storageLimit",
+        "value": 2
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Fetch total count: the call asks for it, and the answer's total is re-sent on Total Count",
+    "because": "getStorageFetchTotalCount; the success stores the count and flags storageTotalCount",
+    "params": {},
+    "wiredOutputs": [
+      "storageTotalCount"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "storageEnableCount",
+        "value": true
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ],
+                "count": 7
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a connected rule whose parameter has supplied nothing does not narrow the query",
+    "because": "savedFilterToNeutral { dropUnresolvedConnected: true } — the optional filter port",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "n",
+              "operator": "greaterThan",
+              "valueSource": "connected",
+              "valuePortName": "qp-min"
+            }
+          ]
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a filter the Parse lowering refuses (pointsTo, no schema): Error is the refusal, Failure, no call",
+    "because": "getStorageFilter's catch → `failed`; fetch() setError and returns",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "owner",
+              "operator": "pointsTo",
+              "valueSource": "static",
+              "value": "u1"
+            }
+          ]
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Backend the project does not have: the not-configured sentence, Failure, no call; Items stays unset",
+    "because": "fetch() — forBackend answers nothing",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "nope"
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the first failure publishes the empty array; a later one keeps the rows already shown",
+    "because": "REL-011b AC2 — only the first failure publishes `_c`",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Note"
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Other"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "collection": "Note"
+            },
+            "answer": {
+              "error": "Unknown class"
+            }
+          },
+          {
+            "match": {
+              "collection": "Other"
+            },
+            "answer": {
+              "error": "Forbidden"
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "refused with no message: Error is `Failed to fetch.`",
+    "because": "`err || 'Failed to fetch.'`",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": null
+            },
+            "after": 10
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the Class box unticked: the Class is stored and nothing runs; Do queries with it",
+    "because": "shouldRunOnValueChanged('collectionName', …) — the box; Do is not governed",
+    "params": {
+      "runOnChange-collectionName": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the Query settings box unticked: a Limit change does not re-query; Do does",
+    "because": "userInputSetter asks the Query settings box",
+    "params": {
+      "runOnChange-querySettings": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "set": "storageEnableLimit",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Do while a query is out is a second query; each answer publishes its own array",
+    "because": "fetchScheduled is cleared before fetch() runs; each success closes over its own `_c`",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            },
+            "after": 10
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the visual sort: one '-'-prefixed name per rule, in order",
+    "because": "queryutils.ts convertVisualSorting",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualSort",
+        "value": [
+          {
+            "property": "n",
+            "order": "descending"
+          },
+          {
+            "property": "title",
+            "order": "ascending"
+          }
+        ]
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the retired QueryEditor shape reads the same as the builder's: a rule on a parameter",
+    "because": "convertVisualFilterToNeutral — isVisualQueryFormat → visualQueryToNeutral",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "combinator": "and",
+          "rules": [
+            {
+              "property": "title",
+              "operator": "equal to",
+              "input": "min"
+            }
+          ]
+        }
+      },
+      {
+        "set": "qp-min",
+        "value": "a"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "an empty Search sends none; an empty filter group narrows nothing",
+    "because": "`this._internal.search || undefined`; savedFilterToNeutral of no conditions is null",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "search",
+        "value": ""
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": []
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "an empty answer: Items is an empty array, Is Empty true, First Record Id unset, Success",
+    "because": "the success publishes whatever came back",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": []
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the Backend picker names the second backend: the query goes there",
+    "because": "forBackend(modelScope, backendId)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "backend": "other"
+            },
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r3",
+                    "title": "c"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "backends": [
+          "main",
+          "other"
+        ]
+      }
+    }
+  },
+  {
+    "name": "a filter parameter's own box unticked: its change does not re-query",
+    "because": "setQueryParameter asks `qp-<name>`'s own box",
+    "params": {
+      "runOnChange-qp-min": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "n",
+              "operator": "greaterThan",
+              "valueSource": "connected",
+              "valuePortName": "qp-min"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "set": "qp-min",
+        "value": 5
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a write made elsewhere that matches the filter joins Items at the end (no sort); one that does not match, and one to another class, are not heard",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) — create: Model.get(object.objectId), matchesQuery against the query made, `add` with no sort; :256 another class",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "title",
+              "operator": "equalTo",
+              "valueSource": "static",
+              "value": "a"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "a",
+              "n": 0
+            }
+          },
+          {
+            "at": 6,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r8",
+            "data": {
+              "title": "b",
+              "n": 8
+            }
+          },
+          {
+            "at": 7,
+            "type": "create",
+            "collection": "Note",
+            "objectId": "r5",
+            "data": {
+              "title": "a",
+              "n": 4
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "under a sort a created record joins at its sorted place: before the first member that sorts after it",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :291-296 — compareObjects(sort, member, new) > 0 is where it goes",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualSort",
+        "value": [
+          {
+            "property": "n",
+            "order": "ascending"
+          }
+        ]
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r3",
+                    "title": "c",
+                    "n": 3
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r2",
+            "data": {
+              "title": "b",
+              "n": 2
+            }
+          },
+          {
+            "at": 6,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r9",
+            "data": {
+              "title": "z",
+              "n": 9
+            }
+          },
+          {
+            "at": 7,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r0",
+            "data": {
+              "title": "y",
+              "n": 0
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Limit under a DESCENDING sort: the record past the limit is dropped from the end — the new one when it sorts last",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :301-311 — a leading '-' on the first sort key drops the LAST",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualSort",
+        "value": [
+          {
+            "property": "n",
+            "order": "descending"
+          }
+        ]
+      },
+      {
+        "set": "storageEnableLimit",
+        "value": true
+      },
+      {
+        "set": "storageLimit",
+        "value": 2
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r3",
+                    "title": "c",
+                    "n": 3
+                  },
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 3,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r2",
+            "data": {
+              "title": "b",
+              "n": 2
+            }
+          },
+          {
+            "at": 8,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r0",
+            "data": {
+              "title": "y",
+              "n": 0
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Limit under an ASCENDING sort drops the record that sorts LAST: a new record that sorts first stays and pushes the last out; one that sorts last is dropped again at once (v4, C40)",
+    "because": "over Limit the end of the sorted list goes, under any sort — what the backend would answer (C40, fixed in P109 ISL-029 — v3 dropped the FIRST unless the first key was descending)",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualSort",
+        "value": [
+          {
+            "property": "n",
+            "order": "ascending"
+          }
+        ]
+      },
+      {
+        "set": "storageEnableLimit",
+        "value": true
+      },
+      {
+        "set": "storageLimit",
+        "value": 2
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r3",
+                    "title": "c",
+                    "n": 3
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 3,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r0",
+            "data": {
+              "title": "y",
+              "n": 0
+            }
+          },
+          {
+            "at": 8,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r9",
+            "data": {
+              "title": "z",
+              "n": 9
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Limit with NO sort: a record that would go over the Limit asks the backend again — only it knows which records the Limit keeps (v4, C40)",
+    "because": "with no sort, a join over Limit schedules the query again (C40, fixed in P109 ISL-029 — v3 appended it and dropped the first)",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "storageEnableLimit",
+        "value": true
+      },
+      {
+        "set": "storageLimit",
+        "value": 2
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "d",
+              "n": 4
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a member saved out of the filter leaves Items; a record saved into it joins",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :330-349 — save: Model.get(objectId), re-matched; the registry holds the write first",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "title",
+              "operator": "equalTo",
+              "valueSource": "static",
+              "value": "a"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r3",
+                    "title": "a",
+                    "n": 3
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 3,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z",
+              "n": 1
+            }
+          },
+          {
+            "at": 8,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r2",
+            "data": {
+              "title": "a",
+              "n": 2
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a member whose sort key moved moves to its new place: a save that still matches re-sorts Items (v4, C41)",
+    "because": "a saved member that still matches is taken out and put back where it now sorts (C41, fixed in P109 ISL-029 — v3 left it in its old place)",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualSort",
+        "value": [
+          {
+            "property": "n",
+            "order": "ascending"
+          }
+        ]
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r3",
+                    "title": "c",
+                    "n": 3
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "a",
+              "n": 9
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a delete removes a member; a delete of a record not shown changes nothing",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :350-362",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 3,
+            "type": "delete",
+            "collection": "Lesson",
+            "objectId": "r1"
+          },
+          {
+            "at": 8,
+            "type": "delete",
+            "collection": "Lesson",
+            "objectId": "r9"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "with a Search term a write re-queries instead: one query at the next frame",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :266-269 (BAK-008) — scheduleFetch",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "search",
+        "value": "ada"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "a",
+              "n": 0
+            }
+          },
+          {
+            "at": 6,
+            "type": "delete",
+            "collection": "Lesson",
+            "objectId": "r1"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the Record changes box unticked: a write made elsewhere is not heard",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :253 — shouldRunOnValueChange('records')",
+    "params": {},
+    "steps": [
+      {
+        "set": "runOnChange-records",
+        "value": false
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "a",
+              "n": 0
+            }
+          },
+          {
+            "at": 6,
+            "type": "delete",
+            "collection": "Lesson",
+            "objectId": "r1"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "before the first answer a write is not heard — nothing is held yet; once the rows landed, the next one joins",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :255 — `collection === undefined`",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 20
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  }
+                ]
+              }
+            },
+            "after": 10
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "a",
+              "n": 0
+            }
+          },
+          {
+            "at": 15,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r7",
+            "data": {
+              "title": "a",
+              "n": 7
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a write to another backend's store is not heard: the node listens to the store of the backend it queried",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :600-616, :851 — bindStoreEvents(cloudstore)",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "backends": [
+          "main",
+          "other"
+        ],
+        "events": [
+          {
+            "at": 5,
+            "backend": "other",
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "a",
+              "n": 0
+            }
+          },
+          {
+            "at": 6,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r7",
+            "data": {
+              "title": "a",
+              "n": 7
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the Class as it is NOW is matched: a Class changed with its box unticked hears the new class's writes into the old rows",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :256 — `args.collection !== _internal.name`, read live",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "set": "runOnChange-collectionName",
+        "value": false
+      },
+      {
+        "set": "collectionName",
+        "value": "Note"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "a",
+              "n": 0
+            }
+          },
+          {
+            "at": 6,
+            "type": "create",
+            "collection": "Note",
+            "objectId": "r5",
+            "data": {
+              "title": "n",
+              "n": 5
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "after the first failure a write joins the empty array it published",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :942 then :321-329 — the failure published an array; the query made is matched",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": "Forbidden"
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "a",
+              "n": 0
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: Subscribe To Changes on with a Class — the query, then the subscribe `{ collection, primaryKey }` with NO filter though one is set; Realtime Status `connecting` at once (v2, D29 fixed), `subscribed` when the subscription says so",
+    "because": "dbcollectionnode2.ts :563-571 (the query first, then the reconnect), :707-714 (no where; v2 — the status read off the handle, D29), :778-786",
+    "params": {
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      },
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 4
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 5,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: realtime written before the Class in one frame — the reconnect was scheduled first, so the subscribe is made before the query",
+    "because": ":650-663 then :563-571 — two scheduleAfterInputsHaveUpdated callbacks, run in the order scheduled",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: a create told — Change Type, Changed Record, Changed Records, Changed Record Id; Record Created then Records Changed; the query runs again at the next frame end",
+    "because": ":745-776 — and :773-775 scheduleFetch under the Record changes box",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                },
+                {
+                  "at": 2,
+                  "change": {
+                    "type": "create",
+                    "ids": [
+                      "r3"
+                    ],
+                    "records": [
+                      {
+                        "id": "r3",
+                        "title": "a"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: Record changes unticked — a create is still told and pulsed, and nothing is queried again",
+    "because": ":773-775 shouldRunOnValueChange('records')",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true,
+      "runOnChange-records": false
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                },
+                {
+                  "at": 2,
+                  "change": {
+                    "type": "create",
+                    "ids": [
+                      "r3"
+                    ],
+                    "records": [
+                      {
+                        "id": "r3",
+                        "title": "a"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: init publishes the snapshot and pulses nothing, and re-queries nothing; an update pulses Record Updated; a key-only delete leaves Changed Record null and Changed Records empty with the id; resync pulses Records Changed alone",
+    "because": ":749-761 (recordsComplete is the gate; init returns early), :767-772",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "change": {
+                    "type": "init",
+                    "ids": [
+                      "r1"
+                    ],
+                    "records": [
+                      {
+                        "id": "r1",
+                        "title": "a"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "at": 2,
+                  "change": {
+                    "type": "update",
+                    "ids": [
+                      "r1"
+                    ],
+                    "records": [
+                      {
+                        "id": "r1",
+                        "title": "b"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "at": 3,
+                  "change": {
+                    "type": "delete",
+                    "ids": [
+                      "r2"
+                    ],
+                    "records": [],
+                    "recordsComplete": false
+                  }
+                },
+                {
+                  "at": 4,
+                  "change": {
+                    "type": "resync"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: an error told — Realtime Error and Realtime Failure; a later subscribed clears the error; a fatal one stops the subscription",
+    "because": ":798-803; :778-784 a subscribed clears a held error; world.ts REALTIME — a fatal error tells stopped",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "error": {
+                    "message": "The realtime connection went down before it was confirmed (errored).",
+                    "code": "CONNECT_FAILED"
+                  }
+                },
+                {
+                  "at": 2,
+                  "status": "subscribed"
+                },
+                {
+                  "at": 3,
+                  "error": {
+                    "message": "No heartbeat",
+                    "code": "HEARTBEAT_MISSED",
+                    "kind": "fatal"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: a Backend the project has not — the query fails, then the reconnect says so on Realtime Error with the id as written; Failure then Realtime Failure",
+    "because": ":1178-1188 (the query scheduled first), :844-850, :685-693",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "nope"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: the same Class re-written keeps the subscription, and queries nothing (v5, C55)",
+    "because": "dbcollectionnode2.ts setCollectionName: the reconnect only on a change (P109 ISL-030, P107-C55 ruled \"Ignore repeated values\"); v4 disposed the subscription and opened a new one",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: Subscribe To Changes off — torn down: disposed, Subscribed false and Realtime Status empty; the error held is kept",
+    "because": ":650-653, :665-668 — the teardown first; the error is not cleared by it",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": false
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                },
+                {
+                  "at": 2,
+                  "error": {
+                    "message": "Rejected",
+                    "code": "SUBSCRIPTION_REJECTED"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: the Backend switched — the query goes to other, then the subscription follows it there",
+    "because": ":1178-1188 — BCN-008: the subscription follows the picker",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: no Class — realtime on subscribes to nothing",
+    "because": ":669-670",
+    "params": {
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: a subscription held, then Subscribe To Changes off and on again and Do in one frame — the old one disposed and a new one opened BEFORE the query",
+    "because": ":650-663 scheduled first (by the off — a change; v5, C55: a same-value write schedules nothing, so v4's \"written again\" is now off-then-on), :1162-1169 Do second — the frame end runs them in that order",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": false
+      },
+      {
+        "set": "realtime",
+        "value": true
+      },
+      {
+        "signal": "storageFetch"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: a subscription held, then Subscribe To Changes off and Do in one frame — disposed BEFORE the query; Do then the Class changed: the query before the reconnect",
+    "because": ":650-663 then :1162-1169; then Do first, :563-571 second (v5, C55: the Class written is a CHANGE, Lesson to Note — a same-value write would reconnect nothing)",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": false
+      },
+      {
+        "signal": "storageFetch"
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      {
+        "set": "collectionName",
+        "value": "Note"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: realtime on with no Class, then Do and the Class in a later frame — the reconnect asked for after the query this time, so the query is made first (a reconnect flag left set would put the subscribe first)",
+    "because": ":656-663 — the flag clears when the reconnect runs, quiet or not",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: Subscribe To Changes then a Backend the project has not, in one frame — the reconnect fails first: Realtime Failure, then Failure",
+    "because": ":650-663 scheduled before :1178-1188's query; :685-693, :844-850",
+    "params": {
+      "collectionName": "Lesson"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      {
+        "set": "backendId",
+        "value": "nope"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: Record changes unticked — create, update, a whole delete and resync each told and pulsed, the Change outputs moving each time, and nothing queried again",
+    "because": ":745-776 with shouldRunOnValueChange('records') false",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true,
+      "runOnChange-records": false
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "change": {
+                    "type": "create",
+                    "ids": [
+                      "r3"
+                    ],
+                    "records": [
+                      {
+                        "id": "r3",
+                        "title": "a"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "at": 2,
+                  "change": {
+                    "type": "update",
+                    "ids": [
+                      "r3"
+                    ],
+                    "records": [
+                      {
+                        "id": "r3",
+                        "title": "b"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "at": 3,
+                  "change": {
+                    "type": "delete",
+                    "ids": [
+                      "r2"
+                    ],
+                    "records": [
+                      {
+                        "id": "r2",
+                        "title": "b"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "at": 4,
+                  "change": {
+                    "type": "resync"
+                  }
+                },
+                {
+                  "at": 5,
+                  "change": {
+                    "type": "create",
+                    "ids": [
+                      "r4"
+                    ],
+                    "records": [
+                      {
+                        "id": "r4"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: a filter the translator refuses beside a quiet reconnect (realtime on, no Class) — Failure; then Do, a good filter and the Class: the query before the subscribe (a reconnect flag left set would put the subscribe first)",
+    "because": ":656-663 the flag clears when the reconnect runs, quiet or not; :983 the refusal",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "owner",
+              "operator": "pointsTo",
+              "valueSource": "static",
+              "value": "u1"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "title",
+              "operator": "equalTo",
+              "valueSource": "static",
+              "value": "a"
+            }
+          ]
+        }
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: a subscription that never answers: the same Class written twice keeps it (v5, C55); realtime off disposes it, and on again opens another (Realtime Status empty throughout)",
+    "because": ":717-727 the teardown disposes what is held; :707-713 the status is never read; v5 (C55): a same-value Class write no longer reconnects",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: the Class, realtime and a refused filter in one frame — Error and Failure, the subscription opened anyway; realtime off then disposes it",
+    "because": ":983 the query refused; :707-713 the subscription takes no filter; :665-668",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "realtime",
+        "value": true
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "owner",
+              "operator": "pointsTo",
+              "valueSource": "static",
+              "value": "u1"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": false
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: a subscription still connecting and a second query, then Subscribe To Changes off and Do in one frame — disposed before the query, whose answer lands as Items; on again opens a new one",
+    "because": ":650-663 then :1162-1169; :717-727 (v2: the `connecting` read at the subscribe cleared — Realtime Status empty)",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": false
+      },
+      {
+        "signal": "storageFetch"
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: a subscription still connecting (the third), then a refused filter and Subscribe To Changes off in one frame — Error and Failure, the third disposed; on again opens a fourth",
+    "because": ":983 the refusal; :717-727 the teardown clears the `connecting` read at the subscribe (v2); v5 (C55): the second and third subscriptions come from two CHANGES of the Class (Note, then Lesson) — a same-value write reconnects nothing",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Note"
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "owner",
+              "operator": "pointsTo",
+              "valueSource": "static",
+              "value": "u1"
+            }
+          ]
+        }
+      },
+      {
+        "set": "realtime",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Fetch total count with no wire out of Total Count: the call still asks for it and the total is stored, but nothing is sent on a port nobody wired",
+    "because": "dbcollectionnode2.ts :927-930 — the count is stored, and flagged only `if (this.hasOutput('storageTotalCount'))`; the output exists only when a wire registers it (:1146-1153). NSP-020 s84",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "storageEnableCount",
+        "value": true
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ],
+                "count": 7
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a filter parameter arriving alone, after the query ran, re-queries with it: the second call narrows on n > 2 and searches nothing",
+    "because": "dbcollectionnode2.ts :1169-1176 setQueryParameter — stored, and under its own ticked box (a changed value) the frame's query is scheduled; the call reads it through the filter (:1061-1098). NSP-020 s84: kills the swap of this branch with Search's, which generated sequences reach on some seeds only",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "n",
+              "operator": "greaterThan",
+              "valueSource": "connected",
+              "valuePortName": "qp-min"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "set": "qp-min",
+        "value": 2
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+]

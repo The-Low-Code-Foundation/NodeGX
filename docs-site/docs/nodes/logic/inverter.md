@@ -27,6 +27,12 @@ Use it wherever you have the boolean you need, but backwards — e.g. a Switch's
 |---|---|---|---|
 | `value` | Boolean | — | Value to negate; anything falsy counts as false, and leaving it unset keeps Result unset too |
 
+### What each input does
+
+**Value** (`value`)
+
+- always: Result becomes its opposite
+
 ## Outputs
 
 ### Values

@@ -1,0 +1,474 @@
+{
+  "fixture": "text-row",
+  "measuredWith": "scripts/node-spec/layout-measure.js (header: what each field is)",
+  "viewports": {
+    "1280x800": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "consoleErrors": [],
+      "nodes": [
+        {
+          "id": "page",
+          "type": "Page",
+          "parent": "fa44b0cb-260c-269c-9274-2f604e2eb0a7",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 800
+          },
+          "size": {
+            "w": 1280,
+            "h": 800
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-2c5kktzbp1w",
+          "scroll": {
+            "sw": 1280,
+            "sh": 800,
+            "cw": 1280,
+            "ch": 800
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "row",
+          "type": "Group",
+          "parent": "page",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 360,
+            "h": 56
+          },
+          "size": {
+            "w": 360,
+            "h": 56
+          },
+          "padding": [
+            8,
+            12,
+            8,
+            12
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-fh8w99eoqj",
+          "scroll": {
+            "sw": 360,
+            "sh": 56,
+            "cw": 360,
+            "ch": 56
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "label",
+          "type": "Text",
+          "parent": "row",
+          "box": {
+            "x": 12,
+            "y": 18,
+            "w": 44.296875,
+            "h": 20
+          },
+          "size": {
+            "w": 44,
+            "h": 20
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-visual-text  ndl-d-1la2vkdeab5",
+          "scroll": {
+            "sw": 44,
+            "sh": 20,
+            "cw": 44,
+            "ch": 20
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 12,
+            "y": 18
+          }
+        },
+        {
+          "id": "grow",
+          "type": "Text",
+          "parent": "row",
+          "box": {
+            "x": 68.296875,
+            "y": 8,
+            "w": 209.84375,
+            "h": 40
+          },
+          "size": {
+            "w": 210,
+            "h": 40
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-visual-text  ndl-d-12mac3leg3c",
+          "scroll": {
+            "sw": 210,
+            "sh": 40,
+            "cw": 210,
+            "ch": 40
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 68.296875,
+            "y": 8
+          }
+        },
+        {
+          "id": "go",
+          "type": "net.noodl.controls.button",
+          "parent": "row",
+          "box": {
+            "x": 290.140625,
+            "y": 15,
+            "w": 57.859375,
+            "h": 26
+          },
+          "size": {
+            "w": 58,
+            "h": 26
+          },
+          "padding": [
+            5,
+            20,
+            5,
+            20
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-controls-button ndl-d-242neady18a",
+          "scroll": {
+            "sw": 58,
+            "sh": 26,
+            "cw": 58,
+            "ch": 26
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 290.140625,
+            "y": 15
+          }
+        }
+      ]
+    },
+    "390x844": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "consoleErrors": [],
+      "nodes": [
+        {
+          "id": "page",
+          "type": "Page",
+          "parent": "fa44b0cb-260c-269c-9274-2f604e2eb0a7",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 390,
+            "h": 844
+          },
+          "size": {
+            "w": 390,
+            "h": 844
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-2c5kktzbp1w",
+          "scroll": {
+            "sw": 390,
+            "sh": 844,
+            "cw": 390,
+            "ch": 844
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "row",
+          "type": "Group",
+          "parent": "page",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 360,
+            "h": 56
+          },
+          "size": {
+            "w": 360,
+            "h": 56
+          },
+          "padding": [
+            8,
+            12,
+            8,
+            12
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-fh8w99eoqj",
+          "scroll": {
+            "sw": 360,
+            "sh": 56,
+            "cw": 360,
+            "ch": 56
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "label",
+          "type": "Text",
+          "parent": "row",
+          "box": {
+            "x": 12,
+            "y": 18,
+            "w": 44.296875,
+            "h": 20
+          },
+          "size": {
+            "w": 44,
+            "h": 20
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-visual-text  ndl-d-1la2vkdeab5",
+          "scroll": {
+            "sw": 44,
+            "sh": 20,
+            "cw": 44,
+            "ch": 20
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 12,
+            "y": 18
+          }
+        },
+        {
+          "id": "grow",
+          "type": "Text",
+          "parent": "row",
+          "box": {
+            "x": 68.296875,
+            "y": 8,
+            "w": 209.84375,
+            "h": 40
+          },
+          "size": {
+            "w": 210,
+            "h": 40
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-visual-text  ndl-d-12mac3leg3c",
+          "scroll": {
+            "sw": 210,
+            "sh": 40,
+            "cw": 210,
+            "ch": 40
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 68.296875,
+            "y": 8
+          }
+        },
+        {
+          "id": "go",
+          "type": "net.noodl.controls.button",
+          "parent": "row",
+          "box": {
+            "x": 290.140625,
+            "y": 15,
+            "w": 57.859375,
+            "h": 26
+          },
+          "size": {
+            "w": 58,
+            "h": 26
+          },
+          "padding": [
+            5,
+            20,
+            5,
+            20
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-controls-button ndl-d-242neady18a",
+          "scroll": {
+            "sw": 58,
+            "sh": 26,
+            "cw": 58,
+            "ch": 26
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 290.140625,
+            "y": 15
+          }
+        }
+      ]
+    }
+  }
+}

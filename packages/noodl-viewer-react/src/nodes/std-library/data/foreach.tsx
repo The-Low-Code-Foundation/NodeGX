@@ -144,7 +144,8 @@ interface ForEachInstance extends NodeInstance {
     /** Latest value of each forwarded item output, keyed without the prefix. */
     itemOutputs: Record<string, unknown>;
     itemActionItemId?: string;
-    itemActionSignal?: string;
+    /** The rows' signals heard this update, in order — see `itemOutputSignalTriggered`. */
+    pendingItemSignals?: Array<{ name: string; model: ModelLike; itemNode: ForEachItemNode }>;
     itemActionParameters?: Record<string, unknown>;
     /** Serialised so that adds and removes cannot interleave — see `_runQueueOperations`. */
     queuedOperations: QueuedOperation[];
@@ -171,7 +172,11 @@ interface ForEachInstance extends NodeInstance {
     pendingRefreshOutcomes: OutcomeToken[];
     /** Messages already raised during the current rebuild — see `reportTemplateProblem`. */
     reportedTemplateProblems?: Set<string>;
+    /** The Items value whose empty entries were last reported — see `_copyItems`. */
+    reportedEmptyEntriesIn?: unknown;
     hasScheduledCopyItems?: boolean;
+    /** A row was added or removed since the queue started running — see `_signalItemsRendered`. */
+    rowsChanged?: boolean;
     hasScheduledTriggerItemOutputSignal?: boolean;
     target?: ForEachItemNode;
     onItemsCollectionChanged(): void;
@@ -194,11 +199,13 @@ interface ForEachInstance extends NodeInstance {
   _deleteAllItemNodes(): void;
   refresh(): Promise<void>;
   /** Ends every `Refresh` this rebuild answered. A no-op for a setter-driven rebuild. */
-  settleRefresh(outcome: NodeOutcome, code?: string, message?: string): void;
   _queueOperation(op: QueuedOperation): void;
   _runQueueOperations(): Promise<void>;
+  _operationThrew(e: unknown): void;
+  _copyItems(): void;
+  _childIndexFor(listIndex: number): number;
   /** Fires `Items Rendered` once the operation queue has drained. See NDA-004 §3. */
-  _signalItemsRendered(didWork: boolean): void;
+  _signalItemsRendered(): void;
   didMount(): void;
   willUnmount(): void;
   scheduleCopyItems(): void;
@@ -230,6 +237,8 @@ const ForEachDefinition: NodeDefinitionOptions = {
     this._internal.itemOutputSignals = {};
     this._internal.itemOutputs = {};
     this._internal.collection = Collection.get(); // We keep an internal collection so we don't have to refresh all content if the input items collection changes
+    // ISL-003: plain rows reusing an id another live list holds keep their own records (`collection.ts`).
+    Collection.keepPlainRowsApart(this._internal.collection);
     this._internal.queuedOperations = [];
     this._internal.pendingRefreshOutcomes = [];
     this._internal.mountedOperations = [];
@@ -239,8 +248,7 @@ const ForEachDefinition: NodeDefinitionOptions = {
       if (!this._internal.target) return;
 
       this._queueOperation(async () => {
-        const baseIndex = this._internal.target.getChildren().indexOf(this as unknown as ForEachItemNode) + 1;
-        await this.addItem(args.item, baseIndex + args.index);
+        await this.addItem(args.item, this._childIndexFor(args.index));
       });
     });
 
@@ -257,11 +265,11 @@ const ForEachDefinition: NodeDefinitionOptions = {
 
       if (repeaterDisabledWhenUnmounted && !this.isMounted) {
         this._internal.mountedOperations.push(() => {
-          this._internal.collection.set(this._internal.items);
+          this._copyItems();
         });
       } else {
         this._queueOperation(() => {
-          this._internal.collection.set(this._internal.items);
+          this._copyItems();
         });
       }
     };
@@ -408,7 +416,7 @@ const ForEachDefinition: NodeDefinitionOptions = {
       group: 'Events',
       displayName: 'Items Rendered',
       description:
-        'Fires once every item component exists and has been added; item creation is spread across frames, so this is the only honest moment to measure or scroll the list'
+        'Fires when rows were added or removed, once every item component exists; item creation is spread across frames, so this is the only honest moment to measure or scroll the list'
     },
 
     // ERG-001 §4. `Refresh`'s own outcome, and it is deliberately *not* `Items Rendered`:
@@ -453,9 +461,14 @@ const ForEachDefinition: NodeDefinitionOptions = {
       if (!internal.hasScheduledRefresh) {
         internal.hasScheduledRefresh = true;
         this.scheduleAfterInputsHaveUpdated(() => {
-          this._queueOperation(() => {
-            this.refresh();
-          });
+          // ISL-001 (P78 D85). The op RETURNS the rebuild's promise, so the queue runner waits for
+          // it. It used to be `() => { this.refresh(); }` — a block body that returned `undefined`
+          // — and the runner awaited that, drained, cleared `runningOperations` and fired
+          // `Items Rendered` while `refresh()` was still creating rows. Any `add`/`remove` a second
+          // `Items` value queued meanwhile then ran BESIDE the rebuild instead of after it: a
+          // record the new list added was built twice, and one it dropped was "removed" before it
+          // existed and attached afterwards. Three templates met that and each hid it with a wait.
+          this._queueOperation(() => this.refresh());
         });
       }
     },
@@ -513,6 +526,17 @@ const ForEachDefinition: NodeDefinitionOptions = {
         );
       }
 
+      // ISL-049 (P107-C135). A component that is not text (`component = item.kind` on a record whose kind is a number)
+      // reached `startsWith` below, outside the try, and the TypeError stopped the Repeater for good. Ruled: skip that item
+      // and report it, as a Script that throws is.
+      if (template && typeof template !== 'string') {
+        this.raiseRuntimeError(
+          'repeater/template-script-threw',
+          `The Repeater's Script set component to ${JSON.stringify(template) ?? String(template)}, which is not a component path, so that item has no row`
+        );
+        return undefined;
+      }
+
       //simple (and limited) way to support ./ and ../ at the start of component template names
       if (template) {
         if (template.startsWith('./')) {
@@ -530,20 +554,33 @@ const ForEachDefinition: NodeDefinitionOptions = {
     },
     _mapInputs: function (this: ForEachInstance, itemNode: ForEachItemNode, model: ModelLike) {
       if (this._internal.inputMapFunc !== undefined) {
-        // We have a mapping function, run the function and use the mapped values
-        // as inputs
-        this._internal.inputMapFunc(function (mappings) {
-          for (const key in mappings) {
-            if (itemNode.hasInput(key)) {
-              const mapping = mappings[key];
-              if (typeof mapping === 'function') {
-                itemNode.setInputValue(key, mapping(model));
-              } else if (typeof mapping === 'string') {
-                itemNode.setInputValue(key, model.get(mapping));
+        // ISL-049 (P107-C140, C141). Caught here, where both callers meet: at a row's landing the throw used to leave
+        // `addItem` and stop the queue for good; on a record's `change` it unwound through `set` into whoever wrote the
+        // record. The row keeps the inputs the mapping set before it threw.
+        try {
+          // We have a mapping function, run the function and use the mapped values
+          // as inputs
+          this._internal.inputMapFunc(function (mappings) {
+            for (const key in mappings) {
+              if (itemNode.hasInput(key)) {
+                const mapping = mappings[key];
+                if (typeof mapping === 'function') {
+                  itemNode.setInputValue(key, mapping(model));
+                } else if (typeof mapping === 'string') {
+                  itemNode.setInputValue(key, model.get(mapping));
+                }
               }
             }
-          }
-        }, model);
+          }, model);
+        } catch (e) {
+          this.raiseRuntimeError(
+            'repeater/input-mapping-threw',
+            `The Repeater's input mapping threw for the item ${JSON.stringify(model.getId())}, so its row keeps the inputs it had: ${
+              (e as Error)?.message ?? String(e)
+            }`,
+            e
+          );
+        }
       }
     },
     addItem: async function (this: ForEachInstance, model: ModelLike, index: number) {
@@ -566,19 +603,31 @@ const ForEachDefinition: NodeDefinitionOptions = {
         return;
       }
 
-      const itemNode = (await this.nodeScope.createNode(template, guid(), {
-        _forEachModel: model,
-        _forEachNode: this
-      })) as ForEachItemNode;
-
-      // D1, second half: `createNode` on a component path that does not exist yields nothing,
-      // and every line below assumes it did. A renamed or deleted template component is the
-      // ordinary way into this, and it was silent.
-      if (!itemNode) {
-        this.reportTemplateProblem(
-          'repeater/template-component-not-found',
-          `The Repeater cannot find the component ${JSON.stringify(template)}, so its items have no rows — it may have been renamed or deleted`
-        );
+      // D1, second half — a renamed or deleted template component is the ordinary way into this. ISL-049 (P107-C128):
+      // `createNode` never yields nothing for a component the project does not have, it THROWS (`getComponentModel`), so
+      // the `!itemNode` branch written for it never ran and the throw stopped the queue for good. Caught: that item has
+      // no row, and the queue runs on.
+      let itemNode: ForEachItemNode;
+      try {
+        itemNode = (await this.nodeScope.createNode(template, guid(), {
+          _forEachModel: model,
+          _forEachNode: this
+        })) as ForEachItemNode;
+      } catch (e) {
+        // found and still not built (a node in it threw while it was made): not "cannot find"
+        if ((this.context as unknown as { hasComponentModelWithName(name: string): boolean }).hasComponentModelWithName(template)) {
+          this.reportTemplateProblem(
+            'repeater/row-build-failed',
+            `The Repeater could not build a row from ${JSON.stringify(template)}, so its items have no rows: ${
+              (e as Error)?.message ?? String(e)
+            }`
+          );
+        } else {
+          this.reportTemplateProblem(
+            'repeater/template-component-not-found',
+            `The Repeater cannot find the component ${JSON.stringify(template)}, so its items have no rows — it may have been renamed or deleted`
+          );
+        }
         return;
       }
 
@@ -647,6 +696,7 @@ const ForEachDefinition: NodeDefinitionOptions = {
 
       internal.itemNodes.push(itemNode);
       internal.target.addChild(itemNode, index);
+      internal.rowsChanged = true;
     },
     removeItem: function (this: ForEachInstance, model: ModelLike) {
       const internal = this._internal;
@@ -660,6 +710,7 @@ const ForEachDefinition: NodeDefinitionOptions = {
       }
       const child = findChild();
       if (!child) return;
+      internal.rowsChanged = true;
 
       const forEachActions = child.nodeScope.getNodesWithType('For Each Actions') as (NodeInstance & {
         tryRemove(callback: () => void): void;
@@ -697,33 +748,22 @@ const ForEachDefinition: NodeDefinitionOptions = {
 
       this._internal.itemNodes = [];
     },
-    /**
-     * End every `Refresh` this rebuild answered, at most once each.
-     *
-     * ERG-001 §4. The tokens are drained by the caller and passed in, so a `Refresh` pulsed
-     * *during* the async rebuild belongs to the next pass rather than being settled by this
-     * one. A rebuild nobody asked for arrives here with an empty list and reports nothing,
-     * which is what keeps every setter-driven refresh silent.
-     */
-    settleRefresh: function (this: ForEachInstance, outcome: NodeOutcome, code?: string, message?: string) {
-      const tokens = this._internal.pendingRefreshOutcomes;
-      if (tokens.length === 0) return;
-      this._internal.pendingRefreshOutcomes = [];
-      for (const token of tokens) {
-        this.reportOutcome(token, outcome, outcome === 'failure' ? { code, message } : undefined);
-      }
-    },
     refresh: async function (this: ForEachInstance) {
       const internal = this._internal;
       internal.hasScheduledRefresh = false;
 
       // Taken now, before any await: these are the invocations *this* pass answers. One pulsed
       // while the rebuild is in flight schedules another pass and is settled by that one.
+      // ERG-001 §4: a rebuild nobody asked for answers nothing, which keeps every setter-driven
+      // refresh silent. ISL-049 (P107-C137), ruled "Answer it when its own rebuild finishes": `settle`
+      // used to write `answered` back over `pendingRefreshOutcomes` and report from there, which threw
+      // away every Refresh pulsed while the rebuild ran — never answered, though its rebuild ran.
       const answered = internal.pendingRefreshOutcomes;
       internal.pendingRefreshOutcomes = [];
       const settle = (outcome: NodeOutcome, code?: string, message?: string) => {
-        internal.pendingRefreshOutcomes = answered;
-        this.settleRefresh(outcome, code, message);
+        for (const token of answered) {
+          this.reportOutcome(token, outcome, outcome === 'failure' ? { code, message } : undefined);
+        }
       };
 
       // NDA-012 (Visual) D1/B2. Per-item template failures are reported once per rebuild, not
@@ -735,8 +775,18 @@ const ForEachDefinition: NodeDefinitionOptions = {
 
       // ERG-001 split this one condition in two so the diagnosis names which half is missing.
       // Behaviour is unchanged — both still return before any teardown.
-      if (!(internal.template || internal.templateFunction)) {
-        settle('failure', 'repeater/no-template', 'The Repeater has no Template, so there is nothing to build each item from');
+      // ISL-049 (P107-C136), ruled "Fail with "no template" whenever Explicit has no Template": the check reads only what
+      // Template Type uses. It asked for "a Template or a compiled Script", so on Explicit a Script left over from Dynamic let
+      // a Refresh report Done with nothing to build from.
+      const explicit = internal.templateType === undefined || internal.templateType === 'explicit';
+      if (explicit ? !internal.template : !internal.templateFunction) {
+        settle(
+          'failure',
+          'repeater/no-template',
+          explicit
+            ? 'The Repeater has no Template, so there is nothing to build each item from'
+            : 'The Repeater picks each component with its Script, and it has no Script that compiles, so there is nothing to build each item from'
+        );
         return;
       }
       if (!internal.items) {
@@ -761,7 +811,16 @@ const ForEachDefinition: NodeDefinitionOptions = {
       // just appended — and only those, so anything already queued before Refresh started
       // (and thus meant to run after it) is left alone.
       const queueLengthBeforeResync = internal.queuedOperations.length;
-      internal.collection.set(internal.items);
+      try {
+        this._copyItems();
+      } catch (e) {
+        // ISL-049 (P107-C128). A copy that throws used to stop the queue for good, its Refreshes never answered. Now it
+        // fails them, and the rows stay as they were. Since C130 an empty entry is skipped, so what is left to throw here is
+        // a record's listener elsewhere in the app.
+        internal.queuedOperations.length = queueLengthBeforeResync;
+        settle('failure', 'repeater/items-copy-threw', `The Repeater could not copy its Items, so it did not rebuild: ${(e as Error)?.message ?? String(e)}`);
+        return;
+      }
       internal.queuedOperations.length = queueLengthBeforeResync;
 
       // Full teardown-and-rebuild, deliberately kept rather than turned into a diff: `set`
@@ -769,6 +828,7 @@ const ForEachDefinition: NodeDefinitionOptions = {
       // reused the *existing* item nodes for records that didn't change is possible — but
       // is a separate, riskier change against item-node identity (component state, mounted
       // DOM) that this fix does not need in order to make Refresh correct.
+      if (internal.itemNodes.length > 0) internal.rowsChanged = true;
       this._deleteAllItemNodes();
 
       //check if we have a target to add nodes to
@@ -777,14 +837,21 @@ const ForEachDefinition: NodeDefinitionOptions = {
         return;
       }
 
-      // figure out our index in our target
-      const baseIndex = this._internal.target.getChildren().indexOf(this as unknown as ForEachItemNode) + 1;
+      // ISL-001 (P78 D85). Iterate a SNAPSHOT taken before the first `await`, not the live
+      // collection. `addItem` yields on every row, and a second `Items` value can reach
+      // `collection.set` in that gap — from a node later in the same update pass, or a frame
+      // later under chunked creation. Reading the live collection made this loop build the new
+      // list's records as well, while the `add` ops `set` queued for the same records waited
+      // behind this op to build them again. With a snapshot the rebuild makes exactly the list
+      // the diff was taken against, and the queued ops then move it to the new one, once.
+      const models: ModelLike[] = [];
+      for (let i = 0; i < internal.collection.size(); i++) {
+        models.push(internal.collection.get(i));
+      }
 
       // Iterate over all models and create items
-      for (let i = 0; i < internal.collection.size(); i++) {
-        const model = internal.collection.get(i);
-
-        await this.addItem(model, baseIndex + i);
+      for (let i = 0; i < models.length; i++) {
+        await this.addItem(models[i], this._childIndexFor(i));
       }
 
       // Last, once every item node for this pass exists. ⚠️ Not `Items Rendered`'s moment and
@@ -803,11 +870,13 @@ const ForEachDefinition: NodeDefinitionOptions = {
 
       const repeaterCreateComponentsAsync = NoodlRuntime.instance.getProjectSettings().repeaterCreateComponentsAsync;
 
-      // Whether this drain actually built anything. `_runQueueOperations` is called on every
+      // Whether this drain added or removed a row. `_runQueueOperations` is called on every
       // `_queueOperation`, so without this the signal would also fire for drains that had
       // nothing to do — and a completion signal that fires when nothing completed is worse
-      // than none, because an author cannot tell the two apart.
-      let didWork = false;
+      // than none, because an author cannot tell the two apart. ISL-049 (P107-C129), ruled "Fire it
+      // only when rows were added or removed": it used to count any operation that ran, so the
+      // start-up rebuild with no Items, a Refresh that failed and an item with no component all fired it.
+      this._internal.rowsChanged = false;
 
       if (repeaterCreateComponentsAsync) {
         //create items in chunks of roughly 25ms at a time
@@ -817,15 +886,18 @@ const ForEachDefinition: NodeDefinitionOptions = {
 
           while (this._internal.queuedOperations.length && performance.now() - start < 25) {
             const op = this._internal.queuedOperations.shift();
-            didWork = true;
-            await op();
+            try {
+              await op();
+            } catch (e) {
+              this._operationThrew(e);
+            }
           }
 
           if (this._internal.queuedOperations.length) {
             setTimeout(runOps, 0);
           } else {
             this.runningOperations = false;
-            this._signalItemsRendered(didWork);
+            this._signalItemsRendered();
           }
         };
 
@@ -833,13 +905,25 @@ const ForEachDefinition: NodeDefinitionOptions = {
       } else {
         while (this._internal.queuedOperations.length) {
           const op = this._internal.queuedOperations.shift();
-          didWork = true;
-          await op();
+          try {
+            await op();
+          } catch (e) {
+            this._operationThrew(e);
+          }
         }
 
         this.runningOperations = false;
-        this._signalItemsRendered(didWork);
+        this._signalItemsRendered();
       }
+    },
+    /**
+     * ISL-049 (P107-C128). The loop used to catch nothing: one operation that threw left `runningOperations` true, and
+     * every later operation waited behind it for good — no Items, Template or Refresh was drawn or answered again. Each
+     * operation catches what it knows how to name (a component not found, a Script's or a mapping's throw, a copy); this
+     * is for anything else, so the queue always runs on.
+     */
+    _operationThrew(this: ForEachInstance, e: unknown) {
+      this.raiseRuntimeError('repeater/operation-threw', `The Repeater could not change its rows: ${(e as Error)?.message ?? String(e)}`, e);
     },
     /**
      * Announce that the queue has drained — every item node for this pass now exists.
@@ -848,8 +932,8 @@ const ForEachDefinition: NodeDefinitionOptions = {
      * `refresh()` returning means only that the work was *queued*; the queue emptying means
      * it was done.
      */
-    _signalItemsRendered(this: ForEachInstance, didWork: boolean) {
-      if (!didWork || this._deleted) return;
+    _signalItemsRendered(this: ForEachInstance) {
+      if (!this._internal.rowsChanged || this._deleted) return;
       this.sendSignalOnOutput('itemsRendered');
     },
     _onNodeDeleted: function (this: ForEachInstance) {
@@ -887,20 +971,73 @@ const ForEachDefinition: NodeDefinitionOptions = {
         // list. `Collection.set` already handles a falsy source (`src = src || []`,
         // collection.ts:485), so clearing needs no special case beyond letting it through.
         //
-        // The `remove` events that `set` raises are queued as operations (`initialize`), so
-        // `didWork` is true and `Items Rendered` fires — a graph waiting on the list stays live.
+        // The `remove` events that `set` raises are queued as operations (`initialize`), each takes
+        // a row away, and `Items Rendered` fires — a graph waiting on the list stays live.
         // ⚠️ Clearing a list that is *already* empty queues nothing and so signals nothing;
         // that is the `Run Tasks` empty-list shape and `OUTCOME-CONTRACT.md` / ERG-001 owns it.
         const repeaterDisabledWhenUnmounted = NoodlRuntime.instance.getProjectSettings().repeaterDisabledWhenUnmounted;
 
         if (repeaterDisabledWhenUnmounted && !this.isMounted) {
           this._internal.mountedOperations.push(() => {
-            this._internal.collection.set(this._internal.items);
+            this._copyItems();
           });
         } else {
-          this._internal.collection.set(this._internal.items);
+          // ISL-049 (P107-C130). A frame-end callback that throws ends the node's callbacks there (node.ts `update`), and
+          // a rebuild asked for in the same frame was lost with its flag still set — no later Refresh was ever answered.
+          try {
+            this._copyItems();
+          } catch (e) {
+            this._operationThrew(e);
+          }
         }
       });
+    },
+    /**
+     * Where the row for the item at `listIndex` goes among the parent's children: before the Repeater's own row at that place,
+     * else after its last own row, else right after the Repeater. ISL-049 (P107-C143): it was the Repeater's place plus
+     * `listIndex`, which counted a row on its way out (no longer in `itemNodes`, still the parent's child until its Remove
+     * Completed) — every row added after one landed one place early, and stayed there.
+     */
+    _childIndexFor(this: ForEachInstance, listIndex: number) {
+      const internal = this._internal;
+      const children = internal.target.getChildren();
+      let at = children.indexOf(this as unknown as ForEachItemNode) + 1;
+      let own = 0;
+      for (let i = at; i < children.length; i++) {
+        if (internal.itemNodes.indexOf(children[i]) === -1) continue;
+        if (own === listIndex) return i;
+        own++;
+        at = i + 1;
+      }
+      return at;
+    },
+    /**
+     * Copy Items into the Repeater's own list. ISL-049 (P107-C130), ruled "Skip the empty entry and report it once": an
+     * entry that is `null` or `undefined` made `Collection.set` throw (`Model.instanceOf` reads `.target`), so the whole new
+     * list was refused and the old rows stayed. Now it has no row, every other entry does, and it is reported once per
+     * Items value.
+     */
+    _copyItems(this: ForEachInstance) {
+      const internal = this._internal;
+      const items = internal.items as unknown as ArrayLike<unknown> | null | undefined;
+      let empty = 0;
+      if (items && typeof items.length === 'number') {
+        for (let i = 0; i < items.length; i++) if (items[i] === null || items[i] === undefined) empty++;
+      }
+      if (empty === 0) {
+        internal.collection.set(internal.items);
+        return;
+      }
+      if (internal.reportedEmptyEntriesIn !== items) {
+        internal.reportedEmptyEntriesIn = items;
+        this.raiseRuntimeError(
+          'repeater/items-empty-entry',
+          empty === 1
+            ? "The Repeater's Items has an empty entry (null or undefined), so it has no row"
+            : `The Repeater's Items has ${empty} empty entries (null or undefined), so they have no rows`
+        );
+      }
+      internal.collection.set(Array.prototype.filter.call(items, (item: unknown) => item !== null && item !== undefined));
     },
     itemOutputSignalTriggered: function (
       this: ForEachInstance,
@@ -908,23 +1045,33 @@ const ForEachDefinition: NodeDefinitionOptions = {
       model: ModelLike,
       itemNode: ForEachItemNode
     ) {
-      this._internal.itemActionItemId = model.getId();
-      this._internal.itemActionSignal = name;
-      this.flagOutputDirty('itemActionItemId');
+      // ISL-049 (P107-C142). Every row whose signal is heard in one update used to fall into ONE report: the
+      // after-update read the outputs of the first row (its closure's) and sent the signal of the last (a shared
+      // field), with the last row's Item Id — so a second row's Added was lost, and a row's Leaving was reported as
+      // another's Added. Each call is queued, and the after-update reports them in order: that row's Item Id, its
+      // outputs, then its signal.
+      const pending = (this._internal.pendingItemSignals ??= []);
+      pending.push({ name, model, itemNode });
 
       // Send signal and update item outputs after they have been correctly updated
       if (!this._internal.hasScheduledTriggerItemOutputSignal) {
         this._internal.hasScheduledTriggerItemOutputSignal = true;
         this.context.scheduleAfterUpdate(() => {
           this._internal.hasScheduledTriggerItemOutputSignal = false;
-          for (const key in itemNode._outputs) {
-            const _output = 'itemOutput-' + key;
-            if (this.hasOutput(_output)) {
-              this._internal.itemOutputs[key] = itemNode._outputs[key].value;
-              this.flagOutputDirty(_output);
+          const heard = this._internal.pendingItemSignals ?? [];
+          this._internal.pendingItemSignals = [];
+          for (const { name, model, itemNode } of heard) {
+            this._internal.itemActionItemId = model.getId();
+            this.flagOutputDirty('itemActionItemId');
+            for (const key in itemNode._outputs) {
+              const _output = 'itemOutput-' + key;
+              if (this.hasOutput(_output)) {
+                this._internal.itemOutputs[key] = itemNode._outputs[key].value;
+                this.flagOutputDirty(_output);
+              }
             }
+            this.sendSignalOnOutput('itemOutputSignal-' + name);
           }
-          this.sendSignalOnOutput('itemOutputSignal-' + this._internal.itemActionSignal);
         });
       }
     },

@@ -82,6 +82,9 @@ import type { CreateComponentResponse, FindToolsResponse } from '../src/tools/re
  */
 const SURFACE_TOKEN_BUDGET = 8280;
 
+/** How many tools the backend group holds, read off the manifest so the count cannot be bumped by hand. */
+const BACKEND_GROUP_SIZE = TOOL_GROUPS.find((g) => g.id === 'backend')!.tools.length;
+
 /**
  * A generous project-directory path length, for normalising the instructions.
  * The replay projects sit at 76 characters; 160 is longer than anything this has
@@ -385,14 +388,15 @@ describe('AWP-006 — nothing is unreachable', () => {
     expect(res.data.note).toBeUndefined();
     const backend = res.data.groups.find((g) => g.group === 'backend');
     expect(backend).toMatchObject({ advertised: false });
-    expect(backend!.tools).toBe(61);
+    // The manifest's count, not a literal: a tool added to the group (ONT-002's two) moves it.
+    expect(backend!.tools).toBe(BACKEND_GROUP_SIZE);
     expect(await toolNames(session.client)).not.toContain('provision_backend');
   });
 
-  it('revealing the backend group makes all 61 advertised and callable', async () => {
+  it('revealing the backend group makes all of them advertised and callable', async () => {
     const res = await call<FindToolsResponse>(session, 'find_tools', { group: 'backend' });
     expect(res.isError).toBe(false);
-    expect(res.data.revealed).toHaveLength(61);
+    expect(res.data.revealed).toHaveLength(BACKEND_GROUP_SIZE);
     expect(res.data.note).toContain('--all-tools');
 
     const names = await toolNames(session.client);

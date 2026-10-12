@@ -65,6 +65,7 @@ import {
 import { DiagnosticCode, type Diagnostic } from './diagnostics';
 import { checkImageSources } from './imageSource';
 import { checkReservedRowFields } from './reservedRowField';
+import { checkFunctionScriptUses } from './functionScriptUses';
 import { checkUnrealisedMeasure } from './unrealisedMeasure';
 import { checkPageScroll } from './pageScroll';
 import { checkFunctionNodePorts, checkScriptNodeRunnable, type FunctionWireLike } from './functionPorts';
@@ -74,7 +75,9 @@ import { checkParameterValues } from './parameterValues';
 import { checkPublicWriteDoor, type FunctionSecurityPolicy } from './publicWriteDoor';
 import { checkRepeaterTemplate } from './repeaterTemplate';
 import { checkVariableInRepeatedComponent } from './repeatedComponentVariable';
+import { checkTypedWordNotTranslated } from './typedWordNotTranslated';
 import { checkLayoutInertCombination } from './layoutInertCombination';
+import { checkGateStartsShown } from './gateStartsShown';
 import { checkOneWayGate } from './oneWayGate';
 import { checkQueryBeforeFilter } from './queryBeforeFilter';
 import { checkResponsiveArrangement } from './responsiveArrangement';
@@ -511,6 +514,12 @@ export interface AuthoredPreconditionOptions {
    * the rule switched off.
    */
   security?: FunctionSecurityPolicy | null;
+  /**
+   * P109 ISL-005 — every script file in the project (`engine/world.js`), for a Function's `uses`.
+   * **Omitted means "do not check"**, the convention every option above follows: a caller that cannot
+   * read the project's `scripts/` folder cannot tell a missing file from one it has not listed.
+   */
+  scripts?: readonly string[];
 }
 
 /**
@@ -570,9 +579,12 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     derived,
     security,
     bodyScroll,
-    views
+    views,
+    scripts
   } = options;
   return [
+    // P109 ISL-005 — a Function's `uses` against the project's script files. Omitted → not checked.
+    ...(scripts ? checkFunctionScriptUses(nodes, { component, scripts }) : []),
     ...checkParameterValues(nodes, catalog, { component }),
     ...(backend ? checkBackendRequirements(nodes, { ...backend, component }) : []),
     ...checkNavigation(nodes, { component, components, urlPaths }),
@@ -620,6 +632,9 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     // shares. Reads the views rather than `nodes`, because the copies are counted project-wide and
     // the holder may be a component this candidate places, not the candidate itself.
     ...(views ? checkVariableInRepeatedComponent({ component, views }) : []),
+    // P109 ISL-007 AC6 — a typed word in an app that translates stays the same in every language. Reads the views
+    // for the project-wide opt-in (a placed Translation node); omitted views means "do not check" inside the check.
+    ...checkTypedWordNotTranslated(nodes, { component, views, connectedInputs: connections }),
     // DEF-010 (SB-009) — the other twelve of the catalog's thirteen
     // component-typed ports. `For Each.template` is skipped inside the check:
     // the line above owns it, and a second producer over one population is a
@@ -636,11 +651,14 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     ...checkResponsiveArrangement(nodes, { component, catalog, views, connectedInputs: connections }),
     // DEF-018/DEF-020 — the two layout combinations in which a declared
     // parameter is silently inert: a contentSize child of a Columns, and a
-    // distributing justifyContent on a row whose children all grow.
-    ...checkLayoutInertCombination(nodes, { component, catalog, connectedInputs: connections }),
+    // distributing justifyContent on a row whose children all grow. P109-S40-ROWWRAPINSTANCE: the views let
+    // `row-cannot-wrap` read the root of a component placed in a row.
+    ...checkLayoutInertCombination(nodes, { component, catalog, views, connectedInputs: connections }),
     // DEF-024 — a mounted/visible gate whose every writer is a constant-true
     // Condition: it can only ever turn on, so sibling answers accumulate.
     ...checkOneWayGate(nodes, { component, catalog, wires }),
+    // P78-TPL011-MOUNTED — a wired mounted that is on the page until its first value: an info, as ruled.
+    ...checkGateStartsShown(nodes, { component, catalog, wires }),
     // DEF-012 §2 — a cloud query with connected filter parameters that fetches
     // at graph build, before the parameters can arrive: the first result is
     // every row in the class. Reads wires; omitted means "do not check".

@@ -30,6 +30,35 @@ Use it to display timestamps — record creation dates, 'last saved' times, "Thu
 | `locale` | String | `` | BCP 47 language tag for the month and day names — fr-FR, de-DE, ja-JP. Leave empty for English (en-US), which is what every project rendered before this port existed. It does not change the digits, the padding or {ordinal}, only the words |
 | `timeZone` | String | `` | IANA zone name to render in, such as Europe/London or America/New_York. Leave empty for the host machine's zone — which on a server is whatever the container says, and is the usual reason a date is an hour out in production but right on your laptop |
 
+### What each input does
+
+**Format** (`formatString`)
+
+- the value it already holds: nothing → Invalid Date, Date Changed stay silent
+- it cannot be written (a Date it cannot read, an unknown Timezone, or a Format that is not text): Date String goes blank → Invalid Date, Date Changed
+- it can be written: Date String is the Date written through Format, in Timezone and Locale → Date Changed; Invalid Date stays silent
+- no Date yet: kept for when one arrives; nothing is sent → Invalid Date, Date Changed stay silent
+
+**Timezone** (`timeZone`)
+
+- the value it already holds (empty is the device's zone): nothing → Invalid Date, Date Changed stay silent
+- it cannot be written (a Date it cannot read, an unknown Timezone, or a Format that is not text): Date String goes blank → Invalid Date, Date Changed
+- it can be written: Date String is the Date written through Format, in Timezone and Locale → Date Changed; Invalid Date stays silent
+- no Date yet: kept for when one arrives; nothing is sent → Invalid Date, Date Changed stay silent
+
+**Locale** (`locale`)
+
+- the value it already holds (empty is en-US): nothing → Invalid Date, Date Changed stay silent
+- it cannot be written (a Date it cannot read, an unknown Timezone, or a Format that is not text): Date String goes blank → Invalid Date, Date Changed
+- it can be written: Date String is the Date written through Format, in Timezone and Locale → Date Changed; Invalid Date stays silent
+- no Date yet: kept for when one arrives; nothing is sent → Invalid Date, Date Changed stay silent
+
+**Date** (`input`)
+
+- the same date object it already holds: nothing → Invalid Date, Date Changed stay silent
+- it cannot be written (a Date it cannot read, an unknown Timezone, or a Format that is not text): Date String goes blank → Invalid Date, Date Changed
+- it can be written: Date String is the Date written through Format, in Timezone and Locale → Date Changed; Invalid Date stays silent
+
 ## Outputs
 
 ### Values

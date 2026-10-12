@@ -1,0 +1,529 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2cacce1b-cd6c-529b-8569-d5ebbfb1da9a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rnIn",
+      "fromProperty": "program",
+      "toId": "rnNew",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "lang",
+      "toId": "rnNew",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "start",
+      "toId": "rnSetWorldStart",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "stepMs",
+      "toId": "rnBeat",
+      "toProperty": "interval"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "play",
+      "toId": "rnMode",
+      "toProperty": "to-playing"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "play",
+      "toId": "rnWait",
+      "toProperty": "to-free"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "play",
+      "toId": "rnSetWorldStart",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "play",
+      "toId": "rnNew",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rnNew",
+      "fromProperty": "run",
+      "toId": "rnSetRunNew",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rnNew",
+      "fromProperty": "ran",
+      "toId": "rnSetRunNew",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rnSetRunNew",
+      "fromProperty": "done",
+      "toId": "rnBeat",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "rnSetRunNew",
+      "fromProperty": "done",
+      "toId": "rnOut",
+      "toProperty": "started"
+    },
+    {
+      "fromId": "rnBeat",
+      "fromProperty": "tick",
+      "toId": "rnStep",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rnRunVar",
+      "fromProperty": "value",
+      "toId": "rnStep",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rnWorldVar",
+      "fromProperty": "value",
+      "toId": "rnStep",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "answer",
+      "toId": "rnStep",
+      "toProperty": "answer"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "run",
+      "toId": "rnSetRunStep",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "ran",
+      "toId": "rnSetRunStep",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rnWorldVar",
+      "fromProperty": "value",
+      "toId": "rnApply",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "delta",
+      "toId": "rnApply",
+      "toProperty": "delta"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "ran",
+      "toId": "rnApply",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rnApply",
+      "fromProperty": "world",
+      "toId": "rnSetWorldApply",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rnApply",
+      "fromProperty": "ran",
+      "toId": "rnSetWorldApply",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "done",
+      "toId": "rnEnd",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rnSetWorldApply",
+      "fromProperty": "done",
+      "toId": "rnEnd",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rnSetWorldApply",
+      "fromProperty": "done",
+      "toId": "rnOut",
+      "toProperty": "ticked"
+    },
+    {
+      "fromId": "rnEnd",
+      "fromProperty": "ontrue",
+      "toId": "rnMode",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "rnEnd",
+      "fromProperty": "ontrue",
+      "toId": "rnOut",
+      "toProperty": "finished"
+    },
+    {
+      "fromId": "rnEnd",
+      "fromProperty": "ontrue",
+      "toId": "rnBeat",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "rnMode",
+      "fromProperty": "playing",
+      "toId": "rnLoop",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "waiting",
+      "toId": "rnPark",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rnEnd",
+      "fromProperty": "onfalse",
+      "toId": "rnPark",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rnPark",
+      "fromProperty": "ontrue",
+      "toId": "rnOut",
+      "toProperty": "parked"
+    },
+    {
+      "fromId": "rnPark",
+      "fromProperty": "ontrue",
+      "toId": "rnWait",
+      "toProperty": "to-parked"
+    },
+    {
+      "fromId": "rnPark",
+      "fromProperty": "ontrue",
+      "toId": "rnBeat",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "rnPark",
+      "fromProperty": "onfalse",
+      "toId": "rnWait",
+      "toProperty": "to-free"
+    },
+    {
+      "fromId": "rnPark",
+      "fromProperty": "onfalse",
+      "toId": "rnCapTest",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "tick",
+      "toId": "rnCapTest",
+      "toProperty": "tick"
+    },
+    {
+      "fromId": "rnCapTest",
+      "fromProperty": "over",
+      "toId": "rnCap",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rnCapTest",
+      "fromProperty": "ran",
+      "toId": "rnCap",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rnCap",
+      "fromProperty": "onfalse",
+      "toId": "rnLoop",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rnCap",
+      "fromProperty": "ontrue",
+      "toId": "rnBeat",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "rnCap",
+      "fromProperty": "ontrue",
+      "toId": "rnMode",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "rnCap",
+      "fromProperty": "ontrue",
+      "toId": "rnCapped",
+      "toProperty": "to-capped"
+    },
+    {
+      "fromId": "rnCap",
+      "fromProperty": "ontrue",
+      "toId": "rnOut",
+      "toProperty": "cap"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "play",
+      "toId": "rnCapped",
+      "toProperty": "to-free"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "stop",
+      "toId": "rnCapped",
+      "toProperty": "to-free"
+    },
+    {
+      "fromId": "rnLive",
+      "fromProperty": "onfalse",
+      "toId": "rnCapped",
+      "toProperty": "to-free"
+    },
+    {
+      "fromId": "rnCapped",
+      "fromProperty": "capped",
+      "toId": "rnOut",
+      "toProperty": "capped"
+    },
+    {
+      "fromId": "rnMode",
+      "fromProperty": "live",
+      "toId": "rnAns",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "answered",
+      "toId": "rnAns",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rnAns",
+      "fromProperty": "ontrue",
+      "toId": "rnBeat",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "rnLoop",
+      "fromProperty": "onfalse",
+      "toId": "rnBeat",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "rnWait",
+      "fromProperty": "parked",
+      "toId": "rnParked",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "step",
+      "toId": "rnParked",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rnParked",
+      "fromProperty": "onfalse",
+      "toId": "rnLive",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rnMode",
+      "fromProperty": "live",
+      "toId": "rnLive",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rnLive",
+      "fromProperty": "ontrue",
+      "toId": "rnMode",
+      "toProperty": "to-paused"
+    },
+    {
+      "fromId": "rnLive",
+      "fromProperty": "ontrue",
+      "toId": "rnBeat",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "rnLive",
+      "fromProperty": "onfalse",
+      "toId": "rnMode",
+      "toProperty": "to-paused"
+    },
+    {
+      "fromId": "rnLive",
+      "fromProperty": "onfalse",
+      "toId": "rnSetWorldStart",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rnLive",
+      "fromProperty": "onfalse",
+      "toId": "rnNew",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "stop",
+      "toId": "rnBeat",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "stop",
+      "toId": "rnMode",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "stop",
+      "toId": "rnWait",
+      "toProperty": "to-free"
+    },
+    {
+      "fromId": "rnIn",
+      "fromProperty": "stop",
+      "toId": "rnReset",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rnReset",
+      "fromProperty": "run",
+      "toId": "rnSetRunReset",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rnReset",
+      "fromProperty": "ran",
+      "toId": "rnSetRunReset",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rnSetRunReset",
+      "fromProperty": "done",
+      "toId": "rnOut",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "rnWorldVar",
+      "fromProperty": "value",
+      "toId": "rnOut",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "rnRunVar",
+      "fromProperty": "value",
+      "toId": "rnOut",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "glowId",
+      "toId": "rnGlow",
+      "toProperty": "glowId"
+    },
+    {
+      "fromId": "rnMode",
+      "fromProperty": "live",
+      "toId": "rnGlow",
+      "toProperty": "live"
+    },
+    {
+      "fromId": "rnGlow",
+      "fromProperty": "id",
+      "toId": "rnOut",
+      "toProperty": "glowId"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "done",
+      "toId": "rnOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "bumps",
+      "toId": "rnOut",
+      "toProperty": "bumps"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "puddles",
+      "toId": "rnOut",
+      "toProperty": "puddles"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "sayKey",
+      "toId": "rnOut",
+      "toProperty": "sayKey"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "sayText",
+      "toId": "rnOut",
+      "toProperty": "sayText"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "sayStyle",
+      "toId": "rnOut",
+      "toProperty": "sayStyle"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "tick",
+      "toId": "rnOut",
+      "toProperty": "tick"
+    },
+    {
+      "fromId": "rnWait",
+      "fromProperty": "parked",
+      "toId": "rnOut",
+      "toProperty": "waiting"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "request",
+      "toId": "rnOut",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "rnStep",
+      "fromProperty": "proposal",
+      "toId": "rnOut",
+      "toProperty": "proposal"
+    },
+    {
+      "fromId": "rnMode",
+      "fromProperty": "playing",
+      "toId": "rnOut",
+      "toProperty": "running"
+    },
+    {
+      "fromId": "rnMode",
+      "fromProperty": "idle",
+      "toId": "rnOut",
+      "toProperty": "idle"
+    },
+    {
+      "fromId": "rnMode",
+      "fromProperty": "live",
+      "toId": "rnOut",
+      "toProperty": "live"
+    }
+  ]
+}

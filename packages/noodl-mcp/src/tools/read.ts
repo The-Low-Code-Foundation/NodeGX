@@ -30,11 +30,13 @@ import type {
   SearchProjectResponse
 } from './responses';
 import { currentKitOverlay } from '../kitOverlay';
+import { dependencyNote } from '../kitRefusal';
 import type { KitHealthDiagnostic } from '@nodegx/kit-catalog';
 import { userProfileForPrompt } from '../userProfile';
 import { guarded, jsonResult } from './util';
 import { projectVisualPredicate } from './author';
 import { readVisualRoots } from '../visualRoots';
+import { drawnPortsFor } from '../specPorts';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { kitDiagnostics } = require('@nodegx/kit-catalog');
@@ -114,12 +116,47 @@ export function kitsReport(): ProjectKitsReport | undefined {
     })),
     ...(overlay.collisions.length > 0 ? { collisions: overlay.collisions } : {}),
     ...(overlay.failures.length > 0
-      ? { failures: overlay.failures.map((f) => ({ kitModule: f.kitModule, message: f.message })) }
+      ? {
+          failures: overlay.failures.map((f) => {
+            const note = dependencyNote(overlay.projectDir, f.dirPath);
+            return { kitModule: f.kitModule, message: f.message, ...(note ? { note } : {}) };
+          })
+        }
       : {}),
     ...(registeredNothing.length > 0 ? { registeredNothing } : {}),
     ...(overlay.warnings.length > 0 ? { warnings: overlay.warnings } : {}),
-    ...(overlay.unavailable ? { unavailable: overlay.unavailable.reason } : {})
+    ...(overlay.unavailable ? { unavailable: overlay.unavailable.reason } : {}),
+    ...(overlay.readerBuilt ? { readerBuilt: overlay.readerBuilt } : {})
   };
+}
+
+/**
+ * P109 ISL-016 — the project's home, read from `rootNodeId` ONLY: that is the field the editor opens on
+ * (`projectmodel.ts`, `json.rootNodeId`; the v2 importer carries nothing else, `ProjectImporter.ts`)
+ * and the one "Make home" and `set_project_settings` write. The registry row typed `root` used to be
+ * the whole answer, and it was wrong both ways: the shipped garden has `rootNodeId` and no such row
+ * (answered "no home" for a project that has one), and the `demo-app` fixture has the row and no
+ * `rootNodeId` (answered "App" for a project the editor opens with "No HOME component selected"). The
+ * row is only an ordering hint for the search.
+ */
+const SET_HOME = 'find_tools "home" reveals set_project_settings; call it with { home: "App" } (the component holding the Router).';
+
+function homeOf(
+  store: ProjectStore,
+  rootNodeId: string | undefined,
+  registryRoot: string | undefined
+): ProjectInfoResponse['rootComponent'] {
+  if (rootNodeId) {
+    const registry = store.readRegistry();
+    // The registry's root first, then everything else: the home is almost always there.
+    const keys = Object.keys(registry.components).sort((a, b) => Number(b === registryRoot) - Number(a === registryRoot));
+    for (const key of keys) {
+      const nodes = store.readComponent(key).files.nodes.nodes ?? [];
+      if (nodes.some((n) => n.id === rootNodeId)) return { path: key, nodeId: rootNodeId };
+    }
+    return { nodeId: rootNodeId, missing: true, fix: SET_HOME };
+  }
+  return { missing: true, fix: SET_HOME };
 }
 
 export function registerReadTools(server: McpServer, binding: ProjectBinding, options: { allowWrites: boolean }): void {
@@ -152,7 +189,7 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
         version: project?.version,
         runtimeVersion: project?.runtimeVersion,
         settings: project?.settings,
-        rootComponent: rootEntry ? { path: rootEntry[0] } : undefined,
+        rootComponent: homeOf(store, (project as { rootNodeId?: string } | undefined)?.rootNodeId, rootEntry?.[0]),
         routes: routes?.routes,
         styles: styles
           ? {
@@ -181,8 +218,8 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
               // CMP-001 AC2 — the other half of the sentence above. The
               // decomposition doctrine says what becomes a component; this says
               // what goes on it, and phase 85 measured the population that
-              // learns only the first half (33% of the corpus's components
-              // publish anything, against 84% of the shipped library's). It
+              // learns only the first half (`CORPUS_PUBLISH_RATE` of the corpus's
+              // components publish anything, against `SHELF_PUBLISH_RATE`). It
               // sits directly after `authoringDoctrine` on purpose: the two are
               // one decision, and the second half is the one that gets skipped.
               interfaceDoctrine: INTERFACE_DOCTRINE_MD,
@@ -307,6 +344,9 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
         connections: stored.files.connections.connections,
         ...(args.include_usages ? { usages: store.findUsages(stored.key) } : {})
       };
+      // NSP-020 R19 — the ports the specs draw now, beside the saved lists (a result field: no tool-surface cost)
+      const drawn = drawnPortsFor(store, stored.files.component.path ?? '/' + stored.key, stored.files.nodes.nodes);
+      if (Object.keys(drawn).length) payload.drawnPorts = drawn;
       return jsonResult(payload);
     })
   );

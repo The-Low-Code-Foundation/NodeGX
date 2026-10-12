@@ -1,0 +1,262 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "eab4d0e5-e1e9-547b-89c1-e7ff16eebfda",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "completerequesIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "jobLive",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "now",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "pay",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "requestId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "reward",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "robotId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tricks",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "completerequesFn",
+      "type": "JavaScriptFunction",
+      "label": "Complete request",
+      "parameters": {
+        "functionScript": "var { ROBOTS, earnShells, lendRobot, liveOf, modelOf, programOf } = Scripts.save;\nvar model = modelOf(Inputs.model);\nvar requestId = String(Inputs.requestId || '');\nvar profileId = String(Inputs.profileId || model.island.activeId);\nvar tricks = Array.isArray(Inputs.tricks) ? Inputs.tricks : [];\nvar reward = Inputs.reward && typeof Inputs.reward === 'object' ? Inputs.reward : null;\nvar program = programOf(Inputs.program);\nvar p = null;\nfor (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === profileId) p = model.profiles[i];\nvar newlyDone = false, bloomed = [], pinned = '', lent = [], upgraded = [];\nif (p) {\n  // P108 IW-007 (s6): her land is never won (its buildings rise on the island) — a win there teaches a robot, no more.\n  var iw7tLand = requestId === \"land\";\n  if (requestId && !iw7tLand && p.island.done.indexOf(requestId) === -1) { p.island.done.push(requestId); newlyDone = true; }\n  for (var t = 0; t < tricks.length; t++) { var key = 'n' + Math.floor(Number(tricks[t])); if (p.tricks[key] !== undefined && p.tricks[key] !== 'bloom') { p.tricks[key] = 'bloom'; bloomed.push(key); } }\n  if (reward && reward.kind === 'hat' && p.hats.indexOf(String(reward.id)) === -1) p.hats.push(String(reward.id));\n  if (reward && (reward.kind === 'sticker' || reward.kind === 'item' || reward.kind === 'seed') && p.stickers.indexOf(String(reward.id)) === -1) p.stickers.push(String(reward.id));\n  // P106 IG-005: a robot reward lends that robot (its name the catalogue's, in her language); the catalogue's own gifts\n  // for this request — the robot an islander lends after it, the upgrade she gives — come with every first win.\n  if (reward && reward.kind === 'robot' && lendRobot(p, reward.id)) lent.push(String(reward.id));\n  for (var g = 0; g < ROBOTS.length; g++) if (requestId && ROBOTS[g].unlockedBy === requestId && lendRobot(p, ROBOTS[g].id)) lent.push(ROBOTS[g].id);\n  // P108 IW-006 (lane H): the upgrades moved to the shop — a first win no longer gives one; the shop shows it once its\n  // request is done (Shop rows). One given before (a sticker) is still hers; Upgraded stays empty.\n  var robotId = String(Inputs.robotId || p.island.robots[0].id);\n  var known = false;\n  for (var r = 0; r < p.island.robots.length; r++) if (p.island.robots[r].id === robotId) known = true;\n  // P108 IW-007 (s6): on her land a robot of hers ALREADY at work there keeps it, and the robot that won here helps it\n  // with its own program (Pip carries the stones, Cobble the planks); a helper there before goes home with its program.\n  var iw7tLead = iw7tLand && p.island.plots[requestId] && Array.isArray(p.island.plots[requestId].program) && p.island.plots[requestId].program.length ? String(p.island.plots[requestId].robotId || '') : '';\n  if (iw7tLand && program && program.length && known && iw7tLead && iw7tLead !== robotId) {\n    for (var o7 in p.island.plots) if (p.island.plots[o7].robotId === robotId) p.island.plots[o7].robotId = '';\n    for (var h7 = 0; h7 < p.island.robots.length; h7++) {\n      var hr = p.island.robots[h7];\n      if (hr.id === robotId) { hr.helps = requestId; hr.program = JSON.parse(JSON.stringify(program)); }\n      else if (hr.helps === requestId) delete hr.helps;\n    }\n    pinned = robotId;\n  }\n  else if (requestId && requestId !== 'free' && program && program.length && known) {\n    // P108 IW-007 (s6): the robot that won leaves any plot it helped on.\n    for (var x7 = 0; x7 < p.island.robots.length; x7++) if (p.island.robots[x7].id === robotId && p.island.robots[x7].helps) delete p.island.robots[x7].helps;\n    for (var other in p.island.plots) if (other !== requestId && p.island.plots[other].robotId === robotId) p.island.plots[other].robotId = '';\n    p.island.plots[requestId] = { program: program, robotId: robotId, wonAt: Number(Inputs.now) > 0 ? Number(Inputs.now) : Date.now() };\n    pinned = robotId;\n    // P108 IW-006 (lane E): the plot starts done — the live job Win pay laid (its robot waits at home until wear reopens it).\n    var jobLive = liveOf(Inputs.jobLive);\n    if (jobLive) p.island.plots[requestId].live = jobLive;\n  }\n  // P108 IW-006 (lane E): the win's shells (Win pay said how many: none for a job done and not worn since).\n  earnShells(p, Inputs.pay);\n}\nOutputs.model = model;\nOutputs.newlyDone = newlyDone;\nOutputs.bloomed = bloomed;\nOutputs.found = !!p;\nOutputs.pinned = pinned;\nOutputs.lent = lent;\nOutputs.upgraded = upgraded;\n",
+        "runOnChange-in-jobLive": false,
+        "runOnChange-in-model": false,
+        "runOnChange-in-now": false,
+        "runOnChange-in-pay": false,
+        "runOnChange-in-profileId": false,
+        "runOnChange-in-program": false,
+        "runOnChange-in-requestId": false,
+        "runOnChange-in-reward": false,
+        "runOnChange-in-robotId": false,
+        "runOnChange-in-tricks": false,
+        "uses": "save.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-requestId",
+          "displayName": "requestId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-profileId",
+          "displayName": "profileId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tricks",
+          "displayName": "tricks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-reward",
+          "displayName": "reward",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-program",
+          "displayName": "program",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robotId",
+          "displayName": "robotId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-now",
+          "displayName": "now",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-jobLive",
+          "displayName": "jobLive",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pay",
+          "displayName": "pay",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-model",
+          "displayName": "model",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-newlyDone",
+          "displayName": "newlyDone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bloomed",
+          "displayName": "bloomed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-found",
+          "displayName": "found",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pinned",
+          "displayName": "pinned",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lent",
+          "displayName": "lent",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-upgraded",
+          "displayName": "upgraded",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "completerequesOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "bloomed",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "found",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "lent",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "newlyDone",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "pinned",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "upgraded",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

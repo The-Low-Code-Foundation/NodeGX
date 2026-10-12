@@ -1,0 +1,104 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "841598b1-cc69-5853-b049-7edd51f01c80",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "Staff only (security: role:staff)",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "learnerId,conceptIds",
+        "allowNoAuth": false,
+        "ptype-learnerId": "string",
+        "preq-learnerId": true,
+        "ptype-conceptIds": "array",
+        "preq-conceptIds": true
+      }
+    },
+    {
+      "id": "write",
+      "type": "JavaScriptFunction",
+      "label": "A new path, in the coach's order",
+      "x": 300,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * GIVE A LEARNER A PATH, IN THE COACH'S ORDER (TASK-L184 \u00a72).\n *\n * A NEW `LearningPath` row every time, never an edit of the old one: the\n * product's replan writes a new row and leaves the old (L86), every read takes\n * the NEWEST path, and the old one stays as the record of what they were doing.\n *\n * Every id is checked against `Concept` and an unknown one is refused BY NAME\n * (the product's L85: the picker's validation, never a silent drop \u2014 a dropped\n * concept is a step the coach chose and the learner never sees). A path with\n * no steps, or a concept twice, is refused too.\n *\n * WHAT THEY FINISHED STAYS FINISHED. A step whose concept they have already\n * completed (a `Progress` row with `completedAt`) starts `complete`; the first\n * step that is not is `available`; the rest are `locked`. Positions 0..n-1.\n *\n * THE PATH ROW IS WRITTEN FIRST, THEN ITS STEPS. A crash in between leaves a\n * newest path with some steps missing, which the learner would see until the\n * coach presses Save again \u2014 and a second press writes a whole NEW path that\n * supersedes it. The other order would leave steps no path names, which the\n * deletion plan finds only through a path (shared/Rows about), so they would\n * outlive the person. Visible-and-fixable beats invisible-and-undeletable.\n *\n * `rationale` is empty: the coach orders by hand, and a sentence nobody wrote\n * must not appear as though somebody had.\n */\nif (Inputs.learnerId !== undefined && Inputs.conceptIds !== undefined) {\n  (async () => {\n    const R = Noodl.Records;\n    const q = (c, where, limit) => R.query(c, where, { limit: limit || 1000, plain: true });\n    const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n    try {\n      const learnerId = String(Inputs.learnerId || '').trim();\n      const ids = (Array.isArray(Inputs.conceptIds) ? Inputs.conceptIds : []).map((x) => String(x || '').trim()).filter(Boolean);\n      if (!learnerId) return refuse('Choose whose path this is.');\n      const profiles = await q('LearnerProfile', { learnerId: { equalTo: learnerId } }, 2);\n      if (profiles.length !== 1) return refuse('There is no learner with that id.');\n      if (!ids.length) return refuse('A path needs at least one step. Add a concept first.');\n      const dup = ids.find((x, i) => ids.indexOf(x) !== i);\n      if (dup) return refuse('\"' + dup + '\" is on the path twice. Remove one of them.');\n      const concepts = await q('Concept', { conceptId: { containedIn: ids } });\n      const known = new Set(concepts.map((c) => c.conceptId));\n      const unknown = ids.filter((x) => !known.has(x));\n      if (unknown.length) return refuse('This course has no concept called \"' + unknown.join('\", \"') + '\". Nothing was saved.');\n\n      const progress = await q('Progress', { learnerId: { equalTo: learnerId } });\n      const finished = new Set(progress.filter((p) => p.completedAt).map((p) => p.conceptId));\n\n      const pathId = 'path-' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()));\n      await R.create('LearningPath', { pathId, learnerId, programmeId: null, replanBlockedAt: null });\n      let opened = false;\n      for (let i = 0; i < ids.length; i++) {\n        let status = 'locked';\n        if (finished.has(ids[i])) status = 'complete';\n        else if (!opened) { status = 'available'; opened = true; }\n        await R.create('PathStep', { pathId, position: i, conceptId: ids[i], status, rationale: '', removedAt: null });\n      }\n      console.log('[dbt:setLearnerPath] learner=' + learnerId + ' path=' + pathId + ' steps=' + ids.length);\n      Outputs.pathId = pathId;\n      Outputs.steps = ids.length;\n      Outputs.done();\n    } catch (e) {\n      console.error('[dbt:setLearnerPath] stopped: ' + String((e && e.message) || e));\n      refuse('That did not finish. Press Save again; it starts a fresh path.');\n    }\n  })();\n}\n",
+        "runOnChange-in-learnerId": true,
+        "runOnChange-in-conceptIds": true
+      },
+      "ports": [
+        {
+          "name": "in-learnerId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "learnerId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-conceptIds",
+          "plug": "input",
+          "type": "*",
+          "displayName": "conceptIds",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-pathId",
+          "plug": "output",
+          "type": "*",
+          "displayName": "pathId",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-steps",
+          "plug": "output",
+          "type": "*",
+          "displayName": "steps",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "*",
+          "displayName": "why",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "metadata": {
+        "comment": "RECORDS CALLS PER SAVE: 3 reads (profile, concepts, progress) and 1 + n writes, the path row first."
+      }
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "pathId, steps",
+      "x": 1080,
+      "y": 40,
+      "parameters": {
+        "params": "pathId,steps"
+      }
+    },
+    {
+      "id": "deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal, in a sentence the coach can act on",
+      "x": 1340,
+      "y": 220,
+      "parameters": {
+        "status": "failure"
+      }
+    }
+  ]
+}

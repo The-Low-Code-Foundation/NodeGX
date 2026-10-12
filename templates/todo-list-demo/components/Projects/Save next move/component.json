@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "798460e9-1212-5157-8ace-d21c15216361",
+  "name": "Save next move",
+  "path": "/Projects/Save next move",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Saves a project’s next move as a task: Mode done closes the current one (Task Id) and adds the next, change rewrites it, new adds one. Waiting On names who it waits on; empty means it is your move."
+}

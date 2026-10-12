@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6f452676-a190-5f95-8e20-0f3198daefb8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "oliveheldIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "exam",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "oliveheldFn",
+      "type": "JavaScriptFunction",
+      "label": "Olive held",
+      "parameters": {
+        "functionScript": "var { langOf, nameOf, wordMap } = Scripts.words;\nvar ORDER = [\"say-thanks\",\"read\",\"is-it-a\"];\nvar BAND = {\"say-thanks\":2,\"read\":2,\"is-it-a\":2};\nvar TITLE = {\"say-thanks\":\"rungSayThanks\",\"read\":\"rungRead\",\"is-it-a\":\"rungIsItA\"};\nvar lang = langOf(Inputs.lang), band = Number(Inputs.band) === 1 ? 1 : 2;\nvar w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));\nvar rungs = Inputs.exam && Inputs.exam.rungs && typeof Inputs.exam.rungs === 'object' ? Inputs.exam.rungs : {};\nvar held = [];\nfor (var i = 0; i < ORDER.length; i++) { var id = ORDER[i]; if (BAND[id] <= band && rungs[id] && rungs[id].pass === false) held.push(id); }\nvar names = [];\nfor (var j = 0; j < held.length; j++) names.push(w[TITLE[held[j]]] || held[j]);\nOutputs.held = held;\nOutputs.show = held.length > 0;\nOutputs.text = held.length ? (w.oliveCant || '') + (lang === 'fr' ? ' : ' : ': ') + names.join(', ') : '';\n",
+        "uses": "words.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-band",
+          "displayName": "band",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-exam",
+          "displayName": "exam",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-held",
+          "displayName": "held",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-show",
+          "displayName": "show",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "oliveheldOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "held",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "show",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "text",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

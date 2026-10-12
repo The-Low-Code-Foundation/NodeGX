@@ -61,6 +61,10 @@ interface LogicBuilderNodeInstance extends NodeInstance {
      * the warning that had been raised microseconds earlier, and the node showed nothing at all.
      */
     runRaisedCodes?: string[];
+    /** P107-C149: true while the run's code executes, so a reserved signal sent then fails the run, not a Failure of its own. */
+    blocksRunning?: boolean;
+    /** P107-C149: the first reserved name the running code SENT. */
+    refusedSignal?: string | null;
     /** The workspace string `io` was derived from — the memo key. */
     ioSource?: string;
     io?: DetectedIO;
@@ -443,6 +447,10 @@ const LogicBuilderNode: NodeDefinitionOptions = {
       try {
         // Create execution context
         const context = this._createExecutionContext(triggerSignal);
+        // P107-C149: a reserved name SENT while the code runs is remembered and fails this run below,
+        // as one WRITTEN does — not a Failure of its own that the run then contradicts with Success.
+        internal.refusedSignal = null;
+        internal.blocksRunning = true;
 
         // Execute generated code, passing context variables as parameters
         internal.compiledFunction(
@@ -459,6 +467,7 @@ const LogicBuilderNode: NodeDefinitionOptions = {
           // Eleventh, matching `_compileFunction`'s parameter list. See the note there on order.
           context.console
         );
+        internal.blocksRunning = false;
 
         // Update outputs. Registration comes first because `flagOutputDirty` throws on an
         // unregistered port: a program that writes two outputs while only one is connected
@@ -478,6 +487,17 @@ const LogicBuilderNode: NodeDefinitionOptions = {
           internal.outputValues[outputName] = context.Outputs[outputName];
           this.registerOutputIfNeeded(outputName);
           this.flagOutputDirty(outputName);
+        }
+
+        // P107-C149: the signal side, the same answer — Error keeps the reason, the Run is answered
+        // failure, no Success, no Done. The values the code wrote have landed, as for a written name.
+        if (internal.refusedSignal) {
+          this._fail(
+            'logic-builder/reserved-port-name',
+            '"' + internal.refusedSignal + '" is one of the node\'s own output signals and cannot be sent from the blocks',
+            token
+          );
+          return;
         }
 
         if (reservedName !== null) {
@@ -501,6 +521,7 @@ const LogicBuilderNode: NodeDefinitionOptions = {
         // Last, after every output the program wrote has been flagged and after `Success`.
         if (token) this.reportOutcome(token, 'done');
       } catch (error) {
+        internal.blocksRunning = false;
         console.error('[Logic Builder] Execution error:', error);
         // `error.message` alone left a `throw "some string"` reporting the empty string —
         // the node's only failure surface, blank, for a failure that did happen.
@@ -565,6 +586,12 @@ const LogicBuilderNode: NodeDefinitionOptions = {
         // (`updatePorts` filters `io.signalOutputs`), so this closes the runtime half.
         sendSignalOnOutput: function (name: string) {
           if (RESERVED_OUTPUTS.indexOf(name) !== -1) {
+            // P107-C149: during a run, the run itself fails once the code returns (the first such name);
+            // a send made later (a block's own timer) has no run to answer, so it fails at once.
+            if (internal.blocksRunning) {
+              if (!internal.refusedSignal) internal.refusedSignal = name;
+              return;
+            }
             self._fail(
               'logic-builder/reserved-port-name',
               '"' + name + '" is one of the node\'s own output signals and cannot be sent from the blocks'

@@ -17,6 +17,7 @@
 
 import { deepEq, eq, ok } from '../assert';
 import type { ConformanceCase, ConformanceContext } from '../index';
+import type { StorageColumn } from '../../src/storage';
 
 /** The optional members are feature-detected, exactly as their call sites do. */
 function hasIndexSupport(ctx: ConformanceContext): boolean {
@@ -301,6 +302,11 @@ export const schemaCases: readonly ConformanceCase[] = Object.freeze([
         const why = thrownBy(() => ctx.schema.dropColumn!(c, 'title'));
         ok(/idx_/.test(why), `the refusal does not name the index: ${why}`);
         ok((ctx.schema.getTableSchema(c)?.columns || []).some((col) => col.name === 'title'), 'a refused drop dropped the column anyway');
+        // A field only the index's `where` reads is read by it too: PostgreSQL would take the index with the column.
+        ctx.schema.reconcileIndexes!(c, [{ fields: ['title'], unique: true, where: { score: 5 } }]);
+        const onlyWhere = thrownBy(() => ctx.schema.dropColumn!(c, 'score'));
+        ok(/idx_/.test(onlyWhere), `the refusal does not name the index whose where reads it: ${onlyWhere}`);
+        ctx.schema.reconcileIndexes!(c, []);
       }
       if (hasCheckSupport(ctx)) {
         ctx.schema.reconcileChecks!(c, [{ field: 'score', min: 0 }]);
@@ -312,6 +318,183 @@ export const schemaCases: readonly ConformanceCase[] = Object.freeze([
       }
       const after = await ctx.fetch(c, row.objectId as string);
       ok(!('score' in after) || !hasCheckSupport(ctx), 'a read still carries the second dropped column');
+    }
+  },
+  {
+    id: 'schema/rename-column-keeps-its-values-and-refuses-one-in-use',
+    area: 'schema',
+    pins:
+      'P116-ONT-007-renamecolumn: renameColumn keeps the values under the new name; a column a declared index or check ' +
+      'reads is refused by name, as dropColumn refuses it, and nothing is renamed — a rename that went through left the ' +
+      'rule naming a field that is gone, still reported built, and the same declaration pushed again was refused',
+    async run(ctx) {
+      const c = ctx.collection('Sch');
+      ctx.createTable(c, [
+        { name: 'title', type: 'String' },
+        { name: 'tier', type: 'String' }
+      ]);
+      const row = await ctx.create(c, { title: 'T', tier: 'gold' });
+      const declared = () => (ctx.schema.getTableSchema(c)?.columns || []).map((col) => col.name);
+
+      ctx.schema.renameColumn(c, 'title', 'name');
+      ok(declared().includes('name') && !declared().includes('title'), `the declaration did not follow the rename: ${declared().join(', ')}`);
+      const back = await ctx.fetch(c, row.objectId as string);
+      eq(back.name, 'T', 'the renamed column lost its value');
+      ok(!('title' in back), 'a read still carries the old name');
+
+      if (hasIndexSupport(ctx)) {
+        ctx.schema.reconcileIndexes!(c, [{ fields: ['name'], unique: true }]);
+        const why = thrownBy(() => ctx.schema.renameColumn(c, 'name', 'label'));
+        ok(/rename/.test(why) && /idx_/.test(why), `the refusal does not say rename and name the index: ${why}`);
+        ok(declared().includes('name') && !declared().includes('label'), 'a refused rename renamed the column anyway');
+        ctx.schema.reconcileIndexes!(c, [{ fields: ['name'], unique: true, where: { tier: 'gold' } }]);
+        const onlyWhere = thrownBy(() => ctx.schema.renameColumn(c, 'tier', 'level'));
+        ok(/idx_/.test(onlyWhere), `the refusal does not name the index whose where reads it: ${onlyWhere}`);
+        ctx.schema.reconcileIndexes!(c, []);
+      }
+      if (hasCheckSupport(ctx)) {
+        const rule = { field: 'tier', oneOf: ['basic', 'gold'] };
+        ctx.schema.reconcileChecks!(c, [rule]);
+        const why = thrownBy(() => ctx.schema.renameColumn(c, 'tier', 'level'));
+        ok(/rename/.test(why) && /tier is one of basic, gold/.test(why), `the refusal does not say rename and name the rule: ${why}`);
+        ok(declared().includes('tier') && !declared().includes('level'), 'a refused rename renamed the column anyway');
+        // The declaration still reads true: pushed again as it stands, it is accepted.
+        ctx.schema.reconcileChecks!(c, [rule]);
+        // With the rule taken off, the rename goes through.
+        ctx.schema.reconcileChecks!(c, []);
+        ctx.schema.renameColumn(c, 'tier', 'level');
+        const after = await ctx.fetch(c, row.objectId as string);
+        eq(after.level, 'gold', 'the rename after the rule came off lost the value');
+      }
+    }
+  },
+  {
+    id: 'schema/delete-table-takes-only-its-own-relations',
+    area: 'schema',
+    pins:
+      "P116-ONT-007-junctions: deleteTable drops the junction tables of the collection it deletes and no other's — a " +
+      'name match took the links of every collection whose name ended with its name ("Account" took "MyAccount"\'s on ' +
+      'one engine and "My_Account"\'s on both) — and leaves none of its own behind, declared or made by addRelation alone',
+    async run(ctx) {
+      if (typeof ctx.schema.deleteTable !== 'function') {
+        throw new Error('deleteTable is absent — declare this case unsupported (§3.4)');
+      }
+      const base = ctx.collection('Acct');
+      const tags = ctx.collection('Tag');
+      const names = [base, `My${base}`, `My_${base}`];
+      ctx.createTable(tags, [{ name: 'label', type: 'String' }]);
+      const t = String((await ctx.create(tags, { label: 't' })).objectId);
+      const owner: Record<string, string> = {};
+      const related = async (n: string, key: string): Promise<string[]> => {
+        const got = await Promise.resolve(ctx.schema.getRelatedIds(n, owner[n], key));
+        return (Array.isArray(got) ? got : []).map(String);
+      };
+      for (const n of names) {
+        ctx.createTable(n, [{ name: 'tags', type: 'Relation', targetClass: tags }]);
+        owner[n] = String((await ctx.create(n, { title: n })).objectId);
+        await ctx.addRelation(n, owner[n], 'tags', t);
+      }
+      // A key nothing declares, made by addRelation alone: it is the deleted collection's too.
+      await ctx.addRelation(base, owner[base], 'loose', t);
+      for (const n of names) deepEq(await related(n, 'tags'), [t], `the control: "${n}" has its link before the delete`);
+      deepEq(await related(base, 'loose'), [t], 'the control: the undeclared link is there before the delete');
+
+      ok(ctx.schema.deleteTable(base) === true, 'deleteTable did not report the delete');
+      for (const n of names.slice(1)) deepEq(await related(n, 'tags'), [t], `deleting "${base}" took "${n}"'s links`);
+      // Made again under the same name, the collection has none of the old links.
+      ctx.createTable(base, [{ name: 'tags', type: 'Relation', targetClass: tags }]);
+      deepEq(await related(base, 'tags'), [], 'the deleted collection\'s declared links came back with its name');
+      deepEq(await related(base, 'loose'), [], 'the deleted collection\'s undeclared links came back with its name');
+    }
+  },
+  {
+    id: 'schema/set-when-target-goes-changes-the-declaration',
+    area: 'schema',
+    pins: 'P116 R10: setWhenTargetGoes changes what a link says happens when its record goes — read back by getTableSchema, taken away by null, refused on a field that is not a link and on a required one told to stay without it; the other columns untouched',
+    async run(ctx) {
+      if (typeof ctx.schema.setWhenTargetGoes !== 'function') {
+        throw new Error('setWhenTargetGoes is absent — declare this case unsupported (§3.4)');
+      }
+      const target = ctx.collection('SchT');
+      const c = ctx.collection('Sch');
+      ctx.createTable(target, [{ name: 'name', type: 'String' }]);
+      ctx.schema.createTable({
+        name: c,
+        columns: [
+          { name: 'title', type: 'String' },
+          { name: 'owner', type: 'Pointer', targetClass: target, whenTargetGoes: 'blocks' },
+          { name: 'must', type: 'Pointer', targetClass: target, required: true } as StorageColumn
+        ]
+      });
+      const rule = (field: string) => (ctx.schema.getTableSchema(c)?.columns || []).find((col) => col.name === field)?.whenTargetGoes;
+      eq(rule('owner'), 'blocks', 'createTable did not keep the rule');
+
+      ok(ctx.schema.setWhenTargetGoes(c, { owner: 'goes-too', must: 'blocks' }) === true, 'setWhenTargetGoes did not report the change');
+      eq(rule('owner'), 'goes-too', 'the changed rule is not read back');
+      eq(rule('must'), 'blocks', 'a rule put on a link that had none is not read back');
+
+      ok(/link|Pointer/i.test(refusalOf(() => ctx.schema.setWhenTargetGoes!(c, { title: 'blocks' }))), 'a rule on a text field was not refused as not a link');
+      ok(/required/i.test(refusalOf(() => ctx.schema.setWhenTargetGoes!(c, { must: 'stays-unlinked' }))), 'stays-unlinked on a required link was not refused');
+      ok(/nope/.test(refusalOf(() => ctx.schema.setWhenTargetGoes!(c, { nope: 'blocks' }))), 'a field the collection does not have was not refused');
+      eq(rule('must'), 'blocks', 'a refused change changed the rule anyway');
+
+      ctx.schema.setWhenTargetGoes(c, { owner: null });
+      eq(rule('owner'), undefined, 'null did not take the rule away');
+      ok(deepEqFields((ctx.schema.getTableSchema(c)?.columns || []).map((col) => col.name), ['title', 'owner', 'must']), 'setWhenTargetGoes disturbed the columns');
+    }
+  },
+  {
+    id: 'schema/set-required-over-records',
+    area: 'schema',
+    pins:
+      'P116-ONT-007-required: setRequired makes a field the records already have required, and optional again — refused in the same words, naming how many, while a record holds none (and nothing changes); kept by the next create once it goes through; every record and value kept; a list, a system field and an unknown field refused; a second ask reports nothing done',
+    async run(ctx) {
+      if (typeof ctx.schema.setRequired !== 'function') {
+        throw new Error('setRequired is absent — declare this case unsupported (§3.4)');
+      }
+      const target = ctx.collection('ReqT');
+      const c = ctx.collection('Req');
+      ctx.createTable(target, [{ name: 'name', type: 'String' }]);
+      ctx.createTable(c, [
+        { name: 'title', type: 'String' },
+        { name: 'owner', type: 'Pointer', targetClass: target },
+        { name: 'tags', type: 'Relation', targetClass: target }
+      ]);
+      const t = String((await ctx.create(target, { name: 'ada' })).objectId);
+      const owner = { __type: 'Pointer', className: target, objectId: t };
+      const a = String((await ctx.create(c, { title: 'a', owner })).objectId);
+      const b = String((await ctx.create(c, { title: 'b' })).objectId);
+      const required = () => ((ctx.schema.getTableSchema(c)?.columns || []).find((col) => col.name === 'owner') as { required?: boolean } | undefined)?.required;
+      const set = (columns: Record<string, boolean>) => () => ctx.schema.setRequired!(c, columns);
+
+      const words = await refusedOverRecords(ctx, c, set({ owner: true }));
+      ok(/owner/.test(words) && /\b1 record\b/.test(words), `the refusal does not say which field and how many records hold none: ${words}`);
+      ok(!required(), 'a refused setRequired left the field declared required');
+      await ctx.create(c, { title: 'c' }); // the control: nothing physical changed either
+      eq(await ctx.count(c, { owner: { $exists: false } }), 2, 'the control: two records hold no owner');
+
+      for (const id of (await ctx.query(c, { where: { owner: { $exists: false } } })).results.map((r) => String(r.objectId))) {
+        await ctx.save(c, id, { owner });
+      }
+      ok(ctx.schema.setRequired(c, { owner: true }) === true, 'setRequired did not report the change');
+      eq(await ctx.count(c), 3, 'records went missing when the field was made required');
+      ok(required() === true, 'the field is not read back as required');
+      await ctx.refused(() => ctx.create(c, { title: 'd' }));
+      await ctx.create(c, { title: 'e', owner });
+      const kept = await ctx.fetch(c, a);
+      eq(kept.title, 'a', 'a record lost its other values when the field was made required');
+      eq((kept.owner as { objectId?: string } | undefined)?.objectId ?? kept.owner, t, 'a record lost its link when the field was made required');
+      ok((await ctx.fetch(c, b)).title === 'b', 'a filled record was not kept');
+      ok(ctx.schema.setRequired(c, { owner: true }) === false, 'a field already required was reported changed');
+
+      ok(/list/i.test(refusalOf(set({ tags: true }))), 'a list of links was not refused');
+      ok(/backend/i.test(refusalOf(set({ objectId: false }))), 'a system field was not refused');
+      ok(/nope/.test(refusalOf(set({ nope: true }))), 'a field the collection does not have was not refused');
+
+      ok(ctx.schema.setRequired(c, { owner: false }) === true, 'making it optional did not report the change');
+      await ctx.create(c, { title: 'f' });
+      ok(!required(), 'the field is still read back as required');
+      eq(await ctx.count(c), 5, 'the records are not all there');
     }
   },
 
@@ -339,6 +522,30 @@ export const schemaCases: readonly ConformanceCase[] = Object.freeze([
 ]);
 
 /** Field lists compare as ordered tuples — `[a,b]` is not `[b,a]` for an index. */
+/** The message of a refusal of any kind; fails the case when the call goes through. */
+function refusalOf(fn: () => unknown): string {
+  try {
+    fn();
+  } catch (err) {
+    return String((err as { message?: string }).message);
+  }
+  throw new Error('expected the call to be refused, and it succeeded');
+}
+
+/**
+ * A schema change refused because of the records already there: SQLite throws it from the call;
+ * PostgreSQL queues the change and throws it at the barrier the next data-plane call passes. Either
+ * way, the words.
+ */
+async function refusedOverRecords(ctx: ConformanceContext, collection: string, fn: () => unknown): Promise<string> {
+  try {
+    fn();
+  } catch (err) {
+    return String((err as { message?: string }).message);
+  }
+  return ctx.refused(() => ctx.count(collection));
+}
+
 function deepEqFields(a: string[] | undefined, b: string[]): boolean {
   if (!Array.isArray(a) || a.length !== b.length) return false;
   return a.every((v, i) => v === b[i]);

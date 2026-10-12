@@ -23,6 +23,7 @@
 
 import * as crypto from 'crypto';
 
+import { deleteKeepingLinks } from '@noodl/backend-contract';
 import type {
   IStorageAdapter,
   IStorageDataPlane,
@@ -48,6 +49,9 @@ export type QueryOptions = StorageQueryOptions;
 export type SearchOptions = StorageSearchOptions;
 export type WireQueryResult = StorageQueryResult;
 export type ImportColumn = StorageImportColumn;
+
+import { reachOf, refuseHiddenNamed, stripHidden, type NamedFields } from './fieldRules';
+import { heldCascade, heldWhile, whyRefused, type Held } from './onlyWhile';
 
 // QueryBuilder is the adapter's own SQL/serialization helper — reused here so
 // BAK-007 import writes serialize values EXACTLY as create()/save() do (JSON
@@ -205,6 +209,7 @@ export class AdapterFacade implements IStorageFacade {
   }
 
   async rawQuery(collection: string, options: QueryOptions = {}): Promise<WireQueryResult> {
+    this.refuseHidden(collection, options, options.acl);
     const { limit, capApplied } = this.resolveLimit(options.limit);
     const result = await this.call<WireQueryResult>(
       'query',
@@ -214,7 +219,38 @@ export class AdapterFacade implements IStorageFacade {
         count: count as number | undefined
       })
     );
+    result.results = await this.stripped(collection, result.results, options.acl);
     return this.markCapped(result, limit, capApplied);
+  }
+
+  // --------------------------------------------------------------------------
+  // P116 ONT-012 (R-a) — per-field read rules (`fieldRules.ts`). Every method below that takes the
+  // caller's ACL refuses a request naming a field it hides, and strips it from what it returns.
+  // --------------------------------------------------------------------------
+
+  private refuseHidden(collection: string, request: NamedFields, acl: AclOption | undefined): void {
+    refuseHiddenNamed(collection, request, acl, (c, field) => this.columnTypes(c).get(field)?.targetClass);
+  }
+
+  private stripped(collection: string, records: Record<string, unknown>[], acl: AclOption | undefined): Promise<Record<string, unknown>[]> {
+    if (!acl?.hidden?.[collection]) return Promise.resolve(records);
+    return stripHidden(collection, records, acl, async (shownWhere, ids) => {
+      // The rows the field's own rule reaches, under the caller's row ACL and nothing else: the
+      // collection's narrowing (`only`) decided which rows came back, not which details show.
+      const reachAcl: AclOption = { access: 'read', keys: acl.keys };
+      const found = await this.call<Record<string, unknown>[]>('query', {
+        collection,
+        where: { $and: [{ objectId: { $in: ids } }, shownWhere] },
+        limit: ids.length,
+        acl: reachAcl
+      });
+      return new Set(found.map((r) => String(r.objectId)));
+    });
+  }
+
+  private async strippedOne(collection: string, record: Record<string, unknown>, acl: AclOption | undefined): Promise<Record<string, unknown>> {
+    if (!record || typeof record !== 'object') return record;
+    return (await this.stripped(collection, [record], acl))[0];
   }
 
   /**
@@ -233,11 +269,14 @@ export class AdapterFacade implements IStorageFacade {
    * pages at 1,000 through here, and its page size is its own decision rather
    * than a number that silently becomes whatever `queries.maxLimit` is today.
    */
-  rawQueryAll(collection: string, options: QueryOptions = {}): Promise<WireQueryResult> {
-    return this.call<WireQueryResult>('query', { collection, ...options }, (results, count) => ({
+  async rawQueryAll(collection: string, options: QueryOptions = {}): Promise<WireQueryResult> {
+    this.refuseHidden(collection, options, options.acl);
+    const result = await this.call<WireQueryResult>('query', { collection, ...options }, (results, count) => ({
       results: results as Record<string, unknown>[],
       count: count as number | undefined
     }));
+    result.results = await this.stripped(collection, result.results, options.acl);
+    return result;
   }
 
   /**
@@ -248,6 +287,7 @@ export class AdapterFacade implements IStorageFacade {
    * surfaces as a rejected promise with LocalSQLAdapter's clear message.
    */
   async rawSearch(collection: string, options: SearchOptions): Promise<WireQueryResult> {
+    this.refuseHidden(collection, { ...options, search: true }, options.acl);
     const { limit, capApplied } = this.resolveLimit(options.limit);
     const result = await this.call<WireQueryResult>(
       'search',
@@ -260,15 +300,16 @@ export class AdapterFacade implements IStorageFacade {
     return this.markCapped(result, limit, capApplied);
   }
 
-  rawFetch(collection: string, objectId: string, acl?: AclOption): Promise<Record<string, unknown>> {
-    return this.call('fetch', { collection, objectId, acl });
+  async rawFetch(collection: string, objectId: string, acl?: AclOption): Promise<Record<string, unknown>> {
+    const record = await this.call<Record<string, unknown>>('fetch', { collection, objectId, acl });
+    return this.strippedOne(collection, record, acl);
   }
 
   rawCreate(collection: string, data: Record<string, unknown>): Promise<Record<string, unknown>> {
     return this.call('create', { collection, data });
   }
 
-  rawSave(
+  async rawSave(
     collection: string,
     objectId: string,
     data: Record<string, unknown>,
@@ -277,14 +318,70 @@ export class AdapterFacade implements IStorageFacade {
   ): Promise<Record<string, unknown>> {
     // HLT-016: `expect` is only sent when there is one, so a save without a precondition
     // reaches the adapter with exactly the options it always did.
-    return this.call('save', expect ? { collection, objectId, data, acl, expect } : { collection, objectId, data, acl });
+    if (expect) this.refuseHidden(collection, { expect }, acl);
+    const held = heldWhile(collection, acl, 'update', Object.keys(data), data);
+    const save = (a: AclOption | undefined) =>
+      this.call<Record<string, unknown>>('save', expect ? { collection, objectId, data, acl: a, expect } : { collection, objectId, data, acl: a });
+    const saved = held.rule ? save(held.acl).catch((e) => this.whyRefused(e, collection, objectId, 'update', acl, held)) : save(acl);
+    return saved.then((record) => this.strippedOne(collection, record, acl));
   }
 
-  rawDelete(collection: string, objectId: string, acl?: AclOption): Promise<void> {
-    return this.call('delete', { collection, objectId, acl });
+  /** P116 ONT-012 — see `onlyWhile.ts` `whyRefused`. */
+  private whyRefused(
+    e: unknown,
+    collection: string,
+    objectId: string,
+    op: 'update' | 'delete',
+    acl: AclOption | undefined,
+    held: Held
+  ): Promise<never> {
+    return whyRefused((c, w, a) => this.rawCount(c, w, a), e, collection, objectId, op, acl, held);
+  }
+
+  /**
+   * P116 R10 — a delete keeps what every link to the record says happens when it goes
+   * (`goes-too`, `stays-unlinked`, `blocks`; `@noodl/backend-contract` `targetGoes.ts`). HERE, above
+   * the adapter, for the reason the page cap is here: every door that deletes — `/classes` (and so
+   * a cloud function's Delete Record, which calls it over loopback), BYOB `/api/:table`, its batch,
+   * the account and session sweeps — passes this one method, on every engine. A `blocks` refusal is
+   * thrown as `StillLinked` with nothing changed; a record's Links pairs (either end) go with it;
+   * a delete no rule and no Relation reaches is the plain one.
+   */
+  async rawDelete(collection: string, objectId: string, acl?: AclOption): Promise<void> {
+    // P116 ONT-012: "deleted only while a draft" is held inside the delete, like the row ACL.
+    const held = heldWhile(collection, acl, 'delete');
+    if (!held.rule) return this.deleteHeld(collection, objectId, acl);
+    return this.deleteHeld(collection, objectId, held.acl).catch((e) => this.whyRefused(e, collection, objectId, 'delete', acl, held));
+  }
+
+  private async deleteHeld(collection: string, objectId: string, acl?: AclOption): Promise<void> {
+    const sm = this.schemaManager;
+    if (!sm || typeof sm.listTables !== 'function') return this.call('delete', { collection, objectId, acl });
+    await deleteKeepingLinks(
+      {
+        schema: sm,
+        query: (c, options) => this.rawQueryAll(c, options),
+        count: (c, where) => this.call('count', { collection: c, where }),
+        save: (c, id, data) => this.call('save', { collection: c, objectId: id, data }),
+        delete: (c, id, a) => this.call('delete', { collection: c, objectId: id, acl: a }),
+        unpair: (c, id, field, relatedId) => this.call('removeRelation', { collection: c, objectId: id, key: field, targetObjectId: relatedId }),
+        // Bug P116-S18-CASCADEHOLD (R-i): the rows the delete reaches, by their own rules, before anything
+        // goes — and only once the caller may delete their own record: a stranger's delete is refused by the
+        // delete itself, never by a 409 that tells them what links to it.
+        held: async (plan) => {
+          if (!acl?.onlyWhile) return;
+          if ((await this.call<number>('count', { collection, where: { objectId }, acl })) === 0) return;
+          await heldCascade((c, where) => this.call('count', { collection: c, where }), acl, { gone: plan.gone.slice(1), unlinked: plan.unlinked });
+        }
+      },
+      collection,
+      objectId,
+      acl
+    );
   }
 
   rawCount(collection: string, where?: Record<string, unknown>, acl?: AclOption): Promise<number> {
+    this.refuseHidden(collection, { where }, acl);
     return this.call('count', { collection, where, acl });
   }
 
@@ -294,7 +391,14 @@ export class AdapterFacade implements IStorageFacade {
     properties: Record<string, number>,
     acl?: AclOption
   ): Promise<Record<string, unknown>> {
-    return this.call('increment', { collection, objectId, properties, acl });
+    const held = heldWhile(collection, acl, 'update', Object.keys(properties));
+    const done = held.rule
+      ? this.call<Record<string, unknown>>('increment', { collection, objectId, properties, acl: held.acl }).catch((e) =>
+          this.whyRefused(e, collection, objectId, 'update', acl, held)
+        )
+      : this.call<Record<string, unknown>>('increment', { collection, objectId, properties, acl });
+    // Parse echoes an incremented counter; a hidden one is not echoed (an Increment by 0 would read it).
+    return done.then((record) => this.strippedOne(collection, record, acl));
   }
 
   /**
@@ -320,6 +424,7 @@ export class AdapterFacade implements IStorageFacade {
     where?: Record<string, unknown>,
     acl?: AclOption
   ): Promise<StorageAggregateResult> {
+    this.refuseHidden(collection, { where, group }, acl);
     const result = await this.call<Record<string, unknown>>('aggregate', {
       collection,
       group,
@@ -369,6 +474,7 @@ export class AdapterFacade implements IStorageFacade {
     where?: Record<string, unknown>,
     acl?: AclOption
   ): Promise<StorageDistinctResult> {
+    this.refuseHidden(collection, { where, distinct: property }, acl);
     const values = await this.call<unknown[]>('distinct', { collection, property, where, acl });
     const { maxLimit } = this.getPageCap();
     if (!Array.isArray(values)) return { values };
@@ -446,12 +552,16 @@ export class AdapterFacade implements IStorageFacade {
       const col = types.get(key);
       if (col && col.type === 'Pointer' && typeof value === 'string') {
         const className = col.targetClass || 'Unknown';
-        if (include.includes(key)) {
+        // Bug INCLUDECLP: the target's own `get` rule decides as well as its row ACL. A collection
+        // the caller may not get is never expanded; a narrowed one is read with its narrowing.
+        const reach = include.includes(key) ? reachOf(acl, 'get', className) : 'none';
+        if (reach !== 'none') {
           try {
             // The caller's read ACL applies to the TARGET row too — without
             // this, include= is a one-hop ACL bypass. An unreadable target
             // degrades to the unexpanded envelope, same as a dangling pointer.
-            const target = await this.rawFetch(className, value, acl && { ...acl, access: 'read' });
+            const readAcl: AclOption | undefined = acl && { ...acl, access: 'read', only: reach === 'all' ? undefined : { collection: className, where: reach.where } };
+            const target = await this.rawFetch(className, value, readAcl);
             const expanded = await this.toWire(className, target, [], acl);
             out[key] = { __type: 'Object', className, ...expanded };
           } catch {

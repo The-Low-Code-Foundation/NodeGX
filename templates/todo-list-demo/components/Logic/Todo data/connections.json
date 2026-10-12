@@ -68,6 +68,18 @@
       "fromProperty": "out-recent",
       "toId": "dtOut",
       "toProperty": "recent"
+    },
+    {
+      "fromId": "dtRead",
+      "fromProperty": "out-routines",
+      "toId": "dtOut",
+      "toProperty": "routines"
+    },
+    {
+      "fromId": "dtRead",
+      "fromProperty": "out-checks",
+      "toId": "dtOut",
+      "toProperty": "checks"
     }
   ]
 }

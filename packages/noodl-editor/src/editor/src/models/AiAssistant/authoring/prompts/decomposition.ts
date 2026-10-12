@@ -162,6 +162,10 @@ and change than the same page as one long column of nodes.
   a Repeater over a data source. Never duplicate a subtree by hand.
 - **Logic clusters are components.** Three or more logic nodes cooperating on one job get their own
   component with a declared interface, rather than sitting beside the visual nodes.
+- **Shared or long code is a script file.** Code two Functions need, or a Function body long enough
+  that you would change one line of it, goes in \`scripts/<name>.js\` (\`write_script_file\`), listed
+  under the Function's \`uses\` and called as \`Scripts.<name>\`. \`edit_script_file\` then changes one
+  line without sending the file again; a Function's own code can only be replaced whole.
 - **Interfaces are deliberate.** Component Inputs/Outputs carry what varies per instance. Shared app
   state goes through Variables and Objects, not through prop drilling. A component's own state never
   does: a Variable is one value however many times the component is placed, so two copies share it.

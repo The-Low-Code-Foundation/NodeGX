@@ -53,7 +53,7 @@ let tempDir: string;
  * once, below.
  *
  * ⚠️ **This is thrift, not a fix, and the distinction cost a measurement.** The
- * `@noodl/mcp` provisioning suites (`provision.test.ts`,
+ * `@nodegx/mcp` provisioning suites (`provision.test.ts`,
  * `projectOwnsBackend.test.ts`) start real backend processes and fail
  * intermittently under machine load. Adding this suite raised the rate, and on a
  * single before/after sample that read as *caused by* it — a reading this file
@@ -161,7 +161,9 @@ describe('acceptance criterion 3 — a type no kit declares is unchanged', () =>
 
     const connPath = path.join(dir, 'components', 'App', 'connections.json');
     const conns = JSON.parse(fs.readFileSync(connPath, 'utf8'));
-    conns.connections.push({ fromId: 'dyn_panel', fromProperty: 'title', toId: 'stray', toProperty: 'anything' });
+    // P109-S1-CN004: into Panel's `title`, which is an INPUT. The wire used to run out of it, and Panel has no output of
+    // that name, so strict read a second, true error (`nonexistent-port`) and `summary.errors` was 2 for this arm's 1.
+    conns.connections.push({ fromId: 'stray', fromProperty: 'anything', toId: 'dyn_panel', toProperty: 'title' });
     fs.writeFileSync(connPath, JSON.stringify(conns, null, 2));
     return dir;
   }
@@ -246,7 +248,10 @@ describe('item 4 — a kit whose ports are runtime-determined is not accused of 
     const panel = overlay.nodes.find((n) => n.typeName === 'dynports.kit.Panel');
     const feed = overlay.nodes.find((n) => n.typeName === 'dynports.kit.Feed');
     expect(panel?.dynamicPorts?.mechanisms).toEqual(['declared-port-groups']);
-    expect(feed?.dynamicPorts?.mechanisms).toEqual(['runtime-discovered']);
+    // P109 ISL-009 (2026-10-03): Feed is a visual kit node, so it now also declares the Data Attributes
+    // list — a declared, enumerable half beside its runtime channel port. Still runtime-discovered,
+    // which is what keeps `channelName` from being accused.
+    expect(feed?.dynamicPorts?.mechanisms).toEqual(['declared-port-groups', 'runtime-discovered']);
     // 🔴 The fact that makes the carve-out load-bearing rather than tidy: the
     // exporter keeps a channel port out of the static list, so nothing but the
     // mechanism can vouch for `channelName`.

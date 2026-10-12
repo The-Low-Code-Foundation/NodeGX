@@ -288,10 +288,13 @@ export function matchesFilter(where: Where | null | undefined, record: Record<st
     // indices become unknown operators → no constraint), exactly as SQL does.
     if (condition === null || typeof condition !== 'object') {
       const target = convertValue(condition);
-      // buildWhereClause emits a bare `col = ?`; a null param means `col = NULL`,
-      // which is NULL (never true) for EVERY row — including null columns. This
-      // differs from `{$eq: null}` (→ `IS NULL`), and the property test proves it.
-      if (isNil(target)) return false;
+      // P116-S17-NULLEQ: a null here is "is empty", as `{$eq: null}` is — buildWhereClause
+      // emits `col IS NULL` for both now (it used to emit `col = NULL`, never true, and this
+      // twin mirrored that). The property test proves the two agree.
+      if (isNil(target)) {
+        if (!isNil(fieldValue)) return false;
+        continue;
+      }
       if (!sqlEq(fieldValue, target)) return false;
       continue;
     }
@@ -316,6 +319,11 @@ export function assertFilterSupported(where: Where | null | undefined): void {
   for (const [key, condition] of Object.entries(where)) {
     if (key === '$relatedTo') {
       throw new UnsupportedFilterError('$relatedTo is not supported in realtime subscription filters');
+    }
+    if (key === '$path') {
+      // P116 ONT-004: a path crosses other collections, which a change frame
+      // of this one does not carry.
+      throw new UnsupportedFilterError('$path is not supported in realtime subscription filters');
     }
     if ((key === '$and' || key === '$or') && Array.isArray(condition)) {
       for (const sub of condition) assertFilterSupported(sub as Where);

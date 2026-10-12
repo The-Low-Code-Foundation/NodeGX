@@ -15,6 +15,13 @@ import {
 } from '@noodl-utils/capability-gating';
 import { revealGateTarget } from '@noodl-utils/portGate';
 import { applyPortHint, hintPortsOf, portNamesForView, portsForView, HINT_PORTS_ATTRIBUTE } from '@noodl-utils/portHint';
+import {
+  applyStyleSourceNote,
+  stylePortsOf,
+  STYLE_PORTS_ATTRIBUTE,
+  type StyleSourceFinding
+} from '@noodl-utils/portStyleSource';
+import { onStyleSourcesStale, requestStyleSources } from '@noodl-utils/styleSourceBridge';
 import { SCHEMA_OUTCOME_CHANGED } from '@noodl-utils/schemaCachePolicy';
 import {
   addFieldTarget,
@@ -71,6 +78,7 @@ import { QuerySortingType } from './QuerySortingType';
 import { ResizingType } from './ResizingType';
 import { SizeModeType } from './SizeModeType';
 import { StringListType } from './StringList/StringListType';
+import { ScriptUsesType } from './ScriptUses/ScriptUsesType';
 import { TabGroup } from './TabGroup';
 import { TextAreaType } from './TextAreaType';
 import { TextStyleType } from './TextStyleType';
@@ -236,6 +244,8 @@ export class Ports extends View {
       (args) => {
         if (args && HINT_INPUT_PARAMETERS.has(args.name)) this.refreshHints();
         this.renderGroupsIfOwnershipChanged();
+        // P109 ISL-008 — any edit can change what the author's CSS decides; the canvas needs a moment to redraw.
+        this.scheduleStyleSources(400);
       },
       this
     );
@@ -315,6 +325,10 @@ export class Ports extends View {
   dispose() {
     this._unsubscribeProbes && this._unsubscribeProbes();
     this._unsubscribeProbes = null;
+    this._unsubscribeStyleSources && this._unsubscribeStyleSources();
+    this._unsubscribeStyleSources = undefined;
+    if (this._styleSourcesTimer) clearTimeout(this._styleSourcesTimer);
+    this._styleSourcesAsked++;
     this.model && this.model.off(this);
     const graph = this.model && graphOf(this.model);
     graph && graph.off(this);
@@ -487,6 +501,54 @@ export class Ports extends View {
     hosts.forEach((host: HTMLElement) => {
       applyPortHint(host, hintPortsOf(host.getAttribute(HINT_PORTS_ATTRIBUTE)), hints, HINTABLE_PORTS);
     });
+
+    // Every pass that brings the structural notes into line is one the style-source notes follow.
+    this.scheduleStyleSources(0);
+  }
+
+  /**
+   * P109 ISL-008 — Richard's request with "Stylesheet beats defaults": mark a row whose value the author's CSS decides
+   * on the canvas, and say where that rule lives. The canvas answers (`styleSourceBridge.ts` → the viewer's
+   * `explainStyle`); the notes are applied in place on the rows `PropertyRow` marked, like the structural hints, so a
+   * focused field keeps its caret. Coalesced: a burst of edits asks once.
+   */
+  private _styleSourcesTimer?: ReturnType<typeof setTimeout>;
+  private _styleSourcesAsked = 0;
+  private _unsubscribeStyleSources?: () => void;
+
+  private scheduleStyleSources(delayMs: number): void {
+    if (!this._unsubscribeStyleSources) {
+      this._unsubscribeStyleSources = onStyleSourcesStale(() => this.scheduleStyleSources(300));
+    }
+    if (this._styleSourcesTimer) clearTimeout(this._styleSourcesTimer);
+    this._styleSourcesTimer = setTimeout(() => {
+      this._styleSourcesTimer = undefined;
+      void this.refreshStyleSources();
+    }, delayMs);
+  }
+
+  private async refreshStyleSources(): Promise<void> {
+    const node = nodeOf(this.model);
+    if (!this.el || !node || !node.id) return;
+    const asked = ++this._styleSourcesAsked;
+    const answer = await requestStyleSources([node.id]);
+    // A newer question, or a panel that has moved on, owns the rows now.
+    if (asked !== this._styleSourcesAsked || !this.el) return;
+
+    const findings = new Map<string, StyleSourceFinding>();
+    for (const finding of answer) if (finding && finding.port) findings.set(finding.port, finding);
+
+    const nameCssDefinition = (nodeId: string) => {
+      const definition = projectModel()?.findNodeWithId(nodeId);
+      if (!definition) return undefined;
+      return {
+        label: definition.label || 'CSS Definition',
+        component: definition.owner && definition.owner.owner ? definition.owner.owner.name : undefined
+      };
+    };
+    this.el.querySelectorAll(`[${STYLE_PORTS_ATTRIBUTE}]`).forEach((host: HTMLElement) => {
+      applyStyleSourceNote(host, stylePortsOf(host.getAttribute(STYLE_PORTS_ATTRIBUTE)), findings, nameCssDefinition);
+    });
   }
 
   /**
@@ -621,6 +683,8 @@ export class Ports extends View {
           // FB-017 AC4 — keyed by `portNamesForView`, because the corner-radius ports arrive
           // folded into a nameless `TabGroup` and would otherwise be reachable from nowhere.
           hintPorts: portNamesForView(v).filter((name) => HINTABLE_PORTS.has(name)),
+          // P109 ISL-008 — every row of a visual node is marked; the canvas says which of them its CSS decides.
+          stylePorts: portNamesForView(v),
           // As a prop rather than `createElement`'s third argument: `PropertyRowProps` declares
           // `children`, and the variadic overload does not satisfy a props type that requires it.
           children: control
@@ -1291,6 +1355,7 @@ export class Ports extends View {
     component: ComponentType,
     sourceCode: SourceCodeType,
     stringList: StringListType,
+    scriptUses: ScriptUsesType,
     resizing: ResizingType,
     variable: VariableType,
     curve: CurveType,

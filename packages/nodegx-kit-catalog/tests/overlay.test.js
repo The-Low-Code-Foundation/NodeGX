@@ -101,6 +101,38 @@ describe('catalogNodesFromNodeLibrary', () => {
     expect(nodes.every((n) => n.allowAsChild === true)).toBe(true);
   });
 
+  it('takes a kit node’s child/parent rules from the payload rather than deriving them again (P107 s90)', () => {
+    // The captured payload already carries the export's answer; the overlay copies it field for field.
+    const { nodes } = catalogNodesFromNodeLibrary(payload);
+    for (const n of nodes) {
+      const src = payload.nodetypes.find((t) => t.name === n.typeName);
+      for (const f of ['allowAsChild', 'allowChildrenWithCategory', 'allowAsExportRoot', 'singleton']) {
+        expect([n.typeName, f, n[f]]).toEqual([n.typeName, f, src[f]]);
+      }
+    }
+    // A Visual entry the runtime could not have produced (no `allowAsChild`) is not given one here: the
+    // placement rule reads the export, so a second derivation would only ever disagree with it.
+    const { nodes: bare } = catalogNodesFromNodeLibrary({
+      nodetypes: [{ name: 'k.Bare', module: 'K', category: 'Visual', ports: [] }]
+    });
+    expect(bare[0].isVisual).toBe(true);
+    expect('allowAsChild' in bare[0]).toBe(false);
+    expect('allowAsExportRoot' in bare[0]).toBe(false);
+  });
+
+  it('carries the port a kit node titles its card from, and leaves it absent when there is none (P107 R24)', () => {
+    const { nodes } = catalogNodesFromNodeLibrary({
+      nodetypes: [
+        { name: 'k.Named', module: 'K', category: 'Data', ports: [], usePortAsLabel: 'key', portLabelTruncationMode: 'length' },
+        { name: 'k.Plain', module: 'K', category: 'Data', ports: [] }
+      ]
+    });
+    const named = nodes.find((n) => n.typeName === 'k.Named');
+    const plain = nodes.find((n) => n.typeName === 'k.Plain');
+    expect([named.usePortAsLabel, named.portLabelTruncationMode]).toEqual(['key', 'length']);
+    expect('usePortAsLabel' in plain).toBe(false);
+  });
+
   it('keeps the port metadata a check needs, not just the names', () => {
     const { nodes } = catalogNodesFromNodeLibrary(payload);
     const lane = nodes.find((n) => n.typeName === 'nodegx.cashflow.Lane');

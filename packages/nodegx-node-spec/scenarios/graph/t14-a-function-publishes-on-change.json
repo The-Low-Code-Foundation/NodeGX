@@ -1,0 +1,526 @@
+[
+  {
+    "name": "a Function writing the value an output already holds publishes nothing: the Function it feeds does not run again",
+    "clauses": [
+      "N"
+    ],
+    "because": "simplejavascript.ts :295-305 — `value !== outputValues[prop]` (\"Some Noodl projects rely on this behavior\"); NSP-017 §5, the contract's most surprising rule: memory a-javascript-output-publishes-only-when-it-changes",
+    "nodes": {
+      "a": {
+        "type": "JavaScriptFunction",
+        "params": {
+          "functionScript": "Outputs.o = Inputs.x",
+          "in-x": {
+            "k": 1
+          }
+        }
+      },
+      "b": {
+        "type": "JavaScriptFunction",
+        "params": {
+          "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n;\nconst seen = Inputs.o"
+        }
+      }
+    },
+    "wires": [
+      {
+        "from": "a.out-o",
+        "to": "b.in-o"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "a",
+        "signal": "run"
+      },
+      "settle",
+      {
+        "node": "a",
+        "signal": "run"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "b",
+        "port": "out-count",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "signal": "success",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "signal": "success",
+        "count": 0
+      },
+      {
+        "at": 3,
+        "subject": "a",
+        "signal": "success",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "b",
+        "signal": "success",
+        "count": 0
+      },
+      {
+        "at": 3,
+        "subject": "b",
+        "port": "out-count",
+        "absent": true
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "functionScript",
+        "value": "Outputs.o = Inputs.x",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "in-x",
+        "value": {
+          "k": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "functionScript",
+        "value": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n;\nconst seen = Inputs.o",
+        "subject": "b"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "out-o",
+        "value": {
+          "k": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "out-count",
+        "value": 1,
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "b"
+      },
+      {
+        "t": "in",
+        "port": "run",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "run",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "in",
+        "port": "run",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "run",
+        "value": "done",
+        "subject": "a"
+      }
+    ]
+  },
+  {
+    "name": "a Function writing a fresh object every run publishes every run: the Function it feeds runs every time",
+    "clauses": [
+      "N"
+    ],
+    "because": "simplejavascript.ts :297 — a new object is never `===` the last; node.ts valueDidChange — an object always counts as changed at the receiver",
+    "nodes": {
+      "a": {
+        "type": "JavaScriptFunction",
+        "params": {
+          "functionScript": "Outputs.o = { k: Inputs.x }",
+          "in-x": 1
+        }
+      },
+      "b": {
+        "type": "JavaScriptFunction",
+        "params": {
+          "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n;\nconst seen = Inputs.o"
+        }
+      }
+    },
+    "wires": [
+      {
+        "from": "a.out-o",
+        "to": "b.in-o"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "a",
+        "signal": "run"
+      },
+      "settle",
+      {
+        "node": "a",
+        "signal": "run"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "b",
+        "signal": "success",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "port": "out-count",
+        "value": 2
+      },
+      {
+        "at": 3,
+        "subject": "b",
+        "port": "out-count",
+        "value": 3
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "functionScript",
+        "value": "Outputs.o = { k: Inputs.x }",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "in-x",
+        "value": 1,
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "functionScript",
+        "value": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n;\nconst seen = Inputs.o",
+        "subject": "b"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "out-o",
+        "value": {
+          "k": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "out-count",
+        "value": 1,
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "b"
+      },
+      {
+        "t": "in",
+        "port": "run",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "run",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "out-count",
+        "value": 2,
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "b"
+      },
+      {
+        "t": "in",
+        "port": "run",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "run",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "out-count",
+        "value": 3,
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "b"
+      }
+    ]
+  },
+  {
+    "name": "a value written again in the same run as a signal is sent with the signal: the Function it feeds runs again",
+    "clauses": [
+      "N"
+    ],
+    "because": "simplejavascript.ts :237-244, :302-305, :608-610 — GAM-011 AC2: a held write is published when the same run fires a signal",
+    "nodes": {
+      "a": {
+        "type": "JavaScriptFunction",
+        "wiredOutputs": ["out-ping"],
+        "params": {
+          "functionScript": "Outputs.o = Inputs.x;\nOutputs.ping()",
+          "in-x": {
+            "k": 1
+          }
+        }
+      },
+      "b": {
+        "type": "JavaScriptFunction",
+        "params": {
+          "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n;\nconst seen = Inputs.o"
+        }
+      }
+    },
+    "wires": [
+      {
+        "from": "a.out-o",
+        "to": "b.in-o"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "a",
+        "signal": "run"
+      },
+      "settle",
+      {
+        "node": "a",
+        "signal": "run"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "b",
+        "signal": "success",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "port": "out-count",
+        "value": 2
+      },
+      {
+        "at": 3,
+        "subject": "b",
+        "port": "out-count",
+        "value": 3
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "functionScript",
+        "value": "Outputs.o = Inputs.x;\nOutputs.ping()",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "in-x",
+        "value": {
+          "k": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "functionScript",
+        "value": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n;\nconst seen = Inputs.o",
+        "subject": "b"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "out-o",
+        "value": {
+          "k": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "out-ping",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "out-count",
+        "value": 1,
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "b"
+      },
+      {
+        "t": "in",
+        "port": "run",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "out-ping",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "run",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "out-count",
+        "value": 2,
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "b"
+      },
+      {
+        "t": "in",
+        "port": "run",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "out-ping",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "run",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "out-count",
+        "value": 3,
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "b"
+      }
+    ]
+  }
+]

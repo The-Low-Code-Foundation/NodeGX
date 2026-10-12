@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4981ad23-f703-577c-8c0b-4ef2f9a21c14",
+  "name": "Budgets",
+  "path": "/Logic/Budgets",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The four budget tiles: what each one has spent, what is left in it, and the one line that says what to do with the rest of the month."
+}

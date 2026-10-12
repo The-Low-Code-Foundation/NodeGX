@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "84a102ff-dc45-5f50-898b-2d0619e798b2",
+  "name": "Routine list",
+  "path": "/Todo/Routine list",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Everything that repeats — current first, finished after — and the box that adds one. Clear New empties the box."
+}

@@ -11,6 +11,24 @@
     },
     {
       "fromId": "hdIn",
+      "fromProperty": "projectsOn",
+      "toId": "hdProjects",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hdLook",
+      "fromProperty": "projectsBg",
+      "toId": "hdProjects",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "hdProjects",
+      "fromProperty": "onClick",
+      "toId": "hdOut",
+      "toProperty": "pickProjects"
+    },
+    {
+      "fromId": "hdIn",
       "fromProperty": "listLabel",
       "toId": "hdList",
       "toProperty": "label"
@@ -22,9 +40,21 @@
       "toProperty": "label"
     },
     {
+      "fromId": "hdIn",
+      "fromProperty": "todayLabel",
+      "toId": "hdToday",
+      "toProperty": "label"
+    },
+    {
       "fromId": "hdLook",
       "fromProperty": "listBg",
       "toId": "hdList",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "hdLook",
+      "fromProperty": "todayBg",
+      "toId": "hdToday",
       "toProperty": "backgroundColor"
     },
     {
@@ -44,6 +74,12 @@
       "fromProperty": "onClick",
       "toId": "hdOut",
       "toProperty": "pickList"
+    },
+    {
+      "fromId": "hdToday",
+      "fromProperty": "onClick",
+      "toId": "hdOut",
+      "toProperty": "pickToday"
     },
     {
       "fromId": "hdDone",

@@ -1,0 +1,186 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e77095c8-4e4f-5b11-8cf5-e78cdc1cf82c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "askoliveIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "narrow",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "request",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "run",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "timeoutMs",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "url",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "askoliveFn",
+      "type": "JavaScriptFunction",
+      "label": "Ask Olive",
+      "parameters": {
+        "functionScript": "var { OLIVE, OLIVE_HEADER, OLIVE_TIMEOUT_MS, OLIVE_URL, oliveCheckForBand, oliveSlotValues, writtenAnswer } = Scripts.olive;\nvar req = Inputs.request && typeof Inputs.request === 'object' ? Inputs.request : null;\nif (req) {\n  var run = Inputs.run && typeof Inputs.run === 'object' ? Inputs.run : null;\n  var lang = String(req.lang) === 'en' ? 'en' : 'fr';\n  var band = Number(Inputs.band) === 1 ? 1 : 2;\n  var rung = String(req.rung);\n  var slots = oliveSlotValues(req.slots);\n  var check = oliveCheckForBand(rung, slots, band, lang, Inputs.narrow);\n  var t0 = Date.now();\n  var reply = null, sent = false;\n  if (check.ok) {\n    sent = true;\n    var body = { rung: rung, slots: check.values, lang: lang };\n    if (req.shape) body.shape = String(req.shape);\n    if (typeof req.temperature === 'number') body.temperature = req.temperature;\n    if (Array.isArray(req.options)) body.options = req.options;\n    var limit = Number(Inputs.timeoutMs) > 0 ? Number(Inputs.timeoutMs) : OLIVE_TIMEOUT_MS;\n    var timer = null;\n    var late = new Promise(function (resolve) { timer = setTimeout(function () { resolve({ ok: false, fallback: true, reason: 'timeout' }); }, limit); });\n    var call;\n    try {\n      var headers = { 'content-type': 'application/json' };\n      headers[OLIVE_HEADER] = '1';\n      call = fetch(String(Inputs.url || OLIVE_URL), { method: 'POST', headers: headers, body: JSON.stringify(body) }).then(function (r) {\n        if (!r || !r.ok) return { ok: false, fallback: true, reason: 'http-' + (r ? r.status : 0) };\n        return r.json().then(function (j) { return j && typeof j === 'object' ? j : { ok: false, fallback: true, reason: 'bad-json' }; }, function () { return { ok: false, fallback: true, reason: 'bad-json' }; });\n      }, function () { return { ok: false, fallback: true, reason: 'no-shell' }; });\n    } catch (e) {\n      call = Promise.resolve({ ok: false, fallback: true, reason: 'no-shell' });\n    }\n    reply = await Promise.race([call, late]);\n    clearTimeout(timer);\n  } else {\n    reply = { ok: false, fallback: true, reason: check.reason, slot: check.slot };\n  }\n  var out = { seq: req.seq, run: run && run.runId ? String(run.runId) : req.run === undefined ? null : req.run, rung: rung, lang: lang, sent: sent, ms: Date.now() - t0 };\n  if (rung === 'voice-hint') out.key = String(slots.key || '');\n  if (reply && reply.ok === true && (reply.value !== undefined || typeof reply.text === 'string')) {\n    out.ok = true;\n    out.fallback = false;\n    if (reply.value !== undefined) out.value = reply.value; else out.text = reply.text;\n  } else {\n    out.ok = false;\n    out.fallback = true;\n    out.reason = String((reply && reply.reason) || 'fallback');\n    if (reply && reply.slot) out.slot = String(reply.slot);\n    var w = writtenAnswer(OLIVE, rung, check.ok ? check.values : slots, lang);\n    if (w) { if (w.value !== undefined) out.value = w.value; else out.text = w.text; }\n  }\n  Outputs.answer = out;\n  Outputs.sent = sent;\n  Outputs.fallback = out.fallback;\n  Outputs.refused = check.ok ? '' : String(check.reason);\n  Outputs.refusedSlot = check.ok ? '' : String(check.slot || '');\n}\n",
+        "runOnChange-in-band": false,
+        "runOnChange-in-narrow": false,
+        "runOnChange-in-request": false,
+        "runOnChange-in-run": false,
+        "runOnChange-in-timeoutMs": false,
+        "runOnChange-in-url": false,
+        "uses": "olive.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-request",
+          "displayName": "request",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-run",
+          "displayName": "run",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-band",
+          "displayName": "band",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-narrow",
+          "displayName": "narrow",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-timeoutMs",
+          "displayName": "timeoutMs",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-url",
+          "displayName": "url",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-answer",
+          "displayName": "answer",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sent",
+          "displayName": "sent",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fallback",
+          "displayName": "fallback",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refusedSlot",
+          "displayName": "refusedSlot",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "askoliveOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "answer",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "fallback",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "refused",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "refusedSlot",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "sent",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

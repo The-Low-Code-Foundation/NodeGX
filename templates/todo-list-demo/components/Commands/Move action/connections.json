@@ -17,6 +17,12 @@
     },
     {
       "fromId": "MoveactionIn",
+      "fromProperty": "toIndex",
+      "toId": "MoveactionGuard",
+      "toProperty": "in-toIndex"
+    },
+    {
+      "fromId": "MoveactionIn",
       "fromProperty": "do",
       "toId": "MoveactionGuard",
       "toProperty": "run"

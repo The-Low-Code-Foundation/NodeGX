@@ -12,7 +12,7 @@
     "unchanged": "Signal; the Router was already showing that page with those parameters, so nothing needed rebuilding.",
     "failure": "Signal; no Pages, no start page, a start page this Router does not serve, or a routed component that is not a page. ⚠️ Reset is also called on mount so the start page is created, and that call reports nothing — a mount that fired Done would pulse every chain in the app at boot.",
     "completed": "Signal; fires after every Reset the author triggered, whatever the outcome.",
-    "currentPageTitle": "String value; the title of the page currently shown (also written to the document title).",
+    "currentPageTitle": "String value; the title of the page currently shown, as typed in the Pages list. The browser tab shows the Page node's current Title, which is this one unless a wire into the Page's Title gives it another.",
     "currentPageComponent": "String value; the component name of the page currently shown."
   },
   "runtimeBehavior": "Runtime-determined ports (runtime-discovered + editor-adapter, RouterAdapter): the `pages` parameter decides which page components exist, and the editor derives navigation metadata — page titles, URL patterns, parameters — from each page component's Page node. An authoring tool should set `name` and `pages` on the Router and declare titles/paths on the Page node inside each page component; it cannot enumerate page-dependent ports statically.",

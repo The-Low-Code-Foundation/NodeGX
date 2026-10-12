@@ -1,0 +1,151 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "423245a4-1c47-5c84-8ede-5886cc10c04a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "proposalcardIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "handled",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "run",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "proposalcardFn",
+      "type": "JavaScriptFunction",
+      "label": "Proposal card",
+      "parameters": {
+        "functionScript": "var { oliveAskBlocks, oliveWords } = Scripts.olive;\nvar lang = String(Inputs.lang) === 'en' ? 'en' : 'fr';\nvar word = oliveWords(Inputs.words, lang);\nvar LABEL = { fwd: 'bFwd', left: 'bLeft', right: 'bRight', water: 'bWater' };\nvar run = Inputs.run && typeof Inputs.run === 'object' ? Inputs.run : null;\nvar p = run && run.proposal && typeof run.proposal === 'object' && Array.isArray(run.proposal.blocks) ? run.proposal : null;\nvar prog = Inputs.program;\nif (typeof prog === 'string' && prog) { try { prog = JSON.parse(prog); } catch (e) { prog = []; } }\nvar asks = oliveAskBlocks(Array.isArray(prog) ? prog : [], []);\nvar here = false;\nfor (var i = 0; p && i < asks.length; i++) if (String(asks[i].id) === String(p.askId)) here = true;\nvar sig = p ? String(run.runId || '') + '|' + String(p.askId) + '|' + p.blocks.join(',') : '';\nvar names = [];\nfor (var j = 0; p && j < p.blocks.length; j++) names.push(word[LABEL[p.blocks[j]]] || String(p.blocks[j]));\nvar show = !!p && p.blocks.length > 0 && here && sig !== String(Inputs.handled || '');\nOutputs.show = show;\n// The proposal itself does not depend on the answer: \"Use them\" marks it answered AFTER Accept proposal has placed it.\nOutputs.proposal = p && here ? { askId: p.askId, blocks: p.blocks.slice() } : null;\nOutputs.blocksText = show ? names.join(' · ') : '';\nOutputs.sig = sig;\n",
+        "uses": "olive.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-run",
+          "displayName": "run",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-program",
+          "displayName": "program",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-handled",
+          "displayName": "handled",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-show",
+          "displayName": "show",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-proposal",
+          "displayName": "proposal",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blocksText",
+          "displayName": "blocksText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sig",
+          "displayName": "sig",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "proposalcardOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "blocksText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "proposal",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "show",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "sig",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

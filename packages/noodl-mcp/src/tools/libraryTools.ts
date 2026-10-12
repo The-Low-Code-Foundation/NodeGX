@@ -46,7 +46,6 @@
  * @module noodl-mcp/tools/libraryTools
  */
 
-import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -336,7 +335,7 @@ export function registerLibraryTools(
         variants?: Array<{ name: string; typename: string; [key: string]: unknown }>;
       };
 
-      const now = new Date().toISOString();
+      const now = store.now();
 
       // ── P100 UPG-003 §6: the entry's text styles arrive as typography tokens ──
       // The conversion the editor's install runs (`import-engine/apply.ts`), against THIS project's
@@ -362,7 +361,10 @@ export function registerLibraryTools(
         }
         // Many seeded entries have id-less components; v2 files carry the id
         // into componentId, so an absent one is minted rather than propagated.
-        const withId: LegacyComponent = component.id ? component : { ...component, id: crypto.randomUUID() };
+        // P109 ISL-019 — minted the way every other component's id is, so a reinstall gives it the same one.
+        const withId: LegacyComponent = component.id
+          ? component
+          : { ...component, id: store.componentIdFor(component.name) };
         const files = buildComponentV2Files(withId, now) as ComponentFiles;
         store.writeComponent(key, files, { expectNew: true });
         componentsInstalled.push(component.name);
@@ -411,13 +413,24 @@ export function registerLibraryTools(
         // CN-017 — the same record the editor's import path writes for a kit
         // copied in from this machine. Best-effort, like create_node_kit: the
         // files are already installed and correct.
+        //
+        // P109 ISL-017 §5 item 3 — the record names the library ENTRY and its version, never a path:
+        // `entry.entryDir` is an absolute path into whichever checkout ran the install, so two machines
+        // wrote two different files for the same install, and a template could not ship the record. The
+        // editor's own local-origin record has no path either (`moduleGate.ts`: "a project on this
+        // computer"). Same `imported` arm, so the Kits panel needs nothing new: it reads "Copied in from
+        // the NodeGX library entry "garden-kit" 1.0.0 on …". `now` is the epoch in reproducible mode.
+        const fromProject = `the NodeGX library entry "${entry.slug}"${entry.meta.version ? ` ${entry.meta.version}` : ''}`;
         const recorded = await recordKitProvenance(
           store.projectDir,
           modulesInstalled.map((module) => ({
             module,
             origin: 'imported' as const,
-            fromProject: entry.entryDir,
-            importedAt: now
+            fromProject,
+            importedAt: now,
+            // ISL-017 ruling 2 — the same two facts as data, for the publish step that resolves the folder.
+            entry: entry.slug,
+            ...(entry.meta.version ? { entryVersion: entry.meta.version } : {})
           }))
         );
         if (!recorded.ok) {

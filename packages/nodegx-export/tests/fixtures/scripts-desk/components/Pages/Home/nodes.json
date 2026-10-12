@@ -1,0 +1,46 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f2b8d4e0-5a3c-4d9f-8b2e-000000000092",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "parameters": {
+        "title": "Home",
+        "urlPath": "home"
+      },
+      "children": [
+        "shell"
+      ]
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "parameters": {
+        "flexDirection": "column"
+      },
+      "children": [
+        "greeting"
+      ]
+    },
+    {
+      "id": "greeting",
+      "type": "Text",
+      "parameters": {}
+    },
+    {
+      "id": "greetOlive",
+      "type": "JavaScriptFunction",
+      "label": "greetOlive",
+      "parameters": {
+        "functionScript": "Outputs.text = Scripts.greet.hello(Inputs.name);",
+        "uses": "engine/greet.js",
+        "in-name": "Olive"
+      }
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

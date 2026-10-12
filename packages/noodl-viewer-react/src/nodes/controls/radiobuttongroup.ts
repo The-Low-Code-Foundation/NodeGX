@@ -16,11 +16,14 @@ const RadioButtonGroupNode = {
   },
   initialize() {
     this.props.name = 'radio-' + guid();
+    // P107-C76 (P109 ISL-031): bumped by every write of the Value — a click and the Value input — so the buttons redraw it
+    this.props.valueWrites = 0;
 
     this.props.valueChanged = (value) => {
       const changed = this._internal.value !== value;
       this._internal.value = value;
       this.props.value = value;
+      this.props.valueWrites++;
       if (changed) {
         this.forceUpdate();
         this.flagOutputDirty('value');
@@ -91,6 +94,7 @@ const RadioButtonGroupNode = {
 
         const changed = value !== this._internal.value;
         this.props.value = this._internal.value = value;
+        this.props.valueWrites++;
 
         if (changed) {
           this.forceUpdate();

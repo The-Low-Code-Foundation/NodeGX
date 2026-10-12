@@ -237,6 +237,43 @@ describe('SB-017: the editor derives the ports the runtime declares', () => {
     }
   });
 
+  /**
+   * P109 ISL-006 AC6/AC9 — the shapes ruling 3 decided, by name, plug AND type, read off the runtime's own Function
+   * module. The template above has none of them, so a copy that drifted on one agreed with the runtime there and passed
+   * (measured s19: an underscore drift stayed green).
+   */
+  it('agrees on the shapes ISL-006 counted — underscore signal, Inputs["x"], a comment, a computed key, list over code', () => {
+    const scripts: Record<string, unknown>[] = [
+      { functionScript: 'Outputs.do_it();' },
+      { functionScript: 'const a = Inputs["first name"];\nOutputs.a = a;' },
+      { functionScript: '// Inputs.commented\nOutputs.x = 1;' },
+      { functionScript: "const k = 'c';\nOutputs[k] = 1;\nconst v = Inputs[k];" },
+      { functionScript: 'const url = "https://api.example.com/v1/" + Inputs.id;\nOutputs.ok = true;' },
+      {
+        functionScript: 'Outputs.total = Inputs.n * 2;',
+        scriptOutputs: [{ id: 'total', label: 'total' }],
+        'outtype-total': 'number',
+        scriptInputs: [{ id: 'trigger', label: 'trigger' }],
+        'intype-trigger': 'boolean'
+      }
+    ];
+    const announced: string[][] = [];
+    for (const [i, parameters] of scripts.entries()) {
+      const node = { id: `isl006-${i}`, type: 'JavaScriptFunction', parameters } as TemplateNode;
+      const runtime = signature(runtimePortsFor(`${RUNTIME}/simplejavascript`, node));
+      announced.push(runtime);
+      expect(signature(scriptPortsForNode(node))).toEqual(runtime);
+    }
+    // Not vacuous, and the ruling read on the runtime: `do_it` is a signal, `Inputs["first name"]` an input, a name in
+    // a comment no port, a computed key nothing, and a `//` inside a URL string is no comment.
+    expect(announced[0]).toContain('out-do_it:output:signal');
+    expect(announced[1]).toContain('in-first name:input:*');
+    expect(announced[2].some((entry) => entry.startsWith('in-commented'))).toBe(false);
+    expect(announced[2]).toContain('out-x:output:*');
+    expect(announced[3]).toEqual([]);
+    expect(announced[4]).toContain('in-id:input:*');
+  });
+
   it('agrees on every Query Records node — `qp-*` and the dynamic `Do`', () => {
     const nodes = cloudNodesOfType('DbCollection2');
 

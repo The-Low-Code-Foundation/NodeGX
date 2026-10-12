@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "afe90186-5e7f-5251-8e9f-33212b12c546",
+  "name": "Skills",
+  "path": "/Pages/Skills",
+  "type": "page",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Skills: the seven tricks, each a block, seed / sprouted / blooming, with where it sits in the programme. No score; nothing wilts."
+}

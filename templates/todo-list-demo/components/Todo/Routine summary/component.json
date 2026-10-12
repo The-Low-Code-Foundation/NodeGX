@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3e225470-000c-5edc-82c9-f895636c1bae",
+  "name": "Routine summary",
+  "path": "/Todo/Routine summary",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The top of something that repeats: its title (edit it in place), how often it repeats (every day, week or month), its times with a ✕ each, the days to pick and a time to add, when it starts and ends, and Stop. A stopped one shows why."
+}

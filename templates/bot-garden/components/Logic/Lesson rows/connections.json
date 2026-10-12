@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "60268503-123c-574c-813f-0c6f89f49d7f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lessonrowsIn",
+      "fromProperty": "band",
+      "toId": "lessonrowsFn",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "lessonrowsIn",
+      "fromProperty": "botName",
+      "toId": "lessonrowsFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "lessonrowsIn",
+      "fromProperty": "exam",
+      "toId": "lessonrowsFn",
+      "toProperty": "in-exam"
+    },
+    {
+      "fromId": "lessonrowsIn",
+      "fromProperty": "lang",
+      "toId": "lessonrowsFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "lessonrowsIn",
+      "fromProperty": "words",
+      "toId": "lessonrowsFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "lessonrowsFn",
+      "fromProperty": "out-count",
+      "toId": "lessonrowsOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "lessonrowsFn",
+      "fromProperty": "out-rows",
+      "toId": "lessonrowsOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "lessonrowsFn",
+      "fromProperty": "out-show",
+      "toId": "lessonrowsOut",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "lessonrowsFn",
+      "fromProperty": "success",
+      "toId": "lessonrowsOut",
+      "toProperty": "ran"
+    }
+  ]
+}

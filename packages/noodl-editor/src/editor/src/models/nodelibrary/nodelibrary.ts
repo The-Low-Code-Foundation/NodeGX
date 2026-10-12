@@ -1,5 +1,7 @@
 import _ from 'underscore';
 
+import { canCastPortType } from '@nodegx/project-contract/typecasts';
+
 import { ComponentModel } from '@noodl-models/componentmodel';
 import { NodeGraphNode } from '@noodl-models/nodegraphmodel';
 import { BasicNodeType } from '@noodl-models/nodelibrary/BasicNodeType';
@@ -383,17 +385,10 @@ export class NodeLibrary extends Model {
   canCastPortTypes(from, to) {
     const _from = NodeLibrary.nameForPortType(from);
     const _to = NodeLibrary.nameForPortType(to);
+    if (_from === _to) return true; // same type — and two ports that declare none, which always connected
 
-    if (_from === '*' || _to === '*') return true; // All types
-    if (_from === _to) return true; // Same type
-
-    // Not same type, look in cast list
-    const cast = _.find(this.library.typecasts, function (c) {
-      return c.from === _from;
-    });
-    if (!cast) return false;
-
-    return cast.to.indexOf(_to) !== -1;
+    // P107 NSP-021 (s88): the one rule body, over the table the runtime published (`@nodegx/project-contract/typecasts`)
+    return canCastPortType(this.library.typecasts, _from, _to);
   }
 
   // This function attempts to find a type that is compatible with all connections

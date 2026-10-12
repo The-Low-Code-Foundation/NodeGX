@@ -285,6 +285,18 @@ export class ModelBindings {
       this.editor
     );
 
+    // P109 ISL-005 — a Function's Uses is on its card's second line (`typeDisplayName`), so a change
+    // to it can change the titlebar's height: relayout, as for a label.
+    model.on(
+      'parametersChanged',
+      function (args?: { name?: string }) {
+        if (!args || args.name !== 'uses') return;
+        _this.relayout();
+        _this.repaint();
+      },
+      this.editor
+    );
+
     // LEG-005. CAN-004's gutter stripe is painted straight off
     // `node.model.hasComment()` (NodeGraphEditorNodePainter), so a comment
     // written anywhere has to reach the canvas. Until now only one writer

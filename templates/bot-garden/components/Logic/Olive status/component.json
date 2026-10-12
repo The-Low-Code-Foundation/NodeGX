@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ce5fbd53-d148-58fa-89ea-7c8caecf2714",
+  "name": "Olive status",
+  "path": "/Logic/Olive status",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Where Olive runs, from the shell’s status door. Runs when an input changes; Ran after each run."
+}

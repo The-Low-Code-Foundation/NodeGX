@@ -85,14 +85,17 @@
  *
  * Like `dynamicPortRules.ts`: this is reached from `tests-unit/` (plain Node, no
  * renderer, no Electron, no editor singletons), which is the only runner in this
- * package that can grade this kind of logic without starting Electron. The two
- * places it restates something another package owns —
- * `JavascriptNodeParser.parseAndAddPortsFromScript`'s port grammar and
- * `queryutils.collectFilterParameters`'s filter walk — are pinned against those
- * originals by `tests-unit/sb-017/`, which *can* import them.
+ * package that can grade this kind of logic without starting Electron. A
+ * Function's port grammar is imported from `@nodegx/project-contract/function-ports`
+ * (P109 ISL-006), the module the runtime's Function node reads too. The one place
+ * this file restates something another package owns, `queryutils.collectFilterParameters`'s
+ * filter walk, is pinned against its original by `tests-unit/sb-017/`, which also
+ * runs the Function ports beside the runtime module.
  *
  * @module models/nodelibrary/cloudDynamicPorts
  */
+
+import { functionScriptPortNames } from '@nodegx/project-contract/function-ports';
 
 /** A port as the node library, `getPorts()` and `setDynamicPorts()` all speak it. */
 export interface GeneratedPort {
@@ -165,46 +168,23 @@ function proplist(parameters: Record<string, unknown>, name: string): ScriptPort
 /**
  * The port names a Function's script declares by using them.
  *
- * The four matches are `JavascriptNodeParser.parseAndAddPortsFromScript`'s, in
- * its order, so that a name it finds is a name this finds and with the same
- * type: an `Outputs.Done()` call is a `signal`, every other mention is `'*'`.
- * Restated rather than imported because that module `require`s four more of the
- * runtime's own files, and this package does not depend on `@noodl/runtime`.
- * `tests-unit/sb-017/script-ports-agree-with-the-runtime.test.ts` runs both over
- * the same corpus.
+ * P109 ISL-006: read with `@nodegx/project-contract/function-ports`, the reader the runtime's Function node imports
+ * too, so a name it finds is a name this finds, with the same type (an `Outputs.done()` call is a `signal`, every
+ * other mention `'*'`). Until ISL-006 this file restated the runtime's regexes, including the `plug: 'inputs'` typo
+ * for `Inputs["x"]`; the shared reader fixed that and two more (ruling 3).
+ * `tests-unit/sb-017/cloud-ports-agree-with-the-runtime.test.ts` runs this and the runtime module side by side.
  */
 export function scriptPortsFromSource(script: string | undefined): GeneratedPort[] {
   const ports: GeneratedPort[] = [];
   if (typeof script !== 'string') return ports;
-
-  const add = (names: Iterable<RegExpMatchArray>, plug: string, type: unknown, prefix: string) => {
-    const seen: Record<string, boolean> = {};
-    for (const match of names) {
-      const name = match[1];
-      if (name === undefined || seen[name]) continue;
-      seen[name] = true;
-      if (ports.some((p) => p.name === prefix + name && p.plug === plug)) continue;
-      ports.push({
-        name: prefix + name,
-        displayName: name,
-        plug,
-        type,
-        group: plug === 'input' ? 'Inputs' : 'Outputs'
-      });
-    }
+  const names = functionScriptPortNames(script);
+  const add = (name: string, plug: string, type: unknown, prefix: string) => {
+    if (ports.some((p) => p.name === prefix + name && p.plug === plug)) return;
+    ports.push({ name: prefix + name, displayName: name, plug, type, group: plug === 'input' ? 'Inputs' : 'Outputs' });
   };
-
-  add(script.matchAll(/Inputs\.([A-Za-z0-9_]+)/g), 'input', '*', 'in-');
-  // `plug: 'inputs'` in the original — a typo it has always had, and one that
-  // matters: the port it makes is not an input port, so a wire to a name that
-  // ONLY appears in `Inputs["x"]` form is dropped by the runtime's own editor
-  // half too. Restated exactly, so the two agree.
-  add(script.matchAll(/Inputs\s*\[\s*(?:'|")(.*)(?:'|")\s*\]/g), 'inputs', '*', 'in-');
-  add(script.matchAll(/Outputs\.([A-Za-z0-9]+)\s*\(\s*\)/g), 'output', 'signal', 'out-');
-  add(script.matchAll(/Outputs\s*\[\s*(?:'|")(.*)(?:'|")\s*\]\(\s*\)/g), 'output', 'signal', 'out-');
-  add(script.matchAll(/Outputs\.([A-Za-z0-9_]+)/g), 'output', '*', 'out-');
-  add(script.matchAll(/Outputs\s*\[\s*"([^"]*)"\s*\]/g), 'output', '*', 'out-');
-
+  for (const name of names.inputs) add(name, 'input', '*', 'in-');
+  for (const name of names.signals) add(name, 'output', 'signal', 'out-');
+  for (const name of names.outputs) add(name, 'output', '*', 'out-');
   return ports;
 }
 

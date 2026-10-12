@@ -1,0 +1,13 @@
+{
+  "$comment": "Hand-kept (NSP-009 §2): a picker node that owes no spec, with the reason. Read by scripts/node-spec/census.js, which fails on a name that is not a picker node or an entry with no reason, and prints every exemption — never hidden.",
+  "Component Children": {
+    "reason": "Not a node: the runtime never makes one — nodescope.ts createNodeFromModel returns before createNode, after telling the owning component instance which node is its child root (setChildRoot). It has no ports, no state and nothing on the wire; what it does is where a component instance's children are placed, a graph rule.",
+    "ruled": "Richard, 2026-10-08 (README §7): count it as done, with the reason written down",
+    "graded": "its placement, by a graph scenario once the graph runner places children (NSP-008)"
+  },
+  "CSS Definition": {
+    "reason": "Web-only by nature: it has no outputs and nothing on the wire; what it does is add its Style text to the page's head as a <style> element for as long as a node with its id exists (ref-counted per node id, css-definition.ts), replace it when Style changes, and remove it with the last one. That is a page effect of the browser, not a behaviour a reducer can state.",
+    "ruled": "Richard, 2026-10-09 (README R17): leave it out — exempt as web-only, rather than spec the stylesheet on the page",
+    "graded": "nothing — an export or a new runtime that drops the CSS is not caught by the node-spec suite; the templates' look is graded where they are drawn"
+  }
+}

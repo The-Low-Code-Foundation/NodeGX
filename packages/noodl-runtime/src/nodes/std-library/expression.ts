@@ -12,7 +12,7 @@ import type {
   OutcomeToken
 } from '@noodl/types';
 
-import { expressionPorts, isReservedExpressionName } from './expression-ports';
+import { expressionNodeInputsRead, expressionPorts, isReservedExpressionName } from './expression-ports';
 import { ARITHMETIC_SEARCH_TAGS } from './logic-search-tags';
 
 import Node = require('../../node');
@@ -37,9 +37,9 @@ interface NoodlDependencies {
  * about that set is knowable statically, which is why the catalog records the mechanism
  * rather than the ports.
  *
- * `scope` holds the current value of each such input by name; `inputNames`/`inputValues`
- * are the same data flattened into positional arrays, because the compiled function takes
- * its inputs as ordered arguments.
+ * `scope` holds the current value of each such input by name; `inputNames` is its keys as the
+ * text last set them, and `compiledWith` the names the function was compiled with — the
+ * arguments are built from those, because the compiled function takes them positionally.
  */
 interface ExpressionNodeInstance extends NodeInstance {
   _internal: {
@@ -80,11 +80,20 @@ interface ExpressionNodeInstance extends NodeInstance {
      * not have read. Gate on what the expression asked for.
      */
     referencedPorts: string[];
+    /** P107-C145 — the node's own input names the text reads as variables: it cannot run, and says so (`reservedNameMessage`). */
+    reservedReads: string[];
     /** The full function body, preamble included — not the raw text the author typed. */
     currentExpression: string;
     compiledFunction?: (...args: unknown[]) => unknown;
     inputNames: string[];
-    inputValues: unknown[];
+    /**
+     * P109 ISL-051 (P107-C151) — the parameter names the current function was compiled with, `Noodl` excepted.
+     *
+     * The arguments were one array written in `inputNames` order and never shortened, with the API appended after all of it.
+     * `inputNames` is the scope's keys when the text was set; the function takes the scope's keys when it compiles — a stray
+     * input registered in between, or a text that once read more names, and `Noodl` landed on a port's value or on nothing.
+     */
+    compiledWith: string[];
     noodlDependencies: NoodlDependencies;
     unsubscribe: (() => void) | null;
     /**
@@ -118,7 +127,7 @@ interface ExpressionNodeInstance extends NodeInstance {
   _scheduleLoadEvaluation(): void;
   /** The answer over inputs that have not arrived, or `NOT_EVALUATED` when there is none to give. */
   _evaluateOverUnsetInputs(): unknown;
-  /** The compiled function's arguments: every input's current value, then the Noodl API. */
+  /** The compiled function's arguments: the current value of each name it was compiled with, then the Noodl API. */
   _argumentsForEvaluation(): unknown[];
   /** Record a value arrival and re-run if this input is ticked. */
   _onInputValueArrived(name: string, value: unknown): void;
@@ -158,12 +167,13 @@ const ExpressionNode: NodeDefinitionOptions = {
     internal.hasEvaluated = false;
     internal.anyInputArrived = false;
     internal.referencedPorts = [];
+    internal.reservedReads = [];
     internal.evaluateAtLoad = true;
     internal.pendingLoadEvaluation = false;
     internal.currentExpression = '';
     internal.compiledFunction = undefined;
     internal.inputNames = [];
-    internal.inputValues = [];
+    internal.compiledWith = [];
 
     // New: Expression evaluator integration
     internal.noodlDependencies = { variables: [], objects: [], arrays: [] };
@@ -379,6 +389,15 @@ const ExpressionNode: NodeDefinitionOptions = {
     _calculateExpression: function (this: ExpressionNodeInstance, tokens?: OutcomeToken[]) {
       const internal = this._internal;
 
+      // P109 ISL-051 (P107-C145, ruled "Block the three names"): a text that reads `run`, `expression` or `evaluateAtLoad` as a
+      // variable can never get a value for it — the port by that name is the node's own. It used to throw "run is not defined"
+      // at every run; it says the name is reserved instead, before anything is compiled.
+      if (internal.reservedReads.length > 0) {
+        const names = internal.reservedReads.slice();
+        this._reportFailure('expression/reserved-name', reservedNameMessage(names), { names }, tokens);
+        return 0;
+      }
+
       if (!internal.compiledFunction) {
         internal.compiledFunction = this._compileFunction();
       }
@@ -411,7 +430,12 @@ const ExpressionNode: NodeDefinitionOptions = {
         // An evaluation that worked re-arms the report, so a problem that comes back is heard
         // again rather than being suppressed for the life of the session.
         internal.lastReportedError = undefined;
-        internal.lastError = undefined;
+        // P109 ISL-051 (P107-C144), as ruled for its twin D25 ("Clear it to blank text"): it emptied the error without sending
+        // it, so a wire on Error kept the last failure beside a good Result. A message is cleared to blank text and sent, once.
+        if (internal.lastError) {
+          internal.lastError = '';
+          this.flagOutputDirty('error');
+        }
         return value;
       } catch (e) {
         // Was `console.error` and nothing else. The `0` returned below is unchanged — altering
@@ -424,15 +448,13 @@ const ExpressionNode: NodeDefinitionOptions = {
     },
     _argumentsForEvaluation: function (this: ExpressionNodeInstance) {
       const internal = this._internal;
-      for (let i = 0; i < internal.inputNames.length; ++i) {
-        const inputValue = internal.scope[internal.inputNames[i]];
-        internal.inputValues[i] = inputValue;
-      }
+      // P107-C151: built fresh from the names the function was compiled with, so the API is always the parameter after them.
+      const values = internal.compiledWith.map((name) => internal.scope[name]);
 
       // Get proper Noodl API and append as last parameter for backward compatibility
       const JavascriptNodeParser = require('../../javascriptnodeparser');
       const noodlAPI = JavascriptNodeParser.createNoodlAPI(this.context && this.context.modelScope);
-      return internal.inputValues.concat([noodlAPI]);
+      return values.concat([noodlAPI]);
     },
     _evaluateOverUnsetInputs: function (this: ExpressionNodeInstance) {
       const internal = this._internal;
@@ -455,6 +477,7 @@ const ExpressionNode: NodeDefinitionOptions = {
     _compileFunction: function (this: ExpressionNodeInstance) {
       const expression = this._internal.currentExpression;
       const args = Object.keys(this._internal.scope);
+      this._internal.compiledWith = args.slice();
 
       // Add 'Noodl' as last parameter for backward compatibility
       args.push('Noodl');
@@ -498,7 +521,7 @@ const ExpressionNode: NodeDefinitionOptions = {
       },
       displayName: 'Expression',
       description:
-        "JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those",
+        "JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those, nor run, expression or evaluateAtLoad, which are this node's own inputs",
       set: function (this: ExpressionNodeInstance, value: string) {
         const internal = this._internal;
         internal.currentExpression = functionPreamble + 'return (' + value + ');';
@@ -506,6 +529,7 @@ const ExpressionNode: NodeDefinitionOptions = {
 
         const newInputs = expressionPorts(value);
         internal.referencedPorts = newInputs;
+        internal.reservedReads = expressionNodeInputsRead(value);
 
         const inputsToAdd: string[] = difference(newInputs, internal.inputNames);
         const inputsToRemove: string[] = difference(internal.inputNames, newInputs);
@@ -792,6 +816,14 @@ function construct(constructor: FunctionConstructor, args: string[]) {
 
 const compiledFunctionsCache: Record<string, (...args: unknown[]) => unknown> = {};
 
+/** P107-C145 — what the node says about a text that reads one of its own input names. */
+function reservedNameMessage(names: readonly string[]): string {
+  const list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names.join('');
+  return names.length === 1
+    ? `${list} is the name of one of this Expression's own inputs (Expression, Run, Evaluate At Load), so the expression cannot read a variable called that — rename it, for example to ${list}Value`
+    : `${list} are names of this Expression's own inputs (Expression, Run, Evaluate At Load), so the expression cannot read variables called those — rename them`;
+}
+
 function updatePorts(nodeId: string, expression: string, editorConnection: EditorConnectionLike) {
   // The same function the `expression` setter uses, so the editor's ports are the runtime's.
   const portNames = expressionPorts(expression);
@@ -827,6 +859,11 @@ function evalCompileWarnings(editorConnection: EditorConnectionLike, node: Graph
   if (!validation.valid) {
     editorConnection.sendWarning(node.component.name, node.id, 'expression-compile-error', {
       message: 'Syntax error: ' + validation.error
+    });
+  } else if (expressionNodeInputsRead(expression).length > 0) {
+    // P107-C145 — said where the text is typed, not only when it runs
+    editorConnection.sendWarning(node.component.name, node.id, 'expression-compile-error', {
+      message: reservedNameMessage(expressionNodeInputsRead(expression))
     });
   } else {
     editorConnection.clearWarning(node.component.name, node.id, 'expression-compile-error');

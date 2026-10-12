@@ -63,6 +63,7 @@ export function Inspector({ isCollapsed, onCollapsedChange }: InspectorProps) {
         title="Show properties"
       >
         <IconButton
+          ariaLabel="Show properties"
           variant={IconButtonVariant.Transparent}
           icon={IconName.CaretLeft}
           testId="inspector-expand"
@@ -75,6 +76,7 @@ export function Inspector({ isCollapsed, onCollapsedChange }: InspectorProps) {
 
   const collapseButton = (
     <IconButton
+      ariaLabel="Hide properties"
       variant={IconButtonVariant.Transparent}
       icon={IconName.CaretRight}
       testId="inspector-collapse"

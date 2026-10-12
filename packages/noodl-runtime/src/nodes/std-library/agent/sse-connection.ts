@@ -663,6 +663,11 @@ export interface SseConnectionOptions extends SseTransportEnv {
   onFrame?: (frame: SseFrame) => void;
   onError?: (message: string) => void;
   onDuplicate?: (frame: SseFrame) => void;
+  /**
+   * P107-C56 (P109 ISL-030, ruled "Send them when they change"): the retry count moved outside a state change — a
+   * failure that schedules a retry while the state is already `reconnecting` tells nobody else.
+   */
+  onRetry?: () => void;
 
   // The injectable environment (tests, and hosts without one of these globals) is
   // inherited from SseTransportEnv above.
@@ -927,6 +932,7 @@ export class SseConnection {
 
     this._closeTransport();
     this.retryCount++;
+    if (!this._disposed && this._options.onRetry) this._options.onRetry();
     this._scheduleReconnect();
   }
 

@@ -7,9 +7,9 @@
  * not just names. A peer that can read the dictionary knows every node's id, name, type and
  * component, *and* every connection between them — which is everything the walk needs. So this
  * server works on a project it cannot see, in a format it does not understand, including the
- * legacy projects `@noodl/mcp` refuses outright.
+ * legacy projects `@nodegx/mcp` refuses outright.
  *
- * ⚠️ **Not to be confused with `@noodl/mcp`.** That server reads project *directories*; this
+ * ⚠️ **Not to be confused with `@nodegx/mcp`.** That server reads project *directories*; this
  * one reads a *running app* over a socket. They share a package for packaging reasons only —
  * one npm dependency set, one build — and share no code paths.
  *

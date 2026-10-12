@@ -44,7 +44,7 @@ const ValueChangedNode: NodeDefinitionOptions = {
       group: 'Events',
       type: 'signal',
       displayName: 'Value Changed',
-      description: 'Fires when Input becomes a different value, including the first time it arrives'
+      description: 'Fires when Input becomes a different value, including the first time a value arrives'
     }
   }
 };

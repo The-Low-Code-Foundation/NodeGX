@@ -35,6 +35,25 @@ The write half of every 'add item' flow — forms, quick-add buttons, duplicatin
 |---|---|---|---|
 | `store` | Signal | — | Creates a record in the chosen Class from the property inputs and sends it to the backend |
 
+### What each input does
+
+**Source Object Id** (`sourceObjectId`)
+
+- always: read by the next create — the record whose data the new one starts from, the property inputs written over it (a record handed in, by its id)
+
+**Upsert On** (`upsertOn`)
+
+- always: read by the next create — the field that makes it update a record already holding that value (blank, none)
+
+**Access Control Rules** (`accessControl`)
+
+- always: read by the next call — the access rules sent with the record
+
+**Do** (`store`)
+
+- no Class: refused at once, and Error says so → Failure
+- otherwise it joins the frame's batch: at the end of the frame one create answers every press — Id is the new record's, and Done for each; or Error and Failure for each (no backend, or the backend refuses)
+
 ## Outputs
 
 ### Values

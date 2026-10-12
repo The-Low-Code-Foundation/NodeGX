@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "529f9ffe-9f40-5184-89ab-94e17ea4e8a8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "SetschedulIn",
+      "fromProperty": "routines",
+      "toId": "SetschedulGuard",
+      "toProperty": "in-routines"
+    },
+    {
+      "fromId": "SetschedulIn",
+      "fromProperty": "routineId",
+      "toId": "SetschedulGuard",
+      "toProperty": "in-routineId"
+    },
+    {
+      "fromId": "SetschedulIn",
+      "fromProperty": "change",
+      "toId": "SetschedulGuard",
+      "toProperty": "in-change"
+    },
+    {
+      "fromId": "SetschedulIn",
+      "fromProperty": "days",
+      "toId": "SetschedulGuard",
+      "toProperty": "in-days"
+    },
+    {
+      "fromId": "SetschedulIn",
+      "fromProperty": "timeText",
+      "toId": "SetschedulGuard",
+      "toProperty": "in-timeText"
+    },
+    {
+      "fromId": "SetschedulIn",
+      "fromProperty": "slotKey",
+      "toId": "SetschedulGuard",
+      "toProperty": "in-slotKey"
+    },
+    {
+      "fromId": "SetschedulIn",
+      "fromProperty": "do",
+      "toId": "SetschedulGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "SetschedulGuard",
+      "fromProperty": "out-cadence",
+      "toId": "SetschedulWrite",
+      "toProperty": "prop-cadence"
+    },
+    {
+      "fromId": "SetschedulGuard",
+      "fromProperty": "out-slots",
+      "toId": "SetschedulWrite",
+      "toProperty": "prop-slots"
+    },
+    {
+      "fromId": "SetschedulIn",
+      "fromProperty": "routineId",
+      "toId": "SetschedulWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "SetschedulGuard",
+      "fromProperty": "out-go",
+      "toId": "SetschedulWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "SetschedulIn",
+      "fromProperty": "routineId",
+      "toId": "SetschedulHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "SetschedulGuard",
+      "fromProperty": "out-summary",
+      "toId": "SetschedulHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "SetschedulIn",
+      "fromProperty": "routineId",
+      "toId": "SetschedulHistory",
+      "toProperty": "mergeKey"
+    },
+    {
+      "fromId": "SetschedulWrite",
+      "fromProperty": "done",
+      "toId": "SetschedulHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "SetschedulHistory",
+      "fromProperty": "done",
+      "toId": "SetschedulOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "SetschedulWrite",
+      "fromProperty": "failure",
+      "toId": "SetschedulProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "SetschedulGuard",
+      "fromProperty": "out-verdict",
+      "toId": "SetschedulSay",
+      "toProperty": "in-verdict"
+    },
+    {
+      "fromId": "SetschedulIn",
+      "fromProperty": "routineId",
+      "toId": "SetschedulSay",
+      "toProperty": "in-about"
+    },
+    {
+      "fromId": "SetschedulSay",
+      "fromProperty": "out-error",
+      "toId": "SetschedulOut",
+      "toProperty": "error"
+    },
+    {
+      "fromId": "SetschedulSay",
+      "fromProperty": "out-hasError",
+      "toId": "SetschedulOut",
+      "toProperty": "hasError"
+    }
+  ]
+}

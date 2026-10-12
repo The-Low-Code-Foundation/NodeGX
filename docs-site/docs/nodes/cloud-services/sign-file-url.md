@@ -33,6 +33,17 @@ Previewing or linking to a file that was uploaded with Upload File's `private` i
 |---|---|---|---|
 | `sign` | Signal | — | Mints a fresh link for File, refused for a caller who could not read the file directly |
 
+### What each input does
+
+**File** (`file`)
+
+- a stored file: held; read when the next Sign goes
+- anything else (nothing, text, a plain object): ignored — the file held before stays
+
+**Sign** (`sign`)
+
+- always: its own call at the frame's end — two presses are two calls — for the File held then: no File, or a Backend the project does not have, is Error, Error Status Code 0 and Failure at once; otherwise the backend answers with Signed URL, URL Kind, Safe To Share, Expires At and TTL (Seconds) then Done, or Error, Error Status Code and Failure
+
 ## Outputs
 
 ### Values

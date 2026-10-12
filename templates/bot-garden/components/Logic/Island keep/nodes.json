@@ -1,0 +1,173 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "88ea282f-4ece-55e7-86c4-290c9bdfa934",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "islandkeepIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "robots",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "state",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "islandkeepFn",
+      "type": "JavaScriptFunction",
+      "label": "Island keep",
+      "parameters": {
+        "functionScript": "var { LAND_H, LAND_LEFT_MAX, LAND_W, animalSpec, blueprintSpec, earnShells, landOf, liveOf, modelOf, newId } = Scripts.save;\n/**\n * A live job the save keeps has no robot in it (its row is only things, age, seed): a can in the robot's hand goes back\n * where the job lays it, its level kept — so the robot built at home after a restart picks it up as its program expects.\n */\nfunction iw6CanBack(things, robot, laidThings) {\n  var out = JSON.parse(JSON.stringify(Array.isArray(things) ? things : []));\n  if (!robot || robot.holds !== 'can') return out;\n  for (var i = 0; i < out.length; i++) if (out[i] && out[i].kind === 'can') return out;\n  var at = null, list = Array.isArray(laidThings) ? laidThings : [];\n  for (var j = 0; j < list.length && !at; j++) if (list[j] && list[j].kind === 'can') at = list[j];\n  if (!at) return out;\n  var can = JSON.parse(JSON.stringify(at));\n  can.level = Math.max(0, Math.floor(Number(robot.can)) || 0);\n  out.push(can);\n  return out;\n}\nfunction iw6WordsOf(rows, lang) { var map = {}, list = Array.isArray(rows) ? rows : []; for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || ''); return map; }\nfunction iw6Fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\n\nvar LAND_ID = \"land\";\nvar LAND_PLOT = {\"x\":46,\"y\":15};\nvar LAND_MAP = [\"GGGGGGTG\",\"GGGGGGGG\",\"GTGGGGGG\",\"GGGGGGGG\",\"GGGGGGGG\",\"GGGGGTGG\"];\nvar LAND_HOME = {\"x\":0,\"y\":0,\"d\":1};\nvar LAND_SOURCES = [{\"kind\":\"tree\",\"id\":\"tree\",\"x\":7,\"y\":0,\"left\":6,\"max\":8},{\"kind\":\"rock\",\"id\":\"rock\",\"x\":7,\"y\":5,\"left\":6,\"max\":8},{\"kind\":\"patch\",\"id\":\"patch\",\"x\":0,\"y\":5,\"left\":3,\"max\":4}];\nvar LAND_FOOD = {\"rabbit\":\"carrot\",\"sheep\":\"carrot\"};\nfunction landParts(b) {\n  var spec = b ? blueprintSpec(b.bp) : null, out = [];\n  if (!spec) return out;\n  for (var i = 0; i < spec.parts.length; i++) out.push({ x: Number(b.x) + spec.parts[i].dx, y: Number(b.y), item: spec.parts[i].item, need: spec.parts[i].need });\n  return out;\n}\nfunction landPen(b) {\n  var spec = b ? blueprintSpec(b.bp) : null, out = [];\n  if (!spec || !spec.pen) return out;\n  for (var i = 0; i < spec.pen; i++) out.push({ x: Number(b.x) + i, y: Number(b.y) + 1, slot: i });\n  return out;\n}\nfunction landThings(raw) {\n  var land = landOf(raw), out = JSON.parse(JSON.stringify(LAND_SOURCES));\n  // P108 s8: each source as the island last left it (land.left, landKeep), so the Workshop shows the real amount.\n  if (land.left) for (var sl = 0; sl < out.length; sl++) if (land.left[out[sl].id] !== undefined) out[sl].left = land.left[out[sl].id];\n  for (var i = 0; i < land.buildings.length; i++) {\n    var b = land.buildings[i], parts = landParts(b);\n    for (var k = 0; k < parts.length; k++) out.push({ kind: 'site', id: b.id + '-' + parts[k].item, of: b.id, build: b.bp, keep: true, item: parts[k].item, need: parts[k].need, have: Number(b.have[parts[k].item]) || 0, x: parts[k].x, y: parts[k].y });\n  }\n  for (var j = 0; j < land.animals.length; j++) {\n    var a = land.animals[j], spec = animalSpec(a.kind), home = null;\n    for (var q = 0; q < land.buildings.length; q++) if (land.buildings[q].id === a.at) home = land.buildings[q];\n    var pen = landPen(home), at = null;\n    for (var s = 0; s < pen.length; s++) if (pen[s].slot === a.slot) at = pen[s];\n    if (!at || !spec) continue;\n    out.push({ kind: 'bowl', id: a.id, item: LAND_FOOD[a.kind] || spec.eats, capacity: spec.capacity, count: a.fed, food: a.fed, animal: a.kind, name: a.name, x: at.x, y: at.y });\n  }\n  return out;\n}\nfunction landJob(raw) {\n  var things = landThings(raw), targets = [];\n  for (var i = 0; i < things.length; i++) if (things[i].kind === 'site' || (things[i].kind === 'bowl' && things[i].animal)) targets.push(String(things[i].id));\n  if (!targets.length) return null;\n  var job = { targets: targets, home: { x: LAND_HOME.x, y: LAND_HOME.y, d: LAND_HOME.d } };\n  // P108 s7: a building that is for resting (the spa, does 'rest') gives its robots a tile each in front of it; the engine\n  // walks them there once it is finished (restOf).\n  var land = landOf(raw);\n  for (var b = 0; b < land.buildings.length && !job.rest; b++) {\n    var spec = blueprintSpec(land.buildings[b].bp);\n    if (!spec || spec.does !== 'rest') continue;\n    var tiles = landRestTiles(land, land.buildings[b]);\n    if (tiles.length) job.rest = { of: String(land.buildings[b].id), tiles: tiles };\n  }\n  return job;\n}\n/**\n * P108 s7: where robots rest at a building — up to two grass tiles a robot can reach, nothing on them and no pen. First\n * two rows in front of it, one tile out at each end (on the 2D island a robot is ~2½ tiles wide: on the row right under\n * the building the two robots hid it and each other — seen on the touch drive's shot); then under each part, over each\n * part, its two ends. Plot coordinates, d facing it.\n */\nfunction landRestTiles(land, b) {\n  var parts = landParts(b), cand = [];\n  if (parts.length) { cand.push({ x: parts[0].x - 1, y: parts[0].y + 2, d: 0 }); cand.push({ x: parts[parts.length - 1].x + 1, y: parts[0].y + 2, d: 0 }); }\n  for (var i = 0; i < parts.length; i++) cand.push({ x: parts[i].x, y: parts[i].y + 1, d: 0 });\n  for (var j = 0; j < parts.length; j++) cand.push({ x: parts[j].x, y: parts[j].y - 1, d: 2 });\n  if (parts.length) { cand.push({ x: parts[0].x - 1, y: parts[0].y, d: 1 }); cand.push({ x: parts[parts.length - 1].x + 1, y: parts[0].y, d: 3 }); }\n  var things = landThings(land), taken = {};\n  for (var t = 0; t < things.length; t++) taken[things[t].x + ',' + things[t].y] = 1;\n  for (var o = 0; o < land.buildings.length; o++) { var pen = landPen(land.buildings[o]); for (var p = 0; p < pen.length; p++) taken[pen[p].x + ',' + pen[p].y] = 1; }\n  taken[LAND_HOME.x + ',' + LAND_HOME.y] = 1;\n  var seen = landReach(worldOf({ map: LAND_MAP.slice(), things: things, robots: [] })), out = [];\n  for (var c = 0; c < cand.length && out.length < 2; c++) {\n    var x = cand[c].x, y = cand[c].y, k = x + ',' + y;\n    if (!(x >= 0 && y >= 0 && x < LAND_W && y < LAND_H) || String(LAND_MAP[y]).charAt(x) !== 'G' || taken[k] || !seen[k]) continue;\n    taken[k] = 1;\n    out.push(cand[c]);\n  }\n  return out;\n}\nfunction landRequest(raw) {\n  var job = landJob(raw), req = { id: LAND_ID, islander: '', band: 1, plot: { x: LAND_PLOT.x, y: LAND_PLOT.y }, tricks: [], map: LAND_MAP.slice(), things: landThings(raw), robotStart: { x: LAND_HOME.x, y: LAND_HOME.y, d: LAND_HOME.d }, goal: { name: 'job_done' }, palette: [], referenceProgram: [] };\n  if (job) req.job = job;\n  return req;\n}\n/** The tiles a robot can stand on, reached from home (breadth first over tiles that do not block). */\nfunction landReach(w) {\n  var seen = {}, q = [[LAND_HOME.x, LAND_HOME.y]], head = 0;\n  seen[LAND_HOME.x + ',' + LAND_HOME.y] = 1;\n  while (head < q.length) {\n    var c = q[head++];\n    for (var d = 0; d < 4; d++) { var nx = c[0] + DX[d], ny = c[1] + DY[d], k = nx + ',' + ny; if (seen[k] || blocked(w, nx, ny)) continue; seen[k] = 1; q.push([nx, ny]); }\n  }\n  return seen;\n}\nfunction landBeside(seen, x, y) { for (var d = 0; d < 4; d++) if (seen[(x + DX[d]) + ',' + (y + DY[d])]) return true; return false; }\nfunction landLegal(raw, bp, x, y) {\n  var land = landOf(raw), spec = blueprintSpec(bp);\n  if (!spec) return 'unknown';\n  for (var i = 0; i < land.buildings.length; i++) if (land.buildings[i].bp === spec.id) return 'built';\n  var b = { id: '?', bp: spec.id, x: Math.floor(Number(x)), y: Math.floor(Number(y)), have: {} };\n  var tiles = landParts(b).concat(landPen(b));\n  var things = landThings(land), taken = {};\n  for (var t = 0; t < things.length; t++) taken[things[t].x + ',' + things[t].y] = 1;\n  for (var o = 0; o < land.buildings.length; o++) { var pen = landPen(land.buildings[o]); for (var p = 0; p < pen.length; p++) taken[pen[p].x + ',' + pen[p].y] = 1; }\n  taken[LAND_HOME.x + ',' + LAND_HOME.y] = 1;\n  for (var k = 0; k < tiles.length; k++) {\n    var tx = tiles[k].x, ty = tiles[k].y;\n    if (!(tx >= 0 && ty >= 0 && tx < LAND_W && ty < LAND_H)) return 'edge';\n    if (String(LAND_MAP[ty]).charAt(tx) !== 'G') return 'ground';\n    if (taken[tx + ',' + ty]) return 'taken';\n  }\n  // Placed (its pen places counted as standing too: an animal's bowl will), can a robot from home still reach every part,\n  // every pen place, every source and every other building's part?\n  land.buildings.push(b);\n  var after = landThings(land);\n  var w = worldOf({ map: LAND_MAP.slice(), things: after.concat(landPen(b).map(function (pp) { return { kind: 'bowl', x: pp.x, y: pp.y }; })), robots: [] });\n  var seen = landReach(w);\n  for (var a = 0; a < after.length; a++) if (!landBeside(seen, after[a].x, after[a].y)) return 'reach';\n  var penB = landPen(b);\n  for (var pb = 0; pb < penB.length; pb++) if (!landBeside(seen, penB[pb].x, penB[pb].y)) return 'reach';\n  return '';\n}\nfunction landPlace(raw, bp, x, y, id) {\n  var why = landLegal(raw, bp, x, y);\n  if (why) return { ok: false, error: why, id: '' };\n  var nid = typeof id === 'string' && id ? id.slice(0, 40) : newId('b');\n  var spec = blueprintSpec(bp), have = {};\n  for (var i = 0; i < spec.parts.length; i++) have[spec.parts[i].item] = 0;\n  raw.buildings = Array.isArray(raw.buildings) ? raw.buildings : [];\n  raw.animals = Array.isArray(raw.animals) ? raw.animals : [];\n  raw.buildings.push({ id: nid, bp: spec.id, x: Math.floor(Number(x)), y: Math.floor(Number(y)), have: have });\n  return { ok: true, error: '', id: nid };\n}\nfunction landKeep(raw, things) {\n  var list = Array.isArray(things) ? things : [], changed = false;\n  var bs = raw && Array.isArray(raw.buildings) ? raw.buildings : [], as = raw && Array.isArray(raw.animals) ? raw.animals : [];\n  for (var i = 0; i < list.length; i++) {\n    var t = list[i];\n    if (!t) continue;\n    if (t.kind === 'site' && isSet(t.of)) for (var b = 0; b < bs.length; b++) {\n      if (bs[b].id !== String(t.of)) continue;\n      var h = Math.floor(Number(t.have)) || 0, was = Math.floor(Number(bs[b].have && bs[b].have[t.item])) || 0;\n      if (!bs[b].have) bs[b].have = {};\n      if (h > was) { bs[b].have[t.item] = Math.min(h, Number(t.need) || h); changed = true; }\n    }\n    if (t.kind === 'bowl' && t.animal) for (var a = 0; a < as.length; a++) {\n      if (as[a].id !== String(t.id)) continue;\n      var f = Math.max(0, Math.floor(Number(t.count)) || 0);\n      if (f !== Number(as[a].fed)) { as[a].fed = f; changed = true; }\n    }\n    // P108 s8: a source's left follows the island's (mined down, grown back), for the Workshop's land (landThings).\n    if (isSet(t.id) && String(t.id) === t.kind && LAND_LEFT_MAX[t.kind] !== undefined && t.left !== undefined && raw) {\n      var lv = Math.max(0, Math.floor(Number(t.left)) || 0);\n      if (!raw.left || typeof raw.left !== 'object') raw.left = {};\n      if (raw.left[String(t.id)] !== lv) { raw.left[String(t.id)] = lv; changed = true; }\n    }\n  }\n  return changed;\n}\n\nfunction isSet(v) { return v !== undefined && v !== null && v !== ''; }\n\n/** P108 s7: the animals on her land whose bowl (in the plot's things) is full and was not in her save: their presents. */\nfunction iw7sGifts(land, things) {\n  var out = [], as = land && Array.isArray(land.animals) ? land.animals : [], list = Array.isArray(things) ? things : [];\n  for (var a = 0; a < as.length; a++) {\n    var spec = animalSpec(as[a].kind);\n    if (!spec || !spec.gift) continue;\n    for (var t = 0; t < list.length; t++) {\n      var b = list[t];\n      if (!b || b.kind !== 'bowl' || !b.animal || String(b.id) !== String(as[a].id)) continue;\n      if ((Math.floor(Number(b.count)) || 0) >= spec.capacity && (Math.floor(Number(as[a].fed)) || 0) < spec.capacity) out.push({ name: String(as[a].name || ''), word: spec.gift.word, shells: spec.gift.shells });\n    }\n  }\n  return out;\n}\nvar s = Inputs.state && typeof Inputs.state === 'object' && Array.isArray(Inputs.state.plots) ? Inputs.state : null;\nvar marked = [];\nif (s && s.live) for (var i = 0; i < s.plots.length; i++) { var pl = s.plots[i], cur = s.live[pl.id]; if (pl && pl.job && cur && cur.moment) marked.push(pl); }\nvar due = false, shells = 0, lines = [];\nif (marked.length) {\n  var model = modelOf(Inputs.model);\n  var p = null;\n  for (var j = 0; j < model.profiles.length; j++) if (model.profiles[j].id === model.island.activeId) p = model.profiles[j];\n  var rows = Array.isArray(Inputs.robots) ? Inputs.robots : [];\n  var w = iw6WordsOf(Inputs.words, String(Inputs.lang) === 'fr' ? 'fr' : 'en');\n  for (var m = 0; p && m < marked.length; m++) {\n    var plot = marked[m], c = s.live[plot.id], sv = p.island.plots[plot.id];\n    // Still hers and still pinned to that robot (a robot brought home meanwhile keeps its plot as won: nothing written).\n    if (!sv || !sv.robotId || sv.robotId !== plot.robotId || !Array.isArray(sv.program) || !sv.program.length) continue;\n    var old = sv.live || null;\n    var lv = liveOf({ things: iw6CanBack(c.things, c.robot, plot.start ? plot.start.things : []), age: c.age, seed: c.seed, spent: c.spent, helper: 'helper' in c ? c.helper : old ? old.helper : '' });\n    if (lv) sv.live = lv;\n    // P108 s7: an animal whose bowl a robot filled right up (it was not full in her save) gives her present — read\n    // BEFORE landKeep writes her fed. Wear only ever lowers a bowl, so a bowl that rose to full was a robot's put.\n    if (plot.id === LAND_ID && p.island.land) {\n      var gifts = iw7sGifts(p.island.land, c.things);\n      for (var gi = 0; gi < gifts.length; gi++) {\n        var gg = earnShells(p, gifts[gi].shells);\n        if (gg > 0) { shells += gg; lines.push(iw6Fill(w[gifts[gi].word], { a: gifts[gi].name, n: gg })); }\n      }\n    }\n    // P108 IW-007 (lane B): her land's buildings written back from the plot — a part's have only rises (AC3).\n    if (plot.id === LAND_ID && p.island.land) landKeep(p.island.land, c.things);\n    due = true;\n    var got = c.paid && typeof c.paid === 'object' ? earnShells(p, c.paid.shells) : 0;\n    if (got > 0) {\n      shells += got;\n      var name = '';\n      for (var r = 0; r < rows.length; r++) if (rows[r] && rows[r].id === plot.robotId) name = String(rows[r].name || '');\n      lines.push(iw6Fill(w.iw6eIslePay, { r: name, n: got }));\n    }\n    // P108 s7: and what the robot helping there earned (its own lap, its own line).\n    var gotM = c.matePaid && typeof c.matePaid === 'object' && plot.mate ? earnShells(p, c.matePaid.shells) : 0;\n    if (gotM > 0) {\n      shells += gotM;\n      var mname = '';\n      for (var rm = 0; rm < rows.length; rm++) if (rows[rm] && rows[rm].id === plot.mate.robotId) mname = String(rows[rm].name || '');\n      lines.push(iw6Fill(w.iw6eIslePay, { r: mname, n: gotM }));\n    }\n  }\n  if (due) Outputs.model = model;\n}\nOutputs.due = due;\nOutputs.paid = shells;\nOutputs.text = lines.join(' · ');\nOutputs.has = shells > 0;\n",
+        "runOnChange-in-lang": false,
+        "runOnChange-in-model": false,
+        "runOnChange-in-robots": false,
+        "runOnChange-in-state": false,
+        "runOnChange-in-words": false,
+        "uses": "save.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-state",
+          "displayName": "state",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robots",
+          "displayName": "robots",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-model",
+          "displayName": "model",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-due",
+          "displayName": "due",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-paid",
+          "displayName": "paid",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-has",
+          "displayName": "has",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "islandkeepOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "due",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "has",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "paid",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "text",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

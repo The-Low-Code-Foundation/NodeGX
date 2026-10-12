@@ -130,6 +130,8 @@ export { checkPageScroll } from './pageScroll';
 export type { CheckImageSourcesOptions, ImageSourceNode } from './imageSource';
 // GAM-007 — a Static Data row field the runtime answers with a Noodl Object member.
 export { checkReservedRowFields, csvHeaderCells, RESERVED_ROW_FIELD_NAMES } from './reservedRowField';
+export { checkFunctionScriptUses } from './functionScriptUses';
+export type { CheckFunctionScriptUsesOptions, FunctionScriptUsesNode } from './functionScriptUses';
 export type { CheckReservedRowFieldsOptions, ReservedRowFieldNode } from './reservedRowField';
 // LAS-007 — the recipe that fixes a rejection, attached to the rejection. Lives
 // beside the checks that produce the diagnostics so both clients read one table.
@@ -206,10 +208,11 @@ export type { ArrangementNode, CheckResponsiveArrangementOptions } from './respo
 // justifyContent on a row whose children all grow.
 export { checkLayoutInertCombination, widthIsPercentage } from './layoutInertCombination';
 export { checkOneWayGate } from './oneWayGate';
+export { checkGateStartsShown } from './gateStartsShown';
 export type { CheckLayoutInertCombinationOptions, LayoutNode } from './layoutInertCombination';
 // DSG-004 §2.3 — doctrine §3: a page with one font weight.
 export { checkTypographyHierarchy, MIN_TEXT_NODES, TEXT_WEIGHT_TYPES } from './typographyHierarchy';
 export type { CheckTypographyHierarchyOptions } from './typographyHierarchy';
 export { SemanticValidator, validateProject } from './SemanticValidator';
 export { ALL_RULES } from './rules';
-export type { Rule, RuleContext, ValidatorOptions } from './rules';
+export type { DrawnPortsLookup, Rule, RuleContext, ValidatorOptions } from './rules';

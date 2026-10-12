@@ -431,12 +431,14 @@ export function registerFindTools(server: McpServer, disclosure: ToolDisclosure)
            * same request `group:` makes, arrived at in the words somebody
            * happened to have.
            */
+          const before = revealed.length;
           for (const group of TOOL_GROUPS) {
             const haystack = [group.id, group.title, ...(group.keywords ?? [])].join(' ').toLowerCase();
             if (haystack.includes(needle)) revealed.push(...disclosure.revealGroup(group.id));
           }
           const matches = TOOL_GROUPS.flatMap((g) => g.tools).filter((name) => name.toLowerCase().includes(needle));
           revealed.push(...disclosure.revealNames(matches));
+          if (revealed.length === before) revealed.push(...revealByWords(disclosure, needle));
         }
       }
       const payload: FindToolsResponse = {
@@ -447,6 +449,42 @@ export function registerFindTools(server: McpServer, disclosure: ToolDisclosure)
       return jsonResult(payload);
     })
   );
+}
+
+/**
+ * P109 S13-FINDTOOLSPHRASE — a query that found nothing as one phrase, tried word by word.
+ *
+ * A model searches in a sentence's worth of words ("project settings home title", "interact click type fill
+ * test"): the phrase match above finds a query only when it is a substring of ONE haystack, so those revealed
+ * nothing while each of their words names a group. Measured s13–s14 over the stdio door: two agents, two empty
+ * searches, one recovered by browsing and one did not.
+ *
+ * 🔴 The DEF-006 (b) rule still holds — a widening must not reveal everything — so the words are held to three
+ * limits: only after the phrase found nothing; only words of four letters or more, matched WHOLE against the
+ * group's id, title and keywords and against the parts of its tool names (`set_project_settings` → set, project,
+ * settings), never a substring and never the purpose; and a word found in three or more groups says nothing about
+ * which one is meant, so it reveals none (measured s14 over the seven groups: `project`, `list`, `create`,
+ * `export` — every other word of four letters is in one or two).
+ */
+function revealByWords(disclosure: ToolDisclosure, needle: string): string[] {
+  const words = [...new Set(needle.split(/[^a-z0-9]+/).filter((w) => w.length >= 4))];
+  if (words.length < 2) return [];
+  const wordsOf = (text: string) => new Set(text.toLowerCase().split(/[^a-z0-9]+/));
+  const groupWords = TOOL_GROUPS.map((g) => ({
+    group: g,
+    words: wordsOf([g.id, g.title, ...(g.keywords ?? [])].join(' ')),
+    tools: g.tools.map((name) => ({ name, parts: wordsOf(name.replace(/_/g, ' ')) }))
+  }));
+  const revealed: string[] = [];
+  for (const word of words) {
+    const inGroups = groupWords.filter((g) => g.words.has(word) || g.tools.some((t) => t.parts.has(word)));
+    if (inGroups.length === 0 || inGroups.length >= 3) continue;
+    for (const g of inGroups) {
+      if (g.words.has(word)) revealed.push(...disclosure.revealGroup(g.group.id));
+      else revealed.push(...disclosure.revealNames(g.tools.filter((t) => t.parts.has(word)).map((t) => t.name)));
+    }
+  }
+  return revealed;
 }
 
 /** The note a write door attaches when it revealed the backend group by itself. */

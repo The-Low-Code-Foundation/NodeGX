@@ -21,7 +21,7 @@
  * `dist/` being absent cannot break a build in this repo. It is a publishing artefact only.
  */
 import { execFileSync } from 'node:child_process';
-import { chmodSync, copyFileSync, existsSync, globSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
+import { chmodSync, copyFileSync, existsSync, globSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
 import { dirname, relative, resolve } from 'node:path';
 import esbuild from 'esbuild';
@@ -101,14 +101,24 @@ for (const entry of ['index', 'ledger']) {
  * which is the instrument that grades both of those against the real artefact (register row C44).
  * These two lines are the cheap net in front of it.
  */
-await esbuild.build({
+const cliBuild = await esbuild.build({
   ...shared,
   entryPoints: ['src/cli/main.ts'],
   format: 'esm',
   banner: esmBanner,
-  outfile: 'dist/cli.mjs'
+  outfile: 'dist/cli.mjs',
+  metafile: true
 });
 chmodSync('dist/cli.mjs', 0o755);
+/**
+ * P109-S39-STALECLIBUNDLE — the files the bin was built from, beside it. In a checkout `nodegx` is this gitignored
+ * bundle, and on 2026-10-10 it was five days older than its source, so a committed fix did not run. `src/cli/cliBundle.ts`
+ * reads the list on start and warns when a file on it is newer (the P109-S5 rule). Paths are relative to this package.
+ */
+writeFileSync(
+  'dist/cli.inputs.json',
+  JSON.stringify({ inputs: Object.keys(cliBuild.metafile.inputs).filter((p) => !/^[a-z-]+:/.test(p)).sort() }, null, 1) + '\n'
+);
 
 const cliText = readFileSync('dist/cli.mjs', 'utf8');
 const shebangs = cliText.split('\n').filter((line) => line.startsWith('#!')).length;

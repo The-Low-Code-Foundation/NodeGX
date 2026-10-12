@@ -1,0 +1,179 @@
+[
+  {
+    "name": "GET answered at once with JSON: the request goes out and the answer lands in the same settle — Response, Status Code, Response Headers, done",
+    "because": "httpnode.ts :494-500 (one request at the frame's end), :1152-1155 (Auto parses application/json), :995-1040, :1160-1162. NSP-007 AC3: the request is in the trace",
+    "params": { "url": "https://api.example.com/users" },
+    "world": { "network": [{ "answer": { "status": 200, "body": { "users": [1, 2] } } }] },
+    "steps": ["settle", { "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "an answer 100 ms away: the request in one settle, nothing at 99, the answer at 100 (the absence beside the firing arm)",
+    "because": "world.ts NETWORK `after`; NSP-007 AC2's shape for a request",
+    "params": { "url": "https://api.example.com/slow" },
+    "world": { "network": [{ "answer": { "status": 200, "body": "later" }, "after": 100 }] },
+    "steps": [{ "signal": "fetch" }, "settle", { "advance": 99 }, "settle", { "advance": 1 }, "settle"]
+  },
+  {
+    "name": "a 404 takes the Failure path with http/error-status, Error = 'HTTP 404: Not Found', and the body still lands on Response",
+    "because": "httpnode.ts :1163-1170. NSP-007 AC3: a failing response takes the Failure path with the contract's `failed`",
+    "params": { "url": "https://api.example.com/missing" },
+    "world": { "network": [{ "answer": { "status": 404, "statusText": "Not Found", "body": { "error": "no such user" } } }] },
+    "steps": [{ "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "a request that never reaches a server: Failure http/network-error, Error = the error's message, no output moves",
+    "because": "httpnode.ts :1191-1203",
+    "params": { "url": "https://down.example.com/" },
+    "world": { "network": [{ "answer": { "error": "fetch failed" } }] },
+    "steps": [{ "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "no answer and Timeout 1000: at 999 nothing, at 1000 the timeout aborts it — Failure http/timeout, Error names the timeout, no Canceled",
+    "because": "httnode.ts :1075-1078, :1194-1203 (NDA-012: a timeout is not a cancel)",
+    "params": { "url": "https://api.example.com/hang", "timeout": 1000 },
+    "world": { "network": [{ "answer": { "never": true } }] },
+    "steps": [{ "signal": "fetch" }, "settle", { "advance": 999 }, "settle", { "advance": 1 }, "settle"]
+  },
+  {
+    "name": "Cancel in flight: done at once; next settle Canceled and the Fetch's unchanged. Cancel with nothing in flight: unchanged",
+    "because": "httpnode.ts :522-531 cancelFetch, :1181-1190 the AbortError branch",
+    "params": { "url": "https://api.example.com/slow" },
+    "world": { "network": [{ "answer": { "status": 200, "body": "late" }, "after": 500 }] },
+    "steps": [{ "signal": "fetch" }, "settle", { "signal": "cancel" }, "settle", { "signal": "cancel" }, "settle", { "advance": 500 }, "settle"]
+  },
+  {
+    "name": "no URL: Failure http/no-url with Error 'URL is required', and no request goes out",
+    "because": "httpnode.ts :1062-1071",
+    "params": {},
+    "world": { "network": [{ "answer": { "status": 200 } }] },
+    "steps": [{ "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "POST with two JSON body fields, a header and a query parameter, and a {id} path parameter: the request as it travels",
+    "because": "httpnode.ts :852-903 buildUrl, :905-927 buildHeaders, :929-968 buildBody json, :1087-1089 the Content-Type it adds",
+    "params": { "url": "https://api.example.com/users/{id}", "method": "POST", "bodyFields": "name, age", "headers": "X-Test", "queryParams": "verbose" },
+    "world": { "network": [{ "answer": { "status": 201, "statusText": "Created", "body": { "id": 7 } } }] },
+    "steps": [{ "set": "path-id", "value": 7 }, { "set": "body-name", "value": "Ada" }, { "set": "body-age", "value": 36 }, { "set": "header-X-Test", "value": "yes" }, { "set": "query-verbose", "value": true }, { "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "URL-encoded and form bodies: the encoding travels; a null field is omitted by both",
+    "because": "httpnode.ts :969-985; the empty-value contract (:107-109)",
+    "params": { "url": "https://api.example.com/form", "method": "PUT", "bodyType": "urlencoded", "bodyFields": "a, b" },
+    "world": { "network": [{ "answer": { "status": 200 } }] },
+    "steps": [{ "set": "body-a", "value": "x y" }, { "set": "body-b", "value": null }, { "signal": "fetch" }, "settle", { "set": "bodyType", "value": "form" }, { "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "a 304 pulses Not Modified and settles unchanged; Response keeps the previous body",
+    "because": "httpnode.ts :1116-1126 (FED-004)",
+    "params": { "url": "https://feed.example.com/rss" },
+    "world": { "network": [{ "match": { "url": "https://feed.example.com/rss" }, "answer": { "status": 304 } }] },
+    "steps": [{ "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "Response Type JSON on a body that is not JSON: Failure, Error says so — under http/bad-body (v4, D11)",
+    "because": "httpnode.ts badBody: the parse failure is marked and the .catch reports HTTP_ERROR_CODES.badBody (P109 ISL-030, P107-D11 ruled \"Give it its own code\"); v3 used the network error's code",
+    "params": { "url": "https://api.example.com/text", "responseType": "json" },
+    "world": { "network": [{ "answer": { "status": 200, "body": "not json" } }] },
+    "steps": [{ "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "Auto on an application/json answer that is not JSON: Failure under http/bad-body (v4, D11)",
+    "because": "httpnode.ts `response.json()` rejected → badBody; the message is the parser's, as it was",
+    "params": { "url": "https://api.example.com/broken" },
+    "world": { "network": [{ "answer": { "status": 200, "headers": { "content-type": "application/json" }, "body": "{oops" } }] },
+    "steps": [{ "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "two Fetch pulses in one frame: ONE request, two dones",
+    "because": "httpnode.ts :494-500 scheduleFetch's same-pass guard coalesces the work, never the outcomes (:480-490)",
+    "params": { "url": "https://api.example.com/once" },
+    "world": { "network": [{ "answer": { "status": 200, "body": "ok" } }] },
+    "steps": [{ "signal": "fetch" }, { "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "two Cancels in one frame: the first aborts and reports done, the second finds the controller already gone and reports unchanged",
+    "because": "httpnode.ts :522-531 — `abortController = null` synchronously in cancelFetch",
+    "params": { "url": "https://api.example.com/slow" },
+    "world": { "network": [{ "answer": { "status": 200 }, "after": 500 }] },
+    "steps": [{ "signal": "fetch" }, "settle", { "signal": "cancel" }, { "signal": "cancel" }, "settle"]
+  },
+  {
+    "name": "an earlier request's completion no longer disarms Cancel for a later one (v5, D12): the aborted first request's landing removes only its own handle, and the second Cancel aborts the second request",
+    "because": "httpnode.ts abortControllers — one per request, each removed by its own completion (P109 ISL-030, P107-D12 ruled \"Every request still running\"); v4 kept one controller, cleared by ANY completion",
+    "params": { "url": "https://api.example.com/slow" },
+    "world": { "network": [{ "answer": { "status": 200, "body": "second" }, "after": 500 }] },
+    "steps": [{ "signal": "fetch" }, "settle", { "signal": "cancel" }, { "signal": "fetch" }, "settle", { "signal": "cancel" }, "settle", { "advance": 500 }, "settle"]
+  },
+  {
+    "name": "a 304 for the first request leaves Cancel able to abort the second (v5, D12): Not Modified lands while the second is in flight, then Cancel aborts the second",
+    "because": "httpnode.ts: the then removes only its own request's controller, before the 304 branch (v5, D12)",
+    "params": { "url": "https://feed.example.com/rss" },
+    "world": { "network": [{ "match": { "url": "https://feed.example.com/rss" }, "answer": { "status": 304 }, "after": 100 }, { "match": { "url": "https://api.example.com/other" }, "answer": { "status": 200 }, "after": 1000 }] },
+    "steps": [{ "signal": "fetch" }, "settle", { "set": "url", "value": "https://api.example.com/other" }, { "signal": "fetch" }, "settle", { "advance": 100 }, { "signal": "cancel" }, "settle", { "advance": 900 }, "settle"]
+  },
+  {
+    "name": "a request answered 304, then Cancel: nothing is in flight, so Unchanged (v5, D12)",
+    "because": "httpnode.ts: the 304 branch removes its own request's controller (v5, D12), so Cancel finds nothing running",
+    "params": { "url": "https://feed.example.com/rss" },
+    "world": { "network": [{ "answer": { "status": 304 } }] },
+    "steps": [{ "signal": "fetch" }, "settle", { "signal": "cancel" }, "settle"]
+  },
+  {
+    "name": "two requests in flight: one Cancel aborts both, each answering on Canceled (v5, D12)",
+    "because": "httpnode.ts cancelFetch aborts every controller still in the set, in the order the requests were sent (P107-D12 ruled \"Every request still running\")",
+    "params": { "url": "https://api.example.com/slow" },
+    "world": { "network": [{ "answer": { "status": 200, "body": "late" }, "after": 1000 }] },
+    "steps": [{ "signal": "fetch" }, "settle", { "set": "url", "value": "https://api.example.com/slower" }, { "signal": "fetch" }, "settle", { "signal": "cancel" }, "settle", { "advance": 1000 }, "settle"]
+  },
+  {
+    "name": "Bearer authentication sends Authorization: Bearer <token> (v3, C7)",
+    "because": "httpnode.ts authInputs → authConfigurators.bearer (P109 ISL-030, P107-C7 ruled \"Fix it, send the credential\"); v2 sent no Authorization: the presets read inputs.authToken, the port stores auth-authToken",
+    "params": { "url": "https://api.example.com/private", "authType": "bearer" },
+    "world": { "network": [{ "answer": { "status": 200 } }] },
+    "steps": [{ "set": "auth-authToken", "value": "secret" }, { "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "Basic authentication sends the encoded user name and password (v3, C7)",
+    "because": "authConfigurators.basic — Authorization: Basic base64(user:password)",
+    "params": { "url": "https://api.example.com/private", "authType": "basic" },
+    "world": { "network": [{ "answer": { "status": 200 } }] },
+    "steps": [{ "set": "auth-authUsername", "value": "ada" }, { "set": "auth-authPassword", "value": "s3cret" }, { "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "API Key in a header sends the header it names (v3, C7)",
+    "because": "authConfigurators.apiKey — Add To unset is the header",
+    "params": { "url": "https://api.example.com/private", "authType": "apiKey" },
+    "world": { "network": [{ "answer": { "status": 200 } }] },
+    "steps": [{ "set": "auth-authApiKeyName", "value": "X-Api-Key" }, { "set": "auth-authApiKeyValue", "value": "k-123" }, { "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "API Key as a query parameter goes on the URL (v3, C7)",
+    "because": "authConfigurators.apiKey with Add To = query → buildUrl appends it after the query ports",
+    "params": { "url": "https://api.example.com/private", "authType": "apiKey" },
+    "world": { "network": [{ "answer": { "status": 200 } }] },
+    "steps": [{ "set": "auth-authApiKeyName", "value": "api_key" }, { "set": "auth-authApiKeyValue", "value": "k-123" }, { "set": "auth-authApiKeyLocation", "value": "query" }, { "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "a non-string URL fails the Fetch with http/input-not-text and Error 'URL is not text' (C8); nothing goes out, and the node still works afterwards",
+    "because": "P107-C8, ruled 2026-10-05 \"Fail and say which input\", fixed in P109 ISL-026 (v2); httpnode.ts once drained the tokens (:1050-1051) and threw at :1069 `.match`, swallowed at nodecontext.ts :472",
+    "params": { "url": 5 },
+    "world": { "network": [{ "answer": { "status": 200, "body": "ok" } }] },
+    "steps": [{ "signal": "fetch" }, "settle", { "set": "url", "value": "https://api.example.com/after" }, { "signal": "fetch" }, "settle"]
+  },
+  {"name": "text after a unit object on Headers arrives as sent: the Fetch sends its request (no headers) and answers Done (ISL-026, C6)", "because": "was NSP-011 §6 C6 (R7): node.ts setInputValue merged a later value into a unit object on ANY port; since ISL-026 only a port whose type declares units merges — reduced by hand from generated seed 73021029 on run seed 777 (s12, the first rotation that drew it)", "params": {"url": "https://api.example.com/users", "headers": {"unit": "px", "value": 1}}, "world": {"network": [{"answer": {"status": 200, "body": {"users": [1, 2]}}}]}, "steps": [{"set": "headers", "value": "3"}, {"signal": "fetch"}, "settle"]},
+  {
+    "name": "Headers wired a number, with a POST: the Fetch fails naming Headers (C8)",
+    "because": "P107-C8, ruled 2026-10-05 \"Fail and say which input\", fixed in P109 ISL-026; the runtime once threw at `.split` inside doFetch and the Fetch was never answered",
+    "params": {
+      "url": "https://api.example.com/x",
+      "method": "POST",
+      "headers": 5
+    },
+    "steps": [
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ]
+  }
+]

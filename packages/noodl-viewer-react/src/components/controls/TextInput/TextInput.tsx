@@ -4,8 +4,9 @@ import Layout from '../../../layout';
 import Utils from '../../../nodes/controls/utils';
 import { outwardValueForFieldType } from '../../../nodes/controls/textInputValue';
 import { Noodl, Slot } from '../../../types';
-import { noodlRootRef } from '../../noodl-root-ref';
+import { noodlRootRef, dataAttributeProps, clearedRootStyles } from '../../noodl-root-ref';
 import { IconGlyph } from '../../visual/Icon/IconGlyph';
+import { labelText } from '../labelText';
 
 //this stops a text field from being unfocused by the clickHandler in the viewer that handles focus globally.
 //The specific case is when a mouseDown is registered in the input, but the mouseUp is outside.
@@ -64,10 +65,36 @@ type State = {
 interface TextInputNodeSeam {
   _typed?: (text: string) => void;
   _announcedValueIs?: (value: string | number | null) => boolean;
+  /** P107-C72 — the node's own props, current as each input arrives; React's copy waits for the holder's render */
+  props?: { type?: unknown; maxLength?: unknown };
 }
 
 export class TextInput extends React.Component<TextInputProps, State> {
   ref: React.MutableRefObject<InputRef>;
+  /**
+   * The text the field holds as of the last write, at once — `state.value` only catches up when
+   * React draws, so a second write in the same frame would read the text before the first.
+   * Every write and keystroke goes through `setText`. Clear reads it (P107-D33); so does `edit`,
+   * so an Insert Text or Backspace after another write in the same frame works on what that write
+   * left (P107-C69, ruled "each sees the last").
+   */
+  text: string;
+
+  /**
+   * P107-C69 — the cursor as the writes since React last drew left it, or `null` when none has: the
+   * element's selection only catches up at the commit. A changed value puts it at the end (HTML's
+   * value setter); an edit in a focused field puts it after what it wrote.
+   */
+  private pendingCaret: number | null = null;
+
+  /** P107-D35 — the <textarea> whose cursor was put at the end when it attached. */
+  private restedTextArea: HTMLTextAreaElement | null = null;
+
+  /** P107-C72 — the Type or Max length as it stands on the node, not as React last drew it. */
+  private live(key: 'type' | 'maxLength') {
+    const props = (this.props.noodlNode as unknown as TextInputNodeSeam | undefined)?.props;
+    return props && key in props ? props[key] : this.props[key];
+  }
 
   constructor(props: TextInputProps) {
     super(props);
@@ -77,6 +104,7 @@ export class TextInput extends React.Component<TextInputProps, State> {
       // start value as a number, and the controlled `<input>` needs a string.
       value: props.startValue === null || props.startValue === undefined ? '' : String(props.startValue)
     } satisfies State;
+    this.text = this.state.value;
 
     this.ref = React.createRef();
   }
@@ -90,8 +118,11 @@ export class TextInput extends React.Component<TextInputProps, State> {
     // Inward it is always text: `startValue` may arrive as a number on a Number field, and the
     // `<input>`'s `value` has to be a string or React drops the control.
     const text = value === null || value === undefined ? '' : String(value);
+    if (text !== this.text) this.pendingCaret = text.length;
+    this.text = text;
     this.setState({ value: text }, afterRender);
-    this.props.onTextChanged && this.props.onTextChanged(outwardValueForFieldType(this.props.type, text));
+    this.props.onTextChanged &&
+      this.props.onTextChanged(outwardValueForFieldType(this.live('type') as TextInputProps['type'], text));
   }
 
   componentDidMount() {
@@ -201,7 +232,12 @@ export class TextInput extends React.Component<TextInputProps, State> {
           type={this.props.type}
           {...inputProps}
           onKeyDown={(e) => this.onKeyDown(e)}
-          onMouseDown={() => window.addEventListener('click', preventGlobalFocusChange, true)}
+          onMouseDown={(e) => {
+            // P107-C68 (P109 ISL-031, ruled "Pointer Down fires"): this replaced the control's own handler from the
+            // spread above, so a mouse press fired no Pointer Down, set no Pressed and ran no drain; run both
+            (inputProps as { onMouseDown?: (e: React.MouseEvent) => void }).onMouseDown?.(e);
+            window.addEventListener('click', preventGlobalFocusChange, true);
+          }}
           noodl-style-tag="input"
         />
       );
@@ -213,6 +249,17 @@ export class TextInput extends React.Component<TextInputProps, State> {
           // cleanup function, and the concise `(ref) => (this.ref.current = ref)` form
           // returns the element itself.
           ref={(ref) => {
+            // P107-D35 (P109 ISL-031, ruled "at the end, both"): React gives a new <textarea> its text as default
+            // content, cursor at 0, where an <input> gets its value through the setter, which leaves it at the end.
+            // A field nobody has put a cursor in has it at the end. Once per element: this runs again on every render.
+            if (ref && ref !== this.restedTextArea) {
+              this.restedTextArea = ref;
+              try {
+                ref.setSelectionRange(ref.value.length, ref.value.length);
+              } catch (e) {
+                // no selection API
+              }
+            }
             this.ref.current = ref;
           }}
           {...inputProps}
@@ -246,7 +293,10 @@ export class TextInput extends React.Component<TextInputProps, State> {
     }
 
     const inputWithWrapper = (
-      <div ref={noodlRootRef(this.props.noodlNode)} style={inputWrapperStyle} noodl-style-tag="inputWrapper">
+      <div
+        ref={props.useLabel ? undefined : noodlRootRef(this.props.noodlNode)}
+        {...(props.useLabel ? undefined : dataAttributeProps(props.dom))}
+        style={props.useLabel ? { ...clearedRootStyles(style), ...inputWrapperStyle } : inputWrapperStyle} noodl-style-tag="inputWrapper">
         {props.useIcon && props.iconPlacement === 'left' ? _renderIcon() : null}
         {inputContent}
         {props.useIcon && props.iconPlacement === 'right' ? _renderIcon() : null}
@@ -266,15 +316,23 @@ export class TextInput extends React.Component<TextInputProps, State> {
       labelStyle.color = props.noodlNode.context.styles.resolveColor(labelStyle.color);
 
       return (
-        <div ref={noodlRootRef(this.props.noodlNode)} style={otherStyles}>
+      // P107-C80 / C66 (P109 ISL-031, ruled "keeps the keyboard" and "Fix it with the label work"): ONE tree whether the label
+      // shows or not, so React keeps the field (and the keyboard on it) when Enable Label changes, and one element carries
+      // the root ref. Without a label the outer div makes no box (display: contents) and the wrapper is the root, as before.
+        <div ref={noodlRootRef(this.props.noodlNode)} {...dataAttributeProps(props.dom)} style={otherStyles}>
           <label htmlFor={props.id} style={labelStyle} noodl-style-tag="label">
-            {props.label}
+            {labelText(props.label)}
           </label>
           {inputWithWrapper}
         </div>
       );
     } else {
-      return inputWithWrapper;
+      return (
+        <div style={{ ...clearedRootStyles(style), display: 'contents' }}>
+          {null}
+          {inputWithWrapper}
+        </div>
+      );
     }
   }
 
@@ -291,6 +349,13 @@ export class TextInput extends React.Component<TextInputProps, State> {
     // value through the node, and a converted value would bring a Number field's "1." back as "1".
     (this.props.noodlNode as unknown as TextInputNodeSeam | undefined)?._typed?.(value);
     this.setText(value);
+    // a keystroke is committed before the event returns, and the browser's caret is where the person typed
+    this.pendingCaret = null;
+  }
+
+  componentDidUpdate() {
+    // drawn: the element's selection is current again (an edit's own cursor is set by its callback, after this)
+    this.pendingCaret = null;
   }
 
   /**
@@ -303,6 +368,10 @@ export class TextInput extends React.Component<TextInputProps, State> {
     if (el && this.hadCaret) {
       try {
         if (el.selectionStart !== null && el.selectionEnd !== null) {
+          if (this.pendingCaret !== null) {
+            const at = Math.min(this.pendingCaret, value.length);
+            return { start: at, end: at };
+          }
           return { start: Math.min(el.selectionStart, value.length), end: Math.min(el.selectionEnd, value.length) };
         }
       } catch (e) {
@@ -325,7 +394,7 @@ export class TextInput extends React.Component<TextInputProps, State> {
    * @returns whether the field's text changed
    */
   edit(mode: 'insert' | 'backspace', replacement = ''): boolean {
-    const value = this.state.value ?? '';
+    const value = this.text ?? '';
     const { start, end } = this.caret(value);
     let from = start;
     let text = replacement;
@@ -340,7 +409,7 @@ export class TextInput extends React.Component<TextInputProps, State> {
       }
     } else {
       // 🔒 R12 — Max length holds, as it does for a typed key: what does not fit is not written.
-      const maxLength = Number(this.props.maxLength);
+      const maxLength = Number(this.live('maxLength'));
       if (maxLength > 0) {
         const room = Math.max(0, maxLength - (value.length - (end - start)));
         text = Array.from(text).reduce((kept, ch) => (kept.length + ch.length <= room ? kept + ch : kept), '');
@@ -364,6 +433,8 @@ export class TextInput extends React.Component<TextInputProps, State> {
         }
       }
     });
+    // P107-C69 — the next edit in this frame starts where this one left the cursor, as the callback will put it
+    if (this.hasFocus()) this.pendingCaret = caret;
     return true;
   }
 

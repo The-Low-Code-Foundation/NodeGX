@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "50154228-717d-55ca-8d4d-2f2cbfef4702",
+  "name": "Read family",
+  "path": "/Logic/Read family",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The family read: the active profile and the profile rows. Runs when an input changes; Ran after each run."
+}

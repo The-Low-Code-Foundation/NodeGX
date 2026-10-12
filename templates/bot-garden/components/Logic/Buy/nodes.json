@@ -1,0 +1,184 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b98d6a06-3a45-5a7d-833c-37d8fcebb046",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "buyIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "itemId",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "robotId",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "buyFn",
+      "type": "JavaScriptFunction",
+      "label": "Buy",
+      "parameters": {
+        "functionScript": "var { UPGRADES, blueprintSpec, buildingDone, buyItem, jobRobotId, landOf, modelOf, robotRowsOf, shopItem } = Scripts.save;\nvar SHOP_TABS_LIST = [\"build\",\"animals\",\"robots\",\"upgrades\",\"helpers\"];\nvar SHOP_TAB_WORDS = {\"build\":\"iw6hTabBuild\",\"animals\":\"iw6hTabAnimals\",\"robots\":\"iw6hTabRobots\",\"upgrades\":\"iw6hTabUpgrades\",\"helpers\":\"iw6hTabHelpers\"};\nvar SHOP_FIRST_TAB = \"robots\";\nvar SHOP_IDS = {\"tab\":\"shoptab-\",\"item\":\"shopitem-\",\"robot\":\"shopbot-\",\"plot\":\"shopplot-\"};\nfunction shLang(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction shWords(rows, lang) { var map = {}, list = Array.isArray(rows) ? rows : []; for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || ''); return map; }\nfunction shFill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\n/** A row id or a bare id: the bare id (a chip publishes its row's id). */\nfunction shBare(v, prefix) { var s = String(v === undefined || v === null ? '' : v); return s.indexOf(prefix) === 0 ? s.slice(prefix.length) : s; }\nfunction shActive(model) { for (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === model.island.activeId) return model.profiles[i]; return null; }\nfunction shModel(raw) { return modelOf(raw && typeof raw === 'object' ? raw : {}); }\n/** An upgrade she has — an islander's gift before the shop (a sticker) or bought. */\nfunction shHasUpgrade(p, up) { return !!p && (p.owned.indexOf(up) !== -1 || p.stickers.indexOf(up) !== -1); }\nfunction shUpgradeSpec(id) { for (var i = 0; i < UPGRADES.length; i++) if (UPGRADES[i].id === id) return UPGRADES[i]; return null; }\n/** Does the shop show this item to her? (See the module's rules.) */\nfunction shShows(p, it) {\n  if (!p || !it) return false;\n  if (it.kind === 'robot') return !!jobRobotId(p, it.robot);\n  if (it.kind === 'upgrade') {\n    if (shHasUpgrade(p, it.upgrade)) return true;\n    var up = shUpgradeSpec(it.upgrade);\n    if (!up || p.island.done.indexOf(up.unlockedBy) === -1) return false;\n    var rows = robotRowsOf(p);\n    for (var i = 0; i < rows.length; i++) if (up.fits.indexOf(rows[i].kind) !== -1) return true;\n    return false;\n  }\n  // P108 IW-007 (lane A): an animal shows once a refuge on her land is finished (iw7aShows, iw007Animals.ts).\n  if (it.kind === 'animal') return iw7aShows(p, it);\n  // P108 IW-007 (s5 base): the blueprints and animals are in the catalogue, but their shelves stay shut (the \"later\" line)\n  // until lane B opens Build and lane A opens Animals.\n  // P108 IW-007 (lane B): the Build tab is open — every blueprint (one she bought says where it is: BUILD_SHOP).\n  if (it.kind === 'blueprint') return true;\n  if (it.kind === 'animal') return false;\n  return true;\n}\n\n// ── P108 IW-007 (lane B): the Build tab ──\nfunction iw7bBuiltOf(p, bp) { var l = landOf(p && p.island ? p.island.land : null); for (var i = 0; i < l.buildings.length; i++) if (l.buildings[i].bp === bp) return l.buildings[i]; return null; }\n/** Where a blueprint she owns is: 'place' (bought, not placed), 'building', 'built' — '' when she does not own it. */\nfunction iw7bBpState(p, it) {\n  if (!p || !it || it.kind !== 'blueprint' || p.owned.indexOf(it.id) === -1) return '';\n  var b = iw7bBuiltOf(p, it.blueprint);\n  return !b ? 'place' : buildingDone(b) ? 'built' : 'building';\n}\nfunction iw7bBpTag(p, it, W) { var st = iw7bBpState(p, it); return st === 'place' ? W.iw7bTagPlace || '' : st === 'building' ? W.iw7bTagBuilding || '' : st === 'built' ? W.iw7bTagBuilt || '' : ''; }\nfunction iw7bBpCardLine(p, it, W) { var st = iw7bBpState(p, it); return st === 'place' ? W.iw7bCardPlace || '' : st === 'building' ? W.iw7bCardBuilding || '' : st === 'built' ? W.iw7bCardBuilt || '' : ''; }\n\n\n// ── P108 IW-007 (lane A): the Animals shelf ──\nvar IW7A_DEFAULT_NAMES = {\"rabbit\":{\"en\":\"Hazel\",\"fr\":\"Noisette\"},\"sheep\":{\"en\":\"Cloud\",\"fr\":\"Nuage\"}};\nvar IW7A_KINDS = [\"rabbit\",\"sheep\"];\n/** Her land's finished refuges (a building whose blueprint does 'animals' and has every material). */\nfunction iw7aRefuges(p) {\n  var out = [];\n  if (!p || !p.island) return out;\n  var land = landOf(p.island.land);\n  for (var i = 0; i < land.buildings.length; i++) { var spec = blueprintSpec(land.buildings[i].bp); if (spec && spec.does === 'animals' && spec.pen && buildingDone(land.buildings[i])) out.push(land.buildings[i]); }\n  return out;\n}\n/** The Animals shelf is open: a refuge on her land is finished (buyItem's own test for 'refuge'). */\nfunction iw7aOpen(p) { return iw7aRefuges(p).length > 0; }\n/** A free place in a finished refuge's pen (buyItem's own test for 'pen'). */\nfunction iw7aPenFree(p) {\n  var rs = iw7aRefuges(p), land = landOf(p && p.island ? p.island.land : null);\n  for (var i = 0; i < rs.length; i++) {\n    var spec = blueprintSpec(rs[i].bp);\n    for (var s = 0; s < spec.pen; s++) { var used = false; for (var a = 0; a < land.animals.length; a++) if (land.animals[a].at === rs[i].id && land.animals[a].slot === s) used = true; if (!used) return true; }\n  }\n  return false;\n}\n/** Does the shop show this animal? Only once the shelf is open. */\nfunction iw7aShows(p, it) { return !!it && it.kind === 'animal' && IW7A_KINDS.indexOf(it.animal) !== -1 && iw7aOpen(p); }\n/** The name an animal of this kind takes when she types none: the kind's name in her language, numbered when taken. */\nfunction iw7aDefaultName(p, kind) {\n  var names = IW7A_DEFAULT_NAMES[kind];\n  if (!names) return '';\n  var base = names[p && p.lang === 'fr' ? 'fr' : 'en'], taken = {};\n  var land = landOf(p && p.island ? p.island.land : null);\n  for (var a = 0; a < land.animals.length; a++) taken[land.animals[a].name] = 1;\n  if (!taken[base]) return base;\n  for (var n = 2; n < 99; n++) if (!taken[base + ' ' + n]) return base + ' ' + n;\n  return base;\n}\n/** The line an open tab says: the Animals tab, shut, says build the refuge first; open, nothing. Other tabs as they were. */\nfunction iw7aLater(tab, later, p, W) {\n  if (tab !== 'animals') return later;\n  return iw7aOpen(p) ? '' : W.iw7aShut || later;\n}\n/** Why an animal's card has no Buy ('' when it may be bought): no finished refuge, or every place of its pen taken. */\nfunction iw7aRefusal(p, W) {\n  if (!iw7aOpen(p)) return W.iw7aNoRefuge || '';\n  if (!iw7aPenFree(p)) return W.iw7aPenFull || '';\n  return '';\n}\n/** The line after Buy: the newest animal of that kind is waiting by her bowl on her land. */\nfunction iw7aBoughtLine(p, it, W) {\n  var land = landOf(p && p.island ? p.island.land : null), last = null;\n  for (var a = 0; a < land.animals.length; a++) if (land.animals[a].kind === it.animal) last = land.animals[a];\n  if (!last) return '';\n  var line = W['iw7aBought_' + it.animal] || W.iw7aBought_rabbit || '';\n  return line.split('{name}').join(last.name || iw7aDefaultName(p, it.animal));\n}\n\n\nvar model = shModel(Inputs.model), p = shActive(model);\nvar id = shBare(Inputs.itemId, SHOP_IDS.item);\nvar name = typeof Inputs.name === 'string' ? Inputs.name : '';\n// P108 IW-007 (lane A): an animal she did not name takes the name its card showed in the box.\nvar iw7aIt = shopItem(id);\nif (p && iw7aIt && iw7aIt.kind === 'animal' && !name.trim()) name = iw7aDefaultName(p, iw7aIt.animal);\nvar r = p ? buyItem(p, id, { robotId: shBare(Inputs.robotId, SHOP_IDS.robot), name: name }) : { ok: false, error: 'unknown', short: 0, left: 0, robotId: '' };\nOutputs.model = model;\nOutputs.ok = !!r.ok;\nOutputs.error = String(r.error || '');\nOutputs.short = Number(r.short) || 0;\nOutputs.left = Number(r.left) || 0;\nOutputs.robotId = String(r.robotId || '');\nOutputs.bought = r.ok ? id : '';\n",
+        "runOnChange-in-itemId": false,
+        "runOnChange-in-model": false,
+        "runOnChange-in-name": false,
+        "runOnChange-in-robotId": false,
+        "uses": "save.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-itemId",
+          "displayName": "itemId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robotId",
+          "displayName": "robotId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-model",
+          "displayName": "model",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "displayName": "error",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-short",
+          "displayName": "short",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-left",
+          "displayName": "left",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-robotId",
+          "displayName": "robotId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bought",
+          "displayName": "bought",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "buyOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "bought",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "error",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "left",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ok",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "robotId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "short",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

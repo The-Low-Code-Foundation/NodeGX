@@ -1,0 +1,504 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "68ba05b2-c61b-5c20-8e18-25d72a37c9b7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mnIn",
+      "type": "Component Inputs",
+      "label": "The money",
+      "ports": [
+        {
+          "name": "balanceText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "balanceWhen",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bars",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lowText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lowColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "incomeRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasIncome",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "items",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "marks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "projects",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "mnOut",
+      "type": "Component Outputs",
+      "label": "Written, or opened",
+      "ports": [
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "addMoney",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "allMoney",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "mnRoot",
+      "type": "Group",
+      "label": "Money",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "mnHeadRow",
+        "mnCard"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mnHeadRow",
+      "type": "Group",
+      "label": "Money, and the way into all of it",
+      "parent": "mnRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "mnHeading",
+        "mnOpen"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mnHeading",
+      "type": "Text",
+      "label": "Money",
+      "parent": "mnHeadRow",
+      "parameters": {
+        "text": "Money",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "mnOpen",
+      "type": "Group",
+      "label": "Add money, or see all of it",
+      "parent": "mnHeadRow",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "children": [
+        "mnAdd",
+        "mnAll"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "mnAdd",
+      "type": "net.noodl.controls.button",
+      "label": "Add money",
+      "parent": "mnOpen",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "+ Add money"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "mnAll",
+      "type": "net.noodl.controls.button",
+      "label": "All money in and out",
+      "parent": "mnOpen",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "All money in and out"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "mnCard",
+      "type": "Group",
+      "label": "Balance and the month ahead",
+      "parent": "mnRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)"
+      },
+      "children": [
+        "mnTop",
+        "mnBars",
+        "mnLow",
+        "mnIncome",
+        "mnNew",
+        "mnError"
+      ],
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "mnTop",
+      "type": "Group",
+      "label": "The balance",
+      "parent": "mnCard",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "mnBalance",
+        "mnWhen"
+      ],
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "mnBalance",
+      "type": "Text",
+      "label": "In the bank",
+      "parent": "mnTop",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize",
+        "fontVariantNumeric": "tabular-nums"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "mnWhen",
+      "type": "Text",
+      "label": "When it was read",
+      "parent": "mnTop",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "styleCss": "flex: 1 1 200px; min-width: 0;"
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "mnBars",
+      "type": "Group",
+      "label": "The next 30 days",
+      "parent": "mnCard",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "columnGap": "var(--space-0-5)",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 48,
+          "unit": "px"
+        }
+      },
+      "children": [
+        "mnEach"
+      ],
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "mnEach",
+      "type": "For Each",
+      "label": "One bar per day",
+      "parent": "mnBars",
+      "parameters": {
+        "template": "/Projects/Money bar",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "mnLow",
+      "type": "Text",
+      "label": "The lowest point",
+      "parent": "mnCard",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "mnIncome",
+      "type": "Group",
+      "label": "Due in soon",
+      "parent": "mnCard",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "mounted": false
+      },
+      "children": [
+        "mnIncomeEach"
+      ],
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "mnIncomeEach",
+      "type": "For Each",
+      "label": "One row per payment due",
+      "parent": "mnIncome",
+      "parameters": {
+        "template": "/Projects/Income row",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 1720
+    },
+    {
+      "id": "mnNew",
+      "type": "Group",
+      "label": "A new balance",
+      "parent": "mnCard",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "mnField",
+        "mnSave"
+      ],
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "mnField",
+      "type": "net.noodl.controls.textinput",
+      "label": "New balance",
+      "parent": "mnNew",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "What is in the bank now, e.g. 2140",
+        "styleCss": "flex: 1 1 220px; min-width: 0;"
+      },
+      "x": 220,
+      "y": 1960
+    },
+    {
+      "id": "mnSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save balance",
+      "parent": "mnNew",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Save balance"
+      },
+      "x": 220,
+      "y": 2080
+    },
+    {
+      "id": "mnError",
+      "type": "Text",
+      "label": "Why it was not saved",
+      "parent": "mnCard",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "lineHeight": "var(--leading-snug)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 160,
+      "y": 2200
+    },
+    {
+      "id": "cmdBalance",
+      "type": "/Projects/Record balance",
+      "label": "Record balance",
+      "x": 470,
+      "y": 2200
+    },
+    {
+      "id": "cmdPaid",
+      "type": "/Projects/Mark money",
+      "label": "Paid",
+      "parameters": {
+        "action": "tick"
+      },
+      "x": 470,
+      "y": 1720
+    }
+  ],
+  "visualRoots": [
+    "mnRoot"
+  ]
+}

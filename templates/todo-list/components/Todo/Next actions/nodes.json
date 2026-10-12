@@ -20,7 +20,7 @@
         }
       ],
       "x": 410,
-      "y": 400
+      "y": 520
     },
     {
       "id": "naOut",
@@ -38,12 +38,7 @@
           "type": "signal"
         },
         {
-          "name": "up",
-          "plug": "input",
-          "type": "signal"
-        },
-        {
-          "name": "down",
+          "name": "moved",
           "plug": "input",
           "type": "signal"
         },
@@ -96,10 +91,20 @@
           "name": "newTitle",
           "plug": "input",
           "type": "string"
+        },
+        {
+          "name": "moveId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "moveTo",
+          "plug": "input",
+          "type": "number"
         }
       ],
       "x": 410,
-      "y": 520
+      "y": 640
     },
     {
       "id": "naRoot",
@@ -257,7 +262,7 @@
         "runOnChange-in-text": false
       },
       "x": 410,
-      "y": 640,
+      "y": 760,
       "ports": [
         {
           "name": "in-text",
@@ -281,6 +286,79 @@
           "group": "Outputs"
         }
       ]
+    },
+    {
+      "id": "naDrag",
+      "type": "JavaScriptFunction",
+      "label": "Drag a row by its grip to move it",
+      "parameters": {
+        "functionScript": "var CSS_ID = 'todo-drag-sort-css';\nvar CSS = \".todo-drag-handle {\\n  position: relative; flex: 0 0 auto; cursor: grab; touch-action: none;\\n  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;\\n  border-radius: var(--radius-md, 6px);\\n}\\n.todo-drag-handle::before {\\n  content: ''; position: absolute; left: 50%; top: 50%; width: 10px; height: 16px; transform: translate(-50%, -50%);\\n  background-image: radial-gradient(circle, var(--muted-foreground, #6b7280) 1.4px, transparent 1.7px);\\n  background-size: 5px 5.34px;\\n}\\n.todo-drag-handle:hover { background-color: var(--muted, #f1f1f1); }\\n.todo-drag-handle:hover::before, .todo-drag-handle:focus-visible::before {\\n  background-image: radial-gradient(circle, var(--foreground, #1c1c1c) 1.4px, transparent 1.7px);\\n}\\n.todo-drag-handle:focus { outline: none; }\\n.todo-drag-handle:focus-visible { outline: 2px solid var(--ring, #3b82f6); outline-offset: 1px; }\\n/* !important: a row paints its own background inline (the selected one's surface), which beats a class. */\\n.todo-drag-row.todo-dragging {\\n  position: relative; z-index: 5;\\n  background-color: var(--surface-raised, var(--background, #ffffff)) !important;\\n  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.12), 0 4px 6px -4px rgba(0, 0, 0, 0.1));\\n}\\n.todo-drag-row.todo-drag-shift { transition: transform 150ms ease; }\\nhtml.todo-drag-active, html.todo-drag-active * { cursor: grabbing !important; -webkit-user-select: none; user-select: none; }\";\nvar ROW = \"todo-drag-row\", HANDLE = \"todo-drag-handle\";\nvar S = this.dragSort || (this.dragSort = {});\nS.Outputs = Outputs;\nS.rows = Inputs.rows || [];\nif (typeof document === 'undefined') return;\nif (!document.getElementById(CSS_ID)) {\n  var sheet = document.createElement('style');\n  sheet.id = CSS_ID;\n  sheet.textContent = CSS;\n  document.head.appendChild(sheet);\n}\n\nif (!S.ready) {\n  S.ready = true;\n  S.movable = function () {\n    var n = 0;\n    while (n < S.rows.length && S.rows[n] && S.rows[n].canMove !== false) n++;\n    return n;\n  };\n  S.els = function () {\n    return S.host ? Array.prototype.slice.call(S.host.querySelectorAll('.' + ROW)) : [];\n  };\n  S.name = function () {\n    var els = S.els();\n    for (var i = 0; i < els.length; i++) {\n      var h = els[i].querySelector('.' + HANDLE);\n      if (!h) continue;\n      h.setAttribute('tabindex', '0');\n      h.setAttribute('role', 'button');\n      h.setAttribute('aria-label', 'Move “' + String((S.rows[i] && S.rows[i].title) || '') + '”');\n      h.setAttribute('title', 'Drag to move, or use the up and down arrow keys');\n    }\n  };\n  S.settle = function (animate) {\n    S.pending = false;\n    var els = S.els();\n    for (var i = 0; i < els.length; i++) {\n      var el = els[i];\n      el.classList.remove('todo-drag-shift', 'todo-dragging');\n      el.style.transition = animate ? 'transform 150ms ease' : 'none';\n      el.style.transform = '';\n    }\n    if (!animate) {\n      if (els.length) void els[0].offsetHeight;\n      for (var j = 0; j < els.length; j++) els[j].style.transition = '';\n    } else {\n      setTimeout(function () {\n        for (var k = 0; k < els.length; k++) els[k].style.transition = '';\n      }, 200);\n    }\n  };\n  S.place = function () {\n    var d = S.drag;\n    if (!d) return;\n    var sy = window.scrollY || 0;\n    var dy = d.lastClientY + sy - d.startY;\n    var n = d.rects.length, me = d.rects[d.from];\n    var lo = d.rects[0].top - me.top, hi = d.rects[n - 1].top + d.rects[n - 1].h - (me.top + me.h);\n    dy = Math.max(lo, Math.min(hi, dy));\n    d.row.style.transform = 'translateY(' + dy + 'px)';\n    // Its LEADING edge past a neighbour's middle takes that place — the top edge going up, the bottom\n    // going down. 🔴 Not its middle: held against the top of the list, a row as tall as the first one\n    // has its middle exactly on the first one's, and could never take first place (measured on a phone).\n    var top = me.top + dy, bottom = top + me.h, to = d.from, k;\n    for (k = 0; k < d.from; k++) if (top < d.rects[k].top + d.rects[k].h / 2) { to = k; break; }\n    for (k = n - 1; k > d.from; k--) if (bottom > d.rects[k].top + d.rects[k].h / 2) { to = k; break; }\n    d.to = to;\n    for (k = 0; k < n; k++) {\n      if (k === d.from) continue;\n      var shift = k > d.from && k <= to ? -me.h : k < d.from && k >= to ? me.h : 0;\n      d.els[k].style.transform = shift ? 'translateY(' + shift + 'px)' : '';\n    }\n  };\n  S.tick = function () {\n    if (!S.drag) return;\n    var y = S.drag.lastClientY, edge = 56, v = 0, height = window.innerHeight || 0;\n    if (y < edge) v = -Math.ceil((edge - y) / 4);\n    else if (y > height - edge) v = Math.ceil((y - (height - edge)) / 4);\n    if (v) {\n      window.scrollBy(0, v);\n      S.place();\n    }\n  };\n  S.down = function (e) {\n    if (S.drag || (e.pointerType === 'mouse' && e.button !== 0)) return;\n    var h = e.target && e.target.closest ? e.target.closest('.' + HANDLE) : null;\n    if (!h || !S.host || !S.host.contains(h)) return;\n    var els = S.els(), row = h.closest('.' + ROW), from = els.indexOf(row), n = Math.min(S.movable(), els.length);\n    if (from < 0 || from >= n || n < 2) return;\n    e.preventDefault();\n    try { h.setPointerCapture(e.pointerId); } catch (x) {}\n    var sy = window.scrollY || 0, rects = [];\n    for (var k = 0; k < n; k++) {\n      var r = els[k].getBoundingClientRect();\n      rects.push({ top: r.top + sy, h: r.height });\n      els[k].style.transition = '';\n      if (k !== from) els[k].classList.add('todo-drag-shift');\n    }\n    S.drag = { pointer: e.pointerId, handle: h, row: row, els: els.slice(0, n), rects: rects, from: from, to: from, startY: e.clientY + sy, lastClientY: e.clientY };\n    row.classList.add('todo-dragging');\n    document.documentElement.classList.add('todo-drag-active');\n    document.addEventListener('pointermove', S.move, { passive: false });\n    document.addEventListener('pointerup', S.up);\n    document.addEventListener('pointercancel', S.cancel);\n    S.scroller = setInterval(S.tick, 16);\n  };\n  S.move = function (e) {\n    if (!S.drag || e.pointerId !== S.drag.pointer) return;\n    e.preventDefault();\n    S.drag.lastClientY = e.clientY;\n    S.place();\n  };\n  S.finish = function (commit) {\n    var d = S.drag;\n    if (!d) return;\n    S.drag = null;\n    clearInterval(S.scroller);\n    document.removeEventListener('pointermove', S.move, { passive: false });\n    document.removeEventListener('pointerup', S.up);\n    document.removeEventListener('pointercancel', S.cancel);\n    document.documentElement.classList.remove('todo-drag-active');\n    try { d.handle.releasePointerCapture(d.pointer); } catch (x) {}\n    d.row.classList.remove('todo-dragging');\n    var row = S.rows[d.from];\n    if (!commit || d.to === d.from || !row) {\n      S.settle(true);\n      return;\n    }\n    // Drawn where it was dropped until the list arrives in its new order (that settles it), or 4s.\n    var me = d.rects[d.from], at = d.rects[d.to];\n    var top = d.to < d.from ? at.top : at.top + at.h - me.h;\n    d.row.style.transition = 'transform 150ms ease';\n    d.row.style.transform = 'translateY(' + (top - me.top) + 'px)';\n    S.pending = true;\n    setTimeout(function () { if (S.pending) S.settle(true); }, 4000);\n    S.Outputs.itemId = row.id;\n    S.Outputs.toIndex = d.to;\n    S.Outputs.moved();\n  };\n  S.up = function (e) {\n    if (S.drag && e.pointerId === S.drag.pointer) S.finish(true);\n  };\n  S.cancel = function (e) {\n    if (S.drag && e.pointerId === S.drag.pointer) S.finish(false);\n  };\n  S.key = function (e) {\n    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;\n    var h = e.target && e.target.closest ? e.target.closest('.' + HANDLE) : null;\n    if (!h || S.drag) return;\n    var els = S.els(), i = els.indexOf(h.closest('.' + ROW)), n = Math.min(S.movable(), els.length);\n    var j = e.key === 'ArrowUp' ? i - 1 : i + 1;\n    if (i < 0 || i >= n || j < 0 || j >= n || !S.rows[i]) return;\n    e.preventDefault();\n    S.refocus = S.rows[i].id;\n    S.Outputs.itemId = S.rows[i].id;\n    S.Outputs.toIndex = j;\n    S.Outputs.moved();\n  };\n}\n\nvar hostNode = Inputs.host;\nvar host = hostNode && typeof hostNode.getDOMElement === 'function' ? hostNode.getDOMElement() : null;\nif (!S.drawn) {\n  /**\n   * 🔴 **The rows are drawn AFTER this runs**, by the For Each, in a later turn (measured: the script\n   * had the host and all three rows, and not one grip was named). So the host is WATCHED: when rows\n   * are drawn or redrawn, the grips are named and a dropped row settles — before the next paint, so the\n   * list never flickers back to its old order while the save is in flight.\n   */\n  S.drawn = function () {\n    if (S.settleOnDraw && !S.drag) {\n      S.settleOnDraw = false;\n      S.settle(false);\n    }\n    S.name();\n    if (!S.refocus) return;\n    var at = -1;\n    for (var q = 0; q < S.rows.length; q++) if (S.rows[q] && S.rows[q].id === S.refocus) at = q;\n    var grip = at >= 0 && S.els()[at] ? S.els()[at].querySelector('.' + HANDLE) : null;\n    if (grip) {\n      S.refocus = null;\n      grip.focus();\n    }\n  };\n}\nif (host && S.host !== host) {\n  if (S.host) {\n    S.host.removeEventListener('pointerdown', S.down);\n    S.host.removeEventListener('keydown', S.key);\n  }\n  if (S.watch) S.watch.disconnect();\n  S.host = host;\n  host.addEventListener('pointerdown', S.down);\n  host.addEventListener('keydown', S.key);\n  if (typeof MutationObserver !== 'undefined') {\n    S.watch = new MutationObserver(function () { S.drawn(); });\n    S.watch.observe(host, { childList: true, subtree: true, characterData: true });\n  }\n}\n// The rows arrived (a save landed, or a remount): whatever the last drop left drawn is spent — once\n// they are drawn, or in 800ms if drawing them changed nothing the watch can see.\nif (S.drawnFor !== S.rows) {\n  S.drawnFor = S.rows;\n  if (S.pending) {\n    S.settleOnDraw = true;\n    setTimeout(function () { if (S.settleOnDraw) S.drawn(); }, 800);\n  }\n}\nif (S.host) S.drawn();"
+      },
+      "ports": [
+        {
+          "name": "in-host",
+          "plug": "input",
+          "type": "*",
+          "displayName": "host",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-mounted",
+          "plug": "input",
+          "type": "*",
+          "displayName": "mounted",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rows",
+          "plug": "input",
+          "type": "*",
+          "displayName": "rows",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-itemId",
+          "plug": "output",
+          "type": "*",
+          "displayName": "itemId",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-toIndex",
+          "plug": "output",
+          "type": "*",
+          "displayName": "toIndex",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moved",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "moved",
+          "group": "Outputs"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "naMounts",
+      "type": "JavaScriptFunction",
+      "label": "Count mounts (a remount is a new element to listen on)",
+      "parameters": {
+        "functionScript": "this.mounts = (this.mounts || 0) + 1;\nOutputs.mounts = this.mounts;"
+      },
+      "ports": [
+        {
+          "name": "out-mounts",
+          "plug": "output",
+          "type": "*",
+          "displayName": "mounts",
+          "group": "Outputs"
+        }
+      ],
+      "x": 410,
+      "y": 400
     }
   ],
   "visualRoots": [

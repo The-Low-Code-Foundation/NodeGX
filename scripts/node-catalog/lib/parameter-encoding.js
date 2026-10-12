@@ -135,7 +135,9 @@ const METADATA_DRIVEN = {
 /** Parameters that must be present for a hook to do anything, but that contribute no names. */
 const ENABLING_PARAMETERS = {
   States: { useTransitions: true },
-  'For Each': { templateType: 'explicit' }
+  'For Each': { templateType: 'explicit' },
+  // P107-C127 — a page's Path (`pagePath-<pageId>`) is drawn only with Use Routes on; probed off, the catalog never knew it
+  'Page Stack': { useRoutes: true }
 };
 
 /** `states` → `state`, `properties` → `property`, `payload` → `payload`. */
@@ -167,20 +169,32 @@ function seedRunFor(typeName, metadata, seedIndex) {
   };
 
   const inputs = metadata.inputs || {};
+  // P109 ISL-009 — a list a `namedports/derived` rule reads (every visual node's Data Attributes) is
+  // not a setup input: the editor mints its ports from the rule, and `withDerivedRules` writes their
+  // pattern. Seeding it here drove Page's setup as if it read the list, and turned Page's true
+  // "ports follow the component the page renders" into a false `known: true`.
+  const derivedLists = new Set(
+    (metadata.dynamicports || []).filter((d) => d && d.name === 'namedports/derived').map((d) => d.parameter)
+  );
   const listInputs = Object.keys(inputs)
     .sort()
+    .filter((name) => !derivedLists.has(name))
     .filter((name) => {
       const type = inputs[name].type;
       const typeName2 = typeof type === 'string' ? type : type && type.name;
       return Object.prototype.hasOwnProperty.call(LIST_PORT_SEEDS, typeName2);
     });
 
-  // The first list input takes the primary tokens, the rest the secondary ones. Two distinct
+  // The first list input takes the primary tokens, the second the secondary ones. Two distinct
   // pools is what makes a two-variable formula like `value-<state>-<value>` separable at all.
+  // ⚠️ P109 ISL-005: a THIRD list input gets the secondary tokens marked with its position, never
+  // the second's own. The Function grew `uses` (script files, which make no port) beside
+  // `scriptInputs`/`scriptOutputs`; sharing the second pool credited `uses` with every output port
+  // `scriptOutputs` makes, and the catalog told agents a Function's outputs come from its files.
   listInputs.forEach((name, i) => {
     const type = inputs[name].type;
     const spec = LIST_PORT_SEEDS[typeof type === 'string' ? type : type.name];
-    const pool = i === 0 ? tokens.primary : tokens.secondary;
+    const pool = i === 0 ? tokens.primary : i === 1 ? tokens.secondary : tokens.secondary.map((t) => t + 'L' + i);
     parameters[name] = spec.write(pool);
     seededBy.push(name);
     claim(pool, name, singularize(name), spec.describe, spec.tokensOf);

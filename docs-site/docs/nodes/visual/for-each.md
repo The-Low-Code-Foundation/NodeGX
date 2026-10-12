@@ -40,6 +40,28 @@ component = '/MyComponent';` | JavaScript run per item that sets `component` to 
 |---|---|---|---|
 | `refresh` | Signal | — | Rebuilds every item from the current Items, discarding any state the item components held |
 
+### What each input does
+
+**Items** (`items`)
+
+- the same list again: nothing; a new one is copied into its own list at the end of the frame — a row added for each new item and taken down for each one gone, then Items Rendered if a row came or went; anything not a list empties it
+
+**Template Type** (`templateType`)
+
+- always: a rebuild at the end of the frame — Explicit builds every row from Template, Dynamic runs Script per item
+
+**Template** (`template`)
+
+- always: a rebuild at the end of the frame, every row built again from this component
+
+**Script** (`templateScript`)
+
+- always: compiled as it arrives (code that does not compile leaves none), and a rebuild at the end of the frame
+
+**Refresh** (`refresh`)
+
+- always: a rebuild at the end of the frame, one however many Refreshes arrived — every row goes and one is built per item, then Done for each Refresh; Failure for each when Template Type has nothing to build from, or there are no Items
+
 ## Outputs
 
 ### Values
@@ -54,7 +76,7 @@ component = '/MyComponent';` | JavaScript run per item that sets `component` to 
 |---|---|---|---|
 | `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
 | `done` | Signal | — | Fires once a Refresh has torn the list down and rebuilt it from the current Items, including when that leaves the list empty |
-| `itemsRendered` | Signal | — | Fires once every item component exists and has been added; item creation is spread across frames, so this is the only honest moment to measure or scroll the list |
+| `itemsRendered` | Signal | — | Fires when rows were added or removed, once every item component exists; item creation is spread across frames, so this is the only honest moment to measure or scroll the list |
 
 ### Failure outputs
 
@@ -86,6 +108,7 @@ Two dynamic mechanisms: `template`/`templateScript` swap in and out based on `te
 
 - Triggering `refresh` whenever data changes: the repeater already diffs `items`; refresh forces a full rebuild and loses instance state.
 - Binding huge unpaged query results into a repeater; page or limit the query instead.
+- Two lists numbering rows alike (`l0, l1…`) each keep their own, but a lookup by id (an Object node given the row's `Id`, a write to `itemActionItemId`) finds the first list's row. In a row, use From repeater; give rows edited by id unique ids.
 
 ## Examples
 

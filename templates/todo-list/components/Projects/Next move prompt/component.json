@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f3a33814-2063-549e-8a2f-343339ba5161",
+  "name": "Next move prompt",
+  "path": "/Projects/Next move prompt",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "After a project’s task is closed: asks for that project’s next move, and saves it as a task. Nothing next for now puts it away."
+}

@@ -1,0 +1,295 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "73b56135-9407-5415-887d-f2aa6b763988",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rsIn",
+      "fromProperty": "title",
+      "toId": "rsTitle",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "scheduleLine",
+      "toId": "rsSchedule",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "statusLine",
+      "toId": "rsStatus",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "statusColor",
+      "toId": "rsStatus",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "cadence",
+      "toId": "rsLook",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "rsLook",
+      "fromProperty": "dailyBg",
+      "toId": "rsDaily",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "rsLook",
+      "fromProperty": "weeklyBg",
+      "toId": "rsWeekly",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "rsLook",
+      "fromProperty": "monthlyBg",
+      "toId": "rsMonthly",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "slotRows",
+      "toId": "rsSlotEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "noSlots",
+      "toId": "rsNoSlots",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "dayChips",
+      "toId": "rsDayEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "showDays",
+      "toId": "rsDays",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "addHint",
+      "toId": "rsHint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "timeError",
+      "toId": "rsTimeError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "hasTimeError",
+      "toId": "rsTimeError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "clearTime",
+      "toId": "rsTime",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "startDate",
+      "toId": "rsStart",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "endDate",
+      "toId": "rsEnd",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "routineId",
+      "toId": "rsAnother",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rsAnother",
+      "fromProperty": "valueChanged",
+      "toId": "rsStart",
+      "toProperty": "Reset"
+    },
+    {
+      "fromId": "rsAnother",
+      "fromProperty": "valueChanged",
+      "toId": "rsEnd",
+      "toProperty": "Reset"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "startError",
+      "toId": "rsStartError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "hasStartError",
+      "toId": "rsStartError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "endError",
+      "toId": "rsEndError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "hasEndError",
+      "toId": "rsEndError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "canStop",
+      "toId": "rsStop",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "isStopped",
+      "toId": "rsStopped",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "stopNote",
+      "toId": "rsStoppedNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "narrow",
+      "toId": "rsBack",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rsTitle",
+      "fromProperty": "onTextChanged",
+      "toId": "rsOut",
+      "toProperty": "newTitle"
+    },
+    {
+      "fromId": "rsTitle",
+      "fromProperty": "onEnter",
+      "toId": "rsTitle",
+      "toProperty": "blur"
+    },
+    {
+      "fromId": "rsTitle",
+      "fromProperty": "onBlur",
+      "toId": "rsOut",
+      "toProperty": "rename"
+    },
+    {
+      "fromId": "rsDaily",
+      "fromProperty": "onClick",
+      "toId": "rsOut",
+      "toProperty": "pickDaily"
+    },
+    {
+      "fromId": "rsWeekly",
+      "fromProperty": "onClick",
+      "toId": "rsOut",
+      "toProperty": "pickWeekly"
+    },
+    {
+      "fromId": "rsMonthly",
+      "fromProperty": "onClick",
+      "toId": "rsOut",
+      "toProperty": "pickMonthly"
+    },
+    {
+      "fromId": "rsSlotEach",
+      "fromProperty": "itemOutputSignal-remove",
+      "toId": "rsOut",
+      "toProperty": "removeSlot"
+    },
+    {
+      "fromId": "rsSlotEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "rsOut",
+      "toProperty": "slotKey"
+    },
+    {
+      "fromId": "rsDayEach",
+      "fromProperty": "itemOutputSignal-pick",
+      "toId": "rsOut",
+      "toProperty": "pickDay"
+    },
+    {
+      "fromId": "rsDayEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "rsOut",
+      "toProperty": "dayKey"
+    },
+    {
+      "fromId": "rsTime",
+      "fromProperty": "onTextChanged",
+      "toId": "rsOut",
+      "toProperty": "timeText"
+    },
+    {
+      "fromId": "rsTime",
+      "fromProperty": "onEnter",
+      "toId": "rsOut",
+      "toProperty": "addTime"
+    },
+    {
+      "fromId": "rsAddTime",
+      "fromProperty": "onClick",
+      "toId": "rsOut",
+      "toProperty": "addTime"
+    },
+    {
+      "fromId": "rsStart",
+      "fromProperty": "Value",
+      "toId": "rsOut",
+      "toProperty": "startText"
+    },
+    {
+      "fromId": "rsStart",
+      "fromProperty": "Changed",
+      "toId": "rsOut",
+      "toProperty": "setStart"
+    },
+    {
+      "fromId": "rsEnd",
+      "fromProperty": "Value",
+      "toId": "rsOut",
+      "toProperty": "endText"
+    },
+    {
+      "fromId": "rsEnd",
+      "fromProperty": "Changed",
+      "toId": "rsOut",
+      "toProperty": "setEnd"
+    },
+    {
+      "fromId": "rsStop",
+      "fromProperty": "onClick",
+      "toId": "rsOut",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "rsBack",
+      "fromProperty": "onClick",
+      "toId": "rsOut",
+      "toProperty": "back"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "name": "transform",
+  "rule": "a transform moves what is drawn, never the siblings",
+  "nodes": [
+    {
+      "id": "col",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 400,
+          "unit": "px"
+        },
+        "height": {
+          "value": 300,
+          "unit": "px"
+        },
+        "flexDirection": "column"
+      },
+      "children": [
+        {
+          "id": "moved",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 50,
+              "unit": "px"
+            },
+            "transformX": 20,
+            "transformY": 10
+          }
+        },
+        {
+          "id": "scaled",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 50,
+              "unit": "px"
+            },
+            "transformScale": 2
+          }
+        },
+        {
+          "id": "still",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 50,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

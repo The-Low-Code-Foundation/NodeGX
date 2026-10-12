@@ -1,0 +1,70 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/world-v1.json#/definitions/relationsFile",
+  "relations": [
+    {
+      "id": "membership",
+      "from": "person",
+      "to": "account",
+      "kind": "is-on",
+      "sentence": "A person is on an account, as its holder or as a member, from the day they join until they leave.",
+      "answers": {
+        "counts": "A person counts as a member while they are on at least one account.",
+        "several": true,
+        "sameTime": true,
+        "startsEnds": true,
+        "whenEnds": "The membership stays, with the day it ended.",
+        "details": "their role on the account: holder or member"
+      },
+      "properties": [
+        {
+          "name": "role",
+          "kind": "choice",
+          "values": [
+            "holder",
+            "member"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "learning",
+      "from": "person",
+      "to": "the learning platform",
+      "kind": "exists-elsewhere",
+      "sentence": "A person also exists in the learning platform, as a learner.",
+      "answers": {
+        "hereFirst": "Yes. Then the enrolment there is skipped and recorded, and the next run tries again.",
+        "thereFirst": true,
+        "wins": "here",
+        "nameThere": "a learner",
+        "endsThere": "their access ends"
+      }
+    },
+    {
+      "id": "mailing",
+      "from": "account",
+      "to": "the mailing system",
+      "kind": "exists-elsewhere",
+      "sentence": "An account also exists in the mailing system, as a list its people are on.",
+      "answers": {
+        "hereFirst": "Yes; the list is made there when the first member is enrolled.",
+        "thereFirst": false,
+        "wins": "here",
+        "nameThere": "a list",
+        "endsThere": "the list is closed"
+      }
+    },
+    {
+      "id": "leaves",
+      "from": "person",
+      "kind": "ends",
+      "sentence": "A person can leave, and is never deleted.",
+      "answers": {
+        "whatStays": "Their record and its history stay; their memberships end; their access to the learning platform ends.",
+        "comesBack": true,
+        "backAs": "the old one",
+        "whoEnds": "one of us, from the admin"
+      }
+    }
+  ]
+}

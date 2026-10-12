@@ -7,5 +7,5 @@
   "created": "2026-09-14T00:00:00.000Z",
   "modified": "2026-09-14T00:00:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "The four queries: your tasks, your next actions, the selected task’s history, and recent history across all tasks. Refresh loads them all again; a task’s history is only asked for when a task is selected."
+  "description": "The six queries: your tasks, your next actions, the selected task’s (or recurring item’s) history, recent history across all of them, the things that repeat, and the times they were ticked off. Refresh loads them all again; a history is only asked for when something is selected."
 }

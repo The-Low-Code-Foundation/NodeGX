@@ -43,7 +43,7 @@ export type { ExpressionPortNote, NotationMode, PortKind } from './utils/notatio
 // editor in the app reads it, which is what keeps the four call sites identical
 // without any of them being edited.
 export { setCodeAuthoringContext, getCodeAuthoringContext, EMPTY_AUTHORING_CONTEXT } from './authoringContext';
-export type { CodeAuthoringContext, AuthoringLibrary } from './authoringContext';
+export type { CodeAuthoringContext, AuthoringLibrary, AuthoringScript } from './authoringContext';
 // FUN-003: and what it knows about the one node whose code is open. Written when
 // a code popout opens and cleared when it closes — a per-editor slot, unlike the
 // project surface above.

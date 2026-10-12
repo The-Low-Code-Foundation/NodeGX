@@ -7,7 +7,7 @@
  */
 const { sanitize, normalizeType, tooltipToText, assignDefined } = require('./sanitize');
 const { NOTES, EDITOR_ADAPTER_TYPES } = require('./dynamic-port-notes');
-const { deriveEncoding, RETYPES_DECLARED_PORTS } = require('./derive-encoding');
+const { deriveEncoding, withDerivedRules, RETYPES_DECLARED_PORTS } = require('./derive-encoding');
 
 // 1.1.0 — SUB-013 adds `parameterEncoding` to every node with dynamic ports. Additive, so a
 // minor bump: a reader written against 1.0.0 sees an unknown key and is otherwise unaffected.
@@ -182,8 +182,21 @@ function detectDynamism(typeName, metadata, rawDef) {
 
 /**
  * @param records Map<typeName, { metadata, rawDef, providedBy, environments:Set }>
- * @param extras { typecasts, packageVersions }
+ * @param extras { typecasts, packageVersions, nodePickerTypes, exportedTypes }
+ *   `exportedTypes`: name -> the runtime's own node library export of that type (`nodelibraryexport.ts`, browser
+ *   first, then cloud) — where the child/parent rules are read from, rather than derived again here.
  */
+/** The export's child/parent fields for one type, as the catalog writes them (absent rather than false). */
+function exportedChildRules(exported) {
+  return {
+    singleton: exported.singleton || undefined,
+    allowAsChild: exported.allowAsChild ? true : undefined,
+    allowChildrenWithCategory: sanitize(exported.allowChildrenWithCategory),
+    haveComponentChildren: sanitize(exported.haveComponentChildren),
+    allowAsExportRoot: exported.allowAsExportRoot
+  };
+}
+
 function buildCatalog(records, extras) {
   const nodes = [];
   const portTypeNames = new Set();
@@ -235,22 +248,20 @@ function buildCatalog(records, extras) {
       node.ssr = metadata.ssr ? sanitize(metadata.ssr) : { compat: 'safe' };
     }
 
-    // Mirror the effective child/parent rules the editor derives in
-    // nodelibraryexport.js: Visual nodes may be placed as children and used
-    // as export roots unless overridden; allowChildren implies Visual children.
-    let allowChildrenWithCategory;
-    if (metadata.allowChildren) allowChildrenWithCategory = ['Visual'];
-    if (metadata.allowChildrenWithCategory) allowChildrenWithCategory = metadata.allowChildrenWithCategory;
+    // The child/parent rules are the runtime export's own answer for this type (P107 s89, R23): until s89 this file
+    // mirrored `nodelibraryexport.ts` by hand, and the mirror never carried `haveComponentChildren`.
+    const exported = extras.exportedTypes.get(typeName) || {};
 
     assignDefined(node, {
       docs: metadata.docs,
       searchTags: sanitize(metadata.searchTags),
       module: metadata.module,
-      singleton: metadata.singleton || undefined,
-      allowAsChild: isVisual || metadata.allowAsChild ? true : undefined,
-      allowChildrenWithCategory: sanitize(allowChildrenWithCategory),
-      allowAsExportRoot:
-        metadata.allowAsExportRoot !== undefined ? metadata.allowAsExportRoot : isVisual ? true : undefined,
+      ...exportedChildRules(exported),
+      // The port whose value titles the card (P107 s90, R24), as the export carries it: the agent names a node by it.
+      usePortAsLabel: exported.usePortAsLabel,
+      portLabelTruncationMode: exported.portLabelTruncationMode,
+      // For a deprecated type, the one that replaced it (P107 s90, R25): the node's own definition says it.
+      replacedBy: exported.replacedBy,
       useVariants: metadata.useVariants || undefined,
       visualStates: sanitize(metadata.visualStates)
     });
@@ -261,7 +272,10 @@ function buildCatalog(records, extras) {
     // SUB-013 — what the dynamic ports are *called*. `dynamicPorts.description` says they exist;
     // without this an author has prose and no way to write a key. Null for nodes with no dynamic
     // ports; never absent for nodes that have them, so a gap cannot pass for "nothing to say".
-    node.parameterEncoding = deriveEncoding(typeName, metadata, rawDef, node.dynamicPorts);
+    node.parameterEncoding = withDerivedRules(
+      deriveEncoding(typeName, metadata, rawDef, node.dynamicPorts),
+      metadata.dynamicports
+    );
 
     nodes.push(node);
   }
@@ -279,13 +293,22 @@ function buildCatalog(records, extras) {
     providedBy: 'noodl-editor',
     ssr: { compat: 'safe' },
     shortDesc: 'Placeholder marking where children given to an instance of this component are inserted.',
-    allowAsChild: true,
+    ...exportedChildRules(extras.exportedTypes.get('Component Children') || {}),
     inputs: [],
     outputs: [],
     dynamicPorts: null,
     parameterEncoding: null
   });
   nodes.sort((a, b) => (a.typeName < b.typeName ? -1 : a.typeName > b.typeName ? 1 : 0));
+
+  // R25: a successor must be a type an author can still add, or the warning that names it sends them somewhere closed.
+  const byName = new Map(nodes.map((n) => [n.typeName, n]));
+  for (const n of nodes) {
+    if (n.replacedBy === undefined) continue;
+    const next = byName.get(n.replacedBy);
+    if (!n.isDeprecated) throw new Error(`${n.typeName} names replacedBy "${n.replacedBy}" but is not deprecated`);
+    if (!next || next.isDeprecated) throw new Error(`${n.typeName} is replaced by "${n.replacedBy}", which is ${next ? 'deprecated too' : 'not a registered type'}`);
+  }
 
   return {
     catalogFormatVersion: CATALOG_FORMAT_VERSION,

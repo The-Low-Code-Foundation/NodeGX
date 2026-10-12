@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "89e6fce7-19dc-5a5e-a7ff-f4fd5b31a4c5",
+  "name": "Thread",
+  "path": "/#__cloud__/shared/Thread",
+  "type": "cloud",
+  "created": "2026-10-01T18:00:00.000Z",
+  "modified": "2026-10-01T18:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The rules of a thread between a learner and their coach, once: the anchor vocabulary, the 4,000-character refusal, the subject, and who marks what read. All four thread functions hand it one request (TASK-L186)."
+}

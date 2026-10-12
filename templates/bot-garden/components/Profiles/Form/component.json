@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "548e1d5c-9ad5-58f9-802b-8eb1da95ac08",
+  "name": "Form",
+  "path": "/Profiles/Form",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The new-player form: a name, the age band, the language and the robot’s name. Reset writes the defaults (band 10–12, the current language, Pip). Publishes Create with every field, or Cancel."
+}

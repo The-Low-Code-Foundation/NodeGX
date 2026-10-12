@@ -1,4 +1,4 @@
-# @noodl/mcp — NodeGX MCP Server
+# @nodegx/mcp — NodeGX MCP Server
 
 A [Model Context Protocol](https://modelcontextprotocol.io) server that exposes
 NodeGX (OpenNoodl) **v2 project directories** to external AI agents: open,
@@ -8,6 +8,21 @@ whole-project context.
 The design goal (Phase 13, Gate G1): *an agent can author a correct new page
 having read only that page's parent, the relevant slice of the node catalog,
 and the validator's feedback — never the entire project.*
+
+## Install
+
+The simplest start is `npm create nodegx my-apps`. It writes one file, `my-apps/.mcp.json`. That file tells Claude Code
+to start this server when you run `claude` in the folder.
+
+Any other MCP client can start the server itself over stdio:
+
+```bash
+npx -y @nodegx/mcp --allow-writes
+```
+
+With no project folder the server starts in bootstrap mode (below). Put a project folder before `--allow-writes` to
+serve that project. The rest of this README runs the server from a checkout of the NodeGX repository, where the same
+server is `node <path-to>/noodl-mcp.cjs`.
 
 ## Quick start
 
@@ -143,6 +158,7 @@ Every tool accepts either form; responses carry both.
 | `get_node_type` | Full enriched entries (ports + semantics, whenToUse, runtime behavior, example ids) for up to 8 named types. |
 | `list_examples` / `get_example` | Browse and fetch validated example graph fragments. |
 | `validate_component` / `validate_project` | SUB-006 semantic diagnostics on demand (`strict` promotes unknown types to errors). |
+| `drive_page` | P109 ISL-021 (deferred, `explore` group) — render the project from disk in a headless browser and run a step list on it (each call a fresh browser): `tap`, `type` (appends; `replace` types over; a field's placeholder is a target), `key`, `wait_for`, `read` (text, an app Variable, localStorage, the URL, an expression; with `expect`), `navigate`, `viewport`, `screenshot`, `seed_storage` (pairs, or an `edit` of a saved value in place; written again at the next load before the app runs, so the app's own save cannot overwrite it), `clear_storage`, `stub_route` (answers a path with canned JSON or text; stubs at the head of the list meet the page's first load; `read: {stub}` gives hits and the last body). One row per step and a PASSED/FAILED headline; a tap is a real pointer press, refused when something covers the target (naming what a finger would hit); the first failing step stops the run. Reports whether the page was visible and had WebGL2. Runner: `scripts/devtools/drive-steps.js`, beside the render harness (`NODEGX_DRIVE_CLI` overrides). |
 | `list_projects` | BST-006 — the NodeGX projects this machine has opened, from the launcher's own list (read, never written). Legacy ones are marked rather than dropped; directories that no longer exist are counted, not listed. Resident in [bootstrap mode](#bootstrap-mode-no-project-yet); deferred to the `project` group when a project is bound, because a bound server cannot be repointed. |
 
 ### Backend permissions — read (always available)
@@ -169,6 +185,7 @@ own `secrets.json`). See [BAK-003](../../docs/runtime/BACKEND-ACCESS-CONTROL.md)
 | `create_component` | New component from nodes/connections. Validated before writing. |
 | `update_component` | One component change: full `set` replacement **or** a batch of `operations` (`add_node`, `update_node`, `remove_node`, `add_connection`, `remove_connection`, `set_visual_roots`, `set_ports`, `set_component_info`). Supports `if_revision`. |
 | `delete_component` | Refuses while referenced (lists usages) unless `force`. |
+| `set_project_settings` | P109 ISL-016 (deferred, `project` group) — the app's `name`, its project settings (`htmlTitle`, `navigationPathType`, `bodyScroll`, `headCode`, the two Repeater switches) and its `home`: the component the project starts from, resolved as the editor's "Make home" resolves it (its first top-level visual node that is not a Page). **Overwrites** and answers `was` → `now` per field; an unknown setting or a component with no visual root is refused by name and nothing is written; a request that changes nothing writes nothing. `get_project_info.rootComponent` reads the home from `rootNodeId`, as the editor does. |
 | `create_plan` / `stage_plan_operation` / `apply_plan` / `discard_plan` | AIX-011 project-scope staging: declare a multi-component change as an ordered plan (creates before the updates that use them), stage each operation's graph **in memory** — validated against the project *plus* the plan's other staged operations, so an update may instantiate a sibling create — then `apply_plan` writes the complete set at once. Skips are the explicit partial apply and must be dependency-closed; discarding (or never applying) leaves the project byte-identical. Doc operations are plannable but refuse to apply until the project-docs write path (AIX-009) lands. Plans live in the server process. |
 | `provision_backend` / `stop_backend` | AAQ-011/F13 — **create, start and bind a backend for this project**, pre-seeding the collections you name, so an external agent can build a full-stack app end to end. Reuses this project's backend of the same name rather than making a second, adopts it if already running, and refuses (changing nothing) if the project already points elsewhere. ⚠️ The one effect here that is not undoable, which is why it is a tool of its own and not a plan operation: `apply_plan` promises all-or-nothing, and a running process and a created database are neither. Lifecycle: the backend carries `--parent-pid`, the owner heartbeats a durable record, and a `noodl-mcp` that is killed outright has its backends reaped by the next one to start. |
 | `set_collection_permissions` / `reset_collection_permissions` | Lock/open a collection (per-op rules + creator-owns), or revert to defaults. Rejected with the reason on a malformed rule or a system collection. |
@@ -263,9 +280,9 @@ and bundled by esbuild — the same single source of truth the editor uses (see
 ## Development
 
 ```bash
-npm test --workspace @noodl/mcp        # jest (29 tests, incl. end-to-end MCP client)
-npm run typecheck --workspace @noodl/mcp
-npm run build --workspace @noodl/mcp   # esbuild → dist/noodl-mcp.cjs
+npm test --workspace @nodegx/mcp        # jest (29 tests, incl. end-to-end MCP client)
+npm run typecheck --workspace @nodegx/mcp
+npm run build --workspace @nodegx/mcp   # esbuild → dist/noodl-mcp.cjs
 ```
 
 ## Current limitations
@@ -278,3 +295,8 @@ npm run build --workspace @noodl/mcp   # esbuild → dist/noodl-mcp.cjs
   (~126 KB for 7 types in the SUB-010 demo, and the host's "overflow saved to a
   file" fallback is useless to a filesystem-less agent). Ask for 1–2 types per
   call until a compact/ports-only projection is added (SUB-010 friction report).
+
+## Licence
+
+The server is licensed GPL-3.0-only because it bundles code from the NodeGX editor. The source is in
+[The-Low-Code-Foundation/NodeGX](https://github.com/The-Low-Code-Foundation/NodeGX), under `packages/noodl-mcp`.

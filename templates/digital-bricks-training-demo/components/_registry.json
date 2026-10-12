@@ -1,38 +1,38 @@
 {
   "$schema": "https://opennoodl.dev/schemas/registry-v2.json",
   "version": 1,
-  "lastUpdated": "2026-09-23T14:03:10.767Z",
+  "lastUpdated": "2026-10-01T20:00:00.000Z",
   "components": {
     "App": {
       "path": "App",
       "type": "root",
-      "nodeCount": 14,
-      "connectionCount": 18,
-      "modified": "2026-09-23T13:54:30.691Z",
+      "nodeCount": 16,
+      "connectionCount": 20,
+      "modified": "2026-10-01T20:00:00.000Z",
       "created": "2026-09-19T20:51:44.992Z"
     },
     "Pages/Home": {
       "path": "Pages/Home",
       "type": "page",
-      "nodeCount": 34,
+      "nodeCount": 33,
       "connectionCount": 25,
-      "modified": "2026-09-23T14:03:10.767Z",
+      "modified": "2026-10-01T08:56:14.350Z",
       "created": "2026-09-19T20:51:44.992Z"
     },
     "Logic/Sections for step": {
       "path": "Logic/Sections for step",
       "type": "logic",
       "nodeCount": 3,
-      "connectionCount": 14,
-      "modified": "2026-09-20T18:13:08.767Z",
+      "connectionCount": 17,
+      "modified": "2026-09-30T15:30:00.000Z",
       "created": "2026-09-19T21:09:14.437Z"
     },
     "Lesson/Section row": {
       "path": "Lesson/Section row",
       "type": "visual",
-      "nodeCount": 3,
-      "connectionCount": 7,
-      "modified": "2026-09-20T18:16:08.053Z",
+      "nodeCount": 8,
+      "connectionCount": 22,
+      "modified": "2026-09-30T15:30:00.000Z",
       "created": "2026-09-19T21:09:24.307Z"
     },
     "Lesson/Step chip": {
@@ -46,25 +46,25 @@
     "Lesson/Step close": {
       "path": "Lesson/Step close",
       "type": "visual",
-      "nodeCount": 8,
-      "connectionCount": 6,
-      "modified": "2026-09-19T21:14:19.087Z",
+      "nodeCount": 15,
+      "connectionCount": 19,
+      "modified": "2026-09-30T15:30:00.000Z",
       "created": "2026-09-19T21:09:41.072Z"
     },
     "Pages/Lesson": {
       "path": "Pages/Lesson",
       "type": "page",
-      "nodeCount": 36,
-      "connectionCount": 34,
-      "modified": "2026-09-23T13:43:46.166Z",
+      "nodeCount": 40,
+      "connectionCount": 45,
+      "modified": "2026-09-30T15:30:00.000Z",
       "created": "2026-09-19T21:11:05.603Z"
     },
     "Pages/Course": {
       "path": "Pages/Course",
       "type": "page",
-      "nodeCount": 52,
-      "connectionCount": 69,
-      "modified": "2026-09-23T13:44:39.931Z",
+      "nodeCount": 58,
+      "connectionCount": 75,
+      "modified": "2026-10-01T22:00:00.000Z",
       "created": "2026-09-19T21:11:24.317Z"
     },
     "Pages/Palette": {
@@ -86,9 +86,9 @@
     "Course/Timeline row": {
       "path": "Course/Timeline row",
       "type": "visual",
-      "nodeCount": 6,
-      "connectionCount": 15,
-      "modified": "2026-09-20T12:51:55.909Z",
+      "nodeCount": 21,
+      "connectionCount": 74,
+      "modified": "2026-10-01T22:00:00.000Z",
       "created": "2026-09-20T12:49:24.850Z"
     },
     "Logic/Standing": {
@@ -126,8 +126,8 @@
     "Data/Strings": {
       "path": "Data/Strings",
       "type": "logic",
-      "nodeCount": 7,
-      "connectionCount": 23,
+      "nodeCount": 8,
+      "connectionCount": 26,
       "modified": "2026-09-20T18:11:53.927Z",
       "created": "2026-09-20T18:11:53.927Z"
     },
@@ -158,8 +158,8 @@
     "Pages/People": {
       "path": "Pages/People",
       "type": "page",
-      "nodeCount": 33,
-      "connectionCount": 25,
+      "nodeCount": 31,
+      "connectionCount": 24,
       "modified": "2026-09-23T13:44:57.668Z",
       "created": "2026-09-21T09:35:02.402Z"
     },
@@ -222,7 +222,7 @@
     "Pages/Learner": {
       "path": "Pages/Learner",
       "type": "page",
-      "nodeCount": 59,
+      "nodeCount": 58,
       "connectionCount": 103,
       "modified": "2026-09-23T13:45:08.603Z",
       "created": "2026-09-21T13:01:49.484Z"
@@ -270,8 +270,8 @@
     "Data/Roster": {
       "path": "Data/Roster",
       "type": "logic",
-      "nodeCount": 4,
-      "connectionCount": 5,
+      "nodeCount": 5,
+      "connectionCount": 6,
       "modified": "2026-09-23T13:39:40.355Z",
       "created": "2026-09-21T09:32:10.011Z"
     },
@@ -279,7 +279,7 @@
       "path": "Data/Programme",
       "type": "visual",
       "nodeCount": 6,
-      "connectionCount": 21,
+      "connectionCount": 22,
       "modified": "2026-09-23T13:40:48.483Z",
       "created": "2026-09-20T12:49:24.848Z"
     },
@@ -302,7 +302,7 @@
   },
   "stats": {
     "totalComponents": 37,
-    "totalNodes": 414,
-    "totalConnections": 607
+    "totalNodes": 451,
+    "totalConnections": 720
   }
 }

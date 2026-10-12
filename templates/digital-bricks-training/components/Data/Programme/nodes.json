@@ -216,10 +216,15 @@
           "name": "learnerId",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "refresh",
+          "plug": "output",
+          "type": "signal"
         }
       ],
       "metadata": {
-        "comment": "`reader` has NO DEFAULT, on Data/Strings' `audience` precedent (TASK-L163): an instance that does not say who is reading would otherwise ask for the wrong programme. `learnerId` is read only when the reader is a coach — a learner's own programme takes no parameter at all, so nothing a learner's page sends can name somebody else (L170 §0.6)."
+        "comment": "`reader` has NO DEFAULT, on Data/Strings' `audience` precedent (TASK-L163): an instance that does not say who is reading would otherwise ask for the wrong programme. `learnerId` is read only when the reader is a coach — a learner's own programme takes no parameter at all, so nothing a learner's page sends can name somebody else (L170 §0.6). TASK-L184: `refresh` asks again for a named learner (the coach's page, after their path is saved). It goes straight to the learnerProgramme call, whose learnerId is already set, so pr_ask stays value-driven (L165)."
       }
     },
     {

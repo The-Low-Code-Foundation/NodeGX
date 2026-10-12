@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3a597373-946c-5b49-8aee-6c18e03f12ce",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tbIn",
+      "fromProperty": "label",
+      "toId": "tbText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tbIn",
+      "fromProperty": "selected",
+      "toId": "tbIsOn",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "tbIsOn",
+      "fromProperty": "ontrue",
+      "toId": "tbStates",
+      "toProperty": "to-on"
+    },
+    {
+      "fromId": "tbIsOn",
+      "fromProperty": "onfalse",
+      "toId": "tbStates",
+      "toProperty": "to-off"
+    },
+    {
+      "fromId": "tbStates",
+      "fromProperty": "bg",
+      "toId": "tbPill",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "tbStates",
+      "fromProperty": "fg",
+      "toId": "tbText",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "tbPill",
+      "fromProperty": "onClick",
+      "toId": "tbOut",
+      "toProperty": "clicked"
+    }
+  ]
+}

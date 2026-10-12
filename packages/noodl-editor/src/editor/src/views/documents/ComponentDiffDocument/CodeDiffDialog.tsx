@@ -46,7 +46,7 @@ export function CodeDiffDialog({ diff, onClose }: CodeDiffDialogProps) {
     >
       <Container isFill direction={ContainerDirection.Vertical}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', zIndex: 100 }}>
-          <IconButton icon={IconName.Close} onClick={onClose} />
+          <IconButton ariaLabel="Close" icon={IconName.Close} onClick={onClose} />
         </div>
         <CodeDiffView original={anyToString(diff.original)} modified={anyToString(diff.modified)} height="80vh" />
       </Container>

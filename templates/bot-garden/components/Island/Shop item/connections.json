@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f5d7b7f5-6a40-5cd4-80d2-6ed9fc86c249",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "siIn",
+      "fromProperty": "icon",
+      "toId": "siPic",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "siIn",
+      "fromProperty": "price",
+      "toId": "siPrice",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "siIn",
+      "fromProperty": "name",
+      "toId": "siName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "siIn",
+      "fromProperty": "line",
+      "toId": "siLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "siIn",
+      "fromProperty": "tag",
+      "toId": "siTag",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "siIn",
+      "fromProperty": "cls",
+      "toId": "siCard",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "siIn",
+      "fromProperty": "hasTag",
+      "toId": "siHasTag",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "siHasTag",
+      "fromProperty": "ontrue",
+      "toId": "siTagState",
+      "toProperty": "to-shown"
+    },
+    {
+      "fromId": "siHasTag",
+      "fromProperty": "onfalse",
+      "toId": "siTagState",
+      "toProperty": "to-none"
+    },
+    {
+      "fromId": "siTagState",
+      "fromProperty": "shown",
+      "toId": "siTag",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "siCard",
+      "fromProperty": "onClick",
+      "toId": "siOut",
+      "toProperty": "chosen"
+    },
+    {
+      "fromId": "siIn",
+      "fromProperty": "id",
+      "toId": "siOut",
+      "toProperty": "id"
+    }
+  ]
+}

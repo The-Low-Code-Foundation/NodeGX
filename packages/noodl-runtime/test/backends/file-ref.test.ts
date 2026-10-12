@@ -281,7 +281,9 @@ describe('the Parse wire, through the normaliser', () => {
 
     FakeXHR.instances[0].finish(403, { error: 'This file is private.', code: 119 });
 
-    expect(errors).toEqual([{ error: 'This file is private.', code: 119 }]);
+    // P107-C51 (P109 ISL-030, ruled "Send the real status"): the HTTP status is put in beside the server's body — the
+    // body's `code` is Parse's (119), not the status the nodes promise. Before, the envelope had no `status` at all.
+    expect(errors).toEqual([{ error: 'This file is private.', code: 119, status: 403 }]);
   });
 });
 

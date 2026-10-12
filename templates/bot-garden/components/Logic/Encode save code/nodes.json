@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "549dcaea-c475-5af4-8e15-291c705c5be0",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "encodesavecodeIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "encodesavecodeFn",
+      "type": "JavaScriptFunction",
+      "label": "Encode save code",
+      "parameters": {
+        "functionScript": "var { FIRST_ROBOT_ID, SAVE_VERSION, TRICK_KEYS, modelOf, toB64 } = Scripts.save;\nvar model = modelOf(Inputs.model);\nvar packed = { v: SAVE_VERSION, f: [model.family.id, model.family.created], p: [], a: model.island.activeId };\nfor (var i = 0; i < model.profiles.length; i++) {\n  var p = model.profiles[i], tr = '';\n  for (var k = 0; k < TRICK_KEYS.length; k++) tr += p.tricks[TRICK_KEYS[k]] === 'bloom' ? 'b' : p.tricks[TRICK_KEYS[k]] === 'sprout' ? 's' : '-';\n  // IG-004: the plots as [requestId, program, robotId, wonAt] rows (sorted: the same island is the same code), the robots as ids.\n  var plots = [];\n  // P108 IW-006 (v5): a plot's live job rides as a fifth field, only when it has one.\n  for (var id in p.island.plots) { var pr = [id, p.island.plots[id].program, p.island.plots[id].robotId, p.island.plots[id].wonAt]; if (p.island.plots[id].live) pr.push(p.island.plots[id].live); plots.push(pr); }\n  plots.sort(function (x, y) { return x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : 0; });\n  var robots = [];\n  // IG-005: r1 (and any row with nothing of its own) is its id, as in session 3; a lent robot is [id, kind, name, color, eye, hat].\n  // P108 IW-006 (v5): a robot with a bigger brain is always a row, its brain the seventh field.\n  for (var r = 0; r < p.island.robots.length; r++) {\n    var rb = p.island.robots[r], rr = (rb.id === FIRST_ROBOT_ID || !rb.kind) && !rb.brain && !rb.program && !rb.helps ? rb.id : [rb.id, rb.id === FIRST_ROBOT_ID ? '' : rb.kind || '', rb.name || '', rb.color || '', rb.eye || '', rb.hat || ''];\n    // P108 IW-008 (lane C): the program it carries the eighth field, the plot it helps on the ninth (null where a later one is set).\n    if ((rb.brain || rb.program || rb.helps) && Array.isArray(rr)) rr.push(rb.brain || null);\n    if ((rb.program || rb.helps) && Array.isArray(rr)) rr.push(rb.program || null);\n    if (rb.helps && Array.isArray(rr)) rr.push(rb.helps);\n    robots.push(rr);\n  }\n  var row = [p.id, p.name, p.band, p.lang, p.face, p.robot.name, p.robot.color, p.robot.eye, p.robot.hat, tr, p.stickers, p.hats, p.island.done, plots, robots];\n  // P108 IW-001 F8: row 15, the cards seen (null when none). P108 IW-006 (v5): row 16 the shells [earned, spent], row 17 owned.\n  row.push(p.cardsSeen && p.cardsSeen.length ? p.cardsSeen : null, [p.shells.earned, p.shells.spent], p.owned);\n  // P108 IW-007 (s5 base): row 18, her land — only when something stands on it (a code without one is as before).\n  if (p.island.land) row.push(p.island.land);\n  packed.p.push(row);\n}\nvar code = 'BG1.' + toB64(JSON.stringify(packed));\nOutputs.code = code;\nOutputs.length = code.length;\n",
+        "uses": "save.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-code",
+          "displayName": "code",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-length",
+          "displayName": "length",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "encodesavecodeOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "code",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "length",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pending</title>
+<!--
+  P117 — Tchac-Boum: a chain-reaction machine on a wall, which is a NodeGX graph seen from the front.
+
+  The project is v2 files held in memory (`tchac/`, served as one map by serve.mjs). Every edit on this page — a part
+  moved, a part taken from the shelf, a string dragged between two parts, a dial turned, a part removed, a mission's
+  step — is a write through `V2ProjectStore` (P112 OWN-001), and the app is the files running on NodeGX's own runtime
+  (`@noodl/preview`'s in-page build, P112 OWN-004). Nothing here runs a node: the marbles on the strings and the faces
+  on the parts are the running app's own trace, and a mission's Vérifier plays the graph on a COPY of the files in a
+  second real app.
+
+  Two faces, one gesture: Mur (the machine on a brick wall, in three dimensions: a low-poly costume on a plank for every
+  part, rails between them, marbles that roll, a balloon that pops into shards — mur3d.js) and Circuit (the editor's
+  canvas look, the node's type and ports). Flip the wall and every part turns over in place: the same node, the same
+  wire, the same files. The part's element is pinned onto its plank (CSS3D), so the DOM the gate clicks is unchanged.
+
+    node serve.mjs → /tchac-boum.html   ?face=mur|circuit  ?demo (plays the three missions by itself)  ?set=node.param=value
+-->
+<style>
+:root {
+  --wall: #2a1f3d; --wall2: #1d1630; --bar: #16112a; --panel: rgba(22, 17, 42, 0.97); --rule: rgba(255, 240, 220, 0.12);
+  --fg: #fff4e6; --dim: #c9b8d9; --faint: #8f7fa3; --accent: #ffd166; --red: #ff3b30; --good: #5be38a; --bad: #ff7a7a;
+  --wood: #c48a4a; --wood2: #8a5a2b; --paper: #fff8ea; --ink: #2b2140;
+  --ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --wd: #45d08a; --ws: #35c3e8;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--wall); color: var(--fg); font: 14px/1.45 var(--ui); overflow: hidden;
+  background-image: radial-gradient(circle at 20% 10%, rgba(255,209,102,.08), transparent 40%), radial-gradient(circle at 80% 90%, rgba(255,59,48,.10), transparent 45%); }
+button, input, select, textarea { font: inherit; color: var(--fg); }
+button { background: #3a2d55; border: 1px solid var(--rule); border-radius: 10px; padding: 7px 12px; cursor: pointer; font-weight: 700; }
+button:hover { background: #4a3a6b; }
+button:disabled { opacity: .45; cursor: default; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary { background: var(--accent); color: var(--ink); border-color: transparent; }
+button.primary:hover { background: #ffe08a; }
+
+/* ---- the bar ---- */
+.bar { position: fixed; left: 0; right: 0; top: 0; z-index: 6; height: 52px; padding: 0 14px; display: flex; align-items: center; gap: 12px; background: var(--bar); border-bottom: 1px solid var(--rule); }
+.logo { font-weight: 900; letter-spacing: 2px; color: var(--accent); white-space: nowrap; }
+.logo small { color: var(--faint); font-weight: 500; letter-spacing: 0; margin-left: 8px; }
+.spacer { flex: 1; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; background: transparent; color: var(--dim); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--ink); }
+
+/* ---- the wall ---- */
+#stage { position: fixed; inset: 52px 0 0 0; overflow: hidden; touch-action: none; cursor: grab; }
+#stage.dragging { cursor: grabbing; }
+#stage.connecting { cursor: crosshair; }
+/* the room is WebGL (mur3d.js); the parts' elements are pinned onto their planks by the CSS3D renderer, above it */
+#stage canvas { pointer-events: auto; }
+
+/* ---- a part: two faces. The front is see-through: the plank and the costume are meshes behind it; the DOM keeps the text, the lamp and the button a finger (or a gate) presses ---- */
+.part { position: absolute; left: 0; top: 0; width: 220px; height: 150px; transform-style: preserve-3d; transition: transform .75s cubic-bezier(.4,0,.2,1); cursor: pointer; pointer-events: auto; }
+.part.fresh { animation: drop .6s cubic-bezier(.2,1.4,.4,1); }
+@keyframes drop { from { transform: translateY(-60px) scale(.6); opacity: 0; } }
+body.circuit .part { transform: rotateY(180deg); }
+.face { position: absolute; inset: 0; border-radius: 16px; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; }
+.face.mur { background: transparent; }
+.face.mur .plate { position: absolute; left: 10px; right: 10px; top: 10px; bottom: 36px; color: var(--ink); display: flex; align-items: center; justify-content: center; gap: 10px; }
+.face.mur .plate .big { font-size: 56px; line-height: 1; transition: transform .25s; }
+/* the text widgets sit on a mesh (the turnstile's housing, the chalkboard, the screen, the sign): no background of their own */
+.face.mur .plate .drum { position: absolute; left: 125px; top: 22px; width: 70px; height: 60px; display: grid; place-items: center; font: 800 44px/1 var(--mono); color: #ffe9c2; text-shadow: 0 2px 0 rgba(0,0,0,.6); }
+.face.mur .plate .drum.small { top: 30px; height: 44px; font-size: 28px; }
+.face.mur .plate .board { font: 700 22px/1.2 var(--mono); color: #fff; padding: 10px 14px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 0 rgba(0,0,0,.5); }
+.face.mur .plate .screen { font: 600 20px/1.2 var(--ui); color: #c9ffe8; padding: 8px 12px; max-width: 176px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 0 8px rgba(120,255,200,.6); }
+.face.mur .plate .sign { font: 700 30px/1.1 var(--ui); color: var(--ink); padding: 6px 14px; margin-top: -8px; }
+.face.mur .plate .sign.aside { position: absolute; right: 2px; top: 34px; font-size: 18px; color: #fff; }
+.face.mur .plate .bouton { width: 90px; height: 90px; border-radius: 50%; background: transparent; border: 0; cursor: pointer; }
+.face.mur .plate .bouton.petit { width: 60px; height: 60px; }
+.face.mur .label { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font-weight: 800; color: #fff4e6; text-shadow: 0 1px 0 rgba(0,0,0,.6); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 10px; }
+.face.mur .lamp { position: absolute; top: 14px; right: 14px; width: 12px; height: 12px; border-radius: 50%; background: #333; box-shadow: inset 0 0 2px #000; transition: background .2s, box-shadow .2s; }
+.face.mur .lamp.on { background: var(--good); box-shadow: 0 0 10px var(--good); }
+.face.mur .lamp.hot { background: var(--accent); box-shadow: 0 0 14px var(--accent); }
+.face.circuit { transform: rotateY(180deg); background: var(--c-base, #2b2a33); border: 1px solid var(--c-outline, #49485a); color: var(--c-text, #fff); font-size: 12px; }
+.face.circuit .head { background: var(--c-header, #3b3a4a); padding: 7px 12px; font-weight: 700; display: flex; justify-content: space-between; gap: 8px; }
+.face.circuit .head span { color: rgba(255,255,255,.65); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.face.circuit .rows { padding: 6px 0; }
+.face.circuit .row { display: flex; justify-content: space-between; padding: 2px 12px; font-family: var(--mono); font-size: 11.5px; white-space: nowrap; }
+.face.circuit .row .v { color: var(--accent); max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
+.face.circuit .row.in::before { content: "●"; color: var(--wd); margin-right: 6px; font-size: 8px; }
+.face.circuit .row.in.s::before { color: var(--ws); }
+.face.circuit .row.out::after { content: "●"; color: var(--wd); margin-left: 6px; font-size: 8px; }
+.face.circuit .row.out.s::after { color: var(--ws); }
+.part.sel .face { outline: 3px solid var(--accent); outline-offset: 2px; }
+.part.hot .lamp { background: var(--accent); box-shadow: 0 0 14px var(--accent); }
+.handle { position: absolute; top: 50%; right: -16px; width: 30px; height: 30px; margin-top: -15px; border-radius: 50%; background: var(--accent); border: 3px solid var(--ink); cursor: crosshair; box-shadow: 0 2px 6px rgba(0,0,0,.5); z-index: 2; display: grid; place-items: center; font-size: 14px; color: var(--ink); font-weight: 900; }
+.handle::after { content: "→"; }
+.inlet { position: absolute; top: 50%; left: -10px; width: 18px; height: 18px; margin-top: -9px; border-radius: 50%; background: #3a2d55; border: 3px solid var(--ink); }
+body.circuit .handle, body.circuit .inlet { transform: rotateY(180deg); }
+body.circuit .handle { right: auto; left: -16px; }
+body.circuit .inlet { left: auto; right: -10px; }
+.newtag { position: absolute; top: -12px; left: 12px; background: var(--good); color: var(--ink); font-size: 11px; font-weight: 900; padding: 2px 8px; border-radius: 10px; z-index: 3; }
+
+/* ---- the real app, in its window ---- */
+#appwin { position: fixed; right: 362px; bottom: 16px; z-index: 5; width: 236px; height: 422px; border-radius: 26px; overflow: hidden; box-shadow: 0 0 0 6px #0d0b16, 0 24px 60px rgba(0,0,0,.6); background: #1b1f3a; }
+#app { width: 380px; height: 680px; transform: scale(.62); transform-origin: 0 0; }
+#appwin .cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 6px 10px; font-size: 11px; color: var(--dim); background: rgba(13,11,22,.85); text-align: center; pointer-events: none; }
+#checkapp { position: fixed; left: 16px; bottom: 16px; z-index: 5; width: 190px; height: 340px; border-radius: 22px; overflow: hidden; box-shadow: 0 0 0 4px var(--accent), 0 16px 40px rgba(0,0,0,.6); background: #1b1f3a; }
+#checkframe { width: 380px; height: 680px; transform: scale(.5); transform-origin: 0 0; }
+#checklbl { position: absolute; left: 0; right: 0; top: 0; padding: 6px 8px; font-size: 11px; color: var(--ink); background: var(--accent); text-align: center; }
+
+/* ---- the panel ---- */
+#panel { position: fixed; top: 52px; right: 0; bottom: 0; width: 346px; z-index: 5; background: var(--panel); border-left: 1px solid var(--rule); display: flex; flex-direction: column; }
+#panel .tabs { display: flex; border-bottom: 1px solid var(--rule); }
+#panel .tabs button { flex: 1; border: 0; border-radius: 0; background: transparent; color: var(--dim); padding: 10px 6px; font-size: 13px; }
+#panel .tabs button[aria-selected="true"] { color: var(--accent); box-shadow: inset 0 -3px 0 var(--accent); }
+#panel .body { flex: 1; overflow: auto; padding: 14px; }
+.lead { color: var(--dim); margin: 0 0 12px; }
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 1.4px; color: var(--faint); margin: 14px 0 6px; }
+.mission { border: 1px solid var(--rule); border-radius: 14px; padding: 12px; margin-bottom: 12px; background: rgba(255,255,255,.03); }
+.mission.done { border-color: var(--good); }
+.mission.locked { opacity: .55; }
+.mission h3 { margin: 0 0 6px; font-size: 15px; display: flex; gap: 10px; align-items: center; }
+.mission h3 b { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--ink); font-size: 13px; }
+.mission.done h3 b { background: var(--good); }
+.mission p { margin: 0 0 8px; color: var(--dim); }
+.mission details { margin: 6px 0; color: var(--dim); } .mission summary { cursor: pointer; color: var(--fg); font-weight: 600; }
+.steps { margin: 6px 0 0; padding-left: 18px; } .steps li.did { color: var(--good); } .steps li.on { color: var(--accent); font-weight: 700; }
+.verdict { margin: 8px 0; padding: 8px 10px; border-radius: 10px; font-weight: 600; }
+.verdict.ok { background: rgba(91,227,138,.15); color: var(--good); } .verdict.no { background: rgba(255,122,122,.15); color: var(--bad); } .verdict.run { background: rgba(255,209,102,.15); color: var(--accent); }
+.verdict small { display: block; font-weight: 400; color: var(--dim); margin-top: 4px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.shelf { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.shelf button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 8px; background: linear-gradient(180deg, var(--wood), var(--wood2)); border: 2px solid #5a3a1b; border-radius: 14px; color: #fff4e6; text-shadow: 0 1px 0 rgba(0,0,0,.5); }
+.shelf button .ico { font-size: 34px; } .shelf button small { font-weight: 500; color: #ffe9c2; font-size: 11px; text-align: center; }
+.field { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; }
+.field label { font-size: 12px; color: var(--dim); }
+.field input, .field select { background: #241b3a; border: 1px solid var(--rule); border-radius: 8px; padding: 7px 9px; }
+.port { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; border-bottom: 1px dashed var(--rule); font-size: 13px; }
+.port .v { color: var(--accent); font-family: var(--mono); font-size: 12px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wire { display: flex; justify-content: space-between; gap: 6px; align-items: center; padding: 5px 0; border-bottom: 1px dashed var(--rule); font-size: 12.5px; }
+.wire button { padding: 2px 8px; font-size: 12px; }
+.danger { background: #5a1d1d; border-color: #7a2a2a; }
+.search { width: 100%; box-sizing: border-box; background: #241b3a; border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; }
+.lib button { display: block; width: 100%; text-align: left; margin: 4px 0; background: #2d2345; }
+
+/* ---- popups ---- */
+#conpop { position: fixed; z-index: 8; width: 380px; background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+#conpop .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0; }
+#conpop .col { display: flex; flex-direction: column; gap: 6px; }
+#conpop .col button { text-align: left; font-weight: 600; }
+#conpop .col button.sig { border-left: 4px solid var(--ws); } #conpop .col button:not(.sig) { border-left: 4px solid var(--wd); }
+#conpop .col button[aria-pressed="true"] { background: var(--accent); color: var(--ink); }
+#conpop .foot { display: flex; justify-content: space-between; align-items: center; color: var(--dim); font-size: 12px; gap: 8px; }
+#toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); z-index: 9; background: var(--accent); color: var(--ink); padding: 10px 16px; border-radius: 12px; font-weight: 700; opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; max-width: 60vw; }
+#toast.on { opacity: 1; transform: translate(-50%, 0); }
+#cap { position: fixed; left: 16px; top: 66px; z-index: 4; max-width: 420px; color: var(--dim); font-size: 13px; pointer-events: none; }
+#cap b { color: var(--fg); display: block; font-size: 15px; }
+#err { position: fixed; inset: 60px 20px auto 20px; z-index: 10; background: #5a1d1d; padding: 12px; border-radius: 10px; font-family: var(--mono); white-space: pre-wrap; }
+@media (max-width: 900px) { #panel { width: 300px; } #appwin { right: 316px; width: 190px; height: 340px; } #app { transform: scale(.5); } }
+</style>
+
+<div class="bar">
+  <div class="logo">TCHAC-BOUM <small id="projName"></small></div>
+  <div class="seg" role="group" aria-label="Face du mur">
+    <button type="button" data-face="mur" aria-pressed="true">Le mur</button>
+    <button type="button" data-face="circuit" aria-pressed="false">Le circuit</button>
+  </div>
+  <button type="button" id="fit">Tout voir</button>
+  <div class="spacer"></div>
+  <button type="button" id="reset" title="Recharge la page: le projet repart de ses fichiers">Recommencer</button>
+</div>
+<div id="cap"><b id="capH"></b><span id="capS"></span></div>
+<div id="stage"></div>
+<div id="appwin"><div id="app"></div><div class="cap">L'appli, en vrai — appuie sur le bouton</div></div>
+<div id="checkapp" hidden><div id="checkframe"></div><div id="checklbl"></div></div>
+<aside id="panel">
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" id="tab-missions" aria-selected="true">Missions <span id="mcount"></span></button>
+    <button type="button" role="tab" id="tab-shelf" aria-selected="false">L'étagère</button>
+    <button type="button" role="tab" id="tab-part" aria-selected="false">La pièce</button>
+  </div>
+  <div class="body" id="body-missions"></div>
+  <div class="body" id="body-shelf" hidden></div>
+  <div class="body" id="body-part" hidden></div>
+</aside>
+<div id="conpop" hidden></div>
+<div id="toast" role="status"></div>
+<div id="err" hidden></div>
+
+<script src="preview.js"></script>
+<script type="module">
+import { look, nodeScheme, wireColors } from './look.js';
+import { portsFor } from './specs.js';
+import { createWall } from './mur3d.js';
+
+const $ = (id) => document.getElementById(id);
+const say = (t) => { document.title = t; };
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = (ms) => new Promise((r) => setTimeout(r, reduce ? Math.min(ms, 80) : ms));
+const query = new URLSearchParams(location.search);
+const RUNTIME = new URL('runtime/', location.href).href;
+const W = 220, H = 150;
+try {
+
+/* ================= the project, held in memory; every edit is a write through the store ================= */
+const source = await (await fetch(`project/${query.get('project') || 'tchac'}.json`)).json();
+const files = NodegxPreview.memoryFiles(source);
+const store = new NodegxPreview.V2ProjectStore(files);
+const KEY = store.componentKeys().includes('App') ? 'App' : store.componentKeys()[0];
+function write(mutate) {
+  const c = store.readComponent(KEY);
+  mutate(c.files.nodes.nodes, c.files.connections.connections, c.files.nodes);
+  store.writeComponent(KEY, c.files, { ifRevision: c.revision });
+}
+const writeParam = (node, param, value) => write((ns) => {
+  const n = ns.find((x) => x.id === node);
+  if (value === undefined) { if (n.parameters) delete n.parameters[param]; }
+  else n.parameters = { ...(n.parameters ?? {}), [param]: value };
+});
+for (const s of query.getAll('set')) {
+  const [, node, param, raw] = s.match(/^([^.]+)\.([^=]+)=(.*)$/);
+  writeParam(node, param, isNaN(Number(raw)) ? raw : Number(raw));
+}
+
+/* ================= the real app ================= */
+const preview = await NodegxPreview.mountPreview($('app'), { runtimeBase: RUNTIME });
+const first = await preview.update(files.entries());
+if (first.status !== 'ok') setTimeout(() => toast(`L'appli ne s'affiche pas : ${first.message || first.status}`), 0);
+const library = preview.nodeLibrary || { nodetypes: [] };
+const libIndex = new Map((library.nodetypes || []).map((t) => [t.name, t]));
+
+/* ================= the graph, read from the files ================= */
+let nodes, conns, byId, visual, parentOf;
+const wireKey = (c) => `${c.fromId}.${c.fromProperty}>${c.toId}.${c.toProperty}`;
+function readGraph() {
+  const comp = store.readComponent(KEY).files;
+  nodes = comp.nodes.nodes;
+  conns = comp.connections.connections;
+  byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
+  visual = new Set(); parentOf = {};
+  const walk = (id, parent) => { if (!byId[id] || visual.has(id)) return; visual.add(id); if (parent) parentOf[id] = parent; for (const c of byId[id].children || []) walk(c, id); };
+  for (const r of comp.nodes.visualRoots || []) walk(r, null);
+}
+readGraph();
+/** The parts on the wall: every node but a Group (a box that holds screen parts is the board itself, not a part). */
+const shown = () => nodes.filter((n) => n.type !== 'Group').map((n) => n.id);
+
+/* ================= ports: the spec's where the type has one, else the runtime's library; French nicknames on top ================= */
+const tname = (t) => (typeof t === 'object' && t !== null ? t.name : t) ?? '*';
+const typeName = (type) => libIndex.get(type)?.displayNodeName || libIndex.get(type)?.displayName || ({ 'net.noodl.controls.button': 'Button' })[type] || type;
+const labelOf = (id) => byId[id]?.label || typeName(byId[id]?.type);
+const libPorts = (type, plug) => (libIndex.get(type)?.ports || []).filter((p) => p.plug === plug || p.plug === 'input/output').map((p) => ({
+  name: p.name, label: p.displayName || p.name, type: tname(p.type), signal: tname(p.type) === 'signal', default: p.default,
+  enums: Array.isArray(p.type?.enums) ? p.type.enums.map((e) => (typeof e === 'object' ? e.value : e)) : undefined, group: p.group
+}));
+// what a part's connectors are called on the wall; anything not here keeps the spec's own name
+const FR = {
+  'Counter': { increase: 'une bille entre (+1)', decrease: 'une bille sort (−1)', reset: 'remettre à zéro', currentCount: 'le compte', countChanged: 'ça vient de compter', startValue: 'compte de départ', limitsEnabled: 'avec limites', limitsMin: 'minimum', limitsMax: 'maximum' },
+  'Timer': { start: 'lâcher la bille', restart: 'relâcher', stop: 'stop', duration: 'durée de la descente (ms)', startDelay: 'attente avant (ms)', timerFinished: 'arrivée en bas', timerStarted: 'départ' },
+  'Switch': { on: 'allumer', off: 'éteindre', flip: 'basculer', state: 'allumé ?', switched: 'a changé', switchedToOn: "vient de s'allumer", switchedToOff: "vient de s'éteindre", onFromStart: 'allumé au départ' },
+  'Expression': { expression: 'la formule', result: 'le résultat', isTrue: 'vrai ?', isFalse: 'faux ?', isTrueEv: 'si vrai →', isFalseEv: 'si faux →', run: 'calculer', evaluateAtLoad: 'calculer au départ', asString: 'en texte', asNumber: 'en nombre', asBoolean: 'en vrai/faux', error: 'erreur' },
+  'Repeat': { interval: 'toutes les (ms)', start: 'démarrer', stop: 'stop', tick: 'tic !', count: 'nombre de tics' },
+  'Boolean To String': { input: 'vrai ou faux ?', trueString: 'si vrai, écrire', falseString: 'si faux, écrire', currentValue: 'le texte', inputChanged: 'a changé' },
+  'String Format': { format: 'le modèle', formatted: 'le texte' },
+  'Condition': { condition: 'vrai ou faux ?', eval: 'décider', ontrue: 'si vrai →', onfalse: 'si faux →', result: 'vrai ?', isfalse: 'faux ?' },
+  'Inverter': { value: 'entrée', result: 'le contraire' },
+  'net.noodl.controls.button': { onClick: 'clic !', label: "l'étiquette" },
+  'Text': { text: 'le texte' }
+};
+const fr = (type, name, fallback) => FR[type]?.[name] ?? fallback;
+function portsOf(id, dir) {
+  const n = byId[id], plug = dir === 'in' ? 'input' : 'output';
+  const spec = portsFor(n.type, n.parameters || {});
+  const lib = libPorts(n.type, plug);
+  const list = (spec ? (dir === 'in' ? spec.inputs : spec.outputs) : lib).map((p) => ({ ...p, label: fr(n.type, p.name, lib.find((l) => l.name === p.name)?.label || p.label) }));
+  for (const c of conns) {
+    const name = dir === 'in' ? (c.toId === id ? c.toProperty : null) : (c.fromId === id ? c.fromProperty : null);
+    if (name && !list.some((p) => p.name === name)) list.push({ name, label: fr(n.type, name, name), type: '*', signal: dir === 'out' ? false : outIsSignal(c.fromId, c.fromProperty) });
+  }
+  return list;
+}
+const portLabel = (id, dir, name) => portsOf(id, dir).find((p) => p.name === name)?.label ?? name;
+const outIsSignal = (id, port) => {
+  const n = byId[id];
+  const spec = portsFor(n.type, n.parameters || {});
+  const p = (spec?.outputs || []).find((x) => x.name === port) || libPorts(n.type, 'output').find((x) => x.name === port);
+  return p ? p.signal : /^(reached-|on[A-Z]|is[A-Z].*Ev$)/.test(port);
+};
+const wireText = (c) => `${labelOf(c.fromId)} · ${portLabel(c.fromId, 'out', c.fromProperty)} → ${labelOf(c.toId)} · ${portLabel(c.toId, 'in', c.toProperty)}`;
+// a connector a kid can drag a string from or to: not the editor-only checkboxes, not Run On Change
+const wirable = (p) => !/^runOnChange-|^evaluateAtLoad$/.test(p.name) && p.type !== 'editOnly';
+
+/* ================= live values: the app's own trace ================= */
+const last = {};
+const strip = (v) => (v === undefined ? undefined : /^".*"$/.test(String(v)) ? String(v).slice(1, -1) : String(v));
+const fmt = (v) => { const s = strip(v); return s === undefined ? '' : s.length > 17 ? s.slice(0, 16) + '…' : s; };
+const recent = [], wiresSeen = new Set();
+let eventCount = 0;
+preview.onTrace(({ events }) => {
+  for (const e of events) {
+    eventCount++;
+    const shownV = e.kind === 'signal' ? '' : e.value;
+    last[`${e.fromNode}.out.${e.fromPort}`] = shownV;
+    last[`${e.toNode}.in.${e.toPort}`] = shownV;
+    const key = `${e.fromNode}.${e.fromPort}>${e.toNode}.${e.toPort}`;
+    wiresSeen.add(key);
+    pulse(key, e.kind === 'signal');
+    if (e.kind === 'signal') arrived(e.toNode, e.toPort);
+    recent.push(e);
+  }
+  if (recent.length > 400) recent.splice(0, recent.length - 400);
+  facesDirty = true;
+});
+
+/* ================= costumes: what each part looks like on the wall ================= */
+const skinOf = (n) => n.metadata?.tchac?.skin || ({ 'Counter': 'tourniquet', 'Timer': 'rampe', 'Switch': 'ampoule', 'Expression': 'ardoise', 'Repeat': 'metronome', 'Boolean To String': 'pancarte', 'String Format': 'afficheur', 'Condition': 'aiguillage', 'Inverter': 'miroir', 'net.noodl.controls.button': 'bouton', 'Text': 'ecran' })[n.type] || 'piece';
+const isOn = (id) => strip(last[`${id}.out.state`]) === 'true';
+/** The front face's plate, from the files and the trace. Returns HTML; `key` says when it must be redrawn. */
+function plate(n) {
+  const id = n.id, p = n.parameters || {}, skin = skinOf(n);
+  switch (skin) {
+    case 'tourniquet': return { key: fmt(last[`${id}.out.currentCount`]), html: `<div class="drum">${esc(fmt(last[`${id}.out.currentCount`]) || p.startValue || 0)}</div>` };
+    case 'rampe': return { key: '', html: '' };
+    case 'ballon': case 'chat': case 'ampoule': case 'miroir': return { key: String(isOn(id)), html: '' };
+    case 'ardoise': return { key: fmt(last[`${id}.out.result`]), html: `<div class="board" title="${esc(p.expression || '')}">${esc(p.expression || '…')}</div>` };
+    case 'metronome': return { key: fmt(last[`${id}.out.count`]), html: `<div class="drum small">${esc(fmt(last[`${id}.out.count`]) || 0)}</div>` };
+    case 'pancarte': return { key: fmt(last[`${id}.out.currentValue`]), html: `<div class="sign">${esc(fmt(last[`${id}.out.currentValue`]) || `${p.falseString ?? ''}`)}</div>` };
+    case 'afficheur': return { key: fmt(last[`${id}.out.formatted`]), html: `<div class="screen">${esc(fmt(last[`${id}.out.formatted`]) || p.format || '')}</div>` };
+    case 'aiguillage': return { key: fmt(last[`${id}.out.result`]), html: `<div class="sign aside">${strip(last[`${id}.out.result`]) === 'true' ? 'vrai' : strip(last[`${id}.out.result`]) === 'false' ? 'faux' : '?'}</div>` };
+    case 'bouton': return { key: '', html: `<button type="button" class="bouton" data-press="${esc(id)}" title="${esc(p.label || '')}"></button>` };
+    case 'bouton-petit': return { key: '', html: `<button type="button" class="bouton petit" data-press="${esc(id)}" title="${esc(p.label || '')}"></button>` };
+    case 'ecran': return { key: fmt(last[`${id}.in.text`]), html: `<div class="screen">${esc(fmt(last[`${id}.in.text`]) || p.text || '')}</div>` };
+    default: return { key: '', html: `<div class="sign aside" style="font-size:14px">${esc(typeName(n.type))}</div>` };
+  }
+}
+/** A signal landed on a part: the costume reacts (the ramp rolls, the drum beats, the button goes down). */
+function arrived(id, port) {
+  const el = parts[id]?.el; if (!el) return;
+  const n = byId[id]; if (!n) return;
+  const lamp = el.querySelector('.lamp'); if (lamp) { lamp.classList.add('hot'); setTimeout(() => lamp.classList.remove('hot'), 350); }
+  if (skinOf(n) === 'rampe' && /start|restart/.test(port)) wall.event(id, 'roll', n.parameters?.duration ?? 1000);
+}
+function fired(id, port) {
+  const el = parts[id]?.el; if (!el) return;
+  const n = byId[id]; if (!n) return;
+  if (skinOf(n) === 'metronome' && port === 'tick') wall.event(id, 'beat');
+  if (/bouton/.test(skinOf(n)) && port === 'onClick') wall.event(id, 'press');
+}
+
+/* ================= the parts on the wall ================= */
+const parts = {};            // id → { el, plateKey, rowsKey, on, count }
+const stage = $('stage');
+const wall = createWall({ stage, W, H, reduce, colors: { ground: look.colors.dark.ground, gridDot: look.colors.dark.gridDot, wireSignal: wireColors('signal').normal, wireData: wireColors('number').normal } });
+const fresh = new Set();
+const SCHEME = { logic: nodeScheme('default'), visual: nodeScheme('visual') };
+const WIRE = { data: wireColors('number').normal, signal: wireColors('signal').normal };
+document.documentElement.style.setProperty('--wd', WIRE.data);
+document.documentElement.style.setProperty('--ws', WIRE.signal);
+let selected = null, facesDirty = true;
+const wiredPorts = (id) => {
+  const ins = [], outs = [];
+  for (const c of conns) {
+    if (c.toId === id && !ins.some((r) => r.name === c.toProperty)) ins.push({ name: c.toProperty, signal: outIsSignal(c.fromId, c.fromProperty) });
+    if (c.fromId === id && !outs.some((r) => r.name === c.fromProperty)) outs.push({ name: c.fromProperty, signal: outIsSignal(id, c.fromProperty) });
+  }
+  return { ins, outs };
+};
+function circuitHtml(n) {
+  const { ins, outs } = wiredPorts(n.id);
+  const spec = portsFor(n.type, n.parameters || {});
+  const specName = (dir, name) => (spec ? (dir === 'in' ? spec.inputs : spec.outputs) : libPorts(n.type, dir === 'in' ? 'input' : 'output')).find((p) => p.name === name)?.label || name;
+  const row = (r, dir) => `<div class="row ${dir}${r.signal ? ' s' : ''}"><span>${esc(specName(dir, r.name))}</span><span class="v">${r.signal ? '' : esc(fmt(last[`${n.id}.${dir}.${r.name}`]))}</span></div>`;
+  return `<div class="head"><span>${esc(n.label || typeName(n.type))}</span><span>${esc(typeName(n.type))}</span></div><div class="rows">${ins.map((r) => row(r, 'in')).join('')}${outs.map((r) => row(r, 'out')).join('')}</div>`;
+}
+function makePart(id) {
+  const n = byId[id];
+  const el = document.createElement('div');
+  el.className = 'part' + (fresh.has(id) ? ' fresh' : '');
+  el.dataset.id = id;
+  const sch = visual.has(id) ? SCHEME.visual : SCHEME.logic;
+  el.style.setProperty('--c-base', sch.base); el.style.setProperty('--c-header', sch.header); el.style.setProperty('--c-outline', sch.outline); el.style.setProperty('--c-text', sch.text);
+  el.innerHTML = `<div class="face mur"><div class="plate"></div><div class="lamp"></div><div class="label"></div></div><div class="face circuit"></div><div class="inlet" title="entrées"></div><div class="handle" title="Tire une ficelle vers une autre pièce" data-handle="${esc(id)}"></div>${fresh.has(id) ? '<div class="newtag">nouveau</div>' : ''}`;
+  parts[id] = { el, plateKey: null, rowsKey: null, on: null, count: null };
+  wall.addPart(id, el, { x: n.x ?? 0, y: n.y ?? 0, skin: skinOf(n), fresh: fresh.has(id) });
+  drawPart(id, true);
+}
+function drawPart(id, force) {
+  const p = parts[id], n = byId[id]; if (!p || !n) return;
+  const pl = plate(n);
+  const key = JSON.stringify([pl.key, n.label, n.parameters, skinOf(n)]);
+  if (force || key !== p.plateKey) {
+    p.plateKey = key;
+    p.el.querySelector('.plate').innerHTML = pl.html;
+    p.el.querySelector('.label').textContent = n.label || typeName(n.type);
+    for (const b of p.el.querySelectorAll('[data-press]')) b.onpointerdown = (e) => e.stopPropagation();
+    for (const b of p.el.querySelectorAll('[data-press]')) b.onclick = (e) => { e.stopPropagation(); pressInApp(b.dataset.press); };
+  }
+  const lamp = p.el.querySelector('.lamp');
+  if (n.type === 'Switch') lamp.classList.toggle('on', isOn(id)); else lamp.classList.remove('on');
+  // the costume follows the files and the trace: a new skin is rebuilt; a Switch's state, a count, a Condition's result are told
+  wall.setSkin(id, skinOf(n));
+  if (n.type === 'Switch') { const on = isOn(id); if (on !== p.on) { p.on = on; wall.event(id, on ? 'on' : 'off'); } }
+  if (n.type === 'Counter') { const c = strip(last[`${id}.out.currentCount`]); if (c !== undefined && c !== p.count) { if (p.count !== null) wall.event(id, 'count', c); p.count = c; } }
+  if (n.type === 'Condition') { const r = strip(last[`${id}.out.result`]); if (r !== p.count) { p.count = r; wall.event(id, 'result', r); } }
+  const { ins, outs } = wiredPorts(id);
+  const rk = JSON.stringify([ins, outs, ins.concat(outs).map((r) => last[`${id}.in.${r.name}`] ?? last[`${id}.out.${r.name}`]), n.label, n.parameters]);
+  if (force || rk !== p.rowsKey) { p.rowsKey = rk; p.el.querySelector('.face.circuit').innerHTML = circuitHtml(n); }
+  p.el.classList.toggle('sel', selected === id);
+}
+function dropPart(id) { parts[id]?.el.remove(); wall.removePart(id); delete parts[id]; }
+/** Pressing a button's costume presses the real button in the app. */
+function pressInApp(id) { const el = preview.elementsOf(id)[0]; (el && (el.matches('button') ? el : el.querySelector('button') || el))?.click(); }
+
+/* ================= the strings between parts: rails in the room (mur3d.js draws them from the parts' positions) ================= */
+const anchorOut = (id) => { const n = byId[id]; return { x: (n.x ?? 0) + W, y: (n.y ?? 0) + H / 2 }; };
+let selectedWire = null;
+const railsOf = () => conns.filter((c) => byId[c.fromId] && byId[c.toId] && parts[c.fromId] && parts[c.toId]).map((c) => ({ key: wireKey(c), from: c.fromId, to: c.toId, signal: outIsSignal(c.fromId, c.fromProperty), selected: selectedWire === wireKey(c) }));
+function syncWires() { wall.setRails(railsOf()); }
+/** The floor of the room sits under the lowest part; the shards of a balloon land on it. */
+function syncFloor() { const ids = shown(); if (ids.length) wall.setFloor(-(Math.max(...ids.map((i) => byId[i].y ?? 0)) + H + 150)); }
+/* marbles: a signal rolls down its rail (a bead under gravity, mur3d.js); a value slides along it as a glow */
+const wireById = () => Object.fromEntries(conns.map((c) => [wireKey(c), c]));
+function pulse(key, signal) {
+  const c = wireById()[key]; if (!c) return;
+  wall.hot(key, signal ? 500 : 700);
+  fired(c.fromId, c.fromProperty);
+  if (parts[c.fromId]) { parts[c.fromId].el.classList.add('hot'); setTimeout(() => parts[c.fromId]?.el.classList.remove('hot'), 300); }
+  wall.marble(key, signal, () => arrivedVisual(c.toId));
+}
+let lastT = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
+  wall.tick(dt);
+  if (facesDirty) { facesDirty = false; for (const id of Object.keys(parts)) drawPart(id); if (selected) drawPanelLive(); }
+  wall.render();
+  requestAnimationFrame(frame);
+}
+function arrivedVisual(id) { const el = parts[id]?.el; if (!el) return; wall.event(id, 'hot'); el.classList.add('hot'); setTimeout(() => el.classList.remove('hot'), 250); }
+requestAnimationFrame(frame);
+
+/* ================= editing: every change is a write through the store, then the app is rebuilt from the files ================= */
+let seq = 0, toastT;
+function toast(text) { $('toast').textContent = text; $('toast').classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => $('toast').classList.remove('on'), 3200); }
+let lastShow = first, shows = 1, pending = 0;   // pending: rebuilds in flight (a gate waits for 0 before it presses)
+async function show(what) {
+  pending++;
+  try {
+    const s = await preview.update(files.entries());
+    lastShow = s; shows++;
+    if (s.status === 'ok') { if (what) toast(`${what}. L'appli a été reconstruite depuis les fichiers en ${Math.round(s.exportMs + s.frameMs)} ms.`); }
+    else toast(`Pas affichée : ${s.message || s.status}`);
+    return s;
+  } finally { pending--; }
+}
+function graphChanged() {
+  readGraph();
+  const want = new Set(shown());
+  for (const id of Object.keys(parts)) if (!want.has(id)) dropPart(id);
+  for (const id of want) { if (!parts[id]) makePart(id); else { const n = byId[id]; wall.movePart(id, n.x ?? 0, n.y ?? 0); drawPart(id, true); } }
+  syncWires(); syncFloor();
+  if (selected && !byId[selected]) selected = null;
+  if (selectedWire && !conns.some((c) => wireKey(c) === selectedWire)) selectedWire = null;
+  drawPanel();
+}
+const newId = (type) => { const base = type.replace(/^net\.noodl\./, '').replace(/[^A-Za-z]/g, '').replace(/^./, (c) => c.toLowerCase()) || 'piece'; let id; do id = `${base}${++seq}`; while (byId[id]); return id; };
+function findFree(x, y) { const hit = (yy) => shown().some((i) => byId[i] && Math.abs(byId[i].x - x) < W + 20 && Math.abs(byId[i].y - yy) < H + 20); let yy = y; while (hit(yy)) yy += H + 40; return { x, y: yy }; }
+async function addNode(type, at, label, params = {}, { parent, index, exact, metadata } = {}) {
+  const id = newId(type);
+  const spot = exact ? at : findFree(at.x, at.y);
+  fresh.add(id);
+  write((ns) => {
+    const node = { id, type };
+    if (label) node.label = label;
+    node.x = Math.round(spot.x); node.y = Math.round(spot.y);
+    if (Object.keys(params).length) node.parameters = { ...params };
+    if (metadata) node.metadata = metadata;
+    if (parent !== undefined) {
+      const p = ns.find((n) => n.id === parent);
+      if (!p) throw new Error(`il n'y a pas de pièce "${parent}" où la mettre`);
+      p.children ??= [];
+      p.children.splice(index === undefined ? p.children.length : Math.max(0, Math.min(index, p.children.length)), 0, id);
+      node.parent = parent;
+    }
+    ns.push(node);
+  });
+  graphChanged();
+  await show(`${labelOf(id)} posé(e) sur le mur`);
+  return id;
+}
+async function removeNode(id) {
+  const name = labelOf(id);
+  write((ns, cs, file) => {
+    const doomed = new Set([id]);
+    for (let grew = true; grew; ) {
+      grew = false;
+      for (const n of ns) if (!doomed.has(n.id) && ((n.parent !== undefined && doomed.has(n.parent)) || [...doomed].some((d) => byId[d]?.children?.includes(n.id)))) { doomed.add(n.id); grew = true; }
+    }
+    for (let i = ns.length - 1; i >= 0; i--) if (doomed.has(ns[i].id)) ns.splice(i, 1);
+    for (const n of ns) if (n.children) { n.children = n.children.filter((c) => !doomed.has(c)); if (!n.children.length) delete n.children; }
+    for (let i = cs.length - 1; i >= 0; i--) if (doomed.has(cs[i].fromId) || doomed.has(cs[i].toId)) cs.splice(i, 1);
+    if (file.visualRoots) { file.visualRoots = file.visualRoots.filter((r) => !doomed.has(r)); if (!file.visualRoots.length) delete file.visualRoots; }
+  });
+  if (selected === id) selected = null;
+  graphChanged();
+  await show(`${name} retiré(e)`);
+}
+async function rename(id, label) { write((ns) => { ns.find((n) => n.id === id).label = label; }); graphChanged(); await show(`Renommé en ${label}`); }
+async function setSkin(id, skin) { write((ns) => { const n = ns.find((x) => x.id === id); n.metadata = { ...(n.metadata ?? {}), tchac: { ...(n.metadata?.tchac ?? {}), skin } }; }); graphChanged(); toast('Nouveau déguisement, écrit dans les fichiers'); }
+const kindOk = (outSig, inSig) => outSig === inSig;
+async function connect(from, to) {
+  const [fromId, fromProperty] = [from.slice(0, from.indexOf('.')), from.slice(from.indexOf('.') + 1)];
+  const [toId, toProperty] = [to.slice(0, to.indexOf('.')), to.slice(to.indexOf('.') + 1)];
+  const c = { fromId, fromProperty, toId, toProperty };
+  if (conns.some((x) => wireKey(x) === wireKey(c))) return false;
+  write((ns, cs) => { cs.push(c); });
+  graphChanged();
+  await show(`Ficelle : ${wireText(c)}`);
+  return true;
+}
+async function disconnect(key) {
+  const c = conns.find((x) => wireKey(x) === key);
+  if (!c) return false;
+  const text = wireText(c);
+  write((ns, cs) => { cs.splice(cs.findIndex((x) => wireKey(x) === key), 1); });
+  graphChanged();
+  await show(`Ficelle coupée : ${text}`);
+  return true;
+}
+async function setParam(id, name, value, what) { writeParam(id, name, value); graphChanged(); await show(what); }
+function moveNode(id, x, y) { write((ns) => { const n = ns.find((k) => k.id === id); n.x = Math.round(x); n.y = Math.round(y); }); readGraph(); wall.movePart(id, byId[id].x, byId[id].y); syncWires(); syncFloor(); }
+
+/* ================= the camera: pan, zoom, fit. cam = the editor-space point at the stage's centre, and the zoom ================= */
+let cam = { x: 800, y: 400, z: 1 };
+const applyCam = () => { wall.setCam(cam); };
+const toWall = (px, py) => wall.toWall(px, py);
+function fit() {
+  const ids = shown(); if (!ids.length) return;
+  const xs = ids.map((i) => byId[i].x ?? 0), ys = ids.map((i) => byId[i].y ?? 0);
+  const x0 = Math.min(...xs) - 40, x1 = Math.max(...xs) + W + 60, y0 = Math.min(...ys) - 60, y1 = Math.max(...ys) + H + 60;
+  // the app's window sits in the bottom-right corner: the wall fits either above it or beside it, whichever is bigger
+  const aw = $('appwin').offsetWidth + 24, ah = $('appwin').offsetHeight + 24;
+  const full = { w: innerWidth - 346 - 24, h: innerHeight - 52 - 24 };
+  const above = { w: full.w, h: full.h - ah }, beside = { w: full.w - aw, h: full.h };
+  const zoomFor = (a) => Math.min(a.w / (x1 - x0), a.h / (y1 - y0));
+  const area = zoomFor(above) >= zoomFor(beside) ? above : beside;
+  cam.z = Math.max(0.25, Math.min(1.2, zoomFor(area)));
+  // the bounds' centre lands at the area's centre; the area starts 12px in from the stage's top-left corner
+  cam.x = (x0 + x1) / 2 - (12 + area.w / 2 - stage.clientWidth / 2) / cam.z;
+  cam.y = (y0 + y1) / 2 - (12 + area.h / 2 - stage.clientHeight / 2) / cam.z;
+  applyCam();
+  syncFloor();
+}
+$('fit').onclick = fit;
+const ptrs = new Map();
+let gesture = null, pinch0 = 0, z0 = 1;
+const partAt = (el) => el.closest?.('.part')?.dataset.id;
+stage.addEventListener('pointerdown', (e) => {
+  if (e.target.closest('#conpop')) return;
+  stage.setPointerCapture(e.pointerId);
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); z0 = cam.z; gesture = { kind: 'pinch' }; return; }
+  const h = e.target.closest('[data-handle]');
+  if (h) { gesture = { kind: 'connect', from: h.dataset.handle, moved: false, x0: e.clientX, y0: e.clientY }; stage.classList.add('connecting'); return; }
+  const id = partAt(e.target);
+  if (id) { const n = byId[id], w = toWall(e.clientX, e.clientY); gesture = { kind: 'move', id, off: { x: w.x - n.x, y: w.y - n.y }, moved: false, x0: e.clientX, y0: e.clientY }; }
+  else gesture = { kind: 'pan', moved: false, x0: e.clientX, y0: e.clientY };
+  stage.classList.add('dragging');
+});
+stage.addEventListener('pointermove', (e) => {
+  const p = ptrs.get(e.pointerId); if (!p || !gesture) return;
+  const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
+  if (gesture.kind === 'pinch') { const [a, b] = [...ptrs.values()]; cam.z = Math.max(0.2, Math.min(3, z0 * Math.hypot(a.x - b.x, a.y - b.y) / Math.max(1, pinch0))); applyCam(); return; }
+  if (Math.hypot(e.clientX - gesture.x0, e.clientY - gesture.y0) > 4) gesture.moved = true;
+  if (gesture.kind === 'pan') { cam.x -= dx / cam.z; cam.y -= dy / cam.z; applyCam(); }
+  else if (gesture.kind === 'move' && gesture.moved) { const w = toWall(e.clientX, e.clientY); const n = byId[gesture.id]; n.x = w.x - gesture.off.x; n.y = w.y - gesture.off.y; wall.movePart(gesture.id, n.x, n.y); syncWires(); }
+  else if (gesture.kind === 'connect') { wall.ghost(anchorOut(gesture.from), toWall(e.clientX, e.clientY)); }
+});
+const up = (e) => {
+  const g = gesture; ptrs.delete(e.pointerId);
+  if (!ptrs.size) { stage.classList.remove('dragging', 'connecting'); gesture = null; }
+  if (!g || g.kind === 'pinch') return;
+  if (g.kind === 'connect') {
+    wall.ghost(null);
+    const to = partAt(document.elementFromPoint(e.clientX, e.clientY));
+    if (to && to !== g.from && portsOf(to, 'in').length) openConpop(g.from, to, e.clientX, e.clientY);
+    else if (g.moved) toast("Lâche la ficelle sur une autre pièce pour l'attacher.");
+    return;
+  }
+  if (g.kind === 'move' && g.moved) { moveNode(g.id, byId[g.id].x, byId[g.id].y); return; }
+  if (!g.moved) { if (g.kind === 'move') select(g.id); else { select(null); } }
+};
+stage.addEventListener('pointerup', up);
+stage.addEventListener('pointercancel', (e) => { ptrs.delete(e.pointerId); gesture = null; stage.classList.remove('dragging', 'connecting'); wall.ghost(null); });
+// zoom at the pointer: the editor point under it stays under it
+stage.addEventListener('wheel', (e) => { e.preventDefault(); const f = 1 - Math.sign(e.deltaY) * 0.1, w = toWall(e.clientX, e.clientY); cam.z = Math.max(0.2, Math.min(3, cam.z * f)); const r = stage.getBoundingClientRect(); cam.x = w.x - (e.clientX - r.left - r.width / 2) / cam.z; cam.y = w.y - (e.clientY - r.top - r.height / 2) / cam.z; applyCam(); }, { passive: false });
+
+/* ================= the connect popup ================= */
+const conpop = $('conpop');
+/** The connectors a kid sees first: the ones with a French name (FR). A part with none shows everything. "Toutes les prises" shows the rest. */
+const front = (id, list) => { const names = FR[byId[id].type]; return names ? list.filter((p) => p.name in names) : list; };
+function openConpop(a, b, x, y) {
+  const allOuts = portsOf(a, 'out').filter(wirable), allIns = portsOf(b, 'in').filter(wirable);
+  let every = false, pick = null;
+  const draw = () => {
+    const outs = every ? allOuts : front(a, allOuts), ins = every ? allIns : front(b, allIns);
+    const fits = outs.filter((o) => ins.some((i) => kindOk(o.signal, i.signal)));
+    if (pick === null && fits.length === 1) pick = fits[0].name;
+    const po = outs.find((o) => o.name === pick);
+    const more = allOuts.length > outs.length || allIns.length > ins.length;
+    conpop.innerHTML = `
+      <div class="eyebrow" style="margin-top:0">Ficelle : ${esc(labelOf(a))} → ${esc(labelOf(b))}</div>
+      <div class="cols">
+        <div class="col">${outs.map((o) => `<button type="button" class="${o.signal ? 'sig' : ''}" data-out="${esc(o.name)}" aria-pressed="${o.name === pick}">${esc(o.label)}</button>`).join('') || '<span class="lead">Rien ne sort de cette pièce</span>'}</div>
+        <div class="col">${ins.map((i) => `<button type="button" class="${i.signal ? 'sig' : ''}" data-in="${esc(i.name)}" ${!po || !kindOk(po.signal, i.signal) ? 'disabled' : ''}>${esc(i.label)}</button>`).join('') || '<span class="lead">Rien n\'entre dans cette pièce</span>'}</div>
+      </div>
+      <div class="foot"><span>${po ? 'Choisis où la ficelle arrive.' : 'Choisis d\'abord ce qui sort. Une bille (bleu) va vers une entrée à billes ; une valeur (vert) vers une entrée à valeurs.'}</span>${more || every ? `<button type="button" id="conall">${every ? 'Les prises simples' : 'Toutes les prises'}</button>` : ''}<button type="button" id="concancel">Annuler</button></div>`;
+    for (const el of conpop.querySelectorAll('[data-out]')) el.onclick = () => { pick = el.dataset.out; draw(); };
+    for (const el of conpop.querySelectorAll('[data-in]')) el.onclick = async () => { closeConpop(); if (!(await connect(`${a}.${pick}`, `${b}.${el.dataset.in}`))) toast('Ces deux-là sont déjà attachées.'); };
+    if ($('conall')) $('conall').onclick = () => { every = !every; draw(); };
+    $('concancel').onclick = closeConpop;
+  };
+  draw();
+  conpop.hidden = false;
+  const w = conpop.offsetWidth, h = conpop.offsetHeight;
+  conpop.style.left = `${Math.max(16, Math.min(x - w / 2, innerWidth - w - 16))}px`;
+  conpop.style.top = `${Math.max(60, Math.min(y + 12, innerHeight - h - 16))}px`;
+}
+function closeConpop() { conpop.hidden = true; wall.ghost(null); }
+
+/* ================= the panel: missions, the shelf, the part ================= */
+const TABS = ['missions', 'shelf', 'part'];
+function showTab(which) { for (const t of TABS) { $(`tab-${t}`).setAttribute('aria-selected', String(t === which)); $(`body-${t}`).hidden = t !== which; } }
+for (const t of TABS) $(`tab-${t}`).onclick = () => showTab(t);
+function select(id) { selected = id; selectedWire = null; for (const k of Object.keys(parts)) parts[k].el.classList.toggle('sel', k === id); syncWires(); if (id) { showTab('part'); } drawPanel(); }
+
+// the shelf: the parts a kid takes first, each with a costume and one sentence; the whole runtime library below
+const SHELF = [
+  ['Counter', '🎟️', 'Le tourniquet', 'Compte les billes qui passent.'],
+  ['Timer', '🛝', 'La rampe', 'La bille met un moment à descendre, puis ressort en bas.'],
+  ['Switch', '💡', "L'interrupteur", 'Allumé ou éteint. Déguise-le en ballon ou en chat.'],
+  ['Expression', '🧮', "L'ardoise", 'Une formule : n >= 3, n % 2 === 0… Vrai ou faux ?'],
+  ['Repeat', '🥁', 'Le métronome', 'Lâche une bille tout seul, encore et encore.'],
+  ['Condition', '🔀', "L'aiguillage", 'Envoie la bille à gauche si vrai, à droite si faux.'],
+  ['Boolean To String', '🪧', 'La pancarte', 'Écrit un mot si vrai, un autre si faux.'],
+  ['String Format', '🔢', "L'afficheur", 'Écrit un texte avec un nombre dedans.']
+];
+const SHELF_META = { Switch: { tchac: { skin: 'ampoule' } } };
+const viewCentre = () => { const c = toWall((innerWidth - 346) / 2, (innerHeight + 52) / 2); return { x: c.x - W / 2, y: c.y - H / 2 }; };
+let libFilter = '';
+function drawShelf() {
+    $('body-shelf').innerHTML = `
+    <p class="lead">Prends une pièce : elle se pose au milieu du mur, et dans les fichiers du projet. Tire une ficelle depuis la flèche jaune d'une pièce vers une autre.</p>
+    <div class="shelf">${SHELF.map(([t, ico, name, what]) => `<button type="button" data-take="${esc(t)}"><span class="ico">${ico}</span><b>${esc(name)}</b><small>${esc(what)}</small></button>`).join('')}</div>
+    <div class="eyebrow">Toutes les pièces de NodeGX (${libIndex.size})</div>
+    <input class="search" id="libq" placeholder="Chercher une pièce…" value="${esc(libFilter)}">
+    <div class="lib" id="lib"></div>`;
+  for (const b of $('body-shelf').querySelectorAll('[data-take]')) b.onclick = async () => { const t = b.dataset.take; const name = SHELF.find((s) => s[0] === t)[2]; await addNode(t, viewCentre(), name, {}, { metadata: SHELF_META[t] }); select(nodes[nodes.length - 1].id); };
+  const drawLib = () => {
+    const q = libFilter.toLowerCase();
+    const list = [...libIndex.values()].filter((t) => !t.name.startsWith('/') && (!q || (t.displayNodeName || t.displayName || t.name).toLowerCase().includes(q))).slice(0, q ? 60 : 24);
+    $('lib').innerHTML = list.map((t) => `<button type="button" data-lib="${esc(t.name)}">${esc(t.displayNodeName || t.displayName || t.name)} <small style="color:var(--faint)">· ${esc(t.category || '')}</small></button>`).join('') + (q || list.length < libIndex.size ? '' : '');
+    for (const b of $('lib').querySelectorAll('[data-lib]')) b.onclick = async () => { await addNode(b.dataset.lib, viewCentre()); select(nodes[nodes.length - 1].id); };
+  };
+  $('libq').oninput = (e) => { libFilter = e.target.value; drawLib(); };
+  drawLib();
+}
+drawShelf();
+
+const readBack = (el, p, old) => {
+  if (p.type === 'boolean') return el.checked;
+  if (p.type === 'number') return el.value === '' ? undefined : Number(el.value);
+  return el.value === '' && old === undefined ? undefined : el.value;
+};
+function propEditor(p, v) {
+  if (p.type === 'boolean') return `<input type="checkbox" data-p="${esc(p.name)}" ${v ? 'checked' : ''}>`;
+  if (p.enums?.length) return `<select data-p="${esc(p.name)}">${p.enums.map((o) => `<option ${String(o) === String(v) ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+  return `<input type="${p.type === 'number' ? 'number' : 'text'}" data-p="${esc(p.name)}" value="${esc(v ?? '')}" placeholder="${esc(p.default ?? '')}">`;
+}
+function drawPanelLive() {
+  const id = selected; if (!id || !byId[id]) return;
+  for (const el of $('body-part').querySelectorAll('[data-live]')) el.textContent = fmt(last[`${id}.out.${el.dataset.live}`]);
+}
+function drawPanel() {
+  drawMissions();
+  const body = $('body-part');
+  if (!selected || !byId[selected]) { body.innerHTML = `<p class="lead">Touche une pièce du mur pour la régler, la déguiser, lire ce qu'elle dit ou couper ses ficelles.</p>${selectedWire ? '' : ''}`; return; }
+  const id = selected, n = byId[id], p = n.parameters || {};
+  const wiredIn = new Set(conns.filter((c) => c.toId === id).map((c) => c.toProperty));
+  const dials = portsOf(id, 'in').filter((x) => !x.signal && !wiredIn.has(x.name) && x.type !== '*' && !/^runOnChange-/.test(x.name)).slice(0, 10);
+  const outs = portsOf(id, 'out').filter((x) => !x.signal);
+  const mine = conns.filter((c) => c.fromId === id || c.toId === id);
+  body.innerHTML = `
+    <div class="eyebrow" style="margin-top:0">${esc(typeName(n.type))}${visual.has(id) ? ' · sur l\'écran' : ''}</div>
+    <div class="field"><label>Son nom sur le mur</label><input id="lbl" value="${esc(n.label || '')}" placeholder="${esc(typeName(n.type))}"></div>
+    ${n.type === 'Switch' ? `<div class="field"><label>Son déguisement</label><select id="skin">${['ampoule', 'ballon', 'chat'].map((s) => `<option ${skinOf(n) === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>` : ''}
+    ${dials.length ? `<div class="eyebrow">Ses réglages</div>${dials.map((d) => `<div class="field"><label>${esc(d.label)}</label>${propEditor(d, p[d.name])}</div>`).join('')}` : ''}
+    ${outs.length ? `<div class="eyebrow">Ce qu'elle dit en ce moment</div>${outs.map((o) => `<div class="port"><span>${esc(o.label)}</span><span class="v" data-live="${esc(o.name)}">${esc(fmt(last[`${id}.out.${o.name}`]))}</span></div>`).join('')}` : ''}
+    <div class="eyebrow">Ses ficelles (${mine.length})</div>
+    ${mine.map((c) => `<div class="wire"><span>${esc(wireText(c))}</span><button type="button" class="danger" data-cut="${esc(wireKey(c))}" title="Couper">✂</button></div>`).join('') || '<p class="lead">Aucune. Tire une ficelle depuis sa flèche jaune.</p>'}
+    <div class="row" style="margin-top:14px"><button type="button" class="danger" id="del">Retirer la pièce</button></div>`;
+  $('lbl').onchange = (e) => rename(id, e.target.value);
+  if ($('skin')) $('skin').onchange = (e) => setSkin(id, e.target.value);
+  for (const el of body.querySelectorAll('[data-p]')) el.onchange = () => { const d = dials.find((x) => x.name === el.dataset.p); setParam(id, d.name, readBack(el, d, p[d.name]), `${labelOf(id)} · ${d.label} réglé`); };
+  for (const b of body.querySelectorAll('[data-cut]')) b.onclick = () => disconnect(b.dataset.cut);
+  $('del').onclick = () => removeNode(id);
+}
+
+/* ================= Missions: each Vérifier plays the graph on a COPY of the files, in a second real app ================= */
+let checker = null;
+async function playCopy(title, set = {}) {
+  const copy = NodegxPreview.memoryFiles(files.entries());
+  const cs = new NodegxPreview.V2ProjectStore(copy);
+  const c = cs.readComponent(KEY);
+  for (const [k, v] of Object.entries(set)) { const [node, pp] = [k.slice(0, k.indexOf('.')), k.slice(k.indexOf('.') + 1)]; const n = c.files.nodes.nodes.find((x) => x.id === node); if (n) n.parameters = { ...(n.parameters ?? {}), [pp]: v }; }
+  cs.writeComponent(KEY, c.files, { ifRevision: c.revision });
+  $('checkapp').hidden = false;
+  $('checklbl').innerHTML = `<b>${esc(title)}</b> — une copie de ton appli joue la vérification`;
+  checker ??= await NodegxPreview.mountPreview($('checkframe'), { runtimeBase: RUNTIME });
+  const s = await checker.update(copy.entries());
+  if (s.status !== 'ok') throw new Error(`la copie n'a pas démarré : ${s.message || s.status}`);
+  const app = {
+    text: (id) => (checker.elementsOf(id)[0]?.innerText ?? '').trim(),
+    press: (id) => { const el = checker.elementsOf(id)[0]; (el && (el.matches('button') ? el : el.querySelector('button') || el))?.click(); },
+    async until(pred, ms) { const t = performance.now(); while (performance.now() - t < ms) { if (pred()) return true; await new Promise((r) => setTimeout(r, 40)); } return pred(); },
+    wait: (ms) => new Promise((r) => setTimeout(r, ms)),
+    billes: () => Number((app.text('billesTxt').match(/\d+/) || [0])[0]),
+    ballon: () => app.text('ballonTxt'), chatG: () => app.text('chatGTxt'), chatD: () => app.text('chatDTxt')
+  };
+  return app;
+}
+const mission = {};
+const MISSIONS = [
+  {
+    title: "Le ballon n'éclate qu'à la 3e bille",
+    goal: "Pour l'instant, chaque bille fait éclater le ballon. Fais-le tenir jusqu'à la troisième. Il faut une pièce qui sait compter jusqu'à 3 : une formule.",
+    hint: "Prends une ardoise sur l'étagère et écris-lui la formule n >= 3. Attache « le compte » du tourniquet à son « n ». Coupe la ficelle qui va du tourniquet à la rampe, et fais partir la rampe de « si vrai → » de l'ardoise.",
+    steps: [
+      { say: "Poser une ardoise avec la formule « n >= 3 »", run: async () => { mission.ardoise = await addNode('Expression', { x: 300, y: 80 }, "L'ardoise", { expression: 'n >= 3' }, { exact: true }); } },
+      { say: "Ficelle : tourniquet · le compte → ardoise · n", run: () => connect('tourniquet.currentCount', `${mission.ardoise}.n`) },
+      { say: "Couper : tourniquet · ça vient de compter → rampe · lâcher la bille", run: () => disconnect('tourniquet.countChanged>rampe.start') },
+      { say: "Ficelle : ardoise · si vrai → rampe · lâcher la bille", run: () => connect(`${mission.ardoise}.isTrueEv`, 'rampe.start') }
+    ],
+    async check() {
+      const app = await playCopy('3e bille', { 'rampe.duration': 200 });
+      await app.wait(300);
+      if (app.ballon() !== '🎈') return [false, "Le ballon est déjà éclaté avant la première bille."];
+      app.press('btn'); await app.wait(250); app.press('btn');
+      if (!(await app.until(() => app.billes() === 2, 3000))) return [false, `Après deux appuis le compteur dit ${app.billes()}, pas 2. Le tourniquet compte-t-il encore ?`];
+      await app.wait(700);
+      if (app.ballon() !== '🎈') return [false, "Le ballon a éclaté avant la troisième bille."];
+      app.press('btn');
+      if (!(await app.until(() => app.ballon() === '💥', 3000))) return [false, "Trois billes et le ballon tient toujours. La rampe reçoit-elle une bille quand la formule devient vraie ?"];
+      return [true, "Deux billes : rien. La troisième : BOUM. C'est une formule (n >= 3) qui décide quand la bille part sur la rampe."];
+    }
+  },
+  {
+    title: 'Pair à gauche, impair à droite',
+    goal: "Deux chats dorment sur le mur. Réveille le chat de gauche aux billes paires (2, 4, 6…) et celui de droite aux billes impaires (1, 3, 5…). L'autre se rendort.",
+    hint: "Une ardoise avec la formule n % 2 === 0 dit « vrai » quand n est pair. Son « si vrai → » allume le chat de gauche et éteint celui de droite ; son « si faux → » fait l'inverse.",
+    steps: [
+      { say: "Poser une ardoise « n % 2 === 0 »", run: async () => { mission.pair = await addNode('Expression', { x: 560, y: 610 }, 'Pair ?', { expression: 'n % 2 === 0' }, { exact: true }); } },
+      { say: "Ficelle : tourniquet · le compte → Pair ? · n", run: () => connect('tourniquet.currentCount', `${mission.pair}.n`) },
+      { say: "Ficelle : Pair ? · si vrai → chat de gauche · allumer", run: () => connect(`${mission.pair}.isTrueEv`, 'chatG.on') },
+      { say: "Ficelle : Pair ? · si vrai → chat de droite · éteindre", run: () => connect(`${mission.pair}.isTrueEv`, 'chatD.off') },
+      { say: "Ficelle : Pair ? · si faux → chat de droite · allumer", run: () => connect(`${mission.pair}.isFalseEv`, 'chatD.on') },
+      { say: "Ficelle : Pair ? · si faux → chat de gauche · éteindre", run: () => connect(`${mission.pair}.isFalseEv`, 'chatG.off') }
+    ],
+    async check() {
+      const app = await playCopy('Pair / impair');
+      await app.wait(300);
+      app.press('btn');
+      if (!(await app.until(() => app.chatD() === '😼' && app.chatG() === '😴', 3000))) return [false, `Première bille (impaire) : le chat de droite devrait être réveillé et celui de gauche dormir. Je lis gauche ${app.chatG()} droite ${app.chatD()}.`];
+      app.press('btn');
+      if (!(await app.until(() => app.chatG() === '😼' && app.chatD() === '😴', 3000))) return [false, `Deuxième bille (paire) : le chat de gauche devrait être réveillé et celui de droite se rendormir. Je lis gauche ${app.chatG()} droite ${app.chatD()}.`];
+      app.press('btn');
+      if (!(await app.until(() => app.chatD() === '😼' && app.chatG() === '😴', 3000))) return [false, 'Troisième bille : le chat de droite ne se réveille pas, ou celui de gauche ne se rendort pas.'];
+      return [true, "1 → droite, 2 → gauche, 3 → droite. Une formule (n % 2 === 0) a deux sorties : « si vrai » et « si faux ». C'est un aiguillage."];
+    }
+  },
+  {
+    title: 'La machine tourne toute seule',
+    goal: "Un appui sur le gros bouton, et les billes continuent de tomber sans toi, une toutes les 0,8 seconde. Le petit bouton arrête tout.",
+    hint: "Prends un métronome sur l'étagère. Le gros bouton le démarre (« clic ! » → « démarrer »), chacun de ses « tic ! » fait entrer une bille dans le tourniquet, et le petit bouton l'arrête.",
+    steps: [
+      { say: "Poser un métronome, toutes les 800 ms", run: async () => { mission.metro = await addNode('Repeat', { x: 300, y: 540 }, 'Le métronome', { interval: 800 }, { exact: true }); } },
+      { say: "Ficelle : gros bouton · clic ! → métronome · démarrer", run: () => connect('btn.onClick', `${mission.metro}.start`) },
+      { say: "Ficelle : métronome · tic ! → tourniquet · une bille entre", run: () => connect(`${mission.metro}.tick`, 'tourniquet.increase') },
+      { say: "Ficelle : petit bouton · clic ! → métronome · stop", run: () => connect('btnReset.onClick', `${mission.metro}.stop`) }
+    ],
+    async check() {
+      const app = await playCopy('Toute seule');
+      await app.wait(300);
+      app.press('btn');
+      if (!(await app.until(() => app.billes() >= 4, 6000))) return [false, `Un seul appui, et 5 secondes plus tard le compteur dit ${app.billes()}. Rien ne lâche de billes tout seul.`];
+      app.press('btnReset');
+      await app.wait(300);
+      const n = app.billes();
+      await app.wait(1800);
+      if (app.billes() !== n) return [false, "Le petit bouton n'arrête pas la machine : le compteur continue."];
+      return [true, 'Un appui, et les billes tombent toutes seules ; le petit bouton arrête tout. Un métronome est une boucle : il refait la même chose à chaque tic.'];
+    }
+  },
+  {
+    title: 'La machine se souvient',
+    locked: "Tranche 2 (pas encore construite) : chaque BOUM s'écrit dans une mémoire du navigateur avec la pièce « Create Record », un « Query Records » remplit le livre des records sur le mur, et tout est encore là quand tu reviens demain.",
+    steps: [], async check() { return [false, 'Pas encore construite.']; }
+  }
+];
+const mstate = MISSIONS.map(() => ({ done: false, verdict: null, step: -1, busy: false }));
+const bodyMissions = $('body-missions');
+let checking = false, hideCopy;
+function drawMissions() {
+  const n = mstate.filter((m) => m.done).length, total = MISSIONS.filter((m) => !m.locked).length;
+  $('mcount').textContent = `${n}/${total}`;
+  bodyMissions.innerHTML = `
+    <p class="lead">Change ce que fait la machine en attachant des pièces. <b>Vérifier</b> joue ta machine sur une copie, dans une deuxième vraie appli, et dit si ça marche. <b>Montre-moi</b> construit la réponse pièce par pièce, chaque pas écrit dans les fichiers.</p>
+    ${n === total ? '<div class="verdict ok">Les trois missions sont faites. Tu as changé ce que fait une appli en ajoutant des pièces et des ficelles — et chaque vérification a fait tourner ta machine pour de vrai.</div>' : ''}
+    ${MISSIONS.map((m, i) => {
+      const s = mstate[i];
+      if (m.locked) return `<div class="mission locked"><h3><b>🔒</b>${esc(m.title)}</h3><p>${esc(m.locked)}</p></div>`;
+      return `<div class="mission${s.done ? ' done' : ''}">
+        <h3><b>${s.done ? '✓' : i + 1}</b>${esc(m.title)}</h3>
+        <p>${esc(m.goal)}</p>
+        <details${s.step >= 0 ? ' open' : ''}><summary>${s.step >= 0 ? 'En construction' : 'Un indice'}</summary>${s.step >= 0 ? `<ol class="steps">${m.steps.map((st, j) => `<li class="${j < s.step ? 'did' : j === s.step ? 'on' : ''}">${esc(st.say)}</li>`).join('')}</ol>` : esc(m.hint)}</details>
+        ${s.verdict ? `<div class="verdict ${s.verdict[0] === null ? 'run' : s.verdict[0] ? 'ok' : 'no'}">${s.verdict[0] === null ? '' : s.verdict[0] ? 'Réussi. ' : 'Pas encore. '}${esc(s.verdict[1])}<small>${esc(s.verdict[2] || '')}</small></div>` : ''}
+        <div class="row"><button type="button" class="primary" data-check="${i}" ${s.busy || checking ? 'disabled' : ''}>Vérifier</button><button type="button" data-show="${i}" ${s.busy || s.done ? 'disabled' : ''}>Montre-moi</button></div>
+      </div>`;
+    }).join('')}`;
+  for (const b of bodyMissions.querySelectorAll('[data-check]')) b.onclick = () => runCheck(Number(b.dataset.check));
+  for (const b of bodyMissions.querySelectorAll('[data-show]')) b.onclick = () => showMe(Number(b.dataset.show));
+}
+async function runCheck(i) {
+  if (checking) return mstate[i].verdict;
+  checking = true;
+  clearTimeout(hideCopy);
+  const t0 = performance.now();
+  mstate[i].verdict = [null, 'Ta machine joue sur une copie de l\'appli…', ''];
+  drawMissions();
+  let res;
+  try { res = await MISSIONS[i].check(); } catch (e) { res = [false, `La copie n'a pas pu jouer : ${e.message}`]; }
+  mstate[i].verdict = [res[0], res[1], `Joué sur une copie de la vraie appli : ${nodes.length} pièces, ${conns.length} ficelles, en ${((performance.now() - t0) / 1000).toFixed(1)} s.`];
+  if (res[0]) mstate[i].done = true;
+  checking = false;
+  hideCopy = setTimeout(() => { $('checkapp').hidden = true; }, 4000);
+  drawMissions();
+  toast(res[0] ? `Mission ${i + 1} réussie !` : `Mission ${i + 1} : pas encore`);
+  return mstate[i].verdict;
+}
+async function showMe(i) {
+  const m = MISSIONS[i], s = mstate[i];
+  if (s.busy) return;
+  s.busy = true;
+  setFace('mur');
+  showTab('missions');
+  for (let j = 0; j < m.steps.length; j++) {
+    s.step = j; drawMissions();
+    await sleep(500);
+    await m.steps[j].run();
+    toast(m.steps[j].say);
+    await sleep(700);
+  }
+  s.step = m.steps.length; drawMissions();
+  await sleep(300);
+  s.step = -1; s.busy = false;
+  return runCheck(i);
+}
+
+/* ================= the two faces ================= */
+const CAPTIONS = {
+  mur: ['Le mur : une machine à réaction en chaîne.', "Appuie sur le gros bouton de l'appli (ou sur son costume ici) : une bille entre dans le tourniquet, descend la rampe, et le ballon éclate. Chaque pièce est une vraie pièce de NodeGX ; chaque ficelle, un vrai fil. Retourne le mur pour voir."],
+  circuit: ['Le circuit : la même machine, vue de derrière.', "Chaque pièce s'est retournée sur place : c'est le même nœud, avec son vrai nom et ses vraies prises, et les mêmes fils. Les billes sont des signaux ; les ficelles en pointillé portent des valeurs. Ce sont les mêmes fichiers — l'éditeur officiel les ouvre tels quels."]
+};
+let face = query.get('face') === 'circuit' ? 'circuit' : 'mur';
+function setFace(f) {
+  face = f;
+  document.body.classList.toggle('circuit', f === 'circuit');
+  wall.setFace(f); syncWires();
+  for (const b of document.querySelectorAll('[data-face]')) b.setAttribute('aria-pressed', String(b.dataset.face === f));
+  $('capH').textContent = CAPTIONS[f][0]; $('capS').textContent = CAPTIONS[f][1];
+  const q = new URLSearchParams(location.search); q.set('face', f); history.replaceState(null, '', '?' + q);
+}
+for (const b of document.querySelectorAll('[data-face]')) b.onclick = () => setFace(b.dataset.face);
+$('reset').onclick = () => location.reload();
+$('projName').textContent = JSON.parse(files.read('nodegx.project.json') || '{}').name || '';
+
+/* ================= go ================= */
+for (const id of shown()) makePart(id);
+syncWires();
+drawMissions();
+drawPanel();
+setFace(face);
+fit();
+addEventListener('resize', () => { wall.resize(); fit(); });
+
+window.__tchac = {
+  recent, wiresSeen, preview, store, files, parts, last, MISSIONS, mstate, portsOf, connect, disconnect, addNode, removeNode, setParam, select, setFace, fit, runCheck, showMe, pressInApp, wall,
+  get conns() { return conns; }, get nodes() { return nodes; }, get face() { return face; }, get events() { return eventCount; }, get lastShow() { return lastShow; }, get shows() { return shows; }, get selected() { return selected; }, get live() { return wall.beads; }, get checker() { return checker; }, get pending() { return pending; }
+};
+if (query.has('demo')) (async () => {
+  await sleep(1500);
+  pressInApp('btn'); await sleep(1800);
+  for (let i = 0; i < 3; i++) { await showMe(i); await sleep(1400); }
+  setFace('circuit');
+})();
+say(`ready nodes=${nodes.length} wires=${conns.length} parts=${Object.keys(parts).length} export=${Math.round(first.exportMs)}ms frame=${Math.round(first.frameMs)}ms`);
+} catch (e) { say('FAIL ' + (e && e.stack || e)); console.error(e); $('err').hidden = false; $('err').textContent = String(e && e.stack || e); }
+</script>
+</html>

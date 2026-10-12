@@ -36,6 +36,30 @@ Undoing relation links: leaving a project, unfavouriting, untagging. To delete t
 |---|---|---|---|
 | `store` | Signal | — | Removes the record named by Target Record Id from the chosen Relation on the record named by Id |
 
+### What each input does
+
+**Id Source** (`idSource`)
+
+- From repeater: at the frame's end it binds to the record of the row it sits in
+- otherwise: kept; the record stays bound until the next Id
+
+**Repeater Component** (`repeaterComponent`)
+
+- under From repeater: at the frame's end it binds to the record of that repeater's row (blank: the nearest)
+- otherwise: kept, and read only under From repeater
+
+**Id** (`modelId`)
+
+- always: the record with that id is bound now (a record handed in, by its id; an empty id binds nothing), and Id is sent again
+
+**Target Record Id** (`targetId`)
+
+- always: kept, unchecked, for the next Do — the record at the other end of the relation; it must have been loaded (from a Query Records or Record), or the Do fails with its class unknown
+
+**Do** (`store`)
+
+- always: no check at the press — it joins the frame's batch, and at the end of the frame one call answers every press: Done for each (what the backend hands back is written onto the record), or Error and Failure for each (no Class, no Relation, no Target Record Id, no record bound, a target record never loaded, no backend, or the backend refuses)
+
 ## Outputs
 
 ### Values

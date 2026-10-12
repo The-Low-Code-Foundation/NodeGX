@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f5e7cda7-9f68-575b-8d09-1a146cb8ec7c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "goalmetIn",
+      "fromProperty": "goal",
+      "toId": "goalmetFn",
+      "toProperty": "in-goal"
+    },
+    {
+      "fromId": "goalmetIn",
+      "fromProperty": "program",
+      "toId": "goalmetFn",
+      "toProperty": "in-program"
+    },
+    {
+      "fromId": "goalmetIn",
+      "fromProperty": "robotId",
+      "toId": "goalmetFn",
+      "toProperty": "in-robotId"
+    },
+    {
+      "fromId": "goalmetIn",
+      "fromProperty": "run",
+      "toId": "goalmetFn",
+      "toProperty": "in-run"
+    },
+    {
+      "fromId": "goalmetIn",
+      "fromProperty": "world",
+      "toId": "goalmetFn",
+      "toProperty": "in-world"
+    },
+    {
+      "fromId": "goalmetIn",
+      "fromProperty": "go",
+      "toId": "goalmetFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "goalmetFn",
+      "fromProperty": "out-done",
+      "toId": "goalmetOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "goalmetFn",
+      "fromProperty": "out-met",
+      "toId": "goalmetOut",
+      "toProperty": "met"
+    },
+    {
+      "fromId": "goalmetFn",
+      "fromProperty": "out-missing",
+      "toId": "goalmetOut",
+      "toProperty": "missing"
+    },
+    {
+      "fromId": "goalmetFn",
+      "fromProperty": "out-total",
+      "toId": "goalmetOut",
+      "toProperty": "total"
+    },
+    {
+      "fromId": "goalmetFn",
+      "fromProperty": "success",
+      "toId": "goalmetOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -132,8 +132,8 @@
     {
       "fromId": "t_pp_page_title",
       "fromProperty": "Translation",
-      "toId": "seo_pp_page",
-      "toProperty": "in-title"
+      "toId": "pp_page",
+      "toProperty": "title"
     },
     {
       "fromId": "pp_rows",
@@ -142,14 +142,8 @@
       "toProperty": "navigate"
     },
     {
-      "fromId": "pp_with_page",
-      "fromProperty": "out-learnerId",
-      "toId": "pp_filter",
-      "toProperty": "withPage"
-    },
-    {
-      "fromId": "pp_with_page",
-      "fromProperty": "out-learnerId",
+      "fromId": "pp_rows",
+      "fromProperty": "itemActionItemId",
       "toId": "pp_open",
       "toProperty": "pm-learner"
     }

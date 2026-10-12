@@ -113,6 +113,23 @@ TimerScheduler.prototype.stopTimer = function (this: TimerScheduler, timer: Time
   }
 };
 
+/**
+ * P107-C19 — one timer's callback must not stop the others.
+ *
+ * `runTimers` reassigns `runningTimers` and joins `newTimers` only after its loops, and its
+ * caller (`NodeContext.update`) does not catch: a callback that threw every frame (an Animate To
+ * Value with an Easing Curve the set did not have) held EVERY timer in the app where it was —
+ * other animations froze, Repeat never ticked again. Each callback is caught and logged, as
+ * `updateDirtyNodes` does for a node's update; the throwing timer carries on to its normal end.
+ */
+function callSafely(callback: () => void): void {
+  try {
+    callback();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 TimerScheduler.prototype.runTimers = function (this: TimerScheduler, currentTime: number): void {
   const remainingTimers: Timer[] = [],
     finishedTimers: Timer[] = [],
@@ -131,7 +148,7 @@ TimerScheduler.prototype.runTimers = function (this: TimerScheduler, currentTime
     timer = timersThisFrame[i];
     if (timer && currentTime >= timer._start) {
       if (timer._hasCalledOnStart === false && timer.onStart) {
-        timer.onStart();
+        callSafely(() => timer.onStart());
         timer._hasCalledOnStart = true;
       }
 
@@ -150,7 +167,7 @@ TimerScheduler.prototype.runTimers = function (this: TimerScheduler, currentTime
       }
 
       if (timer.onRunning) {
-        timer.onRunning(localT);
+        callSafely(() => timer.onRunning(localT));
       }
 
       if (t < 1.0 && timer._isRunning) {
@@ -169,7 +186,8 @@ TimerScheduler.prototype.runTimers = function (this: TimerScheduler, currentTime
     finishedTimers[i]._isRunning = false;
     finishedTimers[i]._hasCalledOnStart = false;
     if (finishedTimers[i].onFinish) {
-      finishedTimers[i].onFinish();
+      const finished = finishedTimers[i];
+      callSafely(() => finished.onFinish());
     }
   }
 
@@ -184,12 +202,13 @@ TimerScheduler.prototype.runTimers = function (this: TimerScheduler, currentTime
 
       if (timer.delay === 0) {
         //play first timer frame directly to keep everything nicely synched
-        if (timer.onStart) {
-          timer.onStart();
-          timer._hasCalledOnStart = true;
+        const joining = timer;
+        if (joining.onStart) {
+          callSafely(() => joining.onStart());
+          joining._hasCalledOnStart = true;
         }
-        if (timer.onRunning) {
-          timer.onRunning(0);
+        if (joining.onRunning) {
+          callSafely(() => joining.onRunning(0));
         }
       }
     }

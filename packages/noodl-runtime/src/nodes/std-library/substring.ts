@@ -68,13 +68,12 @@ const SubStringNode: NodeDefinitionOptions = {
         name: 'string'
       },
       displayName: 'String',
-      description: 'Text to take the substring from; it must not be cleared to null, which raises an error rather than yielding an empty result',
+      description: 'Text to take the substring from; an empty value (null) counts as empty text',
       default: '',
-      // `value.toString()`, not `String(value)`: the two differ on `null`/`undefined`,
-      // where the original throws rather than yielding `"null"`. Typed as the structural
-      // requirement so the call survives without widening what the port accepts.
-      set: function (this: SubStringNodeInstance, value: { toString(): string }) {
-        this._internal.inputString = value.toString();
+      // P107-C4 (ISL-026, ruled "Read it as empty text"): null and undefined are empty text. The
+      // setter once called `value.toString()`, which threw on both and left the frame dead.
+      set: function (this: SubStringNodeInstance, value: unknown) {
+        this._internal.inputString = value === null || value === undefined ? '' : String(value);
         this._internal.resultDirty = true;
         this.flagOutputDirty('result');
       }
@@ -90,7 +89,8 @@ const SubStringNode: NodeDefinitionOptions = {
         const internal = this._internal;
 
         if (internal.resultDirty) {
-          if (internal.endIndex === -1) {
+          // P107-D7: the text '-1' (a text field, an expression) runs to the end too, as the number does.
+          if (Number(internal.endIndex) === -1) {
             internal.cachedResult = internal.inputString.substr(internal.startIndex);
           } else {
             internal.cachedResult = internal.inputString.substr(

@@ -1,0 +1,84 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "98b032ad-a04d-5739-8688-741e5fdebf33",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "apIn",
+      "type": "Component Inputs",
+      "label": "The action",
+      "ports": [
+        {
+          "name": "actionId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "ink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edge",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 290,
+      "y": 40
+    },
+    {
+      "id": "apOut",
+      "type": "Component Outputs",
+      "label": "Which one was pressed",
+      "ports": [
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 290,
+      "y": 160
+    },
+    {
+      "id": "apBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Tick or untick it",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-md)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "fontSize": "var(--text-sm)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "styleCss": "text-align: left; justify-content: flex-start;"
+      },
+      "x": 40,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "apBtn"
+  ]
+}

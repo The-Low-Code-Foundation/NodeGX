@@ -90,6 +90,7 @@ export function RepositorySection({ gitState, remoteUrl, owner, repo, onConnect 
           </span>
           {isGitHub && remoteUrl && (
             <IconButton
+              ariaLabel="Open on GitHub"
               icon={IconName.ExternalLink}
               size={IconSize.Small}
               variant={IconButtonVariant.OpaqueOnHover}

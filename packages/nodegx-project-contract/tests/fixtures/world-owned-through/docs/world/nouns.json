@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/world-v1.json#/definitions/nounsFile",
+  "nouns": [
+    {
+      "id": "person",
+      "name": "Person",
+      "sentence": "A person is anyone we know: a member, someone who came to a session, someone we wrote to.",
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text"
+        }
+      ],
+      "signsIn": true,
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
+    },
+    {
+      "id": "account",
+      "name": "Account",
+      "sentence": "An account is what pays us: a company's membership, with the people on it.",
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
+    },
+    {
+      "id": "company",
+      "name": "Company",
+      "sentence": "A company is where people work; it may or may not have an account with us.",
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
+    },
+    {
+      "id": "session",
+      "name": "Session",
+      "sentence": "A session is one meeting on one date that people sign up for and come to.",
+      "properties": [
+        {
+          "name": "title",
+          "kind": "text"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "title",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
+    },
+    {
+      "id": "tag",
+      "name": "Tag",
+      "sentence": "A tag is a word we put on sessions so people can find them.",
+      "properties": [
+        {
+          "name": "label",
+          "kind": "text"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "label",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
+    },
+    {
+      "id": "topic",
+      "name": "Topic",
+      "sentence": "A topic is what a session is about; topics sit under broader topics.",
+      "properties": [
+        {
+          "name": "title",
+          "kind": "text"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "title",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
+    },
+    {
+      "id": "note",
+      "name": "Note",
+      "sentence": "A note we keep about an account.",
+      "properties": [
+        {
+          "name": "text",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "text",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
+    }
+  ]
+}

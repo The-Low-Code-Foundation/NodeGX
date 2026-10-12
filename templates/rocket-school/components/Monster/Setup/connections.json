@@ -36,18 +36,6 @@
     {
       "fromId": "zsFirst",
       "fromProperty": "onfalse",
-      "toId": "zsInitMode",
-      "toProperty": "do"
-    },
-    {
-      "fromId": "zsDefMode",
-      "fromProperty": "result",
-      "toId": "zsInitMode",
-      "toProperty": "value"
-    },
-    {
-      "fromId": "zsInitMode",
-      "fromProperty": "done",
       "toId": "zsInitStyle",
       "toProperty": "do"
     },
@@ -68,48 +56,6 @@
       "fromProperty": "done",
       "toId": "zsSeeded",
       "toProperty": "to-seeded"
-    },
-    {
-      "fromId": "zsIn",
-      "fromProperty": "mathsWord",
-      "toId": "zsModeItems",
-      "toProperty": "in-maths"
-    },
-    {
-      "fromId": "zsIn",
-      "fromProperty": "typingWord",
-      "toId": "zsModeItems",
-      "toProperty": "in-typing"
-    },
-    {
-      "fromId": "zsModeItems",
-      "fromProperty": "out-items",
-      "toId": "zsMode",
-      "toProperty": "items"
-    },
-    {
-      "fromId": "zsModeVar",
-      "fromProperty": "value",
-      "toId": "zsMode",
-      "toProperty": "value"
-    },
-    {
-      "fromId": "zsMode",
-      "fromProperty": "value",
-      "toId": "zsSetMode",
-      "toProperty": "value"
-    },
-    {
-      "fromId": "zsMode",
-      "fromProperty": "changed",
-      "toId": "zsSetMode",
-      "toProperty": "do"
-    },
-    {
-      "fromId": "zsModeVar",
-      "fromProperty": "value",
-      "toId": "zsOut",
-      "toProperty": "mode"
     },
     {
       "fromId": "zsIn",
@@ -254,6 +200,294 @@
       "fromProperty": "onClick",
       "toId": "zsOut",
       "toProperty": "start"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "practisingWord",
+      "toId": "zsFocusLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "changeWord",
+      "toId": "zsChange",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "curriculum",
+      "toId": "zsFocus",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "sets",
+      "toId": "zsFocus",
+      "toProperty": "sets"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "level",
+      "toId": "zsFocus",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "lang",
+      "toId": "zsFocus",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "everythingWord",
+      "toId": "zsFocus",
+      "toProperty": "everythingWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "countWord",
+      "toId": "zsFocus",
+      "toProperty": "countWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "listWord",
+      "toId": "zsFocus",
+      "toProperty": "listWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "subject0",
+      "toId": "zsFocus",
+      "toProperty": "subject"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "skills0",
+      "toId": "zsFocus",
+      "toProperty": "skills"
+    },
+    {
+      "fromId": "zsFocus",
+      "fromProperty": "line",
+      "toId": "zsFocusLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "zsFocus",
+      "fromProperty": "mode",
+      "toId": "zsOut",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "zsFocus",
+      "fromProperty": "focus",
+      "toId": "zsOut",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "zsFocus",
+      "fromProperty": "customSet",
+      "toId": "zsOut",
+      "toProperty": "customSet"
+    },
+    {
+      "fromId": "zsFocus",
+      "fromProperty": "customSetId",
+      "toId": "zsOut",
+      "toProperty": "customSetId"
+    },
+    {
+      "fromId": "zsFocus",
+      "fromProperty": "customSetBoth",
+      "toId": "zsOut",
+      "toProperty": "customSetBoth"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "app",
+      "toId": "zsSetFocus",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "profileId",
+      "toId": "zsSetFocus",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "zsPicker",
+      "fromProperty": "subject",
+      "toId": "zsSetFocus",
+      "toProperty": "focusSubject"
+    },
+    {
+      "fromId": "zsPicker",
+      "fromProperty": "skills",
+      "toId": "zsSetFocus",
+      "toProperty": "focusSkills"
+    },
+    {
+      "fromId": "zsPicker",
+      "fromProperty": "save",
+      "toId": "zsSetFocus",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "zsSetFocus",
+      "fromProperty": "app",
+      "toId": "zsOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "zsSetFocus",
+      "fromProperty": "done",
+      "toId": "zsOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "zsChoosing",
+      "fromProperty": "setup",
+      "toId": "zsRows",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "zsChoosing",
+      "fromProperty": "picking",
+      "toId": "zsPicker",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "zsChange",
+      "fromProperty": "onClick",
+      "toId": "zsPicker",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "zsChange",
+      "fromProperty": "onClick",
+      "toId": "zsChoosing",
+      "toProperty": "to-picking"
+    },
+    {
+      "fromId": "zsPicker",
+      "fromProperty": "save",
+      "toId": "zsChoosing",
+      "toProperty": "to-setup"
+    },
+    {
+      "fromId": "zsPicker",
+      "fromProperty": "cancel",
+      "toId": "zsChoosing",
+      "toProperty": "to-setup"
+    },
+    {
+      "fromId": "zsPicker",
+      "fromProperty": "editLists",
+      "toId": "zsOut",
+      "toProperty": "editLists"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "curriculum",
+      "toId": "zsPicker",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "sets",
+      "toId": "zsPicker",
+      "toProperty": "sets"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "level",
+      "toId": "zsPicker",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "lang",
+      "toId": "zsPicker",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "subject0",
+      "toId": "zsPicker",
+      "toProperty": "subject0"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "skills0",
+      "toId": "zsPicker",
+      "toProperty": "skills0"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "titleWord",
+      "toId": "zsPicker",
+      "toProperty": "titleWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "subjectWord",
+      "toId": "zsPicker",
+      "toProperty": "subjectWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "topicWord",
+      "toId": "zsPicker",
+      "toProperty": "topicWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "skillsHint",
+      "toId": "zsPicker",
+      "toProperty": "skillsHint"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "allWord",
+      "toId": "zsPicker",
+      "toProperty": "allWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "noneWord",
+      "toId": "zsPicker",
+      "toProperty": "noneWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "saveWord",
+      "toId": "zsPicker",
+      "toProperty": "saveWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "cancelWord",
+      "toId": "zsPicker",
+      "toProperty": "cancelWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "listsWord",
+      "toId": "zsPicker",
+      "toProperty": "listsWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "editListsWord",
+      "toId": "zsPicker",
+      "toProperty": "editListsWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "noListsWord",
+      "toId": "zsPicker",
+      "toProperty": "noListsWord"
     }
   ]
 }

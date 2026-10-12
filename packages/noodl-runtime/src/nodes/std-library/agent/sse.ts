@@ -169,8 +169,9 @@ const SSENode: NodeDefinitionOptions = {
       displayName: 'Method',
       description: 'HTTP method for the request; anything other than GET needs the Fetch transport',
       group: 'Request',
-      set(this: SseNodeInstance, value: string) {
-        internalOf(this).method = value || 'GET';
+      // P107-C57 (ISL-026, ruled "Turn them into text"): as URL does — a number kept as it came threw at `.toUpperCase()` on Connect
+      set(this: SseNodeInstance, value: unknown) {
+        internalOf(this).method = value ? String(value) : 'GET';
       }
     },
 
@@ -214,8 +215,9 @@ const SSENode: NodeDefinitionOptions = {
       group: 'Connection',
       tooltip:
         'Comma-separated named event types to subscribe to. Only needed for the EventSource transport, which delivers a named event only to a listener registered in advance; the Fetch transport delivers every event type.',
-      set(this: SseNodeInstance, value: string) {
-        internalOf(this).eventTypes = value || '';
+      // P107-C57 (ISL-026): as text — a number kept as it came threw at `.split(',')` on Connect
+      set(this: SseNodeInstance, value: unknown) {
+        internalOf(this).eventTypes = value ? String(value) : '';
       }
     },
 
@@ -577,6 +579,14 @@ const SSENode: NodeDefinitionOptions = {
           this.settleConnect('unchanged');
           this.teardownConnection();
           if (inner.autoConnect && inner.url) this.doConnect();
+          else {
+            // P107-C58 (P109 ISL-030, ruled "Say idle, as WebSocket does"): nothing reopens, so say so. The teardown is
+            // silent and Connection State is the node's own field: it stayed `open` (Connected true) with no stream.
+            inner.connectionState = 'idle';
+            this.flagOutputDirty('connectionState');
+            this.flagOutputDirty('connected');
+            this.flagOutputDirty('retryCount');
+          }
           return;
         }
 
@@ -638,6 +648,10 @@ const SSENode: NodeDefinitionOptions = {
         onState: (state) => this.handleState(state),
         onFrame: (frame) => this.handleFrame(frame),
         onError: (message) => this.handleError(message),
+        // P107-C56 (P109 ISL-030, ruled "Send them when they change"): Retry Count and Duplicates Suppressed are sent when
+        // they move. A failure sent the count BEFORE it went up, and a duplicate was counted silently until the next error.
+        onRetry: () => this.flagOutputDirty('retryCount'),
+        onDuplicate: () => this.flagOutputDirty('duplicatesSuppressed'),
         ...internal.seams
       };
 
@@ -666,6 +680,9 @@ const SSENode: NodeDefinitionOptions = {
       this.flagOutputDirty('connectionState');
       this.flagOutputDirty('connected');
       this.flagOutputDirty('retryCount');
+      // P107-C56: an open clears Last Error (the connection does), so the wire is told — it kept the last failure beside
+      // Connection State `open`.
+      if (state === 'open') this.flagOutputDirty('lastError');
 
       if (state === 'open') this.sendSignalOnOutput('onOpen');
       // 'error' is terminal, so it closes the stream from the graph's point of view

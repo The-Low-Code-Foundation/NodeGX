@@ -63,6 +63,7 @@
 
 import { escapeColumn, escapeTable } from '../local-sql/QueryBuilder';
 import {
+  applyRequired,
   builtInIndexNames,
   checkChecksAgainstColumns,
   checkName,
@@ -75,9 +76,12 @@ import {
   type CheckStatus,
   declaredColumn,
   declaredProperties,
+  FieldEmptyError,
   indexName,
   junctionTableName,
   refuseColumnInUse,
+  ownedJunctions,
+  refuseTableRename,
   normalizeIndexDecls,
   POSTGRES_TYPE_MAP,
   sameIndexSignature,
@@ -93,7 +97,8 @@ import {
   type TableSchema
 } from '../local-sql/schemaCommon';
 import { checkConstraintDDL, columnToPostgres, declaredIndexDDL, junctionDDL, tableDDL } from './ddl';
-import { translatePgError, PG_UNIQUE_VIOLATION } from './errors';
+import { translatePgError, PG_UNDEFINED_TABLE, PG_UNIQUE_VIOLATION } from './errors';
+import { assertSeriesColumns, planNumbering, seriesName, seriesProblem, SERIES_SET_SQL, SERIES_TABLE, SERIES_TABLE_DDL, type SeriesOption } from '../series';
 import type { PgConnectionPool } from './pool';
 
 /** PostgreSQL truncates an identifier longer than this silently. Refused instead. */
@@ -202,6 +207,15 @@ function freshSchema<T>(schema: T): T {
   return JSON.parse(JSON.stringify(schema)) as T;
 }
 
+/** How many times `load()` reads the catalog when a table is dropped under it. */
+const LOAD_ATTEMPTS = 5;
+
+/** A read failed because a table it listed was dropped by someone else in between. */
+function droppedUnderTheLoad(e: unknown): boolean {
+  const err = e as { code?: string; message?: string };
+  return err?.code === PG_UNDEFINED_TABLE || (err?.code === 'XX000' && /could not open relation with OID/.test(String(err.message)));
+}
+
 export class PgSchemaManager {
   static SchemaQueueError = SchemaQueueError;
 
@@ -229,8 +243,27 @@ export class PgSchemaManager {
   // Priming the model from the live database
   // ===========================================================================
 
-  /** Create the two meta tables and read everything the model needs. Called once, by `connect()`. */
+  /**
+   * Create the two meta tables and read everything the model needs. Called once, by `connect()`.
+   *
+   * P116-S14-pgloadrace: the reads are several statements, and another backend on the same
+   * database can drop a table between them — a collection deleted while this one starts. The
+   * listing then names a table a later read cannot open (`no such table`, or an index definition
+   * whose relation is gone), and the backend refused to start. Read again from an empty model;
+   * once the drop is committed the catalog is whole.
+   */
   async load(): Promise<void> {
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return await this.loadOnce();
+      } catch (e) {
+        if (attempt >= LOAD_ATTEMPTS || !droppedUnderTheLoad(e)) throw e;
+        for (const m of [this.s.tables, this.s.schemas, this.s.columns, this.s.built, this.s.checks, this.s.relations, this.s.owners, this.s.search]) m.clear();
+      }
+    }
+  }
+
+  private async loadOnce(): Promise<void> {
     await this.pool.run(META_DDL);
     const st = this.s;
 
@@ -369,6 +402,7 @@ export class PgSchemaManager {
   createTable(schema: TableSchema): boolean {
     const st = this.s;
     const name = schema.name;
+    assertSeriesColumns(schema.columns); // P116 ONT-015: a series that cannot be kept is refused, not stored
     if (st.tables.has(name)) return false;
 
     const stored: TableSchema = { ...schema, columns: [...(schema.columns || [])] };
@@ -434,6 +468,7 @@ export class PgSchemaManager {
   }
 
   addColumn(tableName: string, column: SchemaColumn): void {
+    assertSeriesColumns([column]);
     const st = this.s;
     if (!st.tables.has(tableName)) throw new Error(`no such table: ${tableName}`);
     if (!TYPE_MAP[column.type]) {
@@ -484,6 +519,21 @@ export class PgSchemaManager {
   }
 
   /**
+   * BMG-003 / P116-ONT-007-renamecolumn — refuse a drop or a rename while
+   * something declared reads the column (`refuseColumnInUse`).
+   */
+  private refuseIfRead(tableName: string, columnName: string, verb: 'drop' | 'rename'): void {
+    refuseColumnInUse(
+      tableName,
+      columnName,
+      this.declaredIndexes(tableName).map((i) => ({ name: this.indexName(tableName, i.fields, i.where), fields: i.fields, where: i.where })),
+      this.declaredChecks(tableName),
+      this.s.search.get(tableName)?.fields,
+      verb
+    );
+  }
+
+  /**
    * BMG-003 — drop a column. A Relation is a junction table, so that is what
    * goes; a declared index, check or search opt-in that reads the column is a
    * refusal (`code: 'COLUMN_IN_USE'`) naming it, never a cascade: the index
@@ -497,13 +547,7 @@ export class PgSchemaManager {
     const declared = ((schema && schema.columns) || []).find((c) => c.name === columnName);
     const cols = st.columns.get(tableName) || new Set<string>();
     if (!declared && !cols.has(columnName)) return false;
-    refuseColumnInUse(
-      tableName,
-      columnName,
-      this.declaredIndexes(tableName).map((i) => ({ name: this.indexName(tableName, i.fields, i.where), fields: i.fields })),
-      this.declaredChecks(tableName),
-      st.search.get(tableName)?.fields
-    );
+    this.refuseIfRead(tableName, columnName, 'drop');
 
     const relation = declared && declared.type === 'Relation';
     const junction = relation ? junctionTableName(tableName, columnName) : null;
@@ -586,7 +630,10 @@ export class PgSchemaManager {
     const st = this.s;
     if (!st.tables.has(tableName)) return false;
 
-    const junctions = [...st.tables].filter((t) => t.startsWith('_Join_') && t.endsWith(`_${tableName}`));
+    // P116-ONT-007-junctions: its own junction tables, never a suffix match ("Account" took "My_Account"'s).
+    const declared = new Map<string, string[]>();
+    for (const [name, sch] of st.schemas) declared.set(name, (sch.columns || []).filter((c) => c.type === 'Relation').map((c) => c.name));
+    const junctions = ownedJunctions(tableName, st.tables, declared);
     const removed = {
       schema: st.schemas.get(tableName),
       columns: st.columns.get(tableName),
@@ -634,6 +681,253 @@ export class PgSchemaManager {
     return true;
   }
 
+  /**
+   * P116 ONT-007 — rename a collection, keeping its records. See
+   * `IStorageSchema.renameTable`. The model moves at once; the DDL is one
+   * queued transaction (the table, its two built-in indexes, the junction
+   * tables its own `Relation` columns name, the `_Schema` rows), and a
+   * failure puts the model back.
+   */
+  renameTable(oldName: string, newName: string): boolean {
+    const st = this.s;
+    const known = st.tables.has(oldName);
+    refuseTableRename(oldName, newName, (n) => st.tables.has(n) || st.schemas.has(n), {
+      indexes: known ? this.indexStatus(oldName) : [],
+      checks: known ? this.checkStatus(oldName) : [],
+      search: known && this.hasSearchIndex(oldName)
+    });
+
+    const schema = st.schemas.get(oldName);
+    // s11: a fresh copy, with a link the collection has to ITSELF (a topic's parent) renamed with it —
+    // `{ ...schema, name }` kept `targetClass: oldName` on it, a link to a collection that no longer exists.
+    const renamed = schema ? freshSchema({ ...schema, name: newName }) : undefined;
+    for (const c of renamed?.columns || []) if (c.targetClass === oldName) c.targetClass = newName;
+    const junctions = (schema?.columns || [])
+      .filter((c) => c.type === 'Relation' && c.targetClass)
+      .map((c) => ({ from: junctionTableName(oldName, c.name), to: junctionTableName(newName, c.name) }))
+      .filter((j) => st.tables.has(j.from));
+    const others = [...st.schemas.values()].filter(
+      (o) => o.name !== oldName && (o.columns || []).some((c) => c.targetClass === oldName)
+    );
+    // s11: each retargeted schema is a fresh copy, never edited in place — `declaredProperties`
+    // memoises against the object, and an in-place `targetClass` kept answering with the old name.
+    const retargeted = others.map((o) => {
+      const fresh = freshSchema(o);
+      for (const c of fresh.columns || []) if (c.targetClass === oldName) c.targetClass = newName;
+      return { was: o, now: fresh };
+    });
+
+    const move = <T>(m: Map<string, T>, from: string, to: string): void => {
+      if (!m.has(from)) return;
+      m.set(to, m.get(from)!);
+      m.delete(from);
+    };
+    const apply = (from: string, to: string, js: Array<{ from: string; to: string }>): void => {
+      st.tables.delete(from);
+      st.tables.add(to);
+      move(st.columns, from, to);
+      move(st.built, from, to);
+      move(st.checks, from, to);
+      for (const j of js) {
+        st.tables.delete(j.from);
+        st.tables.add(j.to);
+        move(st.relations, j.from, j.to);
+        move(st.owners, j.from, j.to);
+        move(st.columns, j.from, j.to);
+      }
+    };
+    apply(oldName, newName, junctions);
+    st.schemas.delete(oldName);
+    if (renamed) st.schemas.set(newName, renamed);
+    for (const r of retargeted) st.schemas.set(r.now.name, r.now);
+    const snapshots = retargeted.map((r) => [r.now.name, JSON.stringify(r.now)] as const);
+    const [oldCreated, oldUpdated] = builtInIndexNames(oldName);
+    const [newCreated, newUpdated] = builtInIndexNames(newName);
+
+    this.enqueue(
+      `renameTable("${oldName}" → "${newName}")`,
+      async () => {
+        await this.pool.transaction(async (tx) => {
+          await tx.run(`ALTER TABLE ${escapeTable(oldName)} RENAME TO ${escapeTable(newName)}`);
+          await tx.run(`ALTER INDEX IF EXISTS ${escapeTable(oldCreated)} RENAME TO ${escapeTable(newCreated)}`);
+          await tx.run(`ALTER INDEX IF EXISTS ${escapeTable(oldUpdated)} RENAME TO ${escapeTable(newUpdated)}`);
+          for (const j of junctions) {
+            await tx.run(`ALTER TABLE ${escapeTable(j.from)} RENAME TO ${escapeTable(j.to)}`);
+            for (const end of ['owning', 'related'])
+              await tx.run(`ALTER INDEX IF EXISTS ${escapeTable(`idx_${j.from}_${end}`)} RENAME TO ${escapeTable(`idx_${j.to}_${end}`)}`);
+          }
+          await tx.run('DELETE FROM "_Schema" WHERE "name" = ?', [oldName]);
+          if (renamed) await tx.run(UPSERT_SCHEMA, [newName, JSON.stringify(renamed)]);
+          for (const [name, snapshot] of snapshots) await tx.run(UPSERT_SCHEMA, [name, snapshot]);
+        });
+      },
+      () => {
+        apply(
+          newName,
+          oldName,
+          junctions.map((j) => ({ from: j.to, to: j.from }))
+        );
+        st.schemas.delete(newName);
+        if (schema) st.schemas.set(oldName, schema);
+        for (const r of retargeted) st.schemas.set(r.was.name, r.was);
+      }
+    );
+    return true;
+  }
+
+  /** P116 ONT-007 s11 — the SQLite manager's `describeTable`: the words, kept and never interpreted. A fresh object (the memo). */
+  describeTable(tableName: string, description: string | null, columns: Record<string, string | null> = {}): boolean {
+    const st = this.s;
+    const schema = st.schemas.get(tableName);
+    if (!schema) throw new Error(`There is no collection called "${tableName}"`);
+    const fresh = freshSchema(schema);
+    const say = (target: { [key: string]: unknown }, words: string | null | undefined): void => {
+      const text = typeof words === 'string' ? words.trim() : '';
+      if (text) target.description = text;
+      else delete target.description;
+    };
+    say(fresh, description);
+    for (const [name, words] of Object.entries(columns)) {
+      const col = (fresh.columns || []).find((c) => c.name === name);
+      if (!col) throw new Error(`"${tableName}" has no field "${name}"`);
+      say(col as unknown as { [key: string]: unknown }, words);
+    }
+    st.schemas.set(tableName, fresh);
+    const snapshot = JSON.stringify(fresh);
+    this.enqueue(
+      `describeTable("${tableName}")`,
+      async () => {
+        await this.pool.run(UPSERT_SCHEMA, [tableName, snapshot]);
+      },
+      () => {
+        st.schemas.set(tableName, schema);
+      }
+    );
+    return true;
+  }
+
+  /** P116 R10 — the SQLite manager's `setWhenTargetGoes`: the declaration only, a fresh object (the memo). */
+  setWhenTargetGoes(tableName: string, columns: Record<string, 'goes-too' | 'stays-unlinked' | 'blocks' | null>): boolean {
+    const st = this.s;
+    const schema = st.schemas.get(tableName);
+    if (!schema) throw new Error(`There is no collection called "${tableName}"`);
+    const fresh = freshSchema(schema);
+    const RULES = ['goes-too', 'stays-unlinked', 'blocks'];
+    for (const [name, rule] of Object.entries(columns)) {
+      const col = (fresh.columns || []).find((c) => c.name === name);
+      if (!col) throw new Error(`"${tableName}" has no field "${name}"`);
+      if (rule === null) {
+        delete col.whenTargetGoes;
+        continue;
+      }
+      if (!RULES.includes(rule)) throw new Error(`"${tableName}.${name}": "${String(rule)}" is not one of ${RULES.join(', ')}`);
+      if (col.type !== 'Pointer') throw new Error(`"${tableName}.${name}" is not a link to one record, so it cannot say what happens when that record goes`);
+      if (rule === 'stays-unlinked' && col.required) throw new Error(`"${tableName}.${name}" is required, so it cannot stay without one`);
+      col.whenTargetGoes = rule;
+    }
+    st.schemas.set(tableName, fresh);
+    const snapshot = JSON.stringify(fresh);
+    this.enqueue(
+      `setWhenTargetGoes("${tableName}")`,
+      async () => {
+        await this.pool.run(UPSERT_SCHEMA, [tableName, snapshot]);
+      },
+      () => {
+        st.schemas.set(tableName, schema);
+      }
+    );
+    return true;
+  }
+
+  /**
+   * P116 ONT-015 §3.3 — the SQLite manager's `setSeries`: the declaration, the numbers for the
+   * records without one and the counters, in one transaction behind the barrier. The rows and the
+   * counter are read `FOR UPDATE`, so a create in between waits rather than taking a number twice.
+   */
+  setSeries(tableName: string, columns: Record<string, SeriesOption | null>): boolean {
+    const st = this.s;
+    const schema = st.schemas.get(tableName);
+    if (!schema) throw new Error(`There is no collection called "${tableName}"`);
+    const fresh = freshSchema(schema);
+    for (const [name, series] of Object.entries(columns)) {
+      const col = (fresh.columns || []).find((c) => c.name === name);
+      if (!col) throw new Error(`"${tableName}" has no field "${name}"`);
+      if (series === null) {
+        delete col.series;
+        continue;
+      }
+      const problem = seriesProblem(name, series, col.type);
+      if (problem) throw new Error(problem);
+      col.series = series;
+    }
+    st.schemas.set(tableName, fresh);
+    const snapshot = JSON.stringify(fresh);
+    this.enqueue(
+      `setSeries("${tableName}")`,
+      async () => {
+        await this.pool.run(SERIES_TABLE_DDL);
+        await this.pool.transaction(async (tx) => {
+          await tx.run(UPSERT_SCHEMA, [tableName, snapshot]);
+          for (const [name, series] of Object.entries(columns)) {
+            if (series === null) continue;
+            const counter = seriesName(tableName, name);
+            const counters = await tx.query<{ period: string; next: string | number }>(`SELECT "period", "next" FROM "${SERIES_TABLE}" WHERE "name" = ? FOR UPDATE`, [counter]);
+            const rows = await tx.query<{ objectId: string; createdAt: unknown; value: unknown }>(
+              `SELECT "objectId", "createdAt", ${escapeColumn(name)} AS "value" FROM ${escapeTable(tableName)} FOR UPDATE`
+            );
+            const plan = planNumbering(series, rows, counters);
+            for (const a of plan.assign) await tx.run(`UPDATE ${escapeTable(tableName)} SET ${escapeColumn(name)} = ? WHERE "objectId" = ?`, [a.value, a.objectId]);
+            for (const c of plan.counters) await tx.run(SERIES_SET_SQL, [counter, c.period, c.next]);
+          }
+        });
+      },
+      () => {
+        st.schemas.set(tableName, schema);
+      }
+    );
+    return true;
+  }
+
+  /**
+   * P116-ONT-007-required — the SQLite manager's `setRequired`: `ALTER COLUMN … SET / DROP NOT NULL`
+   * and the declaration, in one queued transaction. The model changes at once; the empty records are
+   * counted inside the transaction, under the lock the ALTER takes anyway, so the refusal
+   * (`FieldEmptyError`, the same words) arrives at the barrier and the model is put back.
+   */
+  setRequired(tableName: string, columns: Record<string, boolean>): boolean {
+    const st = this.s;
+    const schema = st.schemas.get(tableName);
+    if (!schema || !st.tables.has(tableName)) throw new Error(`There is no collection called "${tableName}"`);
+    const fresh = freshSchema(schema);
+    const changes = applyRequired(fresh, tableName, columns);
+    if (!changes.length) return false;
+    st.schemas.set(tableName, fresh);
+    const snapshot = JSON.stringify(fresh);
+    const table = escapeTable(tableName);
+    this.enqueue(
+      `setRequired("${tableName}")`,
+      async () => {
+        await this.pool.transaction(async (tx) => {
+          await tx.run(`LOCK TABLE ${table} IN ACCESS EXCLUSIVE MODE`);
+          for (const c of changes) {
+            const col = escapeColumn(c.name);
+            if (c.required) {
+              const [empty] = await tx.query<{ n: string | number }>(`SELECT COUNT(*) AS "n" FROM ${table} WHERE ${col} IS NULL`);
+              const n = Number(empty?.n ?? 0);
+              if (n > 0) throw new FieldEmptyError(tableName, c.name, n);
+            }
+            await tx.run(`ALTER TABLE ${table} ALTER COLUMN ${col} ${c.required ? 'SET' : 'DROP'} NOT NULL`);
+          }
+          await tx.run(UPSERT_SCHEMA, [tableName, snapshot]);
+        });
+      },
+      () => {
+        st.schemas.set(tableName, schema);
+      }
+    );
+    return true;
+  }
+
   renameColumn(tableName: string, oldName: string, newName: string): boolean {
     if (!newName || !/^[a-zA-Z][a-zA-Z0-9_]*$/.test(newName)) {
       throw new Error('Invalid column name');
@@ -645,13 +939,21 @@ export class PgSchemaManager {
     if (!st.tables.has(tableName)) throw new Error(`no such table: ${tableName}`);
     const cols = st.columns.get(tableName)!;
     if (!cols.has(oldName)) throw new Error(`Column "${oldName}" does not exist`);
+    this.refuseIfRead(tableName, oldName, 'rename');
 
     cols.delete(oldName);
     cols.add(newName);
+    // P116 ONT-007 s11: a FRESH object, as `addColumn` (BMG-003). `declaredProperties` memoises against
+    // the schema object, and renaming the column in place left it answering with the old name: a path
+    // rule following the renamed link was refused as "not a declared link (it is String)" on the next
+    // request, on PostgreSQL only (SQLite's manager already caches a fresh copy).
     const schema = st.schemas.get(tableName);
-    const col = schema && schema.columns ? schema.columns.find((c) => c.name === oldName) : undefined;
-    if (col) col.name = newName;
-    const snapshot = schema && col ? JSON.stringify(schema) : null;
+    const renamed = schema && schema.columns && schema.columns.some((c) => c.name === oldName) ? freshSchema(schema) : undefined;
+    if (renamed) {
+      renamed.columns!.find((c) => c.name === oldName)!.name = newName;
+      st.schemas.set(tableName, renamed);
+    }
+    const snapshot = renamed ? JSON.stringify(renamed) : null;
 
     this.enqueue(
       `renameColumn("${tableName}", "${oldName}" → "${newName}")`,
@@ -666,7 +968,7 @@ export class PgSchemaManager {
       () => {
         cols.delete(newName);
         cols.add(oldName);
-        if (col) col.name = oldName;
+        if (renamed && schema) st.schemas.set(tableName, schema);
       }
     );
     return true;

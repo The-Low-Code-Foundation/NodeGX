@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0cf78814-5399-5abe-8903-8089fbed60a8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "MarkmoneyIn",
+      "fromProperty": "key",
+      "toId": "MarkmoneyWrite",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "MarkmoneyIn",
+      "fromProperty": "action",
+      "toId": "MarkmoneyWrite",
+      "toProperty": "in-action"
+    },
+    {
+      "fromId": "MarkmoneyIn",
+      "fromProperty": "items",
+      "toId": "MarkmoneyWrite",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "MarkmoneyIn",
+      "fromProperty": "marks",
+      "toId": "MarkmoneyWrite",
+      "toProperty": "in-marks"
+    },
+    {
+      "fromId": "MarkmoneyIn",
+      "fromProperty": "projects",
+      "toId": "MarkmoneyWrite",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "MarkmoneyIn",
+      "fromProperty": "do",
+      "toId": "MarkmoneyWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "MarkmoneyWrite",
+      "fromProperty": "out-done",
+      "toId": "MarkmoneyOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "MarkmoneyWrite",
+      "fromProperty": "out-failed",
+      "toId": "MarkmoneyProblem",
+      "toProperty": "do"
+    }
+  ]
+}

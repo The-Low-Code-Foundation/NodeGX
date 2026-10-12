@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "de64ec20-6fec-530b-8cbe-ee0c26b89fc5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "name",
+      "toId": "AddprojectWrite",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "amount",
+      "toId": "AddprojectWrite",
+      "toProperty": "in-amount"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "repeat",
+      "toId": "AddprojectWrite",
+      "toProperty": "in-repeat"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "date",
+      "toId": "AddprojectWrite",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "position",
+      "toId": "AddprojectWrite",
+      "toProperty": "in-position"
+    },
+    {
+      "fromId": "AddprojectIn",
+      "fromProperty": "do",
+      "toId": "AddprojectWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "AddprojectWrite",
+      "fromProperty": "out-done",
+      "toId": "AddprojectOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "AddprojectWrite",
+      "fromProperty": "out-error",
+      "toId": "AddprojectOut",
+      "toProperty": "error"
+    },
+    {
+      "fromId": "AddprojectWrite",
+      "fromProperty": "out-hasError",
+      "toId": "AddprojectOut",
+      "toProperty": "hasError"
+    },
+    {
+      "fromId": "AddprojectWrite",
+      "fromProperty": "out-failed",
+      "toId": "AddprojectProblem",
+      "toProperty": "do"
+    }
+  ]
+}

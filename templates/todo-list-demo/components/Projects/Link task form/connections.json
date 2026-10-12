@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2b358db2-c66c-5a5b-868c-d1d75f8c05ed",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lkIn",
+      "fromProperty": "heading",
+      "toId": "lkHead",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lkIn",
+      "fromProperty": "options",
+      "toId": "lkPick",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lkPick",
+      "fromProperty": "value",
+      "toId": "lkCheck",
+      "toProperty": "in-picked"
+    },
+    {
+      "fromId": "lkSave",
+      "fromProperty": "onClick",
+      "toId": "lkCheck",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "lkCheck",
+      "fromProperty": "out-error",
+      "toId": "lkError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lkCheck",
+      "fromProperty": "out-hasError",
+      "toId": "lkError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lkCheck",
+      "fromProperty": "out-taskId",
+      "toId": "lkOut",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "lkCheck",
+      "fromProperty": "out-go",
+      "toId": "lkOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "lkCancel",
+      "fromProperty": "onClick",
+      "toId": "lkOut",
+      "toProperty": "cancel"
+    }
+  ]
+}

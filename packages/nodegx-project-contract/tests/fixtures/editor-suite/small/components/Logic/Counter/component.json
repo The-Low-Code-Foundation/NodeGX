@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "comp-counter",
+  "name": "Counter",
+  "path": "/Logic/Counter",
+  "type": "logic",
+  "created": "2026-10-10T00:00:00.000Z",
+  "modified": "2026-10-10T00:00:00.000Z"
+}

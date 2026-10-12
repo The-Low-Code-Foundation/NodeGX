@@ -204,8 +204,11 @@ const AnimateToValue: NodeDefinitionOptions = {
       displayName: 'Delay',
       description: 'How long to wait before the move begins, in milliseconds',
       default: 0,
-      set: function (this: AnimateToValueInstance, value: number) {
-        this._internal._animation.delay = value;
+      set: function (this: AnimateToValueInstance, value: unknown) {
+        // ISL-026 / P107-C20, ruled "Read it as a number": text "100" waits 100 ms, and anything that is
+        // not a number (a wire let go, null) is no delay. Stored raw, the scheduler's `now + delay` joined
+        // text onto the frame time and made NaN of undefined, a start no frame ever reached.
+        this._internal._animation.delay = Number(value) || 0;
       }
     },
     easingCurve: {
@@ -223,7 +226,14 @@ const AnimateToValue: NodeDefinitionOptions = {
       group: 'Parameters',
       description: 'Shape of the movement between where the value is and Target Value',
       set: function (this: AnimateToValueInstance, value: string) {
-        this._internal._animation.ease = EaseCurves[value];
+        // P107-C19: a name the set does not have (empty, null, a disconnected wire, any other
+        // text) used to store `undefined`, and the run's first curve call threw inside the
+        // scheduler's timer pass — every frame, stopping every timer in the app. It moves
+        // along Ease Out instead, the port's default. Own keys only: `EaseCurves` is a plain
+        // object, so `toString` and friends are not curves.
+        this._internal._animation.ease = Object.prototype.hasOwnProperty.call(EaseCurves, value)
+          ? EaseCurves[value]
+          : EaseCurves.easeOut;
       }
     }
   },

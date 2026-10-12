@@ -82,6 +82,8 @@
     captureSave: 'Save to my project',
     captureSaved: '✓ Saved to your project',
     captureEdit: 'Edit',
+    captureSaving: 'Saving…',
+    captureError: 'Couldn’t save — please try again.',
     prepCopy: 'Copy',
     prepCopied: 'Copied!',
     prepDownload: 'Download .md',
@@ -422,8 +424,11 @@
     var capture = data(p.capturesProjectFact, null);
     var doneState = R.useState({});
     var done = doneState[0];
-    var factState = R.useState({ text: '', saved: false });
+    var factState = R.useState({ text: '', saved: false, pending: null, pressedAt: null, error: false });
     var fact = factState[0];
+    var waits = !!p.waitsForSave;
+    useSaveWait(waits, str(p.saveStatus), factState[1]);
+    var busy = waits && fact.pending !== null;
 
     return h(
       'div',
@@ -465,9 +470,10 @@
                   h('textarea', {
                     className: 'dbt-textarea',
                     value: fact.text,
+                    readOnly: busy,
                     placeholder: COPY.activityPlaceholder,
                     onChange: function (e) {
-                      factState[1]({ text: e.target.value, saved: false });
+                      factState[1](Object.assign({}, fact, { text: e.target.value, saved: false, error: false }));
                     }
                   }),
                   h(
@@ -475,22 +481,56 @@
                     {
                       type: 'button',
                       className: 'dbt-btn',
-                      disabled: !fact.text.trim(),
+                      disabled: busy || !fact.text.trim(),
                       onClick: function () {
                         var v = fact.text.trim();
                         if (!v) return;
-                        factState[1]({ text: v, saved: true });
+                        if (waits) factState[1](Object.assign({}, fact, { text: v, pending: v, pressedAt: str(p.saveStatus), error: false }));
+                        else factState[1]({ text: v, saved: true, pending: null, pressedAt: null, error: false });
                         emit(p, 'onSaveField', str(capture.field));
                         emit(p, 'onSaveValue', v);
                         emit(p, 'onSave');
                         emit(p, 'onAction');
                       }
                     },
-                    COPY.activitySave
-                  )
+                    busy ? COPY.captureSaving : COPY.activitySave
+                  ),
+                  fact.error ? h('p', { className: 'dbt-save-error', role: 'status' }, COPY.captureError) : null
                 )
           )
         : null
+    );
+  }
+
+  /**
+   * WAITING FOR THE BACKEND (TASK-L177). With `Waits for save` off — Palette, or
+   * anything that places the kit with no backend — a save is shown the moment it
+   * is pressed, as it always was. With it on, the words wait: the graph sets
+   * `Save status` to `saving`, then `saved` or `failed`, each followed by `:`
+   * and a token that is new for every save (`saved:1727700000000`), and only
+   * `saved` puts the ✓ on screen. The token is what makes it safe: a status left
+   * over from the PREVIOUS save must not settle this one, and a fast backend can
+   * answer inside one frame, so `saving` may never be seen at all. A save
+   * settles on the first status that DIFFERS from the one on screen when it was
+   * pressed. `failed` gives the box back with the text still in it: somebody's
+   * answer is never lost to a network error.
+   */
+  function saveKind(status) {
+    return String(status || '').split(':')[0];
+  }
+  function useSaveWait(waits, status, setState) {
+    R.useEffect(
+      function () {
+        if (!waits) return;
+        setState(function (cur) {
+          if (cur.pending === null || cur.pending === undefined) return cur;
+          if (status === cur.pressedAt) return cur;
+          if (saveKind(status) === 'saved') return Object.assign({}, cur, { text: cur.pending, saved: cur.pending, editing: false, pending: null, error: false });
+          if (saveKind(status) === 'failed') return Object.assign({}, cur, { pending: null, error: true });
+          return cur;
+        });
+      },
+      [waits, status]
     );
   }
 
@@ -503,9 +543,26 @@
 
     var facts = data(p.facts, {}) || {};
     var initial = str(p.initialValue) || str(facts[str(p.field)]);
-    var st = R.useState({ text: initial, saved: initial, editing: !initial });
+    var st = R.useState({ text: initial, saved: initial, editing: !initial, pending: null, pressedAt: null, error: false });
     var s = st[0];
     var set = st[1];
+    var waits = !!p.waitsForSave;
+    useSaveWait(waits, str(p.saveStatus), set);
+    var busy = waits && s.pending !== null;
+    /* The facts can arrive after the lesson (TASK-L177: the page reads them from
+       the learner's programme, a second request). The product's rule: seed from
+       the FIRST defined value, and never over something the learner has typed or
+       is saving. */
+    R.useEffect(
+      function () {
+        if (!initial) return;
+        set(function (cur) {
+          if (cur.saved || cur.text || cur.pending !== null) return cur;
+          return Object.assign({}, cur, { text: initial, saved: initial, editing: false });
+        });
+      },
+      [initial]
+    );
 
     return h(
       'div',
@@ -540,9 +597,10 @@
               className: 'capture-input',
               rows: 3,
               value: s.text,
+              readOnly: busy,
               placeholder: str(p.hint) || COPY.capturePlaceholder,
               onChange: function (e) {
-                set(Object.assign({}, s, { text: e.target.value }));
+                set(Object.assign({}, s, { text: e.target.value, error: false }));
               }
             }),
             h(
@@ -550,19 +608,21 @@
               {
                 type: 'button',
                 className: 'capture-save-btn',
-                disabled: !s.text.trim(),
+                disabled: busy || !s.text.trim(),
                 onClick: function () {
                   var v = s.text.trim();
                   if (!v) return;
-                  set({ text: v, saved: v, editing: false });
+                  if (waits) set(Object.assign({}, s, { text: v, pending: v, pressedAt: str(p.saveStatus), error: false }));
+                  else set({ text: v, saved: v, editing: false, pending: null, pressedAt: null, error: false });
                   emit(p, 'onSaveField', str(p.field));
                   emit(p, 'onSaveValue', v);
                   emit(p, 'onSave');
                   emit(p, 'onAction');
                 }
               },
-              COPY.captureSave
-            )
+              busy ? COPY.captureSaving : COPY.captureSave
+            ),
+            s.error ? h('p', { className: 'dbt-save-error', role: 'status' }, COPY.captureError) : null
           )
     );
   }
@@ -1344,6 +1404,15 @@
       'Unwired, or missing a key, the node renders its built-in English — never a raw key and never blank.'
   });
 
+  /* TASK-L177: the two inputs that make a save wait for the backend. */
+  var WAITS_FOR_SAVE = port('boolean', 'Waits for save', {
+    default: false,
+    description: 'On: a save shows Saving… until Save status says saved or failed, and only then the ✓. Off (Palette, no backend): shown at once, as before.'
+  });
+  var SAVE_STATUS = text('Save status', {
+    description: 'Set by the graph around its write: "saving", then "saved" or "failed", each followed by ":" and a token new for every save. Read only while Waits for save is on.'
+  });
+
   var ASSET_BASE = text('Asset URL base', {
     default: '/api/assets/',
     description: 'Prepended to a storage key when no Src is given. A port, so the backend that serves files decides it.'
@@ -1432,15 +1501,15 @@
     'Lesson: Activity',
     'Numbered steps the learner ticks off, and optionally one project fact it captures. Ticking ONE step is the action.',
     Activity,
-    { title: text('Title'), steps: obj('Steps', { description: 'An array of markdown strings.' }), capturesProjectFact: obj('Captures fact', { description: 'Optional: { field, prompt }.' }) },
+    { title: text('Title'), steps: obj('Steps', { description: 'An array of markdown strings.' }), capturesProjectFact: obj('Captures fact', { description: 'Optional: { field, prompt }.' }), waitsForSave: WAITS_FOR_SAVE, saveStatus: SAVE_STATUS },
     pick(['onSave', 'onSaveField', 'onSaveValue', 'onAction'])
   );
   var Capture_ = kindNode(
     'Capture',
     'Lesson: Capture',
-    'Asks for one project fact and emits it. Pre-fills from Facts by field. The product bumps the project context on save; here the graph decides.',
+    'Asks for one project fact and emits it. Pre-fills from Facts by field. With Waits for save on, the ✓ appears only when the graph says the backend has it (TASK-L177).',
     Capture,
-    { prompt: text('Prompt', { description: 'Markdown.' }), field: text('Field', { description: 'lowerCamelCase, or deliverable.factName.' }), hint: text('Hint'), initialValue: text('Initial value'), facts: obj('Facts', { description: 'The learner’s facts, { field: value }.' }) },
+    { prompt: text('Prompt', { description: 'Markdown.' }), field: text('Field', { description: 'lowerCamelCase, or deliverable.factName.' }), hint: text('Hint'), initialValue: text('Initial value'), facts: obj('Facts', { description: 'The learner’s facts, { field: value }.' }), waitsForSave: WAITS_FOR_SAVE, saveStatus: SAVE_STATUS },
     pick(['onSave', 'onSaveField', 'onSaveValue', 'onAction'])
   );
   var PrepPack_ = kindNode(
@@ -1550,7 +1619,7 @@
         var cls = ['lesson-section', 'dbt-section-' + section.kind, section.kind === 'human_recording' && 'knot-warm', props.done && 'knot-tied', props.current && !props.done && 'knot-current']
           .filter(Boolean)
           .join(' ');
-        var forwarded = { facts: props.facts, assetBase: props.assetBase, copy: props.copy };
+        var forwarded = { facts: props.facts, assetBase: props.assetBase, copy: props.copy, waitsForSave: props.waitsForSave, saveStatus: props.saveStatus };
         Object.keys(ACTION_OUTS).forEach(function (k) {
           forwarded[k] = props[k];
         });
@@ -1564,7 +1633,9 @@
       current: port('boolean', 'Current', { default: false, description: 'Draws the current-knot ring.' }),
       label: text('Label', { description: 'Shown on the node in the graph only.' }),
       assetBase: ASSET_BASE,
-      copy: COPY_PORT
+      copy: COPY_PORT,
+      waitsForSave: WAITS_FOR_SAVE,
+      saveStatus: SAVE_STATUS
     },
     outputProps: ACTION_OUTS
   };
@@ -1585,6 +1656,17 @@
   // parameter. Ordering, grouping, folding and the preview's words stay in
   // `Logic/Ordered timeline` — readable, changeable graph, which is the whole
   // argument for building this in NodeGX at all.
+
+  /**
+   * WHAT A THREAD CAN BE ABOUT — the product's `NOTE_ANCHOR_KINDS`
+   * (src/lib/coach/note-anchor.ts), verbatim and in its order. The ask control
+   * renders only on these (PathList.tsx: `isNoteAnchorKind(entry.kind)`), so a
+   * coach's NOTE carries none: the product never offered one there, and until
+   * TASK-L186 this kit did, on every kind. `__cloud__/shared/Thread` holds the
+   * same list and refuses anything else; tools/check-write-functions.mjs fails
+   * if the two differ.
+   */
+  var THREAD_ANCHOR_KINDS = ['lesson', 'session', 'evaluation', 'assignment', 'submission', 'message', 'signal'];
 
   /** The timeline's words, from `src/i18n/en/course.json` — one place, so a string table replaces them in one edit. */
   var TL_COPY = {
@@ -1630,7 +1712,29 @@
      */
     messageFromLearner: 'You wrote',
     messageFromCoach: 'Your coach wrote',
-    messageUnread: 'New'
+    messageUnread: 'New',
+    /*
+     * THE THREAD UNDER A CARD (TASK-L186, ported from the product's
+     * ConversationPanel and src/i18n/en/lesson.json `conversation`). The learner
+     * voice is the base; a coach reads `reply` and the coach overlay's
+     * placeholder and closing line. `messageFromLearner` / `messageFromCoach` /
+     * `messageUnread` above name each turn, so a thread and a message row on the
+     * coach's programme say the same thing about the same words.
+     *
+     * WHAT IS TRUE, AND NOTHING MORE (the product's L118): no response-time
+     * promise, no "we'll get back to you", no estimate.
+     */
+    reply: 'Reply',
+    conversationIntro: 'Ask your coach anything about this. Your question stays with this card.',
+    conversationPlaceholder: 'Write your question',
+    conversationSend: 'Send',
+    conversationSending: 'Sending\u2026',
+    conversationClose: 'Close',
+    conversationLoading: 'Loading the conversation\u2026',
+    conversationError: 'This could not be loaded or sent. Try again in a moment.',
+    conversationTooLong: 'That is longer than {limit} characters, so it would be cut short. Make it shorter, or send it in two.',
+    conversationStale: 'Accept the updated privacy notice first, then send this again.',
+    conversationWhenTheySeeIt: 'Your coach sees this on your programme.'
   };
 
   /*
@@ -2147,6 +2251,17 @@
     function setOpen(next) {
       set({ key: key, open: next });
     }
+    /*
+     * A LINK CAN OPEN THIS ROW (TASK-L188 §5): `/course?comment=<this entry>` from
+     * a reply mail. `Focus` only ever OPENS — it never folds a row the reader
+     * opened — and it runs before any early return, because a hook must.
+     */
+    R.useEffect(
+      function () {
+        if (p.focus && !open) setOpen(true);
+      },
+      [p.focus, key]
+    );
 
     if (!entry || typeof entry !== 'object') return null;
 
@@ -2271,7 +2386,7 @@
        * string the coach map inherits and never renders, which
        * `tools/check-coach-voice.py` records by name rather than excusing.
        */
-      open && audience === 'learner'
+      open && audience === 'learner' && THREAD_ANCHOR_KINDS.indexOf(kind) !== -1
         ? h(
             'button',
             {
@@ -2284,6 +2399,27 @@
               }
             },
             TL_COPY.ask
+          )
+        : null,
+      /*
+       * REPLY, on a COACH's open MESSAGE card only (TASK-L186 §4). The coach
+       * answers a thread the learner started and never starts one (sprint 54
+       * §2.1), so the control is on the learner's words and nowhere else — a
+       * coach has no ask control and no reply control on any other kind. It
+       * EMITS the thread's id; the graph opens the thread and writes the reply.
+       */
+      open && audience === 'coach' && kind === 'message' && str(entry.conversationId)
+        ? h(
+            'button',
+            {
+              type: 'button',
+              className: 'path-ask path-reply',
+              onClick: function () {
+                emit(p, 'onConversationId', str(entry.conversationId));
+                emit(p, 'onReplyRequested');
+              }
+            },
+            TL_COPY.reply
           )
         : null,
       /*
@@ -2367,6 +2503,7 @@
       collapsed: port('boolean', 'Starts folded', { default: false, description: 'Derived from the programme by the graph, never stored. What the reader does after is this node’s own state.' }),
       notes: obj('Notes', { description: 'The coach’s notes anchored to this entry. Its LENGTH is the count on the folded line — never a separate number.' }),
       comments: num('Comments', { default: 0, description: 'How many comments this entry’s thread holds. Words and a number on the folded line, never a badge.' }),
+      focus: port('boolean', 'Focus', { default: false, description: 'True when a link points at this entry (a reply mail’s /course?comment=…). Opens the row; never folds one (TASK-L188).' }),
       audience: text('Audience', {
         default: 'learner',
         description:
@@ -2379,6 +2516,8 @@
       onToggled: sig('Toggled', 'The reader opened or re-folded this row.'),
       onOpened: sig('Opened', 'The reader opened this row. Fires on open only.'),
       onAskRequested: sig('Ask requested', 'The learner asked their coach about this entry. Anchor kind and Anchor id already hold what it is about.'),
+      onReplyRequested: sig('Reply requested', 'A coach asked to answer the thread this message belongs to. Conversation id already holds which one. Never fires for a learner (TASK-L186).'),
+      onConversationId: out('string', 'Conversation id', 'The thread a coach asked to reply to.'),
       onShowInLog: sig('Show in log', 'A coach asked to see this entry in the activity log. Anchor id already holds which one. Never fires for a learner.'),
       onOpenLesson: sig('Open lesson', 'The learner pressed Review / Continue / Start on a lesson, or "Open the lesson this came from" on a piece of work. Concept id already holds which lesson. Never fires for a coach.'),
       onConceptId: out('string', 'Concept id', 'The lesson the open control points at.'),
@@ -2971,6 +3110,210 @@
   };
 
 
+  // ── THE THREAD UNDER A CARD (TASK-L186, sprint 54) ──────────────────────────
+  //
+  // Source, in the product's repo: src/lib/components/lesson/ConversationPanel.tsx.
+  // The product's panel FETCHES; this one does not. A kit node renders and
+  // emits, and the graph owns every call (sprint 45 decision 6) — so the four
+  // states the product held in component state arrive here as ports, and the
+  // one thing that stays local is the reader's own unsent draft.
+
+  /** The one limit on a message: refused over it, never sliced (the product's `conversations/limits.ts`). */
+  var CONVERSATION_MAX_CHARS = 4000;
+  // Written out for the sentence rather than formatted, so the words do not
+  // depend on the reader's locale (L93); the copy is English until a locale says otherwise.
+
+  /**
+   * When a turn was written, in the READER's own zone. Formatting in a kit node
+   * is what L93/L100 warn about for a node that server-renders; this one never
+   * does — it mounts only after a press — so the browser's zone is the reader's,
+   * which is the cohort feed's rule.
+   */
+  function turnWhen(iso) {
+    var d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d.getTime())) return '';
+    try {
+      return d.toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      return d.toISOString();
+    }
+  }
+
+  function ConversationPanelView(p) {
+    var TL_COPY = timelineCopy(p);
+    var audience = str(p.audience) || 'learner';
+    if (audience !== 'learner' && audience !== 'coach') {
+      throw new Error('dbt-lesson.ConversationPanel: Audience must be "learner" or "coach", not "' + audience + '"');
+    }
+    var status = str(p.status) || 'loading';
+    var turns = data(p.turns, []) || [];
+    if (!Array.isArray(turns)) turns = [];
+    var sending = !!p.sending;
+    var rejected = str(p.rejected);
+
+    var st = R.useState('');
+    var draft = st[0];
+    var setDraft = st[1];
+
+    /*
+     * THE DRAFT CLEARS WHEN A SEND LANDS, AND ONLY THEN. `Sent` is a token the
+     * graph makes new for every successful write; a refusal leaves the words in
+     * the box, because losing somebody's question to a "too long" would be the
+     * worst answer this panel could give.
+     */
+    var sentKey = str(p.sent);
+    R.useEffect(
+      function () {
+        if (sentKey) setDraft('');
+      },
+      [sentKey]
+    );
+
+    var trimmed = draft.trim();
+    var over = trimmed.length > CONVERSATION_MAX_CHARS;
+
+    function send() {
+      if (!trimmed || over || sending) return;
+      emit(p, 'onBody', trimmed);
+      emit(p, 'onSendRequested');
+    }
+
+    function who(t) {
+      return str(t.authorRole) === 'coach' ? TL_COPY.messageFromCoach : TL_COPY.messageFromLearner;
+    }
+
+    var children = [];
+    if (status === 'loading') {
+      children.push(h('p', { key: 'loading', className: 'conversation-note' }, TL_COPY.conversationLoading));
+    } else if (status === 'error') {
+      children.push(h('p', { key: 'error', className: 'conversation-note' }, TL_COPY.conversationError));
+    } else {
+      if (turns.length === 0) {
+        // A coach only ever opens a thread somebody started, so the invitation is the learner's.
+        if (audience === 'learner') children.push(h('p', { key: 'intro', className: 'conversation-intro' }, TL_COPY.conversationIntro));
+      } else {
+        children.push(
+          h(
+            'ol',
+            { key: 'turns', className: 'conversation-turns' },
+            turns.map(function (t, i) {
+              var role = str(t.authorRole) === 'coach' ? 'coach' : 'learner';
+              return h(
+                'li',
+                { key: str(t.id) || i, className: 'conversation-turn is-' + role + (t.unread ? ' is-new' : '') },
+                h(
+                  'p',
+                  { className: 'conversation-turn-who' },
+                  who(t),
+                  turnWhen(t.createdAt) ? ' · ' + turnWhen(t.createdAt) : '',
+                  // One plain mark. No count, no dot, no colour.
+                  t.unread ? h('span', { className: 'conversation-new' }, ' ' + TL_COPY.messageUnread) : null
+                ),
+                md(t.body, 'conversation-turn-body')
+              );
+            })
+          )
+        );
+      }
+      children.push(
+        h('textarea', {
+          key: 'input',
+          className: 'conversation-input',
+          value: draft,
+          rows: 3,
+          disabled: sending,
+          placeholder: TL_COPY.conversationPlaceholder,
+          'aria-label': TL_COPY.conversationPlaceholder,
+          onChange: function (ev) {
+            setDraft(ev.target.value);
+          }
+        })
+      );
+      // The limit is NAMED before they press, and the server refuses rather than trimming.
+      if (over || rejected === 'too_long') {
+        children.push(h('p', { key: 'long', className: 'conversation-note' }, fill(TL_COPY.conversationTooLong, { limit: '4,000' })));
+      }
+      if (rejected === 'stale') children.push(h('p', { key: 'stale', className: 'conversation-note' }, TL_COPY.conversationStale));
+      if (rejected === 'error') children.push(h('p', { key: 'err', className: 'conversation-note' }, TL_COPY.conversationError));
+      children.push(
+        h(
+          'div',
+          { key: 'actions', className: 'conversation-actions' },
+          h(
+            'button',
+            { type: 'button', className: 'btn btn-thread conversation-send', disabled: sending || !trimmed || over, onClick: send },
+            sending ? TL_COPY.conversationSending : TL_COPY.conversationSend
+          ),
+          h(
+            'button',
+            {
+              type: 'button',
+              className: 'path-ask conversation-close',
+              onClick: function () {
+                emit(p, 'onCloseRequested');
+              }
+            },
+            TL_COPY.conversationClose
+          )
+        )
+      );
+      // WHAT IS TRUE, AND NOTHING MORE.
+      children.push(h('p', { key: 'when', className: 'conversation-note' }, TL_COPY.conversationWhenTheySeeIt));
+    }
+    return h.apply(null, ['div', { className: 'conversation' }].concat(children));
+  }
+
+  /** @type {import('./types/node-kit').ReactNodeDefinition} */
+  var ConversationPanel = {
+    name: KIT + '.ConversationPanel',
+    displayNodeName: 'Course: Conversation',
+    docs:
+      'The thread between a learner and their coach about one card: every turn oldest first, each body through the kit’s one sanitised markdown path, one plain “New” mark on an unread turn, and a box to write in. It FETCHES NOTHING — the graph opens the thread, writes the turn and hands back Turns. The 4,000-character limit is named before the press and the send is refused, never trimmed (TASK-L186).',
+    noodlNodeAsProp: true,
+    getReactComponent: function () {
+      return function ConversationPanelNode(props) {
+        var el = useRoot(props);
+        /*
+         * BROUGHT INTO VIEW ONCE THE THREAD IS THERE (TASK-L188 §5), and only when a
+         * link asked for it. After `ready`, not on mount: scrolling a loading panel
+         * centres a box that is about to grow, and the grown thread lands below the
+         * fold (the product's L142, measured: 31 pixels below it). A thread taller
+         * than the window starts at its top.
+         */
+        var scrolled = R.useRef(false);
+        R.useEffect(
+          function () {
+            if (!props.scrollTo || str(props.status) !== 'ready' || scrolled.current || !el.current) return;
+            scrolled.current = true;
+            var node = el.current;
+            requestAnimationFrame(function () {
+              var tall = node.getBoundingClientRect().height > window.innerHeight * 0.9;
+              node.scrollIntoView({ block: tall ? 'start' : 'center' });
+            });
+          },
+          [props.scrollTo, props.status]
+        );
+        return h('div', { ref: el, className: 'dbt-conversation', style: props.style }, h(ConversationPanelView, props));
+      };
+    },
+    inputProps: {
+      turns: obj('Turns', { description: 'The thread, oldest first: [{ id, authorRole: "learner"|"coach", body, createdAt, unread }]. Unread is derived by the server for THIS reader.' }),
+      status: text('Status', { default: 'loading', description: '"loading", "ready" or "error" (the thread could not be opened).' }),
+      audience: text('Audience', { default: 'learner', description: 'Who is reading: "learner" or "coach". Anything else throws by name.' }),
+      sending: port('boolean', 'Sending', { default: false, description: 'True while the graph is writing a turn. The box and the button wait.' }),
+      rejected: text('Rejected', { description: 'Why the last send was refused: "too_long", "stale", "error", or empty.' }),
+      sent: text('Sent', { description: 'A token the graph makes new after every successful write. The box clears when it changes.' }),
+      scrollTo: port('boolean', 'Scroll to', { default: false, description: 'True when a link asked for this thread. The panel scrolls itself into view once, when its thread is ready (TASK-L188).' }),
+      copy: COPY_PORT
+    },
+    outputProps: {
+      onSendRequested: sig('Send requested', 'The reader pressed Send. Body already holds the words, trimmed and inside the limit.'),
+      onBody: out('string', 'Body', 'What the reader wrote, trimmed.'),
+      onCloseRequested: sig('Close requested', 'The reader closed the thread. Unmount the panel.')
+    }
+  };
+
+
   /** @type {import('./types/node-kit').NodeKitModule} */
   var kit = {
     reactNodes: h
@@ -2999,7 +3342,8 @@
           PaceTracker,
           RatingGauge,
           DossierSegment,
-          DossierReveal
+          DossierReveal,
+          ConversationPanel
         ]
       : []
   };

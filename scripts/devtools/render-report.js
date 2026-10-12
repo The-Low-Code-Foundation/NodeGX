@@ -980,9 +980,23 @@ function resolvePageRequest(routes, requested) {
     if (start) return { ok: true, page: start };
   }
 
-  const match =
+  // P109-S15: the authoring tools take a component's path without its leading slash ("Pages/Garden"), and an agent
+  // names a page by its title ("Garden"); both are accepted. A title two pages share names both rather than guess.
+  let match =
     routes.pages.find((p) => p.urlPath === normalised) ||
-    routes.pages.find((p) => p.component === raw || p.component === normalised);
+    routes.pages.find((p) => p.component === raw || p.component.replace(/^\//, '') === normalised);
+  if (!match) {
+    const titled = routes.pages.filter((p) => p.title !== undefined && p.title === raw);
+    if (titled.length > 1) {
+      return {
+        ok: false,
+        message:
+          `Cannot render the page "${raw}": ${titled.length} pages have that title (${titled.map((p) => p.component).join(', ')}). ` +
+          'Ask for one by its path.'
+      };
+    }
+    match = titled[0];
+  }
 
   if (!match) {
     return {
@@ -1412,6 +1426,7 @@ function settleExpression(ceilingMs, rafs) {
  * @property {(expression: string) => Promise<any>} evaluate  `Runtime.evaluate`, by value, throwing on exceptions.
  * @property {(viewport: object) => Promise<void>} setViewport  Set device metrics and let the reflow settle.
  * @property {(urlPath: string, ceilingMs: number) => Promise<void>} goto  Navigate with an explicit settle ceiling.
+ * @property {(listener: (msg: object) => void) => () => void} onEvent  Hear every CDP event on the primary tab.
  * @property {(label?: string) => Promise<RenderedPage>} openTab  FLD-011 — another tab in the same
  *   Chrome, with its OWN console buffer and its OWN viewport. The returned object is page-shaped:
  *   `client`, `consoleErrors`, `evaluate`, `goto`, `navigate`, `setViewport`.
@@ -1434,6 +1449,8 @@ function settleExpression(ceilingMs, rafs) {
  * @param {number} [options.backendPort]       Backend to proxy `/__backend` to.
  * @param {boolean}[options.editorTokens=false]
  * @param {string[]}[options.chromeArgs]       Extra flags for the headless browser.
+ * @param {(tab: object) => Promise<void>} [options.beforeBoot]  Called with the primary tab before
+ *   its first navigation (ISL-021: a route stub the app's boot fetch must meet).
  * @param {(page: RenderedPage) => Promise<T>} fn
  * @returns {Promise<T>}
  * @template T
@@ -1584,7 +1601,13 @@ async function unthrottle(client) {
  */
 async function attachTab({ wsUrl, servePort, settles, label }) {
   const consoleErrors = [];
+  /**
+   * P109 ISL-021 — whoever else wants this tab's CDP events (`Fetch.requestPaused` for a stubbed route).
+   * `connect` takes ONE handler, at connect time, so a caller cannot add its own afterwards without this.
+   */
+  const listeners = new Set();
   const client = await connect(wsUrl, (msg) => {
+    for (const listener of listeners) listener(msg);
     if (msg.method === 'Runtime.exceptionThrown') {
       const d = msg.params.exceptionDetails || {};
       consoleErrors.push(String((d.exception && d.exception.description) || d.text || '').slice(0, 300));
@@ -1637,6 +1660,11 @@ async function attachTab({ wsUrl, servePort, settles, label }) {
      * page does not have to size it again.
      */
     navigate: (urlPath) => goto(urlPath, PAGE_NAV_MS),
+    /** Hear every CDP event on this tab. Returns the function that stops it. */
+    onEvent(listener) {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
     async setViewport(vp) {
       await client.send('Emulation.setDeviceMetricsOverride', {
         width: vp.width,
@@ -1657,7 +1685,7 @@ async function attachTab({ wsUrl, servePort, settles, label }) {
 }
 
 async function withRenderedPage(options, fn) {
-  const { projectDir, backendPort, editorTokens = false, chromeArgs = [] } = options;
+  const { projectDir, backendPort, editorTokens = false, chromeArgs = [], beforeBoot } = options;
 
   // Before anything else: take down what a killed drive left behind. See
   // `reapOrphanedRenderProcesses` for why this is at the start and not the end.
@@ -1853,6 +1881,10 @@ async function withRenderedPage(options, fn) {
       }
     };
 
+    // P109 ISL-021 — a stubbed route the app fetches AS it boots must be answered by the first load,
+    // so the caller gets the tab before the page exists.
+    if (beforeBoot) await beforeBoot(main);
+
     await main.client.send('Page.navigate', { url: `http://127.0.0.1:${servePort}/` });
     await main.settle('boot', BOOT_MS, 2);
 
@@ -1866,6 +1898,7 @@ async function withRenderedPage(options, fn) {
       goto: main.goto,
       navigate: main.navigate,
       setViewport: main.setViewport,
+      onEvent: main.onEvent,
       openTab,
       closeTab
     });

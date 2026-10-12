@@ -101,7 +101,20 @@ export interface AuthConfig {
      */
     autoLinkVerifiedEmail: boolean;
   };
+  /**
+   * P109 ISL-040 (ruled 2026-10-11, "Ends after 30 days unused"): a sign-in nobody has used for
+   * this many days stops working. Each use moves the end on (`auth/sessions.ts`).
+   */
+  sessions: SessionPolicy;
 }
+
+export interface SessionPolicy {
+  idleDays: number;
+}
+
+export const DEFAULT_SESSION_IDLE_DAYS = 30;
+/** Ten years: past that the number is a typo, and a session that long is the old "never". */
+export const MAX_SESSION_IDLE_DAYS = 3650;
 
 /** A preset is a partial provider — the shape an operator does not have to know. */
 export interface ProviderPreset {
@@ -163,7 +176,8 @@ export function defaultAuthConfig(): AuthConfig {
     providers: [],
     magicLink: { enabled: false, ttlMinutes: 15, allowSignup: true },
     redirectAllowList: [],
-    linking: { autoLinkVerifiedEmail: true }
+    linking: { autoLinkVerifiedEmail: true },
+    sessions: { idleDays: DEFAULT_SESSION_IDLE_DAYS }
   };
 }
 
@@ -284,6 +298,17 @@ export function validateAuthConfig(candidate: unknown): string[] {
       typeof (c.linking as { autoLinkVerifiedEmail?: unknown }).autoLinkVerifiedEmail !== 'boolean'
     ) {
       errors.push('linking.autoLinkVerifiedEmail must be a boolean');
+    }
+  }
+
+  if (c.sessions !== undefined) {
+    if (!c.sessions || typeof c.sessions !== 'object') {
+      errors.push('sessions must be an object');
+    } else {
+      const days = (c.sessions as { idleDays?: unknown }).idleDays;
+      if (days !== undefined && (typeof days !== 'number' || !Number.isFinite(days) || days <= 0 || days > MAX_SESSION_IDLE_DAYS)) {
+        errors.push(`sessions.idleDays must be a number of days above 0 and at most ${MAX_SESSION_IDLE_DAYS}`);
+      }
     }
   }
 

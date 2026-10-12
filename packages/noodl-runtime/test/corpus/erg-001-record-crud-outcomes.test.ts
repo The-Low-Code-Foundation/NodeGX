@@ -97,6 +97,8 @@ function stubStore(): void {
     delete: record('delete'),
     addRelation: record('addRelation'),
     removeRelation: record('removeRelation'),
+    // P109 ISL-029 (D24): the access rules ask the record's own store who is signed in. Nobody, here.
+    currentUserId: () => undefined,
     _fromJSON: (json: Record<string, unknown>) => ({
       getId: () => json.objectId || 'new-id',
       data: json,

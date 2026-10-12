@@ -1,0 +1,246 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8566965e-9a64-52e8-8e83-048d80ea6b87",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "h_page",
+      "type": "Page",
+      "label": "Home",
+      "parameters": {
+        "title": "Two languages",
+        "urlPath": ""
+      },
+      "children": [
+        "h_root"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "h_root",
+      "type": "Group",
+      "label": "Root",
+      "parent": "h_page",
+      "parameters": {
+        "flexDirection": "column"
+      },
+      "children": [
+        "h_bar",
+        "h_name",
+        "h_title",
+        "h_greet",
+        "h_isle",
+        "h_bare"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "h_bar",
+      "type": "Group",
+      "label": "Languages",
+      "parent": "h_root",
+      "parameters": {
+        "flexDirection": "row",
+        "sizeMode": "contentHeight"
+      },
+      "children": [
+        "en",
+        "fr"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "en",
+      "type": "net.noodl.controls.button",
+      "label": "EN",
+      "parent": "h_bar",
+      "parameters": {
+        "label": "EN",
+        "dataAttributes": "data-testid",
+        "data-testid": "en"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "fr",
+      "type": "net.noodl.controls.button",
+      "label": "FR",
+      "parent": "h_bar",
+      "parameters": {
+        "label": "FR",
+        "dataAttributes": "data-testid",
+        "data-testid": "fr"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "h_name",
+      "type": "net.noodl.controls.textinput",
+      "label": "Name",
+      "parent": "h_root",
+      "parameters": {
+        "dataAttributes": "data-testid",
+        "data-testid": "name"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "h_title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "h_root",
+      "parameters": {
+        "text": "?",
+        "dataAttributes": "data-testid",
+        "data-testid": "title"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "h_greet",
+      "type": "Text",
+      "label": "Greeting",
+      "parent": "h_root",
+      "parameters": {
+        "text": "?",
+        "dataAttributes": "data-testid",
+        "data-testid": "greet"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "h_isle",
+      "type": "Text",
+      "label": "Island",
+      "parent": "h_root",
+      "parameters": {
+        "text": "?",
+        "dataAttributes": "data-testid",
+        "data-testid": "isle"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "h_bare",
+      "type": "Text",
+      "label": "Greeting with no name",
+      "parent": "h_root",
+      "parameters": {
+        "text": "?",
+        "dataAttributes": "data-testid",
+        "data-testid": "bare"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "h_trTitle",
+      "type": "Translation",
+      "label": "title",
+      "parameters": {
+        "Key": "title",
+        "Namespace": "common"
+      },
+      "ports": [],
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "h_trGreet",
+      "type": "Translation",
+      "label": "greet",
+      "parameters": {
+        "Key": "greet",
+        "Namespace": "common",
+        "Variables": "name"
+      },
+      "ports": [
+        {
+          "name": "name",
+          "plug": "input",
+          "type": "*"
+        }
+      ],
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "h_trIsle",
+      "type": "Translation",
+      "label": "isle",
+      "parameters": {
+        "Key": "isle",
+        "Namespace": "common"
+      },
+      "ports": [],
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "h_trBare",
+      "type": "Translation",
+      "label": "greet",
+      "parameters": {
+        "Key": "greet",
+        "Namespace": "common"
+      },
+      "ports": [],
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "h_setEn",
+      "type": "Set Variable",
+      "label": "en",
+      "parameters": {
+        "name": "lang",
+        "setWith": "string",
+        "value": "en"
+      },
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "h_setFr",
+      "type": "Set Variable",
+      "label": "fr",
+      "parameters": {
+        "name": "lang",
+        "setWith": "string",
+        "value": "fr"
+      },
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "h_i18n",
+      "type": "i18next",
+      "label": "Switch",
+      "parameters": {},
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "h_lang",
+      "type": "Variable2",
+      "label": "Language",
+      "parameters": {
+        "name": "lang"
+      },
+      "x": 470,
+      "y": 1360
+    }
+  ],
+  "visualRoots": [
+    "h_page"
+  ]
+}

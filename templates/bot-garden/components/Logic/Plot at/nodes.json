@@ -1,0 +1,110 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "73faa365-08ec-5744-85fd-e8d7b1cb73f0",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "plotatIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "cards",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "x",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "y",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "plotatFn",
+      "type": "JavaScriptFunction",
+      "label": "Plot at",
+      "parameters": {
+        "functionScript": "\nvar cards = Array.isArray(Inputs.cards) ? Inputs.cards : [];\nvar x = Math.floor(Number(Inputs.x)), y = Math.floor(Number(Inputs.y));\nvar id = '';\nfor (var i = 0; i < cards.length && !id; i++) {\n  var c = cards[i];\n  if (!c) continue;\n  if (x >= c.x && x < c.x + c.w && y >= c.y && y < c.y + c.h) id = String(c.id);\n  else if (c.door && c.door.x === x && c.door.y === y) id = String(c.id);\n}\nOutputs.requestId = id;\nOutputs.found = !!id;\n",
+        "runOnChange-in-cards": false,
+        "runOnChange-in-x": false,
+        "runOnChange-in-y": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-cards",
+          "displayName": "cards",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-x",
+          "displayName": "x",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-y",
+          "displayName": "y",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-requestId",
+          "displayName": "requestId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-found",
+          "displayName": "found",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "plotatOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "found",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "requestId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

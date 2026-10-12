@@ -163,7 +163,8 @@ const UserNodeDefinition: NodeDefinitionOptions = {
       group: 'General',
       description: 'Id of the signed-in user record; empty while nobody is signed in',
       getter: function (this: UserNodeInstance) {
-        return this._internal.model !== undefined ? this._internal.model.getId() : undefined;
+        // P107-C47 (P109 ISL-030, ruled "Blank text, empty for others"): blank, so a wire lets go of the person who left
+        return this._internal.model !== undefined ? this._internal.model.getId() : '';
       }
     },
     fetched: {
@@ -251,7 +252,8 @@ const UserNodeDefinition: NodeDefinitionOptions = {
         'Roles the signed-in user is in, resolved by the server on each session read; empty while nobody is ' +
         'signed in, and not set on backends that do not track roles',
       getter: function (this: UserNodeInstance) {
-        if (this._internal.model === undefined) return undefined;
+        // P107-C47: `null` while nobody is signed in — sent, so a wire lets go; not `[]`, which is "in no roles"
+        if (this._internal.model === undefined) return null;
         const roles = this._internal.model.get('roles');
         // Pass through only a real list. A backend that answered something else
         // is a backend this port cannot speak for, and returning its value would
@@ -265,7 +267,7 @@ const UserNodeDefinition: NodeDefinitionOptions = {
       group: 'General',
       description: 'Username of the signed-in user; empty while nobody is signed in',
       getter: function (this: UserNodeInstance) {
-        return this._internal.model !== undefined ? this._internal.model.get('username') : undefined;
+        return this._internal.model !== undefined ? this._internal.model.get('username') : ''; // P107-C47
       }
     },
     email: {
@@ -274,7 +276,7 @@ const UserNodeDefinition: NodeDefinitionOptions = {
       group: 'General',
       description: 'Email address of the signed-in user; empty while nobody is signed in',
       getter: function (this: UserNodeInstance) {
-        return this._internal.model !== undefined ? this._internal.model.get('email') : undefined;
+        return this._internal.model !== undefined ? this._internal.model.get('email') : ''; // P107-C47
       }
     },
     authenticated: {
@@ -352,6 +354,7 @@ const UserNodeDefinition: NodeDefinitionOptions = {
     },
     setUserModel(this: UserNodeInstance, model: ModelLike | undefined) {
       const internal = this._internal;
+      const previous = internal.model;
 
       if (internal.model !== model) {
         // Check if we need to change model
@@ -371,9 +374,12 @@ const UserNodeDefinition: NodeDefinitionOptions = {
       // a membership is granted in a cloud function, never in this process.
       this.flagOutputDirty('roles');
 
-      // Notify all properties changed
-      if (model)
-        for (const key in model.data) {
+      // Notify all properties changed. P107-C47 (P109 ISL-030, ruled "Blank text, empty for others"): when the session
+      // ENDS, the properties the person who left had are re-sent too — empty — so no wire keeps them. They used to read
+      // `undefined`, which is never sent, and only Authenticated moved.
+      const source = model || previous;
+      if (source)
+        for (const key in source.data) {
           if (this.hasOutput('prop-' + key)) this.flagOutputDirty('prop-' + key);
         }
     },
@@ -460,9 +466,13 @@ const UserNodeDefinition: NodeDefinitionOptions = {
         this.registerOutput(name, {
           getter: this.getUserProperty.bind(this, name.substring('prop-'.length))
         });
+      // ISL-027 / P107-C48, ruled "Make them fire": the editor offers `<field> Changed` beside each field, and the
+      // model's change callback pulses it behind `hasOutput`. Registered only for `prop-`, the wire was dropped and
+      // the signal never fired.
+      if (name.startsWith('changed-')) this.registerOutput(name, { type: 'signal', getter: () => undefined });
     },
     getUserProperty: function (this: UserNodeInstance, name: string) {
-      return this._internal.model !== undefined ? this._internal.model.get(name) : undefined;
+      return this._internal.model !== undefined ? this._internal.model.get(name) : null; // P107-C47
     }
   }
 };

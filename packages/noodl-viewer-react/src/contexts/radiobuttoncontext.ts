@@ -1,20 +1,26 @@
 import React from 'react';
 
+/**
+ * P109 ISL-031 (P107-D37, ruled "Fire from the click") — the person's click that made the group's selection: which button
+ * (`by`, its element id), the selection it took over (`from`), and a number that is new for every click. Null once the graph's
+ * Value has the last word.
+ */
+export interface RadioClick {
+  seq: number;
+  by: string | undefined;
+  from: string;
+}
+
 export interface IRadioButtonContext {
   name: string;
   selected: string;
   /**
-   * Whether `selected` got its current value from a click rather than from the group's `Value`
-   * input.
-   *
-   * NDA-012 (Visual) A1. The Radio Button's own `Changed` output has to mean what `Changed`
-   * means on `Checkbox` and on `Radio Button Group` — *the user did this* — and only the group
-   * knows which of its two write paths ran. Without this the graph setting the group's `Value`
-   * would fire every affected button's `Changed` while the group's own stayed silent, which is
-   * the inconsistency A1 is about, reintroduced one level down.
+   * P107-D37 — the click that made the selection, or null (see RadioClick). It replaced a `selectionFromUser` flag (NDA-012
+   * A1), which said the LAST selection was a person's and so let any later move of Checked fire a button's Changed.
    */
-  selectionFromUser: boolean;
-  checkedChanged?: (value: string) => void;
+  click: RadioClick | null;
+  /** a click hands the group its Value; `by` is the button's element id (the deprecated Radio Button passes none) */
+  checkedChanged?: (value: string, by?: string) => void;
 }
 
 /**

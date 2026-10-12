@@ -1,0 +1,691 @@
+[
+  {
+    "name": "an untouched node with a Class subscribes at the frame end: connecting, then subscribed when the backend says so",
+    "because": "subscribetochanges.ts :323-325 (untouched Enabled is on), :437-451 \u2014 the status read off the handle; :515-523",
+    "params": {
+      "collectionName": "Lesson"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "no Class: nothing is subscribed",
+    "because": "subscribetochanges.ts :406-407",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": ""
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "init publishes the snapshot's row and pulses nothing; a later create pulses Record Created and Records Changed",
+    "because": "subscribetochanges.ts :497-500 \u2014 init is the confirmation snapshot, not a change; :505-507",
+    "params": {
+      "collectionName": "Lesson"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "change": {
+                    "type": "init",
+                    "ids": [
+                      "r0"
+                    ],
+                    "records": [
+                      {
+                        "id": "r0",
+                        "title": "z"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "at": 2,
+                  "status": "subscribed"
+                },
+                {
+                  "at": 3,
+                  "change": {
+                    "type": "create",
+                    "ids": [
+                      "r1"
+                    ],
+                    "records": [
+                      {
+                        "id": "r1",
+                        "title": "a"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "update, a key-only delete, and resync: each its own signal; a key-only delete publishes no record, resync only Records Changed",
+    "because": "subscribetochanges.ts :484-490 \u2014 recordsComplete is the gate; :502-507",
+    "params": {
+      "collectionName": "Lesson"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                },
+                {
+                  "at": 2,
+                  "change": {
+                    "type": "update",
+                    "ids": [
+                      "r1"
+                    ],
+                    "records": [
+                      {
+                        "id": "r1",
+                        "title": "b"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "at": 3,
+                  "change": {
+                    "type": "delete",
+                    "ids": [
+                      "r1"
+                    ],
+                    "records": [],
+                    "recordsComplete": false
+                  }
+                },
+                {
+                  "at": 4,
+                  "change": {
+                    "type": "resync"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a batch: Changed Record is the first, Changed Records all of them, Changed Record Id the first id",
+    "because": "subscribetochanges.ts :487-490",
+    "params": {
+      "collectionName": "Lesson"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "change": {
+                    "type": "create",
+                    "ids": [
+                      "r3",
+                      "r4"
+                    ],
+                    "records": [
+                      {
+                        "id": "r3"
+                      },
+                      {
+                        "id": "r4"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a retryable error: Realtime Error and Realtime Failure; subscribed later clears the error",
+    "because": "subscribetochanges.ts :532-537; :517-520 \u2014 subscribed clears a held error",
+    "params": {
+      "collectionName": "Lesson"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "error": {
+                    "message": "went down before it was confirmed",
+                    "code": "CONNECT_FAILED"
+                  }
+                },
+                {
+                  "at": 2,
+                  "status": "interrupted"
+                },
+                {
+                  "at": 3,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a fatal error stops the subscription: the error, then stopped; nothing it would tell later is heard",
+    "because": "subscribetochanges.ts :532-537, :515-523; RealtimeSubscription.ts `fail` \u2014 a fatal error stops and closes",
+    "params": {
+      "collectionName": "Lesson"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "error": {
+                    "message": "Not authorised",
+                    "code": "AUTH_FAILED"
+                  }
+                },
+                {
+                  "at": 5,
+                  "change": {
+                    "type": "create",
+                    "ids": [
+                      "r1"
+                    ],
+                    "records": [
+                      {
+                        "id": "r1",
+                        "title": "a"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Enabled off disposes the subscription and clears the status; on again subscribes anew \u2014 the old error is kept",
+    "because": "subscribetochanges.ts :327-330, :454-464 (the teardown leaves realtimeError), :405",
+    "params": {
+      "collectionName": "Lesson"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "error": {
+                    "message": "Rejected",
+                    "code": "SUBSCRIPTION_REJECTED"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the same Class written again keeps the subscription \u2014 no teardown, no new one (v2, C55)",
+    "because": "subscribetochanges.ts: the setter reconnects only on a change (valueDidChange; P109 ISL-030, P107-C55 ruled \"Ignore repeated values\"); v1 tore down and subscribed again",
+    "params": {
+      "collectionName": "Lesson"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Class, Backend and Filter in one frame reconnect once",
+    "because": "subscribetochanges.ts :392-400 \u2014 coalesced",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "title",
+              "operator": "equalTo",
+              "valueSource": "static",
+              "value": "a"
+            }
+          ]
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Backend the project does not have: the not-configured error, no subscription \u2014 then the active one subscribes",
+    "because": "subscribetochanges.ts :413-421",
+    "params": {
+      "collectionName": "Lesson",
+      "backendId": "nope"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "_active_"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the Filter is sent in the backend's dialect; a parameter moving resubscribes with the new value",
+    "because": "subscribetochanges.ts :343-348, :369-377",
+    "params": {
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "n",
+            "operator": "greaterThan",
+            "valueSource": "connected",
+            "valuePortName": "qp-min"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "qp-min",
+        "value": 3
+      },
+      "settle",
+      {
+        "set": "qp-min",
+        "value": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Filter the translator refuses opens the subscription unfiltered",
+    "because": "subscribetochanges.ts :378-388 \u2014 pointsTo with no class schema is refused",
+    "params": {
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "owner",
+            "operator": "pointsTo",
+            "valueSource": "static",
+            "value": "u1"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a subscription disposed before it speaks tells nothing: only the new one is heard",
+    "because": "subscribetochanges.ts :455-458; RealtimeSubscription.ts `dispose` \u2014 nothing more is told",
+    "params": {
+      "collectionName": "Lesson"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Note"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                },
+                {
+                  "at": 2,
+                  "change": {
+                    "type": "create",
+                    "ids": [
+                      "r1"
+                    ],
+                    "records": [
+                      {
+                        "id": "r1",
+                        "title": "a"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+]

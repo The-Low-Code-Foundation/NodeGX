@@ -1,0 +1,27 @@
+[
+  {
+    "name": "one id at creation: the first settle publishes the world's first draw, no pulse",
+    "because": "uuid.ts :48-54 initialize; the connection-time read (node.ts connectInput) hands a wire the getter's value",
+    "params": {},
+    "steps": ["settle"]
+  },
+  {
+    "name": "New replaces the id with the next draw and reports done",
+    "because": "uuid.ts :64-66, :96-110",
+    "params": {},
+    "steps": ["settle", { "signal": "generate" }, "settle"]
+  },
+  {
+    "name": "two News in one frame: the wire carries the second draw, two dones",
+    "because": "uuid.ts :107 flags on every call; the frame sends the last defined value (adapter.ts)",
+    "params": {},
+    "steps": ["settle", { "signal": "generate" }, { "signal": "generate" }, "settle"]
+  },
+  {
+    "name": "a different seed is a different id — the draw is the world's, not the node's",
+    "because": "world.ts RANDOM: one seeded stream; NSP-007 AC1",
+    "params": {},
+    "world": { "seed": 424242 },
+    "steps": ["settle", { "signal": "generate" }, "settle"]
+  }
+]

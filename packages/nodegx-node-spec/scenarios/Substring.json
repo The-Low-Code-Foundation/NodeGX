@@ -1,0 +1,44 @@
+[
+  {
+    "name": "defaults: the whole string; Start 1; End 3",
+    "because": "substring.ts :93-99",
+    "params": { "string": "hello" },
+    "steps": ["settle", { "set": "start", "value": 1 }, "settle", { "set": "end", "value": 3 }, "settle"]
+  },
+  {
+    "name": "a negative Start counts back from the end",
+    "because": "substring.ts :94 `substr`",
+    "params": { "string": "hello", "start": -2 },
+    "steps": ["settle"]
+  },
+  {
+    "name": "End 0 yields ''; End before Start yields ''",
+    "because": "substring.ts :96-99 — a negative length",
+    "params": { "string": "hello", "end": 0 },
+    "steps": ["settle", { "set": "start", "value": 3 }, { "set": "end", "value": 1 }, "settle"]
+  },
+  {
+    "name": "End '-1' as text runs to the end of the string, as the number -1 does (v3; was row D7: it yielded '')",
+    "because": "substring.ts — `Number(endIndex) === -1`; ruled 2026-10-05 (P107-D7, \"Treat it as -1\"). Was strict on the raw value, and `'-1' - 0` is a negative length",
+    "params": { "string": "hello", "end": "-1" },
+    "steps": ["settle"]
+  },
+  {
+    "name": "a number on String is its text; an object Start reads as 0",
+    "because": "substring.ts :77 `toString()`; `substr` converts its arguments",
+    "params": { "string": 12345, "start": 1 },
+    "steps": ["settle", { "set": "start", "value": {} }, "settle"]
+  },
+  {
+    "name": "null on String is empty text: Result is ''",
+    "because": "v2 (P107-C4, ruled 2026-10-05 \"Read it as empty text\"); v1's runtime threw in the setter (`null.toString()`)",
+    "params": { "string": "abc" },
+    "steps": ["settle", { "set": "string", "value": null }, "settle"]
+  },
+  {
+    "name": "undefined on String is empty text too",
+    "because": "v2 (P107-C4); v1's runtime threw (`undefined.toString()`)",
+    "params": { "string": "abc" },
+    "steps": ["settle", { "set": "string" }, "settle"]
+  }
+]

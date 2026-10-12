@@ -1,0 +1,89 @@
+{
+  "name": "scroll-native",
+  "rule": "a scrolling column is unbounded on its axis: nothing grows, the children start at the start (the browser's own scroll, the default)",
+  "nodes": [
+    {
+      "id": "scroller",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "scrollEnabled": true,
+        "rowGap": {
+          "value": 10,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "s1",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "s2",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "s3",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "s4",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 50,
+              "unit": "%"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

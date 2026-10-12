@@ -1,0 +1,12 @@
+{
+  "label": "Bot Garden Fonts",
+  "description": "Fredoka, the rounded title and button face of Olive’s Island (the bot-garden template), bundled so an app renders it offline and never asks fonts.googleapis.com. A variable font, latin and latin-extended subsets (French needs the extended œ), loaded by a stylesheet the module injects; use it as font-family: \"Fredoka\". SIL Open Font License 1.1 — the licence travels with it. No nodes, no code.",
+  "type": "module",
+  "tags": [
+    "UI"
+  ],
+  "version": "1.0.0",
+  "minEditorVersion": "0.1.0",
+  "runtimeVersion": "2.7.0",
+  "icon": "icon.png"
+}

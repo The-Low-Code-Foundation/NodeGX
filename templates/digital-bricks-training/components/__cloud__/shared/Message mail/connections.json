@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "835ed4a7-a5eb-5368-b29f-ee7d58cc6dc3",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mm_in",
+      "fromProperty": "request",
+      "toId": "mm_start",
+      "toProperty": "in-request"
+    },
+    {
+      "fromId": "mm_start",
+      "fromProperty": "out-go",
+      "toId": "mm_staff",
+      "toProperty": "read"
+    },
+    {
+      "fromId": "mm_staff",
+      "fromProperty": "done",
+      "toId": "mm_site",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "mm_staff",
+      "fromProperty": "unchanged",
+      "toId": "mm_site",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "mm_staff",
+      "fromProperty": "failure",
+      "toId": "mm_site",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "mm_site",
+      "fromProperty": "done",
+      "toId": "mm_key",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "mm_site",
+      "fromProperty": "failure",
+      "toId": "mm_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mm_key",
+      "fromProperty": "done",
+      "toId": "mm_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mm_key",
+      "fromProperty": "failure",
+      "toId": "mm_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mm_in",
+      "fromProperty": "request",
+      "toId": "mm_fn",
+      "toProperty": "in-request"
+    },
+    {
+      "fromId": "mm_staff",
+      "fromProperty": "userIds",
+      "toId": "mm_fn",
+      "toProperty": "in-staffIds"
+    },
+    {
+      "fromId": "mm_site",
+      "fromProperty": "value",
+      "toId": "mm_fn",
+      "toProperty": "in-origin"
+    },
+    {
+      "fromId": "mm_key",
+      "fromProperty": "value",
+      "toId": "mm_fn",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "mm_fn",
+      "fromProperty": "out-sent",
+      "toId": "mm_out",
+      "toProperty": "sent"
+    },
+    {
+      "fromId": "mm_fn",
+      "fromProperty": "out-done",
+      "toId": "mm_out",
+      "toProperty": "done"
+    }
+  ]
+}

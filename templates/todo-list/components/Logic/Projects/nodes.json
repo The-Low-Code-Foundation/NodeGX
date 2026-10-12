@@ -1,0 +1,595 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "18587fe1-2251-549d-8f28-f749e873566b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pjIn",
+      "type": "Component Inputs",
+      "label": "What it needs",
+      "ports": [
+        {
+          "name": "tasks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "openId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "flag",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "now",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "refresh",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pjOut",
+      "type": "Component Outputs",
+      "label": "The projects",
+      "ports": [
+        {
+          "name": "projectNames",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "showTab",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "showTurnOn",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "noProjects",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "projectPosition",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "nextPosition",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "balanceText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "balanceWhen",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "bars",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "lowText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "lowColor",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "incomeRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasIncome",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "payingRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasPaying",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "buildingRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasBuilding",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "hobbyRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasHobby",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "quietRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasQuiet",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "upRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "recRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "pastRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "projectOptions",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "projects",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "marks",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "readings",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "pjLoad",
+      "type": "JavaScriptFunction",
+      "label": "Read the projects and the money",
+      "parameters": {
+        "functionScript": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction fmtDay(d) { return DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()]; }\nfunction fmtTime(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }\nfunction when(v) {\n  if (v === undefined || v === null || v === '') return null;\n  var d = v instanceof Date ? v : new Date(v);\n  return isNaN(d.getTime()) ? null : d;\n}\nfunction dayLabel(d) {\n  var t = startOfToday();\n  if (d.getTime() >= t) return 'Today';\n  if (d.getTime() >= t - 86400000) return 'Yesterday';\n  return fmtDay(d);\n}\nfunction due(s) {\n  var d = toDay(s);\n  if (!d) return { text: '', late: false };\n  var n = Math.round((d.getTime() - startOfToday()) / 86400000);\n  if (n < 0) return { text: 'Overdue by ' + (-n) + (n === -1 ? ' day' : ' days'), late: true };\n  if (n === 0) return { text: 'Due today', late: true };\n  if (n === 1) return { text: 'Due tomorrow', late: false };\n  if (n <= 7) return { text: 'Due in ' + n + ' days', late: false };\n  return { text: 'Due ' + fmtDay(d), late: false };\n}\nfunction ago(d) {\n  var ms = Date.now() - d.getTime();\n  if (ms < 3600000) return 'just now';\n  if (ms < 86400000) return Math.round(ms / 3600000) + ' h ago';\n  var n = Math.round(ms / 86400000);\n  return n === 1 ? 'yesterday' : n + ' days ago';\n}\nfunction num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction byPosition(a, b) { return num(a.position, 0) - num(b.position, 0); }\nvar PJ_PREFIX = new RegExp(\"^(?:(?:→|!) |✓ (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) \\\\d{1,2} · )+\");\nfunction pjClean(s) { return String(s === undefined || s === null ? '' : s).replace(PJ_PREFIX, '').trim(); }\nfunction pjId(r) { return r ? String(r.objectId || r.id || '') : ''; }\n/**\n * A row as plain fields with its 'id'. 🔴 A viewer built before 2026-09-23 (HLT-022) ignores\n * 'plain: true' and hands back the record itself — todo.digitalbricks.io runs one — so both shapes\n * are read, and never mutated: a record's own fields are the shared copy every view draws.\n */\nfunction pjPlain(r) {\n  var model = !!r && typeof r.getId === 'function';\n  var src = model ? r.data || {} : r || {}, o = {};\n  for (var k in src) if (Object.prototype.hasOwnProperty.call(src, k)) o[k] = src[k];\n  o.id = model ? String(r.getId()) : pjId(r);\n  if (!o.objectId) o.objectId = o.id;\n  return o;\n}\nfunction pjIso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction pjToday() { return pjIso(new Date()); }\n/** '' stays '', \"today\" and \"tomorrow\" are days, YYYY-MM-DD must be a real day; anything else is null. */\nfunction pjDate(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).trim().toLowerCase();\n  if (s === '') return '';\n  if (s === 'today' || s === 'tomorrow') {\n    var d = new Date();\n    if (s === 'tomorrow') d.setDate(d.getDate() + 1);\n    return pjIso(d);\n  }\n  var m = /^(\\d{4})-(\\d{1,2})-(\\d{1,2})$/.exec(s);\n  if (!m) return null;\n  var y = Number(m[1]), mo = Number(m[2]), da = Number(m[3]);\n  var dt = new Date(y, mo - 1, da);\n  return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === da ? pjIso(dt) : null;\n}\n/** \"2,140\", \"€ 2140\", \"−380\" → a number; anything else NaN. */\nfunction pjAmount(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).replace(/[€\\s,]/g, '').replace('−', '-');\n  if (s === '') return NaN;\n  var n = Number(s);\n  return isFinite(n) ? n : NaN;\n}\nfunction all(cls) { return Noodl.Records.query(cls, {}, { limit: 1000, plain: true }); }\nfunction withIds(list) {\n  var out = [];\n  for (var i = 0; i < (list || []).length; i++) out.push(pjPlain(list[i]));\n  return out;\n}\nPromise.all([all('Project'), all('MoneyItem'), all('MoneyMark'), all('BalanceReading')]).then(\n  function (res) {\n    Outputs.projects = withIds(res[0]);\n    Outputs.items = withIds(res[1]);\n    Outputs.marks = withIds(res[2]);\n    Outputs.readings = withIds(res[3]);\n    Outputs.loaded();\n  },\n  function () {\n    Outputs.failed();\n  }\n);"
+      },
+      "ports": [
+        {
+          "name": "out-projects",
+          "plug": "output",
+          "type": "array",
+          "displayName": "projects",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-items",
+          "plug": "output",
+          "type": "array",
+          "displayName": "items",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-marks",
+          "plug": "output",
+          "type": "array",
+          "displayName": "marks",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-readings",
+          "plug": "output",
+          "type": "array",
+          "displayName": "readings",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-loaded",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "loaded",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "failed",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "pjCarry",
+      "type": "JavaScriptFunction",
+      "label": "Bring Planning’s moves over, once",
+      "parameters": {
+        "functionScript": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction fmtDay(d) { return DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()]; }\nfunction fmtTime(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }\nfunction when(v) {\n  if (v === undefined || v === null || v === '') return null;\n  var d = v instanceof Date ? v : new Date(v);\n  return isNaN(d.getTime()) ? null : d;\n}\nfunction dayLabel(d) {\n  var t = startOfToday();\n  if (d.getTime() >= t) return 'Today';\n  if (d.getTime() >= t - 86400000) return 'Yesterday';\n  return fmtDay(d);\n}\nfunction due(s) {\n  var d = toDay(s);\n  if (!d) return { text: '', late: false };\n  var n = Math.round((d.getTime() - startOfToday()) / 86400000);\n  if (n < 0) return { text: 'Overdue by ' + (-n) + (n === -1 ? ' day' : ' days'), late: true };\n  if (n === 0) return { text: 'Due today', late: true };\n  if (n === 1) return { text: 'Due tomorrow', late: false };\n  if (n <= 7) return { text: 'Due in ' + n + ' days', late: false };\n  return { text: 'Due ' + fmtDay(d), late: false };\n}\nfunction ago(d) {\n  var ms = Date.now() - d.getTime();\n  if (ms < 3600000) return 'just now';\n  if (ms < 86400000) return Math.round(ms / 3600000) + ' h ago';\n  var n = Math.round(ms / 86400000);\n  return n === 1 ? 'yesterday' : n + ' days ago';\n}\nfunction num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction byPosition(a, b) { return num(a.position, 0) - num(b.position, 0); }\nvar PJ_PREFIX = new RegExp(\"^(?:(?:→|!) |✓ (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) \\\\d{1,2} · )+\");\nfunction pjClean(s) { return String(s === undefined || s === null ? '' : s).replace(PJ_PREFIX, '').trim(); }\nfunction pjId(r) { return r ? String(r.objectId || r.id || '') : ''; }\n/**\n * A row as plain fields with its 'id'. 🔴 A viewer built before 2026-09-23 (HLT-022) ignores\n * 'plain: true' and hands back the record itself — todo.digitalbricks.io runs one — so both shapes\n * are read, and never mutated: a record's own fields are the shared copy every view draws.\n */\nfunction pjPlain(r) {\n  var model = !!r && typeof r.getId === 'function';\n  var src = model ? r.data || {} : r || {}, o = {};\n  for (var k in src) if (Object.prototype.hasOwnProperty.call(src, k)) o[k] = src[k];\n  o.id = model ? String(r.getId()) : pjId(r);\n  if (!o.objectId) o.objectId = o.id;\n  return o;\n}\nfunction pjIso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction pjToday() { return pjIso(new Date()); }\n/** '' stays '', \"today\" and \"tomorrow\" are days, YYYY-MM-DD must be a real day; anything else is null. */\nfunction pjDate(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).trim().toLowerCase();\n  if (s === '') return '';\n  if (s === 'today' || s === 'tomorrow') {\n    var d = new Date();\n    if (s === 'tomorrow') d.setDate(d.getDate() + 1);\n    return pjIso(d);\n  }\n  var m = /^(\\d{4})-(\\d{1,2})-(\\d{1,2})$/.exec(s);\n  if (!m) return null;\n  var y = Number(m[1]), mo = Number(m[2]), da = Number(m[3]);\n  var dt = new Date(y, mo - 1, da);\n  return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === da ? pjIso(dt) : null;\n}\n/** \"2,140\", \"€ 2140\", \"−380\" → a number; anything else NaN. */\nfunction pjAmount(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).replace(/[€\\s,]/g, '').replace('−', '-');\n  if (s === '') return NaN;\n  var n = Number(s);\n  return isFinite(n) ? n : NaN;\n}\nif (this.carrying) return;\nvar projects = Inputs.projects || [];\nvar self = this;\nself.carrying = true;\nvar R = Noodl.Records;\nfunction line(id, kind, summary, body) {\n  return R.create('Event', { taskId: id, kind: kind, summary: summary, body: body || '', at: new Date().toISOString() });\n}\nvar changed = false;\nR.query('Task', {}, { limit: 1000, plain: true })\n  .then(function (found) {\n    var steps = Promise.resolve(), maxPos = 0;\n    var tasks = (found || []).map(pjPlain);\n    tasks.forEach(function (t) { if (Number(t.position) > maxPos) maxPos = Number(t.position); });\n    // 1. The arrow Planning wrote in front of a task it sent.\n    tasks.forEach(function (t) {\n      var was = String(t.title || ''), clean = pjClean(was);\n      if (t.status === 'done' || clean === was || clean === '') return;\n      t.title = clean;\n      changed = true;\n      steps = steps\n        .then(function () { return R.save(t.id, { title: clean }, { className: 'Task' }); })\n        .then(function () { return line(t.id, 'renamed', 'Renamed from “' + was + '”', 'Planning had written the arrow into the title.'); });\n    });\n    // 2. Each project's move: linked to its task, or made one.\n    projects.forEach(function (p) {\n      var move = pjClean(p.move);\n      if (!p.id || move === '') return;\n      var key = move.toLowerCase(), open = null, closed = null;\n      tasks.forEach(function (t) {\n        if (pjClean(t.title).toLowerCase() !== key || (t.projectId && t.projectId !== p.id)) return;\n        if (t.status === 'done') closed = closed || t; else open = open || t;\n      });\n      var hit = open || closed;\n      var name = String(p.name || 'the project');\n      var dueRaw = String(p.moveDue || '').slice(0, 10);\n      var dueDay = /^\\d{4}-\\d{2}-\\d{2}$/.test(dueRaw) ? dueRaw : '';\n      changed = true;\n      if (hit) {\n        // Linked, and given the move's day if it has none of its own.\n        var patch = {}, linking = hit.projectId !== p.id;\n        if (linking) patch.projectId = p.id;\n        if (dueDay && !hit.deadline && hit.status !== 'done') patch.deadline = dueDay;\n        hit.projectId = p.id;\n        if (linking || patch.deadline) {\n          steps = steps.then(function () { return R.save(hit.id, patch, { className: 'Task' }); });\n          if (linking) steps = steps.then(function () { return line(hit.id, 'note', 'Now the next move for ' + name, 'Carried over from Planning.'); });\n        }\n      } else {\n        maxPos += 1;\n        var at = maxPos;\n        steps = steps\n          .then(function () {\n            return R.create('Task', { title: move, position: at, status: 'open', deadline: dueDay, closingNote: '', closedAt: '', projectId: p.id, waitingOn: '' });\n          })\n          .then(function (t) { return line(t.getId(), 'created', 'Carried over from Planning: the next move for ' + name, ''); });\n      }\n      steps = steps.then(function () { return R.save(p.id, { move: '', moveDue: null }, { className: 'Project' }); });\n    });\n    return steps;\n  })\n  .then(\n    function () {\n      self.carrying = false;\n      if (changed) Outputs.changed();\n    },\n    function () {\n      self.carrying = false;\n      Outputs.failed();\n    }\n  );",
+        "runOnChange-in-projects": false
+      },
+      "ports": [
+        {
+          "name": "out-changed",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "changed",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "failed",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-projects",
+          "displayName": "projects",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ],
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "pjRows",
+      "type": "JavaScriptFunction",
+      "label": "Work out what the tab draws",
+      "parameters": {
+        "functionScript": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction fmtDay(d) { return DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()]; }\nfunction fmtTime(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }\nfunction when(v) {\n  if (v === undefined || v === null || v === '') return null;\n  var d = v instanceof Date ? v : new Date(v);\n  return isNaN(d.getTime()) ? null : d;\n}\nfunction dayLabel(d) {\n  var t = startOfToday();\n  if (d.getTime() >= t) return 'Today';\n  if (d.getTime() >= t - 86400000) return 'Yesterday';\n  return fmtDay(d);\n}\nfunction due(s) {\n  var d = toDay(s);\n  if (!d) return { text: '', late: false };\n  var n = Math.round((d.getTime() - startOfToday()) / 86400000);\n  if (n < 0) return { text: 'Overdue by ' + (-n) + (n === -1 ? ' day' : ' days'), late: true };\n  if (n === 0) return { text: 'Due today', late: true };\n  if (n === 1) return { text: 'Due tomorrow', late: false };\n  if (n <= 7) return { text: 'Due in ' + n + ' days', late: false };\n  return { text: 'Due ' + fmtDay(d), late: false };\n}\nfunction ago(d) {\n  var ms = Date.now() - d.getTime();\n  if (ms < 3600000) return 'just now';\n  if (ms < 86400000) return Math.round(ms / 3600000) + ' h ago';\n  var n = Math.round(ms / 86400000);\n  return n === 1 ? 'yesterday' : n + ' days ago';\n}\nfunction num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction byPosition(a, b) { return num(a.position, 0) - num(b.position, 0); }\nvar PJ_PREFIX = new RegExp(\"^(?:(?:→|!) |✓ (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) \\\\d{1,2} · )+\");\nfunction pjClean(s) { return String(s === undefined || s === null ? '' : s).replace(PJ_PREFIX, '').trim(); }\nfunction pjId(r) { return r ? String(r.objectId || r.id || '') : ''; }\n/**\n * A row as plain fields with its 'id'. 🔴 A viewer built before 2026-09-23 (HLT-022) ignores\n * 'plain: true' and hands back the record itself — todo.digitalbricks.io runs one — so both shapes\n * are read, and never mutated: a record's own fields are the shared copy every view draws.\n */\nfunction pjPlain(r) {\n  var model = !!r && typeof r.getId === 'function';\n  var src = model ? r.data || {} : r || {}, o = {};\n  for (var k in src) if (Object.prototype.hasOwnProperty.call(src, k)) o[k] = src[k];\n  o.id = model ? String(r.getId()) : pjId(r);\n  if (!o.objectId) o.objectId = o.id;\n  return o;\n}\nfunction pjIso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction pjToday() { return pjIso(new Date()); }\n/** '' stays '', \"today\" and \"tomorrow\" are days, YYYY-MM-DD must be a real day; anything else is null. */\nfunction pjDate(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).trim().toLowerCase();\n  if (s === '') return '';\n  if (s === 'today' || s === 'tomorrow') {\n    var d = new Date();\n    if (s === 'tomorrow') d.setDate(d.getDate() + 1);\n    return pjIso(d);\n  }\n  var m = /^(\\d{4})-(\\d{1,2})-(\\d{1,2})$/.exec(s);\n  if (!m) return null;\n  var y = Number(m[1]), mo = Number(m[2]), da = Number(m[3]);\n  var dt = new Date(y, mo - 1, da);\n  return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === da ? pjIso(dt) : null;\n}\n/** \"2,140\", \"€ 2140\", \"−380\" → a number; anything else NaN. */\nfunction pjAmount(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).replace(/[€\\s,]/g, '').replace('−', '-');\n  if (s === '') return NaN;\n  var n = Number(s);\n  return isFinite(n) ? n : NaN;\n}\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction spentOf(b) { return 0; }\n\nfunction mD(s) { var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || '')); return m ? Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : NaN; }\nfunction mS(t) { return new Date(t).toISOString().slice(0, 10); }\nfunction mOk(s) { return isFinite(mD(s)); }\nfunction mAddDays(s, n) { return mS(mD(s) + n * 86400000); }\nfunction mDim(y, m0) { return new Date(Date.UTC(y, m0 + 1, 0)).getUTCDate(); }\nfunction mAddMonths(s, k, monthEnd) {\n  var y = Number(s.slice(0, 4)), m = Number(s.slice(5, 7)), d = Number(s.slice(8, 10));\n  var t = m - 1 + k, Y = y + Math.floor(t / 12), M = ((t % 12) + 12) % 12;\n  var day = monthEnd ? mDim(Y, M) : Math.min(d, mDim(Y, M));\n  return mS(Date.UTC(Y, M, day));\n}\nfunction mMonth(s) { return String(s).slice(0, 7); }\nfunction mMonthEnd(s) { var y = Number(s.slice(0, 4)), m = Number(s.slice(5, 7)); return mS(Date.UTC(y, m - 1, mDim(y, m - 1))); }\nfunction mBetween(a, b) { return Math.round((mD(b) - mD(a)) / 86400000); }\nvar MONTH_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];\nvar WEEKDAY_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];\nfunction mWeekday(s) { return new Date(mD(s)).getUTCDay(); }\n/** \"Wed 16 Sep\" */\nfunction mDay(s) { var t = new Date(mD(s)); return WEEKDAY_LONG[t.getUTCDay()].slice(0, 3) + ' ' + t.getUTCDate() + ' ' + MON[t.getUTCMonth()]; }\n/** \"Wed 16\" */\nfunction mShort(s) { var t = new Date(mD(s)); return WEEKDAY_LONG[t.getUTCDay()].slice(0, 3) + ' ' + t.getUTCDate(); }\nfunction mOrd(n) { return n + (n % 100 > 10 && n % 100 < 14 ? 'th' : n % 10 === 1 ? 'st' : n % 10 === 2 ? 'nd' : n % 10 === 3 ? 'rd' : 'th'); }\nfunction mEur(n, signed) {\n  var v = Math.round(num(n, 0));\n  var s = '€' + Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  if (v < 0) return '−' + s;\n  return signed && v > 0 ? '+' + s : s;\n}\nfunction mEur2(n) {\n  var v = Math.round(num(n, 0) * 100) / 100;\n  var whole = Math.floor(Math.abs(v)), cents = Math.round((Math.abs(v) - whole) * 100);\n  var s = '€' + whole.toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',') + (cents ? '.' + (cents < 10 ? '0' : '') + cents : '');\n  return v < 0 ? '−' + s : s;\n}\n\n/** M3 — every scheduled date of an item up to and including 'to', stopping at its 'until'. */\nfunction repeatsOf(it, to) {\n  var out = [];\n  if (!it || !mOk(it.date)) return out;\n  var until = mOk(it.until) && it.until < to ? it.until : to;\n  var rep = String(it.repeat || 'once');\n  for (var k = 0; k < 800; k++) {\n    var s;\n    if (rep === 'weekly') s = mAddDays(it.date, 7 * k);\n    else if (rep === 'monthly') s = mAddMonths(it.date, k, it.monthEnd === true);\n    else if (rep === 'quarterly') s = mAddMonths(it.date, 3 * k, it.monthEnd === true);\n    else if (rep === 'yearly') s = mAddMonths(it.date, 12 * k, false);\n    else { if (k > 0) break; s = it.date; }\n    if (s > until) break;\n    out.push(s);\n  }\n  return out;\n}\nfunction markKey(itemId, occurs) { return String(itemId) + '|' + String(occurs); }\nfunction marksById(marks) {\n  var by = {};\n  for (var i = 0; i < (marks || []).length; i++) { var m = marks[i]; if (m && m.itemId) by[markKey(m.itemId, m.occurs)] = m; }\n  return by;\n}\n/** A tick is a payment: { day, amount }, signed as its item is. */\nfunction paymentsOf(m) {\n  var out = [], list = (m && m.payments) || [];\n  for (var i = 0; i < list.length; i++) if (list[i] && mOk(list[i].day) && num(list[i].amount, 0) !== 0) out.push({ day: String(list[i].day), amount: num(list[i].amount, 0) });\n  return out;\n}\nfunction isClient(it, projectsById) {\n  var p = it && it.projectId ? projectsById[it.projectId] : null;\n  return !!p && (num(it.amount, 0) > 0 || it.fromHours === true);\n}\nfunction billingOf(p) { return p && p.billing === 'fixed' ? 'fixed' : 'hourly'; }\n\n/**\n * The money context: everything a repeat needs to know about the world. Built once per run.\n * 'blocks' are the time the hours bills are counted from (M23).\n */\nfunction moneyContext(items, marks, projects, blocks, today, since) {\n  var byP = {};\n  for (var i = 0; i < (projects || []).length; i++) if (projects[i]) byP[projects[i].id] = projects[i];\n  var list = [];\n  for (var j = 0; j < (items || []).length; j++) if (items[j] && items[j].id) list.push(items[j]);\n  // Marks are read for thirteen months back ('since'). A repeat older than that is history: without its\n  // mark it would read as unticked, and a weekly item two years old would be a hundred late rows.\n  return { items: list, marks: marksById(marks), projects: byP, blocks: blocks || [], today: today, since: mOk(since) ? String(since) : '' };\n}\n/** M23 — the hours logged on a project from 'from' to 'to', both inclusive. */\nfunction hoursBetween(ctx, projectId, from, to) {\n  var t = 0;\n  for (var i = 0; i < ctx.blocks.length; i++) {\n    var b = ctx.blocks[i];\n    if (!b || b.projectId !== projectId) continue;\n    var d = String(b.date || '');\n    if (d < from || d > to) continue;\n    t += spentOf(b);\n  }\n  return q(t);\n}\n/** When the bill before this one went out, for the same project — the start of an hours bill's period. */\nfunction previousBillOut(ctx, projectId, before) {\n  var best = '';\n  for (var i = 0; i < ctx.items.length; i++) {\n    var it = ctx.items[i];\n    if (it.projectId !== projectId || !isClient(it, ctx.projects)) continue;\n    var reps = repeatsOf(it, before);\n    for (var r = 0; r < reps.length; r++) {\n      var m = ctx.marks[markKey(it.id, reps[r])];\n      var out = (m && mOk(m.sentOn)) ? String(m.sentOn) : billOutOf(it, reps[r]);\n      if (out && out < before && out > best) best = out;\n    }\n  }\n  return best;\n}\nfunction billOutOf(it, occurs) {\n  if (it.repeat === 'once' || !it.repeat) return mOk(it.billDate) ? String(it.billDate) : '';\n  var lead = Number(it.billLeadDays);\n  return it.billLeadDays === null || it.billLeadDays === undefined || it.billLeadDays === '' || !isFinite(lead) ? '' : mAddDays(occurs, -Math.round(lead));\n}\n\n/** One repeat of one item, with its mark applied. */\nfunction occOf(ctx, it, occurs) {\n  var key = markKey(it.id, occurs);\n  var m = ctx.marks[key] || null;\n  var client = isClient(it, ctx.projects);\n  var p = it.projectId ? ctx.projects[it.projectId] || null : null;\n  var billOut = client ? billOutOf(it, occurs) : '';\n  var sentOn = m && mOk(m.sentOn) ? String(m.sentOn) : '';\n  var marked = m && m.amount !== null && m.amount !== undefined && m.amount !== '' && isFinite(Number(m.amount));\n  var hoursBill = it.fromHours === true && !marked && !!p;\n  var hours = 0, amount;\n  if (hoursBill) {\n    var end = billOut || occurs;\n    var start = previousBillOut(ctx, it.projectId, end);\n    start = start ? mAddDays(start, 1) : end.slice(0, 8) + '01';\n    hours = hoursBetween(ctx, it.projectId, start, end < ctx.today ? end : ctx.today);\n    amount = Math.round(hours * num(p.rate, 0) * 100) / 100;\n  } else amount = marked ? num(m.amount, 0) : num(it.amount, 0);\n  if (amount > 0 !== num(it.amount, 0) > 0 && !hoursBill && num(it.amount, 0) !== 0) amount = -amount;\n  var pays = paymentsOf(m);\n  var paid = 0, lastOn = '';\n  for (var i = 0; i < pays.length; i++) { paid += pays[i].amount; if (pays[i].day > lastOn) lastOn = pays[i].day; }\n  paid = Math.round(paid * 100) / 100;\n  var lostOn = m && mOk(m.lostOn) ? String(m.lostOn) : '';\n  var skip = !!(m && m.skip === true);\n  // A ticked repeat is closed — changing its item afterwards does not reopen the past (M4). Only a part\n  // payment with the rest still owed stays open, and Logic/Mark keeps what was due on its mark for that.\n  var closed = skip || !!lostOn || (pays.length > 0 && (!marked || Math.abs(paid) >= Math.abs(amount) - 0.005));\n  return {\n    it: it, key: key, itemId: it.id, occurs: occurs, m: m, markId: m ? String(m.id || '') : '',\n    date: m && mOk(m.date) ? String(m.date) : occurs,\n    amount: amount, paid: paid, remaining: Math.round((amount - paid) * 100) / 100, lastOn: lastOn, payments: pays,\n    closed: closed, skip: skip, lostOn: lostOn, client: client, project: p,\n    hoped: num(it.likelihood, 100) < 100, likelihood: Math.max(0, Math.min(100, Math.round(num(it.likelihood, 100)))),\n    changed: marked && !it.fromHours && num(m.amount, 0) !== num(it.amount, 0), moved: !!(m && mOk(m.date) && m.date !== occurs),\n    billOut: billOut, sentOn: sentOn, hoursBill: hoursBill, hours: hours\n  };\n}\nfunction allOccs(ctx, to) {\n  var out = [];\n  for (var i = 0; i < ctx.items.length; i++) {\n    var reps = repeatsOf(ctx.items[i], to);\n    for (var r = 0; r < reps.length; r++) if (!ctx.since || reps[r] >= ctx.since) out.push(occOf(ctx, ctx.items[i], reps[r]));\n  }\n  return out;\n}\nfunction byDate(a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : b.remaining - a.remaining; }\n\n/** M11 — the latest reading, and every payment ticked after it. */\nfunction balanceNow(ctx, readings) {\n  var r = null;\n  for (var i = 0; i < (readings || []).length; i++) {\n    var x = readings[i];\n    if (!x || !mOk(x.date)) continue;\n    if (!r || x.date > r.date || (x.date === r.date && String(x.createdAt || '') > String(r.createdAt || ''))) r = x;\n  }\n  var from = r ? String(r.date) : '', bal = r ? num(r.amount, 0) : 0, since = 0;\n  for (var k in ctx.marks) {\n    var pays = paymentsOf(ctx.marks[k]);\n    for (var p = 0; p < pays.length; p++) if (!r || pays[p].day > from) { bal += pays[p].amount; since++; }\n  }\n  return { balance: Math.round(bal * 100) / 100, since: since, readOn: from, readAmount: r ? num(r.amount, 0) : 0, hasReading: !!r };\n}\n\n/** Every open, expected repeat up to 'to' — late ones first, counted today — with the balance after each. */\nfunction projection(ctx, readings, to) {\n  var now = balanceNow(ctx, readings);\n  var os = allOccs(ctx, to);\n  var late = [], future = [], hoped = [], bills = [];\n  for (var i = 0; i < os.length; i++) {\n    var o = os[i];\n    if (o.closed) continue;\n    if (o.billOut && !o.sentOn && o.billOut <= to) bills.push(o);\n    if (o.hoped) { if (o.date >= ctx.today && o.date <= to) hoped.push(o); continue; }\n    if (o.date < ctx.today) late.push(o);\n    else if (o.date <= to) future.push(o);\n  }\n  late.sort(byDate); future.sort(byDate); hoped.sort(byDate);\n  bills.sort(function (a, b) { return a.billOut < b.billOut ? -1 : a.billOut > b.billOut ? 1 : 0; });\n  var run = now.balance, after = {};\n  for (var l = 0; l < late.length; l++) { run += late[l].remaining; after[late[l].key] = Math.round(run * 100) / 100; }\n  for (var f = 0; f < future.length; f++) { run += future[f].remaining; after[future[f].key] = Math.round(run * 100) / 100; }\n  return { now: now, occs: os, late: late, future: future, hoped: hoped, bills: bills, after: after };\n}\n\n/** M12 — what one item counts for in a month's target. */\nfunction perMonth(it) {\n  var a = num(it.amount, 0), r = String(it.repeat || 'once');\n  return r === 'weekly' ? a * 52 / 12 : r === 'monthly' ? a : r === 'quarterly' ? a / 3 : r === 'yearly' ? a / 12 : 0;\n}\nfunction activeOn(it, day) { return mOk(it.date) && (!mOk(it.until) || String(it.until) >= day); }\n\n/** M12, M13, M22 — break-even, target, and the billable hours the month needs. */\nfunction moneyTargets(ctx, settings) {\n  var today = ctx.today, mk = mMonth(today);\n  var outs = [], ins = [], out = 0, inn = 0;\n  for (var i = 0; i < ctx.items.length; i++) {\n    var it = ctx.items[i];\n    if (it.projectId || num(it.likelihood, 100) < 100 || String(it.repeat || 'once') === 'once' || !activeOn(it, today)) continue;\n    var pm = perMonth(it);\n    if (pm < 0) { outs.push(it); out -= pm; } else if (pm > 0) { ins.push(it); inn += pm; }\n  }\n  var breakEven = Math.round((out - inn) * 100) / 100;\n  var target = Math.round((breakEven + Math.max(0, num(settings.savingsTarget, 0))) * 100) / 100;\n  var rate = num(settings.rate, 0);\n  var os = allOccs(ctx, mMonthEnd(mAddMonths(today.slice(0, 8) + '01', 1, false)));\n  var fixed = [], fixedSum = 0, agreedIds = [], agreed = 0;\n  for (var j = 0; j < os.length; j++) {\n    var o = os[j];\n    if (!o.client || o.hoped || o.skip || o.lostOn || billingOf(o.project) !== 'fixed') continue;\n    if (mMonth(o.billOut || o.date) !== mk) continue;\n    fixed.push(o); fixedSum += o.amount;\n    if (agreedIds.indexOf(o.it.projectId) < 0 && num(o.project.agreedHours, 0) > 0) { agreedIds.push(o.it.projectId); agreed += num(o.project.agreedHours, 0); }\n  }\n  var byHour = Math.max(0, target - fixedSum);\n  var hourly = rate > 0 ? Math.ceil(byHour / rate - 1e-9) : 0;\n  return {\n    outs: outs, ins: ins, out: out, inn: inn, breakEven: breakEven, target: target, rate: rate,\n    fixed: fixed, fixedSum: fixedSum, agreedIds: agreedIds, agreed: agreed, byHour: byHour, hourly: hourly,\n    hours: rate > 0 ? hourly + agreed : 0\n  };\n}\n\n/** M14 line 1 and M17 — the month by the day its bills go out. */\nfunction monthLine(ctx, t) {\n  var mk = mMonth(ctx.today);\n  var os = allOccs(ctx, mMonthEnd(mAddMonths(ctx.today.slice(0, 8) + '01', 1, false)));\n  var sent = 0, all = 0;\n  for (var i = 0; i < os.length; i++) {\n    var o = os[i];\n    if (!o.client || o.hoped || o.skip || o.lostOn || mMonth(o.billOut || o.date) !== mk) continue;\n    all += o.amount;\n    if (o.sentOn || (!o.billOut && o.paid)) sent += o.amount;\n  }\n  var toGo = t.target - all;\n  var hours = t.rate > 0 ? Math.ceil(Math.max(0, toGo) / t.rate - 1e-9) : 0;\n  var text = toGo > 0\n    ? 'Break-even ' + mEur(t.breakEven) + ' · target ' + mEur(t.target) + '. Billed ' + mEur(sent) + ' so far, ' + mEur(all) +\n      ' with the bills still to go out this month · ' + mEur(toGo) + ' to target' + (t.rate > 0 ? ', about ' + hours + ' h.' : '.')\n    : 'Break-even ' + mEur(t.breakEven) + ' · target ' + mEur(t.target) + '. Billed ' + mEur(all) + ' this month · ' + mEur(-toGo) + ' past target.';\n  return { sent: sent, all: all, toGo: toGo, hours: hours, text: text, name: MONTH_LONG[Number(mk.slice(5, 7)) - 1] };\n}\n\n/** M7, M14 line 2 — each hoped item's next repeat, weighted by its likelihood. */\nfunction mightEarn(ctx) {\n  var nexts = [], weighted = 0, all = 0;\n  var to = mAddMonths(ctx.today, 24, false);\n  for (var i = 0; i < ctx.items.length; i++) {\n    var it = ctx.items[i];\n    if (num(it.likelihood, 100) >= 100 || !activeOn(it, ctx.today)) continue;\n    var reps = repeatsOf(it, to);\n    for (var r = 0; r < reps.length; r++) {\n      var o = occOf(ctx, it, reps[r]);\n      if (o.date >= ctx.today && !o.closed) { nexts.push(o); weighted += o.amount * o.likelihood / 100; all += o.amount; break; }\n    }\n  }\n  return { nexts: nexts, weighted: weighted, all: all };\n}\n\n/** M14 line 3 — the lowest the balance goes in the next six weeks, counting from today. */\nfunction lowestPoint(ctx, readings) {\n  var p = projection(ctx, readings, mAddDays(ctx.today, 42));\n  var lo = { balance: p.now.balance, date: ctx.today };\n  var list = p.late.concat(p.future);\n  for (var i = 0; i < list.length; i++) { var b = p.after[list[i].key]; if (b < lo.balance) lo = { balance: b, date: list[i].date < ctx.today ? ctx.today : list[i].date }; }\n  return lo;\n}\n\n/** \"every month on the 28th, from Jul 2026, no end\" */\nfunction scheduleWords(it, today) {\n  var d = new Date(mD(it.date)), day = d.getUTCDate(), r = String(it.repeat || 'once');\n  if (r === 'once') return 'once, ' + mDay(it.date);\n  var w = r === 'weekly' ? 'every ' + WEEKDAY_LONG[d.getUTCDay()]\n    : r === 'monthly' ? 'every month on the ' + (it.monthEnd === true ? 'last day' : mOrd(day))\n    : r === 'quarterly' ? 'every three months on the ' + (it.monthEnd === true ? 'last day' : mOrd(day))\n    : 'every year on ' + day + ' ' + MON[d.getUTCMonth()];\n  var end = mOk(it.until) ? (String(it.until) < today ? 'ended ' + mDay(it.until) : 'until ' + MON[Number(String(it.until).slice(5, 7)) - 1] + ' ' + String(it.until).slice(0, 4)) : 'no end';\n  return w + ', from ' + MON[d.getUTCMonth()] + ' ' + d.getUTCFullYear() + ', ' + end;\n}\nfunction repeatWord(it) { var r = String(it.repeat || 'once'); return r === 'quarterly' ? 'every 3 months' : r === 'once' ? '' : r; }\n/** M11a — what the rest of a short payment is called. */\nfunction restWords(o) { return o.client ? ['Still owed', 'Lost'] : o.amount > 0 ? ['Still to come', 'That’s all'] : ['Still to pay', 'That’s all']; }\nfunction projectName(o) { return o.project ? String(o.project.name || '') : ''; }\nvar tasks = Inputs.tasks || [];\nvar projects = Inputs.projects || [];\nvar items = Inputs.items || [], marks = Inputs.marks || [], readings = Inputs.readings || [];\n// The minute clock: read so a day turning over (late, due today) is drawn again without a reload.\nvar clock = Inputs.now;\nvar openId = String(Inputs.openId || '');\nvar flag = String(Inputs.flag || '');\nvar today = pjToday();\nvar PRE = \"pj-\";\n\nvar names = {}, live = [], maxProjectPos = 0;\nfor (var i = 0; i < projects.length; i++) {\n  var p = projects[i];\n  if (!p || !p.id) continue;\n  names[p.id] = String(p.name || 'Untitled project');\n  if (num(p.position, 0) > maxProjectPos) maxProjectPos = num(p.position, 0);\n  if (p.kind !== 'admin') live.push(p);\n}\nvar on = flag === 'on' || (flag !== 'off' && live.length > 0);\nOutputs.projectNames = names;\nOutputs.showTab = on;\nOutputs.showTurnOn = !on;\nOutputs.noProjects = live.length === 0;\nOutputs.projectPosition = maxProjectPos + 1;\n\nvar maxPos = 0, openBy = {}, doneBy = {};\nfor (var t = 0; t < tasks.length; t++) {\n  var task = tasks[t];\n  if (!task) continue;\n  if (num(task.position, 0) > maxPos) maxPos = num(task.position, 0);\n  if (!task.projectId) continue;\n  var bucket = task.status === 'done' ? doneBy : openBy;\n  (bucket[task.projectId] = bucket[task.projectId] || []).push(task);\n}\nOutputs.nextPosition = maxPos + 1;\n\n// ── The money ──\nvar ctx = moneyContext(items, marks, projects, [], today, mAddMonths(today, -13, false));\nvar horizon = mAddDays(today, 30);\nvar pr = projection(ctx, readings, horizon);\nvar now = pr.now;\nOutputs.balanceText = mEur(now.balance);\nOutputs.balanceWhen = now.hasReading\n  ? 'in the bank when you last looked, ' + mDay(now.readOn) + (now.since ? ' · ' + now.since + (now.since === 1 ? ' payment' : ' payments') + ' ticked since' : '')\n  : 'Type what is in the bank below, and the next 30 days are worked out from it.';\nvar start = now.balance, byDay = {};\nfor (var l = 0; l < pr.late.length; l++) start += pr.late[l].remaining;\nfor (var f = 0; f < pr.future.length; f++) byDay[pr.future[f].date] = (byDay[pr.future[f].date] || 0) + pr.future[f].remaining;\nvar run = start, series = [];\nfor (var k = 0; k <= 30; k++) {\n  var day = mAddDays(today, k);\n  run += byDay[day] || 0;\n  series.push({ d: day, v: Math.round(run * 100) / 100 });\n}\nvar lo = series[0], hi = series[0];\nfor (var s = 0; s < series.length; s++) { if (series[s].v < lo.v) lo = series[s]; if (series[s].v > hi.v) hi = series[s]; }\nvar floor = Math.min(0, lo.v), span = Math.max(0, hi.v) - floor || 1;\nvar bars = [];\nfor (var b = 0; b < series.length; b++) {\n  bars.push({\n    id: 'bar-' + series[b].d,\n    height: { value: Math.max(4, Math.round(((series[b].v - floor) / span) * 100)), unit: '%' },\n    mark: series[b].v < 0 ? 'var(--destructive)' : 'var(--primary)'\n  });\n}\nOutputs.bars = bars;\nvar lowText;\nif (lo.v < 0) {\n  var after = null;\n  for (var a = 0; a < pr.future.length; a++) if (pr.future[a].date > lo.d && pr.future[a].remaining > 0) { after = pr.future[a]; break; }\n  lowText = 'Dips to ' + mEur(lo.v) + ' around ' + mDay(lo.d) +\n    (after ? ', then ' + mEur(after.remaining) + ' from ' + (projectName(after) || String(after.it.label || 'money in')) + ' on ' + mShort(after.date) : '') + '.';\n} else lowText = 'Lowest in the next 30 days: ' + mEur(lo.v) + ', ' + mDay(lo.d) + '.';\nvar hopedSum = 0;\nfor (var h = 0; h < pr.hoped.length; h++) if (pr.hoped[h].amount > 0) hopedSum += pr.hoped[h].amount;\nif (hopedSum > 0) lowText += ' Not counting ' + mEur(hopedSum) + ' hoped for.';\nOutputs.lowText = lowText;\nOutputs.lowColor = lo.v < 0 ? 'var(--destructive)' : 'var(--muted-foreground)';\n\nvar soon = mAddDays(today, 14), incomeRows = [];\nvar open = pr.late.concat(pr.future);\nfor (var u = 0; u < open.length; u++) {\n  var o = open[u];\n  if (o.remaining <= 0 || o.date > soon) continue;\n  var lateBy = o.date < today ? mBetween(o.date, today) : 0;\n  incomeRows.push({\n    id: 'in-' + o.key,\n    key: o.key,\n    label: projectName(o) || String(o.it.label || 'Money in'),\n    meta: mDay(o.date) + (lateBy ? ' · ' + lateBy + (lateBy === 1 ? ' day' : ' days') + ' late' : ''),\n    metaColor: lateBy ? 'var(--destructive)' : 'var(--muted-foreground)',\n    amount: mEur(o.remaining)\n  });\n}\nOutputs.incomeRows = incomeRows;\nOutputs.hasIncome = incomeRows.length > 0;\n\n// ── The projects ──\nvar os = allOccs(ctx, mAddDays(today, 400));\nvar occBy = {};\nfor (var c = 0; c < os.length; c++) if (os[c].client && os[c].it.projectId) (occBy[os[c].it.projectId] = occBy[os[c].it.projectId] || []).push(os[c]);\n\nfunction moneyOf(proj) {\n  var occs = (occBy[proj.id] || []).slice().sort(byDate);\n  var late = null, next = null, paid = null;\n  for (var i = 0; i < occs.length; i++) {\n    var o = occs[i];\n    if (o.payments.length && (!paid || o.lastOn > paid.lastOn)) paid = o;\n    if (o.closed) continue;\n    if (o.date < today && !o.hoped) { if (!late) late = o; }\n    else if (o.date >= today && !next) next = o;\n  }\n  var text = '', color = 'var(--muted-foreground)';\n  if (late) {\n    var n = mBetween(late.date, today);\n    text = mEur(late.remaining) + ' · ' + n + (n === 1 ? ' day' : ' days') + ' late';\n    color = 'var(--destructive)';\n  } else if (next) {\n    var rep = repeatWord(next.it);\n    text = mEur(next.remaining) + (rep ? ' ' + (rep === 'monthly' ? 'a month' : rep) : '') + ' · ' + (next.hoped ? next.likelihood + '% likely, ' : '') + mShort(next.date);\n  } else if (paid) text = 'Paid ' + mDay(paid.lastOn);\n  else if (proj.kind === 'building') text = 'Building';\n  else if (proj.kind === 'hobby') text = 'Hobby';\n  else if (proj.kind === 'dormant') text = 'Quiet';\n  var tick = late || (next && !next.hoped && next.date <= soon ? next : null);\n  var send = null;\n  for (var j = 0; j < occs.length; j++) {\n    var x = occs[j];\n    if (!x.closed && x.billOut && !x.sentOn && x.billOut <= mAddDays(today, 3)) { send = x; break; }\n  }\n  // s2 — its money items are their own pressable lines now (moneyRows), so they are not repeated here.\n  var facts = [];\n  if (String(proj.sub || '').trim()) facts.push(String(proj.sub).trim());\n  if (paid) {\n    var after2 = mBetween(paid.date, paid.lastOn);\n    facts.push('Last paid ' + mDay(paid.lastOn) + (after2 > 0 ? ', ' + after2 + (after2 === 1 ? ' day' : ' days') + ' after it was due' : ''));\n  }\n  if (String(proj.moveWorth || '').trim()) facts.push('Worth: ' + String(proj.moveWorth).trim());\n  if (String(proj.say || '').trim()) facts.push(String(proj.say).trim());\n  return { text: text, color: color, late: late, tick: tick, send: send, facts: facts };\n}\n\n// s2 — every money item of a project, as a line that opens the money form.\nvar itemsBy = {};\nfor (var ib = 0; ib < ctx.items.length; ib++) {\n  var itm = ctx.items[ib];\n  if (!itm.projectId || !mOk(itm.date)) continue;\n  // An item removed with Remove (its last day before its first) is never counted, and never shown.\n  if (mOk(itm.until) && String(itm.until) < String(itm.date)) continue;\n  (itemsBy[itm.projectId] = itemsBy[itm.projectId] || []).push(itm);\n}\nfunction itemLine(it) {\n  var a = num(it.amount, 0), like = Math.round(num(it.likelihood, 100));\n  return (it.fromHours === true && a === 0 ? 'From the hours' : mEur(a, true)) + ' ' + scheduleWords(it, today) + (like < 100 ? ', ' + like + '% likely' : '');\n}\nfunction moneyRowsOf(pid) {\n  var list = (itemsBy[pid] || []).slice();\n  function ended(it) { return mOk(it.until) && String(it.until) < today; }\n  list.sort(function (x, y) { return (ended(x) ? 1 : 0) - (ended(y) ? 1 : 0) || String(x.date).localeCompare(String(y.date)); });\n  var out = [];\n  for (var i = 0; i < list.length; i++) {\n    out.push({\n      id: 'pm-' + list[i].id,\n      itemKey: 'item:' + list[i].id,\n      label: String(list[i].label || 'Money'),\n      line: itemLine(list[i]),\n      color: ended(list[i]) ? 'var(--muted-foreground)' : 'var(--foreground)'\n    });\n  }\n  return out;\n}\n/** A project's open tasks, its next move first: each opens in the List. */\nfunction taskRowsOf(list) {\n  var out = [];\n  for (var i = 0; i < list.length; i++) {\n    var x = list[i], whoX = String(x.waitingOn || '').trim(), dX = due(x.deadline), bits = [];\n    if (i === 0) bits.push('The next move');\n    if (whoX) bits.push('Waiting on ' + whoX);\n    if (dX.text) bits.push(dX.text);\n    out.push({\n      id: 'pt-' + x.id,\n      taskId: String(x.id),\n      title: String(x.title || ''),\n      meta: bits.join(' · '),\n      metaColor: dX.late && !whoX ? 'var(--destructive)' : 'var(--muted-foreground)'\n    });\n  }\n  return out;\n}\n\n// s3 — the open tasks a project could take in (Add an existing task): every open task not already its own.\nvar openAll = [];\nfor (var oa = 0; oa < tasks.length; oa++) if (tasks[oa] && tasks[oa].status !== 'done') openAll.push(tasks[oa]);\nopenAll.sort(byPosition);\nfunction otherTasksOf(pid) {\n  var out = [];\n  for (var i = 0; i < openAll.length; i++) {\n    var x = openAll[i];\n    if (x.projectId === pid) continue;\n    var elsewhere = x.projectId && names[x.projectId] ? ' (now ' + names[x.projectId] + ')' : '';\n    out.push({ Label: String(x.title || 'Untitled task') + elsewhere, Value: String(x.id) });\n  }\n  return out;\n}\n\nvar yours = [], waiting = [], quiet = [];\nvar byKind = { earning: [], building: [], hobby: [], dormant: [] };\nfor (var r = 0; r < live.length; r++) {\n  var pj = live[r];\n  var openTasks = (openBy[pj.id] || []).slice().sort(byPosition);\n  var move = openTasks[0] || null;\n  var who = move ? String(move.waitingOn || '').trim() : '';\n  var dd = move ? due(move.deadline) : { text: '', late: false };\n  var money = moneyOf(pj);\n  var meta = '', metaColor = 'var(--muted-foreground)';\n  if (who) {\n    var made = when(move.createdAt);\n    meta = 'Waiting on ' + who + (made ? ' · since ' + fmtDay(made) : '');\n  } else if (dd.text) {\n    meta = dd.text;\n    metaColor = dd.late ? 'var(--destructive)' : 'var(--muted-foreground)';\n  }\n  if (openTasks.length > 1) meta += (meta ? ' · ' : '') + (openTasks.length - 1) + ' more in your list';\n  var closedTasks = (doneBy[pj.id] || []).slice().sort(function (x, y) { return String(y.closedAt || '').localeCompare(String(x.closedAt || '')); });\n  var hist = [];\n  for (var z = 0; z < closedTasks.length && z < 4; z++) {\n    var ct = closedTasks[z], cd = when(ct.closedAt), note = String(ct.closingNote || '').trim();\n    hist.push((cd ? fmtDay(cd) + ' · ' : '') + 'Done: ' + String(ct.title || '') + (note && note !== 'Done' ? ' (' + note + ')' : ''));\n  }\n  var row = {\n    id: PRE + pj.id,\n    projectId: pj.id,\n    name: names[pj.id],\n    moneyText: money.text,\n    moneyColor: money.color,\n    moveText: move ? String(move.title || '') : 'No next move yet. Open it to add one.',\n    moveColor: move ? 'var(--foreground)' : 'var(--muted-foreground)',\n    metaText: meta,\n    hasMeta: meta !== '',\n    metaColor: metaColor,\n    edge: money.late ? 'var(--destructive)' : 'transparent',\n    open: pj.id === openId,\n    facts: money.facts.join('\\n'),\n    hasFacts: money.facts.length > 0,\n    history: hist.join('\\n'),\n    hasHistory: hist.length > 0,\n    taskId: move ? String(move.id) : '',\n    hasMove: !!move,\n    moveTitle: move ? String(move.title || '') : '',\n    waitingRaw: who,\n    deadlineRaw: move ? String(move.deadline || '') : '',\n    doneLabel: !move ? 'Add the next move' : who ? 'They did it' : 'Done',\n    billKey: money.tick ? money.tick.key : '',\n    hasBill: !!money.tick,\n    billLabel: money.tick ? 'Been paid ' + mEur(money.tick.remaining) + '? Tick it' : '',\n    sendKey: money.send ? money.send.key : '',\n    hasSend: !!money.send,\n    sendLabel: 'Sent the invoice? Mark it',\n    isHeading: false,\n    heading: '',\n    // s2 — its tasks (each opens in the List), its money (each opens the money form), and itself as a form.\n    taskRows: taskRowsOf(openTasks),\n    hasTasks: openTasks.length > 0,\n    tasksHeading: openTasks.length === 1 ? 'In your list' : 'In your list (' + openTasks.length + ')',\n    moneyRows: moneyRowsOf(pj.id),\n    hasMoneyRows: (itemsBy[pj.id] || []).length > 0,\n    pName: names[pj.id],\n    pSub: String(pj.sub || ''),\n    pKind: ['earning', 'building', 'hobby', 'dormant'].indexOf(String(pj.kind)) >= 0 ? String(pj.kind) : 'earning',\n    pBilling: pj.billing === 'fixed' ? 'fixed' : 'hourly',\n    pTerms: pj.termsDays === undefined || pj.termsDays === null || pj.termsDays === '' ? '' : String(pj.termsDays),\n    pRate: num(pj.rate, 0) > 0 ? String(pj.rate) : '',\n    pSay: String(pj.say || ''),\n    rank: money.late ? 0 : move && dd.late && !who ? 1 : move && move.deadline && !who ? 2 : move ? 3 : 4,\n    lateBy: money.late ? mBetween(money.late.date, today) : 0,\n    deadline: move ? String(move.deadline || '') : '',\n    hobby: pj.kind === 'hobby' ? 1 : 0,\n    position: num(pj.position, 0)\n  };\n  var others = otherTasksOf(pj.id);\n  row.otherTasks = others;\n  row.hasOtherTasks = others.length > 0;\n  row.title = row.name;\n  row.canMove = false;\n  // s3 — the same project in its kind's list, in your own order: its own row id (pg-), so the two lists never share a model.\n  var kindRow = {};\n  for (var kr in row) if (Object.prototype.hasOwnProperty.call(row, kr)) kindRow[kr] = row[kr];\n  kindRow.id = \"pg-\" + pj.id;\n  kindRow.canMove = true;\n  (byKind[byKind[pj.kind] ? pj.kind : 'earning']).push(kindRow);\n  if (pj.kind === 'dormant' && !move) quiet.push(row);\n  else if (who) waiting.push(row);\n  else yours.push(row);\n}\nfunction yourOrder(x, y) { return x.position - y.position || x.name.localeCompare(y.name); }\nOutputs.payingRows = byKind.earning.sort(yourOrder);\nOutputs.buildingRows = byKind.building.sort(yourOrder);\nOutputs.hobbyRows = byKind.hobby.sort(yourOrder);\nOutputs.quietRows = byKind.dormant.sort(yourOrder);\nOutputs.hasPaying = byKind.earning.length > 0;\nOutputs.hasBuilding = byKind.building.length > 0;\nOutputs.hasHobby = byKind.hobby.length > 0;\nOutputs.hasQuiet = byKind.dormant.length > 0;\nfunction urgency(x, y) {\n  return x.hobby - y.hobby || x.rank - y.rank || y.lateBy - x.lateBy || x.deadline.localeCompare(y.deadline) || x.position - y.position || x.name.localeCompare(y.name);\n}\nyours.sort(urgency);\nwaiting.sort(function (x, y) { return x.rank - y.rank || y.lateBy - x.lateBy || x.name.localeCompare(y.name); });\nquiet.sort(function (x, y) { return x.name.localeCompare(y.name); });\nfunction heading(id, text) {\n  return {\n    id: 'h-' + id, isHeading: true, heading: text, title: text, canMove: false, open: false, hasMeta: false, hasFacts: false, hasHistory: false, hasMove: false,\n    hasBill: false, hasSend: false, hasTasks: false, hasMoneyRows: false, hasOtherTasks: false, taskRows: [], moneyRows: [], otherTasks: []\n  };\n}\nvar rows = [];\nfunction section(id, text, list) {\n  if (!list.length) return;\n  rows.push(heading(id, text));\n  for (var i = 0; i < list.length; i++) rows.push(list[i]);\n}\nsection('yours', 'Your move', yours);\nsection('waiting', 'Waiting on someone', waiting);\nsection('quiet', 'Quiet', quiet);\nOutputs.rows = rows;"
+      },
+      "x": 40,
+      "y": 520,
+      "ports": [
+        {
+          "name": "in-tasks",
+          "displayName": "tasks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projects",
+          "displayName": "projects",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-items",
+          "displayName": "items",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-marks",
+          "displayName": "marks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-readings",
+          "displayName": "readings",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-now",
+          "displayName": "now",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-openId",
+          "displayName": "openId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-flag",
+          "displayName": "flag",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-projectNames",
+          "displayName": "projectNames",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showTab",
+          "displayName": "showTab",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showTurnOn",
+          "displayName": "showTurnOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noProjects",
+          "displayName": "noProjects",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-projectPosition",
+          "displayName": "projectPosition",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-nextPosition",
+          "displayName": "nextPosition",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-balanceText",
+          "displayName": "balanceText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-balanceWhen",
+          "displayName": "balanceWhen",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bars",
+          "displayName": "bars",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lowText",
+          "displayName": "lowText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lowColor",
+          "displayName": "lowColor",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-incomeRows",
+          "displayName": "incomeRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasIncome",
+          "displayName": "hasIncome",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-payingRows",
+          "displayName": "payingRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-buildingRows",
+          "displayName": "buildingRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hobbyRows",
+          "displayName": "hobbyRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-quietRows",
+          "displayName": "quietRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasPaying",
+          "displayName": "hasPaying",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasBuilding",
+          "displayName": "hasBuilding",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasHobby",
+          "displayName": "hasHobby",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasQuiet",
+          "displayName": "hasQuiet",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pjMoney",
+      "type": "JavaScriptFunction",
+      "label": "Work out the money popup’s three lists",
+      "parameters": {
+        "functionScript": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction fmtDay(d) { return DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()]; }\nfunction fmtTime(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }\nfunction when(v) {\n  if (v === undefined || v === null || v === '') return null;\n  var d = v instanceof Date ? v : new Date(v);\n  return isNaN(d.getTime()) ? null : d;\n}\nfunction dayLabel(d) {\n  var t = startOfToday();\n  if (d.getTime() >= t) return 'Today';\n  if (d.getTime() >= t - 86400000) return 'Yesterday';\n  return fmtDay(d);\n}\nfunction due(s) {\n  var d = toDay(s);\n  if (!d) return { text: '', late: false };\n  var n = Math.round((d.getTime() - startOfToday()) / 86400000);\n  if (n < 0) return { text: 'Overdue by ' + (-n) + (n === -1 ? ' day' : ' days'), late: true };\n  if (n === 0) return { text: 'Due today', late: true };\n  if (n === 1) return { text: 'Due tomorrow', late: false };\n  if (n <= 7) return { text: 'Due in ' + n + ' days', late: false };\n  return { text: 'Due ' + fmtDay(d), late: false };\n}\nfunction ago(d) {\n  var ms = Date.now() - d.getTime();\n  if (ms < 3600000) return 'just now';\n  if (ms < 86400000) return Math.round(ms / 3600000) + ' h ago';\n  var n = Math.round(ms / 86400000);\n  return n === 1 ? 'yesterday' : n + ' days ago';\n}\nfunction num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction byPosition(a, b) { return num(a.position, 0) - num(b.position, 0); }\nvar PJ_PREFIX = new RegExp(\"^(?:(?:→|!) |✓ (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) \\\\d{1,2} · )+\");\nfunction pjClean(s) { return String(s === undefined || s === null ? '' : s).replace(PJ_PREFIX, '').trim(); }\nfunction pjId(r) { return r ? String(r.objectId || r.id || '') : ''; }\n/**\n * A row as plain fields with its 'id'. 🔴 A viewer built before 2026-09-23 (HLT-022) ignores\n * 'plain: true' and hands back the record itself — todo.digitalbricks.io runs one — so both shapes\n * are read, and never mutated: a record's own fields are the shared copy every view draws.\n */\nfunction pjPlain(r) {\n  var model = !!r && typeof r.getId === 'function';\n  var src = model ? r.data || {} : r || {}, o = {};\n  for (var k in src) if (Object.prototype.hasOwnProperty.call(src, k)) o[k] = src[k];\n  o.id = model ? String(r.getId()) : pjId(r);\n  if (!o.objectId) o.objectId = o.id;\n  return o;\n}\nfunction pjIso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction pjToday() { return pjIso(new Date()); }\n/** '' stays '', \"today\" and \"tomorrow\" are days, YYYY-MM-DD must be a real day; anything else is null. */\nfunction pjDate(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).trim().toLowerCase();\n  if (s === '') return '';\n  if (s === 'today' || s === 'tomorrow') {\n    var d = new Date();\n    if (s === 'tomorrow') d.setDate(d.getDate() + 1);\n    return pjIso(d);\n  }\n  var m = /^(\\d{4})-(\\d{1,2})-(\\d{1,2})$/.exec(s);\n  if (!m) return null;\n  var y = Number(m[1]), mo = Number(m[2]), da = Number(m[3]);\n  var dt = new Date(y, mo - 1, da);\n  return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === da ? pjIso(dt) : null;\n}\n/** \"2,140\", \"€ 2140\", \"−380\" → a number; anything else NaN. */\nfunction pjAmount(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).replace(/[€\\s,]/g, '').replace('−', '-');\n  if (s === '') return NaN;\n  var n = Number(s);\n  return isFinite(n) ? n : NaN;\n}\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction spentOf(b) { return 0; }\n\nfunction mD(s) { var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || '')); return m ? Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : NaN; }\nfunction mS(t) { return new Date(t).toISOString().slice(0, 10); }\nfunction mOk(s) { return isFinite(mD(s)); }\nfunction mAddDays(s, n) { return mS(mD(s) + n * 86400000); }\nfunction mDim(y, m0) { return new Date(Date.UTC(y, m0 + 1, 0)).getUTCDate(); }\nfunction mAddMonths(s, k, monthEnd) {\n  var y = Number(s.slice(0, 4)), m = Number(s.slice(5, 7)), d = Number(s.slice(8, 10));\n  var t = m - 1 + k, Y = y + Math.floor(t / 12), M = ((t % 12) + 12) % 12;\n  var day = monthEnd ? mDim(Y, M) : Math.min(d, mDim(Y, M));\n  return mS(Date.UTC(Y, M, day));\n}\nfunction mMonth(s) { return String(s).slice(0, 7); }\nfunction mMonthEnd(s) { var y = Number(s.slice(0, 4)), m = Number(s.slice(5, 7)); return mS(Date.UTC(y, m - 1, mDim(y, m - 1))); }\nfunction mBetween(a, b) { return Math.round((mD(b) - mD(a)) / 86400000); }\nvar MONTH_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];\nvar WEEKDAY_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];\nfunction mWeekday(s) { return new Date(mD(s)).getUTCDay(); }\n/** \"Wed 16 Sep\" */\nfunction mDay(s) { var t = new Date(mD(s)); return WEEKDAY_LONG[t.getUTCDay()].slice(0, 3) + ' ' + t.getUTCDate() + ' ' + MON[t.getUTCMonth()]; }\n/** \"Wed 16\" */\nfunction mShort(s) { var t = new Date(mD(s)); return WEEKDAY_LONG[t.getUTCDay()].slice(0, 3) + ' ' + t.getUTCDate(); }\nfunction mOrd(n) { return n + (n % 100 > 10 && n % 100 < 14 ? 'th' : n % 10 === 1 ? 'st' : n % 10 === 2 ? 'nd' : n % 10 === 3 ? 'rd' : 'th'); }\nfunction mEur(n, signed) {\n  var v = Math.round(num(n, 0));\n  var s = '€' + Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  if (v < 0) return '−' + s;\n  return signed && v > 0 ? '+' + s : s;\n}\nfunction mEur2(n) {\n  var v = Math.round(num(n, 0) * 100) / 100;\n  var whole = Math.floor(Math.abs(v)), cents = Math.round((Math.abs(v) - whole) * 100);\n  var s = '€' + whole.toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',') + (cents ? '.' + (cents < 10 ? '0' : '') + cents : '');\n  return v < 0 ? '−' + s : s;\n}\n\n/** M3 — every scheduled date of an item up to and including 'to', stopping at its 'until'. */\nfunction repeatsOf(it, to) {\n  var out = [];\n  if (!it || !mOk(it.date)) return out;\n  var until = mOk(it.until) && it.until < to ? it.until : to;\n  var rep = String(it.repeat || 'once');\n  for (var k = 0; k < 800; k++) {\n    var s;\n    if (rep === 'weekly') s = mAddDays(it.date, 7 * k);\n    else if (rep === 'monthly') s = mAddMonths(it.date, k, it.monthEnd === true);\n    else if (rep === 'quarterly') s = mAddMonths(it.date, 3 * k, it.monthEnd === true);\n    else if (rep === 'yearly') s = mAddMonths(it.date, 12 * k, false);\n    else { if (k > 0) break; s = it.date; }\n    if (s > until) break;\n    out.push(s);\n  }\n  return out;\n}\nfunction markKey(itemId, occurs) { return String(itemId) + '|' + String(occurs); }\nfunction marksById(marks) {\n  var by = {};\n  for (var i = 0; i < (marks || []).length; i++) { var m = marks[i]; if (m && m.itemId) by[markKey(m.itemId, m.occurs)] = m; }\n  return by;\n}\n/** A tick is a payment: { day, amount }, signed as its item is. */\nfunction paymentsOf(m) {\n  var out = [], list = (m && m.payments) || [];\n  for (var i = 0; i < list.length; i++) if (list[i] && mOk(list[i].day) && num(list[i].amount, 0) !== 0) out.push({ day: String(list[i].day), amount: num(list[i].amount, 0) });\n  return out;\n}\nfunction isClient(it, projectsById) {\n  var p = it && it.projectId ? projectsById[it.projectId] : null;\n  return !!p && (num(it.amount, 0) > 0 || it.fromHours === true);\n}\nfunction billingOf(p) { return p && p.billing === 'fixed' ? 'fixed' : 'hourly'; }\n\n/**\n * The money context: everything a repeat needs to know about the world. Built once per run.\n * 'blocks' are the time the hours bills are counted from (M23).\n */\nfunction moneyContext(items, marks, projects, blocks, today, since) {\n  var byP = {};\n  for (var i = 0; i < (projects || []).length; i++) if (projects[i]) byP[projects[i].id] = projects[i];\n  var list = [];\n  for (var j = 0; j < (items || []).length; j++) if (items[j] && items[j].id) list.push(items[j]);\n  // Marks are read for thirteen months back ('since'). A repeat older than that is history: without its\n  // mark it would read as unticked, and a weekly item two years old would be a hundred late rows.\n  return { items: list, marks: marksById(marks), projects: byP, blocks: blocks || [], today: today, since: mOk(since) ? String(since) : '' };\n}\n/** M23 — the hours logged on a project from 'from' to 'to', both inclusive. */\nfunction hoursBetween(ctx, projectId, from, to) {\n  var t = 0;\n  for (var i = 0; i < ctx.blocks.length; i++) {\n    var b = ctx.blocks[i];\n    if (!b || b.projectId !== projectId) continue;\n    var d = String(b.date || '');\n    if (d < from || d > to) continue;\n    t += spentOf(b);\n  }\n  return q(t);\n}\n/** When the bill before this one went out, for the same project — the start of an hours bill's period. */\nfunction previousBillOut(ctx, projectId, before) {\n  var best = '';\n  for (var i = 0; i < ctx.items.length; i++) {\n    var it = ctx.items[i];\n    if (it.projectId !== projectId || !isClient(it, ctx.projects)) continue;\n    var reps = repeatsOf(it, before);\n    for (var r = 0; r < reps.length; r++) {\n      var m = ctx.marks[markKey(it.id, reps[r])];\n      var out = (m && mOk(m.sentOn)) ? String(m.sentOn) : billOutOf(it, reps[r]);\n      if (out && out < before && out > best) best = out;\n    }\n  }\n  return best;\n}\nfunction billOutOf(it, occurs) {\n  if (it.repeat === 'once' || !it.repeat) return mOk(it.billDate) ? String(it.billDate) : '';\n  var lead = Number(it.billLeadDays);\n  return it.billLeadDays === null || it.billLeadDays === undefined || it.billLeadDays === '' || !isFinite(lead) ? '' : mAddDays(occurs, -Math.round(lead));\n}\n\n/** One repeat of one item, with its mark applied. */\nfunction occOf(ctx, it, occurs) {\n  var key = markKey(it.id, occurs);\n  var m = ctx.marks[key] || null;\n  var client = isClient(it, ctx.projects);\n  var p = it.projectId ? ctx.projects[it.projectId] || null : null;\n  var billOut = client ? billOutOf(it, occurs) : '';\n  var sentOn = m && mOk(m.sentOn) ? String(m.sentOn) : '';\n  var marked = m && m.amount !== null && m.amount !== undefined && m.amount !== '' && isFinite(Number(m.amount));\n  var hoursBill = it.fromHours === true && !marked && !!p;\n  var hours = 0, amount;\n  if (hoursBill) {\n    var end = billOut || occurs;\n    var start = previousBillOut(ctx, it.projectId, end);\n    start = start ? mAddDays(start, 1) : end.slice(0, 8) + '01';\n    hours = hoursBetween(ctx, it.projectId, start, end < ctx.today ? end : ctx.today);\n    amount = Math.round(hours * num(p.rate, 0) * 100) / 100;\n  } else amount = marked ? num(m.amount, 0) : num(it.amount, 0);\n  if (amount > 0 !== num(it.amount, 0) > 0 && !hoursBill && num(it.amount, 0) !== 0) amount = -amount;\n  var pays = paymentsOf(m);\n  var paid = 0, lastOn = '';\n  for (var i = 0; i < pays.length; i++) { paid += pays[i].amount; if (pays[i].day > lastOn) lastOn = pays[i].day; }\n  paid = Math.round(paid * 100) / 100;\n  var lostOn = m && mOk(m.lostOn) ? String(m.lostOn) : '';\n  var skip = !!(m && m.skip === true);\n  // A ticked repeat is closed — changing its item afterwards does not reopen the past (M4). Only a part\n  // payment with the rest still owed stays open, and Logic/Mark keeps what was due on its mark for that.\n  var closed = skip || !!lostOn || (pays.length > 0 && (!marked || Math.abs(paid) >= Math.abs(amount) - 0.005));\n  return {\n    it: it, key: key, itemId: it.id, occurs: occurs, m: m, markId: m ? String(m.id || '') : '',\n    date: m && mOk(m.date) ? String(m.date) : occurs,\n    amount: amount, paid: paid, remaining: Math.round((amount - paid) * 100) / 100, lastOn: lastOn, payments: pays,\n    closed: closed, skip: skip, lostOn: lostOn, client: client, project: p,\n    hoped: num(it.likelihood, 100) < 100, likelihood: Math.max(0, Math.min(100, Math.round(num(it.likelihood, 100)))),\n    changed: marked && !it.fromHours && num(m.amount, 0) !== num(it.amount, 0), moved: !!(m && mOk(m.date) && m.date !== occurs),\n    billOut: billOut, sentOn: sentOn, hoursBill: hoursBill, hours: hours\n  };\n}\nfunction allOccs(ctx, to) {\n  var out = [];\n  for (var i = 0; i < ctx.items.length; i++) {\n    var reps = repeatsOf(ctx.items[i], to);\n    for (var r = 0; r < reps.length; r++) if (!ctx.since || reps[r] >= ctx.since) out.push(occOf(ctx, ctx.items[i], reps[r]));\n  }\n  return out;\n}\nfunction byDate(a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : b.remaining - a.remaining; }\n\n/** M11 — the latest reading, and every payment ticked after it. */\nfunction balanceNow(ctx, readings) {\n  var r = null;\n  for (var i = 0; i < (readings || []).length; i++) {\n    var x = readings[i];\n    if (!x || !mOk(x.date)) continue;\n    if (!r || x.date > r.date || (x.date === r.date && String(x.createdAt || '') > String(r.createdAt || ''))) r = x;\n  }\n  var from = r ? String(r.date) : '', bal = r ? num(r.amount, 0) : 0, since = 0;\n  for (var k in ctx.marks) {\n    var pays = paymentsOf(ctx.marks[k]);\n    for (var p = 0; p < pays.length; p++) if (!r || pays[p].day > from) { bal += pays[p].amount; since++; }\n  }\n  return { balance: Math.round(bal * 100) / 100, since: since, readOn: from, readAmount: r ? num(r.amount, 0) : 0, hasReading: !!r };\n}\n\n/** Every open, expected repeat up to 'to' — late ones first, counted today — with the balance after each. */\nfunction projection(ctx, readings, to) {\n  var now = balanceNow(ctx, readings);\n  var os = allOccs(ctx, to);\n  var late = [], future = [], hoped = [], bills = [];\n  for (var i = 0; i < os.length; i++) {\n    var o = os[i];\n    if (o.closed) continue;\n    if (o.billOut && !o.sentOn && o.billOut <= to) bills.push(o);\n    if (o.hoped) { if (o.date >= ctx.today && o.date <= to) hoped.push(o); continue; }\n    if (o.date < ctx.today) late.push(o);\n    else if (o.date <= to) future.push(o);\n  }\n  late.sort(byDate); future.sort(byDate); hoped.sort(byDate);\n  bills.sort(function (a, b) { return a.billOut < b.billOut ? -1 : a.billOut > b.billOut ? 1 : 0; });\n  var run = now.balance, after = {};\n  for (var l = 0; l < late.length; l++) { run += late[l].remaining; after[late[l].key] = Math.round(run * 100) / 100; }\n  for (var f = 0; f < future.length; f++) { run += future[f].remaining; after[future[f].key] = Math.round(run * 100) / 100; }\n  return { now: now, occs: os, late: late, future: future, hoped: hoped, bills: bills, after: after };\n}\n\n/** M12 — what one item counts for in a month's target. */\nfunction perMonth(it) {\n  var a = num(it.amount, 0), r = String(it.repeat || 'once');\n  return r === 'weekly' ? a * 52 / 12 : r === 'monthly' ? a : r === 'quarterly' ? a / 3 : r === 'yearly' ? a / 12 : 0;\n}\nfunction activeOn(it, day) { return mOk(it.date) && (!mOk(it.until) || String(it.until) >= day); }\n\n/** M12, M13, M22 — break-even, target, and the billable hours the month needs. */\nfunction moneyTargets(ctx, settings) {\n  var today = ctx.today, mk = mMonth(today);\n  var outs = [], ins = [], out = 0, inn = 0;\n  for (var i = 0; i < ctx.items.length; i++) {\n    var it = ctx.items[i];\n    if (it.projectId || num(it.likelihood, 100) < 100 || String(it.repeat || 'once') === 'once' || !activeOn(it, today)) continue;\n    var pm = perMonth(it);\n    if (pm < 0) { outs.push(it); out -= pm; } else if (pm > 0) { ins.push(it); inn += pm; }\n  }\n  var breakEven = Math.round((out - inn) * 100) / 100;\n  var target = Math.round((breakEven + Math.max(0, num(settings.savingsTarget, 0))) * 100) / 100;\n  var rate = num(settings.rate, 0);\n  var os = allOccs(ctx, mMonthEnd(mAddMonths(today.slice(0, 8) + '01', 1, false)));\n  var fixed = [], fixedSum = 0, agreedIds = [], agreed = 0;\n  for (var j = 0; j < os.length; j++) {\n    var o = os[j];\n    if (!o.client || o.hoped || o.skip || o.lostOn || billingOf(o.project) !== 'fixed') continue;\n    if (mMonth(o.billOut || o.date) !== mk) continue;\n    fixed.push(o); fixedSum += o.amount;\n    if (agreedIds.indexOf(o.it.projectId) < 0 && num(o.project.agreedHours, 0) > 0) { agreedIds.push(o.it.projectId); agreed += num(o.project.agreedHours, 0); }\n  }\n  var byHour = Math.max(0, target - fixedSum);\n  var hourly = rate > 0 ? Math.ceil(byHour / rate - 1e-9) : 0;\n  return {\n    outs: outs, ins: ins, out: out, inn: inn, breakEven: breakEven, target: target, rate: rate,\n    fixed: fixed, fixedSum: fixedSum, agreedIds: agreedIds, agreed: agreed, byHour: byHour, hourly: hourly,\n    hours: rate > 0 ? hourly + agreed : 0\n  };\n}\n\n/** M14 line 1 and M17 — the month by the day its bills go out. */\nfunction monthLine(ctx, t) {\n  var mk = mMonth(ctx.today);\n  var os = allOccs(ctx, mMonthEnd(mAddMonths(ctx.today.slice(0, 8) + '01', 1, false)));\n  var sent = 0, all = 0;\n  for (var i = 0; i < os.length; i++) {\n    var o = os[i];\n    if (!o.client || o.hoped || o.skip || o.lostOn || mMonth(o.billOut || o.date) !== mk) continue;\n    all += o.amount;\n    if (o.sentOn || (!o.billOut && o.paid)) sent += o.amount;\n  }\n  var toGo = t.target - all;\n  var hours = t.rate > 0 ? Math.ceil(Math.max(0, toGo) / t.rate - 1e-9) : 0;\n  var text = toGo > 0\n    ? 'Break-even ' + mEur(t.breakEven) + ' · target ' + mEur(t.target) + '. Billed ' + mEur(sent) + ' so far, ' + mEur(all) +\n      ' with the bills still to go out this month · ' + mEur(toGo) + ' to target' + (t.rate > 0 ? ', about ' + hours + ' h.' : '.')\n    : 'Break-even ' + mEur(t.breakEven) + ' · target ' + mEur(t.target) + '. Billed ' + mEur(all) + ' this month · ' + mEur(-toGo) + ' past target.';\n  return { sent: sent, all: all, toGo: toGo, hours: hours, text: text, name: MONTH_LONG[Number(mk.slice(5, 7)) - 1] };\n}\n\n/** M7, M14 line 2 — each hoped item's next repeat, weighted by its likelihood. */\nfunction mightEarn(ctx) {\n  var nexts = [], weighted = 0, all = 0;\n  var to = mAddMonths(ctx.today, 24, false);\n  for (var i = 0; i < ctx.items.length; i++) {\n    var it = ctx.items[i];\n    if (num(it.likelihood, 100) >= 100 || !activeOn(it, ctx.today)) continue;\n    var reps = repeatsOf(it, to);\n    for (var r = 0; r < reps.length; r++) {\n      var o = occOf(ctx, it, reps[r]);\n      if (o.date >= ctx.today && !o.closed) { nexts.push(o); weighted += o.amount * o.likelihood / 100; all += o.amount; break; }\n    }\n  }\n  return { nexts: nexts, weighted: weighted, all: all };\n}\n\n/** M14 line 3 — the lowest the balance goes in the next six weeks, counting from today. */\nfunction lowestPoint(ctx, readings) {\n  var p = projection(ctx, readings, mAddDays(ctx.today, 42));\n  var lo = { balance: p.now.balance, date: ctx.today };\n  var list = p.late.concat(p.future);\n  for (var i = 0; i < list.length; i++) { var b = p.after[list[i].key]; if (b < lo.balance) lo = { balance: b, date: list[i].date < ctx.today ? ctx.today : list[i].date }; }\n  return lo;\n}\n\n/** \"every month on the 28th, from Jul 2026, no end\" */\nfunction scheduleWords(it, today) {\n  var d = new Date(mD(it.date)), day = d.getUTCDate(), r = String(it.repeat || 'once');\n  if (r === 'once') return 'once, ' + mDay(it.date);\n  var w = r === 'weekly' ? 'every ' + WEEKDAY_LONG[d.getUTCDay()]\n    : r === 'monthly' ? 'every month on the ' + (it.monthEnd === true ? 'last day' : mOrd(day))\n    : r === 'quarterly' ? 'every three months on the ' + (it.monthEnd === true ? 'last day' : mOrd(day))\n    : 'every year on ' + day + ' ' + MON[d.getUTCMonth()];\n  var end = mOk(it.until) ? (String(it.until) < today ? 'ended ' + mDay(it.until) : 'until ' + MON[Number(String(it.until).slice(5, 7)) - 1] + ' ' + String(it.until).slice(0, 4)) : 'no end';\n  return w + ', from ' + MON[d.getUTCMonth()] + ' ' + d.getUTCFullYear() + ', ' + end;\n}\nfunction repeatWord(it) { var r = String(it.repeat || 'once'); return r === 'quarterly' ? 'every 3 months' : r === 'once' ? '' : r; }\n/** M11a — what the rest of a short payment is called. */\nfunction restWords(o) { return o.client ? ['Still owed', 'Lost'] : o.amount > 0 ? ['Still to come', 'That’s all'] : ['Still to pay', 'That’s all']; }\nfunction projectName(o) { return o.project ? String(o.project.name || '') : ''; }\nvar items = Inputs.items || [], marks = Inputs.marks || [], projects = Inputs.projects || [];\n// The minute clock, as in the rows: what is late moves on at midnight.\nvar clock = Inputs.now;\nvar today = pjToday();\nvar ctx = moneyContext(items, marks, projects, [], today, mAddMonths(today, -13, false));\nvar removed = {};\nfor (var ri = 0; ri < ctx.items.length; ri++) {\n  var rit = ctx.items[ri];\n  if (mOk(rit.until) && mOk(rit.date) && String(rit.until) < String(rit.date)) removed[rit.id] = true;\n}\nfunction whoOf(it, proj) {\n  var l = String(it.label || '').trim(), p = proj ? String(proj.name || '').trim() : '';\n  return p && p !== l ? (l ? l + ' · ' + p : p) : l || p || 'Money';\n}\nfunction likely(it) { var n = Math.round(num(it.likelihood, 100)); return n < 100 ? n + '% likely' : ''; }\nvar os = allOccs(ctx, mAddDays(today, 92)).sort(byDate);\nvar up = [], past = [], pastFrom = mAddDays(today, -92);\nfor (var i = 0; i < os.length; i++) {\n  var o = os[i];\n  if (removed[o.itemId]) continue;\n  var label = whoOf(o.it, o.project);\n  if (!o.closed && Math.abs(o.remaining) >= 0.005) {\n    var late = o.date < today;\n    if (late && o.hoped) continue;\n    var bits = [mDay(o.date)];\n    if (late) { var n = mBetween(o.date, today); bits.push(n + (n === 1 ? ' day' : ' days') + ' late'); }\n    if (o.hoped) bits.push(o.likelihood + '% likely');\n    if (o.client && o.billOut && !o.sentOn) bits.push('the bill goes out ' + mShort(o.billOut));\n    if (o.paid) bits.push(mEur(o.paid) + ' of it ticked');\n    up.push({\n      id: 'mu-' + o.key, key: o.key, itemKey: 'item:' + o.itemId, label: label, meta: bits.join(' · '),\n      metaColor: late ? 'var(--destructive)' : 'var(--muted-foreground)', amount: mEur(o.remaining, true),\n      canTick: !o.hoped, canUntick: false\n    });\n  } else if (o.payments.length && o.lastOn >= pastFrom) {\n    past.push({\n      id: 'mp-' + o.key, key: o.key, itemKey: 'item:' + o.itemId, label: label,\n      meta: 'Was due ' + mDay(o.date) + ' · ticked ' + mDay(o.lastOn), metaColor: 'var(--muted-foreground)',\n      amount: mEur(o.paid, true), canTick: false, canUntick: true, lastOn: o.lastOn\n    });\n  }\n}\npast.sort(function (x, y) { return String(y.lastOn).localeCompare(String(x.lastOn)); });\nvar rec = [];\nfor (var j = 0; j < ctx.items.length; j++) {\n  var it = ctx.items[j];\n  if (removed[it.id] || !mOk(it.date)) continue;\n  var proj = it.projectId ? ctx.projects[it.projectId] : null;\n  var ended = mOk(it.until) && String(it.until) < today;\n  var words = scheduleWords(it, today), lk = likely(it);\n  rec.push({\n    id: 'mr-' + it.id, key: '', itemKey: 'item:' + it.id, label: whoOf(it, proj),\n    meta: words.charAt(0).toUpperCase() + words.slice(1) + (lk ? ' · ' + lk : ''),\n    metaColor: 'var(--muted-foreground)', amount: it.fromHours === true && num(it.amount, 0) === 0 ? 'From the hours' : mEur(num(it.amount, 0), true),\n    canTick: false, canUntick: false, ended: ended ? 1 : 0, sortLabel: whoOf(it, proj).toLowerCase()\n  });\n}\nrec.sort(function (x, y) { return x.ended - y.ended || x.sortLabel.localeCompare(y.sortLabel); });\nOutputs.upRows = up;\nOutputs.recRows = rec;\nOutputs.pastRows = past;\nvar options = [{ Label: 'No project', Value: 'none' }], named = [];\nfor (var k = 0; k < projects.length; k++) {\n  var pp = projects[k];\n  if (pp && pp.id && pp.kind !== 'admin') named.push({ Label: String(pp.name || 'Untitled project'), Value: String(pp.id) });\n}\nnamed.sort(function (x, y) { return x.Label.localeCompare(y.Label); });\nOutputs.projectOptions = options.concat(named);"
+      },
+      "x": 40,
+      "y": 640,
+      "ports": [
+        {
+          "name": "in-items",
+          "displayName": "items",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-marks",
+          "displayName": "marks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projects",
+          "displayName": "projects",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-now",
+          "displayName": "now",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-upRows",
+          "displayName": "upRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-recRows",
+          "displayName": "recRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pastRows",
+          "displayName": "pastRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-projectOptions",
+          "displayName": "projectOptions",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pjProblem",
+      "type": "Set Variable",
+      "label": "Say the projects did not load",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "string",
+        "value": "Your projects could not be loaded. Check your connection, then reload."
+      },
+      "x": 40,
+      "y": 760
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7f675072-4f9a-56b6-872a-5b7a58d3c9b3",
+  "name": "Translate words",
+  "path": "/Logic/Translate words",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Every interface word in the chosen language. Runs when an input changes; Ran after each run."
+}

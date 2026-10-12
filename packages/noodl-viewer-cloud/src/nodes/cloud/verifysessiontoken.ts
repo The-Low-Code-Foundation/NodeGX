@@ -32,13 +32,12 @@
  *
  * ## There is no expiry to report
  *
- * CWF-015 slice 3 asked for "valid / user id / expiry", and the third does not
- * exist. `POST /login` and `POST /users` write `_Session` rows carrying
- * `sessionToken` and `userId` and nothing else, and the `_Session` table has no
- * `expiresAt` column at all (`nodegx-backend/service.ts` `ensureSystemTables`).
- * A session on this backend lives until a password change or a delete revokes
- * it. An `Expires At` output would therefore be blank on every session this
- * backend has ever minted — an inert port, which is worse than an absent one.
+ * CWF-015 slice 3 asked for "valid / user id / expiry", and the third is still
+ * left out. Since P109 ISL-040 a sign-in ends after the backend's idle days
+ * unused (30 by default, set on the Sign-in page), and every use moves the end
+ * on — this verify included. The instant an `Expires At` output reported would
+ * be stale by the person's next request. A session whose end has passed
+ * answers Invalid here.
  */
 
 import { outcomeInputs, outcomeOutputs } from '@noodl/runtime/src/outcome';

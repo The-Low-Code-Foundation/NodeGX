@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6c33cd7b-b409-5802-8f7b-0fe1b367d725",
+  "name": "Land keep here",
+  "path": "/Logic/Land keep here",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "On her land, each part the Workshop’s robot delivered written into her save at once (a building never un-builds). Runs on Go; answers Ran once its outputs are set."
+}

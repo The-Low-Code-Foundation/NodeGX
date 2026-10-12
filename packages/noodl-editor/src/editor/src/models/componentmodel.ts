@@ -1,5 +1,6 @@
 import _ from 'underscore';
 
+import { componentChildCategories, componentHierarchyType } from '@nodegx/project-contract/hierarchy';
 import { UndoQueue } from '@noodl-models/undo-queue-model';
 import Utils from '@noodl-utils/utils';
 
@@ -24,6 +25,8 @@ export type ComponentModelArgs = {
   created?: string;
   /** LEG-006 — who last wrote it, e.g. "noodl-mcp". */
   modifiedBy?: string;
+  /** P112-S7-LOGICTYPE — the declared `type` when the name would not say it (see `LegacyComponent.componentType`). */
+  componentType?: 'root' | 'page' | 'visual' | 'logic' | 'cloud';
   metadata?: Record<string, any>;
   graph?: NodeGraphModel;
 };
@@ -48,6 +51,7 @@ export class ComponentModel extends Model {
   description?: string;
   created?: string;
   modifiedBy?: string;
+  componentType?: ComponentModelArgs['componentType'];
   metadata: ComponentModelArgs['metadata'];
   owner: ProjectModel;
 
@@ -59,6 +63,7 @@ export class ComponentModel extends Model {
     this.description = args.description;
     this.created = args.created;
     this.modifiedBy = args.modifiedBy;
+    this.componentType = args.componentType;
     this.metadata = args.metadata;
 
     if (args.graph) {
@@ -77,6 +82,7 @@ export class ComponentModel extends Model {
       description: json.description,
       created: json.created,
       modifiedBy: json.modifiedBy,
+      componentType: json.componentType,
       // Copied, not aliased — two components built from one json must not share
       // a metadata bag.
       metadata: json.metadata ? JSON.parse(JSON.stringify(json.metadata)) : undefined,
@@ -117,13 +123,12 @@ export class ComponentModel extends Model {
   }
 
   collectAllowedChildCategories() {
-    let categories = [];
-
+    // P107 R23 — `@nodegx/project-contract/hierarchy`, the derivation the agent's checker reads too
+    const types = [];
     this.graph.forEachNode(function (node) {
-      if (node.type.haveComponentChildren) categories = _.union(node.type.haveComponentChildren, categories);
+      types.push(node.type);
     });
-
-    return categories.length > 0 ? categories : undefined;
+    return componentChildCategories(types);
   }
   // Returns the ports for this components, port types are derrived from connections
   // to any ports on node with the "haveComponentPorts" property
@@ -404,6 +409,7 @@ export class ComponentModel extends Model {
       description?: string;
       created?: string;
       modifiedBy?: string;
+      componentType?: ComponentModelArgs['componentType'];
     } = {
       name: this.name,
       id: this.id,
@@ -419,6 +425,7 @@ export class ComponentModel extends Model {
     if (this.description) json.description = this.description;
     if (this.created) json.created = this.created;
     if (this.modifiedBy) json.modifiedBy = this.modifiedBy;
+    if (this.componentType) json.componentType = this.componentType;
     return json;
   }
 
@@ -427,14 +434,11 @@ export class ComponentModel extends Model {
   }
 
   get category() {
-    let category;
-
-    // The component will assume the category of any roots that may act as children
-    _.each(this.graph.roots, function (root) {
-      if (root.type.allowAsChild) category = root.type.category;
-    });
-
-    return category;
+    // The component will assume the category of any roots that may act as children (the last one names it)
+    return componentHierarchyType(
+      this.graph.roots.map((root) => root.type),
+      []
+    ).category;
   }
 
   get color() {
@@ -452,9 +456,10 @@ export class ComponentModel extends Model {
   // in that case the component type may act as a child
 
   get allowAsChild() {
-    return !!_.find(this.graph.roots, function (n) {
-      return n.type.allowAsChild;
-    });
+    return componentHierarchyType(
+      this.graph.roots.map((root) => root.type),
+      []
+    ).allowAsChild;
   }
 
   // The component can have children if there are nodes with "haveComponentChildren"

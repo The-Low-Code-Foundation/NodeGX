@@ -93,6 +93,20 @@ describe('SUB-006 CatalogIndex', () => {
       expect(index.isTypeCompatible(undefined, 'number')).toBe(true);
       expect(index.isTypeCompatible('number', undefined)).toBe(true);
     });
+    // P107 R22 (2026-10-11): the canvas's rule — a signal is not a free pass on either end
+    it('answers signals as the canvas does', () => {
+      expect(index.isTypeCompatible('boolean', 'signal')).toBe(true); // a documented cast
+      expect(index.isTypeCompatible('signal', 'signal')).toBe(true);
+      expect(index.isTypeCompatible('signal', '*')).toBe(true);
+      expect(index.isTypeCompatible('string', 'signal')).toBe(false);
+      expect(index.isTypeCompatible('signal', 'string')).toBe(false);
+      // the table lets a signal be read as a number; a person still cannot wire one into a Number input
+      expect(index.isTypeCompatible('signal', 'number')).toBe(false);
+    });
+    // P107 R21 (2026-10-11): a list into a Dropdown's Items (P107-S88-OPTIONSCAST)
+    it('lets a list feed an options list', () => {
+      expect(index.isTypeCompatible('array', 'optionslist')).toBe(true);
+    });
   });
 
   describe('port type name extraction', () => {

@@ -382,7 +382,9 @@ describe('a cloud function calls a model (FED-003)', () => {
           askFunction(),
           twiceFunction(),
           refusedFunction('askNoSecret', { apiKeySecret: 'NOT_PROVISIONED', provider: 'anthropic' }),
-          refusedFunction('askOtherProvider', { apiKeySecret: SECRET_NAME, provider: 'openai-compatible' })
+          // ISL-010 implemented openai-compatible (its own spec: isl-010-local-model.test.ts), so
+          // AC7's refusal is now graded on a provider value the enum never offered.
+          refusedFunction('askOtherProvider', { apiKeySecret: SECRET_NAME, provider: 'gemini' })
         ],
         settings: {},
         metadata: {}
@@ -578,12 +580,12 @@ describe('a cloud function calls a model (FED-003)', () => {
       expect(seen.length).toBe(before);
     });
 
-    it('fires Failure with not_implemented for a provider that is not anthropic', async () => {
+    it('fires Failure with not_implemented for a provider this release does not know', async () => {
       const before = seen.length;
       const res = await ask('/ok', {}, 'askOtherProvider');
       expect(res.status).toBe(200);
       expect(res.json.result.errorCode).toBe('not_implemented');
-      expect(res.json.result.error).toContain('openai-compatible');
+      expect(res.json.result.error).toContain("'gemini'");
       // ⚠️ An unimplemented provider must not read a credential on its way to refusing.
       expect(seen.length).toBe(before);
     });

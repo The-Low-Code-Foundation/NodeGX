@@ -1,0 +1,310 @@
+[
+  {
+    "name": "the same day at Day granularity though the hours differ: the three answers, then On Same",
+    "because": "datecompare.ts :168-182 truncate, three values, exactly one signal",
+    "params": {
+      "granularity": "day"
+    },
+    "steps": [
+      {
+        "set": "a",
+        "value": "2024-01-31T01:00:00.000Z"
+      },
+      {
+        "set": "b",
+        "value": "2024-01-31T23:00:00.000Z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the same two instants at the default Millisecond granularity: Before; swapped, After",
+    "because": "datecompare.ts :38-40 initialize millisecond; :172-174",
+    "params": {},
+    "steps": [
+      {
+        "set": "a",
+        "value": "2024-01-31T01:00:00.000Z"
+      },
+      {
+        "set": "b",
+        "value": "2024-01-31T23:00:00.000Z"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": "2024-02-01T00:00:00.000Z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the zone decides the day — UTC: 2024-01-31T23:30Z and 2024-02-01T00:30Z are different days (Before)",
+    "because": "datemath.ts :127-150 truncateTo reads the local calendar; world.ts TIME ZONE. NSP-013 AC5",
+    "params": {
+      "granularity": "day"
+    },
+    "world": {
+      "timeZone": "UTC"
+    },
+    "steps": [
+      {
+        "set": "a",
+        "value": "2024-01-31T23:30:00.000Z"
+      },
+      {
+        "set": "b",
+        "value": "2024-02-01T00:30:00.000Z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the zone decides the day — Asia/Kolkata (+05:30): the same two instants are 05:00 and 06:00 on 1 February (Same)",
+    "because": "the same steps as the UTC arm; a half-hour offset. NSP-013 AC5",
+    "params": {
+      "granularity": "day"
+    },
+    "world": {
+      "timeZone": "Asia/Kolkata"
+    },
+    "steps": [
+      {
+        "set": "a",
+        "value": "2024-01-31T23:30:00.000Z"
+      },
+      {
+        "set": "b",
+        "value": "2024-02-01T00:30:00.000Z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "across the spring-forward night in Europe/Paris, at Day: 2026-03-28T23:30Z (00:30 on the 29th) and 2026-03-29T01:30Z (03:30 after the clocks moved) are the same day",
+    "because": "NSP-013 AC5, the DST arm — in UTC these are the 28th and the 29th (the scenario after this one)",
+    "params": {
+      "granularity": "day"
+    },
+    "world": {
+      "timeZone": "Europe/Paris"
+    },
+    "steps": [
+      {
+        "set": "a",
+        "value": "2026-03-28T23:30:00.000Z"
+      },
+      {
+        "set": "b",
+        "value": "2026-03-29T01:30:00.000Z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the same two instants at Day in UTC: Before",
+    "because": "NSP-013 AC5 — the control for the Paris arm",
+    "params": {
+      "granularity": "day"
+    },
+    "world": {
+      "timeZone": "UTC"
+    },
+    "steps": [
+      {
+        "set": "a",
+        "value": "2026-03-28T23:30:00.000Z"
+      },
+      {
+        "set": "b",
+        "value": "2026-03-29T01:30:00.000Z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an unreadable side clears all three answers and pulses Invalid Date; every later setter re-announces it; nothing until both sides have arrived",
+    "because": "datecompare.ts :154 both supplied; :156-166; every setter recomputes (:47-51, :58-62, :90-93)",
+    "params": {},
+    "steps": [
+      {
+        "set": "a",
+        "value": "x"
+      },
+      "settle",
+      {
+        "set": "b",
+        "value": "2024-05-05T10:00:00.000Z"
+      },
+      "settle",
+      {
+        "set": "granularity",
+        "value": "hour"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Granularity set while a side is unreadable applies once both are readable: May 2024 at Month is Same",
+    "because": "datecompare.ts :91 the granularity is stored before the recompute — the store survives the failure",
+    "params": {},
+    "steps": [
+      {
+        "set": "a",
+        "value": "nope"
+      },
+      {
+        "set": "b",
+        "value": "2024-05-05T10:00:00.000Z"
+      },
+      "settle",
+      {
+        "set": "granularity",
+        "value": "month"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": "2024-05-01T00:00:00.000Z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Granularity not in the list truncates nothing: one millisecond apart is Before; '' reads as millisecond",
+    "because": "datemath.ts :127-150 a switch with no default; datecompare.ts :168 `|| 'millisecond'`",
+    "params": {
+      "granularity": "fortnight"
+    },
+    "steps": [
+      {
+        "set": "a",
+        "value": "2024-05-05T10:00:00.000Z"
+      },
+      {
+        "set": "b",
+        "value": "2024-05-05T10:00:00.001Z"
+      },
+      "settle",
+      {
+        "set": "granularity",
+        "value": ""
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Date and a Compare To that are the same object compare Same; the readable sides after an unreadable one compute again",
+    "because": "datecompare.ts :47-51, :58-62 each arrival recomputes",
+    "params": {
+      "granularity": "second"
+    },
+    "steps": [
+      {
+        "set": "a",
+        "value": {
+          "$date": "2024-05-05T10:00:00.400Z"
+        }
+      },
+      {
+        "set": "b",
+        "value": {
+          "$date": "2024-05-05T10:00:00.900Z"
+        }
+      },
+      "settle",
+      {
+        "set": "b",
+        "value": ""
+      },
+      "settle",
+      {
+        "set": "b",
+        "value": "nope"
+      },
+      "settle",
+      {
+        "set": "b",
+        "value": 1714903201000
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Granularity change flips the answers: one millisecond apart is Same at Second, then After at Millisecond, then Same again at Day",
+    "because": "datecompare.ts :90-93 the granularity setter recomputes; :172-182 the three values move with the signal",
+    "params": {
+      "granularity": "second"
+    },
+    "steps": [
+      {
+        "set": "a",
+        "value": "2024-05-05T10:00:00.001Z"
+      },
+      {
+        "set": "b",
+        "value": "2024-05-05T10:00:00.000Z"
+      },
+      "settle",
+      {
+        "set": "granularity",
+        "value": "millisecond"
+      },
+      "settle",
+      {
+        "set": "granularity",
+        "value": "day"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Granularity change flips the answers the other way: one millisecond apart is Same at Second, then Before at Millisecond",
+    "because": "datecompare.ts :90-93; :172-182 — the three values move with the signal (the Before arm of the flip)",
+    "params": {
+      "granularity": "second"
+    },
+    "steps": [
+      {
+        "set": "a",
+        "value": "2024-05-05T10:00:00.000Z"
+      },
+      {
+        "set": "b",
+        "value": "2024-05-05T10:00:00.001Z"
+      },
+      "settle",
+      {
+        "set": "granularity",
+        "value": "millisecond"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a readable Date that turns unreadable is replaced, not kept: a later Granularity change re-announces Invalid Date rather than comparing the old Date",
+    "because": "datecompare.ts :47-51 the setter stores toDate(value) — undefined for an unreadable one — before :153-166 recompute (NSP-013 s12: a dropped store here was graded only by luck in the generated sequences, T4)",
+    "params": {},
+    "steps": [
+      {
+        "set": "a",
+        "value": "2024-05-05T10:00:00.000Z"
+      },
+      {
+        "set": "b",
+        "value": "2024-05-05T11:00:00.000Z"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": "nope"
+      },
+      "settle",
+      {
+        "set": "granularity",
+        "value": "hour"
+      },
+      "settle"
+    ]
+  }
+]

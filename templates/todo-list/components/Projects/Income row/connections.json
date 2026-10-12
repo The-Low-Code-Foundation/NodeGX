@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "92bff15e-e491-5fab-8545-f6d21eda99c3",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "irIn",
+      "fromProperty": "label",
+      "toId": "irLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "irIn",
+      "fromProperty": "meta",
+      "toId": "irMeta",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "irIn",
+      "fromProperty": "metaColor",
+      "toId": "irMeta",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "irIn",
+      "fromProperty": "amount",
+      "toId": "irAmount",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "irIn",
+      "fromProperty": "key",
+      "toId": "irOut",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "irPaid",
+      "fromProperty": "onClick",
+      "toId": "irOut",
+      "toProperty": "paid"
+    }
+  ]
+}

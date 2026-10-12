@@ -4,6 +4,7 @@ import { flexDirectionValues } from '../../constants/flex';
 import Layout from '../../layout';
 import NodeSharedPortDefinitions from '../../node-shared-port-definitions';
 import { createNodeFromReactComponent, type ReactNodeDefinition, type StyleObject } from '../../react-component-node';
+import { dataAttributeProps } from '../../components/noodl-root-ref';
 import type { Noodl, Slot } from '../../types';
 
 interface FieldSetProps extends Noodl.ReactProps {
@@ -19,7 +20,7 @@ function FieldSet(props: FieldSetProps) {
   if (props.className) className = className + ' ' + props.className;
 
   return (
-    <fieldset className={className} style={style}>
+    <fieldset className={className} {...dataAttributeProps(props.dom)} style={style}>
       {props.children}
     </fieldset>
   );

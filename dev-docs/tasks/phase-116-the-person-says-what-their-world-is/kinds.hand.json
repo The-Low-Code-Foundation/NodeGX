@@ -1,0 +1,383 @@
+{
+  "_about": "Hand-kept input of scripts/ontology/census.js (ONT-000). kinds: id → the person's sentence, the question the kind asks before any schema, what tells it from its neighbours, what it projects to. classification: row id (source|from.field, or source|*.field for every collection's field of that name) → kind, for the in-repo sources only; the private rows are classified in the private folder. notes: the three notes attributed to kinds. depthSentences: the deepest path per source in words. oral: Richard's list. A kind is added here only after a row was read off an app; the script refuses one with no row. ONT-011 step 2: a kind with a `borrow` draws its rows from that borrow's candidates judged yes (the second row set), since those rows are not relations the harvest sees.",
+  "kinds": {
+    "belongs-to": {
+      "sentence": "each {from} is attached to one {to}",
+      "question": "Must every one have one, or can it stand alone? Could it ever be attached to several at once, now or later (then it is 'is-on', and changing your mind after real data exists is a migration)? Can it move to another later? When the one it belongs to goes, does this go with it, stay orphaned, or block the removal?",
+      "distinguishes": "one target, no details on the link itself; read the other way it is 'has many' (the same edge)",
+      "projectsTo": "Link (Pointer) with required/optional and an on-delete rule; the reverse read is a query, not a column"
+    },
+    "is-on": {
+      "sentence": "a {from} is on a {to} for a while, with details of its own",
+      "question": "Can it be on two at once? Does it start and end (dates, active)? What stays and what goes when it ends? Which details belong to the link and not to either end (a role, a type, a position)?",
+      "distinguishes": "a junction record that carries details; a plain pairing with none is 'together'",
+      "projectsTo": "a collection of its own with two Links and the details as fields; never a Links (Relation) column, which cannot hold a date"
+    },
+    "together": {
+      "sentence": "a {from} and a {to} go together",
+      "question": "Does the pairing ever need a date, a reason, a role or an order? (Then it is 'is-on'.) Can the same pair be listed twice?",
+      "distinguishes": "a junction with no details",
+      "projectsTo": "Links (Relation) or a junction collection; the unique pair rule"
+    },
+    "one-of": {
+      "sentence": "a {from}'s {field} is one of a fixed list",
+      "question": "Who may add to the list, and does adding need a developer? Is the list the same for everyone? Does a value ever retire (then it is a lifecycle, not a choice)? Will you ever need details about a list entry (then it is a collection)?",
+      "distinguishes": "a value from a declared list on the record itself, not a link to a record",
+      "projectsTo": "Choice (String + oneOf rule); the mutant is free text where a list belongs"
+    },
+    "many-by-list": {
+      "sentence": "a {from} carries a list of {to} on itself",
+      "question": "Will you ever ask it the other way round ('which {from}s name this one')? Will the list grow to dozens? Will the list need details per entry? If any, each entry is its own link — a parent carrying dozens of list entries is the query that falls apart.",
+      "distinguishes": "ids or values stored as an array column, no record per entry",
+      "projectsTo": "List (Array); the mutant is a list of ids that nobody can query from the other side"
+    },
+    "part-of-tree": {
+      "sentence": "a {from} can sit under another {from}",
+      "question": "How deep can it go? Can a thing be moved under another? Can it be its own ancestor? Does a child inherit anything from its parent?",
+      "distinguishes": "a link from a collection to itself",
+      "projectsTo": "a Link to the same collection; the path operation walks it (ONT-004)"
+    },
+    "exists-elsewhere": {
+      "sentence": "a {from} also exists in another system, known there by its own id",
+      "question": "Can it exist here before it exists there, or there before here — and what is silently skipped when it does? Which side wins when they disagree? What is it called over there? What happens over there when it ends here?",
+      "distinguishes": "an id or a provenance record naming another system, not a record in this one",
+      "projectsTo": "a Text field per system, unique, plus a sync log; the enrolment note is this kind's unasked question"
+    },
+    "same-as": {
+      "sentence": "two {from}s turned out to be one thing",
+      "question": "How do you tell? Who decides when the system is not sure? Which record survives and which fields win? Can a merge be undone?",
+      "distinguishes": "a link between records of the same collection that means identity, not hierarchy",
+      "projectsTo": "a 'superseded by' Link on the same collection plus a match record; never a delete"
+    },
+    "ends": {
+      "sentence": "a {from} can end without being deleted",
+      "question": "When it ends, what stays and what goes — its record, its history, the things on it, its access elsewhere, the lists it is on? Can it come back, and does coming back make a new one or revive the old? Who may end it? When it ends, is a note or a reason written with it — which detail, and must it be there?",
+      "distinguishes": "a status, an active flag, an end date, an archive or erasure record — the record is kept",
+      "projectsTo": "a status Choice or a Date, a rule for each linked thing, and a 'delete: nobody' permission; the archive note is this kind's unasked question"
+    },
+    "happened-to": {
+      "sentence": "something happened to a {from} at a time, and the record of it is kept",
+      "question": "Is it kept forever? Can it be undone, and does undoing make a new record or remove this one? Who did it, and who may see the history? Does the thing it happened to need it to exist?",
+      "distinguishes": "a record that is an event about another record (a log, an action, an attendance, a submission, a read receipt)",
+      "projectsTo": "a collection with a Link, a Date and a 'who' Link; update and delete: nobody"
+    },
+    "owned-by": {
+      "sentence": "a {from} is seen and changed by whoever it belongs to, and by nobody else unless said",
+      "question": "Who else may see it — a role, an admin of the thing it sits on, everyone? Does ownership follow a path (the holder of the account the person is on)? What happens to it when its owner ends?",
+      "distinguishes": "a rule about visibility, not a fact about the world: creator-owns, an access list, a tenant, an admin link",
+      "projectsTo": "the security file's permissions and creatorOwns; a path-shaped rule needs ONT-004"
+    },
+    "extends": {
+      "sentence": "a {from} is extra detail about one {to}, at most one each",
+      "question": "Is there ever more than one? Does it exist without the thing it extends? Is it computed (then nobody edits it) or written by a person? Which of its fields will you filter or sort the main thing by — those stay on the main thing, or every such query goes through the extension and you end up copying the field back by hand.",
+      "distinguishes": "a one-to-one link, usually unique or the record's own key",
+      "projectsTo": "a Link with a unique rule; or fields on the thing itself when it is small"
+    },
+    "by-name": {
+      "sentence": "a {from} names its {to} by something a person could retype (an email, a code)",
+      "question": "What if it is misspelled, or changes, or two things share it? Should it be a link instead?",
+      "distinguishes": "a natural key stored as text where a Link would be",
+      "projectsTo": "a Link; the mutant is the text itself"
+    },
+    "points-at-one-of": {
+      "sentence": "a {from} points at one thing that may be any of several kinds, and says which",
+      "question": "Which kinds can it point at, exactly? What happens when the thing it points at goes? Can it be re-pointed?",
+      "distinguishes": "an id beside a kind field; no single target collection",
+      "projectsTo": "a kind Choice plus a Text id; the mutant is an id with no kind beside it"
+    },
+    "settled": {
+      "sentence": "a {from} is agreed at some point, and after that it stays as it was agreed",
+      "question": "Who agrees it, and what is it called when they do (issued, sent, sealed, published)? After that, which of its details may still change? To put a mistake right, is it withdrawn, or replaced by a new one that says which it replaces? May a draft be thrown away, and may an agreed one ever be deleted?",
+      "distinguishes": "a draft that becomes agreed (issued, sent, sealed, published) and is then frozen while still in force; 'ends' keeps a record that stopped, 'happened-to' was never editable",
+      "projectsTo": "a status Choice (draft / agreed / withdrawn), an agreed-at Date and an 'amends' Link to itself; the moves and the freeze kept inside the write (onlyWhile), and no deleting an agreed one if said",
+      "borrow": "settled"
+    }
+  },
+  "classification": {
+    "template:todo-list|*.creatorOwns": "owned-by",
+    "template:planning|*.creatorOwns": "owned-by",
+    "template:members-area|*.acl-admin": "owned-by",
+    "template:members-area|*.acl-member": "owned-by",
+    "template:members-area|*.acl-world": "owned-by",
+    "template:members-area|Member.userId": "is-on",
+    "template:members-area|MemberRequest.userId": "belongs-to",
+    "template:todo-list|Action.taskId": "happened-to",
+    "template:todo-list|Event.taskId": "belongs-to",
+    "template:todo-list|RoutineCheck.routineId": "happened-to",
+    "template:planning|Block.projectId": "belongs-to",
+    "template:planning|Block.todoActionId": "belongs-to",
+    "template:planning|Block.todoTaskId": "belongs-to",
+    "template:planning|Event.taskId": "belongs-to",
+    "template:planning|MoneyItem.projectId": "belongs-to",
+    "template:planning|MoneyMark.itemId": "happened-to",
+    "template:planning|PlanEvent.blockId": "belongs-to",
+    "template:planning|PlanEvent.projectId": "belongs-to",
+    "lessons|ArtifactSubmission.conceptId": "happened-to",
+    "lessons|ArtifactSubmission.deliverableId": "happened-to",
+    "lessons|ArtifactSubmission.learnerId": "happened-to",
+    "lessons|ArtifactSubmission.sectionId": "happened-to",
+    "lessons|Assignment.cohortId": "belongs-to",
+    "lessons|Assignment.deliverableId": "belongs-to",
+    "lessons|Assignment.learnerId": "belongs-to",
+    "lessons|Assignment.programmeId": "belongs-to",
+    "lessons|AssignmentSubmission.assignmentId": "happened-to",
+    "lessons|AssignmentSubmission.learnerId": "happened-to",
+    "lessons|CoachNote.anchorId": "points-at-one-of",
+    "lessons|CoachNote.authorEmail": "by-name",
+    "lessons|CoachNote.editedAt": "happened-to",
+    "lessons|CoachNote.learnerId": "belongs-to",
+    "lessons|CoachNote.sessionId": "belongs-to",
+    "lessons|CoachingSession.cancelledAt": "ends",
+    "lessons|CoachingSession.cohortId": "belongs-to",
+    "lessons|CoachingSession.createdByEmail": "by-name",
+    "lessons|CoachingSession.learnerId": "belongs-to",
+    "lessons|CoachingSession.programmeId": "belongs-to",
+    "lessons|CohortMember.cohortId": "is-on",
+    "lessons|CohortMember.learnerId": "is-on",
+    "lessons|CohortMember.removedAt": "ends",
+    "lessons|Conversation.anchorId": "points-at-one-of",
+    "lessons|Conversation.learnerId": "belongs-to",
+    "lessons|ConversationMessage.authorUserId": "belongs-to",
+    "lessons|ConversationMessage.conversationId": "belongs-to",
+    "lessons|ConversationMessage.readAt": "happened-to",
+    "lessons|DeliverableConcept.conceptId": "is-on",
+    "lessons|DeliverableConcept.deliverableId": "is-on",
+    "lessons|DimensionRating.dimensionId": "belongs-to",
+    "lessons|DimensionRating.evaluationId": "belongs-to",
+    "lessons|DimensionRating.sessionId": "belongs-to",
+    "lessons|LearnerDeliverable.archivedAt": "ends",
+    "lessons|LearnerDeliverable.learnerId": "belongs-to",
+    "lessons|LearnerInvite.claimedAt": "happened-to",
+    "lessons|LearnerInvite.claimedByLearnerId": "belongs-to",
+    "lessons|LearnerInvite.createdByEmail": "by-name",
+    "lessons|LearnerProfile.coachEmail": "by-name",
+    "lessons|LearnerProfile.userId": "extends",
+    "lessons|LearningPath.learnerId": "belongs-to",
+    "lessons|LearningPath.programmeId": "belongs-to",
+    "lessons|Lesson.conceptId": "belongs-to",
+    "lessons|Lesson.learnerId": "belongs-to",
+    "lessons|LessonDraft.conceptId": "belongs-to",
+    "lessons|LessonDraft.copiedFromLearnerId": "belongs-to",
+    "lessons|LessonDraft.learnerId": "belongs-to",
+    "lessons|LessonDraft.updatedByEmail": "by-name",
+    "lessons|PathStep.conceptId": "is-on",
+    "lessons|PathStep.pathId": "is-on",
+    "lessons|PathStep.removedAt": "ends",
+    "lessons|Programme.archivedAt": "ends",
+    "lessons|Programme.createdByEmail": "by-name",
+    "lessons|Programme.learnerId": "belongs-to",
+    "lessons|ProgrammeDimension.archivedAt": "ends",
+    "lessons|ProgrammeDimension.deliverableId": "belongs-to",
+    "lessons|ProgrammeDimension.programmeId": "belongs-to",
+    "lessons|ProgrammeEvaluation.completedAt": "happened-to",
+    "lessons|ProgrammeEvaluation.programmeId": "belongs-to",
+    "lessons|Progress.completedAt": "happened-to",
+    "lessons|Progress.conceptId": "is-on",
+    "lessons|Progress.learnerId": "is-on",
+    "lessons|ProjectContext.learnerId": "extends",
+    "lessons|SessionPrep.assignmentId": "belongs-to",
+    "lessons|SessionPrep.conceptId": "belongs-to",
+    "lessons|SessionPrep.sessionId": "is-on",
+    "lessons|Signal.conceptId": "happened-to",
+    "lessons|Signal.learnerId": "happened-to",
+    "lessons|Signal.sectionId": "happened-to"
+  },
+  "notes": [
+    {
+      "note": "the archive note (what stays, what ends when a person is archived)",
+      "kind": "ends",
+      "question": "When a person stops, what stays and what goes — their record and its history, the account they are on, their access to the things elsewhere, the lists they are on? Can they come back, and is that the old record revived or a new one?"
+    },
+    {
+      "note": "the enrolment note (enrolment elsewhere silently skipped)",
+      "kind": "exists-elsewhere",
+      "question": "Can a person be added here before they exist over there — and if they can, what is silently skipped, and how would anyone notice?"
+    },
+    {
+      "note": "the incident report (a paying member invisible for an unknown period; the remediation that made a person without the links)",
+      "kind": "is-on",
+      "question": "What must be linked for a thing to count as what you call it — is a person with no link to an account a member, or just a contact? When something arrives from elsewhere, which links must be made for it to count?"
+    }
+  ],
+  "depthSentences": {
+    "acme": "the company each person who attended a session works for (attendance → the attendee row → the person → their employment → the company); the account-holder rule, used eight times, is four hops (person-on-account → account → company → its admins → the person asking)",
+    "template:todo-list": "the history of one task",
+    "template:planning": "the blocks of one project",
+    "template:members-area": "the members of one association, by the person signed in",
+    "template:nightbook": "one page, by its id",
+    "tirion": "for each person: the editions they registered for, how many sessions they attended and what they paid (registration → edition, attendance, transaction, joined per person)",
+    "sentinel": "the portfolio a question's segment family belongs to"
+  },
+  "oral": {
+    "status": "taken down 2026-10-08 (s1), in Richard's words; each row names the kind it is a mutant of — ONT-005's seed",
+    "theme": "Richard: \"a lot of the mistakes were about query efficacy … that mistake gets repeated until you have a DB of patchwork solutions and duplicate data.\" The mutant that produces the patchwork is a question not asked before real data existed; every row below was fine on day one.",
+    "rows": [
+      {
+        "mistake": "making a string field when it should have been a relation, to make product categories",
+        "kind": "one-of",
+        "why": "a fixed list typed as free text; when categories need details or ordering it is a 'belongs-to' to a category record"
+      },
+      {
+        "mistake": "designing appointment systems with on and off days, breaks, public holidays all taken into consideration when showing the available time slots, and keeping it free of race conditions",
+        "kind": "is-on",
+        "why": "a booking is a person on a slot at a time; without a unique-pair rule in time two people land on one slot — the availability calendar is the question 'what can it be on, and when'"
+      },
+      {
+        "mistake": "piling all the profile fields directly into the user table thinking there's only a few, when later the profiles needed a dozen fields and some users only use half of them",
+        "kind": "extends",
+        "why": "extra detail folded into the thing it extends"
+      },
+      {
+        "mistake": "making relation fields where the parent record has dozens of relations, and later needing a nested query of relation objects to find the right parent — the query falls apart",
+        "kind": "many-by-list",
+        "why": "a list on the parent that nobody can query from the other side"
+      },
+      {
+        "mistake": "putting a field inside the profile table that is later used very often to filter users and should have been in the user table from the start; too late once users have profile relations, so a nested relation query, and it sucks",
+        "kind": "extends",
+        "why": "the field you filter or sort the main thing by was split off into the extension"
+      },
+      {
+        "mistake": "making a one-to-many thinking 'this user only belongs to one company', then realising they can belong to several — but the field exists and real data is in it",
+        "kind": "belongs-to",
+        "why": "a 'belongs-to' that was an 'is-on'; the question 'could it ever be several at once' was not asked before data existed"
+      },
+      {
+        "mistake": "wanting to order users by the profile's last-updated date and having to choose between a nested query and a copied 'profile_updated' field on user kept in sync by hand — repeated until the DB is patchwork and duplicate data",
+        "kind": "extends",
+        "why": "a derived field copied onto the parent and maintained by hand; the sort key belongs on the thing sorted, or the query goes through the path operation (ONT-004)"
+      }
+    ]
+  },
+  "borrows": {
+    "_about": "ONT-011 step 1. Not kinds: the four things Frappe's DocType says about a kind of record, looked for by the detectors in census.js. `list` is each borrow's person sentence (ONT-011 §1) and its question; `classification` is the verdict on each in-repo candidate, by meaning — \"yes\", \"no: why\" (the word matched, the meaning does not) or \"neighbour: why\" (next door; step 2 decides). A key may use `*` for the collection. `across` (ONT-013 step 4) is not Frappe's: rules over a set of records, found in the apps' code (a row count against a limit near a create, a sum against a total, two ranges compared) and in a field that holds a limit; the same code pass adds read-aloud candidates where an app hands out a number itself (ONT-015's warrant). `hand` holds a row no detector can see, with its file:line. The private candidates' verdicts live in the private folder's borrows.json.",
+    "list": {
+      "secret": {
+        "sentence": "Some details on a record are not for everyone who can see the record, and the system asked me which ones before anyone could read them.",
+        "question": "Is any detail on it not for everyone who can see it? Who may read that detail?"
+      },
+      "settled": {
+        "sentence": "Once something is agreed, it stays as it was agreed. To change it I withdraw it or make a new one that says which one it replaces, and the old one is still there.",
+        "question": "Does it get agreed, signed, sent or published at some point? After that, may it still change, and how is a mistake in it put right?"
+      },
+      "facts": {
+        "sentence": "The system asked whether there is only one of something, whether people read its number aloud, what I call one in a list, and whether I need to know who changed what.",
+        "question": "Is there only one of it? Do people read its number aloud? What do you call one in a list? Do you need to know who changed what?",
+        "facts": {
+          "only-one": "there is only one",
+          "read-aloud": "people read its number aloud",
+          "called-by": "what you call one in a list",
+          "who-changed": "who changed what"
+        }
+      },
+      "sometimes": {
+        "sentence": "A detail that only matters in some cases is asked for in those cases, and never left empty when it mattered.",
+        "question": "Is any detail needed only in some cases? Which cases, and must it be filled then?"
+      },
+      "across": {
+        "sentence": "A cohort holds at most twenty learners, the bills never add up to more than the budget, and no two bookings of a room overlap.",
+        "question": "Is there a most (or a total) over a set of these, or two that may never share the same time?",
+        "facts": {
+          "count": "at most so many",
+          "sum": "never more than the total",
+          "overlap": "no two at the same time"
+        }
+      }
+    },
+    "classification": {
+      "template:members-area|Member.unsubscribeToken@secret": "yes: every admin who can list members reads every member's unsubscribe token, and the rest of the member is theirs to read",
+      "template:members-area|Member.token@secret": "no: the unsubscribe query's parameter name (its filter's input), not a field on Member",
+      "template:nightbook|Profile.codeV@secret": "yes: a salted verifier on a profile anyone may read; known and deliberate until V1-8 (TPL-011)",
+      "template:nightbook|Profile.answerV@secret": "yes: a salted verifier on a profile anyone may read; known and deliberate until V1-8 (TPL-011)",
+      "template:nightbook|Profile.rescueV@secret": "yes: a salted verifier on a profile anyone may read; known and deliberate until V1-8 (TPL-011)",
+      "lessons|CoachNote.visibility@secret": "neighbour: the whole note is hidden from the learner by a value on it, enforced by the read functions; a rule on a value, not a secret field",
+      "template:members-area|Announcement.postedAt@settled": "no: when it was posted; an admin may still edit it, and nothing says otherwise",
+      "template:nightbook|Envelope.sealed@settled": "yes: sealed until a day; sealEnvelope refuses a day that is not still to come",
+      "template:planning|MoneyMark.sentOn@settled": "yes: a bill that is sent, then paid or lost; whether its amount may change after it is sent is the unasked question",
+      "template:planning|Task.status@settled": "no: the todo list's open / done, written from the planning app: finished, not agreed",
+      "template:planning|Task.openStatus@settled": "no: a query parameter that asks for open tasks, not a field",
+      "template:todo-list|Task.status@settled": "no: open / done: finished, not agreed",
+      "template:todo-list|Routine.status@settled": "no: running / stopped: an end (`ends`), not an agreement",
+      "lessons|Assignment.status@settled": "yes: draft / issued / withdrawn, Frappe's draft / submitted / cancelled under other words",
+      "lessons|ArtifactSubmission.attempt@settled": "yes: a new attempt is a new record and the old one stays (unique with learner, concept and section): amend by a new record",
+      "lessons|AssignmentSubmission.attempt@settled": "yes: a new attempt is a new record and the old one stays: amend by a new record",
+      "lessons|ArtifactSubmission.submittedAt@settled": "neighbour: when it was handed in; the record is counted on `attempt`, and the coach's `evaluation` is written onto it afterwards, which answers 'may anything still change?'",
+      "lessons|AssignmentSubmission.submittedAt@settled": "neighbour: when it was handed in; counted on `attempt`; `evaluation` is written onto it afterwards",
+      "lessons|LearnerInvite.status@settled": "no: an invite that is claimed is used up (`ends`), not agreed",
+      "lessons|PathStep.status@settled": "no: locked / available / complete; 'locked' means not yet available, not frozen",
+      "lessons|Programme.status@settled": "no: active / closed: an end, not an agreement",
+      "lessons|LessonDraft.publishedVersion@settled": "yes: a draft kept beside the version that was published",
+      "lessons|Cohort.isDefault@only-one": "neighbour: one of many cohorts marked as the default, not a collection of one",
+      "template:planning|Settings.(collection)@only-one": "yes: a collection meant to hold one record per person (creatorOwns)",
+      "template:members-area|Association.(collection)@only-one": "yes: one association per app; claimAssociation makes it only while none exists",
+      "lessons|ArtifactSubmission.attempt@read-aloud": "neighbour: counted per learner and concept ('attempt 2'), not a number that names the record",
+      "lessons|AssignmentSubmission.attempt@read-aloud": "neighbour: counted per learner and assignment, not a number that names the record",
+      "lessons|LearnerDeliverable.slug@read-aloud": "neighbour: a name people type, not a number",
+      "template:members-area|*.title@called-by": "yes: what one is called in a list",
+      "template:members-area|*.name@called-by": "yes: what one is called in a list",
+      "template:nightbook|*.name@called-by": "yes: what one is called in a list",
+      "template:planning|*.label@called-by": "yes: what one is called in a list",
+      "template:planning|*.name@called-by": "yes: what one is called in a list",
+      "template:planning|*.title@called-by": "yes: what one is called in a list",
+      "template:todo-list|*.title@called-by": "yes: what one is called in a list",
+      "lessons|*.title@called-by": "yes: what one is called in a list",
+      "lessons|*.name@called-by": "yes: what one is called in a list",
+      "lessons|*.displayName@called-by": "yes: what one is called in a list",
+      "lessons|*.subject@called-by": "yes: what one is called in a list",
+      "lessons|*.label@called-by": "yes: what one is called in a list",
+      "lessons|*.resourceLabel@called-by": "yes: what one is called in a list",
+      "lessons|CoachNote.editedAt@who-changed": "yes: keeps that it was edited, not what changed or who changed it",
+      "lessons|LessonDraft.updatedByEmail@who-changed": "yes: the last person to touch the draft, not what they changed",
+      "lessons|LessonDraft.version@who-changed": "neighbour: a counter of the draft's saves, not who changed what",
+      "lessons|LessonDraft.publishedVersion@who-changed": "no: the version that was published, counted under settled",
+      "lessons|Lesson.conceptVersion@who-changed": "neighbour: which version of another thing the lesson was built from: provenance, not a history of changes",
+      "lessons|Lesson.projectContextVersion@who-changed": "neighbour: which version of another thing the lesson was built from: provenance, not a history of changes",
+      "lessons|Lesson.generationVersion@who-changed": "neighbour: which version of another thing the lesson was built from: provenance, not a history of changes",
+      "lessons|ProjectContext.version@who-changed": "neighbour: a counter that Lesson.projectContextVersion reads: provenance",
+      "template:planning|Project.move@sometimes": "yes: moveWorth, moveWhen, moveDue and moveStop matter only when the project has a next move",
+      "template:planning|Task.closingNote@sometimes": "yes: a note that matters only once the task is closed",
+      "template:todo-list|Task.closingNote@sometimes": "yes: a note that matters only once the task is closed",
+      "template:todo-list|Routine.stopNote@sometimes": "yes: a note that matters only once the routine stops",
+      "template:planning|MoneyMark.lostOn@sometimes": "neighbour: a lost bill with no reason field of its own; the mark's general `note` may hold one",
+      "lessons|CoachingSession.cancelledAt@sometimes": "yes: a cancelled session is still shown to the learner, with no field for why: the unasked question",
+      "lessons|CohortMember.removedAt@sometimes": "neighbour: an end with no reason field and no reader of a reason found; the `ends` kind's question",
+      "lessons|LearnerDeliverable.archivedAt@sometimes": "neighbour: an end with no reason field and no reader of a reason found; the `ends` kind's question",
+      "lessons|Programme.archivedAt@sometimes": "neighbour: an end with no reason field and no reader of a reason found; the `ends` kind's question",
+      "lessons|ProgrammeDimension.archivedAt@sometimes": "neighbour: an end with no reason field and no reader of a reason found; the `ends` kind's question",
+      "lessons|PathStep.removedAt@sometimes": "no: a removed step leaves the path (the read filters it out) and is not shown again; nobody is owed a reason",
+      "lessons|SessionPrep.resourceUrl@sometimes": "yes: one or the other with resourceStorageKey, never both",
+      "lessons|AssignmentSubmission.linkUrl@sometimes": "yes: allowed only when the assignment's submissionModes includes link, a case decided on another record",
+      "template:nightbook|keepThing.rows@count": "yes: a person keeps at most 200 things; counted by the function before it creates, so two saves at 199 both pass",
+      "template:nightbook|sealEnvelope.helps@count": "no: the length of one text, not a count of records",
+      "template:todo-list|Projects.nextPosition@read-aloud": "neighbour: the next drag-sort position (the highest plus one) — an order, not a number that names the record",
+      "template:todo-list|Selected task.nextActionPosition@read-aloud": "neighbour: the next drag-sort position for an action — an order, not a number that names the record",
+      "template:todo-list|Task rows.nextPosition@read-aloud": "neighbour: the next drag-sort position for a task — an order, not a number that names the record"
+    },
+    "hand": [
+      {
+        "source": "template:members-area",
+        "from": "Association",
+        "field": "(collection)",
+        "family": "only-one",
+        "evidence": "templates/members-area/components/__cloud__/claimAssociation/nodes.json:70",
+        "note": "claimAssociation refuses unless the association is still unclaimed"
+      },
+      {
+        "source": "lessons",
+        "from": "AssignmentSubmission",
+        "field": "linkUrl",
+        "family": "sometimes",
+        "evidence": "templates/digital-bricks-training/backend/schema.json:159",
+        "note": "submissionModes is Assignment's (schema.json:100); the lessons app refuses a link the brief does not ask for (its assignments service)"
+      },
+      {
+        "source": "lessons",
+        "from": "CoachNote",
+        "field": "visibility",
+        "family": "secret",
+        "evidence": "templates/digital-bricks-training/backend/schema.json:225",
+        "note": "'internal' hides the note from the learner (tools/check-read-functions.mjs)"
+      }
+    ]
+  }
+}

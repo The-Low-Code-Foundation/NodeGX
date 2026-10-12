@@ -1,0 +1,529 @@
+[
+  {
+    "name": "a file chosen: the click, then File, Name, Size in bytes and Type, then Done",
+    "because": "openfilepicker.ts :164-165 the click; :81-110 change with a file — the five outputs flagged, Done (Path: a browser's file has none)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "picker": {
+        "answers": [
+          {
+            "file": {
+              "name": "photo.png",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "D27: Accepted file types never set — the element has no accept: no filter (v2)",
+    "because": "openfilepicker.ts: a blank Accepted file types removes the attribute (P109 ISL-030, P107-D27 ruled \"Blank means no filter\"); v1 held the string \"undefined\"",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "open"
+      },
+      "settle"
+    ],
+    "world": {
+      "picker": {}
+    }
+  },
+  {
+    "name": "Accepted file types and Capture reach the element at the click",
+    "because": "openfilepicker.ts :141-145",
+    "params": {
+      "acceptedFileTypes": "image/*",
+      "capture": "environment"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "picker": {
+        "answers": [
+          {
+            "file": {
+              "name": "photo.png",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "C53: Capture cleared after an Open that set it — the next dialog no longer asks for the camera (v2)",
+    "because": "openfilepicker.ts: a blank Capture removes the attribute on every Open (P109 ISL-030, P107-C53 ruled \"Fix it\"); v1 kept the last one",
+    "params": {
+      "acceptedFileTypes": "image/*"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "capture",
+        "value": "user"
+      },
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "capture",
+        "value": ""
+      },
+      {
+        "signal": "open"
+      },
+      "settle"
+    ],
+    "world": {
+      "picker": {
+        "answers": [
+          {
+            "cancel": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "C53 through a superseding Open: a later blank Capture removes the one it set (v2)",
+    "because": "openfilepicker.ts :66-70, then each Open sets the attributes as they stand (P109 ISL-030, P107-C53); v1 left the superseding Open's Capture on the element",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "set": "capture",
+        "value": "user"
+      },
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "set": "capture",
+        "value": ""
+      },
+      {
+        "signal": "open"
+      },
+      "settle"
+    ],
+    "world": {
+      "picker": {
+        "answers": [
+          {
+            "never": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a cancel after an earlier pick: Unchanged, every output as it was",
+    "because": "openfilepicker.ts :136-139 — Unchanged; :101 the file is replaced only on a pick",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "picker": {
+        "answers": [
+          {
+            "file": {
+              "name": "photo.png",
+              "type": "image/png",
+              "size": 3
+            }
+          },
+          {
+            "cancel": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a change with an empty list (a re-pick backed out of): Unchanged, the earlier file kept",
+    "because": "openfilepicker.ts :96-99 (NDA-004 §2)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "picker": {
+        "answers": [
+          {
+            "file": {
+              "name": "photo.png",
+              "type": "image/png",
+              "size": 3
+            }
+          },
+          {
+            "empty": true,
+            "after": 5
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a second Open while the first waits: the first is Unchanged in the second's frame; the second is answered",
+    "because": "openfilepicker.ts :66-70 — superseded is Unchanged (ERG-001 §4), reported before the new token",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "picker": {
+        "answers": [
+          {
+            "never": true
+          },
+          {
+            "file": {
+              "name": "notes.txt",
+              "type": "text/plain",
+              "size": 12
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "two Opens in one frame: two clicks, the first Unchanged at once",
+    "because": "openfilepicker.ts :66-73 — each press supersedes the one before it, inside its own handler",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "open"
+      },
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "picker": {
+        "answers": [
+          {
+            "cancel": true,
+            "after": 1
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the first dialog's answer arrives while a second Open waits: it meets the second's handler — Done with the first dialog's file",
+    "because": "openfilepicker.ts :147-148 — the element's handlers are the latest Open's; a DOM event meets the handler there when it fires (world.ts PICKER)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 50
+      },
+      "settle"
+    ],
+    "world": {
+      "picker": {
+        "answers": [
+          {
+            "file": {
+              "name": "photo.png",
+              "type": "image/png",
+              "size": 3
+            },
+            "after": 50
+          },
+          {
+            "never": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the first dialog's answer arrives after the second Open was answered: it meets no handler and does nothing",
+    "because": "openfilepicker.ts :82, :137 — every answer takes both handlers off (_detachHandlers :271-275); control: the second's cancel fires",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 50
+      },
+      "settle"
+    ],
+    "world": {
+      "picker": {
+        "answers": [
+          {
+            "file": {
+              "name": "photo.png",
+              "type": "image/png",
+              "size": 3
+            },
+            "after": 50
+          },
+          {
+            "cancel": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a refused click: Error, Failure open-file-picker/open-failed; a later pick is Done and Error stays",
+    "because": "openfilepicker.ts :164-173; Error is never cleared (:251-259 — row P107-D25's family)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "picker": {
+        "answers": [
+          {
+            "throws": "The file chooser is not allowed in this frame"
+          },
+          {
+            "file": {
+              "name": "photo.png",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a refused click with no message: the exception itself, read as its name",
+    "because": "openfilepicker.ts :168-169 — `e.message ? e.message : e`; a DOMException with no message is its name",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "open"
+      },
+      "settle"
+    ],
+    "world": {
+      "picker": {
+        "answers": [
+          {
+            "throws": ""
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a dialog left open: the click, and nothing more",
+    "because": "world.ts PICKER `never`; the token stays pending (:72-73)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 1000
+      },
+      "settle"
+    ],
+    "world": {
+      "picker": {
+        "answers": [
+          {
+            "never": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a value no string port would hand: the element holds it as a string",
+    "because": "openfilepicker.ts :141, :144 — reflected attributes are DOMStrings: null is \"null\", an array its join",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "acceptedFileTypes",
+        "value": null
+      },
+      {
+        "set": "capture",
+        "value": [
+          "user",
+          "x"
+        ]
+      },
+      {
+        "signal": "open"
+      },
+      "settle"
+    ],
+    "world": {
+      "picker": {}
+    }
+  },
+  {
+    "name": "a pick that lands late, after other frames: the outputs arrive in the frame it lands",
+    "because": "openfilepicker.ts :103-109 flagged outside any frame — sent with the next one",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "open"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "picker": {
+        "answers": [
+          {
+            "file": {
+              "name": "notes.txt",
+              "type": "text/plain",
+              "size": 12
+            },
+            "after": 20
+          }
+        ]
+      }
+    }
+  }
+]

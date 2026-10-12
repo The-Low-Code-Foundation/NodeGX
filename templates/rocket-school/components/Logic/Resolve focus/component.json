@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "160e32ef-c811-5b6f-843f-c49b54f84a11",
+  "name": "Resolve focus",
+  "path": "/Logic/Resolve focus",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "P113 REV-001: the profile’s focus (a subject and the skills ticked in it, or a list) as the picker and the setup need it: Mode, the Focus skill ids, the list’s items, and one line that says it."
+}

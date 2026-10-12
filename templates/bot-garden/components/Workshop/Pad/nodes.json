@@ -1,0 +1,102 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "74211808-b73d-5864-8e91-eb80b4f96e96",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pdIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "show",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "allowed",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "palette",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "world",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "pdBox",
+      "type": "Group",
+      "label": "The pad",
+      "children": [
+        "pdEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-pad",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pdKeys",
+      "type": "/Logic/Pad keys",
+      "label": "One key per allowed step",
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "pdEach",
+      "type": "For Each",
+      "label": "One key per row",
+      "parent": "pdBox",
+      "parameters": {
+        "template": "/Workshop/Pad key",
+        "templateType": "explicit"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pdOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "op",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pressed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "pdBox"
+  ]
+}

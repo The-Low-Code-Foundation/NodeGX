@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "755c9da2-646a-584a-8b31-98d77c06912a",
+  "name": "Project row",
+  "path": "/Projects/Project row",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One project on the Projects tab: its name, its money in a few words, its next move and whose it is. Pressed, it opens to its money, its history, its tasks (each opens in the List) and its money items (each opens the money form), with Done, Change the move, Add a task, Add money, Edit project, and Been paid? / Sent? when a bill is due. With Is Heading it is a group’s name instead."
+}

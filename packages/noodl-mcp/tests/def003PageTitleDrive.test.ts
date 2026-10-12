@@ -31,7 +31,7 @@
  *    "something else".
  *
  * ⚠️ Needs the built viewer bundle and a Chrome — `checkPrerequisites` inside `withRenderedPage`
- * fails with the exact command to run if either is missing, the same contract `@noodl/preview`'s
+ * fails with the exact command to run if either is missing, the same contract `@nodegx/preview`'s
  * suite uses. CI builds the viewer in this job before running it.
  */
 import * as fs from 'fs';

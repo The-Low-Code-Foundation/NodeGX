@@ -1,0 +1,160 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c43e1853-e980-5f95-8f3c-046e8aadbac7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "newrunIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "robotId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "runId",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "newrunFn",
+      "type": "JavaScriptFunction",
+      "label": "New run",
+      "parameters": {
+        "functionScript": "var { newRun } = Scripts.engine;\nvar run = newRun(Inputs.program, Inputs.robotId, Inputs.lang, Inputs.runId);\nOutputs.run = run;\nOutputs.runId = run.runId;\nOutputs.steps = run.steps.length;\nOutputs.blocks = run.blocks;\nOutputs.handlers = run.handlers.length;\n",
+        "runOnChange-in-lang": false,
+        "runOnChange-in-program": false,
+        "runOnChange-in-robotId": false,
+        "runOnChange-in-runId": false,
+        "uses": "engine.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-program",
+          "displayName": "program",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robotId",
+          "displayName": "robotId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-runId",
+          "displayName": "runId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-run",
+          "displayName": "run",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-runId",
+          "displayName": "runId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-steps",
+          "displayName": "steps",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blocks",
+          "displayName": "blocks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-handlers",
+          "displayName": "handlers",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "newrunOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "blocks",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "handlers",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "run",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "runId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "steps",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

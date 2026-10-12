@@ -125,11 +125,19 @@ export const EXPRESSION_KEYWORDS: readonly string[] = [
   'enum'
 ];
 
+/**
+ * The Expression's own inputs (P109 ISL-051 / P107-C145, ruled "Block the three names"). A port by one of these names is the
+ * node's own, so a variable called `run` never received a value: the editor drew a port, a wire into it landed on the Run signal,
+ * and the expression threw "run is not defined" every time. No port is drawn for them; the node says the name is reserved.
+ */
+export const EXPRESSION_NODE_INPUTS: readonly string[] = ['expression', 'run', 'evaluateAtLoad'];
+
 const RESERVED: ReadonlySet<string> = new Set([
   ...EXPRESSION_MATH_ALIASES,
   ...NOODL_NAMES,
   ...EXPRESSION_JAVASCRIPT_GLOBALS,
-  ...EXPRESSION_KEYWORDS
+  ...EXPRESSION_KEYWORDS,
+  ...EXPRESSION_NODE_INPUTS
 ]);
 
 /** Whether `name` can never be an Expression input port. */
@@ -257,6 +265,16 @@ export function expressionReferences(expression: string): ExpressionReference[] 
   }
 
   return found;
+}
+
+/** The Expression's own input names the expression reads as variables (row C145), once, in order. */
+export function expressionNodeInputsRead(expression: string): string[] {
+  const names: string[] = [];
+  for (const ref of expressionReferences(expression)) {
+    if (EXPRESSION_NODE_INPUTS.indexOf(ref.name) === -1 || names.indexOf(ref.name) !== -1) continue;
+    names.push(ref.name);
+  }
+  return names;
 }
 
 /** The Expression's input ports: every variable it reads that is not reserved, once, in order. */

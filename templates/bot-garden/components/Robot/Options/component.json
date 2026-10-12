@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9c30498a-8ce4-54d3-8105-c07ccac929ce",
+  "name": "Options",
+  "path": "/Robot/Options",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The My robot panel (the mockup’s .opts): the name, the paint, the eyes, the hat (a gift from the islander it came from), the stickers. Every change is written through Model and Write."
+}

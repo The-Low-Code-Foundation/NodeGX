@@ -14,7 +14,8 @@
  * quietly passes on anything. Mutation-checked 2026-08-23 by commenting out the
  * `initializeDefaultValues` call at its node-creation site: the first three rows go red,
  * the last three stay green — correctly, because they are the arms that do not depend on
- * the seeder. If the seeder can be removed and this file stays green, it has stopped
+ * the seeder. (P109 ISL-050, P107-C132: the two unseeded rows now read a bare number in the port's default unit — the
+ * failure this file pinned as the exclusion, ruled a defect.) If the seeder can be removed and this file stays green, it has stopped
  * measuring.
  *
  * ✅ And the mutated values are the finding: with the seeder gone, `width` receives
@@ -118,29 +119,35 @@ describe('FB-019 — a bare number into a units-typed port', () => {
     expect(node._internal.applied.width).toBe('300px');
   });
 
-  it('leaves a units port with no declared default with nothing to merge against', () => {
+  it('reads a bare number on a units port with no declared default in its default unit (P107-C132)', () => {
     const node = createNode();
     expect(node.getInputValue('unseeded')).toBeUndefined();
 
     node.setInputValue('unseeded', 300);
 
-    // ✅ The exclusion arm. This is the failure the task file described — and it is only
-    // reachable on a port that declares no default, which `width`, `height`, `transformX`,
-    // `transformY` and `iconSize` all do. Without this row the four above would be
-    // consistent with "units ports just work", which is not what is happening.
-    expect(node._internal.applied.unseeded).toBeUndefined();
+    // ✅ The exclusion arm, reversed by a ruling. Nothing seeds a port that declares no default, so there was nothing to merge
+    // against and the number arrived bare — the setter refused it, which is P107-C132 (a Number wired into a Columns' Medium
+    // Below did nothing until a size had been typed there). Ruled 2026-10-08, "Read the number as pixels": a port that holds no
+    // size reads a bare number in its default unit (P109 ISL-050, `setInputValue`).
+    expect(node._internal.applied.unseeded).toBe('300px');
+    expect(node.getInputValue('unseeded')).toEqual({ value: 300, unit: 'px' });
+
+    // Only a number, or text that reads as one: anything else still arrives as sent, for the setter to refuse.
+    const other = createNode();
+    other.setInputValue('unseeded', 'tall');
+    expect(other.getInputValue('unseeded')).toBe('tall');
+    expect(other._internal.applied.unseeded).toBeUndefined();
   });
 
   it('arms the merge on `unit` only — `type` is a different key and does not count', () => {
     const node = createNode();
 
-    // `Node.prototype.registerInput` writes `{ value, type: defaultUnit }`. Node creation
-    // does not use it (`_inputs = Object.create(inputs)`), so it is latent — but if the
-    // two were ever "unified" on the wrong key, every row above would break and this one
-    // says why.
-    node._inputValues.unseeded = { value: 0, type: 'px' };
+    // `Node.prototype.registerInput` once wrote `{ value, type: defaultUnit }` (FLD-004 (c) moved it to `unit`). If a merge
+    // ever read `type`, this would render in the stored `%`; a value with no `unit` holds no size, so the number is read in
+    // the port's default unit instead (P107-C132).
+    node._inputValues.unseeded = { value: 0, type: '%' };
     node.setInputValue('unseeded', 300);
 
-    expect(node._internal.applied.unseeded).toBeUndefined();
+    expect(node._internal.applied.unseeded).toBe('300px');
   });
 });

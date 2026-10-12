@@ -97,3 +97,28 @@ describe('minePorts', () => {
     expect(minePorts(script)).toEqual(minePorts(script));
   });
 });
+
+/**
+ * P109 ISL-006 — a Function (`JavaScriptFunction`) reads its code with `@nodegx/project-contract/function-ports`, the
+ * reader its runtime node imports (ruling 3, "Fix all three"); the Script node keeps the six patterns above.
+ */
+describe('ISL-006 — a Function completes the ports its runtime reader makes', () => {
+  it('an underscore signal completes as a signal for a Function, as a value for a Script node', () => {
+    expect(minePorts('Outputs.do_it();', 'JavaScriptFunction').signals.has('do_it')).toBe(true);
+    expect(minePorts('Outputs.do_it();', 'Javascript2').signals.has('do_it')).toBe(false);
+  });
+
+  it('a name inside a comment completes for a Script node only', () => {
+    const code = '// Inputs.old\nOutputs.x = 1;';
+    expect(minePorts(code, 'JavaScriptFunction').inputs).toEqual([]);
+    expect(minePorts(code, 'Javascript2').inputs).toEqual(['old']);
+  });
+
+  it('two bracket inputs on one line are two for a Function', () => {
+    expect(minePorts('const v = Inputs["a"] + Inputs["b"];', 'JavaScriptFunction').inputs).toEqual(['a', 'b']);
+  });
+
+  it('a `//` inside a URL string is no comment', () => {
+    expect(minePorts('f("https://x.io/" + Inputs.id)', 'JavaScriptFunction').inputs).toEqual(['id']);
+  });
+});

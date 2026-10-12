@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/world-v1.json#/definitions/relationsFile",
+  "relations": [
+    {
+      "id": "subcategory-category",
+      "from": "subcategory",
+      "property": "category",
+      "kind": "one-of",
+      "sentence": "A subcategory belongs to exactly one category, from a fixed list.",
+      "answers": { "needsDetails": false, "whoAdds": "a developer", "sameForEveryone": true, "retires": true }
+    },
+    {
+      "id": "product-subcategory",
+      "from": "product",
+      "to": "subcategory",
+      "kind": "belongs-to",
+      "sentence": "Every product sits on one shelf: its subcategory.",
+      "answers": { "several": false, "required": true, "whenTargetGoes": "blocks", "moves": true }
+    }
+  ]
+}

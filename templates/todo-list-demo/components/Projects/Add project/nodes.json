@@ -1,0 +1,165 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "de64ec20-6fec-530b-8cbe-ee0c26b89fc5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "AddprojectIn",
+      "type": "Component Inputs",
+      "label": "What to write",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "repeat",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "position",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "AddprojectOut",
+      "type": "Component Outputs",
+      "label": "Written",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "error",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hasError",
+          "plug": "input",
+          "type": "boolean"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "AddprojectWrite",
+      "type": "JavaScriptFunction",
+      "label": "Write it",
+      "parameters": {
+        "functionScript": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction fmtDay(d) { return DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()]; }\nfunction fmtTime(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }\nfunction when(v) {\n  if (v === undefined || v === null || v === '') return null;\n  var d = v instanceof Date ? v : new Date(v);\n  return isNaN(d.getTime()) ? null : d;\n}\nfunction dayLabel(d) {\n  var t = startOfToday();\n  if (d.getTime() >= t) return 'Today';\n  if (d.getTime() >= t - 86400000) return 'Yesterday';\n  return fmtDay(d);\n}\nfunction due(s) {\n  var d = toDay(s);\n  if (!d) return { text: '', late: false };\n  var n = Math.round((d.getTime() - startOfToday()) / 86400000);\n  if (n < 0) return { text: 'Overdue by ' + (-n) + (n === -1 ? ' day' : ' days'), late: true };\n  if (n === 0) return { text: 'Due today', late: true };\n  if (n === 1) return { text: 'Due tomorrow', late: false };\n  if (n <= 7) return { text: 'Due in ' + n + ' days', late: false };\n  return { text: 'Due ' + fmtDay(d), late: false };\n}\nfunction ago(d) {\n  var ms = Date.now() - d.getTime();\n  if (ms < 3600000) return 'just now';\n  if (ms < 86400000) return Math.round(ms / 3600000) + ' h ago';\n  var n = Math.round(ms / 86400000);\n  return n === 1 ? 'yesterday' : n + ' days ago';\n}\nfunction num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction byPosition(a, b) { return num(a.position, 0) - num(b.position, 0); }\nvar PJ_PREFIX = new RegExp(\"^(?:(?:→|!) |✓ (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) \\\\d{1,2} · )+\");\nfunction pjClean(s) { return String(s === undefined || s === null ? '' : s).replace(PJ_PREFIX, '').trim(); }\nfunction pjId(r) { return r ? String(r.objectId || r.id || '') : ''; }\n/**\n * A row as plain fields with its 'id'. 🔴 A viewer built before 2026-09-23 (HLT-022) ignores\n * 'plain: true' and hands back the record itself — todo.digitalbricks.io runs one — so both shapes\n * are read, and never mutated: a record's own fields are the shared copy every view draws.\n */\nfunction pjPlain(r) {\n  var model = !!r && typeof r.getId === 'function';\n  var src = model ? r.data || {} : r || {}, o = {};\n  for (var k in src) if (Object.prototype.hasOwnProperty.call(src, k)) o[k] = src[k];\n  o.id = model ? String(r.getId()) : pjId(r);\n  if (!o.objectId) o.objectId = o.id;\n  return o;\n}\nfunction pjIso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction pjToday() { return pjIso(new Date()); }\n/** '' stays '', \"today\" and \"tomorrow\" are days, YYYY-MM-DD must be a real day; anything else is null. */\nfunction pjDate(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).trim().toLowerCase();\n  if (s === '') return '';\n  if (s === 'today' || s === 'tomorrow') {\n    var d = new Date();\n    if (s === 'tomorrow') d.setDate(d.getDate() + 1);\n    return pjIso(d);\n  }\n  var m = /^(\\d{4})-(\\d{1,2})-(\\d{1,2})$/.exec(s);\n  if (!m) return null;\n  var y = Number(m[1]), mo = Number(m[2]), da = Number(m[3]);\n  var dt = new Date(y, mo - 1, da);\n  return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === da ? pjIso(dt) : null;\n}\n/** \"2,140\", \"€ 2140\", \"−380\" → a number; anything else NaN. */\nfunction pjAmount(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).replace(/[€\\s,]/g, '').replace('−', '-');\n  if (s === '') return NaN;\n  var n = Number(s);\n  return isFinite(n) ? n : NaN;\n}\nvar name = String(Inputs.name || '').trim();\nif (name === '') return;\nvar amt = pjAmount(Inputs.amount), repeat = Inputs.repeat === 'once' ? 'once' : 'monthly';\nvar date = pjDate(Inputs.date);\nif (date === null || (String(Inputs.amount || '').trim() !== '' && !(amt > 0))) {\n  Outputs.error = date === null ? 'Use a date like 2026-11-01 for when it is paid, or leave it empty.' : 'Type what they pay as a number, like 1200, or leave it empty.';\n  Outputs.hasError = true;\n  return;\n}\nOutputs.error = '';\nOutputs.hasError = false;\nif (date === '') {\n  var d = new Date();\n  d = repeat === 'monthly' ? new Date(d.getFullYear(), d.getMonth() + 1, 1) : new Date(d.getFullYear(), d.getMonth(), d.getDate() + 30);\n  date = pjIso(d);\n}\nvar R = Noodl.Records;\nR.create('Project', { name: name, sub: '', kind: 'earning', move: '', moveDue: null, position: Number(Inputs.position) || 1 })\n  .then(function (p) {\n    if (!(amt > 0)) return;\n    return R.create('MoneyItem', {\n      label: name, amount: Math.round(amt * 100) / 100, repeat: repeat, date: date, until: null, monthEnd: false, projectId: p.getId(),\n      billDate: repeat === 'once' ? date : null, billLeadDays: null, likelihood: 100, note: '', position: 1\n    });\n  })\n  .then(function () { Outputs.done(); }, function () { Outputs.failed(); });",
+        "runOnChange-in-name": false,
+        "runOnChange-in-amount": false,
+        "runOnChange-in-repeat": false,
+        "runOnChange-in-date": false,
+        "runOnChange-in-position": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "done",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "plug": "output",
+          "type": "string",
+          "displayName": "error",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasError",
+          "plug": "output",
+          "type": "boolean",
+          "displayName": "hasError",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "failed",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-amount",
+          "displayName": "amount",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-repeat",
+          "displayName": "repeat",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-date",
+          "displayName": "date",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-position",
+          "displayName": "position",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "AddprojectProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "string",
+        "value": "That change did not save in this browser. Try again, or reset the demo."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

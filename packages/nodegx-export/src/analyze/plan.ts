@@ -41,12 +41,14 @@ import { componentReachability, Reachability } from './reach';
 import { ScaffoldPage, routedPages } from '../emit/scaffold';
 import { isReservedWord, pascalCase } from '../emit/naming';
 import { DateHelper } from '../emit/dateLib';
-import { UtilHelper, UTIL_HELPER_MAY_BE_UNDEFINED } from '../emit/utilLib';
+import { UtilHelper, utilCallMayBeUndefined } from '../emit/utilLib';
+import { PARSE_SIGNAL_SENTENCES, isParseHelper, parseOutputTsType, parseSelectorOf } from '../emit/parseLib';
 import { ID_HELPERS_BY_FN, IdHelper } from '../emit/idLib';
 import { CONTENT_PARAMS, iconSourceOf, StyleRole, WIRED_STYLE_SINKS } from '../emit/style';
 import { CONTENT_BOUND_PORTS, ROLE_OF_TYPE, STRUCTURE_PORTS } from '../structurePorts';
 import { AnimateEaseName, ANIMATE_EASE_NAMES } from '../emit/animateLib';
 import { StatesValueType, STATES_VALUE_TYPES } from '../emit/statesLib';
+import { PROJECT_SCRIPTS_SYMBOL } from '../emit/projectScriptsLib';
 import {
   expressionIdentifiersOf,
   functionMinedPortsOf,
@@ -74,6 +76,7 @@ import {
   workspaceOf,
   VISUAL_FUNCTION_LABEL
 } from './logicbuilder';
+import { ScriptUsePlan, scriptUsesPlan } from './scriptUses';
 import {
   AppStateRegistry,
   ChannelPlan,
@@ -1050,10 +1053,27 @@ const UTIL_NODES: Record<
   string,
   {
     fn: UtilHelper;
-    args: Array<{ port: string; fallback?: string | number | boolean }>;
+    /**
+     * `required` (EXP-011 §75, the parsers): the port the node abstains without — its display name. Unwired
+     * and unauthored, the node never runs past its abstain, so the read defers with the date family's
+     * sentence rather than printing a call that answers nothing for the life of the app.
+     */
+    args: Array<{ port: string; fallback?: string | number | boolean; required?: string }>;
     outputs: string[];
     /** `String Mapper` only — the numbered families, in `input`/`mapping` order. */
     numbered?: { match: string; to: string };
+    /**
+     * EXP-011 §75 — a node with several value outputs: the output port's name is the call's trailing literal
+     * argument and the helper answers that port (`DATE_NODES`' selector, one family over).
+     */
+    select?: true;
+    /** EXP-011 §75 — the sentence a consumed signal output defers with, by port. */
+    signals?: Readonly<Record<string, string>>;
+    /**
+     * EXP-011 §75 — the one divergence, reported where the text arrives by wire: on a failed parse the
+     * interpreter keeps the previous answer on `kept` beside the Error; the pure call answers `instead`.
+     */
+    previous?: { kept: string; instead: string };
     /**
      * `Color Blend` only (EXP-011 §38) — a numbered family passed as **variadic arguments** after
      * `args`, index-aligned and with a hole printed as `undefined`. Unlike `numbered`, a wired
@@ -1109,6 +1129,58 @@ const UTIL_NODES: Record<
     args: [{ port: 'inputString' }, { port: 'defaultMapping' }],
     outputs: ['mappedString'],
     numbered: { match: 'input', to: 'output' }
+  },
+  /**
+   * EXP-011 §75 (session 100) — the four parsers, `src/lib/parse.ts`. Each is a function of its inputs that
+   * re-parses on every arrival (`scheduleAfterInputsHaveUpdated` → `_parse`), which is exactly a pure call
+   * here. The fallbacks are `initialize`'s and the setters' — `delimiter || ','`, `!!hasHeader`, an
+   * attribute prefix that keeps an authored empty string (only an ABSENT one is `@`), `maxBytes` finite and
+   * positive else 5 MB — and every value output is a selector on one call.
+   *
+   * ⚠️ `Parse XML`'s `alwaysArray` and `To CSV`'s `columns` are comma-separated STRINGS (a `stringlist`
+   * port carries one string, phase 30), so a wire on either is an ordinary argument; the helper splits it.
+   */
+  'net.noodl.ParseCSV': {
+    fn: 'parseCsv',
+    args: [{ port: 'text', required: 'CSV' }, { port: 'hasHeader', fallback: true }, { port: 'delimiter', fallback: ',' }],
+    outputs: ['items', 'count', 'error'],
+    select: true,
+    signals: PARSE_SIGNAL_SENTENCES,
+    previous: { kept: 'Items and Count', instead: 'no Items and a Count of 0' }
+  },
+  'net.noodl.ToCSV': {
+    fn: 'toCsv',
+    args: [
+      { port: 'items', required: 'Items' },
+      { port: 'columns', fallback: '' },
+      { port: 'delimiter', fallback: ',' },
+      { port: 'includeHeader', fallback: true }
+    ],
+    outputs: ['text', 'count'],
+    select: true,
+    signals: PARSE_SIGNAL_SENTENCES
+  },
+  'net.noodl.ParseXML': {
+    fn: 'parseXml',
+    args: [
+      { port: 'text', required: 'XML' },
+      { port: 'attributePrefix', fallback: '@' },
+      { port: 'alwaysArray', fallback: '' },
+      { port: 'trimValues', fallback: true },
+      { port: 'maxBytes', fallback: 5242880 }
+    ],
+    outputs: ['result', 'error', 'errorCode'],
+    select: true,
+    signals: PARSE_SIGNAL_SENTENCES,
+    previous: { kept: 'Result', instead: 'no Result' }
+  },
+  'net.noodl.ParseFeed': {
+    fn: 'parseFeed',
+    args: [{ port: 'text', required: 'Feed' }, { port: 'maxBytes', fallback: 5242880 }],
+    outputs: ['items', 'count', 'feedTitle', 'feedLink', 'feedDescription', 'feedUpdated', 'kind', 'source', 'error', 'errorCode'],
+    select: true,
+    signals: PARSE_SIGNAL_SENTENCES,
+    previous: { kept: 'Items, Count and the Feed outputs', instead: 'no Items, a Count of 0 and empty Feed outputs' }
   }
 };
 
@@ -2672,6 +2744,12 @@ export interface JsFunctionPlan {
    * minted by the block program where no `Variable` node declares it.
    */
   variables?: string[];
+  /**
+   * P109 ISL-005. Function only, present when its `uses` lists script files: each file the body
+   * reaches as `Scripts.<alias>`, in the order listed. The wrapper binds `Scripts` from the one
+   * shared registry (`src/lib/projectScriptFiles.ts`); the files are emitted once, never pasted here.
+   */
+  scripts?: ScriptUsePlan[];
   /**
    * reactive — no `run` wire: one render local per instance, recomputed per render (grade Q).
    * invoked — `run` wired: calls inline inside its own handler chain only (grade I).
@@ -5458,7 +5536,9 @@ function planComponent(
     outputInterface.valueProps.some((v) => v.prop === name) ||
     name === plan.file?.symbol ||
     name === 'Inputs' ||
-    name === 'Outputs';
+    name === 'Outputs' ||
+    // P109 ISL-005: the script-file registry's module-scope import.
+    name === PROJECT_SCRIPTS_SYMBOL;
   const allocJsFnName = (node: NodeIR, kind: JsFunctionPlan['kind']): string => {
     const cleaned = (node.authoredLabel ?? '').replace(/[^A-Za-z0-9_$]+/g, '_').replace(/^_+|_+$/g, '');
     let base = cleaned.length > 0 ? cleaned : kind === 'function' ? 'fn' : kind === 'visual' ? 'blocks' : 'expr';
@@ -5511,6 +5591,19 @@ function planComponent(
       } else {
         const purity = jsPurityDefer(kind, body);
         if (purity !== null) return { defer: `the ${word} ${purity}` };
+      }
+      // P109 ISL-005 AC7. The files a Function lists under Uses: bound as `Scripts`, or the named reason not.
+      let scriptUses: ScriptUsePlan[] = [];
+      if (kind === 'function') {
+        const usesValue = node.parameters.find((p) => p.name === 'uses')?.value;
+        // Read in one expression: the editor's TypeScript, which compiles this file too, does not narrow across the return.
+        const usesRaw = usesValue === undefined ? undefined : usesValue.kind === 'literal' || usesValue.kind === 'json' ? usesValue.value : null;
+        if (usesRaw === null) {
+          return { defer: `the ${word} has a Uses list that is not written out (${usesValue!.kind}) — the files it reaches cannot be read` };
+        }
+        const planned = scriptUsesPlan(usesRaw, ir.project.scripts);
+        if ('defer' in planned) return { defer: `the ${word} ${planned.defer}` };
+        scriptUses = planned.uses;
       }
 
       /**
@@ -5683,6 +5776,7 @@ function planComponent(
         signals,
         mathAliases: exprIds.mathAliases,
         mode,
+        ...(scriptUses.length > 0 ? { scripts: scriptUses } : {}),
         ...(kind === 'visual'
           ? {
               variables: [
@@ -7303,8 +7397,13 @@ function planComponent(
      * anything that reads a list through `resolveExpr` is a read, not a stray: the two transforms, a
      * repeater, a mint's snapshot source, a Run Tasks' items.
      */
+    // EXP-011 §75. A `To CSV`'s Items is a read of the list through `resolveExpr`, exactly as a transform's is.
     const listReader = (type: string | undefined): boolean =>
-      type === 'For Each' || LIST_PRODUCERS.has(type ?? '') || type === COLLECTION_NEW_TYPE || type === RUN_TASKS_TYPE;
+      type === 'For Each' ||
+      LIST_PRODUCERS.has(type ?? '') ||
+      type === COLLECTION_NEW_TYPE ||
+      type === RUN_TASKS_TYPE ||
+      type === 'net.noodl.ToCSV';
     const stray = component.connections.find(
       (c) => c.fromId === node.id && !(c.fromProperty === 'items' && c.toProperty === 'items' && listReader(nodeById.get(c.toId)?.type))
     );
@@ -7824,7 +7923,8 @@ function planComponent(
     ctx: ResolveCtx
   ): ValueExpr | null => {
     if (!spec.outputs.includes(fromProperty)) {
-      ctx.defer = `its ${fromProperty} output is not a port this slice reads`;
+      // EXP-011 §75. A parser's Changed/Failure defers with the date family's recomputation sentence.
+      ctx.defer = spec.signals?.[fromProperty] ?? `its ${fromProperty} output is not a port this slice reads`;
       return null;
     }
     if (ctx.visited.has(node.id)) {
@@ -7847,6 +7947,16 @@ function planComponent(
           return null;
         }
         /**
+         * EXP-011 §75 — the parsers' one divergence, reported where a later arrival can exist at all: only a
+         * wire can deliver a second text. On a failed parse the interpreter keeps the previous answer on its
+         * value outputs beside the Error; the pure call has no previous answer. A literal parses once.
+         */
+        if (arg.required !== undefined && spec.previous !== undefined) {
+          notes.push(
+            `node ${node.id} (${node.type}) reads ${arg.required} from a wire — when a later arrival cannot be parsed the interpreter keeps the previous ${spec.previous.kept} beside the Error, and the exported call answers ${spec.previous.instead} beside it`
+          );
+        }
+        /**
          * 🔴 The one divergence in this family, reported where the emptiness enters the graph.
          *
          * `Substring`'s `string` setter is `value.toString()`, so an arriving `null` or
@@ -7866,10 +7976,18 @@ function planComponent(
         continue;
       }
       // Unwired: the panel's value, or what `initialize` wrote when the author never opened it.
-      const literal = literalParam(node, arg.port);
+      // EXP-011 §75. A parser's text port is a code editor (`codeeditor: 'text'`), so a typed-in CSV or XML
+      // reaches the IR as a `script` parameter — it is the literal the panel holds, read as one here.
+      const literal = literalParam(node, arg.port) ?? (arg.required !== undefined ? scriptParam(node, arg.port) : undefined);
       if (literal !== undefined) {
         args.push({ kind: 'literal', value: literal });
         continue;
+      }
+      // EXP-011 §75. The text itself, with nothing on it and nothing authored: the node never runs `_parse`
+      // past its abstain, so every output is unset for the life of the app — `dateReadExpr`'s sentence.
+      if (arg.required !== undefined) {
+        ctx.defer = `nothing is wired into its ${arg.port} input and none is authored, so the node never produces an answer`;
+        return null;
       }
       args.push(arg.fallback === undefined ? { kind: 'undefined' } : { kind: 'literal', value: arg.fallback });
     }
@@ -7924,6 +8042,8 @@ function planComponent(
       }
     }
 
+    // EXP-011 §75. Several answers off one node: the output port's name selects, as `DATE_NODES`' selector does.
+    if (spec.select === true) args.push({ kind: 'literal', value: fromProperty });
     ctx.logicNodeIds.push(node.id);
     return { kind: 'util-call', fn: spec.fn, args, ...(cases !== undefined ? { cases } : {}) };
   };
@@ -9134,7 +9254,7 @@ function planComponent(
        * number, `NaN` included, which is the same number the interpreter publishes.
        */
       case 'util-call':
-        return UTIL_HELPER_MAY_BE_UNDEFINED[expr.fn];
+        return utilCallMayBeUndefined(expr);
       /**
        * Never — alone in the date family. `initialize` reads the clock when the node is created,
        * so the outputs are never empty before the first Read, and the emitted row is seeded at
@@ -9493,6 +9613,9 @@ function planComponent(
        * where the interpreter substitutes `''`.
        */
       case 'util-call':
+        // EXP-011 §75. A parse call's type is per OUTPUT, off the parse module's table; `any[]` for a list of
+        // rows is what lets a repeater's `items` accept it (Pass 5's `endsWith('[]')` gate).
+        if (isParseHelper(expr.fn)) return parseOutputTsType(expr.fn, parseSelectorOf(expr));
         return expr.fn === 'remapNumber' ? 'number' : expr.fn === 'substring' ? 'string' : 'unknown';
       /**
        * The instant is a `Date`, and `Date` is not a type this vocabulary's sinks fold — the two
@@ -17150,7 +17273,15 @@ function planComponent(
     // EXP-011 Tier 2.7, and this is the **first** of the two opt-in sites the predicate below
     // warns about. Derived from `UTIL_NODES` rather than restated, so a fourth utility cannot be
     // taught to `resolveExpr` and left invisible here.
-    ...Object.fromEntries(Object.entries(UTIL_NODES).map(([type, spec]) => [type, spec.outputs])),
+    // EXP-011 §75. A parser's LIST output (`items`, typed `any[]`) is deliberately left out: its one rendered
+    // sink is a For Each, which Pass 5's §4e branch binds as `itemsExpr` — consumed here, it would be a wire
+    // into a property the repeater renders from nothing ("no rendered sink"). The scalar outputs stay.
+    ...Object.fromEntries(
+      Object.entries(UTIL_NODES).map(([type, spec]) => [
+        type,
+        spec.outputs.filter((o) => !(isParseHelper(spec.fn) && parseOutputTsType(spec.fn, o).endsWith('[]')))
+      ])
+    ),
     // EXP-011 §39. `Log`'s pass-through — the second opt-in site, opted into.
     [LOG_TYPE]: ['value'],
     // EXP-011 §56. A transform's Count — the derived list's length (`list-count`), current whenever the list is.
@@ -19712,6 +19843,12 @@ export function whereExprs(where: RecordWhere | null): ValueExpr[] {
 function literalParam(node: NodeIR, name: string): string | number | boolean | undefined {
   const value = node.parameters.find((p) => p.name === name)?.value;
   return value?.kind === 'literal' ? value.value : undefined;
+}
+
+/** EXP-011 §75. The text of a code-editor parameter — a parser's typed-in document — or undefined. */
+function scriptParam(node: NodeIR, name: string): string | undefined {
+  const value = node.parameters.find((p) => p.name === name)?.value;
+  return value?.kind === 'script' ? value.source : undefined;
 }
 
 /**

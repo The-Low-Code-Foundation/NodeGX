@@ -1,0 +1,140 @@
+{
+  "name": "scroll-centre-long",
+  "rule": "a 200 px scrolling column set to centre, holding 300 px: the first item starts at the top, where scrolling can reach it, not 50 px above it. n… native, i… Native platform scroll off (ruled 2026-10-09, P109 ISL-052)",
+  "nodes": [
+    {
+      "id": "n",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "scrollEnabled": true,
+        "nativeScroll": true,
+        "justifyContent": "center",
+        "alignItems": "center"
+      },
+      "children": [
+        {
+          "id": "n0",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "n1",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "n2",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "i",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "scrollEnabled": true,
+        "nativeScroll": false,
+        "justifyContent": "center",
+        "alignItems": "center"
+      },
+      "children": [
+        {
+          "id": "i0",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "i1",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "i2",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

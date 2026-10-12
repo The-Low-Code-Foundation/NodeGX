@@ -7,7 +7,9 @@
 
 import type * as http from 'http';
 
-import type { StorageQueryResult } from '@noodl/backend-contract';
+import { StillLinked, type StorageQueryResult } from '@noodl/backend-contract';
+
+import { NotWhileItIs } from '../persistence/onlyWhile';
 
 import { requestIdOf } from '../ops/request-id';
 
@@ -262,6 +264,28 @@ export function checkViolationToHttp(message: string, schema?: CheckReader): Htt
 }
 
 /**
+ * P116 R10: a delete a link's `blocks` rule refused (`StillLinked`, `@noodl/backend-contract`
+ * `targetGoes.ts`). 409 — the record is there and something still depends on it — with what links
+ * to it, per collection and field, so a graph can branch on it and a person knows what to unlink.
+ * `null` for any other error: the door's own answer (a 404) stands for those.
+ */
+export function stillLinkedToHttp(e: unknown): HttpError | null {
+  if (!(e instanceof StillLinked)) return null;
+  return new HttpError(409, e.message, 142, { reason: 'still-linked', collection: e.collection, objectId: e.objectId, linked: e.linked });
+}
+
+/**
+ * P116 ONT-012 (R-b): a write an `onlyWhile` rule refused (`NotWhileItIs`) — the record is there
+ * and the caller may write it, but not in the state it is in now. 409 with the rule's own words
+ * (`says`), so a person reads the reason and a graph can branch on `reason`. `null` for any other
+ * error: the door's own answer stands for those.
+ */
+export function notWhileToHttp(e: unknown): HttpError | null {
+  if (!(e instanceof NotWhileItIs)) return null;
+  return new HttpError(409, e.message, 142, { reason: 'not-while', collection: e.collection, objectId: e.objectId, op: e.op, where: e.rule.where });
+}
+
+/**
  * FED-002: a write refused by a declared unique index.
  *
  * SQLite names the table and the columns and stops there; the VALUE is in the
@@ -275,11 +299,14 @@ export function checkViolationToHttp(message: string, schema?: CheckReader): Htt
  * array in the same order).
  */
 export function uniqueViolationToHttp(message: string, values?: Record<string, unknown>): HttpError | null {
-  const conflict = QueryBuilder.uniqueConstraintProblem(message) as { collection: string; fields: string[] } | null;
+  const conflict = QueryBuilder.uniqueConstraintProblem(message) as { collection: string; fields: string[]; values?: Record<string, unknown> } | null;
   if (!conflict) return null;
 
+  // P116-S22-SERIESMSG: a value the store filled in itself (a series number) is in the message; the
+  // body never carried it.
   const { collection, fields } = conflict;
-  const value = fields.map((f) => (values ? values[f] : undefined));
+  const filled = conflict.values || {};
+  const value = fields.map((f) => (f in filled ? filled[f] : values ? values[f] : undefined));
   const shown = fields.length === 1 ? value[0] : value;
   return new HttpError(
     409,

@@ -134,9 +134,10 @@ describe('CWF-015 session expiry is read, not just written', () => {
     expect(me.json.username).toBe('impersonated');
   });
 
-  it('leaves every session this backend has ever minted alone (no expiresAt = never expires)', async () => {
-    // The one that matters for an existing deployment: signup/login write no
-    // expiry, and making expiry real must not log those users out.
+  it('keeps a signed-in session working, and a row with no expiresAt (minted before ISL-040) too', async () => {
+    // The one that matters for an existing deployment: rows minted before
+    // ISL-040 carry no expiry, and making expiry real must not log those users
+    // out. ISL-040's own arms (`isl040-sessions.test.ts`) grade the end it writes.
     const user = await signup('ordinary');
     const me = await http.get<UserResponse>('/users/me', asUser(user.sessionToken));
     expect(me.status).toBe(200);

@@ -35,7 +35,7 @@ import { placeStarterAssets } from './helpers/judge';
 import { clickButton, fill } from './helpers/members-drive';
 import { withRenderedPage } from './helpers/site-drive';
 import {
-  buttonDisabled, clickButtonBeside, clickButtonBesideField, clickButtonByField, clickWords, pathname, text, until, wait
+  arrowOnGrip, buttonDisabled, clickButtonBeside, clickButtonBesideField, clickButtonByField, clickWords, dragRow, pathname, text, until, wait
 } from './helpers/todo-drive';
 
 jest.setTimeout(600_000);
@@ -121,7 +121,10 @@ describe('TPL-008 AC10 — the browser-only demo, driven', () => {
         R.bootShows = ['This is a demo.', 'Reset demo', 'List (3)', 'Done (1)', 'Overdue by 1 day', 'Due tomorrow'].filter((s) => !boot.includes(s));
         R.bootSignIn = boot.includes('Sign in') || boot.includes('Sign out');
         const seeded = await store();
-        R.seeded = seeded ? [seeded.Task.length, seeded.Action.length, seeded.Event.length] : null;
+        // TPL-008-RC: the example list also carries things that repeat, whose lines depend on how many
+        // Fridays the last ten days held — so the task lines are counted, the rest graded elsewhere.
+        const taskLines = (s: Store) => s.Event.filter((e) => !String(e.taskId).startsWith('seed-routine-')).length;
+        R.seeded = seeded ? [seeded.Task.length, seeded.Action.length, taskLines(seeded)] : null;
         await shot('demo-1-list');
 
         // ── §1 Add a task ──────────────────────────────────────────────────────
@@ -135,18 +138,19 @@ describe('TPL-008 AC10 — the browser-only demo, driven', () => {
 
         // ── §2 Move it up twice ────────────────────────────────────────────────
         step('§2 first move');
-        await clickButtonBeside(page, CHAIR, 3, 0);
+        // 2026-09-24: by its grip — the keyboard's way (the grip's up arrow), then a mouse drag.
+        await arrowOnGrip(page, CHAIR, 'ArrowUp');
         await until('first move written', openTitles, (t) => t[2] === CHAIR);
         await wait(800);
         step('§2 second move');
-        await clickButtonBeside(page, CHAIR, 3, 0);
+        await dragRow(page, CHAIR, MOT, 'mouse');
         R.afterMoves = await until('second move written', openTitles, (t) => t[1] === CHAIR);
         await wait(1500);
         R.moveLines = await lines(CHAIR, 'moved');
 
         // ── §3 Close one ───────────────────────────────────────────────────────
         step('§3 close');
-        await clickButtonBeside(page, MOT, 3, 2);
+        await clickButtonBeside(page, MOT, 1, 0);
         await until('close dialog', () => text(page), (s) => s.includes('What happened?'));
         R.okDisabledBeforeNote = await buttonDisabled(page, 'Close task');
         await fill(page, 'what happened', CLOSING_NOTE);
@@ -206,7 +210,7 @@ describe('TPL-008 AC10 — the browser-only demo, driven', () => {
 
         // ── §7 Reset, with the same example task moved on both sides ───────────
         step('§7 move before reset');
-        await clickButtonBeside(page, VAT, 3, 0);
+        await dragRow(page, VAT, CHAIR, 'touch');
         await until('VAT moved', openTitles, (t) => t[1] === VAT);
         await wait(1500);
         step('§7 reset');
@@ -214,9 +218,9 @@ describe('TPL-008 AC10 — the browser-only demo, driven', () => {
         R.afterReset = await until('store is the example list again', openTitles, (t) => t.length === 3 && !t.includes(CHAIR));
         await until('example list drawn again', () => text(page), (s) => s.includes('List (3)') && !s.includes(CHAIR));
         const reset = await store();
-        R.resetShape = reset ? [reset.Task.length, reset.Action.length, reset.Event.length] : null;
+        R.resetShape = reset ? [reset.Task.length, reset.Action.length, taskLines(reset)] : null;
         step('§7 move after reset');
-        await clickButtonBeside(page, VAT, 3, 0);
+        await dragRow(page, VAT, MOT, 'mouse');
         await until('VAT moved after reset', openTitles, (t) => t[1] === VAT);
         await wait(1500);
         R.postResetMoveLines = await lines(VAT, 'moved');

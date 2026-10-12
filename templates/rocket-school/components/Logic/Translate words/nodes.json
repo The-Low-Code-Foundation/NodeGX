@@ -27,7 +27,7 @@
       "type": "JavaScriptFunction",
       "label": "Translate words",
       "parameters": {
-        "functionScript": "\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar rows = Inputs.words || [];\nvar map = {};\nfor (var i = 0; i < rows.length; i++) map[rows[i].key] = rows[i][lang] || rows[i].en || '';\nOutputs.lang = lang;\nOutputs.isFr = lang === 'fr';\nOutputs.appName = map.appName || '';\nOutputs.tagline = map.tagline || '';\nOutputs.whoIsPlaying = map.whoIsPlaying || '';\nOutputs.newProfile = map.newProfile || '';\nOutputs.yourName = map.yourName || '';\nOutputs.pickAvatar = map.pickAvatar || '';\nOutputs.rollAvatar = map.rollAvatar || '';\nOutputs.yourLevel = map.yourLevel || '';\nOutputs.language = map.language || '';\nOutputs.keyboard = map.keyboard || '';\nOutputs.create = map.create || '';\nOutputs.cancel = map.cancel || '';\nOutputs.deleteProfile = map.deleteProfile || '';\nOutputs.switchPlayer = map.switchPlayer || '';\nOutputs.editPlayer = map.editPlayer || '';\nOutputs.saveChanges = map.saveChanges || '';\nOutputs.soundYes = map.soundYes || '';\nOutputs.soundNo = map.soundNo || '';\nOutputs.answersLabel = map.answersLabel || '';\nOutputs.answersTyped = map.answersTyped || '';\nOutputs.answersOptions = map.answersOptions || '';\nOutputs.answersAuto = map.answersAuto || '';\nOutputs.closeMenu = map.closeMenu || '';\nOutputs.deleteAsk = map.deleteAsk || '';\nOutputs.deleteYes = map.deleteYes || '';\nOutputs.deleteNo = map.deleteNo || '';\nOutputs.home = map.home || '';\nOutputs.play = map.play || '';\nOutputs.practice = map.practice || '';\nOutputs.challenge = map.challenge || '';\nOutputs.practiceRule = map.practiceRule || '';\nOutputs.challengeRule = map.challengeRule || '';\nOutputs.dueToday = map.dueToday || '';\nOutputs.daysThisWeek = map.daysThisWeek || '';\nOutputs.gameRace = map.gameRace || '';\nOutputs.gameRaceBlurb = map.gameRaceBlurb || '';\nOutputs.gameMerge = map.gameMerge || '';\nOutputs.gameMergeBlurb = map.gameMergeBlurb || '';\nOutputs.mergeRule = map.mergeRule || '';\nOutputs.newGame = map.newGame || '';\nOutputs.mergeModeLabel = map.mergeModeLabel || '';\nOutputs.mergeEasy = map.mergeEasy || '';\nOutputs.mergeHard = map.mergeHard || '';\nOutputs.mergeFull = map.mergeFull || '';\nOutputs.menuHangar = map.menuHangar || '';\nOutputs.gameHunt = map.gameHunt || '';\nOutputs.gameHuntBlurb = map.gameHuntBlurb || '';\nOutputs.huntNextGrid = map.huntNextGrid || '';\nOutputs.huntShowWay = map.huntShowWay || '';\nOutputs.gameMonster = map.gameMonster || '';\nOutputs.gameMonsterBlurb = map.gameMonsterBlurb || '';\nOutputs.monsterGate = map.monsterGate || '';\nOutputs.monsterPush = map.monsterPush || '';\nOutputs.monsterGatePractice = map.monsterGatePractice || '';\nOutputs.monsterGateChallenge = map.monsterGateChallenge || '';\nOutputs.monsterPushPractice = map.monsterPushPractice || '';\nOutputs.monsterPushChallenge = map.monsterPushChallenge || '';\nOutputs.monsterChange = map.monsterChange || '';\nOutputs.typingMode = map.typingMode || '';\nOutputs.mathsMode = map.mathsMode || '';\nOutputs.customMode = map.customMode || '';\nOutputs.onePlayer = map.onePlayer || '';\nOutputs.twoPlayers = map.twoPlayers || '';\nOutputs.start = map.start || '';\nOutputs.again = map.again || '';\nOutputs.otherRace = map.otherRace || '';\nOutputs.restart = map.restart || '';\nOutputs.rightAnswers = map.rightAnswers || '';\nOutputs.stars = map.stars || '';\nOutputs.hangar = map.hangar || '';\nOutputs.buyTitle = map.buyTitle || '';\nOutputs.youHave = map.youHave || '';\nOutputs.itCosts = map.itCosts || '';\nOutputs.youllHave = map.youllHave || '';\nOutputs.yesBuy = map.yesBuy || '';\nOutputs.noThanks = map.noThanks || '';\nOutputs.ownedElsewhere = map.ownedElsewhere || '';\nOutputs.turboReady = map.turboReady || '';\nOutputs.turboCharging = map.turboCharging || '';\nOutputs.hangarBlurb = map.hangarBlurb || '';\nOutputs.faceTab = map.faceTab || '';\nOutputs.rocketTab = map.rocketTab || '';\nOutputs.earnedPick = map.earnedPick || '';\nOutputs.toHangar = map.toHangar || '';\nOutputs.next = map.next || '';\nOutputs.check = map.check || '';\nOutputs.typeAnswer = map.typeAnswer || '';\nOutputs.correct = map.correct || '';\nOutputs.fluent = map.fluent || '';\nOutputs.wrong = map.wrong || '';\nOutputs.timeUp = map.timeUp || '';\nOutputs.theAnswerWas = map.theAnswerWas || '';\nOutputs.showMe = map.showMe || '';\nOutputs.gotIt = map.gotIt || '';\nOutputs.anExample = map.anExample || '';\nOutputs.youWin = map.youWin || '';\nOutputs.computerWins = map.computerWins || '';\nOutputs.playerWins = map.playerWins || '';\nOutputs.yourTurn = map.yourTurn || '';\nOutputs.score = map.score || '';\nOutputs.biggest = map.biggest || '';\nOutputs.moves = map.moves || '';\nOutputs.gameOver = map.gameOver || '';\nOutputs.hearts = map.hearts || '';\nOutputs.target = map.target || '';\nOutputs.found = map.found || '';\nOutputs.progress = map.progress || '';\nOutputs.mastered = map.mastered || '';\nOutputs.proficient = map.proficient || '';\nOutputs.familiar = map.familiar || '';\nOutputs.newSkill = map.newSkill || '';\nOutputs.saveCode = map.saveCode || '';\nOutputs.saveCodeHelp = map.saveCodeHelp || '';\nOutputs.loadCode = map.loadCode || '';\nOutputs.loaded = map.loaded || '';\nOutputs.badCode = map.badCode || '';\nOutputs.mySets = map.mySets || '';\nOutputs.newSet = map.newSet || '';\nOutputs.setName = map.setName || '';\nOutputs.question = map.question || '';\nOutputs.answer = map.answer || '';\nOutputs.addRow = map.addRow || '';\nOutputs.remove = map.remove || '';\nOutputs.save = map.save || '';\nOutputs.pasteJson = map.pasteJson || '';\nOutputs.teach = map.teach || '';\nOutputs.lessOnNext = map.lessOnNext || '';\nOutputs.soundOn = map.soundOn || '';\nOutputs.credits = map.credits || '';\n"
+        "functionScript": "\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar rows = Inputs.words || [];\nvar map = {};\nfor (var i = 0; i < rows.length; i++) map[rows[i].key] = rows[i][lang] || rows[i].en || '';\nOutputs.lang = lang;\nOutputs.isFr = lang === 'fr';\nOutputs.appName = map.appName || '';\nOutputs.tagline = map.tagline || '';\nOutputs.whoIsPlaying = map.whoIsPlaying || '';\nOutputs.newProfile = map.newProfile || '';\nOutputs.yourName = map.yourName || '';\nOutputs.pickAvatar = map.pickAvatar || '';\nOutputs.rollAvatar = map.rollAvatar || '';\nOutputs.yourLevel = map.yourLevel || '';\nOutputs.language = map.language || '';\nOutputs.keyboard = map.keyboard || '';\nOutputs.create = map.create || '';\nOutputs.cancel = map.cancel || '';\nOutputs.deleteProfile = map.deleteProfile || '';\nOutputs.switchPlayer = map.switchPlayer || '';\nOutputs.editPlayer = map.editPlayer || '';\nOutputs.saveChanges = map.saveChanges || '';\nOutputs.soundYes = map.soundYes || '';\nOutputs.soundNo = map.soundNo || '';\nOutputs.answersLabel = map.answersLabel || '';\nOutputs.answersTyped = map.answersTyped || '';\nOutputs.answersOptions = map.answersOptions || '';\nOutputs.answersAuto = map.answersAuto || '';\nOutputs.closeMenu = map.closeMenu || '';\nOutputs.deleteAsk = map.deleteAsk || '';\nOutputs.deleteYes = map.deleteYes || '';\nOutputs.deleteNo = map.deleteNo || '';\nOutputs.home = map.home || '';\nOutputs.play = map.play || '';\nOutputs.practice = map.practice || '';\nOutputs.challenge = map.challenge || '';\nOutputs.practiceRule = map.practiceRule || '';\nOutputs.challengeRule = map.challengeRule || '';\nOutputs.dueToday = map.dueToday || '';\nOutputs.daysThisWeek = map.daysThisWeek || '';\nOutputs.gameRace = map.gameRace || '';\nOutputs.gameRaceBlurb = map.gameRaceBlurb || '';\nOutputs.gameMerge = map.gameMerge || '';\nOutputs.gameMergeBlurb = map.gameMergeBlurb || '';\nOutputs.mergeRule = map.mergeRule || '';\nOutputs.newGame = map.newGame || '';\nOutputs.mergeModeLabel = map.mergeModeLabel || '';\nOutputs.mergeEasy = map.mergeEasy || '';\nOutputs.mergeHard = map.mergeHard || '';\nOutputs.mergeFull = map.mergeFull || '';\nOutputs.menuHangar = map.menuHangar || '';\nOutputs.gameHunt = map.gameHunt || '';\nOutputs.gameHuntBlurb = map.gameHuntBlurb || '';\nOutputs.huntNextGrid = map.huntNextGrid || '';\nOutputs.huntShowWay = map.huntShowWay || '';\nOutputs.gameMonster = map.gameMonster || '';\nOutputs.gameMonsterBlurb = map.gameMonsterBlurb || '';\nOutputs.monsterGate = map.monsterGate || '';\nOutputs.monsterPush = map.monsterPush || '';\nOutputs.monsterGatePractice = map.monsterGatePractice || '';\nOutputs.monsterGateChallenge = map.monsterGateChallenge || '';\nOutputs.monsterPushPractice = map.monsterPushPractice || '';\nOutputs.monsterPushChallenge = map.monsterPushChallenge || '';\nOutputs.monsterChange = map.monsterChange || '';\nOutputs.typingMode = map.typingMode || '';\nOutputs.mathsMode = map.mathsMode || '';\nOutputs.customMode = map.customMode || '';\nOutputs.onePlayer = map.onePlayer || '';\nOutputs.twoPlayers = map.twoPlayers || '';\nOutputs.start = map.start || '';\nOutputs.again = map.again || '';\nOutputs.otherRace = map.otherRace || '';\nOutputs.restart = map.restart || '';\nOutputs.rightAnswers = map.rightAnswers || '';\nOutputs.stars = map.stars || '';\nOutputs.hangar = map.hangar || '';\nOutputs.buyTitle = map.buyTitle || '';\nOutputs.youHave = map.youHave || '';\nOutputs.itCosts = map.itCosts || '';\nOutputs.youllHave = map.youllHave || '';\nOutputs.yesBuy = map.yesBuy || '';\nOutputs.noThanks = map.noThanks || '';\nOutputs.ownedElsewhere = map.ownedElsewhere || '';\nOutputs.turboReady = map.turboReady || '';\nOutputs.turboCharging = map.turboCharging || '';\nOutputs.turboArmed = map.turboArmed || '';\nOutputs.turboArmedHint = map.turboArmedHint || '';\nOutputs.hangarBlurb = map.hangarBlurb || '';\nOutputs.faceTab = map.faceTab || '';\nOutputs.rocketTab = map.rocketTab || '';\nOutputs.earnedPick = map.earnedPick || '';\nOutputs.toHangar = map.toHangar || '';\nOutputs.next = map.next || '';\nOutputs.check = map.check || '';\nOutputs.typeAnswer = map.typeAnswer || '';\nOutputs.correct = map.correct || '';\nOutputs.fluent = map.fluent || '';\nOutputs.wrong = map.wrong || '';\nOutputs.timeUp = map.timeUp || '';\nOutputs.theAnswerWas = map.theAnswerWas || '';\nOutputs.showMe = map.showMe || '';\nOutputs.gotIt = map.gotIt || '';\nOutputs.anExample = map.anExample || '';\nOutputs.youWin = map.youWin || '';\nOutputs.computerWins = map.computerWins || '';\nOutputs.playerWins = map.playerWins || '';\nOutputs.yourTurn = map.yourTurn || '';\nOutputs.score = map.score || '';\nOutputs.biggest = map.biggest || '';\nOutputs.moves = map.moves || '';\nOutputs.gameOver = map.gameOver || '';\nOutputs.hearts = map.hearts || '';\nOutputs.target = map.target || '';\nOutputs.found = map.found || '';\nOutputs.progress = map.progress || '';\nOutputs.mastered = map.mastered || '';\nOutputs.proficient = map.proficient || '';\nOutputs.familiar = map.familiar || '';\nOutputs.newSkill = map.newSkill || '';\nOutputs.saveCode = map.saveCode || '';\nOutputs.saveCodeHelp = map.saveCodeHelp || '';\nOutputs.loadCode = map.loadCode || '';\nOutputs.loaded = map.loaded || '';\nOutputs.badCode = map.badCode || '';\nOutputs.mySets = map.mySets || '';\nOutputs.newSet = map.newSet || '';\nOutputs.setName = map.setName || '';\nOutputs.question = map.question || '';\nOutputs.answer = map.answer || '';\nOutputs.addRow = map.addRow || '';\nOutputs.remove = map.remove || '';\nOutputs.save = map.save || '';\nOutputs.pasteJson = map.pasteJson || '';\nOutputs.teach = map.teach || '';\nOutputs.lessOnNext = map.lessOnNext || '';\nOutputs.soundOn = map.soundOn || '';\nOutputs.credits = map.credits || '';\nOutputs.practising = map.practising || '';\nOutputs.changeFocus = map.changeFocus || '';\nOutputs.whatToPractise = map.whatToPractise || '';\nOutputs.pickSubject = map.pickSubject || '';\nOutputs.pickTopic = map.pickTopic || '';\nOutputs.pickSkills = map.pickSkills || '';\nOutputs.tickAll = map.tickAll || '';\nOutputs.tickNone = map.tickNone || '';\nOutputs.everythingAtLevel = map.everythingAtLevel || '';\nOutputs.skillsCount = map.skillsCount || '';\nOutputs.saveFocus = map.saveFocus || '';\nOutputs.myLists = map.myLists || '';\nOutputs.myList = map.myList || '';\nOutputs.editLists = map.editLists || '';\nOutputs.noListsYet = map.noListsYet || '';\nOutputs.listsTitle = map.listsTitle || '';\nOutputs.listsBlurb = map.listsBlurb || '';\nOutputs.newList = map.newList || '';\nOutputs.listName = map.listName || '';\nOutputs.listNameHint = map.listNameHint || '';\nOutputs.listLines = map.listLines || '';\nOutputs.listLinesHint = map.listLinesHint || '';\nOutputs.listCount = map.listCount || '';\nOutputs.listEmpty = map.listEmpty || '';\nOutputs.listSaved = map.listSaved || '';\nOutputs.listEdit = map.listEdit || '';\nOutputs.listDelete = map.listDelete || '';\nOutputs.listDeleteAsk = map.listDeleteAsk || '';\nOutputs.listBothWays = map.listBothWays || '';\nOutputs.listOneWay = map.listOneWay || '';\nOutputs.backToGames = map.backToGames || '';\nOutputs.learnedItem = map.learnedItem || '';\nOutputs.learnedList = map.learnedList || '';\nOutputs.moonTitle = map.moonTitle || '';\nOutputs.moonBlurb = map.moonBlurb || '';\nOutputs.visitMoon = map.visitMoon || '';\nOutputs.moonFeed = map.moonFeed || '';\nOutputs.moonDress = map.moonDress || '';\nOutputs.moonAdoptFirst = map.moonAdoptFirst || '';\nOutputs.moonAdoptMore = map.moonAdoptMore || '';\nOutputs.moonName = map.moonName || '';\nOutputs.moonAdoptQ = map.moonAdoptQ || '';\nOutputs.backToHangar = map.backToHangar || '';\n"
       },
       "x": 40,
       "y": 160,
@@ -614,6 +614,20 @@
           "group": "Outputs"
         },
         {
+          "name": "out-turboArmed",
+          "displayName": "turboArmed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-turboArmedHint",
+          "displayName": "turboArmedHint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
           "name": "out-hangarBlurb",
           "displayName": "hangarBlurb",
           "plug": "output",
@@ -962,6 +976,307 @@
           "plug": "output",
           "type": "*",
           "group": "Outputs"
+        },
+        {
+          "name": "out-practising",
+          "displayName": "practising",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-changeFocus",
+          "displayName": "changeFocus",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-whatToPractise",
+          "displayName": "whatToPractise",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pickSubject",
+          "displayName": "pickSubject",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pickTopic",
+          "displayName": "pickTopic",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pickSkills",
+          "displayName": "pickSkills",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tickAll",
+          "displayName": "tickAll",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tickNone",
+          "displayName": "tickNone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-everythingAtLevel",
+          "displayName": "everythingAtLevel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-skillsCount",
+          "displayName": "skillsCount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-saveFocus",
+          "displayName": "saveFocus",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-myLists",
+          "displayName": "myLists",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-myList",
+          "displayName": "myList",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-editLists",
+          "displayName": "editLists",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noListsYet",
+          "displayName": "noListsYet",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-listsTitle",
+          "displayName": "listsTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-listsBlurb",
+          "displayName": "listsBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-newList",
+          "displayName": "newList",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-listName",
+          "displayName": "listName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-listNameHint",
+          "displayName": "listNameHint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-listLines",
+          "displayName": "listLines",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-listLinesHint",
+          "displayName": "listLinesHint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-listCount",
+          "displayName": "listCount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-listEmpty",
+          "displayName": "listEmpty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-listSaved",
+          "displayName": "listSaved",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-listEdit",
+          "displayName": "listEdit",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-listDelete",
+          "displayName": "listDelete",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-listDeleteAsk",
+          "displayName": "listDeleteAsk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-listBothWays",
+          "displayName": "listBothWays",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-listOneWay",
+          "displayName": "listOneWay",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-backToGames",
+          "displayName": "backToGames",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-learnedItem",
+          "displayName": "learnedItem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-learnedList",
+          "displayName": "learnedList",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moonTitle",
+          "displayName": "moonTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moonBlurb",
+          "displayName": "moonBlurb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-visitMoon",
+          "displayName": "visitMoon",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moonFeed",
+          "displayName": "moonFeed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moonDress",
+          "displayName": "moonDress",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moonAdoptFirst",
+          "displayName": "moonAdoptFirst",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moonAdoptMore",
+          "displayName": "moonAdoptMore",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moonName",
+          "displayName": "moonName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moonAdoptQ",
+          "displayName": "moonAdoptQ",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-backToHangar",
+          "displayName": "backToHangar",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
         }
       ]
     },
@@ -1026,6 +1341,16 @@
           "type": "string"
         },
         {
+          "name": "backToGames",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "backToHangar",
+          "plug": "input",
+          "type": "string"
+        },
+        {
           "name": "badCode",
           "plug": "input",
           "type": "string"
@@ -1052,6 +1377,11 @@
         },
         {
           "name": "challengeRule",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "changeFocus",
           "plug": "input",
           "type": "string"
         },
@@ -1126,7 +1456,17 @@
           "type": "string"
         },
         {
+          "name": "editLists",
+          "plug": "input",
+          "type": "string"
+        },
+        {
           "name": "editPlayer",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "everythingAtLevel",
           "plug": "input",
           "type": "string"
         },
@@ -1246,7 +1586,87 @@
           "type": "string"
         },
         {
+          "name": "learnedItem",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "learnedList",
+          "plug": "input",
+          "type": "string"
+        },
+        {
           "name": "lessOnNext",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "listBothWays",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "listCount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "listDelete",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "listDeleteAsk",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "listEdit",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "listEmpty",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "listLines",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "listLinesHint",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "listName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "listNameHint",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "listOneWay",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "listSaved",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "listsBlurb",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "listsTitle",
           "plug": "input",
           "type": "string"
         },
@@ -1336,7 +1756,57 @@
           "type": "string"
         },
         {
+          "name": "moonAdoptFirst",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "moonAdoptMore",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "moonAdoptQ",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "moonBlurb",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "moonDress",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "moonFeed",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "moonName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "moonTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
           "name": "moves",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "myList",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "myLists",
           "plug": "input",
           "type": "string"
         },
@@ -1347,6 +1817,11 @@
         },
         {
           "name": "newGame",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "newList",
           "plug": "input",
           "type": "string"
         },
@@ -1367,6 +1842,11 @@
         },
         {
           "name": "next",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "noListsYet",
           "plug": "input",
           "type": "string"
         },
@@ -1401,6 +1881,21 @@
           "type": "string"
         },
         {
+          "name": "pickSkills",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pickSubject",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pickTopic",
+          "plug": "input",
+          "type": "string"
+        },
+        {
           "name": "play",
           "plug": "input",
           "type": "string"
@@ -1417,6 +1912,11 @@
         },
         {
           "name": "practiceRule",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "practising",
           "plug": "input",
           "type": "string"
         },
@@ -1481,6 +1981,11 @@
           "type": "string"
         },
         {
+          "name": "saveFocus",
+          "plug": "input",
+          "type": "string"
+        },
+        {
           "name": "score",
           "plug": "input",
           "type": "string"
@@ -1492,6 +1997,11 @@
         },
         {
           "name": "showMe",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "skillsCount",
           "plug": "input",
           "type": "string"
         },
@@ -1546,12 +2056,32 @@
           "type": "string"
         },
         {
+          "name": "tickAll",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "tickNone",
+          "plug": "input",
+          "type": "string"
+        },
+        {
           "name": "timeUp",
           "plug": "input",
           "type": "string"
         },
         {
           "name": "toHangar",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "turboArmed",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "turboArmedHint",
           "plug": "input",
           "type": "string"
         },
@@ -1577,6 +2107,16 @@
         },
         {
           "name": "typingMode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "visitMoon",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "whatToPractise",
           "plug": "input",
           "type": "string"
         },

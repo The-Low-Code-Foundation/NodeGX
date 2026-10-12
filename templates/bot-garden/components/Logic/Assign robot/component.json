@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9bf3327c-8ac3-59fe-85d6-d44ca3d35ec6",
+  "name": "Assign robot",
+  "path": "/Logic/Assign robot",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A robot of her crew sent to work a plot she won, or to help the one at work there, or home. Runs on Go; answers Ran once its outputs are set."
+}

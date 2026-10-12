@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9280dab8-d0c7-5470-8264-946119948d5e",
+  "name": "Money editor",
+  "path": "/Projects/Money editor",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One money item as a form: what it is, in or out, how much, how often from which day until which, which project it belongs to, how likely it is, and a note. Save says it all; End it (or Remove it, for a one-off) stops it without deleting anything."
+}

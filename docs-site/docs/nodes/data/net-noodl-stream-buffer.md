@@ -38,6 +38,46 @@ Any producer that outruns the UI: a token stream driving a Repeater, high-rate t
 | `clear` | Signal | — | Discards the buffer and resets both counters without flushing |
 | `flush` | Signal | — | Hands the whole buffer to Flushed Data now; an empty buffer is a legitimate no-op |
 
+### What each input does
+
+**Data** (`data`)
+
+- always: kept as it came for the next Add, and retained after it — any write counts as data having arrived, nothing included
+
+**Flush Size** (`flushSize`)
+
+- always: read at the next Add — the size at which that Add flushes (not above 0: never by size); a buffer already that big waits for an Add
+
+**Max Size** (`maxSize`)
+
+- always: read at the next Add — the cap past which the oldest are dropped (not at least 0: 0, no cap); a buffer already over it is trimmed by the next Add
+
+**Flush Interval (ms)** (`flushInterval`)
+
+- the period it already holds (not above 0 reads as 0): nothing
+- a different period above 0 with anything buffered: a running timer stops and a new one starts, to flush after the new period
+- a different period with nothing buffered, or 0 (never by time): a running timer stops; a period above 0 is armed by the next Add
+
+**Add** (`add`)
+
+- before anything has arrived on Data: refused — the reason on Error, which nothing later clears → Failure; Overflowed, Flushed stay silent
+- Data joins, past Max Size the oldest go (counted on Dropped Items), and the buffer reaches Flush Size: it becomes Flushed Data, a fresh one starts, Flush Count grows, a running timer stops → Overflowed, Flushed, Done
+- Data joins, past Max Size the oldest go (counted on Dropped Items), under Flush Size, with Flush Interval above 0 and no timer running: a timer is armed to flush after Flush Interval → Overflowed, Done; Flushed stays silent
+- Data joins, past Max Size the oldest go (counted on Dropped Items), under Flush Size, with no timer to arm (Flush Interval 0, or one already running): it waits → Overflowed, Done; Flushed stays silent
+- Data joins and the buffer reaches Flush Size: it becomes Flushed Data, a fresh one starts, Flush Count grows, a running timer stops → Flushed, Done; Overflowed stays silent
+- Data joins, under Flush Size, with Flush Interval above 0 and no timer running: a timer is armed to flush after Flush Interval → Done; Overflowed, Flushed stay silent
+- Data joins, under Flush Size, with no timer to arm (Flush Interval 0, or one already running): it waits → Done; Overflowed, Flushed stay silent
+
+**Flush** (`flush`)
+
+- nothing buffered: nothing to hand over, and Flush Count stays → Unchanged; Flushed stays silent
+- anything buffered: it becomes Flushed Data, a fresh buffer starts, Flush Count grows, a running timer stops → Flushed, Done
+
+**Clear** (`clear`)
+
+- anything buffered, flushed or counted: the buffer, Flushed Data and both counts are emptied — not Error, not the Data retained — and a running timer stops → Cleared, Done
+- nothing held: the same empty values are sent again → Cleared, Unchanged
+
 ## Outputs
 
 ### Values

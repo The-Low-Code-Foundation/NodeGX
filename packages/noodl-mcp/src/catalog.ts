@@ -325,6 +325,8 @@ export interface NodeTypeRow {
   isVisual: boolean;
   availableIn: string[];
   deprecated?: boolean;
+  /** P107 R25: the type that replaced a deprecated one, when its definition says. */
+  replacedBy?: string;
   /** false ⇒ superseded/specialised type hidden from the editor's picker. */
   inNodePicker?: boolean;
   /** CN-009 — `"project-kit"` on a node one of this project's kits declares; absent on a built-in. */
@@ -389,6 +391,7 @@ export function listNodeTypes(filter: ListNodeTypesFilter = {}): NodeTypeRow[] {
       availableIn: n.availableIn as unknown as string[]
     };
     if (n.isDeprecated) row.deprecated = true;
+    if (n.replacedBy) row.replacedBy = n.replacedBy;
     if (n.inNodePicker === false) row.inNodePicker = false;
     if (origin) {
       row.providedBy = origin.providedBy;
@@ -455,6 +458,8 @@ export interface NodeTypeDetail {
   category?: string;
   isVisual: boolean;
   deprecated?: boolean;
+  /** P107 R25: the type that replaced a deprecated one, when its definition says. */
+  replacedBy?: string;
   availableIn: string[];
   /** CN-009 — `"project-kit"` on a node one of this project's kits declares; absent on a built-in. */
   providedBy?: string;
@@ -494,6 +499,16 @@ export interface NodeTypeDetail {
   patterns?: string[];
   antiPatterns?: string[];
   relatedNodes?: string[];
+  /**
+   * NSP-018 (phase 107) — for a node with an executable spec, what it does in words: per input port, one line per
+   * case — `increase: ["at Max Value with Limits Enabled → Unchanged; Count Changed stays silent", …]`. Generated
+   * from the spec the conformance suite grades (the catalog's `rules`), so it cannot say one thing while the node
+   * does another. Here and, narrowed to the asked ports, on the `ports` path. Not on the summary: priced against the
+   * real call traffic (phase 107 NSP-018 §5.4), it would add 30.7% to the default path's bytes, five times what
+   * `antiPatterns` cost, and push the storefront basket past AWP-005's ratchet. `tests/nsp018RulesOnTheWire.test.ts`
+   * carries the numbers.
+   */
+  rules?: Record<string, string[]>;
   inputs: PortDetail[];
   outputs: PortDetail[];
   /** Present when the node creates ports at runtime — the validator skips
@@ -600,6 +615,8 @@ export interface NodeTypeSummary {
   category?: string;
   isVisual: boolean;
   deprecated?: boolean;
+  /** P107 R25: the type that replaced a deprecated one, when its definition says. */
+  replacedBy?: string;
   /**
    * CN-009 — `"project-kit"` on a node one of this project's kits declares.
    *
@@ -791,6 +808,7 @@ export function getNodeTypeSummary(typeName: string): NodeTypeSummary | NodeType
   }
   if (full.category) s.category = full.category;
   if (full.deprecated) s.deprecated = true;
+  if (full.replacedBy) s.replacedBy = full.replacedBy;
   // CMP-006 AC3 — see `NodeTypeSummary.antiPatterns` for the traffic count that
   // moved this off `detail: "full"`. Unconditional on purpose: a rule that emits
   // them only for cheap types would reintroduce silence exactly where the
@@ -861,6 +879,8 @@ export function getNodeTypePorts(typeName: string, portNames: readonly string[])
   }
   const caveat = notFound.length > 0 ? partialPortListCaveat(full) : undefined;
   const exportInfo = exportForPorts(full.export, wanted);
+  // NSP-018 — the rules of the asked ports only: what setting or firing THIS port does, from the node's spec
+  const rules = full.rules ? Object.fromEntries(Object.entries(full.rules).filter(([port]) => wanted.has(port))) : {};
   return {
     typeName: full.typeName,
     displayName: full.displayName,
@@ -870,11 +890,13 @@ export function getNodeTypePorts(typeName: string, portNames: readonly string[])
     ...(full.summary ? { summary: full.summary } : {}),
     // CMP-009 §3 — 30 of 176 types, and `antiPatterns` covers 1 of the 30.
     ...(full.deprecated ? { deprecated: true as const } : {}),
+    ...(full.replacedBy ? { replacedBy: full.replacedBy } : {}),
     // CMP-009 §2 — the port-scoped half of the export ledger, narrowed to what
     // was asked. See `NodeTypePortsView.export`.
     ...(exportInfo ? { export: exportInfo } : {}),
     inputs,
     outputs,
+    ...(Object.keys(rules).length > 0 ? { rules } : {}),
     // Carried whenever it exists here, not only for misses: a port this call
     // could not find may be one `runtimeBehavior` is the only record of.
     ...(full.runtimeBehavior ? { runtimeBehavior: full.runtimeBehavior } : {}),
@@ -989,6 +1011,7 @@ export function getNodeTypeDetail(typeName: string): NodeTypeDetail | NodeTypeLo
     examples
   };
   if (n.isDeprecated) detail.deprecated = true;
+  if (n.replacedBy) detail.replacedBy = n.replacedBy;
   const origin = kitOrigin(n);
   if (origin) {
     detail.providedBy = origin.providedBy;
@@ -1008,6 +1031,8 @@ export function getNodeTypeDetail(typeName: string): NodeTypeDetail | NodeTypeLo
   if (e?.patterns?.length) detail.patterns = e.patterns;
   if (e?.antiPatterns?.length) detail.antiPatterns = e.antiPatterns;
   if (e?.relatedNodes?.length) detail.relatedNodes = e.relatedNodes;
+  const rules = (n as { rules?: Record<string, string[]> }).rules;
+  if (rules && Object.keys(rules).length) detail.rules = rules;
   if (n.dynamicPorts) {
     const dp = n.dynamicPorts as {
       mechanisms?: string[];

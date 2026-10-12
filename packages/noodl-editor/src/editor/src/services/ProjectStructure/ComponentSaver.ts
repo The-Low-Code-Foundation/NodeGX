@@ -28,6 +28,8 @@
 import type { RegistryV2File, RegistryComponentEntry } from '../../schemas';
 import type { LegacyProject, LegacyComponent, LegacyNode } from '../../io/ProjectExporter';
 import { buildComponentV2Files, legacyNameToPath, inferComponentType, countNodes } from '../../io/ProjectExporter';
+import { serializeV2File } from '@nodegx/project-contract/format';
+
 import { ProjectStructureFilesystem, V2_FILES } from './types';
 
 /** A component the saver has determined needs (re)writing. */
@@ -245,7 +247,7 @@ export class ComponentSaver {
 
     try {
       for (const s of staged) {
-        await this.fs.writeFile(s.tmp, JSON.stringify(s.content, null, 2));
+        await this.fs.writeFile(s.tmp, await this.serialize(s.target, s.content));
       }
       for (const s of staged) {
         await this.fs.renameFile(s.tmp, s.target);
@@ -351,12 +353,30 @@ export class ComponentSaver {
   }
 
   /**
+   * P112-S2-NEWLINE — the text a file is replaced with, by the format's one rule (`serializeV2File`):
+   * two-space JSON, and the replaced file's final newline kept, so saving a template's component
+   * changes only what changed. A filesystem with no text read, or a file that is not there, gets
+   * the text with no newline, as every official writer has always written a new file.
+   */
+  private async serialize(targetPath: string, content: unknown): Promise<string> {
+    let previous: string | null = null;
+    if (this.fs.readFile && this.fs.exists(targetPath)) {
+      try {
+        previous = await this.fs.readFile(targetPath);
+      } catch {
+        previous = null;
+      }
+    }
+    return serializeV2File(content, previous);
+  }
+
+  /**
    * Atomic JSON write: serialise, write to a temp sibling, then rename over the
    * target. An interrupted write leaves either the old file or nothing — never a
    * half-written file. Rename is atomic on the same filesystem.
    */
   private async atomicWrite(targetPath: string, content: unknown): Promise<void> {
-    const serialized = JSON.stringify(content, null, 2);
+    const serialized = await this.serialize(targetPath, content);
     const tmpPath = `${targetPath}.tmp`;
     await this.fs.writeFile(tmpPath, serialized);
     try {

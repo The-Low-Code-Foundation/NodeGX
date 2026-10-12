@@ -30,6 +30,32 @@ Age, elapsed time, 'days remaining', SLA windows, deciding whether something is 
 | `to` | Date | — | The later instant. Difference is negative when this is actually earlier than From |
 | `unit` | Enum (`milliseconds`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, `years`) | `days` | What Difference counts. Fixed units are exact and fractional (36 hours is 1.5 days); months and years are whole calendar steps |
 
+### What each input does
+
+**From** (`from`)
+
+- From or To not given yet: kept for when both are; nothing is sent → Invalid Date, Changed stay silent
+- either cannot be read as a date: Difference goes empty → Invalid Date; Changed stays silent
+- otherwise Difference is To minus From in Unit (days when not one of the eight), negative when To is earlier unless Absolute is on → Changed; Invalid Date stays silent
+
+**To** (`to`)
+
+- From or To not given yet: kept for when both are; nothing is sent → Invalid Date, Changed stay silent
+- either cannot be read as a date: Difference goes empty → Invalid Date; Changed stays silent
+- otherwise Difference is To minus From in Unit (days when not one of the eight), negative when To is earlier unless Absolute is on → Changed; Invalid Date stays silent
+
+**Unit** (`unit`)
+
+- From or To not given yet: kept for when both are; nothing is sent → Invalid Date, Changed stay silent
+- either cannot be read as a date: Difference goes empty → Invalid Date; Changed stays silent
+- otherwise Difference is To minus From in Unit (days when not one of the eight), negative when To is earlier unless Absolute is on → Changed; Invalid Date stays silent
+
+**Absolute** (`absolute`)
+
+- From or To not given yet: kept for when both are; nothing is sent → Invalid Date, Changed stay silent
+- either cannot be read as a date: Difference goes empty → Invalid Date; Changed stays silent
+- otherwise Difference is To minus From in Unit (days when not one of the eight), negative when To is earlier unless Absolute is on → Changed; Invalid Date stays silent
+
 ## Outputs
 
 ### Values

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1b2c99b8-a971-5173-8c27-a51464b55ecc",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "abIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cls",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "abPill",
+      "type": "Group",
+      "label": "The block",
+      "children": [
+        "abText"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingTop": {
+          "value": 5,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 5,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "borderRadius": {
+          "value": 10,
+          "unit": "px"
+        },
+        "cssClassName": "bg-ability bg-blk bg-blk-motion"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "abText",
+      "type": "Text",
+      "label": "Its word",
+      "parent": "abPill",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--on-fill)"
+      },
+      "x": 100,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "abPill"
+  ]
+}

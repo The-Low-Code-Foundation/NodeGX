@@ -1,0 +1,430 @@
+[
+  {
+    "name": "define: inputs arrive on inputs and run the code at the frame's end",
+    "because": "javascript.ts :636-650 (userInputSetter), :594-608 (scheduleRun); javascriptnodeparser.js :47-55 (define)",
+    "params": {
+      "code": "define({\n  inputs: { a: 'number', b: 'number' },\n  outputs: { sum: 'number' },\n  change: function (inputs, outputs) {\n    outputs.sum = inputs.a + inputs.b;\n  }\n})"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      {
+        "set": "b",
+        "value": 2
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "inputs set at the placing wait for the first read, then arrive in order",
+    "because": "javascript.ts :651-659 (inputQueue), :433-440 (replayed after the read)",
+    "params": {
+      "code": "define({\n  inputs: { a: 'number', b: 'number' },\n  outputs: { sum: 'number' },\n  change: function (inputs, outputs) {\n    outputs.sum = inputs.a + inputs.b;\n  }\n})",
+      "a": 1,
+      "b": 2
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "b",
+        "value": 3
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "this is kept and counts the runs: once a frame however many arrivals, and the same value again runs it",
+    "because": "javascript.ts :193 (one userFunctionScope), :594-608 (runScheduled), :646-649 (no comparison)",
+    "params": {
+      "code": "define({\n  inputs: { a: 'number' },\n  outputs: { count: 'number' },\n  run: function (inputs, outputs) {\n    this.n = (this.n || 0) + 1;\n    outputs.count = this.n;\n  }\n})"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "the run's third argument names the inputs that arrived since the last run",
+    "because": "javascript.ts :648 (changedInputs), :604 (emptied after each run)",
+    "params": {
+      "code": "define({\n  inputs: { a: '*', b: '*' },\n  outputs: { changed: 'string' },\n  change: function (inputs, outputs, changed) {\n    this.k = (this.k || 0) + 1;\n    outputs.changed = this.k + ':' + Object.keys(changed).sort().join(',');\n  }\n})",
+      "a": 1
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "b",
+        "value": 2
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 3
+      },
+      {
+        "set": "b",
+        "value": 4
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a signal input calls the function of its name once a frame; a signal output is a function on outputs",
+    "because": "javascript.ts :640-645, :610-623 (signalScheduled), :510-525, :474-477",
+    "params": {
+      "code": "define({\n  inputs: { go: 'signal', a: '*' },\n  outputs: { got: 'string', done: 'signal' },\n  go: function (inputs, outputs) {\n    this.g = (this.g || 0) + 1;\n    outputs.got = this.g + ':' + inputs.a;\n    outputs.done();\n  }\n})",
+      "a": "x"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "go"
+      },
+      {
+        "signal": "go"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": "y"
+      },
+      {
+        "signal": "go"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a signal before the first read is held and heard after it",
+    "because": "javascript.ts :651-659 (signals queue too), :433-440",
+    "params": {
+      "code": "define({\n  inputs: { go: 'signal', a: '*' },\n  outputs: { got: 'string', done: 'signal' },\n  go: function (inputs, outputs) {\n    this.g = (this.g || 0) + 1;\n    outputs.got = this.g + ':' + inputs.a;\n    outputs.done();\n  }\n})"
+    },
+    "steps": [
+      {
+        "signal": "go"
+      },
+      {
+        "set": "a",
+        "value": "q"
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "setup when read, destroy when the code is replaced, and this across both — the same code set again is read again",
+    "because": "javascript.ts :307-314 (destroy, then read), :416-428 (setup, then a run); the sum code read between them writes an output the PLACING never saved, so the write sends nothing (:431-433 registers the saved ports alone — NSP-020 §6.6 piece 5)",
+    "params": {
+      "code": "define({\n  outputs: { log: 'string' },\n  setup: function (inputs, outputs) {\n    this.log = (this.log || '') + 's';\n    outputs.log = this.log;\n  },\n  destroy: function () {\n    this.log = (this.log || '') + 'd';\n  },\n  change: function (inputs, outputs) {\n    this.log = (this.log || '') + 'r';\n    outputs.log = this.log;\n  }\n})"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "code",
+        "value": "define({\n  outputs: { log: 'string' },\n  setup: function (inputs, outputs) {\n    this.log = (this.log || '') + 's';\n    outputs.log = this.log;\n  },\n  destroy: function () {\n    this.log = (this.log || '') + 'd';\n  },\n  change: function (inputs, outputs) {\n    this.log = (this.log || '') + 'r';\n    outputs.log = this.log;\n  }\n})"
+      },
+      "settle",
+      {
+        "set": "code",
+        "value": "define({\n  inputs: { a: 'number', b: 'number' },\n  outputs: { sum: 'number' },\n  change: function (inputs, outputs) {\n    outputs.sum = inputs.a + inputs.b;\n  }\n})"
+      },
+      "settle",
+      {
+        "set": "code",
+        "value": "define({\n  outputs: { log: 'string' },\n  setup: function (inputs, outputs) {\n    this.log = (this.log || '') + 's';\n    outputs.log = this.log;\n  },\n  destroy: function () {\n    this.log = (this.log || '') + 'd';\n  },\n  change: function (inputs, outputs) {\n    this.log = (this.log || '') + 'r';\n    outputs.log = this.log;\n  }\n})"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a throw ends the run: what it wrote before stays, and the next run runs",
+    "because": "javascript.ts :492-508 (caught, logged, not on the wire)",
+    "params": {
+      "code": "define({\n  inputs: { a: '*' },\n  outputs: { before: '*', after: '*' },\n  change: function (inputs, outputs) {\n    outputs.before = inputs.a;\n    if (typeof inputs.a === 'string') throw new Error('boom ' + inputs.a);\n    outputs.after = inputs.a;\n  }\n})"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": "x"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 2
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a throw in a signal's function, and a thrown string: the next pulse runs it again",
+    "because": "javascript.ts :520-537",
+    "params": {
+      "code": "define({\n  inputs: { poke: 'signal' },\n  outputs: { poked: 'number' },\n  poke: function (inputs, outputs) {\n    this.p = (this.p || 0) + 1;\n    outputs.poked = this.p;\n    if (this.p % 2 === 0) throw 'even';\n  }\n})"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "poke"
+      },
+      "settle",
+      {
+        "signal": "poke"
+      },
+      "settle",
+      {
+        "signal": "poke"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a throw of null, in a run or a signal's function, ends that call and the next one runs (row C148)",
+    "because": "javascript.ts :492-508, :520-537 — every catch read the thrown value's prototype and threw before the scheduled flag cleared, so the code never ran again; fixed in P109 ISL-051",
+    "params": {
+      "code": "define({\n  inputs: { a: '*', poke: 'signal' },\n  outputs: { ran: 'number', poked: 'number' },\n  change: function (inputs, outputs) {\n    this.r = (this.r || 0) + 1;\n    outputs.ran = this.r;\n    if (this.r === 2) throw null;\n  },\n  poke: function (inputs, outputs) {\n    this.p = (this.p || 0) + 1;\n    outputs.poked = this.p;\n    if (this.p === 1) throw undefined;\n  }\n})"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 2
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 3
+      },
+      "settle",
+      {
+        "signal": "poke"
+      },
+      "settle",
+      {
+        "signal": "poke"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "code that does not compile, or throws while read, leaves the code before running — after its destroy",
+    "because": "javascript.ts :309 (destroy first), :380-391 (a failure returns); javascriptnodeparser.js :21-43",
+    "params": {
+      "code": "define({\n  outputs: { log: 'string' },\n  setup: function (inputs, outputs) {\n    this.log = (this.log || '') + 's';\n    outputs.log = this.log;\n  },\n  destroy: function () {\n    this.log = (this.log || '') + 'd';\n  },\n  change: function (inputs, outputs) {\n    this.log = (this.log || '') + 'r';\n    outputs.log = this.log;\n  }\n})"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "code",
+        "value": "define({\n  outputs: { sum: 'number' },\n  change: function (inputs, outputs) {\n    outputs.sum = (;\n  }\n})"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "code",
+        "value": "throw new Error('while read')"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 2
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "empty code is ignored: the code before keeps running",
+    "because": "javascript.ts :303",
+    "params": {
+      "code": "define({\n  inputs: { a: 'number' },\n  outputs: { count: 'number' },\n  run: function (inputs, outputs) {\n    this.n = (this.n || 0) + 1;\n    outputs.count = this.n;\n  }\n})"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "code",
+        "value": ""
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "script(): a changed handler gets the new and the old value, methods and setOutputs are on this, a signal from signals",
+    "because": "javascriptnodeparser.js :58-130",
+    "params": {
+      "code": "script({\n  inputs: { a: '*' },\n  outputs: { twice: 'string', seen: 'string', ping: 'signal' },\n  signals: {\n    reset: function () {\n      this.setOutputs({ twice: 'none' });\n      this.outputs.ping();\n    }\n  },\n  changed: {\n    a: function (value, old) {\n      this.outputs.twice = String(value) + String(value);\n      this.outputs.seen = this.label(old);\n    }\n  },\n  methods: {\n    label: function (v) {\n      return 'was ' + v;\n    }\n  }\n})"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 2
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "script() with an input at the placing: setup runs before the first run",
+    "because": "javascript.ts :422-440 (setup asked for before the run; the held input replayed after)",
+    "params": {
+      "code": "script({\n  inputs: { a: '*' },\n  outputs: { twice: 'string', seen: 'string', ping: 'signal' },\n  signals: {\n    reset: function () {\n      this.setOutputs({ twice: 'none' });\n      this.outputs.ping();\n    }\n  },\n  changed: {\n    a: function (value, old) {\n      this.outputs.twice = String(value) + String(value);\n      this.outputs.seen = this.label(old);\n    }\n  },\n  methods: {\n    label: function (v) {\n      return 'was ' + v;\n    }\n  }\n})",
+      "a": 7
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 8
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Node object: OnInit, Setters for what arrived, OnInputsChanged, a Signals function, and a top-level let that starts again when the code is read again",
+    "because": "javascriptnodeparser.js :159-212, :492-495 (Script is Node); javascript.ts :443-444",
+    "params": {
+      "code": "let runs = 0;\nScript.Inputs = { a: 'number' };\nScript.Outputs = { doubled: 'string', inited: 'boolean', runs: 'number', tick: 'signal' };\nScript.OnInit = function () {\n  Script.setOutputs({ inited: true });\n};\nScript.Setters.a = function (value) {\n  Script.Outputs.doubled = String(Script.Inputs.a) + String(value);\n};\nScript.OnInputsChanged = function () {\n  runs += 1;\n  Script.Outputs.runs = runs;\n};\nScript.Signals.go = function () {\n  Script.Outputs.tick();\n};"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 2
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 3
+      },
+      "settle",
+      {
+        "signal": "go"
+      },
+      "settle",
+      {
+        "set": "code",
+        "value": "let runs = 0;\nScript.Inputs = { a: 'number' };\nScript.Outputs = { doubled: 'string', inited: 'boolean', runs: 'number', tick: 'signal' };\nScript.OnInit = function () {\n  Script.setOutputs({ inited: true });\n};\nScript.Setters.a = function (value) {\n  Script.Outputs.doubled = String(Script.Inputs.a) + String(value);\n};\nScript.OnInputsChanged = function () {\n  runs += 1;\n  Script.Outputs.runs = runs;\n};\nScript.Signals.go = function () {\n  Script.Outputs.tick();\n};"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 4
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "this.sendSignalOnOutput and this.flagOutputDirty; a write to a name that is no output is kept on outputs",
+    "because": "javascript.ts :204-209, :223-225, :466-480",
+    "params": {
+      "code": "define({\n  inputs: { a: '*' },\n  outputs: { done: 'signal', echoed: '*' },\n  change: function (inputs, outputs) {\n    outputs.nowhere = inputs.a;\n    outputs.echoed = outputs.nowhere;\n    this.flagOutputDirty('echoed');\n    this.sendSignalOnOutput('done');\n  }\n})"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 2
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "no code: values wait, and arrive when code is first read — out through the ports the placing saved (the written lists)",
+    "because": "javascript.ts :651-659 (held before the first read), :433-440 (handed over after it), :431-433 (the SAVED ports registered at the read) — a placing with no code saves only its lists, and the input picker has no Signal (:735-762), so a signal cannot wait here: scenario 'a signal before the first read' grades that on a placing with code (NSP-020 §6.6 piece 5)",
+    "params": {
+      "scriptInputs": [
+        {
+          "id": "1",
+          "label": "a"
+        },
+        {
+          "id": "2",
+          "label": "b"
+        }
+      ],
+      "scriptOutputs": [
+        {
+          "id": "3",
+          "label": "sum"
+        }
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      {
+        "set": "b",
+        "value": 2
+      },
+      "settle",
+      {
+        "set": "code",
+        "value": "define({\n  inputs: { a: 'number', b: 'number' },\n  outputs: { sum: 'number' },\n  change: function (inputs, outputs) {\n    outputs.sum = inputs.a + inputs.b;\n  }\n})"
+      },
+      "settle"
+    ]
+  }
+]

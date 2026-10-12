@@ -1604,6 +1604,14 @@ export class RestAuthAdapter extends AuthEvents implements IAuthAdapter {
       return;
     }
 
+    // P107-D23 (P109 ISL-030, ruled "Refuse with a reason"): these backends have no username — `directus_users` has no
+    // such column and PocketBase's stock users collection none either. The write used to drop Username and say Done; the
+    // backend layer's rule is that nothing is silently missing, so the whole write is refused, and says why.
+    if (options.username !== undefined && options.username !== null && options.username !== '') {
+      options.error(REST_USERNAME_UNSUPPORTED);
+      return;
+    }
+
     const content: Record<string, unknown> = Object.assign({}, options.properties);
     if (options.email !== undefined) content.email = options.email;
 
@@ -1645,6 +1653,10 @@ export class RestAuthAdapter extends AuthEvents implements IAuthAdapter {
  * which is unchangeable, because it is what every deployed app has already
  * written into its users' browsers.
  */
+/** P107-D23: what Set User Properties is told when Username is set on a backend that has none. */
+export const REST_USERNAME_UNSUPPORTED =
+  'This backend has no usernames, so Username cannot be set. Leave Username blank, or change Email instead.';
+
 export function restSessionKey(handle: BackendHandle): string {
   return 'NodeGX/' + (handle.id || handle.type) + '/session';
 }

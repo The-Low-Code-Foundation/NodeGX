@@ -406,6 +406,20 @@ export class Highlighter {
     this.placedNodes.clear();
   }
 
+  /**
+   * P109 ISL-008 — for the node the editor has selected, which of its panel values an author's stylesheet (or its own
+   * CSS Style) decides on this canvas, and where that rule lives. The first instance with an element answers: every
+   * instance of one node shares its definition, its classes and the project's CSS.
+   */
+  explainStyleAtPath(path: readonly string[]): unknown[] {
+    for (const node of getNodesAtPath(this.noodlRuntime, path)) {
+      const explain = (node as unknown as { explainStyleSources?: () => unknown[] }).explainStyleSources;
+      if (typeof explain !== 'function' || !node.getDOMElement()) continue;
+      return explain.call(node);
+    }
+    return [];
+  }
+
   deselectNodes(): void {
     // See `disableHighlight` — es5 target, so no direct Map iteration.
     for (const item of Array.from(this.selectedNodes.entries())) {

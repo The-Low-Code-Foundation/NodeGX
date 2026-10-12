@@ -39,6 +39,7 @@
     "array→collection": "Array and collection (legacy shared-list type) are interchangeable: the same underlying list object flows through unchanged.",
     "object→string": "The runtime serialises with JSON.stringify before the receiver's cast runs (NDA-014, PORT-TYPE-CONTRACT.md). Values with their own toString (e.g. Date) keep that rendering; circular structures deliver '' and raise a warning.",
     "array→string": "The runtime serialises with JSON.stringify before the receiver's cast runs (NDA-014, PORT-TYPE-CONTRACT.md). Circular structures deliver '' and raise a warning.",
+    "array→optionslist": "The list arrives unchanged; the Dropdown reads each item as an option (P107 R21, Dropdown v8). A { Label, Value } row keeps its label, its value and its Disabled; a bare word or number becomes an option labelled and valued by its text; a null or missing item is skipped.",
     "color→string": "The resolved color string — a style name resolves to its value (context.styles.resolveColor) before crossing the wire.",
     "enum→string": "The option's value (not its label), which is already a string, arrives unchanged. There is no enum→number cast: parse it with an Expression."
   },

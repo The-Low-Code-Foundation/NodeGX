@@ -10,7 +10,7 @@
       "x": 40,
       "y": 40,
       "children": [
-        "app_router"
+        "app_pages"
       ],
       "parameters": {
         "sizeMode": "explicit",
@@ -30,12 +30,35 @@
       }
     },
     {
+      "id": "app_pages",
+      "type": "Group",
+      "label": "The page they asked for — held, never replaced, while the notice is answered",
+      "x": 100,
+      "y": 160,
+      "parent": "app_root",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "dbt-pages"
+      },
+      "children": [
+        "app_router"
+      ],
+      "metadata": {
+        "comment": "TASK-L185 §2. While the current notice is unanswered this Group takes the class dbt-pages-held (display: none). The ROUTER STAYS MOUNTED, so the address the person asked for is still the page underneath and accepting reloads it in place (the product's L53). Unmounting the router instead would deregister it and take RouterNavigate with it."
+      }
+    },
+    {
       "id": "app_router",
       "type": "Router",
       "label": "Main router",
       "x": 100,
-      "y": 160,
-      "parent": "app_root",
+      "y": 240,
+      "parent": "app_pages",
       "parameters": {
         "name": "Main",
         "pages": {
@@ -58,7 +81,7 @@
       "x": 400,
       "y": 40,
       "parameters": {
-        "style": "/* Digital Bricks Training — the page ground and the pointer. The lesson CSS is the kit's stylesheet. */\nhtml, body { background: var(--background); color: var(--foreground); font-family: var(--font-sans); }\n.pressable { cursor: pointer; }\n@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }\n"
+        "style": "/* Digital Bricks Training — the page ground and the pointer. The lesson CSS is the kit's stylesheet. */\nhtml, body { background: var(--background); color: var(--foreground); font-family: var(--font-sans); }\n.pressable { cursor: pointer; }\n@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }\n/* TASK-L185: the page held while the current privacy notice is answered. display:none, so it is out of\n   the layout, the tab order and the accessibility tree, while the router behind it stays mounted. */\n.dbt-pages-held { display: none !important; }\n"
       },
       "metadata": {
         "comment": "Everything else this template styles lives in noodl_modules/dbt-lesson/styles.css (the product's token aliases and the lesson CSS lifted from globals.css) — TASK-L154 §2. This node holds only what needs the document itself."
@@ -187,6 +210,16 @@
       },
       "metadata": {
         "comment": "The dossier's eyebrow on /course is a graph Translation (TASK-L167). Without this bundle it resolved to nothing and the Text showed its editor default, TEXT — which is why tools/check-language-owner.py now asserts every Translation's namespace is registered here."
+      }
+    },
+    {
+      "id": "app_ns_privacy",
+      "type": "Language Bundle",
+      "label": "privacy → i18next",
+      "x": 1060,
+      "y": 840,
+      "parameters": {
+        "Namespace": "privacy"
       }
     }
   ],

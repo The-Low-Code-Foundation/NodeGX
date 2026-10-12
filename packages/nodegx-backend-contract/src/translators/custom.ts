@@ -73,6 +73,10 @@ function createParamsDialect(): FilterDialect<ParamsFilter> {
       return ctx.fail('A custom API cannot filter by Parse-style relations', { operator: 'relatedTo' });
     },
 
+    path(node, ctx) {
+      return ctx.fail('A custom API cannot follow a path through several links in one request', { operator: 'path' });
+    },
+
     condition(node, ctx) {
       if (node.operator !== 'equalTo') {
         return ctx.fail(

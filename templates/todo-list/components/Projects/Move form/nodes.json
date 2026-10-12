@@ -1,0 +1,463 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "24371863-2ac8-56ef-8d77-622e9a6eb3b1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mfIn",
+      "type": "Component Inputs",
+      "label": "The move as it is",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "heading",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "help",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "who",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "deadline",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "saveLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cancelLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "titleOptional",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "mfOut",
+      "type": "Component Outputs",
+      "label": "The move as it should be",
+      "ports": [
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cancel",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "title",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "waitingOn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "deadline",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "mfRoot",
+      "type": "Group",
+      "label": "The move",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--background)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "mounted": true
+      },
+      "children": [
+        "mfHead",
+        "mfHelp",
+        "mfTitle",
+        "mfWho",
+        "mfDue",
+        "mfError",
+        "mfBtns"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mfHead",
+      "type": "Text",
+      "label": "The question",
+      "parent": "mfRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mfHelp",
+      "type": "Text",
+      "label": "What an empty answer means",
+      "parent": "mfRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "mfTitle",
+      "type": "net.noodl.controls.textinput",
+      "label": "The move",
+      "parent": "mfRoot",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "The next move, in a few words"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "mfWho",
+      "type": "net.noodl.controls.textinput",
+      "label": "Who it waits on",
+      "parent": "mfRoot",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Waiting on someone? Their name. Empty if it is your move."
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "mfDue",
+      "type": "/Todo/Date picker",
+      "label": "Its deadline",
+      "parent": "mfRoot",
+      "parameters": {
+        "Label": "Deadline (optional)",
+        "Show Label": true,
+        "Width": {
+          "value": 240,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "mfError",
+      "type": "Text",
+      "label": "Why it was not saved",
+      "parent": "mfRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "lineHeight": "var(--leading-snug)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "mfBtns",
+      "type": "Group",
+      "label": "Save or cancel",
+      "parent": "mfRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "mfSave",
+        "mfCancel"
+      ],
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "mfSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "parent": "mfBtns",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Save"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "mfCancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "parent": "mfBtns",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Cancel"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "mfLook",
+      "type": "JavaScriptFunction",
+      "label": "Is there help to show?",
+      "parameters": {
+        "functionScript": "Outputs.hasHelp = String(Inputs.help || '') !== '';"
+      },
+      "x": 410,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-help",
+          "displayName": "help",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-hasHelp",
+          "displayName": "hasHelp",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "mfCheck",
+      "type": "JavaScriptFunction",
+      "label": "What the form says",
+      "parameters": {
+        "functionScript": "function pick(typed, start) {\n  if (typed !== undefined && typed !== null) return String(typed);\n  return start === undefined || start === null ? '' : String(start);\n}\nvar title = pick(Inputs.typedTitle, Inputs.title).trim();\nvar who = pick(Inputs.typedWho, Inputs.who).trim();\nvar deadline = pick(Inputs.pickedDeadline, Inputs.deadline).trim();\nif (!/^\\d{4}-\\d{2}-\\d{2}$/.test(deadline)) deadline = '';\nvar error = title === '' && Inputs.titleOptional !== true ? 'The move needs a few words.' : '';\nOutputs.error = error;\nOutputs.hasError = error !== '';\nif (error) return;\nOutputs.title = title;\nOutputs.waitingOn = who;\nOutputs.deadline = deadline;\nOutputs.go();",
+        "runOnChange-in-title": false,
+        "runOnChange-in-who": false,
+        "runOnChange-in-deadline": false,
+        "runOnChange-in-titleOptional": false,
+        "runOnChange-in-typedTitle": false,
+        "runOnChange-in-typedWho": false,
+        "runOnChange-in-pickedDeadline": false
+      },
+      "x": 410,
+      "y": 760,
+      "ports": [
+        {
+          "name": "in-typedTitle",
+          "displayName": "typedTitle",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-title",
+          "displayName": "title",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-typedWho",
+          "displayName": "typedWho",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-who",
+          "displayName": "who",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pickedDeadline",
+          "displayName": "pickedDeadline",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-deadline",
+          "displayName": "deadline",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-titleOptional",
+          "displayName": "titleOptional",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "displayName": "error",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasError",
+          "displayName": "hasError",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-waitingOn",
+          "displayName": "waitingOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-deadline",
+          "displayName": "deadline",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "mfRoot"
+  ]
+}

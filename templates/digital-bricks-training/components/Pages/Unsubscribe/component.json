@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3dd1e6dd-8113-5ed8-956d-c8bdfd4c295e",
+  "name": "Unsubscribe",
+  "path": "/Pages/Unsubscribe",
+  "type": "page",
+  "created": "2026-10-01T20:00:00.000Z",
+  "modified": "2026-10-01T20:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Where the one-click link in a message email lands (TASK-L187). Needs no sign-in and is outside the notice gate. It stops the mail on a PRESS, never on load — a mail scanner follows links."
+}

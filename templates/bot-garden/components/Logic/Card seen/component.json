@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2697c70d-19f6-5588-8c85-6586f1f870b5",
+  "name": "Card seen",
+  "path": "/Logic/Card seen",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Got it: the block’s card is seen, the next tap places it. Runs on Go; answers Ran once its outputs are set."
+}

@@ -38,6 +38,42 @@ Assembling anything that arrives in pieces: AI tokens into a displayable answer,
 | `add` | Signal | — | Appends the current Chunk, which is retained between pulses, so a second Add with no new chunk appends it again |
 | `clear` | Signal | — | Empties the buffer, the messages and both dropped counts |
 
+### What each input does
+
+**Chunk** (`chunk`)
+
+- text (a number, boolean or bigint as its text; nothing as empty) while an Error stands: kept for the next Add, and the Error is cleared → Failure stays silent
+- text (a number, boolean or bigint as its text; nothing as empty): kept for the next Add, and retained after it → Failure stays silent
+- an object, array or Date again, the same refusal already on Error: the chunk is emptied and nothing more is said → Failure stays silent
+- an object, array or Date: refused before any Add — the chunk is emptied and Error names what arrived → Failure
+
+**Delimiter** (`delimiter`)
+
+- always: read at the next Add — where complete messages are split off (nothing, or empty: never split)
+
+**Max Length (characters)** (`maxLength`)
+
+- always: read at the next Add — the cap the oldest characters are dropped past (not above 0: no cap); a buffer already over it is trimmed by the next Add
+
+**Max Messages** (`maxMessages`)
+
+- always: read at the next Add that completes a message — the cap the oldest messages are dropped past (not at least 0: 0, keep all)
+
+**Add** (`add`)
+
+- an empty Chunk (a keep-alive, or one that was refused): nothing is appended → Unchanged; Overflowed, Changed, Message Received stay silent
+- the chunk is appended, past Max Length the oldest characters go (counted on Dropped Characters), and no Delimiter completes a message: Accumulated grows → Overflowed, Changed, Done; Message Received stays silent
+- the chunk is appended and no Delimiter completes a message: Accumulated grows → Changed, Done; Overflowed, Message Received stay silent
+- the chunk is appended, past Max Length the oldest characters go (counted on Dropped Characters), a Delimiter completes a message, and past Max Messages the oldest messages go (counted on Dropped Messages): Overflowed twice, the last complete one is Last Message, the rest stays in Accumulated → Overflowed, Overflowed, Message Received, Changed, Done
+- the chunk is appended, a Delimiter completes a message, and past Max Messages the oldest messages go (counted on Dropped Messages): the last complete one is Last Message, the rest stays in Accumulated → Overflowed, Message Received, Changed, Done
+- the chunk is appended, past Max Length the oldest characters go (counted on Dropped Characters), and a Delimiter completes a message: it joins Messages, the last complete one is Last Message, the rest stays in Accumulated → Overflowed, Message Received, Changed, Done
+- the chunk is appended and a Delimiter completes a message: it joins Messages, the last complete one is Last Message, the rest stays in Accumulated — Message Received once however many completed → Message Received, Changed, Done; Overflowed stays silent
+
+**Clear** (`clear`)
+
+- anything accumulated, kept, dropped or refused: the buffer, Messages, Last Message, both dropped counts and the Error are emptied — not the Chunk retained → Cleared, Done
+- nothing held: the same empty values are sent again → Cleared, Unchanged
+
 ## Outputs
 
 ### Values

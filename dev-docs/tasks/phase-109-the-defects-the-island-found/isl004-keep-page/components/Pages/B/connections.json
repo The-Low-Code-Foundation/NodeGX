@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "de48f7ab-a28e-574a-8a81-f6bf58fad313",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pb_back",
+      "fromProperty": "onClick",
+      "toId": "pb_nav",
+      "toProperty": "navigate"
+    }
+  ]
+}

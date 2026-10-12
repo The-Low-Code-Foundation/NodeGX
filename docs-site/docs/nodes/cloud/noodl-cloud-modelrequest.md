@@ -1,9 +1,9 @@
 ---
 title: "Model Request"
 ---
-Calls a language model from a cloud function. The key is read server-side from a named secret; every call's cost is written down.
+Calls a language model from a cloud function — Anthropic, or an OpenAI-compatible server such as a model on this computer.
 
-Model Request sends one request to a model and hands back either text or, when you give it an Output Schema, a parsed object in exactly the shape you asked for. It runs server-side only: the key is never a port value, never a parameter, and never in the exported workflow a deploy ships — what the graph carries is the NAME of a secret in the project's functions namespace, and the backend resolves it at the moment of the call, uses it in one header, and drops it. Instructions is the system prompt; Input is a single user turn; wire Messages instead when the graph is holding a conversation, and Input is then ignored. Effort is the first lever on both cost and quality — low for tagging and classifying, high for anything that has to be right — and the node sends no thinking budget, because current models think adaptively and reject one. Rate limits and provider faults are retried twice with backoff inside the node, honouring retry-after; a 4xx is not retried, because asking again changes nothing. A refusal arrives as an HTTP 200 with no answer in it, so it fires Failure with Error Code refusal rather than handing an empty string downstream. Every call appends what it cost to the run's execution record, where the dashboard sums it per run.
+Model Request sends one request to a model and hands back either text or, when you give it an Output Schema, a parsed object in exactly the shape you asked for. It runs server-side only: the key is never a port value, never a parameter, and never in the exported workflow a deploy ships — what the graph carries is the NAME of a secret in the project's functions namespace, and the backend resolves it at the moment of the call, uses it in one header, and drops it. Instructions is the system prompt; Input is a single user turn; wire Messages instead when the graph is holding a conversation, and Input is then ignored. Effort is the first lever on both cost and quality — low for tagging and classifying, high for anything that has to be right — and the node sends no thinking budget, because current models think adaptively and reject one. Rate limits and provider faults are retried twice with backoff inside the node, honouring retry-after; a 4xx is not retried, because asking again changes nothing. A refusal arrives as an HTTP 200 with no answer in it, so it fires Failure with Error Code refusal rather than handing an empty string downstream. Every call appends what it cost to the run's execution record, where the dashboard sums it per run. Set Provider to OpenAI-compatible for a model served on your own computer by Ollama, llama.cpp's server or LM Studio: Base URL is that server (http://127.0.0.1:11434 for Ollama), Model is the name it knows the model by, and no key is needed while Base URL is this computer (127.0.0.1, ::1 or localhost — read from the address, so a look-alike name such as 127.0.0.1.example.com still needs one). An Output Schema is sent to such a server as response_format json_schema; a server that ignores it and answers in prose fails with bad_json.
 
 ## When to use it
 
@@ -25,17 +25,17 @@ Any time a backend needs a model: tagging or summarising items a schedule just p
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `apiKeySecret` | String | `MODEL_KEY` | The NAME of a secret in the project's functions namespace — never the key itself. It is read server-side at the moment of the call, exactly as the Secret node reads one, used in one header and dropped. There is deliberately no port that could hold the value |
-| `baseUrl` | String | `https://api.anthropic.com` | Where the request goes. Change it for a proxy, a gateway, or a test double |
+| `apiKeySecret` | String | `MODEL_KEY` | The NAME of a secret in the project's functions namespace — never the key itself. It is read server-side at the moment of the call, exactly as the Secret node reads one, used in one header and dropped. There is deliberately no port that could hold the value. With OpenAI-compatible and a Base URL on this computer, a secret that is not provisioned means no key is sent; anywhere else a missing secret fails with secret_missing |
+| `baseUrl` | String | `https://api.anthropic.com` | Where the request goes. Change it for a local model server, a proxy, a gateway, or a test double. For OpenAI-compatible, a URL ending in /v1 or /chat/completions is used as given |
 | `callInstructions` | String | — | More instructions that change from call to call — who this learner is, what happened last time. Sent after Instructions and never cached, so changing them does not throw the cached Instructions away |
-| `effort` | Enum (`low`, `medium`, `high`, `xhigh`, `max`) | `high` | How hard the model works before answering — the first lever to reach for on both cost and quality. Low for tagging and classifying, high for anything that has to be right |
+| `effort` | Enum (`none`, `low`, `medium`, `high`, `xhigh`, `max`) | `high` | How hard the model works before answering — the first lever to reach for on both cost and quality. Low for tagging and classifying, high for anything that has to be right. OpenAI-compatible: only None is sent (as reasoning_effort none), and it is the setting a small thinking model on this computer needs — without it a Qwen 3 spends a short Max Tokens thinking and answers nothing; the other values are not sent, because a model that does not think refuses them. Anthropic: None is sent as Low, the lowest it takes |
 | `input` | String | — | The one thing being asked, as a single user turn. Ignored when Messages is wired — a graph holding a conversation sends the whole conversation |
-| `instructions` | String | — | The system prompt — who the model is being asked to be, and the rules of the task. Cached: the first call writes it to the provider's prompt cache and calls in the next 5 minutes read it at a tenth of the price. Keep it the same on every call; anything that changes per call (a name, today's date) belongs in Per-Call Instructions or Input, or nothing is ever read back. Instructions shorter than the model's minimum (512 tokens on Claude Opus 5, up to 4,096 on some older models) are not cached at all: the call works, and Usage shows 0 written |
+| `instructions` | String | — | The system prompt — who the model is being asked to be, and the rules of the task. Cached: the first call writes it to the provider's prompt cache and calls in the next 5 minutes read it at a tenth of the price. Keep it the same on every call; anything that changes per call (a name, today's date) belongs in Per-Call Instructions or Input, or nothing is ever read back. Instructions shorter than the model's minimum (512 tokens on Claude Opus 5, up to 4,096 on some older models) are not cached at all: the call works, and Usage shows 0 written. OpenAI-compatible: Instructions and Per-Call Instructions are sent as one system message, and any caching is the server's own |
 | `maxTokens` | Number | `16000` | The ceiling on the answer. Hitting it is not an error: Done fires with Stop Reason set to max_tokens and a truncated Text, so the graph can decide what that means |
 | `messages` | Array | — | A whole conversation as [{ role, content }], for a graph that is holding one. When this is wired and non-empty it replaces Input entirely |
 | `model` | String | `claude-opus-5` | The model id, sent verbatim. Free text on purpose: a model released after this backend was built needs no release of NodeGX to be usable |
-| `outputSchema` | Object | — | A JSON schema the answer must match. When set, the answer is constrained to it and arrives parsed on Json as well as raw on Text. Objects in the schema need additionalProperties false, and the provider refuses the request outright if they do not have it |
-| `provider` | Enum (`anthropic`, `openai-compatible`) | `anthropic` | Which API shape the request is built in. Only Anthropic is implemented; OpenAI-compatible is listed so a graph drawn today keeps its wiring when it arrives, and until then it fails on Failure with Error Code not_implemented rather than pretending |
+| `outputSchema` | Object | — | A JSON schema the answer must match. When set, the answer is constrained to it and arrives parsed on Json as well as raw on Text. Objects in the schema need additionalProperties false, and the provider refuses the request outright if they do not have it. An OpenAI-compatible server is sent it as response_format json_schema; a server that ignores it and answers in prose fails with bad_json, and an answer that parses is not re-checked against the schema here |
+| `provider` | Enum (`anthropic`, `openai-compatible`) | `anthropic` | Which API shape the request is built in. OpenAI-compatible is what a model running on your own computer speaks (Ollama, llama.cpp's server, LM Studio): point Base URL at it, for example http://127.0.0.1:11434, and set Model to the name that server knows the model by. A key is optional only when Base URL is this computer (127.0.0.1, ::1, localhost) |
 | `timeoutMs` | Number | `120000` | The whole call's budget, retries included. Keep it under the function's own timeout, or the function answers 504 before this node gets to report anything |
 
 ### Signals
@@ -67,10 +67,10 @@ Any time a backend needs a model: tagging or summarising items a schedule just p
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `error` | String | — | Why there is no answer, in a sentence. Names the secret or the status, never a key |
+| `error` | String | — | Why there is no answer, in a sentence. Names the secret or the status, never a key. When the provider answered with an error, its own words follow — here only, never on the execution record, because a server's error can quote the request |
 | `errorCode` | String | — | A stable code for the failure, for a graph that branches rather than reads: not_implemented, secret_missing, refusal, bad_json, http_error, rate_limited, timeout, network, unavailable |
 | `failure` | Signal | — | Fires when no answer was obtained — a missing secret, a refusal, a provider error that outlived its retries, or an answer that did not match the schema. Read Error Code to tell them apart rather than matching on Error, which is written for a person |
-| `status` | Number | — | The HTTP status of the last attempt, or 0 when the request never reached the provider — a missing secret, an unimplemented provider, a timeout |
+| `status` | Number | — | The HTTP status of the last attempt, or 0 when the request never reached the provider — a missing secret, a provider this node does not know, a timeout |
 
 ## Patterns
 
@@ -79,6 +79,7 @@ Any time a backend needs a model: tagging or summarising items a schedule just p
 - Wire Failure. A graph that wires only Done hangs for the whole function timeout the first time a key expires or a provider rate-limits (CWF-018), and that is a 504 nobody can read.
 - Branch on Error Code, not on Error. The codes are stable; the sentences are written for a person and will be improved.
 - Keep Timeout below the function's own timeout, so this node reports what went wrong instead of the function answering 504 over the top of it.
+- A model on the family's own computer: Provider OpenAI-compatible, Base URL http://127.0.0.1:11434 (Ollama), no key. Let the page send a choice from a list, never prompt text; compose the prompt from a fixed template inside the function, give an Output Schema with an enum, and check the answer before it reaches the page. The request body that started the function is on the execution record, so prompt text sent by the page would be too.
 
 ## Watch out for
 
@@ -87,6 +88,7 @@ Any time a backend needs a model: tagging or summarising items a schedule just p
 - Treating a refusal as an empty answer. It is an HTTP 200 with nothing in it, which is why it fires Failure instead.
 - Retrying a failure by re-pressing Do in a loop. A 429 is already retried twice inside the node, with backoff; a loop on top of that is a way to get rate-limited for longer.
 - Raising Max Tokens to fix a truncated answer that is truncated because the model was asked for too much. Narrow the request, or give it a schema.
+- Pointing a keyless OpenAI-compatible request at another computer. A key is optional only on this computer; anywhere else a missing secret fails with secret_missing before any request is made.
 
 ## Examples
 

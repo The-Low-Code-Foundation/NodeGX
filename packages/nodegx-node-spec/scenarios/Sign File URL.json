@@ -1,0 +1,440 @@
+[
+  {
+    "name": "no file: the press fails — No file specified, status 0, no call",
+    "because": "signfileurl.ts :139-142 → setError :326-339",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "sign"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "url": "https://files.example/k3j_photo.png?exp=1&sig=ab",
+                "kind": "signed",
+                "expiresAt": "2026-01-01T00:00:00.000Z",
+                "ttlSeconds": 300
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a plain object is not a stored file: still no file",
+    "because": "signfileurl.ts :121-124",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "name": "k3j_photo.png",
+          "url": "u"
+        }
+      },
+      {
+        "signal": "sign"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "url": "https://files.example/k3j_photo.png?exp=1&sig=ab",
+                "kind": "signed",
+                "expiresAt": "2026-01-01T00:00:00.000Z",
+                "ttlSeconds": 300
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a signed link: the five values, Safe To Share true, then Done",
+    "because": "signfileurl.ts :147-167; :216-222",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "k3j_photo.png",
+            "url": "https://files.example/k3j_photo.png",
+            "contentType": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "sign"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signFileUrl"
+            },
+            "answer": {
+              "ok": {
+                "url": "https://files.example/k3j_photo.png?exp=1&sig=ab",
+                "kind": "signed",
+                "expiresAt": "2026-01-01T00:00:00.000Z",
+                "ttlSeconds": 300
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a token link: Safe To Share false",
+    "because": "signfileurl.ts :221 — `kind !== 'token'`",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "k3j_photo.png",
+            "url": "https://files.example/k3j_photo.png",
+            "contentType": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "sign"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "url": "https://directus.example/assets/6f1c?access_token=eyJ",
+                "kind": "token",
+                "expiresAt": "2026-01-01T00:15:00.000Z",
+                "ttlSeconds": 900
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a public link: no expiry, no TTL — blank Expires At and an empty TTL are sent (v3, D26)",
+    "because": "signfileurl.ts: a link with no expiry sends '' and null (P109 ISL-030, P107-D26 ruled \"Clear them\"; v2 held undefined, never sent — C3)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "k3j_photo.png",
+            "url": "https://files.example/k3j_photo.png",
+            "contentType": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "sign"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "url": "https://files.example/plain.png",
+                "kind": "public"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "re-signed to a public link: Expires At and TTL let go of the previous link's (v3, D26)",
+    "because": "signfileurl.ts: the public link's blank Expires At and empty TTL are sent over the private link's (P109 ISL-030, P107-D26 ruled \"Clear them\"; v2 kept the previous expiry on the wire)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "k3j_photo.png",
+            "url": "https://files.example/k3j_photo.png",
+            "contentType": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "sign"
+      },
+      "settle",
+      {
+        "signal": "sign"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "times": 1,
+            "answer": {
+              "ok": {
+                "url": "https://files.example/k3j_photo.png?exp=1&sig=ab",
+                "kind": "signed",
+                "expiresAt": "2026-01-01T00:00:00.000Z",
+                "ttlSeconds": 300
+              }
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "url": "https://files.example/plain.png",
+                "kind": "public"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a PocketBase file: its target rides along on the call",
+    "because": "signfileurl.ts :148-155 — `cloudFile.getTarget()`",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "photo_g235k8arvj.png",
+            "url": "https://pb.example/api/files/notes/r1/photo_g235k8arvj.png",
+            "target": {
+              "kind": "record",
+              "collection": "notes",
+              "recordId": "r1",
+              "field": "attachment"
+            }
+          }
+        }
+      },
+      {
+        "signal": "sign"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "url": "https://directus.example/assets/6f1c?access_token=eyJ",
+                "kind": "token",
+                "expiresAt": "2026-01-01T00:15:00.000Z",
+                "ttlSeconds": 900
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a refusal with a status: Error and Error Status Code, then Failure",
+    "because": "signfileurl.ts :168 → :326-339",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "k3j_photo.png",
+            "url": "https://files.example/k3j_photo.png",
+            "contentType": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "sign"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": "Permission denied",
+              "detail": {
+                "status": 403
+              }
+            },
+            "after": 5
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a refusal with no message and no status: Error is a sentence, Error Status Code 0 — never the Parse code (v2, C51)",
+    "because": "fileRef.ts fileFailureOf (P109 ISL-030, P107-C51 ruled \"Send the real status\"); v1 put the whole envelope on Error and showed 119",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "k3j_photo.png",
+            "url": "https://files.example/k3j_photo.png",
+            "contentType": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "sign"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": null,
+              "detail": {
+                "code": 119
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Backend the project does not have: the not-configured sentence, no call",
+    "because": "signfileurl.ts :300-312",
+    "params": {
+      "backendId": "nope"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "k3j_photo.png",
+            "url": "https://files.example/k3j_photo.png",
+            "contentType": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "sign"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "url": "https://files.example/k3j_photo.png?exp=1&sig=ab",
+                "kind": "signed",
+                "expiresAt": "2026-01-01T00:00:00.000Z",
+                "ttlSeconds": 300
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "two presses in a frame: two calls, two Dones",
+    "because": "signfileurl.ts :135-137 — each press its own callback",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "k3j_photo.png",
+            "url": "https://files.example/k3j_photo.png",
+            "contentType": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "sign"
+      },
+      {
+        "signal": "sign"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "url": "https://files.example/k3j_photo.png?exp=1&sig=ab",
+                "kind": "signed",
+                "expiresAt": "2026-01-01T00:00:00.000Z",
+                "ttlSeconds": 300
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+]

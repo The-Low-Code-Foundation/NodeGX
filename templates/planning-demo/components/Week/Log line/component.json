@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "56d34c8f-d320-5ca7-8973-f704c0382158",
+  "name": "Log line",
+  "path": "/Week/Log line",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One line of a block’s or a project’s history: when, what happened, and any note under it."
+}

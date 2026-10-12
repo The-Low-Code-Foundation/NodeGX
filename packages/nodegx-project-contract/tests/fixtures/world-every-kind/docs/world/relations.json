@@ -1,0 +1,231 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/world-v1.json#/definitions/relationsFile",
+  "relations": [
+    {
+      "id": "account-company",
+      "from": "account",
+      "to": "company",
+      "kind": "belongs-to",
+      "sentence": "Every account is one company's, and stays that company's.",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "membership",
+      "from": "person",
+      "to": "account",
+      "kind": "is-on",
+      "sentence": "A person is on one account at a time, as a member, from the day they join until they leave.",
+      "answers": {
+        "counts": "A person counts as a member only while they are on an account that pays.",
+        "several": false,
+        "sameTime": true,
+        "startsEnds": true,
+        "whenEnds": "The membership stays, with the day it ended.",
+        "details": "their role on the account: holder or member"
+      },
+      "properties": [
+        {
+          "name": "role",
+          "kind": "choice",
+          "values": [
+            "holder",
+            "member"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "booking",
+      "from": "person",
+      "to": "slot",
+      "kind": "is-on",
+      "sentence": "A person books a slot; one slot takes one booking, and a person may book several.",
+      "answers": {
+        "counts": "A booking counts once the slot is taken; a person with no booking is still a person.",
+        "several": true,
+        "sameTime": false,
+        "startsEnds": false,
+        "whenEnds": "A cancelled booking stays, marked cancelled, and the slot is free again.",
+        "details": "whether it was cancelled"
+      },
+      "properties": [
+        {
+          "name": "cancelled",
+          "kind": "yesno"
+        }
+      ]
+    },
+    {
+      "id": "session-tags",
+      "from": "session",
+      "to": "tag",
+      "kind": "together",
+      "sentence": "A session has tags; a tag is on a session once.",
+      "answers": {
+        "needsDetails": false,
+        "twice": false
+      }
+    },
+    {
+      "id": "plan-size",
+      "from": "account",
+      "property": "plan",
+      "kind": "one-of",
+      "sentence": "An account's plan is small, medium or large.",
+      "answers": {
+        "needsDetails": false,
+        "whoAdds": "a developer",
+        "sameForEveryone": true,
+        "retires": true
+      }
+    },
+    {
+      "id": "session-speakers",
+      "from": "session",
+      "to": "person",
+      "kind": "many-by-list",
+      "sentence": "A session lists who speaks at it.",
+      "answers": {
+        "otherWay": false,
+        "grows": false,
+        "entryDetails": false
+      }
+    },
+    {
+      "id": "topic-tree",
+      "from": "topic",
+      "kind": "part-of-tree",
+      "sentence": "A topic can sit under a broader topic.",
+      "answers": {
+        "depth": "Three levels at most.",
+        "ownAncestor": false,
+        "moves": true
+      }
+    },
+    {
+      "id": "on-the-course-platform",
+      "from": "person",
+      "to": "the course platform",
+      "kind": "exists-elsewhere",
+      "sentence": "A member also has a login on the course platform.",
+      "answers": {
+        "hereFirst": "Yes: they join here first, and until the platform knows them they cannot start a course; we want a list of who is waiting.",
+        "thereFirst": false,
+        "wins": "here"
+      }
+    },
+    {
+      "id": "same-person",
+      "from": "person",
+      "kind": "same-as",
+      "sentence": "Sometimes two people turn out to be one person, written down twice.",
+      "answers": {
+        "howTell": "The same email.",
+        "whoDecides": "One of us, by hand.",
+        "undo": false
+      }
+    },
+    {
+      "id": "leaves",
+      "from": "person",
+      "kind": "ends",
+      "sentence": "A person can leave, and we keep what they did.",
+      "answers": {
+        "comesBack": true,
+        "backAs": "the old one",
+        "endNote": "left because",
+        "endNoteNeeded": true
+      }
+    },
+    {
+      "id": "attended",
+      "from": "person",
+      "to": "session",
+      "kind": "happened-to",
+      "sentence": "A person came to a session.",
+      "answers": {
+        "forever": true,
+        "undo": "a new record",
+        "who": true,
+        "outlives": false
+      },
+      "properties": [
+        {
+          "name": "late",
+          "kind": "yesno"
+        }
+      ]
+    },
+    {
+      "id": "note-author",
+      "from": "note",
+      "to": "person",
+      "kind": "owned-by",
+      "sentence": "Only whoever wrote a note may change it; the two of us can read every note.",
+      "answers": {
+        "whoElse": "the two of us who run things",
+        "path": false,
+        "whenOwnerEnds": "passes to someone"
+      }
+    },
+    {
+      "id": "person-profile",
+      "from": "profile",
+      "to": "person",
+      "kind": "extends",
+      "sentence": "A person has one profile, and a profile is one person's.",
+      "answers": {
+        "filterBy": "None of it.",
+        "grows": "a few",
+        "moreThanOne": false,
+        "standsAlone": false,
+        "computed": "written by a person"
+      }
+    },
+    {
+      "id": "invite-for",
+      "from": "invite",
+      "to": "person",
+      "kind": "by-name",
+      "sentence": "An invite is for a person, by their email.",
+      "answers": {
+        "changes": true,
+        "shared": false,
+        "shouldLink": false
+      }
+    },
+    {
+      "id": "note-about",
+      "from": "note",
+      "to": [
+        "person",
+        "account"
+      ],
+      "kind": "points-at-one-of",
+      "sentence": "A note is about a person or about an account.",
+      "answers": {
+        "more": false,
+        "whenTargetGoes": "stays-unlinked",
+        "repoint": false
+      }
+    },
+    {
+      "id": "quote-sent",
+      "from": "quote",
+      "kind": "settled",
+      "sentence": "A quote is a draft until we send it; a sent quote stands as sent, and a mistake means a new quote that says which one it replaces.",
+      "answers": {
+        "agreedBy": "whoever runs the office sends it; a sent quote is agreed",
+        "stillChanges": "note",
+        "putRight": "replace it with a new one",
+        "deleteDraft": true,
+        "deleteAgreed": false
+      }
+    }
+  ]
+}

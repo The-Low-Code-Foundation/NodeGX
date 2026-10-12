@@ -1,0 +1,50 @@
+[
+  {
+    "name": "every part of one instant in UTC: 2024-02-29T13:45:30.123Z is a Thursday in ISO week 9, Month 2, then Changed",
+    "because": "dateparts.ts :69-171 the eleven getters; :203-209",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "input", "value": "2024-02-29T13:45:30.123Z" }, "settle"]
+  },
+  {
+    "name": "the same instant in Pacific/Auckland (+13 in March) is Friday 1 March 02:45:30, still ISO week 9",
+    "because": "world.ts TIME ZONE; dateparts.ts :12-15 local zone. NSP-013 AC5, the second zone",
+    "params": {},
+    "world": { "timeZone": "Pacific/Auckland" },
+    "steps": [{ "set": "input", "value": "2024-02-29T13:45:30.123Z" }, "settle"]
+  },
+  {
+    "name": "the same instant in Asia/Kolkata is 19:15:30 on the Thursday; the Timestamp is the same number in every zone",
+    "because": "a half-hour offset; dateparts.ts :163-171 getTime is zone-free. NSP-013 AC5",
+    "params": {},
+    "world": { "timeZone": "Asia/Kolkata" },
+    "steps": [{ "set": "input", "value": "2024-02-29T13:45:30.123Z" }, "settle"]
+  },
+  {
+    "name": "an unreadable Date pulses Invalid Date and sends no part — the wire keeps the last readable parts; '' and null are not arrivals at all",
+    "because": "dateparts.ts :203 every part is flagged, `input && …` reads as nothing (never sent, adapter.ts); :201 inputSupplied",
+    "params": {},
+    "steps": [{ "set": "input", "value": "2024-02-29T13:45:30.123Z" }, "settle", { "set": "input", "value": "nope" }, "settle", { "set": "input", "value": "" }, { "set": "input", "value": null }, "settle"]
+  },
+  {
+    "name": "a number is epoch milliseconds (0 is Thursday 1 January 1970, week 1); a date-only string is parsed as UTC midnight (2026-01-01 is a Thursday, week 1)",
+    "because": "datemath.ts :56-64 toDate; :153-160 isoWeek",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "input", "value": 0 }, "settle", { "set": "input", "value": "2026-01-01" }, "settle"]
+  },
+  {
+    "name": "ISO week at the year boundary: Monday 30 December 2024 is week 1 (of 2025); Sunday 3 January 2021 is week 53 (of 2020)",
+    "because": "datemath.ts :153-160 — week 1 holds the first Thursday",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "input", "value": "2024-12-30T12:00:00.000Z" }, "settle", { "set": "input", "value": "2021-01-03T12:00:00.000Z" }, "settle"]
+  },
+  {
+    "name": "across the spring-forward night in America/New_York: 07:30Z is 03:30 local (02:30 never happens); the previous instant 06:30Z is 01:30",
+    "because": "NSP-013 AC5, the DST arm — Hours is 7 then 6 in UTC",
+    "params": {},
+    "world": { "timeZone": "America/New_York" },
+    "steps": [{ "set": "input", "value": "2026-03-08T07:30:00.000Z" }, "settle", { "set": "input", "value": "2026-03-08T06:30:00.000Z" }, "settle"]
+  }
+]

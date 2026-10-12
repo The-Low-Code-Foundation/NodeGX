@@ -1,0 +1,301 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "18587fe1-2251-549d-8f28-f749e873566b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pjIn",
+      "fromProperty": "refresh",
+      "toId": "pjLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-projects",
+      "toId": "pjCarry",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-loaded",
+      "toId": "pjCarry",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pjCarry",
+      "fromProperty": "out-changed",
+      "toId": "pjLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pjCarry",
+      "fromProperty": "out-changed",
+      "toId": "pjOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-failed",
+      "toId": "pjProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pjCarry",
+      "fromProperty": "out-failed",
+      "toId": "pjProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pjIn",
+      "fromProperty": "tasks",
+      "toId": "pjRows",
+      "toProperty": "in-tasks"
+    },
+    {
+      "fromId": "pjIn",
+      "fromProperty": "openId",
+      "toId": "pjRows",
+      "toProperty": "in-openId"
+    },
+    {
+      "fromId": "pjIn",
+      "fromProperty": "flag",
+      "toId": "pjRows",
+      "toProperty": "in-flag"
+    },
+    {
+      "fromId": "pjIn",
+      "fromProperty": "now",
+      "toId": "pjRows",
+      "toProperty": "in-now"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-projects",
+      "toId": "pjRows",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-projects",
+      "toId": "pjOut",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-items",
+      "toId": "pjRows",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-items",
+      "toId": "pjOut",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-marks",
+      "toId": "pjRows",
+      "toProperty": "in-marks"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-marks",
+      "toId": "pjOut",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-readings",
+      "toId": "pjRows",
+      "toProperty": "in-readings"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-readings",
+      "toId": "pjOut",
+      "toProperty": "readings"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-projectNames",
+      "toId": "pjOut",
+      "toProperty": "projectNames"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-showTab",
+      "toId": "pjOut",
+      "toProperty": "showTab"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-showTurnOn",
+      "toId": "pjOut",
+      "toProperty": "showTurnOn"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-noProjects",
+      "toId": "pjOut",
+      "toProperty": "noProjects"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-projectPosition",
+      "toId": "pjOut",
+      "toProperty": "projectPosition"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-nextPosition",
+      "toId": "pjOut",
+      "toProperty": "nextPosition"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-balanceText",
+      "toId": "pjOut",
+      "toProperty": "balanceText"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-balanceWhen",
+      "toId": "pjOut",
+      "toProperty": "balanceWhen"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-bars",
+      "toId": "pjOut",
+      "toProperty": "bars"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-lowText",
+      "toId": "pjOut",
+      "toProperty": "lowText"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-lowColor",
+      "toId": "pjOut",
+      "toProperty": "lowColor"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-incomeRows",
+      "toId": "pjOut",
+      "toProperty": "incomeRows"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-hasIncome",
+      "toId": "pjOut",
+      "toProperty": "hasIncome"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-rows",
+      "toId": "pjOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-payingRows",
+      "toId": "pjOut",
+      "toProperty": "payingRows"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-hasPaying",
+      "toId": "pjOut",
+      "toProperty": "hasPaying"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-buildingRows",
+      "toId": "pjOut",
+      "toProperty": "buildingRows"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-hasBuilding",
+      "toId": "pjOut",
+      "toProperty": "hasBuilding"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-hobbyRows",
+      "toId": "pjOut",
+      "toProperty": "hobbyRows"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-hasHobby",
+      "toId": "pjOut",
+      "toProperty": "hasHobby"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-quietRows",
+      "toId": "pjOut",
+      "toProperty": "quietRows"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-hasQuiet",
+      "toId": "pjOut",
+      "toProperty": "hasQuiet"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-projects",
+      "toId": "pjMoney",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-items",
+      "toId": "pjMoney",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-marks",
+      "toId": "pjMoney",
+      "toProperty": "in-marks"
+    },
+    {
+      "fromId": "pjIn",
+      "fromProperty": "now",
+      "toId": "pjMoney",
+      "toProperty": "in-now"
+    },
+    {
+      "fromId": "pjMoney",
+      "fromProperty": "out-upRows",
+      "toId": "pjOut",
+      "toProperty": "upRows"
+    },
+    {
+      "fromId": "pjMoney",
+      "fromProperty": "out-recRows",
+      "toId": "pjOut",
+      "toProperty": "recRows"
+    },
+    {
+      "fromId": "pjMoney",
+      "fromProperty": "out-pastRows",
+      "toId": "pjOut",
+      "toProperty": "pastRows"
+    },
+    {
+      "fromId": "pjMoney",
+      "fromProperty": "out-projectOptions",
+      "toId": "pjOut",
+      "toProperty": "projectOptions"
+    }
+  ]
+}

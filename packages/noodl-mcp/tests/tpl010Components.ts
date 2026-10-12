@@ -16,7 +16,7 @@
  *
  * R1, from the mockup Richard rejected: *"mostly just preachy … only telling you how bad
  * things are"*. **Every sentence this template generates is a plan for the days that are
- * left, never a verdict on the days that are gone.** `Logic/Envelopes` and `Logic/Shutdown`
+ * left, never a verdict on the days that are gone.** `Logic/Budgets` and `Logic/Shutdown`
  * are where sentences are made, and both are rules over data — there is no model in the
  * template. Hobby going over budget is *reported* and never flagged (R4): "not budgeted,
  * not counted, not a problem".
@@ -43,7 +43,7 @@ export const APP_COMPONENT = 'App';
  * TPL-010-M (M10): `CashEvent` became `MoneyItem` + `MoneyMark` + `BalanceReading`, and nothing
  * in them is deleted — ending an item sets its `until`, so the past keeps its history.
  */
-export const COLLECTIONS = ['Project', 'Block', 'MonthPlan', 'MoneyItem', 'MoneyMark', 'BalanceReading', 'Settings'] as const;
+export const COLLECTIONS = ['Project', 'Block', 'MonthPlan', 'MoneyItem', 'MoneyMark', 'BalanceReading', 'Settings', 'PlanEvent'] as const;
 
 export interface Tpl010Component {
   path: string;
@@ -61,7 +61,7 @@ export interface Tpl010Component {
 export const C = {
   themeSwitch: '/Week/Theme switch',
   appBar: '/Week/App bar',
-  envelopeTile: '/Week/Envelope tile',
+  envelopeTile: '/Week/Budget tile',
   movesStrip: '/Week/Moves strip',
   moveChip: '/Week/Move chip',
   dayColumn: '/Week/Day column',
@@ -98,15 +98,18 @@ export const C = {
   keyLine: '/Week/Key line',
   dayPicker: '/Week/Day picker',
   dayPick: '/Week/Day pick',
+  actionPick: '/Week/Action pick',
+  logLine: '/Week/Log line',
 
-  plannerData: '/Logic/Planner data',
-  envelopes: '/Logic/Envelopes',
+  plannerData: '/Logic/Planning data',
+  envelopes: '/Logic/Budgets',
   dayColumns: '/Logic/Day columns',
   moves: '/Logic/Moves',
   money: '/Logic/Money',
   moneyView: '/Logic/Money pane',
   mark: '/Logic/Mark',
   shutdown: '/Logic/Shutdown',
+  todoTasks: '/Logic/Todo tasks',
 
   addBlock: '/Commands/Add block',
   saveBlock: '/Commands/Save block',
@@ -124,6 +127,8 @@ export const C = {
   addMark: '/Commands/Add mark',
   editMark: '/Commands/Edit mark',
   recordBalance: '/Commands/Record balance',
+  sendToTodo: '/Commands/Send to todo',
+  tellTodo: '/Commands/Tell todo',
   agreeMoneyItem: '/Commands/Agree money item',
   editSettings: '/Commands/Edit settings',
   addSettings: '/Commands/Add settings',
@@ -171,9 +176,20 @@ export const VAR = {
   /** Which day the phone is showing. Empty until the picker is pressed, which means today. */
   phoneDay: 'plannerPhoneDay',
   /** What the backend said when signing in did not work. */
-  signInError: 'plannerSignInError'
+  signInError: 'plannerSignInError',
+  /**
+   * TPL-010-T T1 — the next actions ticked in the block sheet, as `<blockId>|<actionId>,<actionId>`.
+   * The block id in front is what makes it belong to one sheet: opened on another task, the ticks
+   * read as that task's first action, so nothing picked on the last one is carried over.
+   */
+  pickedActions: 'plannerPickedActions'
 } as const;
 
+/** L4/L7 — the history line *Send to todo* writes, and what marks a task as one Planning sent. */
+export const SENT_SUMMARY = 'Sent from Planning';
+/** TPL-010-T T2 — how the two lines Planning writes into a task's history in the todo list begin. */
+export const PLANNED_PREFIX = 'Planned in Planning';
+export const LOGGED_PREFIX = 'Logged in Planning';
 export const PROBLEM_TEXT = 'That change did not save. Check your connection, then try again.';
 export const LOAD_PROBLEM_TEXT = 'Your week could not be loaded. Check that the backend is running, then sign in again.';
 
@@ -218,8 +234,10 @@ function group(id: string, label: string, parent: string | undefined, params: Re
   return node;
 }
 
+/** A visual node under `parent`; with none, it is the component's root (a row that is one button). */
 function place(id: string, type: string, label: string, parent: string | undefined, parameters?: Record<string, unknown>): unknown {
-  const node: Record<string, unknown> = { id, type, label, parent };
+  const node: Record<string, unknown> = { id, type, label };
+  if (parent) node.parent = parent;
   if (parameters) node.parameters = parameters;
   return node;
 }
@@ -565,6 +583,42 @@ function moveOf(projectId, moveBlocks, today) {
 function shortDay(s) { var d = parseDay(s); return d ? DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() : ''; }
 `;
 
+/**
+ * **TPL-010-T T3 — the history, Planning's side.** One `PlanEvent` per thing that happened to a block
+ * or a project, never changed and never deleted; the block sheet draws a block's lines and the card a
+ * project's, newest first, from the same rows (Richard, 2026-09-23: *"both, from one log"*).
+ *
+ * A line keeps the block's words as they were (`what`), so the card can say which block it is about
+ * and a block that has since been taken out of the week still has a story.
+ */
+export const LOG_FNS = String.raw`function logWhen(at) {
+  var d = new Date(String(at || ''));
+  if (isNaN(d.getTime())) return '';
+  return DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() + ' ' + MON[d.getMonth()] + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+function logRows(history, key, value, withWhat, limit) {
+  var mine = [];
+  var list = history || [];
+  for (var i = 0; i < list.length; i++) if (list[i] && value && list[i][key] === value) mine.push(list[i]);
+  mine.sort(function (a, b) { return String(b.at || '').localeCompare(String(a.at || '')); });
+  var rows = [];
+  for (var j = 0; j < mine.length && j < limit; j++) {
+    var ev = mine[j];
+    var what = withWhat && ev.what ? '“' + ev.what + '” · ' : '';
+    var body = String(ev.body || '');
+    rows.push({ line: logWhen(ev.at) + ' · ' + what + String(ev.summary || ''), body: body, hasBody: body !== '' });
+  }
+  return rows;
+}
+function findById(list, id) {
+  var l = list || [];
+  for (var i = 0; i < l.length; i++) if (l[i] && id && l[i].id === id) return l[i];
+  return null;
+}
+function nameOf(projects, id) { var p = findById(projects, id); return p ? String(p.name || '') : ''; }
+function cap(s) { s = String(s || ''); return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+`;
+
 /** The five envelope keys, and their colour tokens, available to any Function that builds rows. */
 export const ENVELOPE_FNS = String.raw`var ENV_KEYS = ${JSON.stringify([...ENVELOPE_KEYS])};
 var ENV_NAMES = ${JSON.stringify(ENVELOPE_NAMES)};
@@ -622,18 +676,18 @@ const ENVELOPE_TILE_FIELDS: Array<[string, string]> = [
  * One envelope, budgeted once a month like giving every hour a job (R4).
  *
  * The sentence under the bar is the whole point of the tile and it is built in
- * `Logic/Envelopes`, never here: **Billable says how many hours a day the rest of the month
+ * `Logic/Budgets`, never here: **Billable says how many hours a day the rest of the month
  * needs, not how far behind you are** (R1). `fillColor` arrives already decided so that
  * going over Billable can be red while going over Hobby is simply the bar full — R4:
  * *"not budgeted, not counted, not a problem"*.
  */
 const ENVELOPE_TILE: Tpl010Component = {
-  path: 'Week/Envelope tile',
+  path: 'Week/Budget tile',
   description: 'One envelope: what it is called, how many hours are left in it, a bar of how much is spent, and the one line that says what to do with the rest.',
   ...iface(ENVELOPE_TILE_FIELDS, []),
   nodes: [
-    inputs('etIn', 'The envelope', ENVELOPE_TILE_FIELDS),
-    group('etRoot', 'Envelope tile', undefined, {
+    inputs('etIn', 'The budget', ENVELOPE_TILE_FIELDS),
+    group('etRoot', 'Budget tile', undefined, {
       ...CARD,
       ...COLUMN('var(--space-1)'),
       borderTopWidth: px(3),
@@ -648,7 +702,7 @@ const ENVELOPE_TILE: Tpl010Component = {
       justifyContent: 'space-between',
       cssClassName: 'planner-env-head'
     }),
-    text('etName', 'Envelope name', 'etHead', '', { ...T_META, sizeMode: 'contentSize', fontSize: px(13), color: 'var(--foreground)', fontWeight: 'var(--font-bold)' }),
+    text('etName', 'Budget name', 'etHead', '', { ...T_META, sizeMode: 'contentSize', fontSize: px(13), color: 'var(--foreground)', fontWeight: 'var(--font-bold)' }),
     text('etLeft', 'Hours left', 'etHead', '', { ...T_NUM, sizeMode: 'contentSize', fontSize: px(13), fontWeight: 'var(--font-semibold)' }),
     group('etTrack', 'The bar', 'etRoot', {
       sizeMode: 'explicit',
@@ -689,7 +743,9 @@ const MOVE_CHIP_FIELDS: Array<[string, string]> = [
   ['hint', 'string'],
   ['tick', 'string'],
   ['dotFill', 'string'],
-  ['chipClass', 'string']
+  ['chipClass', 'string'],
+  // TPL-010-L L4 — the move is an open task in the todo list (sent from the card, or typed there).
+  ['inTodo', 'boolean']
 ];
 
 /**
@@ -702,7 +758,7 @@ const MOVE_CHIP_FIELDS: Array<[string, string]> = [
  */
 const MOVE_CHIP: Tpl010Component = {
   path: 'Week/Move chip',
-  description: 'One project’s next move as a chip: a dot in its envelope colour, whose move it is, what it is worth, and whether it already has time in the week.',
+  description: 'One project’s next move as a chip: a dot in its budget colour, whose move it is, what it is worth, and whether it already has time in the week.',
   ...iface(MOVE_CHIP_FIELDS, [['press', 'signal'], ['projectId', 'string'], ['move', 'string'], ['placed', 'boolean']]),
   nodes: [
     inputs('mcIn', 'The move', MOVE_CHIP_FIELDS),
@@ -723,7 +779,7 @@ const MOVE_CHIP: Tpl010Component = {
       paddingBottom: 'var(--space-0-5)'
     }),
     // R7d — the marker is hollow until the move has a day, and filled once it has one.
-    group('mcDot', 'Which envelope', 'mcRoot', {
+    group('mcDot', 'Which budget', 'mcRoot', {
       sizeMode: 'explicit',
       width: px(8),
       height: px(8),
@@ -741,6 +797,7 @@ const MOVE_CHIP: Tpl010Component = {
       fontWeight: 'var(--font-semibold)',
       cssClassName: 'planner-chip-tick'
     }),
+    text('mcInTodo', 'Already in the todo list', 'mcRoot', 'in todo', { ...T_META, sizeMode: 'contentSize', mounted: false }),
     place('mcPress', BUTTON, 'Put it in the week', 'mcRoot', {
       ...BTN_ICON('icon-plus', 'Put 30 minutes in the week'),
       fontSize: px(13),
@@ -761,6 +818,7 @@ const MOVE_CHIP: Tpl010Component = {
     wire('mcIn', 'worth', 'mcWorth', 'text'),
     wire('mcIn', 'hasWorth', 'mcWorth', 'mounted'),
     wire('mcIn', 'placed', 'mcTick', 'mounted'),
+    wire('mcIn', 'inTodo', 'mcInTodo', 'mounted'),
     // R7's red: a move whose date has passed. Red is reserved for exactly this and the ceiling (R13).
     // 🔴 This was `late` (a boolean) wired into a colour port, so a late chip never went red.
     wire('mcIn', 'edge', 'mcRoot', 'borderColor'),
@@ -775,8 +833,9 @@ const MOVE_CHIP: Tpl010Component = {
   ]
 };
 
+// P78-TPL010-MOVEARROW — the block's id is `blockId`; the row's own id is not a record's.
 const BLOCK_FIELDS: Array<[string, string]> = [
-  ['id', 'string'],
+  ['blockId', 'string'],
   ['projectId', 'string'],
   ['projectName', 'string'],
   ['what', 'string'],
@@ -798,9 +857,10 @@ const BLOCK_FIELDS: Array<[string, string]> = [
  * *0.5 of 1 h* (R22), and the hours arrive here already resolved — `Logic/Day columns` decides,
  * because the envelope totals and this line must never disagree.
  *
- * `fromTodo` draws the red edge of an overdue money-linked task pushed over from the todo
- * list (R11, TPL-010-L). Nothing in this template writes it; the field is here so the link
- * task has somewhere to land.
+ * `fromTodo` is a task from the todo list (TPL-010-L), drawn by `Logic/Todo tasks` and not yet
+ * a block. **Every press on one opens the block sheet on it** (L3 as changed 2026-09-23), where
+ * it gets a project and hours and becomes a block — never the tick (there is nothing to log) and
+ * never the project card (it has no project). So each press goes through a `Condition` on it.
  */
 const BLOCK: Tpl010Component = {
   path: 'Week/Block',
@@ -871,7 +931,11 @@ const BLOCK: Tpl010Component = {
       paddingRight: 'var(--space-0)',
       paddingTop: 'var(--space-0)',
       paddingBottom: 'var(--space-0)'
-    })
+    }),
+    // L3 — which press is which, for a task from the todo list.
+    logic('bkTickTodo', CONDITION, 'Is the tick on a todo task?', signalOnly('condition')),
+    logic('bkLogTodo', CONDITION, 'Are the words on a todo task?', signalOnly('condition')),
+    logic('bkWhoTodo', CONDITION, 'Is the name on a todo task?', signalOnly('condition'))
   ],
   connections: [
     wire('bkIn', 'soft', 'bkRoot', 'backgroundColor'),
@@ -884,15 +948,19 @@ const BLOCK: Tpl010Component = {
     // wiring into it here lands nothing and says nothing.
     wire('bkIn', 'what', 'bkWhat', 'label'),
     wire('bkIn', 'hoursText', 'bkHours', 'label'),
-    wire('bkIn', 'id', 'bkOut', 'id'),
+    wire('bkIn', 'blockId', 'bkOut', 'id'),
     wire('bkIn', 'projectId', 'bkOut', 'projectId'),
     wire('bkIn', 'done', 'bkOut', 'done'),
-    wire('bkTick', 'onClick', 'bkOut', 'toggle'),
-    wire('bkWho', 'onClick', 'bkOut', 'openProject'),
+    ...['bkTickTodo', 'bkLogTodo', 'bkWhoTodo'].flatMap((g) => [wire('bkIn', 'fromTodo', g, 'condition'), wire(g, 'ontrue', 'bkOut', 'openLog')]),
+    wire('bkTick', 'onClick', 'bkTickTodo', 'eval'),
+    wire('bkTickTodo', 'onfalse', 'bkOut', 'toggle'),
+    wire('bkWho', 'onClick', 'bkWhoTodo', 'eval'),
+    wire('bkWhoTodo', 'onfalse', 'bkOut', 'openProject'),
     // R16a — the tick opens the block sheet with Done ticked (the page routes it); the words and
     // the hours open the same sheet with Done off, for adding a sitting without closing the block.
-    wire('bkWhat', 'onClick', 'bkOut', 'openLog'),
-    wire('bkHours', 'onClick', 'bkOut', 'openLog')
+    wire('bkWhat', 'onClick', 'bkLogTodo', 'eval'),
+    wire('bkHours', 'onClick', 'bkLogTodo', 'eval'),
+    wire('bkLogTodo', 'onfalse', 'bkOut', 'openLog')
   ]
 };
 
@@ -1151,11 +1219,14 @@ const MIGHT_LINK: Tpl010Component = {
   ]
 };
 
+// P78-TPL010-MOVEARROW — a display row never wears a record's id: a For Each turns a row into the
+// record with that id and writes every field onto it (the arrow went into Project.move). The row
+// carries the project's id as `projectId`, and its words as `moveText`, never the record's `move`.
 const PROJECT_ROW_FIELDS: Array<[string, string]> = [
-  ['id', 'string'],
+  ['projectId', 'string'],
   ['name', 'string'],
   ['hoursText', 'string'],
-  ['move', 'string'],
+  ['moveText', 'string'],
   ['hasMove', 'boolean'],
   ['moveColor', 'string'],
   ['mark', 'string'],
@@ -1199,19 +1270,19 @@ const PROJECT_LIST_ROW: Tpl010Component = {
   connections: [
     wire('prIn', 'name', 'prName', 'text'),
     wire('prIn', 'hoursText', 'prHours', 'text'),
-    wire('prIn', 'move', 'prMove', 'text'),
+    wire('prIn', 'moveText', 'prMove', 'text'),
     wire('prIn', 'hasMove', 'prMove', 'mounted'),
     wire('prIn', 'moveColor', 'prMove', 'color'),
     wire('prIn', 'mark', 'prBar', 'backgroundColor'),
     wire('prIn', 'barWidth', 'prBar', 'width'),
     wire('prIn', 'barRest', 'prBarRest', 'width'),
     wire('prIn', 'rowBackground', 'prRoot', 'backgroundColor'),
-    wire('prIn', 'id', 'prOut', 'id'),
+    wire('prIn', 'projectId', 'prOut', 'id'),
     wire('prRoot', 'onClick', 'prOut', 'pick')
   ]
 };
 
-const CARRY_ROW_FIELDS: Array<[string, string]> = [['id', 'string'], ['projectName', 'string'], ['what', 'string'], ['hoursText', 'string'], ['carryLabel', 'string']];
+const CARRY_ROW_FIELDS: Array<[string, string]> = [['blockId', 'string'], ['projectName', 'string'], ['what', 'string'], ['hoursText', 'string'], ['carryLabel', 'string']];
 
 /**
  * One block that was planned for today and is not done, in the shutdown drawer (R12).
@@ -1239,7 +1310,7 @@ const CARRY_ROW: Tpl010Component = {
     wire('crIn', 'projectName', 'crWho', 'text'),
     wire('crIn', 'what', 'crWhat', 'text'),
     wire('crIn', 'carryLabel', 'crCarry', 'label'),
-    wire('crIn', 'id', 'crOut', 'id'),
+    wire('crIn', 'blockId', 'crOut', 'id'),
     wire('crCarry', 'onClick', 'crOut', 'carry'),
     wire('crDrop', 'onClick', 'crOut', 'drop')
   ]
@@ -1382,7 +1453,7 @@ const DAY_BOXES: Tpl010Component = {
  */
 const MOVES_STRIP: Tpl010Component = {
   path: 'Week/Moves strip',
-  description: 'The one line of next moves under the envelopes, most urgent first, with the dormant projects on it too.',
+  description: 'The one line of next moves under the budgets, most urgent first, with the dormant projects on it too.',
   ...iface([['rows', 'array'], ['empty', 'boolean']], [['press', 'signal'], ['projectId', 'string'], ['move', 'string'], ['placed', 'boolean']]),
   repeats: { source: 'array', rowFields: MOVE_CHIP_FIELDS.map(([n]) => n) },
   instantiates: [C.moveChip],
@@ -1707,6 +1778,58 @@ const ENTRY_ROW: Tpl010Component = {
   ]
 };
 
+const ACTION_PICK_FIELDS: Array<[string, string]> = [['actionId', 'string'], ['label', 'string'], ['ink', 'string'], ['edge', 'string']];
+
+/**
+ * TPL-010-T T1 — one of a todo task's next actions in the block sheet. A press ticks or unticks it;
+ * each one ticked becomes a block. A button with its box drawn as a character (☐ ☑), not a Checkbox:
+ * a Checkbox in a repeated row is set by pulses that can race the row's data (memory: the sheet
+ * traps), while a label is only ever what the list says it is.
+ */
+const ACTION_PICK: Tpl010Component = {
+  path: 'Week/Action pick',
+  description: 'One of a todo task’s next actions in the block sheet: press it to tick or untick it. Each one ticked becomes a block.',
+  ...iface(ACTION_PICK_FIELDS, [['pick', 'signal'], ['id', 'string']]),
+  nodes: [
+    inputs('apIn', 'The action', ACTION_PICK_FIELDS),
+    outputs('apOut', 'Which one was pressed', [['pick', 'signal'], ['id', 'string']]),
+    place('apBtn', BUTTON, 'Tick or untick it', undefined, {
+      ...BTN_GHOST,
+      sizeMode: 'contentHeight',
+      width: pct(100),
+      fontSize: 'var(--text-sm)',
+      styleCss: 'text-align: left; justify-content: flex-start;'
+    })
+  ],
+  connections: [
+    wire('apIn', 'label', 'apBtn', 'label'),
+    wire('apIn', 'ink', 'apBtn', 'color'),
+    wire('apIn', 'edge', 'apBtn', 'borderColor'),
+    wire('apIn', 'actionId', 'apOut', 'id'),
+    wire('apBtn', 'onClick', 'apOut', 'pick')
+  ]
+};
+
+const LOG_LINE_FIELDS: Array<[string, string]> = [['line', 'string'], ['body', 'string'], ['hasBody', 'boolean']];
+
+/** TPL-010-T T3 — one line of history: when and what happened, and the words said about it under it. */
+const LOG_LINE: Tpl010Component = {
+  path: 'Week/Log line',
+  description: 'One line of a block’s or a project’s history: when, what happened, and any note under it.',
+  ...iface(LOG_LINE_FIELDS, []),
+  nodes: [
+    inputs('llIn', 'The line', LOG_LINE_FIELDS),
+    group('llRoot', 'One line', undefined, COLUMN('var(--space-0)')),
+    text('llLine', 'When and what', 'llRoot', '', { ...wide(T_META), color: 'var(--foreground)' }),
+    text('llBody', 'What was said', 'llRoot', '', { ...wide(T_META), marginLeft: 'var(--space-3)' })
+  ],
+  connections: [
+    wire('llIn', 'line', 'llLine', 'text'),
+    wire('llIn', 'body', 'llBody', 'text'),
+    wire('llIn', 'hasBody', 'llBody', 'mounted')
+  ]
+};
+
 /** A labelled box, the one shape every field in the three editors takes. */
 const BOX = (label: string, type: 'text' | 'number' | 'textArea' = 'text') => ({
   ...FIELD,
@@ -1795,11 +1918,18 @@ const BLOCK_SHEET_FIELDS: Array<[string, string]> = [
   ['hours', 'string'],
   ['note', 'string'],
   ['done', 'boolean'],
-  ['saveLabel', 'string']
+  ['saveLabel', 'string'],
+  // TPL-010-L — the task in the todo list this block is for, when there is one and an address.
+  ['todoHref', 'string'],
+  // TPL-010-T T1 — a task's next actions to tick, in place of the one box for its words.
+  ['whatShown', 'boolean'], ['actionsShown', 'boolean'], ['actionRows', 'array'],
+  // T3 — the block's history, newest first.
+  ['logShown', 'boolean'], ['logRows', 'array']
 ];
 const BLOCK_SHEET_OUTS: Array<[string, string]> = [
   ['projectId', 'string'], ['what', 'string'], ['planned', 'string'], ['date', 'string'],
-  ['hours', 'string'], ['note', 'string'], ['done', 'boolean'], ['save', 'signal'], ['close', 'signal']
+  ['hours', 'string'], ['note', 'string'], ['done', 'boolean'], ['save', 'signal'], ['close', 'signal'],
+  ['pickAction', 'signal'], ['actionId', 'string']
 ];
 
 /**
@@ -1822,7 +1952,7 @@ const BLOCK_SHEET: Tpl010Component = {
   description: 'One block over the week: its project, what it is, its hours and its day; the time logged on it so far; and a line to add the time you just spent.',
   ...iface(BLOCK_SHEET_FIELDS, BLOCK_SHEET_OUTS),
   repeats: { source: 'array', rowFields: ENTRY_ROW_FIELDS.map(([n]) => n) },
-  instantiates: [C.entryRow, C.datePicker],
+  instantiates: [C.entryRow, C.datePicker, C.actionPick, C.logLine],
   nodes: [
     inputs('bsIn', 'The block it is showing', BLOCK_SHEET_FIELDS),
     outputs('bsOut', 'What it should become', BLOCK_SHEET_OUTS),
@@ -1833,6 +1963,10 @@ const BLOCK_SHEET: Tpl010Component = {
 
     place('bsProject', 'net.noodl.controls.options', 'Which project', 'bsCard', { ...PICK('Project'), placeholder: 'Pick a project' }),
     place('bsWhat', TEXT_INPUT, 'What it is', 'bsCard', BOX('What it is')),
+    // T1 — a todo task with next actions: tick the ones to plan, and each becomes a block.
+    group('bsActs', 'Its next actions', 'bsCard', { ...COLUMN('var(--space-1)'), mounted: false }),
+    text('bsActsLabel', 'Label', 'bsActs', 'Its next actions — each one ticked becomes a block', wide(T_LABEL)),
+    place('bsActEach', FOR_EACH, 'One line per next action', 'bsActs', { template: C.actionPick, templateType: 'explicit' }),
     group('bsWhen', 'Hours and day', 'bsCard', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
     group('bsPlannedBox', 'Hours planned', 'bsWhen', { ...COLUMN('var(--space-0)'), width: pct(40) }),
     place('bsPlanned', TEXT_INPUT, 'Hours planned', 'bsPlannedBox', BOX('Hours planned', 'number')),
@@ -1858,7 +1992,22 @@ const BLOCK_SHEET: Tpl010Component = {
     derive('bsOpened', 'Clear the boxes on close; tick Done to match the block', SHEET_SCRIPT(['done'])),
 
     group('bsButtons', 'Buttons', 'bsCard', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
-    place('bsSave', BUTTON, 'Save', 'bsButtons', { ...BTN_PRIMARY, label: 'Save' })
+    place('bsSave', BUTTON, 'Save', 'bsButtons', { ...BTN_PRIMARY, label: 'Save' }),
+    place('bsTodo', BUTTON, 'Open its task in the todo list', 'bsButtons', { ...BTN_GHOST, label: 'Open in Todo ↗' }),
+    derive('bsHasTodo', 'Is there a task to open?', "Outputs.shown = String(Inputs.url || '').trim() !== '';"),
+    script('bsOpenTodo', 'Open the task in a new tab', "var u = String(Inputs.url || '').trim();\nif (u) window.open(u, '_blank', 'noopener');", ['url']),
+
+    // T3 — at the bottom of the sheet: what has happened to this block, newest first.
+    group('bsLog', 'Its history', 'bsCard', {
+      ...COLUMN('var(--space-1-5)'),
+      mounted: false,
+      borderTopStyle: 'solid',
+      borderTopWidth: 'var(--border-1)',
+      borderTopColor: 'var(--border)',
+      paddingTop: 'var(--space-3)'
+    }),
+    text('bsLogLabel', 'Label', 'bsLog', 'History', wide(T_LABEL)),
+    place('bsLogEach', FOR_EACH, 'One line per thing that happened', 'bsLog', { template: C.logLine, templateType: 'explicit' })
   ],
   connections: [
     wire('bsIn', 'shown', 'bsScrim', 'mounted'),
@@ -1869,6 +2018,13 @@ const BLOCK_SHEET: Tpl010Component = {
     wire('bsProject', 'value', 'bsOut', 'projectId'),
     // 🔴 `text` is a box's OUTPUT. Putting a value INTO it is `startValue`.
     wire('bsIn', 'what', 'bsWhat', 'startValue'),
+    wire('bsIn', 'whatShown', 'bsWhat', 'mounted'),
+    wire('bsIn', 'actionsShown', 'bsActs', 'mounted'),
+    wire('bsIn', 'actionRows', 'bsActEach', 'items'),
+    wire('bsActEach', 'itemOutput-id', 'bsOut', 'actionId'),
+    wire('bsActEach', 'itemOutputSignal-pick', 'bsOut', 'pickAction'),
+    wire('bsIn', 'logShown', 'bsLog', 'mounted'),
+    wire('bsIn', 'logRows', 'bsLogEach', 'items'),
     wire('bsWhat', 'onTextChanged', 'bsOut', 'what'),
     wire('bsIn', 'planned', 'bsPlanned', 'startValue'),
     wire('bsPlanned', 'onTextChanged', 'bsOut', 'planned'),
@@ -1890,6 +2046,10 @@ const BLOCK_SHEET: Tpl010Component = {
     wire('bsDone', 'checked', 'bsOut', 'done'),
     wire('bsIn', 'saveLabel', 'bsSave', 'label'),
     wire('bsSave', 'onClick', 'bsOut', 'save'),
+    wire('bsIn', 'todoHref', 'bsHasTodo', 'in-url'),
+    wire('bsHasTodo', 'out-shown', 'bsTodo', 'mounted'),
+    wire('bsIn', 'todoHref', 'bsOpenTodo', 'in-url'),
+    wire('bsTodo', 'onClick', 'bsOpenTodo', 'run'),
     wire('bsClose', 'onClick', 'bsOut', 'close'),
     wire('bsScrim', 'onClick', 'bsOut', 'close')
   ]
@@ -1900,23 +2060,32 @@ const under = (prefix: string, name: string) => prefix + name[0].toUpperCase() +
 
 /** What the project editor holds: every field of a Project a person types (R23). */
 const PROJECT_EDIT_VALUES: Array<[string, string]> = [
-  ['name', 'string'], ['sub', 'string'], ['kind', 'string'], ['rate', 'string'], ['slot', 'string'], ['rung', 'string'],
+  ['name', 'string'], ['sub', 'string'], ['kind', 'string'], ['rate', 'string'],
   ['move', 'string'], ['moveWorth', 'string'], ['moveWhen', 'string'], ['moveDue', 'string'], ['moveStop', 'boolean'], ['say', 'string'],
   // M21 and §4.2 — hourly or fixed, the payment terms that pre-fill a bill's due date (M5), and the agreed hours.
-  ['billing', 'string'], ['termsDays', 'string'], ['agreedHours', 'string']
+  ['billing', 'string'], ['termsDays', 'string'], ['agreedHours', 'string'],
+  // TPL-010-B B1 — the bill typed with the project: when (once, monthly, or later), how much, the day it goes out, the last one.
+  ['billWhen', 'string'], ['billAmount', 'string'], ['billDate', 'string'], ['billUntil', 'string']
 ];
-const PROJECT_EDITOR_FIELDS: Array<[string, string]> = [['shown', 'boolean'], ['title', 'string'], ['kinds', '*'], ['billings', '*'], ...PROJECT_EDIT_VALUES];
+const PROJECT_EDITOR_FIELDS: Array<[string, string]> = [
+  ['shown', 'boolean'], ['title', 'string'], ['kinds', '*'], ['billings', '*'], ['whens', '*'],
+  // B3 — a project that has bills is not offered one; the form says what they are instead.
+  ['hasBills', 'boolean'], ['billsLine', 'string'],
+  ...PROJECT_EDIT_VALUES
+];
 const PROJECT_EDITOR_OUTS: Array<[string, string]> = [...PROJECT_EDIT_VALUES, ['save', 'signal'], ['cancel', 'signal']];
 
-/** The typed boxes: `[field, label, id, box type, parent]`. Placed one by one below, because child order is draw order. */
+/**
+ * The typed boxes: `[field, label, id, box type, parent]`. Placed one by one below, because child order is draw order.
+ * B9 — no Slot and no Rung: nothing in the app read or showed either, and they were two unlabelled boxes of jargon.
+ */
 const PROJECT_BOXES: Array<[string, string, string, 'text' | 'number', string]> = [
   ['name', 'Name', 'peName', 'text', 'peRoot'],
   ['sub', 'One line about it', 'peSub', 'text', 'peRoot'],
   ['rate', 'Rate, per hour', 'peRate', 'number', 'peRateBox'],
   ['termsDays', 'Payment terms, days', 'peTerms', 'number', 'peTermsBox'],
-  ['agreedHours', 'Agreed hours a month', 'peAgreed', 'number', 'peAgreedBox'],
-  ['slot', 'Slot', 'peSlot', 'text', 'peSlotBox'],
-  ['rung', 'Rung', 'peRung', 'text', 'peRungBox'],
+  ['agreedHours', 'Agreed hours (optional)', 'peAgreed', 'number', 'peAgreedBox'],
+  ['billAmount', 'Amount, €', 'peAmount', 'number', 'peAmountBox'],
   ['move', 'The move', 'peMove', 'text', 'peMoveBox'],
   ['moveWorth', 'What it is worth', 'peWorth', 'text', 'peWorthBox'],
   ['moveWhen', 'When, in words', 'peWhen', 'text', 'peWhenBox'],
@@ -1928,6 +2097,70 @@ const peBox = (field: string) => {
   const [, label, id, type, parent] = found;
   return place(id, TEXT_INPUT, label, parent, BOX(label, type));
 };
+
+/** The tinted box a part of the project form sits in: its next move, and (B1) its billing. */
+const TINTED_BOX = {
+  ...COLUMN('var(--space-2)'),
+  backgroundColor: 'var(--muted)',
+  borderRadius: 'var(--radius-md)',
+  paddingLeft: 'var(--space-3)',
+  paddingRight: 'var(--space-3)',
+  paddingTop: 'var(--space-2)',
+  paddingBottom: 'var(--space-3)'
+};
+
+/**
+ * **B1–B4, B8 — the project form's shape, and the one sentence about its bill.** Runs on what is
+ * picked now. `billWhen` is what the form sends: `later` unless a bill is being offered, so the
+ * commands never have to know why one was not.
+ */
+const PROJECT_BILL_SHAPE = String.raw`var kind = String(Inputs.kind || 'earning');
+var earning = kind === 'earning';
+var fixed = String(Inputs.billing || '') === 'fixed';
+var hasBills = Inputs.hasBills === true;
+var when = String(Inputs.when || '');
+if (when !== 'once' && when !== 'monthly') when = 'later';
+var offer = earning && !hasBills;
+var eff = offer ? when : 'later';
+Outputs.billingShown = earning;
+Outputs.rateShown = earning && !fixed;
+Outputs.agreedShown = earning && fixed;
+Outputs.offerShown = offer;
+Outputs.amountShown = offer && fixed && eff !== 'later';
+Outputs.datesShown = offer && eff !== 'later';
+Outputs.untilShown = offer && eff === 'monthly';
+Outputs.dateLabel = eff === 'monthly' ? 'First bill goes out' : 'Bill goes out';
+Outputs.billWhen = eff;
+Outputs.moveHint = earning
+  ? 'The next thing to do on it. What it’s worth is a note in words; the money agreed goes in Billing, above.'
+  : 'The next thing to do on it, and what it could lead to, in words.';
+var terms = Math.min(120, Math.max(0, Math.round(num(Inputs.terms, 14))));
+var amount = num(Inputs.amount, 0);
+var rate = num(Inputs.rate, 0);
+var day = String(Inputs.billDate || '');
+var until = String(Inputs.until || '');
+var plan = '';
+if (!earning) plan = '';
+else if (hasBills) plan = 'Its bills are on the card, under Billing: ' + String(Inputs.billsLine || '') + '. Change them there.';
+else if (eff === 'later') plan = 'No bill yet. ' + (fixed ? 'Until it has one, the month doesn’t count this project’s money.' : 'Until it has one, the hours you log on it aren’t billed anywhere.') +
+  ' You can add it later on the card, under Billing.';
+else {
+  var missing = [];
+  if (fixed && !(amount > 0)) missing.push('type the amount');
+  if (!mOk(day)) missing.push('pick the day the ' + (eff === 'monthly' ? 'first ' : '') + 'bill goes out');
+  var what = fixed ? mEur(amount) : 'filled from the hours you log × ' + (rate > 0 ? mEur(rate) : 'the rate');
+  if (missing.length) {
+    var ask = missing.join(' and ');
+    plan = ask.charAt(0).toUpperCase() + ask.slice(1) + ', and saving adds ' + (eff === 'monthly' ? 'a bill every month.' : 'the bill.');
+  } else if (eff === 'once') {
+    plan = 'Saving adds the bill: ' + what + ', goes out ' + mDay(day) + ', due ' + mDay(mAddDays(day, terms)) + '. ' +
+      (fixed ? 'The hours you log are a record and never change it. ' : '') + 'When the work’s done, send your invoice as usual and mark the bill sent on the card.';
+  } else {
+    plan = 'Saving adds a bill every month: ' + what + ', the first going out ' + mDay(day) + ', each due ' + terms + ' days after it goes out' +
+      (mOk(until) && until >= day ? ', the last going out ' + mDay(until) + '.' : ', until you end it in Money.');
+  }
+}
+Outputs.plan = plan;`;
 
 /**
  * **R23 — the project editor, in the card's right-hand pane.**
@@ -1941,12 +2174,19 @@ const peBox = (field: string) => {
  * move by being given a new one here — which is why the move's fields sit in their own box, the
  * same box the detail draws the move in.
  *
- * The billing terms R23 lists belong to R2.2 and arrive with it: the fields they would edit
- * (`invoiceDay`, `termsDays`, `agreedHours`, `cycle`) do not exist until then.
+ * **TPL-010-B — the bill is typed where the project is.** Richard added a €2,400 fixed job and
+ * found an hourly rate, *agreed hours a month* and no box for the €2,400: its one home was
+ * *+ Add a bill* on the card, after saving, and nothing said so. A Billable project now has a
+ * Billing box — hourly or fixed, the terms, the rate or the agreed hours, and **when do you
+ * bill** with the amount and the day — and one sentence under it that always says what Save
+ * will do to the bills (B2). The sentence and the box's shape come from `peShape`, which reads
+ * what is picked NOW (the Money editor's `edShape` pattern), and its `billWhen` is what is sent:
+ * `later` whenever no bill is offered, so a project that has bills, or is not Billable, can never
+ * be given one from here (B3, B4).
  */
 const PROJECT_EDITOR: Tpl010Component = {
   path: 'Week/Project editor',
-  description: 'One project as a form: its name, what kind of work it is, its rate, and its next move — what it is, what it is worth and when.',
+  description: 'One project as a form: its name, what kind of work it is, how it is billed and its first bill, and its next move — what it is, what it is worth and when.',
   ...iface(PROJECT_EDITOR_FIELDS, PROJECT_EDITOR_OUTS),
   instantiates: [C.datePicker],
   nodes: [
@@ -1964,34 +2204,46 @@ const PROJECT_EDITOR: Tpl010Component = {
     place('peClose', BUTTON, 'Stop editing', 'peTop', BTN_ICON('icon-x', 'Stop editing')),
     peBox('name'),
     peBox('sub'),
-    group('peKindRow', 'Kind and rate', 'peRoot', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
-    group('peKindBox', 'What kind of work', 'peKindRow', { ...COLUMN('var(--space-0)'), width: pct(60) }),
-    place('peKind', 'net.noodl.controls.options', 'What kind of work', 'peKindBox', PICK('What kind of work')),
-    group('peRateBox', 'Rate', 'peKindRow', { ...COLUMN('var(--space-0)'), width: pct(40) }),
-    peBox('rate'),
-    group('peBillRow', 'Billing', 'peRoot', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
-    group('peBillingBox', 'Hourly or fixed', 'peBillRow', { ...COLUMN('var(--space-0)'), width: pct(40) }),
-    place('peBilling', 'net.noodl.controls.options', 'Hourly or fixed', 'peBillingBox', PICK('Billing')),
-    group('peTermsBox', 'Payment terms', 'peBillRow', { ...COLUMN('var(--space-0)'), width: pct(30) }),
-    group('peAgreedBox', 'Agreed hours', 'peBillRow', { ...COLUMN('var(--space-0)'), width: pct(30) }),
-    peBox('termsDays'),
-    peBox('agreedHours'),
-    group('peSlotRow', 'Slot and rung', 'peRoot', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
-    group('peSlotBox', 'Slot', 'peSlotRow', { ...COLUMN('var(--space-0)'), width: pct(50) }),
-    group('peRungBox', 'Rung', 'peSlotRow', { ...COLUMN('var(--space-0)'), width: pct(50) }),
-    peBox('slot'),
-    peBox('rung'),
+    place('peKind', 'net.noodl.controls.options', 'What kind of work', 'peRoot', PICK('What kind of work')),
 
-    group('peMoveBox', 'Its next move', 'peRoot', {
-      ...COLUMN('var(--space-2)'),
-      backgroundColor: 'var(--muted)',
-      borderRadius: 'var(--radius-md)',
-      paddingLeft: 'var(--space-3)',
-      paddingRight: 'var(--space-3)',
-      paddingTop: 'var(--space-2)',
-      paddingBottom: 'var(--space-3)'
-    }),
+    // B1 / B4 — Billing, for Billable work only, in the same tinted box as the next move.
+    group('peBillBox', 'Billing', 'peRoot', TINTED_BOX),
+    text('peBillLabel', 'Label', 'peBillBox', 'Billing', wide(T_LABEL)),
+    group('peBillRow', 'Hourly or fixed, and the terms', 'peBillBox', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('peBillingBox', 'Hourly or fixed', 'peBillRow', { ...COLUMN('var(--space-0)'), width: pct(60) }),
+    place('peBilling', 'net.noodl.controls.options', 'Hourly or fixed', 'peBillingBox', PICK('How it’s billed')),
+    group('peTermsBox', 'Payment terms', 'peBillRow', { ...COLUMN('var(--space-0)'), width: pct(40) }),
+    peBox('termsDays'),
+    // One of the two: an hourly project's rate, or a fixed one's agreed hours.
+    group('pePriceRow', 'The rate, or the agreed hours', 'peBillBox', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('peRateBox', 'Rate', 'pePriceRow', { ...COLUMN('var(--space-0)'), width: pct(50) }),
+    peBox('rate'),
+    group('peAgreedBox', 'Agreed hours', 'pePriceRow', { ...COLUMN('var(--space-0)'), width: pct(50) }),
+    peBox('agreedHours'),
+    // B3 — only a project with no bills is offered one.
+    group('peOffer', 'Its bill', 'peBillBox', COLUMN('var(--space-2)')),
+    group('peBillWhenRow', 'When, and how much', 'peOffer', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('peBillWhenBox', 'When do you bill?', 'peBillWhenRow', { ...COLUMN('var(--space-0)'), width: pct(60) }),
+    place('peBillWhen', 'net.noodl.controls.options', 'When do you bill?', 'peBillWhenBox', PICK('When do you bill?')),
+    group('peAmountBox', 'How much', 'peBillWhenRow', { ...COLUMN('var(--space-0)'), width: pct(40) }),
+    peBox('billAmount'),
+    group('peDatesRow', 'When the bill goes out', 'peOffer', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
+    group('peBillDateBox', 'The day it goes out', 'peDatesRow', { ...COLUMN('var(--space-0)'), width: pct(50) }),
+    place('peBillDate', C.datePicker, 'The day the bill goes out', 'peBillDateBox', { Label: 'Bill goes out', 'Show Label': true }),
+    group('peUntilBox', 'The last one', 'peDatesRow', { ...COLUMN('var(--space-0)'), width: pct(50) }),
+    place('peUntil', C.datePicker, 'The day the last bill goes out', 'peUntilBox', { Label: 'Last bill goes out (optional)', 'Show Label': true }),
+    // B2 — what Save will do to the bills, in words, as the fields change.
+    text('pePlan', 'What saving does about the bill', 'peBillBox', '', { ...wide(T_META), color: 'var(--foreground)' }),
+    derive(
+      'peShape',
+      'Which billing fields this project needs, and what saving does about its bill',
+      `${PLANNER_FNS}${MONEY_FNS}${PROJECT_BILL_SHAPE}`
+    ),
+
+    group('peMoveBox', 'Its next move', 'peRoot', TINTED_BOX),
     text('peMoveLabel', 'Label', 'peMoveBox', 'Next move', wide(T_LABEL)),
+    // B8 — the move is the next thing to do, not where agreed money goes.
+    text('peMoveHint', 'What the move is for', 'peMoveBox', '', wide(T_META)),
     peBox('move'),
     group('peMoveMeta', 'Worth and when', 'peMoveBox', { ...ROW('var(--space-3)'), alignItems: 'flex-end' }),
     group('peWorthBox', 'Worth', 'peMoveMeta', { ...COLUMN('var(--space-0)'), width: pct(50) }),
@@ -2016,6 +2268,34 @@ const PROJECT_EDITOR: Tpl010Component = {
     wire('peIn', 'billings', 'peBilling', 'items'),
     wire('peIn', 'billing', 'peBilling', 'value'),
     wire('peBilling', 'value', 'peOut', 'billing'),
+    // B1 — when it bills, the day and the last one; B2–B4 — the shape, from what is picked now.
+    wire('peIn', 'whens', 'peBillWhen', 'items'),
+    wire('peIn', 'billWhen', 'peBillWhen', 'value'),
+    wire('peIn', 'billDate', 'peBillDate', 'Value'),
+    wire('peBillDate', 'Value', 'peOut', 'billDate'),
+    wire('peIn', 'billUntil', 'peUntil', 'Value'),
+    wire('peUntil', 'Value', 'peOut', 'billUntil'),
+    wire('peKind', 'value', 'peShape', 'in-kind'),
+    wire('peBilling', 'value', 'peShape', 'in-billing'),
+    wire('peBillWhen', 'value', 'peShape', 'in-when'),
+    wire('peAmount', 'onTextChanged', 'peShape', 'in-amount'),
+    wire('peRate', 'onTextChanged', 'peShape', 'in-rate'),
+    wire('peTerms', 'onTextChanged', 'peShape', 'in-terms'),
+    wire('peBillDate', 'Value', 'peShape', 'in-billDate'),
+    wire('peUntil', 'Value', 'peShape', 'in-until'),
+    wire('peIn', 'hasBills', 'peShape', 'in-hasBills'),
+    wire('peIn', 'billsLine', 'peShape', 'in-billsLine'),
+    wire('peShape', 'out-billWhen', 'peOut', 'billWhen'),
+    wire('peShape', 'out-billingShown', 'peBillBox', 'mounted'),
+    wire('peShape', 'out-rateShown', 'peRateBox', 'mounted'),
+    wire('peShape', 'out-agreedShown', 'peAgreedBox', 'mounted'),
+    wire('peShape', 'out-offerShown', 'peOffer', 'mounted'),
+    wire('peShape', 'out-amountShown', 'peAmountBox', 'mounted'),
+    wire('peShape', 'out-datesShown', 'peDatesRow', 'mounted'),
+    wire('peShape', 'out-untilShown', 'peUntilBox', 'mounted'),
+    wire('peShape', 'out-dateLabel', 'peBillDate', 'Label'),
+    wire('peShape', 'out-plan', 'pePlan', 'text'),
+    wire('peShape', 'out-moveHint', 'peMoveHint', 'text'),
     wire('peIn', 'moveDue', 'peDue', 'Value'),
     wire('peDue', 'Value', 'peOut', 'moveDue'),
     wire('peIn', 'shown', 'peOpened', 'in-shown'),
@@ -2832,9 +3112,13 @@ const PROJECT_DETAIL_BASE: Array<[string, string]> = [
   ['canPlan', 'boolean'], ['placed', 'boolean'], ['unplaced', 'boolean'], ['placedLine', 'string'],
   ['planDate', 'string'], ['planHours', 'string'], ['minDate', 'string'], ['lastLine', 'string'], ['hasLast', 'boolean'],
   ['moveKey', 'string'],
+  // TPL-010-L L4 — the move can go to the todo list once; after that the card says it is there.
+  ['canSend', 'boolean'], ['inTodo', 'boolean'], ['todoLine', 'string'],
   ['weekText', 'string'], ['sparkTitle', 'string'], ['say', 'string'],
   ['facts', 'array'], ['bars', 'array'], ['boxes', 'array'],
-  ['firstLabel', 'string'], ['lastLabel', 'string']
+  ['firstLabel', 'string'], ['lastLabel', 'string'],
+  // TPL-010-T T3 — the project's history: every line about it or any of its blocks, newest first.
+  ['hasLog', 'boolean'], ['logRows', 'array']
 ];
 /**
  * §4.2 — **Billing**, on an earning project's card: hourly or fixed and the terms (M21), the bills
@@ -2843,13 +3127,17 @@ const PROJECT_DETAIL_BASE: Array<[string, string]> = [
  * And M16: a move can become hoped money. These come from `Logic/Money pane`, not `Card rows`.
  */
 const BILLING_FIELDS: Array<[string, string]> = [
-  ['billingShown', 'boolean'], ['billingTerms', 'string'], ['billingRows', 'array'], ['hopeShown', 'boolean'], ['hopedText', 'string'], ['hasHoped', 'boolean']
+  ['billingShown', 'boolean'], ['billingTerms', 'string'], ['billingRows', 'array'], ['hopeShown', 'boolean'], ['hopedText', 'string'], ['hasHoped', 'boolean'],
+  // TPL-010-B B5 — the next bill's button: Sent the invoice? Mark it, then Been paid? Tick it.
+  ['nextBillShown', 'boolean'], ['nextBillLabel', 'string']
 ];
 const PROJECT_DETAIL_FIELDS: Array<[string, string]> = [...PROJECT_DETAIL_BASE, ...BILLING_FIELDS];
 
 const PROJECT_DETAIL_OUTS: Array<[string, string]> = [
   ['plan', 'signal'], ['moveIt', 'signal'], ['takeOut', 'signal'], ['edit', 'signal'], ['close', 'signal'],
-  ['planDate', 'string'], ['planHours', 'string'], ['addBill', 'signal'], ['addHope', 'signal']
+  ['planDate', 'string'], ['planHours', 'string'], ['addBill', 'signal'], ['addHope', 'signal'], ['sendToTodo', 'signal'],
+  // TPL-010-B B5 — open the next bill in Money, where it is marked sent or its payment ticked.
+  ['openBill', 'signal']
 ];
 
 /**
@@ -2872,7 +3160,7 @@ const PROJECT_DETAIL: Tpl010Component = {
   description: 'One project in full: its next move and what that move is worth, its hours this week, six months of history, its facts, and the one line about it.',
   ...iface(PROJECT_DETAIL_FIELDS, PROJECT_DETAIL_OUTS),
   repeats: { source: 'array', rowFields: FACT_FIELDS.map(([n]) => n) },
-  instantiates: [C.sparkline, C.dayBoxes, C.factRow, C.datePicker, C.keyLine],
+  instantiates: [C.sparkline, C.dayBoxes, C.factRow, C.datePicker, C.keyLine, C.logLine],
   nodes: [
     inputs('pdIn', 'The project', PROJECT_DETAIL_FIELDS),
     outputs('pdOut', 'What you did', PROJECT_DETAIL_OUTS),
@@ -2920,12 +3208,17 @@ const PROJECT_DETAIL: Tpl010Component = {
     // M16 — the move can become hoped money, once; after that the card says what is hoped.
     place('pdHope', BUTTON, 'Add the move as hoped money', 'pdMove', { ...BTN_GHOST, label: 'Add as hoped money' }),
     text('pdHoped', 'The hoped money it already has', 'pdMove', '', wide(T_META)),
+    // L4 — shown only when there is a todo list (Settings.todoUrl) and the move is not in it yet.
+    place('pdSend', BUTTON, 'Send the move to the todo list', 'pdMove', { ...BTN_GHOST, label: 'Send to todo' }),
+    text('pdInTodo', 'The move is in the todo list', 'pdMove', '', wide(T_META)),
 
     group('pdBilling', 'Billing', 'pdRoot', COLUMN('var(--space-1-5)')),
     text('pdBillingLabel', 'Label', 'pdBilling', 'Billing', wide(T_LABEL)),
     text('pdBillingTerms', 'Hourly or fixed, and the terms', 'pdBilling', '', { ...wide(T_META), color: 'var(--foreground)' }),
     place('pdBillingEach', FOR_EACH, 'The bills, the next one, this period, the past', 'pdBilling', { template: C.keyLine, templateType: 'explicit' }),
-    place('pdAddBill', BUTTON, 'Add a bill for this project', 'pdBilling', { ...BTN_GHOST, borderStyle: 'dashed', label: '+ Add a bill' }),
+    group('pdBillActs', 'What to do about the bills', 'pdBilling', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('pdOpenBill', BUTTON, 'Open the next bill in Money', 'pdBillActs', { ...BTN_OUTLINE, label: 'Sent the invoice? Mark it' }),
+    place('pdAddBill', BUTTON, 'Add a bill for this project', 'pdBillActs', { ...BTN_GHOST, borderStyle: 'dashed', label: '+ Add a bill' }),
 
     group('pdWeek', 'This week', 'pdRoot', COLUMN('var(--space-1)')),
     text('pdWeekLabel', 'How much this week', 'pdWeek', '', wide(T_LABEL)),
@@ -2950,7 +3243,12 @@ const PROJECT_DETAIL: Tpl010Component = {
       paddingTop: 'var(--space-2)',
       paddingBottom: 'var(--space-2)'
     }),
-    text('pdSay', 'What to remember about it', 'pdSayBox', '', wide(T_META))
+    text('pdSay', 'What to remember about it', 'pdSayBox', '', wide(T_META)),
+
+    // T3 — last on the card: what has happened on this project, the same lines the block sheets show.
+    group('pdLog', 'Its history', 'pdRoot', { ...COLUMN('var(--space-1-5)'), mounted: false }),
+    text('pdLogLabel', 'Label', 'pdLog', 'History', wide(T_LABEL)),
+    place('pdLogEach', FOR_EACH, 'One line per thing that happened', 'pdLog', { template: C.logLine, templateType: 'explicit' })
   ],
   connections: [
     wire('pdIn', 'name', 'pdName', 'text'),
@@ -2988,6 +3286,8 @@ const PROJECT_DETAIL: Tpl010Component = {
     wire('pdIn', 'weekText', 'pdWeekLabel', 'text'),
     wire('pdIn', 'sparkTitle', 'pdSparkTitle', 'text'),
     wire('pdIn', 'say', 'pdSay', 'text'),
+    wire('pdIn', 'hasLog', 'pdLog', 'mounted'),
+    wire('pdIn', 'logRows', 'pdLogEach', 'items'),
     wire('pdIn', 'facts', 'pdFactEach', 'items'),
     wire('pdIn', 'bars', 'pdSpark', 'bars'),
     wire('pdIn', 'firstLabel', 'pdSpark', 'firstLabel'),
@@ -2998,12 +3298,19 @@ const PROJECT_DETAIL: Tpl010Component = {
     wire('pdTakeOut', 'onClick', 'pdOut', 'takeOut'),
     wire('pdIn', 'hopeShown', 'pdHope', 'mounted'),
     wire('pdHope', 'onClick', 'pdOut', 'addHope'),
+    wire('pdIn', 'canSend', 'pdSend', 'mounted'),
+    wire('pdSend', 'onClick', 'pdOut', 'sendToTodo'),
+    wire('pdIn', 'inTodo', 'pdInTodo', 'mounted'),
+    wire('pdIn', 'todoLine', 'pdInTodo', 'text'),
     wire('pdIn', 'hasHoped', 'pdHoped', 'mounted'),
     wire('pdIn', 'hopedText', 'pdHoped', 'text'),
     wire('pdIn', 'billingShown', 'pdBilling', 'mounted'),
     wire('pdIn', 'billingTerms', 'pdBillingTerms', 'text'),
     wire('pdIn', 'billingRows', 'pdBillingEach', 'items'),
     wire('pdAddBill', 'onClick', 'pdOut', 'addBill'),
+    wire('pdIn', 'nextBillShown', 'pdOpenBill', 'mounted'),
+    wire('pdIn', 'nextBillLabel', 'pdOpenBill', 'label'),
+    wire('pdOpenBill', 'onClick', 'pdOut', 'openBill'),
     wire('pdEdit', 'onClick', 'pdOut', 'edit'),
     wire('pdClose', 'onClick', 'pdOut', 'close')
   ]
@@ -3062,7 +3369,7 @@ const PROJECT_CARD_FIELDS: Array<[string, string]> = [
 const PROJECT_CARD_OUTS: Array<[string, string]> = [
   ['pick', 'signal'], ['projectId', 'string'], ['plan', 'signal'], ['moveIt', 'signal'], ['takeOut', 'signal'],
   ['planDate', 'string'], ['planHours', 'string'], ['close', 'signal'], ['edit', 'signal'], ['newProject', 'signal'],
-  ['addBill', 'signal'], ['addHope', 'signal'],
+  ['addBill', 'signal'], ['addHope', 'signal'], ['sendToTodo', 'signal'], ['openBill', 'signal'],
   ...CARD_EDITOR_OUTS
 ];
 
@@ -3141,7 +3448,9 @@ const PROJECT_CARD: Tpl010Component = {
     ...(['plan', 'moveIt', 'takeOut', 'planDate', 'planHours'] as const).map((n) => wire('pcDetail', n, 'pcOut', n)),
     wire('pcDetail', 'edit', 'pcOut', 'edit'),
     wire('pcDetail', 'addBill', 'pcOut', 'addBill'),
+    wire('pcDetail', 'openBill', 'pcOut', 'openBill'),
     wire('pcDetail', 'addHope', 'pcOut', 'addHope'),
+    wire('pcDetail', 'sendToTodo', 'pcOut', 'sendToTodo'),
     wire('pcDetail', 'close', 'pcOut', 'close'),
     wire('pcNew', 'onClick', 'pcOut', 'newProject'),
     ...PROJECT_EDITOR_FIELDS.map(([n]) => wire('pcIn', under('ed', n), 'pcEditor', n)),
@@ -3278,7 +3587,7 @@ const SETTINGS_VALUES: Array<[string, string]> = [
  * Q4 made Saturday optional and the build counted it anyway, because there was nowhere to say
  * otherwise. These seven ticks are that somewhere. **A `Settings` row with no `workingDays`
  * still means Monday to Saturday**, so nobody's month silently loses four days the first time
- * they open this sheet (`Logic/Envelopes`, and the same default in `Edit settings`).
+ * they open this sheet (`Logic/Budgets`, and the same default in `Edit settings`).
  */
 const WORK_DAYS: Array<[number, string, string]> = [
   [1, 'Mon', 'stDay1'], [2, 'Tue', 'stDay2'], [3, 'Wed', 'stDay3'], [4, 'Thu', 'stDay4'],
@@ -3346,7 +3655,7 @@ const SETTINGS_SECTION = (id: string, title: string, first = false): unknown[] =
  *
  * **R25 — the recommendations are rules over the settings, not a model**, and they are printed
  * beside the fields so a person can disagree with them: admin is a tenth of capacity, building
- * is what is left once billable and admin are paid for, hobby is nothing. `Logic/Envelopes`
+ * is what is left once billable and admin are paid for, hobby is nothing. `Logic/Budgets`
  * works them out, because that is where every other number on the week comes from.
  *
  * 🔴 **Use the recommendation goes through the command, not the box.** A Text Input compares an
@@ -3513,7 +3822,12 @@ const PLANNER_DATA_INS: Array<[string, string]> = [['refresh', 'signal'], ['prev
 const PLANNER_DATA_OUTS: Array<[string, string]> = [
   ['projects', 'array'], ['blocks', 'array'], ['monthPlans', 'array'], ['moneyItems', 'array'], ['moneyMarks', 'array'],
   ['balanceReadings', 'array'], ['settings', 'array'], ['moveBlocks', 'array'], ['weekStart', 'string'], ['weekLabel', 'string'],
-  ['month', 'string'], ['marksSince', 'string'], ['loaded', 'signal']
+  ['month', 'string'], ['marksSince', 'string'], ['loaded', 'signal'],
+  // TPL-010-L — the todo list's open tasks, on the same backend and account (H1), and the history
+  // lines saying which of them Planning sent (L7).
+  ['tasks', 'array'], ['sent', 'array'],
+  // TPL-010-T — the tasks' next actions (T1), and Planning's own history (T3).
+  ['actions', 'array'], ['history', 'array']
 ];
 
 /**
@@ -3535,8 +3849,8 @@ const PLANNER_DATA_OUTS: Array<[string, string]> = [
  * Q1: the week starts as the current week, and `‹ ›` moves it by seven days.
  */
 const PLANNER_DATA: Tpl010Component = {
-  path: 'Logic/Planner data',
-  description: 'The eight queries the week is drawn from: your projects, the blocks in the weeks on screen, the blocks from four weeks back, this month’s plan, your money items, the marks on them from thirteen months back, your balance readings, and your settings.',
+  path: 'Logic/Planning data',
+  description: 'The twelve queries the week is drawn from: your projects, the blocks in the weeks on screen, the blocks from four weeks back, this month’s plan, your money items, the marks on them from thirteen months back, your balance readings, your settings, the latest of Planning’s history, and — when there is a todo list — your open tasks in it, their next actions, and which of them Planning sent.',
   ...iface(PLANNER_DATA_INS, PLANNER_DATA_OUTS),
   nodes: [
     inputs('pnIn', 'When to load', PLANNER_DATA_INS),
@@ -3599,6 +3913,10 @@ Outputs.moveSince = dayKey(addDays(startOfToday(), -28));
 // M10 — the marks on money items, from thirteen months back: a year of Past, and the month before it.
 var since = new Date(startOfToday().getFullYear(), startOfToday().getMonth() - 13, 1);
 Outputs.marksSince = dayKey(since);
+// TPL-010-L — the todo query's one filter. A value and not a literal so the demo, which follows
+// the backend queries' rules, can follow this one too.
+Outputs.openStatus = 'open';
+Outputs.sentSummary = ${JSON.stringify(SENT_SUMMARY)};
 // Last line on purpose: the values above are delivered before the pulse that acts on them,
 // so the query parameters a fetch uses are never a week behind the week on screen.
 Outputs.fetch();`
@@ -3675,6 +3993,65 @@ Outputs.fetch();`
       visualSort: [{ property: 'date', order: 'descending' }]
     }),
     logic('pnSettings', QUERY, 'Your settings', { collectionName: 'Settings', ...QUERY_OFF, storageLimit: 1 }),
+    /**
+     * T3 — the history grows for ever and nothing in it is deleted, so it is asked for newest first
+     * and bounded: the latest thousand lines, which for one person is months of blocks. The block
+     * sheet and the card pick theirs out of these.
+     */
+    logic('pnHistory', QUERY, 'The latest of Planning’s history', {
+      collectionName: 'PlanEvent',
+      ...QUERY_OFF,
+      storageLimit: 1000,
+      visualSort: [{ property: 'at', order: 'descending' }]
+    }),
+    /**
+     * TPL-010-L L1/L2 — **the todo list owns its tasks.** The open ones are read here and drawn in
+     * the week by `Logic/Todo tasks`; nothing in this template writes, closes or moves a `Task`.
+     * Open only: the closed ones grow for ever. Which have a deadline is decided in the script,
+     * so the demo and the backend compare nothing but a status string.
+     */
+    logic('pnTasks', QUERY, 'Your open tasks in the todo list', {
+      collectionName: 'Task',
+      ...QUERY_OFF,
+      'runOnChange-qp-openStatus': false,
+      storageLimit: 500,
+      visualFilter: { combinator: 'and', rules: [{ property: 'status', operator: 'equal to', input: 'openStatus' }] },
+      visualSort: [{ property: 'deadline', order: 'ascending' }]
+    }),
+    /**
+     * T1 — the tasks' next actions, which a task in the week offers as blocks. Asked for the way the
+     * todo list asks for them itself (every action, up to a thousand) and newest first, so a long
+     * history of ticked ones is what the limit cuts. Which are open, and whose, is read in the script:
+     * the demo compares strings, and `done` is a boolean.
+     */
+    logic('pnActions', QUERY, 'Your next actions in the todo list', {
+      collectionName: 'Action',
+      ...QUERY_OFF,
+      storageLimit: 1000,
+      visualSort: [{ property: 'createdAt', order: 'descending' }]
+    }),
+    // L7 — the history lines *Send to todo* writes, so a task Planning sent counts as money.
+    logic('pnSent', QUERY, 'The tasks Planning sent to the todo list', {
+      collectionName: 'Event',
+      ...QUERY_OFF,
+      'runOnChange-qp-sentSummary': false,
+      storageLimit: 500,
+      visualFilter: { combinator: 'and', rules: [{ property: 'summary', operator: 'equal to', input: 'sentSummary' }] },
+      visualSort: [{ property: 'at', order: 'descending' }]
+    }),
+    /**
+     * L6 — **only when there is a todo list to read.** `Settings.todoUrl` empty (the template as it
+     * ships, a planner on a backend with no todo list in it) and `Task` is never asked for, so no
+     * policy has to know the name. It runs off the settings having ARRIVED, not off the read
+     * starting, because the address is in them.
+     */
+    script(
+      'pnTodoGate',
+      'Is there a todo list to read?',
+      `var s = (Inputs.settings || [])[0] || {};
+if (String(s.todoUrl || '').trim()) Outputs.fetch();`,
+      ['settings']
+    ),
     logic('pnLoadProblem', SET_VARIABLE, 'Say the week did not load', { name: VAR.problem, setWith: 'string', value: LOAD_PROBLEM_TEXT })
   ],
   connections: [
@@ -3706,7 +4083,14 @@ Outputs.fetch();`
     wire('pnWindow', 'out-moveSince', 'pnMoveBlocks', 'qp-moveSince'),
     wire('pnWindow', 'out-marksSince', 'pnMarks', 'qp-marksSince'),
     wire('pnWindow', 'out-marksSince', 'pnOut', 'marksSince'),
-    ...['pnProjects', 'pnBlocks', 'pnMoveBlocks', 'pnMonth', 'pnItems', 'pnMarks', 'pnReadings', 'pnSettings'].map((q) => wire('pnReady', 'ontrue', q, 'storageFetch')),
+    wire('pnWindow', 'out-openStatus', 'pnTasks', 'qp-openStatus'),
+    ...['pnProjects', 'pnBlocks', 'pnMoveBlocks', 'pnMonth', 'pnItems', 'pnMarks', 'pnReadings', 'pnSettings', 'pnHistory'].map((q) => wire('pnReady', 'ontrue', q, 'storageFetch')),
+    wire('pnSettings', 'items', 'pnTodoGate', 'in-settings'),
+    wire('pnSettings', 'fetched', 'pnTodoGate', 'run'),
+    wire('pnTodoGate', 'out-fetch', 'pnTasks', 'storageFetch'),
+    wire('pnWindow', 'out-sentSummary', 'pnSent', 'qp-sentSummary'),
+    wire('pnTodoGate', 'out-fetch', 'pnSent', 'storageFetch'),
+    wire('pnTodoGate', 'out-fetch', 'pnActions', 'storageFetch'),
 
     wire('pnProjects', 'items', 'pnOut', 'projects'),
     wire('pnBlocks', 'items', 'pnOut', 'blocks'),
@@ -3716,6 +4100,10 @@ Outputs.fetch();`
     wire('pnMarks', 'items', 'pnOut', 'moneyMarks'),
     wire('pnReadings', 'items', 'pnOut', 'balanceReadings'),
     wire('pnSettings', 'items', 'pnOut', 'settings'),
+    wire('pnTasks', 'items', 'pnOut', 'tasks'),
+    wire('pnSent', 'items', 'pnOut', 'sent'),
+    wire('pnActions', 'items', 'pnOut', 'actions'),
+    wire('pnHistory', 'items', 'pnOut', 'history'),
     wire('pnBlocks', 'fetched', 'pnOut', 'loaded'),
     wire('pnProjects', 'failure', 'pnLoadProblem', 'do')
   ]
@@ -3759,15 +4147,15 @@ const ENVELOPES_OUTS: Array<[string, string]> = [
  * never red, and it never shrinks anything else.
  */
 const ENVELOPES: Tpl010Component = {
-  path: 'Logic/Envelopes',
-  description: 'The four envelope tiles: what each one has spent, what is left in it, and the one line that says what to do with the rest of the month.',
+  path: 'Logic/Budgets',
+  description: 'The four budget tiles: what each one has spent, what is left in it, and the one line that says what to do with the rest of the month.',
   ...iface(ENVELOPES_INS, ENVELOPES_OUTS),
   nodes: [
     inputs('enIn', 'The month so far', ENVELOPES_INS),
     outputs('enOut', 'The tiles', ENVELOPES_OUTS),
     derive(
       'enWork',
-      'Work out every envelope',
+      'Work out every budget',
       `${PLANNER_FNS}${ENVELOPE_FNS}
 var projects = Inputs.projects || [];
 var blocks = Inputs.blocks || [];
@@ -3954,7 +4342,7 @@ Outputs.recLabel = 'Use ' + hText(recBuilding) + ' / ' + hText(recAdmin) + ' / '
 Outputs.hasPlan = !!plan;
 Outputs.planLine = plan
   ? 'This month is planned: ' + hText(budgets.billable) + ' h billable, ' + hText(budgets.building) + ' h building.'
-  : 'This month has no plan yet. Press Plan this month and the envelopes start from your settings.';`
+  : 'This month has no plan yet. Press Plan this month and the budgets start from your settings.';`
     )
   ],
   connections: [
@@ -4031,7 +4419,9 @@ for (var d = 0; d < 6; d++) {
   var rows = [];
   for (var m = 0; m < mine.length; m++) {
     var blk = mine[m];
-    var proj = byId[blk.projectId] || { name: 'Unknown project', kind: 'admin' };
+    // A task still in the todo list, not a block made from one: that is an ordinary block.
+    var fromTodo = !!blk.todoProjected;
+    var proj = fromTodo ? { name: 'From todo', kind: 'admin' } : byId[blk.projectId] || { name: 'Unknown project', kind: 'admin' };
     var env = envelopeOf(proj);
     var h = hoursOf(blk);
     if (env === 'billable' || env === 'building') focused += h;
@@ -4042,19 +4432,23 @@ for (var d = 0; d < 6; d++) {
     // the day is holding for it.
     var logged = blk.done ? 0 : loggedOf(blk);
     rows.push({
-      id: blk.id,
+      // P78-TPL010-MOVEARROW — the row's own id; the block's is blockId.
+      id: 'day:' + blk.id,
+      blockId: blk.id,
       projectId: blk.projectId,
-      projectName: proj.name || '',
+      // TPL-010-L — a task says where it came from, and how late it is when it is.
+      projectName: fromTodo ? (blk.todoLate ? 'From todo · was due ' + shortDay(blk.todoDue) : 'From todo') : proj.name || '',
       what: blk.what || '',
       hoursText: logged > 0 ? hText(logged) + ' of ' + hText(h) + ' h' : hText(h) + ' h',
       done: !!blk.done,
       // R13b — the tick is ink, not the envelope: the left edge is the block's one colour.
       tickFill: blk.done ? 'var(--foreground)' : 'transparent',
       tickInk: blk.done ? 'var(--surface)' : 'transparent',
-      mark: envMark(env),
+      // L7 — money in the todo list is the one todo block with a red edge.
+      mark: fromTodo && blk.todoMoney ? 'var(--destructive)' : envMark(env),
       soft: envSoft(env),
       isNew: !!newId && blk.id === newId,
-      fromTodo: !!blk.todoTaskId
+      fromTodo: fromTodo
     });
   }
 
@@ -4117,8 +4511,119 @@ Outputs.firstOpenDay = firstOpen;`
   ]
 };
 
+const TODO_TASKS_INS: Array<[string, string]> = [['tasks', 'array'], ['sent', 'array'], ['blocks', 'array'], ['moveBlocks', 'array'], ['todoUrl', 'string'], ['actions', 'array']];
+const TODO_TASKS_OUTS: Array<[string, string]> = [['blocks', 'array'], ['lateMoney', 'number'], ['lateMoneyTitle', 'string']];
+
+/**
+ * TPL-010-L L2 — **the todo list's tasks, drawn in the week and never written.** Each open task
+ * with a deadline becomes a block on its deadline day, a quarter of an hour of Admin; one whose
+ * deadline has gone sits at the top of today. They are projected here, at read time, so a task
+ * closed in the todo list is gone from the week on the next read and no `Block` row ever stood
+ * for it (AC2).
+ *
+ * L7 — **money** is a title that starts with `€` or *Invoice*, or a task Planning sent (its
+ * history says so): those get the red edge. Any other task is still drawn, in Admin grey.
+ *
+ * L3, as Richard changed it on 2026-09-23 (*"open the todo task when it appears and assign it to a
+ * project, convert it into an hour block like every other one"*): a press opens the block sheet
+ * on it, and saving writes a real `Block` carrying the task's id. **A task with a stored block is
+ * not drawn again** — the block stands for it — which is read from the blocks on screen and the
+ * four weeks back. `todoHref` is the task's address in the todo list, for the sheet's link.
+ *
+ * TPL-010-T T1 (Richard, 2026-09-23) — a task carries its **open next actions that are not blocks
+ * yet** (`todoActions`, in the todo list's order), and the sheet offers each as a block of its own.
+ * T1c: a task with no open actions is one block, as before; a task whose every open action is a
+ * block has nothing left to plan and **leaves the week**. So a task stays while it has no block at
+ * all, or while any open action of it has none.
+ */
+const TODO_TASKS: Tpl010Component = {
+  path: 'Logic/Todo tasks',
+  description: 'Your open todo tasks with a deadline, as quarter-hour blocks on their deadline day — the late ones at the top of today — added to the blocks the week draws.',
+  ...iface(TODO_TASKS_INS, TODO_TASKS_OUTS),
+  nodes: [
+    inputs('ttIn', 'The tasks and the blocks', TODO_TASKS_INS),
+    outputs('ttOut', 'The blocks, with the tasks in', TODO_TASKS_OUTS),
+    derive(
+      'ttWork',
+      'Put each task on its day',
+      `${PLANNER_FNS}var tasks = Inputs.tasks || [];
+var blocks = Inputs.blocks || [];
+var base = String(Inputs.todoUrl || '').trim();
+var todayKey = dayKey(startOfToday());
+var out = [];
+var planned = {};
+var plannedAction = {};
+function mark(b) {
+  if (!b) return;
+  if (b.todoTaskId) planned[b.todoTaskId] = true;
+  if (b.todoActionId) plannedAction[b.todoActionId] = true;
+}
+for (var i = 0; i < blocks.length; i++) {
+  out.push(blocks[i]);
+  mark(blocks[i]);
+}
+var earlier = Inputs.moveBlocks || [];
+for (var e = 0; e < earlier.length; e++) mark(earlier[e]);
+// T1 — each task's open next actions with no block yet, in the todo list's order.
+var open = {};
+var acts = Inputs.actions || [];
+for (var a = 0; a < acts.length; a++) {
+  var act = acts[a];
+  if (!act || act.done === true || !act.taskId || plannedAction[act.id]) continue;
+  (open[act.taskId] = open[act.taskId] || []).push({ id: String(act.id), title: String(act.title || '').trim() || 'A next action with no words', position: num(act.position, 0) });
+}
+for (var k in open) open[k].sort(function (x, y) { return x.position - y.position; });
+var sentList = Inputs.sent || [];
+var sent = {};
+for (var s = 0; s < sentList.length; s++) if (sentList[s] && sentList[s].taskId) sent[sentList[s].taskId] = true;
+var lateMoney = 0, lateMoneyTitle = '';
+for (var t = 0; t < tasks.length; t++) {
+  var task = tasks[t];
+  if (!task || String(task.status || '') !== 'open') continue;
+  var left = open[task.id] || [];
+  // T1c — nothing left to plan: it has a block, and no open action is without one.
+  if (planned[task.id] && left.length === 0) continue;
+  var due = parseDay(String(task.deadline || ''));
+  if (!due) continue;
+  var dueKey = dayKey(due);
+  var late = dueKey < todayKey;
+  var title = String(task.title || '').trim();
+  var isMoney = /^(€|invoice)/i.test(title) || !!sent[task.id];
+  if (late && isMoney) { lateMoney++; if (!lateMoneyTitle) lateMoneyTitle = title; }
+  out.push({
+    id: 'todo-' + task.id,
+    projectId: '',
+    date: late ? todayKey : dueKey,
+    what: title || 'A task with no title',
+    planned: 0.25,
+    actual: '',
+    entries: [],
+    done: false,
+    isMove: false,
+    todoTaskId: task.id,
+    todoProjected: true,
+    todoLate: late,
+    todoDue: dueKey,
+    todoMoney: isMoney,
+    todoHref: base ? base + (base.indexOf('?') >= 0 ? '&' : '?') + 'task=' + encodeURIComponent(task.id) : '',
+    todoActions: left,
+    // Above every block of the day, the late ones highest.
+    position: (late ? -2000 : -1000) + t
+  });
+}
+Outputs.blocks = out;
+Outputs.lateMoney = lateMoney;
+Outputs.lateMoneyTitle = lateMoneyTitle;`
+    )
+  ],
+  connections: [
+    ...TODO_TASKS_INS.map(([n]) => wire('ttIn', n, 'ttWork', `in-${n}`)),
+    ...TODO_TASKS_OUTS.map(([n]) => wire('ttWork', `out-${n}`, 'ttOut', n))
+  ]
+};
+
 // R7c — no week in: placed is read from today, whichever week is on screen.
-const MOVES_INS: Array<[string, string]> = [['projects', 'array'], ['moveBlocks', 'array']];
+const MOVES_INS: Array<[string, string]> = [['projects', 'array'], ['moveBlocks', 'array'], ['tasks', 'array'], ['todoUrl', 'string']];
 const MOVES_OUTS: Array<[string, string]> = [['rows', 'array'], ['empty', 'boolean'], ['unplacedDormant', 'string'], ['unsentBuilding', 'string']];
 
 /**
@@ -4144,6 +4649,13 @@ const MOVES: Tpl010Component = {
       `${PLANNER_FNS}${ENVELOPE_FNS}
 var projects = Inputs.projects || [];
 var today = startOfToday();
+// L4 — a move that is an open task in the todo list says so on its chip, as the card does. Only with a todo list.
+var hasTodo = String(Inputs.todoUrl || '').trim() !== '';
+var openTitles = {};
+var openTasks = Inputs.tasks || [];
+for (var ot = 0; ot < openTasks.length; ot++) {
+  if (openTasks[ot] && String(openTasks[ot].status || '') === 'open') openTitles[String(openTasks[ot].title || '').trim().toLowerCase()] = true;
+}
 
 var withMove = [];
 for (var i = 0; i < projects.length; i++) {
@@ -4191,7 +4703,8 @@ for (var k = 0; k < withMove.length; k++) {
     // R7d — hollow marker unplaced, filled placed; a placed chip is the mockup's: faded and struck through.
     tick: isPlaced ? '\u2713 ' + (soon ? DOW[(liveDay.getDay() + 6) % 7] : shortDay(live.date)) : '',
     dotFill: isPlaced ? envMark(env) : 'transparent',
-    chipClass: isPlaced ? 'planner-chip planner-chip-placed' : 'planner-chip'
+    chipClass: isPlaced ? 'planner-chip planner-chip-placed' : 'planner-chip',
+    inTodo: hasTodo && !!openTitles[String(p2.move || '').trim().toLowerCase()]
   });
   if (!isPlaced && p2.kind === 'dormant' && !unplacedDormant) unplacedDormant = p2.name || '';
   if (!isPlaced && p2.kind === 'building' && !unsentBuilding) unsentBuilding = p2.name || '';
@@ -4474,9 +4987,15 @@ Outputs.hasLate = lateAll > 0;
 var lc = null;
 for (var q3 = 0; q3 < p.late.length; q3++) if (p.late[q3].client) { lc = p.late[q3]; break; }
 // M15 — late client money is the evening's first concern; a late cost is not (it is almost always paid and not ticked).
+// TPL-010-B B7 — with no late money, a bill whose day has come and is not marked sent: the oldest one.
+var ub = null;
+if (!lc) for (var q4 = 0; q4 < p.bills.length; q4++) { var bb = p.bills[q4]; if (!bb.hoped && bb.billOut <= today && (!ub || bb.billOut < ub.billOut)) ub = bb; }
 Outputs.lateConcern = lc ? 'One thing: ' + (projectName(lc) || lc.it.label) + '\\u2019s ' + mEur(lc.remaining) + (lc.paid ? ' (the rest of the bill)' : '') +
-  ' was due on ' + mDay(lc.date) + ' and is not ticked. Chase it, or tick it.' : '';
-Outputs.lateKey = lc ? lc.key : '';`
+  ' was due on ' + mDay(lc.date) + ' and is not ticked. Chase it, or tick it.'
+  : ub ? 'One thing: ' + (projectName(ub) || ub.it.label) + '\\u2019s bill (' + mEur(ub.amount) + ') ' + (ub.billOut === today ? 'goes out today' : 'was to go out ' + mDay(ub.billOut)) +
+    ' and isn\\u2019t marked sent. Send it and mark it sent, or change its day.' : '';
+// A bill's key names its goes-out line, where it is marked sent.
+Outputs.lateKey = lc ? lc.key : ub ? ub.key + '|bill' : '';`
     )
   ],
   connections: [
@@ -4489,7 +5008,9 @@ const PANE_PART_OUTS: Array<[string, string]> = MONEY_PARTS.flatMap((pt) => pt.i
 const MONEY_VIEW_INS: Array<[string, string]> = [...MONEY_DATA_INS, ['open', 'boolean'], ['sel', 'string'], ['mode', 'string'], ['itemId', 'string'], ['cardProject', 'string']];
 const MONEY_VIEW_OUTS: Array<[string, string]> = [
   ['cardClass', 'string'], ...PANE_PART_OUTS, ...BILLING_FIELDS,
-  ['isNewItem', 'boolean'], ['editItemId', 'string'], ['endItemId', 'string'], ['agreeItemId', 'string'], ['changeKey', 'string'], ['pickedItemId', 'string']
+  ['isNewItem', 'boolean'], ['editItemId', 'string'], ['endItemId', 'string'], ['agreeItemId', 'string'], ['changeKey', 'string'], ['pickedItemId', 'string'],
+  // TPL-010-B — the card's project's bills for its form (B3), and the line its next-bill button opens (B5).
+  ['cardHasBills', 'boolean'], ['cardBillsLine', 'string'], ['nextBillSel', 'string']
 ];
 
 /**
@@ -4543,7 +5064,7 @@ for (var a1 = 0; a1 < t.agreedIds.length; a1++) line('+ ' + String(ctx.projects[
 line('Billable this month', t.hours + ' h');
 Outputs.sumShown = showSum;
 Outputs.sumLines = lines;
-Outputs.sumNote = 'A fixed bill is covered however long the work takes, so it comes off before the hours are worked out; the hours you agreed still go in the envelope. Client money is what the billable hours turn into. One-off items are not in the target; they show on the cash line on their day.';
+Outputs.sumNote = 'A fixed bill is covered however long the work takes, so it comes off before the hours are worked out; the hours you agreed still go in the budget. Client money is what the billable hours turn into. One-off items are not in the target; they show on the cash line on their day.';
 var now = balanceNow(ctx, readings);
 var lo = lowestPoint(ctx, readings);
 Outputs.sumBalanceLines = [
@@ -4609,7 +5130,9 @@ Outputs.rpHopedShown = !!o && !isBill && o.hoped && !o.closed;
 Outputs.rpHopedText = o && o.hoped ? 'Hoped money is never in a balance. When it is agreed, set it to 100% and it counts.' +
   (o.project && o.project.move ? ' What makes it real: ' + String(o.project.move) + '.' : '') : '';
 Outputs.rpBillShown = isBill;
-Outputs.rpBillText = isBill ? (o.sentOn ? '\\u2713 Sent ' + mDay(o.sentOn) + '. Due ' + mDay(o.date) + (o.closed ? ', and paid.' : '.') : 'Goes out ' + mDay(o.billOut) + '. Marking it sent records the day it went out; the payment is its own tick on ' + mDay(o.date) + '.') : '';
+// B6 — the pane says who makes the invoice, and that the payment is ticked on its own.
+Outputs.rpBillText = isBill ? (o.sentOn ? '\\u2713 Sent ' + mDay(o.sentOn) + '. Due ' + mDay(o.date) + (o.closed ? ', and paid.' : '.')
+  : 'Goes out ' + mDay(o.billOut) + '. Planning doesn\\u2019t make the invoice: send yours as usual, then mark it sent here. The payment is its own tick, due ' + mDay(o.date) + '.') : '';
 Outputs.rpSendShown = isBill && !o.sentOn;
 Outputs.rpSentOn = today;
 Outputs.rpSentAmount = isBill && o.hoursBill ? String(o.amount) : '';
@@ -4750,7 +5273,11 @@ for (var y2 = 0; y2 < mine.length; y2++) {
     ? '\\u21bb ' + scheduleWords(bi, today).replace('every month on the', 'every month, due on the') + ', ' + (bi.fromHours ? 'from the hours' : mEur(bi.amount))
     : 'one bill, ' + (bi.fromHours ? 'from the hours' : mEur(bi.amount)) + (mOk(bi.billDate) ? ', goes out ' + mDay(bi.billDate) : '') + ', due ' + mDay(bi.date));
 }
-var brows = [{ key: 'Bills', text: bills.length ? bills.join('\\n') : 'None yet.' }];
+// TPL-010-B B5 — no bills says what adding one does; B3 — the project form shows the same bills in words.
+var brows = [{ key: 'Bills', text: bills.length ? bills.join('\\n')
+  : fixed ? 'None yet. Add the bill, so the month counts its money.' : 'None yet. Add one; it fills from the hours you log.' }];
+Outputs.cardHasBills = !!cp && mine.length > 0;
+Outputs.cardBillsLine = bills.join('; ');
 var ahead = mAddMonths(today, 12, false), open2 = [], done2 = [];
 for (var y3 = 0; y3 < mine.length; y3++) {
   var rr = repeatsOf(mine[y3], ahead);
@@ -4766,6 +5293,17 @@ done2.sort(function (a, b3) { return a.date < b3.date ? 1 : a.date > b3.date ? -
 var nx = open2[0] || null;
 if (nx) brows.push({ key: 'Next', text: (nx.billOut && !nx.sentOn ? 'goes out ' + mDay(nx.billOut) + ' \\u00b7 ' : nx.sentOn ? 'sent ' + mDay(nx.sentOn) + ' \\u00b7 ' : '') +
   mEur(nx.remaining) + ' \\u00b7 due ' + mDay(nx.date) + (nx.date < today ? ' \\u00b7 late' : '') });
+// B5 — what to do with the next bill, as a button that opens it in Money: the goes-out line until it
+// is marked sent, then the payment. The words about the invoice come once per project, with its
+// first bill; after that the button is enough.
+var toSend = !!nx && !!nx.billOut && !nx.sentOn;
+var everSent = false;
+for (var ys = 0; ys < open2.length; ys++) if (open2[ys].sentOn) everSent = true;
+if (done2.length) everSent = true;
+if (toSend && !everSent) brows.push({ key: 'When it\\u2019s done', text: 'Planning doesn\\u2019t make the invoice. Send yours as usual, then mark the bill sent. Tick the payment when the money arrives.' });
+Outputs.nextBillShown = earning && !!nx;
+Outputs.nextBillLabel = !nx ? '' : toSend ? 'Sent the invoice? Mark it' : 'Been paid? Tick it';
+Outputs.nextBillSel = !nx ? '' : nx.key + (toSend ? '|bill' : '|pay');
 var since = '';
 if (cp) { var pb = previousBillOut(ctx, cp.id, mAddDays(today, 1)); since = pb ? mAddDays(pb, 1) : today.slice(0, 8) + '01'; }
 var logged = cp ? hoursBetween(ctx, cp.id, since, today) : 0;
@@ -4929,8 +5467,10 @@ const SHUTDOWN_INS: Array<[string, string]> = [
   ['todayLong', 'string'], ['tomorrowLong', 'string'], ['unplacedDormant', 'string'],
   ['target', 'number'], ['billableUsed', 'number'], ['billableLeft', 'number'], ['perDay', 'number'],
   ['buildingLeft', 'number'], ['daysLeft', 'number'], ['focusHours', 'number'], ['lateConcern', 'string'],
-  // R24 — a guardrail the week has crossed, worked out by Logic/Envelopes.
-  ['guardConcern', 'string']
+  // R24 — a guardrail the week has crossed, worked out by Logic/Budgets.
+  ['guardConcern', 'string'],
+  // TPL-010-L AC6 — money todos past their deadline and not yet made into a block.
+  ['lateTodoCount', 'number'], ['lateTodoTitle', 'string']
 ];
 const SHUTDOWN_OUTS: Array<[string, string]> = [
   ['title', 'string'], ['dayLine', 'string'], ['monthLine', 'string'], ['concern', 'string'], ['chaseShown', 'boolean'],
@@ -4944,6 +5484,8 @@ const SHUTDOWN_OUTS: Array<[string, string]> = [
  *
  * ## One concern, and its order (AC5, and TPL-010-M's M15 in front of it)
  *
+ * −1. **A money todo past its deadline** (TPL-010-L AC6, *"knock me over the head"*) — *"One money
+ *    todo is overdue"*, named, before anything else. A task made into a block no longer counts.
  * 0. **Client money that is late and not ticked** (M15) — *"Chase it, or tick it."* A late cost is
  *    not a concern: it is almost always paid and not ticked, and it waits in Money.
  * 1. **A building move planned for today and not logged.** First because it is the rung next
@@ -5013,7 +5555,7 @@ var buildingLeft = num(Inputs.buildingLeft, 0);
 Outputs.monthLine = left > 0
   ? 'Month: ' + hText(used) + ' of ' + hText(target) + ' billable. ' + hText(left) + ' to go over ' + daysLeft + ' ' +
     (daysLeft === 1 ? 'day' : 'days') + ' is ' + hText(perDay) + ' a day. Building has ' + hText(buildingLeft) + ' h left.'
-  : 'Month: the billable envelope is full. Every hour left is yours to put where it grows.';
+  : 'Month: the billable budget is full. Every hour left is yours to put where it grows.';
 
 // AC5 — the one concern, in this order and no other.
 var unloggedBuilding = null;
@@ -5024,8 +5566,13 @@ for (var u = 0; u < notDone.length; u++) {
 var dormant = String(Inputs.unplacedDormant || '');
 var lateMoney = String(Inputs.lateConcern || '');
 var guard = String(Inputs.guardConcern || '');
-Outputs.chaseShown = lateMoney !== '';
-if (lateMoney) {
+var lateTodos = num(Inputs.lateTodoCount, 0);
+var lateTodo = String(Inputs.lateTodoTitle || '');
+Outputs.chaseShown = lateTodos <= 0 && lateMoney !== '';
+if (lateTodos > 0) {
+  Outputs.concern = (lateTodos === 1 ? 'One money todo is overdue' : lateTodos + ' money todos are overdue, the first') +
+    ': "' + lateTodo + '". It is at the top of today — give it a time, or close it in the todo list.';
+} else if (lateMoney) {
   Outputs.concern = lateMoney;
 } else if (unloggedBuilding) {
   var who = (byId[unloggedBuilding.projectId] || {}).name || 'That building block';
@@ -5045,7 +5592,9 @@ var carryRows = [];
 for (var c = 0; c < notDone.length; c++) {
   var cb = notDone[c];
   carryRows.push({
-    id: cb.id,
+    // P78-TPL010-MOVEARROW — the row's own id; the block's is blockId.
+    id: 'carry:' + cb.id,
+    blockId: cb.id,
     projectName: (byId[cb.projectId] || {}).name || '',
     what: cb.what || '',
     hoursText: hText(num(cb.planned, 0)) + ' h',
@@ -5078,10 +5627,13 @@ Outputs.tomorrowFocusColor = tomorrowFocus > focus ? 'var(--destructive)' : 'var
 };
 
 const CARD_ROWS_INS: Array<[string, string]> = [
-  ['projects', 'array'], ['blocks', 'array'], ['moveBlocks', 'array'], ['weekStart', 'string'], ['selectedId', 'string'], ['firstOpenDay', 'string']
+  ['projects', 'array'], ['blocks', 'array'], ['moveBlocks', 'array'], ['weekStart', 'string'], ['selectedId', 'string'], ['firstOpenDay', 'string'],
+  ['tasks', 'array'], ['todoUrl', 'string'], ['history', 'array']
 ];
-/** The last two are for the commands the card presses, not for the card to draw. */
-const CARD_ROWS_OUTS: Array<[string, string]> = [['groups', 'array'], ...PROJECT_DETAIL_BASE, ['resolvedId', 'string'], ['placedBlockId', 'string']];
+/** The last four are for the commands the card presses, not for the card to draw. */
+const CARD_ROWS_OUTS: Array<[string, string]> = [
+  ['groups', 'array'], ...PROJECT_DETAIL_BASE, ['resolvedId', 'string'], ['placedBlockId', 'string'], ['sendTitle', 'string'], ['sendDeadline', 'string']
+];
 
 /**
  * The card's four groups and the one project on the right (R6, AC7).
@@ -5108,7 +5660,7 @@ const CARD_ROWS: Tpl010Component = {
     derive(
       'kdWork',
       'Group them, then open one',
-      `${PLANNER_FNS}${ENVELOPE_FNS}
+      `${PLANNER_FNS}${ENVELOPE_FNS}${LOG_FNS}
 var projects = Inputs.projects || [];
 var blocks = Inputs.blocks || [];
 var monday = parseDay(Inputs.weekStart) || mondayOf(startOfToday());
@@ -5162,12 +5714,14 @@ for (var g = 0; g < GROUPS.length; g++) {
     var late = isLate(proj);
     var live = liveMove(proj.id);
     rows.push({
-      id: proj.id,
+      // P78-TPL010-MOVEARROW — the row's own id; the project's is projectId.
+      id: 'card:' + proj.id,
+      projectId: proj.id,
       name: proj.name || '',
       hoursText: t > 0 ? hText(t) + ' h' : '\u2014',
       // R7d — the unplaced moves are what the eye should land on here: full strength, and red when
       // late. A placed one goes muted and says its day.
-      move: live ? '\u2713 ' + shortDay(live.date) + ' \u00b7 ' + (proj.move || '') : (late ? '! ' : '\u2192 ') + (proj.move || ''),
+      moveText: live ? '\u2713 ' + shortDay(live.date) + ' \u00b7 ' + (proj.move || '') : (late ? '! ' : '\u2192 ') + (proj.move || ''),
       hasMove: !!proj.move,
       moveColor: live ? 'var(--muted-foreground)' : late ? 'var(--destructive)' : 'var(--foreground)',
       mark: envMark(grp.env),
@@ -5189,7 +5743,9 @@ var one = found || {};
 var oneEnv = envelopeOf(one);
 Outputs.resolvedId = one.id || '';
 Outputs.name = one.name || 'No projects yet';
-Outputs.sub = one.sub || 'Add a project and it appears here.';
+// The invitation is for a planner with no projects; a project with no line about it has an empty line
+// (TPL-010-B: Richard's first project read "Add a project and it appears here." under its own name).
+Outputs.sub = found ? String(one.sub || '') : 'Add a project and it appears here.';
 Outputs.move = one.move || '';
 Outputs.hasMove = !!one.move;
 Outputs.worth = one.moveWorth || '';
@@ -5220,6 +5776,21 @@ Outputs.lastLine = !live && last ? (last.done ? '\u2713 Done ' + shortDay(last.d
 Outputs.hasLast = canPlan && !live && !!last;
 // Which project and which state — the hours box is put back to 0.5 whenever this changes.
 Outputs.moveKey = (one.id || '') + (live ? ':' + live.id : ':open');
+
+// TPL-010-L L4 — the move in the todo list: an open task with the same words. Only with a todo list.
+var hasTodo = String(Inputs.todoUrl || '').trim() !== '';
+var moveWords = String(one.move || '').trim();
+var inTask = null;
+var openTasks = Inputs.tasks || [];
+for (var tk = 0; tk < openTasks.length; tk++) {
+  var ot = openTasks[tk];
+  if (ot && String(ot.status || '') === 'open' && String(ot.title || '').trim().toLowerCase() === moveWords.toLowerCase()) inTask = ot;
+}
+Outputs.inTodo = hasTodo && !!moveWords && !!inTask;
+Outputs.canSend = hasTodo && !!moveWords && !one.moveStop && !inTask;
+Outputs.todoLine = inTask ? '\u2713 In your todo list' + (parseDay(inTask.deadline) ? ', due ' + shortDay(inTask.deadline) : '') : '';
+Outputs.sendTitle = moveWords;
+Outputs.sendDeadline = parseDay(one.moveDue) ? String(one.moveDue) : '';
 
 var weekTotal = one.id ? hoursFor(one.id, null) : 0;
 var rateText = num(one.rate, 0) > 0 && weekTotal > 0 ? ' \u00b7 ' + money(weekTotal * num(one.rate, 0)) : '';
@@ -5257,7 +5828,11 @@ for (var d = 0; d < 6; d++) {
 }
 Outputs.boxes = boxes;
 
-Outputs.say = one.say || '';`
+Outputs.say = one.say || '';
+// T3 — the project's history, each line naming the block it was about. The latest fifty; nothing is deleted.
+var logs = logRows(Inputs.history, 'projectId', one.id || '', true, 50);
+Outputs.logRows = logs;
+Outputs.hasLog = logs.length > 0;`
     )
   ],
   connections: [
@@ -5285,6 +5860,33 @@ interface WriteSpec {
   idFromInput?: string;
 }
 
+/**
+ * TPL-010-T T3 — the history line a command writes after its record. The guard names the line in
+ * `hKind`, `hSummary`, `hBody` and `hWhat`; an empty `hSummary` writes none (a Save that changed
+ * nothing). Where the block and the project ids come from is said here, not spelled in each guard.
+ */
+interface HistorySpec {
+  /** The block the line is about: the record the command just created, or one of its inputs. None for a project line. */
+  blockId?: { write: true } | { input: string };
+  /** The project the line is about: the record just created, one of the command's inputs, or a guard output. */
+  projectId: { write: true } | { input: string } | { guard: string };
+}
+
+/**
+ * TPL-010-B — a second record written after the first, when the guard says so: a project's bill.
+ * Every value is a guard output worked out at the press; only the id it belongs to comes later.
+ */
+interface ThenWriteSpec {
+  /** The guard output (a boolean) that says whether to write it. */
+  gate: string;
+  collection: string;
+  label: string;
+  /** `[field, guard output]`. */
+  props: Array<[string, string]>;
+  /** The record it belongs to: the one just written, or one of the command's inputs. Written as `projectId`. */
+  projectId?: { write: true } | { input: string };
+}
+
 interface CommandSpec {
   path: string;
   description: string;
@@ -5295,6 +5897,42 @@ interface CommandSpec {
   write: WriteSpec;
   extraOuts?: Array<[string, string]>;
   extraWires?: (p: string) => unknown[];
+  history?: HistorySpec;
+  then?: ThenWriteSpec;
+}
+
+/**
+ * The line's four words go in from the guard; `at` is stamped by the gate, as the record has been
+ * written. `done` waits for the line, so the week reads again with it in — and a line that did not
+ * save says so in the banner and still lets the sheet close, because the record itself did save.
+ * `after` is what the line waits for: the record, or the second write that follows it.
+ */
+function historyNodes(p: string, h: HistorySpec, into: string, after: Array<[string, string]>): { nodes: unknown[]; connections: unknown[] } {
+  const src = (spec: { write: true } | { input: string } | { guard: string }): [string, string] =>
+    'write' in spec ? [`${p}Write`, 'id'] : 'input' in spec ? [`${p}In`, spec.input] : [`${p}Guard`, `out-${spec.guard}`];
+  // A project line has no block, and leaves the field unwritten rather than writing an empty one.
+  const blockWire = h.blockId ? [wire(...src(h.blockId), `${p}Log`, 'prop-blockId')] : [];
+  return {
+    nodes: [
+      script(`${p}LogGate`, 'Is there a line to write?', "if (String(Inputs.summary || '') === '') { Outputs.skip(); return; }\nOutputs.at = new Date().toISOString();\nOutputs.log();", ['summary']),
+      logic(`${p}Log`, CREATE, 'Write what happened in the history', { collectionName: 'PlanEvent' })
+    ],
+    connections: [
+      ...blockWire,
+      wire(...src(h.projectId), `${p}Log`, 'prop-projectId'),
+      ...([['kind', 'hKind'], ['summary', 'hSummary'], ['body', 'hBody'], ['what', 'hWhat']] as const).map(([field, out]) =>
+        wire(`${p}Guard`, `out-${out}`, `${p}Log`, `prop-${field}`)
+      ),
+      wire(`${p}Guard`, 'out-hSummary', `${p}LogGate`, 'in-summary'),
+      wire(`${p}LogGate`, 'out-at', `${p}Log`, 'prop-at'),
+      ...after.map(([id, port]) => wire(id, port, `${p}LogGate`, 'run')),
+      wire(`${p}LogGate`, 'out-log', `${p}Log`, 'store'),
+      wire(`${p}LogGate`, 'out-skip', into, 'done'),
+      wire(`${p}Log`, 'done', into, 'done'),
+      wire(`${p}Log`, 'failure', `${p}Problem`, 'do'),
+      wire(`${p}Log`, 'failure', into, 'done')
+    ]
+  };
 }
 
 /**
@@ -5322,6 +5960,40 @@ function command(spec: CommandSpec): Tpl010Component {
   // that silently does nothing.
   const fireInput = 'store';
 
+  // TPL-010-B — a second write after the record, when the guard asks for one. Whatever it does, the
+  // command goes on to its history line (or done): the record itself saved, and a failed second
+  // write says so in the banner like any other.
+  const then = spec.then;
+  const thenGate = `${p}ThenGate`;
+  const thenId = `${p}Then`;
+  const afterRecord: Array<[string, string]> = then
+    ? [[thenGate, 'out-no'], [thenId, 'done'], [thenId, 'failure']]
+    : [[writeId, 'done']];
+  const thenNodes = then
+    ? [
+        script(thenGate, `Is there a ${then.collection} to write as well?`, 'if (Inputs.want === true) Outputs.yes(); else Outputs.no();', ['want']),
+        logic(thenId, CREATE, then.label, { collectionName: then.collection })
+      ]
+    : [];
+  const thenWires = then
+    ? [
+        wire(`${p}Guard`, `out-${then.gate}`, thenGate, 'in-want'),
+        wire(writeId, 'done', thenGate, 'run'),
+        wire(thenGate, 'out-yes', thenId, fireInput),
+        ...then.props.map(([field, from]) => wire(`${p}Guard`, `out-${from}`, thenId, `prop-${field}`)),
+        ...(then.projectId
+          ? [
+              'write' in then.projectId
+                ? wire(writeId, 'id', thenId, 'prop-projectId')
+                : wire(`${p}In`, then.projectId.input, thenId, 'prop-projectId')
+            ]
+          : []),
+        wire(thenId, 'failure', `${p}Problem`, 'do')
+      ]
+    : [];
+
+  const history = spec.history ? historyNodes(p, spec.history, `${p}Out`, afterRecord) : null;
+
   return {
     path: spec.path,
     description: spec.description,
@@ -5334,7 +6006,9 @@ function command(spec: CommandSpec): Tpl010Component {
       {
         ...(logic(`${p}Problem`, SET_VARIABLE, 'Say it did not save', { name: VAR.problem, setWith: 'string', value: PROBLEM_TEXT }) as object),
         comment: SHARED_PROBLEM
-      }
+      },
+      ...thenNodes,
+      ...(history ? history.nodes : [])
     ],
     connections: [
       ...spec.guardIns.map((n) => wire(`${p}In`, n, `${p}Guard`, `in-${n}`)),
@@ -5342,43 +6016,140 @@ function command(spec: CommandSpec): Tpl010Component {
       ...(w.props ?? []).map(([field, from]) => wire(`${p}Guard`, `out-${from}`, writeId, `prop-${field}`)),
       ...(w.idFromInput ? [wire(`${p}In`, w.idFromInput, writeId, 'modelId')] : []),
       wire(`${p}Guard`, 'out-go', writeId, fireInput),
-      wire(writeId, 'done', `${p}Out`, 'done'),
+      ...thenWires,
+      // With a history line, the command is done when the line is — so the week reads again with it in.
+      ...(history ? history.connections : afterRecord.map(([id, port]) => wire(id, port, `${p}Out`, 'done'))),
       wire(writeId, 'failure', `${p}Problem`, 'do'),
       ...(spec.extraWires ? spec.extraWires(p) : [])
     ]
   };
 }
 
-const ADD_BLOCK = command({
-  path: 'Commands/Add block',
-  description: 'Puts a block of time in a day: which project, what it is, and how many hours.',
-  ins: [['projectId', 'string'], ['date', 'string'], ['what', 'string'], ['planned', 'number']],
-  guard: `${PLANNER_FNS}var pid = String(Inputs.projectId || '');
-var date = String(Inputs.date || '');
-var what = String(Inputs.what || '').trim();
-var planned = q(num(Inputs.planned, 0));
-if (pid === '' || !parseDay(date) || what === '' || planned <= 0) return;
-Outputs.projectId = pid;
-Outputs.date = date;
-Outputs.what = what;
-Outputs.planned = planned;
+const ADD_BLOCK_INS: Array<[string, string]> = [
+  ['projectId', 'string'], ['date', 'string'], ['what', 'string'], ['planned', 'number'], ['todoTaskId', 'string'],
+  // TPL-010-T T1 — the next actions ticked in the sheet, one block each: `[{ what, todoActionId }]`.
+  ['items', 'array'], ['fromActions', 'boolean'],
+  // For the line in the todo list, which names the project (T2).
+  ['projects', 'array'],
+  ['do', 'signal']
+];
+const ADD_BLOCK_VALUES = ADD_BLOCK_INS.filter(([, t]) => t !== 'signal').map(([n]) => n);
+
+/**
+ * One block per press, or one per next action ticked (T1), each written in turn: the block, its
+ * first history line (T3), and — when it came from a task — *Planned in Planning* in the task's
+ * history in the todo list (T2). Then the next.
+ *
+ * 🔴 **A Function has one signal in, `Run`, and two runs in one frame are one run** (ERG-001's
+ * coalescing guard). So the queue does not listen for signals at all: `do` steps one Counter and
+ * each finished block steps another, and the queue runs when either count CHANGES — which it does
+ * once per pulse, however close together. The same move the week arrows make (`Logic/Planning data`).
+ */
+const ADD_BLOCK_QUEUE = `${PLANNER_FNS}${LOG_FNS}var start = num(Inputs.start, 0), step = num(Inputs.step, 0);
+if (this.start === undefined) { this.start = 0; this.step = 0; }
+if (start !== this.start) {
+  this.start = start;
+  this.step = step;
+  this.batch = null;
+  var pid = String(Inputs.projectId || '');
+  var date = String(Inputs.date || '');
+  var planned = q(num(Inputs.planned, 0));
+  if (pid === '' || !parseDay(date) || planned <= 0) return;
+  var list = [];
+  var items = Inputs.items || [];
+  for (var i = 0; i < items.length; i++) {
+    var w = String((items[i] && items[i].what) || '').trim();
+    if (w !== '') list.push({ what: w, actionId: String(items[i].todoActionId || '') });
+  }
+  // T1 — a task with next actions makes a block for each one ticked, and nothing when none is.
+  if (Inputs.fromActions === true && list.length === 0) return;
+  var typed = String(Inputs.what || '').trim();
+  if (list.length === 0 && typed !== '') list.push({ what: typed, actionId: '' });
+  if (list.length === 0) return;
+  this.batch = { pid: pid, date: date, planned: planned, taskId: String(Inputs.todoTaskId || ''), name: nameOf(Inputs.projects, pid), list: list, i: 0 };
+} else if (step !== this.step) {
+  this.step = step;
+  if (!this.batch) return;
+  this.batch.i++;
+} else return;
+var b = this.batch;
+if (b.i >= b.list.length) { this.batch = null; Outputs.finished(); return; }
+var it = b.list[b.i];
+Outputs.projectId = b.pid;
+Outputs.date = b.date;
+Outputs.what = it.what;
+Outputs.planned = b.planned;
 Outputs.done = false;
 Outputs.isMove = false;
 Outputs.empty = '';
-// New blocks go to the bottom of their day, which is the order they were thought of in.
-Outputs.position = Date.now();
-Outputs.go();`,
-  guardIns: ['projectId', 'date', 'what', 'planned'],
-  write: {
-    kind: 'create',
-    collection: 'Block',
-    label: 'Put the block in the day',
-    props: [
-      ['projectId', 'projectId'], ['date', 'date'], ['what', 'what'], ['planned', 'planned'],
-      ['actual', 'empty'], ['done', 'done'], ['isMove', 'isMove'], ['todoTaskId', 'empty'], ['position', 'position']
-    ]
-  }
-});
+// TPL-010-L — a block made from a todo task keeps the task's id; T1 — and the action's, when it is one.
+Outputs.todoTaskId = b.taskId;
+Outputs.todoActionId = it.actionId;
+// New blocks go to the bottom of their day, in the order they were ticked.
+Outputs.position = Date.now() + b.i;
+var when = shortDay(b.date) + ' \\u00b7 ' + hText(b.planned) + ' h';
+Outputs.hKind = 'created';
+Outputs.hSummary = b.taskId ? 'Made from the todo list \\u00b7 ' + when : 'Put in ' + when;
+Outputs.hBody = '';
+Outputs.hWhat = it.what;
+Outputs.hasTodo = b.taskId !== '';
+Outputs.tKind = 'planned';
+Outputs.tSummary = ${JSON.stringify(PLANNED_PREFIX)} + ': ' + (it.actionId ? it.what + ' \\u2014 ' : '') + (b.name || 'no project') + ', ' + shortDay(b.date) + ', ' + hText(b.planned) + ' h';
+Outputs.at = new Date().toISOString();
+// Last line on purpose: every value above is delivered with the pulse that writes it (GAM-011).
+Outputs.go();`;
+
+const ADD_BLOCK: Tpl010Component = {
+  path: 'Commands/Add block',
+  description: 'Puts a block of time in a day: which project, what it is, and how many hours — or, from a todo task, one block for each next action ticked. Each block starts its history, and a block from a task says so in the task’s history in the todo list.',
+  ...iface(ADD_BLOCK_INS, [['done', 'signal']]),
+  nodes: [
+    inputs('abIn', 'What to put in', ADD_BLOCK_INS),
+    outputs('abOut', 'Done', [['done', 'signal']]),
+    logic('abStart', 'Counter', 'How many times Put it in was pressed', { startValue: 0 }),
+    logic('abStep', 'Counter', 'How many blocks are written', { startValue: 0 }),
+    logic('abQueue', FUNCTION, 'The next block to write', { functionScript: ADD_BLOCK_QUEUE, ...signalOnly(...ADD_BLOCK_VALUES.map((n) => `in-${n}`)) }),
+    logic('abWrite', CREATE, 'Put the block in the day', { collectionName: 'Block' }),
+    logic('abLog', CREATE, 'Start its history', { collectionName: 'PlanEvent' }),
+    script('abRoute', 'Is it from a todo task?', 'if (Inputs.hasTodo === true) Outputs.todo();\nelse Outputs.next();', ['hasTodo']),
+    logic('abTodo', CREATE, 'Say so in the task’s history in the todo list', { collectionName: 'Event' }),
+    { ...(logic('abProblem', SET_VARIABLE, 'Say it did not save', { name: VAR.problem, setWith: 'string', value: PROBLEM_TEXT }) as object), comment: SHARED_PROBLEM }
+  ],
+  connections: [
+    ...ADD_BLOCK_VALUES.map((n) => wire('abIn', n, 'abQueue', `in-${n}`)),
+    wire('abIn', 'do', 'abStart', 'increase'),
+    wire('abStart', 'currentCount', 'abQueue', 'in-start'),
+    wire('abStep', 'currentCount', 'abQueue', 'in-step'),
+    ...(
+      [
+        ['projectId', 'projectId'], ['date', 'date'], ['what', 'what'], ['planned', 'planned'], ['actual', 'empty'], ['done', 'done'],
+        ['isMove', 'isMove'], ['todoTaskId', 'todoTaskId'], ['todoActionId', 'todoActionId'], ['position', 'position']
+      ] as const
+    ).map(([field, from]) => wire('abQueue', `out-${from}`, 'abWrite', `prop-${field}`)),
+    wire('abQueue', 'out-go', 'abWrite', 'store'),
+    wire('abWrite', 'id', 'abLog', 'prop-blockId'),
+    ...([['projectId', 'projectId'], ['kind', 'hKind'], ['summary', 'hSummary'], ['body', 'hBody'], ['what', 'hWhat'], ['at', 'at']] as const).map(([field, from]) =>
+      wire('abQueue', `out-${from}`, 'abLog', `prop-${field}`)
+    ),
+    wire('abWrite', 'done', 'abLog', 'store'),
+    wire('abQueue', 'out-hasTodo', 'abRoute', 'in-hasTodo'),
+    wire('abLog', 'done', 'abRoute', 'run'),
+    ...([['taskId', 'todoTaskId'], ['kind', 'tKind'], ['summary', 'tSummary'], ['body', 'empty'], ['at', 'at']] as const).map(([field, from]) =>
+      wire('abQueue', `out-${from}`, 'abTodo', `prop-${field}`)
+    ),
+    wire('abRoute', 'out-todo', 'abTodo', 'store'),
+    wire('abRoute', 'out-next', 'abStep', 'increase'),
+    wire('abTodo', 'done', 'abStep', 'increase'),
+    wire('abQueue', 'out-finished', 'abOut', 'done'),
+    // A block that did not save stops the queue, and the sheet stays open with its words in it.
+    wire('abWrite', 'failure', 'abProblem', 'do'),
+    // A line that did not save is said, and the next block is still written: the block itself saved.
+    wire('abLog', 'failure', 'abProblem', 'do'),
+    wire('abLog', 'failure', 'abRoute', 'run'),
+    wire('abTodo', 'failure', 'abProblem', 'do'),
+    wire('abTodo', 'failure', 'abStep', 'increase')
+  ]
+};
 
 /**
  * R23 — what the block sheet writes about the block itself: whose it is, what it is, the hours
@@ -5389,8 +6160,9 @@ Outputs.go();`,
 const SAVE_BLOCK = command({
   path: 'Commands/Save block',
   description: 'Saves what a block is: which project, what it is, the hours it is planned at, and which day.',
-  ins: [['blockId', 'string'], ['projectId', 'string'], ['what', 'string'], ['planned', 'number'], ['date', 'string']],
-  guard: `${PLANNER_FNS}var id = String(Inputs.blockId || '');
+  // T3 — `before` is the block as it is stored, so the history can say what the save changed.
+  ins: [['blockId', 'string'], ['projectId', 'string'], ['what', 'string'], ['planned', 'number'], ['date', 'string'], ['before', '*'], ['projects', 'array']],
+  guard: `${PLANNER_FNS}${LOG_FNS}var id = String(Inputs.blockId || '');
 var pid = String(Inputs.projectId || '');
 var what = String(Inputs.what || '').trim();
 var date = String(Inputs.date || '');
@@ -5402,15 +6174,29 @@ Outputs.projectId = pid;
 Outputs.what = what;
 Outputs.planned = planned;
 Outputs.date = date;
+// T3 — one line naming what changed; a save that changed nothing writes none.
+var was = Inputs.before || {};
+var parts = [];
+if (was.id === id) {
+  if (String(was.date || '') !== date) parts.push('moved ' + shortDay(was.date) + ' \\u2192 ' + shortDay(date));
+  if (q(num(was.planned, 0)) !== planned) parts.push('planned ' + hText(was.planned) + ' h \\u2192 ' + hText(planned) + ' h');
+  if (String(was.projectId || '') !== pid) parts.push('now under ' + (nameOf(Inputs.projects, pid) || 'another project'));
+  if (String(was.what || '').trim() !== what) parts.push('was \\u201c' + String(was.what || '').trim() + '\\u201d');
+}
+Outputs.hKind = parts.length === 1 && parts[0].indexOf('moved') === 0 ? 'moved' : 'changed';
+Outputs.hSummary = cap(parts.join(' \\u00b7 '));
+Outputs.hBody = '';
+Outputs.hWhat = what;
 Outputs.go();`,
-  guardIns: ['blockId', 'projectId', 'what', 'planned', 'date'],
+  guardIns: ['blockId', 'projectId', 'what', 'planned', 'date', 'before', 'projects'],
   write: {
     kind: 'update',
     collection: 'Block',
     label: 'Save what the block is',
     props: [['projectId', 'projectId'], ['what', 'what'], ['planned', 'planned'], ['date', 'date']],
     idFromInput: 'blockId'
-  }
+  },
+  history: { blockId: { input: 'blockId' }, projectId: { guard: 'projectId' } }
 });
 
 /**
@@ -5425,8 +6211,13 @@ Outputs.go();`,
 const ADD_TIME = command({
   path: 'Commands/Add time',
   description: 'Logs a sitting against a block — how long, and what you did — and says whether the block is now done.',
-  ins: [['blockId', 'string'], ['entries', 'array'], ['actual', '*'], ['hours', 'number'], ['note', 'string'], ['day', 'string'], ['logged', 'boolean']],
-  guard: `${PLANNER_FNS}var id = String(Inputs.blockId || '');
+  ins: [
+    ['blockId', 'string'], ['entries', 'array'], ['actual', '*'], ['hours', 'number'], ['note', 'string'], ['day', 'string'], ['logged', 'boolean'],
+    // TPL-010-T — whether the block was done before this save, whose it is, its words and its plan: for its history (T3)
+    // and for what the todo list is told (T2).
+    ['wasDone', 'boolean'], ['projectId', 'string'], ['what', 'string'], ['planned', '*']
+  ],
+  guard: `${PLANNER_FNS}${LOG_FNS}var id = String(Inputs.blockId || '');
 if (id === '') return;
 var list = [];
 var before = entriesOf({ entries: Inputs.entries });
@@ -5441,28 +6232,57 @@ var was = Inputs.actual;
 Outputs.entries = list;
 Outputs.actual = list.length ? q(total) : (done && was !== null && was !== undefined && was !== '' && isFinite(Number(was)) ? q(was) : '');
 Outputs.done = done;
+// T3 — the sitting, and whether the block became done (or was opened again), as one line.
+var wasDone = Inputs.wasDone === true;
+var note = String(Inputs.note || '').trim();
+var parts = [];
+if (h > 0) parts.push(hText(h) + ' h logged');
+if (done && !wasDone) parts.push('done');
+if (!done && wasDone) parts.push('opened again');
+Outputs.hKind = done && !wasDone ? 'done' : !done && wasDone ? 'reopened' : 'logged';
+Outputs.hSummary = cap(parts.join(' \\u00b7 '));
+Outputs.hBody = h > 0 ? note : '';
+Outputs.hWhat = String(Inputs.what || '').trim();
+// T2 — what the todo list is told, decided HERE: after this write the week reads again and the block
+// is done, so anything asking later would think it always was.
+Outputs.becameDone = done && !wasDone;
+var said = note;
+for (var k = list.length - 1; k >= 0 && said === ''; k--) said = String(list[k].note || '').trim();
+Outputs.doneNote = said;
+Outputs.doneHours = list.length ? q(total) : (was !== null && was !== undefined && was !== '' && isFinite(Number(was)) ? q(was) : q(num(Inputs.planned, 0)));
 Outputs.go();`,
-  guardIns: ['blockId', 'entries', 'actual', 'hours', 'note', 'day', 'logged'],
+  // `projectId` goes straight from the input to the history line: the guard never reads it, so it is no guard input.
+  guardIns: ['blockId', 'entries', 'actual', 'hours', 'note', 'day', 'logged', 'wasDone', 'what', 'planned'],
+  extraOuts: [['becameDone', 'boolean'], ['doneNote', 'string'], ['doneHours', 'number']],
   write: {
     kind: 'update',
     collection: 'Block',
     label: 'Log the time',
     props: [['entries', 'entries'], ['actual', 'actual'], ['done', 'done']],
     idFromInput: 'blockId'
-  }
+  },
+  history: { blockId: { input: 'blockId' }, projectId: { input: 'projectId' } },
+  extraWires: (p) => (['becameDone', 'doneNote', 'doneHours'] as const).map((n) => wire(`${p}Guard`, `out-${n}`, `${p}Out`, n))
 });
 
 /** AC6 — carrying moves the block. Nothing is copied, so tomorrow's total changes at once. */
 const CARRY_BLOCK = command({
   path: 'Commands/Carry block',
   description: 'Moves a block that did not get done to the next day.',
-  ins: [['blockId', 'string'], ['date', 'string']],
-  guard: `${PLANNER_FNS}var id = String(Inputs.blockId || '');
+  ins: [['blockId', 'string'], ['date', 'string'], ['blocks', 'array']],
+  guard: `${PLANNER_FNS}${LOG_FNS}var id = String(Inputs.blockId || '');
 var date = String(Inputs.date || '');
 if (id === '' || !parseDay(date)) return;
 Outputs.date = date;
+var b = findById(Inputs.blocks, id) || {};
+Outputs.hProjectId = String(b.projectId || '');
+Outputs.hKind = 'moved';
+Outputs.hSummary = 'Carried to ' + shortDay(date) + (b.date ? ', from ' + shortDay(b.date) : '');
+Outputs.hBody = '';
+Outputs.hWhat = String(b.what || '');
 Outputs.go();`,
-  guardIns: ['blockId', 'date'],
+  guardIns: ['blockId', 'date', 'blocks'],
+  history: { blockId: { input: 'blockId' }, projectId: { guard: 'hProjectId' } },
   write: {
     kind: 'update',
     collection: 'Block',
@@ -5482,11 +6302,19 @@ Outputs.go();`,
 const DROP_BLOCK = command({
   path: 'Commands/Drop block',
   description: 'Drops a block you are not going to do. The block goes; nothing else does.',
-  ins: [['blockId', 'string']],
-  guard: `var id = String(Inputs.blockId || '');
+  ins: [['blockId', 'string'], ['blocks', 'array']],
+  guard: `${PLANNER_FNS}${LOG_FNS}var id = String(Inputs.blockId || '');
 if (id === '') return;
+// T3 — the block goes; its story stays, on the project's card.
+var b = findById(Inputs.blocks, id) || {};
+Outputs.hProjectId = String(b.projectId || '');
+Outputs.hKind = 'dropped';
+Outputs.hSummary = 'Taken out of the week' + (b.date ? ' (it was ' + shortDay(b.date) + ', ' + hText(hoursOf(b)) + ' h)' : '');
+Outputs.hBody = '';
+Outputs.hWhat = String(b.what || '');
 Outputs.go();`,
-  guardIns: ['blockId'],
+  guardIns: ['blockId', 'blocks'],
+  history: { blockId: { input: 'blockId' }, projectId: { guard: 'hProjectId' } },
   write: { kind: 'delete', collection: 'Block', label: 'Drop it', idFromInput: 'blockId' }
 });
 
@@ -5519,8 +6347,13 @@ Outputs.done = false;
 Outputs.isMove = true;
 Outputs.empty = '';
 Outputs.position = Date.now();
+Outputs.hKind = 'created';
+Outputs.hSummary = 'The next move, put in ' + shortDay(date) + ' \\u00b7 ' + hText(planned) + ' h';
+Outputs.hBody = '';
+Outputs.hWhat = move;
 Outputs.go();`,
   guardIns: ['projectId', 'move', 'date', 'planned', 'placed'],
+  history: { blockId: { write: true }, projectId: { guard: 'projectId' } },
   extraOuts: [['blockId', 'string']],
   write: {
     kind: 'create',
@@ -5543,14 +6376,21 @@ Outputs.go();`,
 const MOVE_BLOCK = command({
   path: 'Commands/Move block',
   description: 'Moves a block to another day, from today on. Only its day changes.',
-  ins: [['blockId', 'string'], ['date', 'string'], ['from', 'string']],
-  guard: `${PLANNER_FNS}var id = String(Inputs.blockId || '');
+  ins: [['blockId', 'string'], ['date', 'string'], ['from', 'string'], ['blocks', 'array']],
+  guard: `${PLANNER_FNS}${LOG_FNS}var id = String(Inputs.blockId || '');
 var date = String(Inputs.date || '');
 var d = parseDay(date);
 if (id === '' || !d || d.getTime() < startOfToday().getTime() || date === String(Inputs.from || '')) return;
 Outputs.date = date;
+var b = findById(Inputs.blocks, id) || {};
+Outputs.hProjectId = String(b.projectId || '');
+Outputs.hKind = 'moved';
+Outputs.hSummary = 'Moved ' + shortDay(Inputs.from) + ' \\u2192 ' + shortDay(date);
+Outputs.hBody = '';
+Outputs.hWhat = String(b.what || '');
 Outputs.go();`,
-  guardIns: ['blockId', 'date', 'from'],
+  guardIns: ['blockId', 'date', 'from', 'blocks'],
+  history: { blockId: { input: 'blockId' }, projectId: { guard: 'hProjectId' } },
   write: {
     kind: 'update',
     collection: 'Block',
@@ -5577,7 +6417,8 @@ Outputs.kind = kind;
 Outputs.rate = Math.max(0, num(Inputs.rate, 0));
 Outputs.slot = String(Inputs.slot || '').trim();
 Outputs.rung = String(Inputs.rung || '').trim();
-Outputs.move = String(Inputs.move || '').trim();
+// P78-TPL010-MOVEARROW — the arrows and days the card once wrote into a move come off before it is saved.
+Outputs.move = String(Inputs.move || '').trim().replace(/^(?:(?:\u2192|!) |\u2713 (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) \\d{1,2} \u00b7 )+/, '').trim();
 Outputs.moveWorth = String(Inputs.moveWorth || '').trim();
 Outputs.moveWhen = String(Inputs.moveWhen || '').trim();
 Outputs.moveDue = parseDay(due) ? due : '';
@@ -5586,34 +6427,110 @@ Outputs.say = String(Inputs.say || '').trim();
 // M21 — hourly or fixed; §4.2 — the payment terms a new bill's due date is pre-filled from (M5), and the agreed hours.
 Outputs.billing = String(Inputs.billing || '') === 'fixed' ? 'fixed' : 'hourly';
 Outputs.termsDays = Math.min(120, Math.max(0, Math.round(num(Inputs.termsDays, 14))));
-Outputs.agreedHours = Math.max(0, q(num(Inputs.agreedHours, 0)));`;
+Outputs.agreedHours = Math.max(0, q(num(Inputs.agreedHours, 0)));
+// TPL-010-B B1 — the bill typed with the project, worked out HERE, at the press: the form closes as
+// the project is written, and a bill read after that would be read from boxes being cleared.
+// Only Billable work, only once or monthly, and only with a day — and a fixed bill needs its amount.
+var bWhen = String(Inputs.billWhen || '');
+var bDay = String(Inputs.billDate || '');
+var bFixed = Outputs.billing === 'fixed';
+var bAmount = Math.round(Math.abs(num(Inputs.billAmount, 0)) * 100) / 100;
+var bill = kind === 'earning' && (bWhen === 'once' || bWhen === 'monthly') && mOk(bDay) && (!bFixed || bAmount > 0);
+var bUntil = String(Inputs.billUntil || '');
+Outputs.bill = bill;
+Outputs.bLabel = bill ? name : '';
+Outputs.bAmount = bill && bFixed ? bAmount : 0;
+Outputs.bRepeat = bill ? bWhen : '';
+// M5 — the due date is the payment terms after the day it goes out; a monthly bill goes out that many days before each.
+Outputs.bDate = bill ? mAddDays(bDay, Outputs.termsDays) : '';
+Outputs.bUntil = bill && bWhen === 'monthly' && mOk(bUntil) && bUntil >= bDay ? mAddDays(bUntil, Outputs.termsDays) : '';
+Outputs.bMonthEnd = false;
+Outputs.bBillDate = bill && bWhen === 'once' ? bDay : '';
+Outputs.bLead = bill && bWhen === 'monthly' ? Outputs.termsDays : '';
+// M23 — an hourly project's bill fills from its hours until it is marked sent.
+Outputs.bFromHours = bill && !bFixed;
+Outputs.bLikelihood = 100;
+Outputs.bNote = '';
+Outputs.bPosition = Date.now();
+var billWords = !bill ? '' : (bFixed ? mEur(bAmount) : 'from the hours') + (bWhen === 'once' ? ', goes out ' + mDay(bDay) : ' every month, the first going out ' + mDay(bDay));`;
 
 const PROJECT_INS: Array<[string, string]> = [
-  ['name', 'string'], ['sub', 'string'], ['kind', 'string'], ['rate', 'number'], ['slot', 'string'], ['rung', 'string'],
+  ['name', 'string'], ['sub', 'string'], ['kind', 'string'], ['rate', 'number'],
   ['move', 'string'], ['moveWorth', 'string'], ['moveWhen', 'string'], ['moveDue', 'string'], ['moveStop', 'boolean'], ['say', 'string'],
-  ['billing', 'string'], ['termsDays', 'number'], ['agreedHours', 'number']
+  ['billing', 'string'], ['termsDays', 'number'], ['agreedHours', 'number'],
+  ['billWhen', 'string'], ['billAmount', 'string'], ['billDate', 'string'], ['billUntil', 'string']
 ];
-const PROJECT_PROPS: Array<[string, string]> = PROJECT_INS.map(([n]) => [n, n]);
+/** What a Project stores. The bill fields are the bill's, written to a MoneyItem (B1); Slot and Rung are no longer written (B9). */
+const PROJECT_PROPS: Array<[string, string]> = PROJECT_INS.filter(([n]) => !n.startsWith('bill') || n === 'billing').map(([n]) => [n, n]);
 
-/** R2.4-1 — a project is born in the editor, with its first move if it has one. */
+/** B1 — the bill a project is saved with: a MoneyItem, written after the project, only when the guard says `bill`. */
+const PROJECT_BILL: ThenWriteSpec = {
+  gate: 'bill',
+  collection: 'MoneyItem',
+  label: 'Add the bill it was saved with',
+  props: [
+    ['label', 'bLabel'], ['amount', 'bAmount'], ['repeat', 'bRepeat'], ['date', 'bDate'], ['until', 'bUntil'], ['monthEnd', 'bMonthEnd'],
+    ['billDate', 'bBillDate'], ['billLeadDays', 'bLead'], ['fromHours', 'bFromHours'], ['likelihood', 'bLikelihood'], ['note', 'bNote'],
+    ['position', 'bPosition']
+  ]
+};
+
+/** R2.4-1 — a project is born in the editor, with its first move if it has one, and (B1) its bill if it was given one. */
 const ADD_PROJECT = command({
   path: 'Commands/Add project',
-  description: 'Adds a project: what it is called, what kind of work it is, its rate, and its first move.',
+  description: 'Adds a project: what it is called, what kind of work it is, how it is billed, its first move, and its bill if it was given one.',
   ins: PROJECT_INS,
-  guard: `${PLANNER_FNS}${PROJECT_GUARD}
+  guard: `${PLANNER_FNS}${MONEY_FNS}${PROJECT_GUARD}
 Outputs.position = Date.now();
+Outputs.hKind = 'created';
+Outputs.hSummary = 'Project started as \\u201c' + name + '\\u201d' + (bill ? ', with its bill: ' + billWords : '');
+Outputs.hBody = '';
+Outputs.hWhat = '';
 Outputs.go();`,
   guardIns: PROJECT_INS.map(([n]) => n),
   extraOuts: [['projectId', 'string']],
+  history: { projectId: { write: true } },
   write: {
     kind: 'create',
     collection: 'Project',
     label: 'Add the project',
     props: [...PROJECT_PROPS, ['position', 'position']]
   },
+  then: { ...PROJECT_BILL, projectId: { write: true } },
   // The card opens on the project it just made.
   extraWires: (p) => [wire(`${p}Write`, 'id', `${p}Out`, 'projectId')]
 });
+
+/**
+ * T3 — what an edit changed, in words, from the project as it was stored. The name, the kind, the
+ * move and *fixes only* each get their own words; anything else is *details changed*; nothing
+ * changed writes no line.
+ */
+const PROJECT_CHANGES = `var was = findById(Inputs.projects, String(Inputs.projectId || '')) || {};
+var KIND_WORD = { earning: 'Billable', building: 'Building', hobby: 'Hobby', dormant: 'Dormant', admin: 'Admin' };
+var parts = [];
+function s(v) { return String(v === undefined || v === null ? '' : v).trim(); }
+if (was.id) {
+  if (s(was.name) !== name) parts.push('renamed from \\u201c' + s(was.name) + '\\u201d');
+  if (s(was.kind || 'earning') !== kind) parts.push('now ' + (KIND_WORD[kind] || kind));
+  var mv = s(Inputs.move);
+  if (s(was.move) !== mv) parts.push(mv ? 'next move: \\u201c' + mv + '\\u201d' : 'no next move');
+  if ((was.moveStop === true) !== (Inputs.moveStop === true)) parts.push(Inputs.moveStop === true ? 'fixes only from now' : 'open for work again');
+  if (parts.length === 0) {
+    var words = ['sub', 'moveWorth', 'moveWhen', 'moveDue', 'say'];
+    var nums = [['rate', 0], ['termsDays', 14], ['agreedHours', 0]];
+    var other = s(was.billing || 'hourly') !== (s(Inputs.billing) === 'fixed' ? 'fixed' : 'hourly');
+    for (var w = 0; w < words.length; w++) if (s(was[words[w]]) !== s(Inputs[words[w]])) other = true;
+    for (var n = 0; n < nums.length; n++) if (num(was[nums[n][0]], nums[n][1]) !== num(Inputs[nums[n][0]], nums[n][1])) other = true;
+    if (other) parts.push('details changed');
+  }
+  // B1 — a bill given to a project that had none.
+  if (bill) parts.push('bill added: ' + billWords);
+}
+Outputs.hKind = 'changed';
+Outputs.hSummary = cap(parts.join(' \\u00b7 '));
+Outputs.hBody = '';
+Outputs.hWhat = '';`;
 
 /**
  * R9 lives in this command's `moveStop`. A building asset that is finished is edited to *"fixes
@@ -5623,18 +6540,22 @@ Outputs.go();`,
 const EDIT_PROJECT = command({
   path: 'Commands/Edit project',
   description: 'Changes a project: its name, what kind of work it is, its rate, and what its next move is.',
-  ins: [['projectId', 'string'], ...PROJECT_INS],
-  guard: `${PLANNER_FNS}if (String(Inputs.projectId || '') === '') return;
+  ins: [['projectId', 'string'], ...PROJECT_INS, ['projects', 'array']],
+  guard: `${PLANNER_FNS}${MONEY_FNS}${LOG_FNS}if (String(Inputs.projectId || '') === '') return;
 ${PROJECT_GUARD}
+${PROJECT_CHANGES}
 Outputs.go();`,
-  guardIns: ['projectId', ...PROJECT_INS.map(([n]) => n)],
+  guardIns: ['projectId', ...PROJECT_INS.map(([n]) => n), 'projects'],
+  history: { projectId: { input: 'projectId' } },
   write: {
     kind: 'update',
     collection: 'Project',
     label: 'Change the project',
     props: PROJECT_PROPS,
     idFromInput: 'projectId'
-  }
+  },
+  // B3 — the form offers a bill only to a project with none, and sends `later` otherwise.
+  then: { ...PROJECT_BILL, projectId: { input: 'projectId' } }
 });
 
 /**
@@ -5644,7 +6565,7 @@ Outputs.go();`,
  */
 const SET_MONTH_PLAN = command({
   path: 'Commands/Set month plan',
-  description: 'Writes this month’s plan: what each envelope gets, and how many working days there are.',
+  description: 'Writes this month’s plan: what each budget gets, and how many working days there are.',
   ins: [
     ['month', 'string'], ['billable', 'number'], ['building', 'number'], ['admin', 'number'],
     ['hobby', 'number'], ['workingDays', 'number']
@@ -5808,6 +6729,157 @@ Outputs.go();`,
 });
 
 /** M11 — what the bank says, on a day. The latest one is where every projection starts. */
+/**
+ * **TPL-010-L L4 — Send to todo.** The move on a project's card goes to the bottom of the todo list,
+ * with the move's day as its deadline, in the same two shapes TPL-008's *Add task* writes: one `Task`
+ * (`status` open, `position` after the last open one) and one `Event` (`kind` created) whose summary
+ * says it came from here — which is also how the week knows it is money (L7).
+ *
+ * Sent once: the guard refuses while an open task has the same words, and the card swaps the button
+ * for *In your todo list* on the next read. Two writes, so not `command()`: the history line is
+ * written when the task has an id to hang it on.
+ */
+const SEND_IN: Array<[string, string]> = [['title', 'string'], ['deadline', 'string'], ['tasks', 'array'], ['projectId', 'string'], ['do', 'signal']];
+const SEND_TO_TODO: Tpl010Component = {
+  path: 'Commands/Send to todo',
+  description: 'Puts a project’s move at the bottom of the todo list, with its day as the deadline, and writes “Sent from Planning” in the task’s history. Once: not while an open task has the same words.',
+  ...iface(SEND_IN, [['done', 'signal']]),
+  nodes: [
+    inputs('tqIn', 'What to send', SEND_IN),
+    outputs('tqOut', 'Sent', [['done', 'signal']]),
+    script(
+      'tqGuard',
+      'Is there anything to send?',
+      `${PLANNER_FNS}var t = String(Inputs.title || '').trim();
+if (t === '') return;
+var tasks = Inputs.tasks || [];
+var last = 0;
+for (var i = 0; i < tasks.length; i++) {
+  var k = tasks[i];
+  if (!k || String(k.status || '') !== 'open') continue;
+  if (String(k.title || '').trim().toLowerCase() === t.toLowerCase()) return;
+  last = Math.max(last, num(k.position, 0));
+}
+Outputs.title = t;
+Outputs.position = last + 1;
+Outputs.status = 'open';
+Outputs.deadline = parseDay(Inputs.deadline) ? String(Inputs.deadline) : '';
+Outputs.empty = '';
+Outputs.kind = 'created';
+Outputs.summary = ${JSON.stringify(SENT_SUMMARY)};
+Outputs.at = new Date().toISOString();
+// T3 — and the project's own history says where its move went.
+Outputs.hKind = 'sent';
+Outputs.hSummary = 'Sent to the todo list' + (parseDay(Inputs.deadline) ? ', due ' + shortDay(Inputs.deadline) : '');
+Outputs.go();`,
+      ['title', 'deadline', 'tasks']
+    ),
+    logic('tqTask', CREATE, 'Add the task to the todo list', { collectionName: 'Task' }),
+    logic('tqEvent', CREATE, 'Write where it came from in its history', { collectionName: 'Event' }),
+    logic('tqLog', CREATE, 'Say so in the project’s history', { collectionName: 'PlanEvent' }),
+    { ...(logic('tqProblem', SET_VARIABLE, 'Say it did not save', { name: VAR.problem, setWith: 'string', value: PROBLEM_TEXT }) as object), comment: SHARED_PROBLEM }
+  ],
+  connections: [
+    ...['title', 'deadline', 'tasks'].map((n) => wire('tqIn', n, 'tqGuard', `in-${n}`)),
+    wire('tqIn', 'do', 'tqGuard', 'run'),
+    ...(
+      [['title', 'title'], ['position', 'position'], ['status', 'status'], ['deadline', 'deadline'], ['closingNote', 'empty'], ['closedAt', 'empty']] as const
+    ).map(([field, from]) => wire('tqGuard', `out-${from}`, 'tqTask', `prop-${field}`)),
+    wire('tqGuard', 'out-go', 'tqTask', 'store'),
+    wire('tqTask', 'id', 'tqEvent', 'prop-taskId'),
+    ...([['kind', 'kind'], ['summary', 'summary'], ['body', 'empty'], ['at', 'at']] as const).map(([field, from]) =>
+      wire('tqGuard', `out-${from}`, 'tqEvent', `prop-${field}`)
+    ),
+    wire('tqTask', 'done', 'tqEvent', 'store'),
+    wire('tqIn', 'projectId', 'tqLog', 'prop-projectId'),
+    ...([['kind', 'hKind'], ['summary', 'hSummary'], ['body', 'empty'], ['what', 'title'], ['at', 'at']] as const).map(([field, from]) =>
+      wire('tqGuard', `out-${from}`, 'tqLog', `prop-${field}`)
+    ),
+    wire('tqEvent', 'done', 'tqLog', 'store'),
+    wire('tqLog', 'done', 'tqOut', 'done'),
+    wire('tqTask', 'failure', 'tqProblem', 'do'),
+    wire('tqEvent', 'failure', 'tqProblem', 'do'),
+    wire('tqLog', 'failure', 'tqProblem', 'do'),
+    wire('tqLog', 'failure', 'tqOut', 'done')
+  ]
+};
+
+/**
+ * **TPL-010-T T1b and T2 — the todo list is told when a block made from a task is done.** Richard,
+ * 2026-09-23: finishing the *Send it* block ticks *Send it* in Todo, with the block's note as its
+ * *"what happened?"*. So:
+ *
+ * - a block made from a **next action** that is still open ticks it (`Action.done`, and the note —
+ *   the one Planning's L1 exception: an `Action`, never a `Task`) and writes *Ticked off “…” in
+ *   Planning* in the task's history, the way the todo list's own tick writes *Ticked off “…”*;
+ * - a block made from the **task itself** writes *Logged in Planning: 0.5 h* there, the note under it.
+ *
+ * Only on the save that makes the block done (`becameDone`, which `Add time` works out before the week
+ * reads again), and never for a block with no task. Opening it again tells the todo list nothing.
+ */
+const TELL_IN: Array<[string, string]> = [
+  ['taskId', 'string'], ['actionId', 'string'], ['actions', 'array'],
+  ['becameDone', 'boolean'], ['note', 'string'], ['hours', 'number'], ['do', 'signal']
+];
+const TELL_TODO: Tpl010Component = {
+  path: 'Commands/Tell todo',
+  description: 'When a block made from a todo task is done: ticks its next action in the todo list with the block’s note, or says in the task’s history that the time was logged in Planning.',
+  ...iface(TELL_IN, [['done', 'signal']]),
+  nodes: [
+    inputs('ttdIn', 'The block that was saved', TELL_IN),
+    outputs('ttdOut', 'Told', [['done', 'signal']]),
+    script(
+      'ttdGuard',
+      'Is there anything to tell the todo list?',
+      `${PLANNER_FNS}${LOG_FNS}var taskId = String(Inputs.taskId || '');
+if (taskId === '' || Inputs.becameDone !== true) { Outputs.skip(); return; }
+var hours = hText(num(Inputs.hours, 0)) + ' h';
+var note = String(Inputs.note || '').trim();
+var action = findById(Inputs.actions, String(Inputs.actionId || ''));
+Outputs.taskId = taskId;
+Outputs.body = note;
+Outputs.at = new Date().toISOString();
+if (action && action.done !== true) {
+  Outputs.actionId = action.id;
+  Outputs.done = true;
+  // The todo list asks "what happened?" before a tick and keeps the answer; a block with no note still answers.
+  Outputs.actionNote = note || 'Done in Planning, ' + hours + '.';
+  Outputs.kind = 'action-done';
+  Outputs.summary = 'Ticked off \\u201c' + String(action.title || '') + '\\u201d in Planning \\u00b7 ' + hours;
+  Outputs.tick();
+  return;
+}
+Outputs.kind = 'logged';
+Outputs.summary = ${JSON.stringify(LOGGED_PREFIX)} + ': ' + hours;
+Outputs.line();`,
+      ['taskId', 'actionId', 'actions', 'becameDone', 'note', 'hours']
+    ),
+    logic('ttdAction', UPDATE, 'Tick the next action off in the todo list', { collectionName: 'Action', idSource: 'explicit' }),
+    logic('ttdEvent', CREATE, 'Say so in the task’s history', { collectionName: 'Event' }),
+    { ...(logic('ttdProblem', SET_VARIABLE, 'Say it did not save', { name: VAR.problem, setWith: 'string', value: PROBLEM_TEXT }) as object), comment: SHARED_PROBLEM }
+  ],
+  connections: [
+    ...TELL_IN.filter(([, t]) => t !== 'signal').map(([n]) => wire('ttdIn', n, 'ttdGuard', `in-${n}`)),
+    wire('ttdIn', 'do', 'ttdGuard', 'run'),
+    wire('ttdGuard', 'out-actionId', 'ttdAction', 'modelId'),
+    wire('ttdGuard', 'out-done', 'ttdAction', 'prop-done'),
+    wire('ttdGuard', 'out-actionNote', 'ttdAction', 'prop-note'),
+    wire('ttdGuard', 'out-tick', 'ttdAction', 'store'),
+    ...([['taskId', 'taskId'], ['kind', 'kind'], ['summary', 'summary'], ['body', 'body'], ['at', 'at']] as const).map(([field, from]) =>
+      wire('ttdGuard', `out-${from}`, 'ttdEvent', `prop-${field}`)
+    ),
+    wire('ttdAction', 'done', 'ttdEvent', 'store'),
+    wire('ttdGuard', 'out-line', 'ttdEvent', 'store'),
+    wire('ttdEvent', 'done', 'ttdOut', 'done'),
+    wire('ttdGuard', 'out-skip', 'ttdOut', 'done'),
+    // The block is saved whatever the todo list says; a write that did not go through is said, and the sheet closes.
+    wire('ttdAction', 'failure', 'ttdProblem', 'do'),
+    wire('ttdAction', 'failure', 'ttdOut', 'done'),
+    wire('ttdEvent', 'failure', 'ttdProblem', 'do'),
+    wire('ttdEvent', 'failure', 'ttdOut', 'done')
+  ]
+};
+
 const RECORD_BALANCE = command({
   path: 'Commands/Record balance',
   description: 'Records what the bank says, on a day. Every projection starts from the latest one.',
@@ -5944,10 +7016,12 @@ const APP_BAR: Tpl010Component = {
       justifyContent: 'space-between',
       cssClassName: 'planner-appbar'
     }),
-    // Richard ruled the name on 2026-09-21: **"Planner is perfect"** — the companion to Todo. The
-    // hour budgets are still called envelopes inside the graph, and he has said that word is a bad
-    // one for them; a replacement is his to give, and renaming the tiles is not this task's.
-    text('abTitle', 'App name', 'abRoot', 'Planner', { ...T_TITLE, sizeMode: 'contentSize', as: 'h1' }),
+    // Richard ruled the name on 2026-09-21: **"Planner is perfect"** — the companion to Todo, and
+    // then **renamed it to "Planning" on 2026-09-23**, which is the name that ships. The hour
+    // budgets he called a bad name on 2026-09-21 are **budgets** as of the same day; the stored
+    // column is still `Project.envelope` and `envelopeOf()` reads it, because renaming a column
+    // people already have rows in is a migration, not a word change.
+    text('abTitle', 'App name', 'abRoot', 'Planning', { ...T_TITLE, sizeMode: 'contentSize', as: 'h1' }),
     group('abNav', 'Which week', 'abRoot', ROW_TIGHT('var(--space-1)')),
     place('abPrev', BUTTON, 'The week before', 'abNav', BTN_ICON('icon-chevron-left', 'Previous week')),
     text('abWeekLabel', 'The week on screen', 'abNav', '', { ...T_NUM, sizeMode: 'contentSize', fontSize: 'var(--text-sm)', fontWeight: 'var(--font-semibold)' }),
@@ -6082,6 +7156,12 @@ const MONEY_WIRES: unknown[] = [
   // §4.2 — the card's Billing, for the project it is showing.
   wire('twCardRows', 'resolvedId', 'twMoneyView', 'cardProject'),
   ...BILLING_FIELDS.map(([n]) => wire('twMoneyView', n, 'twCard', n)),
+  // TPL-010-B B5 — the card's next-bill button opens that bill in Money: its goes-out line, or its payment.
+  wire('twMoneyView', 'nextBillSel', 'twSelFromCard', 'value'),
+  ...(['twSelFromCard', 'twPaneNone', 'twMoneyOn', 'twClearCard', 'twEditOff'] as const).map((to) => wire('twCard', 'openBill', to, 'do')),
+  // B3 — the project form knows whether the project already has bills, and what they are.
+  wire('twMoneyView', 'cardHasBills', 'twEditRow', 'in-hasBills'),
+  wire('twMoneyView', 'cardBillsLine', 'twEditRow', 'in-billsLine'),
 
   // ── What the modal shows ──
   wire('twVarMoney', 'value', 'twMoneyShown', 'in-open'),
@@ -6189,14 +7269,14 @@ const PAGE_WEEK: Tpl010Component = {
   instantiates: [
     C.appBar, C.envelopeTile, C.movesStrip, C.dayColumn, C.cashStrip, C.projectCard, C.shutdownDrawer, C.settingsSheet,
     C.blockSheet, C.dayPicker, C.moneySheet,
-    C.plannerData, C.envelopes, C.dayColumns, C.moves, C.money, C.moneyView, C.mark, C.shutdown, '/Logic/Card rows',
+    C.plannerData, C.todoTasks, C.envelopes, C.dayColumns, C.moves, C.money, C.moneyView, C.mark, C.shutdown, '/Logic/Card rows',
     C.addBlock, C.saveBlock, C.addTime, C.carryBlock, C.dropBlock, C.placeMove, C.moveBlock,
     C.addProject, C.editProject, C.setMonthPlan, C.editSettings, C.addSettings,
-    C.addMoneyItem, C.editMoneyItem, C.endMoneyItem, C.agreeMoneyItem, C.addMark, C.editMark, C.recordBalance
+    C.addMoneyItem, C.editMoneyItem, C.endMoneyItem, C.agreeMoneyItem, C.addMark, C.editMark, C.recordBalance, C.sendToTodo, C.tellTodo
   ],
   repeats: { source: 'array', rowFields: ENVELOPE_TILE_FIELDS.map(([n]) => n) },
   nodes: [
-    { id: 'twPage', type: 'Page', label: 'Week', parameters: { title: 'Planner', urlPath: '' } },
+    { id: 'twPage', type: 'Page', label: 'Week', parameters: { title: 'Planning', urlPath: '' } },
     group('twRoot', 'Page', 'twPage', {
       ...COLUMN('var(--space-2-5)'),
       ...pinnedAs('planner-page'),
@@ -6213,8 +7293,8 @@ const PAGE_WEEK: Tpl010Component = {
     text('twPlanLine', 'Whether this month is planned', 'twRoot', '', wide(T_META)),
 
     // ── The four envelopes ──
-    group('twEnvs', 'The envelopes', 'twRoot', { ...ROW('var(--space-2)'), ...pinnedAs('planner-envs'), alignItems: 'stretch' }),
-    place('twEnvEach', FOR_EACH, 'One tile per envelope', 'twEnvs', { template: C.envelopeTile, templateType: 'explicit' }),
+    group('twEnvs', 'The budgets', 'twRoot', { ...ROW('var(--space-2)'), ...pinnedAs('planner-envs'), alignItems: 'stretch' }),
+    place('twEnvEach', FOR_EACH, 'One tile per budget', 'twEnvs', { template: C.envelopeTile, templateType: 'explicit' }),
 
     // ── The moves, the week, the money ──
     place('twMoves', C.movesStrip, 'The moves', 'twRoot'),
@@ -6238,7 +7318,8 @@ const PAGE_WEEK: Tpl010Component = {
 
     // ── The records, and everything worked out from them ──
     logic('twData', C.plannerData, 'Your week, from the backend'),
-    logic('twEnv', C.envelopes, 'The envelopes'),
+    logic('twTodo', C.todoTasks, 'Your todo tasks, in the week'),
+    logic('twEnv', C.envelopes, 'The budgets'),
     logic('twDays', C.dayColumns, 'The six columns'),
     logic('twMovesLogic', C.moves, 'The moves, by urgency'),
     logic('twMoneyLogic', C.money, 'The money, drawn'),
@@ -6282,6 +7363,24 @@ const PAGE_WEEK: Tpl010Component = {
     logic('twVarNewDay', VARIABLE, 'Which day a new block goes in', { name: VAR.newDay }),
     logic('twSetNewDay', SET_VARIABLE, 'Start a new block on a day', { name: VAR.newDay, setWith: 'string' }),
     logic('twClearNewDay', SET_VARIABLE, 'Stop making a new block', { name: VAR.newDay, setWith: 'string', value: '' }),
+    // T1 — the next actions ticked in the sheet. A press flips one, against the task the sheet is on.
+    logic('twVarPicked', VARIABLE, 'Which next actions are ticked', { name: VAR.pickedActions }),
+    logic('twSetPicked', SET_VARIABLE, 'Tick or untick one', { name: VAR.pickedActions, setWith: 'string' }),
+    script(
+      'twPickToggle',
+      'Tick or untick the action pressed',
+      `var id = String(Inputs.actionId || '');
+var cur = String(Inputs.current || '');
+var bar = cur.indexOf('|');
+if (id === '' || bar < 0) return;
+var ids = cur.slice(bar + 1).split(',').filter(function (v) { return v !== ''; });
+var at = ids.indexOf(id);
+if (at >= 0) ids.splice(at, 1);
+else ids.push(id);
+Outputs.value = cur.slice(0, bar) + '|' + ids.join(',');
+Outputs.go();`,
+      ['actionId', 'current']
+    ),
 
     /**
      * R23 — the block sheet is filled from the block itself, looked up by id, so it always opens
@@ -6291,7 +7390,7 @@ const PAGE_WEEK: Tpl010Component = {
     derive(
       'twSheetRow',
       'What the block sheet is showing',
-      `${PLANNER_FNS}var id = String(Inputs.id || '');
+      `${PLANNER_FNS}${LOG_FNS}var id = String(Inputs.id || '');
 var newDay = String(Inputs.newDay || '');
 var blocks = Inputs.blocks || [];
 var projects = Inputs.projects || [];
@@ -6300,6 +7399,27 @@ for (var k = 0; k < projects.length; k++) if (projects[k]) items.push({ Label: S
 Outputs.projects = items;
 var b = null;
 if (id !== '') for (var i = 0; i < blocks.length; i++) if (blocks[i] && blocks[i].id === id) { b = blocks[i]; break; }
+// TPL-010-L — the task's address in the todo list, for a block that is (or is for) a task.
+var base = String(Inputs.todoUrl || '').trim();
+function taskHref(taskId) {
+  return base && taskId ? base + (base.indexOf('?') >= 0 ? '&' : '?') + 'task=' + encodeURIComponent(taskId) : '';
+}
+Outputs.todoTaskId = '';
+Outputs.todoHref = b ? taskHref(b.todoTaskId) : '';
+// TPL-010-T — what every kind of sheet says unless it says otherwise: one box for the words, no
+// next actions to tick, no history yet, and nothing for the todo list.
+Outputs.whatShown = true;
+Outputs.actionsShown = false;
+Outputs.actionRows = [];
+Outputs.items = [];
+Outputs.fromActions = false;
+Outputs.pickedNow = '';
+Outputs.logShown = false;
+Outputs.logRows = [];
+Outputs.block = {};
+Outputs.blockTaskId = '';
+Outputs.blockActionId = '';
+Outputs.wasDone = false;
 function longDay(s) {
   var d = parseDay(s);
   return d ? DOW_LONG[(d.getDay() + 6) % 7] + ' ' + d.getDate() + ' ' + MON[d.getMonth()] : String(s || '');
@@ -6323,6 +7443,61 @@ if (!b && !parseDay(newDay)) {
   Outputs.saveLabel = 'Save';
   Outputs.before = [];
   Outputs.actual = '';
+  return;
+}
+// L3 (2026-09-23) — a task from the todo list opens as a NEW block made from it: its words, its day
+// (today for a late one), half an hour, and no project until one is picked. Saving writes the block
+// with the task's id, and the task leaves the week because the block now stands for it.
+if (b && b.todoProjected) {
+  Outputs.shown = true;
+  Outputs.isNew = true;
+  Outputs.timeShown = false;
+  Outputs.title = 'From todo · ' + longDay(b.date);
+  Outputs.projectId = '';
+  Outputs.what = String(b.what || '');
+  Outputs.planned = '0.5';
+  Outputs.date = String(b.date || '');
+  Outputs.loggedLine = '';
+  Outputs.entries = [];
+  Outputs.hours = '';
+  Outputs.note = '';
+  Outputs.done = false;
+  Outputs.saveLabel = 'Make it a block';
+  Outputs.before = [];
+  Outputs.actual = '';
+  Outputs.todoTaskId = String(b.todoTaskId || '');
+  // T1 — its open next actions, each a line to tick; the ticks are kept against this task only
+  // (VAR.pickedActions), and a task opened fresh has its first action ticked, the next thing to do.
+  var acts = b.todoActions || [];
+  if (acts.length) {
+    var pickedRaw = String(Inputs.picked || '');
+    var bar = pickedRaw.indexOf('|');
+    var ticked = {};
+    if (bar >= 0 && pickedRaw.slice(0, bar) === String(b.id)) {
+      var ids = pickedRaw.slice(bar + 1).split(',');
+      for (var x = 0; x < ids.length; x++) if (ids[x]) ticked[ids[x]] = true;
+    } else ticked[acts[0].id] = true;
+    var arows = [], items = [], chosen = [];
+    for (var a = 0; a < acts.length; a++) {
+      var on = !!ticked[acts[a].id];
+      arows.push({
+        // P78-TPL010-MOVEARROW (s45 census) — the row's own id; the todo action's is actionId.
+        id: 'pick:' + acts[a].id,
+        actionId: acts[a].id,
+        label: (on ? '\u2611 ' : '\u2610 ') + acts[a].title,
+        ink: on ? 'var(--foreground)' : 'var(--muted-foreground)',
+        edge: on ? 'var(--foreground)' : 'var(--border)'
+      });
+      if (on) { items.push({ what: acts[a].title, todoActionId: acts[a].id }); chosen.push(acts[a].id); }
+    }
+    Outputs.whatShown = false;
+    Outputs.actionsShown = true;
+    Outputs.actionRows = arows;
+    Outputs.items = items;
+    Outputs.fromActions = true;
+    Outputs.pickedNow = String(b.id) + '|' + chosen.join(',');
+    Outputs.saveLabel = items.length === 0 ? 'Tick one to plan it' : items.length === 1 ? 'Make it a block' : 'Make ' + items.length + ' blocks';
+  }
   return;
 }
 if (!b) {
@@ -6362,6 +7537,14 @@ for (var e = 0; e < list.length; e++) {
 Outputs.shown = true;
 Outputs.isNew = false;
 Outputs.timeShown = true;
+// T3 — its history; T2/T1b — the task and action it is for, and whether it was done before this save.
+var logs = logRows(Inputs.history, 'blockId', String(b.id), false, 30);
+Outputs.logRows = logs;
+Outputs.logShown = logs.length > 0;
+Outputs.block = b;
+Outputs.blockTaskId = String(b.todoTaskId || '');
+Outputs.blockActionId = String(b.todoActionId || '');
+Outputs.wasDone = b.done === true;
 Outputs.title = (p ? String(p.name || '') : 'This block') + ' · ' + longDay(b.date);
 Outputs.projectId = String(b.projectId || '');
 Outputs.what = String(b.what || '');
@@ -6403,11 +7586,18 @@ Outputs.kinds = [
 ];
 Outputs.billings = [
   { Label: 'Hourly: billed for the hours', Value: 'hourly' },
-  { Label: 'Fixed: a set amount for the agreed work', Value: 'fixed' }
+  { Label: 'Fixed: a set price, whatever the hours', Value: 'fixed' }
+];
+// TPL-010-B B1 — when it bills. A new project starts on one bill, with no day: the day is chosen, never assumed.
+Outputs.whens = [
+  { Label: 'One bill, when the work is done', Value: 'once' },
+  { Label: 'A bill every month', Value: 'monthly' },
+  { Label: 'Not now: I\\u2019ll add bills on the card', Value: 'later' }
 ];
 var p = null;
 for (var i = 0; i < projects.length; i++) if (projects[i] && projects[i].id === id) { p = projects[i]; break; }
 var editing = mode === 'new' || (mode === 'edit' && !!p);
+var UNSET_DAY = '1900-01-01';
 Outputs.editing = editing;
 Outputs.detailShown = !editing;
 Outputs.isNew = mode === 'new';
@@ -6418,19 +7608,27 @@ if (!editing) {
   // Closed. The editor clears its own boxes as it closes (Week/Project editor).
   Outputs.name = '';
   Outputs.sub = '';
-  Outputs.slot = '';
-  Outputs.rung = '';
   Outputs.move = '';
   Outputs.moveWorth = '';
   Outputs.moveWhen = '';
   Outputs.say = '';
   Outputs.rate = '';
   Outputs.kind = '';
-  Outputs.moveDue = '';
+  // 🔴 The three days get a day nobody would pick, not ''. The Date picker applies a Value only when
+  // it differs from the last one it was SENT (D78's shape): send '' on the close and '' on the next
+  // open and the day picked on the last project is still in the box on the new one. This day is
+  // sent while the form is unmounted, so the next opening's '' always arrives and clears it.
+  Outputs.moveDue = UNSET_DAY;
   Outputs.moveStop = false;
   Outputs.billing = '';
   Outputs.termsDays = '';
   Outputs.agreedHours = '';
+  Outputs.billWhen = '';
+  Outputs.billAmount = '';
+  Outputs.billDate = UNSET_DAY;
+  Outputs.billUntil = UNSET_DAY;
+  Outputs.hasBills = false;
+  Outputs.billsLine = '';
   Outputs.title = '';
   return;
 }
@@ -6438,8 +7636,6 @@ var src = mode === 'new' ? {} : p;
 function str(v) { return v === undefined || v === null ? '' : String(v); }
 Outputs.name = str(src.name);
 Outputs.sub = str(src.sub);
-Outputs.slot = str(src.slot);
-Outputs.rung = str(src.rung);
 Outputs.move = str(src.move);
 Outputs.moveWorth = str(src.moveWorth);
 Outputs.moveWhen = str(src.moveWhen);
@@ -6452,6 +7648,16 @@ Outputs.moveStop = src.moveStop === true;
 Outputs.billing = src.billing === 'fixed' ? 'fixed' : 'hourly';
 Outputs.termsDays = String(num(src.termsDays, 14));
 Outputs.agreedHours = num(src.agreedHours, 0) > 0 ? String(num(src.agreedHours, 0)) : '';
+// B3 — a project that has bills is not offered one; one being edited without any opens on Not now,
+// so saving a new name never adds a bill nobody asked for. Its bills come from Logic/Money pane,
+// which is already drawing Billing for the project the card is on.
+var mine = mode === 'edit' && Inputs.hasBills === true;
+Outputs.hasBills = mine;
+Outputs.billsLine = mine ? String(Inputs.billsLine || '') : '';
+Outputs.billWhen = mode === 'new' ? 'once' : 'later';
+Outputs.billAmount = '';
+Outputs.billDate = '';
+Outputs.billUntil = '';
 Outputs.title = mode === 'new' ? 'New project' : 'Edit ' + String(p.name || 'the project');`
     ),
 
@@ -6475,6 +7681,7 @@ Outputs.title = mode === 'new' ? 'New project' : 'Edit ' + String(p.name || 'the
     logic('twSelFromStrip', SET_VARIABLE, 'Pick the box pressed under the week', { name: VAR.moneySel, setWith: 'string' }),
     logic('twSelFromChase', SET_VARIABLE, 'Pick the late money the drawer raised', { name: VAR.moneySel, setWith: 'string' }),
     logic('twSelFromPart', SET_VARIABLE, 'Pick the line answered Part of it', { name: VAR.moneySel, setWith: 'string' }),
+    logic('twSelFromCard', SET_VARIABLE, 'Pick the next bill of the project on the card', { name: VAR.moneySel, setWith: 'string' }),
     logic('twSelClear', SET_VARIABLE, 'Pick nothing', { name: VAR.moneySel, setWith: 'string', value: '' }),
     logic('twVarMoneyMode', VARIABLE, 'What Money’s pane is', { name: VAR.moneyMode }),
     ...([
@@ -6504,7 +7711,8 @@ Outputs.toRepeat();`,
       ['key', 'kind']
     ),
     script('twStripRoute', 'The box pressed, as a line', "var key = String(Inputs.key || '');\nif (key === '') return;\nOutputs.sel = key + '|pay';\nOutputs.go();", ['key']),
-    script('twChaseRoute', 'The late money, as a line', "var key = String(Inputs.key || '');\nif (key === '') return;\nOutputs.sel = key + '|pay';\nOutputs.go();", ['key']),
+    // B7 — the key of a bill not sent yet already names its line (`…|bill`); late money is its payment.
+    script('twChaseRoute', 'The late money, as a line', "var key = String(Inputs.key || '');\nif (key === '') return;\nOutputs.sel = key.split('|').length > 2 ? key : key + '|pay';\nOutputs.go();", ['key']),
     script('twPartRoute', 'The line answered Part of it', "var key = String(Inputs.key || '');\nif (key === '') return;\nOutputs.sel = key + '|pay';\nOutputs.go();", ['key']),
     // One Function per thing a press does to a repeat: it says which, and presses in the same run.
     ...MARK_ACTIONS.map(([id, label, action]) => script(id, label, `Outputs.action = '${action}';\nOutputs.go();`, [])),
@@ -6613,6 +7821,8 @@ Outputs.go();`,
 
     // ── The commands ──
     logic('cmdAddBlock', C.addBlock, 'Put a block in a day'),
+    logic('cmdSendTodo', C.sendToTodo, 'Send the move to the todo list'),
+    logic('cmdTellTodo', C.tellTodo, 'Tell the todo list the block is done'),
     logic('cmdSave', C.saveBlock, 'Save what a block is'),
     logic('cmdTime', C.addTime, 'Log the time on a block'),
     logic('cmdCarry', C.carryBlock, 'Carry a block to tomorrow'),
@@ -6665,8 +7875,19 @@ Outputs.go();`,
 
     // Everything is worked out from the same five arrays.
     ...(['projects', 'blocks', 'monthPlans', 'settings', 'weekStart'] as const).map((n) => wire('twData', n, 'twEnv', n)),
-    ...(['projects', 'blocks', 'weekStart'] as const).map((n) => wire('twData', n, 'twDays', n)),
-    ...(['projects', 'moveBlocks'] as const).map((n) => wire('twData', n, 'twMovesLogic', n)),
+    // TPL-010-L — the columns and the block sheet get the blocks WITH the todo tasks in. The budgets
+    // count what was spent, and a task has spent nothing here; the card and the drawer keep reading
+    // the stored ones. The sheet turns a task into a block and never saves over one (it is new).
+    wire('twData', 'tasks', 'twTodo', 'tasks'),
+    wire('twData', 'sent', 'twTodo', 'sent'),
+    wire('twData', 'blocks', 'twTodo', 'blocks'),
+    wire('twData', 'moveBlocks', 'twTodo', 'moveBlocks'),
+    wire('twData', 'actions', 'twTodo', 'actions'),
+    wire('twSettings', 'out-todoUrl', 'twTodo', 'todoUrl'),
+    wire('twTodo', 'blocks', 'twDays', 'blocks'),
+    ...(['projects', 'weekStart'] as const).map((n) => wire('twData', n, 'twDays', n)),
+    ...(['projects', 'moveBlocks', 'tasks'] as const).map((n) => wire('twData', n, 'twMovesLogic', n)),
+    wire('twSettings', 'out-todoUrl', 'twMovesLogic', 'todoUrl'),
     ...(['projects', 'blocks', 'moveBlocks', 'weekStart'] as const).map((n) => wire('twData', n, 'twCardRows', n)),
     wire('twDays', 'firstOpenDay', 'twCardRows', 'firstOpenDay'),
     wire('twEnv', 'focusHours', 'twDays', 'focusHours'),
@@ -6723,7 +7944,16 @@ Outputs.go();`,
     wire('twVarCard', 'value', 'twCardRows', 'selectedId'),
     wire('twVarCard', 'value', 'twCardShown', 'in-id'),
     wire('twCardShown', 'out-shown', 'twCard', 'shown'),
-    ...CARD_ROWS_OUTS.filter(([n]) => n !== 'resolvedId' && n !== 'placedBlockId').map(([n]) => wire('twCardRows', n, 'twCard', n)),
+    ...CARD_ROWS_OUTS.filter(([n]) => !['resolvedId', 'placedBlockId', 'sendTitle', 'sendDeadline'].includes(n)).map(([n]) => wire('twCardRows', n, 'twCard', n)),
+    // L4 — Send to todo, from the card's move.
+    wire('twData', 'tasks', 'twCardRows', 'tasks'),
+    wire('twData', 'history', 'twCardRows', 'history'),
+    wire('twCardRows', 'resolvedId', 'cmdSendTodo', 'projectId'),
+    wire('twSettings', 'out-todoUrl', 'twCardRows', 'todoUrl'),
+    wire('twCardRows', 'sendTitle', 'cmdSendTodo', 'title'),
+    wire('twCardRows', 'sendDeadline', 'cmdSendTodo', 'deadline'),
+    wire('twData', 'tasks', 'cmdSendTodo', 'tasks'),
+    wire('twCard', 'sendToTodo', 'cmdSendTodo', 'do'),
     wire('twCard', 'projectId', 'twCardPick', 'value'),
     wire('twCard', 'pick', 'twCardPick', 'do'),
     wire('twCard', 'pick', 'twEditOff', 'do'),
@@ -6745,6 +7975,7 @@ Outputs.go();`,
     wire('twIsNewProject', 'ontrue', 'cmdAddProject', 'do'),
     wire('twIsNewProject', 'onfalse', 'cmdEditProject', 'do'),
     wire('twCardRows', 'resolvedId', 'cmdEditProject', 'projectId'),
+    wire('twData', 'projects', 'cmdEditProject', 'projects'),
     ...PROJECT_EDIT_VALUES.flatMap(([n]) => [wire('twCard', under('ed', n), 'cmdAddProject', n), wire('twCard', under('ed', n), 'cmdEditProject', n)]),
     // The card opens on the project it just made, and the form closes on the WRITE, not the press.
     wire('cmdAddProject', 'projectId', 'twCardNew', 'value'),
@@ -6760,6 +7991,8 @@ Outputs.go();`,
     wire('twCard', 'planHours', 'cmdPlaceDay', 'planned'),
     wire('twCard', 'plan', 'cmdPlaceDay', 'do'),
     wire('twCardRows', 'placedBlockId', 'cmdMoveBlock', 'blockId'),
+    wire('twData', 'moveBlocks', 'cmdMoveBlock', 'blocks'),
+    wire('twData', 'moveBlocks', 'cmdTakeOut', 'blocks'),
     wire('twCardRows', 'planDate', 'cmdMoveBlock', 'from'),
     wire('twCard', 'planDate', 'cmdMoveBlock', 'date'),
     wire('twCard', 'moveIt', 'cmdMoveBlock', 'do'),
@@ -6772,6 +8005,8 @@ Outputs.go();`,
     wire('twDrawerShown', 'out-shown', 'twDrawer', 'shown'),
     wire('twDrawer', 'close', 'twCloseDrawer', 'do'),
     ...(['projects', 'blocks'] as const).map((n) => wire('twData', n, 'twShutLogic', n)),
+    wire('twTodo', 'lateMoney', 'twShutLogic', 'lateTodoCount'),
+    wire('twTodo', 'lateMoneyTitle', 'twShutLogic', 'lateTodoTitle'),
     ...(['todayKey', 'tomorrowKey', 'todayLong', 'tomorrowLong'] as const).map((n) => wire('twDays', n, 'twShutLogic', n)),
     wire('twMovesLogic', 'unplacedDormant', 'twShutLogic', 'unplacedDormant'),
     wire('twMoneyLogic', 'lateConcern', 'twShutLogic', 'lateConcern'),
@@ -6781,6 +8016,8 @@ Outputs.go();`,
     ),
     ...SHUTDOWN_OUTS.map(([n]) => wire('twShutLogic', n, 'twDrawer', n)),
     wire('twDrawer', 'blockId', 'cmdCarry', 'blockId'),
+    wire('twData', 'blocks', 'cmdCarry', 'blocks'),
+    wire('twData', 'blocks', 'cmdDrop', 'blocks'),
     wire('twDays', 'tomorrowKey', 'cmdCarry', 'date'),
     wire('twDrawer', 'carry', 'cmdCarry', 'do'),
     wire('twDrawer', 'blockId', 'cmdDrop', 'blockId'),
@@ -6805,8 +8042,24 @@ Outputs.go();`,
     wire('twVarLog', 'value', 'twSheetRow', 'in-id'),
     wire('twVarNewDay', 'value', 'twSheetRow', 'in-newDay'),
     wire('twVarMode', 'value', 'twSheetRow', 'in-mode'),
-    wire('twData', 'blocks', 'twSheetRow', 'in-blocks'),
+    // The sheet reads the blocks WITH the todo tasks in, so a press on a task can open it (L3).
+    wire('twTodo', 'blocks', 'twSheetRow', 'in-blocks'),
     wire('twData', 'projects', 'twSheetRow', 'in-projects'),
+    wire('twSettings', 'out-todoUrl', 'twSheetRow', 'in-todoUrl'),
+    wire('twSheetRow', 'out-todoTaskId', 'cmdAddBlock', 'todoTaskId'),
+    // T1 — the actions ticked, one block each; and the project's name for the todo list's line (T2).
+    wire('twSheetRow', 'out-items', 'cmdAddBlock', 'items'),
+    wire('twSheetRow', 'out-fromActions', 'cmdAddBlock', 'fromActions'),
+    wire('twData', 'projects', 'cmdAddBlock', 'projects'),
+    wire('twData', 'history', 'twSheetRow', 'in-history'),
+    wire('twVarPicked', 'value', 'twSheetRow', 'in-picked'),
+    wire('twLog', 'actionId', 'twPickToggle', 'in-actionId'),
+    wire('twSheetRow', 'out-pickedNow', 'twPickToggle', 'in-current'),
+    wire('twLog', 'pickAction', 'twPickToggle', 'run'),
+    wire('twPickToggle', 'out-value', 'twSetPicked', 'value'),
+    wire('twPickToggle', 'out-go', 'twSetPicked', 'do'),
+    // The sheet was open on the task's id; the block it became has another, so the sheet closes.
+    wire('cmdAddBlock', 'done', 'twClearLog', 'do'),
     ...BLOCK_SHEET_FIELDS.map(([n]) => wire('twSheetRow', `out-${n}`, 'twLog', n)),
     // Save: a new block is written by Add block; an existing one by Save block, then Add time.
     wire('twSheetRow', 'out-isNew', 'twIsNewBlock', 'condition'),
@@ -6815,6 +8068,13 @@ Outputs.go();`,
     wire('twIsNewBlock', 'onfalse', 'cmdSave', 'do'),
     ...(['projectId', 'what', 'planned', 'date'] as const).flatMap((n) => [wire('twLog', n, 'cmdAddBlock', n), wire('twLog', n, 'cmdSave', n)]),
     wire('twVarLog', 'value', 'cmdSave', 'blockId'),
+    // T3 — the block as stored, so the history can say what the save changed.
+    wire('twSheetRow', 'out-block', 'cmdSave', 'before'),
+    wire('twData', 'projects', 'cmdSave', 'projects'),
+    wire('twSheetRow', 'out-wasDone', 'cmdTime', 'wasDone'),
+    wire('twLog', 'projectId', 'cmdTime', 'projectId'),
+    wire('twLog', 'what', 'cmdTime', 'what'),
+    wire('twLog', 'planned', 'cmdTime', 'planned'),
     wire('twVarLog', 'value', 'cmdTime', 'blockId'),
     wire('twSheetRow', 'out-before', 'cmdTime', 'entries'),
     wire('twSheetRow', 'out-actual', 'cmdTime', 'actual'),
@@ -6827,7 +8087,16 @@ Outputs.go();`,
     wire('cmdSave', 'done', 'cmdTime', 'do'),
     wire('twLog', 'close', 'twClearLog', 'do'),
     wire('twLog', 'close', 'twClearNewDay', 'do'),
-    wire('cmdTime', 'done', 'twClearLog', 'do'),
+    // T1b/T2 — then the todo list is told, if the block is for a task and has just been done; that
+    // closes the sheet. What it is told was worked out by Add time, before the week read again.
+    wire('twSheetRow', 'out-blockTaskId', 'cmdTellTodo', 'taskId'),
+    wire('twSheetRow', 'out-blockActionId', 'cmdTellTodo', 'actionId'),
+    wire('twData', 'actions', 'cmdTellTodo', 'actions'),
+    wire('cmdTime', 'becameDone', 'cmdTellTodo', 'becameDone'),
+    wire('cmdTime', 'doneNote', 'cmdTellTodo', 'note'),
+    wire('cmdTime', 'doneHours', 'cmdTellTodo', 'hours'),
+    wire('cmdTime', 'done', 'cmdTellTodo', 'do'),
+    wire('cmdTellTodo', 'done', 'twClearLog', 'do'),
     wire('cmdAddBlock', 'done', 'twClearNewDay', 'do'),
 
     // The settings sheet.
@@ -6893,7 +8162,7 @@ Outputs.go();`,
 
     // After any change, load the week again.
     ...['cmdAddBlock', 'cmdSave', 'cmdTime', 'cmdCarry', 'cmdDrop', 'cmdPlace', 'cmdPlaceDay', 'cmdMoveBlock', 'cmdTakeOut', 'cmdAddProject', 'cmdEditProject', 'cmdMonthPlan', 'cmdSettings', 'cmdAddSettings',
-      'cmdAddItem', 'cmdEditItem', 'cmdEndItem', 'cmdAgreeItem', 'cmdAddMark', 'cmdEditMark', 'cmdRecordBalance'].map(
+      'cmdAddItem', 'cmdEditItem', 'cmdEndItem', 'cmdAgreeItem', 'cmdAddMark', 'cmdEditMark', 'cmdRecordBalance', 'cmdSendTodo', 'cmdTellTodo'].map(
       (id) => wire(id, 'done', 'twData', 'refresh')
     )
   ]
@@ -6925,7 +8194,7 @@ const PAGE_SIGN_IN: Tpl010Component = {
       paddingTop: 'var(--space-6)',
       paddingBottom: 'var(--space-6)'
     }),
-    text('siTitle', 'App name', 'siCard', 'Planner', { ...wide(T_TITLE), as: 'h1' }),
+    text('siTitle', 'App name', 'siCard', 'Planning', { ...wide(T_TITLE), as: 'h1' }),
     text('siLead', 'What this is', 'siCard', 'Sign in, or create an account. Your week is kept on your server, so every device you sign in on sees the same one.', wide(T_META)),
     place('siEmail', TEXT_INPUT, 'Email', 'siCard', {
       ...FIELD, type: 'email', useLabel: true, label: 'Email', labelSpacing: 6, labelfontSize: 'var(--text-sm)', labelcolor: 'var(--foreground)'
@@ -7031,10 +8300,13 @@ export const TPL010_COMPONENTS: ReadonlyArray<Tpl010Component> = [
   ADD_MARK,
   EDIT_MARK,
   RECORD_BALANCE,
+  SEND_TO_TODO,
+  TELL_TODO,
   // Logic: the only places a number or a sentence is decided.
   PLANNER_DATA,
   ENVELOPES,
   DAY_COLUMNS,
+  TODO_TASKS,
   MOVES,
   MONEY,
   MONEY_VIEW,
@@ -7067,6 +8339,8 @@ export const TPL010_COMPONENTS: ReadonlyArray<Tpl010Component> = [
   CASH_STRIP,
   DATE_PICKER,
   ENTRY_ROW,
+  ACTION_PICK,
+  LOG_LINE,
   PROJECT_DETAIL,
   PROJECT_EDITOR,
   PROJECT_CARD,

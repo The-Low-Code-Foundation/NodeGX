@@ -1,0 +1,123 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ace70b17-7be3-53b9-8eed-41999c2e53dc",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "bringhomeIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "robotId",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "bringhomeFn",
+      "type": "JavaScriptFunction",
+      "label": "Bring home",
+      "parameters": {
+        "functionScript": "var { modelOf, plotOfRobot } = Scripts.save;\nvar model = modelOf(Inputs.model);\nvar profileId = String(Inputs.profileId || model.island.activeId);\nvar p = null;\nfor (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === profileId) p = model.profiles[i];\nvar freed = '';\nif (p) {\n  var robotId = String(Inputs.robotId || p.island.robots[0].id);\n  freed = plotOfRobot(p.island, robotId);\n  // P108 IW-008 (lane C): the robot keeps the program it ran (to copy, or to take to another plot); a second robot leaves\n  // the plot it helped on.\n  for (var ck = 0; ck < p.island.robots.length; ck++) {\n    var crow = p.island.robots[ck];\n    if (crow.id !== robotId) continue;\n    if (freed && Array.isArray(p.island.plots[freed].program) && p.island.plots[freed].program.length) crow.program = JSON.parse(JSON.stringify(p.island.plots[freed].program));\n    else if (!freed && crow.helps) { freed = crow.helps; delete crow.helps; }\n  }\n  if (freed && p.island.plots[freed].robotId === robotId) p.island.plots[freed] = { program: null, robotId: '', wonAt: p.island.plots[freed].wonAt };\n}\nOutputs.model = model;\nOutputs.freed = freed;\nOutputs.found = !!p;\n",
+        "runOnChange-in-model": false,
+        "runOnChange-in-profileId": false,
+        "runOnChange-in-robotId": false,
+        "uses": "save.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-profileId",
+          "displayName": "profileId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robotId",
+          "displayName": "robotId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-model",
+          "displayName": "model",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-freed",
+          "displayName": "freed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-found",
+          "displayName": "found",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "bringhomeOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "found",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "freed",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

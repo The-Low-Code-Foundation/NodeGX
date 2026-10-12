@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c79d1202-6d25-5c57-8acd-43c04d85b4df",
+  "name": "Land request",
+  "path": "/Logic/Land request",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The requests with her land as one more, so the Workshop opens the land like any plot. Runs when an input changes; Ran after each run."
+}

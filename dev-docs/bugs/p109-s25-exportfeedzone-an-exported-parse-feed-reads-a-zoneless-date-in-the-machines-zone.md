@@ -1,0 +1,25 @@
+---
+id: P109-S25-EXPORTFEEDZONE
+title: An exported Parse Feed reads a date with no zone in the machine's zone, and a zone name it does not know as UTC
+status: scheduled
+phase: P109
+task: ISL-043
+severity: low
+area: export / Parse Feed (`nodegx-export/src/emit/parseLib.ts`, the emitted `toISODate`)
+found: P109 s25 (ISL-032, the P107-D16 fix), 2026-10-06
+evidence: the emitted `toISODate` is the runtime's v1 reader verbatim — `Date.parse(raw)`, then a retry that rewrites a trailing `[A-Z]{2,5}` to ` UTC`. Read, not run.
+---
+
+P109 ISL-032 fixed P107-D16 in the runtime (`feed.ts`, ruled 2026-10-05 "UTC, and no date if unknown"): a date with no zone
+is read as UTC wherever the app runs, and a trailing zone name `Date.parse` does not know (CEST, BST, CET, IST, JST) gives
+no date. The exported app still gives one feed different Published dates in different time zones, and publishes
+`08:00 CEST` as 08:00Z, two hours late.
+
+**Plain words:** *"In an exported app, the same feed shows different times depending on where it is opened, and a
+European summer-time date is shown two hours wrong."*
+
+**Proposed:** port the runtime's `toISODate` (`packages/noodl-runtime/src/feed.ts`, `ZONE_NAMES_READ`) into the emitted
+module. The runtime's ruling covers it; no new question.
+
+Not checked for the export: P107-D17 (Feed Updated blank) and P107-D18 (Count is what Items holds) — the emitted Parse
+Feed's state shape was not read.

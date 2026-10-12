@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "id": "onboard",
+  "name": "When a company joins, enrol its first member",
+  "entry": "enrol",
+  "concurrency": 1,
+  "steps": [
+    { "id": "enrol", "name": "Enrol the member", "kind": "call-function", "ref": "enrol", "next": ["welcome"] },
+    { "id": "welcome", "name": "Send the welcome", "kind": "call-function", "ref": "sendWelcome" }
+  ],
+  "createdAt": "2026-10-09T00:00:00.000Z",
+  "updatedAt": "2026-10-09T00:00:00.000Z"
+}

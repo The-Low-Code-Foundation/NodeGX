@@ -1,0 +1,192 @@
+{
+  "vocabulary": {
+    "id": "nodegx-world-kinds",
+    "version": 1
+  },
+  "collections": [
+    {
+      "name": "Product",
+      "made": {
+        "noun": "product"
+      },
+      "sentence": "A product is one thing we sell, with a price.",
+      "notHeld": [],
+      "description": "A product is one thing we sell, with a price.",
+      "columns": [
+        {
+          "name": "name",
+          "kind": "text",
+          "type": "String"
+        },
+        {
+          "name": "price",
+          "kind": "number",
+          "type": "Number",
+          "description": "What it sells for, in euros."
+        },
+        {
+          "name": "subcategory",
+          "kind": "link",
+          "type": "Pointer",
+          "targetClass": "Subcategory",
+          "required": true,
+          "whenTargetGoes": "blocks",
+          "description": "Every product sits on one shelf: its subcategory.",
+          "relation": "product-subcategory"
+        }
+      ],
+      "checks": [],
+      "indexes": [],
+      "calledBy": "name"
+    },
+    {
+      "name": "Subcategory",
+      "made": {
+        "noun": "subcategory"
+      },
+      "sentence": "A subcategory is a shelf within a category: fiction within books, jazz within music.",
+      "notHeld": [
+        "a retired value stays on the records that hold it, and is no longer offered"
+      ],
+      "description": "A subcategory is a shelf within a category: fiction within books, jazz within music. Not kept by the database yet: a retired value stays on the records that hold it, and is no longer offered.",
+      "columns": [
+        {
+          "name": "name",
+          "kind": "text",
+          "type": "String"
+        },
+        {
+          "name": "category",
+          "kind": "choice",
+          "type": "String",
+          "description": "Which of our three categories the shelf is in.",
+          "relation": "subcategory-category"
+        }
+      ],
+      "checks": [
+        {
+          "field": "category",
+          "oneOf": [
+            "books",
+            "music",
+            "film"
+          ]
+        }
+      ],
+      "indexes": [],
+      "calledBy": "name"
+    }
+  ],
+  "claims": [
+    {
+      "id": "product/subcategory-is-required",
+      "says": "a product cannot exist without its subcategory",
+      "from": {
+        "relation": "product-subcategory"
+      },
+      "held": true,
+      "mutant": {
+        "dropRequired": {
+          "collection": "Product",
+          "field": "subcategory"
+        }
+      },
+      "steps": [
+        {
+          "make": "Subcategory",
+          "as": "subcategory2",
+          "data": {}
+        },
+        {
+          "make": "Product",
+          "as": "whole",
+          "data": {
+            "subcategory": {
+              "ref": "subcategory2"
+            }
+          }
+        },
+        {
+          "make": "Subcategory",
+          "as": "subcategory4",
+          "data": {}
+        },
+        {
+          "refuse": "Product",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "id": "subcategory/category-is-one-of-its-list",
+      "says": "a subcategory's category is one of books, music, film, and nothing else",
+      "from": {
+        "relation": "subcategory-category"
+      },
+      "held": true,
+      "mutant": {
+        "dropCheck": {
+          "collection": "Subcategory",
+          "field": "category"
+        }
+      },
+      "steps": [
+        {
+          "make": "Subcategory",
+          "as": "subcategory1",
+          "data": {
+            "category": "books"
+          }
+        },
+        {
+          "refuse": "Subcategory",
+          "data": {
+            "category": "not books or music or film"
+          }
+        }
+      ]
+    },
+    {
+      "id": "product-subcategory/subcategory-blocks",
+      "says": "a subcategory cannot go while any products are linked to it",
+      "from": {
+        "relation": "product-subcategory"
+      },
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Product",
+          "field": "subcategory"
+        }
+      },
+      "steps": [
+        {
+          "make": "Subcategory",
+          "as": "subcategory1",
+          "data": {}
+        },
+        {
+          "make": "Product",
+          "as": "product2",
+          "data": {
+            "subcategory": {
+              "ref": "subcategory1"
+            }
+          }
+        },
+        {
+          "remove": "Subcategory",
+          "row": "subcategory1",
+          "refused": true
+        }
+      ]
+    }
+  ],
+  "notHeld": [
+    {
+      "collection": "Subcategory",
+      "says": "a retired value stays on the records that hold it, and is no longer offered",
+      "why": "what a list offers is the screen’s choice; the store keeps whatever value is written"
+    }
+  ]
+}

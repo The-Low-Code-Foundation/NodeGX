@@ -1,0 +1,126 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9cb5e4d2-e323-5465-81c7-f4277462f440",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rrIn",
+      "type": "Component Inputs",
+      "label": "The thing that repeats",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "titleColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "meta",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bg",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "rrOut",
+      "type": "Component Outputs",
+      "label": "Opened",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "rrRow",
+      "type": "Group",
+      "label": "Row",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0-5)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "rrTitle",
+        "rrMeta"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rrTitle",
+      "type": "Text",
+      "label": "Title",
+      "parent": "rrRow",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rrMeta",
+      "type": "Text",
+      "label": "When it repeats",
+      "parent": "rrRow",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "rrRow"
+  ]
+}

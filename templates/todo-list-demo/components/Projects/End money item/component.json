@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1c02b4b2-1783-5314-8ee1-f5f9dba69659",
+  "name": "End money item",
+  "path": "/Projects/End money item",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Ends a money item (Key item:<id>): a repeating one has nothing after today; a one-off, or one not started yet, is never counted. Nothing is deleted."
+}

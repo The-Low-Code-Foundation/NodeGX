@@ -62,6 +62,7 @@ Boolean choices the user flips directly: settings, consent, done flags. For one-
 | `checked` | Boolean | `false` | Sets whether the box is ticked; setting it from the graph does not fire Changed |
 | `clickBubbling` | Enum (`auto`, `always`, `never`) | `auto` | Whether a click on this control also fires Click on the nodes it sits inside. Automatic keeps it here as soon as this control's own Click is connected, so a Favourite button inside a clickable card runs Favourite and not the card; Always is the older behaviour where both run; Never keeps every click here, wired or not |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `enabled` | Boolean | `true` | Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing |
 | `height` | Number | `32` | Height of the box |
 | `iconColor` | Color | `#000000` | Colour of the icon |
@@ -86,13 +87,14 @@ Boolean choices the user flips directly: settings, consent, done flags. For one-
 | `marginRight` | Number | — | Space outside the element's right edge, between it and its neighbours |
 | `marginTop` | Number | — | Space outside the element's top edge, between it and its neighbours |
 | `mixBlendMode` | Enum (`normal`, `multiply`, `screen`, `overlay`, `darken`, `lighten`, `color-dodge`, `color-burn`, `hard-light`, `soft-light`, `difference`, `exclusion`, `hue`, `saturation`, `color`, `luminosity`) | `normal` | How this element's colours blend with whatever is painted behind it |
-| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
+| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen) |
 | `opacity` | Number | `1` | How opaque this element is, from 0 for invisible to 1 for solid |
 | `paddingBottom` | Number | `0` | Space inside the element's bottom edge, between it and its content |
 | `paddingLeft` | Number | `0` | Space inside the element's left edge, between it and its content |
 | `paddingRight` | Number | `0` | Space inside the element's right edge, between it and its content |
 | `paddingTop` | Number | `0` | Space inside the element's top edge, between it and its content |
 | `position` | Enum (`relative`, `absolute`, `sticky`, `fixed`) | `relative` | How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
 | `transformOriginX` | Number | `50` | Horizontal point the element rotates and scales around, as a fraction of its width |
 | `transformOriginY` | Number | `50` | Vertical point the element rotates and scales around, as a fraction of its height |
@@ -114,7 +116,57 @@ Boolean choices the user flips directly: settings, consent, done flags. For one-
 | `blur` | Signal | — | Takes the keyboard away from this checkbox, which is what fires Blurred |
 | `check` | Signal | — | Ticks the box if it is not already ticked, then fires Done — or Unchanged if it already was. Does not fire Changed |
 | `focus` | Signal | — | Puts the keyboard on this checkbox, so Enter, Space and the arrow keys go to it |
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 | `uncheck` | Signal | — | Unticks the box if it is ticked, then fires Done — or Unchanged if it already was. Does not fire Changed |
+
+### What each input does
+
+**Enabled** (`enabled`)
+
+- the value it already holds: nothing
+- a change: Enabled follows; disabled, the box takes no click and no focus
+
+**Checked** (`checked`)
+
+- the value it already holds: nothing
+- a change: the box shows it, and Checked follows — Changed does not fire (only a person's click fires it)
+
+**Check** (`check`)
+
+- already checked → Unchanged
+- unchecked: it is checked, and Checked goes true — never Changed → Done
+
+**Uncheck** (`uncheck`)
+
+- checked: it is unchecked, and Checked goes false — never Changed → Done
+- already unchecked → Unchanged
+
+**Mounted** (`mounted`)
+
+- always: the box is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint
+
+**Enable Label** (`useLabel`)
+
+- always: a label is drawn beside the box, or not; the box and its keyboard stay
+
+**Focus** (`focus`)
+
+- not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent
+- it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent
+- otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done
+
+**Blur** (`blur`)
+
+- it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes → Done; Blurred stays silent
+- it holds the keyboard: it is taken off it, and the Focused state goes false → Blurred, Done
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the box can be seen
+
+**Visible** (`visible`)
+
+- always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it
 
 ## Outputs
 
@@ -141,9 +193,9 @@ Boolean choices the user flips directly: settings, consent, done flags. For one-
 | `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
 | `didMount` | Signal | — | Fires once this element has been added to the page and can be measured |
 | `done` | Signal | — | Fires when Check or Uncheck actually flipped the box, when Focus put the keyboard on it, or when Blur took it away |
-| `hoverEnd` | Signal | — | Fires when the pointer leaves this control, including when it leaves while a button is still held |
+| `hoverEnd` | Signal | — | Fires when the pointer leaves this control, including when it leaves while a button is still held, or when the control leaves the page under it |
 | `hoverStart` | Signal | — | Fires when the pointer moves onto this control |
-| `onBlur` | Signal | — | Fires when keyboard focus leaves this control, which is the usual place to validate what was entered |
+| `onBlur` | Signal | — | Fires when keyboard focus leaves this control, or the control leaves the page while holding it, which is the usual place to validate what was entered |
 | `onChange` | Signal | — | Fires when the user ticks or unticks the box; the Checked input and the Check/Uncheck actions do not fire it |
 | `onFocus` | Signal | — | Fires the moment this control takes keyboard focus, whether from a click, a tab or a Focus action |
 | `pointerDown` | Signal | — | Fires as a mouse button or finger goes down on this control, before any click has completed |
@@ -171,6 +223,7 @@ Declares conditional/expandable port groups whose visibility depends on paramete
 | boxShadowEnabled = true | `boxShadowSource` | — |
 | boxShadowEnabled = true AND boxShadowSource = token | `boxShadowToken` | — |
 | boxShadowEnabled = true AND boxShadowSource != token | `boxShadowOffsetX`, `boxShadowOffsetY`, `boxShadowInset`, `boxShadowBlurRadius`, `boxShadowSpreadRadius`, `boxShadowColor` | — |
+| — | — | — |
 
 ## Ports at runtime
 

@@ -11,6 +11,7 @@
  */
 
 const { injectSeo } = require('./inject-seo');
+const { injectDefaultStyles } = require('./inject-default-styles');
 const { settle, createPageReadyGate } = require('./render-gate');
 
 /**
@@ -124,6 +125,10 @@ function renderPage(deps, path) {
         // the DOM). Without this the served page keeps the template's default title
         // and carries none of the project's meta tags — i.e. no SEO benefit at all.
         html = injectSeo(html, globalThis.Noodl && globalThis.Noodl.SEO);
+
+        // P109 ISL-008 — the nodes' defaults are class rules now, not inline styles; without this sheet the first
+        // paint has none of them. First in <head>, which is what lets an author's class beat a default.
+        html = injectDefaultStyles(html, globalThis.__noodlDefaultStyleRules);
 
         resolve({ html });
       } catch (error) {

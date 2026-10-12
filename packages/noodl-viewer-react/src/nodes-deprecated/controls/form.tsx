@@ -4,6 +4,7 @@ import { flexDirectionValues } from '../../constants/flex';
 import Layout from '../../layout';
 import NodeSharedPortDefinitions from '../../node-shared-port-definitions';
 import { createNodeFromReactComponent, type ReactNodeDefinition, type StyleObject } from '../../react-component-node';
+import { dataAttributeProps } from '../../components/noodl-root-ref';
 import type { Noodl, Slot } from '../../types';
 
 interface FormProps extends Noodl.ReactProps {
@@ -23,6 +24,7 @@ function Form(props: FormProps) {
   return (
     <form
       className={className}
+      {...dataAttributeProps(props.dom)}
       style={style}
       onSubmit={(e) => {
         e.preventDefault();

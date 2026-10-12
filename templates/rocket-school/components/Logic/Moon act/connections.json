@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1044da1f-927d-5e29-847b-b5e4ec7c27e5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "moonactIn",
+      "fromProperty": "app",
+      "toId": "moonactFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "moonactIn",
+      "fromProperty": "profileId",
+      "toId": "moonactFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "moonactIn",
+      "fromProperty": "action",
+      "toId": "moonactFn",
+      "toProperty": "in-action"
+    },
+    {
+      "fromId": "moonactIn",
+      "fromProperty": "alienId",
+      "toId": "moonactFn",
+      "toProperty": "in-alienId"
+    },
+    {
+      "fromId": "moonactIn",
+      "fromProperty": "foodId",
+      "toId": "moonactFn",
+      "toProperty": "in-foodId"
+    },
+    {
+      "fromId": "moonactIn",
+      "fromProperty": "wearId",
+      "toId": "moonactFn",
+      "toProperty": "in-wearId"
+    },
+    {
+      "fromId": "moonactIn",
+      "fromProperty": "species",
+      "toId": "moonactFn",
+      "toProperty": "in-species"
+    },
+    {
+      "fromId": "moonactIn",
+      "fromProperty": "colour",
+      "toId": "moonactFn",
+      "toProperty": "in-colour"
+    },
+    {
+      "fromId": "moonactIn",
+      "fromProperty": "name",
+      "toId": "moonactFn",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "moonactIn",
+      "fromProperty": "run",
+      "toId": "moonactFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "moonactFn",
+      "fromProperty": "out-app",
+      "toId": "moonactOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "moonactFn",
+      "fromProperty": "out-ok",
+      "toId": "moonactOut",
+      "toProperty": "ok"
+    },
+    {
+      "fromId": "moonactFn",
+      "fromProperty": "out-why",
+      "toId": "moonactOut",
+      "toProperty": "why"
+    },
+    {
+      "fromId": "moonactFn",
+      "fromProperty": "out-said",
+      "toId": "moonactOut",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "moonactFn",
+      "fromProperty": "out-alienId",
+      "toId": "moonactOut",
+      "toProperty": "alienId"
+    },
+    {
+      "fromId": "moonactFn",
+      "fromProperty": "success",
+      "toId": "moonactOut",
+      "toProperty": "done"
+    }
+  ]
+}

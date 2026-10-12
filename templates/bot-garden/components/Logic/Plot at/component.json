@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "73faa365-08ec-5744-85fd-e8d7b1cb73f0",
+  "name": "Plot at",
+  "path": "/Logic/Plot at",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Which plot a tapped tile is on. Runs on Go; answers Ran once its outputs are set."
+}

@@ -25,14 +25,13 @@ export enum IconButtonSize {
   Bigger = 'is-button-size-bigger'
 }
 
-export interface IconButtonProps extends UnsafeStyleProps {
+interface IconButtonBaseProps extends UnsafeStyleProps {
   icon: IconName;
   size?: IconSize;
   buttonSize?: IconButtonSize;
   variant?: IconButtonVariant;
   state?: IconButtonState;
   iconVariant?: IconVariant;
-  label?: string;
 
   isDisabled?: boolean;
   testId?: string;
@@ -40,6 +39,20 @@ export interface IconButtonProps extends UnsafeStyleProps {
 
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }
+
+/**
+ * P101-INS003-ICONBTN — what a screen reader calls the button. An icon says nothing to one, so a
+ * button with no words beside its icon must say what it does in `ariaLabel` ("Collapse the
+ * inspector", "Close"), and the compiler refuses one that does not. A `label` drawn beside the icon
+ * names the button already.
+ */
+type IconButtonName =
+  /** Words drawn beside the icon. They are the button's name. */
+  | { label: string; ariaLabel?: string }
+  /** An icon alone: the name a screen reader says, never drawn. */
+  | { label?: undefined; ariaLabel: string };
+
+export type IconButtonProps = IconButtonBaseProps & IconButtonName;
 
 function iconSizeToLabelSize(iconSize: IconSize): LabelSize {
   switch (iconSize) {
@@ -65,6 +78,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       iconVariant,
       isDisabled,
       label,
+      ariaLabel,
       testId,
       onClick,
       UNSAFE_className,
@@ -89,6 +103,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         disabled={isDisabled}
         style={UNSAFE_style}
         data-test={testId}
+        aria-label={ariaLabel}
       >
         <Icon icon={icon} size={size} UNSAFE_className={css['Icon']} variant={iconVariant} />
         {label && (

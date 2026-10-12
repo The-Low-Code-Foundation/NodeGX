@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "isl007 two languages",
+  "version": "5",
+  "nodegxVersion": "1.1.0",
+  "settings": {
+    "navigationPathType": "path"
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  }
+}

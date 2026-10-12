@@ -3,6 +3,7 @@ import MouseWheel from '@better-scroll/mouse-wheel';
 import ScrollBar from '@better-scroll/scroll-bar';
 import React from 'react';
 
+import { layerDefaults, withDefaultsClass } from '../../../default-style-layer';
 import Layout from '../../../layout';
 import PointerListeners from '../../../pointerlisteners';
 import { Noodl } from '../../../types';
@@ -28,6 +29,7 @@ export interface GroupProps extends Noodl.ReactProps {
   clip: boolean;
 
   layout: 'none' | 'row' | 'column';
+  blockTouch?: boolean;
   dom;
 
   onScrollPositionChanged?: (value: number) => void;
@@ -39,10 +41,28 @@ export interface GroupProps extends Noodl.ReactProps {
 
 type ScrollRef = HTMLDivElement & { noodlNode?: Noodl.ReactProps['noodlNode'] };
 
-export class Group extends React.Component<GroupProps> {
+let safeAlignment: boolean | undefined;
+/**
+ * P109-S37-CENTRECUT (ruled 2026-10-09: inside a scrolling Group the content wins once it is longer than the window): a
+ * scroller centres or end-aligns only what fits. Plain `center` on a scroll box pushes the overflow past the start as well,
+ * where no scrolling reaches it — the first item's top was cut off for good. `safe` keeps the start in reach. A browser
+ * without `safe` would drop the whole declaration, so it is asked first and keeps the plain value.
+ */
+function safely<T>(value: T): T {
+  if (value !== 'center' && value !== 'flex-end' && value !== 'end') return value;
+  if (safeAlignment === undefined) {
+    safeAlignment = typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('justify-content', 'safe center');
+  }
+  return (safeAlignment ? `safe ${value}` : value) as T;
+}
+
+export class Group extends React.Component<GroupProps, { view?: { width: number; height: number } }> {
   scrollNeedsToInit: boolean;
   scrollRef: React.RefObject<ScrollRef>;
   iScroll?: BScroll;
+  state: { view?: { width: number; height: number } } = {};
+  viewObserver?: ResizeObserver;
+  viewObserved?: Element;
 
   constructor(props: GroupProps) {
     super(props);
@@ -53,18 +73,58 @@ export class Group extends React.Component<GroupProps> {
   rootRef = (el: ScrollRef | null) => {
     (this.scrollRef as React.MutableRefObject<ScrollRef | null>).current = el;
     this.props.noodlNode?.setDOMElement(el);
+    // Plumbing for the focused signals: the focus tracker's click walk finds the Group by this property. Set on every element
+    // the ref meets, not once at the mount — a new Tag makes React draw a new element without mounting again (P107-C86).
+    if (el) el.noodlNode = this.props.noodlNode;
   };
 
   componentDidMount() {
-    if (this.props.scrollEnabled && this.props.nativeScroll !== true) {
+    // P107-C89: read as `render` and `componentDidUpdate` read it — a truthy Native platform scroll (a wired 1) is native, so
+    // the scroller never starts on children `render` did not wrap.
+    if (this.props.scrollEnabled && !this.props.nativeScroll) {
       this.setupIScroll();
     }
+    this.syncViewObserver();
+  }
 
-    //plumbing for the focused signals
-    this.scrollRef.current.noodlNode = this.props.noodlNode;
+  /**
+   * P109-S37-ISCROLLPERCENT (ruled 2026-10-09): with Native platform scroll off the children sit in an inner box that hugs
+   * them, so a percentage there was of the children added up — slides at 100% came out as wide as all their pictures. The
+   * visible window's size (the Group's content box) is measured here and handed to the inner box as `--ndl-scroll-width` /
+   * `--ndl-scroll-height`, which a child's percentage along the scroll is written against (layout.ts `scrollAxisPercent`).
+   * Measured at the mount (before the first paint) and again whenever the Group's box changes size.
+   */
+  syncViewObserver() {
+    const el = this.scrollRef.current;
+    const wanted = this.props.scrollEnabled && !this.props.nativeScroll && el && typeof ResizeObserver !== 'undefined';
+    if (!wanted) {
+      this.viewObserver?.disconnect();
+      this.viewObserver = undefined;
+      this.viewObserved = undefined;
+      return;
+    }
+    if (this.viewObserver && this.viewObserved === el) return;
+    this.viewObserver?.disconnect();
+    this.viewObserved = el;
+    this.viewObserver = new ResizeObserver(() => this.measureView());
+    this.viewObserver.observe(el);
+    this.measureView();
+  }
+
+  measureView() {
+    const el = this.scrollRef.current;
+    if (!el) return;
+    const cs = getComputedStyle(el);
+    const width = el.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+    const height = el.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+    const view = this.state.view;
+    if (view && view.width === width && view.height === height) return;
+    this.setState({ view: { width, height } });
   }
 
   componentWillUnmount() {
+    this.viewObserver?.disconnect();
+    this.viewObserver = undefined;
     if (this.iScroll) {
       this.iScroll.destroy();
       this.iScroll = undefined;
@@ -251,16 +311,25 @@ export class Group extends React.Component<GroupProps> {
         this.iScroll && this.iScroll.refresh();
       }, 0);
     }
+
+    this.syncViewObserver();
   }
 
   renderIScroll() {
-    const { flexDirection, flexWrap } = this.props.style;
+    // P107-C152, P109-S37-ISCROLLALIGN: the children sit in this box, not in the Group, so it lays them out as the Group would —
+    // its gap and its alignment on both axes, not only its direction. Without them a gap was dropped, and the axis this box
+    // fills (the cross axis, or the main axis when it wraps) lost Align Items or Justify Content.
+    const { flexDirection, flexWrap, rowGap, columnGap, alignItems, justifyContent } = this.props.style;
 
     const childStyle: React.CSSProperties = {
       display: 'inline-flex',
       flexShrink: 0,
       flexDirection,
       flexWrap,
+      rowGap,
+      columnGap,
+      alignItems: safely(alignItems),
+      justifyContent: safely(justifyContent),
       touchAction: 'none'
       // pointerEvents: this.state.isScrolling ? 'none' : undefined
     };
@@ -279,11 +348,46 @@ export class Group extends React.Component<GroupProps> {
       }
     }
 
+    // P107-C154, P109-S37-SCROLLCENTRE (ruled 2026-10-09: inside a scrolling Group the room is the visible window, unless the
+    // content is longer): this box is never shorter than the window along the scroll, so a share fills what the window
+    // leaves and a short list centres in it, as on the native path; longer content makes it longer
+    if (this.getScrollDirection() === 'x') childStyle.minWidth = '100%';
+    else childStyle.minHeight = '100%';
+    const view = this.state.view;
+    if (view) {
+      Object.assign(childStyle, { '--ndl-scroll-width': `${view.width}px`, '--ndl-scroll-height': `${view.height}px` });
+    }
+
     return (
-      <div className="scroll-wrapper-internal" style={childStyle}>
+      // `data-ndl-slots`: the cards sit in here, not in the Group's own element — drag-drop.ts counts Drop Index among them (P107-C88)
+      <div className="scroll-wrapper-internal" data-ndl-slots="" style={childStyle}>
         {this.props.children}
       </div>
     );
+  }
+
+  /**
+   * P107-C90 (ruled "let the list's taps through"): the blocker stops a press after the list has seen it.
+   *
+   * The scroller hears a move and a release on the window, and Block Pointer Events stops both at the app root first, so a
+   * scroller with it on never followed a drag and never saw a tap end — it sent no click, and Click never fired. So the Group's
+   * own move and release handlers hand the event to the scroller after Noodl's callback and before the stop: Pointer Up, then
+   * the scroller's click (Focused, Click), as without the blocker. The page behind still hears nothing, and a release outside
+   * the Group still reaches the scroller on the window. A second delivery of one release is a no-op (`end` resets the gesture).
+   */
+  letScrollerSee(listeners: ReturnType<typeof PointerListeners>) {
+    const passes = { onMouseMove: 'move', onMouseUp: 'end', onTouchMove: 'move', onTouchEnd: 'end', onTouchCancel: 'end' } as const;
+    for (const name of Object.keys(passes) as (keyof typeof passes)[]) {
+      const blocker = listeners[name];
+      if (!blocker) continue;
+      listeners[name] = (e) => {
+        blocker(e);
+        // better-scroll types its gesture handlers private; they are what it registers on the window
+        const actions = this.iScroll?.scroller.actionsHandler as unknown as Record<'move' | 'end', (e: Event) => void> | undefined;
+        actions?.[passes[name]](e.nativeEvent);
+      };
+    }
+    return listeners;
   }
 
   getScrollDirection(): 'x' | 'y' | 'both' {
@@ -299,8 +403,10 @@ export class Group extends React.Component<GroupProps> {
   render() {
     // React.ElementType collapses the intrinsic-elements union; with the ref prop added,
     // the raw union exceeds the compiler's representation limit (TS2590).
-    const { as = 'div', ...props } = this.props;
-    const Component = as as React.ElementType;
+    // P107-C87: `||`, not a destructuring default — a default covers only undefined, and a wired "", null, 0 or false
+    // reached createElement and threw. The Text reads its Tag the same way.
+    const { as, ...props } = this.props;
+    const Component = (as || 'div') as React.ElementType;
 
     const children = props.scrollEnabled && !props.nativeScroll ? this.renderIScroll() : props.children;
     
@@ -308,9 +414,18 @@ export class Group extends React.Component<GroupProps> {
     Layout.size(style, props);
     Layout.align(style, props);
 
-    if (props.clip) {
+    // P107-C153: the scroller moves the inner box with a transform and leaves the hiding to its container — what lies outside
+    // the Group is hidden, as on the native path, and takes no press
+    if (props.clip || (props.scrollEnabled && !props.nativeScroll)) {
       style.overflowX = 'hidden';
       style.overflowY = 'hidden';
+    }
+
+    if (props.scrollEnabled) {
+      // P109-S37-CENTRECUT: centre or end only what fits (`safely`) — on the native path the children, with Native platform
+      // scroll off the inner box, which is longer than the window once the content is
+      style.justifyContent = safely(style.justifyContent);
+      style.alignItems = safely(style.alignItems);
     }
 
     if (props.scrollEnabled && props.nativeScroll) {
@@ -329,11 +444,14 @@ export class Group extends React.Component<GroupProps> {
       style.pointerEvents = 'none';
     }
 
+    // P109 ISL-008 — the defaults leave the inline style for the defaults sheet, so the author's class can place this.
+    const defaultsClass = layerDefaults(style);
+
     return (
       <Component
-        className={props.className}
+        className={withDefaultsClass(props.className, defaultsClass)}
         {...props.dom}
-        {...PointerListeners(props)}
+        {...(props.blockTouch ? this.letScrollerSee(PointerListeners(props)) : PointerListeners(props))}
         style={style}
         ref={this.rootRef}
       >

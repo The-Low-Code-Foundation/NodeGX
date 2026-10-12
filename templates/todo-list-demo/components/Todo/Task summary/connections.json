@@ -17,6 +17,48 @@
     },
     {
       "fromId": "tsIn",
+      "fromProperty": "showProject",
+      "toId": "tsProject",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "projectOptions",
+      "toId": "tsProjectPick",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "projectValue",
+      "toId": "tsProjectPick",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tsProjectPick",
+      "fromProperty": "value",
+      "toId": "tsOut",
+      "toProperty": "pickedProject"
+    },
+    {
+      "fromId": "tsProjectPick",
+      "fromProperty": "onChange",
+      "toId": "tsOut",
+      "toProperty": "setProject"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "hasProject",
+      "toId": "tsOpenProject",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tsOpenProject",
+      "fromProperty": "onClick",
+      "toId": "tsOut",
+      "toProperty": "openProject"
+    },
+    {
+      "fromId": "tsIn",
       "fromProperty": "deadline",
       "toId": "tsDeadlineField",
       "toProperty": "Value"

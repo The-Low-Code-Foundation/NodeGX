@@ -4,6 +4,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import type { TSFixme } from '../typings/global';
+import { withNodeBoundary } from './kit-node-boundary';
 import type {
   ComponentInstanceLike,
   DynamicPortEntry,
@@ -27,7 +28,16 @@ import type {
 
 import { iconSourceProblem } from './components/visual/Icon/iconSourceProblem';
 import DOMBoundingBoxObserver from './dom-boundingbox-oberver';
-import Layout, { type ParentLayout } from './layout';
+import { elementChanged as dragElementChanged } from './drag-drop';
+import {
+  cssPropertyName,
+  DEFAULT_LAYER,
+  defaultDeclarationsOf,
+  type DefaultLayerInfo,
+  type LayerableStyle
+} from './default-style-layer';
+import Layout, { scrollAlongLayout, type ParentLayout } from './layout';
+import { explainStyleSources, type StyleSourceFinding } from './style-sources';
 import mergeDeep from './mergedeep';
 import NodeSharedPortDefinitions from './node-shared-port-definitions';
 import transitionParameter from './node-transitions';
@@ -214,6 +224,14 @@ export interface ReactNodeInstance extends NodeInstance {
   outputPropValues: Record<string, unknown>;
   /** Styles parsed out of the `styleCss` input, so they can be removed on change. */
   customCssStyles?: Record<string, string>;
+  /** P109 ISL-008 — style keys the author has written on this instance (`default-style-layer.ts`). */
+  _authoredStyle?: Set<string>;
+  /** P109 ISL-008 — input names whose setter has run on this instance. */
+  _authoredInputs?: Set<string>;
+  /** P109 ISL-008 — inputs the editor has cleared; their next set is the port's default, not the author's. */
+  _inputsResetToDefault?: Set<string>;
+  /** P109 ISL-008 — true while such a set runs, so `setStyle` un-records rather than records. */
+  _settingDefault?: boolean;
   /** True when the node passes itself to its React component as a prop. */
   noodlNodeAsProp: boolean;
 
@@ -224,6 +242,8 @@ export interface ReactNodeInstance extends NodeInstance {
   childrenCount: number;
   /** Memoised result of {@link renderChildren}; cleared whenever children change. */
   cachedChildren: React.ReactNode;
+  /** How this node scrolled when `cachedChildren` was built (`renderChildren`). */
+  _childrenScrollKey?: string;
   updateChildIndiciesScheduled: boolean;
 
   addChild(child: ReactNodeInstance, index?: number): void;
@@ -236,6 +256,10 @@ export interface ReactNodeInstance extends NodeInstance {
   updateChildIndices(): void;
   updateChildrenCount(): void;
   scheduleUpdateChildCountAndIndicies(): void;
+  /** P107-C114 — count the children now; the queued count then finds nothing new and sends nothing. */
+  updateChildCountAndIndiciesNow(): void;
+  /** P107-C114 — a child was added or removed since the children were last counted. */
+  childrenChangedSinceCount?: boolean;
 
   // --- mounting and rendering ---------------------------------------------
   /** Mirrors the `mounted` input. A false value keeps the node out of the tree. */
@@ -256,7 +280,7 @@ export interface ReactNodeInstance extends NodeInstance {
    */
   setLayout(layout: ParentLayout): void;
   /** Re-key the node so React rebuilds its subtree from scratch. */
-  _resetReactVirtualDOM(): void;
+  _resetReactVirtualDOM(resetInput?: string): void;
   /** SSR only: fire `didMount` without a browser lifecycle to hang it off. */
   triggerDidMount(): void;
 
@@ -490,6 +514,12 @@ export interface ReactNodeDefinition {
 
   /** Passes the node itself to the React component as `props.noodlNode`. */
   noodlNodeAsProp?: boolean;
+  /**
+   * P109 ISL-009 — `true` for a node with no element of its own (Drag moves its child), which
+   * therefore offers no Data Attributes list: an attribute it wrote would land on the child and
+   * overwrite the child's own list.
+   */
+  noDataAttributes?: boolean;
   /** Set `false` to omit the standard `mounted` input. */
   mountedInput?: boolean;
   /** See {@link ReactNodeFrame} — currently unused. */
@@ -520,6 +550,8 @@ export interface ReactNodeDefinition {
   category?: string;
   /** Marks the node deprecated in the runtime definition and the catalog. */
   deprecated?: boolean;
+  /** For a deprecated node: the type that replaced it (P107 R25). */
+  replacedBy?: string;
   /** Server-side-rendering compatibility (RUN-002); forwarded to the runtime definition and the catalog. */
   ssr?: NodeSSRCompat;
 
@@ -711,8 +743,8 @@ function defineRegularInputProp(input: ReactInputPropDefinition, name: string) {
         this.raiseRuntimeError(
           'dimensions/not-a-dimension',
           `"${input.displayName || name}" was sent ${JSON.stringify(value)}, which is not a size. A size is a ` +
-            '{value, unit} object — "400" alone is only a size on a port that already holds one, because a bare ' +
-            'number is merged into the unit the port is currently using. The previous value is kept.'
+            'number (read in the unit the port is using, or its default unit when it holds none), or a {value, unit} ' +
+            'object. The previous value is kept.'
         );
       }
       if (input.onChange) {
@@ -764,6 +796,177 @@ function defineSignalInputProp(input: ReactInputPropDefinition, name: string) {
   };
 }
 
+/**
+ * P109 ISL-009 — "A data-* list" (Richard, 2026-10-02). A node could not carry a name for a test, so
+ * the garden's drives found everything by styling class (499 `querySelector`s). Every visual node now
+ * lists `data-*` attributes by name, and each listed name becomes an input whose value — typed or
+ * wired — is written on the element, in server render too.
+ *
+ * The names are the rule's, carried as data on the node definition so the editor, the catalog and
+ * the door read this exact sentence and pattern: `data-` keeps the list away from behaviour
+ * (`onclick`) and from ACC-006's `aria-*`/`role`.
+ */
+export const DATA_ATTRIBUTE_NAME_PATTERN = '^data-[a-z0-9][a-z0-9._-]*$';
+const DATA_ATTRIBUTE_NAME = new RegExp(DATA_ATTRIBUTE_NAME_PATTERN);
+const DATA_ATTRIBUTES_PARAMETER = 'dataAttributes';
+
+/**
+ * The `namedports/derived` rule every visual node declares: one string input per listed name, the
+ * port named exactly as the attribute. Derived by the editor on read (`dynamicPortRules.ts`), so it
+ * never competes with a node's own `sendDynamicPorts` (Page Stack, Router, Text Input).
+ */
+export const DATA_ATTRIBUTES_RULE: DynamicPortEntry = {
+  name: 'namedports/derived',
+  parameter: DATA_ATTRIBUTES_PARAMETER,
+  accept: {
+    pattern: DATA_ATTRIBUTE_NAME_PATTERN,
+    rule: 'a data attribute name: "data-", then a lowercase letter or digit, then lowercase letters, digits, ".", "_" or "-"',
+    example: 'data-testid'
+  },
+  port: {
+    name: '{{*}}',
+    displayName: '{{*}}',
+    type: 'string',
+    plug: 'input',
+    group: 'Data Attributes',
+    description: 'Written on this element as {{*}}'
+  }
+};
+
+/** The names a `dataAttributes` value lists, read the way the editor's stringlist writes it. */
+function listedDataAttributeNames(value: unknown): string[] {
+  if (value === undefined || value === null || value === '') return [];
+  const names = Array.isArray(value) ? value.map((v) => String(v)) : typeof value === 'string' ? value.split(',') : [];
+  return names.filter((name) => DATA_ATTRIBUTE_NAME.test(name));
+}
+
+/**
+ * Put the listed attributes on `props.dom`, the channel every built-in component spreads on its
+ * root element, and take off any it no longer lists. A listed name with no value is written
+ * empty: listing it is what puts it there.
+ */
+function applyDataAttributes(node: ReactNodeInstance): void {
+  const names = node._dataAttributeNames || [];
+  const values = node._dataAttributeValues || {};
+  const dom = { ...(node.props.dom || {}) };
+  for (const key of Object.keys(dom)) if (key.startsWith('data-')) delete dom[key];
+  for (const name of names) {
+    const value = values[name];
+    dom[name] = value === undefined || value === null ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value);
+  }
+  node.props.dom = dom;
+  node.forceUpdate();
+  syncDataAttributesOnElement(node);
+}
+
+/**
+ * Make the element the node reports carry exactly the listed attributes — for a component that
+ * does not spread `props.dom` on its root, which is every kit component that predates the list.
+ * Built-ins already render them (and in server render); for them this finds nothing to change.
+ *
+ * Only names this function set itself are ever removed, so a `data-*` the element got from
+ * anywhere else (the runtime's own `data-ndl-*`, a kit's markup) is left alone. Client-only: there
+ * is no element during server render, and a kit node's attribute is therefore not in its HTML.
+ */
+function syncDataAttributesOnElement(node: ReactNodeInstance): void {
+  if (typeof document === 'undefined' || !node._dataAttributeNames) return;
+  const el = node.getDOMElement() as Element | null;
+  if (!el || typeof el.setAttribute !== 'function') return;
+  const want: Record<string, string> = {};
+  const dom = node.props.dom || {};
+  for (const name of node._dataAttributeNames as string[]) if (name in dom) want[name] = String(dom[name]);
+  for (const name of (node._appliedDataAttributes as string[]) || []) if (!(name in want)) el.removeAttribute(name);
+  for (const name of Object.keys(want)) if (el.getAttribute(name) !== want[name]) el.setAttribute(name, want[name]);
+  node._appliedDataAttributes = Object.keys(want);
+}
+
+/**
+ * Claim a `data-*` input the moment something names one — a saved parameter (`setVariant` asks
+ * `registerInputIfNeeded` for each) or a wire. Installed per instance, chained onto whatever the
+ * node already answers, so a node's own dynamic ports (Page Stack's `pageComp-…`) are untouched.
+ *
+ * ⚠️ Not a `registerInputIfNeeded` method on the definition: the catalog generator calls any type
+ * with one `runtime-discovered`, and that switches off GAM-019's unknown-port checks on all 27
+ * visual types. These ports are declared — by {@link DATA_ATTRIBUTES_RULE} — and the catalog says so.
+ */
+function claimDataAttributeInputs(node: ReactNodeInstance): void {
+  const own = node.registerInputIfNeeded;
+  node.registerInputIfNeeded = function (this: ReactNodeInstance, name: string) {
+    if (!this.hasInput(name) && DATA_ATTRIBUTE_NAME.test(name)) {
+      this.registerInput(name, {
+        set(value: unknown) {
+          const self = this as unknown as ReactNodeInstance;
+          self._dataAttributeValues = { ...(self._dataAttributeValues || {}), [name]: value };
+          if ((self._dataAttributeNames || []).includes(name)) applyDataAttributes(self);
+        }
+      });
+      return;
+    }
+    return own ? own.call(this, name) : undefined;
+  };
+}
+
+/** P109 ISL-009 — the alignments `Scroll Align` offers, as `scrollIntoView` spells them. */
+const SCROLL_ALIGNMENTS = ['nearest', 'start', 'center', 'end'] as const;
+type ScrollAlignment = (typeof SCROLL_ALIGNMENTS)[number];
+
+/**
+ * P109 ISL-009 ("Signal on every node", Richard 2026-10-02) — scroll whatever holds this node's
+ * element until the element can be seen. Returns why it did nothing, or `undefined`.
+ *
+ * Two holders, because they scroll differently:
+ * - A Group with Native Scroll off moves its content with iScroll's transform, which the
+ *   browser's `scrollIntoView` cannot see. The nearest such Group that contains the element is
+ *   asked through its own `iScroll.scrollToElement` (offset `true` centres, `0` aligns the start,
+ *   which is as close as iScroll comes to `nearest`).
+ * - Everything else — the page's own scroll, a Group scrolling the native way, nested native
+ *   scrollers — is the browser's `scrollIntoView`, which scrolls every scrolling ancestor.
+ */
+function scrollNodeIntoView(node: ReactNodeInstance, align: ScrollAlignment): string | undefined {
+  const element = node.getDOMElement();
+  if (!element || typeof element.scrollIntoView !== 'function') {
+    return 'this element has no rendered DOM element — it may not be mounted';
+  }
+  for (let parent = node.getVisualParentNode(); parent; parent = parent.getVisualParentNode()) {
+    const inner = parent.innerReactComponentRef as
+      | { iScroll?: { scrollToElement(el: Element, time: number, x: number | boolean, y: number | boolean): void }; scrollRef?: { current?: HTMLElement | null } }
+      | null
+      | undefined;
+    if (inner && inner.iScroll && inner.scrollRef?.current?.contains(element)) {
+      const offset = align === 'center' ? true : 0;
+      inner.iScroll.scrollToElement(element, 300, offset, offset);
+      // The Group may itself be below the fold: bring it into view in whatever holds it too.
+      inner.scrollRef.current.scrollIntoView({ behavior: scrollBehavior(), block: 'nearest', inline: 'nearest' });
+      return undefined;
+    }
+  }
+  element.scrollIntoView({ behavior: scrollBehavior(), block: align, inline: align });
+  return undefined;
+}
+
+/**
+ * Run a requested Scroll Into View, reporting why it did nothing through the failure channel.
+ *
+ * 🔴 It waits for the element, not for the inner component's ref. `withInnerComponent` waits for
+ * `innerReactComponentRef`, which only a class component sets: a Page (or any function component
+ * that reports its root through `setDOMElement`) never sets it, so the scroll queued for ever and
+ * said nothing. Found by the deployed drive's fourth arm.
+ */
+function runScrollIntoView(node: ReactNodeInstance): void {
+  const align: ScrollAlignment = SCROLL_ALIGNMENTS.includes(node._scrollIntoViewAlign) ? node._scrollIntoViewAlign : 'nearest';
+  const reason = scrollNodeIntoView(node, align);
+  if (reason) node.raiseRuntimeError('visual/scroll-into-view-failed', `Scroll Into View did nothing: ${reason}`);
+}
+
+/** Smooth, unless the person asked their system for reduced motion. */
+function scrollBehavior(): ScrollBehavior {
+  const reduce =
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return reduce ? 'auto' : 'smooth';
+}
+
 function flattenArray(target: React.ReactNode[], array: React.ReactNode[]) {
   for (const e of array) {
     if (Array.isArray(e)) {
@@ -789,6 +992,14 @@ export interface NoodlReactComponentProps {
  */
 export class NoodlReactComponent extends React.Component<NoodlReactComponentProps> {
   componentDidMount() {
+    // P109 ISL-009 — the element may have arrived through the wrapper's own ref (a host-element
+    // inner component), which does not pass through `setDOMElement`'s pending check first.
+    const node = this.props.noodlNode;
+    if (node._pendingScrollIntoView && node.getDOMElement()) {
+      node._pendingScrollIntoView = false;
+      runScrollIntoView(node);
+    }
+    syncDataAttributesOnElement(node);
     // During SSR (server) and SSR hydration (client pre-settle), triggerDidMount()
     // already sent this node's didMount before React committed; sending it again on
     // commit would double-fire user graphs. The flag is cleared on unmount below so
@@ -797,11 +1008,20 @@ export class NoodlReactComponent extends React.Component<NoodlReactComponentProp
     this.props.noodlNode.sendSignalOnOutput('didMount');
   }
 
+  componentDidUpdate() {
+    // P109 ISL-009 — a list or value change re-renders through here.
+    syncDataAttributesOnElement(this.props.noodlNode);
+  }
+
   componentWillUnmount() {
     this.props.noodlNode.didCallTriggerDidMount = false;
     this.props.noodlNode.sendSignalOnOutput('willUnmount');
     //Remove
     const noodlNode = this.props.noodlNode;
+    // P107-D30 (P109 ISL-031) — a control's states go with its element (controls/utils.ts `_leftPage`)
+    noodlNode._leftPage?.();
+    // P107-C81 (P109 ISL-038) — a file drop zone's drag goes with its element (node-shared-port-definitions.ts `fileDropDark`)
+    noodlNode._fileDropLeftPage?.();
     // GAM-012 fault 3 — leaving the page is not a Blur. Every node is dropped from the focus list
     // here; `Group.tsx` used to send a Blur instead, and the tracker could not tell the two apart.
     noodlNode.context.setNodeUnmounted?.(noodlNode);
@@ -892,6 +1112,9 @@ export class NoodlReactComponent extends React.Component<NoodlReactComponentProp
       if (parent && parent.props.layout) {
         props.parentLayout = parent.props.layout;
       }
+      // P109 ISL-052: a percentage along the axis a parent scrolls is of the visible window (layout.ts `scrollAxisPercent`)
+      const parentScroll = parent ? scrollAlongLayout(parent.props, parent.style) : undefined;
+      if (parentScroll) props.parentScroll = parentScroll;
     }
 
     //optimization. This is used by forceUpdate() to only render this node once per frame.
@@ -910,7 +1133,8 @@ export class NoodlReactComponent extends React.Component<NoodlReactComponentProp
             }*/
     }
 
-    return React.createElement(noodlNode.reactComponent, props, noodlNode.renderChildren());
+    // P109-S22-BUILTINBOUNDARY: a node that throws while drawing loses itself, not the page
+    return withNodeBoundary(noodlNode, React.createElement(noodlNode.reactComponent, props, noodlNode.renderChildren()));
   }
 }
 
@@ -1042,6 +1266,7 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
     displayNodeName: def.displayNodeName || def.displayName,
     category: 'Visual',
     deprecated: def.deprecated,
+    replacedBy: def.replacedBy,
     ssr: def.ssr,
     allowChildren: def.allowChildren === undefined ? true : def.allowChildren, //default to true
     visualStates: def.visualStates,
@@ -1062,8 +1287,21 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
       }
 
       this.props = { styles: {} };
+      if (!def.noDataAttributes) claimDataAttributeInputs(this as unknown as ReactNodeInstance);
       this.outputPropValues = {};
       this.style = Object.assign({}, startStyle);
+      // P109 ISL-008 — what the author has set on THIS instance, so a render can tell a default (written to the
+      // defaults sheet, the weakest rule on the page) from a value the author chose (inline, as it always was).
+      // On the style object under a symbol, so it survives every component's `{ ...props.style }` and never
+      // reaches the DOM. See `default-style-layer.ts`.
+      this._authoredStyle = new Set<string>();
+      this._authoredInputs = new Set<string>();
+      const layer: DefaultLayerInfo = {
+        start: startStyle,
+        authoredStyle: this._authoredStyle,
+        authoredInputs: this._authoredInputs
+      };
+      (this.style as LayerableStyle)[DEFAULT_LAYER] = layer;
 
       for (const styleTag in startStyles) {
         this.props.styles[styleTag] = Object.assign({}, startStyles[styleTag]);
@@ -1131,7 +1369,8 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
     },
     getInspectInfo: def.getInspectInfo,
     nodeScopeDidInitialize: def.nodeScopeDidInitialize,
-    dynamicports,
+    // P109 ISL-009 — every visual node also declares the Data Attributes rule.
+    dynamicports: def.noDataAttributes ? dynamicports : [...(dynamicports || []), DATA_ATTRIBUTES_RULE],
     // P88 GAM-019 — NDA-017 §2's field was dropped here, so Text Input's `runOnValueChange` never
     // reached `defineNode`: its Run On Value Change checkbox was not a declared port, not in the
     // catalog and not in the panel, while a saved `runOnChange-startValue` still worked through
@@ -1163,6 +1402,60 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
         description: 'Raw CSS declarations applied to this element, overriding the styling ports above',
         set(value) {
           this.updateAdvancedStyle({ content: value });
+        }
+      },
+      dataAttributes: {
+        index: 100015,
+        displayName: 'Data Attributes',
+        group: 'Data Attributes',
+        type: { name: 'stringlist', allowEditOnly: true },
+        description: 'data-* names (data-testid) for tests and scripts to find this element by; each gets a value input',
+        set(value) {
+          const node = this as unknown as ReactNodeInstance;
+          node._dataAttributeNames = listedDataAttributeNames(value);
+          applyDataAttributes(node);
+        }
+      },
+      /*
+       * P109 ISL-009 — "Signal on every node" (Richard, 2026-10-02). Group's own Scroll To Element
+       * shows only when Native Scroll is off, and nothing could scroll the page; the island's
+       * Functions reached into `document` instead. Every visual node now scrolls itself into view,
+       * in whatever holds it. Held until the element exists, like Group's actions; during server
+       * render there is nothing to scroll and nothing is said.
+       */
+      scrollIntoView: {
+        index: 100020,
+        displayName: 'Scroll Into View',
+        group: 'Scroll Into View',
+        type: 'signal',
+        description: 'Scrolls the page, or the scrolling Group holding this element, until the element can be seen',
+        valueChangedToTrue() {
+          if (typeof document === 'undefined') return;
+          const node = this as unknown as ReactNodeInstance;
+          node.scheduleAfterInputsHaveUpdated(() => {
+            // Held until the element exists; presses before then coalesce into one scroll.
+            if (node.getDOMElement()) runScrollIntoView(node);
+            else node._pendingScrollIntoView = true;
+          });
+        }
+      },
+      scrollIntoViewAlign: {
+        index: 100021,
+        displayName: 'Scroll Align',
+        group: 'Scroll Into View',
+        type: {
+          name: 'enum',
+          enums: [
+            { label: 'Nearest edge', value: 'nearest' },
+            { label: 'Start', value: 'start' },
+            { label: 'Center', value: 'center' },
+            { label: 'End', value: 'end' }
+          ]
+        },
+        default: 'nearest',
+        description: 'Where Scroll Into View leaves the element: Nearest edge moves only as far as needed',
+        set(value) {
+          (this as unknown as ReactNodeInstance)._scrollIntoViewAlign = value;
         }
       }
     },
@@ -1392,15 +1685,25 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
         return this.children.some((child) => child.contains && child.contains(node));
       },
       scheduleUpdateChildCountAndIndicies() {
+        this.childrenChangedSinceCount = true;
         if (this.updateChildIndiciesScheduled) return;
         this.updateChildIndiciesScheduled = true;
         this.scheduleAfterInputsHaveUpdated(() => {
-          this.updateChildIndices();
-          if (hasChildCountOutput) {
-            this.updateChildrenCount();
-          }
+          if (this.childrenChangedSinceCount) this.updateChildCountAndIndiciesNow();
           this.updateChildIndiciesScheduled = false;
         });
+      },
+      /**
+       * P109 ISL-048 (P107-C114). The queued count runs at the node's next update — a frame later for a change made after the
+       * frame's last update (a Component Stack building its page when it mounts at a frame's paint). A node that publishes what the
+       * change means at once (the stack's Stack Depth) counts here beside it; the queued count then sends nothing twice.
+       */
+      updateChildCountAndIndiciesNow() {
+        this.childrenChangedSinceCount = false;
+        this.updateChildIndices();
+        if (hasChildCountOutput) {
+          this.updateChildrenCount();
+        }
       },
       getChildren() {
         return this.children;
@@ -1454,7 +1757,12 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
       _rerenderReactNode() {
         this.forceUpdate();
       },
-      _resetReactVirtualDOM() {
+      _resetReactVirtualDOM(resetInput?: string) {
+        // P109 ISL-008 — the runtime is about to set this input to its declared default (the author cleared it).
+        if (resetInput) {
+          if (!this._inputsResetToDefault) this._inputsResetToDefault = new Set<string>();
+          this._inputsResetToDefault.add(resetInput);
+        }
         //reset the react key to force a full re-render
         //this can be required since we're editing the DOM tree, without React knowing
         //and can confuse React in certain cases
@@ -1506,6 +1814,15 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
           ref: (ref) => {
             this.reactComponentRef = ref;
             if (ref) {
+              // P109 ISL-009 — React attaches this ref AFTER the wrapper's `componentDidMount`, so a
+              // third-party component that reports no root (a kit's plain function component) has no
+              // reachable element until now. Found in the editor's preview: the kit Badge listed
+              // `data-testid` and its element never got it. A held Scroll Into View waited the same way.
+              syncDataAttributesOnElement(this);
+              if (this._pendingScrollIntoView && this.getDOMElement()) {
+                this._pendingScrollIntoView = false;
+                runScrollIntoView(this);
+              }
               // Built-ins and host elements have already reported their root
               // via setDOMElement (child refs commit first), which also set
               // the observer target. The deferred fallback only matters for
@@ -1525,6 +1842,13 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
         });
       },
       renderChildren() {
+        // The children read how this node scrolls as `parentScroll` (above), so a change to it drops the memo as `setLayout`
+        // does for the layout — Enable Scroll, Native platform scroll and Wrap arrive as plain props, with no setter to do it.
+        const scrollKey = scrollAlongLayout(this.props, this.style);
+        if (scrollKey !== this._childrenScrollKey) {
+          this._childrenScrollKey = scrollKey;
+          this.cachedChildren = undefined;
+        }
         if (!this.cachedChildren) {
           let c = this.children.map((child) => child.render());
 
@@ -1557,12 +1881,26 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
         //set the style directly on the dom node, or trigger a react render
         const styleObject = styleTag ? this.props.styles[styleTag] : this.style;
 
+        const settingDefault = !styleTag && this._settingDefault;
         for (const p in newStyles) {
           styleObject[p] = newStyles[p];
+          // P109 ISL-008 — anything written through here is the author's (a parameter, a wire, a variant, CSS Style),
+          // except a cleared parameter going back to its default, which is a default again.
+          if (!styleTag && this._authoredStyle) {
+            if (settingDefault) this._authoredStyle.delete(p);
+            else this._authoredStyle.add(p);
+          }
         }
 
         const domElement = this.getDOMElement();
         if (!domElement) return;
+
+        // A default is not written inline. Patching the DOM directly would leave the old inline value React no
+        // longer knows it owns; a render removes it and moves the value into the defaults class.
+        if (settingDefault) {
+          this.forceUpdate();
+          return;
+        }
 
         let forceUpdate = false;
 
@@ -1608,6 +1946,13 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
           }
 
           if (newStyles.position || newStyles.flexDirection || newStyles.clip) {
+            forceUpdate = true;
+          }
+
+          // P107-C79: Pointer Events goes through the render, so the component's own rule (an element at Opacity 0 takes no
+          // pointer) has the last word. A patch here was never written back: React writes a style only when ITS value changes,
+          // and at Opacity 0 it renders `none` before and after, so an invisible element kept the patched `auto`.
+          if (newStyles.hasOwnProperty('pointerEvents')) {
             forceUpdate = true;
           }
         } else {
@@ -1657,10 +2002,16 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
           }
         }
 
+        // P107-C79: a removed Pointer Events is left to the render too (see setStyle) — blanking it on the element would undo
+        // the `none` the component draws at Opacity 0.
+        const rendered = !styleTag && styles.includes('pointerEvents');
+        if (rendered && domElement) forceUpdate = true;
+
         if (domElement) {
           //deleting styles is done by setting them to an empty string
           const newStyles = {};
           for (const p of styles) {
+            if (rendered && p === 'pointerEvents') continue;
             newStyles[p] = '';
           }
           setStylesOnDOMNode(domElement, newStyles, styleTag);
@@ -1681,6 +2032,14 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
         if (this.boundingBoxObserver) {
           this.boundingBoxObserver.setTarget((element as HTMLElement) || null);
         }
+        // P109 ISL-009 — a Scroll Into View that arrived before the element did.
+        if (element && this._pendingScrollIntoView) {
+          this._pendingScrollIntoView = false;
+          runScrollIntoView(this);
+        }
+        if (element) syncDataAttributesOnElement(this);
+        // P107-C77 — a Draggable node's new element (a remount, a new Tag) takes the keyboard too.
+        if (element) dragElementChanged(this, element as HTMLElement);
       },
       /**
        * NDA-012 (Visual) check A3 — run an imperative action on the inner React component,
@@ -1991,6 +2350,9 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
     }
   };
 
+  // P109 ISL-009 — a node with no element of its own offers no list (see `noDataAttributes`).
+  if (def.noDataAttributes) delete ReactComponentNode.inputs.dataAttributes;
+
   if (useVariants) {
     ReactComponentNode.inputs.variant = {
       displayName: 'Variant',
@@ -2014,7 +2376,7 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
       index: 9999,
       type: 'boolean',
       group: 'General',
-      description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind',
+      description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen)',
       default: true,
       set(value) {
         value = value ? true : false;
@@ -2097,6 +2459,14 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
           return;
         }
 
+        // P107-C62 (ISL-026, ruled "Remove the style"): null is empty, as undefined is — `typeof null` is
+        // 'object', so `.value` was read off it and the setter threw
+        if (value === null || value === undefined) {
+          this.removeStyle([styleTargetName], input.styleTag);
+          if (input.onChange) input.onChange.call(this, value);
+          return;
+        }
+
         if (typeof value !== 'object' && type.defaultUnit) {
           value = { value, unit: type.defaultUnit };
         }
@@ -2151,6 +2521,60 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
 
   for (const name in methods) {
     ReactComponentNode.methods[name] = methods[name];
+  }
+
+  // P109 ISL-008 — each port that writes a CSS property on the root element, by the property it writes. The panel's
+  // "your stylesheet decides this" note asks the canvas about exactly these (`style-sources.ts`). Tagged ports are
+  // an inner element's, which no author class reaches.
+  const styleTargets: Record<string, string> = {};
+  for (const name in inputCss) {
+    const input = inputCss[name];
+    if (input.styleTag) continue;
+    styleTargets[name] = cssPropertyName(input.targetStyleProperty || name);
+  }
+  for (const name of ['width', 'height']) {
+    if (inputProps && inputProps[name]) styleTargets[name] = name;
+  }
+  if (!ReactComponentNode.methods.explainStyleSources) {
+    ReactComponentNode.methods.explainStyleSources = function (this: ReactNodeInstance): StyleSourceFinding[] {
+      const element = this.getDOMElement();
+      if (!element) return [];
+      const customCss: Record<string, string> = {};
+      for (const key in this.customCssStyles || {}) customCss[cssPropertyName(key)] = String(this.customCssStyles![key]);
+      return explainStyleSources({
+        element,
+        styleTargets,
+        defaults: defaultDeclarationsOf(element),
+        customCss
+      });
+    };
+  }
+
+  // P109 ISL-008 — a setter that runs is the author speaking: a parameter stored in the project, a connection, a
+  // variant, a visual state. A default the runtime seeds never runs one. Recorded per instance, by input name, so
+  // `layerDefaults` keeps every value derived from it inline (`default-style-layer.ts` LAYOUT_SOURCES).
+  for (const name in ReactComponentNode.inputs) {
+    const input = ReactComponentNode.inputs[name] as { set?: (this: ReactNodeInstance, value: unknown) => void };
+    const set = input && input.set;
+    if (typeof set !== 'function' || (set as { __isl008Authored?: boolean }).__isl008Authored) continue;
+    const recording = function (this: ReactNodeInstance, value: unknown) {
+      // The editor cleared this parameter and the runtime is restoring the port's default
+      // (`node.ts` `_onNodeModelParameterUpdated`): a default again, as it would be after a reload.
+      if (this._inputsResetToDefault && this._inputsResetToDefault.has(name)) {
+        this._inputsResetToDefault.delete(name);
+        if (this._authoredInputs) this._authoredInputs.delete(name);
+        this._settingDefault = true;
+        try {
+          return set.call(this, value);
+        } finally {
+          this._settingDefault = false;
+        }
+      }
+      if (this._authoredInputs) this._authoredInputs.add(name);
+      return set.call(this, value);
+    };
+    (recording as { __isl008Authored?: boolean }).__isl008Authored = true;
+    input.set = recording;
   }
 
   return {

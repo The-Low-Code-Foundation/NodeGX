@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "02f0b809-95a5-5838-81da-c32a36434a2c",
+  "name": "Island pins",
+  "path": "/Logic/Island pins",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The islanders on the sea as pins, each one open when she has a request left. Runs when an input changes; Ran after each run."
+}

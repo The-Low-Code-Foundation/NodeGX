@@ -85,6 +85,11 @@ describe('Node Expression Evaluation', () => {
         type: undefined,
         default: null,
         set: jest.fn()
+      },
+      sizeInput: {
+        type: { name: 'number', units: ['px', '%'], defaultUnit: 'px' },
+        default: 0,
+        set: jest.fn()
       }
     });
   });
@@ -377,15 +382,23 @@ describe('Node Expression Evaluation', () => {
     });
 
     describe('Maintains existing behavior', () => {
-      it('maintains existing unit handling', () => {
+      it('maintains existing unit handling on a size port', () => {
         // Set initial value with unit
-        node.setInputValue('numberInput', { value: 10, unit: 'px' });
+        node.setInputValue('sizeInput', { value: 10, unit: '%' });
 
         // Update with unitless value
+        node.setInputValue('sizeInput', 20);
+
+        const input = node.getInput('sizeInput');
+        expect(input.set).toHaveBeenLastCalledWith({ value: 20, unit: '%' });
+      });
+
+      it('passes a unitless value through as sent on a port that is not a size (ISL-026, P107-C6)', () => {
+        node.setInputValue('numberInput', { value: 10, unit: 'px' });
         node.setInputValue('numberInput', 20);
 
         const input = node.getInput('numberInput');
-        expect(input.set).toHaveBeenLastCalledWith({ value: 20, unit: 'px' });
+        expect(input.set).toHaveBeenLastCalledWith(20);
       });
 
       it('maintains existing color resolution', () => {

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2697c70d-19f6-5588-8c85-6586f1f870b5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cardseenIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "cardId",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "seen",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cardseenFn",
+      "type": "JavaScriptFunction",
+      "label": "Card seen",
+      "parameters": {
+        "functionScript": "\nvar seen = Array.isArray(Inputs.seen) ? Inputs.seen.slice() : [];\nvar id = String(Inputs.cardId || '');\nif (id && seen.indexOf(id) === -1) seen.push(id);\nOutputs.seen = seen;\n",
+        "runOnChange-in-cardId": false,
+        "runOnChange-in-seen": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-seen",
+          "displayName": "seen",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-cardId",
+          "displayName": "cardId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-seen",
+          "displayName": "seen",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "cardseenOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "seen",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

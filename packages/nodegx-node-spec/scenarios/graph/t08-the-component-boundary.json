@@ -1,0 +1,639 @@
+[
+  {
+    "name": "a component placed twice with different inputs: each instance's Component Inputs hands ITS value to the nodes inside it; setting one instance's input moves that instance only",
+    "clauses": [
+      "N"
+    ],
+    "because": "NSP-015 AC5 (the control that proves inputs arrive at all) and the MCP server's instruction: \"A component's interface is a `Component Inputs` node whose ports are plugged 'output' — that is the ONLY thing that makes an instance parameter arrive\" (componentinputs.ts: every output is a read of the owner's `_internal.inputValues`; componentinstance.ts `registerComponentInputPort`: the setter flags each Component Inputs' output)",
+    "components": {
+      "a": {
+        "component": "Greeting",
+        "inputs": {
+          "Name": "value"
+        },
+        "params": {
+          "Name": "Ann"
+        }
+      },
+      "b": {
+        "component": "Greeting",
+        "inputs": {
+          "Name": "value"
+        },
+        "params": {
+          "Name": "Bo"
+        }
+      }
+    },
+    "nodes": {
+      "ia": {
+        "type": "Component Inputs",
+        "in": "a"
+      },
+      "fa": {
+        "type": "String Format",
+        "in": "a",
+        "params": {
+          "format": "Hello {who}"
+        }
+      },
+      "ib": {
+        "type": "Component Inputs",
+        "in": "b"
+      },
+      "fb": {
+        "type": "String Format",
+        "in": "b",
+        "params": {
+          "format": "Hello {who}"
+        }
+      }
+    },
+    "wires": [
+      {
+        "from": "ia.Name",
+        "to": "fa.who"
+      },
+      {
+        "from": "ib.Name",
+        "to": "fb.who"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "a",
+        "set": "Name",
+        "value": "Cy"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "ia",
+        "port": "Name",
+        "value": "Ann"
+      },
+      {
+        "at": 1,
+        "subject": "ib",
+        "port": "Name",
+        "value": "Bo"
+      },
+      {
+        "at": 1,
+        "subject": "fa",
+        "port": "formatted",
+        "value": "Hello Ann"
+      },
+      {
+        "at": 1,
+        "subject": "fb",
+        "port": "formatted",
+        "value": "Hello Bo"
+      },
+      {
+        "at": 2,
+        "subject": "fa",
+        "port": "formatted",
+        "value": "Hello Cy"
+      },
+      {
+        "at": 2,
+        "subject": "fb",
+        "port": "formatted",
+        "absent": true
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "Name",
+        "value": "Ann",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "Name",
+        "value": "Bo",
+        "subject": "b"
+      },
+      {
+        "t": "set",
+        "port": "format",
+        "value": "Hello {who}",
+        "subject": "fa"
+      },
+      {
+        "t": "set",
+        "port": "format",
+        "value": "Hello {who}",
+        "subject": "fb"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "Name",
+        "value": "Ann",
+        "subject": "ia"
+      },
+      {
+        "t": "value",
+        "port": "formatted",
+        "value": "Hello Ann",
+        "subject": "fa"
+      },
+      {
+        "t": "value",
+        "port": "Name",
+        "value": "Bo",
+        "subject": "ib"
+      },
+      {
+        "t": "value",
+        "port": "formatted",
+        "value": "Hello Bo",
+        "subject": "fb"
+      },
+      {
+        "t": "set",
+        "port": "Name",
+        "value": "Cy",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "Name",
+        "value": "Cy",
+        "subject": "ia"
+      },
+      {
+        "t": "value",
+        "port": "formatted",
+        "value": "Hello Cy",
+        "subject": "fa"
+      }
+    ]
+  },
+  {
+    "name": "a value written into Component Outputs leaves the instance on the port of the same name and reaches the parent's node wired to it; a signal into the instance pulses the node inside once per pulse",
+    "clauses": [
+      "N",
+      "C4"
+    ],
+    "because": "componentoutputs.ts: \"any name the editor asks for becomes an input that writes straight through to the component owner\" (`setOutputFromComponentOutput` flags the instance's output); componentinputs.ts: the instance's input is read by the Component Inputs output of the same name. C4: every pulse fires — two Add pulses in one frame count twice",
+    "components": {
+      "a": {
+        "component": "Tally",
+        "inputs": {
+          "Add": "signal"
+        },
+        "outputs": {
+          "Total": "value"
+        }
+      }
+    },
+    "nodes": {
+      "ia": {
+        "type": "Component Inputs",
+        "in": "a"
+      },
+      "n": {
+        "type": "Counter",
+        "in": "a"
+      },
+      "oa": {
+        "type": "Component Outputs",
+        "in": "a"
+      },
+      "sink": {
+        "type": "net.noodl.Log"
+      }
+    },
+    "wires": [
+      {
+        "from": "ia.Add",
+        "to": "n.increase"
+      },
+      {
+        "from": "n.currentCount",
+        "to": "oa.Total"
+      },
+      {
+        "from": "a.Total",
+        "to": "sink.value"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "a",
+        "signal": "Add"
+      },
+      "settle",
+      {
+        "node": "a",
+        "signal": "Add"
+      },
+      {
+        "node": "a",
+        "signal": "Add"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "a",
+        "port": "Total",
+        "value": 0
+      },
+      {
+        "at": 1,
+        "subject": "sink",
+        "port": "value",
+        "value": 0
+      },
+      {
+        "at": 2,
+        "subject": "n",
+        "port": "currentCount",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "Total",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "sink",
+        "port": "value",
+        "value": 1
+      },
+      {
+        "at": 3,
+        "subject": "a",
+        "port": "Total",
+        "value": 3
+      },
+      {
+        "at": 3,
+        "subject": "sink",
+        "port": "value",
+        "value": 3
+      },
+      {
+        "at": 2,
+        "subject": "ia",
+        "signal": "Add",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "ia",
+        "signal": "Add",
+        "count": 2
+      }
+    ],
+    "expect": [
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "Total",
+        "value": 0,
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 0,
+        "subject": "n"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 0,
+        "subject": "sink"
+      },
+      {
+        "t": "in",
+        "port": "Add",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "Total",
+        "value": 1,
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "Add",
+        "subject": "ia"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 1,
+        "subject": "n"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "n"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "n"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 1,
+        "subject": "sink"
+      },
+      {
+        "t": "in",
+        "port": "Add",
+        "subject": "a"
+      },
+      {
+        "t": "in",
+        "port": "Add",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "Total",
+        "value": 3,
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "Add",
+        "subject": "ia"
+      },
+      {
+        "t": "signal",
+        "port": "Add",
+        "subject": "ia"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 3,
+        "subject": "n"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "n"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "n"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "n"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "n"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 3,
+        "subject": "sink"
+      }
+    ]
+  },
+  {
+    "name": "a signal leaves a component: Component Outputs' signal input pulses the instance's output, and the parent's node wired to it fires once per pulse",
+    "clauses": [
+      "N",
+      "C4"
+    ],
+    "because": "componentoutputs.ts (as above) for a port the component declares a signal; C4: every pulse fires",
+    "components": {
+      "a": {
+        "component": "Clicker",
+        "inputs": {
+          "Press": "signal"
+        },
+        "outputs": {
+          "Pressed": "signal"
+        }
+      }
+    },
+    "nodes": {
+      "ia": {
+        "type": "Component Inputs",
+        "in": "a"
+      },
+      "oa": {
+        "type": "Component Outputs",
+        "in": "a"
+      },
+      "r": {
+        "type": "Counter"
+      }
+    },
+    "wires": [
+      {
+        "from": "ia.Press",
+        "to": "oa.Pressed"
+      },
+      {
+        "from": "a.Pressed",
+        "to": "r.increase"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "a",
+        "signal": "Press"
+      },
+      "settle",
+      {
+        "node": "a",
+        "signal": "Press"
+      },
+      {
+        "node": "a",
+        "signal": "Press"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "r",
+        "port": "currentCount",
+        "value": 0
+      },
+      {
+        "at": 2,
+        "subject": "r",
+        "port": "currentCount",
+        "value": 1
+      },
+      {
+        "at": 3,
+        "subject": "r",
+        "port": "currentCount",
+        "value": 3
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "signal": "Pressed",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "a",
+        "signal": "Pressed",
+        "count": 2
+      },
+      {
+        "at": 3,
+        "subject": "r",
+        "signal": "countChanged",
+        "count": 2
+      }
+    ],
+    "expect": [
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 0,
+        "subject": "r"
+      },
+      {
+        "t": "in",
+        "port": "Press",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "Pressed",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "Press",
+        "subject": "ia"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 1,
+        "subject": "r"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "r"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "r"
+      },
+      {
+        "t": "in",
+        "port": "Press",
+        "subject": "a"
+      },
+      {
+        "t": "in",
+        "port": "Press",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "Pressed",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "Pressed",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "Press",
+        "subject": "ia"
+      },
+      {
+        "t": "signal",
+        "port": "Press",
+        "subject": "ia"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 3,
+        "subject": "r"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "r"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "r"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "r"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "r"
+      }
+    ]
+  }
+]

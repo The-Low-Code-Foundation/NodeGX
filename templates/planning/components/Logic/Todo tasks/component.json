@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a98a03f2-f74b-50d5-87fe-966850e2c524",
+  "name": "Todo tasks",
+  "path": "/Logic/Todo tasks",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Your open todo tasks with a deadline, as quarter-hour blocks on their deadline day — the late ones at the top of today — added to the blocks the week draws."
+}

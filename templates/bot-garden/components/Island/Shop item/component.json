@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f5d7b7f5-6a40-5cd4-80d2-6ed9fc86c249",
+  "name": "Shop item",
+  "path": "/Island/Shop item",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One thing the shop sells (IW-006): its picture, its price in shells, its name, one line, and a tag when it is hers already (Yours) or held (Ready to use). Publishes Chosen with the Id."
+}

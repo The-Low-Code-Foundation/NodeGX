@@ -27,6 +27,14 @@ Grouping by month or year, branching on the weekday, building a custom label fro
 |---|---|---|---|
 | `input` | Date | — | The instant to take apart. A string or a millisecond timestamp here is read as a date |
 
+### What each input does
+
+**Date** (`input`)
+
+- empty: nothing is sent → Invalid Date, Changed stay silent
+- it cannot be read as a date: every part goes empty → Invalid Date; Changed stays silent
+- a date: every part is read from it, in this device's time zone → Changed; Invalid Date stays silent
+
 ## Outputs
 
 ### Values

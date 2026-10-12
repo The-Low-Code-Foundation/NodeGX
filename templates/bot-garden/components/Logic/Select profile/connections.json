@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "61bf3afa-6972-5e69-8368-fc2867e4de9b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "selectprofileIn",
+      "fromProperty": "model",
+      "toId": "selectprofileFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "selectprofileIn",
+      "fromProperty": "profileId",
+      "toId": "selectprofileFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "selectprofileIn",
+      "fromProperty": "go",
+      "toId": "selectprofileFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "selectprofileFn",
+      "fromProperty": "out-found",
+      "toId": "selectprofileOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "selectprofileFn",
+      "fromProperty": "out-model",
+      "toId": "selectprofileOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "selectprofileFn",
+      "fromProperty": "success",
+      "toId": "selectprofileOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -31,7 +31,9 @@ Do not add Page from the node picker or use it outside a Router page component �
 |---|---|---|---|
 | `boxSizing` | Enum (`border-box`, `content-box`) | `border-box` | Whether Width and Height include this element's padding and border, or only its content |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `description` | String | — | Summary search engines show under the page title in results, usually kept under about 160 characters |
+| `keepWhenLeaving` | Boolean | `false` | Keeps this page as it was when someone leaves it through its Router, so coming back shows it as they left it, its components' state included. A kept page stays in memory while hidden, and its Repeat and Delay clocks pause until it shows again. Off: the page is built fresh on every visit |
 | `og:description` | String | — | Summary shown beneath the title when this page is shared |
 | `og:image` | String | — | Image shown in the share preview; it must be an absolute URL, not a project path |
 | `og:image:height` | String | — | Height of the share image in pixels |
@@ -44,6 +46,7 @@ Do not add Page from the node picker or use it outside a Router page component �
 | `paddingRight` | Number | `0` | Space inside the element's right edge, between it and its content |
 | `paddingTop` | Number | `0` | Space inside the element's top edge, between it and its content |
 | `robots` | String | — | Instructions for search-engine crawlers, e.g. "noindex, nofollow" to keep this page out of results |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `sitemapChangefreq` | Enum (`always`, `hourly`, `daily`, `weekly`, `monthly`, `yearly`, `never`) | `weekly` | How often this page changes, as a hint to search-engine crawlers in the sitemap |
 | `sitemapIncluded` | Boolean | `true` | Lists this page in the generated sitemap |
 | `sitemapPriority` | Number | `0.5` | This page's importance relative to the rest of the site, from 0 to 1, in the sitemap |
@@ -60,6 +63,7 @@ Do not add Page from the node picker or use it outside a Router page component �
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `onPageReady` | Signal | — | Pulse this once the page has the data it needs; the SSR server holds the rendered HTML until it fires. Unconnected pages render as soon as the runtime settles |
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
 ## Outputs
 
@@ -86,9 +90,13 @@ Do not add Page from the node picker or use it outside a Router page component �
 
 ## Dynamic ports
 
-_This node's port list changes at runtime (runtime-discovered); the tables above may be incomplete for a given instance._
+_This node's port list changes at runtime (declared-port-groups, runtime-discovered); the tables above may be incomplete for a given instance._
 
-Some ports are discovered at runtime from user code, parameters or connected components, and are pushed to the editor per instance; the static port list below is incomplete for such instances.
+Declares conditional/expandable port groups whose visibility depends on parameter values (see declaredPortGroups). Some ports are discovered at runtime from user code, parameters or connected components, and are pushed to the editor per instance; the static port list below is incomplete for such instances.
+
+| Condition | Inputs shown | Outputs shown |
+|---|---|---|
+| — | — | — |
 
 ## Ports at runtime
 

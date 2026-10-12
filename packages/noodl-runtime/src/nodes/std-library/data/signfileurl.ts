@@ -48,6 +48,7 @@ import type {
 
 import CloudFile = require('../../../api/cloudfile');
 import CloudStore = require('../../../api/cloudstore');
+import { fileFailureOf } from '../../../api/backends/fileRef';
 import { outcomeOutputs, reportOutcomes } from '../../../outcome';
 import { recordBackendPickerPorts, recordSchemaContext } from './record-ports';
 import { sendSchemaPorts, staticPortNames } from './schema-ports';
@@ -84,7 +85,7 @@ interface SignFileUrlInstance extends NodeInstance {
     url?: string;
     kind?: FileUrlKind;
     expiresAt?: string;
-    ttlSeconds?: number;
+    ttlSeconds?: number | null;
     error?: unknown;
     errorStatus?: number;
   };
@@ -155,8 +156,11 @@ const SignFileUrl: NodeDefinitionOptions = {
             success: (result: SignedUrlResult) => {
               this._internal.url = result.url;
               this._internal.kind = result.kind;
-              this._internal.expiresAt = result.expiresAt;
-              this._internal.ttlSeconds = result.ttlSeconds;
+              // P107-D26 (P109 ISL-030, ruled "Clear them"): a link with no expiry (a public one) sends blank Expires At and an
+              // empty TTL. They were `undefined`, never sent, and a wire kept the PREVIOUS link's expiry beside a link that
+              // never expires.
+              this._internal.expiresAt = result.expiresAt !== undefined ? result.expiresAt : '';
+              this._internal.ttlSeconds = result.ttlSeconds !== undefined ? result.ttlSeconds : null;
               this.flagOutputDirty('url');
               this.flagOutputDirty('urlKind');
               this.flagOutputDirty('isShareable');
@@ -323,8 +327,10 @@ const SignFileUrl: NodeDefinitionOptions = {
     // triggered it. Minting one here keeps that a real, complete failure rather than a special
     // case — there is no branch in which the reason reaches the channel without an outcome.
     setError(this: SignFileUrlInstance, err: SignError | string, tokens?: OutcomeToken[]) {
-      this._internal.error = err.hasOwnProperty('error') ? (err as SignError).error : err;
-      this._internal.errorStatus = (err as SignError).code || (err as SignError).status || 0;
+      // P107-C51: the HTTP status, and always a sentence (`fileFailureOf`)
+      const failure = fileFailureOf(err);
+      this._internal.error = failure.message;
+      this._internal.errorStatus = failure.status;
       this.flagOutputDirty('error');
       this.flagOutputDirty('errorStatus');
 

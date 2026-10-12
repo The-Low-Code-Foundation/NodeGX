@@ -36,6 +36,23 @@ Local list state shared across components without any wiring between them: give 
 |---|---|---|---|
 | `fetch` | Signal | — | Re-reads the array named by Id and rebinds this node to it. This is additional to Id rebinding on change and to array changes being announced; untick either under Run On Value Change to stop it |
 
+### What each input does
+
+**Id** (`collectionId`)
+
+- a new Id, ticked under Run On Value Change: bound to the array it names now (made if none has it); Id, Items, First Item Id and Count follow
+- otherwise (the same Id, or unticked): Id is sent and the binding stays
+
+**Items** (`items`)
+
+- empty: nothing
+- the bound array itself: nothing
+- otherwise: at the frame's end its items are copied into the bound array (a new one when none is bound and Id is ticked under Run On Value Change), and the node follows that list as it changes; Changed fires when the copy moved anything and Array contents is ticked
+
+**Fetch** (`fetch`)
+
+- always: at the frame's end the node rebinds to the array its Id names, one rebind for the frame's presses; Fetched fires, and each press is answered Done
+
 ## Outputs
 
 ### Values
@@ -51,7 +68,7 @@ Local list state shared across components without any wiring between them: give 
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `changed` | Signal | — | Fires when the bound array gains or loses items; suppressed while Fetch is connected |
+| `changed` | Signal | — | Fires when the bound array gains or loses items; with Array contents unticked it stays silent and only Fetch updates the node |
 | `completed` | Signal | — | Fires after every invocation. This node has no other outcome — no Unchanged and no Failure — so it always fires together with Done, and wiring either one does the same thing. It is here on every action so that reaching for it is never a per-node decision |
 | `done` | Signal | — | Fires when a Fetch finished and the outputs are up to date |
 | `fetched` | Signal | — | Fires once Fetch has rebound this node and the outputs are up to date |

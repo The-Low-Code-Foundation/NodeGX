@@ -17,11 +17,12 @@
  * path resolves in a checkout by coincidence of directory depth and is absent in the artefact.
  *
  * ⚠️ **The engine is a build artifact, so a checkout is not enough either.** It is produced by
- * `npm run build --workspace @noodl/preview` (esbuild, one command) and is gitignored, so the
+ * `npm run build --workspace @nodegx/preview` (esbuild, one command) and is gitignored, so the
  * refusal below has to distinguish "you are not in a checkout" from "you are, and have not built
  * it" — those have different fixes and a reader who is told the wrong one goes looking in the
  * wrong place.
  */
+import { spawnSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -104,7 +105,7 @@ export function describeMissingEngine(resolved: ResolvedEngine): string {
       '\n' +
       `Found ${resolved.unbuiltPackage}, but not its bundle. It is a build artifact, not\n` +
       'committed. Build it with:\n' +
-      '  npm run build --workspace @noodl/preview\n'
+      '  npm run build --workspace @nodegx/preview\n'
     );
   }
   return (
@@ -120,4 +121,96 @@ export function describeMissingEngine(resolved: ResolvedEngine): string {
     'Looked in:\n' +
     resolved.probed.map((candidate) => `  ${candidate}\n`).join('')
   );
+}
+
+/** Written by `packages/noodl-preview/build.mjs` beside the engine: the files it was built from. */
+export const ENGINE_INPUTS = 'nodegx-deploy.inputs.json';
+
+/**
+ * P109-S5 — why the engine at `entry` is out of date, or null when it is current: its input list exists, and no file
+ * on it changed after the engine was built. A list naming a file that is gone is out of date too (a module moved). The
+ * same rule as the MCP's kit reader (`noodl-mcp/src/kitExtract/extract.ts` `kitExtractStaleness`, P109 ISL-014).
+ *
+ * 🔴 Why it matters: the engine carries its own copy of the node catalog, the validator and the kit injector. A
+ * checkout's engine bundled on Sep 17 refused a valid project with "Group has no input named scrollIntoView" (exit 2,
+ * blaming the project) while every other check passed it; one built Oct 5 loaded kits in the wrong order on Oct 9.
+ */
+export function engineStaleness(entry: string): string | null {
+  return bundleStaleness(entry, path.join(path.dirname(entry), ENGINE_INPUTS), path.dirname(path.dirname(entry)));
+}
+
+/** The one rule every list follows: `bundle` is out of date when a file on `listFile` (relative to `root`) is gone or newer. */
+export function bundleStaleness(bundle: string, listFile: string, root: string): string | null {
+  let inputs: string[];
+  try {
+    inputs = (JSON.parse(fs.readFileSync(listFile, 'utf8')) as { inputs: string[] }).inputs;
+  } catch {
+    return `it has no ${path.basename(listFile)} beside it to say what it was built from`;
+  }
+  const builtAt = fs.statSync(bundle).mtimeMs;
+  for (const input of inputs) {
+    const file = path.resolve(root, input);
+    if (!fs.existsSync(file)) return `${input} is gone`;
+    if (fs.statSync(file).mtimeMs > builtAt) return `${input} changed after it was built`;
+  }
+  return null;
+}
+
+/** Written by `noodl-viewer-react/webpack-configs/webpack.deploy.common.js` beside the runtime a deployed site carries. */
+export const RUNTIME_INPUTS = 'noodl.deploy.inputs.json';
+
+/**
+ * P109-S5 (its second half, P109 s34) — the sentence for a deploy whose viewer runtime is older than its source, or null
+ * when it is current or this is not a checkout. The runtime (`noodl-editor/src/external/deploy/noodl.deploy.js`) is a
+ * webpack build of the viewer and runtime packages, copied into every deployed site; on 2026-10-09 one two days older
+ * than its source made a deployed page throw `Noodl.getModule is not a function` while every loader spec was green.
+ * A warning, not a refusal and not a rebuild: the build takes minutes, and the site it writes still runs.
+ */
+export function runtimeWarning(resolved: ResolvedEngine, env: NodeJS.ProcessEnv = process.env): string | null {
+  if (!resolved.entry || env[ENGINE_ENV]) return null;
+  const packages = path.dirname(path.dirname(path.dirname(resolved.entry)));
+  const runtimeDir = path.join(packages, 'noodl-editor', 'src', 'external', 'deploy');
+  const runtime = path.join(runtimeDir, 'noodl.deploy.js');
+  if (!fs.existsSync(path.join(packages, 'noodl-viewer-react', 'package.json')) || !fs.existsSync(runtime)) return null;
+  const why = bundleStaleness(runtime, path.join(runtimeDir, RUNTIME_INPUTS), runtimeDir);
+  if (why === null) return null;
+  return (
+    `Warning: the viewer runtime this site carries may be older than its source (${why}), so the site may not\n` +
+    'run the code in this checkout. Rebuild it with:\n' +
+    '  npm run build:editor:_viewer\n'
+  );
+}
+
+export interface EngineRefresh {
+  /** Set when the engine was rebuilt: the sentence to print. */
+  rebuilt?: string;
+  /** Set when it was out of date and the rebuild failed: the refusal to print. */
+  failed?: string;
+}
+
+/**
+ * P109-S5 — in a checkout, an engine older than its source is rebuilt before it runs (`node build.mjs --deploy-only`,
+ * about a second), as the MCP server rebuilds its kit reader (Richard's ISL-014 ruling, 2026-10-02: "Build it
+ * automatically"). Nothing happens for an engine named by `NODEGX_DEPLOY_CLI` (a deliberate choice of engine) or one
+ * with no `build.mjs` beside its folder (not a checkout).
+ */
+export function refreshEngine(resolved: ResolvedEngine, env: NodeJS.ProcessEnv = process.env): EngineRefresh {
+  if (!resolved.entry || env[ENGINE_ENV]) return {};
+  const packageRoot = path.dirname(path.dirname(resolved.entry));
+  const builder = path.join(packageRoot, 'build.mjs');
+  if (!fs.existsSync(builder)) return {};
+  const why = engineStaleness(resolved.entry);
+  if (why === null) return {};
+  const started = Date.now();
+  const run = spawnSync(process.execPath, [builder, '--deploy-only'], { cwd: packageRoot, encoding: 'utf8' });
+  if (run.status !== 0) {
+    return {
+      failed:
+        `The deploy engine is out of date (${why}) and rebuilding it failed:\n` +
+        `${(run.stderr || run.stdout || String(run.error ?? '')).trim()}\n` +
+        'Build it by hand with:\n' +
+        '  npm run build --workspace @nodegx/preview\n'
+    };
+  }
+  return { rebuilt: `The deploy engine was out of date (${why}); rebuilt it in ${((Date.now() - started) / 1000).toFixed(1)} s.\n` };
 }

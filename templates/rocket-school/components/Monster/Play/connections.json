@@ -239,6 +239,30 @@
     },
     {
       "fromId": "zpIn",
+      "fromProperty": "focus",
+      "toId": "zpRound",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "customSet",
+      "toId": "zpRound",
+      "toProperty": "customSet"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "customSetId",
+      "toId": "zpRound",
+      "toProperty": "customSetId"
+    },
+    {
+      "fromId": "zpIn",
+      "fromProperty": "customSetBoth",
+      "toId": "zpRound",
+      "toProperty": "customSetBoth"
+    },
+    {
+      "fromId": "zpIn",
       "fromProperty": "style",
       "toId": "zpRound",
       "toProperty": "game"

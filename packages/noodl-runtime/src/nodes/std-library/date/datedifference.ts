@@ -13,7 +13,7 @@
 
 import type { NodeDefinitionOptions, NodeInstance, NodeModule } from '@noodl/types';
 
-import { DateUnit, differenceBetween, toDate, UNIT_ENUMS } from './datemath';
+import { DateUnit, differenceBetween, toDate, UNIT_ENUMS, unitOrDays, unknownUnitMessage } from './datemath';
 
 interface DateDifferenceNodeInstance extends NodeInstance {
   _internal: {
@@ -70,8 +70,9 @@ const DateDifferenceNode: NodeDefinitionOptions = {
       description:
         'What Difference counts. Fixed units are exact and fractional (36 hours is 1.5 days); months ' +
         'and years are whole calendar steps',
-      set: function (this: DateDifferenceNodeInstance, value: DateUnit) {
-        this._internal.unit = value;
+      set: function (this: DateDifferenceNodeInstance, value: unknown) {
+        this._internal.unit = unitOrDays(value);
+        this.setDiagnostic('date-difference/unknown-unit', unknownUnitMessage(value));
         this._recompute();
       }
     },
@@ -124,7 +125,7 @@ const DateDifferenceNode: NodeDefinitionOptions = {
         return;
       }
 
-      const value = differenceBetween(from, to, this._internal.unit || 'days');
+      const value = differenceBetween(from, to, this._internal.unit);
       this._internal.difference = this._internal.absolute ? Math.abs(value) : value;
       this.flagOutputDirty('difference');
       this.sendSignalOnOutput('changed');

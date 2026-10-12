@@ -282,6 +282,13 @@
     // source-level assertion in `tests-unit/exp-013/`.
     "src/editor/src/utils/codeExport/exportBadge.ts",
     "src/editor/src/views/common/ExportBadge",
-    "src/editor/src/views/PopupLayer/CodeExportModal.tsx"
+    "src/editor/src/views/PopupLayer/CodeExportModal.tsx",
+    // NSP-019: the property panel's spec sections. `nodeRules.ts` reads the bundled catalog through
+    // `validation/catalog` (already here); `tryNodeModel.ts` plays the interpreter from
+    // `@nodegx/node-spec` (mapped by source in jest.config.js); `specDisagreements.ts` reads a
+    // committed JSON. The two hook-free views (`NodeRulesSection`, `TryTimeline`) are evaluated as
+    // element trees; `TryNodePanel` and `SpecSections` render through `react-dom/server`. None
+    // imports `Icon`.
+    "src/editor/src/views/panels/propertyeditor/spec"
   ]
 }

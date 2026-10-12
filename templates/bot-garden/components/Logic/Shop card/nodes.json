@@ -1,0 +1,476 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4ef414a8-37c1-54f2-8c2b-80be25075236",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "shopcardIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "bought",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "itemId",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "plotId",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "requests",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "robotId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "state",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "used",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "shopcardFn",
+      "type": "JavaScriptFunction",
+      "label": "Shop card",
+      "parameters": {
+        "functionScript": "var { helperFits, worldOf } = Scripts.engine;\nvar { islView } = Scripts.island;\nvar { BRAIN_SIZES, CREW_CAP, UPGRADES, balanceOf, blueprintSpec, buildingDone, jobRobotId, landOf, modelOf,\n  robotKindOf, robotRowsOf, robotSpec, shopItem } = Scripts.save;\nvar SHOP_TABS_LIST = [\"build\",\"animals\",\"robots\",\"upgrades\",\"helpers\"];\nvar SHOP_TAB_WORDS = {\"build\":\"iw6hTabBuild\",\"animals\":\"iw6hTabAnimals\",\"robots\":\"iw6hTabRobots\",\"upgrades\":\"iw6hTabUpgrades\",\"helpers\":\"iw6hTabHelpers\"};\nvar SHOP_FIRST_TAB = \"robots\";\nvar SHOP_IDS = {\"tab\":\"shoptab-\",\"item\":\"shopitem-\",\"robot\":\"shopbot-\",\"plot\":\"shopplot-\"};\nfunction shLang(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction shWords(rows, lang) { var map = {}, list = Array.isArray(rows) ? rows : []; for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || ''); return map; }\nfunction shFill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\n/** A row id or a bare id: the bare id (a chip publishes its row's id). */\nfunction shBare(v, prefix) { var s = String(v === undefined || v === null ? '' : v); return s.indexOf(prefix) === 0 ? s.slice(prefix.length) : s; }\nfunction shActive(model) { for (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === model.island.activeId) return model.profiles[i]; return null; }\nfunction shModel(raw) { return modelOf(raw && typeof raw === 'object' ? raw : {}); }\n/** An upgrade she has — an islander's gift before the shop (a sticker) or bought. */\nfunction shHasUpgrade(p, up) { return !!p && (p.owned.indexOf(up) !== -1 || p.stickers.indexOf(up) !== -1); }\nfunction shUpgradeSpec(id) { for (var i = 0; i < UPGRADES.length; i++) if (UPGRADES[i].id === id) return UPGRADES[i]; return null; }\n/** Does the shop show this item to her? (See the module's rules.) */\nfunction shShows(p, it) {\n  if (!p || !it) return false;\n  if (it.kind === 'robot') return !!jobRobotId(p, it.robot);\n  if (it.kind === 'upgrade') {\n    if (shHasUpgrade(p, it.upgrade)) return true;\n    var up = shUpgradeSpec(it.upgrade);\n    if (!up || p.island.done.indexOf(up.unlockedBy) === -1) return false;\n    var rows = robotRowsOf(p);\n    for (var i = 0; i < rows.length; i++) if (up.fits.indexOf(rows[i].kind) !== -1) return true;\n    return false;\n  }\n  // P108 IW-007 (lane A): an animal shows once a refuge on her land is finished (iw7aShows, iw007Animals.ts).\n  if (it.kind === 'animal') return iw7aShows(p, it);\n  // P108 IW-007 (s5 base): the blueprints and animals are in the catalogue, but their shelves stay shut (the \"later\" line)\n  // until lane B opens Build and lane A opens Animals.\n  // P108 IW-007 (lane B): the Build tab is open — every blueprint (one she bought says where it is: BUILD_SHOP).\n  if (it.kind === 'blueprint') return true;\n  if (it.kind === 'animal') return false;\n  return true;\n}\n\n// ── P108 IW-007 (lane B): the Build tab ──\nfunction iw7bBuiltOf(p, bp) { var l = landOf(p && p.island ? p.island.land : null); for (var i = 0; i < l.buildings.length; i++) if (l.buildings[i].bp === bp) return l.buildings[i]; return null; }\n/** Where a blueprint she owns is: 'place' (bought, not placed), 'building', 'built' — '' when she does not own it. */\nfunction iw7bBpState(p, it) {\n  if (!p || !it || it.kind !== 'blueprint' || p.owned.indexOf(it.id) === -1) return '';\n  var b = iw7bBuiltOf(p, it.blueprint);\n  return !b ? 'place' : buildingDone(b) ? 'built' : 'building';\n}\nfunction iw7bBpTag(p, it, W) { var st = iw7bBpState(p, it); return st === 'place' ? W.iw7bTagPlace || '' : st === 'building' ? W.iw7bTagBuilding || '' : st === 'built' ? W.iw7bTagBuilt || '' : ''; }\nfunction iw7bBpCardLine(p, it, W) { var st = iw7bBpState(p, it); return st === 'place' ? W.iw7bCardPlace || '' : st === 'building' ? W.iw7bCardBuilding || '' : st === 'built' ? W.iw7bCardBuilt || '' : ''; }\n\n\n// ── P108 IW-007 (lane A): the Animals shelf ──\nvar IW7A_DEFAULT_NAMES = {\"rabbit\":{\"en\":\"Hazel\",\"fr\":\"Noisette\"},\"sheep\":{\"en\":\"Cloud\",\"fr\":\"Nuage\"}};\nvar IW7A_KINDS = [\"rabbit\",\"sheep\"];\n/** Her land's finished refuges (a building whose blueprint does 'animals' and has every material). */\nfunction iw7aRefuges(p) {\n  var out = [];\n  if (!p || !p.island) return out;\n  var land = landOf(p.island.land);\n  for (var i = 0; i < land.buildings.length; i++) { var spec = blueprintSpec(land.buildings[i].bp); if (spec && spec.does === 'animals' && spec.pen && buildingDone(land.buildings[i])) out.push(land.buildings[i]); }\n  return out;\n}\n/** The Animals shelf is open: a refuge on her land is finished (buyItem's own test for 'refuge'). */\nfunction iw7aOpen(p) { return iw7aRefuges(p).length > 0; }\n/** A free place in a finished refuge's pen (buyItem's own test for 'pen'). */\nfunction iw7aPenFree(p) {\n  var rs = iw7aRefuges(p), land = landOf(p && p.island ? p.island.land : null);\n  for (var i = 0; i < rs.length; i++) {\n    var spec = blueprintSpec(rs[i].bp);\n    for (var s = 0; s < spec.pen; s++) { var used = false; for (var a = 0; a < land.animals.length; a++) if (land.animals[a].at === rs[i].id && land.animals[a].slot === s) used = true; if (!used) return true; }\n  }\n  return false;\n}\n/** Does the shop show this animal? Only once the shelf is open. */\nfunction iw7aShows(p, it) { return !!it && it.kind === 'animal' && IW7A_KINDS.indexOf(it.animal) !== -1 && iw7aOpen(p); }\n/** The name an animal of this kind takes when she types none: the kind's name in her language, numbered when taken. */\nfunction iw7aDefaultName(p, kind) {\n  var names = IW7A_DEFAULT_NAMES[kind];\n  if (!names) return '';\n  var base = names[p && p.lang === 'fr' ? 'fr' : 'en'], taken = {};\n  var land = landOf(p && p.island ? p.island.land : null);\n  for (var a = 0; a < land.animals.length; a++) taken[land.animals[a].name] = 1;\n  if (!taken[base]) return base;\n  for (var n = 2; n < 99; n++) if (!taken[base + ' ' + n]) return base + ' ' + n;\n  return base;\n}\n/** The line an open tab says: the Animals tab, shut, says build the refuge first; open, nothing. Other tabs as they were. */\nfunction iw7aLater(tab, later, p, W) {\n  if (tab !== 'animals') return later;\n  return iw7aOpen(p) ? '' : W.iw7aShut || later;\n}\n/** Why an animal's card has no Buy ('' when it may be bought): no finished refuge, or every place of its pen taken. */\nfunction iw7aRefusal(p, W) {\n  if (!iw7aOpen(p)) return W.iw7aNoRefuge || '';\n  if (!iw7aPenFree(p)) return W.iw7aPenFull || '';\n  return '';\n}\n/** The line after Buy: the newest animal of that kind is waiting by her bowl on her land. */\nfunction iw7aBoughtLine(p, it, W) {\n  var land = landOf(p && p.island ? p.island.land : null), last = null;\n  for (var a = 0; a < land.animals.length; a++) if (land.animals[a].kind === it.animal) last = land.animals[a];\n  if (!last) return '';\n  var line = W['iw7aBought_' + it.animal] || W.iw7aBought_rabbit || '';\n  return line.split('{name}').join(last.name || iw7aDefaultName(p, it.animal));\n}\n\n\nvar lang = shLang(Inputs.lang), W = shWords(Inputs.words, lang);\nvar model = shModel(Inputs.model), p = shActive(model);\nvar id = shBare(Inputs.itemId, SHOP_IDS.item), it = p ? shopItem(id) : null;\nvar reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];\nvar bal = balanceOf(p);\nvar out = { showCard: false, itemId: '', icon: '', name: '', line: '', have: '', cost: '', left: '', showLeft: false, short: '', showShort: false, canBuy: false, showName: false, namePlaceholder: '', showRobots: false, robots: [], robotId: '', showUse: false, plots: [], plotId: '', canUse: false, none: '', showNone: false, done: '', showDone: false, showFigures: false };\nvar rows = p ? robotRowsOf(p) : [];\nfunction nameOfRobot(rid) { for (var n = 0; n < rows.length; n++) if (rows[n].id === rid) return rows[n].name; return ''; }\nfunction titleOf(reqId, botName) { for (var q = 0; q < reqs.length; q++) if (reqs[q] && reqs[q].id === reqId && reqs[q].copyKeys) return (W[reqs[q].copyKeys.title] || reqId).split('{b}').join(botName || 'Pip'); return reqId; }\nif (it && shShows(p, it)) {\n  out.showCard = true;\n  out.itemId = it.id;\n  out.icon = it.icon;\n  out.name = it.name[lang] || it.name.en;\n  out.line = it.line[lang] || it.line.en;\n  var held = it.kind === 'helper' && p.owned.indexOf(it.id) !== -1;\n  var yours = it.kind === 'upgrade' && shHasUpgrade(p, it.upgrade);\n  // P108 IW-007 (lane B): a blueprint she bought has no Buy: its card says where it is (to place on her land, built…).\n  var bpLine = it.kind === 'blueprint' ? iw7bBpCardLine(p, it, W) : '';\n  if (bpLine) { yours = true; }\n  if (held) {\n    // A held helper: the jobs it helps now — a pinned robot at work on a job not done yet, the helper fitting it.\n    var st = Inputs.state && typeof Inputs.state === 'object' && Array.isArray(Inputs.state.plots) ? Inputs.state : null, ids = [];\n    if (st) for (var k = 0; k < st.plots.length; k++) {\n      var plot = st.plots[k], cur = st.live && st.live[plot.id];\n      if (plot.status !== 'working' || !plot.job || plot.stale || !cur || cur.phase === 'wait' || cur.helper) continue;\n      if (!helperFits(worldOf(islView(plot, cur)), it.helper)) continue;\n      ids.push(plot.id);\n      out.plots.push({ id: SHOP_IDS.plot + plot.id, label: titleOf(plot.id, nameOfRobot(plot.robotId)), selected: false, locked: false });\n    }\n    var want = shBare(Inputs.plotId, SHOP_IDS.plot);\n    out.plotId = ids.indexOf(want) !== -1 ? want : ids.length === 1 ? ids[0] : '';\n    for (var s = 0; s < out.plots.length; s++) out.plots[s].selected = out.plots[s].id === SHOP_IDS.plot + out.plotId;\n    out.showUse = ids.length > 0;\n    out.canUse = !!out.plotId;\n    if (!ids.length) out.none = W.iw6hNoJob || '';\n  } else if (yours) {\n    out.done = bpLine || W.iw6hYoursLine || '';\n  } else {\n    out.showFigures = true;\n    out.have = shFill(W.iw6hHave, { n: bal });\n    out.cost = shFill(W.iw6hCost, { n: it.price });\n    // P109 ISL-005: refused, not blocked: a hoisted var blocked replaced ENGINE's blocked() for the whole run.\n    var can = bal >= it.price, refused = false;\n    if (it.kind === 'robot') {\n      if (p.island.robots.length >= CREW_CAP) { refused = true; out.none = shFill(W.iw6hFull, { n: CREW_CAP }); }\n      else {\n        var spec = robotSpec(it.robot), count = 1;\n        for (var c = 0; c < p.island.robots.length; c++) if (robotKindOf(p.island.robots[c]) === it.robot) count++;\n        out.namePlaceholder = spec ? (spec.defaultName[lang] || spec.defaultName.en) + ' ' + count : '';\n        out.showName = can;\n      }\n    } else if (it.kind === 'brain') {\n      // Only a robot at the size before this one (12 → 16 → 20); one alone is chosen for her.\n      var before = BRAIN_SIZES[BRAIN_SIZES.indexOf(it.size) - 1], okIds = [];\n      for (var b = 0; b < rows.length; b++) if (rows[b].brain === before) { okIds.push(rows[b].id); out.robots.push({ id: SHOP_IDS.robot + rows[b].id, label: shFill(W.iw6hBrainOf, { r: rows[b].name, n: rows[b].brain }), selected: false, locked: false }); }\n      var pick = shBare(Inputs.robotId, SHOP_IDS.robot);\n      out.robotId = okIds.indexOf(pick) !== -1 ? pick : okIds.length === 1 ? okIds[0] : '';\n      for (var o = 0; o < out.robots.length; o++) out.robots[o].selected = out.robots[o].id === SHOP_IDS.robot + out.robotId;\n      out.showRobots = okIds.length > 0;\n      if (!okIds.length) { refused = true; out.none = W.iw6hNoBrain || ''; }\n      else if (!out.robotId) refused = true;\n    } else if (it.kind === 'animal') {\n      // P108 IW-007 (lane A): an animal's card has the copy's name box (an empty box takes iw7aDefaultName); a pen with no\n      // free place (or no finished refuge) says so and has no Buy.\n      var iw7aWhy = iw7aRefusal(p, W);\n      if (iw7aWhy) { refused = true; out.none = iw7aWhy; }\n      else { out.namePlaceholder = iw7aDefaultName(p, it.animal); out.showName = can; }\n    }\n    if (can) { out.left = shFill(W.iw6hLeft, { n: bal - it.price }); out.showLeft = true; }\n    else { var more = it.price - bal; out.short = shFill(more === 1 ? W.iw6hShort1 : W.iw6hShort, { n: more }); out.showShort = true; }\n    out.canBuy = can && !refused;\n  }\n  // What the last Buy / Use it did, on this item's card — and, the moment after, only that: never \"you need N more\" under\n  // \"It's yours!\" (the drive's first look at the card just bought). A helper just bought goes on to its jobs.\n  var used = String(Inputs.used || '').split('|'), justBought = String(Inputs.bought || '') === it.id, justUsed = used[0] === it.id && !!used[1];\n  // P108 IW-007 (lane B): a blueprint just bought says where it goes (\"It's yours! Tap your land…\").\n  if (justBought) out.done = (it.kind === 'blueprint' && bpLine) || W.iw6hBought || '';\n  // P108 IW-007 (lane A): an animal just bought — who is waiting by her bowl on her land.\n  if (justBought && it.kind === 'animal') out.done = iw7aBoughtLine(p, it, W) || out.done;\n  if (justUsed) out.done = shFill(W.iw6hUsed, { what: out.name, plot: titleOf(used[1], nameOfRobot(p.island.plots[used[1]] ? p.island.plots[used[1]].robotId : '')) });\n  if ((justBought && !held) || justUsed) { out.showFigures = false; out.showLeft = false; out.showShort = false; out.canBuy = false; out.showName = false; out.showRobots = false; out.none = ''; }\n  out.showDone = !!out.done;\n  out.showNone = !!out.none;\n}\nOutputs.showCard = out.showCard;\nOutputs.itemId = out.itemId;\nOutputs.icon = out.icon;\nOutputs.name = out.name;\nOutputs.line = out.line;\nOutputs.have = out.have;\nOutputs.cost = out.cost;\nOutputs.left = out.left;\nOutputs.showLeft = out.showLeft;\nOutputs.short = out.short;\nOutputs.showShort = out.showShort;\nOutputs.canBuy = out.canBuy;\nOutputs.showName = out.showName;\nOutputs.namePlaceholder = out.namePlaceholder;\nOutputs.showRobots = out.showRobots;\nOutputs.robots = out.robots;\nOutputs.robotId = out.robotId;\nOutputs.showUse = out.showUse;\nOutputs.plots = out.plots;\nOutputs.plotId = out.plotId;\nOutputs.canUse = out.canUse;\nOutputs.none = out.none;\nOutputs.showNone = out.showNone;\nOutputs.done = out.done;\nOutputs.showDone = out.showDone;\nOutputs.showFigures = out.showFigures;\n",
+        "runOnChange-in-state": false,
+        "uses": "engine.js,island.js,save.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-itemId",
+          "displayName": "itemId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-requests",
+          "displayName": "requests",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-state",
+          "displayName": "state",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-plotId",
+          "displayName": "plotId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robotId",
+          "displayName": "robotId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-used",
+          "displayName": "used",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-bought",
+          "displayName": "bought",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-showCard",
+          "displayName": "showCard",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-itemId",
+          "displayName": "itemId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-icon",
+          "displayName": "icon",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-line",
+          "displayName": "line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-have",
+          "displayName": "have",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cost",
+          "displayName": "cost",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-left",
+          "displayName": "left",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showLeft",
+          "displayName": "showLeft",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-short",
+          "displayName": "short",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showShort",
+          "displayName": "showShort",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canBuy",
+          "displayName": "canBuy",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showName",
+          "displayName": "showName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-namePlaceholder",
+          "displayName": "namePlaceholder",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showRobots",
+          "displayName": "showRobots",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-robots",
+          "displayName": "robots",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-robotId",
+          "displayName": "robotId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showUse",
+          "displayName": "showUse",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-plots",
+          "displayName": "plots",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-plotId",
+          "displayName": "plotId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canUse",
+          "displayName": "canUse",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-none",
+          "displayName": "none",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showNone",
+          "displayName": "showNone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showDone",
+          "displayName": "showDone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showFigures",
+          "displayName": "showFigures",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "shopcardOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "canBuy",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "canUse",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "cost",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "have",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "icon",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "itemId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "left",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "line",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "namePlaceholder",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "none",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "plotId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "plots",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "robotId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "robots",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "short",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "showCard",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "showDone",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "showFigures",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "showLeft",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "showName",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "showNone",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "showRobots",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "showShort",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "showUse",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

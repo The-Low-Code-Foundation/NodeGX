@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "423245a4-1c47-5c84-8ede-5886cc10c04a",
+  "name": "Proposal card",
+  "path": "/Logic/Proposal card",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The blocks Olive proposed, offered until the child answers. Runs when an input changes; Ran after each run."
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9f92895e-7b4b-5c3b-8836-8b90eb9e5254",
+  "name": "Land lift",
+  "path": "/Logic/Land lift",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The world the runner, the pad and Teach start from on her land, every part lifted to what her save holds. Runs when an input changes; Ran after each run."
+}

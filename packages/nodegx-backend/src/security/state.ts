@@ -22,9 +22,10 @@ import * as path from 'path';
 import type * as http from 'http';
 
 import type { IStorageFacade } from '@noodl/backend-contract';
+import { Sessions } from '../auth/sessions';
 import type { AclOption } from '../persistence/AdapterFacade';
 import { HttpError } from '../server/http-util';
-import { adminAccessOf, isAccountDisabled } from '../users/accountColumns';
+import { ACCOUNT_DETAILS, adminAccessOf, isAccountDisabled } from '../users/accountColumns';
 import {
   ADMIN_TOKEN_ENV,
   describeMissingSecret,
@@ -43,6 +44,10 @@ import {
   principalKeys,
   checkClp,
   effectiveCreatorOwns,
+  onlyWhileFor,
+  fieldMask,
+  collectionReach,
+  HiddenField,
   AccessDecision,
   DeployedFunction,
   UnresolvedFunction,
@@ -144,6 +149,45 @@ export function undeclaredFunctionMessage(
   );
 }
 
+/**
+ * P109 ISL-040 (P78-DBT-UNRULED) — SB-016's sentence for a function that arrives AFTER start (a deploy to
+ * `PUT /admin/workflows/:name`, or a reload of the folder). Refused on a public bind, warned on loopback,
+ * the way the start-up interlock is. The fix is the running backend's own: declare the rule, then deploy.
+ */
+export function undeclaredFunctionDeployMessage(unresolved: UnresolvedFunction[], functionsBlock: string, refused: boolean): string {
+  const rows = unresolved.map(
+    (fn) =>
+      `  - ${fn.name}: "Allow Unauthenticated" is ${fn.allowNoAuth ? 'TICKED' : 'unticked'} in the graph, ` +
+      `so it would run for ${fn.rule === 'public' ? 'anyone on the internet' : fn.rule === 'authenticated' ? 'any signed-in account' : JSON.stringify(fn.rule)}`
+  );
+  const n = unresolved.length;
+  return (
+    (refused
+      ? `Refusing to deploy: ${n} cloud function${n === 1 ? '' : 's'} ${n === 1 ? 'has' : 'have'} no rule, and this backend is reachable beyond localhost.`
+      : `Deployed on localhost, but ${n} cloud function${n === 1 ? '' : 's'} ${n === 1 ? 'has' : 'have'} no rule. A public backend would refuse ${n === 1 ? 'it' : 'them'}.`) +
+    `\n\nAn undeclared function takes its rule from the Request node's "Allow Unauthenticated" port, which cannot say ` +
+    `"role:admin", and it runs as system.\n\n${rows.join('\n')}\n\n` +
+    `  Fix: give each one its rule on the Permissions page (PUT /admin/permissions/functions/<name> {"call": …}), ` +
+    `then deploy again. Or add this to security.json; every rule in it is the one the graph port gives, so it ` +
+    `changes nothing until you tighten it:\n\n${functionsBlock}`
+  );
+}
+
+/** Every collection open: the half of `reach` a caller's rules do not narrow. */
+const ALL = Object.freeze({ by: {}, otherwise: 'all' as const });
+
+/**
+ * P109 ISL-040 (P100-UPG001-LOCKOUT): the headers `resolvePrincipal` reads a credential from. BAK-005's
+ * failure budget holds back only a request carrying one of these: it is a speed bump against guessing a
+ * credential, and a request with none has nothing to guess. Before, a locked-out address was refused
+ * everything, `/health` and anonymous public reads included.
+ */
+export const CREDENTIAL_HEADERS: readonly string[] = ['authorization', 'x-parse-master-key', 'x-nodegx-api-key', 'x-parse-session-token'];
+
+export function carriesCredential(headers: Record<string, string | string[] | undefined>): boolean {
+  return CREDENTIAL_HEADERS.some((h) => headers[h] !== undefined && headers[h] !== '');
+}
+
 export interface SecurityDeps {
   dataDir: string;
   /** Loopback bind? (The interlock and the dev-open fast-path both key on it.) */
@@ -170,6 +214,11 @@ export interface SecurityDeps {
   deployedFunctions: DeployedFunction[];
   facade: IStorageFacade;
   /**
+   * ISL-040: the Sign-in page's "a sign-in ends after N days unused" (`auth.json`
+   * `sessions.idleDays`), read on every session. Absent means the ruled default, 30.
+   */
+  sessionIdleDays?: () => number;
+  /**
    * PRD-005: refuse to start rather than mint a missing admin credential. The credential may
    * still arrive by `--token`, by `NODEGX_ADMIN_TOKEN` / `NODEGX_ADMIN_TOKEN_FILE`, or from an
    * existing `secrets.json`; only the mint is refused.
@@ -189,9 +238,12 @@ export class SecurityState {
   /** PRD-005: where each admin credential came from. Sources only — never a value. */
   readonly secretProvenance: { adminToken: SecretProvenance; adminReadonlyToken: SecretProvenance };
   private readonly deps: SecurityDeps;
+  /** ISL-040: every session minted and read on this backend goes through this one. */
+  readonly sessions: Sessions;
 
   constructor(deps: SecurityDeps) {
     this.deps = deps;
+    this.sessions = new Sessions(deps.facade, deps.sessionIdleDays);
 
     // --- security.json ------------------------------------------------------
     const configPath = path.join(deps.dataDir, SECURITY_FILE);
@@ -342,6 +394,17 @@ export class SecurityState {
     }
   }
 
+  /**
+   * P109 ISL-040 (P78-DBT-UNRULED): SB-016's check, for functions arriving after start. Null when every
+   * one has a rule; otherwise whether it is refused (a public bind) and the sentence.
+   */
+  undeclaredOnDeploy(arriving: DeployedFunction[]): { refused: boolean; message: string } | null {
+    const unresolved = unresolvedFunctionRules(this.config, arriving);
+    if (unresolved.length === 0) return null;
+    const refused = !this.deps.loopback;
+    return { refused, message: undeclaredFunctionDeployMessage(unresolved, proposedFunctionsBlock(this.config, unresolved), refused) };
+  }
+
   /** Persist the (mutated) config. Callers mutate this.config then save. */
   save(): void {
     atomicWriteJSON(path.join(this.deps.dataDir, SECURITY_FILE), this.config);
@@ -449,11 +512,8 @@ export class SecurityState {
     //    client stringifies an absent token into the header; treat as absent.
     const token = h['x-parse-session-token'];
     if (typeof token === 'string' && token.length > 0 && token !== 'undefined' && token !== 'null') {
-      const { results } = await this.deps.facade.rawQuery('_Session', {
-        where: { sessionToken: token },
-        limit: 1
-      });
-      const session = results[0];
+      // ISL-040: the one reader, so an ended session is refused here as on `/users/me`.
+      const session = await this.sessions.resolve(token);
       if (!session) throw new HttpError(400, 'Invalid session token', 209);
       let user: Record<string, unknown>;
       try {
@@ -504,7 +564,53 @@ export class SecurityState {
    * row-level checks (dev-open, admin, or an API key whose scope covers the
    * access — scoped keys are data-plane tools, not users; model doc §6).
    */
-  aclFor(principal: Principal, access: 'read' | 'write'): AclOption | undefined {
+  aclFor(
+    principal: Principal,
+    access: 'read' | 'write',
+    narrow?: AclOption['only'],
+    collection?: string
+  ): AclOption | undefined {
+    const base = this.aclKeysFor(principal, access);
+    // P116 ONT-004: a path rule's narrowing rides in the ACL option, scoped to
+    // its collection. It arises only for a signed-in caller (or a key acting as
+    // one), for whom `base` is always an option — a bypass never narrows.
+    let acl = base && narrow ? { ...base, only: narrow } : base;
+    // P116 ONT-012 (R-b): "only while it is a draft" binds the same callers the row ACL binds, and
+    // rides beside it for the facade to compile into the one write it holds.
+    // Every collection's rule, not only this one's: a delete reaches others through its links, and each
+    // row it reaches is judged by its own rule before anything goes (bug P116-S18-CASCADEHOLD, R-i).
+    if (acl && access === 'write' && collection) {
+      const onlyWhile: NonNullable<AclOption['onlyWhile']> = {};
+      for (const name of Object.keys(this.config.collections)) {
+        const rule = onlyWhileFor(this.config, name, principal);
+        if (rule) onlyWhile[name] = rule;
+      }
+      if (Object.keys(onlyWhile).length) acl = { ...acl, onlyWhile };
+    }
+    // P116 ONT-012 (R-a): the fields this caller may not read, for every collection, on read and
+    // write alike (a write answers with the record). The same callers the row ACL binds.
+    if (acl) {
+      // R-h: another person's account details are never read through a record (bug INCLUDECLP).
+      const hidden = { ...fieldMask(this.config, principal), _User: ACCOUNT_DETAILS.map((field) => ({ field })) };
+      acl = { ...acl, hidden };
+      // Bug INCLUDECLP: the other collections an `include` or a `$path` reaches, by their own rules.
+      const get = collectionReach(this.config, principal, 'get');
+      const find = collectionReach(this.config, principal, 'find');
+      if (get || find) acl = { ...acl, reach: { get: get ?? ALL, find: find ?? ALL } };
+    }
+    return acl;
+  }
+
+  /**
+   * P116 ONT-012 — the fields this caller may not read, per collection, for a reader that holds no
+   * ACL option (live updates). `{}` for every caller the row ACL does not bind.
+   */
+  hiddenFor(principal: Principal): Record<string, HiddenField[]> {
+    if (!this.aclKeysFor(principal, 'read')) return {};
+    return fieldMask(this.config, principal);
+  }
+
+  private aclKeysFor(principal: Principal, access: 'read' | 'write'): AclOption | undefined {
     if (this.devOpenActive) return undefined;
     if (principal.kind === 'admin') return undefined;
     if (principal.kind === 'apiKey') {

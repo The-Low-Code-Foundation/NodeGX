@@ -29,6 +29,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { resolveRow, userFields } from './lib/seed-resolve.mjs';
+import { adminClient } from './lib/admin-client.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE = join(here, '..');
@@ -47,45 +48,17 @@ const schema = JSON.parse(readFileSync(join(TEMPLATE, 'backend', 'schema.json'),
 const policy = JSON.parse(readFileSync(join(TEMPLATE, 'nodegx.security.json'), 'utf8'));
 const seed = JSON.parse(readFileSync(join(TEMPLATE, 'backend', 'seed.json'), 'utf8'));
 
-async function call(method, path, body, { admin = true } = {}) {
-  const headers = { 'Content-Type': 'application/json' };
-  if (admin) headers.Authorization = `Bearer ${TOKEN}`;
-  else headers['X-Parse-Master-Key'] = TOKEN;
-  const res = await fetch(BACKEND + path, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
-  const text = await res.text();
-  let json;
-  try {
-    json = text ? JSON.parse(text) : {};
-  } catch {
-    json = { raw: text };
-  }
-  if (!res.ok) throw new Error(`${method} ${path} → ${res.status} ${text.slice(0, 400)}`);
-  return json;
-}
-const data = (method, path, body) => call(method, path, body, { admin: false });
-
-async function countOf(collection) {
-  try {
-    const r = await data('GET', `/classes/${encodeURIComponent(collection)}?limit=0&count=1`);
-    return r.count || 0;
-  } catch (e) {
-    // A collection that does not exist yet holds nothing.
-    if (/→ 404/.test(e.message)) return 0;
-    throw e;
-  }
-}
+// The admin client and the refusal are shared with setup-production.mjs
+// (tools/lib/admin-client.mjs): one rule for "never write over a backend that
+// has data", not two that can drift (TASK-L183 §2).
+const api = adminClient(BACKEND, TOKEN);
+const { call, data } = api;
 
 // ── 1. Refuse a backend that is not empty ────────────────────────────────────
-const occupied = [];
-for (const t of schema.tables) {
-  const n = await countOf(t.name);
-  if (n > 0) occupied.push(`${t.name} (${n})`);
-}
-const userCount = await countOf('_User');
-if (userCount > 0) occupied.push(`_User (${userCount})`);
-if (occupied.length) {
-  console.error(`setup-backend: REFUSED — this backend already holds rows: ${occupied.join(', ')}. ` +
-    'Point it at a fresh data directory; this tool never writes over a backend that has data.');
+try {
+  await api.refuseOccupied(schema, 'setup-backend');
+} catch (e) {
+  console.error(e.message);
   process.exit(1);
 }
 
@@ -133,15 +106,7 @@ for (const [collection, list] of Object.entries(seed.rows)) {
 }
 
 // ── 6. Read it back ──────────────────────────────────────────────────────────
-const { diff } = await call('POST', '/admin/schema/diff', { source: { tables: schema.tables } });
-const missing = [
-  ...diff.tables.added.map((t) => `table ${t.name}`),
-  ...diff.tables.changed.flatMap((c) => [
-    ...c.addedColumns.map((col) => `column ${c.name}.${col.name}`),
-    ...(c.indexChange ? [`indexes on ${c.name}`] : [])
-  ])
-];
-if (missing.length) throw new Error(`the backend does not hold what schema.json declares: ${missing.join(', ')}`);
+await api.assertSchema(schema);
 
 console.log(
   `setup-backend: ${schema.tables.length} collections, ${schema.tables.reduce((n, t) => n + t.indexes.length, 0)} indexes read back; ` +

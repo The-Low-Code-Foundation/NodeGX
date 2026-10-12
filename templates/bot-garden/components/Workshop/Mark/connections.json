@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c32f6e69-03ab-5b71-85ec-9bf37ed7dff9",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mkIn",
+      "fromProperty": "cls",
+      "toId": "mkDot",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "lit",
+      "toId": "mkIsLit",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "mkIsLit",
+      "fromProperty": "ontrue",
+      "toId": "mkStates",
+      "toProperty": "to-lit"
+    },
+    {
+      "fromId": "mkIsLit",
+      "fromProperty": "onfalse",
+      "toId": "mkStates",
+      "toProperty": "to-dry"
+    },
+    {
+      "fromId": "mkStates",
+      "fromProperty": "ground",
+      "toId": "mkDot",
+      "toProperty": "backgroundColor"
+    }
+  ]
+}

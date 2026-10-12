@@ -39,6 +39,42 @@ The save half of every edit form, and the way to flip a single field ('mark done
 |---|---|---|---|
 | `store` | Signal | — | Writes the property inputs onto the record named by Id, and on to the backend unless Store to is Local only |
 
+### What each input does
+
+**Id Source** (`idSource`)
+
+- always: From repeater binds the surrounding Repeater's item at the end of the frame (outside one, nothing); Explicit leaves it to Id
+
+**Repeater Component** (`repeaterComponent`)
+
+- always: which Repeater supplies the record (blank, the nearest); while From repeater, it is bound again at the end of the frame
+
+**Id** (`modelId`)
+
+- always: the record with that id is bound now (a record handed in, by its id; an empty id binds nothing), and Id is sent again
+
+**Properties to  store** (`storeProperties`)
+
+- always: read by the next save — the property inputs only, or All: the whole record
+
+**Store to** (`storeType`)
+
+- always: read at the next Do — Cloud (or unset) saves to the backend, anything else writes the record here only
+
+**Only If Unchanged** (`onlyIfUnchanged`)
+
+- always: read by the next save — the fields the backend must still hold as this record holds them, or the save is refused
+
+**Access Control Rules** (`accessControl`)
+
+- always: read by the next call — the access rules sent with the record
+
+**Do** (`store`)
+
+- to the backend, with no Class: refused at once, and Error says so → Failure
+- to the backend: it joins the frame's batch — at the end of the frame one save answers every press, Done for each; or Error and Failure for each (no record bound, an Only If Unchanged field it cannot check, no backend, or the backend refuses), and what the write replaced is put back
+- here only (Store to not Cloud): at the end of the frame the property inputs are written onto the record — Done for each press; Error and Failure for each with no record bound
+
 ## Outputs
 
 ### Values

@@ -1,0 +1,265 @@
+[
+  {
+    "name": "a wire made after the first frame hands the receiver the source's current value",
+    "clauses": [
+      "C1",
+      "C11"
+    ],
+    "because": "C11 — node.ts connectInput (:479-497 in CONTRACT.md's citation) replays the source's current value into the receiver, so a subscriber joining late is not starved; C1 — that value is PULLED from the getter at connection time (an output port stores nothing), which is why a Counter that published 3 two frames ago can still hand it over. Beside test/node-spec/runtime-target.test.ts's connection-time read.",
+    "nodes": {
+      "a": {
+        "type": "Counter",
+        "params": {
+          "startValue": 3
+        }
+      },
+      "b": {
+        "type": "Value Changed"
+      },
+      "c": {
+        "type": "Counter"
+      }
+    },
+    "wires": [
+      {
+        "from": "b.valueChanged",
+        "to": "c.increase"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "wire": {
+          "from": "a.currentCount",
+          "to": "b.value"
+        }
+      },
+      "settle",
+      {
+        "node": "a",
+        "signal": "increase"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "b",
+        "signal": "valueChanged",
+        "count": 0
+      },
+      {
+        "at": 1,
+        "subject": "c",
+        "port": "currentCount",
+        "value": 0
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "signal": "valueChanged",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "c",
+        "port": "currentCount",
+        "value": 1
+      },
+      {
+        "at": 3,
+        "subject": "a",
+        "port": "currentCount",
+        "value": 4
+      },
+      {
+        "at": 3,
+        "subject": "c",
+        "port": "currentCount",
+        "value": 2
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "startValue",
+        "value": 3,
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 3,
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 0,
+        "subject": "c"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 1,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "in",
+        "port": "increase",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 4,
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 2,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      }
+    ]
+  },
+  {
+    "name": "a wire made from an output holding undefined delivers nothing until the source sends",
+    "clauses": [
+      "C11",
+      "C3"
+    ],
+    "because": "C11's exemption is C3: connectInput hands over the current value UNLESS it is undefined. An Inverter that never received a value reports undefined (inverter.ts :5-9), so the wire seeds nothing and the receiver stays unset; the control frame shows the same wire carrying the first real value.",
+    "nodes": {
+      "a": {
+        "type": "Inverter"
+      },
+      "b": {
+        "type": "Inverter"
+      }
+    },
+    "wires": [],
+    "steps": [
+      "settle",
+      {
+        "wire": {
+          "from": "a.result",
+          "to": "b.value"
+        }
+      },
+      "settle",
+      {
+        "node": "a",
+        "set": "value",
+        "value": false
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "b",
+        "port": "result",
+        "absent": true
+      },
+      {
+        "at": 3,
+        "subject": "a",
+        "port": "result",
+        "value": true
+      },
+      {
+        "at": 3,
+        "subject": "b",
+        "port": "result",
+        "value": false
+      }
+    ],
+    "expect": [
+      {
+        "t": "settle"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": false,
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": true,
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": false,
+        "subject": "b"
+      }
+    ]
+  }
+]

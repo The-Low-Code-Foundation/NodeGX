@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e77095c8-4e4f-5b11-8cf5-e78cdc1cf82c",
+  "name": "Ask Olive",
+  "path": "/Logic/Ask Olive",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The parked request sent to Olive, or its written answer; never a slot the rules refuse. Runs on Go; answers Ran once its outputs are set."
+}

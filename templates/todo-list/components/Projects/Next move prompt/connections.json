@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f3a33814-2063-549e-8a2f-343339ba5161",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "npIn",
+      "fromProperty": "open",
+      "toId": "npRoot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "npIn",
+      "fromProperty": "open",
+      "toId": "npLook",
+      "toProperty": "in-open"
+    },
+    {
+      "fromId": "npIn",
+      "fromProperty": "projectId",
+      "toId": "npLook",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "npIn",
+      "fromProperty": "projectName",
+      "toId": "npLook",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "npLook",
+      "fromProperty": "out-formRows",
+      "toId": "npEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "npIn",
+      "fromProperty": "projectId",
+      "toId": "npSaveMove",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "npIn",
+      "fromProperty": "projectName",
+      "toId": "npSaveMove",
+      "toProperty": "projectName"
+    },
+    {
+      "fromId": "npIn",
+      "fromProperty": "position",
+      "toId": "npSaveMove",
+      "toProperty": "position"
+    },
+    {
+      "fromId": "npEach",
+      "fromProperty": "itemOutput-title",
+      "toId": "npSaveMove",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "npEach",
+      "fromProperty": "itemOutput-waitingOn",
+      "toId": "npSaveMove",
+      "toProperty": "waitingOn"
+    },
+    {
+      "fromId": "npEach",
+      "fromProperty": "itemOutput-deadline",
+      "toId": "npSaveMove",
+      "toProperty": "deadline"
+    },
+    {
+      "fromId": "npEach",
+      "fromProperty": "itemOutputSignal-save",
+      "toId": "npSaveMove",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "npSaveMove",
+      "fromProperty": "done",
+      "toId": "npOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "npEach",
+      "fromProperty": "itemOutputSignal-cancel",
+      "toId": "npOut",
+      "toProperty": "skip"
+    }
+  ]
+}

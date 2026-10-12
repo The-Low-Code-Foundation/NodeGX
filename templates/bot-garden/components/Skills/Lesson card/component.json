@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "eaae4705-6f5c-5833-87bf-21fa18cf1e37",
+  "name": "Lesson card",
+  "path": "/Skills/Lesson card",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One of Olive’s lessons: the title, the lesson, the canned question and Ask Olive; underneath, what she said and the check the page does (the count, the sum, every letter e marked, the book, a person’s translation). \"Olive can’t do this here yet\" where this computer’s exam withheld it."
+}

@@ -45,6 +45,7 @@ interface AuthConfig {
   magicLink?: { enabled?: boolean; ttlMinutes?: number; allowSignup?: boolean };
   linking?: { autoLinkVerifiedEmail?: boolean };
   redirectAllowList?: string[];
+  sessions?: { idleDays?: number };
 }
 
 interface AuthData {
@@ -199,6 +200,7 @@ function PolicyForm({ data, readonly, onSaved }: { data: AuthData; readonly: boo
   const [magicSignup, setMagicSignup] = useState(magic.allowSignup !== false);
   const [autoLink, setAutoLink] = useState((config.linking || {}).autoLinkVerifiedEmail !== false);
   const [origins, setOrigins] = useState<string[]>(config.redirectAllowList || []);
+  const [idleDays, setIdleDays] = useState(String((config.sessions || {}).idleDays ?? 30));
 
   function savePolicy() {
     api('PUT', '/admin/auth', {
@@ -208,7 +210,9 @@ function PolicyForm({ data, readonly, onSaved }: { data: AuthData; readonly: boo
         allowSignup: magicSignup
       },
       redirectAllowList: origins,
-      linking: { autoLinkVerifiedEmail: autoLink }
+      linking: { autoLinkVerifiedEmail: autoLink },
+      // Sent as typed: a number the server refuses comes back as its sentence, not as a quiet 30.
+      sessions: { idleDays: Number(idleDays) }
     })
       .then(() => {
         toast('Sign-in policy saved.', 'ok');
@@ -245,6 +249,19 @@ function PolicyForm({ data, readonly, onSaved }: { data: AuthData; readonly: boo
           address than this backend and it is not listed here, every sign-in is refused before it starts.
         </Sub>
         <Chips items={origins} onChange={setOrigins} disabled={readonly} validate={originProblem} normalise={normaliseOrigin} placeholder="https://app.example.com" addLabel="Add address" />
+      </Card>
+
+      <h2>Staying signed in</h2>
+      <Card id="session-length">
+        <div class="grid2">
+          <Field label="A sign-in ends after this many days unused">
+            <input type="number" min={1} max={3650} value={idleDays} disabled={readonly} onInput={(e) => setIdleDays((e.currentTarget as HTMLInputElement).value)} />
+          </Field>
+        </div>
+        <Sub style="margin:8px 0 0">
+          A person stays signed in while they keep using your app. Each visit starts the count of days again. A sign-in left on a lost phone or a shared
+          computer stops working once it has gone unused for this many days. A new number also applies to people who are already signed in.
+        </Sub>
       </Card>
 
       <h2>Account linking</h2>

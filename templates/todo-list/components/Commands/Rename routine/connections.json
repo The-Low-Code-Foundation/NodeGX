@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b5106013-e631-55ea-8201-78a685200ac7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "RenameroutIn",
+      "fromProperty": "routines",
+      "toId": "RenameroutGuard",
+      "toProperty": "in-routines"
+    },
+    {
+      "fromId": "RenameroutIn",
+      "fromProperty": "routineId",
+      "toId": "RenameroutGuard",
+      "toProperty": "in-routineId"
+    },
+    {
+      "fromId": "RenameroutIn",
+      "fromProperty": "newTitle",
+      "toId": "RenameroutGuard",
+      "toProperty": "in-newTitle"
+    },
+    {
+      "fromId": "RenameroutIn",
+      "fromProperty": "do",
+      "toId": "RenameroutGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "RenameroutGuard",
+      "fromProperty": "out-title",
+      "toId": "RenameroutWrite",
+      "toProperty": "prop-title"
+    },
+    {
+      "fromId": "RenameroutIn",
+      "fromProperty": "routineId",
+      "toId": "RenameroutWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "RenameroutGuard",
+      "fromProperty": "out-go",
+      "toId": "RenameroutWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "RenameroutIn",
+      "fromProperty": "routineId",
+      "toId": "RenameroutHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "RenameroutGuard",
+      "fromProperty": "out-summary",
+      "toId": "RenameroutHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "RenameroutWrite",
+      "fromProperty": "done",
+      "toId": "RenameroutHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "RenameroutHistory",
+      "fromProperty": "done",
+      "toId": "RenameroutOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "RenameroutWrite",
+      "fromProperty": "failure",
+      "toId": "RenameroutProblem",
+      "toProperty": "do"
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 'use strict';
 
+import { TYPECASTS } from '@nodegx/project-contract/typecasts';
+
 /**
  * Builds the node-library blob the editor receives over `sendNodeLibrary` — the palette,
  * the type index and every node type's ports. `catalog:check` compares this file's output
@@ -52,6 +54,7 @@ interface NodeExportMetadata {
   nodeDoubleClickAction?: unknown;
   module?: unknown;
   deprecated?: unknown;
+  replacedBy?: unknown;
   haveComponentPorts?: unknown;
   /**
    * P77 SBR-008 §9 — ports with this prefix on this node type are declared by the author's
@@ -91,6 +94,8 @@ interface ExportedNodeType {
   nodeDoubleClickAction?: unknown;
   module?: unknown;
   deprecated?: boolean;
+  /** For a deprecated type: the type that replaced it (P107 R25). */
+  replacedBy?: string;
   haveComponentPorts?: boolean;
   /** P77 SBR-008 §9 — see the same field on the metadata above. */
   wireDeclaredPortPrefix?: string;
@@ -218,84 +223,9 @@ function generateNodeLibrary(nodeRegister: NodeRegisterLike, options?: { runtime
   const isCloud = options?.runtimeType === 'cloud';
 
   const obj = {
-    //note: needs to include ALL types
-    typecasts: [
-      {
-        from: 'string',
-        to: ['number', 'boolean', 'image', 'color', 'enum', 'textStyle', 'dimension', 'array', 'object']
-      },
-      {
-        from: 'boolean',
-        to: ['number', 'string', 'signal']
-      },
-      {
-        from: 'number',
-        to: ['boolean', 'string', 'dimension']
-      },
-      {
-        from: 'date',
-        to: ['string']
-      },
-      {
-        from: 'signal',
-        to: ['boolean', 'number']
-      },
-      {
-        from: 'image',
-        to: []
-      },
-      {
-        from: 'cloudfile',
-        to: ['string', 'image']
-      },
-      {
-        // The resolved color string (context.styles.resolveColor already
-        // produces it), so a Color variable can feed anything that takes text.
-        from: 'color',
-        to: ['string']
-      },
-      {
-        // P88 GAM-023 ruling (Richard, 2026-09-17): an enum is a string. An enum value is
-        // already the option's string, so a dropdown's value wired into a text port (or a
-        // component output typed string) arrives as it is. Only `string`: an enum into
-        // `number` still has nothing to convert it.
-        from: 'enum',
-        to: ['string']
-      },
-      {
-        // PORT-TYPE-CONTRACT.md: declaring `object` must not strand the port.
-        // The string form is JSON — the conversion lives in
-        // Node.setInputValue, which mirrors the existing string -> object
-        // parse on the way out.
-        from: 'object',
-        to: ['string']
-      },
-      {
-        from: 'domelement',
-        to: []
-      },
-      {
-        from: 'reference',
-        to: []
-      },
-      {
-        from: 'font',
-        to: []
-      },
-      {
-        from: 'textStyle',
-        to: ['string']
-      },
-      {
-        // Collection is deprecated but supported via typecasts
-        from: 'collection',
-        to: ['array']
-      },
-      {
-        from: 'array',
-        to: ['collection', 'string']
-      }
-    ],
+    // P107 NSP-021 (s88): the one table, `@nodegx/project-contract/typecasts` — the editor's canvas, Ports tab and
+    // validator read the same rows. A copy, so nothing here can change the shared one.
+    typecasts: TYPECASTS.map((cast) => ({ from: cast.from, to: [...cast.to] })),
     dynamicports: [
       {
         type: 'conditionalports',
@@ -439,6 +369,9 @@ function generateNodeLibrary(nodeRegister: NodeRegisterLike, options?: { runtime
     }
     if (nodeMetadata.deprecated) {
       nodeObj.deprecated = true;
+    }
+    if (typeof nodeMetadata.replacedBy === 'string') {
+      nodeObj.replacedBy = nodeMetadata.replacedBy;
     }
     if (nodeMetadata.haveComponentPorts) {
       nodeObj.haveComponentPorts = true;

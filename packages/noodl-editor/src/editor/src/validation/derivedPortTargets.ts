@@ -83,6 +83,18 @@ export const CLOUD_OUTPUT_PREFIX = 'out-';
 export const PAGE_PARAM_PREFIX = 'pm-';
 
 /**
+ * P109 ISL-042 (P99-HLT016-SUCCESS) — can a `CloudFunction2` ever have this port, beyond the ones its catalog lists?
+ *
+ * The runtime mints an output only if it starts `out-` (`cloudfunction2.ts` `registerOutputIfNeeded`), and an input
+ * only if it is `function` or starts `in-` (`registerInputIfNeeded`). Any other name never exists, so a wire to it
+ * never fires. `success`, the outcome's old name (ERG-001 renamed it `done`), is the one an agent writes. A prefixed
+ * name is minted, and whether the called function declares it is {@link checkDerivedPortTargets}'s question.
+ */
+export function cloudFunctionCanMint(port: string, plug: 'input' | 'output'): boolean {
+  return plug === 'output' ? port.startsWith(CLOUD_OUTPUT_PREFIX) : port === 'function' || port.startsWith(CLOUD_INPUT_PREFIX);
+}
+
+/**
  * The cloud-function namespace a `CloudFunction2.function` parameter is relative
  * to. `CloudFunctionAdapter` looks up `'/#__cloud__/' + parameters.function`, and
  * renames a function node's parameter by stripping the same prefix.

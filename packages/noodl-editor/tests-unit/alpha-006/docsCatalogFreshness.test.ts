@@ -27,10 +27,12 @@ import * as os from 'os';
 import * as path from 'path';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { assertEnrichedCatalogIsFresh, StaleCatalogError } = require('../../../../scripts/generate-node-docs.js') as {
-  assertEnrichedCatalogIsFresh: (enriched: unknown, structuralPath?: string) => void;
-  StaleCatalogError: new (message: string) => Error;
-};
+const { assertEnrichedCatalogIsFresh, StaleCatalogError, renderRulesSection } =
+  require('../../../../scripts/generate-node-docs.js') as {
+    assertEnrichedCatalogIsFresh: (enriched: unknown, structuralPath?: string) => void;
+    StaleCatalogError: new (message: string) => Error;
+    renderRulesSection: (node: unknown) => string;
+  };
 
 type CatalogNode = { typeName: string; displayName: string; docs?: string; enrichment?: unknown };
 
@@ -136,5 +138,77 @@ describe('ALPHA-006 — docs generation refuses a stale enriched catalog', () =>
     const enriched = { nodes: [{ docs: 'https://example.invalid/x', displayName: 'Set Variable', typeName: 'Set Variable' }] };
 
     expect(() => assertEnrichedCatalogIsFresh(enriched, structuralPath)).not.toThrow();
+  });
+});
+
+/**
+ * NSP-018 §6.4 — the generated page says what each input does, in the spec's own words.
+ *
+ * `catalog:generate` writes `rules: { [inputPortName]: string[] }` on every specced node (one
+ * line per reducer branch, `<case> → <what the wire carries>`), and the page renders them under
+ * the input port tables. The two rows here are the rendered shape and the absent shape; the third
+ * reads the committed Counter page, because `docs:nodes:check` can only say the tree matches the
+ * generator, not that the generator put the rules anywhere.
+ */
+describe("NSP-018 — the page renders each specced input's rules under the port table", () => {
+  const COUNTER_PAGE = path.resolve(__dirname, '../../../../docs-site/docs/nodes/math/counter.md');
+
+  test('renders one headed bullet list per input that has lines, in catalog order', () => {
+    const node = {
+      typeName: 'Counter',
+      inputs: [
+        { name: 'increase', displayName: 'Increase Count' },
+        { name: 'reset', displayName: 'Reset To Start' }
+      ],
+      rules: {
+        increase: [
+          'at Max Value with Limits Enabled → Unchanged; Count Changed stays silent',
+          'otherwise up by one → Done'
+        ],
+        reset: ['already at Start Value → Unchanged'],
+        // A port the table does not list falls back to its code name; an empty list is skipped.
+        orphan: ['a <case> → nothing'],
+        silent: []
+      }
+    };
+
+    expect(renderRulesSection(node)).toBe(
+      [
+        '### What each input does',
+        '',
+        '**Increase Count** (`increase`)',
+        '',
+        '- at Max Value with Limits Enabled → Unchanged; Count Changed stays silent',
+        '- otherwise up by one → Done',
+        '',
+        '**Reset To Start** (`reset`)',
+        '',
+        '- already at Start Value → Unchanged',
+        '',
+        '**orphan** (`orphan`)',
+        '',
+        '- a &lt;case> → nothing',
+        ''
+      ].join('\n')
+    );
+  });
+
+  test('a node without rules gets no section — absent, not empty', () => {
+    expect(renderRulesSection({ typeName: 'Text', inputs: [{ name: 'text' }] })).toBe('');
+    expect(renderRulesSection({ typeName: 'Text', inputs: [], rules: {} })).toBe('');
+    expect(renderRulesSection({ typeName: 'Text', inputs: [], rules: { text: [] } })).toBe('');
+  });
+
+  test('the committed Counter page carries its rules between the input tables and the outputs', () => {
+    const page = fs.readFileSync(COUNTER_PAGE, 'utf8');
+    const inputs = page.indexOf('## Inputs');
+    const rules = page.indexOf('### What each input does');
+    const outputs = page.indexOf('## Outputs');
+    expect(inputs).toBeGreaterThan(-1);
+    expect(rules).toBeGreaterThan(inputs);
+    expect(outputs).toBeGreaterThan(rules);
+    expect(page).toContain(
+      '**Increase Count** (`increase`)\n\n- at Max Value with Limits Enabled → Unchanged; Count Changed stays silent'
+    );
   });
 });

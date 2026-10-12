@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f708ac25-e30a-5099-8f67-ac45233d4e22",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "srIn",
+      "fromProperty": "words",
+      "toId": "srT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "lang",
+      "toId": "srT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "botName",
+      "toId": "srT",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "srT",
+      "fromProperty": "skRungsH",
+      "toId": "srH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "srT",
+      "fromProperty": "skRungsSub",
+      "toId": "srSub",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "srStatus",
+      "fromProperty": "exam",
+      "toId": "srRows",
+      "toProperty": "exam"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "band",
+      "toId": "srRows",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "lang",
+      "toId": "srRows",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "words",
+      "toId": "srRows",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "botName",
+      "toId": "srRows",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "srRows",
+      "fromProperty": "rows",
+      "toId": "srEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "srRows",
+      "fromProperty": "show",
+      "toId": "srBox",
+      "toProperty": "mounted"
+    }
+  ]
+}

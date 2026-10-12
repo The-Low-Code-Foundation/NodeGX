@@ -28,6 +28,10 @@
  *   - `/Kit/Storage`: an unresolved **logic** type at the root, with no `visualRoots` key, which is what
  *     the door writes for one (AWP-001's absence rule). It must stay rootless (AC4). Its rootlessness
  *     is the reading that proves the fix trusts the file and does not make every unknown type visual.
+ *   - `/Kit/Instance face` (P78-TPL011-INSTANCEROOT): its only node is an instance of `/Kit/Wrapped face`, with no
+ *     `visualRoots` key — what the door writes when the instanced component is not on disk yet. The deploy never
+ *     registers the project, so the instance is unresolved too. It must keep its root, as the component it instances
+ *     draws. `/Kit/Instance storage`, an instance of the logic-only `/Kit/Storage`, must stay rootless.
  *
  * ⚠️ **This grades `dist/nodegx-deploy.cjs`, which is a build artefact.** The editor model cannot be
  * imported outside a bundle (`NodeGraphModel` reads `platform.getUserDataPath()` at module scope), so
@@ -119,13 +123,17 @@ beforeAll(() => {
     undefined
   );
 
+  writeComponent(projectDir, 'Kit/Instance face', 'c_kit_instance_face', [{ id: 'iface', type: '/Kit/Wrapped face', parameters: {} }], undefined);
+  writeComponent(projectDir, 'Kit/Instance storage', 'c_kit_instance_storage', [{ id: 'istore', type: '/Kit/Storage', parameters: {} }], undefined);
+
   // Placed on the page, so the export reaches them the way a real one does.
   const homeNodes = path.join(projectDir, 'components/__page__/Home/nodes.json');
   const home = JSON.parse(fs.readFileSync(homeNodes, 'utf8'));
   const page = home.nodes.find((n: { id: string }) => n.id === 'page');
   for (const [id, type] of [
     ['placedFace', '/Kit/Face'],
-    ['placedWrapped', '/Kit/Wrapped face']
+    ['placedWrapped', '/Kit/Wrapped face'],
+    ['placedInstanceFace', '/Kit/Instance face']
   ]) {
     page.children.push(id);
     home.nodes.push({ id, type, parent: 'page', parameters: {} });
@@ -134,7 +142,7 @@ beforeAll(() => {
 
   const registryPath = path.join(projectDir, 'components/_registry.json');
   const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
-  for (const folder of ['Kit/Face', 'Kit/Wrapped face', 'Kit/Storage']) {
+  for (const folder of ['Kit/Face', 'Kit/Wrapped face', 'Kit/Storage', 'Kit/Instance face', 'Kit/Instance storage']) {
     registry.components[folder] = { path: folder, type: 'visual', nodeCount: 1, connectionCount: 0 };
   }
   fs.writeFileSync(registryPath, JSON.stringify(registry));
@@ -170,5 +178,18 @@ describe('GAM-014 — a kit node at the root of a component survives nodegx depl
   it('a logic kit node the file did not record as a root stays rootless (AC4)', () => {
     const reading = readDeployedRoots(outDir);
     expect(reading.withoutRoots).toContain('/Kit/Storage');
+  });
+});
+
+describe('P78-TPL011-INSTANCEROOT — a component whose only node is another component’s instance survives nodegx deploy', () => {
+  it('🔴 with no visualRoots recorded, it keeps the instance as its root, since the component it instances draws', () => {
+    const reading = readDeployedRoots(outDir);
+    // The defect, in one line: this contained '/Kit/Instance face'.
+    expect(reading.withoutRoots).not.toContain('/Kit/Instance face');
+  });
+
+  it('an instance of a component that draws nothing stays rootless', () => {
+    const reading = readDeployedRoots(outDir);
+    expect(reading.withoutRoots).toContain('/Kit/Instance storage');
   });
 });

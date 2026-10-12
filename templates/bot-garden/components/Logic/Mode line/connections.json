@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e177abec-1ea8-5ee1-842f-28adfe6b6fe0",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "modelineIn",
+      "fromProperty": "atEntry",
+      "toId": "modelineFn",
+      "toProperty": "in-atEntry"
+    },
+    {
+      "fromId": "modelineIn",
+      "fromProperty": "blocks",
+      "toId": "modelineFn",
+      "toProperty": "in-blocks"
+    },
+    {
+      "fromId": "modelineIn",
+      "fromProperty": "botName",
+      "toId": "modelineFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "modelineIn",
+      "fromProperty": "lang",
+      "toId": "modelineFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "modelineIn",
+      "fromProperty": "mode",
+      "toId": "modelineFn",
+      "toProperty": "in-mode"
+    },
+    {
+      "fromId": "modelineIn",
+      "fromProperty": "words",
+      "toId": "modelineFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "modelineFn",
+      "fromProperty": "out-badge",
+      "toId": "modelineOut",
+      "toProperty": "badge"
+    },
+    {
+      "fromId": "modelineFn",
+      "fromProperty": "out-driving",
+      "toId": "modelineOut",
+      "toProperty": "driving"
+    },
+    {
+      "fromId": "modelineFn",
+      "fromProperty": "out-line",
+      "toId": "modelineOut",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "modelineFn",
+      "fromProperty": "out-note",
+      "toId": "modelineOut",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "modelineFn",
+      "fromProperty": "out-showLine",
+      "toId": "modelineOut",
+      "toProperty": "showLine"
+    },
+    {
+      "fromId": "modelineFn",
+      "fromProperty": "success",
+      "toId": "modelineOut",
+      "toProperty": "ran"
+    }
+  ]
+}

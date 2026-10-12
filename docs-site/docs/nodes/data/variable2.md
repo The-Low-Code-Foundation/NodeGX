@@ -36,6 +36,21 @@ Use it for state shared across components — the logged-in user's name, a selec
 |---|---|---|---|
 | `fetch` | Signal | — | Re-reads the variable named by Name and refreshes Value. This is additional to Name rebinding on change and to changes being announced; untick either under Run On Value Change to stop it |
 
+### What each input does
+
+**Name** (`name`)
+
+- with Name ticked under Run On Value Change: bound to that variable now, Value with it → Fetched
+- with it unticked: Name changes, Value waits for Fetch → Fetched stays silent
+
+**Fetch** (`fetch`)
+
+- always: bound to the variable Name names, Value with it → Fetched, Done
+
+**Value** (`value`)
+
+- always: written to the variable at the end of the frame — Changed if that moved it and Variable changes is ticked under Run On Value Change; Error and Failure when Name is empty
+
 ## Outputs
 
 ### Values

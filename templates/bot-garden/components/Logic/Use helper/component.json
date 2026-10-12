@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "305aaa5e-675b-54ee-82a5-675e895d1152",
+  "name": "Use helper",
+  "path": "/Logic/Use helper",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A held helper used on one job, until that job is done. Runs on Go; answers Ran once its outputs are set."
+}

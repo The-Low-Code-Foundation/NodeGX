@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "73faa365-08ec-5744-85fd-e8d7b1cb73f0",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "plotatIn",
+      "fromProperty": "cards",
+      "toId": "plotatFn",
+      "toProperty": "in-cards"
+    },
+    {
+      "fromId": "plotatIn",
+      "fromProperty": "x",
+      "toId": "plotatFn",
+      "toProperty": "in-x"
+    },
+    {
+      "fromId": "plotatIn",
+      "fromProperty": "y",
+      "toId": "plotatFn",
+      "toProperty": "in-y"
+    },
+    {
+      "fromId": "plotatIn",
+      "fromProperty": "go",
+      "toId": "plotatFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "plotatFn",
+      "fromProperty": "out-found",
+      "toId": "plotatOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "plotatFn",
+      "fromProperty": "out-requestId",
+      "toId": "plotatOut",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "plotatFn",
+      "fromProperty": "success",
+      "toId": "plotatOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "name": "overlay",
+  "rule": "an absolute child lies over the parent's padding box, top-left unless aligned; the flow ignores it",
+  "nodes": [
+    {
+      "id": "host",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "paddingTop": {
+          "value": 30,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 30,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 30,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 30,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "flow",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 50,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "over",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 80,
+              "unit": "px"
+            },
+            "height": {
+              "value": 40,
+              "unit": "px"
+            },
+            "position": "absolute"
+          }
+        },
+        {
+          "id": "over-br",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 30,
+              "unit": "px"
+            },
+            "position": "absolute",
+            "alignX": "right",
+            "alignY": "bottom"
+          }
+        },
+        {
+          "id": "flow2",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 50,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

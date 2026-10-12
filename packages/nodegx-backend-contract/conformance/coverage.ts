@@ -107,8 +107,11 @@ export const ADAPTER_COVERAGE: { readonly [K in keyof IStorageAdapter]-?: Covera
   query: { kind: 'cases', cases: ['records/count-matches-the-visible-set', 'acl/a-user-sees-public-plus-their-own'] },
   fetch: { kind: 'cases', cases: ['records/fetch-by-objectId', 'records/fetch-accepts-id-and-objectId'] },
   create: { kind: 'cases', cases: ['records/create-returns-the-stored-row'] },
-  save: { kind: 'cases', cases: ['records/save-updates-in-place', 'acl/a-non-owner-cannot-save'] },
-  delete: { kind: 'cases', cases: ['records/delete-removes-the-row', 'acl/a-non-owner-cannot-delete'] },
+  save: { kind: 'cases', cases: ['records/save-updates-in-place', 'acl/a-non-owner-cannot-save', 'records/a-write-to-a-missing-row-is-not-found'] },
+  delete: {
+    kind: 'cases',
+    cases: ['records/delete-removes-the-row', 'acl/a-non-owner-cannot-delete', 'records/a-write-to-a-missing-row-is-not-found']
+  },
   count: { kind: 'cases', cases: ['records/count-matches-the-visible-set', 'acl/count-counts-only-visible-rows'] },
   aggregate: {
     kind: 'cases',
@@ -120,7 +123,11 @@ export const ADAPTER_COVERAGE: { readonly [K in keyof IStorageAdapter]-?: Covera
   },
   increment: {
     kind: 'cases',
-    cases: ['records/increment-is-atomic-on-the-stored-value', 'acl/a-non-owner-cannot-increment']
+    cases: [
+      'records/increment-is-atomic-on-the-stored-value',
+      'acl/a-non-owner-cannot-increment',
+      'records/a-write-to-a-missing-row-is-not-found'
+    ]
   },
   addRelation: { kind: 'cases', cases: ['relations/add-then-read-back'] },
   removeRelation: { kind: 'cases', cases: ['relations/remove-detaches-only-the-named-target'] },
@@ -216,19 +223,33 @@ export const SCHEMA_COVERAGE: { readonly [K in keyof IStorageSchema]-?: Coverage
     why: 'Same shape as addRelation — `LocalSQLAdapter.ts:1269` calls `this.schemaManager.removeRelation(...)`.'
   },
 
-  renameColumn: {
-    kind: 'uncovered',
-    why:
-      'A migration-path member, reached from the editor schema UI rather than from anything a deployed app runs. ' +
-      'BRG-004 moves schemas across and is where a rename has to survive the crossing.',
-    owes: 'BRG-004'
-  },
+  renameColumn: { kind: 'cases', cases: ['schema/rename-column-keeps-its-values-and-refuses-one-in-use'] },
   changeColumnType: {
     kind: 'uncovered',
     why: 'Optional and feature-detected, and the type-affinity rules it depends on are exactly what diverges. Belongs to the migrator.',
     owes: 'BRG-004'
   },
-  deleteTable: { kind: 'uncovered', why: 'Optional; same migration path as renameColumn.', owes: 'BRG-004' },
+  deleteTable: { kind: 'cases', cases: ['schema/delete-table-takes-only-its-own-relations'] },
+  renameTable: {
+    kind: 'uncovered',
+    why:
+      'Optional; P116 ONT-007 calls it from a world migration (a noun the person renamed). Graded by ' +
+      '`nodegx-backend/tests/ont-007-migration.test.ts` (AC3) on SQLite and PostgreSQL, not by a suite case.',
+    owes: 'BRG-004'
+  },
+  describeTable: {
+    kind: 'uncovered',
+    why:
+      'Optional; P116 ONT-007 calls it from a world migration (a changed answer that changes only the words on a ' +
+      'collection). Graded by `nodegx-backend/tests/ont-007-migration.test.ts` on SQLite and PostgreSQL, not by a suite case.',
+    owes: 'BRG-004'
+  },
+  setWhenTargetGoes: { kind: 'cases', cases: ['schema/set-when-target-goes-changes-the-declaration'] },
+  setSeries: {
+    kind: 'cases',
+    cases: ['series/put-on-records-numbers-them-in-the-order-made', 'series/put-on-again-never-moves-the-counter-back', 'series/taken-off-hands-out-nothing']
+  },
+  setRequired: { kind: 'cases', cases: ['schema/set-required-over-records'] },
   exportSchemas: {
     kind: 'uncovered',
     why: 'The read half of the export path the two generators below sit on. BRG-004 owns that path end to end.',

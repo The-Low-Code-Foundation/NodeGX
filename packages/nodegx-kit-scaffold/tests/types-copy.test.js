@@ -142,18 +142,38 @@ describe('GAM-015 — the kits this repository ships carry the published types',
   // under `library/modules` are what an author opens, so a type documented after they were written
   // (a size prop arriving as "40px", for one) never reached them.
   //
-  // ⚠️ `templates/rocket-school/noodl_modules` is left out on purpose: a peer owns that tree, and its
-  // two copies were stale at write. `templates/pixel-game`'s one copy was refreshed and is graded.
+  //
+  // 🔴 P109-S6-TPL007 (2026-10-10): the list used to be built from one folder layout plus one named template, and it
+  // missed four stale copies — `templates/rocket-school`'s two (left out by hand while a peer owned that tree),
+  // `templates/digital-bricks-training`'s, and `library/modules/dbt-lesson`'s, which sits at `<kit>/types/` and not
+  // `<kit>/project/noodl_modules/<kit>/types/`. Rocket School's byte gate (tpl007Template) found its two; nothing found
+  // the DBT pair. Now every COMMITTED copy under `library/modules` and `templates` is graded, whatever its layout:
+  // `git ls-files`, because a walk of the disk would grade a peer's untracked template too (one working tree, not the
+  // repository — the `external` lesson in the HLS-006 gate).
   const repo = path.join(__dirname, '..', '..', '..');
-  const copies = [
-    ...fs
-      .readdirSync(path.join(repo, 'library', 'modules'))
-      .map((kit) => path.join('library', 'modules', kit, 'project', 'noodl_modules', kit, KIT_TYPES_RELPATH)),
-    path.join('templates', 'pixel-game', 'noodl_modules', 'keyboard-shortcuts', KIT_TYPES_RELPATH)
-  ].filter((rel) => fs.existsSync(path.join(repo, rel)));
+  const copies = require('child_process')
+    .execFileSync('git', ['ls-files', '--', `library/modules/*${KIT_TYPES_RELPATH}`, `templates/*${KIT_TYPES_RELPATH}`], { cwd: repo, encoding: 'utf8' })
+    .split('\n')
+    .filter(Boolean)
+    .map((rel) => rel.split('/').join(path.sep))
+    .sort();
 
-  test('there are copies to grade (known-firing: the four library kits and pixel-game)', () => {
-    expect(copies.length).toBe(5);
+  test('there are copies to grade (known-firing: every committed copy, named)', () => {
+    // P109 s2: named, not counted — the literal 5 was outgrown twice (garden-kit in P105, garden-3d-kit in P106) and
+    // read red for two weeks while saying nothing about which kit it had not expected.
+    expect(copies.map((rel) => rel.split(path.sep).join('/'))).toEqual([
+      'library/modules/dbt-lesson/types/node-kit.d.ts',
+      'library/modules/example-node-kit/project/noodl_modules/example-node-kit/types/node-kit.d.ts',
+      'library/modules/game-kit/project/noodl_modules/game-kit/types/node-kit.d.ts',
+      'library/modules/garden-3d-kit/project/noodl_modules/garden-3d-kit/types/node-kit.d.ts',
+      'library/modules/garden-kit/project/noodl_modules/garden-kit/types/node-kit.d.ts',
+      'library/modules/keyboard-shortcuts/project/noodl_modules/keyboard-shortcuts/types/node-kit.d.ts',
+      'library/modules/nodegx-charts/project/noodl_modules/nodegx-charts/types/node-kit.d.ts',
+      'templates/digital-bricks-training/noodl_modules/dbt-lesson/types/node-kit.d.ts',
+      'templates/pixel-game/noodl_modules/keyboard-shortcuts/types/node-kit.d.ts',
+      'templates/rocket-school/noodl_modules/game-kit/types/node-kit.d.ts',
+      'templates/rocket-school/noodl_modules/keyboard-shortcuts/types/node-kit.d.ts'
+    ]);
   });
 
   test.each(copies)('%s is current', (rel) => {

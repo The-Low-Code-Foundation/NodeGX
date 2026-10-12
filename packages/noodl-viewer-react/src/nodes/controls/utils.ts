@@ -152,6 +152,30 @@ function addControlEventsAndStates(definition, args?) {
     this.setVisualStates(states);
   };
 
+  /**
+   * P107-D30 (P109 ISL-031, ruled "Reset and announce") — the control's element leaves the page (react-component-node.ts
+   * `componentWillUnmount`). The browser fires no blur or mouseleave for an element it removes, so the states would go on
+   * describing an element that is gone: Focused, Hover and Pressed go false, and Blurred and Hover End fire for the ones that
+   * were on. An app that validates or saves on Blurred now also does so when the field is hidden.
+   */
+  definition.methods._leftPage = function () {
+    const states = this.outputPropValues;
+    if (states.focusState) {
+      states.focusState = false;
+      this.flagOutputDirty('focusState');
+      this.sendSignalOnOutput('onBlur');
+    }
+    if (states.hoverState) {
+      states.hoverState = false;
+      this.flagOutputDirty('hoverState');
+      this.sendSignalOnOutput('hoverEnd');
+    }
+    if (states.pressedState) {
+      states.pressedState = false;
+      this.flagOutputDirty('pressedState');
+    }
+  };
+
   addOutputProps(definition, {
     // Focus
     focusState: {
@@ -186,7 +210,7 @@ function addControlEventsAndStates(definition, args?) {
     onBlur: {
       displayName: 'Blurred',
       group: 'Focus Events',
-      description: 'Fires when keyboard focus leaves this control, which is the usual place to validate what was entered',
+      description: 'Fires when keyboard focus leaves this control, or the control leaves the page while holding it, which is the usual place to validate what was entered',
       type: 'signal',
       props: {
         onBlur() {
@@ -228,7 +252,7 @@ function addControlEventsAndStates(definition, args?) {
     hoverEnd: {
       displayName: 'Hover End',
       group: 'Pointer Events',
-      description: 'Fires when the pointer leaves this control, including when it leaves while a button is still held',
+      description: 'Fires when the pointer leaves this control, including when it leaves while a button is still held, or when the control leaves the page under it',
       type: 'signal',
       props: {
         onMouseLeave() {
@@ -250,6 +274,9 @@ function addControlEventsAndStates(definition, args?) {
           this._updateVisualState();
         },
         onTouchStart() {
+          // P107-C64 (P109 ISL-031, ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing, as a
+          // mouse press on one does (the browser delivers no mouse event to a disabled form control, but it does deliver touches)
+          if (!this._internal.enabled) return;
           this.outputPropValues.pressedState = true;
           this.flagOutputDirty('pressedState');
           this._updateVisualState();
@@ -260,11 +287,13 @@ function addControlEventsAndStates(definition, args?) {
           this._updateVisualState();
         },
         onTouchEnd() {
+          if (!this._internal.enabled) return; // P107-C64
           this.outputPropValues.pressedState = false;
           this.flagOutputDirty('pressedState');
           this._updateVisualState();
         },
         onTouchCancel() {
+          if (!this._internal.enabled) return; // P107-C64
           this.outputPropValues.pressedState = false;
           this.flagOutputDirty('pressedState');
           this._updateVisualState();
@@ -286,6 +315,7 @@ function addControlEventsAndStates(definition, args?) {
           this.sendSignalOnOutput('pointerDown');
         },
         onTouchStart() {
+          if (!this._internal.enabled) return; // P107-C64
           this.sendSignalOnOutput('pointerDown');
         }
       }
@@ -300,9 +330,11 @@ function addControlEventsAndStates(definition, args?) {
           this.sendSignalOnOutput('pointerUp');
         },
         onTouchEnd() {
+          if (!this._internal.enabled) return; // P107-C64
           this.sendSignalOnOutput('pointerUp');
         },
         onTouchCancel() {
+          if (!this._internal.enabled) return; // P107-C64
           this.sendSignalOnOutput('pointerUp');
         }
       }

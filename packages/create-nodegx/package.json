@@ -1,0 +1,29 @@
+{
+  "name": "create-nodegx",
+  "version": "0.2.0",
+  "description": "npm create nodegx — sets a folder up so your AI agent can build NodeGX apps in it.",
+  "license": "GPL-3.0-only",
+  "homepage": "https://nodegx.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/The-Low-Code-Foundation/NodeGX.git",
+    "directory": "packages/create-nodegx"
+  },
+  "bin": {
+    "create-nodegx": "bin/create-nodegx.js"
+  },
+  "files": [
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

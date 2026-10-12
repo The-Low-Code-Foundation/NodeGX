@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "033d873c-17ca-51a6-8528-7c653e020a66",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "glowIn",
+      "fromProperty": "glowId",
+      "toId": "glowFn",
+      "toProperty": "in-glowId"
+    },
+    {
+      "fromId": "glowIn",
+      "fromProperty": "live",
+      "toId": "glowFn",
+      "toProperty": "in-live"
+    },
+    {
+      "fromId": "glowFn",
+      "fromProperty": "out-id",
+      "toId": "glowOut",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "glowFn",
+      "fromProperty": "success",
+      "toId": "glowOut",
+      "toProperty": "ran"
+    }
+  ]
+}

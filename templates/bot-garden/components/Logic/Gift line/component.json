@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "043ee402-adb1-562c-8520-e526664d56ec",
+  "name": "Gift line",
+  "path": "/Logic/Gift line",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The win card’s line for the robot lent and the upgrade given. Runs when an input changes; Ran after each run."
+}

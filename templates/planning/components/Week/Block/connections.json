@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "800c6670-0a91-5b1d-80b9-ded88105d307",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "bkIn",
+      "fromProperty": "soft",
+      "toId": "bkRoot",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "mark",
+      "toId": "bkRoot",
+      "toProperty": "borderLeftColor"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "tickFill",
+      "toId": "bkTick",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "tickInk",
+      "toId": "bkTick",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "projectName",
+      "toId": "bkWho",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "what",
+      "toId": "bkWhat",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "hoursText",
+      "toId": "bkHours",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "blockId",
+      "toId": "bkOut",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "projectId",
+      "toId": "bkOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "done",
+      "toId": "bkOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "fromTodo",
+      "toId": "bkTickTodo",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "bkTickTodo",
+      "fromProperty": "ontrue",
+      "toId": "bkOut",
+      "toProperty": "openLog"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "fromTodo",
+      "toId": "bkLogTodo",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "bkLogTodo",
+      "fromProperty": "ontrue",
+      "toId": "bkOut",
+      "toProperty": "openLog"
+    },
+    {
+      "fromId": "bkIn",
+      "fromProperty": "fromTodo",
+      "toId": "bkWhoTodo",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "bkWhoTodo",
+      "fromProperty": "ontrue",
+      "toId": "bkOut",
+      "toProperty": "openLog"
+    },
+    {
+      "fromId": "bkTick",
+      "fromProperty": "onClick",
+      "toId": "bkTickTodo",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "bkTickTodo",
+      "fromProperty": "onfalse",
+      "toId": "bkOut",
+      "toProperty": "toggle"
+    },
+    {
+      "fromId": "bkWho",
+      "fromProperty": "onClick",
+      "toId": "bkWhoTodo",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "bkWhoTodo",
+      "fromProperty": "onfalse",
+      "toId": "bkOut",
+      "toProperty": "openProject"
+    },
+    {
+      "fromId": "bkWhat",
+      "fromProperty": "onClick",
+      "toId": "bkLogTodo",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "bkHours",
+      "fromProperty": "onClick",
+      "toId": "bkLogTodo",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "bkLogTodo",
+      "fromProperty": "onfalse",
+      "toId": "bkOut",
+      "toProperty": "openLog"
+    }
+  ]
+}

@@ -54,6 +54,15 @@ const path = require('path');
  */
 const NAME_MARKER = /window\.__noodl_module_name\s*=\s*("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g;
 
+/**
+ * ISL-013 — the folder marker the injector writes around a kit that another kit `requires` (a string before its script,
+ * `undefined` after), so `Noodl.getModule` finds it by folder as well as by name.
+ */
+const FOLDER_MARKER = /window\.__noodl_module_folder\s*=\s*("(?:[^"\\]|\\.)*"|undefined)/g;
+
+/** ISL-013 ruling 2 (a) — the line the injector writes in place of a kit it refused (a kit it requires is missing). */
+const REFUSED_LINE = /console\.error\(("The kit (?:[^"\\]|\\.)*")\);/g;
+
 /** Any `<script src="…">`, so dependency tags and kit mains are both seen, in order. */
 const SCRIPT_SRC = /<script[^>]*\ssrc=["']([^"']+)["'][^>]*>/g;
 
@@ -64,12 +73,12 @@ const SCRIPT_SRC = /<script[^>]*\ssrc=["']([^"']+)["'][^>]*>/g;
  * preserved: a name marker applies to the scripts that follow it, exactly as it does in a browser.
  *
  * @param {string} html the deploy's `index.html`
- * @returns {{ src: string, moduleName: string | null }[]}
+ * @returns {{ src: string, moduleName: string | null, moduleFolder?: string }[]} `moduleFolder` only for a kit another requires (ISL-013)
  */
 function kitScriptsFromHtml(html) {
   if (!html) return [];
 
-  /** @type {{ index: number, kind: 'name' | 'src', value: string }[]} */
+  /** @type {{ index: number, kind: 'name' | 'folder' | 'src', value: string | null }[]} */
   const events = [];
 
   NAME_MARKER.lastIndex = 0;
@@ -86,6 +95,11 @@ function kitScriptsFromHtml(html) {
     events.push({ index: m.index, kind: 'name', value });
   }
 
+  FOLDER_MARKER.lastIndex = 0;
+  for (let m = FOLDER_MARKER.exec(html); m; m = FOLDER_MARKER.exec(html)) {
+    events.push({ index: m.index, kind: 'folder', value: m[1] === 'undefined' ? null : JSON.parse(m[1]) });
+  }
+
   SCRIPT_SRC.lastIndex = 0;
   for (let m = SCRIPT_SRC.exec(html); m; m = SCRIPT_SRC.exec(html)) {
     events.push({ index: m.index, kind: 'src', value: m[1] });
@@ -95,15 +109,20 @@ function kitScriptsFromHtml(html) {
 
   const out = [];
   let currentName = null;
+  let currentFolder = null;
   for (const event of events) {
     if (event.kind === 'name') {
       currentName = event.value;
       continue;
     }
+    if (event.kind === 'folder') {
+      currentFolder = event.value;
+      continue;
+    }
     // Only module scripts. The viewer bundle, analytics and anything else the template carries are
     // not this loader's business and would be actively harmful to run twice.
     if (!/(^|\/)noodl_modules\//.test(event.value)) continue;
-    out.push({ src: event.value, moduleName: currentName });
+    out.push(currentFolder ? { src: event.value, moduleName: currentName, moduleFolder: currentFolder } : { src: event.value, moduleName: currentName });
   }
 
   return out;
@@ -174,6 +193,10 @@ function resolveKitScript(src, rootDir) {
 function loadKitModules({ htmlData, rootDir = process.cwd(), log = () => {}, warn = console.warn.bind(console) }) {
   const result = { loaded: [], failures: [], skipped: [] };
 
+  // ISL-013: a kit the injector refused has no script to load — say so here as the browser's console does
+  REFUSED_LINE.lastIndex = 0;
+  for (let m = REFUSED_LINE.exec(htmlData || ''); m; m = REFUSED_LINE.exec(htmlData || '')) warn(`SSR: ${JSON.parse(m[1])}`);
+
   const scripts = kitScriptsFromHtml(htmlData);
   if (scripts.length === 0) return result;
 
@@ -183,6 +206,7 @@ function loadKitModules({ htmlData, rootDir = process.cwd(), log = () => {}, war
   } finally {
     removeWindowShim();
     delete globalThis.__noodl_module_name;
+    delete globalThis.__noodl_module_folder;
   }
 
   return result;
@@ -251,6 +275,7 @@ function loadEach(scripts, { rootDir, log, warn, result }) {
     // The marker the bootstrap's `defineModule` reads. Set per script, exactly where the browser
     // sets it — a kit that defers its `defineModule` call would otherwise adopt a later kit's name.
     globalThis.__noodl_module_name = script.moduleName || undefined;
+    globalThis.__noodl_module_folder = script.moduleFolder || undefined;
 
     try {
       // eslint-disable-next-line no-new-func

@@ -52,6 +52,12 @@
       "toProperty": "in-text"
     },
     {
+      "fromId": "ndIn",
+      "fromProperty": "optional",
+      "toId": "ndCheck",
+      "toProperty": "in-optional"
+    },
+    {
       "fromId": "ndCheck",
       "fromProperty": "out-ok",
       "toId": "ndOk",

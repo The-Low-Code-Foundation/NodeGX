@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e09f3880-52d3-5833-8423-f764c45f70ca",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ywIn",
+      "fromProperty": "tasks",
+      "toId": "ywBuild",
+      "toProperty": "in-tasks"
+    },
+    {
+      "fromId": "ywIn",
+      "fromProperty": "actions",
+      "toId": "ywBuild",
+      "toProperty": "in-actions"
+    },
+    {
+      "fromId": "ywIn",
+      "fromProperty": "routines",
+      "toId": "ywBuild",
+      "toProperty": "in-routines"
+    },
+    {
+      "fromId": "ywIn",
+      "fromProperty": "checks",
+      "toId": "ywBuild",
+      "toProperty": "in-checks"
+    },
+    {
+      "fromId": "ywIn",
+      "fromProperty": "selectedId",
+      "toId": "ywBuild",
+      "toProperty": "in-selectedId"
+    },
+    {
+      "fromId": "ywIn",
+      "fromProperty": "now",
+      "toId": "ywBuild",
+      "toProperty": "in-now"
+    },
+    {
+      "fromId": "ywBuild",
+      "fromProperty": "out-rows",
+      "toId": "ywOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "ywBuild",
+      "fromProperty": "out-routineRows",
+      "toId": "ywOut",
+      "toProperty": "routineRows"
+    },
+    {
+      "fromId": "ywBuild",
+      "fromProperty": "out-todayLabel",
+      "toId": "ywOut",
+      "toProperty": "todayLabel"
+    }
+  ]
+}

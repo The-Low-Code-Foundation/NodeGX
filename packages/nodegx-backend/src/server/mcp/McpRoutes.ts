@@ -64,7 +64,9 @@ import type { WorkflowRunner } from '../../workflow/WorkflowRunner';
 import type { AuditLog } from '../../ops/audit';
 import type { Principal } from '../../security/model';
 import { HttpError, readJSONBody, sendJSON } from '../http-util';
+import { assertSeriesWrite, seriesAnswer } from '../series-door';
 import { logger } from '../../ops/logger';
+import { NotWhileItIs } from '../../persistence/onlyWhile';
 import { AUDIT_MCP_TOOL_CALL } from '../../ops/audit-actions';
 import { buildToolSurface, type FunctionOnSurface, type McpTool, type SchemaColumn } from './toolSurface';
 
@@ -263,7 +265,8 @@ export class McpRoutes {
       ? runner.getAvailableFunctions().map((fn) => ({
           name: fn.name,
           allowNoAuth: runner.functionAllowsNoAuth(fn.name),
-          params: requestParamSpecs(runner.getRequestNodeParameters(fn.name))
+          params: requestParamSpecs(runner.getRequestNodeParameters(fn.name)),
+          description: runner.getFunctionDescription(fn.name)
         }))
       : [];
     return buildToolSurface({
@@ -382,7 +385,7 @@ export class McpRoutes {
           limit: clampLimit(args.limit),
           skip: args.skip
         });
-        options.acl = ctx.acl('read');
+        options.acl = ctx.acl('read', collection);
         const result = (await this.deps.facade.wireQuery(collection, options)) as { results?: unknown[] };
         const rows = (result.results || []).map(plain);
         return {
@@ -395,7 +398,7 @@ export class McpRoutes {
         if (!id) throw new Error('objectId is required.');
         let record: Record<string, unknown>;
         try {
-          record = (await this.deps.facade.wireFetch(collection, id, undefined, ctx.acl('read'))) as Record<
+          record = (await this.deps.facade.wireFetch(collection, id, undefined, ctx.acl('read', collection))) as Record<
             string,
             unknown
           >;
@@ -411,10 +414,12 @@ export class McpRoutes {
         const data = { ...args };
         delete data.objectId;
         delete data.ACL;
+        assertSeriesWrite(ctx.principal, this.deps.facade.schemaManager, collection, data);
         ctx.stampCreate(collection, data);
         const created = (await this.deps.facade.rawCreate(collection, data)) as Record<string, unknown>;
         const id = String(created.objectId);
-        return { text: `Created ${collection} ${id}.`, structured: { objectId: id }, objectId: id };
+        const numbered = seriesAnswer(this.deps.facade.schemaManager, collection, created);
+        return { text: `Created ${collection} ${id}${Object.values(numbered).map((n) => ` (${String(n)})`).join('')}.`, structured: { objectId: id, ...numbered }, objectId: id };
       }
       case 'update': {
         const id = String(args.objectId || '');
@@ -426,8 +431,10 @@ export class McpRoutes {
         delete data.updatedAt;
         if (Object.keys(data).length === 0) throw new Error('Send at least one field to change.');
         try {
-          await this.deps.facade.rawSave(collection, id, data, ctx.acl('write'));
-        } catch {
+          await this.deps.facade.rawSave(collection, id, data, ctx.acl('write', collection));
+        } catch (e) {
+          // P116 ONT-012: a record no longer in the state its rule allows says so in the rule's words.
+          if (e instanceof NotWhileItIs) throw new Error(e.message);
           throw new Error(`No row ${id} in ${collection} that you can change.`);
         }
         return { text: `Updated ${collection} ${id}.`, structured: { objectId: id }, objectId: id };

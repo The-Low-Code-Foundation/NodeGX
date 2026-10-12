@@ -1,0 +1,70 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "aa95b96c-e275-5548-89cb-f33071ee0d4d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "t_root",
+      "type": "Group",
+      "label": "Tally",
+      "parameters": {
+        "flexDirection": "row"
+      },
+      "children": [
+        "t_count",
+        "t_plus"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "t_count",
+      "type": "Text",
+      "label": "Count",
+      "parent": "t_root",
+      "parameters": {
+        "text": "0",
+        "dataAttributes": "data-testid",
+        "data-testid": "count"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "t_plus",
+      "type": "Button",
+      "label": "Plus",
+      "parent": "t_root",
+      "parameters": {
+        "label": "+",
+        "dataAttributes": "data-testid",
+        "data-testid": "plus"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "t_obj",
+      "type": "net.noodl.ComponentObject",
+      "label": "Mine",
+      "parameters": {
+        "properties": "count"
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "t_add",
+      "type": "JavaScriptFunction",
+      "label": "Add one",
+      "parameters": {
+        "functionScript": "const o = Component.Object;\no.set('count', (o.get('count') || 0) + 1);"
+      },
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "t_root"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8b35a6eb-036b-5771-8646-0882bae2f2ac",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "acceptproposalIn",
+      "fromProperty": "accept",
+      "toId": "acceptproposalFn",
+      "toProperty": "in-accept"
+    },
+    {
+      "fromId": "acceptproposalIn",
+      "fromProperty": "program",
+      "toId": "acceptproposalFn",
+      "toProperty": "in-program"
+    },
+    {
+      "fromId": "acceptproposalIn",
+      "fromProperty": "proposal",
+      "toId": "acceptproposalFn",
+      "toProperty": "in-proposal"
+    },
+    {
+      "fromId": "acceptproposalIn",
+      "fromProperty": "go",
+      "toId": "acceptproposalFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "acceptproposalFn",
+      "fromProperty": "out-accepted",
+      "toId": "acceptproposalOut",
+      "toProperty": "accepted"
+    },
+    {
+      "fromId": "acceptproposalFn",
+      "fromProperty": "out-added",
+      "toId": "acceptproposalOut",
+      "toProperty": "added"
+    },
+    {
+      "fromId": "acceptproposalFn",
+      "fromProperty": "out-program",
+      "toId": "acceptproposalOut",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "acceptproposalFn",
+      "fromProperty": "success",
+      "toId": "acceptproposalOut",
+      "toProperty": "ran"
+    }
+  ]
+}

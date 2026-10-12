@@ -3,7 +3,8 @@
  * (BAK-007, implementation steps 2 & 3).
  *
  * A backup is a consistent DB snapshot (snapshot.ts) + the uploaded files dir +
- * the cloud-function workflows + the diffable backend config + a hashed manifest
+ * the cloud-function workflows + the workflow definitions + every settings file
+ * (`CONFIG_FILES`) + a hashed manifest
  * (archive.ts), written atomically. The whole archive is also the migration
  * path (laptop → VPS = backup + restore), so it is a single portable file.
  *
@@ -88,8 +89,38 @@ export class BackupNotFileBackedError extends Error {
   }
 }
 
-/** Config files (dataDir-root) captured under `config/` in the archive. */
-const CONFIG_FILES = ['security.json', 'triggers.json', 'email.json', 'config-params.json', 'backups.json'];
+/**
+ * Config files (dataDir-root) captured under `config/` in the archive.
+ *
+ * ISL-039 (P100-UPG001-BACKUP): every settings file the backend keeps, not the
+ * first five — sign-in, search, file and ops settings and the saved table views
+ * were left out, so a restore put them back to their defaults and said nothing.
+ * Left out on purpose: `config.json` (the backend's identity — an archive
+ * restored onto another backend must not turn it into the first) and
+ * `executions.sqlite` (the run history, a log the restore itself writes into;
+ * the Backups page says it is not kept).
+ */
+const CONFIG_FILES = [
+  'security.json',
+  'triggers.json',
+  'email.json',
+  'config-params.json',
+  'backups.json',
+  'auth.json',
+  'search.json',
+  'files.json',
+  'ops.json',
+  'views.json'
+];
+/**
+ * Folders captured whole, and replaced whole by a restore. ISL-039 added
+ * `workflow-defs/` (a trigger restored without its workflow answered 404). The
+ * manifest lists them, so a restore replaces only what its archive captured: an
+ * archive written before the list existed carries `files` and `workflows` only,
+ * and must not empty a backend's workflow definitions.
+ */
+const FOLDERS = ['files', 'workflows', 'workflow-defs'];
+const FOLDERS_BEFORE_THE_LIST = ['files', 'workflows'];
 const SECRETS_FILE = 'secrets.json';
 
 export interface BackupManagerDeps {
@@ -463,18 +494,13 @@ export class BackupManager {
       // db snapshot
       entries.push({ name: 'db/local.db', data: fs.readFileSync(snapPath) });
 
-      // files/
-      const filesDir = path.join(this.deps.dataDir, 'files');
-      for (const abs of walk(filesDir)) {
-        const rel = path.relative(filesDir, abs).split(path.sep).join('/');
-        entries.push({ name: `files/${rel}`, data: fs.readFileSync(abs) });
-      }
-
-      // workflows/ (cloud functions)
-      const workflowsDir = path.join(this.deps.dataDir, 'workflows');
-      for (const abs of walk(workflowsDir)) {
-        const rel = path.relative(workflowsDir, abs).split(path.sep).join('/');
-        entries.push({ name: `workflows/${rel}`, data: fs.readFileSync(abs) });
+      // files/, workflows/ (cloud functions), workflow-defs/ (workflow definitions)
+      for (const folder of FOLDERS) {
+        const dir = path.join(this.deps.dataDir, folder);
+        for (const abs of walk(dir)) {
+          const rel = path.relative(dir, abs).split(path.sep).join('/');
+          entries.push({ name: `${folder}/${rel}`, data: fs.readFileSync(abs) });
+        }
       }
 
       // config/ (diffable policy)
@@ -509,7 +535,8 @@ export class BackupManager {
         snapshotMechanism: snap.mechanism,
         nodeVersion: process.versions.node,
         includesSecrets: includeSecrets,
-        dbEntry: 'db/local.db'
+        dbEntry: 'db/local.db',
+        folders: [...FOLDERS]
       });
       const bytes = fs.statSync(archivePath).size;
 
@@ -712,16 +739,17 @@ export class BackupManager {
     fs.renameSync(tmpDb, targetDb);
     written++;
 
-    // files/ + workflows/ : clear then repopulate from the archive.
-    for (const sub of ['files', 'workflows']) {
+    // The folders the archive captured: clear then repopulate from the archive.
+    const folders = manifest.folders || FOLDERS_BEFORE_THE_LIST;
+    for (const sub of folders) {
       fs.rmSync(path.join(target, sub), { recursive: true, force: true });
     }
     // config/ : map back to dataDir-root files.
     for (const [name, entry] of entries) {
       if (name === manifest.dbEntry) continue;
       let outPath: string | null = null;
-      if (name.startsWith('files/')) outPath = path.join(target, 'files', name.slice('files/'.length));
-      else if (name.startsWith('workflows/')) outPath = path.join(target, 'workflows', name.slice('workflows/'.length));
+      const folder = folders.find((f) => name.startsWith(`${f}/`));
+      if (folder) outPath = path.join(target, folder, name.slice(folder.length + 1));
       else if (name === 'config/schema.json') outPath = null; // informational only
       else if (name.startsWith('config/')) outPath = path.join(target, name.slice('config/'.length));
       if (!outPath) continue;

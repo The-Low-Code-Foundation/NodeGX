@@ -1,0 +1,255 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5f8baf29-42fb-5827-8974-0a10aefe10b0",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "stepIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "answer",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "run",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "world",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "stepFn",
+      "type": "JavaScriptFunction",
+      "label": "Step",
+      "parameters": {
+        "functionScript": "var { step } = Scripts.engine;\nvar st = step(Inputs.run, Inputs.world, Inputs.answer);\nOutputs.run = st.run;\nOutputs.delta = st.delta;\nOutputs.glowId = st.glowId;\nOutputs.done = st.done;\nOutputs.waiting = st.waiting;\nOutputs.request = st.request;\nOutputs.tick = st.run.tick;\nOutputs.count = st.run.count;\nOutputs.bumps = st.run.bumps;\nOutputs.puddles = st.run.puddles;\n// P108 IW-003 (lane M): nothing found is said by what was sought — sayNone:<kind>, worded by the page (Draw world).\nOutputs.sayKey = st.delta.none && st.delta.sayKey === 'sayNone' && st.delta.none.kind ? 'sayNone:' + st.delta.none.kind : st.delta.sayKey || '';\nOutputs.sayText = st.delta.sayText || '';\nOutputs.sayStyle = st.delta.sayStyle || '';\nOutputs.proposal = st.delta.proposal || null;\n",
+        "runOnChange-in-answer": false,
+        "runOnChange-in-run": false,
+        "runOnChange-in-world": false,
+        "uses": "engine.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-run",
+          "displayName": "run",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-world",
+          "displayName": "world",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-answer",
+          "displayName": "answer",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-run",
+          "displayName": "run",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-delta",
+          "displayName": "delta",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-glowId",
+          "displayName": "glowId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-waiting",
+          "displayName": "waiting",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-request",
+          "displayName": "request",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tick",
+          "displayName": "tick",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bumps",
+          "displayName": "bumps",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-puddles",
+          "displayName": "puddles",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sayKey",
+          "displayName": "sayKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sayText",
+          "displayName": "sayText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sayStyle",
+          "displayName": "sayStyle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-proposal",
+          "displayName": "proposal",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "stepOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "bumps",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "delta",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "glowId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "proposal",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "puddles",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "request",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "run",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "sayKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sayStyle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sayText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "tick",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "waiting",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

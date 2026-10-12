@@ -36,6 +36,19 @@ Use it to hold or snapshot local text: capture a Text Input's current value on s
 |---|---|---|---|
 | `saveValue` | Signal | — | Stores the latest value now. This is additional to Value storing on change; untick Value under Run On Value Change to stop that |
 
+### What each input does
+
+**Value** (`value`)
+
+- undefined: ignored → Changed stays silent
+- the same as the last one, or Run On Value Change unticked: held for the next Set → Changed stays silent
+- a new value that converts to what is already stored: held, nothing changes → Changed stays silent
+- a new value, with Run On Value Change ticked: stored straight away (an empty one as Treat Empty As says) → Changed
+
+**Set** (`saveValue`)
+
+- always: at the end of the frame the last Value is stored — Changed and Done if that changed it, otherwise Unchanged (or what Treat Unchanged As says)
+
 ## Outputs
 
 ### Values

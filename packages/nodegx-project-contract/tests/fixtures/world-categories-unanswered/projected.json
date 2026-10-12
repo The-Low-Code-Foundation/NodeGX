@@ -1,0 +1,46 @@
+{
+  "vocabulary": {
+    "id": "nodegx-world-kinds",
+    "version": 1
+  },
+  "collections": [
+    {
+      "name": "Product",
+      "made": {
+        "noun": "product"
+      },
+      "sentence": "A product is one thing we sell, with a price, a category and a subcategory.",
+      "notHeld": [],
+      "description": "A product is one thing we sell, with a price, a category and a subcategory.",
+      "columns": [
+        {
+          "name": "name",
+          "kind": "text",
+          "type": "String"
+        },
+        {
+          "name": "price",
+          "kind": "number",
+          "type": "Number",
+          "description": "What it sells for, in euros."
+        },
+        {
+          "name": "category",
+          "kind": "text",
+          "type": "String",
+          "description": "Naturally it should just be a text field."
+        },
+        {
+          "name": "subcategory",
+          "kind": "text",
+          "type": "String"
+        }
+      ],
+      "checks": [],
+      "indexes": [],
+      "calledBy": "name"
+    }
+  ],
+  "claims": [],
+  "notHeld": []
+}

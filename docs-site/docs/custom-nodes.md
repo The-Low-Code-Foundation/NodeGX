@@ -148,6 +148,14 @@ The test is simple: if you can imagine wanting to change it from the graph, it w
 belongs on a port. If it is what makes the node a box at all — `display: flex`, `flexDirection` — it
 is structure, and it belongs in `defaultCss`.
 
+:::caution `defaultCss` is an inline style
+`defaultCss` and `inputCss` reach your root as `props.style`, an **inline style**. Inline beats any
+rule in your kit's own stylesheet, so set a property in one place, never in both: a `display: grid`
+in your `.world` class loses, silently, to a `display: block` in `defaultCss`, and every cell of the
+grid draws at zero size. The same object is applied in the editor canvas, on a deployed page and in
+an exported app, so what you put there is what draws everywhere.
+:::
+
 Here is the same idea as code. This node does **not** decide when something counts as over budget:
 
 ```js title="the threshold is not in here"
@@ -193,7 +201,10 @@ inputCss: {
 A node whose defaults are tokens inherits the project's design system instead of fighting it: change
 a token once and every node follows. Nothing *enforces* this — brand colours and data-visualisation
 palettes are legitimate reasons to hardcode — but tokens are what the scaffold emits and what you
-should reach for first.
+should reach for first. The one exception is a colour your component hands to anything that is not CSS — a
+canvas, WebGL, a library's theme object. `var(--surface-raised)` means nothing there, so look the colour
+up first ([how](#a-theme-colour-has-to-be-looked-up-before-a-library-can-use-it)); the port's default
+stays a token.
 
 One thing to know if you hardcode anyway: a `color`-typed port carries no units, so a `var(--token)`
 string passes straight through. A **units-typed** port (like `padding` above) is a different path,
@@ -472,6 +483,221 @@ Forget it and the checkbox is drawn, is togglable, and changes nothing. The firs
 these types got this wrong.
 :::
 
+## Wrapping a library
+
+Most of what a kit is for is a library someone else wrote: a block editor, a chart, a map, a 3D
+scene. Such a library wants a DOM element of its own, it brings its own stylesheet, and it wants
+colours it can do arithmetic on. Each of those goes wrong the first time, in a way you notice before
+you understand it.
+
+### Edits vanish when the page re-renders
+
+**What you notice:** a person types or drags something in your node, something else on the page
+changes, and what they did is gone.
+
+The library owns the element it draws into, and React re-renders your component whenever any prop
+changes: a colour, a size, the parent. If every render hands the graph's value to the library, a
+render that still carries the graph's *old* value puts it back over the person's edit. Your node's own
+output, wired back into its input, does the same a moment later.
+
+The rule: make the library once, into an element React never renders into, and keep it in a ref.
+Load a value into it only when the graph sends a new value, and never your own output coming back.
+
+```js title="noodl_modules/note-kit/index.js"
+// @ts-check
+(function () {
+  var h = React.createElement;
+
+  // Stands in for any library that owns its own DOM: a code editor, a map, a block editor.
+  function createEditor(host, onEdit) {
+    var area = document.createElement('textarea');
+    area.addEventListener('input', function () { onEdit(area.value); });
+    host.appendChild(area);
+    return {
+      load: function (text) { area.value = text; },
+      destroy: function () { host.removeChild(area); }
+    };
+  }
+
+  /** @type {import('./types/node-kit').ReactNodeDefinition} */
+  var Note = {
+    name: 'note-kit.Note',
+    displayNodeName: 'Note',
+
+    getReactComponent: function () {
+      return function NoteComponent(props) {
+        var host = React.useRef(null);
+        var editor = React.useRef(null);
+        var seen = React.useRef({ incoming: undefined, emitted: undefined });
+        var onChange = React.useRef(props.onChange);
+        onChange.current = props.onChange;
+
+        // Made once, into an element React never renders into: no re-render can replace it.
+        React.useEffect(function () {
+          editor.current = createEditor(host.current, function (text) {
+            seen.current.emitted = text;
+            if (onChange.current) onChange.current(text);
+          });
+          return function () { editor.current.destroy(); };
+        }, []);
+
+        // Load only a NEW value from the graph, and never the node's own text coming back.
+        React.useEffect(function () {
+          var text = props.text || '';
+          if (!editor.current || text === seen.current.incoming) return;
+          seen.current.incoming = text;
+          if (text !== seen.current.emitted) editor.current.load(text);
+        });
+
+        return h('div', { ref: host, style: props.style });
+      };
+    },
+
+    inputProps: {
+      text: { type: 'string', displayName: 'Text', group: 'Content' }
+    },
+    outputProps: {
+      onChange: { type: 'string', displayName: 'Text Changed', group: 'Content' }
+    }
+  };
+
+  Noodl.defineModule({ reactNodes: [Note] });
+})();
+```
+
+`seen` holds the two things the rule needs: the last value the graph sent (`incoming`) and the last
+text the node sent (`emitted`). A render whose graph value has not changed loads nothing, whatever
+else changed; a value equal to what the node just sent is its own echo and loads nothing either.
+
+### The library's CSS reaches the whole page
+
+**What you notice:** buttons or text elsewhere in the app change their look when your node is on
+the page.
+
+Many libraries inject a global stylesheet, and a rule you write to restyle the library is just as
+global unless you scope it. It reaches the whole page your node is on, other kits' nodes included.
+It does not reach the editor: the canvas draws your app in a document of its own, apart from the
+editor's panels. Put every rule of your own under a class on your node's root (`.note-kit .toolbar`,
+never `.toolbar`), and when you test, look at an element *outside* your node, because a check inside
+it only reads your own rules.
+
+### A theme colour has to be looked up before a library can use it
+
+**What you notice:** the library draws in its fallback colour, often black or grey, while the port
+says `var(--primary)`.
+
+Default colour ports to a token, as above; that does not change. But a colour handed to anything
+that is not CSS (a canvas, WebGL, a chart's palette, a library's theme object) has to be the colour
+itself, because `var(--primary)` means nothing outside a stylesheet. Look it up on your own element:
+
+```js title="a token, looked up for a library"
+function colourOf(value, el) {
+  var probe = document.createElement('span');
+  probe.style.color = value; // a token, a hex, a name: anything CSS accepts
+  el.appendChild(probe);
+  var rgb = getComputedStyle(probe).color; // e.g. "rgb(37, 99, 235)"
+  el.removeChild(probe);
+  return rgb;
+}
+```
+
+Call it in an effect, once your element is on the page: a token has a value only there. The port's
+value does not change when the theme does (it is still `var(--primary)`), so look it up each time you
+hand colours to the library rather than once. A value CSS cannot read comes back as the colour the
+element inherits, not as an error.
+
+### A library ships only as modern modules
+
+**What you notice:** the library's guide says `import * as THREE from 'three'`. You list its file in
+`manifest.dependencies`. The page logs *Cannot use import statement outside a module*. Your node
+draws nothing.
+
+NodeGX loads each file in `dependencies` as a plain script, one after another, before your kit's own
+file. A file written with `import` and `export` cannot load that way. Many libraries now publish
+only files like that, three.js among them.
+
+Turn the library into one plain script, once, on your own machine. The tool for it is esbuild:
+
+1. In an empty folder, run `npm install three esbuild`.
+2. Write an entry file that imports what your kit needs and puts it on one global name:
+
+```js title="entry.js"
+import * as T from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+window.THREE = Object.assign({}, T, { OrbitControls });
+```
+
+3. Bundle it into your kit's folder:
+
+```bash
+npx esbuild entry.js --bundle --format=iife --minify --outfile=noodl_modules/cube-kit/three.bundle.js
+```
+
+4. List the result in `manifest.json`: `"dependencies": ["three.bundle.js"]`.
+
+Run step 3 again when you move to a new version of the library. Three.js with its camera controls
+comes out at about 760 KB. Most kits in the NodeGX library ship their libraries this way already.
+
+**Read the global when your node mounts, not when your file loads.** An AI agent working on the
+project reads your kit by loading your own file alone, without its dependencies. A server render has
+no page to draw into. In both, `THREE` is not there yet when your file runs. A line like
+`var THREE = window.THREE` at the top leaves it undefined for good. Look it up inside an effect:
+
+```js title="noodl_modules/cube-kit/index.js"
+// @ts-check
+(function () {
+  var h = React.createElement;
+
+  /** @type {import('./types/node-kit').ReactNodeDefinition} */
+  var Cube = {
+    name: 'cube-kit.Cube',
+    displayNodeName: 'Cube',
+
+    getReactComponent: function () {
+      return function CubeComponent(props) {
+        var host = React.useRef(null);
+
+        React.useEffect(function () {
+          // Here, not at the top of the file: the dependency has loaded by the time a node mounts.
+          var THREE = /** @type {any} */ (window).THREE;
+          var el = /** @type {HTMLElement} */ (host.current);
+          var renderer = new THREE.WebGLRenderer({ antialias: true });
+          renderer.setSize(el.clientWidth || 300, el.clientHeight || 300);
+          el.appendChild(renderer.domElement);
+
+          var scene = new THREE.Scene();
+          var camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+          camera.position.set(2, 2, 3);
+          var controls = new THREE.OrbitControls(camera, renderer.domElement);
+          scene.add(new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshNormalMaterial()));
+
+          var frame = 0;
+          function draw() {
+            controls.update();
+            renderer.render(scene, camera);
+            frame = requestAnimationFrame(draw);
+          }
+          draw();
+
+          return function () {
+            cancelAnimationFrame(frame);
+            controls.dispose();
+            renderer.dispose();
+            el.removeChild(renderer.domElement);
+          };
+        }, []);
+
+        return h('div', { ref: host, style: props.style });
+      };
+    }
+  };
+
+  Noodl.defineModule({ reactNodes: [Cube] });
+})();
+```
+
+NodeGX may later load modern files directly. For now, bundle them.
+
 ## Where your kit runs
 
 A kit is a `<script>` tag, so the browser is the default and needs no declaration. `manifest.json`'s
@@ -498,6 +724,49 @@ declaring **`browser`**. A kit declaring only `"ssr"` is in no page and runs now
 One real limit: a kit whose `manifest.dependencies` points at an `http(s)` URL cannot be fetched
 during a server render, so that kit is skipped there and its nodes appear only after the page
 hydrates in the browser. Vendor the dependency into your kit folder to avoid it.
+:::
+
+## A kit that reads another kit
+
+Two kits sometimes need the same thing. A flat view and a 3D view of one world parse the same map. A chart kit and its legend
+kit share a colour scale. Put the shared code in one kit and let the other kit read it.
+
+The kit that shares names what it shares in `exports`:
+
+```js
+// noodl_modules/garden-kit/index.js
+Noodl.defineModule({
+  reactNodes: [Garden],
+  exports: { parseMap: parseMap, legend: LEGEND }
+});
+```
+
+The kit that reads lists the other kit in `requires`, in its own `manifest.json`. It then asks for it by that kit's folder or
+its manifest `name`:
+
+```json
+{ "name": "Garden 3D Kit", "main": "index.js", "requires": ["garden-kit"] }
+```
+
+```js
+// noodl_modules/garden-3d-kit/index.js
+var garden = Noodl.getModule('garden-kit');
+var world = garden.parseMap(rows);
+Noodl.defineModule({ reactNodes: [Garden3D] });
+```
+
+`requires` is what makes this safe. A kit named there loads before yours, whatever the folders are called. That holds in the
+browser, on a server render, in cloud functions and in the MCP server's list of node types. So you can call `getModule` at the
+top of your file, not only inside a render. Without the entry, kits load alphabetically by folder. Whether yours finds the
+other kit then depends on the names.
+
+If a kit you require is not installed, your kit is not loaded at all. The browser console, the server log and
+`get_project_info` name the kit it needed. If you want your kit to work alone, keep your own copy of what you need and leave
+`requires` out.
+
+:::caution Don't walk `window.__noodl_modules`
+It is the runtime's own list. Its order is the load order, which only `requires` guarantees. The MCP server's reader has no
+such list. Use `Noodl.getModule`.
 :::
 
 ## Autocomplete, without a build step
@@ -558,6 +827,11 @@ You do not have to type any of this from scratch. In the editor, **Project Setti
 writes a complete working kit — `manifest.json`, an annotated `index.js` with one example node, a
 copy of the types, and a README — and opens `index.js` for you.
 
+An agent working through the NodeGX MCP server has the same scaffold as the `create_node_kit` tool.
+It is not listed until asked for: call `find_tools` with the group `project`. A kit written by hand
+works too, and the server reads a kit's files again whenever they change, but the scaffold's README
+carries the traps under [Wrapping a library](#wrapping-a-library) as well.
+
 The example node it writes is built to be read: it declares 15 ports across all three groups,
 defaults every colour and spacing port to a design token, and carries a `Highlighted` boolean input
 specifically to demonstrate the rule above — the node draws the highlight, the graph decides when.
@@ -566,6 +840,11 @@ specifically to demonstrate the rule above — the node draws the highlight, the
 
 You will hit these within an hour. Having them written down is worth more than a page that looks
 clean.
+
+- **A kit node can be a component's only visual node.** You may read, in older kits and notes, that
+  a kit node must sit inside a Group to draw. That stopped being true: a component whose only visual
+  node is your kit's node draws on a deployed page and in the editor canvas. Wrap it in a Group only
+  when you want the Group's size ports ([Sizing a kit node](#sizing-a-kit-node-put-it-in-a-group)).
 
 - **Editing a kit file does not hot-reload.** Save, then reload the preview by hand — there is a
   refresh path in the runtime that is dead at both ends, which is why the editor tells you to reload

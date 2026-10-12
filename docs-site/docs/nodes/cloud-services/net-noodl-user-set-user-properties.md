@@ -34,6 +34,21 @@ The action behind a profile/settings form for the logged-in user. To set propert
 |---|---|---|---|
 | `store` | Signal | — | Writes the values below to the signed-in user, and fails when nobody is signed in |
 
+### What each input does
+
+**Do** (`store`)
+
+- the first press this frame: one write goes to the backend at the frame's end, with Email, Username and the properties held then — Done for each press, or Error (the backend's words, when it gives any) and Failure for each; nobody signed in, or a Backend the project does not have, is a Failure too
+- another press this frame: it joins that write, and is answered with it
+
+**Email** (`email`)
+
+- always: held as handed; read when the next write goes
+
+**Username** (`username`)
+
+- always: held as handed; read when the next write goes — a REST backend refuses a Username that is not blank, and writes nothing
+
 ## Outputs
 
 ### Signals

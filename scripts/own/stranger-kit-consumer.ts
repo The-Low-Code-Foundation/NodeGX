@@ -1,0 +1,14 @@
+import { run, Counter } from '@nodegx/node-spec';
+import { loadGraphScenarios } from '@nodegx/node-spec/node';
+import { look, nodeScheme } from '@nodegx/canvas-look';
+import { validateSchema, SCHEMA_IDS } from '@nodegx/project-contract/format/validator';
+import type { ProjectFiles } from '@nodegx/project-contract/format';
+import { diskFiles } from '@nodegx/project-contract/format-node';
+import { runSuite } from '@nodegx/project-contract/editor-suite';
+import { graphGraderFromNodeSpec } from '@nodegx/project-contract/editor-suite-node';
+import * as tokens from '@nodegx/project-contract/tokens';
+const files: ProjectFiles = diskFiles('.');
+const n: number = look.card.size.width;
+const s: string = nodeScheme('visual').base;
+const ok: boolean = validateSchema(SCHEMA_IDS.NODES, {}).valid;
+void [run, Counter, loadGraphScenarios, runSuite, graphGraderFromNodeSpec, tokens, files, n, s, ok];

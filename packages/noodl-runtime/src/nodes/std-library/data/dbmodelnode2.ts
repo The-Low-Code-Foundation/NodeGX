@@ -408,8 +408,9 @@ const ModelNodeDefinition: NodeDefinitionOptions = {
         const tokens = internal.pendingFetch || [];
         internal.pendingFetch = [];
 
-        // Don't do fetch if no id
-        if (internal.modelId === undefined || internal.modelId === '') {
+        // Don't do fetch if no id. P107-D22 (ISL-029, ruled "Say 'Missing Id.'"): the binding's own empty test
+        // (`setModelID`) — a null Id, what a cleared wire carries, asked the backend for the record "null".
+        if (internal.modelId === undefined || internal.modelId === null || internal.modelId === '') {
           _this.setError('Missing Id.', tokens);
           return;
         }
@@ -479,6 +480,10 @@ const ModelNodeDefinition: NodeDefinitionOptions = {
         this.registerOutput(name, {
           getter: userOutputGetter.bind(this, name.substring('prop-'.length))
         });
+      // ISL-027 / P107-C37, ruled "Make them fire": the editor offers `<field> Changed` beside each field, and the
+      // model's change callback pulses it behind `hasOutput`. Registered only for `prop-`, the wire was dropped and
+      // the signal never fired.
+      if (name.startsWith('changed-')) this.registerOutput(name, { type: 'signal', getter: () => undefined });
     },
     registerInputIfNeeded: function (this: DbModelNodeInstance, name: string) {
       if (this.hasInput(name)) {

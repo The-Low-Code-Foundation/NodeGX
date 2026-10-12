@@ -98,7 +98,9 @@ describe('noodl-mcp tools (end to end)', () => {
     expect(isError).toBe(false);
     expect(data.name).toBe('Demo App');
     expect(data.mode).toBe('read-write');
-    expect(data.rootComponent?.path).toBe('App');
+    // P109 ISL-016: the fixture's App is typed `root` in the registry but the project file has no
+    // `rootNodeId`, which is the only field the editor opens on — so it has no home, and says so.
+    expect(data.rootComponent?.missing).toBe(true);
     expect(data.stats?.totalComponents).toBe(3);
   });
 
@@ -119,7 +121,7 @@ describe('noodl-mcp tools (end to end)', () => {
     expect(data.legacyName).toBe('/Pages/Home');
     expect(data.nodes).toHaveLength(6);
     expect(data.connections).toHaveLength(1);
-    expect(data.revision).toMatch(/^[0-9a-f]{12}$/);
+    expect(data.revision).toMatch(/^[0-9a-f]{14}$/);
     expect(data.usages).toEqual([]);
   });
 

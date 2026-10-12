@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d51c2008-5e65-52c0-b6d4-1e9c1070d24c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "Staff only (security: role:staff). No parameters.",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      }
+    },
+    {
+      "id": "list",
+      "type": "JavaScriptFunction",
+      "label": "Id and title, alphabetical",
+      "x": 300,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * THE COURSE'S CONCEPTS, FOR A COACH CHOOSING A PATH (TASK-L184 \u00a73).\n *\n * Every concept's id and title, and nothing about any person. Alphabetical by\n * title: `Concept` holds no order of its own and the backend promises none for\n * a query (L170 measured file order lying), and a coach choosing by hand reads\n * a list they can scan. The path's ORDER is the coach's, set on the page.\n * It runs when the request's caller arrives (`userId`), once per call.\n */\nif (Inputs.userId !== undefined) (async () => {\n  try {\n    const rows = await Noodl.Records.query('Concept', {}, { limit: 1000, plain: true });\n    Outputs.concepts = rows\n      .map((r) => ({ conceptId: String(r.conceptId), title: String(r.title || r.conceptId) }))\n      .sort((a, b) => a.title.localeCompare(b.title));\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbt:conceptList] ' + String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n",
+        "runOnChange-in-userId": true
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "userId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-concepts",
+          "plug": "output",
+          "type": "*",
+          "displayName": "concepts",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "RECORDS QUERIES PER CALL: 1."
+      }
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "concepts",
+      "x": 1080,
+      "y": 40,
+      "parameters": {
+        "params": "concepts"
+      }
+    },
+    {
+      "id": "deny",
+      "type": "noodl.cloud.response",
+      "label": "One refusal",
+      "x": 1080,
+      "y": 220,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This could not be read."
+      }
+    }
+  ]
+}

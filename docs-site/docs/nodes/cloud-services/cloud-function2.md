@@ -27,6 +27,12 @@ Use it whenever browser logic needs work done with server-side trust: secrets, s
 |---|---|---|---|
 | `call` | Signal | — | Runs the selected cloud function with the current input values |
 
+### What each input does
+
+**Call** (`call`)
+
+- always: one call at the end of the frame, however many presses — when it answers, its results and Done for each press, or Error and Failure for each; with no cloud services, Error and Failure for each at the end of the frame
+
 ## Outputs
 
 ### Signals

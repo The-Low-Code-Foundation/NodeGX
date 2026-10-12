@@ -39,7 +39,10 @@ describe('the recorded payload a real viewer sent', () => {
     const types = recordedNodeTypes();
     const withModule = types.filter((t) => t.module);
 
-    expect(types.length).toBe(177);
+    // The recording states its own population (`_recording.counts.total`); counting against that rather than a
+    // literal is what let the 2026-10-03 re-record (177 → 182: five built-ins added since August) move it once.
+    expect(types.length).toBe(JSON.parse(fs.readFileSync(FIXTURE, 'utf8'))._recording.counts.total);
+    expect(types.length).toBeGreaterThanOrEqual(177);
     expect(withModule.map((t) => t.name).sort()).toEqual(['demo.kit.Badge', 'demo.kit.Meter']);
     expect(withModule.every((t) => t.module === 'Demo Kit')).toBe(true);
   });

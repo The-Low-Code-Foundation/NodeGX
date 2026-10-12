@@ -1,10 +1,10 @@
-# @noodl/preview — standalone live-preview harness
+# @nodegx/preview — standalone live-preview harness
 
 Render a NodeGX (OpenNoodl) project in a browser **with no editor process**, and
 reload it automatically when the files on disk change.
 
 ```bash
-npm run preview -- ./my-project --open
+npx @nodegx/preview ./my-project --open
 ```
 
 That is the whole recipe: **point it at the folder your agent is editing.** An
@@ -36,7 +36,9 @@ always in step with the sources. Direct invocation is
 
 ### Prerequisites
 
-The deployed viewer runtime (`packages/noodl-editor/src/external/deploy/`) is a
+Installed from npm, the package needs nothing else. It carries the viewer runtime it renders with.
+
+In a checkout of the NodeGX repository (`npm run preview -- ./my-project --open`), the deployed viewer runtime (`packages/noodl-editor/src/external/deploy/`) is a
 build artifact and is not committed. If it is missing, the CLI says so and how to
 fix it:
 
@@ -153,3 +155,8 @@ worth it only once the payoff is proven. Deliberately not built here.
 | `src/watcher.ts` | Debounced chokidar watch |
 
 Task spec: `dev-docs/tasks/phase-13-format-ai-substrate/SUB-009-LIVE-PREVIEW-HARNESS.md`
+
+## Licence
+
+The preview is licensed GPL-3.0-only because it bundles code from the NodeGX editor. The source is in
+[The-Low-Code-Foundation/NodeGX](https://github.com/The-Low-Code-Foundation/NodeGX), under `packages/noodl-preview`.

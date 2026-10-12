@@ -215,7 +215,7 @@ describe('HLS-015 AC3 / C72 — resolving the deploy engine', () => {
     const resolved = resolveEngine(dist, {});
     expect(resolved.entry).toBeNull();
     expect(resolved.unbuiltPackage).toBe(preview);
-    expect(describeMissingEngine(resolved)).toContain('npm run build --workspace @noodl/preview');
+    expect(describeMissingEngine(resolved)).toContain('npm run build --workspace @nodegx/preview');
   });
 
   it('an override that points at nothing is an error, never a fall-through', () => {

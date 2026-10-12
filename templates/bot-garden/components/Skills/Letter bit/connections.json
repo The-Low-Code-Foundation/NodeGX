@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "df6e5456-c6bd-5d6c-85e2-cf8aa2e6e662",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lbIn",
+      "fromProperty": "text",
+      "toId": "lbText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lbIn",
+      "fromProperty": "ground",
+      "toId": "lbBox",
+      "toProperty": "backgroundColor"
+    }
+  ]
+}

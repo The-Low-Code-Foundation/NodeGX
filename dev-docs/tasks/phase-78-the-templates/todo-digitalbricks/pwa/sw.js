@@ -33,7 +33,13 @@ self.addEventListener('notificationclick', function (event) {
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (windows) {
       for (var i = 0; i < windows.length; i++) {
-        if ('focus' in windows[i]) return windows[i].focus();
+        var w = windows[i];
+        if (!('focus' in w)) continue;
+        // TPL-008-RC: a routine's reminder says /?view=today — an open app is taken to Today too.
+        if (url.indexOf('view=') >= 0 && 'navigate' in w) {
+          return w.navigate(url).then(function (c) { return (c || w).focus(); }, function () { return w.focus(); });
+        }
+        return w.focus();
       }
       return self.clients.openWindow(url);
     })

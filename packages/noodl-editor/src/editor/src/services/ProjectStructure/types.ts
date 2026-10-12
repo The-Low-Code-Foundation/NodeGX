@@ -25,6 +25,12 @@ export interface ProjectStructureFilesystem {
   removeFile(path: string): Promise<void>;
   makeDirectory(path: string): Promise<void>;
   removeDirRecursive(path: string): void;
+  /**
+   * P109 ISL-005 — text reads and a recursive listing, for `scripts/**.js`. Optional so a test double
+   * that never meets a script file need not grow them; without them scripts are neither read nor saved.
+   */
+  readFile?(path: string): Promise<string>;
+  listDirectoryFiles?(path: string): Promise<Array<{ fullPath: string; name: string; isDirectory: boolean }>>;
 }
 
 /** Standard v2 filenames, relative to a component directory / project root. */
@@ -33,6 +39,8 @@ export const V2_FILES = {
   routes: 'nodegx.routes.json',
   styles: 'nodegx.styles.json',
   componentsDir: 'components',
+  /** P109 ISL-005 — the project's script files, `scripts/**.js`. */
+  scriptsDir: 'scripts',
   registry: 'components/_registry.json',
   component: 'component.json',
   nodes: 'nodes.json',

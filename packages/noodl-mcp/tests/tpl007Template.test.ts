@@ -29,12 +29,13 @@ import { execSync } from 'child_process';
 import type { LegacyConnection, LegacyNode } from '../../noodl-editor/src/editor/src/io/ProjectExporter';
 
 import { CURRICULUM, HANGAR_LOOKS, HANGAR_SHELF, HangarItem, WORDS } from './tpl007Curriculum';
-import { APP_CSS, C, CONTENT_SIZED_TEXTS, DATA_COMPONENTS, LOGIC_COMPONENTS, MONSTER_PIXELS, PAGES, REQUIRED_MODULES, TPL007_COMPONENTS } from './tpl007Components';
+import { APP_CSS, C, CONTENT_SIZED_TEXTS, DATA_COMPONENTS, LOGIC_COMPONENTS, logicName, MONSTER_PIXELS, PAGES, REQUIRED_MODULES, TPL007_COMPONENTS } from './tpl007Components';
 import { buildEffectiveTokens, checkFontFaces } from '../src/editor-deps';
 import { reducedMotionReport } from './reducedMotion';
 import { DRAW_HUNT_SCRIPT, MONSTER_LOOKS, runScript } from './tpl007Scripts';
 import { AuthoredTemplate, buildRocketTemplateProject, prepareRocketArtefact, TEMPLATE_ID } from './tpl007Template';
 import { DISPLAY_FONT, LARGE_TEXT_SIZES, requestedCompositions, ROLE, tpl007TokenEntries, USED_COMPOSITIONS } from './tpl007Theme';
+import { ALIEN_COLOURS } from './tpl007Moon';
 
 jest.setTimeout(600_000);
 
@@ -96,7 +97,7 @@ describe('TPL-007 — Rocket School, the artefact', () => {
     built = await buildRocketTemplateProject();
   });
 
-  it('authors every component through one plan, installs the kits first, and registers six pages', () => {
+  it('authors every component through one plan, installs the kits first, and registers eight pages', () => {
     expect(built.planId).toMatch(/^plan-|\w+/);
     // The kits from the library (Make Ten Merge's arrows are keyboard-shortcuts), then the template's own bundled fonts (RKT-002: s1
     // never loaded its font).
@@ -111,21 +112,16 @@ describe('TPL-007 — Rocket School, the artefact', () => {
     expect([...pages.routes!].sort()).toEqual([...PAGES].sort());
   });
 
-  it('raised no warning the door did not refuse over, except the one it raises about its own plan', () => {
+  it('raised no warning the door did not refuse over', () => {
     const warnings = built.diagnostics.filter((d) => d.severity === 'warning');
     const codes = new Set(warnings.map((d) => d.code));
     // P88 GAM-021: `page-cannot-scroll` is gone — the plan door now judges the `bodyScroll` the plan's
     // own `scroll: "page"` leaves, and the artefact HAS it (asserted below).
-    expect([...codes].sort()).toEqual(['uncollapsible-multi-column']);
-    // P88 GAM-022: Arm B reads the item a `For Each` draws. The content-sized pills of `Game/Choice row` and
-    // `Game/Question box` are no longer told to become columns; the two grids of tiles given a width
-    // (132px hangar tiles, 150px profile cards) still are. Pinned by component, because the code set alone
-    // cannot tell a fixed rule from a broken one. `apply` is the builder's label for `apply_plan`'s
-    // re-validation, which raises the same two again.
-    const multiColumn = new Set(
-      warnings.filter((d) => d.code === 'uncollapsible-multi-column').map((d) => String(d.component).replace(/^\//, ''))
-    );
-    expect([...multiColumn].sort()).toEqual(['Hangar/Shelf', 'Pages/Profiles', 'apply']);
+    // P88 GAM-022 silenced the content-sized pills of `Game/Choice row` and `Game/Question box`; P109 ISL-022 (Richard's
+    // ruling 2026-10-02, "Yes, both") silenced the last two, `Hangar/Shelf` (132px tiles) and `Pages/Profiles` (150px
+    // cards): a wrapped row of items a phone can hold wraps, and was being told to become 260-320px columns. The
+    // known-firing arms beside this absence (32%, 600px) are in `isl-022-the-wrapped-row-warning.test.ts`.
+    expect([...codes].sort()).toEqual([]);
     const project = JSON.parse(fs.readFileSync(path.join(built.projectDir, 'nodegx.project.json'), 'utf8')) as { settings: { bodyScroll?: boolean } };
     expect(project.settings.bodyScroll).toBe(true);
   });
@@ -714,12 +710,13 @@ describe('TPL-007 — Rocket School, the artefact', () => {
         missing(C.raceSetup, [
           ['rsSeeded', 'seeded', 'rsFirst', 'condition'],
           ['rsCard', 'didMount', 'rsFirst', 'eval'],
-          ['rsFirst', 'onfalse', 'rsInitMode', 'do'],
+          // P113: the mode row is gone (the chooser is the subject), so the chain starts at the players' default.
+          ['rsFirst', 'onfalse', 'rsInitPlayers', 'do'],
           ['rsInitTimed', 'done', 'rsSeeded', 'to-seeded']
         ])
       ).toEqual([]);
       // The mount must not reach the defaults any other way.
-      const initBy = connectionsOf(built, C.raceSetup).filter((c) => c.toId === 'rsInitMode' && c.toProperty === 'do').map((c) => `${c.fromId}.${c.fromProperty}`);
+      const initBy = connectionsOf(built, C.raceSetup).filter((c) => c.toId === 'rsInitPlayers' && c.toProperty === 'do').map((c) => `${c.fromId}.${c.fromProperty}`);
       expect(initBy).toEqual(['rsFirst.onfalse']);
       // A States node starts in its FIRST state, so `fresh` must be it.
       const seeded = nodesOf(built, C.raceSetup).find((n) => n.id === 'rsSeeded')!.parameters as Record<string, unknown>;
@@ -1468,6 +1465,54 @@ describe('TPL-007 — Rocket School, the artefact', () => {
     });
 
     /**
+     * 🔴 Richard, 2026-09-20, playing the live demo: *"wtf is the avatar in the CPU rocket? it's some creepy orange
+     * thing."* Rocket B's face was never fed from anywhere, so the kit's own defaults drew it — style `thumbs`, seed
+     * `Computer` — and `thumbs` is one of the two collections R3 threw out of the child's chooser for wearing nothing.
+     *
+     * Two clauses, because two different things can go wrong. The FACE must be fed at all (the wires exist), and it must
+     * be fed from the looks a child would recognise (HANGAR_LOOKS), minted on the reset that Start, Restart and Play
+     * again all pass through — so every race is against somebody new rather than the same thumb forever.
+     */
+    it('🔴 the other rocket has a face of its own: fed from HANGAR_LOOKS, minted on every start', () => {
+      const conns = connectionsOf(built, C.racePlay);
+      const into = (property: string) => conns.filter((c) => c.toId === 'rpTrack' && c.toProperty === property).map((c) => `${c.fromId}.${c.fromProperty}`);
+      expect({ lookB: into('lookB'), seedB: into('seedB') }).toEqual({ lookB: ['rpFaceB.out-look'], seedB: ['rpFaceB.out-seed'] });
+      // Minted by the same reset as the race id — not once on mount, which would be one opponent for the whole session.
+      expect(conns.filter((c) => c.toId === 'rpFaceB' && c.toProperty === 'run').map((c) => `${c.fromId}.${c.fromProperty}`)).toEqual(['rpResetA.done']);
+      const script = String((nodesOf(built, C.racePlay).find((n) => n.id === 'rpFaceB')!.parameters as Record<string, unknown>).functionScript);
+      expect(JSON.parse(script.slice(script.indexOf('['), script.indexOf(']') + 1))).toEqual([...HANGAR_LOOKS]);
+      // 🔴 The defect said in the negative: neither collection R3 dropped may reach a rocket a child looks at.
+      expect(script).not.toMatch(/thumbs|fun-emoji/);
+    });
+
+    /**
+     * 🔴 Richard, 2026-09-20, in a challenge race: *"clicking 'lancer le turbo !' does nothing right now … I just
+     * clicked it and then got the right answer and I think that launched the turbo. So there's no visual feedback that
+     * the turbo has been 'activated'."*
+     *
+     * Arming published `on` to the grader and to NOTHING a child can see: same label, same colour, same everything, so
+     * the only way to learn the tap had worked was to answer the question. The armed state now reaches three surfaces —
+     * the button's words, the button's colour, and the line above it that says what spends it.
+     */
+    it('🔴 arming the turbo is visible: the button changes its words and its colour, and the line says what spends it', () => {
+      const conns = connectionsOf(built, C.raceRound);
+      const from = (property: string) => conns.filter((c) => c.fromId === 'rdArmed' && c.fromProperty === property).map((c) => `${c.toId}.${c.toProperty}`).sort();
+      // The grader was the only reader before this; it must stay one of them.
+      expect(from('on')).toEqual(['rdChainLine.in-armed', 'rdGrade.useTurbo', 'rdTurboLabel.armed']);
+      expect(from('bg')).toEqual(['rdTurbo.backgroundColor']);
+      // 🔴 The label is no longer the word straight off the input: it is the choice between the two words.
+      expect(conns.filter((c) => c.toId === 'rdTurbo' && c.toProperty === 'label').map((c) => `${c.fromId}.${c.fromProperty}`)).toEqual(['rdTurboLabel.result']);
+      const armed = nodesOf(built, C.raceRound).find((n) => n.id === 'rdArmed')!.parameters as Record<string, unknown>;
+      expect({ idle: armed['value-idle-bg'], armed: armed['value-armed-bg'] }).toEqual({ idle: 'var(--primary)', armed: ROLE.picked });
+      // Both words exist in both languages, and neither is the word the button already said.
+      for (const key of ['turboArmed', 'turboArmedHint'] as const) {
+        const row = WORDS[key];
+        expect({ key, en: row.en.length > 0, fr: row.fr.length > 0 }).toEqual({ key, en: true, fr: true });
+        expect(row.fr).not.toEqual(WORDS.turboReady.fr);
+      }
+    });
+
+    /**
      * 🔴 PLY-001 AC8 (s3) — the sentence §3.4 designed and nobody built. It was in no source and no built file, so
      * a child on a look that can wear nothing opened the face tab to an empty box and was told nothing at all.
      */
@@ -1581,6 +1626,7 @@ describe('TPL-007 — Rocket School, the artefact', () => {
       // typing version. The mode now arrives from the setup, and no node may pin it again.
       expect(params(C.monsterPlay, 'zpRound').mode).toBeUndefined();
       expect(connectionsOf(built, C.monsterPlay)).toEqual(expect.arrayContaining([expect.objectContaining({ fromId: 'zpIn', fromProperty: 'mode', toId: 'zpRound', toProperty: 'mode' })]));
+      // P113: the setup's mode is now the focus it resolved (a subject or a list), never a row.
       expect(connectionsOf(built, C.pageMonster)).toEqual(expect.arrayContaining([expect.objectContaining({ fromId: 'zgSetup', fromProperty: 'mode', toId: 'zgPlay', toProperty: 'mode' })]));
     });
 
@@ -1640,8 +1686,8 @@ describe('TPL-007 — Rocket School, the artefact', () => {
         missing(C.monsterSetup, [
           ['zsCard', 'didMount', 'zsFirst', 'eval'], ['zsInitStyle', 'done', 'zsInitTimed', 'do'], ['zsInitTimed', 'done', 'zsSeeded', 'to-seeded'],
           ['zsStart', 'onClick', 'zsOut', 'start'], ['zsStyleVar', 'value', 'zsOut', 'style'], ['zsIsTimed', 'result', 'zsOut', 'timed'], ['zsRuleText', 'result', 'zsRule', 'text'],
-          // PLY-004: and the maths/typing row, written once like the other two.
-          ['zsFirst', 'onfalse', 'zsInitMode', 'do'], ['zsInitMode', 'done', 'zsInitStyle', 'do'], ['zsModeVar', 'value', 'zsOut', 'mode']
+          // PLY-004's maths/typing row became the chooser's subject step (P113), so the once-written chain starts at the style.
+          ['zsFirst', 'onfalse', 'zsInitStyle', 'do']
         ])
       ).toEqual([]);
       const items = (id: string, inputs: Record<string, unknown>) => new Function('Inputs', 'Outputs', `${String(params(C.monsterSetup, id).functionScript)}; return Outputs.items;`)(inputs, {});
@@ -1686,6 +1732,179 @@ describe('TPL-007 — Rocket School, the artefact', () => {
       for (const fx of ['rkt-monster-hit-a', 'rkt-monster-lunge-a', 'rkt-monster-arrive-a', 'rkt-monster-gone']) expect(APP_CSS).toMatch(new RegExp(`\\.${fx} \\{ animation: `));
       // The reduced-motion block stills the element that bobs (the checker reads a class name, so it cannot tell the box from its pixels).
       expect(APP_CSS).toMatch(/@media \(prefers-reduced-motion: reduce\) \{[\s\S]*\.rkt-monster::before, \.rkt-monster-hit-a/);
+    });
+  });
+
+
+  describe('P113 — the third play test: what to practise, revision lists, three more subjects', () => {
+    const has = (conns: LegacyConnection[], [fromId, fromProperty, toId, toProperty]: string[]) => conns.some((c) => c.fromId === fromId && c.fromProperty === fromProperty && c.toId === toId && c.toProperty === toProperty);
+    const missing = (name: string, wires: string[][]) => wires.filter((w) => !has(connectionsOf(built, name), w)).map((w) => w.join(' → '));
+
+    it('🔴 REV-001: both setups host the chooser, and what it saves reaches the profile and the picker from both pages', () => {
+      for (const [page, setup, play, p] of [[C.pageRace, C.raceSetup, C.racePlay, 'rc'], [C.pageMonster, C.monsterSetup, C.monsterPlay, 'zg']] as const) {
+        const setupNodes = nodesOf(built, setup);
+        expect(setupNodes.filter((n) => n.type === C.focusPicker).map((n) => n.id)).toEqual([`${setup === C.raceSetup ? 'rs' : 'zs'}Picker`]);
+        // The "Maths or typing" row is gone: typing is a subject in the chooser.
+        expect(setupNodes.filter((n) => n.type === C.choiceRow).map((n) => n.label)).not.toContain('Maths or typing');
+        const setupId = setup === C.raceSetup ? 'rcSetup' : 'zgSetup';
+        const playId = setup === C.raceSetup ? 'rcPlay' : 'zgPlay';
+        const sp = setup === C.raceSetup ? 'rs' : 'zs';
+        expect(
+          missing(page, [
+            [`${p}Me`, 'focusSubject', setupId, 'subject0'], [`${p}Me`, 'focusSkills', setupId, 'skills0'], [`${p}Curriculum`, 'skills', setupId, 'curriculum'], [`${p}Me`, 'sets', setupId, 'sets'],
+            [setupId, 'mode', playId, 'mode'], [setupId, 'focus', playId, 'focus'], [setupId, 'customSet', playId, 'customSet'], [setupId, 'customSetId', playId, 'customSetId'], [setupId, 'customSetBoth', playId, 'customSetBoth'],
+            [`${p}Store`, 'app', setupId, 'app'], [`${p}Me`, 'profileId', setupId, 'profileId'], [setupId, 'app', `${p}Store`, 'app'], [setupId, 'write', `${p}Store`, 'write'],
+            [setupId, 'editLists', `${p}GoLists`, 'navigate']
+          ])
+        ).toEqual([]);
+        // Inside the setup: the saved focus is resolved into the line and the game's inputs, and what the chooser saves is written.
+        expect(
+          missing(setup, [
+            [`${sp}In`, 'subject0', `${sp}Focus`, 'subject'], [`${sp}In`, 'skills0', `${sp}Focus`, 'skills'], [`${sp}Focus`, 'line', `${sp}FocusLine`, 'text'], [`${sp}Focus`, 'mode', `${sp}Out`, 'mode'], [`${sp}Focus`, 'focus', `${sp}Out`, 'focus'],
+            [`${sp}Picker`, 'subject', `${sp}SetFocus`, 'focusSubject'], [`${sp}Picker`, 'skills', `${sp}SetFocus`, 'focusSkills'], [`${sp}Picker`, 'save', `${sp}SetFocus`, 'run'], [`${sp}SetFocus`, 'app', `${sp}Out`, 'app'], [`${sp}SetFocus`, 'done', `${sp}Out`, 'write'],
+            [`${sp}Change`, 'onClick', `${sp}Picker`, 'open'], [`${sp}Change`, 'onClick', `${sp}Choosing`, 'to-picking'], [`${sp}Picker`, 'save', `${sp}Choosing`, 'to-setup'], [`${sp}Choosing`, 'setup', `${sp}Rows`, 'mounted'], [`${sp}Choosing`, 'picking', `${sp}Picker`, 'mounted']
+          ])
+        ).toEqual([]);
+        // No row of the setup feeds the game's mode any more: the setup's one mode output is the focus it resolved.
+        expect(connectionsOf(built, page).filter((c) => c.toId === playId && c.toProperty === 'mode').map((c) => `${c.fromId}.${c.fromProperty}`)).toEqual([`${setupId}.mode`]);
+        expect(connectionsOf(built, setup).filter((c) => c.toId === `${sp}Out` && c.toProperty === 'mode').map((c) => `${c.fromId}.${c.fromProperty}`)).toEqual([`${sp}Focus.mode`]);
+        // Down through the game to the round, and into the picker and the grader.
+        const roundId = setup === C.raceSetup ? 'rpRound' : 'zpRound';
+        const inId = setup === C.raceSetup ? 'rpIn' : 'zpIn';
+        expect(missing(play, (['focus', 'customSet', 'customSetId', 'customSetBoth'] as const).map((f) => [inId, f, roundId, f]))).toEqual([]);
+      }
+      expect(missing(C.raceRound, [['rdIn', 'focus', 'rdPick', 'focus'], ['rdIn', 'customSet', 'rdPick', 'customSet'], ['rdIn', 'customSetId', 'rdPick', 'customSetId'], ['rdIn', 'customSetBoth', 'rdPick', 'customSetBoth'], ['rdPick', 'itemKey', 'rdGrade', 'itemKey'], ['rdPick', 'itemCount', 'rdGrade', 'itemCount']])).toEqual([]);
+      // Nowhere else writes the picker's mode: the chooser is the one way in.
+      for (const page of [C.pageRace, C.pageMonster]) expect(nodesOf(built, page).filter((n) => n.type === C.choiceRow)).toEqual([]);
+    });
+
+    it('🔴 REV-001: the chooser — three rows, the draft loaded on Open, a tap toggles one skill, All and Clear act on the topic, and Practise this publishes the subject the script resolved', () => {
+      const nodes = nodesOf(built, C.focusPicker);
+      expect(nodes.filter((n) => n.type === C.choiceRow).map((n) => n.id).sort()).toEqual(['fpSubject', 'fpTopic']);
+      expect((nodes.find((n) => n.id === 'fpEach')!.parameters as { template?: string }).template).toBe(C.choice);
+      // One Set Variable per writer of the ticks: three scripts never share one value port.
+      const toggles = nodes.filter((n) => n.type === logicName('Logic/Toggle id')).map((n) => [n.id, (n.parameters as { action?: string }).action]);
+      expect(toggles.sort()).toEqual([['fpTickAll', 'all'], ['fpTickNone', 'none'], ['fpToggle', 'toggle']]);
+      expect(
+        missing(C.focusPicker, [
+          ['fpIn', 'open', 'fpLoadSubject', 'do'], ['fpIn', 'subject0', 'fpLoadSubject', 'value'], ['fpLoadSubject', 'done', 'fpLoadTopic', 'do'], ['fpLoadTopic', 'done', 'fpLoadSkills', 'do'], ['fpIn', 'skills0', 'fpLoadSkills', 'value'],
+          ['fpEach', 'itemOutput-value', 'fpToggle', 'id'], ['fpEach', 'itemOutputSignal-picked', 'fpToggle', 'run'], ['fpToggle', 'list', 'fpSetSkills', 'value'], ['fpToggle', 'done', 'fpSetSkills', 'do'],
+          ['fpAll', 'onClick', 'fpTickAll', 'run'], ['fpChoices', 'topicIds', 'fpTickAll', 'ids'], ['fpTickAll', 'list', 'fpSetAll', 'value'],
+          ['fpNone', 'onClick', 'fpTickNone', 'run'], ['fpTickNone', 'list', 'fpSetNone', 'value'],
+          ['fpChoices', 'saveSubject', 'fpOut', 'subject'], ['fpSkillsVar', 'value', 'fpOut', 'skills'], ['fpSave', 'onClick', 'fpOut', 'save'],
+          ['fpChoices', 'hasSkills', 'fpSkills', 'mounted'], ['fpChoices', 'hasTopics', 'fpTopic', 'mounted'], ['fpChoices', 'isLists', 'fpEditLists', 'mounted'], ['fpEditLists', 'onClick', 'fpOut', 'editLists']
+        ])
+      ).toEqual([]);
+      // The door's warning about the shared draft is answered on every one of the three Variables, not one. The door keeps a node's
+      // comment in the artefact under metadata.comment (measured 2026-10-04), so this reads what shipped, not the source.
+      for (const id of ['fpSubjectVar', 'fpTopicVar', 'fpSkillsVar']) {
+        const node = nodes.find((n) => n.id === id) as { metadata?: { comment?: string } };
+        expect({ id, comment: typeof node.metadata?.comment }).toEqual({ id, comment: 'string' });
+      }
+      // Every Variable the chooser holds is one of the draft's three.
+      expect(nodes.filter((n) => n.type === 'Variable2').map((n) => (n.parameters as { name: string }).name).sort()).toEqual(['focusDraftSkills', 'focusDraftSubject', 'focusDraftTopic']);
+    });
+
+    it('🔴 REV-002: the lists page is registered, small, and its editor is a text box whose Save shows only when a line parsed', () => {
+      expect(PAGES).toContain(C.pageLists);
+      expect(nodesOf(built, C.pageLists).length).toBeLessThanOrEqual(32);
+      const editor = nodesOf(built, C.listEditor);
+      const box = editor.find((n) => n.id === 'leText')!.parameters as Record<string, unknown>;
+      expect({ type: box.type, sizeMode: box.sizeMode }).toEqual({ type: 'textArea', sizeMode: 'explicit' });
+      expect(
+        missing(C.listEditor, [
+          ['leTextVar', 'value', 'leParse', 'json'], ['leParse', 'valid', 'leSave', 'mounted'], ['leParse', 'items', 'leOut', 'items'],
+          // Typing is kept (RKT-006), and Fill writes the draft, then tells the boxes.
+          ['leText', 'onTextChanged', 'leTextVar', 'value'], ['leTextVar', 'value', 'leText', 'startValue'], ['leSetText', 'done', 'leText', 'set'],
+          ['leIn', 'fill', 'leFill', 'run'], ['leFill', 'success', 'leSetName', 'do'], ['leSetName', 'done', 'leSetText', 'do'], ['leSetText', 'done', 'leSetBoth', 'do'], ['leSetBoth', 'done', 'leSetId', 'do']
+        ])
+      ).toEqual([]);
+      // The Fill function runs only on its signal.
+      const fill = editor.find((n) => n.id === 'leFill')!.parameters as Record<string, unknown>;
+      expect({ sets: fill['runOnChange-in-sets'], setId: fill['runOnChange-in-setId'] }).toEqual({ sets: false, setId: false });
+      expect(
+        missing(C.pageLists, [
+          ['lsNew', 'onClick', 'lsClearId', 'do'], ['lsClearId', 'done', 'lsEditor', 'fill'], ['lsEach', 'itemOutput-id', 'lsSetEditId', 'value'], ['lsEach', 'itemOutputSignal-edit', 'lsSetEditId', 'do'], ['lsSetEditId', 'done', 'lsEditor', 'fill'],
+          ['lsEditor', 'save', 'lsSave', 'run'], ['lsEditor', 'items', 'lsSave', 'items'], ['lsEditor', 'both', 'lsSave', 'both'], ['lsSave', 'app', 'lsStore', 'app'], ['lsSave', 'done', 'lsStore', 'write'],
+          ['lsEach', 'itemOutputSignal-delete', 'lsDelete', 'run'], ['lsDelete', 'done', 'lsStore', 'write'],
+          ['lsPanel', 'closed', 'lsList', 'mounted'], ['lsPanel', 'open', 'lsEditor', 'mounted']
+        ])
+      ).toEqual([]);
+      // A row asks before it deletes: the first tap reaches the asking state and never the output.
+      expect(missing(C.listRow, [['lrDelete', 'onClick', 'lrAskState', 'to-asking'], ['lrYes', 'onClick', 'lrOut', 'delete'], ['lrNo', 'onClick', 'lrAskState', 'to-idle']])).toEqual([]);
+      expect(connectionsOf(built, C.listRow).filter((c) => c.fromId === 'lrDelete' && c.toId === 'lrOut')).toEqual([]);
+    });
+
+    it('REV-001 / REV-002: every word the chooser and the lists page say exists in both languages, and differs between them where it is not a name', () => {
+      for (const key of ['practising', 'changeFocus', 'whatToPractise', 'pickSubject', 'pickTopic', 'pickSkills', 'tickAll', 'tickNone', 'saveFocus', 'myLists', 'myList', 'editLists', 'noListsYet', 'listsTitle', 'listsBlurb', 'newList', 'listName', 'listLines', 'listCount', 'listEmpty', 'listEdit', 'listDelete', 'listDeleteAsk', 'listBothWays', 'listOneWay', 'everythingAtLevel', 'skillsCount'] as const) {
+        const row = WORDS[key];
+        // "{n} questions" is the same sentence in both languages.
+        expect({ key, en: row.en.length > 0, fr: row.fr.length > 0, differ: key === 'listCount' || row.en !== row.fr }).toEqual({ key, en: true, fr: true, differ: true });
+      }
+    });
+  });
+
+  describe('P113 REV-005 — the moon (ruling 4: the prizes are aliens on a moon), held in the graph', () => {
+    const has = (conns: LegacyConnection[], [fromId, fromProperty, toId, toProperty]: string[]) => conns.some((c) => c.fromId === fromId && c.fromProperty === fromProperty && c.toId === toId && c.toProperty === toProperty);
+    const missing = (name: string, wires: string[][]) => wires.filter((w) => !has(connectionsOf(built, name), w)).map((w) => w.join(' → '));
+    const into = (name: string, toId: string, toProperty: string) => connectionsOf(built, name).filter((c) => c.toId === toId && c.toProperty === toProperty).map((c) => `${c.fromId}.${c.fromProperty}`).sort();
+
+    it('the moon is a page of its own, reached from the hangar and back, and not a card on Home (the hangar is not a game: 2026-09-14)', () => {
+      expect(PAGES).toContain(C.pageMoon);
+      expect(nodesOf(built, C.pageMoon).find((n) => n.type === 'Page')!.parameters).toEqual(expect.objectContaining({ urlPath: 'moon' }));
+      expect(missing(C.pageHangar, [['hgMoon', 'onClick', 'hgGoMoon', 'navigate'], ['hgT', 'visitMoon', 'hgMoon', 'label']])).toEqual([]);
+      expect((nodesOf(built, C.pageHangar).find((n) => n.id === 'hgGoMoon')!.parameters as { target?: string }).target).toBe(C.pageMoon);
+      expect(missing(C.pageMoon, [['mnBack', 'onClick', 'mnGoHangar', 'navigate']])).toEqual([]);
+      expect(nodesOf(built, C.pageHome).some((n) => (n.parameters as { target?: string } | undefined)?.target === C.pageMoon)).toBe(false);
+    });
+
+    it('🔴 a food tap feeds; a thing to wear that is theirs goes on or off; one that is not ASKS first and is bought only on Yes', () => {
+      expect(
+        missing(C.moonCare, [
+          ['mcFoodEach', 'itemOutput-id', 'mcFeed', 'foodId'], ['mcFoodEach', 'itemOutputSignal-use', 'mcFeed', 'run'],
+          ['mcWearEach', 'itemOutput-id', 'mcWear', 'wearId'], ['mcWearEach', 'itemOutputSignal-use', 'mcWear', 'run'],
+          ['mcWearEach', 'itemOutputSignal-ask', 'mcAsk', 'to-asking'], ['mcAsk', 'asking', 'mcConfirm', 'mounted'], ['mcWearEach', 'itemOutput-cost', 'mcConfirm', 'cost'], ['mcIn', 'purse', 'mcConfirm', 'purse'],
+          ['mcConfirm', 'yes', 'mcBuy', 'run'], ['mcWearEach', 'itemOutput-id', 'mcBuy', 'wearId']
+        ])
+      ).toEqual([]);
+      // The purchase runs on Yes and on nothing else: never straight from a tile (P95 PLY-002's "auto-buy").
+      expect(into(C.moonCare, 'mcBuy', 'run')).toEqual(['mcConfirm.yes']);
+      expect(into(C.moonCare, 'mcFeed', 'run')).toEqual(['mcFoodEach.itemOutputSignal-use']);
+      const acts = nodesOf(built, C.moonCare).filter((n) => n.type === logicName('Logic/Moon act')).map((n) => [n.id, (n.parameters as { action?: string }).action]);
+      expect(acts.sort()).toEqual([['mcBuy', 'buy'], ['mcFeed', 'feed'], ['mcWear', 'wear']]);
+      // Only the tile's card answers a tap (the alien inside it publishes Click too).
+      expect(into(C.moonItem, 'miCanUse', 'eval')).toEqual(['miCard.onClick']);
+      expect(into(C.moonItem, 'miCanAsk', 'eval')).toEqual(['miCard.onClick']);
+    });
+
+    it('🔴 the first alien comes at once; a later one asks first; adopting writes the store, folds the card and empties the name', () => {
+      expect(
+        missing(C.moonAdopt, [
+          ['maAdopt', 'onClick', 'maIsFree', 'eval'], ['maIn', 'free', 'maIsFree', 'condition'], ['maIsFree', 'ontrue', 'maDo', 'run'], ['maIsFree', 'onfalse', 'maAsk', 'to-asking'], ['maConfirm', 'yes', 'maDo', 'run'],
+          ['maSpVar', 'value', 'maDo', 'species'], ['maColVar', 'value', 'maDo', 'colour'], ['maNameVar', 'value', 'maDo', 'name'],
+          ['maDo', 'app', 'maOut', 'app'], ['maDo', 'done', 'maOut', 'write'], ['maDo', 'done', 'maOpen', 'to-folded'], ['maDo', 'done', 'maClearName', 'do'], ['maClearName', 'done', 'maName', 'set'],
+          ['maName', 'onTextChanged', 'maNameVar', 'value'], ['maNameVar', 'value', 'maName', 'startValue']
+        ])
+      ).toEqual([]);
+      expect(into(C.moonAdopt, 'maDo', 'run')).toEqual(['maConfirm.yes', 'maIsFree.ontrue']);
+      expect((nodesOf(built, C.moonAdopt).find((n) => n.id === 'maDo')!.parameters as { action?: string }).action).toBe('adopt');
+      // The page: every writer of the store is wired to Write, and the adopt card's draft reaches the view that draws it.
+      expect(
+        missing(C.pageMoon, [
+          ['mnCare', 'app', 'mnStore', 'app'], ['mnCare', 'write', 'mnStore', 'write'], ['mnAdopt', 'app', 'mnStore', 'app'], ['mnAdopt', 'write', 'mnStore', 'write'], ['mnSelect', 'app', 'mnStore', 'app'], ['mnSelect', 'done', 'mnStore', 'write'],
+          ['mnAdopt', 'draftSpecies', 'mnView', 'draftSpecies'], ['mnAdopt', 'draftColour', 'mnView', 'draftColour'], ['mnEach', 'itemOutputSignal-tap', 'mnSelect', 'run'], ['mnView', 'selHappy', 'mnCare', 'happy']
+        ])
+      ).toEqual([]);
+    });
+
+    it('every alien colour is a token the theme emits, and every alien is drawn by the kit node the project installs', () => {
+      const tokens = new Map(tpl007TokenEntries().map((t: { name: string; value: string }) => [t.name, t.value]));
+      for (const c of ALIEN_COLOURS) expect({ token: c.token, value: tokens.get(c.token) }).toEqual({ token: c.token, value: c.hex });
+      const drawn = [C.moonTile, C.moonItem, C.moonCare].flatMap((name) => nodesOf(built, name).filter((n) => n.type === 'game-kit.Alien').map((n) => `${name}:${n.id}`));
+      expect(drawn).toEqual(['/Moon/Alien tile:mtAlien', '/Moon/Shop tile:miAlien', '/Moon/Care:mcAlien']);
+      for (const key of ['moonTitle', 'visitMoon', 'moonFeed', 'moonDress', 'moonAdoptFirst', 'moonAdoptMore', 'moonName', 'moonAdoptQ', 'backToHangar']) {
+        expect({ key, en: !!WORDS[key]?.en, fr: !!WORDS[key]?.fr, differ: WORDS[key]?.en !== WORDS[key]?.fr }).toEqual({ key, en: true, fr: true, differ: true });
+      }
     });
   });
 

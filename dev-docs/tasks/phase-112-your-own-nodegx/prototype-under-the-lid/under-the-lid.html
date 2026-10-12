@@ -1,0 +1,2513 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Under the Lid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Young+Serif&display=swap">
+<style>
+/* Layout: a full-screen 3D workspace. A slim bar on top; the stage fills the rest of the screen,
+   with three floating panels over it (layers + camera top-left, the step deck bottom-left,
+   the inspector on the right). The explainer sits below the workspace. */
+:root {
+  --bg: #e9ece6;
+  --surface: #f7f8f4;
+  --ink: #1b2422;
+  --muted: #5b6763;
+  --line: #cfd6cd;
+  --stage: #dfe4dd;
+  --stage-2: #cdd5cc;
+  --board: #134039;
+  --board-ink: #d7e6df;
+  --board-line: #2a5a51;
+  --copper: #c27a3a;
+  --pulse: #f2b93b;
+  --pick: #2c74c4;
+  --paper: #f3f1ea;
+  --paper-ink: #2a3a52;
+  --paper-dim: #8a93a3;
+  --j-bg: #fcfbf7; --j-ink: #2b2f36; --j-key: #1f4e9c; --j-str: #a33d12; --j-num: #6b35c9; --j-lit: #b4237a; --j-ref: #0f766e; --j-punct: #7b8190; --j-gutter: #b3b8c1;
+  --ok: #2f8a57;
+  --bad: #c2453a;
+  --chip-json: #6a5acd;
+  --chip-js: #b7791f;
+  --chip-react: #2b8db3;
+  --chip-html: #c2453a;
+  --chip-world: #4b7f52;
+  --f-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1514; --surface: #161e1d; --ink: #e4ebe7; --muted: #98a5a0; --line: #2a3533; --stage: #111917; --stage-2: #0a0f0e;
+    --board: #0c2b26; --board-ink: #cfe0d8; --board-line: #23493f; --copper: #d99256; --pulse: #ffcf5c;
+    --pick: #6aaef0; --paper: #1a2029; --paper-ink: #c9d4e6; --paper-dim: #6f7a8c; --j-bg: #12171f; --j-ink: #dde3ec; --j-key: #8ec5ff; --j-str: #f2b179; --j-num: #c9a8ff; --j-lit: #ff8fc6; --j-ref: #5fd3b8; --j-punct: #8a93a3; --j-gutter: #4a5260; --ok: #5cc68a; --bad: #ef7a6e;
+    --chip-json: #9d8ff0; --chip-js: #e0a748; --chip-react: #5cc0e6; --chip-html: #ef7a6e; --chip-world: #7fbf87;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1514; --surface: #161e1d; --ink: #e4ebe7; --muted: #98a5a0; --line: #2a3533; --stage: #111917; --stage-2: #0a0f0e;
+  --board: #0c2b26; --board-ink: #cfe0d8; --board-line: #23493f; --copper: #d99256; --pulse: #ffcf5c;
+  --pick: #6aaef0; --paper: #1a2029; --paper-ink: #c9d4e6; --paper-dim: #6f7a8c; --j-bg: #12171f; --j-ink: #dde3ec; --j-key: #8ec5ff; --j-str: #f2b179; --j-num: #c9a8ff; --j-lit: #ff8fc6; --j-ref: #5fd3b8; --j-punct: #8a93a3; --j-gutter: #4a5260; --ok: #5cc68a; --bad: #ef7a6e;
+  --chip-json: #9d8ff0; --chip-js: #e0a748; --chip-react: #5cc0e6; --chip-html: #ef7a6e; --chip-world: #7fbf87;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+code, pre, .mono { font-family: var(--f-mono); }
+button { font: inherit; cursor: pointer; color: inherit; }
+:focus-visible { outline: 2px solid var(--pick); outline-offset: 2px; }
+
+/* the app shell: exactly one screen tall */
+.app { height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); min-height: 560px; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.bar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 8px 16px; border-bottom: 1px solid var(--line); background: var(--surface); position: relative; z-index: 5; }
+.brand { display: flex; align-items: baseline; gap: 10px; margin-right: auto; min-width: 0; }
+.brand b { font-family: var(--f-display); font-size: 21px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; }
+.brand span { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 700px) { .brand span { display: none; } }
+.seg { display: inline-flex; background: var(--bg); border: 1px solid var(--line); border-radius: 9px; padding: 2px; gap: 2px; flex-wrap: wrap; }
+.seg button { border: 0; background: transparent; padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: 500; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.seg.sm button { padding: 3px 8px; font-size: 12px; }
+.speed { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+.speed input { width: 110px; accent-color: var(--copper); }
+.speed output { font-family: var(--f-mono); font-size: 11.5px; min-width: 9ch; font-variant-numeric: tabular-nums; }
+.barlink { font-size: 13px; color: var(--muted); text-decoration: none; border: 1px solid var(--line); padding: 5px 10px; border-radius: 8px; background: var(--bg); }
+.barlink:hover { color: var(--ink); border-color: var(--ink); }
+#inspToggle { display: none; }
+@media (max-width: 900px) { #inspToggle { display: inline-block; } }
+
+/* the stage */
+.stage { position: relative; overflow: hidden; perspective: 2400px; perspective-origin: 50% 50%; background: radial-gradient(ellipse at 50% 42%, var(--stage), var(--stage-2)); touch-action: none; cursor: grab; user-select: none; }
+.stage.dragging { cursor: grabbing; }
+.world { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; }
+.world.anim, .world.anim .plane { transition: transform .8s cubic-bezier(.2,.7,.2,1), opacity .4s; }
+.plane { position: absolute; left: 0; top: 0; width: 540px; height: 600px; border-radius: 10px; transition: opacity .4s; transform-style: flat; }
+.plane.off { opacity: 0 !important; pointer-events: none; }
+.ptag { position: absolute; left: 0; top: -34px; display: flex; gap: 8px; align-items: center; padding: 4px 10px 4px 6px; border-radius: 8px; font-size: 13px; font-weight: 600; white-space: nowrap; color: var(--ink); background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--line); cursor: move; user-select: none; }
+.ptag .grip { font-size: 13px; color: var(--muted); letter-spacing: -2px; }
+.ptag:hover { border-color: var(--ink); }
+
+/* plane: blueprint (JSON) */
+.p-json { background: var(--j-bg); color: var(--j-ink); border: 1px solid var(--line); box-shadow: 0 30px 60px -30px rgba(0,0,0,.35); }
+.jsonbody { position: absolute; inset: 0; overflow: auto; padding: 12px 14px 30px 0; font: 11.5px/1.62 var(--f-mono); border-radius: 10px; cursor: auto; user-select: text; counter-reset: ln; }
+.jsonbody .jl { display: grid; grid-template-columns: 3.6ch minmax(0, 1fr); column-gap: 1.6ch; counter-increment: ln; transition: background .3s, box-shadow .3s; }
+.jsonbody .jl::before { content: counter(ln); text-align: right; color: var(--j-gutter); user-select: none; font-variant-numeric: tabular-nums; }
+.jsonbody .c { padding-left: calc(var(--d, 0) * 2ch + 2.5ch); text-indent: -2.5ch; white-space: pre-wrap; overflow-wrap: anywhere; min-width: 0; }
+.jsonbody .jk { color: var(--j-key); }
+.jsonbody .js { color: var(--j-str); }
+.jsonbody .jr { color: var(--j-ref); font-weight: 600; }
+.jsonbody .jn { color: var(--j-num); }
+.jsonbody .jb { color: var(--j-lit); }
+.jsonbody .jp { color: var(--j-punct); }
+.jsonbody .jl.sel { background: color-mix(in srgb, var(--pick) 13%, var(--j-bg)); box-shadow: inset 3px 0 0 var(--pick); }
+.jsonbody .jl.hot { background: color-mix(in srgb, var(--pulse) 24%, var(--j-bg)); box-shadow: inset 3px 0 0 var(--pulse); }
+.jsonbody.unloaded { opacity: .18; filter: blur(1.2px); }
+.unloaded-note { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: var(--paper-dim); font-size: 13px; padding: 30px; pointer-events: none; }
+
+/* plane: engine (node objects) */
+.p-engine { background: var(--board); color: var(--board-ink); box-shadow: 0 30px 60px -30px rgba(0,0,0,.5);
+  background-image: radial-gradient(circle at 1px 1px, var(--board-line) 1px, transparent 1.5px); background-size: 14px 14px; }
+.p-engine .boardhead { position: absolute; left: 14px; top: 10px; font: 500 11px var(--f-mono); color: var(--board-ink); opacity: .75; }
+.p-engine .colhead { position: absolute; top: 26px; font: 500 10px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; opacity: .55; }
+#wires { position: absolute; left: 0; top: 0; width: 540px; height: 600px; overflow: visible; pointer-events: none; }
+#wires path.w { fill: none; stroke: var(--copper); stroke-width: 1.6; opacity: .75; transition: opacity .3s, stroke-width .2s; }
+#wires path.w.sig { stroke-dasharray: 4 3; }
+#wires path.w.off { opacity: 0; }
+#wires path.w.hot { stroke: var(--pulse); stroke-width: 3; opacity: 1; }
+#wires path.w.sel { opacity: 1; stroke-width: 2.4; }
+#wires path.w.hov { opacity: 1; stroke-width: 3; stroke: var(--pulse); }
+#wires path.hit { fill: none; stroke: transparent; stroke-width: 14; pointer-events: stroke; cursor: pointer; }
+#wires path.hit.off { pointer-events: none; }
+#wires circle { fill: var(--pulse); }
+#wires circle.val { fill: var(--copper); stroke: var(--pulse); stroke-width: 1.5; }
+#wires text.ride { font: 600 11px var(--f-mono); fill: var(--pulse); paint-order: stroke; stroke: var(--board); stroke-width: 4px; stroke-linejoin: round; }
+.card { position: absolute; height: 26px; display: flex; align-items: center; gap: 6px; padding: 0 8px 0 6px; border-radius: 5px; font-size: 11.5px; line-height: 1; cursor: pointer; transition: opacity .35s, transform .35s, box-shadow .25s; user-select: none; }
+.card.vis { background: #efe6d2; color: #2b2622; border: 1px solid #c9b994; }
+.card.logic { background: #1d2523; color: #e9efe9; border: 1px solid #000; box-shadow: inset 0 0 0 1px #3b4744; }
+.card .ic { font: 600 9px var(--f-mono); padding: 2px 4px; border-radius: 3px; background: rgba(0,0,0,.12); }
+.card.logic .ic { background: #36433f; color: #ffcf5c; }
+.card .lb { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .ty { opacity: .6; font-size: 10px; white-space: nowrap; }
+.card .ro { margin-left: auto; font: 500 10px var(--f-mono); white-space: nowrap; opacity: .85; }
+.card.ghost { opacity: 0; transform: translateY(6px) scale(.96); pointer-events: none; }
+.card.sel { box-shadow: 0 0 0 2px var(--pick), 0 0 0 5px color-mix(in srgb, var(--pick) 30%, transparent); }
+.card.hot { box-shadow: 0 0 0 2px var(--pulse), 0 0 16px 2px color-mix(in srgb, var(--pulse) 70%, transparent); }
+.card.flash { animation: flash .6s; }
+@keyframes flash { 0% { box-shadow: 0 0 0 0 var(--pulse); } 40% { box-shadow: 0 0 0 4px var(--pulse), 0 0 18px var(--pulse); } 100% { box-shadow: 0 0 0 0 transparent; } }
+
+/* data previews, Noodl style */
+#wlabels, #npops { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.wlabel, .wtip { position: absolute; transform: translate(-50%, -50%); font: 500 10.5px/1.3 var(--f-mono); background: #fff8e6; color: #2b2622; border: 1px solid #e1c27a; border-radius: 5px; padding: 2px 6px; white-space: nowrap; box-shadow: 0 3px 10px -4px rgba(0,0,0,.5); cursor: pointer; z-index: 3; }
+.wlabel.pinned::before { content: "● "; color: var(--copper); }
+.wlabel.bump { animation: bump .5s; }
+@keyframes bump { 40% { background: #ffd66b; } }
+.wtip, .wpin { padding: 6px 9px; white-space: normal; width: max-content; max-width: 260px; z-index: 4; cursor: default; }
+.wpin { position: absolute; transform: translate(-50%, -50%); font: 500 10.5px/1.3 var(--f-mono); background: #fff8e6; color: #2b2622; border: 1.5px solid var(--copper); border-radius: 6px; box-shadow: 0 6px 16px -6px rgba(0,0,0,.55); z-index: 3; }
+.wpin.bump { animation: bump .5s; }
+.wtip .top, .wpin .top { display: flex; gap: 8px; align-items: flex-start; }
+.wtip .top .r, .wpin .top .r { flex: 1; min-width: 0; }
+.wbtn { flex: 0 0 auto; border: 1px solid #c9b994; background: #f3ead8; color: #2b2622; border-radius: 4px; padding: 0 6px; font: 600 10.5px var(--f-body); }
+.wbtn:hover { background: #2b2622; color: #fff8e6; }
+.wtip .r, .wpin .r { color: #7a6a52; font-size: 10px; }
+.wtip .v, .wpin .v { font-size: 13px; font-weight: 600; margin: 2px 0; word-break: break-word; }
+.npop { position: absolute; transform: translateY(-100%); margin-top: -6px; min-width: 200px; max-width: 290px; background: #fffaf0; color: #2b2622; border: 1px solid #c9b994; border-radius: 7px; padding: 7px 9px; font-size: 11px; box-shadow: 0 10px 24px -10px rgba(0,0,0,.6); z-index: 5; cursor: default; }
+.npop .h { display: flex; align-items: center; gap: 6px; font-weight: 600; margin-bottom: 4px; }
+.npop .h .pin { margin-left: auto; border: 1px solid #c9b994; background: #f3ead8; border-radius: 4px; padding: 0 6px; font-size: 10.5px; }
+.npop .h .pin[aria-pressed="true"] { background: #2b2622; color: #fffaf0; }
+.npop dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 8px; font-family: var(--f-mono); font-size: 10.5px; }
+.npop dt { color: #7a6a52; white-space: nowrap; }
+.npop dd { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.npop .sect { margin: 5px 0 2px; font-size: 9.5px; letter-spacing: .06em; text-transform: uppercase; color: #7a6a52; }
+
+/* plane: page (the site the graph makes) */
+.p-page { background: #fbf8f3; box-shadow: 0 30px 70px -30px rgba(0,0,0,.45); opacity: var(--lid, 1); }
+.site { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; color: #2b2622; font-family: var(--f-body); font-size: 14px; scroll-behavior: smooth; border-radius: 10px; cursor: auto; user-select: text; touch-action: pan-y; }
+.site-empty { position: absolute; inset: 0; display: grid; place-items: center; color: #9a8f84; font-size: 13px; text-align: center; padding: 40px; pointer-events: none; }
+.site [data-node] { transition: outline-color .3s; outline: 2px solid transparent; outline-offset: -2px; }
+.site [data-node].sel { outline-color: var(--pick); }
+.site [data-node].hot { outline-color: var(--pulse); outline-width: 3px; }
+.site .born { animation: born .7s ease-out; }
+@keyframes born { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.n-page { min-height: 100%; display: flex; flex-direction: column; }
+.n-hero { padding: 34px 28px 30px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+.n-headline { font-family: "Young Serif", Georgia, serif; line-height: 1.08; max-width: 16ch; }
+.n-subhead { max-width: 44ch; line-height: 1.5; }
+.n-cta, .n-send { border: 0; border-radius: 999px; padding: 10px 18px; font: 600 14px var(--f-body); }
+.n-carousel { position: relative; height: 250px; overflow: hidden; background: #d9d0c2; }
+.n-track { display: flex; height: 100%; transition: transform .6s cubic-bezier(.3,.7,.2,1); }
+.slide { flex: 0 0 100%; position: relative; height: 100%; }
+.slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.slide .cap { position: absolute; left: 14px; bottom: 12px; background: rgba(251,248,243,.92); color: #2b2622; padding: 5px 10px; border-radius: 6px; font-size: 12.5px; }
+.n-next { position: absolute; right: 12px; top: 50%; margin-top: -19px; width: 38px; height: 38px; border-radius: 50%; border: 0; background: rgba(251,248,243,.92); color: #2b2622; font-size: 22px; line-height: 1; }
+.n-contact { padding: 28px; display: flex; flex-direction: column; gap: 10px; }
+.n-contactHead { font-family: "Young Serif", Georgia, serif; font-size: 22px; }
+.tin { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #6b6158; }
+.tin input { font: 14px var(--f-body); padding: 9px 11px; border: 1px solid #d3c8b8; border-radius: 8px; background: #fffdf9; color: #2b2622; }
+.n-send { align-self: flex-start; background: #2b2622; color: #f4efe6; }
+.n-status { min-height: 1.5em; font-size: 13.5px; color: #4b6b4f; }
+
+/* floating panels */
+.hud { position: absolute; z-index: 10; background: color-mix(in srgb, var(--surface) 93%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 14px 40px -18px rgba(0,0,0,.45); cursor: auto; user-select: text; display: flex; flex-direction: column; min-height: 0; }
+.phead { display: flex; align-items: center; gap: 8px; padding: 8px 10px 8px 12px; }
+.phead b { font-family: var(--f-display); font-size: 15px; font-weight: 700; }
+.phead .sub { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.ibtn { margin-left: auto; border: 1px solid var(--line); background: var(--bg); border-radius: 6px; width: 26px; height: 24px; line-height: 1; font-size: 14px; flex: 0 0 auto; }
+.pbody { padding: 0 12px 12px; overflow: auto; min-height: 0; }
+.hud.collapsed .pbody { display: none; }
+.layers { left: 12px; top: 12px; width: 258px; max-height: calc(100% - 24px); }
+.lrow { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 13px; }
+.lrow label { display: flex; align-items: center; gap: 6px; flex: 1; cursor: pointer; }
+.lrow input { accent-color: var(--ink); }
+.mini { border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 2px 8px; font-size: 12px; }
+.mini:hover, .ibtn:hover { border-color: var(--ink); }
+.sl { display: grid; gap: 2px; font-size: 12px; color: var(--muted); margin-top: 8px; }
+.sl input { width: 100%; accent-color: var(--copper); }
+.lbl { font-size: 11px; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; margin: 10px 0 4px; }
+.camrow { display: flex; gap: 6px; flex-wrap: wrap; }
+.hint { font-size: 11.5px; color: var(--muted); margin: 8px 0 0; line-height: 1.45; }
+.hint kbd { font: 10.5px var(--f-mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; background: var(--bg); }
+
+.deck { left: 12px; right: 394px; bottom: 12px; max-height: 38%; }
+.stage:has(.insp.collapsed) .deck { right: 12px; }
+.deck .pbody { display: grid; grid-template-columns: minmax(0, 1fr) 230px; grid-template-areas: "narr scen" "log scen"; gap: 4px 16px; align-items: start; }
+.deck .narr { grid-area: narr; } .deck .logbox { grid-area: log; } .deck .scen { grid-area: scen; flex-direction: column; align-items: stretch; }
+.scen { display: flex; flex-wrap: wrap; gap: 6px; }
+.scen button { text-align: left; }
+.stagehint { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 9; font-size: 12.5px; color: var(--muted); background: color-mix(in srgb, var(--surface) 90%, transparent); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; pointer-events: none; white-space: nowrap; transition: opacity .6s; }
+.stagehint.gone { opacity: 0; }
+.scen button, .btn { border: 1px solid var(--line); background: var(--bg); padding: 5px 10px; border-radius: 8px; font-size: 13px; }
+.scen button:hover, .btn:hover { border-color: var(--ink); }
+.btn.primary { background: var(--ink); color: var(--surface); border-color: var(--ink); font-weight: 600; }
+.narr { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.narr .top { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12px; color: var(--muted); }
+.narr h3 { margin: 0; font-size: 15px; font-weight: 600; text-wrap: balance; }
+.narr .body { margin: 0; min-width: 0; font-size: 14px; }
+.narr .body pre { margin: 8px 0 0; padding: 8px 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; font-size: 11.5px; line-height: 1.45; overflow-x: auto; white-space: pre; }
+.narr .body code { font-size: .92em; background: var(--bg); padding: 0 3px; border-radius: 3px; }
+.upnext { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding: 8px 12px; }
+.upnext b { color: var(--ink); font-weight: 600; }
+.upnext .grow { flex: 1 1 220px; min-width: 0; }
+.chip { display: inline-flex; align-items: center; gap: 5px; font: 600 11px var(--f-body); letter-spacing: .03em; padding: 2px 8px; border-radius: 999px; color: #fff; }
+.chip.json { background: var(--chip-json); } .chip.js { background: var(--chip-js); } .chip.react { background: var(--chip-react); }
+.chip.html { background: var(--chip-html); } .chip.world { background: var(--chip-world); }
+.chip.frame { background: transparent; color: var(--muted); border: 1px solid var(--line); font-family: var(--f-mono); font-weight: 500; }
+.log { max-height: 150px; overflow: auto; font-size: 12.5px; display: grid; gap: 2px; padding-right: 4px; }
+.log div { display: flex; gap: 8px; align-items: baseline; min-width: 0; }
+.log .dot { flex: 0 0 8px; height: 8px; border-radius: 50%; transform: translateY(1px); }
+.log .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.log .f { font: 10.5px var(--f-mono); color: var(--muted); flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+details.logbox { margin-top: 10px; }
+details.logbox summary { cursor: pointer; font-size: 12.5px; color: var(--muted); }
+
+.insp { right: 12px; top: 12px; bottom: 12px; width: 370px; }
+.insp.collapsed { bottom: auto; }
+.insp .kind { font-size: 11.5px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; margin: 0; }
+.insp h2 { margin: 2px 0 2px; font-family: var(--f-display); font-size: 22px; font-weight: 700; line-height: 1.1; }
+.insp .sub2 { margin: 0 0 10px; font-size: 12.5px; color: var(--muted); }
+.tabs { display: flex; flex-wrap: wrap; gap: 2px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+.tabs button { border: 0; background: none; color: var(--muted); padding: 6px 6px; font-size: 12.5px; font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+.tabpane { font-size: 13.5px; min-width: 0; }
+.tabpane p { margin: 0 0 10px; }
+.tabpane pre { margin: 0 0 12px; padding: 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; font-size: 11.5px; line-height: 1.5; overflow-x: auto; white-space: pre; }
+.field { display: grid; gap: 4px; margin-bottom: 12px; }
+.field label { font-size: 12.5px; font-weight: 600; }
+.field .hint { margin: 0; }
+.field input[type=text], .field input[type=number], .field select { font: 14px var(--f-body); padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); color: var(--ink); width: 100%; }
+.field input[type=color] { width: 54px; height: 32px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); padding: 2px; }
+.field .row { display: flex; gap: 8px; align-items: center; }
+.note { font-size: 12.5px; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; margin: 0 0 12px; }
+.status-pill { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); margin-bottom: 10px; }
+.status-pill.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 50%, transparent); }
+.status-pill.todo { color: var(--muted); }
+.runner { border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 10px; background: var(--bg); }
+.runner label { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; }
+.res { font-size: 12.5px; display: grid; gap: 3px; }
+.res .r { display: flex; gap: 6px; align-items: baseline; }
+.res .pass { color: var(--ok); font-weight: 600; } .res .fail { color: var(--bad); font-weight: 600; }
+.diff { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.diff pre { font-size: 11px; margin: 0; }
+.diff .bad { color: var(--bad); font-weight: 600; }
+.diff h4 { margin: 0 0 4px; font-size: 12px; }
+
+@media (max-width: 900px) {
+  .layers { left: 8px; top: 8px; width: min(258px, calc(100% - 16px)); }
+  .deck { left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 46%; }
+  .deck .pbody { grid-template-columns: minmax(0, 1fr); grid-template-areas: "scen" "narr" "log"; }
+  .deck .scen { flex-direction: row; }
+  .stagehint { display: none; }
+  .insp { left: 8px; right: 8px; top: auto; bottom: 8px; width: auto; max-height: 64%; display: none; }
+  .insp.open { display: flex; }
+  .insp.collapsed { bottom: 8px; }
+}
+
+/* the journey */
+.barlink.jbtn { background: var(--ink); color: var(--surface); border-color: var(--ink); font-weight: 600; }
+.journey { left: 12px; right: 394px; bottom: 12px; max-height: 52%; }
+.stage:has(.insp.collapsed) .journey { right: 12px; }
+.jhead { display: flex; align-items: center; gap: 12px; padding: 10px 12px 4px 16px; }
+.jkick { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; white-space: nowrap; }
+.jdots { display: inline-flex; gap: 5px; margin-left: auto; }
+.jdots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.jdots i.past { background: var(--muted); }
+.jdots i.on { background: var(--copper); transform: scale(1.25); }
+.jbody { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 320px); gap: 20px; padding: 4px 16px 12px; overflow: auto; min-height: 0; }
+.jbody.wide { grid-template-columns: minmax(0, 1fr); }
+.jtext h3 { font-family: var(--f-display); font-size: 23px; font-weight: 700; line-height: 1.15; margin: 2px 0 8px; text-wrap: balance; }
+.jtext p { font-size: 15px; line-height: 1.55; margin: 0 0 9px; max-width: 64ch; }
+.jtech { margin-top: 4px; }
+.jtech summary { font-size: 12.5px; color: var(--muted); cursor: pointer; }
+.jtech p { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+.jtech code, .jtext code { font-size: .9em; background: var(--bg); padding: 0 3px; border-radius: 3px; overflow-wrap: anywhere; }
+.jfoot { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-top: 1px solid var(--line); }
+.jfoot .jhint { margin: 0 auto; font-size: 12px; color: var(--muted); }
+.jfoot .btn:disabled { opacity: .4; cursor: default; }
+.jill { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.jbadge { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--bg); }
+.jbadge b { font-family: var(--f-display); font-size: 20px; display: block; }
+.jbadge span { font-size: 13px; color: var(--muted); }
+.jbadge ul { margin: 8px 0 0; padding: 0; list-style: none; font-size: 13.5px; display: grid; gap: 3px; color: var(--ok); }
+.ed { background: #24292d; color: #e6eaed; border-radius: 10px; padding: 10px 12px 12px; font-size: 12px; display: grid; gap: 8px; }
+.edlabel { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: #9aa5ad; }
+.ednode { background: #363d42; border-radius: 6px; overflow: hidden; border: 1px solid #4a5258; }
+.edh { background: #4b4466; padding: 5px 9px; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+.edh span { font-weight: 400; opacity: .7; }
+.edports { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; padding: 7px 9px; }
+.edports .in, .edports .out { display: flex; align-items: center; gap: 5px; white-space: nowrap; min-width: 0; }
+.edports .out { justify-content: flex-end; }
+.edports i { width: 8px; height: 8px; border-radius: 50%; background: #d29a5c; flex: 0 0 auto; }
+.edports i.sig { background: #e9cf5a; }
+.edports em { font-style: normal; opacity: .55; font-size: 10.5px; }
+.edprops { display: grid; gap: 3px; background: #2e3438; border-radius: 6px; padding: 7px 9px; }
+.edprops div { display: flex; justify-content: space-between; }
+.edprops span { color: #aeb8bf; }
+.jsnip { background: var(--j-bg); color: var(--j-ink); border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; font: 11.5px/1.55 var(--f-mono); display: grid; gap: 4px; }
+.jsnip .jsl { overflow-wrap: anywhere; }
+.jsnip .jsgap { font-family: var(--f-body); font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+.jsnip .jk { color: var(--j-key); } .jsnip .js { color: var(--j-str); } .jsnip .jr { color: var(--j-ref); font-weight: 600; }
+.jsnip .jn { color: var(--j-num); } .jsnip .jb { color: var(--j-lit); } .jsnip .jp { color: var(--j-punct); }
+.jflow { display: grid; gap: 4px; }
+.jbox { border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; background: var(--bg); font-size: 13px; }
+.jbox small { display: block; font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.jbox.live { border-color: var(--ok); }
+.jarrow { text-align: center; font-size: 12px; color: var(--muted); }
+.jrule { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--bg); font-size: 13.5px; display: grid; gap: 6px; }
+.jrule .br { padding: 6px 9px; border-radius: 6px; border: 1px dashed var(--line); color: var(--muted); }
+.jrule .br.on { border: 1.5px solid var(--copper); color: var(--ink); background: color-mix(in srgb, var(--pulse) 16%, var(--bg)); }
+.jlive { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--bg); display: grid; gap: 6px; }
+.jcount { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.jcount > span:first-child { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.jcount b { font: 700 38px/1 var(--f-display); font-variant-numeric: tabular-nums; min-width: 1ch; }
+.jdots3 { display: inline-flex; gap: 4px; }
+.jdots3 i { width: 22px; height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--muted) 25%, transparent); }
+.jdots3 i.on { background: var(--copper); }
+.jcount .ph { font-size: 12.5px; color: var(--muted); }
+.jmsg { font-size: 13.5px; }
+.jcmp { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+.jcmp > div { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; background: var(--bg); min-width: 0; }
+.jcmp h4 { margin: 0 0 6px; font-family: var(--f-display); font-size: 16px; }
+.jcmp p { font-size: 14px; }
+.jlist { margin: 0 0 10px; padding-left: 20px; max-width: 76ch; font-size: 15px; line-height: 1.55; }
+.jlist li { margin-bottom: 8px; }
+.jbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 900px) {
+  .journey { left: 8px; right: 8px; bottom: 8px; max-height: 60%; }
+  .jbody { grid-template-columns: minmax(0, 1fr); }
+  .jcmp { grid-template-columns: minmax(0, 1fr); }
+  .jfoot .jhint { display: none; }
+  .jfoot { justify-content: space-between; }
+}
+
+/* explainer */
+.explain { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 70px; display: grid; gap: 26px; }
+.explain h2 { margin: 0 0 8px; font-family: var(--f-display); font-size: 26px; font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
+.explain p { max-width: 68ch; margin: 0 0 10px; }
+.big-idea { font-family: var(--f-display); font-size: clamp(19px, 2.2vw, 24px); line-height: 1.3; max-width: 40ch; margin: 0 0 6px; font-weight: 500; }
+.layers3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 860px) { .layers3 { grid-template-columns: minmax(0, 1fr); } }
+.layer { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: var(--surface); min-width: 0; }
+.layer h3 { margin: 6px 0 6px; font-size: 16px; }
+.layer p { font-size: 14px; margin: 0 0 8px; }
+.layer dl { margin: 0; font-size: 13px; display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; }
+.layer dt { color: var(--muted); }
+.layer dd { margin: 0; }
+.targets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 14px 0; }
+@media (max-width: 860px) { .targets { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.target { border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: var(--surface); font-size: 13.5px; min-width: 0; }
+.target b { display: block; margin-bottom: 4px; }
+.tiers { display: grid; gap: 7px; max-width: 640px; font-size: 13.5px; }
+.tier { display: grid; grid-template-columns: 190px minmax(0, 1fr) 60px; gap: 10px; align-items: center; }
+@media (max-width: 560px) { .tier { grid-template-columns: 120px minmax(0, 1fr) 52px; } }
+.bar2 { height: 12px; background: color-mix(in srgb, var(--muted) 18%, transparent); border-radius: 3px; overflow: hidden; }
+.bar2 i { display: block; height: 100%; background: var(--ok); border-radius: 3px; }
+.tier .n { font-family: var(--f-mono); font-size: 12.5px; text-align: right; font-variant-numeric: tabular-nums; }
+.finds { margin: 8px 0 0; padding-left: 20px; max-width: 70ch; }
+.finds li { margin-bottom: 6px; }
+.foot { font-size: 12.5px; color: var(--muted); max-width: 80ch; }
+
+@media (prefers-reduced-motion: reduce) {
+  .world.anim, .world.anim .plane, .n-track, .card { transition: none !important; }
+  .site .born, .card.flash, .wlabel.bump { animation: none !important; }
+}
+</style>
+
+<div class="app" id="app">
+  <header class="bar">
+    <div class="brand"><b>Under the Lid</b><span>A NodeGX site, from JSON to the page</span></div>
+    <div class="seg" id="viewSeg" role="group" aria-label="Arrange the layers">
+      <button type="button" data-view="site" aria-pressed="false">Use the site</button>
+      <button type="button" data-view="lid" aria-pressed="true">Lift the lid</button>
+      <button type="button" data-view="flat" aria-pressed="false">Side by side</button>
+    </div>
+    <div class="seg" id="runSeg" role="group" aria-label="Speed">
+      <button type="button" data-run="live" aria-pressed="true">Live</button>
+      <button type="button" data-run="slow" aria-pressed="false">Slow motion</button>
+      <button type="button" data-run="step" aria-pressed="false">Step by step</button>
+    </div>
+    <label class="speed" id="speedWrap" hidden>Speed <input type="range" id="speed" min="0" max="100" step="1" value="30" aria-label="Slow-motion speed"><output id="speedOut">1.5 s a step</output></label>
+    <button type="button" class="barlink jbtn" id="journeyBtn">Follow one node</button>
+    <button type="button" class="barlink" id="inspToggle" aria-expanded="false">Inspector</button>
+    <a class="barlink" href="#about">How it works ↓</a>
+  </header>
+
+  <main class="stage" id="scene" aria-label="3D view of the three layers">
+    <div class="world anim" id="world">
+      <div class="plane p-json" id="pJson" data-layer="json">
+        <div class="ptag" data-layer="json" title="Drag to move · Shift+drag to lift · Double-click to look straight at it"><span class="grip">⋮⋮</span><span class="chip json">JSON</span> The blueprint: your project as data</div>
+        <div class="jsonbody unloaded" id="jsonBody"></div>
+        <div class="unloaded-note" id="jsonNote" hidden>Not loaded yet. The browser hasn’t opened the page.</div>
+      </div>
+      <div class="plane p-engine" id="pEngine" data-layer="engine">
+        <div class="ptag" data-layer="engine" title="Drag to move · Shift+drag to lift · Double-click to look straight at it"><span class="grip">⋮⋮</span><span class="chip js">JavaScript</span> The engine: node objects in memory</div>
+        <div class="boardhead">component /Home · one object per node</div>
+        <div class="colhead" style="left:14px">visual nodes · draw something</div>
+        <div class="colhead" style="left:330px">logic nodes · never drawn</div>
+        <svg id="wires" viewBox="0 0 540 600" aria-hidden="true"></svg>
+        <div id="cards"></div>
+        <div id="wlabels"></div>
+        <div id="npops"></div>
+      </div>
+      <div class="plane p-page" id="pPage" data-layer="page">
+        <div class="ptag" data-layer="page" title="Drag to move · Shift+drag to lift · Double-click to look straight at it"><span class="grip">⋮⋮</span><span class="chip html">HTML &amp; CSS</span> The page: what the browser draws</div>
+        <div class="site" id="site"></div>
+        <div class="site-empty" id="siteEmpty" hidden>No HTML yet.<br>Nothing has been drawn.</div>
+      </div>
+    </div>
+
+    <div class="stagehint" id="stageHint">Drag to turn · Scroll to pan · Pinch or Ctrl+scroll to zoom · Hover a wire to see its data</div>
+    <section class="hud layers" id="layersPanel" aria-label="Layers and camera">
+      <div class="phead"><b>Layers</b><button type="button" class="ibtn" data-collapse="layersPanel" aria-expanded="true" aria-label="Collapse layers">–</button></div>
+      <div class="pbody">
+        <div class="lrow"><label><input type="checkbox" id="lv-page" data-layer="page" checked><span class="chip html">HTML</span> Page</label><button type="button" class="mini" data-look="page">Face it</button></div>
+        <div class="lrow"><label><input type="checkbox" id="lv-engine" data-layer="engine" checked><span class="chip js">JS</span> Engine</label><button type="button" class="mini" data-look="engine">Face it</button></div>
+        <div class="lrow"><label><input type="checkbox" id="lv-json" data-layer="json" checked><span class="chip json">JSON</span> Blueprint</label><button type="button" class="mini" data-look="json">Face it</button></div>
+        <label class="sl">Space between layers <input type="range" id="spread" min="0" max="700" step="10" value="330"></label>
+        <label class="sl">Page see-through <input type="range" id="lid" min="0.1" max="1" step="0.05" value="0.9"></label>
+        <div class="lbl">Data on wires</div>
+        <div class="seg sm" id="wireSeg" role="group" aria-label="Data on wires">
+          <button type="button" data-wm="off" aria-pressed="false">Off</button>
+          <button type="button" data-wm="hover" aria-pressed="true">On hover</button>
+          <button type="button" data-wm="all" aria-pressed="false">All</button>
+        </div>
+        <div class="lbl">Camera</div>
+        <div class="camrow"><button type="button" class="mini" id="zOut" aria-label="Zoom out">−</button><button type="button" class="mini" id="zIn" aria-label="Zoom in">+</button><button type="button" class="mini" id="camReset">Reset view</button></div>
+        <p class="hint"><b>Drag</b> to turn. <b>Scroll</b> to pan. <b>Pinch</b> or <kbd>Ctrl</kbd>+scroll to zoom. Drag a layer’s label to move it, <kbd>Shift</kbd>+drag to lift it, double-click it to face it. Hover a wire or a node to see its data; click to pin.</p>
+      </div>
+    </section>
+
+    <section class="hud deck" id="deck" aria-label="Watch it run">
+      <div class="phead"><b>Watch it run</b><span class="sub" id="modeHint"></span><button type="button" class="ibtn" data-collapse="deck" aria-expanded="true" aria-label="Collapse">–</button></div>
+      <div class="pbody">
+        <div class="scen" id="scen">
+          <button type="button" data-scen="boot">▶ Replay start-up</button>
+          <button type="button" data-scen="tick">A carousel tick</button>
+          <button type="button" data-scen="cta">Click “Get in touch”</button>
+          <button type="button" data-scen="send">Send the form</button>
+          <button type="button" data-scen="colour">Change the hero colour</button>
+        </div>
+        <div class="narr" id="narr">
+          <div class="top"><span class="chip js" id="nChip">JavaScript</span><span class="chip frame" id="nFrame">frame 0</span><span id="nKind"></span></div>
+          <h3 id="nTitle">Loading…</h3>
+          <div class="body" id="nBody"></div>
+        </div>
+        <details class="logbox">
+          <summary>Everything the engine has done (newest first)</summary>
+          <div class="log" id="log"></div>
+        </details>
+      </div>
+      <div class="upnext" id="upnext"></div>
+    </section>
+
+    <section class="hud journey" id="journey" hidden aria-label="Follow one node">
+      <div class="jhead"><span class="jkick" id="jKick"></span><span class="jdots" id="jDots" aria-hidden="true"></span><button type="button" class="mini" id="jExit">Leave</button></div>
+      <div class="jbody" id="jBody"><div class="jtext" id="jText"></div><div class="jill" id="jIll"></div></div>
+      <div class="jfoot"><button type="button" class="btn" id="jBack">← Back</button><span class="jhint">The ← and → keys work too</span><button type="button" class="btn primary" id="jNext">Next →</button></div>
+    </section>
+
+    <aside class="hud insp" id="insp" aria-label="Inspector">
+      <div class="phead"><span class="sub" id="iKind"></span><button type="button" class="ibtn" data-collapse="insp" aria-expanded="true" aria-label="Collapse inspector">–</button></div>
+      <div class="pbody">
+        <h2 id="iName"></h2>
+        <p class="sub2" id="iSub"></p>
+        <div class="tabs" role="tablist" id="tabs">
+          <button type="button" role="tab" data-tab="settings" aria-selected="true">Settings</button>
+          <button type="button" role="tab" data-tab="json" aria-selected="false">In the JSON</button>
+          <button type="button" role="tab" data-tab="memory" aria-selected="false">In memory</button>
+          <button type="button" role="tab" data-tab="page" aria-selected="false">On the page</button>
+          <button type="button" role="tab" data-tab="spec" aria-selected="false">Its spec</button>
+        </div>
+        <div class="tabpane" id="pane"></div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<section class="explain" id="about">
+  <div>
+    <h2>JSON never turns into HTML</h2>
+    <p class="big-idea">JSON turns into JavaScript objects. Some of those objects then keep a piece of HTML up to date, for as long as the page is open.</p>
+    <p>That is the whole trick. The three layers above are three different things that exist at the same time once the page is running. Each appears at a different moment during start-up.</p>
+  </div>
+  <div class="layers3">
+    <div class="layer">
+      <span class="chip json">JSON</span>
+      <h3>The blueprint</h3>
+      <p>What the editor writes when you deploy. A list of components, each with its nodes, their settings, and the wires between them. It describes the app; it does nothing by itself.</p>
+      <dl>
+        <dt>Arrives</dt><dd>Inside the page, as <code>window.projectData</code>. A large app fetches extra parts later from <code>noodl_bundles/…json</code>.</dd>
+        <dt>Read</dt><dd>Once at start-up, into models (<code>ComponentModel</code>, <code>NodeModel</code>).</dd>
+        <dt>Kept?</dt><dd>Yes, as models. The runtime goes back to them to build a Repeater row or a new page, and to apply an edit from the editor.</dd>
+      </dl>
+    </div>
+    <div class="layer">
+      <span class="chip js">JavaScript</span>
+      <h3>The engine</h3>
+      <p>One live object per node, made from the node library’s definition for that type. Each one has inputs, outputs, and code that runs when an input changes. This is the part that “runs”.</p>
+      <dl>
+        <dt>Built</dt><dd>At start-up, by <code>NodeScope.setComponentModel</code>.</dd>
+        <dt>Runs</dt><dd>In frames. A change marks nodes dirty, then the next animation frame updates them.</dd>
+        <dt>Logic nodes</dt><dd>Live only here. A Counter or an HTTP Request never becomes HTML.</dd>
+      </dl>
+    </div>
+    <div class="layer">
+      <span class="chip html">HTML &amp; CSS</span>
+      <h3>The page</h3>
+      <p>Only visual nodes reach this layer. Each one hands React a description of its element, and React creates the real elements once. After that, nodes change what is already there.</p>
+      <dl>
+        <dt>Created</dt><dd>When React first commits the tree. That is the first moment any HTML exists.</dd>
+        <dt>A style changes</dt><dd>The node patches <code>element.style</code> directly (<code>setStyle</code>).</dd>
+        <dt>Text changes</dt><dd>The node asks React to re-render it at the end of the frame (<code>forceUpdate</code>).</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div>
+    <h2>Where phase 107 comes in</h2>
+    <p>The engine on this page is one way to run a graph. It isn’t the only one, and every one of them has to know exactly what each node does:</p>
+    <div class="targets">
+      <div class="target"><b>The runtime</b>What this page shows: the JSON goes to the browser and node objects run it.</div>
+      <div class="target"><b>Code export</b>Phase 18 turns the same graph into React source code ahead of time. The browser gets no JSON and no node objects.</div>
+      <div class="target"><b>The editor</b>Draws each node’s ports, names, defaults and descriptions.</div>
+      <div class="target"><b>Agents</b>Learn what a node does from <code>get_node_type</code> over MCP.</div>
+    </div>
+    <p>Each of these used to carry its own copy of “what Counter does”, and the copies drifted apart. Phase 107 writes each node down once, as a small <b>spec</b>. A spec is a set of pure functions: given the node’s state, its inputs and what just happened, it says what changes, what fires, and how it went (Done, Unchanged or Failed). A <b>conformance runner</b> then plays the same scenarios against every implementation and compares what each one did, event by event. It also plants bugs on purpose (<b>mutants</b>) to prove every check can actually fail.</p>
+    <p>Select the Counter on the engine board (“Slide index”), open <b>Its spec</b>, and run a small version of that check yourself. Then plant a bug and watch both the check and the carousel go wrong.</p>
+    <p style="margin-top:16px"><b>Progress on 3 October 2026: 102 of 147 picker nodes conform on the runtime.</b></p>
+    <div class="tiers" id="tiers"></div>
+    <p style="margin-top:14px">The runner keeps finding behaviour that no existing test ever checked, for example:</p>
+    <ul class="finds">
+      <li>The Object node’s “&lt;property&gt; Changed” signals have never fired.</li>
+      <li>HTTP Request’s authentication presets have never sent a credential.</li>
+      <li>Giving String Format’s Format input something that isn’t text stops the node for good.</li>
+    </ul>
+  </div>
+  <p class="foot">How this page is built: the engine here is a small model of NodeGX’s runtime, written for this page. The method names in the narration are the real ones, from <code>noodl-runtime</code> and <code>noodl-viewer-react</code>. This page writes the DOM directly where NodeGX goes through React, and it runs every step in one queue where NodeGX batches changes into animation frames. Node ids are shortened; real ones are long random strings. The JSON follows the exported format (<code>sourceId</code> / <code>sourcePort</code>), trimmed to the parts that matter here. Nothing in the contact form leaves your browser.</p>
+</section>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ------------------------------------------------------------------ photos (inline SVG "assets") */
+function photoSVG(k) {
+  const s = [
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 250'><defs><linearGradient id='a' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#a9b8b7'/><stop offset='1' stop-color='#dcd3c4'/></linearGradient><linearGradient id='g' x1='0' x2='1'><stop offset='0' stop-color='#7fa596'/><stop offset='.6' stop-color='#a8c7b6'/><stop offset='1' stop-color='#6f9183'/></linearGradient></defs><rect width='540' height='250' fill='url(#a)'/><rect y='182' width='540' height='68' fill='#b9a88f'/><ellipse cx='270' cy='214' rx='88' ry='12' fill='#8f7d64' opacity='.6'/><path d='M228 92 q-8 -22 10 -30 h64 q18 8 10 30 q34 30 30 72 q-4 40 -36 50 h-72 q-32 -10 -36 -50 q-4 -42 30 -72z' fill='url(#g)'/><path d='M312 104 q46 -6 44 34 q-2 28 -36 34' fill='none' stroke='#6f9183' stroke-width='12' stroke-linecap='round'/><path d='M238 62 l-14 -10' stroke='#6f9183' stroke-width='9' stroke-linecap='round'/></svg>`,
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 250'><rect width='540' height='250' fill='#e6d6bd'/><rect y='170' width='540' height='80' fill='#cbb391'/><g fill='#8a6f52'><path d='M110 150 q60 52 120 0z'/><path d='M250 128 q74 64 148 0z' fill='#5e7f86'/><path d='M150 108 q52 44 104 0z' fill='#c9a46b'/></g><g fill='none' stroke='#fff' stroke-opacity='.35' stroke-width='3'><path d='M120 152 q50 36 100 0'/><path d='M262 130 q62 46 124 0'/></g><ellipse cx='325' cy='184' rx='80' ry='9' fill='#a88d6a' opacity='.6'/><ellipse cx='170' cy='180' rx='64' ry='8' fill='#a88d6a' opacity='.6'/></svg>`,
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 250'><rect width='540' height='250' fill='#4a3b31'/><rect x='360' y='24' width='120' height='150' fill='#f1e3c4' opacity='.85'/><path d='M360 24 h120 v150 h-120z M420 24 v150 M360 99 h120' fill='none' stroke='#4a3b31' stroke-width='6'/><polygon points='360,174 480,174 420,250 300,250' fill='#f1e3c4' opacity='.12'/><rect x='30' y='120' width='280' height='8' fill='#2f251f'/><rect x='30' y='190' width='280' height='8' fill='#2f251f'/><g fill='#b9a07c'><rect x='48' y='90' width='26' height='30' rx='5'/><rect x='90' y='80' width='34' height='40' rx='8'/><rect x='140' y='96' width='22' height='24' rx='4'/><rect x='180' y='84' width='30' height='36' rx='6'/><rect x='228' y='92' width='40' height='28' rx='10'/><rect x='60' y='156' width='40' height='34' rx='8'/><rect x='120' y='162' width='26' height='28' rx='5'/><rect x='170' y='150' width='36' height='40' rx='9'/><rect x='232' y='160' width='28' height='30' rx='6'/></g></svg>`
+  ][k];
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+}
+const ASSETS = { 'tidewater-jug.jpg': photoSVG(0), 'salt-glazed-bowls.jpg': photoSVG(1), 'studio-tuesday.jpg': photoSVG(2) };
+
+/* ------------------------------------------------------------------ the project, in the exported format */
+const node = (id, type, parameters, children, extra) => Object.assign({ id, type, parameters: parameters || {}, ports: [], children: children || [] }, extra || {});
+const PHOTO_DATA = [
+  { Photo: 'tidewater-jug.jpg', Caption: 'Tidewater jug, celadon glaze' },
+  { Photo: 'salt-glazed-bowls.jpg', Caption: 'Salt-glazed bowls, set of three' },
+  { Photo: 'studio-tuesday.jpg', Caption: 'The studio on a Tuesday morning' }
+];
+const PROJECT = {
+  settings: { bodyScroll: true },
+  rootComponent: '/Home',
+  components: [
+    {
+      name: '/Home',
+      roots: ['page'],
+      nodes: [
+        node('page', 'Page', { title: 'Saltmarsh Ceramics' }, [
+          node('hero', 'Group', { backgroundColor: '#E8DFD0' }, [
+            node('headline', 'Text', { text: 'Pots made at the edge of the marsh', fontSize: { value: 32, unit: 'px' } }),
+            node('subhead', 'Text', { text: 'Small-batch stoneware from a one-room studio on the north Norfolk coast. Commissions open for spring.', color: '#5A5048' }),
+            node('cta', 'net.noodl.controls.button', { label: 'Get in touch', backgroundColor: '#2B2622', color: '#F4EFE6' })
+          ]),
+          node('carousel', 'Group', { height: { value: 250, unit: 'px' }, clip: true }, [
+            node('track', 'Group', { flexDirection: 'row', transformX: { value: 0, unit: '%' } }, [
+              node('photos', 'For Each', { template: '/Slide' })
+            ]),
+            node('next', 'net.noodl.controls.button', { label: '›' })
+          ]),
+          node('contact', 'Group', { backgroundColor: '#F4EFE6' }, [
+            node('contactHead', 'Text', { text: 'Commission a piece' }),
+            node('nameIn', 'net.noodl.controls.textinput', { label: 'Name', placeholder: 'Your name' }),
+            node('emailIn', 'net.noodl.controls.textinput', { label: 'Email', placeholder: 'you@example.com' }),
+            node('msgIn', 'net.noodl.controls.textinput', { label: 'Message', placeholder: 'What would you like made?' }),
+            node('send', 'net.noodl.controls.button', { label: 'Send' }),
+            node('status', 'Text', { text: '' })
+          ])
+        ]),
+        node('photoData', 'Static Data', { type: 'json', json: JSON.stringify(PHOTO_DATA) }),
+        node('timer', 'Repeat', { interval: 4000 }),
+        node('slideIndex', 'Counter', { limitsEnabled: true, limitsMax: 2 }),
+        node('offset', 'Expression', { expression: '-count * 100' }),
+        node('request', 'net.noodl.HTTP', { url: 'https://api.saltmarsh.example/contact', method: 'POST', bodyType: 'json', bodyFields: 'name,email,message' }),
+        node('formState', 'States', {
+          states: 'Idle,Sending,Sent,Failed', values: 'message',
+          'value-Idle-message': '', 'value-Sending-message': 'Sending…',
+          'value-Sent-message': 'Thanks. We reply within a day.', 'value-Failed-message': 'That didn’t send. Try again in a minute.'
+        })
+      ],
+      connections: [
+        ['page', 'didMount', 'timer', 'start'],
+        ['timer', 'tick', 'slideIndex', 'increase'],
+        ['next', 'onClick', 'slideIndex', 'increase'],
+        ['slideIndex', 'unchanged', 'slideIndex', 'reset'],
+        ['slideIndex', 'currentCount', 'offset', 'count'],
+        ['offset', 'result', 'track', 'transformX'],
+        ['photoData', 'items', 'photos', 'items'],
+        ['cta', 'onClick', 'contact', 'scrollIntoView'],
+        ['nameIn', 'onTextChanged', 'request', 'body-name'],
+        ['emailIn', 'onTextChanged', 'request', 'body-email'],
+        ['msgIn', 'onTextChanged', 'request', 'body-message'],
+        ['send', 'onClick', 'request', 'fetch'],
+        ['send', 'onClick', 'formState', 'to-Sending'],
+        ['request', 'done', 'formState', 'to-Sent'],
+        ['request', 'failure', 'formState', 'to-Failed'],
+        ['formState', 'message', 'status', 'text']
+      ].map(([a, b, c, d]) => ({ sourceId: a, sourcePort: b, targetId: c, targetPort: d })),
+      ports: []
+    },
+    {
+      name: '/Slide',
+      roots: ['slide'],
+      nodes: [
+        node('slide', 'Group', {}, [node('slideImg', 'Image', {}), node('slideCap', 'Text', {})]),
+        node('slideIn', 'Component Inputs', {}, [], { ports: [{ name: 'Photo', plug: 'output', type: 'image' }, { name: 'Caption', plug: 'output', type: 'string' }] })
+      ],
+      connections: [
+        { sourceId: 'slideIn', sourcePort: 'Photo', targetId: 'slideImg', targetPort: 'src' },
+        { sourceId: 'slideIn', sourcePort: 'Caption', targetId: 'slideCap', targetPort: 'text' }
+      ],
+      ports: [{ name: 'Photo', plug: 'input', type: 'image' }, { name: 'Caption', plug: 'input', type: 'string' }]
+    }
+  ]
+};
+const HOME = PROJECT.components[0];
+const SLIDE = PROJECT.components[1];
+
+/* Labels live in the editor's project.json; the export drops them. */
+const LABELS = {
+  page: 'Home', hero: 'Hero', headline: 'Headline', subhead: 'Subhead', cta: 'Get in touch', carousel: 'Carousel', track: 'Track',
+  photos: 'Photos', next: 'Next photo', contact: 'Contact', contactHead: 'Contact heading', nameIn: 'Name', emailIn: 'Email', msgIn: 'Message',
+  send: 'Send', status: 'Status', photoData: 'Photo list', timer: 'Every 4 s', slideIndex: 'Slide index', offset: 'Slide offset',
+  request: 'Send to studio', formState: 'Form status'
+};
+const PORT_NAMES = {
+  didMount: 'Did Mount', start: 'Start', tick: 'Tick', increase: 'Increase Count', onClick: 'Click', unchanged: 'Unchanged', reset: 'Reset To Start',
+  currentCount: 'Current Count', count: 'count', result: 'Result', transformX: 'Pos X', items: 'Items', scrollIntoView: 'Scroll Into View',
+  onTextChanged: 'Value', 'body-name': 'Body: name', 'body-email': 'Body: email', 'body-message': 'Body: message', fetch: 'Fetch', 'to-Sending': 'To Sending',
+  done: 'Done', 'to-Sent': 'To Sent', failure: 'Failure', 'to-Failed': 'To Failed', message: 'message', text: 'Text', backgroundColor: 'Background Color',
+  label: 'Label', interval: 'Interval', limitsMax: 'Max Value', expression: 'Expression', placeholder: 'Placeholder', fontSize: 'Font Size', color: 'Color',
+  'value-Sent-message': 'message, in state Sent', url: 'URL', countChanged: 'Count Changed'
+};
+const pn = (p) => PORT_NAMES[p] || p;
+const TYPE_NAMES = {
+  Page: 'Page', Group: 'Group', Text: 'Text', Image: 'Image', 'net.noodl.controls.button': 'Button', 'net.noodl.controls.textinput': 'Text Input',
+  'For Each': 'Repeater', 'Static Data': 'Static Array', Repeat: 'Repeat', Counter: 'Counter', Expression: 'Expression', 'net.noodl.HTTP': 'HTTP Request',
+  States: 'States', 'Component Inputs': 'Component Inputs'
+};
+const SIGNAL_PORTS = new Set(['didMount', 'start', 'tick', 'increase', 'decrease', 'onClick', 'unchanged', 'reset', 'scrollIntoView', 'fetch', 'done', 'failure', 'to-Sending', 'to-Sent', 'to-Failed', 'countChanged']);
+
+/* ------------------------------------------------------------------ world: clock + network */
+const WORLD = { http: 'success', clockMs: 0 };
+
+/* ------------------------------------------------------------------ the tape: every step the engine takes */
+const tape = { q: [], later: [], mode: 'live', delay: 1500, timer: null, frame: 0, busy: false, history: [] };
+const LANG = {
+  json: ['json', 'JSON'], js: ['js', 'JavaScript'], react: ['react', 'React'], html: ['html', 'HTML & CSS'], world: ['world', 'The world']
+};
+function enqueue(step) {
+  if (step.key) {
+    const pending = tape.q.find((s) => s.key === step.key);
+    if (pending) { if (step.merge) step.merge(pending); return; }
+  }
+  tape.q.push(step);
+  kick();
+}
+function defer(step) { tape.later.push(step); kick(); }
+function takeNext() { return tape.q.length ? tape.q.shift() : tape.later.shift(); }
+function peekNext() { return tape.q[0] || tape.later[0]; }
+function kick() {
+  if (tape.mode === 'live') {
+    if (tape.busy) return;
+    tape.busy = true;
+    let n = 0;
+    try { while ((tape.q.length || tape.later.length) && n++ < 600) runStep(takeNext()); }
+    finally { tape.busy = false; }
+  } else {
+    renderUpNext();
+    if (tape.mode === 'slow') scheduleSlow();
+  }
+}
+function scheduleSlow() {
+  if (tape.timer || !peekNext()) return;
+  tape.timer = setTimeout(() => { tape.timer = null; if (tape.mode === 'slow') stepOnce(); }, tape.delay);
+}
+function stepOnce() {
+  const s = takeNext();
+  if (s) runStep(s);
+  renderUpNext();
+  if (tape.mode === 'slow') scheduleSlow();
+}
+function runStep(s) {
+  if (s.frameStart) tape.frame++;
+  s.frame = tape.frame;
+  let res = '', pre = '';
+  try { res = s.run ? s.run() || '' : ''; } catch (e) { res = 'This step threw: ' + esc(e.message); (window.__lidErrors = window.__lidErrors || []).push('run: ' + e.stack); }
+  try { pre = typeof s.pre === 'function' ? s.pre() : s.pre || ''; } catch (e) { pre = ''; (window.__lidErrors = window.__lidErrors || []).push('pre: ' + e.stack); }
+  s.text = pre + (res ? (pre ? ' ' : '') + res : '');
+  tape.history.unshift(s);
+  if (tape.history.length > 80) tape.history.pop();
+  for (const f of [animate, narrate, logStep]) { try { f(s); } catch (e) { (window.__lidErrors = window.__lidErrors || []).push(f.name + ': ' + e.message + ' ' + e.stack); } }
+}
+
+/* ------------------------------------------------------------------ engine: node objects */
+let SCOPE = null;          // the /Home instance: { nodes: Map, wires: [] }
+const BUG = { on: false };
+
+class CounterCore {
+  constructor(emit) { this.count = 0; this.start = 0; this.startSet = false; this.min = 0; this.max = 0; this.on = false; this.emit = emit; }
+  setStart(v) { v = Number(v); this.start = v; if (!this.startSet) { this.startSet = true; this.count = v; this.emit('value', 'currentCount', v); this.emit('signal', 'countChanged'); } }
+  setMin(v) { this.min = Number(v); }
+  setMax(v) { this.max = Number(v); }
+  setOn(v) { this.on = v ? true : false; }
+  increase() {
+    const atMax = BUG.on ? this.count > this.max : this.count >= this.max;
+    if (this.on && atMax) { this.emit('outcome', 'unchanged'); return 'unchanged'; }
+    this.count++; this.emit('value', 'currentCount', this.count); this.emit('signal', 'countChanged'); this.emit('outcome', 'done'); return 'done';
+  }
+  decrease() {
+    if (this.on && this.count <= this.min) { this.emit('outcome', 'unchanged'); return 'unchanged'; }
+    this.count--; this.emit('value', 'currentCount', this.count); this.emit('signal', 'countChanged'); this.emit('outcome', 'done'); return 'done';
+  }
+  reset() {
+    if (this.count === this.start) { this.emit('outcome', 'unchanged'); return 'unchanged'; }
+    this.count = this.start; this.emit('value', 'currentCount', this.count); this.emit('signal', 'countChanged'); this.emit('outcome', 'done'); return 'done';
+  }
+}
+
+function fmt(v) {
+  if (v && typeof v === 'object' && 'unit' in v) return v.value + v.unit;
+  if (typeof v === 'string') return '"' + (v.length > 40 ? v.slice(0, 38) + '…' : v) + '"';
+  if (Array.isArray(v)) return 'an array of ' + v.length;
+  if (v && typeof v === 'object') return '{…}';
+  return String(v);
+}
+const STYLE = {
+  backgroundColor: (v) => ({ backgroundColor: v }),
+  color: (v) => ({ color: v }),
+  fontSize: (v) => ({ fontSize: v.value + v.unit }),
+  height: (v) => ({ height: v.value + v.unit }),
+  clip: (v) => ({ overflow: v ? 'hidden' : 'visible' }),
+  flexDirection: (v) => ({ flexDirection: v }),
+  transformX: (v) => ({ transform: 'translateX(' + (typeof v === 'number' ? v + '%' : v.value + v.unit) + ')' })
+};
+const PROPS = new Set(['text', 'label', 'placeholder', 'src', 'title']);
+
+class Inst {
+  constructor(model, scope) {
+    this.id = model.id; this.type = model.type; this.model = model; this.scope = scope;
+    this.def = DEFS[model.type]; this.inputs = {}; this.out = {}; this.style = {}; this.props = {};
+    this.children = []; this.parent = null; this.el = null; this.queued = [];
+    if (this.def.init) this.def.init.call(this);
+  }
+  get label() { return (this.scope.drawn && LABELS[this.id]) || TYPE_NAMES[this.type]; }
+  get visual() { return !!this.def.visual; }
+  setInput(port, v) {
+    if (this.inputs[port] && typeof this.inputs[port] === 'object' && 'unit' in this.inputs[port] && typeof v === 'number') {
+      v = Object.assign({}, this.inputs[port], { value: v });   // node.ts :412-420 keeps the unit
+    }
+    this.inputs[port] = v;
+    const f = this.def.set && this.def.set[port];
+    if (f) return f.call(this, v);
+    if (this.visual && STYLE[port]) return this.applyStyle(STYLE[port](v));
+    if (this.visual && PROPS.has(port)) return this.applyProp(port, v);
+    return '';
+  }
+  applyStyle(css) {
+    Object.assign(this.style, css);
+    const decl = Object.entries(css).map(([k, v]) => k + ': ' + JSON.stringify(v)).join(', ');
+    if (this.el) {
+      Object.assign(this.styleTarget().style, css);
+      return `Its setter calls <code>setStyle({ ${esc(decl)} })</code>. The element already exists, so setStyle writes straight onto <code>element.style</code>. React does not re-render for a plain style.`;
+    }
+    return `Its setter calls <code>setStyle({ ${esc(decl)} })</code>. There is no element yet, so the style just waits in <code>node.style</code>.`;
+  }
+  styleTarget() { return this.el; }
+  applyProp(port, v) {
+    this.props[port] = v;
+    if (this.el) {
+      const me = this;
+      enqueue({ key: 'render:' + this.id, lang: 'react', kind: 'React re-render', nodes: [this.id],
+        title: `End of the frame: React re-renders ${this.label}`,
+        pre: `<code>forceUpdate()</code> waited for <code>frameEnd</code>, then called <code>setState({})</code> on this node’s React component. React renders it again and patches only what differs in the real element.`,
+        run() { me.paint(); return 'The page now shows: ' + esc(fmt(me.props[port])) + '.'; } });
+      return `Its setter stores <code>props.${port} = ${esc(fmt(v))}</code> and calls <code>forceUpdate()</code>, which asks React to re-render this node at the end of the frame.`;
+    }
+    return `Its setter stores <code>props.${port} = ${esc(fmt(v))}</code>. Nothing is drawn yet, so there is nothing to re-render.`;
+  }
+  wiresFrom(port) { return this.scope.wires.filter((w) => w.from === this.id && w.fport === port); }
+  sendValue(port, v) {
+    this.out[port] = v;
+    updateCard(this);
+    if (!this.scope.drawn) { for (const w of this.wiresFrom(port)) this.scope.nodes.get(w.to).setInput(w.tport, v); return; }
+    for (const w of this.wiresFrom(port)) deliverValue(w, v);
+  }
+  sendSignal(port) {
+    this.sig = this.sig || {}; this.sig[port] = (this.sig[port] || 0) + 1;
+    updateCard(this);
+    for (const w of this.wiresFrom(port)) deliverSignal(w);
+  }
+  signal(port) {
+    const f = this.def.sig && this.def.sig[port];
+    return f ? f.call(this, port) : '';
+  }
+  render(born) {
+    if (!this.visual) return null;
+    const el = this.def.create.call(this);
+    this.el = el;
+    updateCard(this);
+    if (this.scope.drawn) el.dataset.node = this.id; else if (this.rowOf) el.dataset.node = this.rowOf;
+    el.classList.add('n-' + this.id);
+    if (born) el.classList.add('born');
+    Object.assign(this.styleTarget().style, this.style);
+    this.paint();
+    for (const c of this.children) { const ce = c.render(false); if (ce) el.appendChild(ce); }
+    return el;
+  }
+  paint() { if (this.def.paint) this.def.paint.call(this); }
+}
+
+function deliverValue(w, v) {
+  const src = SCOPE.nodes.get(w.from), dst = SCOPE.nodes.get(w.to);
+  enqueue({
+    key: 'wire:' + w.i, wire: w.i, nodes: [w.from, w.to], lang: 'js', kind: 'value',
+    value: v,
+    merge(p) { p.value = v; },
+    title: `${src.label} → ${dst.label}: ${pn(w.fport)} carries a value`,
+    pre() { return `<code>flagOutputDirty('${w.fport}')</code> sent <b>${esc(fmt(this.value))}</b> down the wire into ${esc(dst.label)}’s ${esc(pn(w.tport))} input, which queues it and marks ${esc(dst.label)} dirty.`; },
+    run() { noteWire(w.i, this.value, false); return dst.setInput(w.tport, this.value); }
+  });
+}
+function deliverSignal(w) {
+  const src = SCOPE.nodes.get(w.from), dst = SCOPE.nodes.get(w.to);
+  enqueue({
+    wire: w.i, nodes: [w.from, w.to], lang: 'js', kind: 'signal',
+    title: `${src.label} → ${dst.label}: ${pn(w.fport)} fires`,
+    pre: `<code>sendSignalOnOutput('${w.fport}')</code> sends a pulse. A signal carries no value; it means “do it now”. The pulse arrives at ${esc(dst.label)}’s ${esc(pn(w.tport))} input as true-then-false, and the rising edge runs its handler.`,
+    run() { noteWire(w.i, null, true); return dst.signal(w.tport); }
+  });
+}
+function domEvent(inst, kind, key, pre, fn) {
+  if (!SCOPE || !SCOPE.alive) return;
+  enqueue({ key, frameStart: true, lang: 'html', kind: 'browser event', nodes: [inst.id], title: `The browser: ${kind} on ${inst.label}`, pre, run: fn });
+}
+
+/* A tiny arithmetic parser for the Expression node: numbers, variables, + - * / %, brackets. */
+function compileExpr(src) {
+  const toks = src.match(/\d+(?:\.\d+)?|[A-Za-z_]\w*|[-+*/%()]/g) || [];
+  if (toks.join('') !== src.replace(/\s+/g, '')) throw new Error('bad token');
+  let i = 0;
+  const peek = () => toks[i], eat = () => toks[i++];
+  const expr = () => { let v = term(); while (peek() === '+' || peek() === '-') { const op = eat(), l = v, r = term(); v = op === '+' ? (e) => l(e) + r(e) : (e) => l(e) - r(e); } return v; };
+  const term = () => { let v = unary(); while (peek() === '*' || peek() === '/' || peek() === '%') { const op = eat(), l = v, r = unary(); v = op === '*' ? (e) => l(e) * r(e) : op === '/' ? (e) => l(e) / r(e) : (e) => l(e) % r(e); } return v; };
+  const unary = () => { if (peek() === '-') { eat(); const u = unary(); return (e) => -u(e); } if (peek() === '+') { eat(); return unary(); } return atom(); };
+  const atom = () => {
+    const t = eat();
+    if (t === undefined) throw new Error('unexpected end');
+    if (t === '(') { const v = expr(); if (eat() !== ')') throw new Error('missing )'); return v; }
+    if (/^\d/.test(t)) { const n = Number(t); return () => n; }
+    if (/^[A-Za-z_]/.test(t)) return (e) => Number(e[t]);
+    throw new Error('unexpected ' + t);
+  };
+  const f = expr();
+  if (i !== toks.length) throw new Error('trailing input');
+  return f;
+}
+
+/* ------------------------------------------------------------------ node definitions (the "node library") */
+const DEFS = {
+  Page: {
+    visual: true,
+    create() { const d = document.createElement('div'); return d; },
+    inspect() { return this.el ? '<div>' : 'not drawn'; }
+  },
+  Group: {
+    visual: true,
+    create() { const d = document.createElement('div'); if (!this.scope.drawn) d.className = 'slide'; return d; },
+    sig: {
+      scrollIntoView() {
+        const site = $('#site');
+        if (this.el) site.scrollTo({ top: this.el.offsetTop - 6, behavior: reduced ? 'auto' : 'smooth' });
+        return `${esc(this.label)}’s Scroll Into View handler calls <code>runScrollIntoView</code>, and the browser scrolls until the element is in view. Nothing was created or re-rendered. The element was already there.`;
+      }
+    },
+    inspect() { return this.el ? '<div>' : 'not drawn'; }
+  },
+  Text: {
+    visual: true,
+    create() { const d = document.createElement('div'); if (!this.scope.drawn) d.className = 'cap'; return d; },
+    paint() { this.el.textContent = this.props.text == null ? '' : this.props.text; },
+    inspect() { return this.el ? '<div>' : 'not drawn'; }
+  },
+  Image: {
+    visual: true,
+    create() { const i = document.createElement('img'); i.alt = ''; return i; },
+    paint() { const f = this.props.src; if (f) { this.el.src = ASSETS[f] || ''; this.el.dataset.file = f; } }
+  },
+  'net.noodl.controls.button': {
+    visual: true,
+    create() {
+      const b = document.createElement('button'); b.type = 'button';
+      b.addEventListener('click', () => domEvent(this, 'click', null,
+        `You clicked the <code>&lt;button&gt;</code>. React calls the <code>onClick</code> prop this node gave it, which runs <code>node.sendSignalOnOutput('onClick')</code>. Here the HTML hands control back to the node objects.`,
+        () => { this.sendSignal('onClick'); return ''; }));
+      return b;
+    },
+    paint() { this.el.textContent = this.props.label == null ? '' : this.props.label; },
+    inspect() { return this.el ? '<button>' : 'not drawn'; }
+  },
+  'net.noodl.controls.textinput': {
+    visual: true,
+    create() {
+      const l = document.createElement('label'); l.className = 'tin';
+      const s = document.createElement('span'); const i = document.createElement('input'); i.type = 'text';
+      i.id = 'site-' + this.id;
+      l.append(s, i);
+      i.addEventListener('input', () => domEvent(this, 'typing', 'type:' + this.id,
+        `You typed into the <code>&lt;input&gt;</code>. Its change handler copies the text into the node’s Value output. Typing again before this step runs only updates the pending value, so one step carries your latest text.`,
+        () => { this.sendValue('onTextChanged', i.value); return ''; }));
+      return l;
+    },
+    paint() { this.el.firstChild.textContent = this.props.label || ''; this.el.lastChild.placeholder = this.props.placeholder || ''; },
+    inspect() { return this.el ? '<input>' : 'not drawn'; }
+  },
+  'For Each': {
+    init() { this.rows = []; },
+    set: {
+      template(v) { return `It remembers the template: ${esc(v)}.`; },
+      items(arr) {
+        const par = this.parent;
+        for (const r of this.rows) { par.children = par.children.filter((c) => c !== r.root); if (r.root.el) r.root.el.remove(); }
+        this.rows = [];
+        if (!Array.isArray(arr)) return 'Items is not an array, so no rows.';
+        arr.forEach((item, i) => {
+          const sc = buildScope(SLIDE, false);
+          const root = sc.nodes.get('slide');
+          root.rowOf = this.id;
+          for (const k of Object.keys(item)) sc.nodes.get('slideIn').setInput(k, item[k]);
+          par.children.push(root);
+          this.rows.push({ scope: sc, root, item });
+        });
+        updateCard(this);
+        if (par.el) {
+          const me = this;
+          enqueue({ lang: 'react', kind: 'React render', nodes: [this.id, par.id], title: `React renders ${arr.length} new rows into Track`,
+            pre: 'The rows are new node objects, so React creates new elements for them and adds them to the page.',
+            run() { for (const r of me.rows) { const e = r.root.render(true); par.el.appendChild(e); } return ''; } });
+        }
+        return `For each of the ${arr.length} items it calls <code>nodeScope.createNode('/Slide', guid())</code>. That reads the /Slide component model, which is why the runtime keeps the models after start-up, and builds a fresh Group, Image and Text for that row. It copies the item’s fields into the row (Photo, Caption), then <code>addChild</code> puts the row into Track, next to the Repeater.`;
+      }
+    },
+    inspect() { return this.rows.length + ' rows of /Slide'; }
+  },
+  'Component Inputs': {
+    set: new Proxy({}, { get: (t, port) => function (v) { this.sendValue(port, v); return ''; } })
+  },
+  'Static Data': {
+    set: {
+      type() { return ''; },
+      json(v) {
+        let arr; try { arr = JSON.parse(v); } catch (e) { return 'The JSON does not parse, so no Items.'; }
+        this.items = arr;
+        this.sendValue('items', arr);
+        return `It parses its own JSON parameter into an array of ${arr.length} rows and sends it on Items.`;
+      }
+    },
+    inspect() { return this.items ? this.items.length + ' items' : '—'; }
+  },
+  Repeat: {
+    init() { this.running = false; this.count = 0; this.due = 0; },
+    set: { interval(v) { this.interval = v; return `Interval is stored as given: ${esc(fmt(v))} ms.`; } },
+    sig: {
+      start() {
+        if (this.running) { return 'It is already running, so Start reports Unchanged.'; }
+        const iv = this.inputs.interval;
+        if (!(typeof iv === 'number' && isFinite(iv) && iv > 0)) { this.sendSignal('failure'); return 'Interval is not a number above zero, so it reports Failure and starts nothing.'; }
+        this.running = true; this.count = 0; this.due = WORLD.clockMs + iv;
+        updateCard(this);
+        return `It starts one timer: the first tick is due in ${iv} ms. It reports Done.`;
+      }
+    },
+    tick() {
+      this.count++;
+      this.due += this.inputs.interval;
+      if (this.due <= WORLD.clockMs) this.due = WORLD.clockMs + this.inputs.interval;
+      this.sendValue('count', this.count);
+      this.sendSignal('tick');
+    },
+    inspect() { return this.running ? 'tick ' + this.count : 'stopped'; }
+  },
+  Counter: {
+    init() {
+      this.core = new CounterCore((kind, name, v) => {
+        if (kind === 'value') this.sendValue(name, v);
+        else this.sendSignal(name);
+      });
+      this.out.currentCount = 0;
+    },
+    set: {
+      startValue(v) { this.core.setStart(v); return ''; },
+      limitsMin(v) { this.core.setMin(v); return 'Min Value is now ' + esc(fmt(Number(v))) + '.'; },
+      limitsMax(v) { this.core.setMax(v); return 'Max Value is now ' + esc(fmt(Number(v))) + '.'; },
+      limitsEnabled(v) { this.core.setOn(v); return 'Limits are ' + (v ? 'on' : 'off') + '.'; }
+    },
+    sig: {
+      increase() {
+        const before = this.core.count;
+        const r = this.core.increase();
+        this.lastInc = { before, after: this.core.count, r };
+        if (r === 'unchanged') return `Limits are on and the count (${before}) is already at Max Value (${this.core.max}), so Increase changes nothing. It fires <b>Unchanged</b>, and this graph wires Unchanged back into Reset To Start.`;
+        return `The count goes from ${before} to ${this.core.count}${BUG.on && before >= this.core.max ? '. <b>That is past Max Value: the planted bug.</b>' : '.'} It sends Current Count, fires Count Changed and reports Done.`;
+      },
+      reset() {
+        const before = this.core.count;
+        const r = this.core.reset();
+        if (r === 'unchanged') return 'The count is already at Start Value, so Reset reports Unchanged and Count Changed stays silent.';
+        return `The count goes from ${before} back to Start Value (${this.core.start}). It sends Current Count and reports Done.`;
+      },
+      decrease() { this.core.decrease(); return ''; }
+    },
+    inspect() { return 'count ' + this.core.count; }
+  },
+  Expression: {
+    set: {
+      expression(v) {
+        try { this.fn = compileExpr(String(v)); } catch (e) { this.fn = null; return 'That expression does not parse, so Result stays as it was.'; }
+        if (this.inputs.count !== undefined) return this.def.compute.call(this);
+        return 'It compiles the expression and finds one free variable, <code>count</code>, so it grows a count input.';
+      },
+      count() { return this.def.compute.call(this); }
+    },
+    compute() {
+      if (!this.fn) return 'Its own Expression parameter is still queued for the first frame, so for now it just keeps count.';
+      const r = this.fn({ count: Number(this.inputs.count) });
+      this.result = r;
+      this.sendValue('result', r);
+      return `It recomputes <code>${esc(this.inputs.expression)}</code> with count = ${esc(fmt(this.inputs.count))}, gets <b>${esc(fmt(r))}</b>, and sends it on Result.`;
+    },
+    inspect() { return this.result === undefined ? '—' : '= ' + this.result; }
+  },
+  'net.noodl.HTTP': {
+    init() { this.status = 'idle'; },
+    set: new Proxy({}, { get: (t, port) => function (v) {
+      if (String(port).startsWith('body-')) return `It keeps the latest ${String(port).slice(5)} for the next request.`;
+      return '';
+    } }),
+    sig: {
+      fetch() {
+        const body = {};
+        String(this.inputs.bodyFields || '').split(',').filter(Boolean).forEach((f) => { body[f] = this.inputs['body-' + f] || ''; });
+        this.status = 'waiting'; updateCard(this);
+        const me = this;
+        const answer = () => enqueue({
+          frameStart: true, lang: 'world', kind: 'network', nodes: [this.id],
+          title: WORLD.http === 'success' ? 'The server answers: 200 OK' : 'The server answers: 500, and an error',
+          pre: 'In a real app this is a different moment entirely: the answer arrives later and starts a new chain of frames. In this playground no request is made. The inspector for “Send to studio” lets you pick what the network says.',
+          run() {
+            if (!me.scope.alive) return 'This answer belongs to a page that was replaced, so it goes nowhere.';
+            if (WORLD.http === 'success') { me.status = '200 OK'; me.sendValue('statusCode', 200); me.sendSignal('done'); return 'HTTP Request sets Status Code to 200 and fires <b>Done</b>.'; }
+            me.status = 'failed'; me.sendValue('error', 'Server error'); me.sendSignal('failure'); return 'HTTP Request sets Error and fires <b>Failure</b>.';
+          }
+        });
+        if (tape.mode === 'live') setTimeout(answer, 900); else answer();
+        return `It builds the request and hands it to the network: <code>POST ${esc(this.inputs.url)}</code> with the body <code>${esc(JSON.stringify(body))}</code>. Now it waits for an answer.`;
+      }
+    },
+    inspect() { return this.status; }
+  },
+  States: {
+    init() { this.state = null; },
+    set: new Proxy({}, { get: (t, port) => function (v) {
+      if (port === 'states') {
+        const first = String(v).split(',')[0];
+        if (this.state === null) this.state = first;
+        return `It sets up its states (${esc(v)}) and starts in the first one, ${esc(first)}.`;
+      }
+      if (port === 'values') { this.sendValue('message', this.inputs['value-' + this.state + '-message'] || ''); return ''; }
+      if (String(port).startsWith('value-') && String(port).includes('-' + this.state + '-')) this.sendValue('message', v);
+      return '';
+    } }),
+    sig: new Proxy({}, { get: (t, port) => function () {
+      const to = String(port).slice(3);
+      if (to === this.state) return `It is already in ${esc(to)}, so it reports Unchanged.`;
+      const from = this.state; this.state = to; updateCard(this);
+      const msg = this.inputs['value-' + to + '-message'] || '';
+      this.sendValue('message', msg);
+      return `It moves from ${esc(from)} to <b>${esc(to)}</b> and sends that state’s message: ${esc(fmt(msg))}.`;
+    } }),
+    inspect() { return this.state || '—'; }
+  }
+};
+
+/* ------------------------------------------------------------------ building a component instance */
+function walk(nodes, fn, parent) { for (const n of nodes) { fn(n, parent); walk(n.children, fn, n); } }
+function buildScope(comp, drawn) {
+  const sc = { comp, drawn, nodes: new Map(), wires: [], alive: true };
+  walk(comp.nodes, (m, parent) => {
+    const inst = new Inst(m, sc);
+    sc.nodes.set(m.id, inst);
+    if (parent) { const p = sc.nodes.get(parent.id); inst.parent = p; p.children.push(inst); }
+  });
+  comp.connections.forEach((c, i) => sc.wires.push({ i, from: c.sourceId, fport: c.sourcePort, to: c.targetId, tport: c.targetPort }));
+  if (!drawn) {
+    for (const inst of sc.nodes.values()) for (const [k, v] of Object.entries(inst.model.parameters)) inst.setInput(k, v);
+  }
+  return sc;
+}
+
+/* ------------------------------------------------------------------ engine board: cards and wires */
+const ROWS = ['page', 'hero', 'headline', 'subhead', 'cta', 'carousel', 'track', 'photos', 'next', 'contact', 'contactHead', 'nameIn', 'emailIn', 'msgIn', 'send', 'status'];
+const LAYOUT = {};
+(function layout() {
+  const depth = {};
+  walk(HOME.nodes[0].children, (n, p) => { depth[n.id] = p ? depth[p.id] + 1 : 1; });
+  depth.page = 0;
+  ROWS.forEach((id, r) => { const d = depth[id]; LAYOUT[id] = { x: 14 + d * 16, y: 48 + r * 33, w: 220 - d * 16 }; });
+  const L = (id, y) => { LAYOUT[id] = { x: 330, y, w: 196 }; };
+  L('timer', 81); L('slideIndex', 147); L('offset', 213); L('photoData', 279); L('request', 411); L('formState', 510);
+})();
+function portPt(id, side) { const b = LAYOUT[id]; return side === 'r' ? [b.x + b.w, b.y + 13] : [b.x, b.y + 13]; }
+function wirePath(w) {
+  if (w.from === w.to) { const [x, y] = portPt(w.from, 'r'); return `M${x} ${y - 5} C${x + 34} ${y - 30} ${x + 34} ${y + 30} ${x} ${y + 5}`; }
+  const s = portPt(w.from, 'r');
+  const tLogic = LAYOUT[w.to].x >= 300;
+  const t = tLogic ? portPt(w.to, 'l') : portPt(w.to, 'r');
+  const dx = Math.max(40, Math.abs(t[0] - s[0]) * 0.45);
+  const c1 = [s[0] + dx, s[1]];
+  const c2 = tLogic ? [t[0] - dx, t[1]] : [t[0] + Math.max(40, dx * 0.8), t[1]];
+  if (!tLogic && LAYOUT[w.from].x >= 300) { c1[0] = s[0] + 18; c2[0] = t[0] + 60; }
+  return `M${s[0]} ${s[1]} C${c1[0]} ${c1[1]} ${c2[0]} ${c2[1]} ${t[0]} ${t[1]}`;
+}
+const SVGNS = 'http://www.w3.org/2000/svg';
+function buildBoard() {
+  const svg = $('#wires'); svg.innerHTML = '';
+  HOME.connections.forEach((c, i) => {
+    const w = { from: c.sourceId, to: c.targetId };
+    const p = document.createElementNS(SVGNS, 'path');
+    p.setAttribute('d', wirePath(w)); p.id = 'w' + i;
+    p.setAttribute('class', 'w ' + (SIGNAL_PORTS.has(c.sourcePort) ? 'sig ' : '') + 'off');
+    svg.appendChild(p);
+    const h = document.createElementNS(SVGNS, 'path');
+    h.setAttribute('d', wirePath(w)); h.id = 'h' + i; h.setAttribute('class', 'hit off');
+    h.addEventListener('mouseenter', () => { if (drag && drag.moved) return; hoverWire = i; p.classList.add('hov'); showWireTip(i); });
+    h.addEventListener('mouseleave', () => { hoverWire = -1; p.classList.remove('hov'); scheduleHideTip(); });
+    h.addEventListener('click', () => togglePinWire(i));
+    svg.appendChild(h);
+  });
+  const cards = $('#cards'); cards.innerHTML = '';
+  for (const id of Object.keys(LAYOUT)) {
+    const m = findModel(id); const b = LAYOUT[id];
+    const vis = DEFS[m.type].visual;
+    const c = document.createElement('div');
+    c.className = 'card ghost ' + (vis ? 'vis' : 'logic');
+    c.dataset.node = id; c.id = 'card-' + id;
+    c.style.cssText = `left:${b.x}px;top:${b.y}px;width:${b.w}px`;
+    c.tabIndex = 0; c.setAttribute('role', 'button');
+    c.innerHTML = `<span class="ic">${vis ? 'V' : 'ƒ'}</span><span class="lb"></span><span class="ty"></span><span class="ro"></span>`;
+    c.querySelector('.lb').textContent = LABELS[id];
+    c.querySelector('.ty').textContent = TYPE_NAMES[m.type];
+    c.setAttribute('aria-label', LABELS[id] + ', ' + TYPE_NAMES[m.type]);
+    c.addEventListener('click', () => select(id));
+    c.addEventListener('mouseenter', () => showHoverPop(id));
+    c.addEventListener('mouseleave', scheduleHidePop);
+    c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(id); } });
+    cards.appendChild(c);
+  }
+}
+function findModel(id, comp = HOME) { let f = null; walk(comp.nodes, (n) => { if (n.id === id) f = n; }); return f; }
+function updateCard(inst) {
+  if (!inst.scope.drawn) return;
+  const c = document.getElementById('card-' + inst.id); if (!c) return;
+  const r = inst.visual ? (inst.el ? '<' + inst.el.tagName.toLowerCase() + '>' : 'no element yet') : inst.def.inspect ? inst.def.inspect.call(inst) : '';
+  c.querySelector('.ro').textContent = r;
+  refreshPops(inst.id);
+  if (selected === inst.id && (currentTab === 'memory' || currentTab === 'page')) renderPane();
+}
+
+/* ------------------------------------------------------------------ the blueprint plane */
+const REF_KEYS = new Set(['id', 'sourceId', 'targetId', 'roots']);
+function jsonLines() {
+  const L = [];
+  const P = (c) => `<span class="jp">${esc(c)}</span>`;
+  const K = (k) => `<span class="jk">${esc(JSON.stringify(k))}</span>${P(': ')}`;
+  const V = (v, key) => {
+    if (typeof v === 'string') return `<span class="${REF_KEYS.has(key) ? 'jr' : 'js'}">${esc(JSON.stringify(v))}</span>`;
+    if (typeof v === 'number') return `<span class="jn">${v}</span>`;
+    if (typeof v === 'boolean' || v === null) return `<span class="jb">${v}</span>`;
+    if (Array.isArray(v)) return v.length ? P('[') + v.map((x) => V(x, key)).join(P(', ')) + P(']') : P('[]');
+    const es = Object.entries(v);
+    if (!es.length) return P('{}');
+    return P('{ ') + es.map(([k, x]) => K(k) + V(x, k)).join(P(', ')) + P(' }');
+  };
+  const line = (d, html, attr = '') => L.push(`<span class="jl"${attr}><span class="c" style="--d:${d}">${html}</span></span>`);
+  const short = (v) => JSON.stringify(v).length <= 56;
+  const emitNode = (n, d, comma, home) => {
+    const attr = home ? ` data-node="${n.id}"` : '';
+    line(d, P('{ ') + K('id') + V(n.id, 'id') + P(', ') + K('type') + V(n.type, 'type') + P(','), attr);
+    const ents = Object.entries(n.parameters);
+    if (short(n.parameters)) line(d + 1, K('parameters') + V(n.parameters) + P(','), attr);
+    else {
+      line(d + 1, K('parameters') + P('{'), attr);
+      ents.forEach(([k, x], i) => line(d + 2, K(k) + V(x, k) + (i < ents.length - 1 ? P(',') : ''), attr));
+      line(d + 1, P('},'), attr);
+    }
+    if (!n.children.length) { line(d + 1, K('ports') + V(n.ports) + P(', ') + K('children') + P('[]'), attr); line(d, P('}') + comma, attr); return; }
+    line(d + 1, K('ports') + V(n.ports) + P(', ') + K('children') + P('['), attr);
+    n.children.forEach((c, i) => emitNode(c, d + 2, i < n.children.length - 1 ? P(',') : '', home));
+    line(d + 1, P(']'), attr);
+    line(d, P('}') + comma, attr);
+  };
+  line(0, P('{'));
+  line(1, K('settings') + V(PROJECT.settings) + P(','));
+  line(1, K('rootComponent') + V(PROJECT.rootComponent) + P(','));
+  line(1, K('components') + P('['));
+  PROJECT.components.forEach((comp, ci) => {
+    const home = comp === HOME;
+    line(2, P('{'));
+    line(3, K('name') + V(comp.name) + P(', ') + K('roots') + V(comp.roots, 'roots') + P(','));
+    line(3, K('nodes') + P('['));
+    comp.nodes.forEach((n, i) => emitNode(n, 4, i < comp.nodes.length - 1 ? P(',') : '', home));
+    line(3, P('],'));
+    line(3, K('connections') + P('['));
+    comp.connections.forEach((c, i) => line(4, V(c) + (i < comp.connections.length - 1 ? P(',') : ''), home ? ` data-wire="${i}"` : ''));
+    line(3, P('],'));
+    line(3, K('ports') + V(comp.ports));
+    line(2, P('}') + (ci < PROJECT.components.length - 1 ? P(',') : ''));
+  });
+  line(1, P(']'));
+  line(0, P('}'));
+  return L.join('');
+}
+function renderJSON() {
+  const b = $('#jsonBody'); const st = b.scrollTop;
+  b.innerHTML = jsonLines(); b.scrollTop = st;
+  markSelection();
+}
+function scrollJsonTo(id) {
+  const b = $('#jsonBody'); const ln = b.querySelector(`[data-node="${id}"]`); if (!ln) return;
+  const top = ln.offsetTop - b.clientHeight / 3;
+  b.scrollTo({ top: Math.max(0, top), behavior: reduced ? 'auto' : 'smooth' });
+}
+
+/* ------------------------------------------------------------------ start-up (boot) */
+function teardown() {
+  clearTimeout(tape.timer); tape.timer = null; tape.q = []; tape.later = []; tape.frame = 0;
+  if (SCOPE) SCOPE.alive = false;
+  SCOPE = null;
+  $('#site').innerHTML = ''; $('#site').scrollTop = 0;
+  $('#siteEmpty').hidden = false;
+  document.querySelectorAll('.card').forEach((c) => { c.classList.add('ghost'); c.querySelector('.ro').textContent = ''; });
+  document.querySelectorAll('#wires path').forEach((p) => p.classList.add('off'));
+  $('#jsonBody').classList.add('unloaded'); $('#jsonNote').hidden = false;
+  resetWS(); hideHoverPop(); renderPins();
+}
+function boot() {
+  teardown();
+  const order = [];
+  walk(HOME.nodes, (n, p) => order.push([n, p]));
+  const steps = [];
+  steps.push({ lang: 'html', kind: 'start-up', frameStart: true, title: 'The browser opens index.html',
+    pre: 'The page’s script contains your whole project, as one line of JavaScript: <code>window.projectData = {…}</code>. That is the JSON on the bottom plane. It arrives with the page; it is not fetched separately. A big app also fetches extra parts later, from <code>noodl_bundles/&lt;id&gt;.json</code>.',
+    run() { $('#jsonBody').classList.remove('unloaded'); $('#jsonNote').hidden = true; flashPlane('pJson'); return ''; } });
+  steps.push({ lang: 'js', kind: 'start-up', title: 'noodl.deploy.js starts the runtime',
+    pre: '<code>renderDeployed(root, modules, window.projectData)</code> creates a React root on <code>#root</code>. The Viewer then registers the node library: one definition for each node type NodeGX ships (Group, Text, Counter, HTTP Request and the rest). That code comes with NodeGX, not with your project.' });
+  steps.push({ lang: 'js', kind: 'start-up', title: 'setData: the JSON becomes models',
+    pre: '<code>GraphModel.importEditorData</code> turns each component into a <code>ComponentModel</code> and each node into a <code>NodeModel</code>. These are still only descriptions. Nothing runs and nothing is drawn. The runtime keeps the models for as long as the page is open.' });
+  steps.push({ lang: 'js', kind: 'start-up', title: 'The root component, /Home, gets an instance',
+    pre: '<code>_setRootComponent</code> → <code>createComponentInstanceNode</code> → <code>NodeScope.setComponentModel(/Home)</code>. That walks the model and builds one node object for every node in it.',
+    run() { SCOPE = buildScope(HOME, true); return ''; } });
+  for (const [m, p] of order) {
+    const vis = DEFS[m.type].visual;
+    const np = Object.keys(m.parameters).length;
+    steps.push({ lang: 'js', kind: 'create node', nodes: [m.id],
+      title: `createNodeFromModel: ${LABELS[m.id]} (${TYPE_NAMES[m.type]})`,
+      pre: `The type <code>${esc(m.type)}</code> is in the node library, so <code>nodeRegister.createNode</code> makes a new ${esc(TYPE_NAMES[m.type])} object.` +
+        (np ? ` <code>setNodeParameters</code> queues ${np} input${np > 1 ? 's' : ''} from the JSON: ${Object.entries(m.parameters).slice(0, 3).map(([k, v]) => `${esc(pn(k))} = ${esc(fmt(v))}`).join(', ')}${np > 3 ? ', …' : ''}.` : ' It has no parameters to queue.') +
+        (p ? ` <code>insertNodeInTree</code> makes it a child of ${esc(LABELS[p.id])}.` : '') +
+        (vis ? '' : ' It is a logic node, so it will never draw anything.'),
+      run() { const inst = SCOPE.nodes.get(m.id); inst.queued = Object.entries(m.parameters); document.getElementById('card-' + m.id).classList.remove('ghost'); return ''; } });
+  }
+  steps.push({ lang: 'js', kind: 'start-up', title: `addConnection × ${HOME.connections.length}: the wires`,
+    pre: 'Each wire in the JSON becomes <code>targetNode.connectInput(port, sourceNode, sourcePort)</code>. The source’s output now holds a list of everyone listening. A value wire also copies over whatever the source already holds, which is why the Counter’s 0 starts travelling at once.',
+    run() {
+      document.querySelectorAll('#wires path').forEach((p, i) => setTimeout(() => p.classList.remove('off'), reduced || tape.mode === 'live' ? 0 : i * 40));
+      const c = SCOPE.nodes.get('slideIndex');
+      for (const w of c.wiresFrom('currentCount')) deliverValue(w, 0);
+      return '';
+    } });
+  steps.push({ lang: 'js', kind: 'frame', frameStart: true, title: 'The first frame: every node runs its queued inputs',
+    pre: '<code>requestAnimationFrame</code> → <code>updateDirtyNodes</code>. Each node drains its queue and runs each input’s setter in turn. Setters on visual nodes only store styles and props inside the node object, because there is still no element to put them on. Values that setters send travel next.',
+    run() {
+      for (const inst of SCOPE.nodes.values()) for (const [k, v] of inst.queued) inst.setInput(k, v);
+      for (const inst of SCOPE.nodes.values()) updateCard(inst);
+      return '';
+    } });
+  steps.push({ lang: 'react', kind: 'render', title: 'Render: visual nodes describe their elements to React',
+    pre() { return '<code>Viewer.render</code> calls <code>rootComponent.render()</code>, which calls the Page node’s <code>render()</code>. Each visual node returns <code>React.createElement(NoodlReactComponent, {noodlNode})</code>, which renders the node’s real component with its style and props, then asks its children to do the same. Logic nodes are not in this tree. React receives:<pre>' + esc(reactTree()) + '</pre>'; } });
+  const sections = [['page', 'Page', 'React creates the outer <code>&lt;div&gt;</code> for the Page and puts it into <code>#root</code>. This is the first real HTML.'],
+    ['hero', 'Hero', 'Hero’s <code>&lt;div&gt;</code> arrives with its children: two Text <code>&lt;div&gt;</code>s and a <code>&lt;button&gt;</code>. Each element gets the style its node stored during the first frame, such as the background colour.'],
+    ['carousel', 'Carousel', 'Carousel, Track and the three rows the Repeater built. Track already has <code>transform: translateX(0%)</code>, because the Counter’s 0 reached it through the Expression before anything was drawn.'],
+    ['contact', 'Contact', 'The contact section: a heading, three inputs, the Send button, and an empty Status text.']];
+  for (const [id, lbl, pre] of sections) {
+    steps.push({ lang: 'html', kind: 'React commit', nodes: [id], title: `React commits ${lbl === 'Page' ? 'the Page' : lbl}`, pre,
+      run() {
+        const inst = SCOPE.nodes.get(id);
+        if (id === 'page') {
+          const el = document.createElement('div'); inst.el = el; el.dataset.node = 'page'; el.className = 'n-page born';
+          Object.assign(el.style, inst.style);
+          $('#site').appendChild(el); $('#siteEmpty').hidden = true; updateCard(inst);
+        } else {
+          const el = inst.render(true); SCOPE.nodes.get('page').el.appendChild(el);
+        }
+        markSelection();
+        return '';
+      } });
+  }
+  steps.push({ lang: 'js', kind: 'mount', title: 'The Page is in the document: Did Mount',
+    pre: 'With its element in the document, the Page node fires Did Mount. This graph wires that into the Repeat timer’s Start.',
+    run() { SCOPE.nodes.get('page').sendSignal('didMount'); return ''; } });
+  steps.push({ lang: 'js', kind: 'start-up', title: 'Start-up is finished',
+    pre: 'From here on, nothing is rebuilt. The JSON stays in memory as models, but nothing reads it again unless something new has to be built. The node objects stay alive and react to inputs. The HTML changes only when a node patches a style or React re-renders a node. Click something on the site, or pick a scenario above.' });
+  // chain them so values a step sends travel before the next start-up step
+  steps.forEach((s, i) => {
+    const run = s.run;
+    s.run = function () { try { return run ? run.call(this) : ''; } finally { if (steps[i + 1]) defer(steps[i + 1]); } };
+  });
+  defer(steps[0]);
+}
+function reactTree() {
+  const lines = [];
+  const tag = (inst) => ({ Page: 'Page', Group: 'Group', Text: 'Text', Image: 'Image', 'net.noodl.controls.button': 'Button', 'net.noodl.controls.textinput': 'TextInput' }[inst.type]);
+  const rec = (inst, d) => {
+    if (!inst.visual) return;
+    const props = [];
+    if (inst.style.backgroundColor) props.push(`style={{backgroundColor:"${inst.style.backgroundColor}"}}`);
+    if (inst.style.transform) props.push(`style={{transform:"${inst.style.transform}"}}`);
+    if (inst.props.text) props.push(`text="${inst.props.text.slice(0, 22)}${inst.props.text.length > 22 ? '…' : ''}"`);
+    if (inst.props.label) props.push(`label="${inst.props.label}"`);
+    if (inst.props.src) props.push(`src="${inst.props.src}"`);
+    const kids = inst.children.filter((c) => c.visual);
+    const open = '  '.repeat(d) + '<' + tag(inst) + (props.length ? ' ' + props.join(' ') : '');
+    if (!kids.length) { lines.push(open + ' />'); return; }
+    lines.push(open + '>');
+    if (d >= 3 && kids.length > 1 && inst.id === 'track') { rec(kids[0], d + 1); lines.push('  '.repeat(d + 1) + `… ${kids.length - 1} more rows`); }
+    else kids.forEach((k) => rec(k, d + 1));
+    lines.push('  '.repeat(d) + '</' + tag(inst) + '>');
+  };
+  rec(SCOPE.nodes.get('page'), 0);
+  return lines.join('\n');
+}
+
+/* ------------------------------------------------------------------ world clock (live only) */
+setInterval(() => {
+  if (tape.mode !== 'live' || !SCOPE || !SCOPE.alive) return;
+  WORLD.clockMs += 250;
+  const t = SCOPE.nodes.get('timer');
+  if (t && t.running && WORLD.clockMs >= t.due) tickStep(t);
+}, 250);
+function tickStep(t) {
+  enqueue({ frameStart: true, lang: 'world', kind: 'clock', nodes: ['timer'], title: `The clock reaches the next beat: ${LABELS.timer} ticks`,
+    pre: `The scheduler’s timer pass finds the Repeat’s timer due. Repeat adds one to Count, fires Tick, and queues itself again for the next beat.${tape.mode !== 'live' ? ' (The clock is frozen while you watch in slow motion or step by step, so this tick happens only when you ask for it. Phase 107 calls this scripted clock part of “the world”.)' : ''}`,
+    run() { t.def.tick.call(t); return ''; } });
+}
+
+/* ------------------------------------------------------------------ editing (what the editor does) */
+function edit(id, port, value) {
+  const m = findModel(id); const inst = SCOPE && SCOPE.nodes.get(id);
+  enqueue({ frameStart: true, lang: 'json', kind: 'editor', nodes: [id],
+    title: `The editor changes ${LABELS[id]}’s ${pn(port)}`,
+    pre: `In NodeGX this travels over the editor’s WebSocket as a <code>modelUpdate</code> (<code>parameterChanged</code>). The runtime updates the NodeModel, so the JSON now says <code>"${esc(port)}": ${esc(JSON.stringify(value))}</code>. A deployed site never gets this message: its parameters are fixed.`,
+    run() { m.parameters[port] = value; renderJSON(); flashJson(id); return ''; } });
+  if (inst) enqueue({ lang: 'js', kind: 'input', nodes: [id], title: `${LABELS[id]}.setInputValue('${port}', …)`,
+    pre: 'The NodeModel emits <code>parameterUpdated</code>, and the live node object runs that input’s setter. Nothing else is rebuilt.',
+    run() { return inst.setInput(port, value); } });
+}
+
+/* ------------------------------------------------------------------ highlighting + animation */
+function clearHot() { document.querySelectorAll('.hot').forEach((e) => e.classList.remove('hot')); }
+function animate(s) {
+  if (tape.mode !== 'live') clearHot();
+  const ids = s.nodes || [];
+  for (const id of ids) {
+    const c = document.getElementById('card-' + id);
+    if (c) { if (tape.mode !== 'live') c.classList.add('hot'); else { c.classList.remove('flash'); void c.offsetWidth; c.classList.add('flash'); } }
+    if (tape.mode !== 'live') {
+      document.querySelectorAll(`#site [data-node="${id}"]`).forEach((e) => e.classList.add('hot'));
+      document.querySelectorAll(`#jsonBody [data-node="${id}"]`).forEach((jl) => jl.classList.add('hot'));
+    }
+  }
+  if (s.wire !== undefined) {
+    const p = document.getElementById('w' + s.wire);
+    if (p) {
+      if (tape.mode !== 'live') { p.classList.add('hot'); const jl = document.querySelector(`#jsonBody [data-wire="${s.wire}"]`); if (jl) jl.classList.add('hot'); }
+      const ms = tape.mode === 'live' ? 420 : tape.mode === 'slow' ? tape.delay * 0.8 : 1000;
+      if (!reduced) travel(p, s.kind === 'value', ms, tape.mode !== 'live' && s.kind === 'value' ? preview(s.value) : null);
+    }
+  }
+  if (tape.mode !== 'live' && ids[0]) {
+    const el = document.querySelector(`#site [data-node="${ids[ids.length - 1]}"]`) || document.querySelector(`#site [data-node="${ids[0]}"]`);
+    if (el && s.lang !== 'world') { const site = $('#site'); const r = el.offsetTop; if (r < site.scrollTop || r > site.scrollTop + site.clientHeight - 60) site.scrollTo({ top: Math.max(0, r - 40), behavior: reduced ? 'auto' : 'smooth' }); }
+    const jl = document.querySelector(`#jsonBody [data-node="${ids[0]}"]`); if (jl && (s.kind === 'create node' || s.kind === 'editor')) scrollJsonTo(ids[0]);
+  }
+}
+function travel(path, isValue, ms, label) {
+  const len = path.getTotalLength(); const svg = $('#wires');
+  const c = document.createElementNS(SVGNS, 'circle'); c.setAttribute('r', isValue ? 5 : 4); if (isValue) c.setAttribute('class', 'val');
+  svg.appendChild(c);
+  let tx = null;
+  if (label) { tx = document.createElementNS(SVGNS, 'text'); tx.setAttribute('class', 'ride'); tx.textContent = label.length > 22 ? label.slice(0, 21) + '…' : label; svg.appendChild(tx); }
+  const t0 = performance.now();
+  const f = (t) => {
+    const k = Math.min(1, (t - t0) / ms); const pt = path.getPointAtLength(len * k);
+    c.setAttribute('cx', pt.x); c.setAttribute('cy', pt.y);
+    if (tx) { tx.setAttribute('x', pt.x + 8); tx.setAttribute('y', pt.y - 8); }
+    if (k < 1) requestAnimationFrame(f); else setTimeout(() => { c.remove(); if (tx) tx.remove(); }, 160);
+  };
+  requestAnimationFrame(f);
+}
+function flashPlane(id) { const p = document.getElementById(id); p.animate && !reduced && p.animate([{ filter: 'brightness(1.25)' }, { filter: 'none' }], { duration: 700 }); }
+function flashJson(id) { if (reduced) return; document.querySelectorAll(`#jsonBody [data-node="${id}"]`).forEach((jl) => jl.animate && jl.animate([{ background: 'color-mix(in srgb, var(--pulse) 45%, var(--j-bg))' }, { background: 'var(--j-bg)' }], { duration: 1400 })); }
+
+/* ------------------------------------------------------------------ narration + log */
+function narrate(s) {
+  const [cls, name] = LANG[s.lang || 'js'];
+  const chip = $('#nChip'); chip.className = 'chip ' + cls; chip.textContent = name;
+  $('#nFrame').textContent = 'frame ' + s.frame;
+  $('#nKind').textContent = s.kind || '';
+  $('#nTitle').textContent = s.title;
+  $('#nBody').innerHTML = s.text || '';
+}
+function renderUpNext() {
+  const u = $('#upnext'); const n = peekNext();
+  if (tape.mode === 'live') {
+    u.innerHTML = '<span class="grow">Running live, as fast as the browser can go. Choose <b>Slow motion</b> or <b>Step by step</b> at the top to follow each step.</span>';
+    return;
+  }
+  const waiting = tape.q.length + tape.later.length;
+  if (!n) { u.innerHTML = 'Nothing is waiting. Click something on the site, type in the form, or pick a scenario above.'; return; }
+  u.innerHTML = '';
+  const span = document.createElement('span'); span.className = 'grow'; span.innerHTML = 'Up next: <b></b>' + (waiting > 1 ? ` <span>(${waiting - 1} more waiting)</span>` : '');
+  span.querySelector('b').textContent = n.title;
+  u.appendChild(span);
+  if (tape.mode === 'step') {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'btn primary'; b.textContent = 'Next step'; b.id = 'nextBtn';
+    b.addEventListener('click', () => { stepOnce(); const nb = $('#nextBtn'); if (nb) nb.focus(); });
+    u.appendChild(b);
+    const all = document.createElement('button'); all.type = 'button'; all.className = 'btn'; all.textContent = 'Run the rest';
+    all.addEventListener('click', () => { let g = 0; while (peekNext() && g++ < 300) { const s = takeNext(); runStep(s); } renderUpNext(); });
+    u.appendChild(all);
+  }
+}
+function logStep(s) {
+  const log = $('#log');
+  const d = document.createElement('div');
+  const dot = document.createElement('span'); dot.className = 'dot'; dot.style.background = `var(--chip-${s.lang || 'js'})`;
+  const f = document.createElement('span'); f.className = 'f'; f.textContent = 'f' + s.frame;
+  const t = document.createElement('span'); t.className = 't'; t.textContent = s.title;
+  d.append(dot, f, t);
+  log.prepend(d);
+  while (log.children.length > 80) log.lastChild.remove();
+}
+
+/* ------------------------------------------------------------------ selection + inspector */
+let selected = 'hero';
+let currentTab = 'settings';
+function select(id) { selected = id; markSelection(); renderInspector(); scrollJsonTo(id); }
+function markSelection() {
+  document.querySelectorAll('.sel').forEach((e) => e.classList.remove('sel'));
+  const c = document.getElementById('card-' + selected); if (c) c.classList.add('sel');
+  document.querySelectorAll(`#site [data-node="${selected}"]`).forEach((e) => e.classList.add('sel'));
+  document.querySelectorAll(`#jsonBody [data-node="${selected}"]`).forEach((jl) => jl.classList.add('sel'));
+  HOME.connections.forEach((cn, i) => { if (cn.sourceId === selected || cn.targetId === selected) { const p = document.getElementById('w' + i); if (p) p.classList.add('sel'); } });
+}
+$('#site').addEventListener('click', (e) => {
+  const t = e.target.closest('[data-node]'); if (t) select(t.dataset.node);
+}, true);
+$('#tabs').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-tab]'); if (!b) return;
+  currentTab = b.dataset.tab;
+  document.querySelectorAll('#tabs button').forEach((x) => x.setAttribute('aria-selected', x === b ? 'true' : 'false'));
+  renderPane();
+});
+function renderInspector() {
+  const m = findModel(selected); const vis = DEFS[m.type].visual;
+  $('#iKind').textContent = m.type === 'For Each' ? 'Builds visual rows' : vis ? 'Visual node' : 'Logic node';
+  $('#iName').textContent = LABELS[selected];
+  $('#iSub').textContent = `${TYPE_NAMES[m.type]} · type "${m.type}" · id "${m.id}"`;
+  renderPane();
+}
+
+const EDITABLE = {
+  hero: [['backgroundColor', 'color']],
+  headline: [['text', 'text'], ['fontSize', 'px']],
+  subhead: [['text', 'text']],
+  cta: [['label', 'text'], ['backgroundColor', 'color']],
+  contact: [['backgroundColor', 'color']],
+  contactHead: [['text', 'text']],
+  send: [['label', 'text']],
+  nameIn: [['placeholder', 'text']], emailIn: [['placeholder', 'text']], msgIn: [['placeholder', 'text']],
+  timer: [['interval', 'number']],
+  slideIndex: [['limitsMax', 'number']],
+  offset: [['expression', 'text']],
+  request: [['url', 'text']],
+  formState: [['value-Sent-message', 'text']]
+};
+function wiredInputs(id) { return [...new Set(HOME.connections.filter((c) => c.targetId === id).map((c) => c.targetPort))]; }
+function wiredOutputs(id) { return HOME.connections.filter((c) => c.sourceId === id); }
+
+function renderPane() {
+  const pane = $('#pane'); const m = findModel(selected); const inst = SCOPE && SCOPE.nodes.get(selected);
+  const vis = DEFS[m.type].visual;
+  if (currentTab === 'settings') {
+    const ed = EDITABLE[selected] || [];
+    let h = '';
+    if (!ed.length) h += `<p class="note">Nothing to change here in this playground. Its inputs come from the JSON or from wires.</p>`;
+    else h += `<p class="note">Change a setting and watch the change go JSON → node object → page. In <b>Step by step</b> you see each hop.</p>`;
+    for (const [port, kind] of ed) {
+      const v = m.parameters[port];
+      const fid = 'f-' + selected + '-' + port;
+      let input;
+      if (kind === 'color') input = `<div class="row"><input type="color" id="${fid}" value="${esc(String(v || '#000000').slice(0, 7))}"><code>${esc(v)}</code></div>`;
+      else if (kind === 'number') input = `<input type="number" id="${fid}" value="${esc(v)}">`;
+      else if (kind === 'px') input = `<input type="number" id="${fid}" value="${esc(v.value)}" min="12" max="60">`;
+      else input = `<input type="text" id="${fid}" value="${esc(v == null ? '' : v)}">`;
+      h += `<div class="field"><label for="${fid}">${esc(pn(port))}</label>${input}</div>`;
+    }
+    if (selected === 'request') {
+      h += `<div class="field"><label for="f-world">What the network answers</label><select id="f-world"><option value="success">200 OK</option><option value="failure">500, an error</option></select><span class="hint">No request leaves your browser. This is the playground’s stand-in for the server.</span></div>`;
+    }
+    if (selected === 'slideIndex') h += `<p class="note">Want to break it on purpose? Open <b>Its spec</b>.</p>`;
+    const wi = wiredInputs(selected);
+    if (wi.length) h += `<p class="note">Fed by wires: ${wi.map((p) => esc(pn(p))).join(', ')}. A wired input takes whatever arrives on the wire.</p>`;
+    pane.innerHTML = h;
+    for (const [port, kind] of ed) {
+      const f = document.getElementById('f-' + selected + '-' + port);
+      const evt = kind === 'color' ? 'input' : 'change';
+      let tmr;
+      f.addEventListener(evt, () => {
+        let v = f.value;
+        if (kind === 'number') v = Number(v);
+        if (kind === 'px') v = { value: Number(v), unit: 'px' };
+        if (kind === 'color') { v = v.toUpperCase(); f.nextElementSibling.textContent = v; }
+        clearTimeout(tmr);
+        tmr = setTimeout(() => edit(selected, port, v), kind === 'color' ? 120 : 0);
+      });
+    }
+    const w = $('#f-world'); if (w) { w.value = WORLD.http; w.addEventListener('change', () => { WORLD.http = w.value; }); }
+    return;
+  }
+  if (currentTab === 'json') {
+    const conns = HOME.connections.filter((c) => c.sourceId === selected || c.targetId === selected);
+    const own = Object.assign({}, m, { children: m.children.map((c) => `… ${c.id}`) });
+    pane.innerHTML = `<p>This is all the JSON says about ${esc(LABELS[selected])}. It is a description: a type name, some settings and a list of children. No code.</p><pre>${esc(JSON.stringify(own, null, 2))}</pre>` +
+      (conns.length ? `<p>Its wires live in the component’s <code>connections</code> list, not inside the node:</p><pre>${esc(conns.map((c) => JSON.stringify(c)).join(',\n'))}</pre>` : '') +
+      `<p class="note">The label “${esc(LABELS[selected])}” is from the editor’s project file. The exported JSON leaves labels out.</p>`;
+    return;
+  }
+  if (currentTab === 'memory') {
+    if (!inst) { pane.innerHTML = '<p>No node object yet. Start-up hasn’t created it.</p>'; return; }
+    const outs = {};
+    wiredOutputs(selected).forEach((c) => { (outs[c.sourcePort] = outs[c.sourcePort] || []).push(LABELS[c.targetId] + '.' + pn(c.targetPort)); });
+    const ins = {};
+    for (const [k, v] of Object.entries(inst.inputs)) ins[k] = typeof v === 'string' && v.length > 60 ? v.slice(0, 58) + '…' : v;
+    const obj = { id: inst.id, type: inst.type, _inputValues: ins };
+    if (vis) { obj.style = inst.style; obj.props = inst.props; obj.children = inst.children.map((c) => c.scope.drawn ? c.id : 'row of /Slide'); }
+    obj.outputs = Object.fromEntries(Object.entries(outs).map(([k, v]) => [k, '→ ' + v.join(', ')]));
+    pane.innerHTML = `<p>The live object the runtime made for this node. It exists from start-up until the page closes. (A simplified view; the real object has more fields.)</p><pre>${esc(JSON.stringify(obj, null, 2))}</pre>` + memoryNote(m.type);
+    return;
+  }
+  if (currentTab === 'page') {
+    if (selected === 'photos') {
+      const row = inst && inst.rows[0] && inst.rows[0].root.el;
+      pane.innerHTML = `<p><b>The Repeater has no element of its own.</b> Its rows do: ${inst ? inst.rows.length : 0} instances of /Slide inside Track. The first one, as the browser holds it:</p>` + (row ? `<pre>${esc(shallowHTML(row))}</pre>` : '<p>Not drawn yet.</p>');
+      return;
+    }
+    if (!vis) { pane.innerHTML = `<p><b>This node never becomes HTML.</b> ${esc(TYPE_NAMES[m.type])} is a logic node. It lives only as a JavaScript object on the engine board, and changes the page only through the wires it sends into visual nodes.</p>`; return; }
+    if (!inst || !inst.el) { pane.innerHTML = '<p>Nothing on the page yet. React hasn’t committed this node’s element.</p>'; return; }
+    pane.innerHTML = `<p>The element this node keeps up to date, as the browser holds it right now:</p><pre>${esc(shallowHTML(inst.el))}</pre><p class="note">NodeGX’s real elements also carry generated class names and more layout styles. This page adds a little CSS of its own for layout.</p>`;
+    return;
+  }
+  if (currentTab === 'spec') { pane.innerHTML = specPane(m.type); wireSpecPane(m.type); }
+}
+function memoryNote(type) {
+  const N = {
+    Group: '<p>When an input like Background Color changes, the setter generated by <code>createNodeFromReactComponent</code> runs:</p><pre>set(value) {\n  this.setStyle({ backgroundColor: value });\n}\n// setStyle writes straight onto element.style\n// when the element exists (no React render)</pre>',
+    Text: '<p>When Text changes, its setter stores a prop and asks React to re-render this one node:</p><pre>set(value) {\n  this.props.text = value;\n  this.forceUpdate();  // waits for frameEnd, then\n}                     // reactComponentRef.setState({})</pre>',
+    'net.noodl.controls.button': '<p>A click goes the other way, from the page into the node. At render time the node handed React an <code>onClick</code> prop:</p><pre>onClick: () => node.sendSignalOnOutput("onClick")</pre>',
+    'net.noodl.controls.textinput': '<p>Typing goes from the page into the node: the input’s change handler sets the Value output, which is flagged dirty and sent down its wires.</p>',
+    Counter: '<p>Its Increase handler, as the runtime runs it:</p><pre>increase: valueChangedToTrue() {\n  this.beginOutcome();\n  if (limitsEnabled && count >= max)\n    return outcome("unchanged");\n  count++;\n  this.flagOutputDirty("currentCount");\n  this.sendSignalOnOutput("countChanged");\n  outcome("done");\n}</pre>',
+    'For Each': '<p>The Repeater isn’t drawn itself. For each item it builds a whole component instance from the /Slide model and adds that row to its parent, Track.</p>',
+    Repeat: '<p>One scheduler timer that queues itself again after every tick. Missed ticks are skipped, not replayed.</p>',
+    Expression: '<p>It compiles its expression once and grows one input for each free variable (here, <code>count</code>). Every new input value recomputes Result.</p>',
+    'net.noodl.HTTP': '<p>Fetch hands a request to the network and returns at once. The answer arrives later, as a new event, and fires Done or Failure.</p>',
+    States: '<p>Each <code>To &lt;state&gt;</code> signal input moves it to that state and sends that state’s values on its outputs.</p>',
+    'Static Data': '<p>It parses its JSON parameter once and sends the array on Items.</p>'
+  };
+  return N[type] || '';
+}
+function shallowHTML(el, d = 0) {
+  const clone = el.cloneNode(false);
+  clone.classList.remove('sel', 'hot', 'born');
+  if (!clone.getAttribute('class')) clone.removeAttribute('class');
+  if (clone.tagName === 'IMG') clone.setAttribute('src', 'assets/' + (el.dataset.file || ''));
+  clone.removeAttribute('data-file');
+  const open = clone.outerHTML.replace(/<\/[a-z]+>$/i, '');
+  const pad = '  '.repeat(d);
+  if (clone.tagName === 'IMG' || clone.tagName === 'INPUT') return pad + open;
+  const kids = [...el.children];
+  if (!kids.length) return pad + open + esc(el.textContent) + `</${clone.tagName.toLowerCase()}>`;
+  if (d >= 1) return pad + open + `<!-- ${kids.length} child element${kids.length > 1 ? 's' : ''} -->` + `</${clone.tagName.toLowerCase()}>`;
+  return pad + open + '\n' + kids.slice(0, 6).map((k) => shallowHTML(k, d + 1)).join('\n') + (kids.length > 6 ? `\n${pad}  <!-- … -->` : '') + `\n${pad}</${clone.tagName.toLowerCase()}>`;
+}
+
+/* ------------------------------------------------------------------ phase 107: spec pane + a small runner */
+const SPEC_INFO = {
+  Counter: { ok: true, line: 'Specced in NSP-004 (the pilot five). Conforms on the runtime at 10,000 generated sequences, with every mutant caught.', file: 'packages/nodegx-node-spec/src/nodes/counter.ts' },
+  Repeat: { ok: true, line: 'Specced in NSP-013 (clock nodes). Conforms on the runtime.', file: 'packages/nodegx-node-spec/src/nodes/repeat.ts',
+    rule: 'A Repeat is one scheduler timer that queues itself again from its own finish. Start while running reports Unchanged. An Interval that is not a number above zero reports Failure and starts nothing. Missed ticks are skipped, not replayed. The clock is “the world’s”, so a test can move it forward one beat at a time.' },
+  'net.noodl.HTTP': { ok: true, line: 'Specced in NSP-007 and NSP-014 (network). Conforms on the runtime against a scripted network.', file: 'packages/nodegx-node-spec/src/nodes/http.ts',
+    rule: 'Fetch hands one request to “the world”, a scripted network. The test decides the answer, then checks what the node did with it. Writing this spec found that the Authentication presets have never sent a credential.' },
+  States: { ok: true, line: 'Specced in NSP-013. Conforms on the runtime.', file: 'packages/nodegx-node-spec/src/nodes/states.ts',
+    rule: 'Each value gets one input per state and a current-value output. Each state gets a To signal, an At boolean and a Has Reached signal. Moving to the state it is already in reports Unchanged.' },
+  'Static Data': { ok: true, line: 'Specced in NSP-012. Conforms on the runtime.', file: 'packages/nodegx-node-spec/src/nodes/static-array.ts' },
+  'Component Inputs': { ok: true, line: 'Specced in NSP-015 as a graph scenario: a parent and a child component.' },
+  Expression: { ok: false, line: 'Not specced yet. It is in NSP-017, the “escape hatches”. Its grammar belongs to NodeGX, so the census calls it the most valuable spec in that batch.' },
+  Page: { ok: false, line: 'Page isn’t one of the 147 picker nodes in the phase 107 census, so it has no row.' }
+};
+const VISUAL_SPEC = { ok: false, line: 'Not specced yet. Visual nodes are tier T5 (19 nodes, task NSP-016). Their specs need layout rules and the geometry the browser actually draws, compared with a tolerance. That work hasn’t started.' };
+function specPane(type) {
+  const info = SPEC_INFO[type] || (DEFS[type].visual || type === 'For Each' ? VISUAL_SPEC : { ok: false, line: 'No spec yet.' });
+  let h = `<span class="status-pill ${info.ok ? 'ok' : 'todo'}">${info.ok ? '✓ conforms on the runtime' : 'not specced yet'}</span><p>${info.line}</p>`;
+  if (info.file) h += `<p class="note"><code>${esc(info.file)}</code></p>`;
+  if (info.rule) h += `<p>${info.rule}</p>`;
+  if (type !== 'Counter') {
+    h += `<p class="note">A spec says what a node does: given its state, its inputs and what just happened, what changes, what fires, and how it went (Done, Unchanged or Failed). The runtime, the code export, the editor and agents all get checked against it. Select the <b>Slide index</b> Counter to try the check yourself.</p>`;
+    return h;
+  }
+  h += `<p>The real spec, cut down to its handlers. It has no <code>this</code>, no frames and no wires. Each handler takes the state and the inputs, and returns what should happen:</p>`;
+  h += `<pre>${esc(`increase: (s, i) =>
+  i.limitsEnabled && s.count >= i.limitsMax
+    ? { outcome: 'unchanged' }
+    : { set: { count: s.count + 1 },
+        emit: ['countChanged'], outcome: 'done' },
+
+reset: (s) =>
+  s.count === s.start
+    ? { outcome: 'unchanged' }
+    : { set: { count: s.start },
+        emit: ['countChanged'], outcome: 'done' },`)}</pre>`;
+  h += `<div class="runner">
+    <label><input type="checkbox" id="bugBox" ${BUG.on ? 'checked' : ''}> <span>Plant a bug in this page’s Counter: <code>count >= max</code> becomes <code>count > max</code>. (Watch the carousel too.)</span></label>
+    <div><button type="button" class="btn primary" id="runConf">Run the conformance check</button></div>
+    <div id="confOut" class="res"></div>
+  </div>
+  <p class="note">This is a small version of phase 107’s runner, written for this page. It plays the scenarios from <code>scenarios/Counter.json</code>, then 200 random sequences, against two implementations. One is the spec. The other is the Counter that runs the carousel above. They must do the same thing, event by event.</p>`;
+  return h;
+}
+function wireSpecPane(type) {
+  if (type !== 'Counter') return;
+  $('#bugBox').addEventListener('change', (e) => { BUG.on = e.target.checked; $('#confOut').innerHTML = BUG.on ? '<span class="fail">Bug planted.</span> Run the check, or wait for the carousel to reach its last photo.' : 'Bug removed.'; });
+  $('#runConf').addEventListener('click', runConformance);
+}
+
+/* the spec, as pure reducers (ported from counter.ts in the node-spec package) */
+const SPEC = {
+  state: () => ({ count: 0, start: 0, startSeen: false }),
+  increase: (s, i) => (i.limitsEnabled && s.count >= i.limitsMax ? { outcome: 'unchanged' } : { set: { count: s.count + 1 }, emit: ['countChanged'], outcome: 'done' }),
+  decrease: (s, i) => (i.limitsEnabled && s.count <= i.limitsMin ? { outcome: 'unchanged' } : { set: { count: s.count - 1 }, emit: ['countChanged'], outcome: 'done' }),
+  reset: (s) => (s.count === s.start ? { outcome: 'unchanged' } : { set: { count: s.start }, emit: ['countChanged'], outcome: 'done' }),
+  startValue: (s, v) => (s.startSeen ? { set: { start: v } } : { set: { start: v, count: v, startSeen: true }, emit: ['countChanged'] })
+};
+const coerce = { startValue: Number, limitsMin: Number, limitsMax: Number, limitsEnabled: (v) => (v ? true : false) };
+function playSpec(params, steps) {
+  const tr = []; let s = SPEC.state(); const i = { limitsEnabled: false, limitsMin: 0, limitsMax: 0 };
+  const apply = (r, port) => {
+    if (!r) return;
+    if (r.set) { const had = 'count' in r.set; s = Object.assign({}, s, r.set); if (had) tr.push('currentCount = ' + s.count); }
+    (r.emit || []).forEach((e) => tr.push('↯ ' + e));
+    if (r.outcome) tr.push('outcome ' + r.outcome + ' (' + port + ')');
+  };
+  const setIn = (k, v) => { v = coerce[k](v); if (k === 'startValue') apply(SPEC.startValue(s, v), k); else i[k] = v; };
+  Object.entries(params).forEach(([k, v]) => setIn(k, v));
+  for (const st of steps) {
+    if (st === 'settle') tr.push('— settle —');
+    else if (st.signal) apply(SPEC[st.signal](s, i), st.signal);
+    else setIn(st.set, st.value);
+  }
+  return tr;
+}
+function playEngine(params, steps) {
+  const tr = []; let last = null;
+  const core = new CounterCore((kind, name, v) => {
+    if (kind === 'value') tr.push('currentCount = ' + v);
+    else if (kind === 'signal') tr.push('↯ ' + name);
+    else tr.push('outcome ' + name + ' (' + last + ')');
+  });
+  const setIn = (k, v) => { ({ startValue: (x) => core.setStart(x), limitsMin: (x) => core.setMin(x), limitsMax: (x) => core.setMax(x), limitsEnabled: (x) => core.setOn(x) })[k](v); };
+  Object.entries(params).forEach(([k, v]) => setIn(k, v));
+  for (const st of steps) {
+    if (st === 'settle') tr.push('— settle —');
+    else if (st.signal) { last = st.signal; core[st.signal](); }
+    else setIn(st.set, st.value);
+  }
+  return tr;
+}
+const SCENARIOS = [
+  { name: 'seed pulse, a pair in one frame, reset done, reset unchanged', params: { startValue: 5 }, steps: ['settle', { signal: 'increase' }, 'settle', { signal: 'increase' }, { signal: 'decrease' }, 'settle', { signal: 'reset' }, 'settle', { signal: 'reset' }, 'settle'] },
+  { name: 'limits: at Max, Increase reports unchanged and moves nothing', params: { limitsEnabled: true, limitsMax: 1 }, steps: ['settle', { signal: 'increase' }, 'settle', { signal: 'increase' }, 'settle'] },
+  { name: 'limits: at Min, Decrease reports unchanged and moves nothing', params: { limitsEnabled: true, limitsMin: 0 }, steps: ['settle', { signal: 'decrease' }, 'settle'] },
+  { name: 'a later Start Value only moves where Reset returns to', params: { startValue: 1 }, steps: ['settle', { set: 'startValue', value: 9 }, 'settle', { signal: 'reset' }, 'settle'] },
+  { name: 'Reset when already at Start Value: unchanged, Count Changed silent', params: { startValue: 3 }, steps: ['settle', { signal: 'reset' }, 'settle'] },
+  { name: 'coercion: "3" → 3, "abc" → NaN, "" → false', params: { startValue: '3', limitsEnabled: '', limitsMax: 'abc' }, steps: ['settle', { signal: 'increase' }, 'settle'] }
+];
+function mulberry32(a) { return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+function genSeq(rnd) {
+  const n = 2 + Math.floor(rnd() * 12); const steps = [];
+  for (let k = 0; k < n; k++) {
+    const r = rnd();
+    if (r < .32) steps.push({ signal: 'increase' });
+    else if (r < .5) steps.push({ signal: 'decrease' });
+    else if (r < .6) steps.push({ signal: 'reset' });
+    else if (r < .68) steps.push({ set: 'limitsEnabled', value: rnd() < .7 });
+    else if (r < .76) steps.push({ set: 'limitsMax', value: Math.floor(rnd() * 4) });
+    else if (r < .82) steps.push({ set: 'limitsMin', value: -Math.floor(rnd() * 3) });
+    else if (r < .88) steps.push({ set: 'startValue', value: Math.floor(rnd() * 4) });
+    else steps.push('settle');
+  }
+  steps.push('settle');
+  return steps;
+}
+const same = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+const describe = (st) => st === 'settle' ? 'settle' : st.signal ? st.signal : `set ${st.set} = ${JSON.stringify(st.value)}`;
+function runConformance() {
+  const out = $('#confOut'); let h = '';
+  let failed = null;
+  for (const sc of SCENARIOS) {
+    const a = playSpec(sc.params, sc.steps), b = playEngine(sc.params, sc.steps);
+    const ok = same(a, b);
+    h += `<div class="r"><span class="${ok ? 'pass' : 'fail'}">${ok ? '✓' : '✗'}</span><span>${esc(sc.name)}</span></div>`;
+    if (!ok && !failed) failed = { params: sc.params, steps: sc.steps, a, b, label: 'scenario: ' + sc.name };
+  }
+  const seed = 20726; const rnd = mulberry32(seed); let gen = 0, genFail = null;
+  for (let k = 0; k < 200; k++) {
+    const steps = genSeq(rnd); const params = { limitsEnabled: rnd() < .5, limitsMax: Math.floor(rnd() * 3) };
+    gen++;
+    if (!same(playSpec(params, steps), playEngine(params, steps))) { genFail = { params, steps, n: k + 1 }; break; }
+  }
+  if (genFail) {
+    let steps = genFail.steps.slice(); let changed = true;
+    while (changed) {
+      changed = false;
+      for (let j = 0; j < steps.length; j++) {
+        const t = steps.slice(0, j).concat(steps.slice(j + 1));
+        if (t.length && !same(playSpec(genFail.params, t), playEngine(genFail.params, t))) { steps = t; changed = true; break; }
+      }
+    }
+    h += `<div class="r"><span class="fail">✗</span><span>generated sequence ${genFail.n} of 200 (seed ${seed}) diverged, shrunk from ${genFail.steps.length} steps to ${steps.length}: limitsEnabled ${genFail.params.limitsEnabled}, limitsMax ${genFail.params.limitsMax}, then ${esc(steps.map(describe).join(' → '))}</span></div>`;
+    if (!failed) failed = { params: genFail.params, steps, a: playSpec(genFail.params, steps), b: playEngine(genFail.params, steps), label: 'the shrunk sequence' };
+  } else {
+    h += `<div class="r"><span class="pass">✓</span><span>${gen} generated sequences (seed ${seed}) agree, event by event</span></div>`;
+  }
+  if (failed) {
+    const first = failed.a.findIndex((x, i) => x !== failed.b[i]);
+    const col = (tr) => tr.map((x, i) => i === first ? `<span class="bad">${esc(x)}</span>` : esc(x)).join('\n') + (first >= tr.length ? '\n<span class="bad">(nothing)</span>' : '');
+    h += `<p style="margin:8px 0 4px"><b>Red.</b> First difference in ${esc(failed.label)}:</p><div class="diff"><div><h4>The spec</h4><pre>${col(failed.a)}</pre></div><div><h4>This page’s Counter</h4><pre>${col(failed.b)}</pre></div></div><p class="note" style="margin-top:8px">This is what phase 107 is for. A wrong comparison that would have shipped quietly shows up as a red check, with the shortest sequence that proves it.</p>`;
+  } else {
+    h += `<p style="margin:8px 0 0"><b>Green.</b> The Counter running this page does exactly what the spec says. Now plant the bug and run it again.</p>`;
+  }
+  out.innerHTML = h;
+}
+
+/* ------------------------------------------------------------------ tiers (phase 107 progress, 2026-10-03) */
+(function tiers() {
+  const T = [['Pure logic (T1)', 46, 46], ['Clock and randomness (T2)', 11, 11], ['Network and backend (T3)', 18, 39], ['Graph (T4)', 27, 27], ['Visual (T5)', 0, 19], ['Escape hatches (T6)', 0, 5]];
+  $('#tiers').innerHTML = T.map(([n, a, b]) => `<div class="tier"><span>${n}</span><span class="bar2" role="img" aria-label="${a} of ${b}"><i style="width:${(a / b) * 100}%"></i></span><span class="n">${a} / ${b}</span></div>`).join('');
+})();
+
+/* ------------------------------------------------------------------ data previews: what is on each wire, what each node holds */
+const WS = [];
+const pinnedWires = new Set();
+const pinnedNodes = new Set();
+let wireMode = 'hover';
+let hoverWire = -1;
+let hoverTimer = null;
+function resetWS() {
+  WS.length = 0;
+  HOME.connections.forEach((c) => WS.push({ has: false, value: undefined, signal: SIGNAL_PORTS.has(c.sourcePort), count: 0, frame: 0 }));
+  renderWireLabels();
+}
+function preview(v) {
+  if (v === undefined) return '—';
+  if (v === null) return 'null';
+  if (typeof v === 'string') return '"' + (v.length > 26 ? v.slice(0, 24) + '…' : v) + '"';
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+  if (Array.isArray(v)) return 'Array(' + v.length + ')' + (v[0] && typeof v[0] === 'object' ? ' [{' + Object.keys(v[0]).join(', ') + '}, …]' : '');
+  if (typeof v === 'object' && 'unit' in v) return v.value + v.unit;
+  return '{' + Object.keys(v).slice(0, 3).join(', ') + '}';
+}
+function fullValue(v) {
+  if (typeof v === 'string') return '"' + (v.length > 140 ? v.slice(0, 138) + '…' : v) + '"';
+  if (v && typeof v === 'object') { const s = JSON.stringify(v); return s.length > 160 ? s.slice(0, 158) + '…' : s; }
+  return preview(v);
+}
+function noteWire(i, value, isSignal) {
+  const w = WS[i]; if (!w) return;
+  w.has = true; w.count++; w.frame = tape.frame;
+  if (!isSignal) w.value = value;
+  renderWireLabels(i);
+  if (hoverWire === i) showWireTip(i);
+}
+function wireMid(i) { const p = document.getElementById('w' + i); const L = p.getTotalLength(); return p.getPointAtLength(L * 0.5); }
+function wireLine(i) { const c = HOME.connections[i]; return `${LABELS[c.sourceId]} · ${pn(c.sourcePort)}  →  ${LABELS[c.targetId]} · ${pn(c.targetPort)}`; }
+function compact(i) { const w = WS[i]; if (!w.has) return '—'; return w.signal ? '⚡ ×' + w.count : preview(w.value); }
+let tipTimer = null;
+function wireBox(i, cls, pinned) {
+  const w = WS[i]; const pt = wireMid(i);
+  const d = document.createElement('div'); d.className = cls; d.dataset.wire = i;
+  d.style.left = pt.x + 'px'; d.style.top = (pinned ? pt.y : pt.y - 40) + 'px';
+  const v = !w.has ? 'Nothing has travelled on this wire yet.' : w.signal ? `⚡ signal, fired ${w.count} time${w.count > 1 ? 's' : ''}` : fullValue(w.value);
+  const meta = w.has ? `last in frame ${w.frame}` + (w.signal ? '' : ` · sent ${w.count} time${w.count > 1 ? 's' : ''}`) : (w.signal ? 'signal wire' : 'value wire');
+  d.innerHTML = '<div class="top"><div class="r"></div><button type="button" class="wbtn"></button></div><div class="v"></div><div class="r"></div>';
+  d.querySelector('.top .r').textContent = wireLine(i);
+  const btn = d.querySelector('.wbtn'); btn.textContent = pinned ? 'Unpin' : 'Pin';
+  btn.addEventListener('click', (e) => { e.stopPropagation(); togglePinWire(i); });
+  d.querySelector('.v').textContent = v;
+  d.lastElementChild.textContent = meta;
+  return d;
+}
+function renderWireLabels(bumped) {
+  const box = $('#wlabels'); box.innerHTML = '';
+  if (wireMode === 'off' && !pinnedWires.size) return;
+  HOME.connections.forEach((c, i) => {
+    if (pinnedWires.has(i)) {
+      const d = wireBox(i, 'wpin' + (bumped === i && !reduced ? ' bump' : ''), true);
+      box.appendChild(d);
+      return;
+    }
+    if (!(wireMode === 'all' || (J.on && J.wires.has(i))) || !WS[i] || !WS[i].has) return;
+    const pt = wireMid(i);
+    const d = document.createElement('div');
+    d.className = 'wlabel' + (bumped === i && !reduced ? ' bump' : '');
+    d.style.left = pt.x + 'px'; d.style.top = pt.y + 'px';
+    d.textContent = compact(i);
+    d.title = wireLine(i) + ' (click to pin)';
+    d.addEventListener('click', (e) => { e.stopPropagation(); togglePinWire(i); });
+    d.addEventListener('mouseenter', () => showWireTip(i));
+    d.addEventListener('mouseleave', scheduleHideTip);
+    box.appendChild(d);
+  });
+}
+function togglePinWire(i) {
+  if (pinnedWires.has(i)) pinnedWires.delete(i); else pinnedWires.add(i);
+  hideWireTip();
+  renderWireLabels();
+}
+function showWireTip(i) {
+  clearTimeout(tipTimer);
+  hideWireTip();
+  if (wireMode === 'off' || pinnedWires.has(i)) return;
+  const d = wireBox(i, 'wtip', false); d.id = 'wtip';
+  d.addEventListener('mouseenter', () => clearTimeout(tipTimer));
+  d.addEventListener('mouseleave', scheduleHideTip);
+  $('#npops').appendChild(d);
+}
+function scheduleHideTip() { clearTimeout(tipTimer); tipTimer = setTimeout(hideWireTip, 260); }
+function hideWireTip() { const t = $('#wtip'); if (t) t.remove(); }
+
+function popHTML(id) {
+  const inst = SCOPE && SCOPE.nodes.get(id); const m = findModel(id);
+  let h = `<div class="h"><span>${esc(LABELS[id])}</span><span style="opacity:.6;font-weight:400">${esc(TYPE_NAMES[m.type])}</span><button type="button" class="pin" aria-pressed="${pinnedNodes.has(id)}">${pinnedNodes.has(id) ? 'Pinned' : 'Pin'}</button></div>`;
+  if (!inst) return h + '<div>Not created yet.</div>';
+  const ins = HOME.connections.filter((c, k, all) => c.targetId === id && c.sourceId !== id && all.findIndex((o) => o.targetId === id && o.targetPort === c.targetPort) === k);
+  const outs = [...new Set(HOME.connections.filter((c) => c.sourceId === id).map((c) => c.sourcePort))];
+  const row = (k, v) => `<dt>${esc(k)}</dt><dd title="${esc(v)}">${esc(v)}</dd>`;
+  if (ins.length) h += '<div class="sect">Inputs from wires</div><dl>' + ins.map((c) => row(pn(c.targetPort), SIGNAL_PORTS.has(c.targetPort) ? '⚡ signal input' : preview(inst.inputs[c.targetPort]))).join('') + '</dl>';
+  if (outs.length) h += '<div class="sect">Outputs</div><dl>' + outs.map((p) => row(pn(p), SIGNAL_PORTS.has(p) ? '⚡ fired ×' + ((inst.sig && inst.sig[p]) || 0) : preview(inst.out[p]))).join('') + '</dl>';
+  if (inst.visual) {
+    h += '<div class="sect">On the page</div><dl>' + row('element', inst.el ? '<' + inst.el.tagName.toLowerCase() + '>' : 'not drawn yet') +
+      Object.entries(inst.style).slice(0, 2).map(([k, v]) => row(k, String(v))).join('') +
+      Object.entries(inst.props).slice(0, 1).map(([k, v]) => row(k, preview(v))).join('') + '</dl>';
+  } else if (inst.def.inspect) {
+    h += `<div class="sect">State</div><div>${esc(inst.def.inspect.call(inst))}</div>`;
+  }
+  return h;
+}
+function makePop(id, pinned) {
+  const d = document.createElement('div');
+  d.className = 'npop' + (pinned ? ' pinned' : '');
+  d.dataset.pop = id;
+  d.innerHTML = popHTML(id);
+  const b = LAYOUT[id]; d.style.left = b.x + 'px'; d.style.top = b.y + 'px';
+  d.querySelector('.pin').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (pinnedNodes.has(id)) pinnedNodes.delete(id); else pinnedNodes.add(id);
+    hideHoverPop(); renderPins();
+  });
+  d.addEventListener('mouseenter', () => clearTimeout(hoverTimer));
+  d.addEventListener('mouseleave', () => { if (!pinned) scheduleHidePop(); });
+  return d;
+}
+function showHoverPop(id) {
+  clearTimeout(hoverTimer);
+  if (pinnedNodes.has(id) || (drag && drag.moved)) return;
+  hideHoverPop();
+  $('#npops').appendChild(makePop(id, false));
+}
+function hideHoverPop() { document.querySelectorAll('.npop:not(.pinned)').forEach((e) => e.remove()); }
+function scheduleHidePop() { clearTimeout(hoverTimer); hoverTimer = setTimeout(hideHoverPop, 220); }
+function renderPins() { document.querySelectorAll('.npop.pinned').forEach((e) => e.remove()); for (const id of pinnedNodes) $('#npops').appendChild(makePop(id, true)); }
+function refreshPops(id) {
+  document.querySelectorAll(`.npop[data-pop="${id}"]`).forEach((e) => { const n = makePop(id, e.classList.contains('pinned')); e.replaceWith(n); });
+}
+function setWireMode(m) {
+  wireMode = m;
+  document.querySelectorAll('#wireSeg button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.wm === m ? 'true' : 'false'));
+  hideWireTip(); renderWireLabels();
+}
+$('#wireSeg').addEventListener('click', (e) => { const b = e.target.closest('[data-wm]'); if (b) setWireMode(b.dataset.wm); });
+
+/* ------------------------------------------------------------------ the camera: free movement around the three layers */
+const P = 2400;
+const scene = $('#scene'), world = $('#world');
+const LAYERS = {
+  json: { el: $('#pJson'), x: 0, y: 0, z: -330, vis: true },
+  engine: { el: $('#pEngine'), x: 0, y: 0, z: 0, vis: true },
+  page: { el: $('#pPage'), x: 0, y: 0, z: 330, vis: true }
+};
+const cam = { rx: 55, rz: -30, zoom: 0.6, px: 0, py: 0 };
+let view = 'lid', camTouched = false, drag = null, suppressClick = false;
+const ptrs = new Map();
+
+function applyCam(anim) {
+  world.classList.toggle('anim', !!anim && !reduced);
+  world.style.transform = `translate(${cam.px}px, ${cam.py}px) scale(${cam.zoom}) rotateX(${cam.rx}deg) rotateZ(${cam.rz}deg)`;
+  for (const [k, L] of Object.entries(LAYERS)) {
+    L.el.style.transform = `translate3d(${L.x - 270}px, ${L.y - 300}px, ${L.z}px)`;
+    L.el.classList.toggle('off', !L.vis);
+    const cb = document.getElementById('lv-' + k); if (cb) cb.checked = L.vis;
+  }
+}
+function region() {
+  const r = scene.getBoundingClientRect();
+  let left = 12, right = r.width - 12, top = 12, bottom = r.height - 12;
+  const insp = $('#insp'), deck = J.on ? $('#journey') : $('#deck');
+  if (r.width > 900 && !insp.classList.contains('collapsed')) right -= insp.offsetWidth + 12;
+  bottom -= deck.offsetHeight + 12;
+  if (bottom - top < 220) bottom = top + Math.max(220, r.height * 0.55);
+  return { w: right - left, h: bottom - top, ox: (left + right) / 2 - r.width / 2, oy: (top + bottom) / 2 - r.height / 2 };
+}
+function setLid(v) { $('#lid').value = v; $('#pPage').style.setProperty('--lid', v); }
+function setView(v, anim = true) {
+  view = v; camTouched = false;
+  document.querySelectorAll('#viewSeg button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.view === v ? 'true' : 'false'));
+  const R = region(); const sp = Number($('#spread').value);
+  const put = (k, x, y, z, vis) => Object.assign(LAYERS[k], { x, y, z, vis });
+  if (v === 'site') {
+    put('page', 0, 0, 0, true); put('engine', 0, 0, -sp, false); put('json', 0, 0, -2 * sp, false);
+    cam.rx = 0; cam.rz = 0; cam.zoom = Math.min(R.w / 560, R.h / 640, 1.5);
+    setLid(1);
+  } else if (v === 'lid') {
+    put('page', 0, 0, sp, true); put('engine', 0, 0, 0, true); put('json', 0, 0, -sp, true);
+    cam.rx = 55; cam.rz = -30; cam.zoom = Math.min(R.w / 800, R.h / (430 + sp * 1.6));
+    setLid(0.9);
+  } else {
+    if (R.w / R.h > 1.1) {
+      put('json', -600, 0, 0, true); put('engine', 0, 0, 0, true); put('page', 600, 0, 0, true);
+      cam.zoom = Math.min(R.w / 1780, R.h / 690);
+    } else {
+      put('json', 0, -680, 0, true); put('engine', 0, 0, 0, true); put('page', 0, 680, 0, true);
+      cam.zoom = Math.min(R.w / 570, R.h / 2060);
+    }
+    cam.rx = 0; cam.rz = 0;
+    setLid(1);
+  }
+  cam.px = R.ox; cam.py = R.oy;
+  applyCam(anim);
+}
+function faceLayer(k, f) {
+  f = f || {};
+  const fx = f.x === undefined ? 270 : f.x, fy = f.y === undefined ? 300 : f.y, mul = f.mul || 1;
+  const L = LAYERS[k]; L.vis = true;
+  for (const [n, o] of Object.entries(LAYERS)) {
+    if (n !== k && o.vis && o.z > L.z + 1 && Math.abs(o.x - L.x) < 540 && Math.abs(o.y - L.y) < 600) o.vis = false;
+  }
+  const R = region();
+  const a = Math.min(R.w / 580, R.h / 650, 1.6);
+  cam.rx = 0; cam.rz = 0;
+  const am = a * mul;
+  cam.zoom = (am * P) / (P + am * L.z);
+  const m = P / (P - cam.zoom * L.z);
+  cam.px = R.ox / m - cam.zoom * (L.x - 270 + fx);
+  cam.py = R.oy / m - cam.zoom * (L.y - 300 + fy);
+  camTouched = true;
+  applyCam(true);
+}
+function zoomAt(clientX, clientY, k, anim) {
+  const r = scene.getBoundingClientRect();
+  const cx = clientX - r.left - r.width / 2, cy = clientY - r.top - r.height / 2;
+  const nz = Math.max(0.12, Math.min(5, cam.zoom * k)); const kk = nz / cam.zoom;
+  cam.zoom = nz; cam.px = cx - (cx - cam.px) * kk; cam.py = cy - (cy - cam.py) * kk;
+  camTouched = true; applyCam(anim);
+}
+function zoomCenter(k) {
+  const r = scene.getBoundingClientRect(); const R = region();
+  zoomAt(r.left + r.width / 2 + R.ox, r.top + r.height / 2 + R.oy, k, true);
+}
+
+const NO_DRAG = '.hud, .site, input, select, textarea, .npop, .wlabel, .wtip, .wpin, a';
+scene.addEventListener('pointerdown', (e) => {
+  if (e.target.closest(NO_DRAG)) return;
+  const jb = e.target.closest('.jsonbody'); if (jb && e.offsetX > jb.clientWidth - 2) return;
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (ptrs.size === 2) {
+    const [a, b] = [...ptrs.values()];
+    drag = { type: 'pinch', d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, m0: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, cam0: Object.assign({}, cam), moved: true };
+    return;
+  }
+  const tag = e.target.closest('.ptag');
+  let type = 'orbit';
+  if (tag) type = e.shiftKey || e.altKey ? 'lift' : 'move';
+  else if (e.button === 1 || e.button === 2 || e.shiftKey) type = 'pan';
+  drag = { type, layer: tag && tag.dataset.layer, x0: e.clientX, y0: e.clientY, cam0: Object.assign({}, cam), l0: tag ? Object.assign({}, LAYERS[tag.dataset.layer]) : null, moved: false };
+});
+addEventListener('pointermove', (e) => {
+  if (ptrs.has(e.pointerId)) ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (!drag) return;
+  if (drag.type === 'pinch') {
+    if (ptrs.size < 2) return;
+    const [a, b] = [...ptrs.values()];
+    const d = Math.hypot(a.x - b.x, a.y - b.y); const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    const r = scene.getBoundingClientRect();
+    const cx = drag.m0.x - r.left - r.width / 2, cy = drag.m0.y - r.top - r.height / 2;
+    const nz = Math.max(0.12, Math.min(5, drag.cam0.zoom * d / drag.d0)); const k = nz / drag.cam0.zoom;
+    cam.zoom = nz;
+    cam.px = cx - (cx - drag.cam0.px) * k + (mx - drag.m0.x);
+    cam.py = cy - (cy - drag.cam0.py) * k + (my - drag.m0.y);
+    camTouched = true; applyCam(false);
+    return;
+  }
+  const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+  if (!drag.moved) {
+    if (Math.hypot(dx, dy) < 5) return;
+    drag.moved = true; scene.classList.add('dragging'); hideHoverPop(); hideWireTip(); $('#stageHint').classList.add('gone');
+  }
+  camTouched = true;
+  if (drag.type === 'orbit') {
+    cam.rz = drag.cam0.rz + dx * 0.3;
+    cam.rx = Math.max(0, Math.min(88, drag.cam0.rx - dy * 0.3));
+  } else if (drag.type === 'pan') {
+    cam.px = drag.cam0.px + dx; cam.py = drag.cam0.py + dy;
+  } else if (drag.type === 'move') {
+    const L = LAYERS[drag.layer];
+    const rz = cam.rz * Math.PI / 180, tilt = Math.max(0.15, Math.cos(cam.rx * Math.PI / 180));
+    const sx = dx / cam.zoom, sy = dy / (cam.zoom * tilt);
+    L.x = drag.l0.x + sx * Math.cos(rz) + sy * Math.sin(rz);
+    L.y = drag.l0.y - sx * Math.sin(rz) + sy * Math.cos(rz);
+  } else if (drag.type === 'lift') {
+    LAYERS[drag.layer].z = drag.l0.z - dy * 1.5 / cam.zoom;
+  }
+  applyCam(false);
+});
+function endDrag(e) {
+  ptrs.delete(e.pointerId);
+  if (!drag) return;
+  if (drag.type === 'pinch' && ptrs.size >= 2) return;
+  if (drag.moved) { suppressClick = true; setTimeout(() => { suppressClick = false; }, 0); }
+  drag = null; scene.classList.remove('dragging');
+}
+addEventListener('pointerup', endDrag);
+addEventListener('pointercancel', endDrag);
+scene.addEventListener('click', (e) => { if (suppressClick) { e.stopPropagation(); e.preventDefault(); suppressClick = false; } }, true);
+scene.addEventListener('contextmenu', (e) => { if (!e.target.closest(NO_DRAG)) e.preventDefault(); });
+scene.addEventListener('dblclick', (e) => { const tag = e.target.closest('.ptag'); if (tag) faceLayer(tag.dataset.layer); });
+scene.addEventListener('wheel', (e) => {
+  if (e.target.closest('.hud')) return;
+  const f = e.deltaMode === 1 ? 16 : 1;
+  if (e.ctrlKey || e.metaKey || e.altKey) {
+    e.preventDefault();
+    const k = Math.max(0.8, Math.min(1.25, Math.exp(-e.deltaY * f * (e.ctrlKey ? 0.01 : 0.003))));
+    zoomAt(e.clientX, e.clientY, k, false);
+    return;
+  }
+  const sc = e.target.closest('.site, .jsonbody');
+  if (sc) {
+    const can = e.deltaY < 0 ? sc.scrollTop > 0 : sc.scrollTop + sc.clientHeight < sc.scrollHeight - 1;
+    if (can && Math.abs(e.deltaY) >= Math.abs(e.deltaX)) return;
+  }
+  e.preventDefault();
+  cam.px -= e.deltaX * f; cam.py -= e.deltaY * f;
+  camTouched = true; applyCam(false);
+}, { passive: false });
+
+/* panels */
+document.querySelectorAll('[data-collapse]').forEach((b) => b.addEventListener('click', () => {
+  const p = document.getElementById(b.dataset.collapse);
+  const c = p.classList.toggle('collapsed');
+  b.textContent = c ? '+' : '–';
+  b.setAttribute('aria-expanded', c ? 'false' : 'true');
+  if (!camTouched) setView(view);
+}));
+$('#inspToggle').addEventListener('click', () => {
+  const o = $('#insp').classList.toggle('open');
+  $('#inspToggle').setAttribute('aria-expanded', o ? 'true' : 'false');
+});
+document.querySelectorAll('#layersPanel input[type=checkbox]').forEach((cb) => cb.addEventListener('change', () => { LAYERS[cb.dataset.layer].vis = cb.checked; applyCam(true); }));
+document.querySelectorAll('[data-look]').forEach((b) => b.addEventListener('click', () => faceLayer(b.dataset.look)));
+$('#spread').addEventListener('input', (e) => {
+  const sp = Number(e.target.value);
+  if (view === 'site') { LAYERS.engine.z = -sp; LAYERS.json.z = -2 * sp; }
+  else { LAYERS.page.z = sp; LAYERS.engine.z = 0; LAYERS.json.z = -sp; }
+  applyCam(false);
+});
+$('#lid').addEventListener('input', (e) => { $('#pPage').style.setProperty('--lid', e.target.value); });
+$('#zIn').addEventListener('click', () => zoomCenter(1.25));
+$('#zOut').addEventListener('click', () => zoomCenter(0.8));
+$('#camReset').addEventListener('click', () => setView(view));
+$('#viewSeg').addEventListener('click', (e) => { const b = e.target.closest('[data-view]'); if (b) setView(b.dataset.view); });
+addEventListener('resize', () => { if (!camTouched) setView(view, false); });
+
+/* ------------------------------------------------------------------ run modes + scenarios */
+function delayFromSlider(v) { return Math.round(3000 * Math.pow(0.1, v / 100)); }
+function showSpeed() { $('#speedOut').textContent = (tape.delay / 1000).toFixed(1) + ' s a step'; }
+function setRun(mode) {
+  tape.mode = mode;
+  clearTimeout(tape.timer); tape.timer = null;
+  document.querySelectorAll('#runSeg button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.run === mode ? 'true' : 'false'));
+  $('#speedWrap').hidden = mode !== 'slow';
+  $('#modeHint').textContent = mode === 'live' ? 'Live. The carousel clock is running.' : mode === 'slow' ? 'Slow motion. The clock waits for you.' : 'Step by step. Press Next step, or N.';
+  if (mode === 'live') clearHot();
+  kick();
+  renderUpNext();
+}
+$('#runSeg').addEventListener('click', (e) => { const b = e.target.closest('[data-run]'); if (b) setRun(b.dataset.run); });
+$('#speed').addEventListener('input', (e) => {
+  tape.delay = delayFromSlider(Number(e.target.value));
+  showSpeed();
+  if (tape.timer) { clearTimeout(tape.timer); tape.timer = null; scheduleSlow(); }
+});
+addEventListener('keydown', (e) => {
+  if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
+  if (J.on) {
+    if (e.key === 'ArrowRight') { e.preventDefault(); $('#jNext').click(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); $('#jBack').click(); }
+    else if (e.key === 'Escape') endJourney();
+    return;
+  }
+  if ((e.key === 'n' || e.key === 'N' || e.key === 'ArrowRight') && tape.mode === 'step' && peekNext()) { e.preventDefault(); stepOnce(); }
+  if (e.key === '+' || e.key === '=') zoomCenter(1.2);
+  if (e.key === '-' || e.key === '_') zoomCenter(1 / 1.2);
+});
+function ensureWatchable() { if (tape.mode === 'live') setRun('step'); }
+const SWATCHES = ['#D9E4DD', '#F1D9C9', '#E8DFD0', '#D7DDEA', '#EAD9A8'];
+$('#scen').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-scen]'); if (!b) return;
+  const k = b.dataset.scen;
+  if (view === 'site') setView('lid');
+  if (k === 'boot') { ensureWatchable(); boot(); select(selected); return; }
+  if (!SCOPE || !SCOPE.alive || !SCOPE.nodes.get('page').el) { ensureWatchable(); return; }
+  ensureWatchable();
+  if (k === 'tick') { tickStep(SCOPE.nodes.get('timer')); select('slideIndex'); }
+  if (k === 'cta') { $('#site').scrollTo({ top: 0 }); SCOPE.nodes.get('cta').el.click(); select('cta'); }
+  if (k === 'send') {
+    const fill = { nameIn: 'Sam Reid', emailIn: 'sam@example.com', msgIn: 'Two celadon mugs, please' };
+    for (const [id, v] of Object.entries(fill)) { const inp = SCOPE.nodes.get(id).el.querySelector('input'); inp.value = v; inp.dispatchEvent(new Event('input')); }
+    SCOPE.nodes.get('send').el.click(); select('send');
+  }
+  if (k === 'colour') {
+    const cur = findModel('hero').parameters.backgroundColor; const nx = SWATCHES[(SWATCHES.indexOf(cur) + 1) % SWATCHES.length];
+    edit('hero', 'backgroundColor', nx); select('hero');
+  }
+  renderUpNext();
+});
+
+/* ------------------------------------------------------------------ the journey: one specced node, from the editor to the screen */
+const J = { on: false, i: 0, timers: [], ran: new Set(), wires: new Set(), msg: '', pending: 0, finish: null };
+function jStep() { if (J.pending > 0 && peekNext()) { stepOnce(); J.pending--; jLive(); } }
+function ownSteps(n, fast, gap) {
+  J.pending = n;
+  J.finish = () => { while (J.pending > 0 && peekNext()) jStep(); J.pending = 0; };
+  if (fast) { J.finish(); J.finish = null; return; }
+  const go = () => { if (!J.on || J.pending <= 0) return; jStep(); if (J.pending > 0) jLater(gap, go); };
+  go();
+}
+function jLater(ms, fn) { J.timers.push(setTimeout(fn, ms)); }
+function jClear() { J.timers.forEach(clearTimeout); J.timers = []; }
+function drain() { let g = 0; while (peekNext() && g++ < 300) stepOnce(); }
+function counterInst() { return SCOPE && SCOPE.nodes.get('slideIndex'); }
+function jRunAll(gap, after) {
+  const go = () => {
+    if (!J.on) return;
+    if (!peekNext()) { if (after) after(); return; }
+    stepOnce(); jLive(); jLater(gap, go);
+  };
+  go();
+}
+function lastPlain() {
+  const s = tape.history[0]; const c = counterInst();
+  if (!s || !c) return '';
+  if (s.kind === 'clock') return 'Tick: the timer fires.';
+  if (s.wire === 1) return c.lastInc && c.lastInc.r === 'unchanged'
+    ? `Increase: the count is already at Max (${c.core.max}). Nothing changes, and it says Unchanged.`
+    : `Increase: the count goes from ${c.lastInc ? c.lastInc.before : '?'} to ${c.core.count}.`;
+  if (s.wire === 3) return `Unchanged loops back into Reset To Start. The count goes back to ${c.core.count}.`;
+  if (s.wire === 4) return `Current Count carries ${s.value} out to the maths node, which works out ${-s.value * 100}.`;
+  if (s.wire === 5) { const v = typeof s.value === 'number' ? s.value : s.value && s.value.value; return `Track gets ${v}%, and the strip slides to photo ${Math.round(-v / 100) + 1}.`; }
+  return s.title;
+}
+function jLiveHTML() {
+  const c = counterInst(); if (!c) return '';
+  const n = c.core.count;
+  const t = SCOPE.nodes.get('track'); const tv = t && t.inputs.transformX;
+  const shown = Math.round(-(typeof tv === 'number' ? tv : tv ? tv.value : 0) / 100);
+  const dots = [0, 1, 2].map((k) => `<i class="${k === shown ? 'on' : ''}"></i>`).join('');
+  return `<div class="jlive"><div class="jcount"><span>count</span><b>${n}</b><span class="jdots3" aria-hidden="true">${dots}</span><span class="ph">${shown >= 0 && shown <= 2 ? 'on screen: photo ' + (shown + 1) + ' of 3' : 'on screen: no photo'}</span></div>` +
+    (J.msg ? `<div class="jmsg">${esc(J.msg)}</div>` : '') + '</div>';
+}
+function jLive(msg) {
+  J.msg = msg !== undefined ? msg : lastPlain();
+  const ch = CHAPTERS[J.i];
+  if (ch && ch.ill) $('#jIll').innerHTML = ch.ill();
+}
+function jVal(v, key) {
+  const P = (c) => `<span class="jp">${esc(c)}</span>`;
+  const K = (k) => `<span class="jk">${esc(JSON.stringify(k))}</span>${P(': ')}`;
+  if (typeof v === 'string') return `<span class="${REF_KEYS.has(key) ? 'jr' : 'js'}">${esc(JSON.stringify(v))}</span>`;
+  if (typeof v === 'number') return `<span class="jn">${v}</span>`;
+  if (typeof v === 'boolean' || v === null) return `<span class="jb">${v}</span>`;
+  const es = Object.entries(v);
+  return P('{ ') + es.map(([k, x]) => K(k) + jVal(x, k)).join(P(', ')) + P(' }');
+}
+function hotCounter(extra) {
+  clearHot();
+  ['slideIndex'].concat(extra || []).forEach((id) => { const c = document.getElementById('card-' + id); if (c) c.classList.add('hot'); });
+}
+function scrollSiteTo(id) {
+  const inst = SCOPE && SCOPE.nodes.get(id);
+  if (inst && inst.el) $('#site').scrollTo({ top: Math.max(0, inst.el.offsetTop - 30), behavior: reduced ? 'auto' : 'smooth' });
+}
+const ENGINE_FOCUS = { x: 300, y: 170, mul: 1.5 };
+const CHAPTERS = [
+  {
+    kick: 'The node we’ll follow',
+    title: 'Meet the Counter',
+    body: `<p>Every four seconds, the carousel slides to the next photo. One node does the counting: a <b>Counter</b> called “Slide index”. It’s one of the nodes phase 107 has already written a spec for.</p>
+      <p>We’ll follow it from the moment it’s placed in the editor to the moment a photo slides across the screen. Press <b>Next</b>, or the → key.</p>`,
+    ill: () => `<div class="jbadge"><b>Counter</b><span>Slide index</span><ul><li>✓ Specced in phase 107</li><li>✓ Passes its checks on the runtime</li><li>✓ Passes its checks on the code export</li></ul></div>`,
+    cam: () => { setView('lid'); hotCounter(); }
+  },
+  {
+    kick: '1 · In the editor',
+    title: 'You place a Counter and wire it up',
+    body: `<p>In the editor you drop a Counter onto the canvas. You tick <b>Limits Enabled</b> and set <b>Max Value</b> to 2, because there are three photos: 0, 1 and 2.</p>
+      <p>Then you draw three wires. The timer’s Tick goes into <b>Increase Count</b>. <b>Current Count</b> goes out to the maths that moves the photos. And the Counter’s own <b>Unchanged</b> goes back into its <b>Reset To Start</b>, so it loops round.</p>`,
+    tech: 'The board in the 3D view is laid out like the editor’s canvas: visual nodes down the left, logic nodes on the right.',
+    ill: () => `<div class="ed"><div class="edlabel">In the NodeGX editor</div>
+      <div class="ednode"><div class="edh">Slide index <span>Counter</span></div>
+        <div class="edports">
+          <div class="in"><i class="sig"></i>Increase Count <em>← timer</em></div><div class="out">Current Count <i></i></div>
+          <div class="in"><i class="sig"></i>Decrease Count</div><div class="out">Count Changed <i class="sig"></i></div>
+          <div class="in"><i class="sig"></i>Reset To Start <em>← itself</em></div><div class="out">Unchanged <i class="sig"></i></div>
+        </div></div>
+      <div class="edprops"><div><span>Limits Enabled</span><b>☑</b></div><div><span>Max Value</span><b>2</b></div><div><span>Start Value</span><b>0</b></div></div></div>`,
+    cam: () => { faceLayer('engine', ENGINE_FOCUS); hotCounter(['timer', 'offset']); }
+  },
+  {
+    kick: '2 · Saved as JSON',
+    title: 'The editor writes it down as a note',
+    body: `<p>When you deploy, the editor writes the Counter down as a few lines of JSON: its type, its settings, and the wires that touch it.</p>
+      <p>That’s all the JSON is: a note. It doesn’t say what “Increase” means. It only says “there’s a Counter here, with these settings, wired like this”.</p>`,
+    tech: 'In the exported format the Counter is one entry in the component’s <code>nodes</code> list, and each wire is one entry in its <code>connections</code> list. The whole note travels inside the page as <code>window.projectData</code>.',
+    ill: () => {
+      const m = findModel('slideIndex');
+      const node = { id: m.id, type: m.type, parameters: m.parameters };
+      const wires = HOME.connections.filter((c) => c.sourceId === 'slideIndex' || c.targetId === 'slideIndex');
+      return `<div class="jsnip"><div class="jsl">${jVal(node)}</div><div class="jsgap">wires that touch it:</div>${wires.map((c) => `<div class="jsl">${jVal(c)}</div>`).join('')}</div>`;
+    },
+    cam: () => {
+      faceLayer('json');
+      clearHot();
+      document.querySelectorAll('#jsonBody [data-node="slideIndex"]').forEach((e) => e.classList.add('hot'));
+      HOME.connections.forEach((c, i) => { if (c.sourceId === 'slideIndex' || c.targetId === 'slideIndex') { const l = document.querySelector(`#jsonBody [data-wire="${i}"]`); if (l) l.classList.add('hot'); } });
+      jLater(500, () => scrollJsonTo('slideIndex'));
+    }
+  },
+  {
+    kick: '3 · The page opens',
+    title: 'The browser turns the note into a live Counter',
+    body: `<p>The page opens in a browser, and NodeGX’s runtime reads the note. It sees the word “Counter” and looks it up in its <b>node library</b>: code that ships with NodeGX and knows how to be a Counter.</p>
+      <p>It uses that code to build one live Counter in memory, with its count at 0. From now on the Counter is a running JavaScript object. The note isn’t read again unless you change the Counter in the editor.</p>`,
+    tech: '<code>createNodeFromModel</code> → <code>nodeRegister.createNode(\'Counter\')</code>, then <code>setNodeParameters</code> queues Limits Enabled = true and Max Value = 2. The code it runs is <code>noodl-runtime/src/nodes/std-library/counter.ts</code>.',
+    ill: () => `<div class="jflow"><div class="jbox"><small>the note says</small><code>"type": "Counter"</code></div><div class="jarrow">↓ looked up in</div>
+      <div class="jbox"><small>the node library</small>counter.ts: the code that knows how to be a Counter</div><div class="jarrow">↓ builds</div>
+      <div class="jbox live"><small>in memory, running</small>one live Counter: count 0, Max 2, limits on</div></div>`,
+    cam: () => { faceLayer('engine', ENGINE_FOCUS); hotCounter(); const c = document.getElementById('card-slideIndex'); if (c) { c.classList.remove('flash'); void c.offsetWidth; c.classList.add('flash'); } }
+  },
+  {
+    kick: '4 · A tick',
+    title: 'Four seconds pass, and the timer fires',
+    body: `<p>The Repeat node is a timer. Every four seconds it fires its <b>Tick</b> output. Tick is a <b>signal</b>: it carries no value. It just means “now”.</p>
+      <p>Watch the pulse travel down the wire into the Counter’s Increase Count.</p>`,
+    tech: '<code>sendSignalOnOutput(\'tick\')</code>. The pulse arrives as true then false, and the rising edge runs the Counter’s Increase handler.',
+    ill: () => jLiveHTML(),
+    cam: () => { faceLayer('engine', { x: 330, y: 140, mul: 1.6 }); hotCounter(['timer']); },
+    act: (fast) => { tickStep(SCOPE.nodes.get('timer')); ownSteps(2, fast, 900); }
+  },
+  {
+    kick: '5 · The rule',
+    title: 'The Counter follows its rule for Increase',
+    body: `<p>Increase has one rule. <b>If limits are on and the count is already at Max, change nothing and say Unchanged. Otherwise add one, say Count Changed, and say Done.</b></p>
+      <p>The count was 0 and Max is 2, so it adds one. That rule, written down in a few lines, is exactly what phase 107 calls Counter’s <b>spec</b>. More on that at the end.</p>`,
+    tech: 'The spec, word for word: <code>increase: (s, i) => i.limitsEnabled && s.count >= i.limitsMax ? { outcome: \'unchanged\' } : { set: { count: s.count + 1 }, emit: [\'countChanged\'], outcome: \'done\' }</code>',
+    ill: () => {
+      const c = counterInst(); const r = c && c.lastInc;
+      return `<div class="jrule"><b>Increase Count</b>
+        <div class="br ${r && r.r === 'unchanged' ? 'on' : ''}">If limits are on and the count is already at Max (${c ? c.core.max : 2}) → change nothing, say <b>Unchanged</b></div>
+        <div class="br ${r && r.r === 'done' ? 'on' : ''}">Otherwise → add one, say <b>Count Changed</b> and <b>Done</b></div></div>` + jLiveHTML();
+    },
+    cam: () => { faceLayer('engine', { x: 400, y: 160, mul: 1.7 }); hotCounter(); }
+  },
+  {
+    kick: '6 · The number goes out',
+    title: 'The new count travels to the maths node',
+    body: `<p>The Counter sends its new count, 1, out of <b>Current Count</b>. This time the wire carries a <b>value</b>, not just a pulse. Watch the 1 ride along it.</p>
+      <p>A small maths node, an Expression, works out −1 × 100 = −100. That means “move the strip of photos 100% to the left”.</p>`,
+    tech: '<code>flagOutputDirty(\'currentCount\')</code> sends 1 into the Expression’s <code>count</code> input. The Expression recomputes <code>-count * 100</code> and sends −100 on Result.',
+    ill: () => jLiveHTML(),
+    cam: () => { faceLayer('engine', { x: 330, y: 200, mul: 1.5 }); hotCounter(['offset']); },
+    act: (fast) => ownSteps(1, fast)
+  },
+  {
+    kick: '7 · The screen changes',
+    title: 'A photo slides across',
+    body: `<p>−100 reaches <b>Track</b>, the visual node that holds the strip of photos. Track writes it straight onto its HTML element as a style: move left by 100%.</p>
+      <p>The browser redraws, and the second photo slides in. Of the whole journey, this is the only moment the HTML changes.</p>`,
+    tech: 'Track’s Pos X setter calls <code>setStyle({ transform: \'translateX(-100%)\' })</code>. The element already exists, so the style goes straight onto <code>element.style</code>, and React doesn’t re-render.',
+    ill: () => {
+      const t = SCOPE && SCOPE.nodes.get('track');
+      const tag = t && t.el ? '<div class="n-track" style="' + (t.el.getAttribute('style') || '') + '">' : '';
+      return (tag ? `<div class="jsnip"><div class="jsgap">the element, as the browser holds it now:</div><div class="jsl">${esc(tag)}</div></div>` : '') + jLiveHTML();
+    },
+    cam: () => { faceLayer('page', { x: 270, y: 300, mul: 1 }); clearHot(); jLater(200, () => scrollSiteTo('carousel')); },
+    act: (fast) => ownSteps(1, fast)
+  },
+  {
+    kick: '8 · Round again',
+    title: 'The last photo, and back to the first',
+    body: `<p>One more tick takes the count to 2: the third photo.</p>
+      <p>On the tick after that, Increase finds the count already at Max, so it changes nothing and says <b>Unchanged</b>. That Unchanged is wired into the Counter’s own Reset To Start, so the count goes back to 0, and the carousel slides back to the first photo.</p>`,
+    tech: 'Unchanged is one of the Counter’s outcome signals (Done, Unchanged). Wiring an outcome back into the same node is an ordinary NodeGX pattern.',
+    ill: () => jLiveHTML(),
+    cam: () => { setView('lid'); hotCounter(); jLater(300, () => scrollSiteTo('carousel')); },
+    act: (fast) => {
+      const t = SCOPE.nodes.get('timer');
+      let stage = 0;
+      J.finish = () => {
+        jClear();
+        if (stage === 0) { tickStep(t); stage = 1; }
+        if (stage === 1) { drain(); tickStep(t); stage = 2; }
+        drain(); jLive();
+      };
+      if (fast) { J.finish(); J.finish = null; return; }
+      tickStep(t); stage = 1;
+      jRunAll(800, () => jLater(1500, () => { stage = 2; tickStep(t); jRunAll(1300, () => { J.finish = null; }); }));
+    }
+  },
+  {
+    kick: '9 · Then and now',
+    title: 'Original Noodl vs phase 107',
+    wide: true,
+    body: `<p><b>On screen, nothing changes.</b> The carousel moves exactly the same way. What phase 107 changes is where Counter’s rules are written down, and how we know every copy follows them.</p>
+      <div class="jcmp">
+        <div><h4>Original Noodl</h4>
+          <p>Counter’s behaviour lived in one place: a hand-written code file in the runtime. That code <i>was</i> the definition of what Increase, Decrease and Reset do.</p>
+          <p>The editor learned the port names from that code. There were no written rules, and nothing in the open-source release tested the Counter.</p>
+          <p>Its Reset check (“if the count is already back at the start, do nothing”) read a variable that didn’t exist, so it never once worked. It shipped like that in Noodl’s open-source release in January 2024, and nothing noticed.</p></div>
+        <div><h4>NodeGX, phase 107</h4>
+          <p>Counter’s behaviour is written down once, as a <b>spec</b>: short rules for Increase, Decrease and Reset, and what Start Value does.</p>
+          <p>NodeGX now has several copies of Counter: the runtime running this page; the <b>code export</b> (phase 18), which turns it into a React state variable; and the <b>editor</b>, which shows its ports and descriptions.</p>
+          <p>A <b>checker</b> plays the same scenarios on each copy and compares every step: 7 written by hand, then 10,000 random ones. Counter passes on the runtime and on the export. A gate checks that the editor’s port names, descriptions and defaults match the spec. The next step, not built yet, is for the editor to read them straight from the spec.</p></div>
+      </div>`,
+    cam: () => { setView('lid'); hotCounter(); }
+  },
+  {
+    kick: '10 · What checking found',
+    title: 'Even this small node had problems nobody had seen',
+    wide: true,
+    body: `<ul class="jlist">
+        <li><b>The Reset check had never worked.</b> NodeGX fixed it (FH-022) after someone spotted it while reading the code. The spec now has a scenario for exactly that case, so if it ever breaks again, a check goes red the same day.</li>
+        <li><b>The runtime and the export disagreed.</b> When the checker was first pointed at the code export, it found that giving Start Value the text “abc” makes the runtime’s Counter show NaN for ever, while the exported app quietly starts from 0. Same graph, two different apps. That’s now on phase 18’s list to settle.</li>
+      </ul>
+      <p>Try it yourself: plant a bug in this page’s Counter, run the check, and watch the carousel slide onto an empty fourth photo.</p>
+      <div class="jbtns"><button type="button" class="btn primary" id="jTry">Plant a bug and run the check</button><button type="button" class="btn" id="jAgain">Start the journey again</button></div>`,
+    cam: () => { setView('lid'); hotCounter(); },
+    after: () => {
+      $('#jTry').addEventListener('click', () => {
+        select('slideIndex'); currentTab = 'spec';
+        document.querySelectorAll('#tabs button').forEach((x) => x.setAttribute('aria-selected', x.dataset.tab === 'spec' ? 'true' : 'false'));
+        renderPane();
+        const insp = $('#insp'); insp.classList.remove('collapsed'); insp.classList.add('open');
+        const b = $('#bugBox'); if (b && !b.checked) b.click();
+        const r = $('#runConf'); if (r) r.click();
+      });
+      $('#jAgain').addEventListener('click', startJourney);
+    }
+  }
+];
+function runAct(k, fast) { const ch = CHAPTERS[k]; if (!ch.act || J.ran.has(k)) return; J.ran.add(k); ch.act(fast); }
+function showChapter(i) {
+  jClear();
+  if (J.finish) { const f = J.finish; J.finish = null; f(); }
+  for (let k = 0; k < i; k++) { if (CHAPTERS[k].act && !J.ran.has(k)) runAct(k, true); }
+  J.i = i;
+  const ch = CHAPTERS[i];
+  $('#jKick').textContent = ch.kick;
+  $('#jDots').innerHTML = CHAPTERS.map((_, k) => `<i class="${k === i ? 'on' : k < i ? 'past' : ''}"></i>`).join('');
+  $('#jText').innerHTML = `<h3>${ch.title}</h3>${ch.body}` + (ch.tech ? `<details class="jtech"><summary>The technical bit</summary><p>${ch.tech}</p></details>` : '');
+  $('#jBody').classList.toggle('wide', !!ch.wide);
+  J.msg = J.ran.has(i) ? lastPlain() : (ch.act ? 'Watch the board…' : '');
+  $('#jIll').innerHTML = ch.ill ? ch.ill() : '';
+  $('#jIll').hidden = !ch.ill;
+  $('#jBack').disabled = i === 0;
+  $('#jNext').textContent = i === CHAPTERS.length - 1 ? 'Finish' : 'Next →';
+  $('#jBody').scrollTop = 0;
+  if (ch.after) ch.after();
+  ch.cam();
+  if (ch.act && !J.ran.has(i)) jLater(1000, () => { runAct(i, false); });
+}
+function startJourney() {
+  jClear(); J.finish = null; J.pending = 0;
+  J.on = true; J.ran.clear(); J.msg = '';
+  BUG.on = false;
+  setRun('live'); boot(); setRun('step');
+  $('#site').scrollTo({ top: 0 });
+  $('#deck').hidden = true; $('#journey').hidden = false;
+  $('#journeyBtn').textContent = 'Leave the journey';
+  J.wires.clear(); [1, 3, 4, 5].forEach((k) => J.wires.add(k)); renderWireLabels();
+  select('slideIndex');
+  showChapter(0);
+}
+function endJourney() {
+  jClear(); J.finish = null; J.pending = 0;
+  J.on = false;
+  $('#journey').hidden = true; $('#deck').hidden = false;
+  $('#journeyBtn').textContent = 'Follow one node';
+  J.wires.clear(); renderWireLabels(); clearHot();
+  setRun('live');
+  setView('lid');
+}
+$('#jNext').addEventListener('click', () => { if (J.i < CHAPTERS.length - 1) showChapter(J.i + 1); else endJourney(); });
+$('#jBack').addEventListener('click', () => { if (J.i > 0) showChapter(J.i - 1); });
+$('#jExit').addEventListener('click', endJourney);
+$('#journeyBtn').addEventListener('click', () => { if (J.on) endJourney(); else startJourney(); });
+
+
+/* ------------------------------------------------------------------ go */
+tape.delay = delayFromSlider(Number($('#speed').value)); showSpeed();
+buildBoard();
+resetWS();
+renderJSON();
+if (innerWidth <= 900 || scene.clientHeight < 900) { $('#layersPanel').classList.add('collapsed'); const b = $('[data-collapse="layersPanel"]'); b.textContent = '+'; b.setAttribute('aria-expanded', 'false'); }
+boot();                      // live: runs to the end at once
+select('hero');
+setRun('live');
+setView('lid', false);
+requestAnimationFrame(() => { if (!camTouched) setView('lid', false); });
+})();
+</script>
+
+</body></html>

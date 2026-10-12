@@ -1,0 +1,1225 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "28e21b23-d318-5886-85ae-641b980defd6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "iwIn",
+      "fromProperty": "requests",
+      "toId": "iwWorld",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "plots",
+      "toId": "iwWorld",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "robots",
+      "toId": "iwWorld",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "done",
+      "toId": "iwWorld",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "band",
+      "toId": "iwWorld",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "pins",
+      "toId": "iwWorld",
+      "toProperty": "pins"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "land",
+      "toId": "iwWorld",
+      "toProperty": "land"
+    },
+    {
+      "fromId": "iwWorld",
+      "fromProperty": "state",
+      "toId": "iwSetBuilt",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwVar",
+      "fromProperty": "value",
+      "toId": "iwWorld",
+      "toProperty": "kept"
+    },
+    {
+      "fromId": "iwWorld",
+      "fromProperty": "ran",
+      "toId": "iwSetBuilt",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "iwSetBuilt",
+      "fromProperty": "done",
+      "toId": "iwBeat",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "iwBeat",
+      "fromProperty": "tick",
+      "toId": "iwTick",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwVar",
+      "fromProperty": "value",
+      "toId": "iwTick",
+      "toProperty": "state"
+    },
+    {
+      "fromId": "iwWorld",
+      "fromProperty": "state",
+      "toId": "iwTick",
+      "toProperty": "built"
+    },
+    {
+      "fromId": "iwTick",
+      "fromProperty": "state",
+      "toId": "iwSetTick",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwTick",
+      "fromProperty": "ran",
+      "toId": "iwSetTick",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "iwWorld",
+      "fromProperty": "world",
+      "toId": "iwWithGhost",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "iwTick",
+      "fromProperty": "world",
+      "toId": "iwWithGhost",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "ghostThing",
+      "toId": "iwWithGhost",
+      "toProperty": "ghost"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "ghostShow",
+      "toId": "iwWithGhost",
+      "toProperty": "showGhost"
+    },
+    {
+      "fromId": "iwWithGhost",
+      "fromProperty": "world",
+      "toId": "iwDraw",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "words",
+      "toId": "iwDraw",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "lang",
+      "toId": "iwDraw",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "botName",
+      "toId": "iwDraw",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "color",
+      "toId": "iwDraw",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "eye",
+      "toId": "iwDraw",
+      "toProperty": "eye"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "hat",
+      "toId": "iwDraw",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "words",
+      "toId": "iwT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "lang",
+      "toId": "iwT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "botName",
+      "toId": "iwT",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "iwT",
+      "fromProperty": "a11yIsland",
+      "toId": "iwGarden",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "iwT",
+      "fromProperty": "a11yIsland",
+      "toId": "iwGarden3d",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "iwDraw",
+      "fromProperty": "map",
+      "toId": "iwGarden",
+      "toProperty": "map"
+    },
+    {
+      "fromId": "iwDraw",
+      "fromProperty": "things",
+      "toId": "iwGarden",
+      "toProperty": "things"
+    },
+    {
+      "fromId": "iwDraw",
+      "fromProperty": "robots",
+      "toId": "iwGarden",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "iwDraw",
+      "fromProperty": "map",
+      "toId": "iwGarden3d",
+      "toProperty": "map"
+    },
+    {
+      "fromId": "iwDraw",
+      "fromProperty": "things",
+      "toId": "iwGarden3d",
+      "toProperty": "things"
+    },
+    {
+      "fromId": "iwDraw",
+      "fromProperty": "robots",
+      "toId": "iwGarden3d",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "iwWorld",
+      "fromProperty": "focus",
+      "toId": "iwGarden3d",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "iwView",
+      "fromProperty": "camera",
+      "toId": "iwGarden3d",
+      "toProperty": "camera"
+    },
+    {
+      "fromId": "iwGarden",
+      "fromProperty": "onTileX",
+      "toId": "iwAt",
+      "toProperty": "x"
+    },
+    {
+      "fromId": "iwGarden",
+      "fromProperty": "onTileY",
+      "toId": "iwAt",
+      "toProperty": "y"
+    },
+    {
+      "fromId": "iwGarden",
+      "fromProperty": "onTileTapped",
+      "toId": "iwAt",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwGarden3d",
+      "fromProperty": "onTileX",
+      "toId": "iwAt",
+      "toProperty": "x"
+    },
+    {
+      "fromId": "iwGarden3d",
+      "fromProperty": "onTileY",
+      "toId": "iwAt",
+      "toProperty": "y"
+    },
+    {
+      "fromId": "iwGarden3d",
+      "fromProperty": "onTileTapped",
+      "toId": "iwAt",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwWorld",
+      "fromProperty": "cards",
+      "toId": "iwAt",
+      "toProperty": "cards"
+    },
+    {
+      "fromId": "iwAt",
+      "fromProperty": "requestId",
+      "toId": "iwChoose",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "iwAt",
+      "fromProperty": "ran",
+      "toId": "iwChoose",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "pickId",
+      "toId": "iwChoose",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "pick",
+      "toId": "iwChoose",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwWorld",
+      "fromProperty": "cards",
+      "toId": "iwChoose",
+      "toProperty": "cards"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "requests",
+      "toId": "iwChoose",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "plots",
+      "toId": "iwChoose",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "robots",
+      "toId": "iwChoose",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "words",
+      "toId": "iwChoose",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "lang",
+      "toId": "iwChoose",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "botName",
+      "toId": "iwChoose",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "found",
+      "toId": "iwFound",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "ran",
+      "toId": "iwFound",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "iwFound",
+      "fromProperty": "ontrue",
+      "toId": "iwCardState",
+      "toProperty": "to-shown"
+    },
+    {
+      "fromId": "iwFound",
+      "fromProperty": "onfalse",
+      "toId": "iwCardState",
+      "toProperty": "to-hidden"
+    },
+    {
+      "fromId": "iwFound",
+      "fromProperty": "ontrue",
+      "toId": "iwCard",
+      "toProperty": "scrollIntoView"
+    },
+    {
+      "fromId": "iwCardState",
+      "fromProperty": "shown",
+      "toId": "iwCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "faceClass",
+      "toId": "iwCardFace",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "who",
+      "toId": "iwCardWho",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "title",
+      "toId": "iwCardTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "line",
+      "toId": "iwCardLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "canOpen",
+      "toId": "iwOpen",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "openText",
+      "toId": "iwOpen",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "showHome",
+      "toId": "iwHomeBtn",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "homeText",
+      "toId": "iwHomeBtn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "iwClose",
+      "fromProperty": "onClick",
+      "toId": "iwCardState",
+      "toProperty": "to-hidden"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "requestId",
+      "toId": "iwOut",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "iwOpen",
+      "fromProperty": "onClick",
+      "toId": "iwOut",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "model",
+      "toId": "iwHome",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "robotId",
+      "toId": "iwHome",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "iwHomeBtn",
+      "fromProperty": "onClick",
+      "toId": "iwHome",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwHome",
+      "fromProperty": "model",
+      "toId": "iwOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwHome",
+      "fromProperty": "ran",
+      "toId": "iwOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "iwHome",
+      "fromProperty": "ran",
+      "toId": "iwAgain",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "iwAgain",
+      "fromProperty": "timerFinished",
+      "toId": "iwChoose",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "requestId",
+      "toId": "iwCrewFn",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "iwWorld",
+      "fromProperty": "cards",
+      "toId": "iwCrewFn",
+      "toProperty": "cards"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "requests",
+      "toId": "iwCrewFn",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "plots",
+      "toId": "iwCrewFn",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "robots",
+      "toId": "iwCrewFn",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "words",
+      "toId": "iwCrewFn",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "lang",
+      "toId": "iwCrewFn",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "iwCrewFn",
+      "fromProperty": "show",
+      "toId": "iwCrew",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwCrewFn",
+      "fromProperty": "rows",
+      "toId": "iwCrewEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "iwCrewFn",
+      "fromProperty": "label",
+      "toId": "iwCrewL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwCrewFn",
+      "fromProperty": "hereText",
+      "toId": "iwCrewHere",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwCrewFn",
+      "fromProperty": "line",
+      "toId": "iwCrewTap",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwCrewFn",
+      "fromProperty": "saidText",
+      "toId": "iwCrewSaid",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "model",
+      "toId": "iwAssign",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "requestId",
+      "toId": "iwAssign",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "requests",
+      "toId": "iwAssign",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "words",
+      "toId": "iwAssign",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "lang",
+      "toId": "iwAssign",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "iwCrewEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "iwAssign",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "iwCrewEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "iwAssign",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwAssign",
+      "fromProperty": "told",
+      "toId": "iwCrewFn",
+      "toProperty": "told"
+    },
+    {
+      "fromId": "iwAssign",
+      "fromProperty": "ok",
+      "toId": "iwAssignOk",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwAssign",
+      "fromProperty": "ran",
+      "toId": "iwAssignOk",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "iwAssign",
+      "fromProperty": "model",
+      "toId": "iwOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwAssignOk",
+      "fromProperty": "ontrue",
+      "toId": "iwOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "iwAssignOk",
+      "fromProperty": "ontrue",
+      "toId": "iwAgain",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "iwLandBotVar",
+      "fromProperty": "value",
+      "toId": "iwChoose",
+      "toProperty": "landBot"
+    },
+    {
+      "fromId": "iwLandBotVar",
+      "fromProperty": "value",
+      "toId": "iwCrewFn",
+      "toProperty": "landBot"
+    },
+    {
+      "fromId": "iwAssign",
+      "fromProperty": "chosen",
+      "toId": "iwSetLandBot",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwAssign",
+      "fromProperty": "chose",
+      "toId": "iwChoseIs",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwAssign",
+      "fromProperty": "ran",
+      "toId": "iwChoseIs",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "iwChoseIs",
+      "fromProperty": "ontrue",
+      "toId": "iwSetLandBot",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "iwSetLandBot",
+      "fromProperty": "done",
+      "toId": "iwAgain",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "findText",
+      "toId": "iwFind",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "tapText",
+      "toId": "iwTap",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwView",
+      "fromProperty": "onRobots",
+      "toId": "iwViewIs",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwFind",
+      "fromProperty": "onClick",
+      "toId": "iwViewIs",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "iwViewIs",
+      "fromProperty": "ontrue",
+      "toId": "iwView",
+      "toProperty": "to-island"
+    },
+    {
+      "fromId": "iwViewIs",
+      "fromProperty": "onfalse",
+      "toId": "iwView",
+      "toProperty": "to-robots"
+    },
+    {
+      "fromId": "iwFind",
+      "fromProperty": "onClick",
+      "toId": "iwFindFn",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwRendStore",
+      "fromProperty": "value",
+      "toId": "iwRendRead",
+      "toProperty": "stored"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "words",
+      "toId": "iwRendRead",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "lang",
+      "toId": "iwRendRead",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "iwRendRead",
+      "fromProperty": "use3d",
+      "toId": "iwRendIs3d",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwRendIs3d",
+      "fromProperty": "ontrue",
+      "toId": "iwRenderer",
+      "toProperty": "to-3d"
+    },
+    {
+      "fromId": "iwRendIs3d",
+      "fromProperty": "onfalse",
+      "toId": "iwRenderer",
+      "toProperty": "to-2d"
+    },
+    {
+      "fromId": "iwRenderer",
+      "fromProperty": "show2d",
+      "toId": "iwGarden",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwRenderer",
+      "fromProperty": "show3d",
+      "toId": "iwGarden3d",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwGarden3d",
+      "fromProperty": "onSupported",
+      "toId": "iwRendOk",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwRendStore",
+      "fromProperty": "value",
+      "toId": "iwRendNoGl",
+      "toProperty": "stored"
+    },
+    {
+      "fromId": "iwRendOk",
+      "fromProperty": "onfalse",
+      "toId": "iwRendNoGl",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwRendStore",
+      "fromProperty": "value",
+      "toId": "iwRendSlow",
+      "toProperty": "stored"
+    },
+    {
+      "fromId": "iwGarden3d",
+      "fromProperty": "onTooSlow",
+      "toId": "iwRendSlow",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwRendNoGl",
+      "fromProperty": "renderer",
+      "toId": "iwRendWrite",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwRendSlow",
+      "fromProperty": "renderer",
+      "toId": "iwRendWrite",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwRendNoGl",
+      "fromProperty": "ran",
+      "toId": "iwRendWrite",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "iwRendSlow",
+      "fromProperty": "ran",
+      "toId": "iwRendWrite",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "iwTick",
+      "fromProperty": "state",
+      "toId": "iwKeep",
+      "toProperty": "state"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "model",
+      "toId": "iwKeep",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "robots",
+      "toId": "iwKeep",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "words",
+      "toId": "iwKeep",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "lang",
+      "toId": "iwKeep",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "iwTick",
+      "fromProperty": "ran",
+      "toId": "iwKeep",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwKeep",
+      "fromProperty": "model",
+      "toId": "iwOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwKeep",
+      "fromProperty": "due",
+      "toId": "iwKeepDue",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwKeep",
+      "fromProperty": "ran",
+      "toId": "iwKeepDue",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "iwKeepDue",
+      "fromProperty": "ontrue",
+      "toId": "iwOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "iwKeep",
+      "fromProperty": "text",
+      "toId": "iwPay",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwKeep",
+      "fromProperty": "has",
+      "toId": "iwPayIs",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwKeep",
+      "fromProperty": "ran",
+      "toId": "iwPayIs",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "iwPayIs",
+      "fromProperty": "ontrue",
+      "toId": "iwPayState",
+      "toProperty": "to-shown"
+    },
+    {
+      "fromId": "iwPayIs",
+      "fromProperty": "ontrue",
+      "toId": "iwPayWait",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "iwPayWait",
+      "fromProperty": "timerFinished",
+      "toId": "iwPayState",
+      "toProperty": "to-hidden"
+    },
+    {
+      "fromId": "iwPayState",
+      "fromProperty": "shown",
+      "toId": "iwPay",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "model",
+      "toId": "iwLandCard",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "requestId",
+      "toId": "iwLandCard",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "iwGhostVar",
+      "fromProperty": "value",
+      "toId": "iwLandCard",
+      "toProperty": "ghost"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "words",
+      "toId": "iwLandCard",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "lang",
+      "toId": "iwLandCard",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "show",
+      "toId": "iwLand",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "line",
+      "toId": "iwLandLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "chipsLabel",
+      "toId": "iwLandL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "showChips",
+      "toId": "iwLandL",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "showChips",
+      "toId": "iwLandRow",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "chips",
+      "toId": "iwLandEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "ghostLine",
+      "toId": "iwGhostLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "ghostShow",
+      "toId": "iwGhostLine",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "ghostShow",
+      "toId": "iwGhostBtns",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "ghostOk",
+      "toId": "iwGhostPut",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "putText",
+      "toId": "iwGhostPut",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "cancelText",
+      "toId": "iwGhostNo",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "iwGhostVar",
+      "fromProperty": "value",
+      "toId": "iwGhostStart",
+      "toProperty": "ghost"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "model",
+      "toId": "iwGhostStart",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwGhostStart",
+      "fromProperty": "ghost",
+      "toId": "iwSetGhost",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwGhostStart",
+      "fromProperty": "ran",
+      "toId": "iwSetGhost",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "iwGhostVar",
+      "fromProperty": "value",
+      "toId": "iwGhostMove",
+      "toProperty": "ghost"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "model",
+      "toId": "iwGhostMove",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwGhostMove",
+      "fromProperty": "ghost",
+      "toId": "iwSetGhost",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwGhostMove",
+      "fromProperty": "ran",
+      "toId": "iwSetGhost",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "iwGhostVar",
+      "fromProperty": "value",
+      "toId": "iwGhostPlace",
+      "toProperty": "ghost"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "model",
+      "toId": "iwGhostPlace",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwGhostPlace",
+      "fromProperty": "ghost",
+      "toId": "iwSetGhost",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwGhostPlace",
+      "fromProperty": "ran",
+      "toId": "iwSetGhost",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "iwGhostVar",
+      "fromProperty": "value",
+      "toId": "iwGhostCancel",
+      "toProperty": "ghost"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "model",
+      "toId": "iwGhostCancel",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwGhostCancel",
+      "fromProperty": "ghost",
+      "toId": "iwSetGhost",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwGhostCancel",
+      "fromProperty": "ran",
+      "toId": "iwSetGhost",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "iwLandEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "iwGhostStart",
+      "toProperty": "bp"
+    },
+    {
+      "fromId": "iwLandEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "iwGhostStart",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwGarden",
+      "fromProperty": "onTileX",
+      "toId": "iwGhostMove",
+      "toProperty": "x"
+    },
+    {
+      "fromId": "iwGarden",
+      "fromProperty": "onTileY",
+      "toId": "iwGhostMove",
+      "toProperty": "y"
+    },
+    {
+      "fromId": "iwGarden",
+      "fromProperty": "onTileTapped",
+      "toId": "iwGhostMove",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwGarden3d",
+      "fromProperty": "onTileX",
+      "toId": "iwGhostMove",
+      "toProperty": "x"
+    },
+    {
+      "fromId": "iwGarden3d",
+      "fromProperty": "onTileY",
+      "toId": "iwGhostMove",
+      "toProperty": "y"
+    },
+    {
+      "fromId": "iwGarden3d",
+      "fromProperty": "onTileTapped",
+      "toId": "iwGhostMove",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwGhostPut",
+      "fromProperty": "onClick",
+      "toId": "iwGhostPlace",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwGhostNo",
+      "fromProperty": "onClick",
+      "toId": "iwGhostCancel",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwGhostPlace",
+      "fromProperty": "model",
+      "toId": "iwOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwGhostPlace",
+      "fromProperty": "ok",
+      "toId": "iwGhostPlaced",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwGhostPlace",
+      "fromProperty": "ran",
+      "toId": "iwGhostPlaced",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "iwGhostPlaced",
+      "fromProperty": "ontrue",
+      "toId": "iwOut",
+      "toProperty": "write"
+    }
+  ]
+}

@@ -33,16 +33,16 @@
  *
  * @module noodl-mcp/tests/templatePins
  */
-import { createHash } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 
-/** A stable UUID-shaped id for a component, derived from its path and the template's namespace alone. */
-export function stableComponentId(namespace: string, componentPath: string): string {
-  const h = createHash('sha1').update(`${namespace}:${componentPath}`).digest('hex');
-  // UUIDv5 layout: version nibble 5, variant nibble 8.
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`;
-}
+/**
+ * A stable UUID-shaped id for a component, derived from its path and the template's namespace alone.
+ * P109 ISL-019 — the door's own formula now (`src/project/writeClock.ts`), re-exported so the pins and
+ * a reproducible server can never disagree on it.
+ */
+export { stableComponentId } from '../src/project/writeClock';
+import { stableComponentId } from '../src/project/writeClock';
 
 function pinComponentDirectory(dir: string, namespace: string, epoch: string): void {
   const componentFile = path.join(dir, 'component.json');
@@ -98,6 +98,21 @@ export function copyTree(from: string, to: string): void {
     if (entry.isDirectory()) copyTree(src, dst);
     else fs.copyFileSync(src, dst);
   }
+}
+
+/**
+ * P109 ISL-016 AC8 — the project file's `modified`, pinned to the template's epoch. The door's `set_project_settings`
+ * stamps it as the editor's own save does (`ProjectExporter.ts` `buildProjectV2File` always writes it), so a generator
+ * that sets its home through the door has a wall-clock key to pin, as `pinComponentFiles` pins the components'. Key
+ * order and the file's ending are kept; a file with no `modified` is left alone.
+ */
+export function pinProjectModified(projectDir: string, epoch: string): void {
+  const file = path.join(projectDir, 'nodegx.project.json');
+  const text = fs.readFileSync(file, 'utf-8');
+  const doc = JSON.parse(text) as Record<string, unknown>;
+  if (!('modified' in doc)) return;
+  doc.modified = epoch;
+  fs.writeFileSync(file, JSON.stringify(doc, null, 2) + (text.endsWith('\n') ? '\n' : ''));
 }
 
 /**

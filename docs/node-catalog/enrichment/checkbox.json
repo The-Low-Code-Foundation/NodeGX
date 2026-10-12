@@ -3,5 +3,6 @@
   "summary": "Legacy checkbox visual, hidden from the node picker — superseded by net.noodl.controls.checkbox.",
   "description": "The original Checkbox visual, kept only so old projects load. The Checkbox control (net.noodl.controls.checkbox) supersedes it with visual states and accessibility.",
   "whenToUse": "Do not use in new graphs — use net.noodl.controls.checkbox instead.",
+  "runtimeBehavior": "Its only dynamic ports are its Data Attributes list: each data-* name listed in `dataAttributes` becomes a string input of that name, written on the element (declared-port-groups). Every other port is static.",
   "relatedNodes": ["net.noodl.controls.checkbox"]
 }

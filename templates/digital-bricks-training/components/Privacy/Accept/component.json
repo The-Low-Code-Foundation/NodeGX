@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4a2f5ffb-4ff4-4aa8-817d-7c998ee4b18d",
+  "name": "Accept",
+  "path": "/Privacy/Accept",
+  "type": "visual",
+  "created": "2026-10-01T08:57:05.193Z",
+  "modified": "2026-10-01T08:57:20.026Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The acceptance screen. App renders it IN PLACE of the page the person asked for, so the address survives and accepting reloads it (the product's L53). No close control, no backdrop, no escape key: it is a step, not a modal. The way out (settings) and the notice itself stay one press away (TASK-L185 §2)."
+}

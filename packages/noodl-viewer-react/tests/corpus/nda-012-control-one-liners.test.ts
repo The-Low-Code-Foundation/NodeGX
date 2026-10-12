@@ -187,7 +187,9 @@ describe('SL-1 — Slider only flags Value Percent when the percentage moved', (
     withZero.drivable.setInputValue('value', 60);
     withZero.drivable.setInputValue('value', 0);
 
-    expect(withNull.drivable.props.value).toBe(60);
-    expect(withZero.drivable.props.value).toBe(10);
+    // P109 ISL-031 (P107-C74): the paint clamps the Value it draws (`drawHandle`, what the component's effect calls)
+    const drawn = (p: Probe) => (p.drivable.props.drawHandle as () => number)();
+    expect(drawn(withNull)).toBe(60);
+    expect(drawn(withZero)).toBe(10);
   }, 30000);
 });

@@ -83,6 +83,18 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-backToGames",
+      "toId": "translateworOut",
+      "toProperty": "backToGames"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-backToHangar",
+      "toId": "translateworOut",
+      "toProperty": "backToHangar"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-badCode",
       "toId": "translateworOut",
       "toProperty": "badCode"
@@ -116,6 +128,12 @@
       "fromProperty": "out-challengeRule",
       "toId": "translateworOut",
       "toProperty": "challengeRule"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-changeFocus",
+      "toId": "translateworOut",
+      "toProperty": "changeFocus"
     },
     {
       "fromId": "translateworFn",
@@ -203,9 +221,21 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-editLists",
+      "toId": "translateworOut",
+      "toProperty": "editLists"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-editPlayer",
       "toId": "translateworOut",
       "toProperty": "editPlayer"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-everythingAtLevel",
+      "toId": "translateworOut",
+      "toProperty": "everythingAtLevel"
     },
     {
       "fromId": "translateworFn",
@@ -347,9 +377,105 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-learnedItem",
+      "toId": "translateworOut",
+      "toProperty": "learnedItem"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-learnedList",
+      "toId": "translateworOut",
+      "toProperty": "learnedList"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-lessOnNext",
       "toId": "translateworOut",
       "toProperty": "lessOnNext"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-listBothWays",
+      "toId": "translateworOut",
+      "toProperty": "listBothWays"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-listCount",
+      "toId": "translateworOut",
+      "toProperty": "listCount"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-listDelete",
+      "toId": "translateworOut",
+      "toProperty": "listDelete"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-listDeleteAsk",
+      "toId": "translateworOut",
+      "toProperty": "listDeleteAsk"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-listEdit",
+      "toId": "translateworOut",
+      "toProperty": "listEdit"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-listEmpty",
+      "toId": "translateworOut",
+      "toProperty": "listEmpty"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-listLines",
+      "toId": "translateworOut",
+      "toProperty": "listLines"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-listLinesHint",
+      "toId": "translateworOut",
+      "toProperty": "listLinesHint"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-listName",
+      "toId": "translateworOut",
+      "toProperty": "listName"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-listNameHint",
+      "toId": "translateworOut",
+      "toProperty": "listNameHint"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-listOneWay",
+      "toId": "translateworOut",
+      "toProperty": "listOneWay"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-listSaved",
+      "toId": "translateworOut",
+      "toProperty": "listSaved"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-listsBlurb",
+      "toId": "translateworOut",
+      "toProperty": "listsBlurb"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-listsTitle",
+      "toId": "translateworOut",
+      "toProperty": "listsTitle"
     },
     {
       "fromId": "translateworFn",
@@ -455,9 +581,69 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-moonAdoptFirst",
+      "toId": "translateworOut",
+      "toProperty": "moonAdoptFirst"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonAdoptMore",
+      "toId": "translateworOut",
+      "toProperty": "moonAdoptMore"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonAdoptQ",
+      "toId": "translateworOut",
+      "toProperty": "moonAdoptQ"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonBlurb",
+      "toId": "translateworOut",
+      "toProperty": "moonBlurb"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonDress",
+      "toId": "translateworOut",
+      "toProperty": "moonDress"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonFeed",
+      "toId": "translateworOut",
+      "toProperty": "moonFeed"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonName",
+      "toId": "translateworOut",
+      "toProperty": "moonName"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonTitle",
+      "toId": "translateworOut",
+      "toProperty": "moonTitle"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-moves",
       "toId": "translateworOut",
       "toProperty": "moves"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-myList",
+      "toId": "translateworOut",
+      "toProperty": "myList"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-myLists",
+      "toId": "translateworOut",
+      "toProperty": "myLists"
     },
     {
       "fromId": "translateworFn",
@@ -470,6 +656,12 @@
       "fromProperty": "out-newGame",
       "toId": "translateworOut",
       "toProperty": "newGame"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-newList",
+      "toId": "translateworOut",
+      "toProperty": "newList"
     },
     {
       "fromId": "translateworFn",
@@ -494,6 +686,12 @@
       "fromProperty": "out-next",
       "toId": "translateworOut",
       "toProperty": "next"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-noListsYet",
+      "toId": "translateworOut",
+      "toProperty": "noListsYet"
     },
     {
       "fromId": "translateworFn",
@@ -533,6 +731,24 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-pickSkills",
+      "toId": "translateworOut",
+      "toProperty": "pickSkills"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-pickSubject",
+      "toId": "translateworOut",
+      "toProperty": "pickSubject"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-pickTopic",
+      "toId": "translateworOut",
+      "toProperty": "pickTopic"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-play",
       "toId": "translateworOut",
       "toProperty": "play"
@@ -554,6 +770,12 @@
       "fromProperty": "out-practiceRule",
       "toId": "translateworOut",
       "toProperty": "practiceRule"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-practising",
+      "toId": "translateworOut",
+      "toProperty": "practising"
     },
     {
       "fromId": "translateworFn",
@@ -629,6 +851,12 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-saveFocus",
+      "toId": "translateworOut",
+      "toProperty": "saveFocus"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-score",
       "toId": "translateworOut",
       "toProperty": "score"
@@ -644,6 +872,12 @@
       "fromProperty": "out-showMe",
       "toId": "translateworOut",
       "toProperty": "showMe"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-skillsCount",
+      "toId": "translateworOut",
+      "toProperty": "skillsCount"
     },
     {
       "fromId": "translateworFn",
@@ -707,6 +941,18 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-tickAll",
+      "toId": "translateworOut",
+      "toProperty": "tickAll"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-tickNone",
+      "toId": "translateworOut",
+      "toProperty": "tickNone"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-timeUp",
       "toId": "translateworOut",
       "toProperty": "timeUp"
@@ -716,6 +962,18 @@
       "fromProperty": "out-toHangar",
       "toId": "translateworOut",
       "toProperty": "toHangar"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-turboArmed",
+      "toId": "translateworOut",
+      "toProperty": "turboArmed"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-turboArmedHint",
+      "toId": "translateworOut",
+      "toProperty": "turboArmedHint"
     },
     {
       "fromId": "translateworFn",
@@ -746,6 +1004,18 @@
       "fromProperty": "out-typingMode",
       "toId": "translateworOut",
       "toProperty": "typingMode"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-visitMoon",
+      "toId": "translateworOut",
+      "toProperty": "visitMoon"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-whatToPractise",
+      "toId": "translateworOut",
+      "toProperty": "whatToPractise"
     },
     {
       "fromId": "translateworFn",

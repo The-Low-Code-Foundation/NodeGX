@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "df6e5456-c6bd-5d6c-85e2-cf8aa2e6e662",
+  "name": "Letter bit",
+  "path": "/Skills/Letter bit",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A piece of Olive’s sentence as the page checked it: a letter e it found is marked on the sun; the rest is plain."
+}

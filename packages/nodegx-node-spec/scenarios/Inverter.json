@@ -1,0 +1,26 @@
+[
+  {
+    "name": "nothing before the first value; then true → false, 'x' → false, 0 → true",
+    "because": "inverter.ts :5-9 — the undefined passthrough; :14 `!value`",
+    "params": {},
+    "steps": ["settle", { "set": "value", "value": true }, "settle", { "set": "value", "value": "x" }, "settle", { "set": "value", "value": 0 }, "settle"]
+  },
+  {
+    "name": "null, '' and {} : falsy inverts to true, an object to false",
+    "because": "inverter.ts :14",
+    "params": { "value": null },
+    "steps": ["settle", { "set": "value", "value": "" }, "settle", { "set": "value", "value": {} }, "settle"]
+  },
+  {
+    "name": "the same value twice is published once — the wire dedups, the setter does not",
+    "because": "inverter.ts :41-44 flags on every write",
+    "params": {},
+    "steps": [{ "set": "value", "value": true }, "settle", { "set": "value", "value": true }, "settle"]
+  },
+  {
+    "name": "null then undefined in one frame: the wire keeps true — a frame sends the last DEFINED value, and undefined is never sent",
+    "because": "node.ts :820-822 (undefined is never sent), :832-835 (sent at the write) — NSP-011 decision 2; the shape a target that reads outputs only at settle gets wrong (NSP-006 §5.4)",
+    "params": {},
+    "steps": [{ "set": "value", "value": null }, { "set": "value" }, "settle", { "set": "value", "value": 1 }, "settle"]
+  }
+]

@@ -779,12 +779,22 @@ export interface ReactNodeDefinition {
 
   /** Passes the node itself to the React component as `props.noodlNode`. */
   noodlNodeAsProp?: boolean;
+  /**
+   * `true` for a node with no element of its own (it moves or wraps its child), so it offers no
+   * Data Attributes list: an attribute it wrote would land on the child and overwrite the child's own.
+   */
+  noDataAttributes?: boolean;
   /** Set `false` to omit the standard `mounted` input. */
   mountedInput?: boolean;
   /** See {@link ReactNodeFrame}. */
   frame?: ReactNodeFrame;
 
-  /** Styles applied to every instance before any input is set. */
+  /**
+   * Styles applied to every instance before any input is set. They reach your component as
+   * `props.style`, an inline style that beats any rule in the kit's own stylesheet — set a
+   * property here or in a class rule, never in both. Applied the same way in the editor canvas,
+   * on a deployed page and in an exported app.
+   */
   defaultCss?: Record<string, any>;
 
   /** Ports written as ordinary runtime inputs, with their own `set`. */
@@ -1052,6 +1062,16 @@ export interface NodeKitModule {
    * name itself. Provenance in the editor's property panel reads it.
    */
   name?: string;
+  /**
+   * ISL-013 — what this kit shares with a kit that `requires` it: a table, a parser, a helper. Another kit reads it with
+   * {@link NoodlGlobal.getModule}. Anything you like; nothing else reads it.
+   */
+  exports?: unknown;
+  /**
+   * Set by the bootstrap when another kit `requires` this one: the kit's folder under `noodl_modules/`, so
+   * {@link NoodlGlobal.getModule} finds it by folder as well as by name.
+   */
+  folder?: string;
   [extra: string]: unknown;
 }
 
@@ -1064,6 +1084,20 @@ export interface NodeKitModule {
 export interface NoodlGlobal {
   /** Registers the kit. Call it once, at the end of `index.js`. */
   defineModule(module: NodeKitModule): void;
+  /**
+   * ISL-013 — what another kit shares (its module's `exports`), by its manifest `name` or its folder under `noodl_modules/`;
+   * `undefined` when that kit is not loaded.
+   *
+   * Name the kit in your manifest's `requires` (`"requires": ["garden-kit"]`) and it loads BEFORE yours, whatever the folders
+   * are called, so reading it at definition is safe — in a browser, on a server render and in the MCP door's catalog. Without
+   * the entry, the order is alphabetical by folder and the answer depends on the names. If a required kit is missing, your kit
+   * is not loaded at all and the console (and `get_project_info`) says which kit it needed.
+   *
+   * @example
+   * var garden = Noodl.getModule('garden-kit');
+   * var world = garden.parseMap(rows);
+   */
+  getModule(id: string): unknown;
   /** `false` in the editor's local viewer, `true` in a deployed or SSR bundle. */
   deployed: boolean;
   /**
@@ -1110,7 +1144,10 @@ declare global {
     Noodl: NoodlGlobal;
     /** Browser only — see the note on the global {@link React}. */
     React: any;
-    /** The array `defineModule` pushes into. Runtime-internal. */
+    /**
+     * The array `defineModule` pushes into. Runtime-internal: to read another kit, name it in `requires` and call
+     * {@link NoodlGlobal.getModule} (ISL-013) — this array's order is the load order, which `requires` is what guarantees.
+     */
     __noodl_modules: NodeKitModule[];
   }
 }

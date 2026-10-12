@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "edf9d75e-7fa2-5c02-84fc-1f7d7babfe51",
+  "name": "Olive slots",
+  "path": "/Logic/Olive slots",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The picker for an ask block in a band, and the inline refusal. Runs when an input changes; Ran after each run."
+}

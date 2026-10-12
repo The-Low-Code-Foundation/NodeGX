@@ -285,6 +285,42 @@
           "value": "#243b6b",
           "category": "color-semantic",
           "isCustom": true
+        },
+        {
+          "name": "--alien-lime",
+          "value": "#8bc34a",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--alien-mint",
+          "value": "#4fd1b5",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--alien-sky",
+          "value": "#5aa9f0",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--alien-lilac",
+          "value": "#b388eb",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--alien-pink",
+          "value": "#f48fb1",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--alien-sunny",
+          "value": "#ffca28",
+          "category": "color-semantic",
+          "isCustom": true
         }
       ]
     }

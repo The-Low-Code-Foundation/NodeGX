@@ -120,7 +120,12 @@ const ImageNode: ReactNodeDefinition = {
         name: 'string'
       },
       index: 31,
-      allowVisualStates: true
+      allowVisualStates: true,
+      // P107-C94 — a boolean is no srcset. React 19 creates the element with srcset="true" (and removes it on an update), so a
+      // `true` wired in as the Image is placed fetched a picture called "true". Leave it off, as an update already does.
+      onChange(value) {
+        if (typeof value === 'boolean') delete this.props.dom.srcSet;
+      }
     },
     alt: {
       // SIG-003 — the node's own subject heading, which `groupPriority` already

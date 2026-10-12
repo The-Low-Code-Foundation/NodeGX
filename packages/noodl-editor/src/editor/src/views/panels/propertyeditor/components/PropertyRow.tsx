@@ -71,6 +71,7 @@ import {
   GATED_PORT_REASON_CLASS
 } from '@noodl-utils/portGate';
 import { HINT_PORTS_ATTRIBUTE } from '@noodl-utils/portHint';
+import { STYLE_PORTS_ATTRIBUTE } from '@noodl-utils/portStyleSource';
 
 /** The class CHR-009's row grid hangs off. One per drawn row, whatever produced its control. */
 export const PROPERTY_ROW_CLASS = 'property-panel-row';
@@ -163,6 +164,8 @@ export interface PropertyRowProps {
   look?: PropertyRowLook;
   /** FB-017 AC4 — the hintable ports this row speaks for; drawn as the marker `refreshHints` finds. */
   hintPorts?: string[];
+  /** P109 ISL-008 — the ports this row speaks for, marked so the canvas's "your CSS decides this" note can find it. */
+  stylePorts?: string[];
   /** The control: today an element built by a row class, tomorrow a widget component. */
   children: React.ReactNode;
 }
@@ -338,7 +341,7 @@ function lookOverrideLine(look: PropertyRowLook) {
 }
 
 /** One property row: the control, and everything the panel says about it. */
-export function PropertyRow({ description, capability, gate, look, hintPorts, children }: PropertyRowProps) {
+export function PropertyRow({ description, capability, gate, look, hintPorts, stylePorts, children }: PropertyRowProps) {
   let content: React.ReactNode = children;
 
   // Innermost first, so the nesting matches what `renderParams` built: describe → capability → gate.
@@ -355,6 +358,7 @@ export function PropertyRow({ description, capability, gate, look, hintPorts, ch
       // FB-017 AC4 — recorded whether or not a note is drawn; this is how `refreshHints` finds the
       // row again later, when the condition has changed but the panel has not re-rendered.
       {...(marked ? { [HINT_PORTS_ATTRIBUTE]: marked } : {})}
+      {...(stylePorts && stylePorts.length ? { [STYLE_PORTS_ATTRIBUTE]: stylePorts.join(',') } : {})}
       // P94 STY-003 — absent on a plain row, so "no Look" is styled by nothing at all.
       {...(look
         ? {

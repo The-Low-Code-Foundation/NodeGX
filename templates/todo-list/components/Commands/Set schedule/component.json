@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "529f9ffe-9f40-5184-89ab-94e17ea4e8a8",
+  "name": "Set schedule",
+  "path": "/Commands/Set schedule",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Changes when something repeats. Place it with Change set to daily, weekly or monthly (the timescale — its times are kept), add (the typed time, on every day picked) or remove (the time in Slot Key). A time that is not a time, or a weekly one with no day picked, is refused in words."
+}

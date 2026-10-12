@@ -1,0 +1,161 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f5e7cda7-9f68-575b-8d09-1a146cb8ec7c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "goalmetIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "goal",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "robotId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "run",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "world",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "goalmetFn",
+      "type": "JavaScriptFunction",
+      "label": "Goal met",
+      "parameters": {
+        "functionScript": "var { goalMet, worldOf } = Scripts.engine;\nvar w = worldOf(Inputs.world);\nvar run = Inputs.run && typeof Inputs.run === 'object' ? Inputs.run : { robotId: Inputs.robotId, handled: {}, said: 0 };\nvar g = goalMet(w, run, Inputs.program, Inputs.goal);\nOutputs.met = g.met;\nOutputs.missing = g.missing;\nOutputs.done = g.done;\nOutputs.total = g.total;\n",
+        "runOnChange-in-goal": false,
+        "runOnChange-in-program": false,
+        "runOnChange-in-robotId": false,
+        "runOnChange-in-run": false,
+        "runOnChange-in-world": false,
+        "uses": "engine.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-world",
+          "displayName": "world",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-run",
+          "displayName": "run",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robotId",
+          "displayName": "robotId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-program",
+          "displayName": "program",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-goal",
+          "displayName": "goal",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-met",
+          "displayName": "met",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-missing",
+          "displayName": "missing",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-total",
+          "displayName": "total",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "goalmetOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "met",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "missing",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "total",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

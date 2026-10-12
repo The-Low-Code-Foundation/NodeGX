@@ -146,6 +146,14 @@ describe('LAS-005 — render_report', () => {
     expect(images[0].data).toBe(PIXEL_PNG);
     // …and it is labelled, or the model cannot tell which viewport it is.
     expect(res.content.some((c) => c.type === 'text' && /Screenshot — desktop/.test(c.text ?? ''))).toBe(true);
+    // P109 ISL-021 AC6 — the answer says it saw the first frame only, and names the tool that presses and types
+    // (an agent read this four times and went looking for a browser to script).
+    const last = res.content[res.content.length - 1];
+    expect({ type: last.type, first: /FIRST FRAME only/.test(last.text ?? ''), names: /find_tools\(\{ query: "press" \}\).*drive_page/.test(last.text ?? '') }).toEqual({
+      type: 'text',
+      first: true,
+      names: true
+    });
   });
 
   it('reports a missing harness as an actionable error, not a crash', async () => {

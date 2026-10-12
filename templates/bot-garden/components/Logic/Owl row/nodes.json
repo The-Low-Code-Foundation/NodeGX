@@ -1,0 +1,247 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f57236aa-270c-5d38-8b82-f18b7fa21615",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "owlrowIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "answer",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hintKey",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "vars",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "voiced",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "waiting",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "written",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "owlrowFn",
+      "type": "JavaScriptFunction",
+      "label": "Owl row",
+      "parameters": {
+        "functionScript": "var { blocked, oliveFaithful, oliveListOf, oliveWords } = Scripts.olive;\nvar lang = String(Inputs.lang) === 'en' ? 'en' : 'fr';\nvar word = oliveWords(Inputs.words, lang);\nvar key = String(Inputs.hintKey || '');\nvar written = String(Inputs.written || '');\nvar name = String(Inputs.botName || 'Pip');\nvar keys = oliveListOf('hintKeys', lang);\nvar vars = Inputs.vars && typeof Inputs.vars === 'object' ? Inputs.vars : {};\nvar voiceSlots = { key: key, b: name };\nif (vars.n !== undefined && vars.n !== null && vars.n !== '') voiceSlots.n = String(vars.n);\nif (vars.w !== undefined && vars.w !== null && vars.w !== '') voiceSlots.w = String(vars.w);\nif (vars.t !== undefined && vars.t !== null && vars.t !== '') voiceSlots.t = String(vars.t);\nvar voiceable = key !== '' && keys.indexOf(key) !== -1;\nvar sig = voiceable ? JSON.stringify({ rung: 'voice-hint', slots: voiceSlots, lang: lang }) : '';\nvar v = Inputs.voiced && typeof Inputs.voiced === 'object' ? Inputs.voiced : null;\nvar mine = !!v && sig !== '' && String(v.seq) === sig;\nvar vText = v && typeof v.text === 'string' ? v.text.trim() : '';\nvar useVoiced = mine && v.ok === true && v.rung === 'voice-hint' && String(v.key) === key && (v.lang === undefined || v.lang === lang) && vText !== '' && !blocked(vText, lang) && oliveFaithful(vText, written, name);\nvar a = Inputs.answer && typeof Inputs.answer === 'object' ? Inputs.answer : null;\nvar waiting = Inputs.waiting === true;\nvar voicing = voiceable && !mine;\nvar thinking = waiting || voicing;\n// Resting is Olive not answering a question that was SENT: a slot the rules refused never left the page (the slot line says why).\nvar resting = !thinking && !!a && a.fallback === true && a.sent !== false;\nOutputs.text = useVoiced ? vText : written;\nOutputs.voiced = useVoiced;\nOutputs.thinking = thinking;\nOutputs.thinkingText = thinking ? word.oliveThinkingTag || '' : '';\nOutputs.resting = resting;\nOutputs.restingText = resting ? word.oliveRestingTag || '' : '';\nOutputs.voiceRequest = voiceable ? { rung: 'voice-hint', slots: voiceSlots, lang: lang, seq: sig } : null;\nOutputs.voiceSig = sig;\n",
+        "uses": "olive.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-hintKey",
+          "displayName": "hintKey",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-written",
+          "displayName": "written",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-vars",
+          "displayName": "vars",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-voiced",
+          "displayName": "voiced",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-answer",
+          "displayName": "answer",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-waiting",
+          "displayName": "waiting",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-voiced",
+          "displayName": "voiced",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-thinking",
+          "displayName": "thinking",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-thinkingText",
+          "displayName": "thinkingText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-resting",
+          "displayName": "resting",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-restingText",
+          "displayName": "restingText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-voiceRequest",
+          "displayName": "voiceRequest",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-voiceSig",
+          "displayName": "voiceSig",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "owlrowOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "resting",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "restingText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "text",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "thinking",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "thinkingText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "voiceRequest",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "voiceSig",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "voiced",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

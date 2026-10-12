@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ef2edc89-591d-56fb-8c66-d9deabc432c1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "MoveprojecIn",
+      "fromProperty": "rows",
+      "toId": "MoveprojecWrite",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "MoveprojecIn",
+      "fromProperty": "rowId",
+      "toId": "MoveprojecWrite",
+      "toProperty": "in-rowId"
+    },
+    {
+      "fromId": "MoveprojecIn",
+      "fromProperty": "toIndex",
+      "toId": "MoveprojecWrite",
+      "toProperty": "in-toIndex"
+    },
+    {
+      "fromId": "MoveprojecIn",
+      "fromProperty": "do",
+      "toId": "MoveprojecWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "MoveprojecWrite",
+      "fromProperty": "out-done",
+      "toId": "MoveprojecOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "MoveprojecWrite",
+      "fromProperty": "out-failed",
+      "toId": "MoveprojecProblem",
+      "toProperty": "do"
+    }
+  ]
+}

@@ -13,6 +13,7 @@ import type {
   NodeInstance,
   OutcomeToken
 } from '@noodl/types';
+import { fileFailureOf } from '@noodl/runtime/src/api/backends/fileRef';
 import { outcomeOutputs, reportOutcomes } from '@noodl/runtime/src/outcome';
 
 /** What `CloudStore.uploadFile`'s `error` callback is given, and what `setError` reads. */
@@ -205,8 +206,13 @@ const UploadFile: NodeDefinitionOptions = {
               contentType?: string;
               size?: number;
               target?: FileTarget;
+              filename?: string;
             }) => {
-              this._internal.cloudFile = new CloudFile(response);
+              // P107-C52 (P109 ISL-030, ruled "Keep the real name"): the name the file was uploaded as — the backend's
+              // when it reports one (Directus), else the name of the file this upload sent.
+              const sent = file && typeof (file as { name?: unknown }).name === 'string' ? (file as { name: string }).name : undefined;
+              const filename = response.filename !== undefined ? response.filename : sent;
+              this._internal.cloudFile = new CloudFile(filename !== undefined ? Object.assign({}, response, { filename }) : response);
               this.flagOutputDirty('cloudFile');
               // Last, after the value it is about.
               this.reportOutcome(outcome, 'done');
@@ -388,9 +394,10 @@ const UploadFile: NodeDefinitionOptions = {
     // and its reason cannot drift apart and `Completed` follows automatically. `tokens` is
     // optional so a direct call is still a real, complete failure — see `login.ts::setError`.
     setError(this: UploadFileInstance, err: UploadError | string, tokens?: OutcomeToken[]) {
-      this._internal.error = err.hasOwnProperty('error') ? (err as UploadError).error : err;
-      //use the error code. If there is none, use the http status
-      this._internal.errorStatus = (err as UploadError).code || (err as UploadError).status || 0;
+      // P107-C51 (P109 ISL-030, ruled "Send the real status"): the HTTP status, never a Parse code, and always a sentence
+      const failure = fileFailureOf(err);
+      this._internal.error = failure.message;
+      this._internal.errorStatus = failure.status;
       this.flagOutputDirty('error');
       this.flagOutputDirty('errorStatus');
 

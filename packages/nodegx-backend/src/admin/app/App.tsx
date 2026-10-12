@@ -315,9 +315,9 @@ function Topbar() {
 function DevOpenNotice() {
   return (
     <Notice kind="warn">
-      <b>This backend enforces nothing for your app. </b>
-      dev-open is enabled in security.json, so collection permissions and row ACLs are bypassed for every caller. It is only ever active on a
-      loopback bind — the service refuses to start dev-open while bound beyond localhost. Set "devOpen": false to test real enforcement.
+      <b>Dev-open is on. </b>
+      While it is, collection permissions and row ACLs do nothing for any caller of your app. Dev-open only runs on a backend bound to this machine. To
+      test your real rules, turn on Enforce my rules on this machine at the top of the <a href="#/permissions">Permissions page</a>.
     </Notice>
   );
 }

@@ -13,8 +13,12 @@
  * `test/nodes/signfileurl.test.ts` for the node-level half, which mocks
  * `CloudStore` instead of the wire.
  */
+// P109 ISL-029 (P107-C33): a project WITH a backend address — the wire now refuses a request that has none, and these
+// rows pinned `undefined/files/…`, the relative address that sent a backend-less project's requests to its own host.
 jest.mock('../noodl-runtime', () => ({
-  instance: { getMetaData: () => undefined }
+  instance: {
+    getMetaData: (key: string) => (key === 'cloudservices' ? { endpoint: 'http://backend.test', appId: 'app' } : undefined)
+  }
 }));
 
 import CloudStore = require('../src/api/cloudstore');
@@ -69,7 +73,7 @@ describe('CloudStore — browser (XHR) path', () => {
     });
 
     const xhr = FakeXHR.instances[0];
-    expect(xhr.opened).toBe('POST undefined/files/photo.png');
+    expect(xhr.opened).toBe('POST http://backend.test/files/photo.png');
     expect(xhr.headers['x-nodegx-file-private']).toBe('true');
   });
 
@@ -105,7 +109,7 @@ describe('CloudStore — browser (XHR) path', () => {
     });
 
     const xhr = FakeXHR.instances[0];
-    expect(xhr.opened).toBe('GET undefined/files/abc123_photo.png/sign');
+    expect(xhr.opened).toBe('GET http://backend.test/files/abc123_photo.png/sign');
 
     // Drive the fake XHR's completion the way a real one would.
     xhr.status = 200;

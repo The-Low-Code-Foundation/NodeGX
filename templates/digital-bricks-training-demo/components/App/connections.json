@@ -110,6 +110,18 @@
       "fromProperty": "jsonDossier",
       "toId": "app_ns_dossier",
       "toProperty": "Bundle"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "contentLanguage",
+      "toId": "app_ns_privacy",
+      "toProperty": "Language"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "jsonPrivacy",
+      "toId": "app_ns_privacy",
+      "toProperty": "Bundle"
     }
   ]
 }

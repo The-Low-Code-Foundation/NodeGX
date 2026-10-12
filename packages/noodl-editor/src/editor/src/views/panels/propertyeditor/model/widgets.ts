@@ -59,6 +59,7 @@ export type WidgetId =
   | 'component'
   | 'sourceCode'
   | 'stringList'
+  | 'scriptUses'
   | 'resizing'
   | 'variable'
   | 'curve'
@@ -126,6 +127,9 @@ export const WIDGET_RULES: readonly { widget: WidgetId; test: (type: EditType) =
   { widget: 'textStyle', test: named('textStyle') },
   { widget: 'component', test: named('component') },
   { widget: 'sourceCode', test: named('source') },
+  // P109 ISL-005 — a Function's Uses: a `stringlist` in storage, a script-file picker in the panel.
+  // Before `stringList`, which would otherwise take it by its type name.
+  { widget: 'scriptUses', test: (t) => typeof t === 'object' && t.editorType === 'script-uses' },
   { widget: 'stringList', test: named('stringlist') },
   { widget: 'resizing', test: named('resizing') },
   { widget: 'variable', test: named('variable') },

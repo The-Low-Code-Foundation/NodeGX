@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "24371863-2ac8-56ef-8d77-622e9a6eb3b1",
+  "name": "Move form",
+  "path": "/Projects/Move form",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A project’s move as a form: what it is, who it waits on (empty when it is yours), and a deadline from the calendar. Save says the three; Cancel puts it away. Used for Done, Change the move, Add a task and the question after a project’s task is closed."
+}

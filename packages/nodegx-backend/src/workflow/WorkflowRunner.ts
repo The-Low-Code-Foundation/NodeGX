@@ -30,6 +30,7 @@ import * as path from 'path';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import { boundText, boundValue, RecordBounds } from '../execution/record-bounds';
 import { logger } from '../ops/logger';
+import { bundleWiringProblems } from './bundleWiring';
 import { FunctionRuns } from './FunctionRuns';
 // SB-016 — the endpoint predicate, shared with the deploy interlock so the gate
 // and the runner cannot disagree about what a function is.
@@ -634,6 +635,9 @@ export class WorkflowRunner {
       try {
         const content = await fs.readFile(path.join(this.workflowsPath, file), 'utf-8');
         const exportData = JSON.parse(content);
+        // P109 ISL-042: a bundle already on disk still loads, as it always did, but what in it reaches nothing is said.
+        const wiring = bundleWiringProblems(exportData);
+        for (const problem of [...wiring.refusals, ...wiring.warnings]) safeLog(`Workflow ${workflowName}: ${problem}`);
         this.loadedWorkflows.set(workflowName, exportData);
         this.reportKitLoad(workflowName, await this.cloudRunner.load(exportData));
         safeLog(`Loaded workflow: ${workflowName}`);
@@ -931,6 +935,22 @@ export class WorkflowRunner {
       }
     }
     return null;
+  }
+
+  /**
+   * P109 ISL-042 (P96-FED005-R10): the description its author wrote on the cloud component, as the editor's exporter
+   * now carries it into the bundle. `undefined` for a function with none, or one this runner has not loaded.
+   */
+  getFunctionDescription(functionName: string): string | undefined {
+    const fullName = `${CLOUD_COMPONENT_PREFIX}${functionName}`;
+    for (const exportData of this.loadedWorkflows.values()) {
+      const components = (exportData.components as { name: string; description?: unknown }[] | undefined) || [];
+      for (const component of components) {
+        if (component.name !== fullName) continue;
+        if (typeof component.description === 'string' && component.description.trim()) return component.description.trim();
+      }
+    }
+    return undefined;
   }
 
   hasFunction(functionName: string): boolean {

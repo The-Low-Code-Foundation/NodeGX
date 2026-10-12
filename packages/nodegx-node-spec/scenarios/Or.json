@@ -1,0 +1,32 @@
+[
+  {
+    "name": "no params: the first settle publishes false — unlike And, which publishes nothing",
+    "because": "or.ts :52-54 reads `[].some(isTrue)` live; connectInput's read of the getter",
+    "params": {},
+    "steps": ["settle"]
+  },
+  {
+    "name": "false, true → true; the true one goes false → false",
+    "because": "or.ts :52-54",
+    "params": {},
+    "steps": [{ "set": "input 0", "value": false }, { "set": "input 1", "value": true }, "settle", { "set": "input 1", "value": false }, "settle"]
+  },
+  {
+    "name": "a hole counts as false: input 2 alone true → true, then false → false",
+    "because": "or.ts :8-11 — `some` skips holes, and a skipped hole is not true",
+    "params": {},
+    "steps": [{ "set": "input 2", "value": true }, "settle", { "set": "input 2", "value": false }, "settle"]
+  },
+  {
+    "name": "coercion `value ? true : false`: 'false' is true, 0 is false",
+    "because": "or.ts :65-67",
+    "params": {},
+    "steps": [{ "set": "input 0", "value": "false" }, "settle", { "set": "input 0", "value": 0 }, "settle"]
+  },
+  {
+    "name": "numbered inputs as parameters, in the caller's order",
+    "because": "nodescope.ts applies parameters in Object.keys order",
+    "params": { "input 1": true, "input 0": 0 },
+    "steps": ["settle"]
+  }
+]

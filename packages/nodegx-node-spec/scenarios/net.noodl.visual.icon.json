@@ -1,0 +1,681 @@
+[
+  {
+    "name": "a fresh icon on the page: Did Mount in the first frame, Child Index 0, This itself — nothing else",
+    "because": "react-component-node.ts :982-990 (Did Mount at the commit), :1428-1444 (Child Index, This); icon.ts declares no output of its own",
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off: Will Unmount; on: Did Mount; the same value again: nothing; a truthy non-boolean is on",
+    "because": "react-component-node.ts :2302-2321 `!!value`, the frame's end paints it (:1675-1689); :993-1003 Will Unmount",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": 0
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": "yes"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "placed off the page: nothing in the first frame; Mounted on: Did Mount",
+    "because": "the params are set before the first render; a node that does not want to be mounted renders nothing",
+    "params": {
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a person's pointer, finger and keyboard on the icon raise nothing — every act, twice",
+    "because": "Icon.tsx :44-48 wires no handler; a `<div>` is not a focusable area",
+    "steps": [
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "act": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted written off and an act in the same frame: the act's paint takes the element off — Will Unmount; on and an act: Did Mount — every act, both ways",
+    "because": "the face paints before the act (node-spec-target.ts PERSON), as a browser paints before a person can act",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off and on in one frame: nothing (the frame's end paints what the node wants, which did not change); off, on, off with an act between: Will Unmount at the act's paint, Did Mount at the frame's end",
+    "because": "react-component-node.ts :2310-2320 writes `wantsToBeMounted`; only a paint commits it",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an act between two Mounted writes in one frame paints the first: off, an act, on — Will Unmount at the act's paint and Did Mount at the frame's end; from off, on, an act, off — Did Mount at the act's paint and Will Unmount at the frame's end — every act",
+    "because": "the face paints before the act (node-spec-target.ts PERSON); the frame's end paints again (react-component-node.ts :1675-1689) — a write after the act in the same frame is what tells the act's paint from the frame end's",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Scroll Into View, Scroll Align and every look input change nothing on the wire",
+    "because": "react-component-node.ts :1380-1395 scrolls; the look inputs are written to the style or the component's props (R10)",
+    "steps": [
+      "settle",
+      {
+        "signal": "scrollIntoView"
+      },
+      {
+        "set": "scrollIntoViewAlign",
+        "value": "center"
+      },
+      {
+        "signal": "scrollIntoView"
+      },
+      "settle",
+      {
+        "set": "iconSize",
+        "value": 32
+      },
+      {
+        "set": "iconColor",
+        "value": "#ff0000"
+      },
+      {
+        "set": "iconSourceType",
+        "value": "image"
+      },
+      {
+        "set": "iconImageSource",
+        "value": "https://example.com/i.png"
+      },
+      "settle",
+      {
+        "set": "iconSourceType",
+        "value": "icon"
+      },
+      {
+        "set": "opacity",
+        "value": 0.5
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Margin Top wired null: the style is removed, as for undefined — nothing moves on the wire and the node keeps working",
+    "because": "P107-C62, ruled 2026-10-05 \"Remove the style\", fixed in P109 ISL-026: the `inputCss` units setter treats null as empty; it once read `.value` of null and threw (react-component-node.ts, every node with margins)",
+    "steps": [
+      "settle",
+      {
+        "set": "marginTop",
+        "value": null
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Pos X wired undefined: back to 0 — nothing moves on the wire and the node keeps working",
+    "because": "P107-C63, ruled 2026-10-05 \"Use the default\", fixed in P109 ISL-026: an empty Placement value stores nothing (position and rotation 0, origin 50%); the setters once read `.value` of it and threw (node-shared-port-definitions.ts, every node with Placement inputs)",
+    "steps": [
+      "settle",
+      {
+        "set": "transformX"
+      },
+      "settle"
+    ]
+  }
+]

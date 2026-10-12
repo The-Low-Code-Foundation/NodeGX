@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6f452676-a190-5f95-8e20-0f3198daefb8",
+  "name": "Olive held",
+  "path": "/Logic/Olive held",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The rungs this computer’s exam failed, in words, for Skills. Runs when an input changes; Ran after each run."
+}

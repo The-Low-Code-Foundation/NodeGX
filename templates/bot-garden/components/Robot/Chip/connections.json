@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "673eed2f-920a-52aa-8c3f-65b2bbbc5e1e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cpIn",
+      "fromProperty": "label",
+      "toId": "cpText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cpIn",
+      "fromProperty": "selected",
+      "toId": "cpIsOn",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "cpIsOn",
+      "fromProperty": "ontrue",
+      "toId": "cpStates",
+      "toProperty": "to-on"
+    },
+    {
+      "fromId": "cpIsOn",
+      "fromProperty": "onfalse",
+      "toId": "cpStates",
+      "toProperty": "to-off"
+    },
+    {
+      "fromId": "cpStates",
+      "fromProperty": "bg",
+      "toId": "cpPill",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "cpStates",
+      "fromProperty": "fg",
+      "toId": "cpText",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "cpIn",
+      "fromProperty": "locked",
+      "toId": "cpIsLocked",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "cpIsLocked",
+      "fromProperty": "ontrue",
+      "toId": "cpLock",
+      "toProperty": "to-locked"
+    },
+    {
+      "fromId": "cpIsLocked",
+      "fromProperty": "onfalse",
+      "toId": "cpLock",
+      "toProperty": "to-open"
+    },
+    {
+      "fromId": "cpLock",
+      "fromProperty": "opacity",
+      "toId": "cpPill",
+      "toProperty": "opacity"
+    },
+    {
+      "fromId": "cpIn",
+      "fromProperty": "locked",
+      "toId": "cpGate",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "cpPill",
+      "fromProperty": "onClick",
+      "toId": "cpGate",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "cpGate",
+      "fromProperty": "onfalse",
+      "toId": "cpOut",
+      "toProperty": "picked"
+    },
+    {
+      "fromId": "cpIn",
+      "fromProperty": "id",
+      "toId": "cpOut",
+      "toProperty": "id"
+    }
+  ]
+}

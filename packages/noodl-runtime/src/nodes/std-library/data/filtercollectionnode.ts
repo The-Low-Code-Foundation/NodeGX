@@ -4,6 +4,7 @@ import Node = require('../../../node');
 import Collection = require('../../../collection');
 import Model = require('../../../model');
 import { outcomeOutputs, reportOutcomes } from '../../../outcome';
+import { notAList } from './itemsinput';
 import type {
   CollectionLike,
   EditorConnectionLike,
@@ -19,7 +20,7 @@ import type {
 
 
 /** The comparison operators {@link applyFilter} understands, as authored port suffixes. */
-type FilterOperator = 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'regex';
+type FilterOperator = 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'regex' | 'in' | 'nin';
 
 /**
  * One property's test, keyed by `'$' + operator`. `$case` is not an operator — it is the
@@ -34,6 +35,22 @@ type Filter = Record<string, PropertyFilter>;
 type SortSpec = Record<string, 1 | -1>;
 
 /**
+ * P109-S8-ARRAYFILTERPATH (ruled 2026-10-05, "Yes, exact name first"): the value a filter key names in a row. A row that
+ * HAS a field with that exact name gives it, dots and all; otherwise a dotted key is a path into nested objects
+ * (`owner.id` → `item.owner.id`), and a step that is not an object ends it as `undefined` (absent, as for any missing
+ * field). Measured before the ruling: 0 of 253 filter keys in 55 projects contain a dot, so no list reads differently.
+ */
+function fieldOf(item: Record<string, unknown>, key: string): unknown {
+  if (Object.prototype.hasOwnProperty.call(item, key) || !key.includes('.')) return item[key];
+  let at: unknown = item;
+  for (const step of key.split('.')) {
+    if (at === null || typeof at !== 'object') return undefined;
+    at = (at as Record<string, unknown>)[step];
+  }
+  return at;
+}
+
+/**
  * Tests one record's raw `data` against `filter`.
  *
  * `$neq` is checked first and is the only operator that tolerates a missing property —
@@ -44,20 +61,25 @@ type SortSpec = Record<string, 1 | -1>;
 function applyFilter(item: Record<string, unknown>, filter: Filter): boolean {
   for (const key in filter) {
     const op = filter[key];
+    const got = fieldOf(item, key);
 
     //check neq first, it's the only operation where the key can be undefined
     if (op['$neq'] !== undefined) {
-      if (!(item[key] != op['$neq'])) return false;
-    } else if (item[key] === undefined) return false;
+      if (!(got != op['$neq'])) return false;
+    } else if (op['$nin'] !== undefined) {
+      // P109 (IW-010's "is in this list" gap): like `$neq`, a row without the property is not in the list.
+      if (listOf(op['$nin']).some((m) => got == m)) return false;
+    } else if (got === undefined) return false;
     // The key does not exist, always return false
-    else if (op['$eq'] !== undefined && !(item[key] == op['$eq'])) return false;
-    else if (op['$gt'] !== undefined && !(item[key] > op['$gt'])) return false;
-    else if (op['$lt'] !== undefined && !(item[key] < op['$lt'])) return false;
-    else if (op['$gte'] !== undefined && !(item[key] >= op['$gte'])) return false;
-    else if (op['$lte'] !== undefined && !(item[key] <= op['$lte'])) return false;
+    else if (op['$eq'] !== undefined && !(got == op['$eq'])) return false;
+    else if (op['$gt'] !== undefined && !(got > op['$gt'])) return false;
+    else if (op['$lt'] !== undefined && !(got < op['$lt'])) return false;
+    else if (op['$gte'] !== undefined && !(got >= op['$gte'])) return false;
+    else if (op['$lte'] !== undefined && !(got <= op['$lte'])) return false;
+    else if (op['$in'] !== undefined && !listOf(op['$in']).some((m) => got == m)) return false;
     else if (op['$regex'] !== undefined) {
       // Test if string matches regex
-      const a = item[key] + ''; // Convert to string
+      const a = got + ''; // Convert to string
       const regex = new RegExp(op['$regex'] as string, op['$case'] !== true ? 'i' : undefined);
 
       if (!regex.test(a)) return false;
@@ -65,6 +87,21 @@ function applyFilter(item: Record<string, unknown>, filter: Filter): boolean {
   }
 
   return true;
+}
+
+/**
+ * The list an `$in` / `$nin` test compares against, from whatever the Value port holds.
+ *
+ * Wired, it is usually an Array (a `Collection`; its records count by id, so "rows whose `owner` is one of these
+ * records" works) or a plain JS array. Typed into the property panel, it is text: `"fern, moss"` is two values, each
+ * trimmed, an empty piece dropped. Any other single value is a list of one. Members compare loosely (`==`), like
+ * `$eq`, so the typed `"2"` matches the number 2.
+ */
+function listOf(value: unknown): unknown[] {
+  if (value instanceof Collection) return value.items.map((m: ModelLike) => (m instanceof Model ? m.getId() : m));
+  if (Array.isArray(value)) return value.map((m) => (m instanceof Model ? m.getId() : m));
+  if (typeof value === 'string') return value.split(',').map((v) => v.trim()).filter((v) => v !== '');
+  return [value];
 }
 
 /**
@@ -101,6 +138,8 @@ function sorter(this: SortSpec, a: ModelLike | Record<string, unknown>, b: Model
 interface FilterCollectionInstance extends NodeInstance {
   _internal: {
     collection?: CollectionLike;
+    /** P107-C10: why the value on Items is not a list (itemsinput.ts), while it stands. */
+    notAList?: string;
     /** Rebuilt from scratch on every run — a fresh collection, never mutated in place. */
     filteredCollection?: CollectionLike;
     enabled?: boolean;
@@ -339,8 +378,10 @@ const FilterCollectionNode: NodeDefinitionOptions = {
     },
     bindCollection: function (this: FilterCollectionInstance, collection: CollectionLike) {
       this.unbindCurrentCollection();
-      this._internal.collection = collection;
-      collection && collection.on('change', this._internal.collectionChangedCallback);
+      // P107-C10: what is not a list binds nothing, and the next run says so (itemsinput.ts)
+      this._internal.notAList = notAList(collection);
+      this._internal.collection = this._internal.notAList === undefined ? collection : undefined;
+      if (this._internal.collection) this._internal.collection.on('change', this._internal.collectionChangedCallback);
     },
     _onNodeDeleted: function (this: FilterCollectionInstance) {
       Node.prototype._onNodeDeleted.call(this);
@@ -463,6 +504,12 @@ const FilterCollectionNode: NodeDefinitionOptions = {
         this._internal.pendingFilterOutcomes = [];
         const requested = tokens.length > 0;
 
+        if (this._internal.notAList !== undefined) {
+          // P107-C10: refused, every time a run is due — a press gets its Failure, a value-path run pulses it once
+          this.reportFailure('array-filter/not-a-list', this._internal.notAList, undefined, tokens);
+          return;
+        }
+
         if (!this._internal.collection) {
           // Silent unless an author asked. Without the `requested` test this fires while the
           // graph boots, every time an `enabled` default or a filter setting lands before the
@@ -486,7 +533,7 @@ const FilterCollectionNode: NodeDefinitionOptions = {
           const filter = this.getFilter();
           const sort = this.getSort();
           try {
-            if (filter) filtered = filtered.filter((m) => applyFilter(m.data, filter));
+            if (filter) filtered = filtered.filter((m) => applyFilter(m instanceof Model ? m.data : (m as unknown as Record<string, unknown>), filter)); // P107 C59: a record's data, any other row as it is (the sorter's rule); `null` still throws into the catch
             if (sort) filtered.sort(sorter.bind(sort));
           } catch (e) {
             /**
@@ -615,7 +662,9 @@ function updatePorts(
     string: [
       { value: 'eq', label: 'Equals' },
       { value: 'neq', label: 'Not Equals' },
-      { value: 'regex', label: 'Matches RegEx' }
+      { value: 'regex', label: 'Matches RegEx' },
+      { value: 'in', label: 'Is one of' },
+      { value: 'nin', label: 'Is not one of' }
     ],
     boolean: [
       { value: 'eq', label: 'Equals' },
@@ -627,7 +676,9 @@ function updatePorts(
       { value: 'lt', label: 'Less than' },
       { value: 'gt', label: 'Greater than' },
       { value: 'gte', label: 'Greater than or equal' },
-      { value: 'lte', label: 'Less than or equal' }
+      { value: 'lte', label: 'Less than or equal' },
+      { value: 'in', label: 'Is one of' },
+      { value: 'nin', label: 'Is not one of' }
     ]
   };
 
@@ -678,11 +729,13 @@ function updatePorts(
         });
       }
 
+      // `Is one of` takes a list: wire an Array (any type may arrive, so `*`) or type "a, b, c".
+      const listOp = parameters['filterFilterOp-' + f] === 'in' || parameters['filterFilterOp-' + f] === 'nin';
       ports.push({
-        type: type || 'string',
+        type: listOp ? '*' : type || 'string',
         plug: 'input',
         group: f + ' filter',
-        displayName: 'Value',
+        displayName: listOp ? 'Values' : 'Value',
         editorName: f + ' Filter Value',
         name: 'filterFilterValue-' + f
       });

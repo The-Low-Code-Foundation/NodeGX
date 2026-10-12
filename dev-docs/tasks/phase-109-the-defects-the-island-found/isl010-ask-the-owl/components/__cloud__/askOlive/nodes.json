@@ -1,0 +1,106 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_askolive",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "askOlive(thing)",
+      "parameters": {
+        "allowNoAuth": true,
+        "params": "thing"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "fence",
+      "type": "JavaScriptFunction",
+      "label": "the fence: a choice from a list, a fixed sentence",
+      "parameters": {
+        "functionScript": "// The fence. The page sends a CHOICE; the prompt is written here, from a fixed sentence,\n// and the answer can only be a word from COLOURS (the schema below is an enum).\nconst THINGS = ['the sky on a clear day', 'grass', 'a ripe tomato', 'snow'];\nconst COLOURS = ['red', 'blue', 'green', 'white', 'yellow', 'black'];\nif (THINGS.indexOf(Inputs.thing) === -1) {\n  Outputs.code = 'not_on_the_list';\n  Outputs.refused();\n  return;\n}\nOutputs.prompt = 'What colour is ' + Inputs.thing + '?';\nOutputs.schema = {\n  type: 'object',\n  properties: { word: { type: 'string', enum: COLOURS } },\n  required: ['word'],\n  additionalProperties: false\n};\nOutputs.ask();",
+        "runOnChange-in-thing": false
+      },
+      "ports": [
+        {
+          "name": "in-thing",
+          "displayName": "thing",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-prompt",
+          "displayName": "prompt",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-schema",
+          "displayName": "schema",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-code",
+          "displayName": "code",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ask",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "model",
+      "type": "noodl.cloud.modelrequest",
+      "label": "Olive, on this computer",
+      "parameters": {
+        "provider": "openai-compatible",
+        "model": "hf.co/unsloth/Qwen3.5-0.8B-GGUF:Q4_K_M",
+        "baseUrl": "http://127.0.0.1:11434",
+        "apiKeySecret": "OLIVE_KEY",
+        "effort": "none",
+        "maxTokens": 64,
+        "timeoutMs": 20000,
+        "instructions": "You are Olive, a friendly owl in a children's game. Answer with one colour word."
+      },
+      "x": 40,
+      "y": 300
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "the word",
+      "parameters": {
+        "params": "answer"
+      },
+      "x": 40,
+      "y": 440
+    },
+    {
+      "id": "resErr",
+      "type": "noodl.cloud.response",
+      "label": "why there is no word",
+      "parameters": {
+        "params": "errorCode"
+      },
+      "x": 300,
+      "y": 440
+    }
+  ]
+}

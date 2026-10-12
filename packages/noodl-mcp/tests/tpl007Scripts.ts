@@ -55,6 +55,8 @@
  * @module noodl-mcp/tests/tpl007Scripts
  */
 import { HANGAR_SHELF, LEVELS, LOOK_NAMES, WORD_KEYS } from './tpl007Curriculum';
+import { FRENCH_TENSES, FRENCH_VERBS, PERSONS_FR, SUBJECTS, TOPICS } from './tpl007Subjects';
+import { MOON } from './tpl007Moon';
 
 /** How far one correct answer moves a rocket, before the speed factor. Eight fluent answers reach the planet. */
 export const RACE_STEP = 1 / 8;
@@ -105,7 +107,10 @@ export const MAX_PROFILES = 6;
  * RKT-010 — what earns a star, in one table the scripts and the gate both read, so play-test feedback is a one-line change.
  * Speed pays nothing here: it already moves the rocket.
  */
-export const STAR_RULE = { right: 1, finish: 5, level: 10, best: 5 } as const;
+export const STAR_RULE = { right: 1, finish: 5, level: 10, best: 5, item: 2, list: 25 } as const;
+
+/** P113 REV-004: an item of a list counts as learned after this many right answers in a row (asked on separate turns). */
+export const ITEM_LEARNED_AT = 2;
 
 /**
  * The stars live inside the model, so saving it (a replace) can never count them twice. A model saved before RKT-010 has
@@ -235,9 +240,12 @@ function normalise(v) {
   if (/^-?\\d+(\\.\\d+)?$/.test(num)) return String(Number(num));
   var big = s.replace(/[\\s.,']/g, '');
   if (/^-?\\d+$/.test(big) && /\\d[\\s.,']\\d{3}/.test(s)) return String(Number(big));
-  return s.replace(/\\s+/g, ' ');
+  // P113: words. A curly apostrophe is an apostrophe, a hyphen is a space (forty-seven, forty seven), a full stop at the end says nothing.
+  return s.replace(/[\u2019\u02bc]/g, "'").replace(/-/g, ' ').replace(/\\.$/, '').replace(/\\s+/g, ' ').trim();
 }
 function sameAnswer(a, b) { return normalise(a) === normalise(b); }
+/** P113 REV-001: the subject a skill is filed under. The maths and typing skills carry none; their strand says. */
+function subjectOf(sk) { return sk && sk.subject ? String(sk.subject) : sk && sk.strand === 'typing' ? 'typing' : 'maths'; }
 
 var EN_ONES = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
 var EN_TENS = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
@@ -699,9 +707,142 @@ function customQ(items) {
   if (opts.length && opts.indexOf(String(it.a)) === -1) opts.push(String(it.a));
   return { prompt: String(it.q || ''), answer: String(it.a === undefined ? '' : it.a), options: opts, typedOnly: !opts.length };
 }
-function generate(skill, lang, layout, wordLists) {
+// ── P113 REV-003: lists and conjugation ────────────────────────────────────
+var FRENCH_VERBS = ${JSON.stringify(FRENCH_VERBS)};
+var FRENCH_TENSES = ${JSON.stringify(FRENCH_TENSES)};
+var PERSONS_FR = ${JSON.stringify(PERSONS_FR)};
+function itemText(v, lang) { return typeof v === 'string' ? v : pickText(v, lang); }
+function itemKeyOf(it, i) { if (it && it.id) return String(it.id); var q = it ? (typeof it.q === 'string' ? it.q : (it.q && (it.q.fr || it.q.en))) : ''; return String(q || i).slice(0, 48); }
+/** The accented letters a set of answers uses, for the pad's strip. */
+function accentKeys(texts) { var out = []; for (var i = 0; i < texts.length; i++) { var t = String(texts[i] || '').toLowerCase(); for (var k = 0; k < t.length; k++) { var ch = t.charAt(k); if (ch !== ch.toUpperCase() && !/[a-z]/.test(ch) && out.indexOf(ch) === -1) out.push(ch); } } return out.sort().join(''); }
+/**
+ * A bank of items (a shipped list, or a person's own). An item not yet learned is asked more often than one that is, the item
+ * just asked waits a turn, and the wrong buttons are the OTHER items' answers, so the distractors are the real confusions.
+ */
+function listQ(skill, p, lang, model) {
+  var items = Array.isArray(p.items) && p.items.length ? p.items : [{ q: '2 + 2 = ?', a: '4' }];
+  var st = model && model.skills ? model.skills[skill.id] : null;
+  var mem = st && st.items ? st.items : {};
+  var lastItem = st && st.lastItem ? String(st.lastItem) : '';
+  var keys = [], weights = [], total = 0;
+  for (var i = 0; i < items.length; i++) {
+    var key = itemKeyOf(items[i], i); keys.push(key);
+    var m = mem[key];
+    var w = !m ? 1.2 : m.ok ? 0.35 : 1;
+    if (key === lastItem && items.length > 1) w = 0;
+    weights.push(w); total += w;
+  }
+  var roll = Math.random() * total, acc = 0, idx = items.length - 1;
+  for (var j = 0; j < items.length; j++) { acc += weights[j]; if (roll <= acc) { idx = j; break; } }
+  var it = items[idx];
+  var reverse = (p.both === true || it.both === true) && Math.random() < 0.5;
+  var qText = itemText(reverse ? it.a : it.q, lang), answer = itemText(reverse ? it.q : it.a, lang);
+  var lead = itemText(reverse ? (p.askBack || p.ask) : p.ask, lang);
+  var prompt = lead ? lead + ' ' + qText : qText;
+  // The buttons: the item's own, cut to the answer and three others when it names more; or, in a list of four or more, the
+  // OTHER items' answers (so the distractors are the real confusions). A shorter list with no buttons of its own is typed.
+  var opts = [];
+  if (!reverse && Array.isArray(it.opts) && it.opts.length) {
+    var own = [], rest = [];
+    for (var o = 0; o < it.opts.length; o++) { var ot = itemText(it.opts[o], lang); if (normalise(ot) === normalise(answer)) own.push(ot); else rest.push(ot); }
+    opts = (own.length ? [own[0]] : [answer]).concat(shuffle(rest).slice(0, 3));
+  } else if (items.length >= 4) {
+    var pool = [];
+    for (var k = 0; k < items.length; k++) { if (k === idx) continue; var cand = itemText(reverse ? items[k].q : items[k].a, lang); if (normalise(cand) !== normalise(answer) && pool.indexOf(cand) === -1) pool.push(cand); }
+    opts = [answer].concat(shuffle(pool).slice(0, 3));
+  }
+  if (opts.length < 2) opts = [];
+  var all = []; for (var a2 = 0; a2 < items.length; a2++) { all.push(itemText(items[a2].a, lang)); if (p.both || items[a2].both) all.push(itemText(items[a2].q, lang)); }
+  return { prompt: prompt, answer: answer, options: opts, typedOnly: !opts.length, worked: itemText(it.note, lang), itemKey: keys[idx], itemCount: items.length, padKeys: accentKeys(all) };
+}
+function verbByName(name) { for (var i = 0; i < FRENCH_VERBS.length; i++) if (FRENCH_VERBS[i].inf === name) return FRENCH_VERBS[i]; return FRENCH_VERBS[0]; }
+function tenseById(id) { for (var i = 0; i < FRENCH_TENSES.length; i++) if (FRENCH_TENSES[i].id === id) return FRENCH_TENSES[i]; return FRENCH_TENSES[0]; }
+/** The participe agrees with a plural subject when the auxiliary is être (nous sommes allés). Subjects are masculine here. */
+function ppAgree(v, person) { return v.aux === 'être' && person >= 3 ? v.pp + 's' : v.pp; }
+function formsOf(v, tenseId) {
+  var FUT = ['ai', 'as', 'a', 'ons', 'ez', 'ont'], COND = ['ais', 'ais', 'ait', 'ions', 'iez', 'aient'];
+  var aux = verbByName(v.aux), out = [];
+  for (var i = 0; i < 6; i++) {
+    if (tenseId === 'imparfait') out.push(v.imp[i]);
+    else if (tenseId === 'futur') out.push(v.fut + FUT[i]);
+    else if (tenseId === 'conditionnel') out.push(v.fut + COND[i]);
+    else if (tenseId === 'passeSimple') out.push(v.ps[i]);
+    else if (tenseId === 'subjonctif') out.push(v.subj[i]);
+    else if (tenseId === 'passeCompose') out.push(aux.pres[i] + ' ' + ppAgree(v, i));
+    else if (tenseId === 'plusQueParfait') out.push(aux.imp[i] + ' ' + ppAgree(v, i));
+    else if (tenseId === 'imperatif') out.push(v.imper ? (i === 1 ? v.imper[0] : i === 3 ? v.imper[1] : i === 4 ? v.imper[2] : '') : '');
+    else out.push(v.pres[i]);
+  }
+  return out;
+}
+function elide(pronoun, form) { return pronoun === 'je' && /^[aeiouéèêâîôûh]/i.test(form) ? 'j’' : pronoun + ' '; }
+function subjectWord(tenseId, person, form) {
+  var pr = PERSONS_FR[person];
+  if (tenseId === 'imperatif') return '(' + pr + ') ';
+  if (tenseId === 'subjonctif') return person === 2 || person === 5 ? 'qu’' + pr + ' ' : 'que ' + elide(pr, form);
+  return elide(pr, form);
+}
+function conjugateQ(p, lang) {
+  var verbs = Array.isArray(p.verbs) && p.verbs.length ? p.verbs : ['chanter'];
+  var tenses = Array.isArray(p.tenses) && p.tenses.length ? p.tenses : ['present'];
+  var v = verbByName(pickOne(verbs)), t = tenseById(pickOne(tenses));
+  var persons = Array.isArray(p.persons) && p.persons.length ? p.persons : [0, 1, 2, 3, 4, 5];
+  if (t.id === 'imperatif') { persons = persons.filter(function (x) { return x === 1 || x === 3 || x === 4; }); if (!persons.length) persons = [1, 3, 4]; }
+  var forms = formsOf(v, t.id);
+  var person = pickOne(persons);
+  if (!forms[person]) { t = tenseById('present'); forms = formsOf(v, 'present'); person = pickOne([0, 1, 2, 3, 4, 5]); }
+  var answer = forms[person];
+  var au = /^[aeiouéè]/.test(t.name) ? 'à l’' : 'au ';
+  var prompt = (isFr(lang) ? 'Conjugue « ' + v.inf + ' » ' + au + t.name + ' : ' : 'Conjugate « ' + v.inf + ' » in the ' + t.name + ': ') + subjectWord(t.id, person, answer) + '___';
+  // The wrong buttons are the same tense's other persons: the slip a test catches.
+  var opts = [answer];
+  var others = shuffle(forms.filter(function (f, i) { return f && i !== person && normalise(f) !== normalise(answer); }));
+  for (var i = 0; i < others.length && opts.length < 4; i++) if (opts.indexOf(others[i]) === -1) opts.push(others[i]);
+  // The impératif has three forms: the fourth button comes from another tense, this person first.
+  var extra = formsOf(v, t.id === 'present' ? 'imparfait' : 'present');
+  if (extra[person] && opts.length < 4 && opts.indexOf(extra[person]) === -1) opts.push(extra[person]);
+  for (var e = 0; e < 6 && opts.length < 4; e++) if (extra[e] && opts.indexOf(extra[e]) === -1) opts.push(extra[e]);
+  // The correction is the whole paradigm, compact: a compound tense says its auxiliary six times and its participle once, and the
+  // subjonctif says « que » once — so the longest correction still fits the stage (RKT-003 foldWorst).
+  var compound = t.id === 'passeCompose' || t.id === 'plusQueParfait';
+  var parts = [];
+  for (var k = 0; k < 6; k++) {
+    if (!forms[k]) continue;
+    var who = t.id === 'imperatif' ? '(' + PERSONS_FR[k] + ') ' : elide(PERSONS_FR[k], forms[k]);
+    parts.push(compound ? who + forms[k].split(' ')[0] : who + forms[k]);
+  }
+  var worked = v.inf + ', ' + t.name + (isFr(lang) ? ' : ' : ': ') + (t.id === 'subjonctif' ? 'que ' : '') + parts.join(compound ? ' / ' : ', ') + (compound ? ' + ' + forms[3].split(' ').slice(1).join(' ') : '');
+  var all = []; for (var a = 0; a < FRENCH_VERBS.length; a++) { var fs = formsOf(FRENCH_VERBS[a], t.id); for (var b = 0; b < 6; b++) all.push(fs[b]); }
+  return { prompt: prompt, answer: answer, options: opts, worked: worked, padKeys: accentKeys(all) };
+}
+function numberWordEnQ(p, lang) {
+  var n = rnd(1, Number(p.max) || 20), answer = spellEn(n);
+  var prompt = (isFr(lang) ? 'Écris en anglais : ' : 'Write in English: ') + n;
+  var opts = [answer], cands = [n + 1, n - 1, n + 10, n * 2, n + 2];
+  for (var i = 0; i < cands.length && opts.length < 4; i++) { if (cands[i] < 1 || cands[i] === n) continue; var w = spellEn(cands[i]); if (opts.indexOf(w) === -1) opts.push(w); }
+  return { prompt: prompt, answer: answer, options: opts, worked: n + ' = ' + answer + '.' };
+}
+function roman(n) { var map = [[100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']]; var out = ''; for (var i = 0; i < map.length; i++) while (n >= map[i][0]) { out += map[i][1]; n -= map[i][0]; } return out; }
+function centuryOf(year) { return Math.floor((year - 1) / 100) + 1; }
+function centuryQ(p, lang) {
+  var year = rnd(Number(p.min) || 1001, Number(p.max) || 2024), c = centuryOf(year), answer = roman(c) + 'e';
+  var round = year % 100 === 0;
+  var prompt = isFr(lang) ? 'L’année ' + year + ', c’est quel siècle ?' : 'The year ' + year + ': which century?';
+  // The trap: reading the century off the first two digits (1515 → XVe); for a round year, adding one anyway (1500 → XVIe).
+  var trap = round ? c + 1 : c - 1;
+  var opts = [answer, roman(trap) + 'e', roman(round ? c - 1 : c + 1) + 'e', roman(c + 2) + 'e'];
+  var worked = isFr(lang)
+    ? year + ' : cache les deux derniers chiffres (' + Math.floor(year / 100) + ')' + (round ? ', l’année finit par 00, le siècle reste : ' : ', ajoute 1 : ') + answer + ' siècle.'
+    : year + ': hide the last two digits (' + Math.floor(year / 100) + ')' + (round ? ', the year ends in 00, so the century stays: ' : ', add 1: ') + answer + ' century.';
+  return { prompt: prompt, answer: answer, options: opts, worked: worked };
+}
+function generate(skill, lang, layout, wordLists, model) {
   var p = skill.params || {};
   switch (skill.generator) {
+    case 'list': return listQ(skill, p, lang, model);
+    case 'conjugate': return conjugateQ(p, lang);
+    case 'numberWordEn': return numberWordEnQ(p, lang);
+    case 'century': return centuryQ(p, lang);
     case 'table': return tableQ(p, lang);
     case 'add': return addQ(p, lang);
     case 'sub': return subQ(p, lang);
@@ -746,6 +887,9 @@ var lang = isFr(Inputs.lang) ? 'fr' : 'en';
 var layout = String(Inputs.layout || (lang === 'fr' ? 'azerty' : 'qwerty'));
 var mode = String(Inputs.mode || 'maths');
 var answerMode = String(Inputs.answerMode || 'auto');
+// P113 REV-001: the chooser's ticks (skill ids; none = everything the level allows), and the person's list, if the mode is custom.
+var focus = Array.isArray(Inputs.focus) ? Inputs.focus.map(String) : [];
+var customSetId = String(Inputs.customSetId || '');
 var now = Date.now();
 var li = levelIndex(level);
 var r = Number(model.rating) || (LEVEL_BASE[level] + 50);
@@ -756,15 +900,23 @@ if (mode !== 'custom' && !curriculum.length) {
   skill = { id: 'none', name: { en: '', fr: '' }, strategy: { en: '', fr: '' }, teach: '', fluentMs: 4000, level: level, diff: 0.5, answer: 'typed' };
   q = { prompt: '', answer: '', options: [], typedOnly: true };
 } else if (mode === 'custom') {
-  var items = Inputs.customSet || [];
-  q = customQ(items);
-  skill = { id: 'custom', name: { en: 'My questions', fr: 'Mes questions' }, strategy: { en: '', fr: '' }, teach: '', fluentMs: 6000, level: level, diff: 0.5, answer: 'either' };
+  // P113 REV-002: a person's own list goes through the list engine under its own skill id, so each list has its own memory
+  // (what is learned, what is due) and pays its own stars. A set with no id keeps the old 'custom' id.
+  var items = Array.isArray(Inputs.customSet) ? Inputs.customSet : [];
+  skill = { id: customSetId ? 'set:' + customSetId : 'custom', subject: 'lists', name: { en: 'My list', fr: 'Ma liste' }, strategy: { en: '', fr: '' }, teach: '', fluentMs: 8000, level: level, diff: 0.5, answer: 'either', generator: 'list', params: { items: items, both: Inputs.customSetBoth === true } };
+  q = items.length ? listQ(skill, skill.params, lang, model) : customQ(items);
 } else {
-  var wanted = mode === 'typing' ? ['typing'] : mode === 'mixed' ? ['calc', 'number', 'typing'] : ['calc', 'number'];
+  // P113 REV-001: the mode is a subject (maths, typing, french, english, history); mixed is maths and typing together.
+  var wanted = mode === 'mixed' ? ['maths', 'typing'] : [mode];
   var candidates = [];
-  for (var i = 0; i < curriculum.length; i++) {
+  // A focus names the skills outright, whatever their level: the child, or the parent, chose them.
+  var focused = [];
+  for (var f = 0; f < curriculum.length; f++) if (focus.indexOf(curriculum[f].id) !== -1) focused.push(curriculum[f]);
+  for (var i = 0; i < curriculum.length && !focused.length; i++) {
     var sk = curriculum[i];
-    if (wanted.indexOf(sk.strand) === -1) continue;
+    if (wanted.indexOf(subjectOf(sk)) === -1) continue;
+    // P113 ruling 1: a later class's skill (beyond) is asked only when it is ticked — never as part of "everything".
+    if (sk.beyond) continue;
     var si = levelIndex(sk.level);
     var st = skills[sk.id];
     if (si > li) continue;
@@ -772,7 +924,8 @@ if (mode !== 'custom' && !curriculum.length) {
     if (si === li - 1 && st && st.m >= 3 && !(st.due <= now)) continue;
     candidates.push(sk);
   }
-  if (!candidates.length) candidates = curriculum.filter(function (sk) { return wanted.indexOf(sk.strand) !== -1; });
+  if (focused.length) candidates = focused;
+  if (!candidates.length) candidates = curriculum.filter(function (sk) { return wanted.indexOf(subjectOf(sk)) !== -1 && !sk.beyond; });
   if (!candidates.length) candidates = curriculum.slice();
 
   // A due review first — the most overdue one.
@@ -801,7 +954,7 @@ if (mode !== 'custom' && !curriculum.length) {
     var roll = Math.random() * total, acc = 0; skill = candidates[candidates.length - 1];
     for (var m = 0; m < candidates.length; m++) { acc += weights[m]; if (roll <= acc) { skill = candidates[m]; break; } }
   }
-  q = generate(skill, lang, layout, Inputs.wordLists);
+  q = generate(skill, lang, layout, Inputs.wordLists, model);
 }
 
 var state = skills[skill.id];
@@ -828,7 +981,15 @@ if (useOptions && q.options && q.options.length) {
 }
 
 Outputs.skillId = skill.id;
-Outputs.skillName = pickText(skill.name, lang);
+// P113 REV-004: a list says how much of it is learned, beside its name (the model's own count, as the grader wrote it).
+var itemCount = Number(q.itemCount) || 0, learnedCount = 0;
+if (itemCount && state && state.items) for (var ik in state.items) if (state.items[ik] && state.items[ik].ok) learnedCount++;
+Outputs.skillName = pickText(skill.name, lang) + (itemCount ? ' · ' + learnedCount + '/' + itemCount + ' ✓' : '');
+Outputs.itemKey = String(q.itemKey || '');
+Outputs.itemCount = itemCount;
+Outputs.learned = learnedCount;
+Outputs.subject = subjectOf(skill);
+Outputs.topic = String(skill.topic || '');
 Outputs.prompt = q.prompt;
 Outputs.answer = q.answer;
 Outputs.options = options;
@@ -857,6 +1018,9 @@ if (q.typing) {
   padKeys = accents.sort().join('');
 } else if (padNumeric) {
   padKeys = '1234567890' + (isFr(lang) ? ',' : '.') + (/^-/.test(String(q.answer)) || String(Inputs.mode) === 'custom' ? '-' : '');
+} else if (q.padKeys) {
+  // P113: a French form or a list answer gets the accents its skill's answers use.
+  padKeys = q.padKeys;
 }
 Outputs.padKeys = padKeys;
 Outputs.padNumeric = padNumeric;
@@ -940,16 +1104,36 @@ var paidLevel = Number(st.paid) || 0;
 var levelStars = m > paidLevel ? STAR_RULE.level * (m - paidLevel) : 0;
 if (m > paidLevel) st.paid = m;
 var rightStars = correct ? STAR_RULE.right : 0;
-var starsEarned = forB ? 0 : rightStars + levelStars;
+// 🔴 P113 REV-004: a list item is learned after ITEM_LEARNED_AT right answers in a row (on separate turns: the picker never asks
+// the same item twice running). Learning it pays once (paid, like a level), and forgetting it (a miss) makes it unlearned
+// again without taking anything back. Every item of the list learned pays the list's own bonus, once per list.
+var itemKey = String(Inputs.itemKey || '');
+var itemCount = Math.max(0, Math.floor(Number(Inputs.itemCount) || 0));
+var itemLearned = false, listDone = false, itemStars = 0;
+if (itemKey) {
+  if (!st.items || typeof st.items !== 'object') st.items = {};
+  var im = st.items[itemKey] || { n: 0, k: 0, ok: false, paid: false };
+  im.n += 1;
+  im.k = correct ? im.k + 1 : 0;
+  im.ok = im.k >= ${ITEM_LEARNED_AT};
+  if (im.ok && !im.paid) { im.paid = true; itemLearned = true; itemStars += STAR_RULE.item; }
+  st.items[itemKey] = im;
+  st.lastItem = itemKey;
+  var learned = 0; for (var ik in st.items) if (st.items[ik] && st.items[ik].ok) learned++;
+  st.learned = learned;
+  if (itemCount > 0 && learned >= itemCount && !st.listPaid) { st.listPaid = true; listDone = true; itemStars += STAR_RULE.list; }
+}
+var starsEarned = forB ? 0 : rightStars + levelStars + itemStars;
 model.stars += starsEarned;
 // This race so far, under the id Race/Play mints at every start: the longest run of right answers, and what the answers paid.
 var raceId = String(Inputs.raceId || '');
-if (!model.race || model.race.id !== raceId) model.race = { id: raceId, run: 0, bestRun: 0, rightStars: 0, levelStars: 0, chain: 0, turbo: Math.max(0, Math.floor(Number(Inputs.startTurbo) || 0)) };
+if (!model.race || model.race.id !== raceId) model.race = { id: raceId, run: 0, bestRun: 0, rightStars: 0, levelStars: 0, itemStars: 0, chain: 0, turbo: Math.max(0, Math.floor(Number(Inputs.startTurbo) || 0)) };
 if (!forB) {
   model.race.run = correct ? model.race.run + 1 : 0;
   model.race.bestRun = Math.max(model.race.bestRun, model.race.run);
   model.race.rightStars += rightStars;
   model.race.levelStars += levelStars;
+  model.race.itemStars = (Number(model.race.itemStars) || 0) + itemStars;
 }
 
 model.rating = Math.round(r);
@@ -1024,6 +1208,9 @@ if (game === 'gate') {
 // game says it the same way.
 if (turboUsed) boost = boost + (isFr(lang) ? ' · ⚡⚡ turbo lancé' : ' · ⚡⚡ turbo fired');
 if (slip > 1) boost = boost + (isFr(lang) ? ' · 🌀 aspiration +' + Math.round((slip - 1) * 100) + ' %' : ' · 🌀 slipstream +' + Math.round((slip - 1) * 100) + '%');
+// P113 REV-004: what learning paid, on the same line, in the same numbers.
+if (itemLearned) boost = boost + ' · 📚 +' + STAR_RULE.item + ' ⭐';
+if (listDone) boost = boost + ' · 🏆 +' + STAR_RULE.list + ' ⭐';
 
 var shownAnswer = String(answer);
 var strategy = String(Inputs.strategy || '');
@@ -1074,6 +1261,9 @@ Outputs.streak = st.streak;
 Outputs.missCount = st.miss;
 Outputs.starsEarned = starsEarned;
 Outputs.stars = model.stars;
+Outputs.itemLearned = itemLearned;
+Outputs.listDone = listDone;
+Outputs.learned = Number(st.learned) || 0;
 `;
 
 // ── Make Ten Merge ──────────────────────────────────────────────────────────
@@ -1921,10 +2111,11 @@ var paid = false;
 if (over && id && model.lastMonsterId !== id) { model.stars += MONSTER_STAR_RULE.finish; model.lastMonsterId = id; paid = true; }
 var counted = over && !!id && model.lastMonsterId === id;
 // The answers' tally: Logic/Grade answer keeps it under the id it is given, and Monster/Play gives it the game's.
-var tally = model.race && model.race.id === id ? model.race : { rightStars: 0, levelStars: 0 };
+var tally = model.race && model.race.id === id ? model.race : { rightStars: 0, levelStars: 0, itemStars: 0 };
 var rightStars = Number(tally.rightStars) || 0;
 var levelStars = Number(tally.levelStars) || 0;
-var total = counted ? rightStars + levelStars + MONSTER_STAR_RULE.finish : 0;
+var itemStars = Number(tally.itemStars) || 0;
+var total = counted ? rightStars + levelStars + itemStars + MONSTER_STAR_RULE.finish : 0;
 var right = Number(g.right) || 0;
 var beaten = Math.max(0, Math.min(MONSTER.monsters, Number(g.beaten) || 0));
 Outputs.paid = paid;
@@ -1938,6 +2129,7 @@ Outputs.starsText = total > 0 ? '+' + total + ' ⭐' : '';
 var parts = [];
 if (counted && rightStars) parts.push((fr ? 'bonnes réponses +' : 'right answers +') + rightStars);
 if (counted && levelStars) parts.push((fr ? 'niveau gagné +' : 'new level +') + levelStars);
+if (counted && itemStars) parts.push((fr ? 'appris +' : 'learned +') + itemStars);
 if (total) parts.push((fr ? 'partie finie +' : 'game finished +') + MONSTER_STAR_RULE.finish);
 Outputs.why = parts.join(' · ');
 Outputs.headline = won ? (fr ? 'La porte a tenu !' : 'The gate held!') : fr ? 'Le monstre est entré !' : 'The monster got in!';
@@ -2090,6 +2282,10 @@ Outputs.nextText = purse >= SHOP_FROM
   ? (frNext ? '⭐ ' + purse + ' à dépenser au hangar' : '⭐ ' + purse + ' to spend in the hangar')
   : (frNext ? 'Encore ' + (SHOP_FROM - purse) + ' ⭐ pour ta première peinture' : (SHOP_FROM - purse) + ' ⭐ more for your first paint');
 Outputs.sets = app.sets;
+// P113 REV-001: the focus, as the chooser last saved it. Maths and everything until a child chooses.
+var focus = p.focus && typeof p.focus === 'object' ? p.focus : {};
+Outputs.focusSubject = typeof focus.subject === 'string' && focus.subject ? focus.subject : 'maths';
+Outputs.focusSkills = Array.isArray(focus.skills) ? focus.skills : [];
 `;
 
 export const SAVE_MODEL_SCRIPT = `${PROFILE_HELPERS}
@@ -2118,7 +2314,7 @@ model = withStars(model);
 var lang = isFr(Inputs.lang) ? 'fr' : 'en';
 var raceId = String(Inputs.raceId || '');
 var mode = Inputs.timed === true ? 'defi' : 'practice';
-var race = model.race && model.race.id === raceId ? model.race : { id: raceId, run: 0, bestRun: 0, rightStars: 0, levelStars: 0 };
+var race = model.race && model.race.id === raceId ? model.race : { id: raceId, run: 0, bestRun: 0, rightStars: 0, levelStars: 0, itemStars: 0 };
 var earned = 0;
 if (raceId && model.lastRaceId !== raceId) {
   race.finishStars = STAR_RULE.finish;
@@ -2131,12 +2327,13 @@ if (raceId && model.lastRaceId !== raceId) {
   model.lastRaceId = raceId;
   model.race = race;
 }
-var total = (race.rightStars || 0) + (race.levelStars || 0) + (race.finishStars || 0) + (race.bestStars || 0);
+var total = (race.rightStars || 0) + (race.levelStars || 0) + (race.itemStars || 0) + (race.finishStars || 0) + (race.bestStars || 0);
 var fr = isFr(lang);
 var parts = [];
 if (race.rightStars) parts.push((fr ? 'bonnes réponses +' : 'right answers +') + race.rightStars);
 if (race.finishStars) parts.push((fr ? 'arrivée +' : 'landed +') + race.finishStars);
 if (race.levelStars) parts.push((fr ? 'niveau gagné +' : 'new level +') + race.levelStars);
+if (race.itemStars) parts.push((fr ? 'appris +' : 'learned +') + race.itemStars);
 if (race.bestStars) parts.push((fr ? 'record +' : 'new best +') + race.bestStars);
 var isBest = (race.bestStars || 0) > 0;
 // PLY-002: the purse can buy something, so the result screen offers the hangar. (Was RKT-011's milestone crossing.)
@@ -2174,6 +2371,8 @@ for (var i = 0; i < app.profiles.length; i++) {
   if (Inputs.mergeMode === 'easy' || Inputs.mergeMode === 'hard') app.profiles[i].mergeMode = Inputs.mergeMode;
   if (Inputs.look) app.profiles[i].look = String(Inputs.look);
   if (Inputs.seed) app.profiles[i].seed = String(Inputs.seed);
+  // P113 REV-001: what to practise — a subject and the skills ticked in it (none = everything), or a list ('set:<id>').
+  if (typeof Inputs.focusSubject === 'string' && Inputs.focusSubject) app.profiles[i].focus = { subject: Inputs.focusSubject, skills: Array.isArray(Inputs.focusSkills) ? Inputs.focusSkills.map(String) : [] };
 }
 Outputs.app = app;
 `;
@@ -2366,21 +2565,39 @@ Outputs.position = hist.length ? (at + 1) + '/' + hist.length : '';
 `;
 
 export const PARSE_SET_SCRIPT = `
-// Accepts the editor's rows OR pasted JSON: [{ "q": "...", "a": "...", "opts": [...] }] — or [["q","a"], ...].
+// Accepts the editor's rows, pasted JSON ([{ "q": "...", "a": "...", "opts": [...] }] or [["q","a"], ...]), or — P113 REV-002,
+// what a parent actually types — plain text, one line per question: "question = answer". The separator is the first of a tab,
+// " = ", " → ", " -> ", " : ", " - ", then a bare "=" or ":". A line with no separator is skipped and counted.
 var raw = Inputs.json;
 var rows = Inputs.rows;
-var items = [], error = '';
+var items = [], error = '', skipped = 0;
 function push(q, a, opts) { q = String(q === undefined ? '' : q).trim(); a = String(a === undefined ? '' : a).trim(); if (q && a) items.push(opts && opts.length ? { q: q, a: a, opts: opts.map(String) } : { q: q, a: a }); }
 if (Array.isArray(rows) && rows.length) { for (var i = 0; i < rows.length; i++) push(rows[i].q, rows[i].a, rows[i].opts); }
 else if (typeof raw === 'string' && raw.trim()) {
-  try {
-    var parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) throw new Error('not a list');
-    for (var j = 0; j < parsed.length; j++) { var it = parsed[j]; if (Array.isArray(it)) push(it[0], it[1], it[2]); else if (it && typeof it === 'object') push(it.q || it.question, it.a || it.answer, it.opts || it.options); }
-  } catch (e) { error = 'That is not a list of questions. Expected [{"q": "...", "a": "..."}].'; }
+  var text = raw.trim();
+  if (text.charAt(0) === '[') {
+    try {
+      var parsed = JSON.parse(text);
+      if (!Array.isArray(parsed)) throw new Error('not a list');
+      for (var j = 0; j < parsed.length; j++) { var it = parsed[j]; if (Array.isArray(it)) push(it[0], it[1], it[2]); else if (it && typeof it === 'object') push(it.q || it.question, it.a || it.answer, it.opts || it.options); }
+    } catch (e) { error = 'That is not a list of questions. Expected [{"q": "...", "a": "..."}].'; }
+  } else {
+    var lines = text.split(/\\r?\\n/);
+    var seps = ['\\t', ' = ', ' → ', ' -> ', ' : ', ' - ', '=', ':'];
+    for (var l = 0; l < lines.length; l++) {
+      var line = lines[l].trim();
+      if (!line) continue;
+      var at = -1, sep = '';
+      // An equals sign splits at its LAST occurrence (a question can hold one: "2 + 2 = ? = 4"); the others at their first.
+      for (var s2 = 0; s2 < seps.length && at === -1; s2++) { var k2 = seps[s2] === ' = ' || seps[s2] === '=' ? line.lastIndexOf(seps[s2]) : line.indexOf(seps[s2]); if (k2 > 0) { at = k2; sep = seps[s2]; } }
+      if (at === -1) { skipped++; continue; }
+      push(line.slice(0, at), line.slice(at + sep.length));
+    }
+  }
 }
 Outputs.items = items;
 Outputs.count = items.length;
+Outputs.skipped = skipped;
 Outputs.error = error;
 Outputs.valid = items.length > 0 && !error;
 `;
@@ -2390,10 +2607,11 @@ var app = appOf(Inputs.app);
 var id = String(Inputs.setId || '');
 var name = String(Inputs.name || '').trim() || 'My questions';
 var items = Array.isArray(Inputs.items) ? Inputs.items : [];
+var both = Inputs.both === true;
 if (!id) id = 's' + Date.now().toString(36);
 var found = false;
-for (var i = 0; i < app.sets.length; i++) if (app.sets[i].id === id) { app.sets[i] = { id: id, name: name, items: items }; found = true; }
-if (!found) app.sets.push({ id: id, name: name, items: items });
+for (var i = 0; i < app.sets.length; i++) if (app.sets[i].id === id) { app.sets[i] = { id: id, name: name, items: items, both: both }; found = true; }
+if (!found) app.sets.push({ id: id, name: name, items: items, both: both });
 Outputs.app = app;
 Outputs.setId = id;
 `;
@@ -2408,7 +2626,16 @@ Outputs.app = app;
 export const LIST_SETS_SCRIPT = `${PROFILE_HELPERS}
 var app = appOf(Inputs.app);
 var wanted = String(Inputs.setId || '');
-var rows = app.sets.map(function (s) { return { id: s.id, name: s.name, count: (s.items || []).length, itemsJson: JSON.stringify(s.items || [], null, 2), selected: s.id === wanted }; });
+// P113 REV-002: a repeated row cannot translate, so each row carries the words it shows, and its count line.
+var rows = app.sets.map(function (s) {
+  var n = (s.items || []).length;
+  return {
+    id: s.id, name: s.name, count: n,
+    line: String(Inputs.countWord || '{n}').replace('{n}', n) + (s.both === true && Inputs.bothWord ? ' · ' + Inputs.bothWord : ''),
+    editWord: String(Inputs.editWord || 'Edit'), deleteWord: String(Inputs.deleteWord || 'Delete'), askWord: String(Inputs.askWord || 'Delete?'), yesWord: String(Inputs.yesWord || 'Yes'), noWord: String(Inputs.noWord || 'No'),
+    itemsJson: JSON.stringify(s.items || [], null, 2), itemsText: (s.items || []).map(function (it) { return it.q + ' = ' + it.a; }).join('\\n'), both: s.both === true, selected: s.id === wanted
+  };
+});
 var chosen = null;
 for (var i = 0; i < app.sets.length; i++) if (app.sets[i].id === wanted) chosen = app.sets[i];
 if (!chosen && app.sets.length) chosen = app.sets[0];
@@ -2419,6 +2646,148 @@ Outputs.chosenId = chosen ? chosen.id : '';
 Outputs.chosenName = chosen ? chosen.name : '';
 Outputs.chosenItems = chosen ? chosen.items : [];
 Outputs.chosenJson = chosen ? JSON.stringify(chosen.items, null, 2) : '[]';
+Outputs.chosenText = chosen ? (chosen.items || []).map(function (it) { return it.q + ' = ' + it.a; }).join('\\n') : '';
+Outputs.chosenBoth = !!(chosen && chosen.both === true);
+`;
+
+// ── P113 REV-001: the focus — what to practise ─────────────────────────────
+
+/**
+ * The profile's focus (a subject and the skills ticked in it, or a list) as the picker and the setup need it: the picker's
+ * mode, the skill ids to serve, the list's items, and one line that says it ("Maths · Tables de 5, Table de 8"). Placed on a
+ * game page between Logic/Active profile and the game.
+ */
+export const FOCUS_SCRIPT = `${HELPERS}
+var SUBJECT_NAMES = ${JSON.stringify(Object.fromEntries(SUBJECTS.map((s) => [s.id, s.name])))};
+var curriculum = Array.isArray(Inputs.curriculum) ? Inputs.curriculum : [];
+var sets = Array.isArray(Inputs.sets) ? Inputs.sets : [];
+var lang = isFr(Inputs.lang) ? 'fr' : 'en';
+var level = String(Inputs.level || 'CE2');
+var subject = String(Inputs.subject || 'maths');
+var ticked = Array.isArray(Inputs.skills) ? Inputs.skills.map(String) : [];
+var everything = String(Inputs.everythingWord || (lang === 'fr' ? 'tout' : 'everything'));
+var countWord = String(Inputs.countWord || (lang === 'fr' ? '{n} notions' : '{n} skills'));
+var listWord = String(Inputs.listWord || (lang === 'fr' ? 'Ma liste' : 'My list'));
+var mode = 'maths', focus = [], customSet = [], customSetId = '', customSetBoth = false, line = '', name = '';
+if (subject.indexOf('set:') === 0) {
+  var id = subject.slice(4), set = null;
+  for (var i = 0; i < sets.length; i++) if (sets[i] && sets[i].id === id) set = sets[i];
+  if (set) { mode = 'custom'; customSet = Array.isArray(set.items) ? set.items : []; customSetId = String(set.id); customSetBoth = set.both === true; name = String(set.name || ''); line = listWord + ' · ' + name; }
+  else subject = 'maths';
+}
+if (subject.indexOf('set:') !== 0) {
+  if (!SUBJECT_NAMES[subject]) subject = 'maths';
+  mode = subject;
+  name = pickText(SUBJECT_NAMES[subject], lang);
+  var chosen = [];
+  for (var j = 0; j < curriculum.length; j++) if (subjectOf(curriculum[j]) === subject && ticked.indexOf(curriculum[j].id) !== -1) chosen.push(curriculum[j]);
+  for (var c = 0; c < chosen.length; c++) focus.push(chosen[c].id);
+  var what = !chosen.length ? everything + ' (' + level + ')' : chosen.length <= 2 ? chosen.map(function (sk) { return pickText(sk.name, lang); }).join(', ') : countWord.replace('{n}', chosen.length);
+  line = name + ' · ' + what;
+}
+Outputs.mode = mode;
+Outputs.focus = focus;
+Outputs.customSet = customSet;
+Outputs.customSetId = customSetId;
+Outputs.customSetBoth = customSetBoth;
+Outputs.line = line;
+Outputs.subject = subject;
+Outputs.subjectName = name;
+Outputs.count = focus.length;
+Outputs.isList = mode === 'custom';
+Outputs.hasFocus = focus.length > 0 || mode === 'custom';
+`;
+
+/**
+ * The chooser's three steps as rows for three Choice rows: the subjects that have anything at this level (plus My lists), the
+ * chosen subject's topics (a list's are the person's sets), and the chosen topic's skills with their ticks. Nothing above the
+ * child's level is offered — a 6e child sees CE2 to 6e, a CE2 child sees CE2.
+ */
+export const FOCUS_CHOICES_SCRIPT = `${HELPERS}
+var SUBJECTS = ${JSON.stringify(SUBJECTS)};
+var TOPICS = ${JSON.stringify(TOPICS)};
+var curriculum = Array.isArray(Inputs.curriculum) ? Inputs.curriculum : [];
+var sets = Array.isArray(Inputs.sets) ? Inputs.sets : [];
+var lang = isFr(Inputs.lang) ? 'fr' : 'en';
+var level = String(Inputs.level || 'CE2');
+var li = levelIndex(level);
+var subject = String(Inputs.subject || 'maths');
+var topic = String(Inputs.topic || '');
+var ticked = Array.isArray(Inputs.skills) ? Inputs.skills.map(String) : [];
+var listsWord = String(Inputs.listsWord || (lang === 'fr' ? 'Mes listes' : 'My lists'));
+var isLists = subject === 'lists' || subject.indexOf('set:') === 0;
+var subjectRows = [];
+for (var s = 0; s < SUBJECTS.length; s++) {
+  var any = false;
+  for (var k = 0; k < curriculum.length; k++) if (subjectOf(curriculum[k]) === SUBJECTS[s].id && levelIndex(curriculum[k].level) <= li) any = true;
+  if (!any) continue;
+  subjectRows.push({ id: SUBJECTS[s].id, label: SUBJECTS[s].glyph + ' ' + pickText(SUBJECTS[s].name, lang), value: SUBJECTS[s].id, selected: !isLists && subject === SUBJECTS[s].id });
+}
+subjectRows.push({ id: 'lists', label: '📚 ' + listsWord, value: 'lists', selected: isLists });
+var topicRows = [], skillRows = [], saveSubject = subject;
+if (isLists) {
+  var wantedSet = subject.indexOf('set:') === 0 ? subject : topic;
+  var known = false;
+  for (var t0 = 0; t0 < sets.length; t0++) if ('set:' + sets[t0].id === wantedSet) known = true;
+  if (!known) wantedSet = sets.length ? 'set:' + sets[0].id : '';
+  for (var t = 0; t < sets.length; t++) { var sid = 'set:' + sets[t].id; topicRows.push({ id: sid, label: String(sets[t].name || '') + ' (' + (Array.isArray(sets[t].items) ? sets[t].items.length : 0) + ')', value: sid, selected: sid === wantedSet }); }
+  topic = wantedSet;
+  saveSubject = wantedSet || 'maths';
+} else {
+  var seen = [];
+  for (var u = 0; u < TOPICS.length; u++) {
+    if (TOPICS[u].subject !== subject) continue;
+    var has = false;
+    for (var k2 = 0; k2 < curriculum.length; k2++) if (curriculum[k2].topic === TOPICS[u].id && levelIndex(curriculum[k2].level) <= li) has = true;
+    if (has) seen.push(TOPICS[u]);
+  }
+  var found = false;
+  for (var v = 0; v < seen.length; v++) if (seen[v].id === topic) found = true;
+  if (!found) topic = seen.length ? seen[0].id : '';
+  for (var w = 0; w < seen.length; w++) {
+    var n = 0;
+    for (var k3 = 0; k3 < curriculum.length; k3++) if (curriculum[k3].topic === seen[w].id && ticked.indexOf(curriculum[k3].id) !== -1) n++;
+    topicRows.push({ id: seen[w].id, label: pickText(seen[w].name, lang) + (n ? ' ✓' + n : ''), value: seen[w].id, selected: seen[w].id === topic });
+  }
+  for (var x = 0; x < curriculum.length; x++) {
+    var sk = curriculum[x];
+    if (sk.topic !== topic || levelIndex(sk.level) > li) continue;
+    // A skill from an earlier class says its class; one from a later class's programme (beyond) says that class instead.
+    var tag = sk.beyond ? sk.beyond : sk.level !== level ? sk.level : '';
+    skillRows.push({ id: sk.id, label: pickText(sk.name, lang) + (tag ? ' · ' + tag : ''), value: sk.id, selected: ticked.indexOf(sk.id) !== -1 });
+  }
+}
+var topicIds = [];
+for (var y = 0; y < skillRows.length; y++) topicIds.push(skillRows[y].id);
+var allOn = topicIds.length > 0;
+for (var z = 0; z < topicIds.length; z++) if (ticked.indexOf(topicIds[z]) === -1) allOn = false;
+Outputs.subjectRows = subjectRows;
+Outputs.topicRows = topicRows;
+Outputs.skillRows = skillRows;
+Outputs.topic = topic;
+Outputs.topicIds = topicIds;
+Outputs.saveSubject = saveSubject;
+Outputs.isLists = isLists;
+Outputs.hasSets = sets.length > 0;
+Outputs.hasSkills = skillRows.length > 0;
+Outputs.hasTopics = topicRows.length > 0;
+Outputs.tickedCount = ticked.length;
+Outputs.allTicked = allOn;
+`;
+
+/** A list of ids with one toggled, several added (all), several removed (none), replaced (set) or emptied (clear). */
+export const TOGGLE_ID_SCRIPT = `
+var list = Array.isArray(Inputs.list) ? Inputs.list.map(String) : [];
+var id = String(Inputs.id || '');
+var action = String(Inputs.action || 'toggle');
+var ids = Array.isArray(Inputs.ids) ? Inputs.ids.map(String) : [];
+if (action === 'toggle') { if (id) { var at = list.indexOf(id); if (at === -1) list.push(id); else list.splice(at, 1); } }
+else if (action === 'all') { for (var i = 0; i < ids.length; i++) if (list.indexOf(ids[i]) === -1) list.push(ids[i]); }
+else if (action === 'none') { list = list.filter(function (x) { return ids.indexOf(x) === -1; }); }
+else if (action === 'set') { list = ids.slice(); }
+else if (action === 'clear') { list = []; }
+Outputs.list = list;
+Outputs.count = list.length;
 `;
 
 // ── The save code ───────────────────────────────────────────────────────────
@@ -2457,7 +2826,13 @@ if (p) {
   var skills = mdl.skills;
   for (var k in skills) { var s = skills[k]; sk[k] = [Math.round(s.d || 0), s.n || 0, s.streak || 0, Math.round((s.hl || 1) * 4), Math.round((s.due || 0) / 3600000), s.m || 0, Math.round(s.best || 0), s.miss || 0, s.paid || 0]; }
   // RKT-011: what the child owns and wears travels in the same code.
-  var packed = { v: 3, n: p.name, k: p.look, s: p.seed, l: p.level, g: p.lang, y: p.layout, r: mdl.rating || 0, a: mdl.answered || 0, d: (p.days || []).slice(-14), sk: sk, st: mdl.stars, b: mdl.bests, o: ownedOf(p), w: wearOf(p), sp: spentOf(mdl) };
+  var packed = { v: 4, n: p.name, k: p.look, s: p.seed, l: p.level, g: p.lang, y: p.layout, r: mdl.rating || 0, a: mdl.answered || 0, d: (p.days || []).slice(-14), sk: sk, st: mdl.stars, b: mdl.bests, o: ownedOf(p), w: wearOf(p), sp: spentOf(mdl) };
+  // P113 REV-002 (Richard, 2026-10-04: "yep", the code carries the lists): v4 adds what the player chose to practise and every
+  // revision list in the store, each under its own id, so the learning kept under set:<id> still names its list on the other computer.
+  if (p.focus && typeof p.focus === 'object' && p.focus.subject) packed.f = [String(p.focus.subject), Array.isArray(p.focus.skills) ? p.focus.skills.map(String) : []];
+  // P113 REV-005: the moon (aliens, what they wear, what is owned) travels too; every reader normalises it (moonOf).
+  if (p.moon && typeof p.moon === 'object') packed.mo = p.moon;
+  if (app.sets.length) packed.ls = app.sets.map(function (x) { return { i: String(x.id), n: String(x.name || ''), b: x.both === true ? 1 : 0, q: Array.isArray(x.items) ? x.items : [] }; });
   code = 'RS1.' + toB64(JSON.stringify(packed));
 }
 Outputs.code = code;
@@ -2471,7 +2846,7 @@ var ok = false, error = '', profileId = '';
 try {
   if (code.indexOf('RS1.') !== 0) throw new Error('prefix');
   var packed = JSON.parse(fromB64(code.slice(4)));
-  if (!packed || [1, 2, 3].indexOf(packed.v) === -1 || typeof packed.n !== 'string') throw new Error('shape');
+  if (!packed || [1, 2, 3, 4].indexOf(packed.v) === -1 || typeof packed.n !== 'string') throw new Error('shape');
   var v2 = packed.v >= 2;
   var v3 = packed.v >= 3;
   var skills = {};
@@ -2484,10 +2859,24 @@ try {
   profile.model.spent = v3 ? Math.max(0, Number(packed.sp) || 0) : 0;
   if (v2 && Array.isArray(packed.o)) profile.owned = ownedOf({ owned: packed.o });
   if (v2 && packed.w && typeof packed.w === 'object') profile.wear = wearOf({ wear: packed.w });
+  // v4: the focus, and (below) the lists. A list already here under the same id is replaced by the code's (the code is the newer
+  // copy); any other is added. Nothing in the store is removed.
+  if (packed.mo && typeof packed.mo === 'object' && !Array.isArray(packed.mo)) profile.moon = packed.mo;
+  if (Array.isArray(packed.f) && typeof packed.f[0] === 'string' && packed.f[0]) profile.focus = { subject: packed.f[0], skills: Array.isArray(packed.f[1]) ? packed.f[1].map(String) : [] };
   // The same name already here: replace it rather than make a twin.
   var replaced = false;
   for (var i = 0; i < app.profiles.length; i++) if (app.profiles[i].name === profile.name) { profile.id = app.profiles[i].id; app.profiles[i] = profile; replaced = true; }
   if (!replaced) { if (app.profiles.length >= ${MAX_PROFILES}) throw new Error('full'); app.profiles.push(profile); }
+  // The lists go in only once the player has a place (a full store refuses the code and changes nothing).
+  var incoming = Array.isArray(packed.ls) ? packed.ls : [];
+  for (var li = 0; li < incoming.length; li++) {
+    var x = incoming[li];
+    if (!x || typeof x.i !== 'string' || !x.i || !Array.isArray(x.q)) continue;
+    var set = { id: x.i, name: String(x.n || ''), items: x.q, both: x.b === 1 };
+    var at = -1;
+    for (var si = 0; si < app.sets.length; si++) if (app.sets[si].id === set.id) at = si;
+    if (at === -1) app.sets.push(set); else app.sets[at] = set;
+  }
   app.activeId = profile.id;
   profileId = profile.id;
   ok = true;
@@ -2498,6 +2887,204 @@ Outputs.app = app;
 Outputs.ok = ok;
 Outputs.error = error;
 Outputs.profileId = profileId;
+`;
+
+// ── P113 REV-005: the moon ──────────────────────────────────────────────────
+
+/**
+ * The moon's catalogue and its readers. A player's moon lives on the profile (`p.moon`): the aliens (species, colour, name,
+ * meals, the favourite food and whether it has been found, and what each wears), which one is chosen, and what the player
+ * owns to wear. Spending is the hangar's: `model.spent` goes up, `model.stars` (what was earned) never goes down.
+ */
+export const MOON_HELPERS = `
+var MOON = ${JSON.stringify(MOON)};
+function moonText(bi, lang) { return bi ? (lang === 'fr' ? bi.fr : bi.en) : ''; }
+function moonFind(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return null; }
+function moonOf(p) {
+  var m = p && p.moon && typeof p.moon === 'object' ? p.moon : {};
+  var aliens = Array.isArray(m.aliens) ? m.aliens.filter(function (a) { return a && typeof a.id === 'string' && a.id; }) : [];
+  return {
+    aliens: aliens.map(function (a) {
+      var w = a.wear && typeof a.wear === 'object' ? a.wear : {};
+      return { id: a.id, species: moonFind(MOON.species, a.species) ? a.species : MOON.species[0].id, colour: moonFind(MOON.colours, a.colour) ? a.colour : MOON.colours[0].id, name: String(a.name || ''), meals: Math.max(0, Math.floor(Number(a.meals) || 0)), fav: moonFind(MOON.foods, a.fav) ? a.fav : MOON.foods[0].id, found: a.found === true, wear: { hat: typeof w.hat === 'string' ? w.hat : '', eyes: typeof w.eyes === 'string' ? w.eyes : '', neck: typeof w.neck === 'string' ? w.neck : '' } };
+    }),
+    sel: typeof m.sel === 'string' ? m.sel : '',
+    owned: Array.isArray(m.owned) ? m.owned.filter(function (x) { return typeof x === 'string'; }) : []
+  };
+}
+function moonStage(meals) { return meals >= MOON.grow[1] ? 2 : meals >= MOON.grow[0] ? 1 : 0; }
+function moonAlienCost(n) { return n < MOON.cost.length ? MOON.cost[n] : MOON.cost[MOON.cost.length - 1]; }
+function moonColour(id) { var c = moonFind(MOON.colours, id) || MOON.colours[0]; return 'var(' + c.token + ')'; }
+function moonSelected(moon) { return moonFind(moon.aliens, moon.sel) || moon.aliens[0] || null; }
+`;
+
+/**
+ * The moon as the active player sees it: their aliens as rows (the chosen one flagged), the chosen alien's picture and its
+ * lines, the food and the things to wear as tiles with what a tap does, and the adopt card (the species drawn in the colour
+ * being chosen, the price of the next alien, a name to suggest). Every line is in the player's language.
+ */
+export const MOON_VIEW_SCRIPT = `${PROFILE_HELPERS}${STAR_HELPERS}${MOON_HELPERS}
+var app = appOf(Inputs.app);
+var p = null;
+for (var i = 0; i < app.profiles.length; i++) if (app.profiles[i].id === app.activeId) p = app.profiles[i];
+var lang = p && p.lang === 'fr' ? 'fr' : 'en';
+var fr = lang === 'fr';
+var moon = moonOf(p);
+var model = withStars(JSON.parse(JSON.stringify((p && p.model) || {})));
+var purse = purseOf(model);
+var sel = moonSelected(moon);
+var STAGE = fr ? ['Bébé', 'Jeune', 'Tout grand'] : ['Baby', 'Young', 'Grown up'];
+function stageLine(a) {
+  var st = moonStage(a.meals);
+  var meals = (fr ? '{n} repas' : a.meals === 1 ? '{n} meal' : '{n} meals').replace('{n}', a.meals);
+  if (st >= 2) return STAGE[2] + (fr ? ' ! · ' : '! · ') + meals;
+  return STAGE[st] + ' · ' + meals + ' · ' + (fr ? 'encore {n} pour grandir' : '{n} more to grow').replace('{n}', MOON.grow[st] - a.meals);
+}
+Outputs.aliens = moon.aliens.map(function (a) {
+  return { id: a.id, name: a.name, species: a.species, colour: moonColour(a.colour), grown: moonStage(a.meals), hat: a.wear.hat, eyes: a.wear.eyes, neck: a.wear.neck, happy: a.meals, selected: !!sel && sel.id === a.id, line: STAGE[moonStage(a.meals)] };
+});
+Outputs.has = moon.aliens.length > 0;
+Outputs.count = moon.aliens.length;
+Outputs.full = moon.aliens.length >= MOON.max;
+Outputs.purse = purse;
+Outputs.purseLine = (fr ? 'Tu as {n} ⭐' : 'You have {n} ⭐').replace('{n}', purse);
+// The chosen alien.
+var fav = sel ? moonFind(MOON.foods, sel.fav) : null;
+Outputs.selId = sel ? sel.id : '';
+Outputs.selName = sel ? sel.name : '';
+Outputs.selSpecies = sel ? sel.species : '';
+Outputs.selColour = sel ? moonColour(sel.colour) : '';
+Outputs.selGrown = sel ? moonStage(sel.meals) : 0;
+Outputs.selHat = sel ? sel.wear.hat : '';
+Outputs.selEyes = sel ? sel.wear.eyes : '';
+Outputs.selNeck = sel ? sel.wear.neck : '';
+Outputs.selHappy = sel ? sel.meals : 0;
+Outputs.selLine = sel ? stageLine(sel) : '';
+Outputs.favLine = !sel ? '' : sel.found && fav ? (fr ? 'Plat préféré : ' : 'Favourite food: ') + fav.glyph + ' ' + moonText(fav.name, lang) : fr ? 'Plat préféré : ❓ — trouve-le !' : 'Favourite food: ❓ — find it!';
+// Food: a tap feeds. Too dear is greyed, and says nothing worse than its price.
+Outputs.foods = MOON.foods.map(function (f) {
+  return { id: f.id, glyph: f.glyph, label: moonText(f.name, lang), line: f.cost + ' ⭐', cost: f.cost, use: !!sel && f.cost <= purse, ask: false, dim: f.cost > purse, worn: false, showAlien: false, species: '', colour: '', grown: 2, hat: '', eyes: '', neck: '' };
+});
+// What to wear: the chosen alien drawn wearing it. Owned goes on or off with a tap; not owned asks first (the hangar's card).
+Outputs.wear = MOON.wear.map(function (w) {
+  var owned = moon.owned.indexOf(w.id) !== -1;
+  var worn = !!sel && sel.wear[w.slot] === w.id;
+  var look = sel ? { hat: sel.wear.hat, eyes: sel.wear.eyes, neck: sel.wear.neck } : { hat: '', eyes: '', neck: '' };
+  look[w.slot] = w.id;
+  return {
+    id: w.id, glyph: '', label: moonText(w.name, lang), line: worn ? (fr ? 'Porté ✓' : 'On ✓') : owned ? (fr ? 'Le mettre' : 'Put it on') : w.cost + ' ⭐', cost: w.cost,
+    use: !!sel && owned, ask: !!sel && !owned && w.cost <= purse, dim: !owned && w.cost > purse, worn: worn, showAlien: true,
+    species: sel ? sel.species : MOON.species[0].id, colour: sel ? moonColour(sel.colour) : moonColour(''), grown: 2, hat: look.hat, eyes: look.eyes, neck: look.neck
+  };
+});
+// The adopt card.
+var draftSp = moonFind(MOON.species, String(Inputs.draftSpecies || '')) || MOON.species[0];
+var draftCol = moonFind(MOON.colours, String(Inputs.draftColour || '')) || MOON.colours[0];
+var nextCost = moonAlienCost(moon.aliens.length);
+var priceLine = nextCost === 0 ? (fr ? 'gratuit !' : 'free!') : nextCost + ' ⭐';
+Outputs.adoptSpecies = MOON.species.map(function (s) {
+  return { id: s.id, name: moonText(s.name, lang), species: s.id, colour: moonColour(draftCol.id), grown: 2, hat: '', eyes: '', neck: '', happy: 0, selected: s.id === draftSp.id, line: '' };
+});
+Outputs.adoptColours = MOON.colours.map(function (c) { return { label: moonText(c.name, lang), value: c.id }; });
+Outputs.draftSpecies = draftSp.id;
+Outputs.draftColour = draftCol.id;
+Outputs.adoptCost = nextCost;
+Outputs.adoptFree = nextCost === 0;
+Outputs.canAdopt = moon.aliens.length < MOON.max && nextCost <= purse;
+Outputs.suggestedName = draftSp.names[moon.aliens.length % draftSp.names.length];
+Outputs.adoptButton = (fr ? 'Adopter · ' : 'Adopt · ') + priceLine;
+Outputs.anotherLine = moon.aliens.length >= MOON.max ? '' : (fr ? '＋ Adopter un autre alien · ' : '＋ Adopt another alien · ') + priceLine;
+`;
+
+/**
+ * One thing done on the moon. Action is a parameter, placed once per action: adopt (Species, Colour, Name — the next alien's
+ * price, the first free), select (Alien Id), feed (Food Id: a meal, or two for its favourite, which is found the first time),
+ * buy (Wear Id: bought once, put on the chosen alien) or wear (Wear Id, owned: on, or off if it was on). Refused with nothing
+ * changed when the purse is short, the moon is full, or the thing is unknown or not theirs (Why says which). Said is the line
+ * the moon shows: welcome, yum, it grew, it's wearing it.
+ */
+export const MOON_ACT_SCRIPT = `${PROFILE_HELPERS}${STAR_HELPERS}${MOON_HELPERS}
+var app = appOf(Inputs.app);
+var id = String(Inputs.profileId || app.activeId);
+var action = String(Inputs.action || '');
+var ok = false, why = 'noProfile', said = '', alienId = '';
+for (var i = 0; i < app.profiles.length; i++) {
+  var p = app.profiles[i];
+  if (p.id !== id) continue;
+  var lang = p.lang === 'fr' ? 'fr' : 'en';
+  var fr = lang === 'fr';
+  var moon = moonOf(p);
+  var model = withStars(JSON.parse(JSON.stringify(p.model || {})));
+  var purse = purseOf(model);
+  var al = moonFind(moon.aliens, String(Inputs.alienId || '')) || moonSelected(moon);
+  why = '';
+  if (action === 'adopt') {
+    var n = moon.aliens.length;
+    var cost = moonAlienCost(n);
+    if (n >= MOON.max) why = 'full';
+    else if (cost > purse) why = 'tooDear';
+    else {
+      var sp = moonFind(MOON.species, String(Inputs.species || '')) || MOON.species[0];
+      var col = moonFind(MOON.colours, String(Inputs.colour || '')) || MOON.colours[0];
+      var nm = String(Inputs.name || '').trim().slice(0, 16) || sp.names[n % sp.names.length];
+      al = { id: 'a' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36), species: sp.id, colour: col.id, name: nm, meals: 0, fav: MOON.foods[Math.floor(Math.random() * MOON.foods.length)].id, found: false, wear: { hat: '', eyes: '', neck: '' } };
+      moon.aliens.push(al);
+      model.spent = spentOf(model) + cost;
+      said = (fr ? 'Bienvenue sur la Lune, {n} !' : 'Welcome to the moon, {n}!').replace('{n}', nm);
+      ok = true;
+    }
+  } else if (!al) why = 'noAlien';
+  else if (action === 'select') ok = true;
+  else if (action === 'feed') {
+    var food = moonFind(MOON.foods, String(Inputs.foodId || ''));
+    if (!food) why = 'unknown';
+    else if (food.cost > purse) why = 'tooDear';
+    else {
+      var before = moonStage(al.meals);
+      var loved = food.id === al.fav;
+      al.meals += loved ? MOON.fav : 1;
+      model.spent = spentOf(model) + food.cost;
+      if (loved && !al.found) said = fr ? '{n} ADORE {f} ! C’est son plat préféré : deux repas d’un coup.' : '{n} LOVES {f}! It’s the favourite: two meals in one.';
+      else if (loved) said = fr ? '{n} ADORE {f} ! (+2 repas)' : '{n} LOVES {f}! (+2 meals)';
+      else said = fr ? '{n} croque {f}. Miam !' : '{n} munches {f}. Yum!';
+      if (loved) al.found = true;
+      said = said.replace('{n}', al.name).replace('{f}', food.glyph);
+      if (moonStage(al.meals) > before) said += (fr ? ' {n} a grandi !' : ' {n} grew!').replace('{n}', al.name);
+      ok = true;
+    }
+  } else if (action === 'buy' || action === 'wear') {
+    var item = moonFind(MOON.wear, String(Inputs.wearId || ''));
+    var owns = !!item && moon.owned.indexOf(item.id) !== -1;
+    if (!item) why = 'unknown';
+    else if (action === 'buy' && owns) why = 'owned';
+    else if (action === 'wear' && !owns) why = 'notOwned';
+    else if (action === 'buy' && item.cost > purse) why = 'tooDear';
+    else {
+      var thing = moonText(item.name, lang);
+      if (action === 'buy') { moon.owned.push(item.id); model.spent = spentOf(model) + item.cost; }
+      if (action === 'wear' && al.wear[item.slot] === item.id) {
+        al.wear[item.slot] = '';
+        said = (fr ? '{n} enlève : {i}.' : '{n} takes off the {i}.').replace('{n}', al.name).replace('{i}', fr ? thing : thing.toLowerCase());
+      } else {
+        al.wear[item.slot] = item.id;
+        said = (fr ? 'Et voilà : {i} pour {n} !' : '{n} is wearing the {i}!').replace('{n}', al.name).replace('{i}', fr ? thing : thing.toLowerCase());
+      }
+      ok = true;
+    }
+  } else why = 'action';
+  if (why === 'tooDear') said = fr ? 'Pas encore assez d’étoiles : une partie en rapporte !' : 'Not enough stars yet: a game earns more!';
+  if (ok) {
+    if (al) moon.sel = al.id;
+    p.model = model;
+    p.moon = moon;
+    alienId = al ? al.id : '';
+  }
+}
+Outputs.app = app;
+Outputs.ok = ok;
+Outputs.why = why;
+Outputs.said = said;
+Outputs.alienId = alienId;
 `;
 
 // ── Translate words ─────────────────────────────────────────────────────────
@@ -2587,6 +3174,9 @@ export const FUNCTION_SCRIPTS: ReadonlyArray<{ component: string; script: string
   { component: 'Logic/Save question set', script: UPSERT_SET_SCRIPT, seam: 'the store with a set added or replaced' },
   { component: 'Logic/Delete question set', script: DELETE_SET_SCRIPT, seam: 'the store with a set removed' },
   { component: 'Logic/List question sets', script: LIST_SETS_SCRIPT, seam: 'the sets, and the chosen one' },
+  { component: 'Logic/Resolve focus', script: FOCUS_SCRIPT, seam: 'the profile’s focus as the picker and the setup need it' },
+  { component: 'Logic/Focus choices', script: FOCUS_CHOICES_SCRIPT, seam: 'the chooser’s three steps as rows' },
+  { component: 'Logic/Toggle id', script: TOGGLE_ID_SCRIPT, seam: 'a list of ids with one toggled, or several added or removed' },
   { component: 'Logic/Encode save code', script: ENCODE_SAVE_SCRIPT, seam: 'a profile as a code' },
   { component: 'Logic/Decode save code', script: DECODE_SAVE_SCRIPT, seam: 'a code back into a profile' },
   { component: 'Logic/Translate words', script: TRANSLATE_SCRIPT, seam: 'every interface word in the chosen language' },

@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0165c2d5-6b27-555b-8795-83452d4f4fd6",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "teachagainIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "plots",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "requestId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "requests",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "teachagainFn",
+      "type": "JavaScriptFunction",
+      "label": "Teach again",
+      "parameters": {
+        "functionScript": "var { islStale } = Scripts.island;\nvar { fill, langOf, nameOf, wordMap } = Scripts.words;\nvar lang = langOf(Inputs.lang), name = nameOf(Inputs.botName);\nvar w = wordMap(Inputs.words, lang, name);\nvar reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];\nvar id = String(Inputs.requestId || '');\nvar plots = Inputs.plots && typeof Inputs.plots === 'object' ? Inputs.plots : {};\nvar req = null;\nfor (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === id) req = reqs[i];\nvar sv = req ? plots[id] : null;\nvar stale = !!req && !!sv && Array.isArray(sv.program) && islStale(req, sv.program, null, null);\nOutputs.show = stale;\nOutputs.text = stale ? fill(w.iw3bTeachAgain, { b: name }) : '';\n",
+        "uses": "engine.js,island.js,words.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-requests",
+          "displayName": "requests",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-requestId",
+          "displayName": "requestId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-plots",
+          "displayName": "plots",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-show",
+          "displayName": "show",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "teachagainOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "show",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "text",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

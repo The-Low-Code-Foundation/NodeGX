@@ -123,6 +123,11 @@ export const CONNECTED_ROW_POLICY: Record<string, ConnectedRowPolicy> = {
     kind: 'deferred',
     reason: 'One port, drawn as a variable picker with its own popout.'
   },
+  // P109 ISL-005 — a Function's Uses.
+  ScriptUsesType: {
+    kind: 'exception',
+    reason: "Edit-only: a Function's Uses names the project's script files and takes no wire, so there is no connection to show."
+  },
   PropListType: {
     kind: 'deferred',
     reason: 'One port holding a list of properties; the row is an editor for the list, not a field.'

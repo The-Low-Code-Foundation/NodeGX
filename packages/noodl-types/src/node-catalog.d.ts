@@ -310,6 +310,11 @@ export interface ParameterPattern {
    * `value-<state>-<value>` is chosen by the matching `type-<value>` parameter.
    */
   valueType?: string;
+  /**
+   * Parameters these ports need, set as given, to exist at all — observed by driving the hook with
+   * them unset. The Component Stack's `pagePath-<pageId>` needs `{ useRoutes: true }` (P107-C127).
+   */
+  when?: Record<string, unknown>;
   /** A real emitted port name, preferring one that shows verbatim interpolation. */
   example: string;
 }
@@ -343,6 +348,8 @@ export interface CatalogNode {
   category?: NodeCategory;
   isVisual: boolean;
   isDeprecated: boolean;
+  /** For a deprecated type: the type that replaced it, from its definition (P107 R25). Absent when nothing did. */
+  replacedBy?: NodeTypeName;
   /** False for legacy/superseded types or ones created only through specialised flows; avoid authoring these. */
   inNodePicker: boolean;
   availableIn: RuntimeEnvironment[];
@@ -362,7 +369,13 @@ export interface CatalogNode {
   singleton?: boolean;
   allowAsChild?: boolean;
   allowChildrenWithCategory?: string[];
+  /** Set on `Component Children`: a component that holds one holds children of these categories. */
+  haveComponentChildren?: string[];
   allowAsExportRoot?: boolean;
+  /** The port whose value titles an unlabelled node's card (`@nodegx/project-contract/node-title`, P107 R24). */
+  usePortAsLabel?: string;
+  /** `filename` or `length`: how that title is cut. */
+  portLabelTruncationMode?: string;
   useVariants?: boolean;
   visualStates?: Array<{ name: string; label: string }>;
   inputs: CatalogPort[];
@@ -374,6 +387,12 @@ export interface CatalogNode {
    * are called.
    */
   parameterEncoding: ParameterEncoding | null;
+  /**
+   * NSP-018 (phase 107) — for a node with an executable spec, what it does in words: for each input port, one line
+   * per case, `<the case> → <what the wire carries>`. Generated from the spec; a port is absent until its cases
+   * have been given their words.
+   */
+  rules?: Record<string, string[]>;
 }
 
 export interface Typecast {

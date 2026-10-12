@@ -1,0 +1,391 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "50154228-717d-55ca-8d4d-2f2cbfef4702",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "readfamilyIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "fallbackLang",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "readfamilyFn",
+      "type": "JavaScriptFunction",
+      "label": "Read family",
+      "parameters": {
+        "functionScript": "var { MAX_PROFILES, migrationDue, modelOf, robotRowsOf } = Scripts.save;\nvar raw = Inputs.model && typeof Inputs.model === 'object' ? Inputs.model : null;\nvar model = modelOf(raw || {});\n// A stored family older than v4 is migrated here on every read until it is written back: the page writes it at once.\nOutputs.migrated = migrationDue(raw);\nvar active = null;\nfor (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === model.island.activeId) active = model.profiles[i];\nvar fallback = String(Inputs.fallbackLang) === 'fr' ? 'fr' : 'en';\nOutputs.hasProfile = !!active;\nOutputs.profileId = active ? active.id : '';\nOutputs.name = active ? active.name : '';\nOutputs.band = active ? active.band : 2;\nOutputs.older = active ? active.band === 2 : true;\nOutputs.younger = !!active && active.band === 1;\nOutputs.lang = active ? active.lang : fallback;\nOutputs.face = active ? (active.face || active.name) : '';\nOutputs.botName = active ? active.robot.name : 'Pip';\nOutputs.color = active ? active.robot.color : '#FF7A59';\nOutputs.eye = active ? active.robot.eye : 'round';\nOutputs.hat = active ? active.robot.hat : 'none';\nOutputs.hats = active ? active.hats.slice() : [];\nOutputs.stickers = active ? active.stickers.slice() : [];\nOutputs.tricks = active ? JSON.parse(JSON.stringify(active.tricks)) : {};\n// One island per kid (ruling 8): what THIS kid has done, never a sibling's.\nOutputs.done = active ? active.island.done.slice() : [];\n// P106 IG-004: her plots (a won plot's program and the robot pinned to it) and her robots (v4: the one).\nOutputs.plots = active ? JSON.parse(JSON.stringify(active.island.plots)) : {};\n// IG-005: each robot resolved for the pages — its look, what it can do, its upgrades applied, where it works.\nOutputs.robots = active ? robotRowsOf(active) : [];\n// P108 IW-001 F8: the block cards she has seen, hers (a sibling's are her own).\nOutputs.cardsSeen = active && active.cardsSeen ? active.cardsSeen.slice() : [];\n// P108 IW-007 (lane B): her land (what stands on it), or null when nothing does.\nOutputs.land = active && active.island.land ? JSON.parse(JSON.stringify(active.island.land)) : null;\n// P108 IW-007 (s6): her land as TEXT, for the Workshop's Land request — a text the same as before is not published again,\n// so a write that leaves her land as it was (Got it's cards seen, the win itself) does not rebuild the requests, which\n// re-ran Start world: her program cleared and the world reset under her (Land object above is new on every read).\n// P108 s9: and WITHOUT what has been delivered (each building's have) — the Workshop writes a part the moment it is\n// delivered (Land keep here), and that write must not change this text either; Land start / Land lift put every part\n// back from her save, so the Workshop on her land still starts from what is built.\nvar iw9Shape = active && active.island.land ? JSON.parse(JSON.stringify(active.island.land)) : null;\nif (iw9Shape && Array.isArray(iw9Shape.buildings)) for (var iw9b = 0; iw9b < iw9Shape.buildings.length; iw9b++) if (iw9Shape.buildings[iw9b]) delete iw9Shape.buildings[iw9b].have;\nOutputs.landText = iw9Shape ? JSON.stringify(iw9Shape) : '';\nvar rows = [];\nfor (var j = 0; j < model.profiles.length; j++) {\n  var p = model.profiles[j];\n  rows.push({ id: p.id, name: p.name, face: p.face || p.name, band: p.band === 1 ? '7–9' : '10–12', robot: p.robot.name, color: p.robot.color, eye: p.robot.eye, hat: p.robot.hat, selected: p.id === model.island.activeId });\n}\nOutputs.profiles = rows;\nOutputs.count = rows.length;\nOutputs.canAdd = rows.length < MAX_PROFILES;\nOutputs.isEmpty = rows.length === 0;\nOutputs.model = model;\n",
+        "uses": "save.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-fallbackLang",
+          "displayName": "fallbackLang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-migrated",
+          "displayName": "migrated",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasProfile",
+          "displayName": "hasProfile",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-profileId",
+          "displayName": "profileId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band",
+          "displayName": "band",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-older",
+          "displayName": "older",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-younger",
+          "displayName": "younger",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lang",
+          "displayName": "lang",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-face",
+          "displayName": "face",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-botName",
+          "displayName": "botName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-color",
+          "displayName": "color",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-eye",
+          "displayName": "eye",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hat",
+          "displayName": "hat",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hats",
+          "displayName": "hats",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stickers",
+          "displayName": "stickers",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tricks",
+          "displayName": "tricks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-plots",
+          "displayName": "plots",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-robots",
+          "displayName": "robots",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cardsSeen",
+          "displayName": "cardsSeen",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-land",
+          "displayName": "land",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-landText",
+          "displayName": "landText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-profiles",
+          "displayName": "profiles",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canAdd",
+          "displayName": "canAdd",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isEmpty",
+          "displayName": "isEmpty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-model",
+          "displayName": "model",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "readfamilyOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "band",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "botName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "canAdd",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "cardsSeen",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "color",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "eye",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "face",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hasProfile",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "hat",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hats",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "isEmpty",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "land",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "landText",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "lang",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "migrated",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "name",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "older",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "plots",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "profileId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "profiles",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "robots",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "stickers",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "tricks",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "younger",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

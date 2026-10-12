@@ -15,7 +15,7 @@
 
 import type { NodeDefinitionOptions, NodeInstance, NodeModule } from '@noodl/types';
 
-import { addToDate, DateUnit, toDate, UNIT_ENUMS } from './datemath';
+import { addToDate, DateUnit, toDate, UNIT_ENUMS, unitOrDays, unknownUnitMessage } from './datemath';
 
 interface DateAddNodeInstance extends NodeInstance {
   _internal: {
@@ -74,8 +74,9 @@ const DateAddNode: NodeDefinitionOptions = {
       description:
         'What Amount counts. Months and years are calendar steps and CLAMP: 31 January plus one month ' +
         'is 28 (or 29) February, never 2 March',
-      set: function (this: DateAddNodeInstance, value: DateUnit) {
-        this._internal.unit = value;
+      set: function (this: DateAddNodeInstance, value: unknown) {
+        this._internal.unit = unitOrDays(value);
+        this.setDiagnostic('date-add/unknown-unit', unknownUnitMessage(value));
         this._recompute();
       }
     }
@@ -119,7 +120,7 @@ const DateAddNode: NodeDefinitionOptions = {
       }
 
       const amount = Number.isFinite(this._internal.amount) ? this._internal.amount : 0;
-      this._internal.result = addToDate(input, amount, this._internal.unit || 'days');
+      this._internal.result = addToDate(input, amount, this._internal.unit);
       this.flagOutputDirty('result');
       this.sendSignalOnOutput('changed');
     }

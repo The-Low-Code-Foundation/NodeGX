@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4a2f5ffb-4ff4-4aa8-817d-7c998ee4b18d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "t_pa_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "pa_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pa_title",
+      "fromProperty": "Translation",
+      "toId": "pa_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pa_lede",
+      "fromProperty": "Translation",
+      "toId": "pa_lede",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pa_read",
+      "fromProperty": "Translation",
+      "toId": "pa_read",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_pa_confirm",
+      "fromProperty": "Translation",
+      "toId": "pa_label",
+      "toProperty": "in-confirmText"
+    },
+    {
+      "fromId": "t_pa_saving",
+      "fromProperty": "Translation",
+      "toId": "pa_label",
+      "toProperty": "in-savingText"
+    },
+    {
+      "fromId": "t_pa_failed",
+      "fromProperty": "Translation",
+      "toId": "pa_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pa_settings",
+      "fromProperty": "Translation",
+      "toId": "pa_settings",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pa_saving_sw",
+      "fromProperty": "state",
+      "toId": "pa_label",
+      "toProperty": "in-saving"
+    },
+    {
+      "fromId": "pa_label",
+      "fromProperty": "out-label",
+      "toId": "pa_confirm",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pa_label",
+      "fromProperty": "out-enabled",
+      "toId": "pa_confirm",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "pa_confirm",
+      "fromProperty": "onClick",
+      "toId": "pa_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pa_confirm",
+      "fromProperty": "onClick",
+      "toId": "pa_saving_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pa_confirm",
+      "fromProperty": "onClick",
+      "toId": "pa_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pa_call",
+      "fromProperty": "failure",
+      "toId": "pa_saving_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pa_call",
+      "fromProperty": "failure",
+      "toId": "pa_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pa_fail_sw",
+      "fromProperty": "state",
+      "toId": "pa_failed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pa_read",
+      "fromProperty": "onClick",
+      "toId": "pa_to_privacy",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "pa_settings",
+      "fromProperty": "onClick",
+      "toId": "pa_to_settings",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "pa_call",
+      "fromProperty": "done",
+      "toId": "pa_reload",
+      "toProperty": "run"
+    }
+  ]
+}

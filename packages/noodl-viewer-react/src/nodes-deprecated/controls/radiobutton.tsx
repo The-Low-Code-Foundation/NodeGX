@@ -6,6 +6,7 @@ import Layout from '../../layout';
 import NodeSharedPortDefinitions from '../../node-shared-port-definitions';
 import { createNodeFromReactComponent, type ReactNodeDefinition, type StyleObject } from '../../react-component-node';
 import type { Noodl } from '../../types';
+import { dataAttributeProps } from '../../components/noodl-root-ref';
 import Utils from './utils';
 
 interface RadioButtonProps extends Noodl.ReactProps {
@@ -65,6 +66,7 @@ function RadioButton(props: RadioButtonProps) {
   return (
     <input
       className={className}
+      {...dataAttributeProps(props.dom)}
       {...Utils.controlEvents(props)}
       type="radio"
       name={radioButtonGroup ? radioButtonGroup.name : undefined}
@@ -86,6 +88,7 @@ const RadioButtonNode: ReactNodeDefinition = {
   // `displayName`. The picker therefore offered two entries reading the same word, and
   // the one an author was most likely to reach for was this one.
   deprecated: true,
+  replacedBy: 'net.noodl.controls.radiobutton',
   displayName: 'Radio Button',
   docs: 'https://docs.noodl.net/nodes/visual/radiobutton',
   allowChildren: false,

@@ -315,6 +315,7 @@ function getActionProps(action: DiffListActionProps<unknown>, change: unknown) {
     isShowingAffixOnHover: !!action,
     affix: Boolean(action) && (
       <IconButton
+        ariaLabel="Reset changes"
         variant={IconButtonVariant.SemiTransparent}
         size={IconSize.Small}
         icon={action.icon}

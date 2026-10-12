@@ -1,0 +1,1071 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3e225470-000c-5edc-82c9-f895636c1bae",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rsIn",
+      "type": "Component Inputs",
+      "label": "The thing that repeats",
+      "ports": [
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "scheduleLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "statusLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "statusColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cadence",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "slotRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "noSlots",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "dayChips",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "showDays",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "addHint",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "timeError",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasTimeError",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "routineId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "startDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "endDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "startError",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasStartError",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "endError",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasEndError",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "canStop",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "isStopped",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "stopNote",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "narrow",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "clearTime",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 530,
+      "y": 400
+    },
+    {
+      "id": "rsOut",
+      "type": "Component Outputs",
+      "label": "What you did",
+      "ports": [
+        {
+          "name": "rename",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "pickDaily",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "pickWeekly",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "pickMonthly",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "removeSlot",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "pickDay",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "addTime",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "setStart",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "setEnd",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "stop",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "back",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "newTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "slotKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "dayKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "timeText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "startText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "endText",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 530,
+      "y": 520
+    },
+    {
+      "id": "rsRoot",
+      "type": "Group",
+      "label": "Routine summary",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "rsBack",
+        "rsHead",
+        "rsRepeats",
+        "rsDates",
+        "rsButtons",
+        "rsStopped"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rsBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "parent": "rsRoot",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "← Back",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rsHead",
+      "type": "Group",
+      "label": "Title and when",
+      "parent": "rsRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "rsTitle",
+        "rsSchedule",
+        "rsStatus"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "rsTitle",
+      "type": "net.noodl.controls.textinput",
+      "label": "Title",
+      "parent": "rsHead",
+      "parameters": {
+        "type": "text",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "placeholder": "What repeats",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "backgroundColor": "transparent",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-subtle)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "rsSchedule",
+      "type": "Text",
+      "label": "How often",
+      "parent": "rsHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "rsStatus",
+      "type": "Text",
+      "label": "Started, ends, ended or stopped",
+      "parent": "rsHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "rsRepeats",
+      "type": "Group",
+      "label": "How often",
+      "parent": "rsRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingBottom": "var(--space-4)"
+      },
+      "children": [
+        "rsRepeatsLabel",
+        "rsCadence",
+        "rsTimesLabel",
+        "rsSlots",
+        "rsNoSlots",
+        "rsHint",
+        "rsDays",
+        "rsAdd",
+        "rsTimeError"
+      ],
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "rsRepeatsLabel",
+      "type": "Text",
+      "label": "How often label",
+      "parent": "rsRepeats",
+      "parameters": {
+        "text": "Repeats",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "rsCadence",
+      "type": "Group",
+      "label": "Every day, week or month",
+      "parent": "rsRepeats",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "rsDaily",
+        "rsWeekly",
+        "rsMonthly"
+      ],
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "rsDaily",
+      "type": "net.noodl.controls.button",
+      "label": "Every day",
+      "parent": "rsCadence",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Every day"
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "rsWeekly",
+      "type": "net.noodl.controls.button",
+      "label": "Every week",
+      "parent": "rsCadence",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Every week"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "rsMonthly",
+      "type": "net.noodl.controls.button",
+      "label": "Every month",
+      "parent": "rsCadence",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Every month"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "rsLook",
+      "type": "States",
+      "label": "Which timescale is on",
+      "parameters": {
+        "states": "daily,weekly,monthly",
+        "currentState": "daily",
+        "values": "dailyBg,weeklyBg,monthlyBg",
+        "type-dailyBg": "color",
+        "type-weeklyBg": "color",
+        "type-monthlyBg": "color",
+        "value-daily-dailyBg": "var(--muted)",
+        "value-daily-weeklyBg": "transparent",
+        "value-daily-monthlyBg": "transparent",
+        "value-weekly-dailyBg": "transparent",
+        "value-weekly-weeklyBg": "var(--muted)",
+        "value-weekly-monthlyBg": "transparent",
+        "value-monthly-dailyBg": "transparent",
+        "value-monthly-weeklyBg": "transparent",
+        "value-monthly-monthlyBg": "var(--muted)",
+        "useTransitions": false
+      },
+      "x": 530,
+      "y": 1120
+    },
+    {
+      "id": "rsTimesLabel",
+      "type": "Text",
+      "label": "Times label",
+      "parent": "rsRepeats",
+      "parameters": {
+        "text": "Times",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "marginTop": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "rsSlots",
+      "type": "Group",
+      "label": "The times",
+      "parent": "rsRepeats",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap",
+        "styleCss": "row-gap: 8px;"
+      },
+      "children": [
+        "rsSlotEach"
+      ],
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "rsSlotEach",
+      "type": "For Each",
+      "label": "One chip per time",
+      "parent": "rsSlots",
+      "parameters": {
+        "template": "/Todo/Slot chip",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 1720
+    },
+    {
+      "id": "rsNoSlots",
+      "type": "Text",
+      "label": "When it has no times",
+      "parent": "rsRepeats",
+      "parameters": {
+        "text": "No times yet, so it never comes up. Add one below.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "rsHint",
+      "type": "Text",
+      "label": "What to do to add a time",
+      "parent": "rsRepeats",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "marginTop": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "rsDays",
+      "type": "Group",
+      "label": "Days to pick",
+      "parent": "rsRepeats",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1)",
+        "flexWrap": "wrap",
+        "styleCss": "row-gap: 4px;",
+        "mounted": false
+      },
+      "children": [
+        "rsDayEach"
+      ],
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "rsDayEach",
+      "type": "For Each",
+      "label": "One chip per day",
+      "parent": "rsDays",
+      "parameters": {
+        "template": "/Todo/Day chip",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 2200
+    },
+    {
+      "id": "rsAdd",
+      "type": "Group",
+      "label": "Add a time",
+      "parent": "rsRepeats",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "rsTime",
+        "rsAddTime"
+      ],
+      "x": 160,
+      "y": 2320
+    },
+    {
+      "id": "rsTime",
+      "type": "net.noodl.controls.textinput",
+      "label": "Time",
+      "parent": "rsAdd",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "A time, like 08:00 or 8:30pm"
+      },
+      "x": 220,
+      "y": 2440
+    },
+    {
+      "id": "rsAddTime",
+      "type": "net.noodl.controls.button",
+      "label": "Add time",
+      "parent": "rsAdd",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Add time"
+      },
+      "x": 220,
+      "y": 2560
+    },
+    {
+      "id": "rsTimeError",
+      "type": "Text",
+      "label": "A time that is not a time",
+      "parent": "rsRepeats",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "lineHeight": "var(--leading-snug)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 160,
+      "y": 2680
+    },
+    {
+      "id": "rsDates",
+      "type": "Group",
+      "label": "Starts and ends",
+      "parent": "rsRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingBottom": "var(--space-4)"
+      },
+      "children": [
+        "rsDateRow",
+        "rsDatesHint",
+        "rsStartError",
+        "rsEndError"
+      ],
+      "x": 100,
+      "y": 2800
+    },
+    {
+      "id": "rsDateRow",
+      "type": "Group",
+      "label": "Both dates",
+      "parent": "rsDates",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "flexWrap": "wrap",
+        "styleCss": "row-gap: 12px;"
+      },
+      "children": [
+        "rsStartBox",
+        "rsEndBox"
+      ],
+      "x": 160,
+      "y": 2920
+    },
+    {
+      "id": "rsStartBox",
+      "type": "Group",
+      "label": "Starts",
+      "parent": "rsDateRow",
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "children": [
+        "rsStartLabel",
+        "rsStart"
+      ],
+      "x": 220,
+      "y": 3040
+    },
+    {
+      "id": "rsStartLabel",
+      "type": "Text",
+      "label": "Starts label",
+      "parent": "rsStartBox",
+      "parameters": {
+        "text": "Starts",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 3160
+    },
+    {
+      "id": "rsStart",
+      "type": "/Todo/Date picker",
+      "label": "Start date",
+      "parent": "rsStartBox",
+      "parameters": {
+        "Label": "Starts",
+        "Width": {
+          "value": 180,
+          "unit": "px"
+        }
+      },
+      "x": 280,
+      "y": 3280
+    },
+    {
+      "id": "rsEndBox",
+      "type": "Group",
+      "label": "Ends",
+      "parent": "rsDateRow",
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "children": [
+        "rsEndLabel",
+        "rsEnd"
+      ],
+      "x": 220,
+      "y": 3400
+    },
+    {
+      "id": "rsEndLabel",
+      "type": "Text",
+      "label": "Ends label",
+      "parent": "rsEndBox",
+      "parameters": {
+        "text": "Ends",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 3520
+    },
+    {
+      "id": "rsEnd",
+      "type": "/Todo/Date picker",
+      "label": "End date",
+      "parent": "rsEndBox",
+      "parameters": {
+        "Label": "Ends",
+        "Width": {
+          "value": 180,
+          "unit": "px"
+        }
+      },
+      "x": 280,
+      "y": 3640
+    },
+    {
+      "id": "rsDatesHint",
+      "type": "Text",
+      "label": "What the end date does",
+      "parent": "rsDates",
+      "parameters": {
+        "text": "Leave the end empty and it keeps going.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 3760
+    },
+    {
+      "id": "rsStartError",
+      "type": "Text",
+      "label": "A start date it cannot have",
+      "parent": "rsDates",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "lineHeight": "var(--leading-snug)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 160,
+      "y": 3880
+    },
+    {
+      "id": "rsEndError",
+      "type": "Text",
+      "label": "An end date it cannot have",
+      "parent": "rsDates",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "lineHeight": "var(--leading-snug)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 160,
+      "y": 4000
+    },
+    {
+      "id": "rsAnother",
+      "type": "Value Changed",
+      "label": "Another routine: its dates over any pick",
+      "x": 530,
+      "y": 3280
+    },
+    {
+      "id": "rsButtons",
+      "type": "Group",
+      "label": "Buttons",
+      "parent": "rsRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "rsStop"
+      ],
+      "x": 100,
+      "y": 4120
+    },
+    {
+      "id": "rsStop",
+      "type": "net.noodl.controls.button",
+      "label": "Stop it",
+      "parent": "rsButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Stop it",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 4240
+    },
+    {
+      "id": "rsStopped",
+      "type": "Group",
+      "label": "Why it stopped",
+      "parent": "rsRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-1)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingBottom": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "rsStoppedLabel",
+        "rsStoppedNote"
+      ],
+      "x": 100,
+      "y": 4360
+    },
+    {
+      "id": "rsStoppedLabel",
+      "type": "Text",
+      "label": "Why it stopped label",
+      "parent": "rsStopped",
+      "parameters": {
+        "text": "Why it stopped",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 4480
+    },
+    {
+      "id": "rsStoppedNote",
+      "type": "Text",
+      "label": "Why it stopped",
+      "parent": "rsStopped",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 4600
+    }
+  ],
+  "visualRoots": [
+    "rsRoot"
+  ]
+}

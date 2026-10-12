@@ -1,0 +1,547 @@
+{
+  "vocabulary": {
+    "id": "nodegx-world-kinds",
+    "version": 1
+  },
+  "collections": [
+    {
+      "name": "Invoice",
+      "made": {
+        "noun": "invoice"
+      },
+      "sentence": "An invoice is what we send a company for what it owes.",
+      "notHeld": [],
+      "description": "An invoice is what we send a company for what it owes.",
+      "columns": [
+        {
+          "name": "amount",
+          "kind": "number",
+          "type": "Number"
+        },
+        {
+          "name": "status",
+          "kind": "choice",
+          "type": "String"
+        },
+        {
+          "name": "number",
+          "kind": "text",
+          "type": "String",
+          "description": "an invoice's number, which people read aloud",
+          "series": {
+            "format": "INV-{YYYY}-{####}",
+            "restart": "year",
+            "gapFree": true
+          }
+        }
+      ],
+      "checks": [
+        {
+          "field": "status",
+          "oneOf": [
+            "draft",
+            "issued",
+            "paid"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "number"
+          ],
+          "unique": true
+        }
+      ],
+      "calledBy": "amount",
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "number",
+              "amount"
+            ],
+            "unless": {
+              "status": "draft"
+            },
+            "says": "Once an invoice is issued, its amount never changes."
+          }
+        }
+      }
+    },
+    {
+      "name": "Assignment",
+      "made": {
+        "noun": "assignment"
+      },
+      "sentence": "An assignment is a piece of work a coach gives a learner.",
+      "notHeld": [
+        "Only a coach may issue an assignment."
+      ],
+      "description": "An assignment is a piece of work a coach gives a learner. Not kept by the database yet: Only a coach may issue an assignment.",
+      "columns": [
+        {
+          "name": "brief",
+          "kind": "text",
+          "type": "String"
+        },
+        {
+          "name": "status",
+          "kind": "choice",
+          "type": "String"
+        }
+      ],
+      "checks": [
+        {
+          "field": "status",
+          "oneOf": [
+            "draft",
+            "issued",
+            "withdrawn"
+          ]
+        }
+      ],
+      "indexes": [],
+      "calledBy": "brief",
+      "onlyWhile": {
+        "update": {
+          "moves": {
+            "status": {
+              "draft": {
+                "to": [
+                  "issued"
+                ],
+                "says": "An assignment goes from draft to issued to withdrawn. It never goes back."
+              },
+              "issued": {
+                "to": [
+                  "withdrawn"
+                ],
+                "says": "An assignment goes from draft to issued to withdrawn. It never goes back."
+              },
+              "withdrawn": {
+                "to": [],
+                "says": "An assignment goes from draft to issued to withdrawn. It never goes back."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Cohort",
+      "made": {
+        "noun": "cohort"
+      },
+      "sentence": "A cohort is a group of learners who start together.",
+      "notHeld": [
+        "A cohort holds at most twenty learners."
+      ],
+      "description": "A cohort is a group of learners who start together. Not kept by the database yet: A cohort holds at most twenty learners.",
+      "columns": [
+        {
+          "name": "name",
+          "kind": "text",
+          "type": "String"
+        }
+      ],
+      "checks": [],
+      "indexes": [],
+      "calledBy": "name"
+    },
+    {
+      "name": "Learner",
+      "made": {
+        "noun": "learner"
+      },
+      "sentence": "A learner is a person on one of our courses.",
+      "notHeld": [],
+      "description": "A learner is a person on one of our courses.",
+      "columns": [
+        {
+          "name": "name",
+          "kind": "text",
+          "type": "String"
+        },
+        {
+          "name": "cohort",
+          "kind": "link",
+          "type": "Pointer",
+          "targetClass": "Cohort",
+          "required": true,
+          "whenTargetGoes": "blocks",
+          "description": "A learner is in one cohort.",
+          "relation": "learner-cohort"
+        }
+      ],
+      "checks": [],
+      "indexes": [],
+      "calledBy": "name"
+    }
+  ],
+  "claims": [
+    {
+      "id": "invoice/status-is-one-of-its-list",
+      "says": "an invoice's status is one of draft, issued, paid, and nothing else",
+      "from": {
+        "noun": "invoice"
+      },
+      "held": true,
+      "mutant": {
+        "dropCheck": {
+          "collection": "Invoice",
+          "field": "status"
+        }
+      },
+      "steps": [
+        {
+          "make": "Invoice",
+          "as": "invoice1",
+          "data": {
+            "status": "draft"
+          }
+        },
+        {
+          "refuse": "Invoice",
+          "data": {
+            "status": "not draft or issued or paid"
+          }
+        }
+      ]
+    },
+    {
+      "id": "invoice/number-is-unique",
+      "says": "no two invoices have the same number",
+      "from": {
+        "noun": "invoice"
+      },
+      "held": true,
+      "mutant": {
+        "dropIndex": {
+          "collection": "Invoice",
+          "fields": [
+            "number"
+          ]
+        }
+      },
+      "steps": [
+        {
+          "make": "Invoice",
+          "as": "invoice2",
+          "data": {
+            "number": "number-1"
+          }
+        },
+        {
+          "make": "Invoice",
+          "as": "invoice4",
+          "data": {
+            "number": "number-3"
+          }
+        },
+        {
+          "refuse": "Invoice",
+          "data": {
+            "number": "number-1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "assignment/status-is-one-of-its-list",
+      "says": "an assignment's status is one of draft, issued, withdrawn, and nothing else",
+      "from": {
+        "noun": "assignment"
+      },
+      "held": true,
+      "mutant": {
+        "dropCheck": {
+          "collection": "Assignment",
+          "field": "status"
+        }
+      },
+      "steps": [
+        {
+          "make": "Assignment",
+          "as": "assignment1",
+          "data": {
+            "status": "draft"
+          }
+        },
+        {
+          "refuse": "Assignment",
+          "data": {
+            "status": "not draft or issued or withdrawn"
+          }
+        }
+      ]
+    },
+    {
+      "id": "learner/cohort-is-required",
+      "says": "a learner cannot exist without its cohort",
+      "from": {
+        "relation": "learner-cohort"
+      },
+      "held": true,
+      "mutant": {
+        "dropRequired": {
+          "collection": "Learner",
+          "field": "cohort"
+        }
+      },
+      "steps": [
+        {
+          "make": "Cohort",
+          "as": "cohort2",
+          "data": {}
+        },
+        {
+          "make": "Learner",
+          "as": "whole",
+          "data": {
+            "cohort": {
+              "ref": "cohort2"
+            }
+          }
+        },
+        {
+          "make": "Cohort",
+          "as": "cohort4",
+          "data": {}
+        },
+        {
+          "refuse": "Learner",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "id": "invoice/number-never-used-again",
+      "says": "an invoice's number is handed out by the store, going up by one, and never used again; it looks like INV-{YYYY}-{####}; a number is never skipped: a save that fails gives it back; it starts again each year",
+      "from": {
+        "noun": "invoice"
+      },
+      "held": true,
+      "mutant": {
+        "dropSeries": {
+          "collection": "Invoice",
+          "field": "number"
+        }
+      },
+      "steps": [
+        {
+          "make": "Invoice",
+          "as": "invoice1",
+          "data": {}
+        },
+        {
+          "make": "Invoice",
+          "as": "invoice2",
+          "data": {}
+        },
+        {
+          "numbered": "Invoice",
+          "field": "number",
+          "rows": [
+            "invoice1",
+            "invoice2"
+          ]
+        },
+        {
+          "remove": "Invoice",
+          "row": "invoice2"
+        },
+        {
+          "make": "Invoice",
+          "as": "invoice3",
+          "data": {}
+        },
+        {
+          "numbered": "Invoice",
+          "field": "number",
+          "rows": [
+            "invoice1",
+            "invoice2",
+            "invoice3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "invoice/number-is-set-once",
+      "says": "an invoice's number is written once and never changed",
+      "from": {
+        "noun": "invoice"
+      },
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "Invoice",
+          "setOnce": "number"
+        }
+      },
+      "steps": [
+        {
+          "make": "Invoice",
+          "as": "invoice3",
+          "data": {
+            "status": "issued",
+            "number": "number-1"
+          }
+        },
+        {
+          "change": "Invoice",
+          "row": "invoice3",
+          "data": {
+            "number": "number-2"
+          },
+          "refused": true,
+          "byPerson": true
+        }
+      ]
+    },
+    {
+      "id": "invoice-amount-settled/frozen-once-issued",
+      "says": "Once an invoice is issued, its amount never changes.",
+      "from": {
+        "rule": "invoice-amount-settled"
+      },
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "Invoice",
+          "frozen": true
+        }
+      },
+      "steps": [
+        {
+          "make": "Invoice",
+          "as": "invoice3",
+          "data": {
+            "status": "issued",
+            "amount": 1
+          }
+        },
+        {
+          "change": "Invoice",
+          "row": "invoice3",
+          "data": {
+            "amount": 2
+          },
+          "refused": true,
+          "byPerson": true
+        },
+        {
+          "make": "Invoice",
+          "as": "invoice4",
+          "data": {
+            "status": "draft",
+            "amount": 1
+          }
+        },
+        {
+          "change": "Invoice",
+          "row": "invoice4",
+          "data": {
+            "amount": 2
+          },
+          "byPerson": true
+        }
+      ]
+    },
+    {
+      "id": "assignment-never-back/status-never-goes-back",
+      "says": "An assignment goes from draft to issued to withdrawn. It never goes back.",
+      "from": {
+        "rule": "assignment-never-back"
+      },
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "Assignment",
+          "moves": "status"
+        }
+      },
+      "steps": [
+        {
+          "make": "Assignment",
+          "as": "assignment1",
+          "data": {
+            "status": "draft"
+          }
+        },
+        {
+          "change": "Assignment",
+          "row": "assignment1",
+          "data": {
+            "status": "issued"
+          },
+          "byPerson": true
+        },
+        {
+          "change": "Assignment",
+          "row": "assignment1",
+          "data": {
+            "status": "draft"
+          },
+          "refused": true,
+          "byPerson": true
+        },
+        {
+          "holds": "Assignment",
+          "row": "assignment1",
+          "field": "status",
+          "value": "issued"
+        }
+      ]
+    },
+    {
+      "id": "learner-cohort/cohort-blocks",
+      "says": "a cohort cannot go while any learners are linked to it",
+      "from": {
+        "relation": "learner-cohort"
+      },
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Learner",
+          "field": "cohort"
+        }
+      },
+      "steps": [
+        {
+          "make": "Cohort",
+          "as": "cohort1",
+          "data": {}
+        },
+        {
+          "make": "Learner",
+          "as": "learner2",
+          "data": {
+            "cohort": {
+              "ref": "cohort1"
+            }
+          }
+        },
+        {
+          "remove": "Cohort",
+          "row": "cohort1",
+          "refused": true
+        }
+      ]
+    }
+  ],
+  "notHeld": [
+    {
+      "collection": "Assignment",
+      "field": "status",
+      "says": "Only a coach may issue an assignment.",
+      "why": "who may make a change is a role, and a world names no role; the backend keeps it as the move’s \"by\" in its permissions, set in the manager (ONT-014) — a rule on who may change one field is ONT-012 §7’s, unruled"
+    },
+    {
+      "collection": "Cohort",
+      "says": "A cohort holds at most twenty learners.",
+      "why": "a count over the records linked to one parent, held inside the create, is none of the store’s checks, which are each on one row; ONT-016 builds it (a count made before the create lets two saves at the limit both pass)"
+    }
+  ]
+}

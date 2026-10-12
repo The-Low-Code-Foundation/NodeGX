@@ -42,11 +42,15 @@
  *
  * Usage: `node kit-extract.cjs <projectDirectory>` → JSON on stdout.
  */
+// 🔴 BEFORE ANYTHING ELSE: stdout is this child's ANSWER, one JSON document, and a kit's `index.js` can log at
+// import. Logs go to stderr from here on (P109 ISL-042, P78 D84; see the module). An import, so it runs before the
+// shim below: imports run in the order they are written.
+import '../childLogsToStderr';
 import '../../../../scripts/node-catalog/dom-shim';
 
 const path = require('path');
 
-const { scanModuleManifests } = require('@nodegx/module-inject');
+const { scanModuleManifests, toInjectModules } = require('@nodegx/module-inject');
 
 // A kit's module scope reads `window.React` — the deployed viewer loads React as
 // a global before module scripts run, which is what makes hand-written kits work
@@ -100,7 +104,19 @@ async function main() {
   // unguarded kit happened to be scanned first. A kit now registers here exactly
   // when it registers in a browser.
   const collected = [];
-  globalThis.Noodl = { deployed: false, Env: {}, defineModule: (m) => collected.push(m) };
+  globalThis.Noodl = {
+    deployed: false,
+    Env: {},
+    defineModule: (m) => collected.push(m),
+    // ISL-013: the page's `getModule` — what a required kit shares (its `exports`), by its name or folder
+    getModule: (id) => {
+      for (let i = collected.length - 1; i >= 0; i--) {
+        const m = collected[i];
+        if (m && (m.name === id || m.folder === id)) return m.exports;
+      }
+      return undefined;
+    }
+  };
   globalThis.window.Noodl = globalThis.Noodl;
 
   // ✅ Reuses CN-001's scanner rather than adding a fourth one. It also carries
@@ -115,12 +131,21 @@ async function main() {
   const failures = [];
   const warnings = scanned.flatMap((s) => s.warnings);
 
-  for (const entry of scanned) {
-    const manifest = entry.manifest;
+  // 🔴 ISL-013 — the page's order, not the scan's: a kit's `requires` load before it, and a kit whose needed kit is missing
+  // is refused here exactly as the injector refuses it on the page (ruling 2 (a)), so the door's catalog and the page agree.
+  const byFolder = new Map(scanned.map((s) => [s.name, s]));
+  for (const m of toInjectModules(scanned)) {
+    const entry = byFolder.get(m.folder);
+    const manifest = entry && entry.manifest;
     if (!manifest || !manifest.main) continue; // iconsets and the like register no nodes
 
     const moduleName = manifest.name || entry.name;
     moduleRuntimes[moduleName] = manifest.runtimes || ['browser'];
+
+    if (m.refused) {
+      failures.push({ kitModule: moduleName, dirPath: entry.dirPath, message: `not loaded: ${m.refused}` });
+      continue;
+    }
 
     const indexPath = path.join(projectDirectory, entry.dirPath, manifest.main);
     const before = collected.length;
@@ -149,6 +174,7 @@ async function main() {
         // `registerModule` stamps `module` onto every node it registers, and
         // that field is what marks a payload entry as a kit node downstream.
         module.name = module.name || moduleName;
+        module.folder = module.folder || entry.name; // ISL-013: `getModule` finds a kit by its folder too
         runtime.registerModule(module);
       } catch (error) {
         failures.push({

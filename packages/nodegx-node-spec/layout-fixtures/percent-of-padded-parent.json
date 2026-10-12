@@ -1,0 +1,89 @@
+{
+  "name": "percent-of-padded-parent",
+  "rule": "across the axis a percent is of the content box less the margins; along it, a fill with the percent as basis and weight",
+  "nodes": [
+    {
+      "id": "col",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 400,
+          "unit": "px"
+        },
+        "height": {
+          "value": 300,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "paddingTop": {
+          "value": 20,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 20,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 20,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 20,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "half",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 50,
+              "unit": "%"
+            },
+            "height": {
+              "value": 40,
+              "unit": "px"
+            },
+            "marginLeft": {
+              "value": 10,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "quarter",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 25,
+              "unit": "%"
+            }
+          }
+        },
+        {
+          "id": "rest",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 40,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

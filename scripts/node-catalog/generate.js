@@ -23,12 +23,18 @@
  *
  * Output is deterministic; the generator runs the extraction twice and
  * asserts byte-identical results before writing anything.
+ *
+ * NSP-018 (phase 107): for a node with an executable spec, port descriptions are taken from the spec
+ * (scripts/node-spec/load-specs.js), and a runtime description that differs from it fails both modes; its
+ * reducers' branches give the node's `rules` (scripts/node-spec/rules.js).
  */
 const { spawnSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { bundleEntry } = require('./lib/bundle');
+const { loadSpecs } = require('../node-spec/load-specs');
+const { rulesFor } = require('../node-spec/rules');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const OUT_JSON = path.join(REPO_ROOT, 'packages/noodl-types/src/node-catalog.json');
@@ -148,6 +154,11 @@ export interface ParameterPattern {
    * \`value-<state>-<value>\` is chosen by the matching \`type-<value>\` parameter.
    */
   valueType?: string;
+  /**
+   * Parameters these ports need, set as given, to exist at all — observed by driving the hook with
+   * them unset. The Component Stack's \`pagePath-<pageId>\` needs \`{ useRoutes: true }\` (P107-C127).
+   */
+  when?: Record<string, unknown>;
   /** A real emitted port name, preferring one that shows verbatim interpolation. */
   example: string;
 }
@@ -181,6 +192,8 @@ export interface CatalogNode {
   category?: NodeCategory;
   isVisual: boolean;
   isDeprecated: boolean;
+  /** For a deprecated type: the type that replaced it, from its definition (P107 R25). Absent when nothing did. */
+  replacedBy?: NodeTypeName;
   /** False for legacy/superseded types or ones created only through specialised flows; avoid authoring these. */
   inNodePicker: boolean;
   availableIn: RuntimeEnvironment[];
@@ -200,7 +213,13 @@ export interface CatalogNode {
   singleton?: boolean;
   allowAsChild?: boolean;
   allowChildrenWithCategory?: string[];
+  /** Set on \`Component Children\`: a component that holds one holds children of these categories. */
+  haveComponentChildren?: string[];
   allowAsExportRoot?: boolean;
+  /** The port whose value titles an unlabelled node's card (\`@nodegx/project-contract/node-title\`, P107 R24). */
+  usePortAsLabel?: string;
+  /** \`filename\` or \`length\`: how that title is cut. */
+  portLabelTruncationMode?: string;
   useVariants?: boolean;
   visualStates?: Array<{ name: string; label: string }>;
   inputs: CatalogPort[];
@@ -212,6 +231,12 @@ export interface CatalogNode {
    * are called.
    */
   parameterEncoding: ParameterEncoding | null;
+  /**
+   * NSP-018 (phase 107) — for a node with an executable spec, what it does in words: for each input port, one line
+   * per case, \`<the case> → <what the wire carries>\`. Generated from the spec; a port is absent until its cases
+   * have been given their words.
+   */
+  rules?: Record<string, string[]>;
 }
 
 export interface Typecast {
@@ -229,6 +254,51 @@ export interface NodeCatalog {
   nodes: CatalogNode[];
 }
 `;
+}
+
+/**
+ * NSP-018 (phase 107) — for a node with a spec, a port's description is the SPEC's: the catalog takes it from
+ * `packages/nodegx-node-spec/src/nodes`, where it is edited, and the runtime's registration keeps its own copy only because
+ * the editor reads it there. Returns every port whose runtime description differs from its spec's — each one is a
+ * description edited in the wrong place, or a spec that has not been told. Outcome ports (`done`, `unchanged`, …) are drawn
+ * from the spec's `outcomes`, not declared, and keep the runtime's words.
+ */
+function takeDescriptionsFromSpecs(catalog, specs) {
+  const disagreements = [];
+  const byName = new Map(catalog.nodes.map((n) => [n.typeName, n]));
+  for (const [typeName, spec] of Object.entries(specs)) {
+    const node = byName.get(typeName);
+    if (!node) continue; // the catalog-parity gate (packages/nodegx-node-spec) fails a spec with no catalog node
+    for (const [plug, ports, declared] of [
+      ['input', node.inputs, spec.inputs],
+      ['output', node.outputs, spec.outputs]
+    ]) {
+      for (const port of ports) {
+        if (!Object.prototype.hasOwnProperty.call(declared, port.name)) continue;
+        const fromSpec = declared[port.name].description;
+        if (port.description !== fromSpec) {
+          disagreements.push({ typeName, plug, port: port.name, runtime: port.description, spec: fromSpec, source: spec.source });
+        }
+        if (fromSpec === undefined) delete port.description;
+        else port.description = fromSpec;
+      }
+    }
+  }
+  return disagreements;
+}
+
+function describeDisagreements(disagreements) {
+  const lines = disagreements.map(
+    (d) =>
+      `  ${d.typeName} · ${d.plug} "${d.port}" (${d.source || 'no source named'})\n` +
+      `    the runtime says: ${JSON.stringify(d.runtime)}\n` +
+      `    the spec says:    ${JSON.stringify(d.spec)}`
+  );
+  return (
+    `${disagreements.length} port description(s) differ from the node's spec (NSP-018):\n${lines.join('\n')}\n` +
+    'A specced node\'s descriptions are edited in its spec (packages/nodegx-node-spec/src/nodes). Make the runtime\'s ' +
+    'registration say the same words, or change the spec if the runtime\'s are the better ones.'
+  );
 }
 
 async function main() {
@@ -250,6 +320,13 @@ async function main() {
     }
 
     const catalog = JSON.parse(first);
+    const specs = loadSpecs();
+    const disagreements = takeDescriptionsFromSpecs(catalog, specs);
+    if (disagreements.length) throw new Error(describeDisagreements(disagreements));
+    // NSP-018 — a specced node's rules in words, from its reducers' `says` (scripts/node-spec/rules.js)
+    const rules = rulesFor(specs);
+    for (const node of catalog.nodes) if (rules[node.typeName]) node.rules = rules[node.typeName];
+    const json = JSON.stringify(catalog, null, 2) + '\n';
     const dts = emitTypes(catalog);
 
     const dynamic = catalog.nodes.filter((n) => n.dynamicPorts);
@@ -278,7 +355,7 @@ async function main() {
     if (checkMode) {
       const stale = [];
       // --check always compares against the committed artifacts; --out-dir is a write option.
-      const current = { [OUT_JSON]: first, [OUT_DTS]: dts };
+      const current = { [OUT_JSON]: json, [OUT_DTS]: dts };
       for (const [file, expected] of Object.entries(current)) {
         const committed = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null;
         if (committed !== expected) stale.push(path.relative(REPO_ROOT, file));
@@ -293,7 +370,7 @@ async function main() {
       console.log('Committed catalog is up to date.');
     } else {
       if (outDir) fs.mkdirSync(outDir, { recursive: true });
-      fs.writeFileSync(targetJson, first);
+      fs.writeFileSync(targetJson, json);
       fs.writeFileSync(targetDts, dts);
       console.log(`Wrote ${targetJson} and ${targetDts}.`);
     }

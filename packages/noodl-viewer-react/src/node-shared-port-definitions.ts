@@ -215,6 +215,8 @@ interface FileDropInstance {
     acceptedFileTypes?: string;
     /** Enters minus leaves — see the note on `onDragEnter`. */
     dragDepth?: number;
+    /** The element the count belongs to (P107-C81). */
+    dragElement?: EventTarget | null;
     isDragOver?: boolean;
     droppedFile?: File;
     droppedFiles?: File[];
@@ -260,6 +262,15 @@ function fileDropArmed(node: FileDropInstance, e: DragEvent): boolean {
   return Array.prototype.indexOf.call(types, 'Files') !== -1;
 }
 
+/**
+ * P107-C81 — the zone forgets the drag: the count to 0 and `Is Dragging Over` false. Accept File Drops switched off, and the
+ * element leaving the page (`_fileDropLeftPage`, from react-component-node.ts `componentWillUnmount`): neither hears a leave.
+ */
+function fileDropDark(node: FileDropInstance): void {
+  node._internal.dragDepth = 0;
+  setDragOver(node, false);
+}
+
 /** Publishes `Is Dragging Over`, and only when it actually changed. */
 function setDragOver(node: FileDropInstance, value: boolean): void {
   if (!!node._internal.isDragOver === value) return;
@@ -290,8 +301,9 @@ function flagFileDropOutputs(node: FileDropInstance): void {
  * blank port must mean: the alternative is a drop zone that silently refuses every file until
  * a field nobody filled in gets filled in.
  */
-function fileMatchesAcceptedTypes(file: File, accept: string | undefined): boolean {
-  const patterns = (accept || '')
+function fileMatchesAcceptedTypes(file: File, accept: unknown): boolean {
+  // Read as text (P107-C82): a wired number names a type no file has, so the drop is rejected out loud instead of throwing.
+  const patterns = String(accept || '')
     .split(',')
     .map((entry) => entry.trim().toLowerCase())
     .filter(Boolean);
@@ -564,6 +576,16 @@ export default {
     });
   },
   addTransformInputs(definition: ReactNodeDefinition) {
+    /**
+     * P107-C63 (ISL-026, ruled "Use the default"): an empty Placement value — `undefined`, `null`, or a unit
+     * object holding either — stores nothing, so `updateTransform` leaves that part out (position and rotation
+     * 0) and `updateTransformOrigin` uses 50%. `value.value` on an empty value threw and the update died.
+     */
+    const placementOf = (value: { value?: unknown; unit?: string } | null | undefined): string | undefined =>
+      value === undefined || value === null || value.value === undefined || value.value === null
+        ? undefined
+        : value.value + value.unit;
+
     addInputs(definition, {
       transformX: {
         group: 'Placement',
@@ -579,7 +601,7 @@ export default {
         },
         set(value) {
           if (!this.transforms) this.transforms = {};
-          this.transforms.x = value.value + value.unit;
+          this.transforms.x = placementOf(value);
           this.updateTransform();
         }
       },
@@ -597,7 +619,7 @@ export default {
         },
         set(value) {
           if (!this.transforms) this.transforms = {};
-          this.transforms.y = value.value + value.unit;
+          this.transforms.y = placementOf(value);
           this.updateTransform();
         }
       },
@@ -615,7 +637,7 @@ export default {
         },
         set(value) {
           if (!this.transforms) this.transforms = {};
-          this.transforms.rotation = value.value + value.unit;
+          this.transforms.rotation = placementOf(value);
           this.updateTransform();
         }
       },
@@ -648,7 +670,7 @@ export default {
         },
         default: '50',
         set(value) {
-          this.transformOriginX = value.value + value.unit;
+          this.transformOriginX = placementOf(value);
           this.updateTransformOrigin();
         }
       },
@@ -665,7 +687,7 @@ export default {
         },
         default: '50',
         set(value) {
-          this.transformOriginY = value.value + value.unit;
+          this.transformOriginY = placementOf(value);
           this.updateTransformOrigin();
         }
       }
@@ -944,6 +966,12 @@ export default {
    * on shows one extra row and gains no output clutter at all.
    */
   addFileDropPorts(definition: ReactNodeDefinition) {
+    // P107-C81 — a zone leaving the page under a drag goes dark (the browser sends no leave for an element it removes)
+    if (!definition.methods) definition.methods = {};
+    definition.methods._fileDropLeftPage = function (this: FileDropInstance) {
+      fileDropDark(this);
+    };
+
     addInputs(definition, {
       acceptFileDrops: {
         index: 350,
@@ -955,6 +983,8 @@ export default {
           'Lets a file dragged from the desktop be dropped onto this element, which reveals the File Drop outputs below',
         set(this: FileDropInstance, value: boolean) {
           this._internal.acceptFileDrops = !!value;
+          // P107-C81: switched off, the zone can no longer hear the drag's leave, so it forgets the count and goes dark now.
+          if (!value) fileDropDark(this);
         }
       },
       acceptedFileTypes: {
@@ -1005,6 +1035,12 @@ export default {
             // edge. Counting enters and leaves is the standard answer and the only one that
             // survives a drop zone with content in it — which is every real drop zone, since
             // the "Drop files here" label is itself a child.
+            // P107-C81 (ruled "the zone tracks itself"): the count belongs to one element. A zone redrawn under the drag (a new
+            // Tag, Mounted off and on) never hears the old element's leave, so an enter on a new element starts it again.
+            if (this._internal.dragElement !== e.currentTarget) {
+              this._internal.dragElement = e.currentTarget;
+              this._internal.dragDepth = 0;
+            }
             this._internal.dragDepth = (this._internal.dragDepth || 0) + 1;
             setDragOver(this, true);
           },
@@ -1981,7 +2017,8 @@ export default {
           // ⚠️ `!url.startsWith(baseUrl)` is not belt-and-braces: without it, a value that already
           // carries the base gains it twice (`/x/y/x/y/…`). An author deploying to a sub-path can
           // reasonably type the full path into this port, and a wire can carry one. `Image.tsx`
-          // has no such guard and doubles in that case — a defect this port should not copy.
+          // carries the same guard since P107-C93, where its lack (and a write-back into the
+          // node's props) grew the base at every render.
           // Caught by exp018's "already carries the base" arm, which failed on the first version
           // of this fix.
           if (url && url.startsWith('/')) {
@@ -2434,7 +2471,9 @@ export default {
         description:
           'Typeface to render the text in, either a web-safe family name or a font file added to the project',
         set(value) {
-          if (value) {
+          // P107-C61 (ISL-026, ruled "Treat it as no family"): a value that is not text — a wired number, an
+          // object — falls back to the default font; `.split` on it threw and the rest of the update died
+          if (value && typeof value === 'string') {
             let family = value;
             if (family.split('.').length > 1) {
               FontLoader.instance.loadFont(family);

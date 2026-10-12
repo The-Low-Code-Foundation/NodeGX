@@ -31,6 +31,7 @@ import type {
   LegacyConnection,
   LegacyVariant
 } from './ProjectExporter';
+import { inferComponentType } from './ProjectExporter';
 
 //  Import input types 
 
@@ -47,6 +48,8 @@ export interface ImportInput {
   routes?: RoutesV2File;
   /** Contents of nodegx.styles.json (optional) */
   styles?: StylesV2File;
+  /** P109 ISL-005 — `scripts/**.js`, read as `{ 'engine/world.js': source }`. */
+  scripts?: Record<string, string>;
   /** Per-component files, keyed by registry path (e.g. "Header", "Pages/Home") */
   components: Record<
     string,
@@ -282,6 +285,10 @@ export function reconstructLegacyComponent(
   if (typeof componentFile.modifiedBy === 'string' && componentFile.modifiedBy.length > 0) {
     component.modifiedBy = componentFile.modifiedBy;
   }
+  // P112-S7-LOGICTYPE — only when the name would not say it, so no other component gains a key (F46).
+  if (componentFile.type && componentFile.type !== inferComponentType(legacyName)) {
+    component.componentType = componentFile.type;
+  }
 
   if (componentFile.metadata && Object.keys(componentFile.metadata).length > 0) {
     component.metadata = componentFile.metadata as Record<string, unknown>;
@@ -393,6 +400,10 @@ export class ProjectImporter {
 
     if (variants.length > 0) {
       project.variants = variants;
+    }
+
+    if (input.scripts && Object.keys(input.scripts).length > 0) {
+      project.scripts = { ...input.scripts };
     }
 
     return { project, warnings };

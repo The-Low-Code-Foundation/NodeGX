@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e538ff79-af3c-5879-8897-78433ba038bc",
+  "name": "Renderer panel",
+  "path": "/Grown/Renderer panel",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "How the island is drawn on this computer: in 3D, or the flat garden and why (it cannot draw 3D, 3D was too slow, or it was chosen here), with the switch. The choice is kept on this computer."
+}

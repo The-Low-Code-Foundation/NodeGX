@@ -84,6 +84,8 @@ beforeAll(async () => {
 });
 
 const COMMANDS = TPL008_COMPONENTS.filter((c) => c.path.startsWith('Commands/')).map((c) => `/${c.path}`);
+/** TPL-008-PJ — the Projects tab's writes: in the demo they say its own "did not save" sentence, and are never reached. */
+const PROJECT_WRITES = [C.saveMove, C.addProject, C.recordBalance, C.markMoney, C.saveMoneyItem, C.endMoneyItem, C.saveProject, C.moveProject, C.setTaskProject];
 
 // ── §1 ─────────────────────────────────────────────────────────────────────
 
@@ -129,7 +131,7 @@ describe('§2 nothing in it talks to a backend', () => {
 
 describe('§3 it is in step with the template', () => {
   it('changes exactly the components that write, read or sign in', () => {
-    expect([...DEMO_CHANGED].sort()).toEqual([C.header, C.todoData, C.pageTodo, C.writeHistory, ...COMMANDS].sort());
+    expect([...DEMO_CHANGED].sort()).toEqual([C.header, C.todoData, C.projectsLogic, C.pageTodo, C.writeHistory, ...COMMANDS, ...PROJECT_WRITES].sort());
   });
 
   it('every interface is the template’s, except Reset demo and the reset it sends', () => {
@@ -190,10 +192,18 @@ describe('§3 it is in step with the template', () => {
     }
     expect(missing.sort()).toEqual(
       [
+        // TPL-008-PJ — the demo has no projects: Logic/Projects is one Function saying so.
+        '/Logic/Projects pjCarry',
+        '/Logic/Projects pjLoad',
+        '/Logic/Projects pjMoney',
+        '/Logic/Projects pjProblem',
+        '/Logic/Projects pjRows',
         '/Logic/Todo data dtActions',
+        '/Logic/Todo data dtChecks',
         '/Logic/Todo data dtEvents',
         '/Logic/Todo data dtHasTask',
         '/Logic/Todo data dtRecent',
+        '/Logic/Todo data dtRoutines',
         '/Logic/Todo data dtTasks',
         '/Pages/Todo tdAuth',
         '/Pages/Todo tdLogOut',
@@ -246,7 +256,10 @@ describe('§4 the store', () => {
       { output: 'tasks', collection: 'Task', sort: { property: 'position', order: 'ascending' }, limit: 1000 },
       { output: 'actions', collection: 'Action', sort: { property: 'position', order: 'ascending' }, limit: 1000 },
       { output: 'events', collection: 'Event', sort: { property: 'at', order: 'descending' }, limit: 1000, filter: { property: 'taskId', input: 'taskId' } },
-      { output: 'recent', collection: 'Event', sort: { property: 'at', order: 'descending' }, limit: 300 }
+      { output: 'recent', collection: 'Event', sort: { property: 'at', order: 'descending' }, limit: 300 },
+      // TPL-008-RC
+      { output: 'routines', collection: 'Routine', sort: { property: 'title', order: 'ascending' }, limit: 1000 },
+      { output: 'checks', collection: 'RoutineCheck', sort: { property: 'date', order: 'descending' }, limit: 1000 }
     ]);
   });
 
@@ -256,7 +269,11 @@ describe('§4 the store', () => {
     expect(first.signals).toEqual([]);
     expect((first.outputs.tasks as Row[]).map((t) => t.title)).toEqual(SEED_TITLES);
     expect(first.outputs.events).toEqual([]);
-    expect((first.outputs.recent as Row[]).length).toBe(13);
+    // The thirteen task lines, and the routines' own (TPL-008-RC) — how many of those there are
+    // depends on how many Fridays the last ten days held, so they are counted, not typed.
+    const recent = first.outputs.recent as Row[];
+    expect(recent.filter((e) => !String(e.taskId).startsWith('seed-routine-')).length).toBe(13);
+    expect(recent.length).toBeGreaterThan(13);
     expect(b.map.has(DEMO_STORAGE_KEY)).toBe(true);
 
     const created = run(demoWriteScript('create', 'Task', ['title', 'position', 'status']), { title: 'Order a chair', position: 9, status: 'open' }, b.win);

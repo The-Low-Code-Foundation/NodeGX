@@ -976,7 +976,9 @@ export function AiAuthoringPanel({ width = 'panel' }: AiAuthoringPanelProps = {}
     const validation = validateCandidateComponent(fromProjectModel(project), session.legacyName, files, {
       ...(session.baseComponentFiles ? { baseline: session.baseComponentFiles } : {}),
       // REL-002a — see ProjectAuthoringView: `null` means the project has not decided.
-      bodyScroll: typeof project.getSettings().bodyScroll === 'boolean' ? !!project.getSettings().bodyScroll : null
+      bodyScroll: typeof project.getSettings().bodyScroll === 'boolean' ? !!project.getSettings().bodyScroll : null,
+      // P109 ISL-005 — a Function's `uses` is checked against the project's script files.
+      scripts: project.getScriptPaths()
     });
     if (!validation.ok) {
       const lines = validation.errors.slice(0, 3).map(formatDiagnosticLine);
@@ -1840,6 +1842,7 @@ export function AiAuthoringPanel({ width = 'panel' }: AiAuthoringPanelProps = {}
         host === 'document' ? undefined : (
           <Tooltip content={EXPAND_LABEL} showAfterMs={400}>
             <IconButton
+              ariaLabel={EXPAND_LABEL}
               icon={IconName.Columns}
               size={IconSize.Default}
               variant={IconButtonVariant.Transparent}

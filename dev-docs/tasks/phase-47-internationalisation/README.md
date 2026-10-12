@@ -2,6 +2,13 @@
 
 **Created:** 2026-08-06
 **Status:** 📋 Specced, not started — 9 tasks. Post-alpha.
+**Meanwhile (P109 ISL-007, ruled 2026-10-02 "Adopt the add-on"):** bilingual apps use the shipped
+`library/modules/i18next-translation` module, fixed in its 1.1.0 (2026-10-03): text shows as typed (no HTML escaping),
+a missing word or `{{variable}}` is named in the editor and never reaches the screen as braces or as the previous word,
+`<html lang>` follows the language, and the detector keeps a person's choice (`?lng=`, then local storage, then the
+browser: INT-005's order, minus a project default). **Nothing here is built as an INT task**; INT-001's string table,
+INT-002's translatable parameters and INT-009's door tools are still this phase's. The P65 check ("i18next vs phase 47")
+is answered by that ruling: the module is the answer until this phase starts.
 **Doctrine:** the same one as [phase 41](../phase-41-accessibility/NORTH-STAR.md), applied to a
 second invisible property.
 

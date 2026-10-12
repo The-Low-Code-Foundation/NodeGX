@@ -95,6 +95,20 @@ function createParseDialect(): FilterDialect<ParseWhere> {
       return { $relatedTo: { object: { __type: 'Pointer', objectId: id, className }, key } };
     },
 
+    path(node, ctx) {
+      // The wire shape is the neutral shape with every nested `where` in Parse
+      // spelling: `$path` is what the built-in backend's query builder reads.
+      const p = node.value;
+      const hops = p.hops.map((h) => {
+        const out: Record<string, unknown> = { ...h };
+        if (h.where) out.where = ctx.translate(h.where);
+        return out;
+      });
+      const from: Record<string, unknown> = { collection: p.from.collection };
+      if (p.from.where) from.where = ctx.translate(p.from.where);
+      return { $path: { from, hops, maxDepth: p.maxDepth } };
+    },
+
     condition(node, ctx) {
       return { [node.field]: conditionValue(node, ctx) };
     }

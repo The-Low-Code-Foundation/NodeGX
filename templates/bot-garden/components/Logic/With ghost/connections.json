@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2b3b639c-e4d6-526b-8521-ae8b846a0556",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "withghostIn",
+      "fromProperty": "ghost",
+      "toId": "withghostFn",
+      "toProperty": "in-ghost"
+    },
+    {
+      "fromId": "withghostIn",
+      "fromProperty": "showGhost",
+      "toId": "withghostFn",
+      "toProperty": "in-showGhost"
+    },
+    {
+      "fromId": "withghostIn",
+      "fromProperty": "world",
+      "toId": "withghostFn",
+      "toProperty": "in-world"
+    },
+    {
+      "fromId": "withghostFn",
+      "fromProperty": "out-world",
+      "toId": "withghostOut",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "withghostFn",
+      "fromProperty": "success",
+      "toId": "withghostOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -541,6 +541,8 @@ function indexJs(kit) {
     // Structure, not decisions. These are what make the node a box at all, so
     // they are not ports. The test: if you can imagine wanting to change one
     // from the graph, it was a decision — move it into inputCss.
+    // They reach the component as \`props.style\`, an inline style: it beats any
+    // rule in the kit's stylesheet, so set a property here or in a class rule, never both.
     defaultCss: { display: 'flex', flexDirection: 'column', borderStyle: 'solid' },
 
     // Values handed to the React component above, for the elements it draws
@@ -717,6 +719,12 @@ ${ports}
 itself. Inner text colour has to be an \`inputProp\` — there is no other route
 to it.
 
+**\`defaultCss\` is an inline style.** It and \`inputCss\` reach the component as
+\`props.style\`, which beats any rule in the kit's stylesheet. Set a property in
+one place, never both: a \`display: grid\` in a class rule loses, silently, to a
+\`display: block\` in \`defaultCss\`. The same object applies in the editor
+canvas, on a deployed page and in an exported app.
+
 ## Adding a node
 
 1. Write a second definition object in \`index.js\`, annotated the same way.
@@ -724,6 +732,42 @@ to it.
    kits in one project can never collide.
 3. Add it to \`kit.reactNodes\`.
 4. Reload the preview.
+
+## Traps you will meet
+
+Each of these cost a real kit at least one rebuild. The docs page *Writing your
+own nodes* has the full version, with a sample, under "Wrapping a library".
+
+- **A kit node can be a component's only visual node.** It draws on its own,
+  in the canvas and on a deployed page. Wrap it in a Group only for the
+  Group's size ports.
+- **A signal input arrives as a count.** A prop cannot hold an event, so a
+  signal in \`inputProps\` reaches your component as a number that goes up by
+  one each time it fires. Two pulses in the same frame can count as one.
+- **Edits vanish when the page re-renders.** A library that owns its own DOM
+  (an editor, a map, a block editor) must be made once, into an element React
+  never renders into, and kept in a ref. Load a value into it only when the
+  graph sends a new value, and never your own output coming back.
+- **A library's CSS reaches the whole page.** Its stylesheet, and any rule you
+  write to restyle it, applies to every element on the page your node is on.
+  Scope every rule of yours under a class on your node's root.
+- **A colour for anything that is not CSS has to be looked up.** Colour ports
+  default to a \`var(--token)\`, and that stays right. A canvas, WebGL or a
+  library's theme object cannot read \`var(--primary)\`: set the value as a
+  probe element's \`color\` and read \`getComputedStyle(probe).color\`.
+- **\`defaultCss\` is an inline style** (see Ports above): it beats any rule
+  in your stylesheet.
+- **A library written as modern modules will not load.** Each file in
+  \`dependencies\` loads as a plain script, so one with \`import\` in it fails.
+  Bundle it once into a plain script with esbuild (\`--bundle --format=iife\`)
+  and list that file instead.
+- **A dependency's global is not there when your file first runs.** An agent
+  reads your kit by loading \`index.js\` alone, and a server render has no page.
+  Read the library's global inside an effect, never at the top of the file.
+- **Another kit's code: name the kit in \`requires\`.** List it in
+  \`manifest.json\` (\`"requires": ["garden-kit"]\`) and read what it shares
+  with \`Noodl.getModule('garden-kit')\`. It then loads before yours. The top
+  of your file can read it. Never walk \`window.__noodl_modules\`.
 
 ## Autocomplete
 

@@ -22,7 +22,7 @@
 
 import type { BackendType } from '../backends';
 import type { BackendDescriptor } from '../capabilities';
-import type { Filter, FilterOperator, RelatedToFilter } from '../filter';
+import type { Filter, FilterOperator, PathFilter, RelatedToFilter } from '../filter';
 
 /**
  * What a translator needs to know about one field.
@@ -191,6 +191,7 @@ export type FilterNode =
   | { kind: 'group'; combinator: 'and' | 'or'; children: Filter[] }
   | { kind: 'id'; operator: 'idEqualTo' | 'idContainedIn'; value: unknown }
   | { kind: 'relatedTo'; value: RelatedToFilter }
+  | { kind: 'path'; value: PathFilter }
   | { kind: 'condition'; field: string; operator: FilterOperator; value: unknown; regexOptions?: string };
 
 /**
@@ -225,6 +226,8 @@ export interface FilterDialect<T> {
   condition(node: Extract<FilterNode, { kind: 'condition' }>, ctx: DialectContext): T;
   id(node: Extract<FilterNode, { kind: 'id' }>, ctx: DialectContext): T;
   relatedTo(node: Extract<FilterNode, { kind: 'relatedTo' }>, ctx: DialectContext): T;
+  /** P116 ONT-004: a path through several links. Refused by name where the backend has no cell for it. */
+  path(node: Extract<FilterNode, { kind: 'path' }>, ctx: DialectContext): T;
 }
 
 /** Handed to a dialect so it can read the schema and refuse an operator uniformly. */
@@ -232,4 +235,10 @@ export interface DialectContext {
   schema?: FilterSchema;
   /** Refuse an operator this dialect cannot express, with a sentence for the user. */
   fail(message: string, details?: { operator?: FilterOperator; field?: string }): never;
+  /**
+   * Translate a nested filter in this same dialect — the `where` of a path's start or hop.
+   * It is translated with THIS collection's schema, so a Date or a Pointer on another
+   * collection along the path is written as the caller spelled it.
+   */
+  translate(filter: Filter | null | undefined): unknown;
 }

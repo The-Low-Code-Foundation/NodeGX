@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3e01f9a9-0f70-5fdf-8d6b-37c28a3e4084",
+  "name": "Bar state",
+  "path": "/Logic/Bar state",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Which tab, band and language is lit. Runs when an input changes; Ran after each run."
+}

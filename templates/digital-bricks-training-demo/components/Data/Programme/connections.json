@@ -128,6 +128,12 @@
       "fromProperty": "out-work",
       "toId": "fp_out",
       "toProperty": "work"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "refresh",
+      "toId": "pr_about",
+      "toProperty": "run"
     }
   ]
 }

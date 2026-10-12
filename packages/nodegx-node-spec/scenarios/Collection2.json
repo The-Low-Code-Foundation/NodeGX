@@ -1,0 +1,237 @@
+[
+  {
+    "name": "Id binds a seeded array: Id, Items (the array with its name), First Item Id and Count at the first settle",
+    "because": "collectionnode2.ts :131 setCollectionID → :264-276 setCollection flags the four",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "collectionId": "abc"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "Items copies a plain array into the bound array in place: Changed once, First Item Id and Count move, Items keeps its last snapshot (AC6: mutated, not replaced)",
+    "because": ":153-156 the copy at the frame end, :325 set() diffs in place, :80-85 the announcement re-sends count and firstItemId only",
+    "params": {
+      "collectionId": "abc"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "items",
+        "value": [
+          {
+            "a": 1
+          },
+          {
+            "a": 2
+          }
+        ]
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "null on Items empties the array: Changed once",
+    "because": ":141-144, collection.ts :490 — a falsy source is an empty array",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "collectionId": "abc"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "items",
+        "value": null
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Fetch twice in one frame: one rebind, Fetched once, done twice",
+    "because": ":294-300 a token per press; :302-303 one callback",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "collectionId": "abc"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Id unticked: a new Id re-sends Id only; Fetch then rebinds to it",
+    "because": ":131-134 shouldRunOnValueChanged, :310 setCollectionID(collectionId)",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "runOnChange-collectionId": false,
+      "collectionId": "abc"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionId",
+        "value": "def"
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "No Id: Items binds a fresh anonymous array first, then copies into it",
+    "because": ":319-320 — Collection.get() with no name when nothing is bound and the Id box is ticked",
+    "params": {},
+    "steps": [
+      {
+        "set": "items",
+        "value": [
+          {
+            "a": 1
+          }
+        ]
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Array contents unticked: the copy changes the array silently — no Changed, Count stays as last sent",
+    "because": ":73 shouldRunOnValueChange('array')",
+    "params": {
+      "collectionId": "abc",
+      "runOnChange-array": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "items",
+        "value": [
+          {
+            "a": 1
+          }
+        ]
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "The same Id again is not a change: Id re-sent (no event), no rebind, no Fetched",
+    "because": ":129-131 DEF-046 read-before-write",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "collectionId": "abc"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionId",
+        "value": "abc"
+      },
+      "settle"
+    ]
+  }
+]

@@ -12,6 +12,7 @@ import {
   type StyleObject
 } from '../../react-component-node';
 import type { Noodl } from '../../types';
+import { dataAttributeProps } from '../../components/noodl-root-ref';
 import Utils from './utils';
 
 //this stops a text field from being unfocused by the clickHandler in the viewer that handles focus globally.
@@ -88,6 +89,7 @@ class TextFieldComponent extends React.Component<TextFieldProps, TextFieldState>
       style,
       className: props.className,
       placeholder: props.placeholder,
+      ...dataAttributeProps(props.dom),
       onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => this.onChange(e)
     };
 
@@ -141,6 +143,7 @@ const TextInput: ReactNodeDefinition = {
   // `displayName`. The picker therefore offered two entries reading the same word, and
   // the one an author was most likely to reach for was this one.
   deprecated: true,
+  replacedBy: 'net.noodl.controls.textinput',
   docs: 'https://docs.noodl.net/nodes/visual/text-input',
   allowChildren: false,
   noodlNodeAsProp: true,

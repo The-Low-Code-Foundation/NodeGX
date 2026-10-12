@@ -1,0 +1,6 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c-accounts",
+  "version": 1,
+  "nodes": [{ "id": "a_list", "type": "DbCollection2", "label": "Every account", "parameters": { "collectionName": "Account" } }]
+}

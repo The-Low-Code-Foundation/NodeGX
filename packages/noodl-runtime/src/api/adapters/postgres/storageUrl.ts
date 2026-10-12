@@ -61,7 +61,7 @@ export function parseStorageUrl(raw: string): ParsedStorageUrl {
   const m = /^([a-zA-Z][a-zA-Z0-9+.-]*):/.exec(text);
   if (!m) {
     throw new StorageUrlError(
-      `NODEGX_STORAGE_URL is not a URL: ${JSON.stringify(text)}. Expected postgres://user:password@host:5432/database, ` +
+      `NODEGX_STORAGE_URL is not a URL: ${JSON.stringify(text)}. Expected postgres://USER:PASS@host:5432/database, ` +
         'or leave it unset to use the built-in SQLite backend.',
       null
     );

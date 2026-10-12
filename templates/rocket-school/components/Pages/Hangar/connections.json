@@ -148,6 +148,18 @@
       "toProperty": "text"
     },
     {
+      "fromId": "hgT",
+      "fromProperty": "visitMoon",
+      "toId": "hgMoon",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hgMoon",
+      "fromProperty": "onClick",
+      "toId": "hgGoMoon",
+      "toProperty": "navigate"
+    },
+    {
       "fromId": "hgMe",
       "fromProperty": "name",
       "toId": "hgPreview",

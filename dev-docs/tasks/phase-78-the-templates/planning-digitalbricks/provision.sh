@@ -33,12 +33,26 @@ systemctl is-active --quiet "$BACKEND_UNIT" || { echo "FATAL: $BACKEND_UNIT is n
 
 chown -R caddy:caddy /srv/planning
 
-# The merged policy: installed only when the planner's collections are not there yet. Never overwrites otherwise.
-if grep -q '"MonthPlan"' "$DATA_DIR/security.json"; then
-  echo "==> policy already carries the planner collections; leaving $DATA_DIR/security.json alone"
+# The merged policy: installed only when the planner's newest collection is not there yet. Never overwrites
+# otherwise. TPL-010-T added `PlanEvent` (the history), so a box that has the first seven gets it on a re-run.
+if grep -q '"PlanEvent"' "$DATA_DIR/security.json"; then
+  echo "==> policy already carries the planner collections, PlanEvent included; leaving $DATA_DIR/security.json alone"
 else
   [ -f "$STAGE/security.json" ] || { echo "FATAL: $STAGE/security.json missing (run merge-policy.js locally and scp it)" >&2; exit 1; }
   grep -q '"Task"' "$STAGE/security.json" || { echo "FATAL: merged policy has lost the todo collections; refusing" >&2; exit 1; }
+  grep -q '"MonthPlan"' "$STAGE/security.json" && grep -q '"PlanEvent"' "$STAGE/security.json" || { echo "FATAL: merged policy lacks the planner collections; refusing" >&2; exit 1; }
+  # TPL-008-RC (2026-09-23): the todo list's own policy grows too (Routine, RoutineCheck). A merged file made before
+  # that landed on the box would drop them, so every collection the live policy has must be in the staged one.
+  fatal() { echo "FATAL: $*" >&2; exit 1; }
+python3 - "$DATA_DIR/security.json" "$STAGE/security.json" <<'KEEP' || fatal "the staged policy would drop a collection the live one has; refusing"
+import json, sys
+live = set(json.load(open(sys.argv[1]))['collections'])
+staged = set(json.load(open(sys.argv[2]))['collections'])
+lost = sorted(live - staged)
+if lost:
+    print('would drop: ' + ', '.join(lost), file=sys.stderr)
+    sys.exit(1)
+KEEP
   cp -a "$DATA_DIR/security.json" "$DATA_DIR/security.json.bak-$(date +%Y%m%d%H%M%S)"
   install -o "$APP_USER" -g "$APP_USER" -m 640 "$STAGE/security.json" "$DATA_DIR/security.json"
   systemctl restart "$BACKEND_UNIT"
@@ -75,6 +89,9 @@ ${DOMAIN} {
 		root * ${SITE_DIR}
 		try_files {path} /index.html
 		header /index.html Cache-Control "no-cache"
+		header /sw.js Cache-Control "no-cache"
+		header /pwa/* Cache-Control "no-cache"
+		header /pwa/manifest.webmanifest Content-Type "application/manifest+json"
 		file_server
 	}
 }

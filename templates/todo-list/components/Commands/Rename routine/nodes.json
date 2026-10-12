@@ -1,0 +1,143 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b5106013-e631-55ea-8201-78a685200ac7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "RenameroutIn",
+      "type": "Component Inputs",
+      "label": "What to do",
+      "ports": [
+        {
+          "name": "routines",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "routineId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "newTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "RenameroutOut",
+      "type": "Component Outputs",
+      "label": "Done",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "RenameroutGuard",
+      "type": "JavaScriptFunction",
+      "label": "Is there anything to write?",
+      "parameters": {
+        "functionScript": "function findRow(rows, id) {\n  for (var i = 0; i < rows.length; i++) if (rows[i] && rows[i].id === id) return rows[i];\n  return null;\n}\nvar row = findRow(Inputs.routines || [], String(Inputs.routineId || ''));\nif (!row) return;\nvar old = String(row.title || '');\nvar t = String(Inputs.newTitle || '').trim();\nif (t === '' || t === old) return;\nOutputs.title = t;\nOutputs.summary = 'Renamed from “' + old + '”';\nOutputs.go();",
+        "runOnChange-in-routines": false,
+        "runOnChange-in-routineId": false,
+        "runOnChange-in-newTitle": false
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-routines",
+          "displayName": "routines",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-routineId",
+          "displayName": "routineId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-newTitle",
+          "displayName": "newTitle",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-summary",
+          "displayName": "summary",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "RenameroutWrite",
+      "type": "SetDbModelProperties",
+      "label": "Rename it",
+      "parameters": {
+        "collectionName": "Routine",
+        "idSource": "explicit"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "RenameroutHistory",
+      "type": "/Logic/Write history",
+      "label": "Write the history line",
+      "parameters": {
+        "kind": "routine-renamed"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "RenameroutProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "string",
+        "value": "That change did not save. Check your connection, then try again."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 640
+    }
+  ]
+}

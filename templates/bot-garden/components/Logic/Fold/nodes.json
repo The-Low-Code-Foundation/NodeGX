@@ -1,0 +1,161 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "16a07cd4-7a46-5181-86e3-d609456fa28f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "foldIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "containerId",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "count",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "i",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "len",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "foldFn",
+      "type": "JavaScriptFunction",
+      "label": "Fold",
+      "parameters": {
+        "functionScript": "var { findBlock, maxId, reId } = Scripts.fold;\nvar program = JSON.parse(JSON.stringify(Array.isArray(Inputs.program) ? Inputs.program : []));\nvar i = Math.max(0, Math.floor(Number(Inputs.i)) || 0), len = Math.max(1, Math.floor(Number(Inputs.len)) || 1), count = Math.max(2, Math.floor(Number(Inputs.count)) || 2);\nvar containerId = Inputs.containerId === undefined || Inputs.containerId === null || Inputs.containerId === '' ? null : Number(Inputs.containerId);\nvar host = containerId === null ? program : (findBlock(program, containerId) || {}).body;\nvar repeatId = 0;\nif (host && i + len * count <= host.length) {\n  var next = { n: maxId(program) + 1 };\n  var body = [];\n  for (var k = 0; k < len; k++) body.push(reId(host[i + k], next));\n  repeatId = next.n++;\n  host.splice(i, len * count, { id: repeatId, t: 'repeat', n: count, body: body });\n}\nOutputs.program = program;\nOutputs.repeatId = repeatId;\nOutputs.folded = repeatId > 0;\nOutputs.blocks = countBlocksFold(program);\nfunction countBlocksFold(list) { var n = 0; for (var j = 0; j < list.length; j++) { if (!list[j]) continue; n++; if (list[j].body) n += countBlocksFold(list[j].body); if (Array.isArray(list[j]['else'])) n += countBlocksFold(list[j]['else']); } return n; }\n",
+        "runOnChange-in-containerId": false,
+        "runOnChange-in-count": false,
+        "runOnChange-in-i": false,
+        "runOnChange-in-len": false,
+        "runOnChange-in-program": false,
+        "uses": "fold.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-program",
+          "displayName": "program",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-i",
+          "displayName": "i",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-len",
+          "displayName": "len",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-count",
+          "displayName": "count",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-containerId",
+          "displayName": "containerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-program",
+          "displayName": "program",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-repeatId",
+          "displayName": "repeatId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-folded",
+          "displayName": "folded",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blocks",
+          "displayName": "blocks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "foldOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "blocks",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "folded",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "program",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "repeatId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

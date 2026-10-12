@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "63e9051a-f9d8-5757-8870-a233eab9b179",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "padkeysIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "allowed",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "palette",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "world",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "padkeysFn",
+      "type": "JavaScriptFunction",
+      "label": "Pad keys",
+      "parameters": {
+        "functionScript": "var { langOf, wordMap } = Scripts.words;\nvar PAD = [[\"fwd\",\"bg-key-fwd\",\"fwd\",\"bFwd\"],[\"left\",\"bg-key-left\",\"left\",\"bLeft\"],[\"water\",\"\",\"water\",\"bWater\"],[\"right\",\"bg-key-right\",\"right\",\"bRight\"],[\"fill\",\"\",\"fill\",\"bFill\"],[\"pick\",\"\",\"pick\",\"bPick\"],[\"put\",\"\",\"put\",\"bPut\"],[\"say\",\"\",\"say\",\"bSay\"],[\"olive:read\",\"\",\"read\",\"rungRead\"]];\n// IG-003: the key's label (what a screen reader says; the key shows its icon) is the step's word in the child's language —\n// the pad is up from the moment a request opens (Drive), and an English op name there was the one word a switch left.\nvar W = wordMap(Inputs.words, langOf(Inputs.lang), 'Pip');\nvar KNOWN = [\"fwd\",\"left\",\"right\",\"water\",\"fill\",\"pick\",\"put\",\"say\",\"repeat\",\"until\",\"if\",\"when\",\"count_inc\",\"trick\",\"do\",\"ask\",\"go_nearest\",\"go_to\",\"set\",\"change\"];\n// P108 IW-001 F7: the pad is the DRAWER's actions — the palette the kit shows (band x request x robot, Olive's rungs\n// included), so \"read\" is a key where the drawer has it; with no palette, the request's allowed list as before.\nvar pal = Array.isArray(Inputs.palette) ? Inputs.palette : [];\nvar drawer = [];\nfor (var p = 0; p < pal.length; p++) if (pal[p] && pal[p].id) drawer.push(String(pal[p].id));\nvar allowed = drawer.length ? drawer : Array.isArray(Inputs.allowed) ? Inputs.allowed : [];\nvar slots = ['bg-key-mid', 'bg-key-r3a', 'bg-key-r3b', 'bg-key-r3c', 'bg-key-r4a', 'bg-key-r4b', 'bg-key-r4c', 'bg-key-r5a', 'bg-key-r5b', 'bg-key-r5c'], used = 0;\nvar keys = [];\nfor (var i = 0; i < PAD.length; i++) {\n  var op = PAD[i][0];\n  var ok = allowed.length ? allowed.indexOf(op) !== -1 : KNOWN.indexOf(op) !== -1;\n  if (!ok) continue;\n  var place = PAD[i][1] || slots[Math.min(used++, slots.length - 1)];\n  var slug = op.replace(/[^a-z0-9]+/gi, '-');\n  // 🔴 A stable row id per key (a row is a Noodl Object, global by id): the keys arrive twice as a request opens (its\n  // allowed list, then the drawer's palette), and two lists of id-less rows in quick succession left the For Each\n  // with BOTH sets (the page drive: ten keys on the tulips, each under its twin, so no press landed).\n  // P108 IW-003 look (lane L): an Olive key says what the drawer's block says (the envelopes' read reads the envelope).\n  var palLabel = '';\n  for (var pl = 0; pl < pal.length; pl++) if (pal[pl] && pal[pl].id === op && op.indexOf('olive:') === 0 && typeof pal[pl].label === 'string') palLabel = pal[pl].label;\n  keys.push({ id: 'padkey-' + slug, op: op, cls: 'bg-key bg-key-' + slug + (place === 'bg-key-' + slug ? '' : ' ' + place) + ' bg-i-' + PAD[i][2] + ' bg-press', label: palLabel || W[PAD[i][3]] || op });\n}\n// P108 IW-003 (lane M): go to nearest / go to — one key per kind on the plot as the request opens (PAD_GO), op\n// go_nearest:<kind> or go_to:<kind>, after the actions; its label says the whole step, its face shows the kind.\nvar GO = {\"nearest\":[\"egg\",\"letter\",\"stone\",\"food\",\"ball\",\"rock\",\"can\",\"tree\",\"patch\",\"site\",\"bowl\",\"basket\"],\"to\":[\"basket\",\"bowl\",\"store\",\"door\",\"site\",\"postbox\"]};\nvar onPlot = Inputs.world && Array.isArray(Inputs.world.things) ? Inputs.world.things : [];\nfunction lying(k) { for (var q = 0; q < onPlot.length; q++) if (onPlot[q] && onPlot[q].kind === k) return true; return false; }\nvar goRows = [];\n// P108 s8: a kind that go to has a key for here is not also a nearest key (one key per place).\nvar hasTo = allowed.indexOf('go_to') !== -1;\nif (allowed.indexOf('go_nearest') !== -1) for (var gn = 0; gn < GO.nearest.length; gn++) if (lying(GO.nearest[gn]) && !(hasTo && GO.to.indexOf(GO.nearest[gn]) !== -1)) goRows.push(['go_nearest', GO.nearest[gn]]);\nif (allowed.indexOf('go_to') !== -1) for (var gt = 0; gt < GO.to.length; gt++) if (lying(GO.to[gt])) goRows.push(['go_to', GO.to[gt]]);\nfor (var gi = 0; gi < goRows.length; gi++) {\n  var gslug = (goRows[gi][0] === 'go_to' ? 'go-to-' : 'go-nearest-') + goRows[gi][1];\n  keys.push({ id: 'padkey-' + gslug, op: goRows[gi][0] + ':' + goRows[gi][1], cls: 'bg-key bg-key-' + gslug + ' ' + slots[Math.min(used++, slots.length - 1)] + ' bg-key-go bg-key-go-' + goRows[gi][1] + ' bg-i-go bg-press', label: (W[goRows[gi][0] === 'go_to' ? 'bGoTo' : 'bGoNearest'] || goRows[gi][0]) + ' ' + (W['iw4K_' + goRows[gi][1]] || W['iw7aK_' + goRows[gi][1]] || goRows[gi][1]) });\n}\nOutputs.keys = keys;\nOutputs.count = keys.length;\n",
+        "uses": "words.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-palette",
+          "displayName": "palette",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-allowed",
+          "displayName": "allowed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-world",
+          "displayName": "world",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-keys",
+          "displayName": "keys",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "padkeysOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "keys",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

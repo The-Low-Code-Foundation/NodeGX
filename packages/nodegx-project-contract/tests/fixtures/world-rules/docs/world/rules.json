@@ -1,0 +1,69 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/world-v1.json#/definitions/rulesFile",
+  "rules": [
+    {
+      "id": "invoice-amount-settled",
+      "on": "invoice",
+      "says": "Once an invoice is issued, its amount never changes.",
+      "holds": {
+        "frozen": [
+          "amount"
+        ],
+        "unless": {
+          "status": "draft"
+        }
+      },
+      "mutant": "an issued invoice's amount is changed in place, and the company is billed twice for different sums",
+      "from": "oral"
+    },
+    {
+      "id": "assignment-never-back",
+      "on": "assignment",
+      "says": "An assignment goes from draft to issued to withdrawn. It never goes back.",
+      "holds": {
+        "moves": "status",
+        "from": {
+          "draft": {
+            "to": [
+              "issued"
+            ]
+          },
+          "issued": {
+            "to": [
+              "withdrawn"
+            ]
+          },
+          "withdrawn": {
+            "to": []
+          }
+        }
+      },
+      "mutant": "an issued assignment is put back to draft and edited, so nobody can tell what the learner had been given",
+      "from": "oral"
+    },
+    {
+      "id": "assignment-issued-by-coach",
+      "on": "assignment",
+      "says": "Only a coach may issue an assignment.",
+      "holds": {
+        "onlyBy": "coach",
+        "changes": "status",
+        "to": "issued"
+      },
+      "mutant": "a learner issues their own assignment",
+      "from": "oral"
+    },
+    {
+      "id": "cohort-at-most-twenty",
+      "on": "cohort",
+      "says": "A cohort holds at most twenty learners.",
+      "holds": {
+        "atMost": 20,
+        "of": "learner",
+        "per": "learner-cohort"
+      },
+      "mutant": "two learners are added to a cohort of nineteen at the same moment, and both get in",
+      "from": "oral"
+    }
+  ]
+}

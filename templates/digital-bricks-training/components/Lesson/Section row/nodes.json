@@ -29,6 +29,11 @@
           "name": "copy",
           "plug": "output",
           "type": "*"
+        },
+        {
+          "name": "conceptId",
+          "plug": "output",
+          "type": "string"
         }
       ]
     },
@@ -71,6 +76,193 @@
           "name": "value",
           "plug": "input",
           "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "sr_waits",
+      "type": "JavaScriptFunction",
+      "label": "Does this row write — only with a concept",
+      "x": 560,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * DOES THIS ROW WRITE? (TASK-L177). Only when it carries the concept its lesson\n * is for — the lesson page puts it on every row. Palette's specimen rows carry\n * none, so they call nothing and the kit shows a save at once, as it always did.\n */\nOutputs.waits = String(Inputs.conceptId || '') !== '';\n"
+      },
+      "ports": [
+        {
+          "name": "in-conceptId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "conceptId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-waits",
+          "plug": "output",
+          "type": "*",
+          "displayName": "waits",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "sr_save",
+      "type": "JavaScriptFunction",
+      "label": "They pressed Save: tell the kit, then ask",
+      "x": 560,
+      "y": 180,
+      "parameters": {
+        "functionScript": "/*\n * THE LEARNER PRESSED SAVE (TASK-L177). Runs on the kit's `Saved` only — its\n * inputs do not re-run it. With no concept on the row there is no backend to\n * ask and nothing happens here. Otherwise the kit is told `saving:<token>`\n * before the call, and the answer carries the same token, new for every save:\n * that is how the kit tells THIS save's answer from the last one's, even when a\n * fast backend answers inside one frame.\n */\nconst conceptId = String(Inputs.conceptId || '');\nif (!conceptId) return;\nconst token = String(Date.now()) + '-' + Math.floor(Math.random() * 1e6);\nOutputs.conceptId = conceptId;\nOutputs.field = String(Inputs.field || '');\nOutputs.value = String(Inputs.value || '');\nOutputs.token = token;\nOutputs.status = 'saving:' + token;\nOutputs.ask();\n",
+        "runOnChange-in-conceptId": false,
+        "runOnChange-in-field": false,
+        "runOnChange-in-value": false
+      },
+      "ports": [
+        {
+          "name": "in-conceptId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "conceptId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-field",
+          "plug": "input",
+          "type": "*",
+          "displayName": "field",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-value",
+          "plug": "input",
+          "type": "*",
+          "displayName": "value",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-conceptId",
+          "plug": "output",
+          "type": "*",
+          "displayName": "conceptId",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-field",
+          "plug": "output",
+          "type": "*",
+          "displayName": "field",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-value",
+          "plug": "output",
+          "type": "*",
+          "displayName": "value",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-token",
+          "plug": "output",
+          "type": "*",
+          "displayName": "token",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-status",
+          "plug": "output",
+          "type": "*",
+          "displayName": "status",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ask",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "ask",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "sr_call",
+      "type": "CloudFunction2",
+      "label": "capture — onto their project, only if unchanged",
+      "x": 820,
+      "y": 180,
+      "parameters": {
+        "function": "capture"
+      },
+      "metadata": {
+        "comment": "components/__cloud__/capture (TASK-L177). The learner is the session; this sends only which lesson, which question, and the words."
+      }
+    },
+    {
+      "id": "sr_ok",
+      "type": "JavaScriptFunction",
+      "label": "Saved: the kit may say so",
+      "x": 1080,
+      "y": 140,
+      "parameters": {
+        "functionScript": "/*\n * THE BACKEND HAS IT (TASK-L177). Now, and only now, the kit may say ✓ Saved.\n * The fact also goes into `dbtCapturedFacts`, which the lesson page lays over\n * the facts it loaded, so moving to another step and back still shows it — the\n * page reads the learner's facts once, when it opens.\n */\nconst field = String(Inputs.field || '');\nif (field) {\n  const now = Object.assign({}, Noodl.Variables.dbtCapturedFacts || {});\n  now[field] = String(Inputs.value || '');\n  Noodl.Variables.dbtCapturedFacts = now;\n}\nOutputs.status = 'saved:' + String(Inputs.token || '');\n",
+        "runOnChange-in-field": false,
+        "runOnChange-in-value": false,
+        "runOnChange-in-token": false
+      },
+      "ports": [
+        {
+          "name": "in-field",
+          "plug": "input",
+          "type": "*",
+          "displayName": "field",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-value",
+          "plug": "input",
+          "type": "*",
+          "displayName": "value",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-token",
+          "plug": "input",
+          "type": "*",
+          "displayName": "token",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-status",
+          "plug": "output",
+          "type": "*",
+          "displayName": "status",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "sr_fail",
+      "type": "JavaScriptFunction",
+      "label": "Not saved: the kit says so, words kept",
+      "x": 1080,
+      "y": 300,
+      "parameters": {
+        "functionScript": "/*\n * THE BACKEND REFUSED OR COULD NOT BE REACHED (TASK-L177). The kit gives the box\n * back with the words still in it and says it could not save. Never a ✓.\n */\nOutputs.status = 'failed:' + String(Inputs.token || '');\n",
+        "runOnChange-in-token": false
+      },
+      "ports": [
+        {
+          "name": "in-token",
+          "plug": "input",
+          "type": "*",
+          "displayName": "token",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-status",
+          "plug": "output",
+          "type": "*",
+          "displayName": "status",
+          "group": "Outputs"
         }
       ]
     }

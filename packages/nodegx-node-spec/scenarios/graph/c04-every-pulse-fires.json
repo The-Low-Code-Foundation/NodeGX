@@ -1,0 +1,287 @@
+[
+  {
+    "name": "two pulses in one frame fire the receiver twice",
+    "clauses": [
+      "C4"
+    ],
+    "because": "C4 — a pulse is one SIGNAL_PULSE queue entry per receiver (outputproperty.ts :182-214) and both edges are applied inside the same drain pass (node.ts :592-600), so the port is back at false before the next entry is read. Two Count Changed pulses in one frame reach the downstream Counter's Increase twice; a target that de-duplicates per frame counts one. Beside node-signal-value-pairing.test.ts.",
+    "nodes": {
+      "a": {
+        "type": "Counter"
+      },
+      "b": {
+        "type": "Counter"
+      }
+    },
+    "wires": [
+      {
+        "from": "a.countChanged",
+        "to": "b.increase"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "a",
+        "signal": "increase"
+      },
+      {
+        "node": "a",
+        "signal": "increase"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "a",
+        "signal": "countChanged",
+        "count": 2
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "currentCount",
+        "value": 2
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "port": "currentCount",
+        "value": 2
+      }
+    ],
+    "expect": [
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 0,
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 0,
+        "subject": "b"
+      },
+      {
+        "t": "in",
+        "port": "increase",
+        "subject": "a"
+      },
+      {
+        "t": "in",
+        "port": "increase",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 2,
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 2,
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "b"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "b"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "b"
+      }
+    ]
+  },
+  {
+    "name": "a value one hop behind its signal is applied before the signal — FB-025's two sweeps",
+    "clauses": [
+      "C4",
+      "C7"
+    ],
+    "because": "C4's last sentence and FB-025 (node.ts, the drain's two sweeps): a pending VALUE is applied before a pending SIGNAL, whatever order they arrived in. Here the Counter's Start Value arrives one hop late (through a Log) while its Reset pulse arrives directly, so the pulse is queued first; the sweep applies Start Value = 1 before Reset, and the count lands on 1. A target that drains in arrival order resets to the OLD start (0) and reads 0. Beside fb-025-run-reads-the-value-beside-it.test.ts, gam-004-gate-reads-the-same-turn.test.ts, gam-011-a-value-sent-with-a-signal-arrives.test.ts.",
+    "nodes": {
+      "a": {
+        "type": "Counter"
+      },
+      "l": {
+        "type": "net.noodl.Log"
+      },
+      "b": {
+        "type": "Counter",
+        "params": {
+          "startValue": 10
+        }
+      }
+    },
+    "wires": [
+      {
+        "from": "a.currentCount",
+        "to": "l.value"
+      },
+      {
+        "from": "l.value",
+        "to": "b.startValue"
+      },
+      {
+        "from": "a.countChanged",
+        "to": "b.reset"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "a",
+        "signal": "increase"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "b",
+        "port": "currentCount",
+        "value": 10
+      },
+      {
+        "at": 2,
+        "subject": "l",
+        "port": "value",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "port": "currentCount",
+        "value": 1
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "startValue",
+        "value": 10,
+        "subject": "b"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 0,
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 0,
+        "subject": "l"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 10,
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "b"
+      },
+      {
+        "t": "in",
+        "port": "increase",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 1,
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 1,
+        "subject": "l"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 1,
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "b"
+      },
+      {
+        "t": "outcome",
+        "port": "reset",
+        "value": "done",
+        "subject": "b"
+      }
+    ]
+  }
+]

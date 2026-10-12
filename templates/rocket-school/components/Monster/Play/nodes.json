@@ -74,6 +74,26 @@
           "type": "boolean"
         },
         {
+          "name": "focus",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "customSet",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "customSetId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "customSetBoth",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
           "name": "placeholder",
           "plug": "output",
           "type": "string"

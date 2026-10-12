@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b0520f67-b84f-5f42-8c61-831624b8d14c",
+  "name": "Var monitor",
+  "path": "/Logic/Var monitor",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What the robot remembers, as one line under the world. Runs when an input changes; Ran after each run."
+}

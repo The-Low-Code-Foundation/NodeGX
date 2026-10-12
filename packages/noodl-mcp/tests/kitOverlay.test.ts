@@ -115,8 +115,12 @@ describe('extraction', () => {
     // node that computes none — a pairing that occurs on no shipped type.
     // The `known: false` arm is still asserted, on a node that DOES declare
     // dynamic ports, in `nodegx-kit-catalog/tests/overlay.test.js`.
-    expect(badge?.dynamicPorts).toBeNull();
-    expect(badge?.parameterEncoding).toBeNull();
+    //
+    // P109 ISL-009 (2026-10-03): no longer `null`. Every visual node — a kit's included — declares
+    // its Data Attributes list, so Badge has a declared, enumerable dynamic half, and its encoding is
+    // known from the rule. The static-node `null` arm now needs a node with no element.
+    expect(badge?.dynamicPorts?.mechanisms).toEqual(['declared-port-groups']);
+    expect(badge?.parameterEncoding).toMatchObject({ known: true, seededBy: ['dataAttributes'] });
   });
 
   it('survives a throwing kit, names it, and keeps its neighbours', () => {
@@ -323,7 +327,10 @@ describe('acceptance criterion 3 — the skipped checks run, and find something'
     // would pass just as well on a change that deleted the diagnostics.
     expect(after.summary.endpointsChecked).toBe(4);
     expect(after.byCode['nonexistent-port']).toBe(1);
-    expect(after.summary.errors).toBe(1);
+    // P107 R23 (s89): known types also say where a node may sit — `/Broken`'s Badge inside a Meter that declares
+    // `allowChildren: false` is two more errors (the Meter holds a child; the Badge sits where it is not held)
+    expect(after.byCode['invalid-hierarchy']).toBe(2);
+    expect(after.summary.errors).toBe(3);
   });
 
   it('names the port, the node and the component that were wrong', () => {

@@ -23,8 +23,12 @@ import {
   userPositionForError
 } from './functionDiagnostics';
 
+import Node = require('../../node');
+import { ScriptFileError, scriptAlias, scriptUsesOf, type ScriptFiles, type ScriptPath } from '../../scriptfiles';
+import { functionScriptPortNames } from '@nodegx/project-contract/function-ports';
+
 const JavascriptNodeParser = require('../../javascriptnodeparser');
-const { logJavaScriptNodeError } = require('../../utils');
+const { logJavaScriptNodeError, thrownMessage } = require('../../utils');
 
 /** One row of the `scriptInputs`/`scriptOutputs` proplist the author edits. */
 interface ScriptPortSpec {
@@ -75,6 +79,10 @@ interface SimpleJavascriptNodeInstance extends NodeInstance {
      * Published after all if the same run fires a signal: see `publishHeldWrites`.
      */
     heldWrites: Set<string>;
+    /** ISL-005 — the script files this Function uses, as the project names them (`engine/world.js`). */
+    uses?: ScriptPath[];
+    /** ISL-005 — listening for `scriptsChanged` on the graph model, so an edited file re-runs its users. */
+    listeningForScripts?: boolean;
     /** The receiver user code sees as `this`; persists across runs. */
     _this: Record<string, unknown>;
     func?: (...args: unknown[]) => Promise<unknown>;
@@ -127,11 +135,111 @@ interface SimpleJavascriptNodeInstance extends NodeInstance {
  *
  * Called before the signal is sent, so the value is delivered first, in the same update.
  */
+/** What this node reads from the graph model for script files; `NodeContextLike` types it `unknown`. */
+interface ScriptGraph {
+  scriptFiles?: ScriptFiles;
+  on(event: string, callback: () => void, ref: unknown): void;
+  removeListenersWithRef(ref: unknown): void;
+  getAllComponents?(): Array<{
+    name: string;
+    getNodesWithType(type: string): Array<{ id: string; label?: string; parameters?: Record<string, unknown> }>;
+  }>;
+}
+
+function graphOf(node: SimpleJavascriptNodeInstance): ScriptGraph | undefined {
+  return node.context ? (node.context.graphModel as ScriptGraph | undefined) : undefined;
+}
+
+interface ScriptsFailure {
+  code: string;
+  message: string;
+  detail: Record<string, unknown>;
+  /** Present when the failure is a script file's own, so it is raised once across its users. */
+  error?: ScriptFileError;
+}
+
+/**
+ * ISL-005 — what this Function's code sees as `Scripts`: one entry per file in `uses`, by its file
+ * name. Or why it cannot run.
+ */
+function scriptsFor(node: SimpleJavascriptNodeInstance): { scripts: Record<string, unknown> } | { failure: ScriptsFailure } {
+  const uses = node._internal.uses || [];
+  const scripts: Record<string, unknown> = {};
+  if (uses.length === 0) return { scripts };
+
+  // Ruled 2026-10-05: browser and server render; a cloud function is refused by name until a task
+  // carries script files to the cloud runtime.
+  const editorConnection = node.context && node.context.editorConnection;
+  if (editorConnection && editorConnection.runtimeType === 'cloud') {
+    return {
+      failure: {
+        code: 'function/scripts-in-cloud',
+        message: "Script files don't run in cloud functions yet. This Function uses " + uses.map((p) => 'scripts/' + p).join(', '),
+        detail: { uses }
+      }
+    };
+  }
+
+  const graph = graphOf(node);
+  const files = graph && graph.scriptFiles;
+  const byAlias: Record<string, ScriptPath> = {};
+  for (const path of uses) {
+    const alias = scriptAlias(path);
+    if (byAlias[alias] !== undefined) {
+      return {
+        failure: {
+          code: 'function/script-name-clash',
+          message:
+            'scripts/' + byAlias[alias] + ' and scripts/' + path + ' would both be Scripts.' + alias + '. Rename one of the files',
+          detail: { alias, paths: [byAlias[alias], path] }
+        }
+      };
+    }
+    byAlias[alias] = path;
+
+    try {
+      if (!files) throw new ScriptFileError('script/missing', path, 'There is no script file scripts/' + path);
+      scripts[alias] = files.load(path);
+    } catch (e) {
+      const error =
+        e instanceof ScriptFileError ? e : new ScriptFileError('script/threw', path, e && (e as Error).message ? (e as Error).message : String(e));
+      return {
+        failure: {
+          code: error.code === 'script/missing' ? 'function/script-missing' : 'function/script-file-failed',
+          message: error.describe(),
+          detail: { path: error.path, line: error.line, column: error.column, uses, users: usersOf(node, error.path) },
+          error
+        }
+      };
+    }
+  }
+  return { scripts };
+}
+
+/** Every code `scriptsFor` fails with; a run whose files load clears all four from the node. */
+const SCRIPT_FAILURE_CODES = ['function/script-missing', 'function/script-file-failed', 'function/script-name-clash', 'function/scripts-in-cloud'];
+
+/** The Functions in the project whose `uses` names `path` directly, as `Component / label` (or id) — for the one report. */
+function usersOf(node: SimpleJavascriptNodeInstance, path: ScriptPath): string[] {
+  const graph = graphOf(node);
+  if (!graph || typeof graph.getAllComponents !== 'function') return [];
+  const users: string[] = [];
+  for (const component of graph.getAllComponents()) {
+    for (const model of component.getNodesWithType('JavaScriptFunction')) {
+      if (scriptUsesOf(model.parameters && model.parameters.uses).includes(path)) {
+        users.push(component.name + ' / ' + (model.label || model.id));
+      }
+    }
+  }
+  return users;
+}
+
 function publishHeldWrites(node: SimpleJavascriptNodeInstance): void {
-  for (const prop of node._internal.heldWrites) {
+  // forEach, not for…of: the viewer's ES5 test build compiles this file (P109 ISL-005 AC5's server render).
+  node._internal.heldWrites.forEach((prop) => {
     node.registerOutputIfNeeded('out-' + prop);
     node.flagOutputDirty('out-' + prop);
-  }
+  });
   node._internal.heldWrites.clear();
 }
 
@@ -278,6 +386,34 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
         if (!this.isInputConnected('run')) this.scheduleRun();
       }
     },
+    uses: {
+      displayName: 'Uses',
+      description:
+        "The project's script files this Function uses. Each one is ready in the code as Scripts.<file name>, so engine/world.js is Scripts.world",
+      group: 'General',
+      type: { name: 'stringlist', allowEditOnly: true, editorType: 'script-uses' },
+      set(this: SimpleJavascriptNodeInstance, value: unknown) {
+        this._internal.uses = scriptUsesOf(value);
+        this.clearRunDiagnostics();
+
+        // An edited script file re-runs the Functions that use it, as an edited body does.
+        const graph = graphOf(this);
+        if (!this._internal.listeningForScripts && graph) {
+          this._internal.listeningForScripts = true;
+          graph.on(
+            'scriptsChanged',
+            () => {
+              if (this._deleted || !this._internal.uses || this._internal.uses.length === 0) return;
+              this.clearRunDiagnostics();
+              if (!this.isInputConnected('run')) this.scheduleRun();
+            },
+            this
+          );
+        }
+
+        if (this._internal.func && !this.isInputConnected('run')) this.scheduleRun();
+      }
+    },
     run: {
       type: 'signal',
       displayName: 'Run',
@@ -346,6 +482,14 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
     }
   },
   methods: {
+    _onNodeDeleted: function (this: SimpleJavascriptNodeInstance) {
+      const graph = graphOf(this);
+      if (this._internal.listeningForScripts && graph) {
+        graph.removeListenersWithRef(this);
+        this._internal.listeningForScripts = false;
+      }
+      Node.prototype._onNodeDeleted.call(this);
+    },
     scheduleRun: function (this: SimpleJavascriptNodeInstance, token?: OutcomeToken) {
       if (token) {
         if (!this._internal.pendingRunOutcomes) this._internal.pendingRunOutcomes = [];
@@ -423,6 +567,33 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
         return;
       }
 
+      // ISL-005. Before anything else is prepared: a Function whose script files cannot be
+      // loaded does not run at all, so it never half-runs against a missing engine.
+      const scripts = scriptsFor(this);
+      if ('failure' in scripts) {
+        const { code, message, detail, error } = scripts.failure;
+        this._internal.lastError = message;
+        this.flagOutputDirty('error');
+        // A broken file is raised once, by the first Function that meets it; every other user
+        // fails with the same words and stays quiet (ISL-005 §5: "an error is named once").
+        const raise = !error || !error.reported;
+        if (error) error.reported = true;
+        if (tokens.length > 0) {
+          reportOutcomes(this, tokens, 'failure', { code, message, detail, raise });
+        } else {
+          if (raise) this.raiseRuntimeError(code, message, detail);
+          this.sendSignalOnOutput('failure');
+        }
+        return;
+      }
+      // The files loaded, so nothing an earlier run said about them is still true. A raise is keyed by
+      // its code on the node, and nothing else clears these four (found driving AC4: a fixed file
+      // left "scripts/…: broken" on the Function after it had run clean).
+      const editorConnection = this.context.editorConnection;
+      if (editorConnection) {
+        for (const key of SCRIPT_FAILURE_CODES) editorConnection.clearWarning(this.nodeScope.componentOwner.name, this.id, key);
+      }
+
       const inputs = this._internal.inputValues;
       const outputs = this._internal.outputValuesProxy;
 
@@ -464,7 +635,8 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
           inputs,
           outputs,
           noodlAPI,
-          JavascriptNodeParser.getComponentScopeForNode(this)
+          JavascriptNodeParser.getComponentScopeForNode(this),
+          scripts.scripts
         ]);
 
         // `await`ed, so an `async` script signals when it has actually finished rather than
@@ -475,13 +647,19 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
           // run's throw and the previous run's silence are now stale, and whatever this run
           // has to say is said before anything downstream of `Success` gets to move.
           this.reportOutputSilence();
+          // P109 ISL-051 (P107-C146), as ruled for its twins D25 and C144 ("Clear it to blank text"): a run that works after a
+          // failure left Error on the wire. A message is cleared to blank text and sent, once, before Success.
+          if (this._internal.lastError) {
+            this._internal.lastError = '';
+            this.flagOutputDirty('error');
+          }
           this.sendSignalOnOutput('success');
           reportOutcomes(this, tokens, 'done');
         }
       } catch (e) {
         logJavaScriptNodeError(e);
 
-        const rawMessage = e && e.message ? String(e.message) : String(e);
+        const rawMessage = thrownMessage(e);
 
         /**
          * FUN-007 §2 and §3.
@@ -514,7 +692,8 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
           this.context.editorConnection.sendWarning(this.nodeScope.componentOwner.name, this.id, RUN_WARNING_KEY, {
             showGlobally: true,
             message: runtimeErrorMessage(rawMessage, position, hint),
-            stack: e.stack,
+            // P107-C147: `throw null` has no stack, and reading one off it threw inside this catch
+            stack: e ? e.stack : undefined,
             line: position ? position.line : undefined,
             column: position ? position.column : undefined,
             hint
@@ -597,8 +776,10 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
      * publish an `undefined` down every `Error` wire in the project for nothing.
      */
     clearRunDiagnostics: function (this: SimpleJavascriptNodeInstance) {
-      if (this._internal.lastError !== undefined) {
-        this._internal.lastError = undefined;
+      // P107-C146: blank text, sent — `undefined` is never sent, so a wire on Error kept the old message. Only when there is a
+      // message, so a Script set at load sends nothing.
+      if (this._internal.lastError) {
+        this._internal.lastError = '';
         this.flagOutputDirty('error');
       }
 
@@ -652,6 +833,7 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
           'Outputs',
           'Noodl',
           'Component',
+          'Scripts',
           JavascriptNodeParser.getCodePrefix() + script
         );
         this._internal.parseError = undefined;
@@ -770,10 +952,22 @@ function _parseScriptForErrorsAndPorts(
     });
   }
 
-  JavascriptNodeParser.parseAndAddPortsFromScript(script, ports, {
-    inputPrefix: 'in-',
-    outputPrefix: 'out-'
-  });
+  // P109 ISL-006: the Function reads its code with `@nodegx/project-contract/function-ports`, the one reader the
+  // editor, the door and the exporter import too (underscore signals, `Inputs["x"]` as an input, comments skipped).
+  // The Script node and the filters still use `JavascriptNodeParser.parseAndAddPortsFromScript`.
+  addFunctionScriptPorts(script, ports);
+}
+
+/** The ports a Function's code names, after the written lists: a name already there keeps the list's port. */
+function addFunctionScriptPorts(script: string, ports: Record<string, unknown>[]) {
+  const names = functionScriptPortNames(script);
+  const add = (name: string, plug: 'input' | 'output', type: string) => {
+    if (ports.some((p) => p.name === name && p.plug === plug)) return;
+    ports.push({ name, displayName: name.slice(name.indexOf('-') + 1), plug, type, group: plug === 'input' ? 'Inputs' : 'Outputs' });
+  };
+  for (const n of names.inputs) add('in-' + n, 'input', '*');
+  for (const n of names.signals) add('out-' + n, 'output', 'signal');
+  for (const n of names.outputs) add('out-' + n, 'output', '*');
 }
 
 const inputTypeEnums = [
@@ -818,7 +1012,10 @@ const SimpleJavascriptNodeModule: NodeModule = {
       function _updatePorts() {
         const ports: Record<string, unknown>[] = [];
 
-        const _outputTypeEnums = inputTypeEnums.concat([
+        // P109-S20-LISTDEFAULTTYPE (ruled 2026-10-11): an output's port is `outtype-<name> || '*'` and a default is never
+        // written, so the select's default is Any (`*`): it says what the port is until a type is picked. Inputs keep
+        // String, which is what their port falls back to.
+        const _outputTypeEnums = [{ value: '*', label: 'Any' }].concat(inputTypeEnums, [
           {
             value: 'signal',
             label: 'Signal'
@@ -840,7 +1037,7 @@ const SimpleJavascriptNodeModule: NodeModule = {
                 enums: _outputTypeEnums,
                 allowEditOnly: true
               },
-              default: 'string',
+              default: '*',
               parent: 'scriptOutputs',
               parentItemId: p.id
             });

@@ -1,0 +1,469 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "13d04a24-c95a-522d-8e52-36ab1dda6269",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "isStore",
+      "fromProperty": "model",
+      "toId": "isFam",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "model",
+      "toId": "isStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "migrated",
+      "toId": "isResave",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "ran",
+      "toId": "isResave",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "isResave",
+      "fromProperty": "ontrue",
+      "toId": "isStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "isLangVar",
+      "fromProperty": "value",
+      "toId": "isFam",
+      "toProperty": "fallbackLang"
+    },
+    {
+      "fromId": "isWords",
+      "fromProperty": "words",
+      "toId": "isT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "lang",
+      "toId": "isT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "botName",
+      "toId": "isT",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "band",
+      "toId": "isBar",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "lang",
+      "toId": "isBar",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "name",
+      "toId": "isBar",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "face",
+      "toId": "isBar",
+      "toProperty": "face"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "botName",
+      "toId": "isBar",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "profileId",
+      "toId": "isBar",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "hasProfile",
+      "toId": "isBar",
+      "toProperty": "hasProfile"
+    },
+    {
+      "fromId": "isWords",
+      "fromProperty": "words",
+      "toId": "isBar",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "isStore",
+      "fromProperty": "model",
+      "toId": "isBar",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "isBar",
+      "fromProperty": "model",
+      "toId": "isStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "isBar",
+      "fromProperty": "write",
+      "toId": "isStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "isT",
+      "fromProperty": "isEyebrow",
+      "toId": "isHead",
+      "toProperty": "eyebrow"
+    },
+    {
+      "fromId": "isT",
+      "fromProperty": "isTitle",
+      "toId": "isHead",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "isT",
+      "fromProperty": "isSub",
+      "toId": "isHead",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "isT",
+      "fromProperty": "isReq",
+      "toId": "isReqL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "isT",
+      "fromProperty": "isFree",
+      "toId": "isFreeL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "isT",
+      "fromProperty": "sandH",
+      "toId": "isFree",
+      "toProperty": "who"
+    },
+    {
+      "fromId": "isT",
+      "fromProperty": "sandP",
+      "toId": "isFree",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "isRequests",
+      "fromProperty": "requests",
+      "toId": "isRows",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "done",
+      "toId": "isRows",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "band",
+      "toId": "isRows",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "isWords",
+      "fromProperty": "words",
+      "toId": "isRows",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "lang",
+      "toId": "isRows",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "botName",
+      "toId": "isRows",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "isRequests",
+      "fromProperty": "requests",
+      "toId": "isPins",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "done",
+      "toId": "isPins",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "band",
+      "toId": "isPins",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "isWords",
+      "fromProperty": "words",
+      "toId": "isPins",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "lang",
+      "toId": "isPins",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "botName",
+      "toId": "isPins",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "plots",
+      "toId": "isRows",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "robots",
+      "toId": "isRows",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "isRows",
+      "fromProperty": "rows",
+      "toId": "isEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "isRequests",
+      "fromProperty": "requests",
+      "toId": "isWorld",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "isWords",
+      "fromProperty": "words",
+      "toId": "isWorld",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "lang",
+      "toId": "isWorld",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "botName",
+      "toId": "isWorld",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "color",
+      "toId": "isWorld",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "eye",
+      "toId": "isWorld",
+      "toProperty": "eye"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "hat",
+      "toId": "isWorld",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "band",
+      "toId": "isWorld",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "done",
+      "toId": "isWorld",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "plots",
+      "toId": "isWorld",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "robots",
+      "toId": "isWorld",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "land",
+      "toId": "isWorld",
+      "toProperty": "land"
+    },
+    {
+      "fromId": "isPins",
+      "fromProperty": "pins",
+      "toId": "isWorld",
+      "toProperty": "pins"
+    },
+    {
+      "fromId": "isT",
+      "fromProperty": "ig4Find",
+      "toId": "isWorld",
+      "toProperty": "findText"
+    },
+    {
+      "fromId": "isT",
+      "fromProperty": "ig4Tap",
+      "toId": "isWorld",
+      "toProperty": "tapText"
+    },
+    {
+      "fromId": "isStore",
+      "fromProperty": "model",
+      "toId": "isWorld",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "isWorld",
+      "fromProperty": "model",
+      "toId": "isStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "isWorld",
+      "fromProperty": "write",
+      "toId": "isStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "isEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "isSetReq",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "isEach",
+      "fromProperty": "itemOutput-blocked",
+      "toId": "isBlocked",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "isEach",
+      "fromProperty": "itemOutputSignal-chosen",
+      "toId": "isBlocked",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "isBlocked",
+      "fromProperty": "onfalse",
+      "toId": "isSetReq",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "isEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "isWorld",
+      "toProperty": "pickId"
+    },
+    {
+      "fromId": "isBlocked",
+      "fromProperty": "ontrue",
+      "toId": "isWorld",
+      "toProperty": "pick"
+    },
+    {
+      "fromId": "isWorld",
+      "fromProperty": "requestId",
+      "toId": "isSetReq",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "isWorld",
+      "fromProperty": "open",
+      "toId": "isSetReq",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "isSetReq",
+      "fromProperty": "done",
+      "toId": "isGoWorkshop",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "isFree",
+      "fromProperty": "chosen",
+      "toId": "isSetFree",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "isSetFree",
+      "fromProperty": "done",
+      "toId": "isGoWorkshop",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "isStore",
+      "fromProperty": "model",
+      "toId": "isShop",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "isWords",
+      "fromProperty": "words",
+      "toId": "isShop",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "lang",
+      "toId": "isShop",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "isRequests",
+      "fromProperty": "requests",
+      "toId": "isShop",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "isShop",
+      "fromProperty": "model",
+      "toId": "isStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "isShop",
+      "fromProperty": "write",
+      "toId": "isStore",
+      "toProperty": "write"
+    }
+  ]
+}

@@ -1,0 +1,189 @@
+{
+  "name": "tags",
+  "rule": "the Tag (web-only): does an h1, an h2, a p, or a Group's section, nav or span move a box? The browser gives h1-h6 and p margins of their own, and the runtime's sheet resets a Text's (.ndl-visual-text { margin: 0 })",
+  "nodes": [
+    {
+      "id": "tags",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 400,
+          "unit": "px"
+        },
+        "flexDirection": "column"
+      },
+      "children": [
+        {
+          "id": "div",
+          "type": "Text",
+          "parameters": {
+            "text": "A div"
+          }
+        },
+        {
+          "id": "h1",
+          "type": "Text",
+          "parameters": {
+            "text": "An h1",
+            "as": "h1"
+          }
+        },
+        {
+          "id": "h2",
+          "type": "Text",
+          "parameters": {
+            "text": "An h2",
+            "as": "h2"
+          }
+        },
+        {
+          "id": "p",
+          "type": "Text",
+          "parameters": {
+            "text": "A p",
+            "as": "p"
+          }
+        },
+        {
+          "id": "g-div",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "contentHeight",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "paddingTop": {
+              "value": 4,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "g-div-in",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 50,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 20,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "g-section",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "contentHeight",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "paddingTop": {
+              "value": 4,
+              "unit": "px"
+            },
+            "as": "section"
+          },
+          "children": [
+            {
+              "id": "g-section-in",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 50,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 20,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "g-nav",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "contentHeight",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "paddingTop": {
+              "value": 4,
+              "unit": "px"
+            },
+            "as": "nav"
+          },
+          "children": [
+            {
+              "id": "g-nav-in",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 50,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 20,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "g-span",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "contentHeight",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "paddingTop": {
+              "value": 4,
+              "unit": "px"
+            },
+            "as": "span"
+          },
+          "children": [
+            {
+              "id": "g-span-in",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 50,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 20,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "after",
+          "type": "Text",
+          "parameters": {
+            "text": "After"
+          }
+        }
+      ]
+    }
+  ]
+}

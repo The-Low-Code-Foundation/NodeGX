@@ -66,6 +66,8 @@ import {
   LIST_PROFILES_SCRIPT,
   LIST_SETS_SCRIPT,
   MAX_PROFILES,
+  MOON_ACT_SCRIPT,
+  MOON_VIEW_SCRIPT,
   NEW_BOARD_SCRIPT,
   PARSE_SET_SCRIPT,
   PICK_ITEM_SCRIPT,
@@ -81,9 +83,14 @@ import {
   UPDATE_SETTINGS_SCRIPT,
   UPSERT_SET_SCRIPT,
   WEAR_ITEM_SCRIPT,
+  FOCUS_SCRIPT,
+  FOCUS_CHOICES_SCRIPT,
+  TOGGLE_ID_SCRIPT,
+  ITEM_LEARNED_AT,
   portsOf,
   runScript
 } from './tpl007Scripts';
+import { FRENCH_VERBS, SUBJECTS, TOPICS, TOPIC_OF } from './tpl007Subjects';
 
 const WORD_ROWS = WORD_KEYS.map((key) => ({ key, ...require('./tpl007Curriculum').WORDS[key] }));
 const WORD_LIST_ROWS = [{ lang: 'en', words: WORD_LISTS.en }, { lang: 'fr', words: WORD_LISTS.fr }];
@@ -227,7 +234,7 @@ describe('TPL-007 — the engine', () => {
     it.each(CURRICULUM.map((s) => [s.id, s] as const))('%s generates a sound question 60 times, in both languages, on both layouts', (_id, skill) => {
       for (let i = 0; i < 60; i++) {
         const lang = i % 2 ? 'fr' : 'en';
-        const q = pick({ curriculum: [skill], level: skill.level, lang, layout: lang === 'fr' ? 'azerty' : 'qwerty', mode: skill.strand === 'typing' ? 'typing' : 'maths' });
+        const q = pick({ curriculum: [skill], level: skill.level, lang, layout: lang === 'fr' ? 'azerty' : 'qwerty', mode: String(skill.subject) });
         expect(q.skillId).toBe(skill.id);
         expect(typeof q.prompt).toBe('string');
         expect(q.prompt.length).toBeGreaterThan(0);
@@ -1328,7 +1335,8 @@ describe('TPL-007 — the engine', () => {
 
   describe('RKT-004 — the correction works through the question that was asked', () => {
     const flat = (text: string) => text.replace(/[\s  ]/g, '');
-    const MATHS = CURRICULUM.filter((skill) => skill.strand !== 'typing');
+    // P113: the maths subject only — a French form, a word or a date has no numbers to work through and no numeric pad (graded in the P113 block).
+    const MATHS = CURRICULUM.filter((skill) => skill.subject === 'maths');
 
     /** For each maths skill, the first question whose worked line is empty, leaves out a number of the prompt, or never shows the answer. */
     const workedGaps = (script: string): string[] => {
@@ -1390,7 +1398,7 @@ describe('TPL-007 — the engine', () => {
         let longest = '';
         for (const skill of CURRICULUM) {
           for (let i = 0; i < 40; i++) {
-            const q = pick({ curriculum: [skill], level: skill.level, lang, mode: skill.strand === 'typing' ? 'typing' : 'maths' });
+            const q = pick({ curriculum: [skill], level: skill.level, lang, mode: String(skill.subject) });
             // RKT-005: the correction now starts with the child's own answer, cut at twelve characters — so the longest one is a long entry.
             const message = String(grade(q, 'x'.repeat(40), { lang, worked: q.worked }).message);
             if (message.length > longest.length) longest = message;
@@ -1402,7 +1410,8 @@ describe('TPL-007 — the engine', () => {
   });
 
   describe('RKT-005 — the answer pad’s keys, and a correction in the child’s own terms', () => {
-    const MATHS = CURRICULUM.filter((skill) => skill.strand !== 'typing');
+    // P113: the maths subject only — a French form, a word or a date has no numbers to work through and no numeric pad (graded in the P113 block).
+    const MATHS = CURRICULUM.filter((skill) => skill.subject === 'maths');
     const TYPING = CURRICULUM.filter((skill) => skill.strand === 'typing');
     /** The accents in a word list, by the picker's own rule: a letter with a capital that is not a–z. */
     const accentsOf = (words: ReadonlyArray<string>) =>
@@ -2117,6 +2126,570 @@ describe('TPL-007 — the engine', () => {
         for (const input of ports.inputs) expect(input).toMatch(/^[a-z][A-Za-z]*$/);
       }
       expect(FUNCTION_SCRIPTS.map((f) => f.component)).toHaveLength(new Set(FUNCTION_SCRIPTS.map((f) => f.component)).size);
+    });
+  });
+
+  // ── P113 — the third play test: choose what to practise, revision lists, French / English / history, what learning pays ──
+
+  describe('P113 REV-001 — the focus: a subject, and the skills ticked in it', () => {
+    it('every skill carries a subject and a topic that exists, and every maths and typing skill is filed by TOPIC_OF', () => {
+      const topicIds = new Set(TOPICS.map((t) => t.id));
+      const subjectIds = new Set(SUBJECTS.map((s) => s.id));
+      for (const skill of CURRICULUM) {
+        expect({ skill: skill.id, subject: skill.subject, known: subjectIds.has(skill.subject!) }).toEqual({ skill: skill.id, subject: skill.subject, known: true });
+        expect({ skill: skill.id, topic: skill.topic, known: topicIds.has(skill.topic!) }).toEqual({ skill: skill.id, topic: skill.topic, known: true });
+        // A topic belongs to the skill's own subject: a French skill filed under a maths topic would hide in the wrong menu.
+        expect(TOPICS.find((t) => t.id === skill.topic)!.subject).toBe(skill.subject);
+      }
+      for (const skill of CURRICULUM.filter((s) => s.subject === 'maths' || s.subject === 'typing')) expect(TOPIC_OF[skill.id]).toBe(skill.topic);
+      // The four subjects Richard named, each with something at CE2 and something at 6e.
+      for (const subject of ['french', 'english', 'history'] as const) {
+        const mine = CURRICULUM.filter((s) => s.subject === subject);
+        expect({ subject, count: mine.length >= 5 }).toEqual({ subject, count: true });
+        expect({ subject, ce2: mine.some((s) => s.level === 'CE2'), sixth: mine.some((s) => s.level === '6e') }).toEqual({ subject, ce2: true, sixth: true });
+      }
+    });
+
+    it('🔴 a focus serves ONLY the ticked skills, whatever their level — a CE2 child who ticks tables 5 and 8 is never asked anything else', () => {
+      const seen = new Set<string>();
+      for (let i = 0; i < 80; i++) seen.add(pick({ level: 'CE2', focus: ['table-5', 'table-8'], mode: 'maths' }).skillId);
+      expect([...seen].sort()).toEqual(['table-5', 'table-8']);
+      // Above the level: a CE2 child whose parent ticked a 6e skill gets it (the choice is theirs), where the level alone never would.
+      const above = new Set<string>();
+      for (let i = 0; i < 20; i++) above.add(pick({ level: 'CE2', focus: ['frac-quotient'], mode: 'maths' }).skillId);
+      expect([...above]).toEqual(['frac-quotient']);
+      const plain = new Set<string>();
+      for (let i = 0; i < 80; i++) plain.add(pick({ level: 'CE2', mode: 'maths' }).skillId);
+      expect(plain.has('frac-quotient')).toBe(false);
+    });
+
+    it('🔴 ruling 1 (2026-10-04): the 5e verb study is a choice, identify-only — never in "everything", asked only when ticked, marked 5e', () => {
+      const beyond = CURRICULUM.filter((sk) => sk.beyond);
+      expect(beyond.map((sk) => `${sk.id}:${sk.beyond}`).sort()).toEqual(['fr-verb-subj:5e', 'fr-verb-voice:5e']);
+      // Identify-only: no 5e skill makes the child produce a form, and the typed subjonctif is gone.
+      expect(beyond.every((sk) => sk.generator === 'list' && sk.answer === 'options')).toBe(true);
+      expect(CURRICULUM.some((sk) => sk.id === 'fr-conj-subjonctif')).toBe(false);
+      // The programme's own banks no longer ask the subjonctif: it lives only in the 5e spot-it bank.
+      const bankOf = (id: string) => ((CURRICULUM.find((sk) => sk.id === id)!.params as any).items as Array<{ a: { en: string } }>).map((it) => it.a.en);
+      expect(bankOf('fr-verb-mode').some((a) => /subjonctif/.test(a))).toBe(false);
+      expect(bankOf('fr-verb-tense').some((a) => /subjonctif/.test(a))).toBe(false);
+      expect([...new Set(bankOf('fr-verb-subj'))].sort()).toEqual(['indicatif', 'subjonctif']);
+      // Everything at 6e, 300 draws: never a 5e skill. Ticked, it is all that is asked, with its two buttons.
+      const plain = new Set<string>();
+      for (let i = 0; i < 300; i++) plain.add(pick({ level: '6e', mode: 'french' }).skillId);
+      expect(plain.size).toBeGreaterThan(5);
+      expect([...plain].filter((id) => beyond.some((sk) => sk.id === id))).toEqual([]);
+      for (let i = 0; i < 20; i++) {
+        const q = pick({ level: '6e', mode: 'french', focus: ['fr-verb-subj'] });
+        expect(q.skillId).toBe('fr-verb-subj');
+        expect([...q.options].sort()).toEqual(['indicatif', 'subjonctif']);
+      }
+      // The chooser offers both, unticked, each saying 5e (not the child's own 6e).
+      const rows = runScript(FOCUS_CHOICES_SCRIPT, { curriculum: CURRICULUM, sets: [], level: '6e', lang: 'fr', subject: 'french', topic: 'verb-study', skills: [] }).skillRows as Array<{ value: string; label: string; selected: boolean }>;
+      expect(rows.filter((r) => /· 5e$/.test(r.label)).map((r) => r.value).sort()).toEqual(['fr-verb-subj', 'fr-verb-voice']);
+      expect(rows.find((r) => r.value === 'fr-verb-subj')!.label).toBe('Repérer le subjonctif · 5e');
+      // Sabotage: without the picker's skip, "everything" serves a 5e skill.
+      const leaky = PICK_QUESTION_SCRIPT.replace('if (sk.beyond) continue;', '');
+      expect(leaky).not.toBe(PICK_QUESTION_SCRIPT);
+      const leaked = new Set<string>();
+      for (let i = 0; i < 300; i++) leaked.add(runScript(leaky, { curriculum: CURRICULUM, model: freshModel(), level: '6e', lang: 'en', layout: 'qwerty', mode: 'french', answerMode: 'auto', wordLists: WORD_LIST_ROWS, nonce: 1 }).skillId);
+      expect([...leaked].some((id) => beyond.some((sk) => sk.id === id))).toBe(true);
+    });
+
+    it('🔴 a subject mode serves that subject at the child’s level and below, and maths never serves French', () => {
+      const bySubject = (mode: string, level: string) => {
+        const seen = new Set<string>();
+        for (let i = 0; i < 120; i++) seen.add(pick({ level, mode }).skillId);
+        return [...seen].map((id) => CURRICULUM.find((s) => s.id === id)!);
+      };
+      const frenchCe2 = bySubject('french', 'CE2');
+      expect(frenchCe2.length).toBeGreaterThan(0);
+      expect(frenchCe2.every((s) => s.subject === 'french' && s.level === 'CE2')).toBe(true);
+      const history6e = bySubject('history', '6e');
+      expect(history6e.every((s) => s.subject === 'history')).toBe(true);
+      expect(history6e.some((s) => s.level === '6e')).toBe(true);
+      expect(bySubject('maths', '6e').every((s) => s.subject === 'maths')).toBe(true);
+      expect(bySubject('english', 'CE2').every((s) => s.subject === 'english' && s.level === 'CE2')).toBe(true);
+    });
+
+    it('Logic/Focus turns a saved focus into the picker’s mode, skills and line — and a list into its items', () => {
+      const run = (over: Record<string, unknown>) => runScript(FOCUS_SCRIPT, { curriculum: CURRICULUM, sets: [], level: 'CE2', lang: 'en', subject: 'maths', skills: [], ...over });
+      const all = run({});
+      expect({ mode: all.mode, focus: all.focus, line: all.line, hasFocus: all.hasFocus }).toEqual({ mode: 'maths', focus: [], line: 'Maths · everything (CE2)', hasFocus: false });
+      const two = run({ skills: ['table-5', 'table-8', 'fr-plural'] });
+      expect(two.focus).toEqual(['table-5', 'table-8']);
+      expect(two.line).toBe('Maths · 5 times table, 8 times table');
+      const many = run({ subject: 'french', skills: ['fr-plural', 'fr-homophones-ce2', 'fr-word-class-ce2'], lang: 'fr' });
+      expect({ mode: many.mode, line: many.line, count: many.count }).toEqual({ mode: 'french', line: 'Français · 3 notions', count: 3 });
+      const sets = [{ id: 'abc', name: 'Histoire lundi', items: [{ q: 'Néandertal', a: 'vers -40 000' }], both: true }];
+      const list = run({ sets, subject: 'set:abc', lang: 'fr' });
+      expect({ mode: list.mode, id: list.customSetId, both: list.customSetBoth, line: list.line, items: list.customSet.length, isList: list.isList }).toEqual({ mode: 'custom', id: 'abc', both: true, line: 'Ma liste · Histoire lundi', items: 1, isList: true });
+      // A list that was deleted falls back to maths, everything — never to a blank race.
+      const gone = run({ sets, subject: 'set:nope' });
+      expect({ mode: gone.mode, line: gone.line }).toEqual({ mode: 'maths', line: 'Maths · everything (CE2)' });
+      // A subject that does not exist falls back the same way.
+      expect(run({ subject: 'latin' }).mode).toBe('maths');
+    });
+
+    it('Logic/Focus choices offers nothing above the child’s level, falls back to the first topic, and files the lists under My lists', () => {
+      const run = (over: Record<string, unknown>) => runScript(FOCUS_CHOICES_SCRIPT, { curriculum: CURRICULUM, sets: [], level: 'CE2', lang: 'en', subject: 'french', topic: '', skills: [], ...over });
+      const ce2 = run({});
+      expect(ce2.subjectRows.map((r: { value: string }) => r.value)).toEqual(['maths', 'french', 'english', 'history', 'typing', 'lists']);
+      expect(ce2.subjectRows.find((r: { value: string }) => r.value === 'french').selected).toBe(true);
+      // CE2 French has conjugation, word classes, homophones and plurals — not the 6e verb study, not the CM1 feminines' topic alone.
+      const topics = ce2.topicRows.map((r: { value: string }) => r.value);
+      expect(topics).toEqual(['conjugation', 'word-classes', 'homophones', 'agreement']);
+      expect(ce2.topic).toBe('conjugation');
+      expect(ce2.skillRows.map((r: { value: string }) => r.value)).toEqual(['fr-conj-present']);
+      // A 6e child sees every level up to theirs, with the class on a skill that is not theirs.
+      const sixth = run({ level: '6e', topic: 'verb-study', skills: ['fr-verb-mode', 'fr-verb-group'] });
+      expect(sixth.topicRows.map((r: { value: string }) => r.value)).toContain('verb-study');
+      expect(sixth.topicRows.find((r: { value: string }) => r.value === 'verb-study').label).toMatch(/✓2$/);
+      const rows = sixth.skillRows as Array<{ value: string; label: string; selected: boolean }>;
+      expect(rows.find((r) => r.value === 'fr-verb-mode')!.selected).toBe(true);
+      expect(rows.find((r) => r.value === 'fr-verb-group')!.label).toMatch(/· CM1$/);
+      expect(rows.find((r) => r.value === 'fr-verb-mode')!.label).not.toMatch(/·/);
+      expect(sixth.allTicked).toBe(false);
+      expect(run({ level: '6e', topic: 'verb-study', skills: sixth.topicIds }).allTicked).toBe(true);
+      // A topic that is not in this subject falls back to the first.
+      expect(run({ topic: 'tables' }).topic).toBe('conjugation');
+      // My lists: the sets are the topics; with none, saving falls back to maths rather than to an empty list.
+      const none = run({ subject: 'lists' });
+      expect({ isLists: none.isLists, topics: none.topicRows, save: none.saveSubject, hasSets: none.hasSets }).toEqual({ isLists: true, topics: [], save: 'maths', hasSets: false });
+      const sets = [{ id: 'a1', name: 'Verbes', items: [{ q: 'x', a: 'y' }] }, { id: 'b2', name: 'Dates', items: [] }];
+      const some = run({ subject: 'lists', sets });
+      expect(some.topicRows.map((r: { value: string; label: string; selected: boolean }) => [r.value, r.label, r.selected])).toEqual([['set:a1', 'Verbes (1)', true], ['set:b2', 'Dates (0)', false]]);
+      expect(some.saveSubject).toBe('set:a1');
+      expect(run({ subject: 'set:b2', sets }).saveSubject).toBe('set:b2');
+    });
+
+    it('Logic/Toggle id: toggle, all, none, set, clear', () => {
+      const run = (over: Record<string, unknown>) => runScript(TOGGLE_ID_SCRIPT, { list: ['a', 'b'], id: '', action: 'toggle', ids: [], ...over });
+      expect(run({ id: 'c' }).list).toEqual(['a', 'b', 'c']);
+      expect(run({ id: 'a' }).list).toEqual(['b']);
+      expect(run({ action: 'all', ids: ['b', 'c', 'd'] }).list).toEqual(['a', 'b', 'c', 'd']);
+      expect(run({ action: 'none', ids: ['a', 'x'] }).list).toEqual(['b']);
+      expect(run({ action: 'set', ids: ['z'] }).list).toEqual(['z']);
+      expect(run({ action: 'clear' })).toEqual({ list: [], count: 0 });
+      expect(run({}).list).toEqual(['a', 'b']);
+    });
+
+    it('the focus is kept on the profile: Update settings writes it, Active profile reads it back, and a profile with none is on maths, everything', () => {
+      let app: any = runScript(CREATE_PROFILE_SCRIPT, { app: undefined, name: 'Saoirse', level: 'CE2' }).app;
+      const before = runScript(ACTIVE_PROFILE_SCRIPT, { app });
+      expect({ subject: before.focusSubject, skills: before.focusSkills }).toEqual({ subject: 'maths', skills: [] });
+      app = runScript(UPDATE_SETTINGS_SCRIPT, { app, focusSubject: 'maths', focusSkills: ['table-5', 'table-8'] }).app;
+      const after = runScript(ACTIVE_PROFILE_SCRIPT, { app });
+      expect({ subject: after.focusSubject, skills: after.focusSkills }).toEqual({ subject: 'maths', skills: ['table-5', 'table-8'] });
+      // A settings write that says nothing about the focus leaves it alone.
+      app = runScript(UPDATE_SETTINGS_SCRIPT, { app, soundMode: 'off' }).app;
+      expect(runScript(ACTIVE_PROFILE_SCRIPT, { app }).focusSkills).toEqual(['table-5', 'table-8']);
+    });
+  });
+
+  describe('P113 REV-003 — lists and conjugation', () => {
+    const LISTS = CURRICULUM.filter((s) => s.generator === 'list');
+    const CONJ = CURRICULUM.filter((s) => s.generator === 'conjugate');
+
+    it('🔴 a list asks its own items: at most four buttons, the answer among them, the others drawn from the list (60× each, EN and FR)', () => {
+      expect(LISTS.length).toBeGreaterThanOrEqual(30);
+      for (const skill of LISTS) {
+        const items = (skill.params as { items: Array<{ q: unknown; a: unknown; opts?: unknown[] }> }).items;
+        const answers = new Set<string>();
+        for (const it of items) for (const lang of ['en', 'fr'] as const) {
+          const a = typeof it.a === 'string' ? it.a : (it.a as Record<string, string>)[lang];
+          const q = typeof it.q === 'string' ? it.q : (it.q as Record<string, string>)[lang];
+          answers.add(helper<string>('normalise', a));
+          answers.add(helper<string>('normalise', q));
+          for (const o of it.opts ?? []) answers.add(helper<string>('normalise', typeof o === 'string' ? o : (o as Record<string, string>)[lang]));
+        }
+        for (let i = 0; i < 60; i++) {
+          const lang = i % 2 ? 'fr' : 'en';
+          const q = pick({ curriculum: [skill], level: skill.level, lang, mode: String(skill.subject) });
+          expect({ skill: skill.id, key: q.itemKey.length > 0, count: q.itemCount }).toEqual({ skill: skill.id, key: true, count: items.length });
+          expect(q.skillName).toMatch(new RegExp(` · 0/${items.length} ✓$`));
+          if (q.kind === 'options') {
+            expect(q.optionValues.length).toBeLessThanOrEqual(4);
+            for (const v of q.optionValues) expect({ skill: skill.id, option: v, fromList: answers.has(helper<string>('normalise', v)) }).toEqual({ skill: skill.id, option: v, fromList: true });
+          }
+        }
+      }
+    });
+
+    it('a two-item list of a person’s own is typed (two buttons would be a coin toss); four items get buttons; given buttons are kept', () => {
+      const two = [{ q: 'Capital of France?', a: 'Paris' }, { q: '7 × 6', a: '42' }];
+      for (let i = 0; i < 20; i++) expect(pick({ mode: 'custom', customSet: two, customSetId: 's1' }).kind).toBe('typed');
+      const four = [{ q: 'a', a: '1' }, { q: 'b', a: '2' }, { q: 'c', a: '3' }, { q: 'd', a: '4' }];
+      for (let i = 0; i < 20; i++) {
+        const q = pick({ mode: 'custom', customSet: four, customSetId: 's1' });
+        expect(q.skillId).toBe('set:s1');
+        expect(q.optionValues.sort()).toEqual(['1', '2', '3', '4']);
+      }
+      const own = [{ q: 'Il ___ parti.', a: 'a', opts: ['a', 'à'] }, { q: 'x', a: 'y' }];
+      const q = pick({ mode: 'custom', customSet: own, customSetId: 's1', nonce: 2 });
+      if (q.prompt === 'Il ___ parti.') expect(q.optionValues.sort()).toEqual(['a', 'à']);
+    });
+
+    it('🔴 a list asked both ways is asked both ways, with the instruction for each direction', () => {
+      const colours = CURRICULUM.find((s) => s.id === 'en-colours')!;
+      const leads = new Set<string>();
+      for (let i = 0; i < 80; i++) leads.add(pick({ curriculum: [colours], level: 'CE2', lang: 'fr', mode: 'english' }).prompt.split(' ')[0]);
+      expect([...leads].sort()).toEqual(['En']);
+      const full = new Set<string>();
+      for (let i = 0; i < 80; i++) full.add(pick({ curriculum: [colours], level: 'CE2', lang: 'fr', mode: 'english' }).prompt.split(' ').slice(0, 2).join(' '));
+      expect([...full].sort()).toEqual(['En anglais', 'En français']);
+      // Backwards, the English word is asked and the French one is the answer.
+      for (let i = 0; i < 40; i++) {
+        const q = pick({ curriculum: [colours], level: 'CE2', lang: 'en', mode: 'english' });
+        if (q.prompt.startsWith('In French:')) expect(['rouge', 'bleu', 'vert', 'jaune', 'noir', 'blanc', 'orange', 'rose', 'violet', 'marron', 'gris']).toContain(q.answer);
+        else expect(q.prompt.startsWith('In English:')).toBe(true);
+      }
+    });
+
+    it('🔴 the item just asked waits a turn, and an item not yet learned is asked more than one that is', () => {
+      const skill = CURRICULUM.find((s) => s.id === 'fr-verb-group')!;
+      const items = (skill.params as { items: Array<{ q: { fr: string } }> }).items;
+      const model = freshModel();
+      model.skills[skill.id] = { d: 1000, n: 0, items: {}, lastItem: items[0].q.fr };
+      for (let i = 0; i < 60; i++) expect(pick({ curriculum: [skill], level: '6e', mode: 'french', model }).itemKey).not.toBe(items[0].q.fr);
+      // Every item learned but the last: the last is asked far more than its share.
+      const learned = freshModel();
+      const mem: Record<string, { n: number; k: number; ok: boolean; paid: boolean }> = {};
+      for (const it of items.slice(0, -1)) mem[it.q.fr] = { n: 2, k: 2, ok: true, paid: true };
+      learned.skills[skill.id] = { d: 1000, n: 0, items: mem };
+      let hits = 0;
+      for (let i = 0; i < 200; i++) if (pick({ curriculum: [skill], level: '6e', mode: 'french', model: learned }).itemKey === items[items.length - 1].q.fr) hits++;
+      expect(hits).toBeGreaterThan(200 * 0.08);
+      // And the eyebrow counts what is learned.
+      expect(pick({ curriculum: [skill], level: '6e', mode: 'french', model: learned }).skillName).toMatch(new RegExp(` · ${items.length - 1}/${items.length} ✓$`));
+    });
+
+    /** One question on one verb, one tense and one person, so the form can be asserted exactly. */
+    const conj = (verb: string, tense: string, person: number, lang = 'fr') => {
+      const base = CURRICULUM.find((s) => s.id === 'fr-conj-present')!;
+      return pick({ curriculum: [{ ...base, params: { verbs: [verb], tenses: [tense], persons: [person] } }], level: '6e', lang, mode: 'french', answerMode: 'options' });
+    };
+
+    it('🔴 conjugation: the forms a French test marks (être, aller, avoir, finir, manger across the tenses), with the pronoun elided before a vowel', () => {
+      const cases: Array<[string, string, number, string, string]> = [
+        ['être', 'present', 3, 'sommes', 'nous ___'],
+        ['aller', 'futur', 0, 'irai', 'j’___'],
+        ['aller', 'passeCompose', 5, 'sont allés', 'ils ___'],
+        ['aller', 'passeCompose', 2, 'est allé', 'il ___'],
+        ['manger', 'imparfait', 3, 'mangions', 'nous ___'],
+        ['manger', 'imparfait', 0, 'mangeais', 'je ___'],
+        ['avoir', 'subjonctif', 0, 'aie', 'que j’___'],
+        ['finir', 'subjonctif', 2, 'finisse', 'qu’il ___'],
+        ['aller', 'imperatif', 1, 'va', '(tu) ___'],
+        ['chanter', 'passeSimple', 5, 'chantèrent', 'ils ___'],
+        ['être', 'passeSimple', 2, 'fut', 'il ___'],
+        ['prendre', 'conditionnel', 4, 'prendriez', 'vous ___'],
+        ['venir', 'plusQueParfait', 3, 'étions venus', 'nous ___'],
+        ['faire', 'present', 4, 'faites', 'vous ___'],
+        ['avoir', 'present', 0, 'ai', 'j’___']
+      ];
+      for (const [verb, tense, person, form, tail] of cases) {
+        const q = conj(verb, tense, person);
+        expect({ verb, tense, person, answer: q.answer, tail: q.prompt.endsWith(tail) }).toEqual({ verb, tense, person, answer: form, tail: true });
+        expect(q.prompt).toContain('« ' + verb + ' »');
+        // The correction is the paradigm, and it holds the answer.
+        expect(q.worked.replace(/\s+/g, ' ')).toContain(form.split(' ')[0]);
+        expect(q.optionValues).toContain(form);
+      }
+      expect(conj('finir', 'present', 3).prompt).toBe('Conjugue « finir » au présent : nous ___');
+      expect(conj('finir', 'imparfait', 3).prompt).toBe('Conjugue « finir » à l’imparfait : nous ___');
+      expect(conj('finir', 'present', 3, 'en').prompt).toBe('Conjugate « finir » in the présent: nous ___');
+      // The passé simple skill asks only il and ils.
+      const ps = CURRICULUM.find((s) => s.id === 'fr-conj-passe-simple')!;
+      for (let i = 0; i < 40; i++) expect(pick({ curriculum: [ps], level: 'CM2', lang: 'fr', mode: 'french' }).prompt).toMatch(/: ils? ___$/);
+    });
+
+    it('every conjugation skill generates 60× in both languages: four distinct buttons, the answer among them, the pad carrying the accents, and no verb it names is missing from the tables', () => {
+      const known = new Set(FRENCH_VERBS.map((v) => v.inf));
+      for (const skill of CONJ) {
+        for (const verb of (skill.params as { verbs: string[] }).verbs) expect({ skill: skill.id, verb, known: known.has(verb) }).toEqual({ skill: skill.id, verb, known: true });
+        for (let i = 0; i < 60; i++) {
+          const lang = i % 2 ? 'fr' : 'en';
+          const q = pick({ curriculum: [skill], level: skill.level, lang, mode: 'french', answerMode: 'options' });
+          expect(q.optionValues).toHaveLength(4);
+          expect(new Set(q.optionValues).size).toBe(4);
+          expect(q.optionValues).toContain(q.answer);
+          const typed = pick({ curriculum: [skill], level: skill.level, lang, mode: 'french', answerMode: 'typed' });
+          expect(typed.kind).toBe('typed');
+          expect(typed.padNumeric).toBe(false);
+          for (const ch of typed.answer) if (ch !== ch.toUpperCase() && !/[a-z ]/.test(ch)) expect({ skill: skill.id, ch, onPad: typed.padKeys.includes(ch) }).toEqual({ skill: skill.id, ch, onPad: true });
+          // Graded right as a French child would type it, straight or curly apostrophe aside.
+          expect(grade(typed, typed.answer, { lang }).correct).toBe(true);
+        }
+      }
+    });
+
+    it('numbers in English and centuries: forty-seven or forty seven both grade right; 1515 is the XVIe, 1500 the XVe, 2024 the XXIe', () => {
+      const en20 = CURRICULUM.find((s) => s.id === 'en-numbers-100')!;
+      for (let i = 0; i < 40; i++) {
+        const q = pick({ curriculum: [en20], level: '6e', lang: 'fr', mode: 'english', answerMode: 'typed' });
+        const n = Number(q.prompt.replace(/\D/g, ''));
+        expect(q.answer).toBe(helper<string>('spellEn', n));
+        expect(grade(q, q.answer.replace(/-/g, ' '), { lang: 'fr' }).correct).toBe(true);
+      }
+      const century = CURRICULUM.find((s) => s.id === 'hi-century')!;
+      const at = (year: number) => pick({ curriculum: [{ ...century, params: { min: year, max: year } }], level: 'CM1', lang: 'fr', mode: 'history' });
+      expect(at(1515).answer).toBe('XVIe');
+      expect(at(1500).answer).toBe('XVe');
+      expect(at(2024).answer).toBe('XXIe');
+      expect(at(1789).answer).toBe('XVIIIe');
+      // The trap is on the buttons: 1515 offers the XVe.
+      expect(at(1515).optionValues).toContain('XVe');
+      expect(new Set(at(1515).optionValues).size).toBe(4);
+    });
+  });
+
+  describe('P113 REV-004 — what learning pays', () => {
+    const q0 = { skillId: 'fr-verb-mode', answer: 'subjonctif', fluentMs: 8000, itemDiff: 1600, strategy: '' };
+    const ask = (model: any, typed: string, itemKey: string, over: Record<string, unknown> = {}) =>
+      runScript(GRADE_ANSWER_SCRIPT, { model, skillId: q0.skillId, answer: q0.answer, typed, shownAt: Date.now(), fluentMs: q0.fluentMs, itemDiff: q0.itemDiff, level: '6e', lang: 'fr', strategy: '', timedOut: false, itemKey, itemCount: 2, raceId: 'r1', ...over });
+
+    it(`🔴 an item is learned after ${ITEM_LEARNED_AT} right answers in a row and pays ${STAR_RULE.item} ⭐ once; a miss unlearns it without taking anything back; every item learned pays the list’s ${STAR_RULE.list} ⭐ once`, () => {
+      let g = ask(freshModel(), 'subjonctif', 'q1');
+      expect({ learned: g.itemLearned, stars: g.starsEarned }).toEqual({ learned: false, stars: STAR_RULE.right });
+      g = ask(g.model, 'subjonctif', 'q1');
+      expect({ learned: g.itemLearned, stars: g.starsEarned, count: g.learned, done: g.listDone }).toEqual({ learned: true, stars: STAR_RULE.right + STAR_RULE.item, count: 1, done: false });
+      expect(g.boost).toContain('📚 +' + STAR_RULE.item);
+      const starsAfterItem = g.stars;
+      g = ask(g.model, 'subjonctif', 'q1');
+      expect({ learned: g.itemLearned, stars: g.starsEarned }).toEqual({ learned: false, stars: STAR_RULE.right });
+      // A miss: no longer learned, nothing taken back, and re-learning pays nothing.
+      g = ask(g.model, 'indicatif', 'q1');
+      expect({ learned: g.learned, stars: g.stars }).toEqual({ learned: 0, stars: starsAfterItem + STAR_RULE.right });
+      g = ask(g.model, 'subjonctif', 'q1');
+      g = ask(g.model, 'subjonctif', 'q1');
+      expect({ learned: g.learned, itemLearned: g.itemLearned, paid: g.starsEarned }).toEqual({ learned: 1, itemLearned: false, paid: STAR_RULE.right });
+      // The second item: learning it completes the list of two.
+      g = ask(g.model, 'subjonctif', 'q2');
+      g = ask(g.model, 'subjonctif', 'q2');
+      expect({ done: g.listDone, stars: g.starsEarned }).toEqual({ done: true, stars: STAR_RULE.right + STAR_RULE.item + STAR_RULE.list });
+      expect(g.boost).toContain('🏆 +' + STAR_RULE.list);
+      // Once.
+      g = ask(g.model, 'indicatif', 'q2');
+      g = ask(g.model, 'subjonctif', 'q2');
+      g = ask(g.model, 'subjonctif', 'q2');
+      expect({ done: g.listDone, learned: g.learned }).toEqual({ done: false, learned: 2 });
+      // The race remembers what learning paid, and the finish says it.
+      expect(g.model.race.itemStars).toBe(STAR_RULE.item * 2 + STAR_RULE.list);
+      const finish = runScript(FINISH_RACE_SCRIPT, { model: g.model, raceId: 'r1', timed: false, lang: 'en' });
+      expect(finish.why).toContain('learned +' + (STAR_RULE.item * 2 + STAR_RULE.list));
+    });
+
+    it('player two’s turns learn nothing for this profile, and a generated maths question (no item) is graded as before', () => {
+      let g = ask(freshModel(), 'subjonctif', 'q1', { forB: true });
+      g = ask(g.model, 'subjonctif', 'q1', { forB: true });
+      expect({ learned: g.itemLearned, stars: g.starsEarned, ok: g.model.skills['fr-verb-mode'].items.q1.ok }).toEqual({ learned: true, stars: 0, ok: true });
+      const plain = ask(freshModel(), 'subjonctif', '');
+      expect({ learned: plain.learned, items: plain.model.skills['fr-verb-mode'].items }).toEqual({ learned: 0, items: undefined });
+    });
+  });
+
+  describe('P113 REV-002 — a revision list typed as a parent types it', () => {
+    it('🔴 plain text, one line per question, with the separator a person actually used: =, →, a tab, a colon, a dash', () => {
+      const text = 'Néandertal disparaît = vers -40 000\nqu’il vienne → subjonctif\nfeu maîtrisé\tvers -400 000\nLascaux : vers -20 000\nHomo sapiens en Europe - vers -45 000\n\nune ligne sans réponse\n2 + 2 = ? = 4';
+      const parsed = runScript(PARSE_SET_SCRIPT, { json: text });
+      expect(parsed.items).toEqual([
+        { q: 'Néandertal disparaît', a: 'vers -40 000' },
+        { q: 'qu’il vienne', a: 'subjonctif' },
+        { q: 'feu maîtrisé', a: 'vers -400 000' },
+        { q: 'Lascaux', a: 'vers -20 000' },
+        { q: 'Homo sapiens en Europe', a: 'vers -45 000' },
+        { q: '2 + 2 = ?', a: '4' }
+      ]);
+      expect({ count: parsed.count, skipped: parsed.skipped, valid: parsed.valid }).toEqual({ count: 6, skipped: 1, valid: true });
+      // JSON still works, and a bare word is nothing to save.
+      expect(runScript(PARSE_SET_SCRIPT, { json: '[["a","b"]]' }).items).toEqual([{ q: 'a', a: 'b' }]);
+      expect(runScript(PARSE_SET_SCRIPT, { json: 'hello' })).toEqual(expect.objectContaining({ valid: false, skipped: 1 }));
+    });
+
+    it('a saved list keeps whether it is asked both ways, and lists back its text for the editor', () => {
+      let app: any = runScript(CREATE_PROFILE_SCRIPT, { app: undefined, name: 'Ellie', level: '6e' }).app;
+      const items = runScript(PARSE_SET_SCRIPT, { json: 'go = went\nsee = saw' }).items;
+      const saved = runScript(UPSERT_SET_SCRIPT, { app, name: 'Irregular verbs', items, both: true });
+      const list = runScript(LIST_SETS_SCRIPT, { app: saved.app, setId: saved.setId });
+      expect({ both: list.chosenBoth, text: list.chosenText, rowBoth: list.sets[0].both }).toEqual({ both: true, text: 'go = went\nsee = saw', rowBoth: true });
+      // The focus can point at it, and the picker then asks it both ways under its own skill id.
+      const focus = runScript(FOCUS_SCRIPT, { curriculum: CURRICULUM, sets: list.sets.map((r: { id: string }) => saved.app.sets.find((s: { id: string }) => s.id === r.id)), level: '6e', lang: 'en', subject: 'set:' + saved.setId, skills: [] });
+      const seen = new Set<string>();
+      for (let i = 0; i < 40; i++) {
+        const q = pick({ mode: focus.mode, customSet: focus.customSet, customSetId: focus.customSetId, customSetBoth: focus.customSetBoth, level: '6e' });
+        expect(q.skillId).toBe('set:' + saved.setId);
+        seen.add(q.prompt);
+      }
+      expect([...seen].sort()).toEqual(['go', 'saw', 'see', 'went']);
+    });
+
+    it('a typed word forgives a hyphen for a space, a curly apostrophe, and a full stop at the end — and nothing else', () => {
+      expect(helper<boolean>('sameAnswer', 'forty-seven', 'forty seven')).toBe(true);
+      expect(helper<boolean>('sameAnswer', "qu'il", 'qu’il')).toBe(true);
+      expect(helper<boolean>('sameAnswer', 'subjonctif.', 'Subjonctif')).toBe(true);
+      expect(helper<boolean>('sameAnswer', 'etais', 'étais')).toBe(false);
+      expect(helper<boolean>('sameAnswer', '12.', '12')).toBe(true);
+      expect(helper<boolean>('sameAnswer', '2.5', '2,5')).toBe(true);
+    });
+
+    it('🔴 the save code carries the lists and the focus (Richard, 2026-10-04: "yep"), under their own ids, and a refused code adds no list', () => {
+      let app: any = runScript(CREATE_PROFILE_SCRIPT, { app: undefined, name: 'Ellie', level: '6e' }).app;
+      app = runScript(UPSERT_SET_SCRIPT, { app, setId: 'sHist', name: 'History Monday', items: [{ q: 'Lascaux', a: 'vers -20 000' }], both: false }).app;
+      app = runScript(UPSERT_SET_SCRIPT, { app, setId: 'sVoc', name: 'English words', items: [{ q: 'le chien', a: 'the dog' }, { q: 'la maison', a: 'the house' }], both: true }).app;
+      app = runScript(UPDATE_SETTINGS_SCRIPT, { app, focusSubject: 'set:sVoc', focusSkills: [] }).app;
+      const code = runScript(ENCODE_SAVE_SCRIPT, { app }).code;
+      expect(code).toMatch(/^RS1\.[A-Za-z0-9_-]+$/);
+
+      // Another computer, empty: the player, the focus on the list, and both lists with their ids and both-ways flag.
+      const there = runScript(DECODE_SAVE_SCRIPT, { app: { profiles: [], activeId: '', sets: [] }, code });
+      expect(there.ok).toBe(true);
+      expect(there.app.sets).toEqual([
+        { id: 'sHist', name: 'History Monday', items: [{ q: 'Lascaux', a: 'vers -20 000' }], both: false },
+        { id: 'sVoc', name: 'English words', items: [{ q: 'le chien', a: 'the dog' }, { q: 'la maison', a: 'the house' }], both: true }
+      ]);
+      expect(runScript(ACTIVE_PROFILE_SCRIPT, { app: there.app }).focusSubject).toBe('set:sVoc');
+
+      // A computer that has an older copy of one list and a list of its own: the code's copy wins, the other list stays.
+      const busy = { profiles: [], activeId: '', sets: [{ id: 'sHist', name: 'History (old)', items: [], both: false }, { id: 'sMine', name: 'Mine', items: [{ q: 'a', a: 'b' }], both: false }] };
+      const merged = runScript(DECODE_SAVE_SCRIPT, { app: busy, code });
+      expect(merged.app.sets.map((x: any) => `${x.id}:${x.name}`)).toEqual(['sHist:History Monday', 'sMine:Mine', 'sVoc:English words']);
+
+      // A full store refuses the code, and its lists do not slip in.
+      let full: any = { profiles: [], activeId: '', sets: [] };
+      for (let i = 0; i < MAX_PROFILES; i++) full = runScript(CREATE_PROFILE_SCRIPT, { app: full, name: `P${i}` }).app;
+      const refused = runScript(DECODE_SAVE_SCRIPT, { app: full, code });
+      expect([refused.ok, refused.error, refused.app.sets.length]).toEqual([false, 'full', 0]);
+
+      // A v3 code (before lists) still loads, with no list and no focus.
+      const v3 = 'RS1.' + Buffer.from(JSON.stringify({ v: 3, n: 'Sam', k: 'thumbs', s: 'Sam', l: 'CM1', g: 'en', y: 'qwerty', r: 0, a: 0, d: [], sk: {}, st: 0, b: {}, o: [], w: {}, sp: 0 }), 'utf8').toString('base64url');
+      const old = runScript(DECODE_SAVE_SCRIPT, { app: { profiles: [], activeId: '', sets: [] }, code: v3 });
+      expect([old.ok, old.app.sets.length, old.app.profiles[0].focus]).toEqual([true, 0, undefined]);
+    });
+  });
+
+  describe('P113 REV-005 — the moon: adopt, feed, dress, and nothing ever gets worse', () => {
+    const withPurse = (stars: number, lang = 'en') => {
+      let app: any = runScript(CREATE_PROFILE_SCRIPT, { app: undefined, name: 'Ellie', level: '6e', lang }).app;
+      app = runScript(SAVE_MODEL_SCRIPT, { app, model: { rating: 0, answered: 0, lastSkill: '', skills: {}, stars, spent: 0, bests: {} } }).app;
+      return app;
+    };
+    const act = (app: any, action: string, over: Record<string, unknown> = {}) => runScript(MOON_ACT_SCRIPT, { app, action, ...over });
+    const view = (app: any, over: Record<string, unknown> = {}) => runScript(MOON_VIEW_SCRIPT, { app, ...over });
+    const me = (app: any) => app.profiles.find((p: any) => p.id === app.activeId);
+
+    it('🔴 the first alien is free, the next costs 60 ⭐ from the hangar’s purse, and a short purse changes nothing', () => {
+      let app = withPurse(50);
+      expect(view(app)).toEqual(expect.objectContaining({ has: false, adoptFree: true, canAdopt: true, adoptButton: 'Adopt · free!', purseLine: 'You have 50 ⭐' }));
+      const first = act(app, 'adopt', { species: 'bean', colour: 'pink', name: '  Zorpina  ' });
+      expect([first.ok, first.said]).toEqual([true, 'Welcome to the moon, Zorpina!']);
+      app = first.app;
+      expect(me(app).model.spent).toBe(0);
+      const v = view(app);
+      expect(v.aliens).toEqual([expect.objectContaining({ name: 'Zorpina', species: 'bean', colour: 'var(--alien-pink)', grown: 0, selected: true, line: 'Baby' })]);
+      expect([v.adoptCost, v.canAdopt, v.anotherLine]).toEqual([60, false, '＋ Adopt another alien · 60 ⭐']);
+      // 50 ⭐ is not 60: refused, said gently, and the store is exactly as it was.
+      const short = act(app, 'adopt', { species: 'blob' });
+      expect([short.ok, short.why, short.said]).toEqual([false, 'tooDear', 'Not enough stars yet: a game earns more!']);
+      expect(short.app).toEqual(app);
+      // With 60 more earned, the second comes, and is spent for.
+      app = runScript(SAVE_MODEL_SCRIPT, { app, model: { ...me(app).model, stars: 110 } }).app;
+      const second = act(app, 'adopt', { species: 'fuzz', colour: 'nope', name: '' });
+      expect(second.ok).toBe(true);
+      const two = me(second.app);
+      expect([two.moon.aliens.length, two.model.spent, two.model.stars, two.moon.aliens[1].colour, two.moon.aliens[1].name]).toEqual([2, 60, 110, 'lime', 'Puff']);
+      expect(two.moon.sel).toBe(two.moon.aliens[1].id);
+    });
+
+    it('a moon holds six aliens, and the seventh is refused', () => {
+      let app = withPurse(10000);
+      for (let i = 0; i < 6; i++) app = act(app, 'adopt', { species: 'star' }).app;
+      expect(view(app)).toEqual(expect.objectContaining({ count: 6, full: true, canAdopt: false, anotherLine: '' }));
+      const seventh = act(app, 'adopt', {});
+      expect([seventh.ok, seventh.why, me(seventh.app).moon.aliens.length]).toEqual([false, 'full', 6]);
+      expect(me(app).model.spent).toBe(60 + 90 + 120 + 160 + 200);
+    });
+
+    it('🔴 a meal spends its price and counts; the favourite counts two and is found the first time; six meals grow it, eighteen grow it up', () => {
+      let app = act(withPurse(500), 'adopt', { species: 'blob', name: 'Zib' }).app;
+      const fav = me(app).moon.aliens[0].fav as string;
+      const other = ['strawberry', 'cookie', 'doughnut', 'pizza', 'cheese', 'cake'].find((f) => f !== fav)!;
+      expect(view(app).favLine).toBe('Favourite food: ❓ — find it!');
+      const yum = act(app, 'feed', { foodId: other });
+      expect(yum.ok).toBe(true);
+      expect(yum.said).toMatch(/^Zib munches .+\. Yum!$/);
+      app = yum.app;
+      const loved = act(app, 'feed', { foodId: fav });
+      expect(loved.said).toMatch(/^Zib LOVES .+! It’s the favourite: two meals in one\.$/);
+      app = loved.app;
+      expect([me(app).moon.aliens[0].meals, me(app).moon.aliens[0].found]).toEqual([3, true]);
+      expect(view(app).favLine).toMatch(/^Favourite food: \S+ /);
+      expect(view(app).selLine).toBe('Baby · 3 meals · 3 more to grow');
+      // Three more of the favourite: 9 meals, it grew on the way past 6, and said so.
+      let said = '';
+      for (let i = 0; i < 2; i++) { const r = act(app, 'feed', { foodId: fav }); app = r.app; said = r.said; }
+      expect(said).toMatch(/ Zib grew!$/);
+      expect([view(app).selGrown, view(app).selLine]).toEqual([1, 'Young · 7 meals · 11 more to grow']);
+      for (let i = 0; i < 6; i++) app = act(app, 'feed', { foodId: fav }).app;
+      expect([view(app).selGrown, view(app).selLine, view(app).aliens[0].line]).toEqual([2, 'Grown up! · 19 meals', 'Grown up']);
+      // Spent is every meal's price; stars (earned) never moved.
+      expect(me(app).model.stars).toBe(500);
+      expect(view(app).foods.every((f: any) => f.use === true)).toBe(true);
+    });
+
+    it('🔴 something to wear is bought once, put on the chosen alien at once, and then goes on or off any alien for free', () => {
+      let app = withPurse(160);
+      app = act(app, 'adopt', { species: 'squid', name: 'Tako' }).app;
+      app = act(app, 'adopt', { species: 'trio', name: 'Oko' }).app; // 60
+      const crown = view(app).wear.find((w: any) => w.id === 'crown');
+      expect(crown).toEqual(expect.objectContaining({ line: '80 ⭐', use: false, ask: true, dim: false, showAlien: true, species: 'trio', hat: 'crown' }));
+      const bought = act(app, 'buy', { wearId: 'crown' });
+      expect([bought.ok, bought.said]).toEqual([true, 'Oko is wearing the crown!']);
+      app = bought.app;
+      expect([me(app).moon.owned, me(app).moon.aliens[1].wear.hat, me(app).model.spent]).toEqual([['crown'], 'crown', 140]);
+      expect(view(app).wear.find((w: any) => w.id === 'crown')).toEqual(expect.objectContaining({ line: 'On ✓', use: true, ask: false, worn: true }));
+      // Bought twice: refused. Off again: free. On the other alien: free.
+      expect(act(app, 'buy', { wearId: 'crown' }).why).toBe('owned');
+      const off = act(app, 'wear', { wearId: 'crown' });
+      expect([off.said, me(off.app).moon.aliens[1].wear.hat]).toEqual(['Oko takes off the crown.', '']);
+      app = act(off.app, 'select', { alienId: me(off.app).moon.aliens[0].id }).app;
+      app = act(app, 'wear', { wearId: 'crown' }).app;
+      expect([me(app).moon.aliens[0].wear.hat, me(app).model.spent]).toEqual(['crown', 140]);
+      // Not owned cannot be worn; too dear cannot be bought, and is greyed.
+      expect(act(app, 'wear', { wearId: 'tophat' }).why).toBe('notOwned');
+      expect(act(app, 'buy', { wearId: 'starglasses' }).why).toBe('tooDear');
+      expect(view(app).wear.find((w: any) => w.id === 'starglasses')).toEqual(expect.objectContaining({ dim: true, ask: false }));
+    });
+
+    it('the moon speaks French to a French player, and the adopt card draws every species in the colour being chosen', () => {
+      let app = withPurse(100, 'fr');
+      const v0 = view(app, { draftSpecies: 'star', draftColour: 'sky' });
+      expect(v0.adoptSpecies).toHaveLength(6);
+      expect(v0.adoptSpecies.every((r: any) => r.colour === 'var(--alien-sky)')).toBe(true);
+      expect(v0.adoptSpecies.filter((r: any) => r.selected).map((r: any) => r.id)).toEqual(['star']);
+      expect([v0.suggestedName, v0.adoptButton, v0.purseLine, v0.adoptColours[0].label]).toEqual(['Stella', 'Adopter · gratuit !', 'Tu as 100 ⭐', 'Citron vert']);
+      const r = act(app, 'adopt', { species: 'star', colour: 'sky', name: 'Nova' });
+      expect(r.said).toBe('Bienvenue sur la Lune, Nova !');
+      app = r.app;
+      expect(view(app).selLine).toBe('Bébé · 0 repas · encore 6 pour grandir');
+      expect(act(app, 'buy', { wearId: 'bow' }).said).toBe('Et voilà : Nœud pour Nova !');
+    });
+
+    it('🔴 nothing on the moon has a clock: the same store read later says the same thing, and the save code carries the moon', () => {
+      let app = act(withPurse(100), 'adopt', { species: 'bean', name: 'Beep' }).app;
+      app = act(app, 'feed', { foodId: 'cookie' }).app;
+      const now = view(app);
+      const realNow = Date.now;
+      try {
+        Date.now = () => realNow() + 1000 * 60 * 60 * 24 * 30;
+        expect(view(app)).toEqual(now);
+      } finally {
+        Date.now = realNow;
+      }
+      const code = runScript(ENCODE_SAVE_SCRIPT, { app }).code;
+      const there = runScript(DECODE_SAVE_SCRIPT, { app: { profiles: [], activeId: '', sets: [] }, code });
+      expect(view(there.app).aliens).toEqual(now.aliens);
+      expect(view(there.app).purse).toBe(now.purse);
     });
   });
 });

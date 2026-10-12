@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3ab9f63c-dbd6-5c0b-893b-198699e9b681",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "brainsizeIn",
+      "fromProperty": "robot",
+      "toId": "brainsizeFn",
+      "toProperty": "in-robot"
+    },
+    {
+      "fromId": "brainsizeFn",
+      "fromProperty": "out-size",
+      "toId": "brainsizeOut",
+      "toProperty": "size"
+    },
+    {
+      "fromId": "brainsizeFn",
+      "fromProperty": "success",
+      "toId": "brainsizeOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -1,0 +1,243 @@
+name: Olive's Island desktop (P105 CG-004, CG-008)
+
+# The coding game as a desktop app ("Olive's Island" / "L'île d'Olive"; internally garden-desktop): an Electron shell
+# that runs its own nodegx-backend and its own owl (Qwen3.5-0.8B through node-llama-cpp in the main process), with no
+# network. Modelled on nightbook-desktop.yml (TPL-011).
+#
+# shell   (Linux)   the shell's unit tests, then Olive's contract test against the REAL model on CPU (correctness, not
+#                   timing). The 532 MB GGUF is fetched by pinned URL + sha256 and cached on the sha.
+# windows           the garden template (templates/bot-garden) exported, the NSIS installer built and installed silently,
+#                   its name read back (exe + Start-menu shortcut), egress blocked for the installed exe, and the
+#                   installed app driven: drive-upgrade.js (v2 over a used v1 data dir keeps the exam, the policy AND a
+#                   family made on the real pages; the wire 127.0.0.1 only). The installer and the readouts uploaded.
+#
+# Prepared in lane C, session 1 (2026-09-27); made to build the real template and the renamed app in session 3
+# (2026-09-28, lane DESKTOP). Never run yet on Windows. Unsigned by ruling D2 (TPL-011-DESKTOP §9).
+#
+# TRIGGER: this file is not on the default branch, so `workflow_dispatch` cannot start it; a push to the branch below
+# does: `git push origin <commit>:refs/heads/p105-garden-desktop`.
+#
+# Names: every name a person sees is read from shell/package.json (`build.productName`); nothing below spells it,
+# because it carries an apostrophe (a PowerShell single-quoted string would need it doubled). The install folder is
+# the package name, `garden-desktop` (electron-builder's oneClick per-user install uses the package name, measured in
+# app-builder-lib 26.15.3 getWindowsInstallationDirName), and the installer's file name has no apostrophe.
+
+on:
+  push:
+    branches: [p105-garden-desktop]
+  workflow_dispatch:
+
+concurrency:
+  group: garden-desktop
+  cancel-in-progress: true
+
+env:
+  GARDEN: dev-docs/tasks/phase-105-the-coding-garden/garden-desktop
+
+jobs:
+  shell:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      # The shell is NOT a workspace: its own lockfile, its own install (node-llama-cpp's postinstall picks the
+      # linux-x64 prebuilt binary; Electron's postinstall downloads its binary, cached below).
+      - name: Cache Electron binaries
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/electron
+          key: electron-${{ runner.os }}-${{ hashFiles(format('{0}/shell/package-lock.json', env.GARDEN)) }}
+
+      - name: Install the shell
+        working-directory: ${{ env.GARDEN }}/shell
+        run: npm ci --no-audit --no-fund
+
+      - name: Shell unit tests (AC1, AC3, AC4, AC6, AC7 — fake owl; the name and the pinned saves folder)
+        working-directory: ${{ env.GARDEN }}/shell
+        run: node --test tests/*.test.js
+
+      - name: Read the model's pin
+        id: pin
+        run: echo "sha=$(node -p "require('./$GARDEN/shell/garden.json').model.sha256")" >> "$GITHUB_OUTPUT"
+
+      # Cached on the sha256 alone: the file is immutable by definition, so the key never needs the OS or the lockfile.
+      - name: Cache the model
+        id: model
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.GARDEN }}/shell/build-output/model
+          key: gguf-${{ steps.pin.outputs.sha }}
+
+      - name: Fetch the model (pinned URL, sha256 verified)
+        if: steps.model.outputs.cache-hit != 'true'
+        run: node $GARDEN/fetch-model.mjs
+
+      - name: Verify the cached model
+        run: node $GARDEN/fetch-model.mjs --check
+
+      # A sampled model at temperature 0.2–1.2: the exam takes the majority of three per probe, and the readout's own bar
+      # was "most of the time". Measured on the Mac's CPU path (2026-09-27, lane C): 18–19 of 20 asserted probes per run,
+      # the reds moving between runs (P05 variety at 1.2, P07 one route). A lone red is run once more, as every gate here is.
+      - name: Olive's contract test on CPU (AC2, AC3, AC7 — the real model through the route)
+        run: |
+          node $GARDEN/tests/olive-contract.mjs --cpu --out contract-linux-cpu.json && exit 0
+          echo "::warning::contract test red once; running it again"
+          node $GARDEN/tests/olive-contract.mjs --cpu --out contract-linux-cpu.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: olive-contract-linux-${{ github.sha }}
+          path: contract-linux-cpu.json
+          retention-days: 30
+
+  # Not `needs: shell`: the contract test grades the MODEL on one CPU; the installed app runs its own exam on its own
+  # machine and withholds what fails there. The first run (2026-09-28, 36419321133) skipped this job because the Linux
+  # contract was red on one probe (P07, x86 CPU, 4 of 4 wrong), so the product was never built. Both jobs run; both show.
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      # The template is committed (CG-003). Its absence is a RED run now, never a skipped job that reads green.
+      - name: The garden template is there (CG-003)
+        run: |
+          test -f templates/bot-garden/nodegx.project.json || { echo "::error::templates/bot-garden is missing: nothing to build"; exit 1; }
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: ./.github/actions/setup
+
+      # The production viewer: nodegx-deploy refuses a development engine (and build-app.js now reads that refusal).
+      - name: Build viewer bundles
+        run: npm run build:editor:_viewer
+        env:
+          WORKSPACE_PATH: .
+
+      - name: Build the backend bundle and the deploy engine
+        run: |
+          npm --prefix packages/nodegx-backend run build
+          npm run build --workspace @nodegx/preview
+
+      - name: Read the model's pin
+        id: pin
+        run: echo "sha=$(node -p "require('./$GARDEN/shell/garden.json').model.sha256")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache the model
+        id: model
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.GARDEN }}/shell/build-output/model
+          key: gguf-${{ steps.pin.outputs.sha }}
+
+      - name: Fetch the model
+        if: steps.model.outputs.cache-hit != 'true'
+        run: node $GARDEN/fetch-model.mjs
+
+      # templates/bot-garden ships no nodegx.security.json (no backend: the family lives in localStorage), so the
+      # shell's CLOSED policy is shipped (BUILD.json policySource: shell-closed).
+      - name: Assemble the app (export + backend + policy + model + licences)
+        run: |
+          node $GARDEN/build-app.js --project templates/bot-garden
+          node -e "const b=require('./$GARDEN/shell/build-output/BUILD.json'); console.log(JSON.stringify({project:b.project,name:b.name,policySource:b.policySource,developmentEngine:b.developmentEngine,bundle:b.bundle})); if (b.project.replace(/\\\\/g,'/')!=='templates/bot-garden'||b.developmentEngine) process.exit(1)"
+
+      # `npm ci` HERE, on Windows: node-llama-cpp's postinstall installs @node-llama-cpp/win-x64 (the CPU-only prebuilt
+      # binary, AC5). The Mac's node_modules must never be copied to Windows.
+      - name: Install the shell and run its tests
+        working-directory: ${{ env.GARDEN }}/shell
+        run: |
+          npm ci --no-audit --no-fund
+          node --test tests/*.test.js
+
+      - name: Build the installer
+        working-directory: ${{ env.GARDEN }}/shell
+        run: npm run dist:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: The native binary is outside the asar (AC5); the installer's size (CG-008 AC2)
+        run: |
+          ls "$GARDEN"/shell/dist/win-unpacked/resources/app.asar.unpacked/node_modules/@node-llama-cpp/win-x64/bins/win-x64/ || (echo "::error::no unpacked win-x64 binary" && exit 1)
+          ls "$GARDEN"/shell/dist/win-unpacked/resources/model/ || (echo "::error::no model in extraResources" && exit 1)
+          ls "$GARDEN"/shell/dist/win-unpacked/resources/licenses/
+          ls "$GARDEN"/shell/dist/win-unpacked/resources/policy/
+          ls -l "$GARDEN"/shell/dist/*-Setup-*.exe
+          for f in "$GARDEN"/shell/dist/*-Setup-*.exe; do echo "Installer: $(basename "$f"), $(stat -c %s "$f") bytes" >> "$GITHUB_STEP_SUMMARY"; done
+
+      # Per-user, no admin, silent. The exe and the Start-menu shortcut must carry the product name (ruling 7).
+      - name: Install it silently and read its name back
+        shell: pwsh
+        run: |
+          $pkg = Get-Content -LiteralPath "$env:GARDEN/shell/package.json" -Raw | ConvertFrom-Json
+          $name = $pkg.build.productName
+          $setup = Get-ChildItem -LiteralPath "$env:GARDEN/shell/dist" -Filter '*-Setup-*.exe' | Select-Object -First 1
+          if (-not $setup) { throw "no installer in $env:GARDEN/shell/dist" }
+          Start-Process -FilePath $setup.FullName -ArgumentList '/S' -Wait
+          Get-Process -Name $name -ErrorAction SilentlyContinue | Stop-Process -Force
+          $exe = Join-Path (Join-Path $env:LOCALAPPDATA 'Programs\garden-desktop') "$name.exe"
+          if (-not (Test-Path -LiteralPath $exe)) { Get-ChildItem (Join-Path $env:LOCALAPPDATA 'Programs') -Recurse -Filter '*.exe' | Select-Object -First 5 FullName; throw "$name.exe not at $exe" }
+          $lnk = Join-Path ([Environment]::GetFolderPath('Programs')) "$name.lnk"
+          if (-not (Test-Path -LiteralPath $lnk)) { Get-ChildItem ([Environment]::GetFolderPath('Programs')) -Filter '*.lnk' | Select-Object Name; throw "no Start-menu shortcut named $name" }
+          $desc = (Get-Item -LiteralPath $exe).VersionInfo.FileDescription
+          "Installed: $exe (FileDescription '$desc'); shortcut $lnk" | Tee-Object -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          if ($desc -ne $name) { throw "the exe's FileDescription (Task Manager's name) is '$desc', not '$name'" }
+          "GARDEN_EXE=$exe" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      # CG-008 AC3: the installed app runs with no network. The backend is the same exe in Node mode, so one rule covers
+      # both; loopback traffic is not filtered by Windows Firewall, so the relay and the backend still talk.
+      - name: Block egress for the installed exe
+        shell: pwsh
+        run: |
+          New-NetFirewallRule -DisplayName 'garden-desktop no egress' -Direction Outbound -Program $env:GARDEN_EXE -Action Block | Out-Null
+          Get-NetFirewallRule -DisplayName 'garden-desktop no egress' | Select-Object DisplayName, Enabled, Direction, Action
+
+      # AC8 (v2 over v1 keeps the island's family, the exam; adopts the policy) and AC9 (the wire: 127.0.0.1 only).
+      # The installed app loads the model CPU-only on Windows (AC5): backend.log says "owl: loaded in N ms on cpu"; the
+      # first exam on the runner's CPU is minutes (GARDEN_EXAM_WAIT_MS bounds it).
+      # s4: the SAME contract on this CPU (2 threads, the shipped win-x64 prebuilt), before the installed app is driven.
+      # Run 36423640596's first-launch exam never finished: 80 asks, 55 fell back at the 12 s limit, while the Linux
+      # runner answered in ~2 s. This separates "this CPU / this binary is slow" from "the app's own settings (it asks
+      # for a GPU, so the configured cpuThreads is not passed) or its other processes are". A reading, not a gate.
+      - name: Olive's contract on Windows CPU (a measurement, not a gate)
+        continue-on-error: true
+        timeout-minutes: 25
+        run: node $GARDEN/tests/olive-contract.mjs --cpu --out contract-win-cpu.json
+
+      - name: Drive the installed app (upgrade + family + wire)
+        run: node $GARDEN/drive-upgrade.js --exe "$GARDEN_EXE"
+        env:
+          GARDEN_DRIVE_REPORT: ${{ github.workspace }}/drive-report.json
+          GARDEN_EXAM_WAIT_MS: '900000'
+
+      - name: Collect
+        if: always()
+        run: |
+          mkdir -p out
+          cp "$GARDEN"/shell/dist/*-Setup-*.exe out/ || true
+          cp "$GARDEN"/shell/build-output/BUILD.json out/ || true
+          cp drive-report.json out/ || true
+          cp contract-win-cpu.json out/ || true
+          # The installed app's own logs (timings.log: model load, each ask's ms), from the drive's throwaway home.
+          node -e "const r=require('./drive-report.json'),fs=require('fs'),p=require('path');const d=p.join(r.home||'','A','userData','logs');if(r.home&&fs.existsSync(d))fs.cpSync(d,'out/logs',{recursive:true})" || true
+
+      - name: Upload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: garden-win32-x64-${{ github.sha }}
+          path: out
+          retention-days: 30

@@ -148,7 +148,9 @@ const NavigateToPathNode: NodeDefinitionOptions = {
       internal.pendingNavigateOutcomes = undefined;
 
       let formattedPath = internal.path;
-      if (formattedPath === undefined) {
+      // P107-C24 (ISL-026, ruled "Treat it as no path"): a Path that is not text — null from an empty wire, a
+      // number — is no path; `.match` on it threw in this frame-end callback and every press went unanswered
+      if (typeof formattedPath !== 'string') {
         // Was a bare `return`: the node was told to navigate, could not, and said nothing.
         internal.lastError = 'No path to navigate to';
         this.flagOutputDirty('error');
@@ -169,7 +171,10 @@ const NavigateToPathNode: NodeDefinitionOptions = {
 
       inputs.forEach(function (name) {
         const v = internal.params[name];
-        formattedPath = formattedPath.replace('{' + name + '}', v !== undefined ? String(v) : '');
+        // P107-D20 (ISL-028, ruled "Insert values as written"): a function replacement, so a `$&` or `$$` in the
+        // value is text — a string replacement read it as a pattern and `$&` put the placeholder back
+        const text = v !== undefined ? String(v) : '';
+        formattedPath = formattedPath.replace('{' + name + '}', () => text);
       });
 
       let urlPath, hashPath;
@@ -180,8 +185,11 @@ const NavigateToPathNode: NodeDefinitionOptions = {
       const query: string[] = [];
       if (internal.queryNames !== undefined) {
         internal.queryNames.split(',').forEach((q) => {
-          if (internal.query[q] !== undefined) {
-            query.push(q + '=' + internal.query[q]);
+          const v = internal.query[q];
+          // P107-D21 (ISL-028, ruled "Encode, and skip null"): a value with `&` or `#` broke the address, and a null
+          // arrived as the text 'null'. The Router decodes both halves (`_getSearchParams`).
+          if (v !== undefined && v !== null) {
+            query.push(encodeURIComponent(q) + '=' + encodeURIComponent(String(v)));
           }
         });
       }
@@ -215,7 +223,21 @@ const NavigateToPathNode: NodeDefinitionOptions = {
           return;
         }
       } else {
-        window.history.pushState({}, '', compiledUrl);
+        // P107-C25 (ISL-028, ruled "Report a clear failure"): the browser refuses a push to another origin (a Path
+        // like `https://…` with the Path URL type) with a SecurityError. It threw out of this frame-end callback and
+        // every press went unanswered. Another website is External Link's job; here it is a Failure that says why.
+        try {
+          window.history.pushState({}, '', compiledUrl);
+        } catch (e) {
+          internal.lastError = 'The browser refused to navigate to this path';
+          this.flagOutputDirty('error');
+          reportOutcomes(this, tokens, 'failure', {
+            code: 'navigate-to-path/refused',
+            message: 'The browser refused to navigate to this path',
+            detail: { url: compiledUrl, reason: e instanceof Error ? e.message : String(e) }
+          });
+          return;
+        }
         dispatchEvent(new PopStateEvent('popstate', {}));
       }
 

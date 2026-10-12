@@ -20,7 +20,7 @@
  * @module conformance/mutants
  */
 
-import type { IStorageAdapter, IStorageSchema, StorageIndexDecl } from '../src/storage';
+import type { IStorageAdapter, IStorageSchema, StorageIndexDecl, StorageSeries } from '../src/storage';
 
 /** The mutations, by name. AC3 records failures against these. */
 export type MutationKind =
@@ -32,7 +32,12 @@ export type MutationKind =
   | 'aggregate-ignores-acl'
   | 'drop-precondition-on-save'
   | 'drop-where-on-index'
-  | 'skip-checks';
+  | 'skip-checks'
+  | 'path-ignores-the-start-filter'
+  | 'path-ignores-hop-filters'
+  | 'path-ignores-the-depth-bound'
+  | 'missing-row-written-without-acl-succeeds'
+  | 'series-counted-not-taken';
 
 export const MUTATIONS: readonly MutationKind[] = Object.freeze([
   'drop-acl-on-reads',
@@ -43,7 +48,12 @@ export const MUTATIONS: readonly MutationKind[] = Object.freeze([
   'aggregate-ignores-acl',
   'drop-precondition-on-save',
   'drop-where-on-index',
-  'skip-checks'
+  'skip-checks',
+  'path-ignores-the-start-filter',
+  'path-ignores-hop-filters',
+  'path-ignores-the-depth-bound',
+  'missing-row-written-without-acl-succeeds',
+  'series-counted-not-taken'
 ]);
 
 /** What each mutation models, for the record AC3 asks for. */
@@ -65,8 +75,50 @@ export const MUTATION_DESCRIPTIONS: Readonly<Record<MutationKind, string>> = Obj
   'drop-where-on-index':
     'a partial index is built as a full one (HLT-016) — the predicate a parser or an exporter drops, which refuses every row the declaration deliberately allowed',
   'skip-checks':
-    'a declared check is recorded but never enforced (HLT-016) — the rule reads as present in the schema while every row it forbids is written'
+    'a declared check is recorded but never enforced (HLT-016) — the rule reads as present in the schema while every row it forbids is written',
+  'path-ignores-the-start-filter':
+    'a $path starts from every row of its first collection instead of the rows its where names (P116 ONT-004) — "the members on MY account" answers with the members on every account',
+  'path-ignores-hop-filters':
+    'a $path drops the where on each hop — "as holder" is forgotten, and a member reaches what only a holder should',
+  'path-ignores-the-depth-bound':
+    'a $path walks a repeated hop past maxDepth — the bound the contract makes mandatory, so a tree is walked whole and a cycle walked for as long as the engine allows',
+  'missing-row-written-without-acl-succeeds':
+    'a save, increment or delete with no ACL that changed no row answers success (P109 ISL-039, P99-HLT016-NOACL) — a cloud function saving a record somebody just deleted is told it worked, and nothing is stored',
+  'series-counted-not-taken':
+    "a series number worked out as the rows counted plus one, before the insert and outside it (P116 ONT-015) — the census's two rows exactly: a deleted record's number comes back, and two creates at once read the same count"
 });
+
+/** `series-counted-not-taken`: the number an app works out for itself — what ONT-015 exists to replace. */
+function countedNumber(series: StorageSeries, n: number): string {
+  const at = new Date();
+  return series.format.replace(/\{([^{}]*)\}/g, (_w, t: string) =>
+    t === 'YYYY' ? String(at.getUTCFullYear()) : t === 'YY' ? String(at.getUTCFullYear() % 100).padStart(2, '0') : t === 'MM' ? String(at.getUTCMonth() + 1).padStart(2, '0') : String(n).padStart(t.length, '0')
+  );
+}
+
+/** The three path mutations, applied to a `where` before it reaches the adapter. */
+function mutatePath(where: unknown, kind: MutationKind): unknown {
+  if (!where || typeof where !== 'object') return where;
+  if (Array.isArray(where)) return where.map((w) => mutatePath(w, kind));
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(where as Record<string, unknown>)) {
+    if (k === '$path' && v && typeof v === 'object') {
+      const p = JSON.parse(JSON.stringify(v)) as { from: { where?: unknown }; hops: Array<{ where?: unknown; repeat?: boolean }>; maxDepth: number };
+      if (kind === 'path-ignores-the-start-filter') delete p.from.where;
+      if (kind === 'path-ignores-hop-filters') for (const h of p.hops) delete h.where;
+      if (kind === 'path-ignores-the-depth-bound' && p.hops.some((h) => h.repeat)) p.maxDepth = 8;
+      out[k] = p;
+    } else out[k] = mutatePath(v, kind);
+  }
+  return out;
+}
+
+const PATH_MUTATIONS: readonly MutationKind[] = ['path-ignores-the-start-filter', 'path-ignores-hop-filters', 'path-ignores-the-depth-bound'];
+
+function withMutatedPath<T extends { where?: unknown }>(options: T, kind: MutationKind): T {
+  if (!PATH_MUTATIONS.includes(kind) || !options.where) return options;
+  return { ...options, where: mutatePath(options.where, kind) };
+}
 
 /**
  * Drop the `acl` context from a call, keeping the call's own type.
@@ -89,6 +141,22 @@ function stripAcl<T extends { acl?: unknown }>(options: T): T {
  * suite reports against a mutant is attributable to that one mutation and not
  * to the wrapper.
  */
+/**
+ * `missing-row-written-without-acl-succeeds`: the answer a write with no ACL gave before P109
+ * ISL-039 — "not found" turned back into success with no row.
+ */
+function missingRowSucceeds<T extends { acl?: unknown; success: (...a: never[]) => void; error: (message: string) => void }>(
+  kind: MutationKind,
+  options: T
+): T {
+  if (kind !== 'missing-row-written-without-acl-succeeds' || options.acl) return options;
+  return {
+    ...options,
+    error: (message: string) =>
+      /^Object not found/.test(String(message)) ? (options.success as (r?: null) => void)(null) : options.error(message)
+  };
+}
+
 export function mutate(adapter: IStorageAdapter, kind: MutationKind): IStorageAdapter {
 
   const schema: IStorageSchema =
@@ -161,7 +229,7 @@ export function mutate(adapter: IStorageAdapter, kind: MutationKind): IStorageAd
         adapter.query(stripAcl(options));
         return;
       }
-      adapter.query(options);
+      adapter.query(withMutatedPath(options, kind));
     },
     search(options) {
       if (kind === 'drop-acl-on-reads') {
@@ -188,7 +256,18 @@ export function mutate(adapter: IStorageAdapter, kind: MutationKind): IStorageAd
       adapter.fetch(options);
     },
 
-    create: (options) => adapter.create(options),
+    create(options) {
+      const series = kind === 'series-counted-not-taken' ? (adapter.schemaManager.getTableSchema(options.collection)?.columns ?? []).filter((c) => c.series && (options.data[c.name] === undefined || options.data[c.name] === null)) : [];
+      if (!series.length) {
+        adapter.create(options);
+        return;
+      }
+      adapter.count({
+        collection: options.collection,
+        success: (n) => adapter.create({ ...options, data: { ...options.data, ...Object.fromEntries(series.map((c) => [c.name, countedNumber(c.series!, n + 1)])) } }),
+        error: options.error
+      });
+    },
 
     save(options) {
       if (kind === 'drop-acl-on-writes') {
@@ -201,7 +280,7 @@ export function mutate(adapter: IStorageAdapter, kind: MutationKind): IStorageAd
         adapter.save(unguarded);
         return;
       }
-      adapter.save(options);
+      adapter.save(missingRowSucceeds(kind, options));
     },
 
     delete(options) {
@@ -209,7 +288,7 @@ export function mutate(adapter: IStorageAdapter, kind: MutationKind): IStorageAd
         adapter.delete(stripAcl(options));
         return;
       }
-      adapter.delete(options);
+      adapter.delete(missingRowSucceeds(kind, options));
     },
 
     increment(options) {
@@ -217,7 +296,7 @@ export function mutate(adapter: IStorageAdapter, kind: MutationKind): IStorageAd
         adapter.increment(stripAcl(options));
         return;
       }
-      adapter.increment(options);
+      adapter.increment(missingRowSucceeds(kind, options));
     },
 
     count(options) {
@@ -237,7 +316,7 @@ export function mutate(adapter: IStorageAdapter, kind: MutationKind): IStorageAd
         adapter.count(stripAcl(options));
         return;
       }
-      adapter.count(options);
+      adapter.count(withMutatedPath(options, kind));
     },
 
     distinct(options) {

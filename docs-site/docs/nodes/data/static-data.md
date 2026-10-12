@@ -29,6 +29,20 @@ Fixtures, menus, option lists, demo content — any list that ships with the app
 | `json` | String | — | An array of objects authored inline; unlike CSV it keeps numbers and booleans as they are — ignored unless Type is JSON |
 | `type` | Enum (`csv`, `json`) | `csv` | Which of the two authoring formats below is read |
 
+### What each input does
+
+**Type** (`type`)
+
+- always: kept; the data is read again only when CSV or JSON changes
+
+**CSV** (`csv`)
+
+- always: the data is read again at the end of the frame, as Type says (CSV when unset) — Items and Count follow
+
+**JSON** (`json`)
+
+- always: the data is read again at the end of the frame, as Type says — Items and Count follow; with Type JSON, Error and Failure if it does not parse (Failure once per message)
+
 ## Outputs
 
 ### Values

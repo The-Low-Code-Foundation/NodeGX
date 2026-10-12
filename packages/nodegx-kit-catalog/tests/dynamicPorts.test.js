@@ -199,3 +199,44 @@ describe('shapes the recording cannot cover', () => {
     ]);
   });
 });
+
+/**
+ * P109 ISL-009 — every visual node, a kit's included, now declares its Data Attributes list as a
+ * `namedports/derived` rule. The recording above predates it, so the rule is added here to a copy, in
+ * exactly the shape `formatDynamicPorts` passes a `port` entry through (verbatim).
+ *
+ * 🔴 Read as a `port` entry it made every kit visual node `runtime-discovered`, which switched off
+ * the port checks CN-010 turned on for kit nodes (`noodl-mcp/tests/cn010.test.ts` AC3 went red).
+ */
+describe('a namedports/derived rule (the Data Attributes list)', () => {
+  const RULE = {
+    name: 'namedports/derived',
+    parameter: 'dataAttributes',
+    accept: { pattern: '^data-[a-z0-9][a-z0-9._-]*$', rule: 'a data attribute name', example: 'data-testid' },
+    port: { name: '{{*}}', displayName: '{{*}}', type: 'string', plug: 'input', group: 'Data Attributes' }
+  };
+  const withRule = JSON.parse(JSON.stringify(payload));
+  for (const n of withRule.nodetypes) n.dynamicports = [...(n.dynamicports || []), RULE];
+  const named = (name) => catalogNodesFromNodeLibrary(withRule).nodes.find((n) => n.typeName === name);
+
+  it('is declared: a node with only conditional groups and the rule stays declared-port-groups', () => {
+    expect(named('dynports.kit.Panel').dynamicPorts.mechanisms).toEqual(['declared-port-groups']);
+  });
+
+  it('is kept verbatim beside the translated group, where the validator reads it', () => {
+    expect(named('dynports.kit.Panel').dynamicPorts.declaredPortGroups).toEqual([
+      { condition: 'mode = list', inputs: ['itemCount'] },
+      RULE
+    ]);
+  });
+
+  it('makes the encoding known when nothing else is dynamic, and leaves a runtime half unknown', () => {
+    expect(named('dynports.kit.Panel').parameterEncoding).toMatchObject({
+      known: true,
+      seededBy: ['dataAttributes'],
+      patterns: [{ pattern: '<name>', example: 'data-testid', valueType: 'string' }]
+    });
+    expect(named('dynports.kit.Feed').dynamicPorts.mechanisms).toEqual(['declared-port-groups', 'runtime-discovered']);
+    expect(named('dynports.kit.Feed').parameterEncoding.known).toBe(false);
+  });
+});

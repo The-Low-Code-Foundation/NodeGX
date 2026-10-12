@@ -1,0 +1,607 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "899e86c3-c9cc-5227-83b4-13d2d5c6745d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rbStore",
+      "fromProperty": "model",
+      "toId": "rbFam",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "model",
+      "toId": "rbStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "migrated",
+      "toId": "rbResave",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "ran",
+      "toId": "rbResave",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rbResave",
+      "fromProperty": "ontrue",
+      "toId": "rbStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "rbLangVar",
+      "fromProperty": "value",
+      "toId": "rbFam",
+      "toProperty": "fallbackLang"
+    },
+    {
+      "fromId": "rbWords",
+      "fromProperty": "words",
+      "toId": "rbT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "lang",
+      "toId": "rbT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "botName",
+      "toId": "rbT",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "band",
+      "toId": "rbBar",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "lang",
+      "toId": "rbBar",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "name",
+      "toId": "rbBar",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "face",
+      "toId": "rbBar",
+      "toProperty": "face"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "botName",
+      "toId": "rbBar",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "profileId",
+      "toId": "rbBar",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "hasProfile",
+      "toId": "rbBar",
+      "toProperty": "hasProfile"
+    },
+    {
+      "fromId": "rbWords",
+      "fromProperty": "words",
+      "toId": "rbBar",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "rbStore",
+      "fromProperty": "model",
+      "toId": "rbBar",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbBar",
+      "fromProperty": "model",
+      "toId": "rbStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbBar",
+      "fromProperty": "write",
+      "toId": "rbStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "rbT",
+      "fromProperty": "navRobot",
+      "toId": "rbHead",
+      "toProperty": "eyebrow"
+    },
+    {
+      "fromId": "rbT",
+      "fromProperty": "ig5Title",
+      "toId": "rbHead",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "rbT",
+      "fromProperty": "ig5Sub",
+      "toId": "rbHead",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "rbT",
+      "fromProperty": "ig5Fleet",
+      "toId": "rbFleetL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rbT",
+      "fromProperty": "a11yMyRobot",
+      "toId": "rbGarden",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "robots",
+      "toId": "rbCards",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "hats",
+      "toId": "rbCards",
+      "toProperty": "hats"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "band",
+      "toId": "rbCards",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "lang",
+      "toId": "rbCards",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "botName",
+      "toId": "rbCards",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "rbWords",
+      "fromProperty": "words",
+      "toId": "rbCards",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "rbRequests",
+      "fromProperty": "requests",
+      "toId": "rbCards",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "rbCards",
+      "fromProperty": "cards",
+      "toId": "rbFleetEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rbStore",
+      "fromProperty": "model",
+      "toId": "rbCopy",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "profileId",
+      "toId": "rbCopy",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "lang",
+      "toId": "rbCopy",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "band",
+      "toId": "rbCopy",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "rbWords",
+      "fromProperty": "words",
+      "toId": "rbCopy",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-robotId",
+      "toId": "rbCopy",
+      "toProperty": "from"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-copyTo",
+      "toId": "rbCopy",
+      "toProperty": "to"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutputSignal-copied",
+      "toId": "rbCopy",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rbCopy",
+      "fromProperty": "told",
+      "toId": "rbCards",
+      "toProperty": "told"
+    },
+    {
+      "fromId": "rbCopy",
+      "fromProperty": "model",
+      "toId": "rbStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbCopy",
+      "fromProperty": "ok",
+      "toId": "rbCopyOk",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rbCopy",
+      "fromProperty": "ran",
+      "toId": "rbCopyOk",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rbCopyOk",
+      "fromProperty": "ontrue",
+      "toId": "rbStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "stickers",
+      "toId": "rbCards",
+      "toProperty": "stickers"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "done",
+      "toId": "rbCards",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "rbStore",
+      "fromProperty": "model",
+      "toId": "rbSend",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "profileId",
+      "toId": "rbSend",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "lang",
+      "toId": "rbSend",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rbWords",
+      "fromProperty": "words",
+      "toId": "rbSend",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "rbRequests",
+      "fromProperty": "requests",
+      "toId": "rbSend",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-robotId",
+      "toId": "rbSend",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-sendTo",
+      "toId": "rbSend",
+      "toProperty": "sendTo"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutputSignal-sent",
+      "toId": "rbSend",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rbSend",
+      "fromProperty": "told",
+      "toId": "rbCards",
+      "toProperty": "told"
+    },
+    {
+      "fromId": "rbSend",
+      "fromProperty": "model",
+      "toId": "rbStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbSend",
+      "fromProperty": "ok",
+      "toId": "rbSendOk",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rbSend",
+      "fromProperty": "ran",
+      "toId": "rbSendOk",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rbSendOk",
+      "fromProperty": "ontrue",
+      "toId": "rbStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "rbStore",
+      "fromProperty": "model",
+      "toId": "rbSetName",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "profileId",
+      "toId": "rbSetName",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-robotId",
+      "toId": "rbSetName",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-name",
+      "toId": "rbSetName",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutputSignal-named",
+      "toId": "rbSetName",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rbSetName",
+      "fromProperty": "model",
+      "toId": "rbStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbSetName",
+      "fromProperty": "ran",
+      "toId": "rbStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "rbStore",
+      "fromProperty": "model",
+      "toId": "rbSetColour",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "profileId",
+      "toId": "rbSetColour",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-robotId",
+      "toId": "rbSetColour",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-colour",
+      "toId": "rbSetColour",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutputSignal-coloured",
+      "toId": "rbSetColour",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rbSetColour",
+      "fromProperty": "model",
+      "toId": "rbStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbSetColour",
+      "fromProperty": "ran",
+      "toId": "rbStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "rbStore",
+      "fromProperty": "model",
+      "toId": "rbSetHat",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "profileId",
+      "toId": "rbSetHat",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-robotId",
+      "toId": "rbSetHat",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-hat",
+      "toId": "rbSetHat",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutputSignal-hatted",
+      "toId": "rbSetHat",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rbSetHat",
+      "fromProperty": "model",
+      "toId": "rbStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbSetHat",
+      "fromProperty": "ran",
+      "toId": "rbStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "botName",
+      "toId": "rbDraw",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "color",
+      "toId": "rbDraw",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "eye",
+      "toId": "rbDraw",
+      "toProperty": "eye"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "hat",
+      "toId": "rbDraw",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "rbDraw",
+      "fromProperty": "map",
+      "toId": "rbGarden",
+      "toProperty": "map"
+    },
+    {
+      "fromId": "rbDraw",
+      "fromProperty": "robots",
+      "toId": "rbGarden",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "rbStore",
+      "fromProperty": "model",
+      "toId": "rbOptions",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "profileId",
+      "toId": "rbOptions",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "botName",
+      "toId": "rbOptions",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "color",
+      "toId": "rbOptions",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "eye",
+      "toId": "rbOptions",
+      "toProperty": "eye"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "hat",
+      "toId": "rbOptions",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "hats",
+      "toId": "rbOptions",
+      "toProperty": "hats"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "stickers",
+      "toId": "rbOptions",
+      "toProperty": "stickers"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "lang",
+      "toId": "rbOptions",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rbWords",
+      "fromProperty": "words",
+      "toId": "rbOptions",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "rbOptions",
+      "fromProperty": "model",
+      "toId": "rbStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbOptions",
+      "fromProperty": "write",
+      "toId": "rbStore",
+      "toProperty": "write"
+    }
+  ]
+}

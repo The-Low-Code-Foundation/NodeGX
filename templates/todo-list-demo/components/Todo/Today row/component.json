@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9f57195d-03bd-5d69-84d8-03546004a95e",
+  "name": "Today row",
+  "path": "/Todo/Today row",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One line of Today: the heading when it starts a section, the time for something that repeats, the title, how late or soon it is, and the tick box — which closes a task (\"what happened?\") or ticks off that one occurrence."
+}

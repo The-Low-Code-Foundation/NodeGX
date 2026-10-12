@@ -127,9 +127,38 @@ describe('AWP-005 — the response budget (a ratchet: move the number, say why)'
   const cost = async (types: string[], detail: 'summary' | 'full') =>
     tokens(await callRawText(session, 'get_node_type', { type_names: types, detail }));
 
-  it('keeps the 8-type storefront basket under 8,000 tokens at summary detail', async () => {
+  /**
+   * 🔴 **Ratchet moved 8,350 → 8,450 by P107 R25, "Warn on any" (2026-10-12, s90).** A deprecated type's summary now
+   * says what replaced it (`replacedBy`), and the basket holds one: the retired `Text Input`, which gained
+   * `"replacedBy": "net.noodl.controls.textinput"`. Measured with this spec's harness, that one line removed and
+   * restored: **8,338 → 8,351** (+13). The headroom it hit was 12, because the basket had grown 84 since the last move,
+   * which s90 did not attribute. Headroom kept near the last move's 96: **99**.
+   *
+   * ---
+   *
+   * 🔴 **Ratchet moved 8,200 → 8,350 by P109/ISL-009's second ruling, "A data-* list" (2026-10-03).**
+   * Every visual node gained one input, `dataAttributes` (a stringlist of `data-*` names; each listed
+   * name becomes a port of that name). A summary carries one line per port and no description, so it
+   * is that one line on the basket's seven visual types: **8,115 → 8,254** (+139), measured with this
+   * spec's harness before and after. Headroom kept near s5's 85: **96**.
+   *
+   * ---
+   *
+   * 🔴 **Ratchet moved 8,000 → 8,200 by P109/ISL-009 (2026-10-02).** Every visual node gained
+   * `Scroll Into View` and `Scroll Align` (Richard's ruling, "Signal on every node"). A summary
+   * line carries no description, so nothing could be trimmed: it is the two port lines on the
+   * basket's seven visual types. Measured with this spec's harness, the enriched catalog at `HEAD`
+   * `1f23b05dd` swapped in against the working tree: **7,919 → 8,115** (+196). Headroom kept near
+   * what `HEAD` had (81): **85**.
+   *
+   * The full-detail ceiling below was not moved: `Group` 15,840 → **16,141** after the two
+   * descriptions and Group's enrichment line were cut to fit (`Text` 10,142 → 10,386, `Page`
+   * 3,940 → 4,223, `textinput` 14,520 → 14,765). ⚠️ That leaves 59 tokens, and `HEAD`'s `Group`
+   * had already grown 279 past P99's recorded 15,561 — not attributed here.
+   */
+  it('keeps the 8-type storefront basket under 8,450 tokens at summary detail', async () => {
     // Was 30,815 at full detail — more than all 89 tool schemas combined.
-    expect(await cost(STOREFRONT_TYPES, 'summary')).toBeLessThan(8_000);
+    expect(await cost(STOREFRONT_TYPES, 'summary')).toBeLessThan(8_450);
   });
 
   it('keeps any single summary response under 3,000 tokens', async () => {
@@ -142,6 +171,32 @@ describe('AWP-005 — the response budget (a ratchet: move the number, say why)'
   });
 
   /**
+   * 🔴 **Ratchet moved 16,350 → 17,900 by P107/NSP-018 (2026-10-10), P107-S76-FULLBUDGET.** It was red on `HEAD`:
+   * NSP-018 s74 gave Group's reducers their words, `rules` ride on full detail (NSP-018 AC3), and this spec was not
+   * run. Each full response measured with this spec's harness, then re-sent without its `rules` key:
+   *
+   * | type | full | without rules | rules |
+   * |---|---|---|---|
+   * | worst single (**`Group`**) | **17,292** | 16,313 | **+979** |
+   * | `net.noodl.controls.textinput` | 15,689 | 14,832 | +857 |
+   * | `Image` / `net.noodl.controls.range` | 12,008 / 12,821 | 11,375 / 12,246 | +633 / +575 |
+   *
+   * Group without its rules is 16,313: +52 since ISL-009's 16,261, not P107's and not traced here. All of Group's
+   * reducers have their words now. The specs that still owe theirs are far below this ceiling (Video 11,579, Radio
+   * Button 10,956, Circle 7,673). Rules stay OFF the summary (NSP-018 §5.4, priced against real traffic). Headroom:
+   * **608**.
+   *
+   * ---
+   *
+   * 🔴 **Ratchet moved 16,200 → 16,350 by P109/ISL-009, "A data-* list" (2026-10-03).** `Group`, the
+   * worst single, **16,141 → 16,261** (+120): the `dataAttributes` port entry every visual type now
+   * carries (+67, its descriptions already cut to one line each and still unshown here, because port
+   * descriptions come from enrichment) and Group's one enrichment line telling an agent that each
+   * listed name becomes a port of that exact name (+53). That line is the only place `get_node_type`
+   * says so; dropping it to stay under 16,200 would ship the port undocumented. Headroom: **89**.
+   *
+   * ---
+   *
    * 🔴 **Ratchet moved 14,300 → 16,200 by P99/HLT-017 (2026-09-22). Two growths, attributed apart.**
    * Measured with this spec's own harness (`get_node_type`, full detail, the wire text ÷ 4) against
    * the enriched catalog at `HEAD` `447c33fef` and against the working tree:
@@ -221,11 +276,11 @@ describe('AWP-005 — the response budget (a ratchet: move the number, say why)'
    * 12,500), 601 now (12,899 of 13,500). This ceiling exists to catch growth
    * nobody noticed; this growth was measured before it was taken.
    */
-  it('keeps any single full-detail response under 16,200 tokens', async () => {
+  it('keeps any single full-detail response under 17,900 tokens', async () => {
     const over: Array<{ name: string; cost: number }> = [];
     for (const name of allTypeNames()) {
       const c = await cost([name], 'full');
-      if (c >= 16_200) over.push({ name, cost: c });
+      if (c >= 17_900) over.push({ name, cost: c });
     }
     expect(over).toEqual([]);
   });

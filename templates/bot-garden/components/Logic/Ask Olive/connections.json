@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e77095c8-4e4f-5b11-8cf5-e78cdc1cf82c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "askoliveIn",
+      "fromProperty": "band",
+      "toId": "askoliveFn",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "askoliveIn",
+      "fromProperty": "narrow",
+      "toId": "askoliveFn",
+      "toProperty": "in-narrow"
+    },
+    {
+      "fromId": "askoliveIn",
+      "fromProperty": "request",
+      "toId": "askoliveFn",
+      "toProperty": "in-request"
+    },
+    {
+      "fromId": "askoliveIn",
+      "fromProperty": "run",
+      "toId": "askoliveFn",
+      "toProperty": "in-run"
+    },
+    {
+      "fromId": "askoliveIn",
+      "fromProperty": "timeoutMs",
+      "toId": "askoliveFn",
+      "toProperty": "in-timeoutMs"
+    },
+    {
+      "fromId": "askoliveIn",
+      "fromProperty": "url",
+      "toId": "askoliveFn",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "askoliveIn",
+      "fromProperty": "go",
+      "toId": "askoliveFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "askoliveFn",
+      "fromProperty": "out-answer",
+      "toId": "askoliveOut",
+      "toProperty": "answer"
+    },
+    {
+      "fromId": "askoliveFn",
+      "fromProperty": "out-fallback",
+      "toId": "askoliveOut",
+      "toProperty": "fallback"
+    },
+    {
+      "fromId": "askoliveFn",
+      "fromProperty": "out-refused",
+      "toId": "askoliveOut",
+      "toProperty": "refused"
+    },
+    {
+      "fromId": "askoliveFn",
+      "fromProperty": "out-refusedSlot",
+      "toId": "askoliveOut",
+      "toProperty": "refusedSlot"
+    },
+    {
+      "fromId": "askoliveFn",
+      "fromProperty": "out-sent",
+      "toId": "askoliveOut",
+      "toProperty": "sent"
+    },
+    {
+      "fromId": "askoliveFn",
+      "fromProperty": "success",
+      "toId": "askoliveOut",
+      "toProperty": "ran"
+    }
+  ]
+}

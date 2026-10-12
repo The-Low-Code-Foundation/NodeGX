@@ -17,6 +17,12 @@
     },
     {
       "fromId": "MovetaskIn",
+      "fromProperty": "toIndex",
+      "toId": "MovetaskGuard",
+      "toProperty": "in-toIndex"
+    },
+    {
+      "fromId": "MovetaskIn",
       "fromProperty": "do",
       "toId": "MovetaskGuard",
       "toProperty": "run"

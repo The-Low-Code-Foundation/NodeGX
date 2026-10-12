@@ -78,6 +78,25 @@ export class OpsState {
   }
 
   /**
+   * ISL-039: re-read ops.json after a restore. A fresh instance does the reading, so
+   * the rules are the constructor's; the live config is replaced in place. An
+   * invalid file is refused: the live config is written back over it, and the
+   * refusal thrown (as `EmailConfigState.reload`).
+   */
+  reload(): void {
+    let fresh: OpsState;
+    try {
+      fresh = new OpsState(this.dataDir);
+    } catch (e) {
+      this.save();
+      throw e;
+    }
+    const live = this.config as unknown as Record<string, unknown>;
+    for (const key of Object.keys(live)) delete live[key];
+    Object.assign(live, fresh.config);
+  }
+
+  /**
    * Apply a partial update (the admin/MCP surface's write path). Validates the
    * MERGED document, so a patch that would produce an invalid whole is refused
    * before anything is persisted.

@@ -732,7 +732,7 @@ describe('§G what building it found, pinned', () => {
       expect(entry.status).toBe('translated');
       expect((entry.note ?? '').length).toBeGreaterThan(40);
     }
-    expect(ledger.pickerCoverageFloor).toBe(118); // GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §60 the component-object trio + §61 the component-stack trio + §62 + §63 (session 86)
+    expect(ledger.pickerCoverageFloor).toBe(122); // EXP-011 §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §60 the component-object trio + §61 the component-stack trio + §62 + §63 (session 86)
   });
 
   test('G6 readers alone (no parent Set, no other raiser) still ship errors.ts — the lib imports it, and the emitted app typechecks', () => {

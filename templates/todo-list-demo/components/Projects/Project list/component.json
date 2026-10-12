@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e583bd2d-c48d-5e56-86dd-c8f8b0215143",
+  "name": "Project list",
+  "path": "/Projects/Project list",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The projects, one Project row each: grouped by whose move it is, or one kind in your own order, dragged by the grip (Moved, with Move Id and Move To). Passes on whatever a row says."
+}

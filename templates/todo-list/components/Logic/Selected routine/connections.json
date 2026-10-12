@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1574455f-7cf8-517c-8b55-87002e082cf1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "srIn",
+      "fromProperty": "routines",
+      "toId": "srBuild",
+      "toProperty": "in-routines"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "checks",
+      "toId": "srBuild",
+      "toProperty": "in-checks"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "events",
+      "toId": "srBuild",
+      "toProperty": "in-events"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "selectedId",
+      "toId": "srBuild",
+      "toProperty": "in-selectedId"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "days",
+      "toId": "srBuild",
+      "toProperty": "in-days"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "now",
+      "toId": "srBuild",
+      "toProperty": "in-now"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-found",
+      "toId": "srOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-title",
+      "toId": "srOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-cadence",
+      "toId": "srOut",
+      "toProperty": "cadence"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-scheduleLine",
+      "toId": "srOut",
+      "toProperty": "scheduleLine"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-statusLine",
+      "toId": "srOut",
+      "toProperty": "statusLine"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-statusColor",
+      "toId": "srOut",
+      "toProperty": "statusColor"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-slotRows",
+      "toId": "srOut",
+      "toProperty": "slotRows"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-noSlots",
+      "toId": "srOut",
+      "toProperty": "noSlots"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-dayChips",
+      "toId": "srOut",
+      "toProperty": "dayChips"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-showDays",
+      "toId": "srOut",
+      "toProperty": "showDays"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-addHint",
+      "toId": "srOut",
+      "toProperty": "addHint"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-startDate",
+      "toId": "srOut",
+      "toProperty": "startDate"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-endDate",
+      "toId": "srOut",
+      "toProperty": "endDate"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-canStop",
+      "toId": "srOut",
+      "toProperty": "canStop"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-isStopped",
+      "toId": "srOut",
+      "toProperty": "isStopped"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-stopNote",
+      "toId": "srOut",
+      "toProperty": "stopNote"
+    },
+    {
+      "fromId": "srBuild",
+      "fromProperty": "out-historyRows",
+      "toId": "srOut",
+      "toProperty": "historyRows"
+    }
+  ]
+}

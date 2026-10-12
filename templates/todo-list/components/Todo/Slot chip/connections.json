@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "58166f1e-fa20-5252-837f-4ca7c9633041",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "scIn",
+      "fromProperty": "label",
+      "toId": "scLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "scIn",
+      "fromProperty": "id",
+      "toId": "scOut",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "scRemove",
+      "fromProperty": "onClick",
+      "toId": "scOut",
+      "toProperty": "remove"
+    }
+  ]
+}

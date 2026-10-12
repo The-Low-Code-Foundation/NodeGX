@@ -342,6 +342,19 @@ describe('Sign-in page (BMG-010 §3.2)', () => {
     unmount(root);
   });
 
+  it('ISL-040 SESSIONS: the page shows how many unused days end a sign-in (30 when unset), and Save sends the number typed', async () => {
+    const root = mount(<SignInView params={[]} />);
+    await settle(20);
+    const days = q<HTMLInputElement>(root, '#session-length input[type="number"]');
+    expect(days.value).toBe('30');
+    typeInto(days, '7');
+    click(qa<HTMLButtonElement>(root, 'button').find((b) => text(b) === 'Save policy')!);
+    await settle(20);
+    const put = calls.filter((c) => c.method === 'PUT' && /\/admin\/auth$/.test(c.url)).pop()!;
+    expect(put.body!.sessions).toEqual({ idleDays: 7 });
+    unmount(root);
+  });
+
   it('AC7: no textarea and no separated field, drawer closed or open', async () => {
     for (const params of [[], ['new']]) {
       const root = mount(<SignInView params={params} />);

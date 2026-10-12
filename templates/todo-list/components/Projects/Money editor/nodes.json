@@ -1,0 +1,1170 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9280dab8-d0c7-5470-8264-946119948d5e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "meIn",
+      "type": "Component Inputs",
+      "label": "The item as it is",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "key",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "heading",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "dir",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "repeat",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "until",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "projectId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "likelihood",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "projectOptions",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "isNew",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "endLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "endHint",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "meOut",
+      "type": "Component Outputs",
+      "label": "The item as it should be",
+      "ports": [
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cancel",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "end",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "key",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "dir",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "repeat",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "until",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "projectId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "likelihood",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 3160
+    },
+    {
+      "id": "meRoot",
+      "type": "Group",
+      "label": "The money form",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "meHead",
+        "meLabel",
+        "meDirs",
+        "meAmount",
+        "meOftenLabel",
+        "meOften",
+        "meDates",
+        "meProjectLabel",
+        "meProject",
+        "meLikelihood",
+        "meNote",
+        "meError",
+        "meBtns",
+        "meEndHint"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "meHead",
+      "type": "Text",
+      "label": "What this form is",
+      "parent": "meRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "as": "h3"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "meLabel",
+      "type": "net.noodl.controls.textinput",
+      "label": "What it is",
+      "parent": "meRoot",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "What it is, like Rent or the Clarion retainer"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "meDirs",
+      "type": "Group",
+      "label": "In or out",
+      "parent": "meRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "meDirIn",
+        "meDirOut"
+      ],
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "meDirIn",
+      "type": "net.noodl.controls.button",
+      "label": "Money in",
+      "parent": "meDirs",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Money in"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "meDirOut",
+      "type": "net.noodl.controls.button",
+      "label": "Money out",
+      "parent": "meDirs",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Money out"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "meAmount",
+      "type": "net.noodl.controls.textinput",
+      "label": "How much",
+      "parent": "meRoot",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "How much (€)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "meOftenLabel",
+      "type": "Text",
+      "label": "How often",
+      "parent": "meRoot",
+      "parameters": {
+        "text": "How often",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "meOften",
+      "type": "Group",
+      "label": "How often",
+      "parent": "meRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "meOnce",
+        "meWeekly",
+        "meMonthly",
+        "meQuarterly",
+        "meYearly"
+      ],
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "meOnce",
+      "type": "net.noodl.controls.button",
+      "label": "Once",
+      "parent": "meOften",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Once"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "meWeekly",
+      "type": "net.noodl.controls.button",
+      "label": "Every week",
+      "parent": "meOften",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Every week"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "meMonthly",
+      "type": "net.noodl.controls.button",
+      "label": "Every month",
+      "parent": "meOften",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Every month"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "meQuarterly",
+      "type": "net.noodl.controls.button",
+      "label": "Every 3 months",
+      "parent": "meOften",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Every 3 months"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "meYearly",
+      "type": "net.noodl.controls.button",
+      "label": "Every year",
+      "parent": "meOften",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Every year"
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "meDates",
+      "type": "Group",
+      "label": "From when, until when",
+      "parent": "meRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "meDateBox",
+        "meUntilBox"
+      ],
+      "x": 100,
+      "y": 1720
+    },
+    {
+      "id": "meDateBox",
+      "type": "Group",
+      "label": "From when",
+      "parent": "meDates",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentSize"
+      },
+      "children": [
+        "meDate"
+      ],
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "meDate",
+      "type": "/Todo/Date picker",
+      "label": "The day",
+      "parent": "meDateBox",
+      "parameters": {
+        "Label": "On",
+        "Show Label": true,
+        "Width": {
+          "value": 220,
+          "unit": "px"
+        }
+      },
+      "x": 220,
+      "y": 1960
+    },
+    {
+      "id": "meUntilBox",
+      "type": "Group",
+      "label": "Until when",
+      "parent": "meDates",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "children": [
+        "meUntil"
+      ],
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "meUntil",
+      "type": "/Todo/Date picker",
+      "label": "The last day",
+      "parent": "meUntilBox",
+      "parameters": {
+        "Label": "Until (optional)",
+        "Show Label": true,
+        "Width": {
+          "value": 220,
+          "unit": "px"
+        }
+      },
+      "x": 220,
+      "y": 2200
+    },
+    {
+      "id": "meProjectLabel",
+      "type": "Text",
+      "label": "Whose",
+      "parent": "meRoot",
+      "parameters": {
+        "text": "Project (optional)",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 2320
+    },
+    {
+      "id": "meProject",
+      "type": "net.noodl.controls.options",
+      "label": "Which project, if any",
+      "parent": "meRoot",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 2440
+    },
+    {
+      "id": "meLikelihood",
+      "type": "net.noodl.controls.textinput",
+      "label": "How likely",
+      "parent": "meRoot",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "How likely, in % (empty when it is certain)"
+      },
+      "x": 100,
+      "y": 2560
+    },
+    {
+      "id": "meNote",
+      "type": "net.noodl.controls.textinput",
+      "label": "A note",
+      "parent": "meRoot",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "A note (optional)"
+      },
+      "x": 100,
+      "y": 2680
+    },
+    {
+      "id": "meError",
+      "type": "Text",
+      "label": "Why it was not saved",
+      "parent": "meRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "lineHeight": "var(--leading-snug)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 100,
+      "y": 2800
+    },
+    {
+      "id": "meBtns",
+      "type": "Group",
+      "label": "Save, cancel, end",
+      "parent": "meRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "meSave",
+        "meCancel",
+        "meEnd"
+      ],
+      "x": 100,
+      "y": 2920
+    },
+    {
+      "id": "meSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "parent": "meBtns",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Save"
+      },
+      "x": 160,
+      "y": 3040
+    },
+    {
+      "id": "meCancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "parent": "meBtns",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Cancel"
+      },
+      "x": 160,
+      "y": 3160
+    },
+    {
+      "id": "meEnd",
+      "type": "net.noodl.controls.button",
+      "label": "End it",
+      "parent": "meBtns",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "End it",
+        "styleCss": "margin-left: auto;",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 3280
+    },
+    {
+      "id": "meEndHint",
+      "type": "Text",
+      "label": "What ending it does",
+      "parent": "meRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 100,
+      "y": 3400
+    },
+    {
+      "id": "meDir",
+      "type": "States",
+      "label": "In or out",
+      "parameters": {
+        "states": "in,out",
+        "currentState": "out",
+        "values": "inBg,outBg",
+        "type-inBg": "color",
+        "type-outBg": "color",
+        "value-in-inBg": "var(--muted)",
+        "value-in-outBg": "transparent",
+        "value-out-inBg": "transparent",
+        "value-out-outBg": "var(--muted)",
+        "useTransitions": false
+      },
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "meRepeat",
+      "type": "States",
+      "label": "How often",
+      "parameters": {
+        "states": "once,weekly,monthly,quarterly,yearly",
+        "currentState": "once",
+        "values": "onceBg,weeklyBg,monthlyBg,quarterlyBg,yearlyBg",
+        "type-onceBg": "color",
+        "type-weeklyBg": "color",
+        "type-monthlyBg": "color",
+        "type-quarterlyBg": "color",
+        "type-yearlyBg": "color",
+        "value-once-onceBg": "var(--muted)",
+        "value-once-weeklyBg": "transparent",
+        "value-once-monthlyBg": "transparent",
+        "value-once-quarterlyBg": "transparent",
+        "value-once-yearlyBg": "transparent",
+        "value-weekly-onceBg": "transparent",
+        "value-weekly-weeklyBg": "var(--muted)",
+        "value-weekly-monthlyBg": "transparent",
+        "value-weekly-quarterlyBg": "transparent",
+        "value-weekly-yearlyBg": "transparent",
+        "value-monthly-onceBg": "transparent",
+        "value-monthly-weeklyBg": "transparent",
+        "value-monthly-monthlyBg": "var(--muted)",
+        "value-monthly-quarterlyBg": "transparent",
+        "value-monthly-yearlyBg": "transparent",
+        "value-quarterly-onceBg": "transparent",
+        "value-quarterly-weeklyBg": "transparent",
+        "value-quarterly-monthlyBg": "transparent",
+        "value-quarterly-quarterlyBg": "var(--muted)",
+        "value-quarterly-yearlyBg": "transparent",
+        "value-yearly-onceBg": "transparent",
+        "value-yearly-weeklyBg": "transparent",
+        "value-yearly-monthlyBg": "transparent",
+        "value-yearly-quarterlyBg": "transparent",
+        "value-yearly-yearlyBg": "var(--muted)",
+        "useTransitions": false
+      },
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "meShape",
+      "type": "JavaScriptFunction",
+      "label": "Which date fields it needs",
+      "parameters": {
+        "functionScript": "var once = String(Inputs.repeat || 'once') === 'once';\nOutputs.untilShown = !once;\nOutputs.dateLabel = once ? 'On' : 'From';\nOutputs.existing = Inputs.isNew !== true;"
+      },
+      "x": 470,
+      "y": 2080,
+      "ports": [
+        {
+          "name": "in-repeat",
+          "displayName": "repeat",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-isNew",
+          "displayName": "isNew",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-untilShown",
+          "displayName": "untilShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-dateLabel",
+          "displayName": "dateLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-existing",
+          "displayName": "existing",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "meCheck",
+      "type": "JavaScriptFunction",
+      "label": "What the form says",
+      "parameters": {
+        "functionScript": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction fmtDay(d) { return DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()]; }\nfunction fmtTime(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }\nfunction when(v) {\n  if (v === undefined || v === null || v === '') return null;\n  var d = v instanceof Date ? v : new Date(v);\n  return isNaN(d.getTime()) ? null : d;\n}\nfunction dayLabel(d) {\n  var t = startOfToday();\n  if (d.getTime() >= t) return 'Today';\n  if (d.getTime() >= t - 86400000) return 'Yesterday';\n  return fmtDay(d);\n}\nfunction due(s) {\n  var d = toDay(s);\n  if (!d) return { text: '', late: false };\n  var n = Math.round((d.getTime() - startOfToday()) / 86400000);\n  if (n < 0) return { text: 'Overdue by ' + (-n) + (n === -1 ? ' day' : ' days'), late: true };\n  if (n === 0) return { text: 'Due today', late: true };\n  if (n === 1) return { text: 'Due tomorrow', late: false };\n  if (n <= 7) return { text: 'Due in ' + n + ' days', late: false };\n  return { text: 'Due ' + fmtDay(d), late: false };\n}\nfunction ago(d) {\n  var ms = Date.now() - d.getTime();\n  if (ms < 3600000) return 'just now';\n  if (ms < 86400000) return Math.round(ms / 3600000) + ' h ago';\n  var n = Math.round(ms / 86400000);\n  return n === 1 ? 'yesterday' : n + ' days ago';\n}\nfunction num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction byPosition(a, b) { return num(a.position, 0) - num(b.position, 0); }\nvar PJ_PREFIX = new RegExp(\"^(?:(?:→|!) |✓ (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) \\\\d{1,2} · )+\");\nfunction pjClean(s) { return String(s === undefined || s === null ? '' : s).replace(PJ_PREFIX, '').trim(); }\nfunction pjId(r) { return r ? String(r.objectId || r.id || '') : ''; }\n/**\n * A row as plain fields with its 'id'. 🔴 A viewer built before 2026-09-23 (HLT-022) ignores\n * 'plain: true' and hands back the record itself — todo.digitalbricks.io runs one — so both shapes\n * are read, and never mutated: a record's own fields are the shared copy every view draws.\n */\nfunction pjPlain(r) {\n  var model = !!r && typeof r.getId === 'function';\n  var src = model ? r.data || {} : r || {}, o = {};\n  for (var k in src) if (Object.prototype.hasOwnProperty.call(src, k)) o[k] = src[k];\n  o.id = model ? String(r.getId()) : pjId(r);\n  if (!o.objectId) o.objectId = o.id;\n  return o;\n}\nfunction pjIso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction pjToday() { return pjIso(new Date()); }\n/** '' stays '', \"today\" and \"tomorrow\" are days, YYYY-MM-DD must be a real day; anything else is null. */\nfunction pjDate(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).trim().toLowerCase();\n  if (s === '') return '';\n  if (s === 'today' || s === 'tomorrow') {\n    var d = new Date();\n    if (s === 'tomorrow') d.setDate(d.getDate() + 1);\n    return pjIso(d);\n  }\n  var m = /^(\\d{4})-(\\d{1,2})-(\\d{1,2})$/.exec(s);\n  if (!m) return null;\n  var y = Number(m[1]), mo = Number(m[2]), da = Number(m[3]);\n  var dt = new Date(y, mo - 1, da);\n  return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === da ? pjIso(dt) : null;\n}\n/** \"2,140\", \"€ 2140\", \"−380\" → a number; anything else NaN. */\nfunction pjAmount(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).replace(/[€\\s,]/g, '').replace('−', '-');\n  if (s === '') return NaN;\n  var n = Number(s);\n  return isFinite(n) ? n : NaN;\n}\nfunction pick(typed, start) {\n  if (typed !== undefined && typed !== null) return String(typed);\n  return start === undefined || start === null ? '' : String(start);\n}\nfunction moneyItemProblem(v) {\n  var amt = Math.abs(pjAmount(v.amount));\n  var date = pjDate(v.date), until = pjDate(v.until);\n  var likeRaw = String(v.likelihood === undefined || v.likelihood === null ? '' : v.likelihood).replace('%', '').trim();\n  var like = likeRaw === '' ? 100 : Number(likeRaw);\n  if (String(v.label || '').trim() === '') return 'Say what it is, like Rent or the Clarion retainer.';\n  if (!(amt > 0)) return 'Type how much as a number, like 900.';\n  if (!date) return 'Pick the day it happens.';\n  if (until === null) return 'Pick the last day, or leave it empty.';\n  if (String(v.repeat) !== 'once' && until !== '' && until < date) return 'The last day is before the first.';\n  if (!isFinite(like) || like < 0 || like > 100) return 'How likely is a number from 0 to 100, or empty when it is certain.';\n  return '';\n}\nvar v = {\n  label: pick(Inputs.typedLabel, Inputs.label).trim(),\n  dir: pick(Inputs.pickedDir, Inputs.dir) === 'out' ? 'out' : 'in',\n  amount: pick(Inputs.typedAmount, Inputs.amount).trim(),\n  repeat: pick(Inputs.pickedRepeat, Inputs.repeat) || 'once',\n  date: pick(Inputs.pickedDate, Inputs.date).trim(),\n  until: pick(Inputs.pickedUntil, Inputs.until).trim(),\n  projectId: pick(Inputs.pickedProject, Inputs.projectId) || 'none',\n  likelihood: pick(Inputs.typedLikelihood, Inputs.likelihood).trim(),\n  note: pick(Inputs.typedNote, Inputs.note).trim()\n};\nif (v.repeat === 'once') v.until = '';\nvar error = moneyItemProblem(v);\nOutputs.error = error;\nOutputs.hasError = error !== '';\nif (error) return;\nOutputs.label = v.label;\nOutputs.dir = v.dir;\nOutputs.amount = v.amount;\nOutputs.repeat = v.repeat;\nOutputs.date = v.date;\nOutputs.until = v.until;\nOutputs.projectId = v.projectId;\nOutputs.likelihood = v.likelihood;\nOutputs.note = v.note;\nOutputs.go();",
+        "runOnChange-in-label": false,
+        "runOnChange-in-dir": false,
+        "runOnChange-in-amount": false,
+        "runOnChange-in-repeat": false,
+        "runOnChange-in-date": false,
+        "runOnChange-in-until": false,
+        "runOnChange-in-projectId": false,
+        "runOnChange-in-likelihood": false,
+        "runOnChange-in-note": false,
+        "runOnChange-in-typedLabel": false,
+        "runOnChange-in-pickedDir": false,
+        "runOnChange-in-typedAmount": false,
+        "runOnChange-in-pickedRepeat": false,
+        "runOnChange-in-pickedDate": false,
+        "runOnChange-in-pickedUntil": false,
+        "runOnChange-in-pickedProject": false,
+        "runOnChange-in-typedLikelihood": false,
+        "runOnChange-in-typedNote": false
+      },
+      "x": 470,
+      "y": 2800,
+      "ports": [
+        {
+          "name": "in-typedLabel",
+          "displayName": "typedLabel",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-label",
+          "displayName": "label",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pickedDir",
+          "displayName": "pickedDir",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-dir",
+          "displayName": "dir",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-typedAmount",
+          "displayName": "typedAmount",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-amount",
+          "displayName": "amount",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pickedRepeat",
+          "displayName": "pickedRepeat",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-repeat",
+          "displayName": "repeat",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pickedDate",
+          "displayName": "pickedDate",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-date",
+          "displayName": "date",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pickedUntil",
+          "displayName": "pickedUntil",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-until",
+          "displayName": "until",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pickedProject",
+          "displayName": "pickedProject",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectId",
+          "displayName": "projectId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-typedLikelihood",
+          "displayName": "typedLikelihood",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-likelihood",
+          "displayName": "likelihood",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-typedNote",
+          "displayName": "typedNote",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-note",
+          "displayName": "note",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "displayName": "error",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasError",
+          "displayName": "hasError",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-label",
+          "displayName": "label",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-dir",
+          "displayName": "dir",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-amount",
+          "displayName": "amount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-repeat",
+          "displayName": "repeat",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-date",
+          "displayName": "date",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-until",
+          "displayName": "until",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-projectId",
+          "displayName": "projectId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-likelihood",
+          "displayName": "likelihood",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-note",
+          "displayName": "note",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "meRoot"
+  ]
+}

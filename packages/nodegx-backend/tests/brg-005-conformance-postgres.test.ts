@@ -90,9 +90,18 @@ suite('BRG-005 — conformance, PostgreSQL', () => {
     return handle;
   }
 
+  // One adapter per case, each with its own pool: closed when its run ends, not at afterAll. P116
+  // ONT-015's series cases put eight creates in flight at once, which fills a pool, and sixteen runs of
+  // full pools left idle until the pools' own timeout exhausted the server's 100 connections.
+  let drained = 0;
+  async function drain(): Promise<void> {
+    for (; drained < handles.length; drained++) await handles[drained].adapter.disconnect().catch(() => undefined);
+  }
+
   beforeAll(async () => {
     psql(ADMIN_URL, `CREATE DATABASE "${DB_NAME}"`);
     report = await runConformance(async () => (await freshAdapter()).adapter, declaration);
+    await drain();
     for (const kind of MUTATIONS) {
       mutantReports.set(
         kind,
@@ -101,11 +110,12 @@ suite('BRG-005 — conformance, PostgreSQL', () => {
           adapter: `postgres mutant:${kind}`
         })
       );
+      await drain();
     }
   });
 
   afterAll(async () => {
-    for (const h of handles) {
+    for (const h of handles.slice(drained)) {
       try {
         await h.adapter.disconnect();
       } catch {

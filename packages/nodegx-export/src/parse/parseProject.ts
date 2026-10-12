@@ -22,11 +22,17 @@ import { DEFAULT_TOKENS } from '@nodegx/project-contract/tokens';
 // package for exactly this reason: one copy, both readers. See `settleComponent`.
 import {
   applyRunOnValueChangeMigration,
+  projectPredatesRunOnValueChange,
   type MigrationComponentLike,
   type MigrationConnectionLike,
   type MigrationNodeLike,
   type RunOnChangeWrite
 } from '@nodegx/project-contract/run-on-value-change-migration';
+import {
+  applyFunctionPortFixUp,
+  type FunctionPortConnectionLike,
+  type FunctionPortNodeLike
+} from '@nodegx/project-contract/function-ports';
 import {
   Catalog,
   CatalogIndex,
@@ -48,9 +54,11 @@ import {
   PortIR,
   ProjectIR,
   RouterIR,
+  ScriptFileIR,
   StylesIR,
   VariantIR
 } from '../ir/types';
+import { normalizeScriptPath } from '../scriptFiles';
 import { parseModules } from './parseModules';
 
 export const EXPORTER_VERSION = '0.0.1';
@@ -93,13 +101,16 @@ export function parseProject(projectDir: string, catalog: Catalog): ExportIR {
   // HLS-003. Filled by `settleComponent` as each component is read; carried into the IR so the
   // report can say what the file did not, rather than the export quietly reading a better graph.
   const settled: RunOnChangeWrite[] = [];
+  // P109 ISL-018: the editor runs the migration once, as format step 4 → 5; a project at 5 was
+  // authored (or upgraded) under §2, and the editor does not settle it on open — so neither does this.
+  const settles = projectPredatesRunOnValueChange(projectFile.version);
 
   // STY-004. Read before the components, because every node that wears a Look resolves against it.
   const styles = parseStyles(projectDir, projectFile);
 
   const components = findComponentDirs(componentsDir)
     .filter((dir) => !path.relative(componentsDir, dir).split(path.sep).includes('__cloud__'))
-    .map((dir) => parseComponent(dir, index, settled, styles))
+    .map((dir) => parseComponent(dir, index, settles ? settled : null, styles))
     // D1: components sort by path, codepoint order.
     .sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
 
@@ -123,8 +134,35 @@ export function parseProject(projectDir: string, catalog: Catalog): ExportIR {
   if (cloudservices !== undefined) project.cloudservices = cloudservices;
 
   if (styles !== undefined) project.styles = styles;
+  // P109 ISL-005. Absent without a `scripts/` folder, so every earlier project's IR is unchanged.
+  const scripts = parseScriptFiles(projectDir);
+  if (scripts !== undefined) project.scripts = scripts;
 
   return { project, components };
+}
+
+/**
+ * P109 ISL-005 — `scripts/**.js`, read as the editor and the preview read it
+ * (`ScriptFileStore`, `noodl-preview`'s `readScriptFiles`): every `.js` file under the folder,
+ * keyed by its path relative to `scripts/`, anything else ignored. Undefined without the folder.
+ */
+function parseScriptFiles(projectDir: string): ScriptFileIR[] | undefined {
+  const root = path.join(projectDir, 'scripts');
+  if (!fs.existsSync(root) || !fs.statSync(root).isDirectory()) return undefined;
+  const found: ScriptFileIR[] = [];
+  const walk = (dir: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.isFile() && entry.name.endsWith('.js')) {
+        const key = normalizeScriptPath(path.relative(root, full).split(path.sep).join('/'));
+        if (key !== undefined) found.push({ path: key, source: fs.readFileSync(full, 'utf8') });
+      }
+    }
+  };
+  walk(root);
+  // D1: codepoint order.
+  return found.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
 }
 
 /**
@@ -309,7 +347,8 @@ function settleComponent(
 function parseComponent(
   dir: string,
   catalog: CatalogIndex,
-  settled: RunOnChangeWrite[],
+  /** Null for a project at format 5 or later, which the editor does not settle either (ISL-018). */
+  settled: RunOnChangeWrite[] | null,
   styles: StylesIR | undefined
 ): ComponentIR {
   const meta = readJson(path.join(dir, 'component.json'));
@@ -321,9 +360,19 @@ function parseComponent(
 
   // 🔴 Before anything reads a parameter. `parseNode` copies the bag into the IR, so a settle
   // after this line would be invisible to every consumer of it.
-  settled.push(
+  settled?.push(
     ...settleComponent(String(meta.path ?? meta.name ?? ''), rawNodes, connectionsFile.connections ?? [])
   );
+  // P109 ISL-006 AC10: the editor's on-open fix-up, in memory like the settle above. A Function's reader no longer
+  // makes a port from a name in a comment; a wired one goes onto the list, so the export keeps the wire the editor keeps.
+  applyFunctionPortFixUp({
+    components: [
+      {
+        name: String(meta.path ?? meta.name ?? ''),
+        graph: { roots: rawNodes as unknown as FunctionPortNodeLike[], connections: (connectionsFile.connections ?? []) as FunctionPortConnectionLike[] }
+      }
+    ]
+  });
 
   const nodes = rawNodes.map((raw) => parseNode(raw, catalog, styles));
   const nodeById = new Map(rawNodes.map((raw) => [raw.id, raw]));

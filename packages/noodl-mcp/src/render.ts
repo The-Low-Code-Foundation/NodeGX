@@ -314,7 +314,14 @@ export function resolveRenderCli(fromDir: string = __dirname): ResolvedRenderCli
      * Plain Node does not — see `harness-paths.js` for the four measurements.
      */
     path.resolve(fromDir, '..', 'app.asar', 'render-harness', 'measure-from-disk.js'),
-    path.resolve(fromDir, '..', '..', 'app.asar', 'render-harness', 'measure-from-disk.js')
+    path.resolve(fromDir, '..', '..', 'app.asar', 'render-harness', 'measure-from-disk.js'),
+    /**
+     * P112 OWN-014 — the npm install. `npm pack` bundles the harness into this package's own
+     * `dist/render-harness/` (`build-render-harness.mjs`, run by `prepack`), with a production viewer at
+     * `dist/src/external/viewer`, the packaged editor's layout one level down, so `harness-paths.js`
+     * resolves it with no new rule. Bundled, `fromDir` is `dist/`.
+     */
+    path.resolve(fromDir, 'render-harness', 'measure-from-disk.js')
   ];
   for (const candidate of candidates) {
     const found = push(candidate);
@@ -427,6 +434,8 @@ export async function runRenderReport(
           'NODEGX_RENDER_CLI to an unpacked measure-from-disk.js.'
         : 'The render harness could not be located, so the page cannot be rendered or measured. On a packaged ' +
           'install it ships inside the app and this means the installation is incomplete — reinstall NodeGX. ' +
+          'Installed from npm, it ships inside @nodegx/mcp (dist/render-harness) from version 0.2.0 on; an older ' +
+          'version has none, so run npx -y @nodegx/mcp@latest. ' +
           'From a source checkout, run this server from the checkout or set NODEGX_RENDER_CLI to ' +
           'scripts/devtools/measure-from-disk.js. If you only need the write and not the picture, ' +
           'allow_unrendered writes the bundle with the render check deliberately unanswered.',
@@ -475,4 +484,105 @@ interface RenderCliError {
   actionable: boolean;
   message: string;
   problems: string[];
+}
+
+// ── P109 ISL-021 — drive_page: press, type, wait and read, from one step list ──────────────────
+
+/** One step's result row, as `scripts/devtools/drive-steps.js` writes it. */
+export interface DriveStepRow {
+  n: number;
+  do: string;
+  ok: boolean;
+  error?: string;
+  value?: unknown;
+  pressed?: string;
+  matched?: number;
+  url?: string;
+  viewport?: string;
+  file?: string;
+  keys?: string[];
+  /** `stub_route`: the route it answers, and whether it was installed before the page first loaded. */
+  route?: string;
+  before_boot?: boolean;
+  ms: number;
+}
+
+export interface DrivePagePayload {
+  verdict: 'passed' | 'failed';
+  steps: DriveStepRow[];
+  ran: number;
+  of: number;
+  viewport: string;
+  /** Where the page ended, and whether it was visible and had WebGL2 — a throttled or 2D run says so. */
+  page: { url: string; visibilityState: string; focused: boolean; webgl2: boolean };
+  /** Every `stub_route` the run set, and how many requests each answered. Absent when none was set. */
+  stubs?: Array<{ route: string; status: number; hits: number }>;
+  consoleErrors: string[];
+  /** Requests that failed to load or answered 400+ (not a cancelled one, not Chrome's own favicon), with the URL. */
+  networkErrors: string[];
+  /** Every origin other than the page's own that the run asked for anything. */
+  otherOrigins: string[];
+}
+
+export interface DriveOptions {
+  page?: string;
+  viewport?: string;
+  outDir?: string;
+  backendPort?: number;
+  timeoutMs?: number;
+}
+
+/**
+ * The step runner sits beside the render harness — `drive-steps.js` next to `measure-from-disk.js`, in a
+ * checkout and inside `app.asar`'s `render-harness/` alike (the editor's packaging ships both) — so it is
+ * found through the same resolution and run with the same binary. `NODEGX_DRIVE_CLI` overrides it on its
+ * own, because a spec that stubs the render harness must not thereby lose the runner.
+ */
+export function resolveDriveCli(): { entry: string | null; exec: string; probed: string[] } {
+  const override = process.env.NODEGX_DRIVE_CLI;
+  if (override) return { entry: fs.existsSync(override) ? override : null, exec: process.execPath, probed: [override] };
+  const render = resolveRenderCli();
+  if (!render.entry) return { entry: null, exec: render.exec, probed: render.probed };
+  const sibling = path.join(path.dirname(render.entry), 'drive-steps.js');
+  // Inside an asar `existsSync` may answer false for a file that is there (P79 L3); the harness beside it
+  // was found, and the packaging gate pins that both ship, so the sibling is trusted on that path.
+  const inAsar = render.entry.includes(`app.asar${path.sep}`);
+  return { entry: inAsar || fs.existsSync(sibling) ? sibling : null, exec: render.exec, probed: [...render.probed, sibling] };
+}
+
+/**
+ * Run a step list against `projectDir` rendered from disk. A failed step is a verdict (`failed`, with the
+ * row that failed), never a thrown error; what throws is a run that could not happen — no harness, no
+ * Chrome, a malformed step, a page no router lists.
+ */
+export async function runDrivePage(projectDir: string, steps: unknown[], options: DriveOptions = {}): Promise<DrivePagePayload> {
+  const { entry, exec, probed } = resolveDriveCli();
+  if (!entry) {
+    throw new ToolError(
+      'io-error',
+      'The step runner (drive-steps.js, beside the render harness) could not be located, so the page cannot be ' +
+        'driven. From a source checkout run this server from the checkout, or set NODEGX_DRIVE_CLI to ' +
+        'scripts/devtools/drive-steps.js; on a packaged install this means the installation is incomplete.',
+      { probed }
+    );
+  }
+  const args = [projectDir, '--steps', JSON.stringify(steps)];
+  if (options.page) args.push('--page', options.page);
+  if (options.viewport) args.push('--viewport', options.viewport);
+  if (options.outDir) args.push('--out-dir', options.outDir);
+  if (options.backendPort) args.push('--backend-port', String(options.backendPort));
+
+  const { stdout, stderr } = await spawnRender(exec, entry, args, options.timeoutMs ?? RENDER_TIMEOUT_MS);
+  let parsed: DrivePagePayload | { error: RenderCliError };
+  try {
+    parsed = JSON.parse(stdout);
+  } catch {
+    throw new ToolError('io-error', `The step runner produced no result. ${stderr.trim().slice(0, 500)}`);
+  }
+  if ('error' in parsed && parsed.error) {
+    throw new ToolError(parsed.error.actionable ? 'invalid-argument' : 'io-error', parsed.error.problems.join(' '), {
+      problems: parsed.error.problems
+    });
+  }
+  return parsed as DrivePagePayload;
 }

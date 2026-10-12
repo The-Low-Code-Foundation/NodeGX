@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "61bf3afa-6972-5e69-8368-fc2867e4de9b",
+  "name": "Select profile",
+  "path": "/Logic/Select profile",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The family with another profile active. Runs on Go; answers Ran once its outputs are set."
+}

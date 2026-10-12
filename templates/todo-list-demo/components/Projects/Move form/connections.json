@@ -1,0 +1,163 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9d7ed1d8-2183-56b5-8a29-964fcb2be0d1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mfIn",
+      "fromProperty": "heading",
+      "toId": "mfHead",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mfIn",
+      "fromProperty": "help",
+      "toId": "mfHelp",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mfIn",
+      "fromProperty": "help",
+      "toId": "mfLook",
+      "toProperty": "in-help"
+    },
+    {
+      "fromId": "mfLook",
+      "fromProperty": "out-hasHelp",
+      "toId": "mfHelp",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mfIn",
+      "fromProperty": "title",
+      "toId": "mfTitle",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "mfIn",
+      "fromProperty": "who",
+      "toId": "mfWho",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "mfIn",
+      "fromProperty": "deadline",
+      "toId": "mfDue",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "mfIn",
+      "fromProperty": "saveLabel",
+      "toId": "mfSave",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "mfIn",
+      "fromProperty": "cancelLabel",
+      "toId": "mfCancel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "mfIn",
+      "fromProperty": "title",
+      "toId": "mfCheck",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "mfIn",
+      "fromProperty": "who",
+      "toId": "mfCheck",
+      "toProperty": "in-who"
+    },
+    {
+      "fromId": "mfIn",
+      "fromProperty": "deadline",
+      "toId": "mfCheck",
+      "toProperty": "in-deadline"
+    },
+    {
+      "fromId": "mfIn",
+      "fromProperty": "titleOptional",
+      "toId": "mfCheck",
+      "toProperty": "in-titleOptional"
+    },
+    {
+      "fromId": "mfTitle",
+      "fromProperty": "onTextChanged",
+      "toId": "mfCheck",
+      "toProperty": "in-typedTitle"
+    },
+    {
+      "fromId": "mfWho",
+      "fromProperty": "onTextChanged",
+      "toId": "mfCheck",
+      "toProperty": "in-typedWho"
+    },
+    {
+      "fromId": "mfDue",
+      "fromProperty": "Value",
+      "toId": "mfCheck",
+      "toProperty": "in-pickedDeadline"
+    },
+    {
+      "fromId": "mfTitle",
+      "fromProperty": "didMount",
+      "toId": "mfTitle",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "mfTitle",
+      "fromProperty": "onEnter",
+      "toId": "mfCheck",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mfSave",
+      "fromProperty": "onClick",
+      "toId": "mfCheck",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mfCheck",
+      "fromProperty": "out-error",
+      "toId": "mfError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mfCheck",
+      "fromProperty": "out-hasError",
+      "toId": "mfError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mfCheck",
+      "fromProperty": "out-title",
+      "toId": "mfOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "mfCheck",
+      "fromProperty": "out-waitingOn",
+      "toId": "mfOut",
+      "toProperty": "waitingOn"
+    },
+    {
+      "fromId": "mfCheck",
+      "fromProperty": "out-deadline",
+      "toId": "mfOut",
+      "toProperty": "deadline"
+    },
+    {
+      "fromId": "mfCheck",
+      "fromProperty": "out-go",
+      "toId": "mfOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "mfCancel",
+      "fromProperty": "onClick",
+      "toId": "mfOut",
+      "toProperty": "cancel"
+    }
+  ]
+}

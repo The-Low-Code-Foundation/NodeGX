@@ -39,6 +39,7 @@ Do not use in new graphs — use net.noodl.controls.range instead.
 | `borderWidth` | Number | `1` | — |
 | `clickBubbling` | Enum (`auto`, `always`, `never`) | `auto` | — |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `enabled` | Boolean | `true` | — |
 | `height` | Number | `100` | — |
 | `marginBottom` | Number | — | Space outside the element's bottom edge, between it and its neighbours |
@@ -48,9 +49,10 @@ Do not use in new graphs — use net.noodl.controls.range instead.
 | `max` | Number | `100` | — |
 | `min` | Number | `0` | — |
 | `mixBlendMode` | Enum (`normal`, `multiply`, `screen`, `overlay`, `darken`, `lighten`, `color-dodge`, `color-burn`, `hard-light`, `soft-light`, `difference`, `exclusion`, `hue`, `saturation`, `color`, `luminosity`) | `normal` | How this element's colours blend with whatever is painted behind it |
-| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
+| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen) |
 | `opacity` | Number | `1` | How opaque this element is, from 0 for invisible to 1 for solid |
 | `position` | Enum (`relative`, `absolute`, `sticky`, `fixed`) | `relative` | How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `step` | Number | `1` | — |
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
 | `thumbColor` | Color | `#000000` | — |
@@ -70,6 +72,12 @@ Do not use in new graphs — use net.noodl.controls.range instead.
 | `visible` | Boolean | `true` | Hides the element while keeping the space it occupies in the layout |
 | `width` | Number | `100` | — |
 | `zIndex` | Number | — | Paint order among overlapping siblings; higher numbers paint on top |
+
+### Signals
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
 ## Outputs
 
@@ -104,6 +112,20 @@ Do not use in new graphs — use net.noodl.controls.range instead.
 | `pointerDown` | Signal | — | — |
 | `pointerUp` | Signal | — | — |
 | `willUnmount` | Signal | — | Fires just before this element is removed from the page, while it still exists |
+
+## Dynamic ports
+
+_This node's port list changes at runtime (declared-port-groups); the tables above may be incomplete for a given instance._
+
+Declares conditional/expandable port groups whose visibility depends on parameter values (see declaredPortGroups).
+
+| Condition | Inputs shown | Outputs shown |
+|---|---|---|
+| — | — | — |
+
+## Ports at runtime
+
+Its only dynamic ports are its Data Attributes list: each data-* name listed in `dataAttributes` becomes a string input of that name, written on the element (declared-port-groups). Every other port is static.
 
 ## Related nodes
 

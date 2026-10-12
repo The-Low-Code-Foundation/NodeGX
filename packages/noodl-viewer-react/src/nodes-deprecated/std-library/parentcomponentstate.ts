@@ -55,6 +55,7 @@ const ParentComponentState: NodeDefinitionOptions = {
   color: 'component',
   docs: 'https://docs.noodl.net/nodes/component-utilities/parent-component-object',
   deprecated: true,
+  replacedBy: 'net.noodl.ParentComponentObject',
   initialize(this: ParentComponentStateInstance) {
     this._internal.inputValues = {};
 

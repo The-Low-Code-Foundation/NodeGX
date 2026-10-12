@@ -24,6 +24,18 @@
     {
       "fromId": "dtIn",
       "fromProperty": "refresh",
+      "toId": "dtRoutines",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "dtIn",
+      "fromProperty": "refresh",
+      "toId": "dtChecks",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "dtIn",
+      "fromProperty": "refresh",
       "toId": "dtHasTask",
       "toProperty": "eval"
     },
@@ -80,6 +92,18 @@
       "fromProperty": "items",
       "toId": "dtOut",
       "toProperty": "recent"
+    },
+    {
+      "fromId": "dtRoutines",
+      "fromProperty": "items",
+      "toId": "dtOut",
+      "toProperty": "routines"
+    },
+    {
+      "fromId": "dtChecks",
+      "fromProperty": "items",
+      "toId": "dtOut",
+      "toProperty": "checks"
     }
   ]
 }

@@ -1,0 +1,415 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5d569a51-ef22-5c98-85e8-88ee662c32e5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "projectId",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "name",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "sub",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-sub"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "kind",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "rate",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-rate"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "move",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-move"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "moveWorth",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-moveWorth"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "moveWhen",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-moveWhen"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "moveDue",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-moveDue"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "moveStop",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-moveStop"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "say",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-say"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "billing",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-billing"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "termsDays",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-termsDays"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "agreedHours",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-agreedHours"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "billWhen",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-billWhen"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "billAmount",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-billAmount"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "billDate",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-billDate"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "billUntil",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-billUntil"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "projects",
+      "toId": "EditprojecGuard",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "do",
+      "toId": "EditprojecGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-name",
+      "toId": "EditprojecWrite",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-sub",
+      "toId": "EditprojecWrite",
+      "toProperty": "in-sub"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-kind",
+      "toId": "EditprojecWrite",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-rate",
+      "toId": "EditprojecWrite",
+      "toProperty": "in-rate"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-move",
+      "toId": "EditprojecWrite",
+      "toProperty": "in-move"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-moveWorth",
+      "toId": "EditprojecWrite",
+      "toProperty": "in-moveWorth"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-moveWhen",
+      "toId": "EditprojecWrite",
+      "toProperty": "in-moveWhen"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-moveDue",
+      "toId": "EditprojecWrite",
+      "toProperty": "in-moveDue"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-moveStop",
+      "toId": "EditprojecWrite",
+      "toProperty": "in-moveStop"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-say",
+      "toId": "EditprojecWrite",
+      "toProperty": "in-say"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-billing",
+      "toId": "EditprojecWrite",
+      "toProperty": "in-billing"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-termsDays",
+      "toId": "EditprojecWrite",
+      "toProperty": "in-termsDays"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-agreedHours",
+      "toId": "EditprojecWrite",
+      "toProperty": "in-agreedHours"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "projectId",
+      "toId": "EditprojecWrite",
+      "toProperty": "in-modelId"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-go",
+      "toId": "EditprojecWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-bill",
+      "toId": "EditprojecThenGate",
+      "toProperty": "in-want"
+    },
+    {
+      "fromId": "EditprojecWrite",
+      "fromProperty": "out-done",
+      "toId": "EditprojecThenGate",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EditprojecThenGate",
+      "fromProperty": "out-yes",
+      "toId": "EditprojecThen",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-bLabel",
+      "toId": "EditprojecThen",
+      "toProperty": "in-label"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-bAmount",
+      "toId": "EditprojecThen",
+      "toProperty": "in-amount"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-bRepeat",
+      "toId": "EditprojecThen",
+      "toProperty": "in-repeat"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-bDate",
+      "toId": "EditprojecThen",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-bUntil",
+      "toId": "EditprojecThen",
+      "toProperty": "in-until"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-bMonthEnd",
+      "toId": "EditprojecThen",
+      "toProperty": "in-monthEnd"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-bBillDate",
+      "toId": "EditprojecThen",
+      "toProperty": "in-billDate"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-bLead",
+      "toId": "EditprojecThen",
+      "toProperty": "in-billLeadDays"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-bFromHours",
+      "toId": "EditprojecThen",
+      "toProperty": "in-fromHours"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-bLikelihood",
+      "toId": "EditprojecThen",
+      "toProperty": "in-likelihood"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-bNote",
+      "toId": "EditprojecThen",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-bPosition",
+      "toId": "EditprojecThen",
+      "toProperty": "in-position"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "projectId",
+      "toId": "EditprojecThen",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "EditprojecThen",
+      "fromProperty": "out-failure",
+      "toId": "EditprojecProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "EditprojecIn",
+      "fromProperty": "projectId",
+      "toId": "EditprojecLog",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-hKind",
+      "toId": "EditprojecLog",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-hSummary",
+      "toId": "EditprojecLog",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-hBody",
+      "toId": "EditprojecLog",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-hWhat",
+      "toId": "EditprojecLog",
+      "toProperty": "in-what"
+    },
+    {
+      "fromId": "EditprojecGuard",
+      "fromProperty": "out-hSummary",
+      "toId": "EditprojecLogGate",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "EditprojecLogGate",
+      "fromProperty": "out-at",
+      "toId": "EditprojecLog",
+      "toProperty": "in-at"
+    },
+    {
+      "fromId": "EditprojecThenGate",
+      "fromProperty": "out-no",
+      "toId": "EditprojecLogGate",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EditprojecThen",
+      "fromProperty": "out-done",
+      "toId": "EditprojecLogGate",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EditprojecThen",
+      "fromProperty": "out-failure",
+      "toId": "EditprojecLogGate",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EditprojecLogGate",
+      "fromProperty": "out-log",
+      "toId": "EditprojecLog",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EditprojecLogGate",
+      "fromProperty": "out-skip",
+      "toId": "EditprojecOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "EditprojecLog",
+      "fromProperty": "out-done",
+      "toId": "EditprojecOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "EditprojecLog",
+      "fromProperty": "out-failure",
+      "toId": "EditprojecProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "EditprojecLog",
+      "fromProperty": "out-failure",
+      "toId": "EditprojecOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "EditprojecWrite",
+      "fromProperty": "out-failure",
+      "toId": "EditprojecProblem",
+      "toProperty": "do"
+    }
+  ]
+}

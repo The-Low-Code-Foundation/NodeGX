@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e09f3880-52d3-5833-8423-f764c45f70ca",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ywIn",
+      "type": "Component Inputs",
+      "label": "The records",
+      "ports": [
+        {
+          "name": "tasks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "actions",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "routines",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "checks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "selectedId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "now",
+          "plug": "output",
+          "type": "number"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ywOut",
+      "type": "Component Outputs",
+      "label": "The rows",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "routineRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "todayLabel",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ywBuild",
+      "type": "JavaScriptFunction",
+      "label": "Build Today",
+      "parameters": {
+        "functionScript": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction fmtDay(d) { return DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()]; }\nfunction fmtTime(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }\nfunction when(v) {\n  if (v === undefined || v === null || v === '') return null;\n  var d = v instanceof Date ? v : new Date(v);\n  return isNaN(d.getTime()) ? null : d;\n}\nfunction dayLabel(d) {\n  var t = startOfToday();\n  if (d.getTime() >= t) return 'Today';\n  if (d.getTime() >= t - 86400000) return 'Yesterday';\n  return fmtDay(d);\n}\nfunction due(s) {\n  var d = toDay(s);\n  if (!d) return { text: '', late: false };\n  var n = Math.round((d.getTime() - startOfToday()) / 86400000);\n  if (n < 0) return { text: 'Overdue by ' + (-n) + (n === -1 ? ' day' : ' days'), late: true };\n  if (n === 0) return { text: 'Due today', late: true };\n  if (n === 1) return { text: 'Due tomorrow', late: false };\n  if (n <= 7) return { text: 'Due in ' + n + ' days', late: false };\n  return { text: 'Due ' + fmtDay(d), late: false };\n}\nfunction ago(d) {\n  var ms = Date.now() - d.getTime();\n  if (ms < 3600000) return 'just now';\n  if (ms < 86400000) return Math.round(ms / 3600000) + ' h ago';\n  var n = Math.round(ms / 86400000);\n  return n === 1 ? 'yesterday' : n + ' days ago';\n}\nfunction num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction byPosition(a, b) { return num(a.position, 0) - num(b.position, 0); }\nvar SCHED_DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];\nvar SCHED_WEEK = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];\nvar SCHED_NAMES = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun' };\nfunction schedPad(n) { return (n < 10 ? '0' : '') + n; }\nfunction schedIso(d) { return d.getFullYear() + '-' + schedPad(d.getMonth() + 1) + '-' + schedPad(d.getDate()); }\nfunction schedDate(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  return schedIso(d) === m[0] ? d : null;\n}\nfunction schedRank(day) {\n  if (day === '') return 0;\n  var w = SCHED_WEEK.indexOf(day);\n  if (w >= 0) return w;\n  return day === 'last' ? 32 : Number(day);\n}\nfunction schedSlots(cadence, text) {\n  var out = [], seen = {};\n  var parts = String(text || '').split(',');\n  for (var i = 0; i < parts.length; i++) {\n    var p = parts[i].replace(/\\s+/g, '').toLowerCase();\n    if (p === '') continue;\n    var at = p.indexOf('@');\n    var day = at >= 0 ? p.slice(0, at) : '';\n    var time = at >= 0 ? p.slice(at + 1) : p;\n    if (!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(time)) continue;\n    if (cadence === 'daily') day = '';\n    else if (cadence === 'weekly') {\n      if (SCHED_WEEK.indexOf(day) < 0) continue;\n    } else if (cadence === 'monthly') {\n      if (day !== 'last') {\n        if (!/^\\d{1,2}$/.test(day) || Number(day) < 1 || Number(day) > 31) continue;\n        day = String(Number(day));\n      }\n    } else continue;\n    var key = day === '' ? time : day + '@' + time;\n    if (seen[key]) continue;\n    seen[key] = true;\n    out.push({ day: day, time: time, key: key });\n  }\n  out.sort(function (a, b) { return schedRank(a.day) - schedRank(b.day) || (a.time < b.time ? -1 : a.time > b.time ? 1 : 0); });\n  return out;\n}\nfunction schedJoin(slots) {\n  var keys = [];\n  for (var i = 0; i < slots.length; i++) keys.push(slots[i].key);\n  return keys.join(',');\n}\nfunction schedStopDay(r) {\n  if (!r || r.status !== 'stopped') return null;\n  var s = r.stoppedAt ? new Date(r.stoppedAt) : null;\n  if (!s || isNaN(s.getTime())) return new Date(0);\n  s.setHours(0, 0, 0, 0);\n  return s;\n}\nfunction schedOn(r, d) {\n  if (!r) return [];\n  var day = new Date(d.getFullYear(), d.getMonth(), d.getDate());\n  var start = schedDate(r.startDate), end = schedDate(r.endDate), stop = schedStopDay(r);\n  if (start && day < start) return [];\n  if (end && day > end) return [];\n  if (stop && day >= stop) return [];\n  var last = new Date(day.getFullYear(), day.getMonth() + 1, 0).getDate();\n  var slots = schedSlots(r.cadence, r.slots), out = [], seen = {};\n  for (var i = 0; i < slots.length; i++) {\n    var s = slots[i], hit = false;\n    if (s.day === '') hit = true;\n    else if (SCHED_WEEK.indexOf(s.day) >= 0) hit = SCHED_DAYS[day.getDay()] === s.day;\n    else if (s.day === 'last') hit = day.getDate() === last;\n    else hit = Math.min(Number(s.day), last) === day.getDate();\n    if (hit && !seen[s.time]) {\n      seen[s.time] = true;\n      out.push(s.time);\n    }\n  }\n  out.sort();\n  return out;\n}\nfunction schedOrdinal(n) {\n  var t = n % 100, u = n % 10;\n  return n + (t >= 11 && t <= 13 ? 'th' : u === 1 ? 'st' : u === 2 ? 'nd' : u === 3 ? 'rd' : 'th');\n}\nfunction schedAnd(list) {\n  return list.length < 2 ? list.join('') : list.slice(0, -1).join(', ') + ' and ' + list[list.length - 1];\n}\nfunction schedDayName(cadence, day) {\n  if (cadence === 'weekly') return SCHED_NAMES[day];\n  return day === 'last' ? 'the last day' : 'the ' + schedOrdinal(Number(day));\n}\nfunction schedSlotLabel(cadence, s) {\n  if (cadence === 'weekly') return SCHED_NAMES[s.day] + ' ' + s.time;\n  if (cadence === 'monthly') return (s.day === 'last' ? 'Last day' : schedOrdinal(Number(s.day))) + ' ' + s.time;\n  return s.time;\n}\nfunction schedDescribe(r) {\n  var cadence = String((r && r.cadence) || '');\n  var slots = schedSlots(cadence, r && r.slots);\n  if (slots.length === 0) return 'No times yet';\n  var i, k;\n  if (cadence === 'daily') {\n    var times = [];\n    for (i = 0; i < slots.length; i++) times.push(slots[i].time);\n    return 'Every day at ' + schedAnd(times);\n  }\n  var byDay = {}, order = [];\n  for (i = 0; i < slots.length; i++) {\n    if (!byDay[slots[i].day]) {\n      byDay[slots[i].day] = [];\n      order.push(slots[i].day);\n    }\n    byDay[slots[i].day].push(slots[i].time);\n  }\n  var same = true;\n  for (k = 1; k < order.length; k++) if (byDay[order[k]].join() !== byDay[order[0]].join()) same = false;\n  var lead = cadence === 'weekly' ? 'Every ' : 'Every month on ';\n  var parts = [];\n  if (same) {\n    for (k = 0; k < order.length; k++) parts.push(schedDayName(cadence, order[k]));\n    return lead + schedAnd(parts) + ' at ' + schedAnd(byDay[order[0]]);\n  }\n  for (k = 0; k < order.length; k++) parts.push(schedDayName(cadence, order[k]) + ' at ' + schedAnd(byDay[order[k]]));\n  return lead + parts.join('; ');\n}\nfunction schedTime(text) {\n  var t = String(text || '').trim().toLowerCase().replace(/\\s+/g, '');\n  var m = /^(\\d{1,2})(?:[:.h]?(\\d{2}))?(am|pm)?$/.exec(t);\n  if (!m) return null;\n  var h = Number(m[1]), min = m[2] ? Number(m[2]) : 0, ap = m[3] || '';\n  if (min > 59) return null;\n  if (ap) {\n    if (h < 1 || h > 12) return null;\n    if (h === 12) h = 0;\n    if (ap === 'pm') h += 12;\n  }\n  if (h > 23) return null;\n  return schedPad(h) + ':' + schedPad(min);\n}\nvar tasks = Inputs.tasks || [];\nvar actions = Inputs.actions || [];\nvar routines = Inputs.routines || [];\nvar checks = Inputs.checks || [];\nvar sel = String(Inputs.selectedId || '');\nvar now = new Date(Number(Inputs.now) || Date.now());\nvar today = new Date(now.getFullYear(), now.getMonth(), now.getDate());\nvar todayIso = schedIso(today);\nvar nowTime = schedPad(now.getHours()) + ':' + schedPad(now.getMinutes());\nvar DAY = 86400000;\nvar LATE = 'var(--destructive)', QUIET = 'var(--muted-foreground)';\n\nvar nextOf = {};\nvar sortedActions = actions.slice().sort(byPosition);\nfor (var k = 0; k < sortedActions.length; k++) {\n  var a = sortedActions[k];\n  if (a && !a.done && nextOf[a.taskId] === undefined) nextOf[a.taskId] = String(a.title || '');\n}\n\nvar done = {};\nfor (var c = 0; c < checks.length; c++) {\n  var ch = checks[c];\n  if (ch) done[ch.routineId + '|' + ch.date + '|' + ch.time] = true;\n}\n\nvar overdue = [], dueNow = [], soon = [];\nfor (var i = 0; i < tasks.length; i++) {\n  var t = tasks[i];\n  if (!t || t.status === 'done') continue;\n  var d = toDay(t.deadline);\n  if (!d) continue;\n  var n = Math.round((d.getTime() - today.getTime()) / DAY);\n  if (n < 0) overdue.push(t);\n  else if (n === 0) dueNow.push(t);\n  else if (n <= 7) soon.push(t);\n}\nfunction byDeadline(x, y) { return String(x.deadline).localeCompare(String(y.deadline)) || byPosition(x, y); }\noverdue.sort(byDeadline);\ndueNow.sort(byPosition);\nsoon.sort(byDeadline);\n\nvar slots = [], doneToday = 0;\nfor (var r = 0; r < routines.length; r++) {\n  var ro = routines[r];\n  if (!ro) continue;\n  var times = schedOn(ro, today);\n  for (var s = 0; s < times.length; s++) {\n    if (done[ro.id + '|' + todayIso + '|' + times[s]]) doneToday++;\n    else slots.push({ routine: ro, time: times[s] });\n  }\n}\nslots.sort(function (x, y) { return x.time < y.time ? -1 : x.time > y.time ? 1 : String(x.routine.title || '').localeCompare(String(y.routine.title || '')); });\n\nvar rows = [], lastHeading = '';\nfunction add(row) {\n  row.showHeading = row.heading !== lastHeading;\n  lastHeading = row.heading;\n  rows.push(row);\n}\nfunction taskRow(task, heading) {\n  var dd = due(task.deadline);\n  var parts = [dd.text];\n  if (nextOf[task.id]) parts.push('Next: ' + nextOf[task.id]);\n  return {\n    id: 't:' + task.id,\n    targetId: task.id,\n    isRoutine: false,\n    heading: heading,\n    time: '',\n    hasTime: false,\n    title: String(task.title || ''),\n    meta: parts.join(' · '),\n    hasMeta: true,\n    metaColor: dd.late ? LATE : QUIET,\n    bg: task.id === sel ? 'var(--surface)' : 'transparent'\n  };\n}\nfor (var o = 0; o < overdue.length; o++) add(taskRow(overdue[o], 'Overdue'));\nvar todayHeading = doneToday > 0 ? 'Today · ' + doneToday + ' done' : 'Today';\nfor (var q = 0; q < slots.length; q++) {\n  var sl = slots[q];\n  var late = sl.time < nowTime;\n  add({\n    id: 'r:' + sl.routine.id + '|' + todayIso + '|' + sl.time,\n    targetId: sl.routine.id,\n    isRoutine: true,\n    heading: todayHeading,\n    time: sl.time,\n    hasTime: true,\n    title: String(sl.routine.title || ''),\n    meta: late ? 'Not done yet' : '',\n    hasMeta: late,\n    metaColor: LATE,\n    bg: sl.routine.id === sel ? 'var(--surface)' : 'transparent',\n    routineId: sl.routine.id,\n    date: todayIso\n  });\n}\nfor (var u = 0; u < dueNow.length; u++) add(taskRow(dueNow[u], 'Due today'));\nfor (var v = 0; v < soon.length; v++) add(taskRow(soon[v], 'Next 7 days'));\n\n// Everything that repeats: current ones first (by title), finished ones after.\nfunction state(ro) {\n  var start = schedDate(ro.startDate), end = schedDate(ro.endDate);\n  if (ro.status === 'stopped') {\n    var at = when(ro.stoppedAt);\n    return { finished: true, text: 'Stopped' + (at ? ' ' + fmtDay(at) : '') };\n  }\n  if (end && end < today) return { finished: true, text: 'Ended ' + fmtDay(end) };\n  if (start && start > today) return { finished: false, text: 'Starts ' + fmtDay(start) + (end ? ', until ' + fmtDay(end) : '') };\n  return { finished: false, text: end ? 'Until ' + fmtDay(end) : '' };\n}\nvar current = [], finished = [];\nfor (var w = 0; w < routines.length; w++) {\n  var rt = routines[w];\n  if (!rt) continue;\n  var st = state(rt);\n  var line = schedDescribe(rt) + (st.text ? ' · ' + st.text : '');\n  (st.finished ? finished : current).push({\n    id: rt.id,\n    title: String(rt.title || ''),\n    titleColor: st.finished ? QUIET : 'var(--foreground)',\n    meta: line,\n    bg: rt.id === sel ? 'var(--surface)' : 'transparent'\n  });\n}\nfunction byTitle(x, y) { return x.title.localeCompare(y.title); }\ncurrent.sort(byTitle);\nfinished.sort(byTitle);\n\nOutputs.rows = rows;\nOutputs.routineRows = current.concat(finished);\nOutputs.todayLabel = 'Today (' + (overdue.length + slots.length + dueNow.length) + ')';"
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-tasks",
+          "displayName": "tasks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-actions",
+          "displayName": "actions",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-routines",
+          "displayName": "routines",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-checks",
+          "displayName": "checks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-selectedId",
+          "displayName": "selectedId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-now",
+          "displayName": "now",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-routineRows",
+          "displayName": "routineRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-todayLabel",
+          "displayName": "todayLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ]
+}

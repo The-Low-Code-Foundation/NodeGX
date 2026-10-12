@@ -11,6 +11,9 @@
       "@noodl-core-ui/*": ["../noodl-core-ui/src/*"],
       "@nodegx/export": ["../nodegx-export/src/index.ts"],
       "@nodegx/export/*": ["../nodegx-export/src/*"],
+      // NSP-019: the spec package's browser entry, by source — its `types` field points at a
+      // gitignored `dist/`, which CI never has (the same reason `@nodegx/export` is mapped).
+      "@nodegx/node-spec": ["../nodegx-node-spec/src/browser.ts"],
       "@noodl-hooks/*": ["./src/editor/src/hooks/*"],
       "@noodl-utils/*": ["./src/editor/src/utils/*"],
       "@noodl-models/*": ["./src/editor/src/models/*"],

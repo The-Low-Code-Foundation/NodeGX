@@ -1,0 +1,2473 @@
+[
+  {
+    "name": "Auto Connect with a URL streams: connecting, open, three events, then the end closes it",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": [
+              {
+                "at": 1,
+                "text": "data: hello\n\n"
+              },
+              {
+                "at": 2,
+                "text": "id: 1\ndata: {\"delta\":\"Hi\"}\n\n"
+              },
+              {
+                "at": 4,
+                "text": "event: token\ndata: x\n\n"
+              },
+              {
+                "at": 8,
+                "end": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "because": "sse :555-586 the frame end's pass; conn :503-586 open, frames, end; sse :693-712 values then On Message"
+  },
+  {
+    "name": "A Connect: Done when the stream opens; the request carries the event-stream headers",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": []
+          }
+        }
+      ]
+    },
+    "because": "sse :328-334; conn :446 Accept and Cache-Control; :519 onOpen"
+  },
+  {
+    "name": "A Connect with no URL fails for good",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": []
+    },
+    "because": "conn :735-739 — No URL was set on the stream, fatal"
+  },
+  {
+    "name": "Disconnect with nothing running is Unchanged; with a stream open it is Done and closed",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle",
+      {
+        "advance": 20
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": [
+              {
+                "at": 1,
+                "text": "data: hello\n\n"
+              },
+              {
+                "at": 2,
+                "text": "id: 1\ndata: {\"delta\":\"Hi\"}\n\n"
+              },
+              {
+                "at": 4,
+                "text": "event: token\ndata: x\n\n"
+              },
+              {
+                "at": 8,
+                "end": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "because": "sse :336-348, conn :756-763"
+  },
+  {
+    "name": "Disconnect while the Connect waits: the Connect Unchanged, the Disconnect Done",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      {
+        "signal": "disconnect"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": []
+          },
+          "after": 5
+        }
+      ]
+    },
+    "because": "sse :342-347 — cancelled, not failed"
+  },
+  {
+    "name": "A second Connect supersedes the first",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": []
+          },
+          "after": 5
+        }
+      ]
+    },
+    "because": "sse :608 — settled before the new token"
+  },
+  {
+    "name": "POST with a JSON body: Content-Type added; a string body as itself; GET sends none",
+    "params": {
+      "url": "https://api.example/stream",
+      "method": "POST",
+      "body": {
+        "prompt": "hi"
+      },
+      "headers": {
+        "Authorization": "Bearer t"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "body",
+        "value": "raw"
+      },
+      {
+        "set": "headers",
+        "value": {
+          "content-type": "text/plain",
+          "X": 3,
+          "skip": null
+        }
+      },
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "method",
+        "value": "GET"
+      },
+      {
+        "signal": "connect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": []
+          }
+        }
+      ]
+    },
+    "because": "conn :446-469"
+  },
+  {
+    "name": "A 500 retries with backoff; a later open is the Connect's one Done",
+    "params": {
+      "url": "https://api.example/stream",
+      "reconnectDelay": 10
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "advance": 20
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "match": {
+            "url": "https://api.example/stream"
+          },
+          "answer": {
+            "status": 500
+          },
+          "after": 0
+        }
+      ]
+    },
+    "because": "conn :510-516 retryable; :933-947 backoff; sse :678-682 the token rides the outage"
+  },
+  {
+    "name": "A 404 fails for good: Failure",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 404,
+            "body": "missing"
+          }
+        }
+      ]
+    },
+    "because": "conn :514 — a 4xx other than 408 / 429 is fatal"
+  },
+  {
+    "name": "A 429 is retried",
+    "params": {
+      "url": "https://api.example/stream",
+      "reconnectDelay": 3,
+      "maxRetries": 2
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle",
+      {
+        "advance": 6
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 429
+          }
+        }
+      ]
+    },
+    "because": "conn :514; :919-926 gave up after 2 attempts — On Error twice"
+  },
+  {
+    "name": "A network failure retries; Auto Reconnect off makes it final",
+    "params": {
+      "url": "https://api.example/stream",
+      "autoReconnect": false
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "error": "Failed to fetch"
+          }
+        }
+      ]
+    },
+    "because": "conn :497-499, :913-917"
+  },
+  {
+    "name": "No body on a 200 fails for good after it opened",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200
+          }
+        }
+      ]
+    },
+    "because": "conn :519-527"
+  },
+  {
+    "name": "A 204 opens and then has no body",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 204
+          }
+        }
+      ]
+    },
+    "because": "conn :519-527; a 204 carries no body"
+  },
+  {
+    "name": "A whole body: every event, and a last one with no blank line still dispatched",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": "id: 7\ndata: one\n\nevent: last\ndata: two"
+          }
+        }
+      ]
+    },
+    "because": "conn :571-583"
+  },
+  {
+    "name": "A stream interrupted mid-way retries and resumes from the last id",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream",
+      "reconnectDelay": 4
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "advance": 4
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": [
+              {
+                "at": 1,
+                "text": "id: 9\ndata: a\n\n"
+              },
+              {
+                "at": 2,
+                "text": "data: b\n\n"
+              },
+              {
+                "at": 4,
+                "error": "terminated"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "because": "conn :565-568; :454 Last-Event-ID on the retry"
+  },
+  {
+    "name": "Dedupe By Id drops a replayed id and counts it on Duplicates Suppressed (v2, C56); with it off the replay is delivered",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle",
+      {
+        "set": "dedupeById",
+        "value": false
+      },
+      {
+        "signal": "connect"
+      },
+      "settle",
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": [
+              {
+                "at": 1,
+                "text": "id: 1\ndata: first\n\n"
+              },
+              {
+                "at": 2,
+                "text": "id: 1\ndata: again\n\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "because": "conn :854-864; the count is not sent until an error (sse :714-719); v2 (P109 ISL-030, P107-C56 ruled \"Send them when they change\"): the count is sent as it moves (onDuplicate) — v1 counted silently"
+  },
+  {
+    "name": "A server retry: is the backoff's base from then on",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream",
+      "reconnectDelay": 1000
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": [
+              {
+                "at": 1,
+                "text": "retry: 2\ndata: r\n\n"
+              },
+              {
+                "at": 2,
+                "error": "gone"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "because": "conn :852, :937"
+  },
+  {
+    "name": "Reconnect On Stream End reconnects without an error; off it closes",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream",
+      "reconnectOnStreamEnd": true,
+      "reconnectDelay": 5
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "set": "reconnectOnStreamEnd",
+        "value": false
+      },
+      {
+        "signal": "connect"
+      },
+      "settle",
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": [
+              {
+                "at": 1,
+                "text": "data: x\n\n"
+              },
+              {
+                "at": 2,
+                "end": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "because": "conn :872-883"
+  },
+  {
+    "name": "Text Path picks the field; a missing one is blank; changing it sends Text at once",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream",
+      "textPath": "choices.0.delta.content"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "set": "textPath",
+        "value": "delta"
+      },
+      "settle",
+      {
+        "set": "textPath",
+        "value": ""
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": [
+              {
+                "at": 1,
+                "text": "data: {\"choices\":[{\"delta\":{\"content\":\"Hi\"}}]}\n\n"
+              },
+              {
+                "at": 2,
+                "text": "data: {\"delta\":\"x\"}\n\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "because": "sse :232-235, stream-parsers textForPath"
+  },
+  {
+    "name": "EventSource asked for: none in the play, a failure for good",
+    "params": {
+      "url": "https://api.example/stream",
+      "transport": "eventsource"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": []
+    },
+    "because": "conn :298-303 — EventSource is not available in this environment"
+  },
+  {
+    "name": "A URL change while a Connect waits, Auto Connect off: torn down, nothing reconnects, and it says idle (v3, C58); the pending Connect Unchanged",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": []
+          },
+          "after": 5
+        }
+      ]
+    },
+    "because": "sse :565-580 — only the URL decides; the rebuild mints no token; Auto Connect is off so nothing reconnects; v3 (P109 ISL-030, P107-C58 ruled \"Say idle, as WebSocket does\"): the three state outputs sent with idle. Its v1/v2 name said \"reconnects to the new one\", which it never did"
+  },
+  {
+    "name": "A URL change with Auto Connect on reconnects to the new one",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      {
+        "set": "maxRetries",
+        "value": 3
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": []
+          }
+        }
+      ]
+    },
+    "because": "sse :578-579"
+  },
+  {
+    "name": "A tuning input does not reconnect",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "set": "maxRetries",
+        "value": 3
+      },
+      {
+        "set": "url",
+        "value": "https://api.example/stream"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": []
+          }
+        }
+      ]
+    },
+    "because": "sse :566-568 — the identity check"
+  },
+  {
+    "name": "Max Retries gives up after its count, Last Error saying so",
+    "params": {
+      "url": "https://api.example/stream",
+      "maxRetries": 1,
+      "reconnectDelay": 2,
+      "maxReconnectDelay": 3
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 503
+          }
+        }
+      ]
+    },
+    "because": "conn :919-926"
+  },
+  {
+    "name": "A JSON payload is Data; a sentinel stays text; multi-line data joins",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "advance": 4
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": [
+              {
+                "at": 1,
+                "text": "data: {\"a\":1}\n\n"
+              },
+              {
+                "at": 2,
+                "text": "data: [DONE]\n\n"
+              },
+              {
+                "at": 4,
+                "text": "data: one\r\ndata: two\r\n\r\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "because": "stream-parsers parseJsonOrText, parseSseChunk"
+  },
+  {
+    "name": "Pieces split mid-event join; comments and events with no data are skipped",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "advance": 4
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": [
+              {
+                "at": 1,
+                "text": "data: par"
+              },
+              {
+                "at": 2,
+                "text": "tial\n\n: keep-alive\n\nevent: empty\n\n"
+              },
+              {
+                "at": 4,
+                "text": "data: next\r"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "because": "parseSseChunk — whole events only; a trailing CR waits"
+  },
+  {
+    "name": "Event Types wired a number: read as text (C57)",
+    "params": {
+      "url": "https://api.example/stream",
+      "eventTypes": 5
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": []
+          }
+        }
+      ]
+    },
+    "because": "P107-C57, ruled 2026-10-05 \"Turn them into text\", fixed in P109 ISL-026: the setter keeps `String(value)`; it once kept the number and Connect threw at .split"
+  },
+  {
+    "name": "Method wired a number: read as text (C57)",
+    "params": {
+      "url": "https://api.example/stream",
+      "method": 5
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": []
+          }
+        }
+      ]
+    },
+    "because": "P107-C57 (ISL-026): the setter keeps `String(value)`; it once kept the number and Connect threw at .toUpperCase"
+  },
+  {
+    "name": "Auto Connect then a URL that is not the first one, written twice: the stream opens at that URL",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/other"
+    },
+    "steps": [
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": []
+          }
+        }
+      ]
+    },
+    "because": "sse :133-136 — String(value); one pass per frame"
+  },
+  {
+    "name": "Auto Connect turned off with a URL change in one frame: torn down, nothing reconnects, and it says idle — Connected false (v3, C58)",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      {
+        "set": "autoConnect",
+        "value": false
+      },
+      "settle",
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": []
+          }
+        }
+      ]
+    },
+    "because": "sse :570-580 — the new connection needs Auto Connect; v3 (P109 ISL-030, P107-C58 ruled \"Say idle, as WebSocket does\"): the three state outputs sent with idle — v2 left Connected true and Connection State open"
+  },
+  {
+    "name": "Text Path written blank again: Text stays the raw payload",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream",
+      "textPath": ""
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": [
+              {
+                "at": 1,
+                "text": "data: {\"choices\":[{\"delta\":{\"content\":\"Hi\"}}]}\n\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "because": "sse :232-235; stream-parsers textForPath — no path, the raw text"
+  },
+  {
+    "name": "Body written as nothing again: a POST sends no body",
+    "params": {
+      "url": "https://api.example/stream",
+      "method": "POST"
+    },
+    "steps": [
+      {
+        "set": "body"
+      },
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": []
+          }
+        }
+      ]
+    },
+    "because": "conn :462 — no body when there is none"
+  },
+  {
+    "name": "After the stream ended, Disconnect has nothing to stop: Unchanged",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": [
+              {
+                "at": 1,
+                "text": "data: x\n\n"
+              },
+              {
+                "at": 2,
+                "end": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "because": "conn :872-883 closed the transport; :756-763 nothing active"
+  },
+  {
+    "name": "After a whole body was read, Disconnect has nothing to stop: Unchanged",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": "data: one\n\n"
+          }
+        }
+      ]
+    },
+    "because": "conn :571-585"
+  },
+  {
+    "name": "Auto Connect over EventSource fails once; the next frames are quiet",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream",
+      "transport": "eventsource"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "network": []
+    },
+    "because": "sse :559-561 — the pass clears its flag first"
+  },
+  {
+    "name": "A failed Connect, again, then the same URL with Auto Connect on: nothing new",
+    "params": {
+      "url": "https://api.example/stream",
+      "transport": "eventsource"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/stream"
+      },
+      {
+        "set": "autoConnect",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "network": []
+    },
+    "because": "sse :565-568 — the dead connection was opened against this URL"
+  },
+  {
+    "name": "Max Retries written 0 again: retries go on",
+    "params": {
+      "url": "https://api.example/stream",
+      "maxRetries": 0,
+      "reconnectDelay": 2,
+      "maxReconnectDelay": 2
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 503
+          }
+        }
+      ]
+    },
+    "because": "sse :305-307; conn :919 — 0 never gives up"
+  },
+  {
+    "name": "Auto Connect reads a whole body; Disconnect afterwards has nothing to stop",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": "data: one\n\n"
+          }
+        }
+      ]
+    },
+    "because": "conn :571-585 — the end closed it"
+  },
+  {
+    "name": "A second Connect reads the same whole body; Disconnect afterwards has nothing to stop",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": "data: one\n\n"
+          }
+        }
+      ]
+    },
+    "because": "conn :872-883"
+  },
+  {
+    "name": "A stream whose last event has no blank line, then the end; Disconnect has nothing to stop",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle",
+      {
+        "set": "textPath",
+        "value": "k"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": [
+              {
+                "at": 1,
+                "text": "data: a\n\n"
+              },
+              {
+                "at": 2,
+                "text": "data: tail"
+              },
+              {
+                "at": 2,
+                "end": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "because": "conn :577-585"
+  },
+  {
+    "name": "A 404 ends it for good; Disconnect afterwards is Unchanged but closes the state",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 404
+          }
+        }
+      ]
+    },
+    "because": "conn :514-516, :756-763"
+  },
+  {
+    "name": "Reconnect On Stream End after a whole body: the next request goes out at the delay",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream",
+      "reconnectOnStreamEnd": true,
+      "reconnectDelay": 6
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 6
+      },
+      "settle",
+      {
+        "advance": 6
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": "data: one\n\n"
+          }
+        }
+      ]
+    },
+    "because": "conn :876-880 — no error, the retry count unmoved"
+  },
+  {
+    "name": "Disconnect twice: Done, then Unchanged",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "never": true
+          }
+        }
+      ]
+    },
+    "because": "conn :756-763"
+  },
+  {
+    "name": "Auto Connect written on again while on: a later URL change still reconnects",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "set": "autoConnect",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": []
+          }
+        }
+      ]
+    },
+    "because": "sse :244-247, :578-579"
+  },
+  {
+    "name": "A URL change and Auto Connect written on again in one frame: reconnects to the new URL",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      {
+        "set": "autoConnect",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": []
+          }
+        }
+      ]
+    },
+    "because": "sse :578-579"
+  },
+  {
+    "name": "A failed Connect, Disconnect, a failed Connect again, then the same URL with Auto Connect on: nothing new",
+    "params": {
+      "url": "https://api.example/stream",
+      "transport": "eventsource"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/stream"
+      },
+      {
+        "set": "autoConnect",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "network": []
+    },
+    "because": "sse :565-568"
+  },
+  {
+    "name": "A failed Connect, new Headers, a failed Connect again, then the same URL with Auto Connect on: nothing new",
+    "params": {
+      "url": "https://api.example/stream",
+      "transport": "eventsource"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "headers",
+        "value": {
+          "a": "1"
+        }
+      },
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/stream"
+      },
+      {
+        "set": "autoConnect",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "network": []
+    },
+    "because": "sse :565-568"
+  },
+  {
+    "name": "Reconnect Delay and its ceiling written as they were: the retry waits the default second",
+    "params": {
+      "url": "https://api.example/stream",
+      "reconnectDelay": 1000,
+      "maxReconnectDelay": 30000
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "advance": 990
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 503
+          }
+        }
+      ]
+    },
+    "because": "sse :283, :294; conn :937-938"
+  },
+  {
+    "name": "A Connect reads a whole JSON body; Text Path then picks from it",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "textPath",
+        "value": "delta"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": "data: {\"delta\":\"zz\"}\n\n"
+          }
+        }
+      ]
+    },
+    "because": "sse :232-235 — Text is sent at once, read from the last event"
+  },
+  {
+    "name": "Two Connects read the same body; Text Path then picks from it",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "textPath",
+        "value": "delta"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": "data: {\"delta\":\"zz\"}\n\n"
+          }
+        }
+      ]
+    },
+    "because": "sse :232-235"
+  },
+  {
+    "name": "Auto Connect meets a 404; Disconnect afterwards is Unchanged",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 404
+          }
+        }
+      ]
+    },
+    "because": "conn :514-516"
+  },
+  {
+    "name": "Auto Connect that never hears back: Disconnect twice — Done, then Unchanged",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "never": true
+          }
+        }
+      ]
+    },
+    "because": "conn :756-763"
+  },
+  {
+    "name": "A stream ending on a named event with no blank line: dispatched at the end; Text Path then reads it; Disconnect has nothing to stop",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "set": "textPath",
+        "value": "k"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": [
+              {
+                "at": 1,
+                "text": "data: a\n\n"
+              },
+              {
+                "at": 2,
+                "text": "event: last\ndata: {\"k\":\"tail\"}"
+              },
+              {
+                "at": 3,
+                "end": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "because": "conn :577-585"
+  },
+  {
+    "name": "A failed Connect, the URL moved, a failed Connect at the new one, then that URL with Auto Connect on: nothing new",
+    "params": {
+      "url": "https://api.example/stream",
+      "transport": "eventsource"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      {
+        "set": "autoConnect",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "network": []
+    },
+    "because": "sse :565-580, :617 — the connection is the one opened against the URL now; v3 (C58): each URL move that does not reopen says idle"
+  },
+  {
+    "name": "Auto Connect meets a 200 with no body; Disconnect afterwards is Unchanged",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200
+          }
+        }
+      ]
+    },
+    "because": "conn :519-527"
+  },
+  {
+    "name": "Reconnect On Stream End written off again: the end closes it, no new request",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream",
+      "reconnectOnStreamEnd": false
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "advance": 1000
+      },
+      "settle",
+      {
+        "advance": 30000
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": "data: one\n\n"
+          }
+        }
+      ]
+    },
+    "because": "conn :876-882"
+  },
+  {
+    "name": "A Connect over EventSource while a stream is open: the open one is torn down, the new one fails; Disconnect then has nothing to stop",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "set": "transport",
+        "value": "eventsource"
+      },
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": []
+          }
+        }
+      ]
+    },
+    "because": "sse :603-612 — the old connection goes before the new one is made"
+  },
+  {
+    "name": "A Connect with Reconnect On Stream End: Done at the open, and the end schedules the next request",
+    "params": {
+      "url": "https://api.example/stream",
+      "reconnectOnStreamEnd": true,
+      "reconnectDelay": 4
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 4
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": "data: one\n\n"
+          }
+        }
+      ]
+    },
+    "because": "conn :876-880"
+  },
+  {
+    "name": "Dedupe By Id written on again: a replayed id is still dropped",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream",
+      "dedupeById": true
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": [
+              {
+                "at": 1,
+                "text": "id: 1\ndata: first\n\n"
+              },
+              {
+                "at": 2,
+                "text": "id: 1\ndata: again\n\n"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "because": "sse :319-321; conn :859-863"
+  },
+  {
+    "name": "A Connect while Auto Connect is still connecting: the new request answers it, Done",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": []
+          },
+          "after": 5
+        }
+      ]
+    },
+    "because": "sse :603-612 — the new connection's request is the one listened to"
+  },
+  {
+    "name": "A Connect waiting, then an EventSource Connect fails and supersedes it; the same URL with Auto Connect on is then left alone",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "transport",
+        "value": "eventsource"
+      },
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/stream"
+      },
+      {
+        "set": "autoConnect",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "never": true
+          }
+        }
+      ]
+    },
+    "because": "sse :603-617 — the failed connection was opened against this URL"
+  },
+  {
+    "name": "A Connect waiting, then a new URL and an EventSource Connect in one frame; that URL with Auto Connect on is then left alone",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "transport",
+        "value": "eventsource"
+      },
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      {
+        "set": "autoConnect",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "never": true
+          }
+        }
+      ]
+    },
+    "because": "sse :617 — connectedUrl is the URL the Connect used"
+  },
+  {
+    "name": "Reconnect On Stream End across a URL change reading the same body: the cycle goes on at the new URL",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream",
+      "reconnectOnStreamEnd": true,
+      "reconnectDelay": 5
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": "data: one\n\n"
+          }
+        }
+      ]
+    },
+    "because": "conn :876-880; sse :578-579"
+  },
+  {
+    "name": "An open stream, then a URL whose answer is the same event as a whole body: closed at its end; Disconnect has nothing to stop",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "match": {
+            "url": "https://api.example/stream"
+          },
+          "answer": {
+            "status": 200,
+            "chunks": [
+              {
+                "at": 1,
+                "text": "data: one\n\n"
+              }
+            ]
+          }
+        },
+        {
+          "match": {
+            "url": "https://api.example/other"
+          },
+          "answer": {
+            "status": 200,
+            "body": "data: one\n\n"
+          }
+        }
+      ]
+    },
+    "because": "conn :571-585"
+  },
+  {
+    "name": "A stream that fails with Auto Reconnect off is over; Disconnect has nothing to stop",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream",
+      "autoReconnect": false
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "chunks": [
+              {
+                "at": 1,
+                "error": "reset"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "because": "conn :913-917"
+  },
+  {
+    "name": "Auto Connect over EventSource, then another URL: fails there too; the same URL again is left alone",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream",
+      "transport": "eventsource"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "network": []
+    },
+    "because": "sse :565-579"
+  },
+  {
+    "name": "A URL change while the first request is still out: one request to each URL, then quiet",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      "settle",
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "never": true
+          }
+        }
+      ]
+    },
+    "because": "sse :559-561 — the pass runs once per schedule"
+  },
+  {
+    "name": "A Connect waiting, then Auto Connect on over EventSource at a new URL: the waiting Connect is Unchanged, the pass fails once; the next frame is quiet",
+    "params": {
+      "url": "https://api.example/stream"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "transport",
+        "value": "eventsource"
+      },
+      {
+        "set": "autoConnect",
+        "value": true
+      },
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "never": true
+          }
+        }
+      ]
+    },
+    "because": "sse :570-580 — superseded, then the pass's own connect"
+  },
+  {
+    "name": "A Connect pressed again during an outage: the waiting one Unchanged, the new request answered",
+    "params": {
+      "url": "https://api.example/stream",
+      "reconnectDelay": 7
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 7
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 503
+          }
+        }
+      ]
+    },
+    "because": "sse :603-612 — superseded; the new connection's request is the one listened to"
+  },
+  {
+    "name": "A Connect pressed again during an outage at a new URL: answered there; the URL is left alone",
+    "params": {
+      "url": "https://api.example/stream",
+      "reconnectDelay": 7
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "https://api.example/other"
+      },
+      {
+        "signal": "connect"
+      },
+      "settle",
+      "settle",
+      {
+        "advance": 7
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 503
+          }
+        }
+      ]
+    },
+    "because": "sse :565-568, :617"
+  },
+  {
+    "name": "Reconnect On Stream End: a Connect reads the same body again; Text Path then picks from it",
+    "params": {
+      "autoConnect": true,
+      "url": "https://api.example/stream",
+      "reconnectOnStreamEnd": true,
+      "reconnectDelay": 1000
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "textPath",
+        "value": "k"
+      },
+      "settle",
+      {
+        "advance": 1000
+      },
+      "settle"
+    ],
+    "world": {
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": "data: {\"k\":\"v\"}\n\n"
+          }
+        }
+      ]
+    },
+    "because": "conn :876-880; sse :232-235"
+  }
+]

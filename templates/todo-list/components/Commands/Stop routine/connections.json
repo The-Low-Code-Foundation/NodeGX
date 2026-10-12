@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "89378bf9-3ece-5b64-877e-03267bb23285",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "StoproutinIn",
+      "fromProperty": "routineId",
+      "toId": "StoproutinGuard",
+      "toProperty": "in-routineId"
+    },
+    {
+      "fromId": "StoproutinIn",
+      "fromProperty": "note",
+      "toId": "StoproutinGuard",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "StoproutinIn",
+      "fromProperty": "do",
+      "toId": "StoproutinGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "StoproutinGuard",
+      "fromProperty": "out-status",
+      "toId": "StoproutinWrite",
+      "toProperty": "prop-status"
+    },
+    {
+      "fromId": "StoproutinGuard",
+      "fromProperty": "out-at",
+      "toId": "StoproutinWrite",
+      "toProperty": "prop-stoppedAt"
+    },
+    {
+      "fromId": "StoproutinGuard",
+      "fromProperty": "out-note",
+      "toId": "StoproutinWrite",
+      "toProperty": "prop-stopNote"
+    },
+    {
+      "fromId": "StoproutinIn",
+      "fromProperty": "routineId",
+      "toId": "StoproutinWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "StoproutinGuard",
+      "fromProperty": "out-go",
+      "toId": "StoproutinWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "StoproutinIn",
+      "fromProperty": "routineId",
+      "toId": "StoproutinHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "StoproutinGuard",
+      "fromProperty": "out-summary",
+      "toId": "StoproutinHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "StoproutinGuard",
+      "fromProperty": "out-note",
+      "toId": "StoproutinHistory",
+      "toProperty": "body"
+    },
+    {
+      "fromId": "StoproutinWrite",
+      "fromProperty": "done",
+      "toId": "StoproutinHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "StoproutinHistory",
+      "fromProperty": "done",
+      "toId": "StoproutinOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "StoproutinWrite",
+      "fromProperty": "failure",
+      "toId": "StoproutinProblem",
+      "toProperty": "do"
+    }
+  ]
+}

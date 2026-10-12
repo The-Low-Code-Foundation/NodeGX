@@ -13,6 +13,7 @@
 
 const {
   TOKEN_SETS,
+  ENABLING_PARAMETERS,
   seedRunFor,
   numberedSeedRunFor,
   templatize,
@@ -168,6 +169,8 @@ function deriveEncoding(typeName, metadata, rawDef, dynamicPorts) {
 
   // The type-selector pass: does any pattern's value type follow another parameter?
   applyTypeDependencies(typeName, rawDef, runs[0], entries);
+  // The enabling pass: does any pattern appear only with an enabling parameter on?
+  if (!numberedInputs) applyEnablingConditions(typeName, rawDef, runs[0], entries);
 
   const encoding = {
     known: true,
@@ -338,6 +341,28 @@ function applyTypeDependencies(typeName, rawDef, runA, patterns) {
   }
 }
 
+/**
+ * P107-C127 — re-run seed A with the node's enabling parameters left unset, and mark each pattern
+ * that no longer appears with the parameters it needs (`when`). Every seed run sets them, so
+ * without this pass a port drawn only behind a switch reads as always there: the Component Stack's
+ * `pagePath-<pageId>` exists only with Use Routes on.
+ */
+function applyEnablingConditions(typeName, rawDef, runA, patterns) {
+  const enabling = ENABLING_PARAMETERS[typeName];
+  if (!enabling) return;
+
+  const off = { ...runA.seed.parameters };
+  for (const name of Object.keys(enabling)) delete off[name];
+  const observed = driveSetup(typeName, rawDef, off, runA.seed.projectMetadata);
+  const namesOff = (observed.ports || []).map((p) => p.name);
+
+  for (const entry of patterns) {
+    const re = patternToRegExp(entry.pattern);
+    if (!runA.ports.some((p) => re.test(p.name))) continue;
+    if (!namesOff.some((name) => re.test(name))) entry.when = { ...enabling };
+  }
+}
+
 function noteFor(entries, numberedInputs) {
   const notes = [];
   if (numberedInputs) {
@@ -454,6 +479,7 @@ function residueFor(typeName, dynamicPorts, runs, error) {
 /** Shape the derived entry into its catalog form. */
 function toCatalogPattern(entry, tokenMap) {
   const pattern = { pattern: entry.pattern, plug: entry.plug };
+  if (entry.when) pattern.when = entry.when;
 
   if (entry.variables.length) {
     pattern.variables = {};
@@ -482,4 +508,60 @@ function toCatalogPattern(entry, tokenMap) {
   return pattern;
 }
 
-module.exports = { deriveEncoding, toCatalogPattern, RESIDUE_REASONS, DECLARED_ONLY_REASON, RETYPES_DECLARED_PORTS };
+/**
+ * P109 ISL-009 — the ports a `namedports/derived` rule mints (every visual node's Data Attributes
+ * list), added to an encoding derived without them.
+ *
+ * Read from the rule itself, not by driving a setup: these ports are minted by the editor from the
+ * node's own list parameter (`dynamicPortRules.derivedPortsForNode`), and no runtime hook publishes
+ * them. Without this step the 20-odd visual types kept `DECLARED_ONLY_REASON`, which says the node
+ * computes no port names — false the moment one lists `data-testid`.
+ *
+ * A `known: false` encoding is left as it is: its reason is about the node's other ports, and it is
+ * still true.
+ */
+const DERIVED_RULE_NAME = 'namedports/derived';
+
+function withDerivedRules(encoding, dynamicports) {
+  if (!encoding || !encoding.known || !Array.isArray(dynamicports)) return encoding;
+  const rules = dynamicports.filter(
+    (d) => d && d.name === DERIVED_RULE_NAME && typeof d.parameter === 'string' && d.port && typeof d.port.name === 'string'
+  );
+  if (!rules.length) return encoding;
+
+  const patterns = [...encoding.patterns];
+  const seededBy = [...encoding.seededBy];
+  for (const rule of rules) {
+    const accept = rule.accept || {};
+    const pattern = {
+      pattern: rule.port.name.split('{{*}}').join('<name>'),
+      plug: rule.port.plug || 'input',
+      variables: {
+        name: `one of the names listed in the \`${rule.parameter}\` parameter` + (accept.rule ? `; ${accept.rule}` : '')
+      }
+    };
+    if (rule.port.group) pattern.group = rule.port.group;
+    if (typeof rule.port.type === 'string') pattern.valueType = rule.port.type;
+    pattern.example = rule.port.name.split('{{*}}').join(accept.example || 'name');
+    patterns.push(pattern);
+    if (!seededBy.includes(rule.parameter)) seededBy.push(rule.parameter);
+  }
+
+  const out = { ...encoding, seededBy, patterns };
+  if (encoding.notes === DECLARED_ONLY_REASON) {
+    out.notes =
+      'Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns ' +
+      'here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds ' +
+      'the `namedports/derived` rule that turns each listed name into a port.';
+  }
+  return out;
+}
+
+module.exports = {
+  deriveEncoding,
+  withDerivedRules,
+  toCatalogPattern,
+  RESIDUE_REASONS,
+  DECLARED_ONLY_REASON,
+  RETYPES_DECLARED_PORTS
+};

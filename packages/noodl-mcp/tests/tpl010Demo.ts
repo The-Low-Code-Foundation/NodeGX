@@ -6,14 +6,14 @@
  *
  * The demo is **computed from `TPL010_COMPONENTS` when the template is generated**,
  * the way TPL-008's is (R9): one graph, two data layers. A change to a command, a
- * tile or a script reaches the demo on the next `npm run template:planner` without
+ * tile or a script reaches the demo on the next `npm run template:planning` without
  * anybody remembering to make it. What differs is exactly this, and the gate lists it:
  *
  * - **Every record write** (`NewDbModelProperties`, `SetDbModelProperties`,
  *   `DeleteDbModelProperties`) in `Commands/` becomes a `Function` with the same node
  *   id, the same fields on `in-<field>`, `run` for `store`, and `out-done` /
  *   `out-id` / `out-failure` for its outputs. It writes to this browser's `localStorage`.
- * - **`Logic/Planner data`** keeps its whole week-nav machinery and its interface (plus
+ * - **`Logic/Planning data`** keeps its whole week-nav machinery and its interface (plus
  *   `reset`); its five queries become one `Function` that reads the same store. The
  *   collections, filters, sort orders and limits are read off the backend queries, so the
  *   demo asks for exactly what the template asks for.
@@ -22,7 +22,7 @@
  * - A line under the app bar says it is a demo whose data stays in the browser.
  *
  * 🔴 Anything the transform does not recognise — a record node with a port it has not
- * mapped, a query outside `Logic/Planner data`, a page wire it expected and did not
+ * mapped, a query outside `Logic/Planning data`, a page wire it expected and did not
  * find — **throws**. A demo that silently kept a backend node would load clean and
  * save nothing.
  *
@@ -43,6 +43,11 @@ import { composition } from './tpl010Theme';
  * v2 since R2.4: blocks carry the time logged on them (R22). v3 since TPL-010-M: the money is
  * money items, marks and a balance reading, and a browser holding v2's cash events would open on
  * an empty Money modal — so the key moves and the new week is seeded.
+ *
+ * 🔴 Still `planner` after the rename to Planning (2026-09-23), on purpose. The demo moved from
+ * /templates/planner/ to /templates/planning/ on the same origin, so localStorage carries over —
+ * but only under the same key. Renaming it would wipe the week of anyone who pressed *Empty it
+ * and start my own* and used the demo for real.
  */
 export const DEMO_STORAGE_KEY = 'nodegx-planner-demo-v3';
 export const DEMO_PROBLEM_TEXT = 'That change did not save in this browser. Try again, or reset the demo.';
@@ -224,7 +229,16 @@ function withBrowserWrites(c: Tpl010Component): Tpl010Component {
   const stored = new Set<string>();
   const addressed = new Set<string>();
 
-  const rewired = wires.map((w) => {
+  const rewired = wires.map((original) => {
+    // A write can feed another (Send to todo: the task's id into its history line), so the
+    // outgoing end is mapped first and the incoming end on the result.
+    let w = original;
+    if (writes.has(w.fromId)) {
+      if (!WRITE_OUTPUTS.includes(w.fromProperty)) {
+        throw new Error(`tpl010Demo: ${c.path} ${w.fromId}.${w.fromProperty} is a record output the demo does not map`);
+      }
+      w = { ...w, fromProperty: `out-${w.fromProperty}` };
+    }
     const into = writes.get(w.toId);
     if (into) {
       // 🔴 All three record nodes fire on `store`. Delete Record's `storageDelete` is the
@@ -244,12 +258,6 @@ function withBrowserWrites(c: Tpl010Component): Tpl010Component {
       const list = fields.get(w.toId) as string[];
       if (!list.includes(m[1])) list.push(m[1]);
       return { ...w, toProperty: `in-${m[1]}` };
-    }
-    if (writes.has(w.fromId)) {
-      if (!WRITE_OUTPUTS.includes(w.fromProperty)) {
-        throw new Error(`tpl010Demo: ${c.path} ${w.fromId}.${w.fromProperty} is a record output the demo does not map`);
-      }
-      return { ...w, fromProperty: `out-${w.fromProperty}` };
     }
     return w;
   });
@@ -287,7 +295,7 @@ function withBrowserWrites(c: Tpl010Component): Tpl010Component {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// Logic/Planner data, reading the store
+// Logic/Planning data, reading the store
 // ════════════════════════════════════════════════════════════════════════════
 
 interface Rule {
@@ -310,7 +318,7 @@ const COMPARE: Record<string, string> = {
   'less than or equal to': '<='
 };
 
-/** What each backend query asks for, read off `Logic/Planner data` — so the demo follows it. */
+/** What each backend query asks for, read off `Logic/Planning data` — so the demo follows it. */
 export function backendQueries(): QueryShape[] {
   const data = source(C.plannerData);
   const nodes = data.nodes as Node[];
@@ -523,6 +531,24 @@ export const DEMO_SEED_FNS = String.raw`function demoSeed() {
     }
   }
 
+  // TPL-010-T T3 — the coaching offer's story so far, so its card and its blocks open on a history.
+  var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  function short(k) { var p = k.split('-'); var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])); return DAYS[d.getDay()] + ' ' + d.getDate(); }
+  function noonOf(k) { var p = k.split('-'); return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]), 12, 0, 0).toISOString(); }
+  var history = [];
+  function logLine(blk, kind, summary, body, at) {
+    history.push({
+      id: 'seed-log-' + history.length, blockId: blk.id, projectId: blk.projectId, what: blk.what,
+      kind: kind, summary: summary, body: body, at: at, createdAt: at, updatedAt: at
+    });
+  }
+  for (var hb = 0; hb < blocks.length; hb++) {
+    var blk = blocks[hb];
+    if (blk.projectId !== 'seed-coaching' || cols.indexOf(blk.date) < 0) continue;
+    logLine(blk, 'created', (blk.isMove ? 'The next move, put in ' : 'Put in ') + short(blk.date) + ' \u00b7 ' + blk.planned + ' h', '', stamp);
+    if (blk.done && blk.date < key(today)) logLine(blk, 'done', blk.actual ? blk.actual + ' h logged \u00b7 done' : 'Done', blk.actual ? 'Took longer: the price took an hour on its own' : '', noonOf(blk.date));
+  }
+
   // Q3 — the month is planned. 46 h is M22's target for the example money below: €3,808.33 less the two
   // fixed bills going out this month, at €50 an hour, plus Bramble & Co's 14 agreed hours.
   var plan = {
@@ -628,9 +654,36 @@ export const DEMO_SEED_FNS = String.raw`function demoSeed() {
     createdAt: stamp, updatedAt: stamp
   };
 
-  return { Project: projects, Block: blocks, MonthPlan: [plan], MoneyItem: items, MoneyMark: marks, BalanceReading: readings, Settings: [settings] };
+  // TPL-010-L — two open tasks as the todo list would hold them: a money one due today (red, at the
+  // top of today) and a plain one due in two days. Due today, not yesterday: a LATE money todo is the
+  // evening's first concern (AC6), and the demo's evening is the late Salon bill's (M15). Not
+  // \`due()\`: the money section's \`var due\` is hoisted over it by now.
+  var tasks = [
+    { id: 'seed-task-invoice', title: '€ Chase Salon Collective’s late payment', status: 'open', deadline: key(today), position: 1, createdAt: stamp, updatedAt: stamp },
+    { id: 'seed-task-domain', title: 'Renew the portfolio domain', status: 'open', deadline: key(plus(today, 2)), position: 2, createdAt: stamp, updatedAt: stamp }
+  ];
+  // TPL-010-T T1 — the domain task's next actions: one already ticked in the todo list, two to plan.
+  var actions = [
+    { id: 'seed-action-login', taskId: 'seed-task-domain', title: 'Find the registrar login', position: 1, done: true, note: 'In the password manager after all', description: '', createdAt: stamp, updatedAt: stamp },
+    { id: 'seed-action-price', taskId: 'seed-task-domain', title: 'Check what the renewal costs', position: 2, done: false, note: '', description: '', createdAt: stamp, updatedAt: stamp },
+    { id: 'seed-action-pay', taskId: 'seed-task-domain', title: 'Pay for two years', position: 3, done: false, note: '', description: '', createdAt: stamp, updatedAt: stamp }
+  ];
+
+  return {
+    Project: projects, Block: blocks, MonthPlan: [plan], MoneyItem: items, MoneyMark: marks, BalanceReading: readings, Settings: [settings],
+    PlanEvent: history, Task: tasks, Action: actions, Event: []
+  };
 }
 `;
+
+/** Collections another template owns, read here and never required to be in the store. */
+export const BORROWED = ['Action', 'Event', 'Task'];
+/**
+ * TPL-010-T — collections this app gained after people had started keeping real weeks in the demo
+ * (R2.7). A store without one reads it as empty, exactly like a borrowed one: reseeding over it
+ * would put the invented week back over somebody's own.
+ */
+export const ADDED_LATER = ['PlanEvent'];
 
 function readScript(queries: QueryShape[]): string {
   const inputs = [...new Set(queries.flatMap((q) => q.rules.map((r) => r.input)))];
@@ -646,7 +699,9 @@ function readScript(queries: QueryShape[]): string {
     const guard = q.rules.length ? `${q.rules.map((r) => `${r.input} === ''`).join(' || ')} ? [] : ` : '';
     return `Outputs.${q.output} = ${guard}${sorted}.slice(0, ${q.limit});`;
   });
-  const collections = [...new Set(queries.map((q) => q.collection))];
+  // TPL-010-L — `Task` and `Event` are the todo list's, not this app's: a store from before has no
+  // key for it, and that must read as no tasks rather than reseed somebody's week.
+  const collections = [...new Set(queries.map((q) => q.collection))].filter((c) => !BORROWED.includes(c) && !ADDED_LATER.includes(c));
   return `${DEMO_STORE_FNS}${DEMO_SEED_FNS}function copy(list) {
   var out = [];
   for (var i = 0; i < (list || []).length; i++) {
@@ -694,12 +749,16 @@ function demoPlannerData(): Tpl010Component {
   const queryIds = new Set(queries.map((q) => q.id));
   const byId = new Map(queries.map((q) => [q.id, q]));
   const inNode = nodes.find((n) => n.type === 'Component Inputs');
-  if (!inNode) throw new Error('tpl010Demo: Logic/Planner data has no Component Inputs');
+  if (!inNode) throw new Error('tpl010Demo: Logic/Planning data has no Component Inputs');
   const ins = [...(src.inputs ?? []), { name: 'reset', type: 'signal' }];
   const filterInputs = [...new Set(queries.flatMap((q) => q.rules.map((r) => r.input)))];
 
+  // L6's gate reads the settings a query fetched; here there is one read, and it reads the tasks
+  // every time — the demo's seeded tasks show without a todo address, which the demo never has.
+  const dropped = new Set([...queryIds, 'pnTodoGate']);
+  if (!nodes.some((n) => n.id === 'pnTodoGate')) throw new Error('tpl010Demo: Logic/Planning data has no pnTodoGate to take out');
   const kept = nodes
-    .filter((n) => !queryIds.has(n.id))
+    .filter((n) => !dropped.has(n.id))
     .map((n): Node => {
       if (n.id === inNode.id) return { ...n, ports: ins.map((p) => ({ name: p.name, type: String(p.type), plug: 'output' })) };
       if (n.type === 'Set Variable' && n.parameters?.value === LOAD_PROBLEM_TEXT) {
@@ -717,6 +776,7 @@ function demoPlannerData(): Tpl010Component {
     rewired.push(w);
   };
   for (const w of wires) {
+    if (w.fromId === 'pnTodoGate' || w.toId === 'pnTodoGate') continue;
     if (queryIds.has(w.toId)) {
       if (w.toProperty === 'storageFetch') add({ ...w, toId: 'pnRead', toProperty: 'run' });
       else {
@@ -865,7 +925,7 @@ function demoPage(): Tpl010Component {
   return {
     ...src,
     description:
-      'The demo week: the envelopes, the moves, six days of blocks and the cash strip, all kept in this browser, with the projects card and the evening drawer over the top of it.',
+      'The demo week: the budgets, the moves, six days of blocks and the cash strip, all kept in this browser, with the projects card and the evening drawer over the top of it.',
     instantiates: (src.instantiates ?? []).filter((n) => n !== C.pageSignIn),
     nodes: kept,
     connections: [

@@ -30,13 +30,18 @@
  *
  * Usage:
  *   deploy-from-disk <project-dir> --out <dir> [--base-url /] [--endpoint URL]
- *                    [--sabotage] [--json]
+ *                    [--sabotage] [--ssr] [--external <runtime-dir>] [--json]
  */
+// Must be first: binds @noodl/platform and populates NodeLibrary before any editor module is
+// touched (below an editor import, `EditorSettings` reads web storage at load and throws). See
+// noodl-preview/src/headless.ts.
+import { bootstrapNodeLibrary } from '../../packages/noodl-preview/src/headless';
 import * as fs from 'fs';
 import * as path from 'path';
 
 import { ProjectModel } from '@noodl-models/projectmodel';
 import { deployToFolder } from '@noodl-utils/compilation/build/deployer';
+import { setExternalFolderPath } from '@noodl-utils/compilation/build/deploy-index';
 
 import type { LegacyProject } from '../../packages/noodl-editor/src/editor/src/io/ProjectExporter';
 import { ProjectImporter, type ImportInput } from '../../packages/noodl-editor/src/editor/src/io/ProjectImporter';
@@ -49,9 +54,6 @@ import type {
   RoutesV2File,
   StylesV2File
 } from '../../packages/noodl-editor/src/editor/src/schemas';
-// Must be first: binds @noodl/platform and populates NodeLibrary before any
-// editor module is touched. See noodl-preview/src/headless.ts.
-import { bootstrapNodeLibrary } from '../../packages/noodl-preview/src/headless';
 import { readWireHealth } from '../../packages/noodl-preview/src/wireHealth';
 
 type Json = Record<string, any>;
@@ -106,7 +108,7 @@ const has = (name: string) => process.argv.includes(name);
 async function main() {
   const target = process.argv[2];
   if (!target || target.startsWith('--')) {
-    process.stderr.write('usage: deploy-from-disk <project-dir> --out <dir> [--endpoint URL] [--sabotage]\n');
+    process.stderr.write('usage: deploy-from-disk <project-dir> --out <dir> [--endpoint URL] [--sabotage] [--ssr] [--external <runtime-dir>]\n');
     process.exit(2);
   }
   const projectDir = path.resolve(target);
@@ -217,22 +219,33 @@ async function main() {
       } as any)
     : undefined;
 
+  // The runtime files are the editor's `src/external`, named outright as `nodegx deploy` names its
+  // own: left to `platform.getAppPath()`, they are looked for under whatever folder this runs from.
+  setExternalFolderPath(path.resolve(flag('--external', path.join(__dirname, '../../packages/noodl-editor/src/external'))!));
   fs.rmSync(outDir, { recursive: true, force: true });
   fs.mkdirSync(outDir, { recursive: true });
 
+  // `--ssr`: the editor's Deploy → Self Hosting with server rendering, composed as
+  // `compilation.deployToFolderWithContext` composes it — the Node server at the root
+  // (runtime type `ssr`), then the browser app it hydrates in public/ (`deploy`).
+  const ssr = has('--ssr');
+  const webRoot = ssr ? path.join(outDir, 'public') : outDir;
   const result = await deployToFolder({
     project,
     direntry: outDir,
     environment,
     baseUrl: flag('--base-url', '/')!,
-    runtimeType: 'deploy'
+    runtimeType: ssr ? 'ssr' : 'deploy'
   });
+  if (ssr) {
+    await deployToFolder({ project, direntry: webRoot, environment, baseUrl: flag('--base-url', '/')!, runtimeType: 'deploy' });
+  }
 
   // Census output: what landed in the deployed bundle, per component.
   // `useBundleHashes` names it index-<hash>.js, so find it rather than assume.
-  const indexName = fs.readdirSync(outDir).find((f) => /^index(-[0-9a-f]+)?\.js$/.test(f));
-  if (!indexName) throw new Error(`no index js in ${outDir} — the deploy did not write its export`);
-  const indexJs = fs.readFileSync(path.join(outDir, indexName), 'utf8');
+  const indexName = fs.readdirSync(webRoot).find((f) => /^index(-[0-9a-f]+)?\.js$/.test(f));
+  if (!indexName) throw new Error(`no index js in ${webRoot} — the deploy did not write its export`);
+  const indexJs = fs.readFileSync(path.join(webRoot, indexName), 'utf8');
   const m = indexJs.match(/window\.projectData\s*=\s*(\{[\s\S]*\});\s*$/);
   if (!m) throw new Error(`could not read window.projectData out of ${indexName}`);
   const exported: Json = JSON.parse(m[1]);
@@ -339,7 +352,8 @@ async function main() {
 }
 
 main().catch((err) => {
-  process.stderr.write((err && err.stack) || String(err));
+  // `deployToFolder` rejects with a plain `{ result, message }`, which `String()` turns into `[object Object]`.
+  process.stderr.write((err && err.stack) || (err && typeof err === 'object' ? JSON.stringify(err) : String(err)));
   process.stderr.write('\n');
   process.exit(1);
 });

@@ -1,0 +1,144 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f3a33814-2063-549e-8a2f-343339ba5161",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "npIn",
+      "type": "Component Inputs",
+      "label": "Which project",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "projectId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "projectName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "position",
+          "plug": "output",
+          "type": "number"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "npOut",
+      "type": "Component Outputs",
+      "label": "Answered",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "skip",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "npRoot",
+      "type": "Group",
+      "label": "The next move",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "mounted": false,
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--primary)",
+        "borderRadius": "var(--radius-lg)"
+      },
+      "children": [
+        "npEach"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "npEach",
+      "type": "For Each",
+      "label": "The question, while it is asked",
+      "parent": "npRoot",
+      "parameters": {
+        "template": "/Projects/Move form",
+        "templateType": "explicit"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "npLook",
+      "type": "JavaScriptFunction",
+      "label": "The question",
+      "parameters": {
+        "functionScript": "var open = Inputs.open === true, pid = String(Inputs.projectId || '');\nOutputs.formRows = open && pid !== ''\n  ? [{ id: 'np-' + pid, heading: 'Closed. What is the next move for ' + String(Inputs.name || 'the project') + '?', help: '', title: '', who: '', deadline: '', saveLabel: 'Save', cancelLabel: 'Nothing next for now', titleOptional: false }]\n  : [];"
+      },
+      "x": 350,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-open",
+          "displayName": "open",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectId",
+          "displayName": "projectId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-formRows",
+          "displayName": "formRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "npSaveMove",
+      "type": "/Projects/Save next move",
+      "label": "Save the next move",
+      "parameters": {
+        "mode": "new"
+      },
+      "x": 350,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "npRoot"
+  ]
+}

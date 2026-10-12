@@ -17,10 +17,14 @@
 
 import { LegacyNode, LegacyProject } from '../../src/editor/src/io/ProjectExporter';
 
-import projectSchema from '../../src/editor/src/schemas/project-v2.schema.json';
-import nodesSchema from '../../src/editor/src/schemas/nodes.schema.json';
-import connectionsSchema from '../../src/editor/src/schemas/connections.schema.json';
-import stylesSchema from '../../src/editor/src/schemas/styles.schema.json';
+// The schemas moved to `@nodegx/project-contract/format` (P112 OWN-001); the barrel re-exports them.
+import {
+  projectV2Schema as projectSchema,
+  nodesSchema,
+  connectionsSchema,
+  stylesSchema,
+  componentSchema
+} from '../../src/editor/src/schemas';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const FIXTURES: LegacyProject[] = [
@@ -93,7 +97,7 @@ describe('schema drift guard', () => {
   it('every component-level field is representable', () => {
     const observed = keyUnion(FIXTURES.flatMap((p) => p.components));
     const allowed = [
-      ...schemaProps(require('../../src/editor/src/schemas/component.schema.json')),
+      ...schemaProps(componentSchema),
       'graph' // → nodes.json + connections.json
     ];
     expectRepresentable('component', observed, allowed);

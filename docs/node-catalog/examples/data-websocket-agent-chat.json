@@ -42,14 +42,14 @@
         },
         {
           "id": "prompt_input",
-          "type": "Text Input",
+          "type": "net.noodl.controls.textinput",
           "label": "Prompt",
           "parent": "composer",
           "parameters": { "placeholder": "Ask the agent…" }
         },
         {
           "id": "send_button",
-          "type": "Button",
+          "type": "net.noodl.controls.button",
           "label": "Send",
           "parent": "composer",
           "parameters": { "label": "Send" }

@@ -162,6 +162,55 @@ export function scanRecentProjects(candidates: readonly string[] = userDataCandi
 }
 
 /**
+ * P112 OWN-011 (P112-S9-DAYTWO) — the projects in the folder this server was started in: the folder itself, or its
+ * immediate subfolders.
+ *
+ * 🔴 The launcher's list is written by the EDITOR. Someone who began with `npm create nodegx` has never opened it, so on
+ * day two — Claude Code reopened in the same folder, the app their agent made yesterday sitting in it — the list was
+ * empty and the note said `create_project is the way forward`: the duplicate this tool exists to prevent. A client
+ * starts a project's server in the folder it was opened in, so that folder is where a person without the editor keeps
+ * their apps. Only v2 projects are reported here (the launcher's list is where a legacy one is remembered).
+ */
+export function scanFolderProjects(folder: string = process.cwd()): ProjectListRow[] {
+  const rowFor = (dir: string): ProjectListRow | null => {
+    if (formatOf(dir) !== 'v2') return null;
+    let name = path.basename(dir);
+    let lastOpened: string | undefined;
+    try {
+      const project = JSON.parse(fs.readFileSync(path.join(dir, 'nodegx.project.json'), 'utf8')) as { name?: unknown; modified?: unknown };
+      if (typeof project.name === 'string' && project.name.trim()) name = project.name;
+      if (typeof project.modified === 'string') lastOpened = project.modified;
+    } catch {
+      // A registry-only v2 project has no project file to name it; the folder name stands.
+    }
+    return { name, directory: dir, format: 'v2', ...(lastOpened ? { lastOpened } : {}) };
+  };
+  const root = path.resolve(folder);
+  const self = rowFor(root);
+  if (self) return [self];
+  let entries: fs.Dirent[];
+  try {
+    entries = fs.readdirSync(root, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  return entries
+    .filter((e) => e.isDirectory() && !e.name.startsWith('.') && e.name !== 'node_modules')
+    .map((e) => rowFor(path.join(root, e.name)))
+    .filter((row): row is ProjectListRow => row !== null);
+}
+
+/** The launcher's list and the server's folder, one row per directory, newest first. */
+export function scanProjects(candidates?: readonly string[], folder?: string): ProjectScanResult {
+  const recent = scanRecentProjects(candidates);
+  const seen = new Set(recent.projects.map((p) => p.directory));
+  const projects = [...recent.projects, ...scanFolderProjects(folder).filter((p) => !seen.has(p.directory))].sort((a, b) =>
+    (b.lastOpened ?? '').localeCompare(a.lastOpened ?? '')
+  );
+  return { ...recent, projects };
+}
+
+/**
  * The sentence attached to the result.
  *
  * ⚠️ **Absent is a real answer, not an error.** A machine where NodeGX has never
@@ -234,7 +283,7 @@ export function registerListProjectsTools(server: McpServer, binding?: ProjectBi
       title: 'List NodeGX projects on this machine',
       description:
         'The NodeGX projects this machine has opened, newest first: name, directory, format and when it was ' +
-        'last opened. Read from the launcher\'s own recent-projects list, and never written to. Call this ' +
+        'last opened. Read from the launcher\'s recent-projects list and this folder; never written to. Call this ' +
         'BEFORE create_project when the user talks about their app as something that already exists — building ' +
         'a second copy beside the real one is not undoable by a tool call, and open_project turns a row of this ' +
         'list into a project this server is serving. An empty list is a valid answer and means this is a fresh ' +
@@ -242,7 +291,7 @@ export function registerListProjectsTools(server: McpServer, binding?: ProjectBi
       inputSchema: {}
     },
     guarded(() => {
-      const result = scanRecentProjects();
+      const result = scanProjects();
       const payload: ListProjectsResponse = {
         projects: result.projects,
         note: noteFor(result, binding?.isBound ?? false),

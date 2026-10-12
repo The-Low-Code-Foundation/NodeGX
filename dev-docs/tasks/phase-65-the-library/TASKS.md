@@ -142,7 +142,8 @@ panning-and-zooming-control, shake-detector.
    uses bare `Helvetica`; avatar keeps one #FFFFFF raw hex; confetti's bundle banner says MIT but
    upstream is ISC; mqtt's small transitives not individually licensed; old Mapbox node types don't
    auto-migrate to `nodegx.maplibre.map`.
-10. **Not done from the table**: the i18next-translation vs phase-47 check (nobody was assigned);
+10. **Not done from the table**: the i18next-translation vs phase-47 check (nobody was assigned; ✅ answered by P109
+    ISL-007's ruling 2026-10-02, "Adopt the add-on": the module stays and was fixed in 1.1.0, see the P47 README);
     LBR-010 (Tier 2) untouched; avatar's 41 unknown-"Avatar" warnings remain the CN-003 fixture.
 
 

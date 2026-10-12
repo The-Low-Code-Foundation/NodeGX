@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5fb57eb8-6e77-4c36-870e-1decb9d70f04",
+  "name": "Path concept row",
+  "path": "/People/Path concept row",
+  "type": "visual",
+  "created": "2026-10-01T09:23:35.290Z",
+  "modified": "2026-10-01T09:23:35.290Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One concept from the course a coach can add to a learner's path: its title and an Add control. Emits `add`; the page decides what it does (TASK-L184)."
+}

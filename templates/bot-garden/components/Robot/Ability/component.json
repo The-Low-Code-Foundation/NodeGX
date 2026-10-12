@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1b2c99b8-a971-5173-8c27-a51464b55ecc",
+  "name": "Ability",
+  "path": "/Robot/Ability",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One block a robot can place (the mockup’s robot cards): a pill in the block’s colour, its word in the band’s form."
+}

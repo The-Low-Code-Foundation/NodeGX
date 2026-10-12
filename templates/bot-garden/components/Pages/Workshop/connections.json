@@ -1,0 +1,631 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4b911db9-5959-5323-8d27-3b622c31b574",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "wsStore",
+      "fromProperty": "model",
+      "toId": "wsFam",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "model",
+      "toId": "wsStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "migrated",
+      "toId": "wsResave",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "ran",
+      "toId": "wsResave",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "wsResave",
+      "fromProperty": "ontrue",
+      "toId": "wsStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "wsLangVar",
+      "fromProperty": "value",
+      "toId": "wsFam",
+      "toProperty": "fallbackLang"
+    },
+    {
+      "fromId": "wsWords",
+      "fromProperty": "words",
+      "toId": "wsT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "lang",
+      "toId": "wsT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "botName",
+      "toId": "wsT",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "band",
+      "toId": "wsBar",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "lang",
+      "toId": "wsBar",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "name",
+      "toId": "wsBar",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "face",
+      "toId": "wsBar",
+      "toProperty": "face"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "botName",
+      "toId": "wsBar",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "profileId",
+      "toId": "wsBar",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "hasProfile",
+      "toId": "wsBar",
+      "toProperty": "hasProfile"
+    },
+    {
+      "fromId": "wsWords",
+      "fromProperty": "words",
+      "toId": "wsBar",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "wsStore",
+      "fromProperty": "model",
+      "toId": "wsBar",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsBar",
+      "fromProperty": "model",
+      "toId": "wsStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsBar",
+      "fromProperty": "write",
+      "toId": "wsStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "wsReqVar",
+      "fromProperty": "value",
+      "toId": "wsPlay",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "wsRequests",
+      "fromProperty": "requests",
+      "toId": "wsLandReqs",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "landText",
+      "toId": "wsLandReqs",
+      "toProperty": "land"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "land",
+      "toId": "wsPlay",
+      "toProperty": "land"
+    },
+    {
+      "fromId": "wsStore",
+      "fromProperty": "model",
+      "toId": "wsLandKeep",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsReqVar",
+      "fromProperty": "value",
+      "toId": "wsLandKeep",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "runWorld",
+      "toId": "wsLandKeep",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "ticked",
+      "toId": "wsLandKeep",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "wsLandKeep",
+      "fromProperty": "wrote",
+      "toId": "wsLandKeepDue",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "wsLandKeep",
+      "fromProperty": "ran",
+      "toId": "wsLandKeepDue",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "wsLandKeep",
+      "fromProperty": "model",
+      "toId": "wsStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsLandKeepDue",
+      "fromProperty": "ontrue",
+      "toId": "wsStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "wsLandReqs",
+      "fromProperty": "requests",
+      "toId": "wsPlay",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "wsHints",
+      "fromProperty": "hints",
+      "toId": "wsPlay",
+      "toProperty": "hints"
+    },
+    {
+      "fromId": "wsWords",
+      "fromProperty": "words",
+      "toId": "wsPlay",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "lang",
+      "toId": "wsPlay",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "band",
+      "toId": "wsPlay",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "wsLandReqs",
+      "fromProperty": "requests",
+      "toId": "wsJob",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "wsReqVar",
+      "fromProperty": "value",
+      "toId": "wsJob",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "robots",
+      "toId": "wsJob",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "lang",
+      "toId": "wsJob",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "plots",
+      "toId": "wsJob",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "wsLandBotVar",
+      "fromProperty": "value",
+      "toId": "wsJob",
+      "toProperty": "landBot"
+    },
+    {
+      "fromId": "wsJob",
+      "fromProperty": "botName",
+      "toId": "wsPlay",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "wsJob",
+      "fromProperty": "color",
+      "toId": "wsPlay",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "wsJob",
+      "fromProperty": "eye",
+      "toId": "wsPlay",
+      "toProperty": "eye"
+    },
+    {
+      "fromId": "wsJob",
+      "fromProperty": "hat",
+      "toId": "wsPlay",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "wsJob",
+      "fromProperty": "robot",
+      "toId": "wsPlay",
+      "toProperty": "robot"
+    },
+    {
+      "fromId": "wsJob",
+      "fromProperty": "robotKey",
+      "toId": "wsPlay",
+      "toProperty": "robotKey"
+    },
+    {
+      "fromId": "wsJob",
+      "fromProperty": "paletteRobot",
+      "toId": "wsPlay",
+      "toProperty": "paletteRobot"
+    },
+    {
+      "fromId": "wsJob",
+      "fromProperty": "stepMs",
+      "toId": "wsPlay",
+      "toProperty": "stepMs"
+    },
+    {
+      "fromId": "wsJob",
+      "fromProperty": "robotId",
+      "toId": "wsComplete",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "wsComplete",
+      "fromProperty": "lent",
+      "toId": "wsGift",
+      "toProperty": "lent"
+    },
+    {
+      "fromId": "wsComplete",
+      "fromProperty": "upgraded",
+      "toId": "wsGift",
+      "toProperty": "upgraded"
+    },
+    {
+      "fromId": "wsWords",
+      "fromProperty": "words",
+      "toId": "wsGift",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "lang",
+      "toId": "wsGift",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "wsJob",
+      "fromProperty": "botName",
+      "toId": "wsGift",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "wsGift",
+      "fromProperty": "text",
+      "toId": "wsPlay",
+      "toProperty": "giftText"
+    },
+    {
+      "fromId": "wsGift",
+      "fromProperty": "has",
+      "toId": "wsPlay",
+      "toProperty": "hasGift"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "older",
+      "toId": "wsPlay",
+      "toProperty": "isOlder"
+    },
+    {
+      "fromId": "wsStore",
+      "fromProperty": "model",
+      "toId": "wsComplete",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "wonRequest",
+      "toId": "wsComplete",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "profileId",
+      "toId": "wsComplete",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "bloom",
+      "toId": "wsComplete",
+      "toProperty": "tricks"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "reward",
+      "toId": "wsComplete",
+      "toProperty": "reward"
+    },
+    {
+      "fromId": "wsProgVar",
+      "fromProperty": "value",
+      "toId": "wsComplete",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "wonRequest",
+      "toId": "wsPay",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "wsLandReqs",
+      "fromProperty": "requests",
+      "toId": "wsPay",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "plots",
+      "toId": "wsPay",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "done",
+      "toId": "wsPay",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "lang",
+      "toId": "wsPay",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "wsWords",
+      "fromProperty": "words",
+      "toId": "wsPay",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "won",
+      "toId": "wsPay",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "wsPay",
+      "fromProperty": "pay",
+      "toId": "wsComplete",
+      "toProperty": "pay"
+    },
+    {
+      "fromId": "wsPay",
+      "fromProperty": "jobLive",
+      "toId": "wsComplete",
+      "toProperty": "jobLive"
+    },
+    {
+      "fromId": "wsPay",
+      "fromProperty": "ran",
+      "toId": "wsComplete",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "wsPay",
+      "fromProperty": "text",
+      "toId": "wsPlay",
+      "toProperty": "payText"
+    },
+    {
+      "fromId": "wsPay",
+      "fromProperty": "has",
+      "toId": "wsPlay",
+      "toProperty": "hasPay"
+    },
+    {
+      "fromId": "wsComplete",
+      "fromProperty": "model",
+      "toId": "wsStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsComplete",
+      "fromProperty": "ran",
+      "toId": "wsStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "wsComplete",
+      "fromProperty": "model",
+      "toId": "wsNews",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsComplete",
+      "fromProperty": "newlyDone",
+      "toId": "wsNews",
+      "toProperty": "newlyDone"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "wonRequest",
+      "toId": "wsNews",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "profileId",
+      "toId": "wsNews",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "lang",
+      "toId": "wsNews",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "wsWords",
+      "fromProperty": "words",
+      "toId": "wsNews",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "wsComplete",
+      "fromProperty": "ran",
+      "toId": "wsNews",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "wsNews",
+      "fromProperty": "text",
+      "toId": "wsPlay",
+      "toProperty": "shopText"
+    },
+    {
+      "fromId": "wsNews",
+      "fromProperty": "has",
+      "toId": "wsPlay",
+      "toProperty": "hasShop"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "island",
+      "toId": "wsGoIsland",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "cardsSeen",
+      "toId": "wsPlay",
+      "toProperty": "cardsSeen"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "plots",
+      "toId": "wsPlay",
+      "toProperty": "plots"
+    },
+    {
+      "fromId": "wsStore",
+      "fromProperty": "model",
+      "toId": "wsSeen",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "profileId",
+      "toId": "wsSeen",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "cardsSeen",
+      "toId": "wsSeen",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "cardSeen",
+      "toId": "wsSeen",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "wsSeen",
+      "fromProperty": "model",
+      "toId": "wsStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsSeen",
+      "fromProperty": "changed",
+      "toId": "wsSeenChanged",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "wsSeen",
+      "fromProperty": "ran",
+      "toId": "wsSeenChanged",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "wsSeenChanged",
+      "fromProperty": "ontrue",
+      "toId": "wsStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "wsPage",
+      "fromProperty": "didMount",
+      "toId": "wsGuardWait",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "found",
+      "toId": "wsGuard",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "wsGuardWait",
+      "fromProperty": "timerFinished",
+      "toId": "wsGuard",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "wsGuard",
+      "fromProperty": "onfalse",
+      "toId": "wsGoIsland",
+      "toProperty": "navigate"
+    }
+  ]
+}

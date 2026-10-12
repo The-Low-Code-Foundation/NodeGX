@@ -34,6 +34,17 @@ Use it to branch signal flow ('when clicked, proceed only if valid') or to deriv
 |---|---|---|---|
 | `eval` | Signal | — | Tests Condition now. This is additional to Condition re-testing on change; untick it under Run On Value Change to stop that |
 
+### What each input does
+
+**Condition** (`condition`)
+
+- a changed value, with Run On Value Change ticked: tested at the end of the frame — On True or On False, from the frame's last value
+- the same value, or Run On Value Change unticked: kept for the next test, and asks for none
+
+**Evaluate** (`eval`)
+
+- always: tested at the end of the frame — On True or On False, from the frame's last Condition → Done
+
 ## Outputs
 
 ### Values

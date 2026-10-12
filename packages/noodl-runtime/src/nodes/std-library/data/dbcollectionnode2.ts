@@ -49,7 +49,7 @@ import {
   recordSchemaContext
 } from './record-ports';
 import { sendSchemaPorts, staticPortNames } from './schema-ports';
-import { runOnChangeDynamicPorts } from '../../../run-on-value-change';
+import { runOnChangeDynamicPorts, valueDidChange } from '../../../run-on-value-change';
 
 /**
  * NDA-004 §2 — see `setError`.
@@ -285,6 +285,14 @@ const DbCollectionNode: NodeDefinitionOptions = {
         const sort = _this._internal.currentQuery.sort;
         const hasSort = Array.isArray(sort) ? sort.length > 0 : sort !== undefined;
 
+        // P107-C40 (ISL-029, ruled "Drop the last; re-query if unsorted"): with no sort only the backend knows which
+        // records a Limit keeps, so a record that would go over it asks the backend again rather than guess
+        const limit = _this._internal.currentQuery.limit;
+        if (!hasSort && limit !== undefined && _this._internal.collection.size() + 1 > limit) {
+          _this.scheduleFetch();
+          return;
+        }
+
         // `i` is declared outside the loop because the original relied on `var` hoisting to
         // read it after the `break` (PLAT-003 NOTES §23.1).
         let i = 0;
@@ -298,16 +306,12 @@ const DbCollectionNode: NodeDefinitionOptions = {
           _this._internal.collection.add(m);
         }
 
-        // Make sure we don't exceed limit
+        // Make sure we don't exceed limit. C40: the record that sorts LAST goes, under any sort — the list is in sort
+        // order, so that is the end, ascending or descending. It used to drop the FIRST unless the first key was
+        // descending: a new record that belonged at the top vanished at once, and one past the end pushed the top out.
         const size = _this._internal.collection.size();
-        if (_this._internal.currentQuery.limit !== undefined && size > _this._internal.currentQuery.limit) {
-          // Which end to drop from depends on the sort direction. The first sort key
-          // carries it as a leading `-`, and it is read the same way whether `sort` is
-          // a string (`'-rank'`) or an array (`['-rank']`) — which is what the original
-          // `sort[0][0]` did by accident, and is preserved deliberately.
-          const firstKey = hasSort ? (Array.isArray(sort) ? sort[0] : sort) : undefined;
-          const descending = typeof firstKey === 'string' && firstKey.charAt(0) === '-';
-          _this._internal.collection.remove(_this._internal.collection.get(descending ? size - 1 : 0));
+        if (limit !== undefined && size > limit) {
+          _this._internal.collection.remove(_this._internal.collection.get(size - 1));
         }
 
         //Send the array again over the items output to trigger function nodes etc that might be connected
@@ -345,6 +349,25 @@ const DbCollectionNode: NodeDefinitionOptions = {
           } else if (matchesQuery && !_this._internal.collection.contains(m)) {
             // It's not part of the result collection but now matches they query, add it and resort
             _addModelAtCorrectIndex(m);
+          } else if (matchesQuery) {
+            // P107-C41 (ISL-029, ruled "Move it to its new place"): a member that still matches moves to where its
+            // values now sort. It kept its old place, and the list stayed out of order until the query ran again.
+            const sort = _this._internal.currentQuery.sort;
+            if (Array.isArray(sort) ? sort.length > 0 : sort !== undefined) {
+              const collection = _this._internal.collection;
+              let from = -1;
+              for (let k = 0; k < collection.size(); k++) if (collection.get(k) === m) from = k;
+              collection.remove(m);
+              let i = 0;
+              for (i = 0; i < collection.size(); i++) if (QueryUtils.compareObjects(sort, collection.get(i), m) > 0) break;
+              collection.addAtIndex(m, i);
+              if (i !== from) {
+                _this.flagOutputDirty('items');
+                _this.flagOutputDirty('count');
+                _this.flagOutputDirty('firstItemId');
+                _this.flagOutputDirty('isEmpty');
+              }
+            }
           }
         }
       } else if (args.type === 'delete') {
@@ -567,7 +590,9 @@ const DbCollectionNode: NodeDefinitionOptions = {
 
       if (this.shouldRunOnValueChanged('collectionName', previous, name)) this.scheduleFetch();
       // A subscription is to a named collection; the old one is watching the wrong thing.
-      this.scheduleRealtimeReconfigure();
+      // P107-C55 (P109 ISL-030, ruled "Ignore repeated values"): a write of the value already held does not reconnect — it used to
+      // tear the subscription down and open a new one, and a change in that gap was never delivered.
+      if (valueDidChange(previous, name)) this.scheduleRealtimeReconfigure();
     },
     setCollection: function (this: DbCollectionNodeInstance, collection: CollectionLike) {
       this.bindCollection(collection);
@@ -648,8 +673,11 @@ const DbCollectionNode: NodeDefinitionOptions = {
     // ────────────────────────────────────────────────────────────────────────
 
     setRealtime: function (this: DbCollectionNodeInstance, value: boolean) {
+      const previous = this._internal.realtime;
       this._internal.realtime = !!value;
-      this.scheduleRealtimeReconfigure();
+      // P107-C55 (P109 ISL-030, ruled "Ignore repeated values"): a write of the value already held does not reconnect
+      // Unset is off (`reconfigureRealtime` reads it so), so a first write of off is no change.
+      if (valueDidChange(!!previous, this._internal.realtime)) this.scheduleRealtimeReconfigure();
     },
 
     /** Coalesce: a backend and a collection arriving in one update reconnect once. */
@@ -711,6 +739,7 @@ const DbCollectionNode: NodeDefinitionOptions = {
         onStatus: this.handleRealtimeStatus.bind(this),
         onError: this.handleRealtimeError.bind(this)
       });
+      this.handleRealtimeStatus(this._internal.subscription.status); // P107 D29: `connecting` is never told (a status is told on a CHANGE) — read it off the handle, as Subscribe To Changes does
     },
 
     teardownRealtime: function (this: DbCollectionNodeInstance) {
@@ -997,7 +1026,13 @@ const DbCollectionNode: NodeDefinitionOptions = {
         // JSON filter
         if (!this._internal.filterFunc) {
           try {
-            let filterCode = storageSettings['storageJSONFilter'] as string;
+            // P107-C38 (ISL-029, ruled "Run the shown script; report typos"): no script saved runs the starter
+            // script the editor shows (a port default is not a parameter, so it is often absent). It threw on
+            // `.replace` here and the node never queried and never said why.
+            let filterCode =
+              typeof storageSettings['storageJSONFilter'] === 'string'
+                ? (storageSettings['storageJSONFilter'] as string)
+                : _defaultJSONQuery;
 
             // Parse out variables
             filterCode = filterCode.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, ''); // Remove comments
@@ -1009,11 +1044,10 @@ const DbCollectionNode: NodeDefinitionOptions = {
             this._internal.filterFunc = Function.apply(null, args);
           } catch (e) {
             this._internal.filterFunc = undefined;
-            console.log('Error while parsing filter script: ' + e);
+            // C38: a script that does not parse fails the node, and asks nothing
+            return { failed: 'The filter script could not be read: ' + ((e as Error).message || String(e)) };
           }
         }
-
-        if (!this._internal.filterFunc) return;
 
         let _filter: unknown = {},
           _filterFailed: string | undefined,
@@ -1080,8 +1114,11 @@ const DbCollectionNode: NodeDefinitionOptions = {
         try {
           this._internal.filterFunc.apply(this, filterFuncArgs);
         } catch (e) {
-          // Kept: before FLD-008 this was the only trace a swallowed refusal left.
-          console.log('Error while running filter script: ' + e);
+          // A refusal the translator raised was captured above (FLD-008); it is the better sentence.
+          if (_filterFailed !== undefined) return { failed: _filterFailed };
+          // P107-C39 (ISL-029, ruled "Fail with the script's error"): a script that throws fails the node. It was
+          // logged and the query went out with no filter — every row in the class, as a Success.
+          return { failed: 'The filter script failed: ' + ((e as Error).message || String(e)) };
         }
 
         if (_filterFailed !== undefined) return { failed: _filterFailed };
@@ -1182,8 +1219,8 @@ const DbCollectionNode: NodeDefinitionOptions = {
           this._internal.backendId = value;
           if (this.shouldRunOnValueChanged('querySettings', previous, value)) this.scheduleFetch();
           // BCN-008: and the subscription follows the picker, or it stays connected to
-          // whichever backend happened to be selected when the node first ran.
-          this.scheduleRealtimeReconfigure();
+          // whichever backend happened to be selected when the node first ran. P107-C55: only when it moved.
+          if (valueDidChange(previous, value)) this.scheduleRealtimeReconfigure();
         }) as (value: never) => void,
         realtime: this.setRealtime.bind(this) as (value: never) => void
       };

@@ -817,3 +817,16 @@ Mocked first, three ways to play it, each playable, with phone mocks and seven c
   (`P='--path /templates/rocket-school/'`), and zsh does not split an unquoted variable:** the drive got ONE argument, `arg('--path')` found
   nothing, BASE stayed `/`, and every cell looked for "New player" on the nodegx.io homepage. Measured: `node -e … $P` reads
   `bad option: --path /templates/rocket-school/`. Neither the site nor the drives were at fault; the third chain passes the path literally.
+
+## 17. 2026-10-04 — The third play test is Phase 113: choose what to practise, revision lists, French / English / history
+
+> "one extra menu in the game start bit … if my youngest wants to just learn multiplication, and just the tables of 5 and 8" —
+> Richard, 2026-10-04 (the start of year: a CE2 child meets fractions her class has not reached; a 6e child revises "l'étude du
+> verbe" and a teacher's prehistory dates from an older textbook)
+
+Built in [`phase-113-the-third-play-test/`](../phase-113-the-third-play-test/README.md) (REV-001..004), commit `6bbd34f38`:
+the chooser (`Game/Focus picker`) replaces the setups' "Maths or typing" row; the player's own revision lists (`Pages/Lists`,
+typed one line per question) go through the same list engine as the new French, English and history banks
+(`tpl007Subjects.ts`, 46 skills, 500 items, 10 Teach cards); learning an item pays 2 ⭐, a whole list 25 ⭐. Gates: engine
+265/265, artefact 106/106, `drive-p113-focus.js` three cells ALL PASS. The curriculum is now 108 skills over 8 pages. Ruling
+3 of §10 (a visual editor for a person's own question sets) is built there, as a text box rather than rows.

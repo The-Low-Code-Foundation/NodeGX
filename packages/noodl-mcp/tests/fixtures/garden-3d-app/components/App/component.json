@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c_app",
+  "name": "App",
+  "path": "/App",
+  "type": "root",
+  "description": "IG-007's two-module drive project (P105 D41): garden-3d-kit beside garden-kit and nothing else. The drive assembles the kits in next to this."
+}

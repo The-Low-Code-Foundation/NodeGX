@@ -111,7 +111,7 @@ export function registerKitTools(server: McpServer, binding: ProjectBinding): vo
        * successful scaffold into a reported failure.
        */
       const recorded = await recordKitProvenance(store.projectDir, [
-        { module: result.kit.dirName, origin: 'local', createdAt: new Date().toISOString() }
+        { module: result.kit.dirName, origin: 'local', createdAt: store.now() }
       ]);
       if (!recorded.ok) {
         console.error(`[create_node_kit] could not record provenance for "${result.kit.dirName}": ${recorded.message}`);
@@ -144,7 +144,8 @@ export function registerKitTools(server: McpServer, binding: ProjectBinding): vo
         next:
           `Reload the preview and "${result.kit.nodeDisplayName}" (${result.kit.nodeType}) is placeable like any ` +
           `built-in node. Read noodl_modules/${result.kit.dirName}/README.md before adding a second node — it ` +
-          'argues the one rule that makes a kit worth having.'
+          'argues the one rule that makes a kit worth having — and its "Traps you will meet" before wrapping a ' +
+          'library: each one cost a real kit a rebuild.'
       };
       return jsonResult(payload);
     })

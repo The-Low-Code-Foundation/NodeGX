@@ -1,0 +1,175 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e177abec-1ea8-5ee1-842f-28adfe6b6fe0",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "modelineIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "atEntry",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "blocks",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "modelineFn",
+      "type": "JavaScriptFunction",
+      "label": "Mode line",
+      "parameters": {
+        "functionScript": "var { langOf, nameOf, wordMap } = Scripts.words;\nvar lang = langOf(Inputs.lang), w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));\nvar mode = String(Inputs.mode || '');\nvar blocks = Math.max(0, Math.floor(Number(Inputs.blocks)) || 0), atEntry = Math.max(0, Math.floor(Number(Inputs.atEntry)) || 0);\nvar badge = '', line = '';\nif (mode === 'drive') { badge = w.ig3DrivingTag || ''; line = w.ig3Driving || ''; }\nelse if (mode === 'teach') { badge = w.recording || ''; line = blocks > atEntry ? '' : atEntry > 0 ? w.ig3TeachGoOn || '' : w.ig3TeachOn || ''; }\nOutputs.badge = badge;\nOutputs.line = line;\nOutputs.showLine = line !== '';\nOutputs.driving = mode === 'drive';\nOutputs.note = mode === 'drive' ? w.ig3StepsDriving || '' : '';\n",
+        "uses": "words.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-mode",
+          "displayName": "mode",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-blocks",
+          "displayName": "blocks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-atEntry",
+          "displayName": "atEntry",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-badge",
+          "displayName": "badge",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-line",
+          "displayName": "line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showLine",
+          "displayName": "showLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-driving",
+          "displayName": "driving",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-note",
+          "displayName": "note",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "modelineOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "badge",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "driving",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "line",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "showLine",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

@@ -1,0 +1,1555 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "84640d79-7159-5a6f-8f2b-d4f780d083c7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pvIn",
+      "fromProperty": "balanceText",
+      "toId": "pvMoney",
+      "toProperty": "balanceText"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "balanceWhen",
+      "toId": "pvMoney",
+      "toProperty": "balanceWhen"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "bars",
+      "toId": "pvMoney",
+      "toProperty": "bars"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "lowText",
+      "toId": "pvMoney",
+      "toProperty": "lowText"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "lowColor",
+      "toId": "pvMoney",
+      "toProperty": "lowColor"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "incomeRows",
+      "toId": "pvMoney",
+      "toProperty": "incomeRows"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "hasIncome",
+      "toId": "pvMoney",
+      "toProperty": "hasIncome"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "items",
+      "toId": "pvMoney",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "marks",
+      "toId": "pvMoney",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "projects",
+      "toId": "pvMoney",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "pvMoney",
+      "fromProperty": "changed",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "rows",
+      "toId": "pvList",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "payingRows",
+      "toId": "pvKpaying",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "hasPaying",
+      "toId": "pvKpaying",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "changed",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "buildingRows",
+      "toId": "pvKbuilding",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "hasBuilding",
+      "toId": "pvKbuilding",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "changed",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "hobbyRows",
+      "toId": "pvKhobby",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "hasHobby",
+      "toId": "pvKhobby",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "changed",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "quietRows",
+      "toId": "pvKquiet",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "hasQuiet",
+      "toId": "pvKquiet",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "changed",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvByKindBtn",
+      "fromProperty": "onClick",
+      "toId": "pvOrder",
+      "toProperty": "to-kind"
+    },
+    {
+      "fromId": "pvOrder",
+      "fromProperty": "kindBg",
+      "toId": "pvByKindBtn",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "pvByUrgentBtn",
+      "fromProperty": "onClick",
+      "toId": "pvOrder",
+      "toProperty": "to-urgent"
+    },
+    {
+      "fromId": "pvOrder",
+      "fromProperty": "urgentBg",
+      "toId": "pvByUrgentBtn",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "pvOrder",
+      "fromProperty": "at-kind",
+      "toId": "pvByKind",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pvOrder",
+      "fromProperty": "at-urgent",
+      "toId": "pvUrgent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pvOrderRead",
+      "fromProperty": "out-kind",
+      "toId": "pvOrder",
+      "toProperty": "to-kind"
+    },
+    {
+      "fromId": "pvOrderRead",
+      "fromProperty": "out-urgent",
+      "toId": "pvOrder",
+      "toProperty": "to-urgent"
+    },
+    {
+      "fromId": "pvByKindBtn",
+      "fromProperty": "onClick",
+      "toId": "pvKeepKind",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pvByUrgentBtn",
+      "fromProperty": "onClick",
+      "toId": "pvKeepUrgent",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "linkTaskId",
+      "toId": "cmdLink",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "linkTaskId",
+      "toId": "cmdLink",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "linkTaskId",
+      "toId": "cmdLink",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "linkTaskId",
+      "toId": "cmdLink",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "linkTaskId",
+      "toId": "cmdLink",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "projectId",
+      "toId": "cmdLink",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "projectId",
+      "toId": "cmdLink",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "projectId",
+      "toId": "cmdLink",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "projectId",
+      "toId": "cmdLink",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "projectId",
+      "toId": "cmdLink",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "projectNames",
+      "toId": "cmdLink",
+      "toProperty": "projectNames"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "linkTask",
+      "toId": "cmdLink",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "linkTask",
+      "toId": "cmdLink",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "linkTask",
+      "toId": "cmdLink",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "linkTask",
+      "toId": "cmdLink",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "linkTask",
+      "toId": "cmdLink",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdLink",
+      "fromProperty": "done",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "noProjects",
+      "toId": "pvEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "projectId",
+      "toId": "pvOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "projectId",
+      "toId": "pvOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "projectId",
+      "toId": "pvOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "projectId",
+      "toId": "pvOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "projectId",
+      "toId": "pvOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "toggle",
+      "toId": "pvOut",
+      "toProperty": "toggle"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "toggle",
+      "toId": "pvOut",
+      "toProperty": "toggle"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "toggle",
+      "toId": "pvOut",
+      "toProperty": "toggle"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "toggle",
+      "toId": "pvOut",
+      "toProperty": "toggle"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "toggle",
+      "toId": "pvOut",
+      "toProperty": "toggle"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "projectId",
+      "toId": "cmdMove",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "projectId",
+      "toId": "cmdMove",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "projectId",
+      "toId": "cmdMove",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "projectId",
+      "toId": "cmdMove",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "projectId",
+      "toId": "cmdMove",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "projectName",
+      "toId": "cmdMove",
+      "toProperty": "projectName"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "projectName",
+      "toId": "cmdMove",
+      "toProperty": "projectName"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "projectName",
+      "toId": "cmdMove",
+      "toProperty": "projectName"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "projectName",
+      "toId": "cmdMove",
+      "toProperty": "projectName"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "projectName",
+      "toId": "cmdMove",
+      "toProperty": "projectName"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "taskId",
+      "toId": "cmdMove",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "taskId",
+      "toId": "cmdMove",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "taskId",
+      "toId": "cmdMove",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "taskId",
+      "toId": "cmdMove",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "taskId",
+      "toId": "cmdMove",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "mode",
+      "toId": "cmdMove",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "mode",
+      "toId": "cmdMove",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "mode",
+      "toId": "cmdMove",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "mode",
+      "toId": "cmdMove",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "mode",
+      "toId": "cmdMove",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "title",
+      "toId": "cmdMove",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "title",
+      "toId": "cmdMove",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "title",
+      "toId": "cmdMove",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "title",
+      "toId": "cmdMove",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "title",
+      "toId": "cmdMove",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "waitingOn",
+      "toId": "cmdMove",
+      "toProperty": "waitingOn"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "waitingOn",
+      "toId": "cmdMove",
+      "toProperty": "waitingOn"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "waitingOn",
+      "toId": "cmdMove",
+      "toProperty": "waitingOn"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "waitingOn",
+      "toId": "cmdMove",
+      "toProperty": "waitingOn"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "waitingOn",
+      "toId": "cmdMove",
+      "toProperty": "waitingOn"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "deadline",
+      "toId": "cmdMove",
+      "toProperty": "deadline"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "deadline",
+      "toId": "cmdMove",
+      "toProperty": "deadline"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "deadline",
+      "toId": "cmdMove",
+      "toProperty": "deadline"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "deadline",
+      "toId": "cmdMove",
+      "toProperty": "deadline"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "deadline",
+      "toId": "cmdMove",
+      "toProperty": "deadline"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "nextPosition",
+      "toId": "cmdMove",
+      "toProperty": "position"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "save",
+      "toId": "cmdMove",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "save",
+      "toId": "cmdMove",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "save",
+      "toId": "cmdMove",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "save",
+      "toId": "cmdMove",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "save",
+      "toId": "cmdMove",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdMove",
+      "fromProperty": "done",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "items",
+      "toId": "cmdTick",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "items",
+      "toId": "cmdSent",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "marks",
+      "toId": "cmdTick",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "marks",
+      "toId": "cmdSent",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "projects",
+      "toId": "cmdTick",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "projects",
+      "toId": "cmdSent",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "billKey",
+      "toId": "cmdTick",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "billKey",
+      "toId": "cmdTick",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "billKey",
+      "toId": "cmdTick",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "billKey",
+      "toId": "cmdTick",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "billKey",
+      "toId": "cmdTick",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "tick",
+      "toId": "cmdTick",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "tick",
+      "toId": "cmdTick",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "tick",
+      "toId": "cmdTick",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "tick",
+      "toId": "cmdTick",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "tick",
+      "toId": "cmdTick",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdTick",
+      "fromProperty": "done",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "sendKey",
+      "toId": "cmdSent",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "sendKey",
+      "toId": "cmdSent",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "sendKey",
+      "toId": "cmdSent",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "sendKey",
+      "toId": "cmdSent",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "sendKey",
+      "toId": "cmdSent",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "sent",
+      "toId": "cmdSent",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "sent",
+      "toId": "cmdSent",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "sent",
+      "toId": "cmdSent",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "sent",
+      "toId": "cmdSent",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "sent",
+      "toId": "cmdSent",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdSent",
+      "fromProperty": "done",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "projectId",
+      "toId": "cmdSaveProject",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "projectId",
+      "toId": "cmdSaveProject",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "projectId",
+      "toId": "cmdSaveProject",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "projectId",
+      "toId": "cmdSaveProject",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "projectId",
+      "toId": "cmdSaveProject",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "pName",
+      "toId": "cmdSaveProject",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "pName",
+      "toId": "cmdSaveProject",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "pName",
+      "toId": "cmdSaveProject",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "pName",
+      "toId": "cmdSaveProject",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "pName",
+      "toId": "cmdSaveProject",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "pSub",
+      "toId": "cmdSaveProject",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "pSub",
+      "toId": "cmdSaveProject",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "pSub",
+      "toId": "cmdSaveProject",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "pSub",
+      "toId": "cmdSaveProject",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "pSub",
+      "toId": "cmdSaveProject",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "pKind",
+      "toId": "cmdSaveProject",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "pKind",
+      "toId": "cmdSaveProject",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "pKind",
+      "toId": "cmdSaveProject",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "pKind",
+      "toId": "cmdSaveProject",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "pKind",
+      "toId": "cmdSaveProject",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "pBilling",
+      "toId": "cmdSaveProject",
+      "toProperty": "billing"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "pBilling",
+      "toId": "cmdSaveProject",
+      "toProperty": "billing"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "pBilling",
+      "toId": "cmdSaveProject",
+      "toProperty": "billing"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "pBilling",
+      "toId": "cmdSaveProject",
+      "toProperty": "billing"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "pBilling",
+      "toId": "cmdSaveProject",
+      "toProperty": "billing"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "pTerms",
+      "toId": "cmdSaveProject",
+      "toProperty": "termsDays"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "pTerms",
+      "toId": "cmdSaveProject",
+      "toProperty": "termsDays"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "pTerms",
+      "toId": "cmdSaveProject",
+      "toProperty": "termsDays"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "pTerms",
+      "toId": "cmdSaveProject",
+      "toProperty": "termsDays"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "pTerms",
+      "toId": "cmdSaveProject",
+      "toProperty": "termsDays"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "pRate",
+      "toId": "cmdSaveProject",
+      "toProperty": "rate"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "pRate",
+      "toId": "cmdSaveProject",
+      "toProperty": "rate"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "pRate",
+      "toId": "cmdSaveProject",
+      "toProperty": "rate"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "pRate",
+      "toId": "cmdSaveProject",
+      "toProperty": "rate"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "pRate",
+      "toId": "cmdSaveProject",
+      "toProperty": "rate"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "pSay",
+      "toId": "cmdSaveProject",
+      "toProperty": "say"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "pSay",
+      "toId": "cmdSaveProject",
+      "toProperty": "say"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "pSay",
+      "toId": "cmdSaveProject",
+      "toProperty": "say"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "pSay",
+      "toId": "cmdSaveProject",
+      "toProperty": "say"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "pSay",
+      "toId": "cmdSaveProject",
+      "toProperty": "say"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "saveProject",
+      "toId": "cmdSaveProject",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "saveProject",
+      "toId": "cmdSaveProject",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "saveProject",
+      "toId": "cmdSaveProject",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "saveProject",
+      "toId": "cmdSaveProject",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "saveProject",
+      "toId": "cmdSaveProject",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdSaveProject",
+      "fromProperty": "done",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "openTaskId",
+      "toId": "pvOut",
+      "toProperty": "openTaskId"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "openTaskId",
+      "toId": "pvOut",
+      "toProperty": "openTaskId"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "openTaskId",
+      "toId": "pvOut",
+      "toProperty": "openTaskId"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "openTaskId",
+      "toId": "pvOut",
+      "toProperty": "openTaskId"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "openTaskId",
+      "toId": "pvOut",
+      "toProperty": "openTaskId"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "openTask",
+      "toId": "pvOut",
+      "toProperty": "openTask"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "openTask",
+      "toId": "pvOut",
+      "toProperty": "openTask"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "openTask",
+      "toId": "pvOut",
+      "toProperty": "openTask"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "openTask",
+      "toId": "pvOut",
+      "toProperty": "openTask"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "openTask",
+      "toId": "pvOut",
+      "toProperty": "openTask"
+    },
+    {
+      "fromId": "pvSheetState",
+      "fromProperty": "currentState",
+      "toId": "pvSheetLook",
+      "toProperty": "in-state"
+    },
+    {
+      "fromId": "pvSheetState",
+      "fromProperty": "currentState",
+      "toId": "pvSheetBack",
+      "toProperty": "in-state"
+    },
+    {
+      "fromId": "pvSheetLook",
+      "fromProperty": "out-open",
+      "toId": "pvSheet",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "pvSheetLook",
+      "fromProperty": "out-editing",
+      "toId": "pvSheet",
+      "toProperty": "editing"
+    },
+    {
+      "fromId": "pvEditKey",
+      "fromProperty": "value",
+      "toId": "pvSheet",
+      "toProperty": "editKey"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "upRows",
+      "toId": "pvSheet",
+      "toProperty": "upRows"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "recRows",
+      "toId": "pvSheet",
+      "toProperty": "recRows"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "pastRows",
+      "toId": "pvSheet",
+      "toProperty": "pastRows"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "projectOptions",
+      "toId": "pvSheet",
+      "toProperty": "projectOptions"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "items",
+      "toId": "pvSheet",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "marks",
+      "toId": "pvSheet",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "projects",
+      "toId": "pvSheet",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "pvMoney",
+      "fromProperty": "allMoney",
+      "toId": "pvSheetState",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "pvMoney",
+      "fromProperty": "addMoney",
+      "toId": "pvEditNew",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvMoney",
+      "fromProperty": "addMoney",
+      "toId": "pvSheetState",
+      "toProperty": "to-editOnly"
+    },
+    {
+      "fromId": "pvSheet",
+      "fromProperty": "add",
+      "toId": "pvEditNewInSheet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvSheet",
+      "fromProperty": "add",
+      "toId": "pvSheetState",
+      "toProperty": "to-edit"
+    },
+    {
+      "fromId": "pvSheet",
+      "fromProperty": "itemKey",
+      "toId": "pvEditLine",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pvSheet",
+      "fromProperty": "edit",
+      "toId": "pvEditLine",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvSheet",
+      "fromProperty": "edit",
+      "toId": "pvSheetState",
+      "toProperty": "to-edit"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "moneyKey",
+      "toId": "pvEditRowItem",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "moneyKey",
+      "toId": "pvEditRowItem",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "moneyKey",
+      "toId": "pvEditRowItem",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "moneyKey",
+      "toId": "pvEditRowItem",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "moneyKey",
+      "toId": "pvEditRowItem",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "editMoney",
+      "toId": "pvEditRowItem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "editMoney",
+      "toId": "pvEditRowItem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "editMoney",
+      "toId": "pvEditRowItem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "editMoney",
+      "toId": "pvEditRowItem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "editMoney",
+      "toId": "pvEditRowItem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "editMoney",
+      "toId": "pvSheetState",
+      "toProperty": "to-editOnly"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "editMoney",
+      "toId": "pvSheetState",
+      "toProperty": "to-editOnly"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "editMoney",
+      "toId": "pvSheetState",
+      "toProperty": "to-editOnly"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "editMoney",
+      "toId": "pvSheetState",
+      "toProperty": "to-editOnly"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "editMoney",
+      "toId": "pvSheetState",
+      "toProperty": "to-editOnly"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "projectId",
+      "toId": "pvNewFor",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "projectId",
+      "toId": "pvNewFor",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "projectId",
+      "toId": "pvNewFor",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "projectId",
+      "toId": "pvNewFor",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "projectId",
+      "toId": "pvNewFor",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "addMoney",
+      "toId": "pvNewFor",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pvKpaying",
+      "fromProperty": "addMoney",
+      "toId": "pvNewFor",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pvKbuilding",
+      "fromProperty": "addMoney",
+      "toId": "pvNewFor",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pvKhobby",
+      "fromProperty": "addMoney",
+      "toId": "pvNewFor",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pvKquiet",
+      "fromProperty": "addMoney",
+      "toId": "pvNewFor",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pvNewFor",
+      "fromProperty": "out-value",
+      "toId": "pvEditRowNew",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pvNewFor",
+      "fromProperty": "out-go",
+      "toId": "pvEditRowNew",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvNewFor",
+      "fromProperty": "out-go",
+      "toId": "pvSheetState",
+      "toProperty": "to-editOnly"
+    },
+    {
+      "fromId": "pvSheet",
+      "fromProperty": "back",
+      "toId": "pvSheetBack",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pvSheetBack",
+      "fromProperty": "out-toList",
+      "toId": "pvSheetState",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "pvSheetBack",
+      "fromProperty": "out-toClosed",
+      "toId": "pvSheetState",
+      "toProperty": "to-closed"
+    },
+    {
+      "fromId": "pvSheet",
+      "fromProperty": "close",
+      "toId": "pvSheetState",
+      "toProperty": "to-closed"
+    },
+    {
+      "fromId": "pvSheet",
+      "fromProperty": "changed",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvMonthly",
+      "fromProperty": "onClick",
+      "toId": "pvRepeat",
+      "toProperty": "to-monthly"
+    },
+    {
+      "fromId": "pvOnce",
+      "fromProperty": "onClick",
+      "toId": "pvRepeat",
+      "toProperty": "to-once"
+    },
+    {
+      "fromId": "pvRepeat",
+      "fromProperty": "monthlyBg",
+      "toId": "pvMonthly",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "pvRepeat",
+      "fromProperty": "onceBg",
+      "toId": "pvOnce",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "pvName",
+      "fromProperty": "onTextChanged",
+      "toId": "cmdAddProject",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pvAmount",
+      "fromProperty": "onTextChanged",
+      "toId": "cmdAddProject",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "pvWhen",
+      "fromProperty": "onTextChanged",
+      "toId": "cmdAddProject",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "pvRepeat",
+      "fromProperty": "currentState",
+      "toId": "cmdAddProject",
+      "toProperty": "repeat"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "projectPosition",
+      "toId": "cmdAddProject",
+      "toProperty": "position"
+    },
+    {
+      "fromId": "pvAddButton",
+      "fromProperty": "onClick",
+      "toId": "cmdAddProject",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdAddProject",
+      "fromProperty": "error",
+      "toId": "pvAddError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cmdAddProject",
+      "fromProperty": "hasError",
+      "toId": "pvAddError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cmdAddProject",
+      "fromProperty": "done",
+      "toId": "pvName",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "cmdAddProject",
+      "fromProperty": "done",
+      "toId": "pvAmount",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "cmdAddProject",
+      "fromProperty": "done",
+      "toId": "pvWhen",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "cmdAddProject",
+      "fromProperty": "done",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvHide",
+      "fromProperty": "onClick",
+      "toId": "pvOut",
+      "toProperty": "hide"
+    }
+  ]
+}

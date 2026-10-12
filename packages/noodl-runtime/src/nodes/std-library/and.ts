@@ -11,7 +11,7 @@ import type { InspectInfo, NodeDefinitionOptions, NodeInstance, NodeModule } fro
 interface AndNodeInstance extends NodeInstance {
   _internal: {
     inputs: boolean[];
-    result?: boolean;
+    result: boolean;
   };
 }
 
@@ -21,6 +21,10 @@ const AndNode: NodeDefinitionOptions = {
   category: 'Logic',
   initialize: function (this: AndNodeInstance) {
     this._internal.inputs = [];
+    // P107-D1 (P109 ISL-033, ruled "Make And start at false"): the description has always said
+    // false with nothing connected, and Or's getter gives false from the start; this one left
+    // `result` undefined until the first input, so a wire read nothing.
+    this._internal.result = false;
   },
   getInspectInfo(this: AndNodeInstance): InspectInfo {
     // Wrapped: a bare boolean renders as nothing in the inspector (DEBT-006).

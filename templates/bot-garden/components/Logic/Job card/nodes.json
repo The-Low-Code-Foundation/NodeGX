@@ -1,0 +1,283 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "dedd0771-f4bc-5480-8d00-f84913c30ce5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "jobcardIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "request",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "world",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "jobcardFn",
+      "type": "JavaScriptFunction",
+      "label": "Job card",
+      "parameters": {
+        "functionScript": "var { jobOf, jobProgress, meterOf, thingById, worldOf } = Scripts.engine;\nvar { fill, langOf, nameOf, wordMap } = Scripts.words;\nvar CARDS = {\"tulip-door\":{\"src\":\"iw3mDoorSrc\",\"car\":\"iw3mDoorCar\",\"tgt\":\"iw3mDoorTgt\",\"fin\":\"iw3mDoorFin\",\"wr\":\"iw3mDoorWr\",\"sum\":\"iw3mDoorSum\"},\"tulips-three\":{\"src\":\"iw3mTulipsSrc\",\"car\":\"iw3mTulipsCar\",\"tgt\":\"iw3mTulipsTgt\",\"fin\":\"iw3mTulipsFin\",\"wr\":\"iw3mTulipsWr\",\"sum\":\"iw3mTulipsSum\"},\"eggs-count\":{\"src\":\"iw3mEggsSrc\",\"car\":\"iw3mEggsCar\",\"tgt\":\"iw3mEggsTgt\",\"fin\":\"iw3mEggsFin\",\"wr\":\"iw3mEggsWr\",\"sum\":\"iw3mEggsSum\"},\"rows-trick\":{\"src\":\"iw3mRowsSrc\",\"car\":\"iw3mRowsCar\",\"tgt\":\"iw3mRowsTgt\",\"fin\":\"iw3mRowsFin\",\"wr\":\"iw3mRowsWr\",\"sum\":\"iw3mRowsSum\"},\"mamie-note\":{\"src\":\"iw3mNoteSrc\",\"car\":\"iw3mNoteCar\",\"tgt\":\"iw3mNoteTgt\",\"fin\":\"iw3mNoteFin\",\"wr\":\"iw3mNoteWr\",\"sum\":\"iw3mNoteSum\"}};\nvar req = Inputs.request && typeof Inputs.request === 'object' ? Inputs.request : null;\nvar card = req && CARDS[String(req.id)] ? CARDS[String(req.id)] : null;\nvar W = wordMap(Inputs.words, langOf(Inputs.lang), nameOf(Inputs.botName));\nOutputs.show = !!card;\nOutputs.srcLabel = W.iw3mJcSrc || '';\nOutputs.carLabel = W.iw3mJcCar || '';\nOutputs.tgtLabel = W.iw3mJcTgt || '';\nOutputs.finLabel = W.iw3mJcFin || '';\nOutputs.wrLabel = W.iw3mJcWr || '';\nOutputs.src = card ? W[card.src] || '' : '';\nOutputs.car = card ? W[card.car] || '' : '';\nOutputs.tgt = card ? W[card.tgt] || '' : '';\nOutputs.fin = card ? W[card.fin] || '' : '';\nOutputs.wr = card ? W[card.wr] || '' : '';\n// One row per line for the card's repeater (a stable id each: a row is a Noodl Object, global by id).\nvar PARTS = [['src', 'iw3mJcSrc'], ['car', 'iw3mJcCar'], ['tgt', 'iw3mJcTgt'], ['fin', 'iw3mJcFin'], ['wr', 'iw3mJcWr']], rows = [];\nif (card) for (var pi = 0; pi < PARTS.length; pi++) rows.push({ id: 'jobline-' + PARTS[pi][0], label: W[PARTS[pi][1]] || '', text: W[card[PARTS[pi][0]]] || '' });\nOutputs.rows = rows;\nvar jw = worldOf(Inputs.world), jj = jobOf(jw), jn = 0, jt = 0;\nif (jj && jj.targets.length === 1) { var one = thingById(jw, jj.targets[0]), m1 = one ? meterOf(one) : { have: 0, need: 0 }; jn = m1.have; jt = isFinite(m1.need) ? m1.need : 0; }\nelse if (jj) { var jp = jobProgress(jw); jn = jp.full; jt = jp.total; }\nOutputs.sum = card && jt > 0 ? fill(W[card.sum] || '', { n: jn, t: jt }) : '';\nOutputs.full = jt > 0 && jn >= jt;\nOutputs.sumClass = 'bg-job-sum' + (jt > 0 && jn >= jt ? ' bg-job-sum-full' : '');\n",
+        "uses": "engine.js,words.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-request",
+          "displayName": "request",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-world",
+          "displayName": "world",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-show",
+          "displayName": "show",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-srcLabel",
+          "displayName": "srcLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-carLabel",
+          "displayName": "carLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tgtLabel",
+          "displayName": "tgtLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-finLabel",
+          "displayName": "finLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-wrLabel",
+          "displayName": "wrLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-src",
+          "displayName": "src",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-car",
+          "displayName": "car",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tgt",
+          "displayName": "tgt",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fin",
+          "displayName": "fin",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-wr",
+          "displayName": "wr",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sum",
+          "displayName": "sum",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-full",
+          "displayName": "full",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sumClass",
+          "displayName": "sumClass",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "jobcardOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "car",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "carLabel",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "fin",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "finLabel",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "full",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "show",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "src",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "srcLabel",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "sum",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "sumClass",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "tgt",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "tgtLabel",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "wr",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "wrLabel",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

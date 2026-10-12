@@ -1,0 +1,104 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5fb57eb8-6e77-4c36-870e-1decb9d70f04",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pc_row_in",
+      "type": "Component Inputs",
+      "label": "One concept",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "addLabel",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "pc_row",
+      "type": "Group",
+      "label": "The concept",
+      "x": 40,
+      "y": 240,
+      "children": [
+        "pc_row_add",
+        "pc_row_title"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)"
+      }
+    },
+    {
+      "id": "pc_row_add",
+      "type": "net.noodl.controls.button",
+      "label": "Add",
+      "x": 100,
+      "y": 320,
+      "parent": "pc_row",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-sm)"
+      }
+    },
+    {
+      "id": "pc_row_title",
+      "type": "Text",
+      "label": "Its title",
+      "x": 100,
+      "y": 400,
+      "parent": "pc_row",
+      "parameters": {
+        "as": "span",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "pc_row_out",
+      "type": "Component Outputs",
+      "label": "Add pressed",
+      "x": 600,
+      "y": 320,
+      "ports": [
+        {
+          "name": "add",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "pc_row"
+  ]
+}

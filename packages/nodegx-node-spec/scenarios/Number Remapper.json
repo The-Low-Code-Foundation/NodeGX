@@ -1,0 +1,38 @@
+[
+  {
+    "name": "defaults pass the input through, clamped to 0..1",
+    "because": "numberremapper.ts :25-46 (NDA-012), :154-166",
+    "params": {},
+    "steps": ["settle", { "set": "inputValue", "value": 0.5 }, "settle", { "set": "inputValue", "value": 2 }, "settle", { "set": "inputValue", "value": -1 }, "settle"]
+  },
+  {
+    "name": "Clamp Output off extrapolates",
+    "because": "numberremapper.ts :162-164",
+    "params": { "clamp": false, "inputValue": 2 },
+    "steps": ["settle", { "set": "inputValue", "value": -1 }, "settle"]
+  },
+  {
+    "name": "0..10 onto 0..100: 5 → 50; a reversed output range: 0.25 → 0.75",
+    "because": "numberremapper.ts :157-166",
+    "params": { "maxInputValue": 10, "maxOutputValue": 100, "inputValue": 5 },
+    "steps": ["settle", { "set": "maxInputValue", "value": 1 }, { "set": "minOutputValue", "value": 1 }, { "set": "maxOutputValue", "value": 0 }, { "set": "inputValue", "value": 0.25 }, "settle"]
+  },
+  {
+    "name": "Input Minimum equal to Input Maximum pins the result at Output Minimum",
+    "because": "numberremapper.ts :154-155",
+    "params": { "minInputValue": 3, "maxInputValue": 3, "minOutputValue": 7, "inputValue": 9 },
+    "steps": ["settle"]
+  },
+  {
+    "name": "raw values: '1' and 1 are not the same endpoint, so the division happens and NaN comes out",
+    "because": "numberremapper.ts :154 `===` on raw values, :157-159",
+    "params": { "minInputValue": "1", "maxInputValue": 1, "inputValue": 1 },
+    "steps": ["settle"]
+  },
+  {
+    "name": "an unparseable input yields NaN; clamp keeps NaN",
+    "because": "numberremapper.ts :163 — Math.max/min on NaN",
+    "params": { "inputValue": "abc" },
+    "steps": ["settle"]
+  }
+]

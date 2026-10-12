@@ -1,0 +1,246 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "529f9ffe-9f40-5184-89ab-94e17ea4e8a8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "SetschedulIn",
+      "type": "Component Inputs",
+      "label": "What to do",
+      "ports": [
+        {
+          "name": "routines",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "routineId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "change",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "days",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "timeText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "slotKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "SetschedulOut",
+      "type": "Component Outputs",
+      "label": "Done",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "error",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hasError",
+          "plug": "input",
+          "type": "boolean"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "SetschedulGuard",
+      "type": "JavaScriptFunction",
+      "label": "Is there anything to write?",
+      "parameters": {
+        "functionScript": "var SCHED_DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];\nvar SCHED_WEEK = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];\nvar SCHED_NAMES = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun' };\nfunction schedPad(n) { return (n < 10 ? '0' : '') + n; }\nfunction schedIso(d) { return d.getFullYear() + '-' + schedPad(d.getMonth() + 1) + '-' + schedPad(d.getDate()); }\nfunction schedDate(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  return schedIso(d) === m[0] ? d : null;\n}\nfunction schedRank(day) {\n  if (day === '') return 0;\n  var w = SCHED_WEEK.indexOf(day);\n  if (w >= 0) return w;\n  return day === 'last' ? 32 : Number(day);\n}\nfunction schedSlots(cadence, text) {\n  var out = [], seen = {};\n  var parts = String(text || '').split(',');\n  for (var i = 0; i < parts.length; i++) {\n    var p = parts[i].replace(/\\s+/g, '').toLowerCase();\n    if (p === '') continue;\n    var at = p.indexOf('@');\n    var day = at >= 0 ? p.slice(0, at) : '';\n    var time = at >= 0 ? p.slice(at + 1) : p;\n    if (!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(time)) continue;\n    if (cadence === 'daily') day = '';\n    else if (cadence === 'weekly') {\n      if (SCHED_WEEK.indexOf(day) < 0) continue;\n    } else if (cadence === 'monthly') {\n      if (day !== 'last') {\n        if (!/^\\d{1,2}$/.test(day) || Number(day) < 1 || Number(day) > 31) continue;\n        day = String(Number(day));\n      }\n    } else continue;\n    var key = day === '' ? time : day + '@' + time;\n    if (seen[key]) continue;\n    seen[key] = true;\n    out.push({ day: day, time: time, key: key });\n  }\n  out.sort(function (a, b) { return schedRank(a.day) - schedRank(b.day) || (a.time < b.time ? -1 : a.time > b.time ? 1 : 0); });\n  return out;\n}\nfunction schedJoin(slots) {\n  var keys = [];\n  for (var i = 0; i < slots.length; i++) keys.push(slots[i].key);\n  return keys.join(',');\n}\nfunction schedStopDay(r) {\n  if (!r || r.status !== 'stopped') return null;\n  var s = r.stoppedAt ? new Date(r.stoppedAt) : null;\n  if (!s || isNaN(s.getTime())) return new Date(0);\n  s.setHours(0, 0, 0, 0);\n  return s;\n}\nfunction schedOn(r, d) {\n  if (!r) return [];\n  var day = new Date(d.getFullYear(), d.getMonth(), d.getDate());\n  var start = schedDate(r.startDate), end = schedDate(r.endDate), stop = schedStopDay(r);\n  if (start && day < start) return [];\n  if (end && day > end) return [];\n  if (stop && day >= stop) return [];\n  var last = new Date(day.getFullYear(), day.getMonth() + 1, 0).getDate();\n  var slots = schedSlots(r.cadence, r.slots), out = [], seen = {};\n  for (var i = 0; i < slots.length; i++) {\n    var s = slots[i], hit = false;\n    if (s.day === '') hit = true;\n    else if (SCHED_WEEK.indexOf(s.day) >= 0) hit = SCHED_DAYS[day.getDay()] === s.day;\n    else if (s.day === 'last') hit = day.getDate() === last;\n    else hit = Math.min(Number(s.day), last) === day.getDate();\n    if (hit && !seen[s.time]) {\n      seen[s.time] = true;\n      out.push(s.time);\n    }\n  }\n  out.sort();\n  return out;\n}\nfunction schedOrdinal(n) {\n  var t = n % 100, u = n % 10;\n  return n + (t >= 11 && t <= 13 ? 'th' : u === 1 ? 'st' : u === 2 ? 'nd' : u === 3 ? 'rd' : 'th');\n}\nfunction schedAnd(list) {\n  return list.length < 2 ? list.join('') : list.slice(0, -1).join(', ') + ' and ' + list[list.length - 1];\n}\nfunction schedDayName(cadence, day) {\n  if (cadence === 'weekly') return SCHED_NAMES[day];\n  return day === 'last' ? 'the last day' : 'the ' + schedOrdinal(Number(day));\n}\nfunction schedSlotLabel(cadence, s) {\n  if (cadence === 'weekly') return SCHED_NAMES[s.day] + ' ' + s.time;\n  if (cadence === 'monthly') return (s.day === 'last' ? 'Last day' : schedOrdinal(Number(s.day))) + ' ' + s.time;\n  return s.time;\n}\nfunction schedDescribe(r) {\n  var cadence = String((r && r.cadence) || '');\n  var slots = schedSlots(cadence, r && r.slots);\n  if (slots.length === 0) return 'No times yet';\n  var i, k;\n  if (cadence === 'daily') {\n    var times = [];\n    for (i = 0; i < slots.length; i++) times.push(slots[i].time);\n    return 'Every day at ' + schedAnd(times);\n  }\n  var byDay = {}, order = [];\n  for (i = 0; i < slots.length; i++) {\n    if (!byDay[slots[i].day]) {\n      byDay[slots[i].day] = [];\n      order.push(slots[i].day);\n    }\n    byDay[slots[i].day].push(slots[i].time);\n  }\n  var same = true;\n  for (k = 1; k < order.length; k++) if (byDay[order[k]].join() !== byDay[order[0]].join()) same = false;\n  var lead = cadence === 'weekly' ? 'Every ' : 'Every month on ';\n  var parts = [];\n  if (same) {\n    for (k = 0; k < order.length; k++) parts.push(schedDayName(cadence, order[k]));\n    return lead + schedAnd(parts) + ' at ' + schedAnd(byDay[order[0]]);\n  }\n  for (k = 0; k < order.length; k++) parts.push(schedDayName(cadence, order[k]) + ' at ' + schedAnd(byDay[order[k]]));\n  return lead + parts.join('; ');\n}\nfunction schedTime(text) {\n  var t = String(text || '').trim().toLowerCase().replace(/\\s+/g, '');\n  var m = /^(\\d{1,2})(?:[:.h]?(\\d{2}))?(am|pm)?$/.exec(t);\n  if (!m) return null;\n  var h = Number(m[1]), min = m[2] ? Number(m[2]) : 0, ap = m[3] || '';\n  if (min > 59) return null;\n  if (ap) {\n    if (h < 1 || h > 12) return null;\n    if (h === 12) h = 0;\n    if (ap === 'pm') h += 12;\n  }\n  if (h > 23) return null;\n  return schedPad(h) + ':' + schedPad(min);\n}\nfunction findRow(rows, id) {\n  for (var i = 0; i < rows.length; i++) if (rows[i] && rows[i].id === id) return rows[i];\n  return null;\n}\nvar row = findRow(Inputs.routines || [], String(Inputs.routineId || ''));\nif (!row) return;\nvar change = String(Inputs.change || '');\nvar cadence = row.cadence === 'weekly' || row.cadence === 'monthly' ? row.cadence : 'daily';\nvar slots = schedSlots(cadence, row.slots);\nvar next = cadence, keys = [], i;\nfunction fail(text) {\n  Outputs.verdict = { about: String(Inputs.routineId || ''), error: text };\n}\nif (change === 'daily' || change === 'weekly' || change === 'monthly') {\n  if (change === cadence) return;\n  next = change;\n  var times = [], seen = {};\n  for (i = 0; i < slots.length; i++) if (!seen[slots[i].time]) { seen[slots[i].time] = true; times.push(slots[i].time); }\n  if (times.length === 0) times.push('09:00');\n  times.sort();\n  var now = new Date();\n  var day = next === 'weekly' ? SCHED_DAYS[now.getDay()] : next === 'monthly' ? String(now.getDate()) : '';\n  for (i = 0; i < times.length; i++) keys.push(day === '' ? times[i] : day + '@' + times[i]);\n} else if (change === 'add') {\n  var time = schedTime(Inputs.timeText);\n  if (!time) return fail('Type a time like 08:00, 8:30 or 8pm.');\n  var picked = [], list = String(Inputs.days || '').split(',');\n  for (i = 0; i < list.length; i++) if (list[i]) picked.push(list[i]);\n  if (cadence !== 'daily' && picked.length === 0) {\n    return fail(cadence === 'weekly' ? 'Pick at least one day first.' : 'Pick at least one day of the month first.');\n  }\n  for (i = 0; i < slots.length; i++) keys.push(slots[i].key);\n  if (cadence === 'daily') keys.push(time);\n  else for (i = 0; i < picked.length; i++) keys.push(picked[i] + '@' + time);\n} else if (change === 'remove') {\n  var gone = String(Inputs.slotKey || '');\n  for (i = 0; i < slots.length; i++) if (slots[i].key !== gone) keys.push(slots[i].key);\n} else return;\nvar text = schedJoin(schedSlots(next, keys.join(',')));\nif (next === cadence && text === schedJoin(slots)) {\n  if (change === 'add') fail('That time is already there.');\n  return;\n}\nOutputs.verdict = { about: String(Inputs.routineId || ''), error: '' };\nOutputs.cadence = next;\nOutputs.slots = text;\nvar said = schedDescribe({ cadence: next, slots: text });\nOutputs.summary = 'Schedule: ' + said.charAt(0).toLowerCase() + said.slice(1);\nOutputs.go();",
+        "runOnChange-in-routines": false,
+        "runOnChange-in-routineId": false,
+        "runOnChange-in-change": false,
+        "runOnChange-in-days": false,
+        "runOnChange-in-timeText": false,
+        "runOnChange-in-slotKey": false
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-routines",
+          "displayName": "routines",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-routineId",
+          "displayName": "routineId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-change",
+          "displayName": "change",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-timeText",
+          "displayName": "timeText",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-days",
+          "displayName": "days",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-slotKey",
+          "displayName": "slotKey",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-verdict",
+          "displayName": "verdict",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cadence",
+          "displayName": "cadence",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slots",
+          "displayName": "slots",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-summary",
+          "displayName": "summary",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "SetschedulWrite",
+      "type": "SetDbModelProperties",
+      "label": "Save the schedule",
+      "parameters": {
+        "collectionName": "Routine",
+        "idSource": "explicit"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "SetschedulHistory",
+      "type": "/Logic/Write history",
+      "label": "Write the history line",
+      "parameters": {
+        "kind": "schedule"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "SetschedulProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "string",
+        "value": "That change did not save. Check your connection, then try again."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 640
+    },
+    {
+      "id": "SetschedulSay",
+      "type": "JavaScriptFunction",
+      "label": "Say a refusal while its record is open",
+      "parameters": {
+        "functionScript": "var verdict = Inputs.verdict || null;\nvar about = String(Inputs.about || '');\nif (verdict !== this.verdict) {\n  this.verdict = verdict;\n  this.error = verdict && verdict.about === about ? String(verdict.error || '') : '';\n} else if (about !== this.about) this.error = '';\nthis.about = about;\nOutputs.error = this.error;\nOutputs.hasError = this.error !== '';"
+      },
+      "x": 40,
+      "y": 760,
+      "ports": [
+        {
+          "name": "in-verdict",
+          "displayName": "verdict",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-about",
+          "displayName": "about",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-error",
+          "displayName": "error",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasError",
+          "displayName": "hasError",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ]
+}

@@ -91,13 +91,33 @@ export class AuthConfigState {
       providers: Array.isArray(p.providers) ? p.providers.map((provider) => ({ ...provider })) : [],
       magicLink: { ...base.magicLink, ...(p.magicLink || {}) },
       redirectAllowList: Array.isArray(p.redirectAllowList) ? [...p.redirectAllowList] : [],
-      linking: { ...base.linking, ...(p.linking || {}) }
+      linking: { ...base.linking, ...(p.linking || {}) },
+      sessions: { ...base.sessions, ...(p.sessions || {}) }
     };
   }
 
   save(): void {
     fs.mkdirSync(this.dataDir, { recursive: true });
     atomicWriteJSON(path.join(this.dataDir, AUTH_FILE), this.config);
+  }
+
+  /**
+   * ISL-039: re-read auth.json after a restore. A fresh instance does the reading, so
+   * the rules are the constructor's; the live config is replaced in place. An
+   * invalid file is refused: the live config is written back over it, and the
+   * refusal thrown (as `EmailConfigState.reload`).
+   */
+  reload(): void {
+    let fresh: AuthConfigState;
+    try {
+      fresh = new AuthConfigState(this.dataDir);
+    } catch (e) {
+      this.save();
+      throw e;
+    }
+    const live = this.config as unknown as Record<string, unknown>;
+    for (const key of Object.keys(live)) delete live[key];
+    Object.assign(live, fresh.config);
   }
 
   /** The provider with this id, or null. Does NOT filter on `enabled` — callers decide. */

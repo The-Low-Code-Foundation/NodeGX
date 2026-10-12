@@ -48,8 +48,41 @@ const HTTP_ERROR_CODES = {
   noUrl: 'http/no-url',
   status: 'http/error-status',
   timeout: 'http/timeout',
-  network: 'http/network-error'
+  network: 'http/network-error',
+  inputNotText: 'http/input-not-text',
+  /** P107-D11 (P109 ISL-030, ruled "Give it its own code"): the server answered, and its body could not be read as JSON. */
+  badBody: 'http/bad-body'
 };
+
+/**
+ * P107-D11: a body that failed to parse reached the same `catch` as a request that never left, and was reported under
+ * `http/network-error` — "never reached a server" — for a request the server answered. The parse failures are marked
+ * here so the `catch` can tell them apart; the message is unchanged.
+ */
+function badBody(error: unknown): unknown {
+  // The error itself is marked, never wrapped: a parser's error can come from another realm (`instanceof Error` false),
+  // and re-making it from `String(error)` would put its class name in front of the message.
+  if (error !== null && typeof error === 'object') {
+    (error as { httpBadBody?: boolean }).httpBadBody = true;
+    return error;
+  }
+  return Object.assign(new Error(String(error)), { httpBadBody: true });
+}
+
+/**
+ * P107-C8 (P109 ISL-026, ruled 2026-10-05 "Fail and say which input"): the first text input that holds something else,
+ * in the order the request reads them — URL (`.match`), Query Parameters, Headers, and Body Fields when a body is built
+ * (`.split`). Read as it came, it threw inside `doFetch` after the tokens were drained, and the Fetch was never answered.
+ */
+function inputNotText(internal: { url?: unknown; queryParams?: unknown; headers?: unknown; bodyFields?: unknown; method?: unknown }): string | undefined {
+  const notText = (v: unknown) => !!v && typeof v !== 'string';
+  if (notText(internal.url)) return 'URL';
+  if (notText(internal.queryParams)) return 'Query Parameters';
+  if (notText(internal.headers)) return 'Headers';
+  const method = internal.method || 'GET';
+  if (!['GET', 'HEAD', 'OPTIONS'].includes(method as string) && notText(internal.bodyFields)) return 'Body Fields';
+  return undefined;
+}
 
 /**
  * Extract value from object using JSONPath-like syntax
@@ -111,10 +144,9 @@ interface AuthContribution {
 }
 
 /**
- * The values the `auth-…` dynamic inputs write, keyed *with* their prefix stripped by the
- * port names themselves (`auth-authToken` → `authToken`). Every one of these ports is
- * declared `type: 'string'` in `updatePorts`, which is why the two call sites narrow the
- * node's `Record<string, unknown>` to this on the way in.
+ * The values the `auth-…` dynamic inputs write, keyed with their `auth-` prefix stripped
+ * (`auth-authToken` → `authToken`) by {@link authInputs}. Every one of these ports is
+ * declared `type: 'string'` in `updatePorts`.
  */
 interface AuthInputs {
   authToken?: string;
@@ -123,6 +155,19 @@ interface AuthInputs {
   authApiKeyName?: string;
   authApiKeyValue?: string;
   authApiKeyLocation?: 'header' | 'query';
+}
+
+/**
+ * P107-C7 (P109 ISL-030, ruled "Fix it, send the credential"): the `auth-…` ports store under their FULL names
+ * (`_storeInputValue(name)`), and the configurators read the short ones. Nothing stripped the prefix, so no preset
+ * ever sent a credential: Bearer added no Authorization header and API Key no header or query parameter.
+ */
+function authInputs(inputValues: Record<string, unknown>): AuthInputs {
+  const out: Record<string, unknown> = {};
+  for (const key of Object.keys(inputValues)) {
+    if (key.startsWith('auth-')) out[key.slice('auth-'.length)] = inputValues[key];
+  }
+  return out as AuthInputs;
 }
 
 const authConfigurators: Record<string, (inputs: AuthInputs) => AuthContribution> = {
@@ -191,7 +236,12 @@ interface HttpNodeInstance extends NodeInstance {
     error?: string;
     lastRequestUrl?: string;
     hasScheduledFetch?: boolean;
-    abortController?: AbortController | null;
+    /**
+     * P107-D12 (P109 ISL-030, ruled "Every request still running"): one per request in flight, each removed when its own
+     * request completes. There used to be ONE, cleared by ANY completion, so an earlier request finishing left Cancel
+     * unable to reach a later one still running.
+     */
+    abortControllers?: Set<AbortController>;
     /**
      * ERG-001 — `Fetch` pulses no `doFetch` call has taken ownership of yet.
      *
@@ -286,7 +336,7 @@ const HttpNode: NodeDefinitionOptions = {
       displayName: 'Cancel',
       group: 'Actions',
       description:
-        'Abandons a request that is still in flight, which answers on Canceled rather than Failure; reports Unchanged when there is nothing to cancel',
+        'Abandons every request still in flight, each answering on Canceled rather than Failure; reports Unchanged when there is nothing to cancel',
       valueChangedToTrue: function (this: HttpNodeInstance) {
         // Minted here and settled synchronously inside `cancelFetch`, which is not scheduled —
         // one pulse is one call, so there is nothing to batch.
@@ -480,9 +530,12 @@ const HttpNode: NodeDefinitionOptions = {
      * Two `Completed`s for one cancelled request is two action ports invoked, not a duplicate.
      */
     cancelFetch: function (this: HttpNodeInstance, token: OutcomeToken) {
-      if (this._internal.abortController) {
-        this._internal.abortController.abort();
-        this._internal.abortController = null;
+      const running = this._internal.abortControllers;
+      if (running && running.size > 0) {
+        // Every request still running, in the order they were sent (P107-D12).
+        const controllers = Array.from(running);
+        running.clear();
+        for (const controller of controllers) controller.abort();
         this.reportOutcome(token, 'done');
         return;
       }
@@ -525,7 +578,7 @@ const HttpNode: NodeDefinitionOptions = {
       // From auth (API Key in query)
       const authType = this._internal.authType;
       if (authType && authConfigurators[authType]) {
-        const authConfig = authConfigurators[authType](this._internal.inputValues as AuthInputs);
+        const authConfig = authConfigurators[authType](authInputs(this._internal.inputValues));
         if (authConfig.queryParams) {
           Object.assign(queryParams, authConfig.queryParams);
         }
@@ -563,7 +616,7 @@ const HttpNode: NodeDefinitionOptions = {
       // From auth
       const authType = this._internal.authType;
       if (authType && authConfigurators[authType]) {
-        const authConfig = authConfigurators[authType](this._internal.inputValues as AuthInputs);
+        const authConfig = authConfigurators[authType](authInputs(this._internal.inputValues));
         if (authConfig.headers) {
           Object.assign(headers, authConfig.headers);
         }
@@ -685,6 +738,17 @@ const HttpNode: NodeDefinitionOptions = {
       const tokens = this._internal.pendingFetchOutcomes;
       this._internal.pendingFetchOutcomes = [];
 
+      const notText = inputNotText(this._internal);
+      if (notText !== undefined) {
+        this._internal.error = notText + ' is not text';
+        this.flagOutputDirty('error');
+        reportOutcomes(this, tokens, 'failure', {
+          code: HTTP_ERROR_CODES.inputNotText,
+          message: notText + ' is not text, so no request could be sent'
+        });
+        return;
+      }
+
       const url = this.buildUrl();
       const method = this._internal.method || 'GET';
       const headers = this.buildHeaders();
@@ -707,7 +771,8 @@ const HttpNode: NodeDefinitionOptions = {
 
       // Set up abort controller for timeout and cancel
       const abortController = new AbortController();
-      this._internal.abortController = abortController;
+      if (!this._internal.abortControllers) this._internal.abortControllers = new Set();
+      this._internal.abortControllers.add(abortController);
 
       /**
        * NDA-012 (Data) — which of the two aborts this was.
@@ -768,7 +833,7 @@ const HttpNode: NodeDefinitionOptions = {
         )
         .then((response) => {
           clearTimeout(timeoutId);
-          this._internal.abortController = null;
+          this._internal.abortControllers?.delete(abortController);
 
           /**
            * 🔴 **304 is intercepted here, before the body is read and before `response.ok` is
@@ -810,9 +875,11 @@ const HttpNode: NodeDefinitionOptions = {
               try {
                 return { response, body: JSON.parse(text) };
               } catch (e) {
-                throw new Error(
-                  'Response Type is JSON but the body is not JSON: ' +
-                    (e && (e as Error).message ? (e as Error).message : String(e))
+                throw badBody(
+                  new Error(
+                    'Response Type is JSON but the body is not JSON: ' +
+                      (e && (e as Error).message ? (e as Error).message : String(e))
+                  )
                 );
               }
             });
@@ -820,7 +887,12 @@ const HttpNode: NodeDefinitionOptions = {
 
           const contentType = response.headers.get('content-type') || '';
           if (contentType.includes('application/json')) {
-            return response.json().then((json) => ({ response, body: json }));
+            return response.json().then(
+              (json) => ({ response, body: json }),
+              (e) => {
+                throw badBody(e);
+              }
+            );
           }
           return response.text().then((text) => ({ response, body: text }));
         })
@@ -846,7 +918,7 @@ const HttpNode: NodeDefinitionOptions = {
         })
         .catch((error) => {
           clearTimeout(timeoutId);
-          this._internal.abortController = null;
+          this._internal.abortControllers?.delete(abortController);
 
           if (error.name === 'AbortError' && !timedOut) {
             // The author pressed Cancel. Nothing went wrong, so nothing is reported.
@@ -866,7 +938,11 @@ const HttpNode: NodeDefinitionOptions = {
               : error.message || 'Network error';
             this.flagOutputDirty('error');
             reportOutcomes(this, tokens, 'failure', {
-              code: timedOut ? HTTP_ERROR_CODES.timeout : HTTP_ERROR_CODES.network,
+              code: timedOut
+                ? HTTP_ERROR_CODES.timeout
+                : error.httpBadBody
+                ? HTTP_ERROR_CODES.badBody
+                : HTTP_ERROR_CODES.network,
               message: this._internal.error,
               detail: { url: this._internal.lastRequestUrl, timeout: timedOut ? timeout : undefined }
             });
@@ -1217,7 +1293,9 @@ function updatePorts(nodeId: string, parameters: Record<string, unknown>, editor
     default: 'none',
     plug: 'input',
     group: 'Authentication',
-    description: 'Credential scheme to apply, which decides which credential inputs appear below'
+    description:
+      'Credential scheme to apply, which decides which credential inputs appear below; Bearer and Basic set the ' +
+      'Authorization header, so leave Authorization out of Headers'
   });
 
   // Auth-specific inputs

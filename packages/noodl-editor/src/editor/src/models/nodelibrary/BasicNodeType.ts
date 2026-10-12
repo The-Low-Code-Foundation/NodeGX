@@ -1,4 +1,4 @@
-import { getParameterDisplayValue } from '@noodl-models/ExpressionParameter';
+import { portTitle } from '@nodegx/project-contract/node-title';
 import { RuntimeType } from '@noodl-models/nodelibrary/NodeLibraryData';
 
 import Model from '../../../../shared/model';
@@ -76,35 +76,8 @@ export class BasicNodeType extends Model {
    * author typed, and it is the more useful thing to read off a card.
    */
   labelForNode(node: TSFixme) {
-    // If usePortAsLabel is specified use that port value as label
-    if (node.type.usePortAsLabel && node.parameters[node.type.usePortAsLabel]) {
-      const rawValue = getParameterDisplayValue(node.parameters[node.type.usePortAsLabel]);
-
-      // Anything that is still not a primitive has no sensible card text: `String()` on an
-      // object is exactly the "[object Object]" this guards against. Treat it as no label.
-      if (rawValue === null || rawValue === undefined || typeof rawValue === 'object') {
-        return this.displayName;
-      }
-
-      let labelName = String(rawValue);
-
-      // An expression object is truthy even when its expression is empty, so the guard above
-      // (`node.parameters[...]`) cannot judge emptiness — only the resolved string can.
-      if (labelName.length === 0) {
-        return this.displayName;
-      }
-
-      const truncationMode = node.type.portLabelTruncationMode;
-      if (truncationMode === 'filename') {
-        labelName = labelName.split('/').pop();
-      } else if (truncationMode === 'length' && labelName.length > 36) {
-        labelName = labelName.slice(0, 33) + '...';
-      }
-
-      return labelName;
-    } else {
-      return this.displayName;
-    }
+    // P107 R24 — the rule's one body is `@nodegx/project-contract/node-title`, which the agent server calls too.
+    return portTitle(node.parameters, node.type) ?? this.displayName;
   }
 
   /**

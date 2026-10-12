@@ -204,6 +204,7 @@ export function NodeGraphComponentTrail({
     <div className={css['Root']}>
       <div className={css['HistoryControls']}>
         <IconButton
+          ariaLabel="Go back"
           icon={IconName.CaretLeft}
           onClick={onHistoryBack}
           variant={IconButtonVariant.OpaqueOnHover}
@@ -211,6 +212,7 @@ export function NodeGraphComponentTrail({
           UNSAFE_className={css['HistoryButton']}
         />
         <IconButton
+          ariaLabel="Go forward"
           icon={IconName.CaretRight}
           onClick={onHistoryForward}
           variant={IconButtonVariant.OpaqueOnHover}

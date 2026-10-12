@@ -33,6 +33,7 @@ import { isV2FormatEnabled } from '../services/ProjectStructure/featureFlags';
 import { decideComponentReload } from '../services/ProjectFileWatcher/decide';
 import { resolveProjectTokenValue } from './StyleTokensModel/ProjectTokenCss';
 import { lookWearersIn } from './StylesModel.usage';
+import { normalizeScriptPath } from '@noodl/runtime/src/scriptfiles';
 
 /** Which on-disk format a loaded project uses. Set at load; drives the save path. */
 export type ProjectFormatKind = 'legacy' | 'v2';
@@ -108,6 +109,13 @@ export class ProjectModel extends Model {
     3: function (project) {
       // Upgrade event senders to use string lists instead of PortEditor
       project.version = '4';
+    },
+    4: function (project) {
+      // P109 ISL-018 (ruled 2026-10-02): the run-on-value-change migration has run. It ran in
+      // `applyPatches`, before `fromJSON`, because it needs the whole document; this step records
+      // that it did, so the next open — and every reader that checks the version — skips it.
+      // From format 5 an absent `runOnChange-*` key is a ticked box, never a pre-§2 author.
+      project.version = '5';
     }
   };
 
@@ -185,11 +193,17 @@ export class ProjectModel extends Model {
   public componentAnnotations: TSFixme;
   public previews: TSFixme;
   public thumbnailURI: TSFixme;
+  /**
+   * P109 ISL-005 — the project's script files, `{ 'engine/world.js': source }`; on disk as
+   * `scripts/**.js` (`ScriptFileStore`), and handed to every runtime as `scripts` beside the components.
+   */
+  public scripts: Record<string, string>;
 
   constructor(args?: TSFixme) {
     super();
 
     this.components = [];
+    this.scripts = {};
     this.variants = [];
     this.settings = {};
     if (args) {
@@ -207,6 +221,7 @@ export class ProjectModel extends Model {
       this.version = args.version;
       this.runtimeVersion = args.runtimeVersion;
       this.metadata = args.metadata;
+      this.scripts = args.scripts ? { ...args.scripts } : {};
       // this.deviceSettings = args.deviceSettings;
     }
 
@@ -402,6 +417,7 @@ export class ProjectModel extends Model {
       description: component.description,
       created: component.created,
       modifiedBy: component.modifiedBy,
+      componentType: component.componentType,
       metadata: component.metadata ? JSON.parse(JSON.stringify(component.metadata)) : undefined
     });
 
@@ -690,6 +706,44 @@ export class ProjectModel extends Model {
     this.notifyListeners('settingsChanged');
   }
 
+  // ── P109 ISL-005: script files ──────────────────────────────────────────────
+
+  /** Every script file's path, sorted (`engine/world.js`). */
+  getScriptPaths(): string[] {
+    return Object.keys(this.scripts).sort();
+  }
+
+  getScript(path: string): string | undefined {
+    const p = normalizeScriptPath(path);
+    return p === undefined ? undefined : this.scripts[p];
+  }
+
+  /** Creates or replaces one script file. Returns its normalised path, or `undefined` for a bad path. */
+  setScript(path: string, source: string): string | undefined {
+    const p = normalizeScriptPath(path);
+    if (p === undefined || typeof source !== 'string') return undefined;
+    if (this.scripts[p] === source) return p;
+    this.scripts = { ...this.scripts, [p]: source };
+    this.notifyListeners('scriptsChanged', { path: p });
+    return p;
+  }
+
+  removeScript(path: string): boolean {
+    const p = normalizeScriptPath(path);
+    if (p === undefined || !(p in this.scripts)) return false;
+    const next = { ...this.scripts };
+    delete next[p];
+    this.scripts = next;
+    this.notifyListeners('scriptsChanged', { path: p, removed: true });
+    return true;
+  }
+
+  /** Replaces every script at once (a reload from disk). */
+  setScripts(scripts: Record<string, string> | undefined): void {
+    this.scripts = { ...(scripts || {}) };
+    this.notifyListeners('scriptsChanged', {});
+  }
+
   setSetting(name, value) {
     // The constructor takes `args.settings` verbatim, so a project saved without
     // a settings block loads with `settings === undefined` — writing must heal that.
@@ -931,6 +985,54 @@ export class ProjectModel extends Model {
 
     this.notifyListeners('componentReloadedFromDisk', { component: newModel, previous: existing });
     return 'reloaded';
+  }
+
+  /**
+   * P109 ISL-005 — REL-009b for script files: an agent (or a text editor) wrote `scripts/**.js` while
+   * this editor holds the project. Each file is adopted unless the person has an unsaved change to it;
+   * then it is refused and its baseline left alone, so the next save sees the file moved and does not
+   * write over it. Adopting fires `scriptsChanged`, which the preview hears and re-runs the Functions.
+   */
+  async reloadScriptsFromDisk(paths: string[]): Promise<Record<string, ReloadFromDiskOutcome>> {
+    const outcomes: Record<string, ReloadFromDiskOutcome> = {};
+    if (this._projectFormat !== 'v2' || !this._retainedProjectDirectory) {
+      for (const p of paths) outcomes[p] = 'not-applicable';
+      return outcomes;
+    }
+    const decisions = await projectStructureService.decideScriptReloads(this._retainedProjectDirectory, paths, this.scripts);
+    const next = { ...this.scripts };
+    const reloaded: string[] = [];
+    const refused: string[] = [];
+    for (const p of paths) {
+      const decision = decisions[p];
+      if (decision.action === 'skip-unchanged') {
+        outcomes[p] = 'unchanged';
+      } else if (decision.action === 'refuse-dirty') {
+        outcomes[p] = 'refused-dirty';
+        refused.push(p);
+      } else {
+        if (decision.text === null) delete next[p];
+        else next[p] = decision.text;
+        projectStructureService.markScriptBaseline(p, decision.text);
+        outcomes[p] = 'reloaded';
+        reloaded.push(p);
+      }
+    }
+    if (reloaded.length > 0) {
+      // Disarmed for the same reason as the project-level reload: what is adopted is already on disk.
+      const wasSaving = saveOnModelChange;
+      ProjectModel.setSaveOnModelChange(false);
+      try {
+        this.scripts = next;
+        this.notifyListeners('scriptsChanged', { paths: reloaded, fromDisk: true });
+      } finally {
+        ProjectModel.setSaveOnModelChange(wasSaving);
+      }
+    }
+    if (refused.length > 0) {
+      this.notifyListeners('scriptsReloadRefused', { paths: refused });
+    }
+    return outcomes;
   }
 
   /**
@@ -1700,7 +1802,9 @@ export class ProjectModel extends Model {
       runtimeVersion: this.runtimeVersion,
       lesson: this.lesson ? this.lesson.toJSON() : undefined,
       metadata: this.metadata,
-      variants: this.variants.map((v) => v.toJSON())
+      variants: this.variants.map((v) => v.toJSON()),
+      // P109 ISL-005. Absent when there are none, so a project without scripts serialises as before.
+      scripts: Object.keys(this.scripts || {}).length > 0 ? this.scripts : undefined
       //   deviceSettings:this.deviceSettings,
     };
     for (const i in this.components) {
@@ -1830,6 +1934,8 @@ const projectSaveTriggers = new Set(
     // ProjectModel — the project's own shape.
     'renamed',
     'settingsChanged',
+    // P109 ISL-005 — a script file created, edited or removed.
+    'scriptsChanged',
     'runtimeVersionChanged',
     'rootNodeChanged',
     'componentAdded',

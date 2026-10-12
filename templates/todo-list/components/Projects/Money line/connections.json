@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "72e6d9be-01e0-50fd-8bf1-a157ca88e455",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mlIn",
+      "fromProperty": "label",
+      "toId": "mlLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mlIn",
+      "fromProperty": "meta",
+      "toId": "mlMeta",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mlIn",
+      "fromProperty": "metaColor",
+      "toId": "mlMeta",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "mlIn",
+      "fromProperty": "amount",
+      "toId": "mlAmount",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mlIn",
+      "fromProperty": "canTick",
+      "toId": "mlTick",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mlIn",
+      "fromProperty": "canUntick",
+      "toId": "mlUntick",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mlIn",
+      "fromProperty": "key",
+      "toId": "mlOut",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "mlIn",
+      "fromProperty": "itemKey",
+      "toId": "mlOut",
+      "toProperty": "itemKey"
+    },
+    {
+      "fromId": "mlText",
+      "fromProperty": "onClick",
+      "toId": "mlOut",
+      "toProperty": "edit"
+    },
+    {
+      "fromId": "mlTick",
+      "fromProperty": "onClick",
+      "toId": "mlOut",
+      "toProperty": "tick"
+    },
+    {
+      "fromId": "mlUntick",
+      "fromProperty": "onClick",
+      "toId": "mlOut",
+      "toProperty": "untick"
+    }
+  ]
+}

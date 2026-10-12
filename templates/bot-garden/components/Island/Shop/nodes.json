@@ -1,0 +1,1237 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f43f5377-3117-5464-8a0b-e31e84f6cd07",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "shIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "requests",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 650,
+      "y": 4480
+    },
+    {
+      "id": "shRoot",
+      "type": "Group",
+      "label": "The shop",
+      "children": [
+        "shOpen",
+        "shSheet"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-shop-root"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "shOpen",
+      "type": "net.noodl.controls.button",
+      "label": "Open the shop (the balance on it)",
+      "parent": "shRoot",
+      "parameters": {
+        "backgroundColor": "var(--paper-2)",
+        "color": "var(--ink)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-shop-open",
+        "label": "🐚 0 · Shop"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "shSheet",
+      "type": "Group",
+      "label": "The shop, over the island",
+      "parent": "shRoot",
+      "children": [
+        "shPanel"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-shop",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "shPanel",
+      "type": "Group",
+      "label": "The shop’s sheet",
+      "parent": "shSheet",
+      "children": [
+        "shTop",
+        "shTabs",
+        "shLater",
+        "shItems",
+        "shCard"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "cssClassName": "bg-panel bg-shop-panel",
+        "paddingTop": "var(--space-3-5)",
+        "paddingBottom": "var(--space-3-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "shTop",
+      "type": "Group",
+      "label": "The title, the balance, close",
+      "parent": "shPanel",
+      "children": [
+        "shTitle",
+        "shBal",
+        "shClose"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "nowrap",
+        "columnGap": "var(--space-2-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "shTitle",
+      "type": "Text",
+      "label": "The shop",
+      "parent": "shTop",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h2",
+        "fontSize": {
+          "value": 22,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2,
+        "cssClassName": "bg-grow"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "shBal",
+      "type": "Text",
+      "label": "Her shells",
+      "parent": "shTop",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "cssClassName": "bg-shop-bal"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "shClose",
+      "type": "net.noodl.controls.button",
+      "label": "Close the shop",
+      "parent": "shTop",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--ink-2)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-shop-close",
+        "label": "✕"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "shTabs",
+      "type": "Group",
+      "label": "The five tabs",
+      "parent": "shPanel",
+      "children": [
+        "shTabEach"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "cssClassName": "bg-shop-tabs"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "shTabEach",
+      "type": "For Each",
+      "label": "One chip per tab",
+      "parent": "shTabs",
+      "parameters": {
+        "template": "/Robot/Chip",
+        "templateType": "explicit"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "shLater",
+      "type": "Text",
+      "label": "What comes later",
+      "parent": "shPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-shop-later",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "shItems",
+      "type": "Group",
+      "label": "What this tab sells",
+      "parent": "shPanel",
+      "children": [
+        "shItemEach"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "cssClassName": "bg-shop-items"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "shItemEach",
+      "type": "For Each",
+      "label": "One card per item",
+      "parent": "shItems",
+      "parameters": {
+        "template": "/Island/Shop item",
+        "templateType": "explicit"
+      },
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "shCard",
+      "type": "Group",
+      "label": "The purchase card",
+      "parent": "shPanel",
+      "children": [
+        "shCHead",
+        "shFigs",
+        "shShort",
+        "shDone",
+        "shNone",
+        "shNameL",
+        "shName",
+        "shWhichL",
+        "shBots",
+        "shUseL",
+        "shPlots",
+        "shBtns"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2-5)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "cssClassName": "bg-panel bg-shop-card",
+        "paddingTop": "var(--space-3-5)",
+        "paddingBottom": "var(--space-3-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "shCHead",
+      "type": "Group",
+      "label": "The picture, the name, the line",
+      "parent": "shCard",
+      "children": [
+        "shCPic",
+        "shCText"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "nowrap",
+        "columnGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "shCPic",
+      "type": "Text",
+      "label": "The picture",
+      "parent": "shCHead",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 48,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "lineHeight": 1.1,
+        "cssClassName": "bg-shop-pic"
+      },
+      "x": 340,
+      "y": 1840
+    },
+    {
+      "id": "shCText",
+      "type": "Group",
+      "label": "The name and the line",
+      "parent": "shCHead",
+      "children": [
+        "shCName",
+        "shCLine"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-0-5)",
+        "cssClassName": "bg-grow"
+      },
+      "x": 340,
+      "y": 1960
+    },
+    {
+      "id": "shCName",
+      "type": "Text",
+      "label": "Its name",
+      "parent": "shCText",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2,
+        "cssClassName": "bg-shop-card-name"
+      },
+      "x": 400,
+      "y": 2080
+    },
+    {
+      "id": "shCLine",
+      "type": "Text",
+      "label": "One line",
+      "parent": "shCText",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)"
+      },
+      "x": 400,
+      "y": 2200
+    },
+    {
+      "id": "shFigs",
+      "type": "Group",
+      "label": "You have · it costs · left after",
+      "parent": "shCard",
+      "children": [
+        "shHave",
+        "shCost",
+        "shLeft"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)",
+        "cssClassName": "bg-shop-figs",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "shHave",
+      "type": "Text",
+      "label": "What she has",
+      "parent": "shFigs",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "cssClassName": "bg-shop-fig"
+      },
+      "x": 340,
+      "y": 2440
+    },
+    {
+      "id": "shCost",
+      "type": "Text",
+      "label": "What it costs",
+      "parent": "shFigs",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "cssClassName": "bg-shop-fig"
+      },
+      "x": 340,
+      "y": 2560
+    },
+    {
+      "id": "shLeft",
+      "type": "Text",
+      "label": "What is left after",
+      "parent": "shFigs",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "cssClassName": "bg-shop-fig bg-shop-left",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 2680
+    },
+    {
+      "id": "shShort",
+      "type": "Text",
+      "label": "How many more shells",
+      "parent": "shCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "cssClassName": "bg-shop-short",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 2800
+    },
+    {
+      "id": "shDone",
+      "type": "Text",
+      "label": "It is hers",
+      "parent": "shCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "cssClassName": "bg-shop-done",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 2920
+    },
+    {
+      "id": "shNone",
+      "type": "Text",
+      "label": "Why not now",
+      "parent": "shCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-shop-none",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3040
+    },
+    {
+      "id": "shNameL",
+      "type": "Text",
+      "label": "Its name",
+      "parent": "shCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2,
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3160
+    },
+    {
+      "id": "shName",
+      "type": "net.noodl.controls.textinput",
+      "label": "The new robot’s name",
+      "parent": "shCard",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 320,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 20,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "backgroundColor": "var(--card)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderColor": "var(--line)",
+        "borderRadius": {
+          "value": 14,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "maxLength": 16,
+        "cssClassName": "bg-shop-name-box",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3280
+    },
+    {
+      "id": "shWhichL",
+      "type": "Text",
+      "label": "Which robot",
+      "parent": "shCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2,
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3400
+    },
+    {
+      "id": "shBots",
+      "type": "Group",
+      "label": "Her robots a brain fits",
+      "parent": "shCard",
+      "children": [
+        "shBotEach"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "cssClassName": "bg-shop-chips",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3520
+    },
+    {
+      "id": "shBotEach",
+      "type": "For Each",
+      "label": "One chip per robot",
+      "parent": "shBots",
+      "parameters": {
+        "template": "/Robot/Chip",
+        "templateType": "explicit"
+      },
+      "x": 340,
+      "y": 3640
+    },
+    {
+      "id": "shUseL",
+      "type": "Text",
+      "label": "Use it on a job",
+      "parent": "shCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2,
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3760
+    },
+    {
+      "id": "shPlots",
+      "type": "Group",
+      "label": "The jobs it helps now",
+      "parent": "shCard",
+      "children": [
+        "shPlotEach"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "cssClassName": "bg-shop-chips",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3880
+    },
+    {
+      "id": "shPlotEach",
+      "type": "For Each",
+      "label": "One chip per job",
+      "parent": "shPlots",
+      "parameters": {
+        "template": "/Robot/Chip",
+        "templateType": "explicit"
+      },
+      "x": 340,
+      "y": 4000
+    },
+    {
+      "id": "shBtns",
+      "type": "Group",
+      "label": "Buy, use, or not now",
+      "parent": "shCard",
+      "children": [
+        "shBuy",
+        "shUse",
+        "shNotNow"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2-5)",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 4120
+    },
+    {
+      "id": "shBuy",
+      "type": "net.noodl.controls.button",
+      "label": "Buy it",
+      "parent": "shBtns",
+      "parameters": {
+        "backgroundColor": "var(--leaf)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-shop-buy",
+        "label": "Buy it",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 4240
+    },
+    {
+      "id": "shUse",
+      "type": "net.noodl.controls.button",
+      "label": "Use it",
+      "parent": "shBtns",
+      "parameters": {
+        "backgroundColor": "var(--leaf)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-shop-use",
+        "label": "Use it",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 4360
+    },
+    {
+      "id": "shNotNow",
+      "type": "net.noodl.controls.button",
+      "label": "Not now",
+      "parent": "shBtns",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--ink-2)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-shop-no",
+        "label": "Not now"
+      },
+      "x": 340,
+      "y": 4480
+    },
+    {
+      "id": "shT",
+      "type": "/Logic/Translate words",
+      "label": "In her language",
+      "x": 650,
+      "y": 640
+    },
+    {
+      "id": "shRows",
+      "type": "/Logic/Shop rows",
+      "label": "The balance, the tabs, the items",
+      "x": 650,
+      "y": 160
+    },
+    {
+      "id": "shCardFn",
+      "type": "/Logic/Shop card",
+      "label": "The purchase card",
+      "x": 650,
+      "y": 2080
+    },
+    {
+      "id": "shBuyFn",
+      "type": "/Logic/Buy",
+      "label": "Buy it",
+      "x": 650,
+      "y": 3280
+    },
+    {
+      "id": "shUseFn",
+      "type": "/Logic/Use helper",
+      "label": "Use the helper on that job",
+      "x": 650,
+      "y": 4360
+    },
+    {
+      "id": "shOpenState",
+      "type": "States",
+      "label": "The shop open or not",
+      "parameters": {
+        "states": "closed,open",
+        "values": "open",
+        "useTransitions": false,
+        "type-open": "boolean",
+        "value-closed-open": false,
+        "value-open-open": true
+      },
+      "x": 650,
+      "y": 400
+    },
+    {
+      "id": "shBuyOk",
+      "type": "Condition",
+      "label": "Was it bought?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 650,
+      "y": 4600
+    },
+    {
+      "id": "shUseOk",
+      "type": "Condition",
+      "label": "Was the helper used?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 650,
+      "y": 4720
+    },
+    {
+      "id": "shTabVar",
+      "type": "Variable2",
+      "label": "The tab open",
+      "parameters": {
+        "name": "gardenShopTab"
+      },
+      "x": 650,
+      "y": 4840
+    },
+    {
+      "id": "shItemVar",
+      "type": "Variable2",
+      "label": "The item tapped",
+      "parameters": {
+        "name": "gardenShopItem"
+      },
+      "x": 650,
+      "y": 4960
+    },
+    {
+      "id": "shBotVar",
+      "type": "Variable2",
+      "label": "The robot chosen for a brain",
+      "parameters": {
+        "name": "gardenShopRobot"
+      },
+      "x": 650,
+      "y": 5080
+    },
+    {
+      "id": "shPlotVar",
+      "type": "Variable2",
+      "label": "The job chosen for a helper",
+      "parameters": {
+        "name": "gardenShopPlot"
+      },
+      "x": 650,
+      "y": 5200
+    },
+    {
+      "id": "shBoughtVar",
+      "type": "Variable2",
+      "label": "What was just bought",
+      "parameters": {
+        "name": "gardenShopBought"
+      },
+      "x": 650,
+      "y": 5320
+    },
+    {
+      "id": "shUsedVar",
+      "type": "Variable2",
+      "label": "What was just used, and where",
+      "parameters": {
+        "name": "gardenShopUsed"
+      },
+      "x": 650,
+      "y": 5440
+    },
+    {
+      "id": "shIsleVar",
+      "type": "Variable2",
+      "label": "The island, running",
+      "parameters": {
+        "name": "gardenIsland"
+      },
+      "x": 650,
+      "y": 5560
+    },
+    {
+      "id": "shSetTab",
+      "type": "Set Variable",
+      "label": "Open this tab",
+      "parameters": {
+        "name": "gardenShopTab"
+      },
+      "x": 650,
+      "y": 1120
+    },
+    {
+      "id": "shSetItem",
+      "type": "Set Variable",
+      "label": "Open this item’s card",
+      "parameters": {
+        "name": "gardenShopItem"
+      },
+      "x": 650,
+      "y": 1480
+    },
+    {
+      "id": "shClearItem",
+      "type": "Set Variable",
+      "label": "No card",
+      "parameters": {
+        "name": "gardenShopItem",
+        "setWith": "string",
+        "value": "none"
+      },
+      "x": 650,
+      "y": 280
+    },
+    {
+      "id": "shSetBot",
+      "type": "Set Variable",
+      "label": "This robot",
+      "parameters": {
+        "name": "gardenShopRobot"
+      },
+      "x": 650,
+      "y": 3640
+    },
+    {
+      "id": "shClearBot",
+      "type": "Set Variable",
+      "label": "No robot chosen",
+      "parameters": {
+        "name": "gardenShopRobot",
+        "setWith": "string",
+        "value": "none"
+      },
+      "x": 650,
+      "y": 1600
+    },
+    {
+      "id": "shSetPlot",
+      "type": "Set Variable",
+      "label": "This job",
+      "parameters": {
+        "name": "gardenShopPlot"
+      },
+      "x": 650,
+      "y": 4000
+    },
+    {
+      "id": "shClearPlot",
+      "type": "Set Variable",
+      "label": "No job chosen",
+      "parameters": {
+        "name": "gardenShopPlot",
+        "setWith": "string",
+        "value": "none"
+      },
+      "x": 650,
+      "y": 1720
+    },
+    {
+      "id": "shSetBought",
+      "type": "Set Variable",
+      "label": "What was just bought",
+      "parameters": {
+        "name": "gardenShopBought"
+      },
+      "x": 650,
+      "y": 5680
+    },
+    {
+      "id": "shClearBought",
+      "type": "Set Variable",
+      "label": "Nothing just bought",
+      "parameters": {
+        "name": "gardenShopBought",
+        "setWith": "string",
+        "value": "none"
+      },
+      "x": 650,
+      "y": 1840
+    },
+    {
+      "id": "shSetUsed",
+      "type": "Set Variable",
+      "label": "What was just used",
+      "parameters": {
+        "name": "gardenShopUsed"
+      },
+      "x": 650,
+      "y": 5800
+    },
+    {
+      "id": "shClearUsed",
+      "type": "Set Variable",
+      "label": "Nothing just used",
+      "parameters": {
+        "name": "gardenShopUsed",
+        "setWith": "string",
+        "value": "none"
+      },
+      "x": 650,
+      "y": 1960
+    },
+    {
+      "id": "shSetIsle",
+      "type": "Set Variable",
+      "label": "The island with the helper at work",
+      "parameters": {
+        "name": "gardenIsland"
+      },
+      "x": 650,
+      "y": 5920
+    },
+    {
+      "id": "shOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "write",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 650,
+      "y": 6040
+    }
+  ],
+  "visualRoots": [
+    "shRoot"
+  ]
+}

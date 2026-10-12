@@ -4,19 +4,21 @@
  * Two things are graded here, and the first is the reason the second is allowed
  * to exist:
  *
- *  1. **Agreement with the runtime.** `functionPorts.ts` copies five regexes out
- *     of `@noodl/runtime`'s `javascriptnodeparser.js` rather than importing it
- *     (that layer runs in the editor, the MCP server and a CLI, and must not
- *     pull the runtime in). A copy that drifts turns this gate from a help into
- *     a liar, so both implementations are run over one corpus and diffed. This
- *     is the only place the real parser is loaded; it is a test-time dependency,
- *     not a product one.
+ *  1. **Agreement with the Function's reader.** Since P109 ISL-006 `functionPorts.ts`
+ *     holds no regexes: it reads `@nodegx/project-contract/function-ports`, the
+ *     module the runtime's Function node imports. This file pins the mapping,
+ *     and pins where that reader parts from the old shared one
+ *     (`javascriptnodeparser.js`, still used by the Script node and the filters):
+ *     on exactly the rows ruling 3 changed. The old parser is loaded here as a
+ *     test-time dependency, not a product one.
  *
  *  2. **The check itself**, with its negative controls. The mistake is invisible
  *     to everything else we own — a bare `toProperty: "amount"` is four
  *     well-formed strings to zod, a runtime-discovered port to the semantic
  *     validator, and a red canvas warning to the user an hour later.
  */
+
+import { functionScriptPortNames } from '@nodegx/project-contract/function-ports';
 
 import { loadDefaultCatalog } from '../../src/editor/src/validation/catalog';
 import { DiagnosticCode } from '../../src/editor/src/validation/diagnostics';
@@ -40,10 +42,24 @@ const CORPUS: string[] = [
   'await fetch(Inputs.url).then((r) => r.json()).then((j) => { Outputs.body = j; Outputs.Success(); });',
   'Outputs.done();', // a signal whose display name is also a declared port
   '', // no script
-  'const nothing = 1;' // no ports at all
+  'const nothing = 1;', // no ports at all
+  // P109 ISL-006 — the shapes ruling 3 decided ("Fix all three"), plus the ones a comment strip must not break.
+  'Outputs.do_it();', // a signal now; the old reader made a `*` value port (same name, so equal by name here)
+  "const k = 'c';\nOutputs[k] = 1;\nconst v = Inputs[k];", // a computed key mints nothing, in either reader
+  'const both = Inputs["a"] + Inputs["b"];', // two inputs now; the old reader made one, `a"] + Inputs["b`
+  'const url = "https://api.example.com/v1/" + Inputs.id;\nOutputs.ok = true;', // a `//` in a string is no comment
+  'const re = /https?:\\/\\//;\nOutputs.k = re.test(Inputs.s);', // nor in a regular expression
+  '/* Outputs.gone = 1; */\nOutputs.kept = `a // ${Inputs.t}`;' // a block comment goes; a template keeps its text
 ];
 
-describe('FIX-007 — the mined port set agrees with the runtime parser', () => {
+/** The rows where ruling 3 says the Function's reader and the old shared reader name different ports. */
+const RULED_DIFFERENCES = [
+  '// Inputs.commented is mined too — the parser does not strip comments\nOutputs.x = 1;',
+  'const both = Inputs["a"] + Inputs["b"];',
+  '/* Outputs.gone = 1; */\nOutputs.kept = `a // ${Inputs.t}`;'
+];
+
+describe('FIX-007 — the mined port set agrees with the Function reader the runtime uses (P109 ISL-006)', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const JavascriptNodeParser = require('../../../noodl-runtime/src/javascriptnodeparser');
 
@@ -63,11 +79,21 @@ describe('FIX-007 — the mined port set agrees with the runtime parser', () => 
     return { inputs, outputs };
   }
 
-  it.each(CORPUS)('mines the same names as the runtime: %j', (script) => {
-    const theirs = runtimePorts(script);
+  it.each(CORPUS)('mines the names the Function reader makes: %j', (script) => {
+    const theirs = functionScriptPortNames(script);
     const ours = mineFunctionScriptPorts(script);
     expect([...ours.inputs].sort()).toEqual([...theirs.inputs].sort());
-    expect([...ours.outputs].sort()).toEqual([...theirs.outputs].sort());
+    expect([...ours.outputs].sort()).toEqual([...theirs.signals, ...theirs.outputs].sort());
+  });
+
+  it('differs from the old shared reader on exactly the rows ruling 3 changed', () => {
+    const differing = CORPUS.filter((script) => {
+      const old = runtimePorts(script);
+      const now = mineFunctionScriptPorts(script);
+      const same = (a: Set<string>, b: Set<string>) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
+      return !same(old.inputs, now.inputs) || !same(old.outputs, now.outputs);
+    });
+    expect(differing).toEqual(RULED_DIFFERENCES);
   });
 
   it('names the ports with the prefix, and displays them without it', () => {

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "033d873c-17ca-51a6-8528-7c653e020a66",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "glowIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "glowId",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "live",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "glowFn",
+      "type": "JavaScriptFunction",
+      "label": "Glow",
+      "parameters": {
+        "functionScript": "\nvar g = Inputs.glowId;\nOutputs.id = Inputs.live === true && g !== null && g !== undefined && g !== '' ? String(g) : '';\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-glowId",
+          "displayName": "glowId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-live",
+          "displayName": "live",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "glowOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

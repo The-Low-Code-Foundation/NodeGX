@@ -55,6 +55,96 @@
 export interface StorageAclOption {
   access: 'read' | 'write';
   keys: string[];
+  /**
+   * P116 ONT-004: a collection rule that narrows what this caller may reach —
+   * `{ "path": … }` in `security.json`, compiled to a `$path` from the caller's
+   * own `_User` row. It rides INSIDE the ACL option, and is ANDed into the same
+   * predicate as the keys (`buildAclPredicate`), so every reader that passes
+   * the ACL applies it and no reader can forget it. Scoped to one collection:
+   * a record `include`d from another collection is not narrowed by this
+   * collection's rule.
+   */
+  only?: { collection: string; where: Record<string, unknown> };
+  /**
+   * P116 ONT-012 (R-b) — *"a bill changes only while it is a draft"*: a condition on the record's
+   * own values as they are BEFORE the write, from `security.json` `collections.<c>.onlyWhile`.
+   * Read by the backend's facade, never by an adapter: the facade ANDs `where` into `only` for the
+   * one write it binds, so the check and the write are one statement on every engine.
+   *
+   * Per collection (bug P116-S18-CASCADEHOLD, R-i): every collection that has a rule, not only the
+   * one written, because a delete reaches others through its links (`goes-too`, `stays-unlinked`)
+   * and each row it reaches is judged by its own collection's rule before anything is deleted.
+   */
+  onlyWhile?: Record<string, { update?: OnlyWhileRule; delete?: OnlyWhileRule | 'never' }>;
+  /**
+   * P116 ONT-012 (R-a) — the fields this caller may not read, per collection (every collection
+   * with a field rule, not only the one being read: an `include` and a `$path` hop reach others).
+   * Read by the backend's facade, never by an adapter: the facade strips them from every record
+   * it returns and refuses a request that names one. `shownWhere` = shown only on the rows it
+   * reaches; absent = hidden on every row.
+   */
+  hidden?: Record<string, Array<{ field: string; shownWhere?: Record<string, unknown> }>>;
+  /**
+   * P116 bug INCLUDECLP — what this caller may read of the OTHER collections a request reaches,
+   * by each one's own collection rule: an `include` reads its target by `get`, a `$path` walks a
+   * collection by `find`. Without it, both read a collection under the row ACL alone, and a
+   * collection closed to the caller came back embedded. Read by the backend's facade, never by
+   * an adapter. Absent when every collection answers `'all'`.
+   */
+  reach?: { get: CollectionReach; find: CollectionReach };
+}
+
+/** P116 bug INCLUDECLP — one rule's answer for one caller, per collection. */
+export interface CollectionReach {
+  /** Collections the rules name. */
+  by: Record<string, Reach>;
+  /** Every other collection (the defaults). */
+  otherwise: Reach;
+}
+
+/** Every row the row ACL lets through; none; or only the rows a path rule reaches (`where` is a `$path`). */
+export type Reach = 'all' | 'none' | { where: Record<string, unknown> };
+
+/** P116 ONT-012 — one `onlyWhile` entry: the condition, the fields free of it, the refusal's words. */
+export interface OnlyWhileRule {
+  /** A Parse-wire filter on the record's own fields. ONT-014: optional when `moves` or `frozen` says the rule. */
+  where?: Record<string, unknown>;
+  /** `update` only: a change to these fields alone is not held to the condition. */
+  except?: string[];
+  /** The refusal in the person's words (for `where`; `moves` and `frozen` carry their own). */
+  says?: string;
+  /**
+   * P116 ONT-014 — *"an assignment goes from draft to issued to withdrawn, never back; only a coach
+   * issues one"*. Per field, per OLD value: the values it may move to. `"*"` is every old value no
+   * entry names; without it those move freely (the rule says what is forbidden). Setting a field to
+   * the value it has is not a move.
+   */
+  moves?: Record<string, Record<string, OnlyWhileMove>>;
+  /** P116 ONT-014 — *"once issued, its number and amount never change"*: fields that do not change, `unless` the old record matches. */
+  frozen?: OnlyWhileFrozen;
+}
+
+/** P116 ONT-014 — the moves one old value may make. */
+export interface OnlyWhileMove {
+  /** The values it may move to. `[]` = none. */
+  to: string[];
+  /**
+   * Who may make the move, decided for ONE caller before the write (`security.json` says `by`, a
+   * rule value; `SecurityState.aclFor` compiles it): absent or `true` = this caller, `false` = not
+   * this caller, `{ where }` = only on the records a path rule reaches from them.
+   */
+  admits?: boolean | { where: Record<string, unknown> };
+  /** The refusal in the person's words. */
+  says?: string;
+}
+
+/** P116 ONT-014 — fields that never change, or not once a condition on the old record stops holding. */
+export interface OnlyWhileFrozen {
+  /** The fields; `"*"` = every field but `except` (*"never edited"*). */
+  fields: string[] | '*';
+  /** A filter on the OLD record under which the fields may still change. Absent = from the first save. */
+  unless?: Record<string, unknown>;
+  says?: string;
 }
 
 /**
@@ -66,6 +156,13 @@ export interface StorageAclOption {
  * on the canvas asks for, this one is what the database is asked for.
  */
 export interface StorageQueryOptions {
+  /**
+   * A Parse-wire `where`. P116 ONT-004 adds one top-level key to it, `$path`:
+   * the neutral `path` operator (`filter.ts` `PathFilter`) with every nested
+   * `where` in this same wire spelling. `conformance/cases/paths.ts` is what
+   * it means; `pathProblem` is its shape; `MAX_PATH_DEPTH` its ceiling. An
+   * adapter that cannot follow a path refuses it by name — never one hop.
+   */
   where?: Record<string, unknown>;
   sort?: string[] | string;
   limit?: number;
@@ -205,6 +302,26 @@ export interface StorageColumn {
   /** Optional: some import paths carry a column with no declared type yet. */
   type?: string;
   targetClass?: string;
+  /**
+   * P116 R10 — a Pointer only: what happens to the rows holding this link when the record it points
+   * at is deleted. Kept by the backend at delete time, never a foreign key (`targetGoes.ts`).
+   */
+  whenTargetGoes?: 'goes-too' | 'stays-unlinked' | 'blocks';
+  /** P116 ONT-015 — a text column only: a number the store hands out on create (`conformance/cases/series.ts`). */
+  series?: StorageSeries;
+}
+
+/**
+ * P116 ONT-015 — `INV-{YYYY}-{####}`: literal text, `{YYYY}`, `{YY}`, `{MM}` and one run of `#` for the
+ * counter (its width a minimum). The store fills the field on create, going up by one, never handing a
+ * number out twice — not after a delete, not to two creates at once. `restart` keys the counter by the
+ * year or the month (UTC, the backend's clock). `gapFree` (only on the person's word, R-g): the number
+ * is taken inside the record's insert, so a refused create gives it back.
+ */
+export interface StorageSeries {
+  format: string;
+  restart?: 'never' | 'year' | 'month';
+  gapFree?: boolean;
 }
 
 /**
@@ -299,6 +416,8 @@ export interface StorageTableSchema {
   indexes?: StorageIndexDecl[];
   /** HLT-016 — the rules every row must satisfy. */
   checks?: StorageCheckDecl[];
+  /** P116 ONT-003 — what the collection is, in the words of whoever said it. Kept, never interpreted. */
+  description?: string;
 }
 
 /** Options for `IStorageSchema.generatePostgresSQL`. */
@@ -310,6 +429,9 @@ export interface StoragePostgresExportOptions {
    */
   updatedAtTrigger?: boolean;
 }
+
+/** A collection rule as the Supabase export receives it: string atoms, or an object atom it must refuse. */
+export type StorageExportRule = string | object | Array<string | object>;
 
 /**
  * Options for `IStorageSchema.generateSupabaseSQL`.
@@ -323,14 +445,19 @@ export interface StoragePostgresExportOptions {
  */
 export interface StorageSupabaseExportOptions {
   security?: {
-    defaults: { permissions: Record<string, string | string[]>; creatorOwns?: boolean };
-    collections?: Record<string, { permissions?: Record<string, string | string[]>; creatorOwns?: boolean }>;
+    /**
+     * A rule is a string atom or a list of them; P116 ONT-004 adds an
+     * object-shaped atom (a rule through a path), which no policy can express
+     * and which the generator refuses by name (`CANNOT_CROSS`).
+     */
+    defaults: { permissions: Record<string, StorageExportRule>; creatorOwns?: boolean };
+    collections?: Record<string, { permissions?: Record<string, StorageExportRule>; creatorOwns?: boolean }>;
   };
   userIdClaim?: string;
 }
 
 /**
- * The schema surface — 16 names, every one called by `nodegx-backend` today.
+ * The schema surface — 18 names, every one called by `nodegx-backend` today.
  *
  * This replaces `persistence/SchemaManagerLike.ts`, whose own docstring asked
  * to be replaced ("it is a stand-in, and it says so on purpose"). The list is
@@ -338,7 +465,7 @@ export interface StorageSupabaseExportOptions {
  * called, so that a second adapter has something to implement rather than a
  * class to imitate.
  *
- * **On the optional members:** `changeColumnType`, `deleteTable`,
+ * **On the optional members:** `changeColumnType`, `deleteTable`, `renameTable`,
  * `reconcileIndexes` and `indexStatus` are optional and feature-detected at
  * their call sites, because this interface describes whatever adapter the
  * service was handed and an older one predates them. The two that are reachable
@@ -348,7 +475,7 @@ export interface IStorageSchema {
   // --- tables and columns --------------------------------------------------
 
   /** `byob-admin.ts:352` (createTable route); `AdapterFacade.ts:383`. */
-  createTable(spec: { name: string; columns: StorageColumn[] }): boolean;
+  createTable(spec: { name: string; columns: StorageColumn[]; description?: string }): boolean;
   /** `byob-admin.ts:366`; `AdapterFacade.ts:390, 407`. */
   addColumn(table: string, column: StorageColumn): void;
   /** `byob-admin.ts:375` (renameColumn route). */
@@ -364,6 +491,51 @@ export interface IStorageSchema {
   ): { changed: boolean; from?: string; rebuilt?: boolean; convertedValues?: number };
   /** Optional: `backup/schema-migrate.ts` feature-detects it before calling. */
   deleteTable?(table: string): boolean;
+  /**
+   * P116 ONT-007: rename a collection, keeping its records — a noun the person calls something
+   * else now. Carries what is keyed by the name and nothing more: the `_Schema` declaration,
+   * the two built-in indexes, the junction tables the collection owns, and every link
+   * (`targetClass`) that points at it — another collection's, and its own to itself (s11). Throws `code: 'TABLE_IN_USE'` while a
+   * declared index, a check or a search index is built under the old name — those are taken
+   * off first and put back after, on purpose, the way `dropColumn` refuses (`COLUMN_IN_USE`).
+   * Throws when the new name is taken, the old one is unknown, or either is the backend's own
+   * (`_`-prefixed). Optional — `byob-admin.ts` answers 501 without it.
+   */
+  renameTable?(oldName: string, newName: string): boolean;
+  /**
+   * P116 ONT-007 s11: say again what a collection — and any of its fields — is, in the person's
+   * words now (`description`; `columns` by field name). Kept with the declaration and never
+   * interpreted, like `createTable`'s `description`, which writes them once; this is what changes
+   * them. Empty or null takes the words away. Throws on a collection or a field it does not
+   * have. Optional — `byob-admin.ts` answers 501 without it.
+   */
+  describeTable?(table: string, description: string | null, columns?: Record<string, string | null>): boolean;
+  /**
+   * P116 R10: say again, per link, what happens to a record when the one it points at goes
+   * (`whenTargetGoes`, by field name; `null` takes the rule away). Only a Pointer may carry one, and
+   * `stays-unlinked` not on a required field. The backend keeps it at delete time (`targetGoes.ts`);
+   * this only changes the declaration. Throws on a collection or field the declaration does not
+   * have, or a rule the field cannot carry. Optional — `byob-admin.ts` answers 501 without it.
+   */
+  setWhenTargetGoes?(table: string, columns: Record<string, 'goes-too' | 'stays-unlinked' | 'blocks' | null>): boolean;
+  /**
+   * P116 ONT-015 §3.3: put a series on fields the collection already has (`null` takes it off). The
+   * records holding no value are numbered in the order they were made, each in its own period; the
+   * ones that hold one keep it; the counter starts above the highest number held and never moves
+   * backward — the declaration, the numbers and the counter in one transaction. Throws on a field the
+   * declaration does not have or a series it cannot keep. Optional — `byob-admin.ts` answers 501 without it.
+   */
+  setSeries?(table: string, columns: Record<string, StorageSeries | null>): boolean;
+  /**
+   * P116-ONT-007-required: make fields the collection already has required (`true`) or optional
+   * (`false`), over the records it holds — the column's NOT NULL and the declaration together.
+   * Throws `code: 'FIELD_EMPTY'` (with `count`) while any record holds nothing in a field made
+   * required: SQLite before anything changes, PostgreSQL at the queue's barrier. Throws on a field
+   * the declaration does not have, a system field, a list of links, or a link that stays without one
+   * when its record goes. Returns false when every field was already as asked. Optional —
+   * `byob-admin.ts` answers 501 without it.
+   */
+  setRequired?(table: string, columns: Record<string, boolean>): boolean;
   /**
    * BMG-003: drop a column (a Relation's junction table goes with it). Throws
    * `code: 'COLUMN_IN_USE'` naming the declared index, check or search opt-in

@@ -417,7 +417,7 @@ describe('SBR-012 §4 — AC4: the gate actually runs', () => {
    * it never runs. This package has no barrel; `jest.config.js` matches
    * `tests/**\/*.test.ts` by glob, so discovery is by filename. The AC's
    * substance is therefore checked where it actually lives: this file's name is
-   * matched by that glob, `test:packages` scopes `@noodl/mcp`, and `pr.yml` runs
+   * matched by that glob, `test:packages` scopes `@nodegx/mcp`, and `pr.yml` runs
    * `test:packages`.
    *
    * ⚠️ It is `test:packages`, NOT `test:ci`. `test:ci` is the editor's own
@@ -439,7 +439,7 @@ describe('SBR-012 §4 — AC4: the gate actually runs', () => {
     const root = JSON.parse(fs.readFileSync(path.join(repo, 'package.json'), 'utf8')) as {
       scripts: Record<string, string>;
     };
-    expect(root.scripts['test:packages']).toContain('@noodl/mcp');
+    expect(root.scripts['test:packages']).toContain('@nodegx/mcp');
     const pr = fs.readFileSync(path.join(repo, '.github', 'workflows', 'pr.yml'), 'utf8');
     expect(pr).toContain('npm run test:packages');
   });

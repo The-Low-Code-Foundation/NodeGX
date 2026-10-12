@@ -154,7 +154,7 @@ describe('TPL-008 — light and dark, driven', () => {
         await clickThemeSwitch(page);
         R.s4 = { ...(await settled('switched to dark', DARK.ground)), switches: await themeSwitches(page) };
         step('§4 dialog');
-        await clickButtonBeside(page, MOT, 3, 2);
+        await clickButtonBeside(page, MOT, 1, 0);
         await until('close dialog', () => text(page), (s) => s.includes('What happened?'));
         await wait(500);
         R.panel = await page.evaluate(PANEL);

@@ -9,7 +9,7 @@
  * must require neither. `noodl-mcp/lessons/wholeSolutionGrader.ts` is one
  * implementation, for the sidecar.
  *
- * It is not reachable from here. `noodl-editor` has **no `@noodl/mcp`
+ * It is not reachable from here. `noodl-editor` has **no `@nodegx/mcp`
  * dependency** — the dependency runs the other way, `noodl-mcp` importing this
  * package's pure modules — and adding one to reach an adapter would invert it.
  * That is not a gap to patch: the editor owns its own copy of both halves of the

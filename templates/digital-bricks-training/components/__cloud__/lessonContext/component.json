@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c283de44-7cce-420d-bb7c-04b40a91b111",
+  "name": "lessonContext",
+  "path": "/#__cloud__/lessonContext",
+  "type": "cloud",
+  "created": "2026-10-01T18:00:00.000Z",
+  "modified": "2026-10-01T18:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Everything a lesson for one learner and one step is written against: their project and saved answers, the step on their path, the concept's teaching body, the capture fields their other lessons use, and who else has a published lesson on it (TASK-L189)."
+}

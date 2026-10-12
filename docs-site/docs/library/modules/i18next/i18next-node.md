@@ -19,3 +19,12 @@ This is triggered when the current language is changed, as a result of a signal 
 
 **CurrentLanguage**
 Contains the language code of the currently set language.
+
+## Which language a page starts in
+
+With no **ChangeLanguage** sent, the first of these that names a language wins: a `?lng=fr` in the address, the
+language the person last chose on this device (kept in the browser's local storage under `i18nextLng` every time the
+language changes), then the browser's own language. A language with no bundle falls back to English.
+
+Every time the language changes the page's `<html lang>` follows it, so screen readers and the browser's translate
+offer know which language the page is in.

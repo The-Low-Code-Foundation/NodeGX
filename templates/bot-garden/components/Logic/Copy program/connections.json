@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2516c2cb-c942-5184-8fc0-ed27f38b7aa7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "copyprogramIn",
+      "fromProperty": "band",
+      "toId": "copyprogramFn",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "copyprogramIn",
+      "fromProperty": "from",
+      "toId": "copyprogramFn",
+      "toProperty": "in-from"
+    },
+    {
+      "fromId": "copyprogramIn",
+      "fromProperty": "lang",
+      "toId": "copyprogramFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "copyprogramIn",
+      "fromProperty": "model",
+      "toId": "copyprogramFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "copyprogramIn",
+      "fromProperty": "profileId",
+      "toId": "copyprogramFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "copyprogramIn",
+      "fromProperty": "to",
+      "toId": "copyprogramFn",
+      "toProperty": "in-to"
+    },
+    {
+      "fromId": "copyprogramIn",
+      "fromProperty": "words",
+      "toId": "copyprogramFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "copyprogramIn",
+      "fromProperty": "go",
+      "toId": "copyprogramFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "copyprogramFn",
+      "fromProperty": "out-error",
+      "toId": "copyprogramOut",
+      "toProperty": "error"
+    },
+    {
+      "fromId": "copyprogramFn",
+      "fromProperty": "out-model",
+      "toId": "copyprogramOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "copyprogramFn",
+      "fromProperty": "out-ok",
+      "toId": "copyprogramOut",
+      "toProperty": "ok"
+    },
+    {
+      "fromId": "copyprogramFn",
+      "fromProperty": "out-told",
+      "toId": "copyprogramOut",
+      "toProperty": "told"
+    },
+    {
+      "fromId": "copyprogramFn",
+      "fromProperty": "success",
+      "toId": "copyprogramOut",
+      "toProperty": "ran"
+    }
+  ]
+}

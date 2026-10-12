@@ -1,0 +1,713 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c7e59d6a-6809-4ebe-9c9e-5a6695033039",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tp_in",
+      "type": "Component Inputs",
+      "label": "Whose path, and what they have now",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "learnerId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "entries",
+          "plug": "output",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "tp_box",
+      "type": "Group",
+      "label": "Their path",
+      "x": 40,
+      "y": 200,
+      "children": [
+        "tp_h",
+        "tp_lede",
+        "tp_change",
+        "tp_chosen_label",
+        "tp_none",
+        "tp_chosen",
+        "tp_actions",
+        "tp_msg",
+        "tp_avail"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-6)"
+      }
+    },
+    {
+      "id": "tp_h",
+      "type": "Text",
+      "label": "Heading",
+      "x": 100,
+      "y": 280,
+      "parent": "tp_box",
+      "parameters": {
+        "as": "h2",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": 800,
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "tp_lede",
+      "type": "Text",
+      "label": "How a path opens",
+      "x": 100,
+      "y": 360,
+      "parent": "tp_box",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "tp_change",
+      "type": "Text",
+      "label": "Saving starts a new path",
+      "x": 100,
+      "y": 440,
+      "parent": "tp_box",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "tp_chosen_label",
+      "type": "Text",
+      "label": "On their path",
+      "x": 100,
+      "y": 520,
+      "parent": "tp_box",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "tp_none",
+      "type": "Text",
+      "label": "Nothing chosen yet",
+      "x": 100,
+      "y": 600,
+      "parent": "tp_box",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-base)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "tp_chosen",
+      "type": "Group",
+      "label": "The chosen steps",
+      "x": 100,
+      "y": 680,
+      "parent": "tp_box",
+      "children": [
+        "tp_chosen_each"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "tp_chosen_each",
+      "type": "For Each",
+      "label": "One per chosen step",
+      "x": 160,
+      "y": 760,
+      "parent": "tp_chosen",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/People/Path step row"
+      }
+    },
+    {
+      "id": "tp_actions",
+      "type": "Group",
+      "label": "Save, or add more",
+      "x": 100,
+      "y": 840,
+      "parent": "tp_box",
+      "children": [
+        "tp_save",
+        "tp_toggle"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-2)"
+      }
+    },
+    {
+      "id": "tp_save",
+      "type": "net.noodl.controls.button",
+      "label": "Save their path",
+      "x": 160,
+      "y": 920,
+      "parent": "tp_actions",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn btn-thread pressable",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)"
+      }
+    },
+    {
+      "id": "tp_toggle",
+      "type": "net.noodl.controls.button",
+      "label": "Add from the course",
+      "x": 160,
+      "y": 1000,
+      "parent": "tp_actions",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "tp_msg",
+      "type": "Text",
+      "label": "Saved, or why not",
+      "x": 100,
+      "y": 1080,
+      "parent": "tp_box",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "tp_avail",
+      "type": "Group",
+      "label": "The course's other concepts",
+      "x": 100,
+      "y": 1160,
+      "parent": "tp_box",
+      "children": [
+        "tp_avail_each"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "tp_avail_each",
+      "type": "For Each",
+      "label": "One per concept not on their path",
+      "x": 160,
+      "y": 1240,
+      "parent": "tp_avail",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/People/Path concept row"
+      }
+    },
+    {
+      "id": "tp_ask",
+      "type": "JavaScriptFunction",
+      "label": "Ask for the concepts once, when this arrives",
+      "x": 700,
+      "y": 40,
+      "parameters": {
+        "functionScript": "// Nothing is wired to this node's Run, so it runs once when the component mounts\n// (the template's Data/Roster ro_ask idiom). The concept list names nobody.\nOutputs.ask();\n"
+      },
+      "ports": [
+        {
+          "name": "out-ask",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "tp_concepts",
+      "type": "CloudFunction2",
+      "label": "conceptList — staff only",
+      "x": 1000,
+      "y": 40,
+      "parameters": {
+        "function": "conceptList"
+      }
+    },
+    {
+      "id": "tp_seed",
+      "type": "JavaScriptFunction",
+      "label": "Start the draft from their current path",
+      "x": 700,
+      "y": 200,
+      "parameters": {
+        "functionScript": "/*\n * THE DRAFT STARTS AS THEIR CURRENT PATH (TASK-L184 §3). `entries` are the coach's\n * timeline for this learner; its lesson entries ARE their live path, in `position`\n * order. It is re-seeded whenever the programme is read — on arrival and after a save,\n * which is exactly when the draft should equal what is stored.\n */\nfunction plain(x) { if (x && typeof x === 'object' && x.data) return x.data; if (x && Array.isArray(x.items)) return x.items; return x; }\nconst entries = plain(Inputs.entries);\nif (Array.isArray(entries)) {\n  const lessons = entries.map(plain).filter((e) => e && e.kind === 'lesson' && e.conceptId).sort((a, b) => (a.position || 0) - (b.position || 0));\n  Noodl.Variables.dbtPathDraft = lessons.map((e) => e.conceptId);\n  Noodl.Variables.dbtPathTitles = Object.fromEntries(lessons.map((e) => [e.conceptId, e.title || e.conceptId]));\n  Outputs.hasPath = lessons.length > 0;\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-entries",
+          "plug": "input",
+          "type": "*",
+          "displayName": "entries",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-hasPath",
+          "plug": "output",
+          "type": "*",
+          "displayName": "hasPath",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tp_draft",
+      "type": "Variable2",
+      "label": "The draft path — concept ids in order",
+      "x": 700,
+      "y": 360,
+      "parameters": {
+        "name": "dbtPathDraft"
+      }
+    },
+    {
+      "id": "tp_rows",
+      "type": "JavaScriptFunction",
+      "label": "The two lists, from the draft",
+      "x": 1000,
+      "y": 360,
+      "parameters": {
+        "functionScript": "/*\n * THE TWO LISTS (TASK-L184 §3): what is on the path, in order, with what each can\n * do; and every other concept in the course, to add. A concept the course no longer\n * lists keeps its stored title rather than vanishing from a path somebody chose.\n */\nfunction plain(x) { if (x && typeof x === 'object' && x.data) return x.data; if (x && Array.isArray(x.items)) return x.items; return x; }\nconst draft = (plain(Inputs.draft) || []).map(String);\nconst concepts = (plain(Inputs.concepts) || []).map(plain).filter(Boolean);\nconst stored = Noodl.Variables.dbtPathTitles || {};\nconst titleOf = Object.fromEntries(concepts.map((c) => [String(c.conceptId), String(c.title)]));\nOutputs.chosen = draft.map((id, i) => ({\n  id, title: titleOf[id] || stored[id] || id, number: String(i + 1),\n  canUp: i > 0, canDown: i < draft.length - 1,\n  upLabel: Inputs.upLabel, downLabel: Inputs.downLabel, removeLabel: Inputs.removeLabel\n}));\nOutputs.available = concepts.filter((c) => draft.indexOf(String(c.conceptId)) === -1).map((c) => ({ id: String(c.conceptId), title: String(c.title), addLabel: Inputs.addLabel }));\nOutputs.noneChosen = draft.length === 0;\nOutputs.conceptIds = draft;\n"
+      },
+      "ports": [
+        {
+          "name": "in-draft",
+          "plug": "input",
+          "type": "*",
+          "displayName": "draft",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-concepts",
+          "plug": "input",
+          "type": "*",
+          "displayName": "concepts",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-upLabel",
+          "plug": "input",
+          "type": "*",
+          "displayName": "upLabel",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-downLabel",
+          "plug": "input",
+          "type": "*",
+          "displayName": "downLabel",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-removeLabel",
+          "plug": "input",
+          "type": "*",
+          "displayName": "removeLabel",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-addLabel",
+          "plug": "input",
+          "type": "*",
+          "displayName": "addLabel",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-chosen",
+          "plug": "output",
+          "type": "*",
+          "displayName": "chosen",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-available",
+          "plug": "output",
+          "type": "*",
+          "displayName": "available",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noneChosen",
+          "plug": "output",
+          "type": "*",
+          "displayName": "noneChosen",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-conceptIds",
+          "plug": "output",
+          "type": "*",
+          "displayName": "conceptIds",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tp_up",
+      "type": "JavaScriptFunction",
+      "label": "Move a step up",
+      "x": 1300,
+      "y": 600,
+      "parameters": {
+        "functionScript": "const d = (Noodl.Variables.dbtPathDraft || []).slice();\nconst i = d.indexOf(String(Inputs.id));\nif (i > 0) { [d[i - 1], d[i]] = [d[i], d[i - 1]]; Noodl.Variables.dbtPathDraft = d; }\n",
+        "runOnChange-in-id": false
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*",
+          "displayName": "id",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "tp_down",
+      "type": "JavaScriptFunction",
+      "label": "Move a step down",
+      "x": 1300,
+      "y": 680,
+      "parameters": {
+        "functionScript": "const d = (Noodl.Variables.dbtPathDraft || []).slice();\nconst i = d.indexOf(String(Inputs.id));\nif (i > -1 && i < d.length - 1) { [d[i + 1], d[i]] = [d[i], d[i + 1]]; Noodl.Variables.dbtPathDraft = d; }\n",
+        "runOnChange-in-id": false
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*",
+          "displayName": "id",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "tp_remove",
+      "type": "JavaScriptFunction",
+      "label": "Take a step off",
+      "x": 1300,
+      "y": 760,
+      "parameters": {
+        "functionScript": "const id = String(Inputs.id);\nNoodl.Variables.dbtPathDraft = (Noodl.Variables.dbtPathDraft || []).filter((x) => x !== id);\n",
+        "runOnChange-in-id": false
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*",
+          "displayName": "id",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "tp_add",
+      "type": "JavaScriptFunction",
+      "label": "Put a concept at the end",
+      "x": 1300,
+      "y": 1240,
+      "parameters": {
+        "functionScript": "const id = String(Inputs.id);\nconst d = (Noodl.Variables.dbtPathDraft || []).slice();\nif (id && d.indexOf(id) === -1) { d.push(id); Noodl.Variables.dbtPathDraft = d; }\n",
+        "runOnChange-in-id": false
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*",
+          "displayName": "id",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "tp_avail_sw",
+      "type": "Switch",
+      "label": "Show the course's other concepts",
+      "x": 700,
+      "y": 1000,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "tp_save_call",
+      "type": "CloudFunction2",
+      "label": "setLearnerPath — staff only",
+      "x": 700,
+      "y": 920,
+      "parameters": {
+        "function": "setLearnerPath"
+      }
+    },
+    {
+      "id": "tp_ok",
+      "type": "JavaScriptFunction",
+      "label": "Saved",
+      "x": 1000,
+      "y": 1080,
+      "parameters": {
+        "functionScript": "Outputs.text = Inputs.savedText;\n",
+        "runOnChange-in-savedText": false
+      },
+      "ports": [
+        {
+          "name": "in-savedText",
+          "plug": "input",
+          "type": "*",
+          "displayName": "savedText",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-text",
+          "plug": "output",
+          "type": "*",
+          "displayName": "text",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tp_fail",
+      "type": "JavaScriptFunction",
+      "label": "Why not, as the server worded it",
+      "x": 1000,
+      "y": 1160,
+      "parameters": {
+        "functionScript": "// setLearnerPath words every refusal for the coach (an unknown concept by name, an\n// empty path, a concept twice), so it is shown as written.\nOutputs.text = String(Inputs.error || '');\n",
+        "runOnChange-in-error": false
+      },
+      "ports": [
+        {
+          "name": "in-error",
+          "plug": "input",
+          "type": "*",
+          "displayName": "error",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-text",
+          "plug": "output",
+          "type": "*",
+          "displayName": "text",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tp_msg_sw",
+      "type": "Switch",
+      "label": "Show the sentence once there is one",
+      "x": 700,
+      "y": 1080,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "tp_out",
+      "type": "Component Outputs",
+      "label": "Their path was saved",
+      "x": 1300,
+      "y": 920,
+      "ports": [
+        {
+          "name": "saved",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "t_tp_h",
+      "type": "Translation",
+      "label": "people:path.heading",
+      "x": 1600,
+      "y": 280,
+      "parameters": {
+        "Key": "path.heading",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_tp_lede",
+      "type": "Translation",
+      "label": "people:path.lede",
+      "x": 1600,
+      "y": 360,
+      "parameters": {
+        "Key": "path.lede",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_tp_change",
+      "type": "Translation",
+      "label": "people:path.change",
+      "x": 1600,
+      "y": 440,
+      "parameters": {
+        "Key": "path.change",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_tp_chosen",
+      "type": "Translation",
+      "label": "people:path.chosen",
+      "x": 1600,
+      "y": 520,
+      "parameters": {
+        "Key": "path.chosen",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_tp_none",
+      "type": "Translation",
+      "label": "people:path.none",
+      "x": 1600,
+      "y": 600,
+      "parameters": {
+        "Key": "path.none",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_tp_up",
+      "type": "Translation",
+      "label": "people:path.up",
+      "x": 1600,
+      "y": 680,
+      "parameters": {
+        "Key": "path.up",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_tp_down",
+      "type": "Translation",
+      "label": "people:path.down",
+      "x": 1600,
+      "y": 760,
+      "parameters": {
+        "Key": "path.down",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_tp_remove",
+      "type": "Translation",
+      "label": "people:path.remove",
+      "x": 1600,
+      "y": 840,
+      "parameters": {
+        "Key": "path.remove",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_tp_save",
+      "type": "Translation",
+      "label": "people:path.save",
+      "x": 1600,
+      "y": 920,
+      "parameters": {
+        "Key": "path.save",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_tp_avail",
+      "type": "Translation",
+      "label": "people:path.available",
+      "x": 1600,
+      "y": 1000,
+      "parameters": {
+        "Key": "path.available",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_tp_saved",
+      "type": "Translation",
+      "label": "people:path.saved",
+      "x": 1600,
+      "y": 1080,
+      "parameters": {
+        "Key": "path.saved",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_tp_add",
+      "type": "Translation",
+      "label": "people:path.add",
+      "x": 1600,
+      "y": 1240,
+      "parameters": {
+        "Key": "path.add",
+        "Namespace": "people"
+      }
+    }
+  ],
+  "visualRoots": [
+    "tp_box"
+  ]
+}

@@ -57,6 +57,8 @@ interface SignInWithInstance extends NodeInstance {
      * minted on a page the launcher never ran on.
      */
     pendingSignIn?: OutcomeToken[];
+    /** P107-C50: the return's final state has been reported — a page load has one return, so a repeat is ignored. */
+    returnReported?: boolean;
   };
   signInScheduled?: boolean;
   setError(err: string, tokens?: OutcomeToken[]): void;
@@ -80,8 +82,8 @@ const SignInWithNodeDefinition: NodeDefinitionOptions = {
     // A return may have RESOLVED before this node existed (the exchange is a
     // network round trip started in UserService's constructor, but a cached or
     // failed one can settle first), so check the current state as well as
-    // subscribing. Both paths go through applyReturn, which is idempotent per
-    // page load because UserService only ever consumes one return.
+    // subscribing. Both paths go through applyReturn, which reports the final
+    // state once per page load (P107-C50: `returnReported`).
     service.on('oauthReturn', (state: unknown) => this.applyReturn(state as OAuthReturnState));
     if (service.oauthReturn && (service.oauthReturn.inProgress || service.oauthReturn.succeeded !== undefined)) {
       this.applyReturn(service.oauthReturn);
@@ -205,6 +207,12 @@ const SignInWithNodeDefinition: NodeDefinitionOptions = {
         this.flagOutputDirty('signingIn');
         return;
       }
+      // P107-C50 (P109 ISL-030, ruled "Fire it once"): a provider's error is final when this node is made AND announced
+      // a tick later, so it reached here twice and reported Failure twice (and raised the error twice). One return per
+      // page load, so the repeat is ignored.
+      if (this._internal.returnReported) return;
+      this._internal.returnReported = true;
+
       this._internal.signingIn = false;
       this.flagOutputDirty('signingIn');
 

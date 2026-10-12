@@ -1,0 +1,756 @@
+[
+  {
+    "name": "the Script set runs the code at load: Success alone, and what it wrote",
+    "because": "simplejavascript.ts :386 (Run is not wired), :633-652",
+    "params": {
+      "functionScript": "Outputs.sum = Inputs.a + Inputs.b"
+    },
+    "steps": [
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "inputs arrive by name and re-run the code when they change; the same value again does not",
+    "because": "simplejavascript.ts :784-799 (DEF-046: read before write), :847-868",
+    "params": {
+      "functionScript": "Outputs.sum = Inputs.a + Inputs.b"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      {
+        "set": "in-b",
+        "value": 2
+      },
+      "settle",
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "in-b",
+        "value": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "this is kept across runs and counts them: Run, then two Runs in one frame — one run, two Dones",
+    "because": "simplejavascript.ts :310 (_this), :493-511 (runScheduled), :425-430 (a token per pulse)",
+    "params": {
+      "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Run and an input change in one frame are one run",
+    "because": "simplejavascript.ts :493-511",
+    "params": {
+      "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "undefined and an object always count as a change; the same number does not",
+    "because": "node.ts shouldRunOnValueChanged → valueDidChange (run-on-value-change.ts)",
+    "params": {
+      "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "in-a"
+      },
+      "settle",
+      {
+        "set": "in-a"
+      },
+      "settle",
+      {
+        "set": "in-a",
+        "value": {}
+      },
+      "settle",
+      {
+        "set": "in-a",
+        "value": {}
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an unticked input does not run the code; Run still does",
+    "because": "simplejavascript.ts :798 (in-a governs runOnChange-in-a), :425-430",
+    "params": {
+      "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n",
+      "runOnChange-in-a": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a checkbox ticked again runs on change again",
+    "because": "nodedefinition.ts registerInputIfNeeded (runOnChange- wrapper); run-on-value-change.ts",
+    "params": {
+      "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "runOnChange-in-a",
+        "value": false
+      },
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "runOnChange-in-a",
+        "value": true
+      },
+      {
+        "set": "in-a",
+        "value": 2
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a signal output is a function the code calls: it fires before Success, and every run",
+    "because": "simplejavascript.ts :600-618, :650",
+    "params": {
+      "functionScript": "Outputs.count = Inputs.a;\nOutputs.ping()"
+    },
+    "wiredOutputs": [
+      "out-ping"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "in-a",
+        "value": 5
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a synchronous throw: Error in its own words and Failure, no Success; a Run is answered failure instead",
+    "because": "simplejavascript.ts :653-721",
+    "params": {
+      "functionScript": "throw new Error(\"boom \" + Inputs.a)"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "in-a",
+        "value": 2
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a throw after an await: the write before it lands, then Error and the failure — in the same settle",
+    "because": "simplejavascript.ts :633-640 (awaited), :653-721",
+    "params": {
+      "functionScript": "await null;\nOutputs.late = Inputs.a;\nif (Inputs.b) throw new Error(\"late\")"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "in-a",
+        "value": 3
+      },
+      "settle",
+      {
+        "set": "in-b",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a throw that is not an Error: Error is its text",
+    "because": "simplejavascript.ts :656 (String(e))",
+    "params": {
+      "functionScript": "throw \"bare \" + Inputs.a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "in-a",
+        "value": 7
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a throw of null or undefined is a throw: Error \"null\", Failure, and a Run answered failure (row C147)",
+    "because": "simplejavascript.ts :653-721 — the logger (utils.ts) read the value's prototype inside the catch and threw, so nothing was reported; fixed in P109 ISL-051",
+    "params": {
+      "functionScript": "if (Inputs.a) throw undefined;\nthrow null"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a script that will not compile: Error is the engine's message, Failure at load, a Run answered failure",
+    "because": "simplejavascript.ts :534-561, :818-842",
+    "params": {
+      "functionScript": "Outputs.sum = ("
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an empty script compiles and runs: Success, and Done for a Run",
+    "because": "simplejavascript.ts :822-829 (a body of the prefix alone)",
+    "params": {
+      "functionScript": ""
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "no Script: nothing at load, a Run answered Unchanged",
+    "because": "simplejavascript.ts :563-567",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Script set to nothing forgets the code and asks for no run: a Run is answered Unchanged",
+    "because": "simplejavascript.ts :369-375",
+    "params": {
+      "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "functionScript"
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a fresh object every run: on the wire when its content moves",
+    "because": "simplejavascript.ts :297 (!== — every new object is new); trace.ts: an unchanged value is not sent again",
+    "params": {
+      "functionScript": "Outputs.o = { a: Inputs.a }"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "in-a",
+        "value": 2
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the code writes to Inputs: the next arrival is compared with what the code wrote",
+    "because": "simplejavascript.ts :597, :634 (Inputs is _internal.inputValues), :786",
+    "params": {
+      "functionScript": "Inputs.a = \"seen\";\nthis.n = (this.n || 0) + 1;\nOutputs.count = this.n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "in-a",
+        "value": "seen"
+      },
+      "settle",
+      {
+        "set": "in-a",
+        "value": "x"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a run that works after a throw clears Error to blank text, sent once, before Success (v2, row C146)",
+    "because": "simplejavascript.ts :645-652 — as ruled for D25 / C144, \"Clear it to blank text\"",
+    "params": {
+      "functionScript": "await null;\nOutputs.late = Inputs.a;\nif (Inputs.b) throw new Error(\"late\")"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "in-b",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "in-b",
+        "value": false
+      },
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a new Script after a throw clears Error to blank text and sends it (v2, row C146)",
+    "because": "simplejavascript.ts :367, :771-775 clearRunDiagnostics — blank text, sent, only when there was a message",
+    "params": {
+      "functionScript": "throw new Error(\"boom \" + Inputs.a)"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "functionScript",
+        "value": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n"
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Script edited to one that will not compile, then fixed: Failure, then Error cleared to blank and the code runs again, this kept (v2, row C146)",
+    "because": "simplejavascript.ts :361-388, :534-561, :830-833",
+    "params": {
+      "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "functionScript",
+        "value": "Outputs.sum = ("
+      },
+      "settle",
+      {
+        "set": "functionScript",
+        "value": "Outputs.sum = ("
+      },
+      "settle",
+      {
+        "set": "functionScript",
+        "value": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the written lists: an input row the code reads, an output row it writes, and a signal row only the list names",
+    "because": "simplejavascript.ts :1013-1073, :600-618 (a signal port from the model, called as Outputs[k]())",
+    "params": {
+      "scriptInputs": [
+        {
+          "id": "1",
+          "label": "q"
+        }
+      ],
+      "scriptOutputs": [
+        {
+          "id": "2",
+          "label": "r"
+        },
+        {
+          "id": "3",
+          "label": "go"
+        }
+      ],
+      "outtype-go": "signal",
+      "functionScript": "Outputs.r = Inputs.q * 2;\nconst k = \"go\";\nOutputs[k]()"
+    },
+    "wiredOutputs": [
+      "out-go"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "in-q",
+        "value": 4
+      },
+      "settle",
+      {
+        "set": "intype-q",
+        "value": "number"
+      },
+      {
+        "set": "in-q",
+        "value": "5"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Noodl carries Inputs and Outputs for the old code",
+    "because": "simplejavascript.ts :620-625; javascriptnodeparser.js :497-501",
+    "params": {
+      "functionScript": "Noodl.Outputs.sum = Noodl.Inputs.a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "in-a",
+        "value": "v"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Outputs.ping.send() alone names a VALUE port, so the call throws: the write before it lands, then Error and Failure — a Run answered failure",
+    "because": "simplejavascript.ts :611-616 (.send is prepared only on a SIGNAL port the model saved), function-ports.ts (`.send()` is not a signal pattern), :653-721 — FIX-016 (P66) measured the same throw",
+    "params": {
+      "functionScript": "Outputs.count = 1;\nOutputs.ping.send()"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an unticked input is still taken: the code reads it at the next Run",
+    "because": "simplejavascript.ts :786-787 (the value is stored before the checkbox is asked), :798",
+    "params": {
+      "functionScript": "Outputs.sum = Inputs.a + Inputs.b",
+      "runOnChange-in-a": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "in-b",
+        "value": 2
+      },
+      "settle",
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a checkbox written while the app runs: unticked, an arrival runs nothing; ticked again, the next one runs",
+    "because": "nodedefinition.ts registerInputIfNeeded (the runOnChange- wrapper); run-on-value-change.ts",
+    "params": {
+      "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "runOnChange-in-a",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "runOnChange-in-a",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "in-a",
+        "value": 2
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a type picker written while the app runs does nothing: no run, the inputs kept for the next Run, every checkbox as it was",
+    "because": "simplejavascript.ts :870-892 (the intype setter reads `in` + n, a port that never exists), :888-892",
+    "params": {
+      "functionScript": "Outputs.sum = Inputs.a + Inputs.b"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "in-a",
+        "value": "k1"
+      },
+      {
+        "set": "in-b",
+        "value": "k2"
+      },
+      "settle",
+      {
+        "set": "intype-a",
+        "value": "number"
+      },
+      "settle",
+      {
+        "set": "outtype-sum",
+        "value": "string"
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "in-a",
+        "value": "k3"
+      },
+      "settle",
+      {
+        "set": "in-b",
+        "value": "k4"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a script that will not compile, left alone: Failure once, at its run — not again at the next frame",
+    "because": "simplejavascript.ts :493-511 (runScheduled cleared), :534-561",
+    "params": {
+      "functionScript": "Outputs.sum = ("
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "set": "functionScript",
+        "value": "Outputs.sum = ("
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "with Run wired, a new Script does not run at load: nothing until Run, then one run (P107-C155)",
+    "because": "simplejavascript.ts :386 `if (!this.isInputConnected('run')) this.scheduleRun()` — NDA-017 §2's surviving guard; P109 ISL-033 measured it (wired: not at load, still on an input). The unwired twin is the first scenario: count 1 at load, 2 after Run",
+    "wired": [
+      "run"
+    ],
+    "params": {
+      "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "with Run wired, a changed ticked input still runs the code (P107-C155)",
+    "because": "simplejavascript.ts :784-799 — Run adds a trigger and takes nothing away (NDA-017 §2); ISL-033's measurement: wired, still on the input",
+    "wired": [
+      "run"
+    ],
+    "params": {
+      "functionScript": "Outputs.sum = Inputs.a + Inputs.b"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      {
+        "set": "in-b",
+        "value": 2
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "with Run wired, a Script that will not compile reports nothing until Run: then Error, and the Run answered failure (P107-C155)",
+    "because": "simplejavascript.ts :386 (no run asked), :534-561 (the run Run asks for meets the kept compile failure)",
+    "wired": [
+      "run"
+    ],
+    "params": {
+      "functionScript": "Outputs.sum = ("
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "with Run wired, a new Script after a throw clears Error to blank text and sends it, and runs nothing (P107-C155, row C146's twin)",
+    "because": "simplejavascript.ts :771-775 clearRunDiagnostics before the guard at :386 — the clearing is not guarded, the run is",
+    "wired": [
+      "run"
+    ],
+    "params": {
+      "functionScript": "throw new Error(\"boom \" + Inputs.a)"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "functionScript",
+        "value": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n"
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a signal the code calls with no wire on it sends nothing; the run still succeeds",
+    "because": "simplejavascript.ts :600-618 (the callable is prepared for every saved signal port), :609 (`if (this.hasOutput(key))`) — NSP-020 §6.6 piece 3",
+    "params": {
+      "functionScript": "Outputs.count = Inputs.a;\nOutputs.ping()"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "in-a",
+        "value": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Script set while the app runs calls only the signals the placing saved: a new signal is not a function",
+    "because": "simplejavascript.ts :600-618 reads `model.outputPorts`, the project's saved ports for the PLACING's Script; the headless runtime never re-draws them — NSP-020 §6.6 piece 5",
+    "params": {
+      "functionScript": "Outputs.sum = Inputs.a + Inputs.b"
+    },
+    "wiredOutputs": [
+      "out-ping"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "functionScript",
+        "value": "Outputs.count = Inputs.a;\nOutputs.ping()"
+      },
+      "settle"
+    ]
+  }
+]

@@ -1,8 +1,9 @@
 import React from 'react';
 
+import { layerDefaults, withDefaultsClass } from '../../../default-style-layer';
 import Layout from '../../../layout';
 import { Noodl } from '../../../types';
-import { noodlRootRef } from '../../noodl-root-ref';
+import { noodlRootRef, dataAttributeProps } from '../../noodl-root-ref';
 import { IconGlyph } from './IconGlyph';
 
 export interface IconProps extends Noodl.ReactProps {
@@ -41,8 +42,11 @@ export function Icon(props: IconProps) {
   let className = 'ndl-visual-icon';
   if (props.className) className = className + ' ' + props.className;
 
+// P109 ISL-008 — defaults leave the inline style for the defaults sheet, so an author's class can override them.
+const defaultsClass = layerDefaults(style);
+
   return (
-    <div ref={noodlRootRef(props.noodlNode)} className={className} style={style}>
+    <div ref={noodlRootRef(props.noodlNode)} {...dataAttributeProps(props.dom)} className={withDefaultsClass(className, defaultsClass)} style={style}>
       {_renderIcon()}
     </div>
   );

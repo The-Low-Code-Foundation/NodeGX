@@ -8,6 +8,7 @@
   {"url":"server-core.js"},
   {"url":"kit-modules.js"},
   {"url":"inject-seo.js"},
+  {"url":"inject-default-styles.js"},
   {"url":"ssg-paths.js"},
   {"url":"README.md"}
 ]

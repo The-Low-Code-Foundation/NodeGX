@@ -170,9 +170,20 @@ describe('CN-007 — the custom-nodes docs page', () => {
    * compile alone. What it claims is graded instead by
    * `noodl-viewer-react/tests/gam-015-a-wired-size-reaches-a-kit-node.test.ts`,
    * through the real bridge.
+   *
+   * **8 → 9 on 2026-10-03** (P109 ISL-015): `colourOf`, the lookup of a token's
+   * real colour for a library (title "a token, looked up for a library"). A
+   * function an author pastes into their own file, with no module. The same
+   * commit added a COMPLETE sample (`noodl_modules/note-kit/index.js`), compiled
+   * here and also RUN, with a sabotage arm, by `isl015-kit-traps.test.js`.
+   *
+   * **9 → 10 on 2026-10-05** (P109 ISL-012, ruled "Recipe now, loader later"): `entry.js`, the three-line esbuild
+   * entry that turns a modern-format library into one global. It imports from npm, so it is not a kit file and
+   * cannot compile against these types. The same commit added a COMPLETE sample (`noodl_modules/cube-kit/index.js`,
+   * the global read at mount), compiled here.
    */
   it('declares how many blocks it does not compile', () => {
-    expect(fragments.length).toBe(8);
+    expect(fragments.length).toBe(10);
   });
 
   /**

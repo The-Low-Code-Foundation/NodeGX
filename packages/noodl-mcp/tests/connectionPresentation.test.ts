@@ -92,7 +92,8 @@ describe('SIG-007 R3 — connection presentation survives read-modify-write', ()
     const out = assembleSetFiles(
       baseline,
       { nodes: [{ id: 'a', type: 'Group' }] as ComponentFiles['nodes']['nodes'], connections: [wire()] },
-      () => false
+      () => false,
+      { now: '2026-10-02T00:00:00.000Z', componentId: 'c1' }
     );
 
     expect(out.connections.connections[0].label).toBe('the retry path');

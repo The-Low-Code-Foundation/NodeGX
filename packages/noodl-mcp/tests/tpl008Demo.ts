@@ -31,6 +31,7 @@ import {
   C,
   DATE_FNS,
   PROBLEM_TEXT,
+  SCHEDULE_FNS,
   signalOnly,
   TPL008_COMPONENTS,
   Tpl008Component,
@@ -301,7 +302,42 @@ export const DEMO_SEED_FNS = String.raw`function demoSeed() {
     line('seed-task-notes', 'action-done', 'Ticked off “List what shipped”', 'Pulled it from the merged PRs.', at(1, 14, 30)),
     line('seed-task-notes', 'note', 'Note', 'The draft is in the shared folder.', at(1, 15, 10))
   ];
-  return { Task: tasks, Action: actions, Event: events };
+
+  // TPL-008-RC — things that repeat: a tablet twice a day (one evening missed), a client call every
+  // Friday for four weeks, invoices on the last day of the month, and a class that starts next week.
+  function routine(id, title, cadence, slots, start, end, created) {
+    return { id: id, title: title, cadence: cadence, slots: slots, startDate: start, endDate: end, status: 'active', stoppedAt: '', stopNote: '', createdAt: created, updatedAt: created };
+  }
+  var routines = [
+    routine('seed-routine-tablets', 'Take the tablets', 'daily', '08:00,20:00', iso(-12), '', at(12, 21, 0)),
+    routine('seed-routine-salon', 'Call Salon Collective about the payment', 'weekly', 'fri@10:00', iso(-10), iso(18), at(10, 9, 30)),
+    routine('seed-routine-invoices', 'Send the month’s invoices', 'monthly', 'last@17:00', iso(-40), '', at(40, 12, 0)),
+    routine('seed-routine-pilates', 'Pilates', 'weekly', 'tue@18:30,thu@18:30', iso(5), '', at(2, 19, 5))
+  ];
+  var checks = [];
+  var missed = iso(-3) + '|20:00';
+  for (var r = 0; r < routines.length; r++) {
+    var ro = routines[r];
+    for (var back = 12; back >= 1; back--) {
+      var day = new Date(now - back * DAY);
+      var times = schedOn(ro, day);
+      for (var t = 0; t < times.length; t++) {
+        var date = schedIso(day);
+        if (ro.id === 'seed-routine-tablets' && date + '|' + times[t] === missed) continue;
+        var hm = times[t].split(':');
+        var doneAt = new Date(day.getFullYear(), day.getMonth(), day.getDate(), Number(hm[0]), Number(hm[1]) + 7).toISOString();
+        var note = ro.id === 'seed-routine-salon' ? 'They will pay half this week and half next.' : '';
+        checks.push({ id: 'seed-check-' + (checks.length + 1), routineId: ro.id, date: date, time: times[t], doneAt: doneAt, note: note, createdAt: doneAt, updatedAt: doneAt });
+        // The last two days' ticks are in the history too, the way Tick routine writes them.
+        if (back <= 2 || note) events.push(line(ro.id, 'routine-done', 'Done (' + times[t] + ')', note, doneAt));
+      }
+    }
+    events.push(line(ro.id, 'routine-added', 'Added: every day at 09:00', '', ro.createdAt));
+    var said = schedDescribe(ro);
+    // A minute after it was added, so the two lines read in the order they happened.
+    events.push(line(ro.id, 'schedule', 'Schedule: ' + said.charAt(0).toLowerCase() + said.slice(1), '', new Date(Date.parse(ro.createdAt) + 60000).toISOString()));
+  }
+  return { Task: tasks, Action: actions, Event: events, Routine: routines, RoutineCheck: checks };
 }
 `;
 
@@ -315,7 +351,8 @@ function readScript(queries: QueryShape[]): string {
   });
   const filters = [...new Set(queries.filter((q) => q.filter).map((q) => q.filter?.input))];
   if (filters.length > 1) throw new Error('tpl008Demo: the backend queries filter on more than one input');
-  return `${DATE_FNS}${DEMO_STORE_FNS}${DEMO_SEED_FNS}function copy(list) {
+  const collections = [...new Set(queries.map((q) => q.collection))];
+  return `${DATE_FNS}${SCHEDULE_FNS}${DEMO_STORE_FNS}${DEMO_SEED_FNS}function copy(list) {
   var out = [];
   for (var i = 0; i < (list || []).length; i++) {
     var r = {};
@@ -331,9 +368,22 @@ function sortBy(list, field, order) {
     return order === 'descending' ? -c : c;
   });
 }
-var store = demoLoad();
-if (!store || !store.Task || !store.Action || !store.Event) {
-  store = demoSeed();
+var store = demoLoad() || {};
+// A collection the store has never had comes from the example list — the whole list for a new
+// visitor; for one whose list predates TPL-008-RC, only the things that repeat (and their lines),
+// so nothing they did is lost.
+var NEEDED = ${JSON.stringify(collections)};
+var seed = null, grew = false;
+for (var n = 0; n < NEEDED.length; n++) {
+  if (store[NEEDED[n]]) continue;
+  seed = seed || demoSeed();
+  store[NEEDED[n]] = seed[NEEDED[n]];
+  if (NEEDED[n] === 'Routine' && store.Event && store.Event !== seed.Event) {
+    for (var l = 0; l < seed.Event.length; l++) if (String(seed.Event[l].taskId).indexOf('seed-routine-') === 0) store.Event.push(seed.Event[l]);
+  }
+  grew = true;
+}
+if (grew) {
   try { demoSave(store); } catch (e) { Outputs.failure(); }
 }
 var filterValue = String(Inputs.${filters[0] ?? 'taskId'} || '');
@@ -419,7 +469,63 @@ function demoHeader(): Tpl008Component {
 
 /** The page's sign-in machinery, which the demo has no use for. Named, so drift throws. */
 const PAGE_AUTH_NODES = ['tdUser', 'tdAuth', 'tdToSignIn', 'tdLogOut'];
-const PAGE_AUTH_WIRES = 6;
+/**
+ * s1–s9: 7. TPL-008-RC: + the link to Today (read once signed in) and the clock's wake (check who you are, then load).
+ * TPL-008-PJ: + the projects, read once signed in.
+ */
+const PAGE_AUTH_WIRES = 10;
+
+/**
+ * TPL-008-PJ — **the demo has no projects.** `Logic/Projects` reads four backend collections
+ * through the records API; here it keeps its interface and says, once, that there is nothing:
+ * no tab, no way in, no names on tasks. The tab's own components stay the template's — with no
+ * tab they are never drawn, so nothing in them ever runs.
+ */
+export const DEMO_PROJECTS_SCRIPT = `Outputs.projectNames = {};
+Outputs.showTab = false;
+Outputs.showTurnOn = false;
+Outputs.noProjects = true;
+Outputs.projectPosition = 1;
+Outputs.nextPosition = 1;
+Outputs.balanceText = '';
+Outputs.balanceWhen = '';
+Outputs.bars = [];
+Outputs.lowText = '';
+Outputs.lowColor = '';
+Outputs.incomeRows = [];
+Outputs.hasIncome = false;
+Outputs.rows = [];
+Outputs.projects = [];
+Outputs.items = [];
+Outputs.marks = [];
+Outputs.readings = [];
+Outputs.upRows = [];
+Outputs.recRows = [];
+Outputs.pastRows = [];
+Outputs.projectOptions = [];
+Outputs.payingRows = [];
+Outputs.buildingRows = [];
+Outputs.hobbyRows = [];
+Outputs.quietRows = [];
+Outputs.hasPaying = false;
+Outputs.hasBuilding = false;
+Outputs.hasHobby = false;
+Outputs.hasQuiet = false;`;
+
+function demoProjects(): Tpl008Component {
+  const backend = source(C.projectsLogic);
+  const nodes = backend.nodes as Node[];
+  const ins = nodes.find((n) => n.type === 'Component Inputs');
+  const outs = nodes.find((n) => n.type === 'Component Outputs');
+  if (!ins || !outs) throw new Error('tpl008Demo: Logic/Projects has no interface nodes');
+  const values = (outs.ports ?? []).filter((p) => p.type !== 'signal').map((p) => p.name);
+  return {
+    ...backend,
+    description: 'The demo has no projects: the same interface as the template’s, saying once that there is nothing — no tab, no way in.',
+    nodes: [ins, outs, { id: 'pjNone', type: FUNCTION, label: 'No projects in the demo', parameters: { functionScript: DEMO_PROJECTS_SCRIPT } }],
+    connections: values.map((n) => ({ fromId: 'pjNone', fromProperty: `out-${n}`, toId: outs.id, toProperty: n }))
+  };
+}
 
 function demoPage(): Tpl008Component {
   const backend = withBrowserWrites(source(C.pageTodo));
@@ -453,6 +559,11 @@ function demoPage(): Tpl008Component {
     nodes: kept,
     connections: [
       { fromId: 'tdPage', fromProperty: 'didMount', toId: 'tdData', toProperty: 'refresh' },
+      // L5 — no sign-in here, so the link is read when the page mounts.
+      { fromId: 'tdPage', fromProperty: 'didMount', toId: 'tdLinkOpen', toProperty: 'run' },
+      { fromId: 'tdPage', fromProperty: 'didMount', toId: 'tdViewOpen', toProperty: 'run' },
+      // RC — back in view: read the list again (there is nobody to check).
+      { fromId: 'tdClock', fromProperty: 'out-wake', toId: 'tdData', toProperty: 'refresh' },
       ...wires.filter((w) => !auth(w)),
       { fromId: 'tdHeader', fromProperty: 'reset', toId: 'tdData', toProperty: 'reset' },
       { fromId: 'tdHeader', fromProperty: 'reset', toId: 'tdDeselect', toProperty: 'do' }
@@ -472,6 +583,7 @@ export const TPL008_DEMO_COMPONENTS: ReadonlyArray<Tpl008Component> = TPL008_COM
     const name = `/${c.path}`;
     let out: Tpl008Component;
     if (name === C.todoData) out = demoTodoData();
+    else if (name === C.projectsLogic) out = demoProjects();
     else if (name === C.header) out = demoHeader();
     else if (name === C.pageTodo) out = demoPage();
     else out = withBrowserWrites(c);

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "305aaa5e-675b-54ee-82a5-675e895d1152",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "usehelperIn",
+      "fromProperty": "itemId",
+      "toId": "usehelperFn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "usehelperIn",
+      "fromProperty": "model",
+      "toId": "usehelperFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "usehelperIn",
+      "fromProperty": "plotId",
+      "toId": "usehelperFn",
+      "toProperty": "in-plotId"
+    },
+    {
+      "fromId": "usehelperIn",
+      "fromProperty": "state",
+      "toId": "usehelperFn",
+      "toProperty": "in-state"
+    },
+    {
+      "fromId": "usehelperIn",
+      "fromProperty": "go",
+      "toId": "usehelperFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "usehelperFn",
+      "fromProperty": "out-error",
+      "toId": "usehelperOut",
+      "toProperty": "error"
+    },
+    {
+      "fromId": "usehelperFn",
+      "fromProperty": "out-model",
+      "toId": "usehelperOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "usehelperFn",
+      "fromProperty": "out-ok",
+      "toId": "usehelperOut",
+      "toProperty": "ok"
+    },
+    {
+      "fromId": "usehelperFn",
+      "fromProperty": "out-state",
+      "toId": "usehelperOut",
+      "toProperty": "state"
+    },
+    {
+      "fromId": "usehelperFn",
+      "fromProperty": "out-used",
+      "toId": "usehelperOut",
+      "toProperty": "used"
+    },
+    {
+      "fromId": "usehelperFn",
+      "fromProperty": "success",
+      "toId": "usehelperOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -167,18 +167,6 @@
     },
     {
       "fromId": "zgT",
-      "fromProperty": "mathsMode",
-      "toId": "zgSetup",
-      "toProperty": "mathsWord"
-    },
-    {
-      "fromId": "zgT",
-      "fromProperty": "typingMode",
-      "toId": "zgSetup",
-      "toProperty": "typingWord"
-    },
-    {
-      "fromId": "zgT",
       "fromProperty": "monsterGate",
       "toId": "zgSetup",
       "toProperty": "gateWord"
@@ -296,6 +284,192 @@
       "fromProperty": "mode",
       "toId": "zgPlay",
       "toProperty": "mode"
+    },
+    {
+      "fromId": "zgSetup",
+      "fromProperty": "focus",
+      "toId": "zgPlay",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "zgSetup",
+      "fromProperty": "customSet",
+      "toId": "zgPlay",
+      "toProperty": "customSet"
+    },
+    {
+      "fromId": "zgSetup",
+      "fromProperty": "customSetId",
+      "toId": "zgPlay",
+      "toProperty": "customSetId"
+    },
+    {
+      "fromId": "zgSetup",
+      "fromProperty": "customSetBoth",
+      "toId": "zgPlay",
+      "toProperty": "customSetBoth"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "everythingAtLevel",
+      "toId": "zgSetup",
+      "toProperty": "everythingWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "skillsCount",
+      "toId": "zgSetup",
+      "toProperty": "countWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "myList",
+      "toId": "zgSetup",
+      "toProperty": "listWord"
+    },
+    {
+      "fromId": "zgCurriculum",
+      "fromProperty": "skills",
+      "toId": "zgSetup",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "sets",
+      "toId": "zgSetup",
+      "toProperty": "sets"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "level",
+      "toId": "zgSetup",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "lang",
+      "toId": "zgSetup",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "focusSubject",
+      "toId": "zgSetup",
+      "toProperty": "subject0"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "focusSkills",
+      "toId": "zgSetup",
+      "toProperty": "skills0"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "practising",
+      "toId": "zgSetup",
+      "toProperty": "practisingWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "changeFocus",
+      "toId": "zgSetup",
+      "toProperty": "changeWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "whatToPractise",
+      "toId": "zgSetup",
+      "toProperty": "titleWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "pickSubject",
+      "toId": "zgSetup",
+      "toProperty": "subjectWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "pickTopic",
+      "toId": "zgSetup",
+      "toProperty": "topicWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "pickSkills",
+      "toId": "zgSetup",
+      "toProperty": "skillsHint"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "tickAll",
+      "toId": "zgSetup",
+      "toProperty": "allWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "tickNone",
+      "toId": "zgSetup",
+      "toProperty": "noneWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "saveFocus",
+      "toId": "zgSetup",
+      "toProperty": "saveWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "cancel",
+      "toId": "zgSetup",
+      "toProperty": "cancelWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "myLists",
+      "toId": "zgSetup",
+      "toProperty": "listsWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "editLists",
+      "toId": "zgSetup",
+      "toProperty": "editListsWord"
+    },
+    {
+      "fromId": "zgT",
+      "fromProperty": "noListsYet",
+      "toId": "zgSetup",
+      "toProperty": "noListsWord"
+    },
+    {
+      "fromId": "zgStore",
+      "fromProperty": "app",
+      "toId": "zgSetup",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "zgMe",
+      "fromProperty": "profileId",
+      "toId": "zgSetup",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "zgSetup",
+      "fromProperty": "app",
+      "toId": "zgStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "zgSetup",
+      "fromProperty": "write",
+      "toId": "zgStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "zgSetup",
+      "fromProperty": "editLists",
+      "toId": "zgGoLists",
+      "toProperty": "navigate"
     },
     {
       "fromId": "zgMe",

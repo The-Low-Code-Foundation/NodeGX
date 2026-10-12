@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "018bf3ec-50a6-5ed8-815c-5bfce297c930",
+  "name": "Save project",
+  "path": "/Projects/Save project",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Saves a project’s details: its name, one line about it, what kind it is (a client who pays, building, hobby, quiet), how it bills (hourly or fixed, the rate, the payment terms) and what to remember about it."
+}

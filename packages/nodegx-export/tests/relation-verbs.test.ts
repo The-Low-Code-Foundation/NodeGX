@@ -208,16 +208,18 @@ describe('§17 — the Record node', () => {
    * fails for a reason that has nothing to do with what it is testing. `net.noodl.ToCSV` is one
    * nobody is waiting on, so the example stops being a moving target.
    */
+  // EXP-011 §75 translated `To CSV`, this row's former example of an untranslated feeder; `Pattern Extractor`
+  // is the one still out (relation-pair D18 uses it for the same reason).
   it('a Record whose Id is fed by an untranslated node names that feeder', () => {
     const source = cloneIr();
-    addNode(source, ADMIN, 'toCsv', 'net.noodl.ToCSV', {});
+    addNode(source, ADMIN, 'toCsv', 'net.noodl.PatternExtractor', {});
     addNode(source, ADMIN, 'puppyModel', 'DbModel2', {
       collectionName: lit('Puppy'),
       idSource: lit('explicit')
     });
-    wire(source, ADMIN, 'toCsv', 'text', 'puppyModel', 'modelId');
+    wire(source, ADMIN, 'toCsv', 'match', 'puppyModel', 'modelId');
     expect(reasonFor(source, ADMIN, 'puppyModel')).toBe(
-      'its Id is fed by net.noodl.ToCSV, which has no statically known source'
+      'its Id is fed by net.noodl.PatternExtractor, which has no statically known source'
     );
   });
 

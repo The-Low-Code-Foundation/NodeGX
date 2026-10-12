@@ -1,0 +1,32 @@
+[
+  {
+    "name": "the first arrival fires; the same value does not; a different one does",
+    "because": "valuechanged.ts :31-39",
+    "params": {},
+    "steps": [{ "set": "value", "value": 1 }, "settle", { "set": "value", "value": 1 }, "settle", { "set": "value", "value": 2 }, "settle"]
+  },
+  {
+    "name": "a first arrival of undefined is NOT a change (lastValue starts undefined); null then is",
+    "because": "valuechanged.ts :15, :32 — `undefined === undefined`; so the description says 'including the first time a value arrives' (P109 ISL-027, D9, ruled 'Reword the description'): undefined is not a value",
+    "params": {},
+    "steps": [{ "set": "value" }, "settle", { "set": "value", "value": null }, "settle"]
+  },
+  {
+    "name": "NaN fires every time",
+    "because": "valuechanged.ts :32 — `NaN === NaN` is false",
+    "params": {},
+    "steps": [{ "set": "value", "value": { "$num": "NaN" } }, "settle", { "set": "value", "value": { "$num": "NaN" } }, "settle"]
+  },
+  {
+    "name": "-0 after 0 is not a change; two equal-looking objects are two changes (identity, not equality)",
+    "because": "valuechanged.ts :32 `===`; the description says 'by identity'",
+    "params": {},
+    "steps": [{ "set": "value", "value": 0 }, "settle", { "set": "value", "value": { "$num": "-0" } }, "settle", { "set": "value", "value": { "a": 1 } }, "settle", { "set": "value", "value": { "a": 1 } }, "settle"]
+  },
+  {
+    "name": "a primitive after a unit object arrives as sent, so a repeated 2 fires once, not on every write (ISL-026, C6)",
+    "because": "was NSP-011 §6 C6 (R7): node.ts setInputValue merged a later value into a unit object on ANY port; since ISL-026 only a port whose type declares units merges; it minted a new { value: 2, unit } on every write, so a repeated 2 fired again",
+    "params": {},
+    "steps": [{ "set": "value", "value": { "value": 1, "unit": "px" } }, "settle", { "set": "value", "value": 2 }, "settle", { "set": "value", "value": 2 }, "settle"]
+  }
+]

@@ -1,0 +1,506 @@
+[
+  {
+    "name": "values arrive and wait for Run; Run runs the code at once: what it wrote, Error blank, Success, Done",
+    "because": "logic-builder.ts :246-251 (a value runs nothing), :765-781, :463-502; blockrun.ts :42 (__p hands its value back)",
+    "params": {
+      "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_define_input\",\"fields\":{\"NAME\":\"a\",\"TYPE\":\"number\"}},{\"type\":\"noodl_define_input\",\"fields\":{\"NAME\":\"b\",\"TYPE\":\"number\"}},{\"type\":\"noodl_define_output\",\"fields\":{\"NAME\":\"sum\",\"TYPE\":\"number\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"sum\"}}]}}",
+      "generatedCode": "__s(\"s1\");\nOutputs[\"sum\"] = __p(\"v1\", __p(\"v2\", Inputs[\"a\"]) + __p(\"v3\", Inputs[\"b\"]));\n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      {
+        "set": "b",
+        "value": 2
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 5
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a signal input the blocks declare runs the whole program, and __triggerSignal__ names the input",
+    "because": ":233-241 (a declared signal input mints and runs), :587, NoodlGenerators.ts :104-121 (the hat emits no code)",
+    "params": {
+      "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_when_signal\",\"fields\":{\"NAME\":\"go\"}},{\"type\":\"noodl_define_signal_input\",\"fields\":{\"NAME\":\"stop\"}},{\"type\":\"noodl_define_output\",\"fields\":{\"NAME\":\"by\",\"TYPE\":\"string\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"by\"}}]}}",
+      "generatedCode": "__s(\"s1\");\nOutputs[\"by\"] = __p(\"v1\", __triggerSignal__);\n"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "go"
+      },
+      "settle",
+      {
+        "signal": "stop"
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "signal": "go"
+      },
+      {
+        "signal": "stop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a signal sent fires at once, before the values the run wrote",
+    "because": ":566-576, :463-481",
+    "params": {
+      "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_define_signal_output\",\"fields\":{\"NAME\":\"ping\"}},{\"type\":\"noodl_send_signal\",\"fields\":{\"NAME\":\"ping\"}},{\"type\":\"noodl_get_input\",\"fields\":{\"NAME\":\"a\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"sent\"}}]}}",
+      "generatedCode": "__s(\"s1\");\nsendSignalOnOutput(\"ping\");\n__s(\"s2\");\nOutputs[\"sent\"] = __p(\"v1\", Inputs[\"a\"]);\n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": "x"
+      },
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": "y"
+      },
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a throw: the signal before it fired, the value before it dropped; Error, a failure; the next good run clears Error to blank",
+    "because": ":503-511, :492-496",
+    "params": {
+      "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_send_signal\",\"fields\":{\"NAME\":\"ping\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"sum\"}},{\"type\":\"noodl_get_input\",\"fields\":{\"NAME\":\"a\"}}]}}",
+      "generatedCode": "__s(\"s1\");\nsendSignalOnOutput(\"ping\");\n__s(\"s2\");\nOutputs[\"sum\"] = __p(\"v1\", 1);\n__s(\"s3\");\nthrow new Error(\"boom \" + __p(\"v2\", Inputs[\"a\"]));\n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": "q"
+      },
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "generatedCode",
+        "value": "__s(\"s1\");\nOutputs[\"sum\"] = __p(\"v1\", __p(\"v2\", Inputs[\"a\"]) + __p(\"v3\", Inputs[\"b\"]));\n"
+      },
+      {
+        "set": "a",
+        "value": 1
+      },
+      {
+        "set": "b",
+        "value": 2
+      },
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "whatever is thrown: its message, or its text when it has none",
+    "because": ":505-511 (String(error) for a throw with no message)",
+    "params": {
+      "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_get_input\",\"fields\":{\"NAME\":\"a\"}}]}}",
+      "generatedCode": "__s(\"s1\");\nthrow __p(\"v1\", Inputs[\"a\"]);\n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": "text"
+      },
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": null
+      },
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "a"
+      },
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": {
+          "message": "m"
+        }
+      },
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 7
+      },
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a throw in a run a signal input started: Error says what was thrown, that run answered failure, and the code wrote to Inputs first",
+    "because": ":233-241, :503-511 (the same failure path as Run)",
+    "params": {
+      "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_when_signal\",\"fields\":{\"NAME\":\"go\"}},{\"type\":\"noodl_define_signal_input\",\"fields\":{\"NAME\":\"stop\"}},{\"type\":\"noodl_get_input\",\"fields\":{\"NAME\":\"n\"}}]}}",
+      "generatedCode": "__s(\"s1\");\nInputs[\"n\"] = __p(\"v1\", (Inputs[\"n\"] || 0) + 1);\n__s(\"s2\");\nthrow \"thrown \" + __p(\"v2\", __triggerSignal__) + \" \" + __p(\"v3\", Inputs[\"n\"]);\n"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "go"
+      },
+      "settle",
+      {
+        "signal": "stop"
+      },
+      "settle",
+      {
+        "set": "generatedCode",
+        "value": "__s(\"s1\");\nOutputs[\"by\"] = __p(\"v1\", __triggerSignal__);\n"
+      },
+      {
+        "signal": "go"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a run a signal input started ends every way a Run does: a signal and a value, a reserved signal, no compile, a reserved value, no code",
+    "because": ":233-241 — the same _executeLogic as Run (:385-526)",
+    "params": {
+      "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_when_signal\",\"fields\":{\"NAME\":\"go\"}},{\"type\":\"noodl_define_signal_input\",\"fields\":{\"NAME\":\"stop\"}},{\"type\":\"noodl_define_output\",\"fields\":{\"NAME\":\"by\",\"TYPE\":\"string\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"by\"}}]}}",
+      "generatedCode": "__s(\"s1\");\nsendSignalOnOutput(\"ping\");\n__s(\"s2\");\nOutputs[\"sent\"] = __p(\"v1\", Inputs[\"a\"]);\n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": "x"
+      },
+      {
+        "signal": "go"
+      },
+      "settle",
+      {
+        "set": "generatedCode",
+        "value": "__s(\"s1\");\nsendSignalOnOutput(\"done\");\n__s(\"s2\");\nOutputs[\"sum\"] = __p(\"v1\", Inputs[\"a\"]);\n"
+      },
+      {
+        "set": "a",
+        "value": 4
+      },
+      {
+        "signal": "stop"
+      },
+      "settle",
+      {
+        "set": "generatedCode",
+        "value": "Outputs[\"sum\"] = (;\n"
+      },
+      {
+        "signal": "go"
+      },
+      "settle",
+      {
+        "set": "generatedCode",
+        "value": "__s(\"s1\");\nOutputs[\"sum\"] = __p(\"v1\", Inputs[\"a\"]);\n__s(\"s2\");\nOutputs[\"done\"] = __p(\"v2\", 1);\n"
+      },
+      {
+        "set": "a",
+        "value": 6
+      },
+      {
+        "signal": "stop"
+      },
+      "settle",
+      {
+        "set": "generatedCode",
+        "value": ""
+      },
+      {
+        "signal": "go"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "code that will not compile is reported at the run, not the write; no code after it is Unchanged, and Error stays",
+    "because": ":385-414, :610-676, :416-421",
+    "params": {
+      "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_define_output\",\"fields\":{\"NAME\":\"sum\",\"TYPE\":\"number\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"sum\"}}]}}",
+      "generatedCode": "Outputs[\"sum\"] = (;\n"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "generatedCode",
+        "value": ""
+      },
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "no code: Unchanged; code set later runs at the next Run",
+    "because": ":416-421, :759-763",
+    "params": {
+      "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_define_input\",\"fields\":{\"NAME\":\"a\",\"TYPE\":\"*\"}},{\"type\":\"noodl_define_output\",\"fields\":{\"NAME\":\"sum\",\"TYPE\":\"*\"}}]}}",
+      "generatedCode": ""
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "generatedCode",
+        "value": "__s(\"s1\");\nOutputs[\"sum\"] = __p(\"v1\", __p(\"v2\", Inputs[\"a\"]) + __p(\"v3\", Inputs[\"b\"]));\n"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 2
+      },
+      {
+        "set": "b",
+        "value": 3
+      },
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "nothing placed: Run is Unchanged",
+    "because": ":416-421",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the code writes to Inputs and the next run reads it; a value of undefined is never sent",
+    "because": ":543 (Inputs is the node's own object), node.ts :858",
+    "params": {
+      "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_get_input\",\"fields\":{\"NAME\":\"a\"}},{\"type\":\"noodl_get_input\",\"fields\":{\"NAME\":\"z\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"kept\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"none\"}}]}}",
+      "generatedCode": "__s(\"s1\");\nOutputs[\"kept\"] = __p(\"v1\", Inputs[\"a\"]);\n__s(\"s2\");\nInputs[\"a\"] = \"seen\";\n__s(\"s3\");\nOutputs[\"none\"] = __p(\"v2\", Inputs[\"z\"]);\n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 2
+      },
+      {
+        "set": "z",
+        "value": 3
+      },
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "z"
+      },
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a value written to a name the node owns: the others land, then Error says so, a failure, no Success",
+    "because": ":466-490",
+    "params": {
+      "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_get_input\",\"fields\":{\"NAME\":\"a\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"sum\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"done\"}}]}}",
+      "generatedCode": "__s(\"s1\");\nOutputs[\"sum\"] = __p(\"v1\", Inputs[\"a\"]);\n__s(\"s2\");\nOutputs[\"done\"] = __p(\"v2\", 1);\n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 4
+      },
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 5
+      },
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a signal sent to a name the node owns: the values land, then Error says so, a failure — no Success, no Done (v2, row C149)",
+    "because": ":582-597, :487-497 (the value side’s answer, :483-490)",
+    "params": {
+      "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_send_signal\",\"fields\":{\"NAME\":\"done\"}},{\"type\":\"noodl_get_input\",\"fields\":{\"NAME\":\"a\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"sum\"}}]}}",
+      "generatedCode": "__s(\"s1\");\nsendSignalOnOutput(\"done\");\n__s(\"s2\");\nOutputs[\"sum\"] = __p(\"v1\", Inputs[\"a\"]);\n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 4
+      },
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "code set while the app runs sends a signal the placing's blocks never declared: the send registers it, and the wire carries the pulse",
+    "because": ":601 (registerOutputIfNeeded, then sendSignalOnOutput), :259-277 (a name the placing's blocks do not declare is a value port), node.ts sendSignalOnOutput → sendPulse, :566-576 — NSP-020 §6.6 piece 4 (minted at the act's kind)",
+    "params": {
+      "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_define_input\",\"fields\":{\"NAME\":\"a\",\"TYPE\":\"number\"}},{\"type\":\"noodl_define_input\",\"fields\":{\"NAME\":\"b\",\"TYPE\":\"number\"}},{\"type\":\"noodl_define_output\",\"fields\":{\"NAME\":\"sum\",\"TYPE\":\"number\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"sum\"}}]}}",
+      "generatedCode": "__s(\"s1\");\nOutputs[\"sum\"] = __p(\"v1\", __p(\"v2\", Inputs[\"a\"]) + __p(\"v3\", Inputs[\"b\"]));\n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "generatedCode",
+        "value": "__s(\"s1\");\nsendSignalOnOutput(\"ping\");\n__s(\"s2\");\nOutputs[\"sent\"] = __p(\"v1\", Inputs[\"a\"]);\n"
+      },
+      {
+        "set": "a",
+        "value": 1
+      },
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "generatedCode",
+        "value": "__s(\"s1\");\nsendSignalOnOutput(\"ping\");\n__s(\"s2\");\nOutputs[\"sum\"] = __p(\"v1\", 1);\n__s(\"s3\");\nthrow new Error(\"boom \" + __p(\"v2\", Inputs[\"a\"]));\n"
+      },
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the kinds are the placing's: blocks written while the app runs move no port, and the code is what runs",
+    "because": ":200-212 (the model's blocks first), :740-746",
+    "params": {
+      "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_when_signal\",\"fields\":{\"NAME\":\"go\"}},{\"type\":\"noodl_define_signal_input\",\"fields\":{\"NAME\":\"stop\"}},{\"type\":\"noodl_define_output\",\"fields\":{\"NAME\":\"by\",\"TYPE\":\"string\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"by\"}}]}}",
+      "generatedCode": "__s(\"s1\");\nOutputs[\"by\"] = __p(\"v1\", __triggerSignal__);\n"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "workspace",
+        "value": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_define_input\",\"fields\":{\"NAME\":\"a\",\"TYPE\":\"number\"}},{\"type\":\"noodl_define_input\",\"fields\":{\"NAME\":\"b\",\"TYPE\":\"number\"}},{\"type\":\"noodl_define_output\",\"fields\":{\"NAME\":\"sum\",\"TYPE\":\"number\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"sum\"}}]}}"
+      },
+      {
+        "set": "generatedCode",
+        "value": "__s(\"s1\");\nOutputs[\"sum\"] = __p(\"v1\", __p(\"v2\", Inputs[\"a\"]) + __p(\"v3\", Inputs[\"b\"]));\n"
+      },
+      {
+        "set": "a",
+        "value": 1
+      },
+      {
+        "set": "b",
+        "value": 1
+      },
+      {
+        "signal": "go"
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  }
+]

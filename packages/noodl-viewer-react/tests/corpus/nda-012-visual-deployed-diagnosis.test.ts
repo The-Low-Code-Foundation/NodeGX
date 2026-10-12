@@ -65,6 +65,13 @@ interface DrivableNode extends NodeInstance {
   getTemplateForModel(model: unknown): string | undefined;
   reportTemplateProblem(code: string, message: string): void;
   registerInputIfNeeded(name: string): void;
+  addItem(model: unknown, index: number): Promise<void>;
+  _mapInputs(itemNode: unknown, model: unknown): void;
+  _queueOperation(op: () => unknown): void;
+  _copyItems(): void;
+  itemOutputSignalTriggered(name: string, model: unknown, itemNode: unknown): void;
+  registerOutputIfNeeded(name: string): void;
+  getItemOutput(name: string): unknown;
 }
 
 async function build(module: { node: { name: string } }, parameters: Record<string, unknown> = {}) {
@@ -355,3 +362,180 @@ describe('B2-d — the report is raised once per rebuild, not once per item', ()
     expect(codes(graph)).toEqual(['repeater/no-template-for-item', 'repeater/no-template-for-item']);
   });
 });
+
+/**
+ * P109 ISL-049 — what used to stop a Repeater for good is caught where it happens and said on the bus (rows C128, C135, C140,
+ * C141). Whether the queue then runs on, and when, is graded by the For Each scenarios on the runtime target; the trace there
+ * carries no runtime errors, so the codes are graded here. Each catch has a control beside it that raises nothing.
+ */
+describe('ISL-049 — a Repeater names what it cannot build and goes on', () => {
+  const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  // C135: `startsWith` on a number threw outside the Script's try
+  it('reports a Script whose component is not text, and gives that item no row', async () => {
+    const { graph, node } = await build(ForEachModule, { templateType: 'dynamic' });
+
+    node.setInputValue('templateScript', 'component = 7;');
+    graph.update();
+
+    expect(node.getTemplateForModel(Model.create({ id: 'a' }))).toBeUndefined();
+    expect(codes(graph)).toEqual(['repeater/template-script-threw']);
+    expect(graph.errors[0].message).toContain('7');
+  });
+
+  // C128: `createNode` throws for a component the project does not have; the `!itemNode` branch never ran
+  it('reports a Template the project does not have, and the build resolves', async () => {
+    const { graph, node } = await build(ForEachModule, { template: '/Missing' });
+
+    await expect(node.addItem(Model.create({ id: 'a' }), 0)).resolves.toBeUndefined();
+
+    expect(codes(graph)).toEqual(['repeater/template-component-not-found']);
+    expect(graph.errors[0].message).toContain('"/Missing"');
+  });
+
+  // C140 / C141: the same catch serves the landing and a record's change
+  it('reports a mapping that throws for an item, keeps what it set before, and does not throw into the caller', async () => {
+    const { graph, node } = await build(ForEachModule);
+    const set: Record<string, unknown> = {};
+    const row = { hasInput: () => true, setInputValue: (k: string, v: unknown) => (set[k] = v) };
+
+    node.registerInputIfNeeded('inputMappingScript');
+    node.setInputValue('inputMappingScript', "map({ id: function (o) { return o.getId() }, label: function () { throw new Error('no label'); } })");
+    graph.update();
+
+    expect(() => node._mapInputs(row, Model.create({ id: 'b' }))).not.toThrow();
+    expect(set).toEqual({ id: 'b' });
+    expect(codes(graph)).toEqual(['repeater/input-mapping-threw']);
+    expect(graph.errors[0].message).toContain('"b"');
+    expect(graph.errors[0].message).toContain('no label');
+  });
+
+  it('says nothing about a mapping that does not throw', async () => {
+    const { graph, node } = await build(ForEachModule);
+    const set: Record<string, unknown> = {};
+    const row = { hasInput: () => true, setInputValue: (k: string, v: unknown) => (set[k] = v) };
+
+    node.registerInputIfNeeded('inputMappingScript');
+    node.setInputValue('inputMappingScript', 'map({ id: function (o) { return o.getId() } })');
+    graph.update();
+
+    node._mapInputs(row, Model.create({ id: 'b' }));
+    expect(set).toEqual({ id: 'b' });
+    expect(codes(graph)).toEqual([]);
+  });
+
+  // C128's backstop: anything an operation does not catch itself
+  it('reports an operation that throws, and runs the next one', async () => {
+    const { graph, node } = await build(ForEachModule);
+    let ran = false;
+
+    node._queueOperation(() => {
+      throw new Error('broken op');
+    });
+    node._queueOperation(() => {
+      ran = true;
+    });
+    await flush();
+
+    expect(ran).toBe(true);
+    expect(codes(graph)).toEqual(['repeater/operation-threw']);
+    expect(graph.errors[0].message).toContain('broken op');
+  });
+
+  it('says nothing when every operation completes', async () => {
+    const { graph, node } = await build(ForEachModule);
+    let ran = 0;
+
+    node._queueOperation(() => void ran++);
+    node._queueOperation(() => void ran++);
+    await flush();
+
+    expect(ran).toBe(2);
+    expect(codes(graph)).toEqual([]);
+  });
+});
+
+/**
+ * P109 ISL-049, row C130 — ruled "Skip the empty entry and report it once". Which rows are drawn is graded by the For Each
+ * scenarios on the runtime target; the report is graded here.
+ */
+describe('ISL-049 — a list with an empty entry draws the rest and says so once', () => {
+  const size = (node: DrivableNode) => (node._internal.collection as { size(): number }).size();
+
+  it('copies every entry but the empty ones, and reports them once for that list', async () => {
+    const { graph, node } = await build(ForEachModule, { template: '/Row' });
+    const items = [{ id: 'a' }, null, { id: 'b' }, undefined];
+
+    node.setInputValue('items', items);
+    graph.update();
+    node._copyItems();
+
+    expect(size(node)).toBe(2);
+    expect(codes(graph)).toEqual(['repeater/items-empty-entry']);
+    expect(graph.errors[0].message).toContain('2 empty entries');
+  });
+
+  it('says nothing about a list with no empty entry', async () => {
+    const { graph, node } = await build(ForEachModule, { template: '/Row' });
+
+    node.setInputValue('items', [{ id: 'a' }, { id: 'b' }]);
+    graph.update();
+
+    expect(size(node)).toBe(2);
+    expect(codes(graph)).toEqual([]);
+  });
+
+  // The second half: a copy that throws at the frame's end no longer drops the rebuild asked for in the same frame
+  it('keeps the frame-end rebuild when the copy throws', async () => {
+    const { graph, node } = await build(ForEachModule, { template: '/Row' });
+    graph.update();
+    node._copyItems = () => {
+      throw new Error('a listener threw');
+    };
+
+    node.setInputValue('items', [{ id: 'a' }]);
+    node.setInputValue('template', '/Other');
+    graph.update();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(codes(graph)).toContain('repeater/operation-threw');
+    expect(node._internal.hasScheduledRefresh).toBe(false);
+  });
+});
+
+/**
+ * P107-C142 — the rows' signals heard in one update. A trace keeps a settle's last value per port, so the For Each scenarios show
+ * every signal and the last row's values; which values each signal goes out with is graded here, at the node.
+ */
+describe('ISL-049 — each row\'s signal goes out with its own row', () => {
+  it('reports two rows heard in one update one after the other: Item Id, outputs, then the signal', async () => {
+    const { graph, node } = await build(ForEachModule);
+    node.registerOutputIfNeeded('itemOutputSignal-Added');
+    node.registerOutputIfNeeded('itemOutputSignal-Leaving');
+    node.registerOutputIfNeeded('itemOutput-Label');
+    const sent: string[] = [];
+    const n = node as unknown as { sendSignalOnOutput(name: string): void; flagOutputDirty(name: string): void };
+    const send = n.sendSignalOnOutput.bind(node);
+    const flag = n.flagOutputDirty.bind(node);
+    n.sendSignalOnOutput = (name) => (sent.push(`signal ${name}`), send(name));
+    n.flagOutputDirty = (name) => (
+      sent.push(`${name} ${name === 'itemActionItemId' ? node._internal.itemActionItemId : node.getItemOutput(name.slice('itemOutput-'.length))}`),
+      flag(name)
+    );
+    const row = (label: string) => ({ _outputs: { Label: { value: label } } });
+
+    node.itemOutputSignalTriggered('Leaving', Model.create({ id: 'c142-a' }), row('A'));
+    node.itemOutputSignalTriggered('Added', Model.create({ id: 'c142-b' }), row('B'));
+    graph.update();
+
+    expect(sent).toEqual([
+      'itemActionItemId c142-a',
+      'itemOutput-Label A',
+      'signal itemOutputSignal-Leaving',
+      'itemActionItemId c142-b',
+      'itemOutput-Label B',
+      'signal itemOutputSignal-Added'
+    ]);
+  });
+});
+

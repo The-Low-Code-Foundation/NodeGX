@@ -188,7 +188,8 @@ interface NodeContext extends RuntimeNodeContext {
   popupStack: PopupStackEntry[];
   _dismissOpenPopups(): void;
   cancelTopPopup(): boolean;
-  showPopup(popupComponent: string, params: Record<string, unknown>, args?: any): Promise<void>;
+  /** Resolves `'dismissed'` for a popup replaced before it opened (P107-C32): its opener already heard Dismissed. */
+  showPopup(popupComponent: string, params: Record<string, unknown>, args?: any): Promise<'dismissed' | void>;
   setWarningTypes(warningTypes: Record<string, boolean>): void;
 }
 
@@ -1242,14 +1243,29 @@ NodeContext.prototype.showPopup = async function (popupComponent, params, args) 
   }
   this.popupStack.push(entry);
 
-  const popupNode = await nodeScope.createNode(popupComponent);
+  let popupNode;
+  try {
+    popupNode = await nodeScope.createNode(popupComponent);
+  } catch (e) {
+    // Replaced while it was being built: its opener heard Dismissed, which answers the press (P107-C32, below).
+    if (entry.dismissed) return 'dismissed';
+    // P107-C30 (ISL-028, ruled "Give the place back"): a popup that could not be built gives its slot back. It
+    // used to stay on the stack: the next Replace It told this popup's opener Dismissed for a popup nobody saw,
+    // and on top it took Escape away from the popup beneath. Marked spoken-for, so nothing reports it again.
+    entry.dismissed = true;
+    const index = this.popupStack.indexOf(entry);
+    if (index !== -1) this.popupStack.splice(index, 1);
+    throw e;
+  }
 
   if (entry.dismissed) {
     // Replaced while this one was still being built. Nothing was shown, so nothing is
     // closed — but the node exists and would otherwise leak, along with everything its
     // component scope created.
     nodeScope.deleteNode(popupNode);
-    return;
+    // P107-C32 (ISL-028, ruled "Drop the Done"): said, so Show Popup does not report Done for a popup that never
+    // opened. Its opener heard Dismissed when it was replaced, and that answers the press.
+    return 'dismissed';
   }
   for (const inputKey in params) {
     popupNode.setInputValue(inputKey, params[inputKey]);

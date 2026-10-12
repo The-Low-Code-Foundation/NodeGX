@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "74211808-b73d-5864-8e91-eb80b4f96e96",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pdIn",
+      "fromProperty": "show",
+      "toId": "pdBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "allowed",
+      "toId": "pdKeys",
+      "toProperty": "allowed"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "palette",
+      "toId": "pdKeys",
+      "toProperty": "palette"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "words",
+      "toId": "pdKeys",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "lang",
+      "toId": "pdKeys",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "pdIn",
+      "fromProperty": "world",
+      "toId": "pdKeys",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "pdKeys",
+      "fromProperty": "keys",
+      "toId": "pdEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pdEach",
+      "fromProperty": "itemOutput-op",
+      "toId": "pdOut",
+      "toProperty": "op"
+    },
+    {
+      "fromId": "pdEach",
+      "fromProperty": "itemOutputSignal-pressed",
+      "toId": "pdOut",
+      "toProperty": "pressed"
+    }
+  ]
+}

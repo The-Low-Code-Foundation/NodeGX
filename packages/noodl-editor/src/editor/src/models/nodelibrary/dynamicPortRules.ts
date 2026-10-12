@@ -260,3 +260,96 @@ export function generatedPortsForNode(node: RuleNodeLike): GeneratedPort[] {
 
   return ports;
 }
+
+/** The rule name {@link derivedPortsForNode} answers to. */
+export const NAMED_PORTS_DERIVED = 'namedports/derived';
+
+/**
+ * The names a `namedports/derived` rule takes, and the sentence that says so.
+ *
+ * Carried on the rule as data, so the runtime that writes the ports, the catalog, the editor and
+ * the door all read one definition: `pattern` is a regular-expression source, `rule` the words a
+ * refusal quotes.
+ */
+export interface DerivedNameRule {
+  pattern: string;
+  rule: string;
+}
+
+/** One `namedports/derived` entry, after it has been recognised. */
+export interface NamedPortsDerivedRule {
+  name: string;
+  parameter: string;
+  accept?: DerivedNameRule;
+  port: GeneratedPort;
+}
+
+/**
+ * P109 ISL-009 — the `namedports/derived` rules a type declares.
+ *
+ * The same template as `namedports/list`, delivered differently. A `list` rule's ports are pushed
+ * by {@link NamedPortsAdapter} through `setDynamicPorts`, which REPLACES a node's dynamic ports: on
+ * a node whose runtime also pushes ports (Page Stack, Router, Text Input) the two writers would
+ * erase each other on every parameter change. A `derived` rule is read by `getPorts()` itself, from
+ * the type and the node's own parameters, so it has no writer to compete with. That is what lets one
+ * rule sit on every visual node.
+ *
+ * Takes the type's `dynamicports` array, so the editor (a node's type) and the validator (the
+ * catalog's `declaredPortGroups`, which is the same array) ask the same function.
+ */
+export function namedPortsDerivedRules(dynamicports: unknown): NamedPortsDerivedRule[] {
+  if (!Array.isArray(dynamicports)) return [];
+  const rules: NamedPortsDerivedRule[] = [];
+  for (const entry of dynamicports) {
+    const rule = entry as Partial<NamedPortsDerivedRule>;
+    if (!rule || rule.name !== NAMED_PORTS_DERIVED) continue;
+    if (typeof rule.parameter !== 'string' || !rule.port || typeof rule.port.name !== 'string') continue;
+    rules.push(rule as NamedPortsDerivedRule);
+  }
+  return rules;
+}
+
+const _acceptCache: Record<string, RegExp> = {};
+
+/** Whether a rule takes this name. A rule with no `accept` takes every name. */
+export function derivedRuleAccepts(rule: NamedPortsDerivedRule, name: string): boolean {
+  if (!rule.accept || typeof rule.accept.pattern !== 'string') return true;
+  const re = _acceptCache[rule.accept.pattern] || (_acceptCache[rule.accept.pattern] = new RegExp(rule.accept.pattern));
+  return re.test(name);
+}
+
+/**
+ * The ports a node's `namedports/derived` rules imply, from its own parameters.
+ *
+ * A name the rule's `accept` refuses mints no port: the runtime would not write it, and a port the
+ * runtime ignores is worse than none. The validator reports those names instead
+ * ({@link refusedDerivedNames}).
+ */
+export function derivedPortsForNode(dynamicports: unknown, parameters: Record<string, unknown> | undefined): GeneratedPort[] {
+  const ports: GeneratedPort[] = [];
+  const taken: Record<string, boolean> = {};
+  for (const rule of namedPortsDerivedRules(dynamicports)) {
+    for (const name of namesFromListParameter(parameters ? parameters[rule.parameter] : undefined)) {
+      if (!derivedRuleAccepts(rule, name)) continue;
+      const port = instantiate(rule.port, name);
+      if (taken[port.name]) continue;
+      taken[port.name] = true;
+      ports.push(port);
+    }
+  }
+  return ports;
+}
+
+/** Every name a node lists that its rule refuses, with the rule that refused it. */
+export function refusedDerivedNames(
+  dynamicports: unknown,
+  parameters: Record<string, unknown> | undefined
+): Array<{ parameter: string; name: string; rule: string }> {
+  const out: Array<{ parameter: string; name: string; rule: string }> = [];
+  for (const rule of namedPortsDerivedRules(dynamicports)) {
+    for (const name of namesFromListParameter(parameters ? parameters[rule.parameter] : undefined)) {
+      if (!derivedRuleAccepts(rule, name)) out.push({ parameter: rule.parameter, name, rule: rule.accept?.rule ?? '' }); // refused ⇒ `accept` is set
+    }
+  }
+  return out;
+}

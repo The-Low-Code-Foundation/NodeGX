@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "eaae4705-6f5c-5833-87bf-21fa18cf1e37",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lcIn",
+      "fromProperty": "title",
+      "toId": "lcTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lcIn",
+      "fromProperty": "lesson",
+      "toId": "lcLesson",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lcIn",
+      "fromProperty": "question",
+      "toId": "lcQuestion",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lcIn",
+      "fromProperty": "askWord",
+      "toId": "lcAsk",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lcIn",
+      "fromProperty": "heldText",
+      "toId": "lcHeld",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lcIn",
+      "fromProperty": "isHeld",
+      "toId": "lcHeld",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lcIn",
+      "fromProperty": "id",
+      "toId": "lcAskOlive",
+      "toProperty": "lesson"
+    },
+    {
+      "fromId": "lcIn",
+      "fromProperty": "lang",
+      "toId": "lcAskOlive",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "lcIn",
+      "fromProperty": "w",
+      "toId": "lcAskOlive",
+      "toProperty": "w"
+    },
+    {
+      "fromId": "lcAsk",
+      "fromProperty": "onClick",
+      "toId": "lcAskOlive",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "lcAskOlive",
+      "fromProperty": "lines",
+      "toId": "lcEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lcAskOlive",
+      "fromProperty": "letters",
+      "toId": "lcLetterEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lcAskOlive",
+      "fromProperty": "hasLetters",
+      "toId": "lcLetters",
+      "toProperty": "mounted"
+    }
+  ]
+}

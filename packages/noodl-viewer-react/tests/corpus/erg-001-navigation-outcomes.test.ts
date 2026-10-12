@@ -396,6 +396,8 @@ function makeStack(options: {
   instance.matchPageFromUrl = () => undefined;
   instance.createPageContainer = () => ({ addChild() {} });
   instance.setPageOutputs = () => undefined;
+  // P109 ISL-048 (P107-C114): the reset counts its pages beside its outputs — a collaborator, as `setPageOutputs` is
+  instance.updateChildCountAndIndiciesNow = () => undefined;
 
   return { instance, recorder, created };
 }

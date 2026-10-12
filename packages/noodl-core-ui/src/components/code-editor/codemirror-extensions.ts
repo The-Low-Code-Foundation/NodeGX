@@ -109,6 +109,7 @@ export function diagnosticsFor(
     case 'expression':
     case 'function':
     case 'script':
+    case 'scriptfile':
       return javascriptDiagnostics(state, validationType, subject);
 
     case 'json':

@@ -66,6 +66,16 @@ function registerInput(object: SharedInputs, metadata: NodeMetadata, name: strin
     object[name].setUnitType = input.setUnitType;
   }
 
+  // ISL-026 / P107-C6: a port built for sizes. Its type stays in the metadata (only the types listed
+  // above are kept on the instance's input), so `node.ts` reads this mark to decide whether a bare number
+  // is merged into the unit the port holds. Every other port receives exactly what was sent.
+  if (object[name] && input.type && Array.isArray((input.type as PortType).units)) {
+    (object[name] as InputPortDefinition & { hasUnits?: true }).hasUnits = true;
+    // P109 ISL-050 / P107-C132: and the unit a bare number is read in when the port holds no size to merge into.
+    const type = input.type as PortType;
+    (object[name] as InputPortDefinition & { defaultUnit?: string }).defaultUnit = type.defaultUnit || type.units[0];
+  }
+
   metadata.inputs[name] = {
     displayName: input.displayName,
     editorName: input.editorName,
@@ -338,6 +348,7 @@ function defineNode(opts: NodeDefinitionOptions): NodeDefinition {
     name: opts.name,
     displayNodeName: opts.displayNodeName || opts.displayName,
     deprecated: opts.deprecated,
+    replacedBy: opts.replacedBy,
     haveComponentPorts: opts.haveComponentPorts,
     // P77 SBR-008 §9 — ports under this prefix are declared by the author's wires. Carried
     // through to the editor so it stops calling such a wire broken before the runtime has

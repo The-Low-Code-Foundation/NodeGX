@@ -166,6 +166,9 @@ export const PORT_TOKEN_RULES: readonly PortTokenRule[] = [
   // `iconSize` is here and not under a size scale of its own because there is no such category:
   // an icon is sized off the spacing ramp in this vocabulary (`--space-4` is 16px).
   { test: /iconSize$/i, categories: ['spacing'] },
+  // P103-CMG009-OGIMAGE. A Page's meta ports are named for their tag, and `og:image:width` is a
+  // pixel count for a link preview: a token picked there is written into the tag verbatim.
+  { test: /^og:/i, categories: null },
   { test: /(width|height)$/i, categories: ['spacing'] }
 ];
 

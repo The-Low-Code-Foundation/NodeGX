@@ -114,6 +114,25 @@ interface CloudFunction2Instance extends NodeInstance {
   doCall(): void;
 }
 
+/**
+ * P107-D28 (P109 ISL-030, ruled "Always text"): Error is a string port. A backend that answers
+ * `{ "error": { "reason": … } }` put the OBJECT there, and a Text wired to it showed `[object Object]`. The object's
+ * `message` when it has one, else the object written out as JSON; anything else as text.
+ */
+function errorText(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (value !== null && typeof value === 'object') {
+    const message = (value as { message?: unknown }).message;
+    if (typeof message === 'string' && message !== '') return message;
+    try {
+      return JSON.stringify(value);
+    } catch (e) {
+      return String(value);
+    }
+  }
+  return String(value);
+}
+
 /** NDA-004 §2 — see `setError`. Also the editor's warning key; the bus keys by `code`. */
 const CALL_ERROR_CODE = 'cloud-function/call-failed';
 
@@ -289,7 +308,9 @@ const CloudFunctionNode: NodeDefinitionOptions = {
         content: this._internal.paramsValues,
         method: 'POST',
         success: (res) => {
-          if (res === undefined) {
+          // P107-C54 (ISL-026, ruled "Treat it as empty"): a body of JSON `null` is no result, as an empty one is —
+          // `res.result` on it threw inside the XHR handler and the Call was never answered
+          if (res === undefined || res === null) {
             // No result, still success
 
             this._internal.lastCallResult = {
@@ -321,13 +342,12 @@ const CloudFunctionNode: NodeDefinitionOptions = {
         // graph wired correctly for failure showed nothing when the backend was
         // simply not running, which is the ordinary way this breaks.
         error: (e, status) => {
-          const error =
+          const error = errorText(
             typeof e === 'string'
               ? e
               : (e && e.error) ||
-                (status === 0
-                  ? 'Could not reach the backend at ' + endpoint
-                  : 'Failed running cloud function.');
+                  (status === 0 ? 'Could not reach the backend at ' + endpoint : 'Failed running cloud function.')
+          );
           this._internal.lastCallResult = {
             status: 'failure',
             error

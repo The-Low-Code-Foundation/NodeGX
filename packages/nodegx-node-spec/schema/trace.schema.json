@@ -1,0 +1,251 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nodegx.io/schemas/node-spec/trace/v1.json",
+  "title": "NodeGX node trace, format version 1",
+  "description": "What a node did, in one form whichever implementation did it (phase 107, NSP-002). An ordered stream of stimulus events (set, in, settle, advance) and observation events (value, signal, outcome, request, open). Between two settles the observation events are grouped canonically: `value` events sorted by port name, then `signal` events in emission order, then `outcome` events in the order they were reported (NSP-007: an outcome the world settles — an answer landing, a timeout — is reported when it lands, which may be frames after its invocation), then `request`, `backend` and `socket` events, one group, in the order they were issued, then the LOCATION group — `open`, `history`, `dispatch`, `stack`, `route`, `popup` and `picker` events — in the order they were made (NSP-015); a `value` is recorded only when it changed since the last settle. Every event MAY carry a `subject` (what it happened to): omitted in a one-node trace, a node id in a graph trace, and left open for app-level subjects such as `app:click`. `completed` is never recorded: every `outcome` event implies it. A `failure` outcome carries the implementation's error CODE in `error`, never its message. Values are in the canonical form src/canonical.ts defines (tagged `$num` / `$date` objects for what JSON cannot say, keys sorted). The world (NSP-007, src/world.ts): `advance` says the scripted clock moved by `ms`; `request` says the node handed the world a request — `method` as handed, `url` as handed, `headers` with lower-cased names, `body` the text that travelled or `{ \"$form\": [[name, value], …] }` for form data, absent when there was none. NSP-015: `open` says the node asked the browser to open a URL (`window.open(url, target, features)`), each canonical, as handed; s17 `history` and `dispatch` the push and the event it dispatched; s18 `stack` a request handed to a Component Stack (src/world.ts STACK); s19 `route` a navigate handed to the Routers (src/world.ts ROUTE); s20 `popup` a popup shown or closed (src/world.ts POPUP). NSP-014 s21: `backend` says the node handed a backend an operation in the backend contract's words (src/world.ts BACKEND) — `op`, `backend` the id it went to, `args` as handed, callbacks left out. s31: `picker` says the node clicked a file input (src/world.ts PICKER) — `accept` and `capture`, what the element held at the click. s34: `socket` says the node made a call on a WebSocket (src/world.ts SOCKET) — a `connect`, a `send` or a `close`, as handed, in the request group.",
+  "type": "array",
+  "items": { "$ref": "#/definitions/event" },
+  "definitions": {
+    "port": { "type": "string", "description": "A port name. MAY be empty: String Format registers the empty placeholder `{}` as the port named '' (NSP-006 found the schema refusing what the spec and its scenario produce)." },
+    "subject": { "type": "string", "minLength": 1 },
+    "canonical": {
+      "description": "A canonical value: JSON, plus `{ \"$num\": tag }` for -0 / NaN / ±Infinity and `{ \"$date\": iso | null }` for a Date. Key order is not expressible in JSON Schema; the TypeScript validator checks it.",
+      "anyOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "type": "number" },
+        { "type": "string" },
+        { "type": "array", "items": { "$ref": "#/definitions/canonical" } },
+        {
+          "type": "object",
+          "required": ["$num"],
+          "additionalProperties": false,
+          "properties": { "$num": { "enum": ["-0", "NaN", "Infinity", "-Infinity"] } }
+        },
+        {
+          "type": "object",
+          "required": ["$date"],
+          "additionalProperties": false,
+          "properties": { "$date": { "type": ["string", "null"] } }
+        },
+        {
+          "type": "object",
+          "propertyNames": { "not": { "enum": ["$num", "$date"] } },
+          "additionalProperties": { "$ref": "#/definitions/canonical" }
+        }
+      ]
+    },
+    "event": {
+      "type": "object",
+      "required": ["t"],
+      "oneOf": [
+        {
+          "description": "stimulus: a value written to an input port. `value` absent means undefined was written.",
+          "properties": { "t": { "const": "set" }, "port": { "$ref": "#/definitions/port" }, "value": { "$ref": "#/definitions/canonical" }, "subject": { "$ref": "#/definitions/subject" } },
+          "required": ["t", "port"],
+          "additionalProperties": false
+        },
+        {
+          "description": "stimulus: a signal input pulsed.",
+          "properties": { "t": { "const": "in" }, "port": { "$ref": "#/definitions/port" }, "subject": { "$ref": "#/definitions/subject" } },
+          "required": ["t", "port"],
+          "additionalProperties": false
+        },
+        {
+          "description": "stimulus: the target drained its frame; the observations that follow belong to it.",
+          "properties": { "t": { "const": "settle" }, "subject": { "$ref": "#/definitions/subject" } },
+          "required": ["t"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation: an output value changed (never undefined — C3).",
+          "properties": { "t": { "const": "value" }, "port": { "$ref": "#/definitions/port" }, "value": { "$ref": "#/definitions/canonical" }, "subject": { "$ref": "#/definitions/subject" } },
+          "required": ["t", "port", "value"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation: a signal output pulsed.",
+          "properties": { "t": { "const": "signal" }, "port": { "$ref": "#/definitions/port" }, "subject": { "$ref": "#/definitions/subject" } },
+          "required": ["t", "port"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation: an outcome-reporting input finished (ERG-001) — `port` is the INPUT that was invoked; `''` (NSP-014 s29) when no input opened the invocation (an outcome a node reports for something that did not start on this page — Sign In With's return leg).",
+          "properties": {
+            "t": { "const": "outcome" },
+            "port": { "$ref": "#/definitions/port" },
+            "value": { "enum": ["done", "unchanged", "failure"] },
+            "error": { "type": "string", "minLength": 1 },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "port", "value"],
+          "additionalProperties": false
+        },
+        {
+          "description": "stimulus (NSP-007): the world's clock moved by `ms` milliseconds; every timer due on the way fired, in order.",
+          "properties": { "t": { "const": "advance" }, "ms": { "type": "number", "minimum": 0 }, "subject": { "$ref": "#/definitions/subject" } },
+          "required": ["t", "ms"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation (NSP-007): the node handed the world a request. `headers` names are lower-cased; `body` is the text that travelled, or `{ \"$form\": [[name, value], …] }`, or absent.",
+          "properties": {
+            "t": { "const": "request" },
+            "method": { "$ref": "#/definitions/canonical" },
+            "url": { "type": "string" },
+            "headers": { "type": "object", "additionalProperties": { "type": "string" } },
+            "body": { "$ref": "#/definitions/canonical" },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "method", "url", "headers"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation (NSP-015): the node asked the browser to open a URL — `window.open(url, target, features)` — each canonical, as handed; a target or features not handed is absent (s17). The world opens nothing (src/world.ts LOCATION).",
+          "properties": {
+            "t": { "const": "open" },
+            "url": { "$ref": "#/definitions/canonical" },
+            "target": { "$ref": "#/definitions/canonical" },
+            "features": { "$ref": "#/definitions/canonical" },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "url"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation (NSP-015 s17): the node pushed a history entry — `history.pushState(state, title, url)` — or (NSP-016 s70) replaced the current one — op `replace`, `history.replaceState(state, title, url)` — `url` canonical, as handed; or stepped back — op `back`, `history.back()`, no `url`: the traversal lands at the next yield to the event loop, where the page's `popstate` listeners run (src/world.ts LOCATION).",
+          "properties": {
+            "t": { "const": "history" },
+            "op": { "enum": ["push", "replace", "back"] },
+            "url": { "$ref": "#/definitions/canonical" },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "op"],
+          "if": { "properties": { "op": { "const": "back" } } },
+          "then": { "not": { "required": ["url"] } },
+          "else": { "required": ["url"] },
+          "additionalProperties": false
+        },
+        {
+          "description": "observation (NSP-015 s17): the node dispatched an event on the window — `window.dispatchEvent(event)` — named by its type (src/world.ts LOCATION).",
+          "properties": {
+            "t": { "const": "dispatch" },
+            "event": { "type": "string", "minLength": 1 },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "event"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation (NSP-015 s18): the node handed a Component Stack a request (src/world.ts STACK) — `push` / `replace` (`NavigationHandler.navigate` / `.replace`: `stack` and `target` as handed, absent when not handed; `params` and `transition` canonical at the call) or `back` (a pop through the stack's back callback: `action` absent when none, `results` canonical at the call).",
+          "properties": {
+            "t": { "const": "stack" },
+            "op": { "enum": ["push", "replace", "back"] },
+            "stack": { "$ref": "#/definitions/canonical" },
+            "target": { "$ref": "#/definitions/canonical" },
+            "params": { "$ref": "#/definitions/canonical" },
+            "transition": { "$ref": "#/definitions/canonical" },
+            "action": { "$ref": "#/definitions/canonical" },
+            "results": { "$ref": "#/definitions/canonical" },
+            "params": { "$ref": "#/definitions/canonical" },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "op"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation (NSP-015 s19): the node handed the Routers a navigate (src/world.ts ROUTE) — `RouterHandler.navigate(router, args)`: `router` and `target` as handed, absent when not handed; `params` and `openInNewTab` canonical at the call.",
+          "properties": {
+            "t": { "const": "route" },
+            "router": { "$ref": "#/definitions/canonical" },
+            "target": { "$ref": "#/definitions/canonical" },
+            "params": { "$ref": "#/definitions/canonical" },
+            "openInNewTab": { "$ref": "#/definitions/canonical" },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "params", "openInNewTab"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation (NSP-015 s20): the popups (src/world.ts POPUP) — `show` (`context.showPopup(target, params, args)`, Show Popup: `target` as handed, `params` canonical at the call, `stackPolicy`, `closeOnEscape` and `modal` as handed, `accessibleName` absent when not handed) or `close` (the close handler a Close Popup resolved, called with `(action, results)`: `popup` the name of the popup it closes, absent when unnamed; `action` absent when none; `results` canonical at the call).",
+          "properties": {
+            "t": { "const": "popup" },
+            "op": { "enum": ["show", "close"] },
+            "target": { "$ref": "#/definitions/canonical" },
+            "params": { "$ref": "#/definitions/canonical" },
+            "stackPolicy": { "$ref": "#/definitions/canonical" },
+            "closeOnEscape": { "$ref": "#/definitions/canonical" },
+            "modal": { "$ref": "#/definitions/canonical" },
+            "accessibleName": { "$ref": "#/definitions/canonical" },
+            "popup": { "$ref": "#/definitions/canonical" },
+            "action": { "$ref": "#/definitions/canonical" },
+            "results": { "$ref": "#/definitions/canonical" },
+            "params": { "$ref": "#/definitions/canonical" },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "op"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation (NSP-014 s21): the node handed a backend an operation (src/world.ts BACKEND; R9, the request not the wire) — `op` the backend contract's method (`delete`, `query`, …), `backend` the id of the backend it went to, `args` the options as handed with callbacks left out, canonical at the call. In the request group.",
+          "properties": {
+            "t": { "const": "backend" },
+            "op": { "type": "string", "minLength": 1 },
+            "backend": { "type": "string", "minLength": 1 },
+            "args": { "allOf": [{ "type": "object" }, { "$ref": "#/definitions/canonical" }] },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "op", "backend", "args"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation (NSP-014 s31): the node clicked a file input (world.ts PICKER) — `input.click()`: `accept` and `capture`, what the element held at the click (reflected attributes, so strings; '' when never assigned). In the LOCATION group.",
+          "properties": {
+            "t": { "const": "picker" },
+            "accept": { "type": "string" },
+            "capture": { "type": "string" },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "accept", "capture"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation (NSP-014 s34): the node made a call on a WebSocket (src/world.ts SOCKET) — a `connect` (`new WebSocket(url, protocols)`: `url` as handed, `protocols` absent when not handed), a `send` (`data` as handed: text as itself, bytes as `$bytes`) or a `close` (`code`, `reason`, each absent when not handed); each canonical. In the request group.",
+          "properties": {
+            "t": { "const": "socket" },
+            "op": { "enum": ["connect", "send", "close"] },
+            "url": { "$ref": "#/definitions/canonical" },
+            "protocols": { "$ref": "#/definitions/canonical" },
+            "data": { "$ref": "#/definitions/canonical" },
+            "code": { "$ref": "#/definitions/canonical" },
+            "reason": { "$ref": "#/definitions/canonical" },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "op"],
+          "additionalProperties": false
+        },
+        {
+          "description": "stimulus (NSP-016 s37): a person did `act` to the node on the page — one of the acts its spec declares (click, press, release, hover, leave, touch, lift, focus, blur, type, choose, key) — with the value the act carries, canonical, or none.",
+          "properties": { "t": { "const": "act" }, "act": { "type": "string", "minLength": 1 }, "value": { "$ref": "#/definitions/canonical" }, "subject": { "$ref": "#/definitions/subject" } },
+          "required": ["t", "act"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation (NSP-016 s56): the node answered a request another node handed it (src/spec.ts THE CALLERS) — a Component Stack's answer to a `push`, a `replace` or a `back` (`value` done, unchanged or failure; `error` the failure's code, only with a failure), or `returned`: the page a back popped hands the node that pushed it the back's `action` (absent when none) and `results`, canonical at the call. In the LOCATION group.",
+          "properties": {
+            "t": { "const": "answer" },
+            "op": { "enum": ["push", "replace", "back", "returned", "navigate", "page"] },
+            "value": { "enum": ["done", "unchanged", "failure"] },
+            "error": { "type": "string", "minLength": 1 },
+            "action": { "$ref": "#/definitions/canonical" },
+            "results": { "$ref": "#/definitions/canonical" },
+            "params": { "$ref": "#/definitions/canonical" },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "op"],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

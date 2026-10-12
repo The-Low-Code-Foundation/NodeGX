@@ -11,6 +11,7 @@
 import { resolveEngine, type EngineDatabase, type ResolvedEngine } from './engine';
 import { registerSqlFunctions } from './sqlFunctions';
 import { declaredProperties, inferType, requiredWithoutDefault } from './schemaCommon';
+import { SERIES_RAISE_SQL, SERIES_TABLE_DDL, SERIES_TAKE_SQL, formatSeries, seriesColumns, seriesName, seriesNow, seriesPeriod, seriesRaises } from '../series';
 import type { AclContext } from './QueryBuilder';
 
 import EventEmitter = require('../../../events');
@@ -704,7 +705,7 @@ class LocalSQLAdapter {
       if (!Array.isArray(rows) || rows.length === 0) return undefined;
       const present = new Set(rows.map((r) => r.name).filter((n): n is string => typeof n === 'string'));
       if (present.size === 0) return undefined;
-      return { present, absent: new Set<string>() };
+      return { present, absent: new Set<string>(), arrays: QueryBuilder.arrayColumns(this.schemaManager?.getTableSchema(collection)) };
     } catch (e) {
       return undefined;
     }
@@ -735,6 +736,23 @@ class LocalSQLAdapter {
           'carried that property, so it is read as empty. If the name is a typo, nothing else will say so.'
       );
     }
+  }
+
+  /**
+   * P116 ONT-004: what a `$path` filter may learn about any collection it
+   * walks through — the declared columns (a Pointer's target) and the columns
+   * the table has. `null` for a collection that does not exist, which the
+   * builder refuses by name rather than letting SQLite answer "no such table".
+   *
+   * @private
+   */
+  _pathLookup(): QueryBuilder.CollectionLookup {
+    return (collection: string) => {
+      const properties = declaredProperties(this._getSchema(collection));
+      const scope = this._columnScope(collection);
+      if (!properties && !scope) return null;
+      return { properties, present: scope?.present };
+    };
   }
 
   /**
@@ -844,7 +862,7 @@ class LocalSQLAdapter {
 
       const schema = this._getSchema(options.collection);
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildSelect(options, schema, scope);
+      const { sql, params } = QueryBuilder.buildSelect({ ...options, lookup: this._pathLookup() }, schema, scope);
 
       const rows = this.db.prepare(sql).all(...params) as AdapterRecord[];
       const results = rows.map((row) => this._rowToRecord(row, options.collection));
@@ -852,7 +870,7 @@ class LocalSQLAdapter {
       // Handle count if requested
       let count;
       if (options.count) {
-        const { sql: countSQL, params: countParams } = QueryBuilder.buildCount(options, schema, scope);
+        const { sql: countSQL, params: countParams } = QueryBuilder.buildCount({ ...options, lookup: this._pathLookup() }, schema, scope);
         const countRow = this.db.prepare(countSQL).get(...countParams) as { count?: number } | undefined;
         count = countRow?.count || 0;
       }
@@ -905,7 +923,7 @@ class LocalSQLAdapter {
 
       const schema = this._getSchema(options.collection);
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildSearchSelect(options, schema, scope);
+      const { sql, params } = QueryBuilder.buildSearchSelect({ ...options, lookup: this._pathLookup() }, schema, scope);
 
       const rows = this.db.prepare(sql).all(...params) as AdapterRecord[];
       const results = rows.map((row) => {
@@ -920,7 +938,7 @@ class LocalSQLAdapter {
 
       let count;
       if (options.count) {
-        const { sql: countSQL, params: countParams } = QueryBuilder.buildSearchCount(options, schema, scope);
+        const { sql: countSQL, params: countParams } = QueryBuilder.buildSearchCount({ ...options, lookup: this._pathLookup() }, schema, scope);
         const countRow = this.db.prepare(countSQL).get(...countParams) as { count?: number } | undefined;
         count = countRow?.count || 0;
       }
@@ -952,7 +970,11 @@ class LocalSQLAdapter {
       let sql = `SELECT * FROM ${QueryBuilder.escapeTable(options.collection)} WHERE "objectId" = ?`;
       // Row-level read check: an unreadable row answers exactly like a missing
       // one (existence hiding).
-      const aclClause = QueryBuilder.buildAclPredicate(options.collection, options.acl, params);
+      const aclClause = QueryBuilder.buildAclPredicate(options.collection, options.acl, params, 'sqlite', {
+        collection: options.collection,
+        acl: options.acl,
+        lookup: this._pathLookup()
+      });
       if (aclClause) {
         sql += ` AND ${aclClause}`;
       }
@@ -1023,12 +1045,50 @@ class LocalSQLAdapter {
       }
 
       const recordId = hasClientId ? (requestedId as string) : generateUUID();
-      const { sql, params } = QueryBuilder.buildInsert(
-        { collection: options.collection, data, required: this.requiredToName(options.collection) },
-        recordId
-      );
+      const insert = (): void => {
+        const { sql, params } = QueryBuilder.buildInsert(
+          { collection: options.collection, data, required: this.requiredToName(options.collection) },
+          recordId
+        );
+        this.db.prepare(sql).run(...params);
+      };
 
-      this.db.prepare(sql).run(...params);
+      // P116 ONT-015: a series field the record does not carry is handed out here. A gap-free one is
+      // taken inside the insert's own transaction (a refused insert gives it back); the rest first.
+      // One the record carries in the series' own look raises the counter above it, in that same
+      // transaction (P116-S22-SERIESCARRY), and a number handed out that collides is named in the
+      // refusal (P116-S22-SERIESMSG: the body never carried it).
+      const tableSchema = this.schemaManager?.getTableSchema(options.collection);
+      const series = seriesColumns(tableSchema).filter((c) => {
+        const v = data[c.name];
+        return v === undefined || v === null || v === '';
+      });
+      const raises = seriesRaises(tableSchema, options.collection, data);
+      if (!series.length && !raises.length) insert();
+      else {
+        this.db.exec(SERIES_TABLE_DDL);
+        const at = seriesNow();
+        const filled: Record<string, unknown> = {};
+        const take = (c: (typeof series)[number]): void => {
+          const row = this.db.prepare(SERIES_TAKE_SQL).get(seriesName(options.collection, c.name), seriesPeriod(c.series, at)) as { issued: number | bigint };
+          data[c.name] = filled[c.name] = formatSeries(c.series, Number(row.issued), at);
+        };
+        for (const c of series) if (!c.series.gapFree) take(c);
+        const held = series.filter((c) => c.series.gapFree);
+        try {
+          if (held.length || raises.length)
+            this.db.transaction(() => {
+              for (const c of held) take(c);
+              for (const r of raises) this.db.prepare(SERIES_RAISE_SQL).run(r.name, r.period, r.next);
+              insert();
+            })();
+          else insert();
+        } catch (e) {
+          // node:sqlite's error can come from another realm (a jest sandbox), so not `instanceof Error`.
+          if (e && typeof e.message === 'string') e.message = QueryBuilder.uniqueConstraintWithValues(e.message, filled);
+          throw e;
+        }
+      }
 
       // Fetch the created record to get all fields
       const createdRow = this.db
@@ -1095,25 +1155,35 @@ class LocalSQLAdapter {
 
       this._guardAclSupport(options);
       const recordId = options.id || options.objectId;
-      const { sql, params } = QueryBuilder.buildUpdate(options);
+      const { sql, params } = QueryBuilder.buildUpdate({ ...options, lookup: this._pathLookup() });
       const result = this.db.prepare(sql).run(...params);
 
       // HLT-016: a precondition that matched nothing is "changed since read" only if the row is
       // there and this caller may write it. The probe carries the ACL, so a forbidden row still
       // answers "not found". Asked AFTER the write, which already did not happen, so it cannot race.
       if (options.expect && (!result || result.changes === 0)) {
-        const probe = QueryBuilder.buildRowExists(options.collection, recordId, options.acl);
+        const probe = QueryBuilder.buildRowExists(options.collection, recordId, options.acl, 'sqlite', this._pathLookup());
         const exists = this.db.prepare(probe.sql).get(...probe.params);
         options.error(exists ? QueryBuilder.PRECONDITION_FAILED : 'Object not found');
         return;
       }
 
-      // With an ACL context, 0 rows changed means not-found or forbidden —
-      // deliberately indistinguishable (the write predicate is compiled into
-      // the UPDATE itself, so there is no read-then-write race).
-      if (options.acl && (!result || result.changes === 0)) {
+      // P109 ISL-039 (P99-HLT016-NOACL): 0 rows changed is "not found" with or without an ACL.
+      // With one it is also "forbidden", deliberately indistinguishable (the write predicate is
+      // compiled into the statement, so there is no read-then-write race). With none — the admin,
+      // the master key, a cloud function — it used to answer success, store nothing, and announce
+      // a change.
+      if (!result || result.changes === 0) {
         options.error('Object not found');
         return;
+      }
+
+      // P116-S22-SERIESCARRY: a number edited into the series' own look raises its counter too, or
+      // the store would later hand it out again and refuse a person's create.
+      const raises = seriesRaises(this.schemaManager?.getTableSchema(options.collection), options.collection, options.data);
+      if (raises.length) {
+        this.db.exec(SERIES_TABLE_DDL);
+        for (const r of raises) this.db.prepare(SERIES_RAISE_SQL).run(r.name, r.period, r.next);
       }
 
       // Fetch the updated record
@@ -1169,10 +1239,11 @@ class LocalSQLAdapter {
         removedRecord = null;
       }
 
-      const { sql, params } = QueryBuilder.buildDelete(options);
+      const { sql, params } = QueryBuilder.buildDelete({ ...options, lookup: this._pathLookup() });
       const result = this.db.prepare(sql).run(...params);
 
-      if (options.acl && (!result || result.changes === 0)) {
+      // P109 ISL-039: with or without an ACL (see save).
+      if (!result || result.changes === 0) {
         options.error('Object not found');
         return;
       }
@@ -1201,7 +1272,7 @@ class LocalSQLAdapter {
 
       const schema = this._getSchema(options.collection);
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildCount(options, schema, scope);
+      const { sql, params } = QueryBuilder.buildCount({ ...options, lookup: this._pathLookup() }, schema, scope);
 
       const row = this.db.prepare(sql).get(...params) as { count?: number } | undefined;
       this._reportAbsentColumns(options.collection, scope);
@@ -1221,7 +1292,7 @@ class LocalSQLAdapter {
       this._guardAclSupport(options);
 
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildAggregate(options, scope);
+      const { sql, params } = QueryBuilder.buildAggregate({ ...options, lookup: this._pathLookup() }, scope);
       const row = this.db.prepare(sql).get(...params) as AdapterRecord | undefined;
       this._reportAbsentColumns(options.collection, scope);
 
@@ -1249,7 +1320,7 @@ class LocalSQLAdapter {
       this._guardAclSupport(options);
 
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildDistinct(options, scope);
+      const { sql, params } = QueryBuilder.buildDistinct({ ...options, lookup: this._pathLookup() }, scope);
       const rows = this.db.prepare(sql).all(...params) as AdapterRecord[];
 
       this._reportAbsentColumns(options.collection, scope);
@@ -1269,10 +1340,11 @@ class LocalSQLAdapter {
       this._ensureTable(options.collection);
       this._guardAclSupport(options);
 
-      const { sql, params } = QueryBuilder.buildIncrement(options);
+      const { sql, params } = QueryBuilder.buildIncrement({ ...options, lookup: this._pathLookup() });
       const result = this.db.prepare(sql).run(...params);
 
-      if (options.acl && (!result || result.changes === 0)) {
+      // P109 ISL-039: with or without an ACL (see save).
+      if (!result || result.changes === 0) {
         options.error('Object not found');
         return;
       }

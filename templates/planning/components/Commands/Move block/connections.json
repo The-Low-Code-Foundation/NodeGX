@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "46bd23c8-1bff-5e02-80e9-63bae83b0651",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "MoveblockIn",
+      "fromProperty": "blockId",
+      "toId": "MoveblockGuard",
+      "toProperty": "in-blockId"
+    },
+    {
+      "fromId": "MoveblockIn",
+      "fromProperty": "date",
+      "toId": "MoveblockGuard",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "MoveblockIn",
+      "fromProperty": "from",
+      "toId": "MoveblockGuard",
+      "toProperty": "in-from"
+    },
+    {
+      "fromId": "MoveblockIn",
+      "fromProperty": "blocks",
+      "toId": "MoveblockGuard",
+      "toProperty": "in-blocks"
+    },
+    {
+      "fromId": "MoveblockIn",
+      "fromProperty": "do",
+      "toId": "MoveblockGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "MoveblockGuard",
+      "fromProperty": "out-date",
+      "toId": "MoveblockWrite",
+      "toProperty": "prop-date"
+    },
+    {
+      "fromId": "MoveblockIn",
+      "fromProperty": "blockId",
+      "toId": "MoveblockWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "MoveblockGuard",
+      "fromProperty": "out-go",
+      "toId": "MoveblockWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "MoveblockIn",
+      "fromProperty": "blockId",
+      "toId": "MoveblockLog",
+      "toProperty": "prop-blockId"
+    },
+    {
+      "fromId": "MoveblockGuard",
+      "fromProperty": "out-hProjectId",
+      "toId": "MoveblockLog",
+      "toProperty": "prop-projectId"
+    },
+    {
+      "fromId": "MoveblockGuard",
+      "fromProperty": "out-hKind",
+      "toId": "MoveblockLog",
+      "toProperty": "prop-kind"
+    },
+    {
+      "fromId": "MoveblockGuard",
+      "fromProperty": "out-hSummary",
+      "toId": "MoveblockLog",
+      "toProperty": "prop-summary"
+    },
+    {
+      "fromId": "MoveblockGuard",
+      "fromProperty": "out-hBody",
+      "toId": "MoveblockLog",
+      "toProperty": "prop-body"
+    },
+    {
+      "fromId": "MoveblockGuard",
+      "fromProperty": "out-hWhat",
+      "toId": "MoveblockLog",
+      "toProperty": "prop-what"
+    },
+    {
+      "fromId": "MoveblockGuard",
+      "fromProperty": "out-hSummary",
+      "toId": "MoveblockLogGate",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "MoveblockLogGate",
+      "fromProperty": "out-at",
+      "toId": "MoveblockLog",
+      "toProperty": "prop-at"
+    },
+    {
+      "fromId": "MoveblockWrite",
+      "fromProperty": "done",
+      "toId": "MoveblockLogGate",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "MoveblockLogGate",
+      "fromProperty": "out-log",
+      "toId": "MoveblockLog",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "MoveblockLogGate",
+      "fromProperty": "out-skip",
+      "toId": "MoveblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "MoveblockLog",
+      "fromProperty": "done",
+      "toId": "MoveblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "MoveblockLog",
+      "fromProperty": "failure",
+      "toId": "MoveblockProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "MoveblockLog",
+      "fromProperty": "failure",
+      "toId": "MoveblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "MoveblockWrite",
+      "fromProperty": "failure",
+      "toId": "MoveblockProblem",
+      "toProperty": "do"
+    }
+  ]
+}

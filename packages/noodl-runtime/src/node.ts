@@ -401,6 +401,34 @@ Node.prototype._evaluateExpressionParameter = function (paramValue, portName) {
   }
 };
 
+/**
+ * A port built for sizes: its type declares `units` (`{ name: 'number', units: ['px', '%'] }`). A library
+ * port carries `hasUnits` (nodedefinition.ts keeps only some types on the instance's input); a port
+ * registered at run time keeps its whole type.
+ */
+function portHasUnits(input: { type?: unknown; hasUnits?: boolean } | undefined): boolean {
+  if (!input) return false;
+  if (input.hasUnits === true) return true;
+  const type = input.type;
+  return !!type && typeof type === 'object' && Array.isArray((type as { units?: unknown }).units);
+}
+
+/**
+ * The unit a size port reads a bare number in when it holds no size (P107-C132): the mark `nodedefinition.ts` sets on a library
+ * port, else the type's own (`registerInput` above reads it the same way).
+ */
+function defaultUnitOf(input: { type?: unknown; defaultUnit?: string }): string | undefined {
+  if (input.defaultUnit) return input.defaultUnit;
+  const type = input.type as { units?: string[]; defaultUnit?: string } | undefined;
+  return type && typeof type === 'object' && Array.isArray(type.units) ? type.defaultUnit || type.units[0] : undefined;
+}
+
+/** A number, or text that reads as one — what a Number node, an Expression or a Text Input hands a size port. */
+function isBareMagnitude(value: unknown): boolean {
+  if (typeof value === 'number') return Number.isFinite(value);
+  return typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value));
+}
+
 Node.prototype.setInputValue = function (name, value) {
   const input = this.getInput(name);
   if (!input) {
@@ -411,13 +439,23 @@ Node.prototype.setInputValue = function (name, value) {
   //inputs with units always expect objects in the shape of {value, unit, ...}
   //these inputs might sometimes get raw numbers without units, and in those cases
   //Noodl should just update the value and not the other parameters
+  //
+  // ISL-026 / P107-C6 (R7, ruled "Only on size inputs"): only a port whose TYPE declares units
+  // merges. Every other port receives exactly what was sent — a `*` port that once held a
+  // `{ value, unit }` used to turn every later number, null or boolean into one.
   const currentInputValue = this._inputValues[name] as { unit?: string } | undefined;
 
-  if (isNaN(value as number) === false && currentInputValue && currentInputValue.unit) {
+  if (portHasUnits(input) && isNaN(value as number) === false && currentInputValue && currentInputValue.unit) {
     //update the value, and keep the other parameters
     const newValue = Object.assign({}, currentInputValue); //copy it, so we don't modify the original object (e.g. it might come from a variant)
     (newValue as { value?: unknown }).value = value;
     value = newValue;
+  } else if (portHasUnits(input) && isBareMagnitude(value) && defaultUnitOf(input)) {
+    // P109 ISL-050 / P107-C132 (ruled "Read the number as pixels"): a size port that holds no size — one with no default that
+    // nothing has set yet, or one that last held a var(--token) or a value it refused — reads a bare number in its default unit.
+    // It used to be stored bare and refused by the size setter, so a Number wired into a Columns' Medium Below did nothing
+    // until a size had been typed there first.
+    value = { value, unit: defaultUnitOf(input) };
   }
 
   //Save the current input value. Save it before resolving color styles so delta updates on color styles work correctly
@@ -1252,7 +1290,9 @@ Node.prototype.queueInput = function (inputName, value, causeSeq) {
       //and the node will get a value without ever getting a unit.
       //To make sure that doesn't happen, look at the value being overwritten
       //and use the unit from that before overwriting
+      // ISL-026 / P107-C6: on a port whose type declares units only, as in `setInputValue`.
       if (
+        portHasUnits(this._inputs[inputName]) &&
         queueValue instanceof Object &&
         (queueValue as { unit?: string }).unit &&
         (value as unknown) instanceof Object === false
@@ -1437,7 +1477,9 @@ Node.prototype._onNodeModelParameterUpdated = function (event: NodeModelParamete
       //React will then re-render, and should apply the values from the text style, but won't see any delta in the virtual dom,
       //even though there is a diff to the real dom.
       //to fix that, we just force React to re-render the entire node
-      this._resetReactVirtualDOM && this._resetReactVirtualDOM();
+      // P109 ISL-008: named, so the React node records this input's next value as a DEFAULT again — a cleared
+      // parameter is the weakest rule on the page, exactly as it is after a reload.
+      this._resetReactVirtualDOM && this._resetReactVirtualDOM(event.name);
     }
 
     this.queueInput(event.name, defaultValue);

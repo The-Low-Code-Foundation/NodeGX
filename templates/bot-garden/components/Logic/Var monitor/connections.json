@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b0520f67-b84f-5f42-8c61-831624b8d14c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "varmonitorIn",
+      "fromProperty": "botName",
+      "toId": "varmonitorFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "varmonitorIn",
+      "fromProperty": "lang",
+      "toId": "varmonitorFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "varmonitorIn",
+      "fromProperty": "run",
+      "toId": "varmonitorFn",
+      "toProperty": "in-run"
+    },
+    {
+      "fromId": "varmonitorIn",
+      "fromProperty": "words",
+      "toId": "varmonitorFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "varmonitorFn",
+      "fromProperty": "out-show",
+      "toId": "varmonitorOut",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "varmonitorFn",
+      "fromProperty": "out-text",
+      "toId": "varmonitorOut",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "varmonitorFn",
+      "fromProperty": "success",
+      "toId": "varmonitorOut",
+      "toProperty": "ran"
+    }
+  ]
+}

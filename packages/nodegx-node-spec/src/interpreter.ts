@@ -1,0 +1,1365 @@
+/**
+ * The interpreter — runs one spec as a node in isolation (NSP-001 §2.2).
+ *
+ * Holds state, applies input writes and signal pulses through the spec's reducers, computes
+ * outputs, and records a trace (trace.ts). It implements the per-node parts of the core contract
+ * (`packages/nodegx-core/CONTRACT.md`):
+ *   C2  every send delivered, in order — every `emit` becomes exactly one `signal` event, in order;
+ *   C3  `undefined` is never sent — an output whose `from(state)` is `undefined` produces no event;
+ *   C4  every pulse fires — a pulse is never coalesced with the previous one.
+ * Graph-level clauses are NSP-008's.
+ *
+ * Frame model: `set` and `signal` run their reducer at once and QUEUE what the reducer emitted;
+ * `settle()` then records, in the format's canonical order, the values that changed since the
+ * last settle (sorted by port name), the queued signals, and the queued outcomes. A value is
+ * recorded when it changed (compared canonically, canonical.ts) — so a reducer that sets a state
+ * key to the value it already had produces no `value` event, and the first settle records every
+ * output that is not `undefined` (C8, the first update consolidates).
+ *
+ * What a frame's value IS (NSP-011, from Inverter): the runtime sends an output at every write
+ * that flags it (`flagOutputDirty` → `sendValue`, node.ts :832-835) and NEVER sends `undefined`
+ * (:820-822, C3). So a wire carries the LAST DEFINED value a frame produced — a node whose state
+ * ends the frame unset (Inverter handed `null` then `undefined`) still shows its last answer
+ * downstream, while a connection made later would read the getter's `undefined`. The spec
+ * models the wire (NSP-002 decision 6): outputs are observed after every step, and at settle the
+ * last defined observation per port is what is recorded — the settle-time value when it is
+ * defined, an intermediate one when it is not. For a spec whose outputs are never undefined
+ * mid-frame this is exactly the settle-time value.
+ *
+ * WHEN OUTPUTS ARE SAMPLED (NSP-012 closed NSP-006's row F1): after every step and after every
+ * handler, the outputs that step SENDS are read (`Patch.send` / `sendDerived`; all of them when
+ * the patch names neither); at the FIRST settle, every output nothing has sent yet is read once
+ * — the connection-time read a wire made before the first frame gets (node.ts `connectInput`),
+ * which is what the runtime target does and all a target without a getter can do. A LATER settle
+ * reads nothing: what a frame sends is what its steps sent. Until NSP-012 the interpreter read
+ * every output again at every settle; the two readings were one for every spec whose outputs
+ * are a function of state alone, and are not for one whose output IS a registry entry — an
+ * Array node's `items` moves when another node inserts, and the wire does not carry that until
+ * the node sends it again (it sends `count`, not `items` — collectionnode2.ts :80-85).
+ *
+ * `mount(spec, params)` creates the instance with the spec's initial state and each value input
+ * at its declared default, then applies `params` as ordinary writes (recorded as `set` events)
+ * in the order of the params object's keys — which is what the runtime does with a node's
+ * parameters before its first frame (`Object.keys(parameters)`, nodescope.ts), and what every
+ * adapter does (adapter.ts). s1 normalised this to declaration order for trace stability; NSP-002
+ * reversed it so the interpreter and the runtime are driven identically. Mount does NOT settle;
+ * the scenario's first `settle` is where the first frame's events land (NSP-002 §4, C8).
+ *
+ * THE WORLD (NSP-007, world.ts). An instance holds one `World`; a spec that declares no `needs`
+ * gets a fresh default one and never notices. Reducers read it (`now()`, `random()`, `uuid()`) and
+ * ask for effects in their patch (`after`, `cancel`, `request`, `abort`), applied here after the
+ * patch's `set`. What the world hands back — a timer firing, an answer landing — is queued in the
+ * instance's INBOX by the world and DELIVERED to the spec's world handlers (`spec.world.timer`,
+ * `spec.world.response`) the way a target's event loop would:
+ *   - a TIMER's handler runs at the moment the clock fires it, inside `advance` — a `setTimeout`
+ *     callback is synchronous at its due time, and a timeout that ties with an answer must win
+ *     on every target;
+ *   - an ANSWER lands in the inbox (a promise resolution) and is delivered on `advance` — before
+ *     the clock moves (what was already resolved lands before real time passes) and again after
+ *     it (what the move resolved lands before the next step; the runtime target yields to its
+ *     event loop at the same two moments) — and at `settle`, after the frame-end reducer, until
+ *     nothing more is in the inbox (an answer scripted to land at once lands in the settle whose
+ *     frame issued the request).
+ * A handler's patch is applied like any reducer's; its `outcomes` settle `pending` invocations
+ * (oldest first per port). Outcomes are recorded in the order they were REPORTED (trace.ts).
+ * A `request` effect is recorded as a `request` event in the frame it was issued in; a `backend` effect
+ * (NSP-014 s21) as a `backend` event beside it, its answer delivered to `spec.world.backend` like a response.
+ * (s24) A write made elsewhere (world.ts BACKEND `events`) reaches `spec.world.store` of every instance that listens,
+ * at its firing — after their inboxes were delivered, once the registry holds the write (`listenToStore`).
+ * (s29) `spec.world.mount` runs once at mount, after `init` and before the params — the rest of the node's `initialize` —
+ * and `spec.world.authReturn` at each `oauthReturn` the world's user service announces (world.ts AUTH, THE RETURN LEG). A
+ * world handler's `opens` opens and reports invocations no input invoked, at once, recorded with the port `''`.
+ * (s31) A `picker` effect records the click in the LOCATION group; the person's answer runs `spec.world.picker` at its
+ * moment on the clock. An outcome reducer's `settles` reports its input's still-pending invocations before its own opens.
+ * (s33) An `unsubscribe` then a `subscribe` effect record `backend` events in the request group (world.ts REALTIME); what a
+ * subscription tells runs `spec.world.realtime` at its moment on the clock.
+ * (s34) A `socket` effect's calls record `socket` events in the request group (world.ts SOCKET); what a socket fires runs
+ * `spec.world.socket` at its moment on the clock. A streamed body's pieces land in the inbox like a response and run
+ * `spec.world.stream`; its request stays open (an abort reaches it) until the body ends or fails.
+ *
+ * THE REGISTRY (NSP-012, registry.ts). Reducers reach it through `world.registry` and WRITE to it
+ * directly; a write notifies every OTHER instance watching the entry (`world.watch`) synchronously
+ * — a node never hears its own write; its reaction to it is written beside the write — and the
+ * interpreter hands the notification to the spec's `change` handler as soon as the reducer that
+ * caused it returns — after its patch, before the next step — and again for what the handler's
+ * own writes cause. At `settle` the frame-end reducer runs, the changes its writes caused are
+ * delivered, and if any were, the frame-end reducer runs AGAIN (the scheduler's callback loop,
+ * nodecontext.ts `updateDirtyNodes` :453-490, up to its ten passes). `world.send(port)` records
+ * an output as sent at the call — where the runtime flags it, before a later write in the same
+ * reducer moves what it reads. Derived OUTPUTS (`derived.outputs(params)`) are observed like
+ * declared ones and reached through `sendDerived` / `emitDerived`. Values that arrive from
+ * outside (a step, a param) are never frozen: the runner hands the same objects to the next target.
+ *
+ * Deterministic by construction: no clock of its own, no randomness of its own, no I/O — two
+ * runs of one sequence on one script are byte-identical (AC3).
+ */
+
+import type { Step } from './adapter';
+import { canonicalise, canonicalKey } from './canonical';
+import { coerce } from './coerce';
+import { isRegistryEntry, performRegistryWrite } from './registry';
+import type { AnswerCall, AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, PlayContext, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SocketEvent, SpecBackendCall, StreamEvent, SpecRequest, SpecSocketOp, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
+import { isSignalInput, playContextOf } from './spec';
+import { outcomePorts, playOutputs } from './ports';
+import type { TraceEvent } from './trace';
+import { backendEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PickerClick, type PickerEvent, type PopupCall, type PopupEvent, type StoreEvent, type StreamDelivery, type WorldSocket, type WorldSubscription } from './world';
+
+/** One thing the world handed back, waiting to be delivered to the spec. */
+type Inbound =
+  | { kind: 'timer'; tag: string }
+  // NSP-016 s56: a promise the node awaited resolved (spec.ts `Patch.resume`) — at the next yield
+  | { kind: 'resume'; tag: string }
+  // NSP-016 s70: a `history.back()` landed and the window fired popstate (world.ts LOCATION, THE SESSION HISTORY)
+  | { kind: 'popstate' }
+  | { kind: 'response'; response: WorldResponse }
+  // s26: an AUTH call's answer carries the call and the session at the call — its landing runs the adapter's steps (world.ts AUTH)
+  | { kind: 'backend'; answer: BackendAnswerEvent; auth?: { op: string; backend: string; args: Readonly<Record<string, unknown>>; atCall: Readonly<Record<string, unknown>> | undefined; delivery: BackendDelivery } }
+  | { kind: 'resize' }
+  | { kind: 'page'; params: Readonly<Record<string, unknown>> }
+  // NSP-016 s42: the graph wrote the Value of the Radio Button Group the node sits in (world.ts GROUP)
+  | { kind: 'group'; value: unknown }
+  | { kind: 'popup'; event: PopupEvent }
+  | { kind: 'store'; event: StoreEvent }
+  | { kind: 'auth'; event: AuthNotice }
+  // s29: the service's `oauthReturn` event (world.ts AUTH, THE RETURN LEG); the end of the node's initialize (spec.ts `WorldHandlers.mount`)
+  | { kind: 'authReturn'; state: AuthReturnState }
+  | { kind: 'mount' }
+  // NSP-016 s37: the node is placed on the page, after its params (spec.ts `WorldHandlers.place`)
+  | { kind: 'place' }
+  // s31: the person answered a click on the node's file input (world.ts PICKER)
+  | { kind: 'picker'; event: PickerEvent }
+  // s33: a subscription the node opened told it something (world.ts REALTIME)
+  | { kind: 'realtime'; event: RealtimeEvent }
+  // s34: a WebSocket the node made fired an event (world.ts SOCKET)
+  | { kind: 'socket'; event: SocketEvent }
+  // s34: a streamed body said something after its head (world.ts NETWORK, A STREAMED BODY)
+  | { kind: 'stream'; event: StreamEvent };
+
+interface OutcomeSlot {
+  port: string;
+  outcome: ReducerOutcome;
+  error?: string;
+  /** Report order (trace.ts): set when the outcome became terminal. */
+  reportedAt?: number;
+}
+
+/** The scheduler's cap on after-update passes in one frame (nodecontext.ts `iterations < 10`). */
+const MAX_PASSES = 10;
+
+export interface Instance {
+  readonly spec: AnyNodeSpec;
+  readonly world: World;
+  /** The world as this instance's reducers see it — bound to the instance for `watch`. */
+  readonly view: WorldView;
+  state: Readonly<Record<string, unknown>>;
+  inputs: Readonly<Record<string, unknown>>;
+  /** Derived (dynamic) ports declared for this instance's params, if the spec has any. */
+  derivedInputs: Readonly<Record<string, InputDecl>>;
+  derivedValues: Readonly<Record<string, unknown>>;
+  /** Derived outputs for this instance's params (NSP-012). */
+  derivedOutputs: Readonly<Record<string, ErasedValueOutput | SignalOutputDecl>>;
+  readonly trace: TraceEvent[];
+  pending: { signals: string[]; outcomes: OutcomeSlot[]; requests: TraceEvent[]; location: TraceEvent[] };
+  /** The last DEFINED canonical value each output produced this frame (see the frame model above). */
+  frameLast: Record<string, unknown>;
+  lastSent: Record<string, string>;
+  settles: number;
+  reports: number;
+  /** The world's deliveries not yet handed to the spec. */
+  inbox: Inbound[];
+  /** Pending world timers by tag → clock handles (a tag may be scheduled more than once). */
+  timers: Map<string, number[]>;
+  /** The spec's request ids → the world's, for `abort`. */
+  requests: Map<string, number>;
+  /** Registry notifications not yet handed to the spec's `change` handler (NSP-012). */
+  changes: ChangeEvent[];
+  /** What this instance watches: `model:<id>` / `collection:<name>` → the unsubscribe. */
+  watches: Map<string, () => void>;
+  /** NSP-013 s13: the unsubscribe of this instance's `resize` listener (`WorldView.listen`), when it listens. */
+  resizeOff?: () => void;
+  /** NSP-014 s33: the spec's subscription ids → the world's handles (world.ts REALTIME), until disposed. */
+  subscriptions?: Map<string, WorldSubscription>;
+  /** NSP-014 s34: the WebSockets this instance made, by the spec's id (world.ts SOCKET). */
+  sockets?: Map<string, WorldSocket>;
+  /** P107-C155: the input ports a wire reaches for the whole play (spec.ts `WorldView.wired`); empty unless the mount named any. */
+  readonly wired: ReadonlySet<string>;
+  /** NSP-020 (s82): the play's context — the wire fields, `wired` folded in — handed to every `derived.*` call (spec.ts `PlayContext`). */
+  readonly playContext: Readonly<PlayContext>;
+  /**
+   * NSP-020 (s82): the node's parameters as it now holds them — the mount's params, then every value a `set` step wrote
+   * (RAW, as `node.parameters` stores what was typed). What `derived.inputs/outputs` are re-derived from after a write to a
+   * `rederive` param (states.ts :338-358 registers a value output when `values` is written).
+   */
+  written: Record<string, unknown>;
+}
+
+export class SpecError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'SpecError';
+  }
+}
+
+/** Canonical comparison key for "did this value change" — the canonicaliser's (canonical.ts). */
+export const valueKey = canonicalKey;
+
+/** A `set` event, with `value` omitted when undefined was written (schema: `set` may omit it). */
+function setEvent(port: string, value: unknown): TraceEvent {
+  const c = canonicalise(value);
+  return c === undefined ? { t: 'set', port } : { t: 'set', port, value: c };
+}
+
+/**
+ * Values that arrived from OUTSIDE — a scenario's step, the generator's pool — and may be handed to
+ * another target after this one (the runner plays the reference first): never frozen here, or the
+ * runtime target meets a frozen array it cannot subscribe to (NSP-012). Marked on arrival.
+ */
+const external = new WeakSet<object>();
+function markExternal(value: unknown): void {
+  if (!value || typeof value !== 'object' || external.has(value) || isRegistryEntry(value)) return;
+  external.add(value);
+  for (const v of Object.values(value as Record<string, unknown>)) markExternal(v);
+}
+
+/** Freezes what a reducer sees — never a registry entry (shared and mutable by design) and never an external value. */
+const deepFreeze = <T>(o: T): Readonly<T> => {
+  if (o && typeof o === 'object' && !Object.isFrozen(o) && !isRegistryEntry(o) && !external.has(o)) {
+    Object.freeze(o);
+    for (const v of Object.values(o as Record<string, unknown>)) deepFreeze(v);
+  }
+  return o;
+};
+
+/** The instance whose reducer is running: its own writes are not handed back to it (registry.ts, the notification rule). */
+let currentWriter: Instance | undefined;
+function asWriter<T>(inst: Instance, fn: () => T): T {
+  const previous = currentWriter;
+  currentWriter = inst;
+  try {
+    return fn();
+  } finally {
+    currentWriter = previous;
+  }
+}
+
+const watchKey = (t: WatchTarget): string => ('model' in t ? `model:${String(t.model)}` : `collection:${String(t.collection)}`);
+
+/** The world as a reducer of THIS instance reads it: the four pure reads, the registry, and the instance's watch seam. */
+function viewOf(inst: Instance): WorldView {
+  const world = inst.world;
+  return {
+    now: () => world.clock.now(),
+    random: () => world.random.next(),
+    bytes: (n) => world.random.bytes(n),
+    uuid: () => world.random.uuid(),
+    registry: world.registry,
+    // s82 — a send of a name the instance has no output for mints it when the spec's `discoverOutput` accepts the name (the
+    // Function's Outputs proxy, simplejavascript.ts :298); otherwise nothing is sent, as before
+    send: (name, state) => {
+      mintOutput(inst, name, 'value');
+      observe(inst, [name], false, state);
+    },
+    watch: (t) => {
+      const key = watchKey(t);
+      if (inst.watches.has(key)) return;
+      const off =
+        'model' in t
+          ? world.registry.onRecord(t.model, (change) => {
+              if (currentWriter !== inst) inst.changes.push({ kind: 'model', id: t.model, ...change });
+            })
+          : world.registry.onCollection(t.collection, () => {
+              if (currentWriter !== inst) inst.changes.push({ kind: 'collection', id: t.collection });
+            });
+      inst.watches.set(key, off);
+    },
+    unwatch: (t) => {
+      const key = watchKey(t);
+      const off = inst.watches.get(key);
+      if (!off) return;
+      off();
+      inst.watches.delete(key);
+    },
+    viewport: () => (world.viewport ? { width: world.viewport.width, height: world.viewport.height } : undefined),
+    // a DOM event's listener runs at its dispatch, inside the `advance` that reaches the resize — as a timer's handler does
+    listen: (event) => {
+      if (event !== 'resize' || !world.viewport || inst.resizeOff) return;
+      inst.resizeOff = world.viewport.listen(() => handleInbound(inst, { kind: 'resize' }));
+    },
+    unlisten: (event) => {
+      if (event !== 'resize' || !inst.resizeOff) return;
+      inst.resizeOff();
+      inst.resizeOff = undefined;
+    },
+    userActivation: () => world.location?.activation,
+    opens: (target, features) => !!world.location && openReturnsWindow(target, features, world.location.activation),
+    pushes: (url) => !!world.location && pushTarget(url, world.location.href) !== null,
+    href: () => world.location?.href,
+    projectSettings: () => world.projectSettings,
+    cloudServices: () => world.cloudServices,
+    stackAnswer: (op, stack, target) => world.stack.answer(op, stack, target),
+    backAnswer: (ahead) => world.stack.backAnswer(ahead ?? 0),
+    routeAnswer: (router, target, openInNewTab) => world.router.answer(router, target, openInNewTab),
+    popupAnswer: (target) => world.popup.answer(target),
+    popupsInside: () => world.popup.inside,
+    backendFor: (backendId) => world.backend.resolve(backendId),
+    backendUser: (backend) => world.backend.userOn(backend),
+    session: (backend) => world.backend.session(backend),
+    userService: () => startUserService(world),
+    authReturn: () => world.backend.authReturn,
+    pickerAnswer: (ahead) => world.picker.answer(ahead ?? 0),
+    socketAnswer: (url) => world.sockets.answerFor(url),
+    group: () => ({ present: world.group.present, load: world.group.load }),
+    // P107-C155 — the ports the mount named as wired (adapter.ts `mount`): a fact of this instance, not of the world
+    wired: (port) => inst.wired.has(port),
+    // NSP-020 (s82) — the runtime's `hasOutput`: declared, an outcome port, or a derived output the instance has NOW
+    hasOutput: (name) => name in inst.spec.outputs || name in inst.derivedOutputs || name in outcomePorts(inst.spec)
+  };
+}
+
+/**
+ * NSP-014 s26 — the world's user service as the interpreter plays it (world.ts AUTH, THE SERVICE): every instance of a
+ * world (for the bridge's record write — its watchers hear it at once, in mount order) and the instances that listen to
+ * the session events (a spec that needs `backend` and has `world.auth`), in mount order.
+ */
+const worldInstances = new WeakMap<World, { all: Instance[]; auth: Instance[] }>();
+function instancesOf(world: World): { all: Instance[]; auth: Instance[] } {
+  let entry = worldInstances.get(world);
+  if (!entry) {
+    worldInstances.set(world, (entry = { all: [], auth: [] }));
+    hearWritesMadeElsewhere(world, entry.all);
+    hearRegistryWrites(world, entry.all);
+  }
+  return entry;
+}
+
+/** One step of an auth landing, as the interpreter performs it (world.ts AUTH): the world's sessions already moved; `callback` is the caller's success / error. */
+function performAuth(world: World, step: AuthStep, callback: (step: AuthStep) => void): void {
+  if (step.do === 'success' || step.do === 'error') return callback(step);
+  if (step.do === 'return') {
+    // s29 — the state is the world's already; an announcement reaches the instances that subscribed to it, in mount order
+    if (!step.announce) return;
+    for (const i of [...instancesOf(world).all]) {
+      if (i.spec.world?.authReturn && i.spec.needs?.includes('backend')) handleInbound(i, { kind: 'authReturn', state: { ...step.state } });
+    }
+    return;
+  }
+  if (step.do !== 'event') return; // a write / clear moved the world's sessions already
+  const { all, auth } = instancesOf(world);
+  if (step.type === 'sessionChanged') {
+    // THE BRIDGE — the active backend's session handed to the record store; no instance is the writer: every watcher hears it
+    const session = world.backend.session(world.backend.ids[0]);
+    if (session === undefined) return;
+    const previous = currentWriter;
+    currentWriter = undefined;
+    try {
+      writeStoreEvent(world.registry, userRecordEvent(session));
+    } finally {
+      currentWriter = previous;
+    }
+    for (const i of [...all]) deliverChanges(i);
+    return;
+  }
+  for (const i of [...auth]) handleInbound(i, { kind: 'auth', event: { type: step.type, backend: step.backend } });
+}
+
+/**
+ * NSP-014 s26 — THE START-UP CHECK (world.ts AUTH): made by the first reach of the service; its answer lands on the clock
+ * (a world timer, never before 1 ms). At the landing, as at a store event, every instance's inbox is delivered first (what
+ * already landed runs before the next timer fires), then the adapter's steps, and — when it failed — the service's.
+ */
+function startUserService(world: World): void {
+  if (world.backend.serviceStarted) return;
+  const backend = world.backend.ids[0];
+  const atCall = world.backend.session(backend);
+  // userservice.ts :143-144 — a stored session is read into `current` when the service is made: the record store's write
+  if (atCall !== undefined) {
+    const previous = currentWriter;
+    currentWriter = undefined;
+    try {
+      writeStoreEvent(world.registry, userRecordEvent(atCall));
+    } finally {
+      currentWriter = previous;
+    }
+    for (const i of [...instancesOf(world).all]) deliverChanges(i);
+  }
+  world.backend.startService(
+    (d: BackendDelivery) => {
+      for (const i of [...instancesOf(world).all]) deliver(i);
+      // P109 ISL-030 (C45 + C46): the adapter's steps alone — the service neither clears nor announces on a failed check
+      world.backend.landAuth('fetchCurrentUser', backend, {}, atCall, d, (step) => performAuth(world, step, () => undefined));
+    },
+    // s29 — THE RETURN LEG: its steps as a landing's (no caller); at each later moment what already landed runs first
+    (step) => performAuth(world, step, () => undefined),
+    (_moment, steps) => {
+      for (const i of [...instancesOf(world).all]) deliver(i);
+      steps();
+    }
+  );
+}
+
+/**
+ * NSP-014 s24 — the store's listeners per world (world.ts BACKEND, `events`): the world is subscribed ONCE. At the firing
+ * every listening instance's inbox is delivered first (an answer that landed at 10 is seen by a write at 15, as on an
+ * event loop: the clock's `advance` fires its timers in one sweep), then the write lands in the registry once (no
+ * instance is the writer — every watcher hears it), then every listening instance is handed the event, in mount order.
+ */
+const storeListeners = new WeakMap<World, Instance[]>();
+function listenToStore(inst: Instance): void {
+  let list = storeListeners.get(inst.world);
+  if (!list) storeListeners.set(inst.world, (list = []));
+  list.push(inst);
+}
+
+/**
+ * s26 — the world's writes made elsewhere reach the REGISTRY whoever listens to the store (s24 subscribed only once a
+ * store listener was mounted, so a User node watching its record never heard a save made elsewhere — found by the User's
+ * mutants, which a write from elsewhere was the only way to kill): subscribed ONCE per world, at its first mount. At the
+ * firing every instance's inbox is delivered first (CLOCK: what already landed runs before the next timer), the write
+ * lands in the registry (no instance is the writer), the store's listeners are handed the event in mount order, and then
+ * every instance hears what the write changed on the records it watches.
+ */
+function hearWritesMadeElsewhere(world: World, all: Instance[]): void {
+  world.backend.onStoreEvent((event) => {
+    const listeners = storeListeners.get(world) ?? [];
+    for (const i of [...all]) deliver(i);
+    const previous = currentWriter;
+    currentWriter = undefined;
+    try {
+      writeStoreEvent(world.registry, event);
+    } finally {
+      currentWriter = previous;
+    }
+    for (const i of [...listeners]) handleInbound(i, { kind: 'store', event });
+    for (const i of [...all]) deliverChanges(i);
+  });
+}
+
+/**
+ * NSP-016 s62 — the registry writes made elsewhere (world.ts REGISTRY `writes`), subscribed ONCE per world: at the firing
+ * every instance's inbox is delivered first (CLOCK, as s26's), the write lands in the registry with no instance the writer,
+ * and every instance hears what it changed on the entries it watches.
+ */
+function hearRegistryWrites(world: World, all: Instance[]): void {
+  world.onRegistryWrite((w) => {
+    for (const i of [...all]) deliver(i);
+    const previous = currentWriter;
+    currentWriter = undefined;
+    try {
+      performRegistryWrite(world.registry, w);
+    } finally {
+      currentWriter = previous;
+    }
+    for (const i of [...all]) deliverChanges(i);
+  });
+}
+
+export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, world: World = new World(), wired: readonly string[] = [], context: Readonly<PlayContext> = {}): Instance {
+  const inputs: Record<string, unknown> = {};
+  for (const [name, decl] of Object.entries(spec.inputs)) {
+    if (!isSignalInput(decl)) inputs[name] = decl.default;
+  }
+  for (const v of Object.values(params)) markExternal(v);
+  const frozenParams = deepFreeze({ ...params });
+  // NSP-020 — the derived ports read the PLAY's context (spec.ts `PlayContext`: the wire fields and nothing else — at play a
+  // node has its params and its wires, never the project) with the mount's `wired` folded in: And counts a wired `input 3`
+  // the way `collectPorts` does, from the wire, not from a param.
+  const portContext = deepFreeze({ ...playContextOf(context), wired: [...(context.wired ?? []), ...wired] }) as Readonly<PlayContext>;
+  const derivedInputs = spec.derived ? spec.derived.inputs(frozenParams, portContext) : {};
+  const derivedValues: Record<string, unknown> = {};
+  for (const [name, decl] of Object.entries(derivedInputs)) {
+    if (name in spec.inputs) throw new SpecError(`${spec.type}: derived port "${name}" shadows a declared input`);
+    if (!isSignalInput(decl)) derivedValues[name] = decl.default;
+  }
+  // s82 — what a target registers: the params' derived outputs minus the `onWire` ones no wire asks for, plus the wired names
+  // nothing derived (ports.ts `playOutputs`)
+  const derivedOutputs = playOutputs(spec, frozenParams, portContext) as Record<string, ErasedValueOutput | SignalOutputDecl>;
+  const inst: Instance = {
+    spec,
+    world,
+    view: undefined as unknown as WorldView,
+    state: deepFreeze({ ...spec.state }),
+    inputs: deepFreeze(inputs),
+    derivedInputs: deepFreeze(derivedInputs),
+    derivedValues: deepFreeze(derivedValues),
+    derivedOutputs: deepFreeze(derivedOutputs),
+    trace: [],
+    pending: { signals: [], outcomes: [], requests: [], location: [] },
+    frameLast: {},
+    lastSent: {},
+    settles: 0,
+    reports: 0,
+    inbox: [],
+    timers: new Map(),
+    requests: new Map(),
+    changes: [],
+    watches: new Map(),
+    wired: new Set(wired),
+    playContext: portContext,
+    written: { ...params }
+  };
+  (inst as { view: WorldView }).view = viewOf(inst);
+  // P107-C155 — a wired port is one the node has (the runtime's `connectInput` throws on one it does not); checked before
+  // anything is applied, as the unknown params are below
+  for (const port of wired) {
+    if (!(port in spec.inputs) && !(port in derivedInputs) && !discoverable(inst, port)) throw new SpecError(`${spec.type}: wired port "${port}" is not an input`);
+  }
+  // s24: a node that watches the store hears the writes made elsewhere (spec.ts `WorldHandlers.store`)
+  if (spec.world?.store && spec.needs?.includes('backend')) listenToStore(inst);
+  // s26: every instance is in its world's list (the bridge's record write); a listener of the session events in the other
+  const mine = instancesOf(world);
+  mine.all.push(inst);
+  if (spec.world?.auth && spec.needs?.includes('backend')) mine.auth.push(inst);
+  // the part of the initial state the world supplies (spec.ts `init`) — drawn at mount, before the params
+  if (spec.init) {
+    const initial = asWriter(inst, () => spec.init!(inst.view, frozenParams));
+    for (const key of Object.keys(initial)) {
+      if (!(key in spec.state)) throw new SpecError(`${spec.type}: init names undeclared state key "${key}"`);
+    }
+    inst.state = deepFreeze({ ...spec.state, ...initial });
+  }
+  // params in the caller's key order — the adapter contract (adapter.ts), and the runtime's own
+  // order. Unknown params are refused before anything is applied; a port `derived.discover`
+  // accepts is not unknown (the runtime's `registerInputIfNeeded` runs before `hasInput`).
+  for (const name of Object.keys(params)) {
+    if (!(name in spec.inputs) && !(name in derivedInputs) && !discoverable(inst, name)) {
+      throw new SpecError(`${spec.type}: param "${name}" is not an input`);
+    }
+  }
+  deliverChanges(inst);
+  // s31 — a node that makes a file input at its making plays only where there is a document (world.ts PICKER)
+  if (spec.needs?.includes('picker') && !world.picker.present) throw new SpecError(`${spec.type}: needs a picker and the play's script has none — no document to make its file input in`);
+  // s29 — the end of the node's initialize (spec.ts `WorldHandlers.mount`): after `init`, before the params
+  if (spec.world?.mount) handleInbound(inst, { kind: 'mount' });
+  for (const name of Object.keys(params)) set(inst, name, params[name]);
+  // NSP-016 s37 — placed on the page, its params set (spec.ts `WorldHandlers.place`)
+  if (spec.world?.place) handleInbound(inst, { kind: 'place' });
+  // ROUTE (world.ts, NSP-015 s19): the params the Router hands the page this node sits in — at the build
+  // (now: they land with the first settle's deliveries), then each later one at its time on the clock
+  if (spec.needs?.includes('router')) {
+    for (const p of world.router.pages) {
+      const item: Inbound = { kind: 'page', params: deepFreeze({ ...p.params }) };
+      if (p.at > 0) world.clock.schedule(p.at, () => handleInbound(inst, item));
+      else inst.inbox.push(item);
+    }
+  }
+  // GROUP (world.ts, NSP-016 s42): the graph's writes to the Value of the group the node sits in, each at its time on the clock
+  if (spec.needs?.includes('group')) {
+    for (const w of world.group.writes) {
+      const item: Inbound = { kind: 'group', value: deepFreeze(w.value) };
+      world.clock.schedule(w.at, () => handleInbound(inst, item));
+    }
+  }
+  // POPUP (world.ts, NSP-015 s20): what the person does to the popups, each at its time on the clock — handed
+  // to a spec that opens popups (its `world.popup` handler); a Close Popup is closed BY one, never handed any
+  if (spec.needs?.includes('popup') && spec.world?.popup) {
+    for (const e of world.popup.events) {
+      const item: Inbound = { kind: 'popup', event: deepFreeze({ ...e.event }) as PopupEvent };
+      world.clock.schedule(e.at, () => handleInbound(inst, item));
+    }
+  }
+  return inst;
+}
+
+function discoverable(inst: Instance, port: string): boolean {
+  return !!inst.spec.derived?.discover && inst.spec.derived.discover(port) !== undefined;
+}
+
+/**
+ * NSP-020 (s82) — after a write to a `rederive` param (spec.ts `DerivedPorts.rederive`): the derived ports for the params AS
+ * THEY NOW STAND (`written`), registered where new — a derived input at its default, a derived output unless `onWire` and
+ * unwired. Never removed, never re-shaped: the runtime never unregisters a port, and a name already registered keeps the
+ * placing's declaration (states.ts :338-358 registers; the `values` setter removes nothing).
+ */
+function rederive(inst: Instance): void {
+  const { spec } = inst;
+  if (!spec.derived) return;
+  const params = deepFreeze({ ...inst.written });
+  const inputs = spec.derived.inputs(params, inst.playContext);
+  let nextInputs = inst.derivedInputs;
+  let nextValues = inst.derivedValues;
+  for (const [name, decl] of Object.entries(inputs)) {
+    // the declaration wins over a re-derived port of its name (spec.ts `DerivedPorts`: "a DECLARED input always wins"; the
+    // runtime's `registerInputIfNeeded` is a no-op on a port the node has) — at mount the same shadow is a spec error
+    if (name in spec.inputs || name in nextInputs) continue;
+    nextInputs = { ...nextInputs, [name]: decl };
+    if (!isSignalInput(decl)) nextValues = { ...nextValues, [name]: decl.default };
+  }
+  if (nextInputs !== inst.derivedInputs) {
+    inst.derivedInputs = deepFreeze(nextInputs);
+    inst.derivedValues = deepFreeze(nextValues);
+  }
+  const outputs = playOutputs(spec, params, inst.playContext, 'skip') as Record<string, ErasedValueOutput | SignalOutputDecl>;
+  let nextOutputs = inst.derivedOutputs;
+  for (const [name, decl] of Object.entries(outputs)) if (!(name in nextOutputs)) nextOutputs = { ...nextOutputs, [name]: decl };
+  if (nextOutputs !== inst.derivedOutputs) inst.derivedOutputs = deepFreeze(nextOutputs);
+}
+
+/**
+ * NSP-020 (s82) — an output the node mints by its own write (spec.ts `DerivedPorts.discoverOutput`): a reducer that sends,
+ * pulses or `world.send`s a name the instance has no output for registers it first, as `registerOutputIfNeeded` in the
+ * Function's Outputs proxy (simplejavascript.ts :298) and the Logic Builder's run (:488, :601) do. Returns the output, or
+ * `undefined` when the spec refuses the name — then the caller's spec error stands.
+ */
+function mintOutput(inst: Instance, name: string, as: 'signal' | 'value'): ErasedValueOutput | SignalOutputDecl | undefined {
+  const have = inst.derivedOutputs[name];
+  if (have) return have;
+  if (name in inst.spec.outputs) return undefined;
+  // s83 — the act's kind (spec.ts `discoverOutput`'s `as`): a pulse or a send
+  const decl = inst.spec.derived?.discoverOutput?.(name, as) as ErasedValueOutput | SignalOutputDecl | undefined;
+  if (!decl) return undefined;
+  inst.derivedOutputs = deepFreeze({ ...inst.derivedOutputs, [name]: decl });
+  return decl;
+}
+
+/**
+ * A port the target registers on first write (spec.ts `DerivedPorts.discover`). Registered here
+ * into the instance's derived ports, at its declared default, before the write is applied.
+ */
+function discover(inst: Instance, port: string): InputDecl | undefined {
+  const decl = inst.spec.derived?.discover?.(port);
+  if (!decl) return undefined;
+  if (port in inst.spec.inputs) throw new SpecError(`${inst.spec.type}: discovered port "${port}" shadows a declared input`);
+  inst.derivedInputs = deepFreeze({ ...inst.derivedInputs, [port]: decl });
+  if (!isSignalInput(decl)) inst.derivedValues = deepFreeze({ ...inst.derivedValues, [port]: decl.default });
+  return decl;
+}
+
+export function set(inst: Instance, port: string, value: unknown): void {
+  const { spec, view } = inst;
+  markExternal(value);
+  const declared = spec.inputs[port];
+  if (declared) {
+    if (isSignalInput(declared)) throw new SpecError(`${spec.type}: "${port}" is a signal input — use signal()`);
+    inst.trace.push(setEvent(port, value));
+    const coerced = coerce(declared.coerce, value, declared.default);
+    inst.inputs = deepFreeze({ ...inst.inputs, [port]: coerced });
+    // s82 — the write is a parameter the node now holds; a `rederive` param's setter registers ports at run time (States' `values`)
+    inst.written[port] = value;
+    if (spec.derived?.rederive?.includes(port)) rederive(inst);
+    const reducer = spec.on[port];
+    if (typeof reducer === 'function') {
+      const sends = apply(inst, port, asWriter(inst, () => (reducer as (s: unknown, v: unknown, i: unknown, w: WorldView) => unknown)(inst.state, coerced, inst.inputs, view)), false);
+      observe(inst, sends);
+      deliverChanges(inst);
+    }
+    // a value input with no reducer stores its value and nothing else: no state moved, no output
+    // can have (an output is a function of state and the registry, never of an input), so nothing
+    // is read — reading would re-sample a registry entry another write moved (NSP-012)
+    return;
+  }
+  const derived = inst.derivedInputs[port] ?? discover(inst, port);
+  if (derived && !isSignalInput(derived)) {
+    inst.trace.push(setEvent(port, value));
+    const coerced = coerce(derived.coerce, value, derived.default);
+    inst.derivedValues = deepFreeze({ ...inst.derivedValues, [port]: coerced });
+    inst.written[port] = value;
+    if (spec.derived?.rederive?.includes(port)) rederive(inst);
+    if (!spec.derived) throw new SpecError(`${spec.type}: derived port without a derived reducer`);
+    observe(inst, apply(inst, port, asWriter(inst, () => spec.derived!.on(inst.state as never, port, coerced, inst.derivedValues, view)), false));
+    deliverChanges(inst);
+    return;
+  }
+  if (derived) throw new SpecError(`${spec.type}: "${port}" is a signal input — use signal()`);
+  throw new SpecError(`${spec.type}: no value input "${port}"`);
+}
+
+export function signal(inst: Instance, port: string): void {
+  const { spec } = inst;
+  const declared = spec.inputs[port];
+  if (!declared) {
+    // NSP-013 s14 — a derived signal input (spec.ts `DerivedPorts.signal`): States' `To <state>`
+    const derived = inst.derivedInputs[port] ?? discover(inst, port);
+    if (!derived) throw new SpecError(`${spec.type}: no input "${port}"`);
+    if (!isSignalInput(derived)) throw new SpecError(`${spec.type}: "${port}" is a value input — use set()`);
+    const reducer = spec.derived?.signal;
+    if (typeof reducer !== 'function') throw new SpecError(`${spec.type}: derived signal input "${port}" and no derived.signal reducer`);
+    inst.trace.push({ t: 'in', port });
+    observe(inst, apply(inst, port, asWriter(inst, () => reducer(inst.state as never, port, inst.derivedValues, inst.view)), derived.outcome === true));
+    deliverChanges(inst);
+    return;
+  }
+  if (!isSignalInput(declared)) throw new SpecError(`${spec.type}: "${port}" is a value input — use set()`);
+  const reducer = spec.on[port];
+  if (typeof reducer !== 'function') throw new SpecError(`${spec.type}: signal input "${port}" has no reducer`);
+  inst.trace.push({ t: 'in', port });
+  observe(inst, apply(inst, port, asWriter(inst, () => (reducer as (s: unknown, i: unknown, w: WorldView) => unknown)(inst.state, inst.inputs, inst.view)), declared.outcome === true));
+  deliverChanges(inst);
+}
+
+/**
+ * The `act` step (NSP-016 s37, adapter.ts; spec.ts THE PERSON): a person did `act` to the node. The
+ * spec's reducer for the act runs at once, like a signal input's, handed the act's value as it
+ * came (no coercion); what it emits and sends lands in the next settle. An act the spec does not
+ * declare is a spec error, as an unknown port is.
+ */
+export function act(inst: Instance, name: string, value?: unknown): void {
+  const { spec, view } = inst;
+  const decl = spec.acts?.[name];
+  if (!decl) throw new SpecError(`${spec.type}: no act "${name}" — a person cannot do that to this node`);
+  const reducer = spec.person?.[name];
+  if (typeof reducer !== 'function') throw new SpecError(`${spec.type}: act "${name}" is declared and has no person reducer`);
+  markExternal(value);
+  const c = canonicalise(value);
+  inst.trace.push(c === undefined ? { t: 'act', act: name } : { t: 'act', act: name, value: c });
+  const patch = asWriter(inst, () => reducer(inst.state as never, inst.inputs as never, value, view));
+  const sends = apply(inst, `<person.${name}>`, patch, false);
+  // NSP-016 s38 (spec.ts `PersonPatch`) — a pointer act drains the node's frame-end work: what the frame deferred before
+  // the act is resolved here, in order; the rest still waits for `afterInputs`
+  resolveOpen(inst, `person.${name}`, (patch as { outcomes?: ReadonlyArray<{ port: string; outcome: Outcome; error?: string }> }).outcomes ?? [], ['deferred', 'pending']);
+  observe(inst, sends);
+  deliverChanges(inst);
+}
+
+/**
+ * The `advance` step (NSP-007, adapter.ts): what the world already delivered lands first, then
+ * the clock moves by `ms` — every timer due on the way fires, and a timer's handler runs AT the
+ * firing, the way a `setTimeout` callback does (so a timeout that ties with an answer wins, as
+ * it does on a target) — then what the move delivered lands too. Nothing is recorded but the
+ * step itself; the next settle shows what the landing did.
+ */
+export function advance(inst: Instance, ms: number): void {
+  inst.trace.push({ t: 'advance', ms });
+  const everyone = () => {
+    for (const i of [...instancesOf(inst.world).all]) deliver(i);
+  };
+  everyone();
+  // world.ts CLOCK (s34): timer by timer, what each delivered landing before the next fires — at ITS moment. One sweep then one
+  // delivery handed an answer that landed at +2 to its handler at the advance's end: a handler that reads the clock (Server-Sent
+  // Events' Last Message Time) read +3 where the runtime target, which yields between timers (T6), read +2.
+  const target = inst.world.clock.now() + Math.max(0, ms);
+  while (inst.world.clock.step(target)) everyone();
+  inst.world.clock.advance(target - inst.world.clock.now());
+  everyone();
+}
+
+/** Every output of the instance: the declared ones and the derived ones (NSP-012). */
+function outputDecl(inst: Instance, name: string): ErasedValueOutput | SignalOutputDecl | undefined {
+  return inst.spec.outputs[name] ?? inst.derivedOutputs[name];
+}
+function outputNames(inst: Instance): string[] {
+  return [...Object.keys(inst.spec.outputs), ...Object.keys(inst.derivedOutputs)];
+}
+
+/**
+ * The frame's observation of the value outputs a step SENDS (spec.ts `Patch.send`; all of them
+ * when the patch names none): a defined value replaces the port's last (C3: undefined is not a
+ * send). `fillOnly` is the first settle's read: outputs nothing sent yet, read once.
+ */
+function observe(inst: Instance, only: readonly string[] | undefined, fillOnly = false, state: Readonly<Record<string, unknown>> = inst.state): void {
+  for (const name of only ?? outputNames(inst)) {
+    const decl = outputDecl(inst, name);
+    if (!decl || decl.type === 'signal') continue;
+    if (fillOnly && name in inst.frameLast) continue;
+    const v = canonicalise(asWriter(inst, () => decl.from(state as never, inst.view)));
+    if (v !== undefined) inst.frameLast[name] = v;
+  }
+}
+
+interface PatchLike {
+  set?: Record<string, unknown>;
+  emit?: string[];
+  emitDerived?: string[];
+  pulses?: ReadonlyArray<string | { derived: string }>;
+  outcome?: ReducerOutcome;
+  error?: string;
+  send?: readonly string[];
+  sendDerived?: readonly string[];
+  after?: ReadonlyArray<{ ms: unknown; tag: string }>;
+  cancel?: readonly string[];
+  request?: SpecRequest;
+  abort?: readonly string[];
+  open?: { url: unknown; target?: unknown; features?: unknown };
+  push?: { url: unknown };
+  replace?: { url: unknown };
+  historyBack?: number;
+  dispatch?: string;
+  traverse?: { url: unknown };
+  stack?: { op: 'push' | 'replace'; stack: unknown; target: unknown; params: unknown; transition: unknown };
+  back?: ReadonlyArray<{ action: unknown; results: unknown }>;
+  route?: { router: unknown; target: unknown; params: unknown; openInNewTab: unknown };
+  popup?: PopupCall;
+  backend?: SpecBackendCall;
+  opens?: ReadonlyArray<{ outcome: Outcome; error?: string }>;
+  picker?: PickerClick;
+  settles?: ReadonlyArray<{ outcome: Outcome; error?: string }>;
+  unsubscribe?: readonly string[];
+  subscribe?: SpecBackendCall;
+  subscribeFirst?: boolean;
+  socket?: readonly SpecSocketOp[];
+  answers?: readonly AnswerCall[];
+  resume?: string;
+}
+
+/** Applies a reducer's patch; returns the value outputs the write sends (`send` + `sendDerived`), or undefined for all. */
+function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequired: boolean): readonly string[] | undefined {
+  const { spec } = inst;
+  if (!patchUnknown || typeof patchUnknown !== 'object') {
+    throw new SpecError(`${spec.type}.${port}: reducer returned ${String(patchUnknown)}, not a patch`);
+  }
+  const patch = patchUnknown as PatchLike;
+  // s29 — only a world handler opens an invocation no input invoked (spec.ts `AfterInputsPatch.opens`)
+  if (patch.opens !== undefined && !port.startsWith('<world.')) throw new SpecError(`${spec.type}.${port}: opened an invocation — only a world handler may (a reducer's outcome is its input's)`);
+  if (patch.set) {
+    for (const key of Object.keys(patch.set)) {
+      if (!(key in spec.state)) throw new SpecError(`${spec.type}.${port}: set names undeclared state key "${key}"`);
+    }
+    inst.state = deepFreeze({ ...inst.state, ...patch.set });
+  }
+  // derived pulses first, then declared ones — the one order the format fixes (spec.ts `emitDerived`)
+  if (patch.emitDerived) {
+    for (const name of patch.emitDerived) {
+      const out = mintOutput(inst, name, 'signal');
+      if (!out || out.type !== 'signal') throw new SpecError(`${spec.type}.${port}: emitDerived names no derived signal output "${name}"`);
+      inst.pending.signals.push(name);
+    }
+  }
+  if (patch.emit) {
+    for (const name of patch.emit) {
+      const out = spec.outputs[name];
+      // an outcome port pulsed OUTSIDE an invocation (Array Filter's value-path `failure`, NSP-012) is a plain signal
+      const outcomePort = spec.outcomes !== undefined && (spec.outcomes as readonly string[]).includes(name);
+      if (!outcomePort && (!out || out.type !== 'signal')) throw new SpecError(`${spec.type}.${port}: emit names undeclared signal output "${name}"`);
+      inst.pending.signals.push(name);
+    }
+  }
+  // NSP-013 s14 — declared and derived pulses in one order (spec.ts `pulses`)
+  if (patch.pulses) {
+    for (const p of patch.pulses) {
+      if (typeof p === 'string') {
+        const out = spec.outputs[p];
+        const outcomePort = spec.outcomes !== undefined && (spec.outcomes as readonly string[]).includes(p);
+        if (!outcomePort && (!out || out.type !== 'signal')) throw new SpecError(`${spec.type}.${port}: pulses names undeclared signal output "${p}"`);
+        inst.pending.signals.push(p);
+      } else {
+        const name = (p as { derived: string }).derived;
+        const out = mintOutput(inst, name, 'signal');
+        if (!out || out.type !== 'signal') throw new SpecError(`${spec.type}.${port}: pulses names no derived signal output "${name}"`);
+        inst.pending.signals.push(name);
+      }
+    }
+  }
+  if (outcomeRequired) {
+    const o = patch.outcome;
+    if (o !== 'done' && o !== 'unchanged' && o !== 'failure' && o !== 'deferred' && o !== 'pending') {
+      throw new SpecError(`${spec.type}.${port}: outcome input returned no outcome`);
+    }
+    if (o === 'deferred' && !spec.afterInputs) {
+      throw new SpecError(`${spec.type}.${port}: deferred an outcome but the spec has no afterInputs to resolve it`);
+    }
+    if (o === 'pending' && !spec.world) {
+      throw new SpecError(`${spec.type}.${port}: left an outcome pending but the spec has no world handlers to resolve it`);
+    }
+    // s31 — this input's invocations still pending, settled before this one opens (spec.ts `OutcomePatch.settles`)
+    if (patch.settles) resolveOpen(inst, port, patch.settles.map((r) => ({ port, ...r })), ['pending']);
+    const slot: OutcomeSlot = patch.error === undefined ? { port, outcome: o } : { port, outcome: o, error: patch.error };
+    if (o !== 'deferred' && o !== 'pending') slot.reportedAt = inst.reports++;
+    inst.pending.outcomes.push(slot);
+  } else if (patch.outcome !== undefined) {
+    throw new SpecError(`${spec.type}.${port}: returned an outcome but the input is not declared outcome: true`);
+  } else if (patch.settles !== undefined) {
+    throw new SpecError(`${spec.type}.${port}: settled earlier invocations — only an outcome input's reducer may (spec.ts \`settles\`)`);
+  }
+  if (patch.send) {
+    for (const name of patch.send) {
+      const out = spec.outputs[name];
+      if (!out || out.type === 'signal') throw new SpecError(`${spec.type}.${port}: send names undeclared value output "${name}"`);
+    }
+  }
+  if (patch.sendDerived) {
+    for (const name of patch.sendDerived) {
+      const out = mintOutput(inst, name, 'value');
+      if (!out || out.type === 'signal') throw new SpecError(`${spec.type}.${port}: sendDerived names no derived value output "${name}"`);
+    }
+  }
+  effects(inst, port, patch);
+  if (patch.send === undefined && patch.sendDerived === undefined) return undefined;
+  return [...(patch.send ?? []), ...(patch.sendDerived ?? [])];
+}
+
+/** The world effects of a patch (spec.ts `Patch`): timers, requests, aborts, an open — in the order the patch names them. */
+function effects(inst: Instance, port: string, patch: PatchLike): void {
+  const { world, spec } = inst;
+  // NSP-016 s56 — the await resolves at the next yield: the inbox, delivered after the frame-end reducer or before an advance moves the clock
+  if (patch.resume !== undefined) {
+    if (!spec.world?.resume) throw new SpecError(`${spec.type}.${port}: awaited a promise but the spec has no world.resume handler`);
+    inst.inbox.push({ kind: 'resume', tag: patch.resume });
+  }
+  for (const a of patch.after ?? []) {
+    if (!spec.world?.timer) throw new SpecError(`${spec.type}.${port}: asked for a timer but the spec has no world.timer handler`);
+    const tag = a.tag;
+    const handle = world.clock.schedule(a.ms, () => {
+      const list = inst.timers.get(tag);
+      if (list) {
+        const i = list.indexOf(handle);
+        if (i >= 0) list.splice(i, 1);
+      }
+      // a timer's handler runs at the firing, like the callback it models (see `advance`)
+      handleInbound(inst, { kind: 'timer', tag });
+    });
+    inst.timers.set(tag, [...(inst.timers.get(tag) ?? []), handle]);
+  }
+  for (const tag of patch.cancel ?? []) {
+    for (const handle of inst.timers.get(tag) ?? []) world.clock.cancel(handle);
+    inst.timers.delete(tag);
+  }
+  if (patch.request) {
+    if (!spec.world?.response) throw new SpecError(`${spec.type}.${port}: issued a request but the spec has no world.response handler`);
+    const r = patch.request;
+    if (typeof r.id !== 'string' || inst.requests.has(r.id)) throw new SpecError(`${spec.type}.${port}: a request needs an id the instance has not used (${String(r.id)})`);
+    const worldId = world.network.issue({ method: r.method, url: r.url, headers: r.headers, body: r.body }, (d: Delivery | StreamDelivery) => {
+      // s34 — what a streamed body does after its head lands like a read resolving: in the inbox, to `world.stream`
+      if ('chunk' in d || 'end' in d || 'streamError' in d) inst.inbox.push({ kind: 'stream', event: { id: r.id, ...d } as StreamEvent });
+      else inst.inbox.push({ kind: 'response', response: { id: r.id, ...d } as WorldResponse });
+    });
+    inst.requests.set(r.id, worldId);
+    const record = world.network.requests[world.network.requests.length - 1];
+    const event: TraceEvent = { t: 'request', method: canonicalise(record.method), url: record.url, headers: { ...record.headers } };
+    if (record.body !== undefined) event.body = canonicalise(record.body);
+    inst.pending.requests.push(event);
+  }
+  for (const id of patch.abort ?? []) {
+    const worldId = inst.requests.get(id);
+    if (worldId !== undefined) world.network.abort(worldId);
+  }
+  // s35 — `subscribeFirst`: the subscriptions before the backend calls (spec.ts), as a frame end that reconnected first made them
+  const backendCalls = (): void => {
+    // BACKEND (world.ts, NSP-014 s21): the call recorded as handed, in the request group; the answer lands in the inbox
+    // (s30) a list is several calls, made in its order
+    for (const c of patch.backend === undefined ? [] : Array.isArray(patch.backend) ? (patch.backend as readonly SpecBackendCall[]) : [patch.backend as SpecBackendCall]) {
+      if (!spec.world?.backend) throw new SpecError(`${spec.type}.${port}: called a backend but the spec has no world.backend handler`);
+      if (typeof c.id !== 'string') throw new SpecError(`${spec.type}.${port}: a backend call needs an id`);
+      const call = { op: c.op, backend: c.backend, args: c.args };
+      // s26: an AUTH call keeps the session its backend held at the call — the REST adapter merges an answer over that
+      const auth = isAuthOp(c.op) ? { op: c.op, backend: c.backend, args: c.args, atCall: world.backend.session(c.backend) } : undefined;
+      world.backend.issue(call, (d) => inst.inbox.push(auth ? { kind: 'backend', answer: { id: c.id, ...d } as BackendAnswerEvent, auth: { ...auth, delivery: d } } : { kind: 'backend', answer: { id: c.id, ...d } as BackendAnswerEvent }));
+      inst.pending.requests.push(backendEvent(call));
+    }
+  };
+  const realtime = (): void => {
+    // REALTIME (world.ts, NSP-014 s33): the subscriptions disposed, then the one opened — each a `backend` event in the request
+    // group, as the world records it; what an open one tells runs the spec's handler at its moment on the clock
+    if (patch.unsubscribe !== undefined || patch.subscribe !== undefined) {
+      const subs = (inst.subscriptions ??= new Map());
+      const recordFrom = world.backend.calls.length;
+      for (const id of patch.unsubscribe ?? []) {
+        const sub = subs.get(id);
+        if (!sub) throw new SpecError(`${spec.type}.${port}: unsubscribed ${JSON.stringify(id)}, which is not open`);
+        subs.delete(id);
+        sub.dispose();
+      }
+      if (patch.subscribe) {
+        const c = patch.subscribe;
+        if (!spec.world?.realtime) throw new SpecError(`${spec.type}.${port}: subscribed but the spec has no world.realtime handler`);
+        if (c.op !== 'subscribe') throw new SpecError(`${spec.type}.${port}: a subscribe effect's op is subscribe, not ${String(c.op)}`);
+        if (typeof c.id !== 'string' || subs.has(c.id)) throw new SpecError(`${spec.type}.${port}: a subscription needs an id not already open`);
+        subs.set(c.id, world.backend.subscribe({ op: 'subscribe', backend: c.backend, args: c.args }, (told) => handleInbound(inst, { kind: 'realtime', event: { id: c.id, ...told } as RealtimeEvent })));
+      }
+      for (const call of world.backend.calls.slice(recordFrom)) inst.pending.requests.push(backendEvent(call));
+    }
+  };
+  if (patch.subscribeFirst) {
+    realtime();
+    backendCalls();
+  } else {
+    backendCalls();
+    realtime();
+  }
+  // SOCKET (world.ts, NSP-014 s34): calls on WebSockets in the order made — each a `socket` event in the request group, as the
+  // world records it; what a socket tells runs the spec's handler at its moment on the clock
+  if (patch.socket !== undefined) {
+    const sockets = (inst.sockets ??= new Map());
+    const recordFrom = world.sockets.calls.length;
+    for (const op of patch.socket) {
+      if (op.op === 'connect') {
+        if (!spec.world?.socket) throw new SpecError(`${spec.type}.${port}: made a WebSocket but the spec has no world.socket handler`);
+        if (typeof op.id !== 'string' || sockets.has(op.id)) throw new SpecError(`${spec.type}.${port}: a socket needs an id not already made`);
+        const id = op.id;
+        try {
+          sockets.set(id, world.sockets.open(op.url, op.protocols, (told) => handleInbound(inst, { kind: 'socket', event: { id, ...told } as SocketEvent })));
+        } catch {
+          // the script's constructor throw (world.ts SOCKET): recorded; what follows it is the spec's, read from `socketAnswer`
+        }
+      } else if (op.op === 'send' || op.op === 'close') {
+        const socket = sockets.get(op.id);
+        if (!socket) throw new SpecError(`${spec.type}.${port}: a ${op.op} on socket ${JSON.stringify(op.id)}, which it never made`);
+        try {
+          if (op.op === 'send') socket.send(op.data);
+          else socket.close(op.code, op.reason);
+        } catch {
+          // a send while CONNECTING throws (world.ts SOCKET): recorded; what follows it is the spec's
+        }
+      } else throw new SpecError(`${spec.type}.${port}: a socket effect's op is connect, send or close, not ${String((op as { op?: unknown }).op)}`);
+    }
+    for (const e of world.sockets.calls.slice(recordFrom)) inst.pending.requests.push(e);
+  }
+  // LOCATION (world.ts): only with a window — a spec reads `viewport()` first, as a node checks `typeof window`
+  if ((patch.open || patch.push || patch.replace || patch.historyBack || patch.dispatch !== undefined || patch.traverse) && !world.location) {
+    throw new SpecError(`${spec.type}.${port}: used the location in a play with no window`);
+  }
+  if (!world.location) return stackEffects(inst, port, patch);
+  const location = world.location!;
+  const record = (c: LocationCall) => inst.pending.location.push(locationEvent(c));
+  if (patch.open) {
+    const o = patch.open;
+    location.open(o.url, o.target, o.features);
+    record({ call: 'open', url: o.url, target: o.target, features: o.features });
+  }
+  if (patch.push) {
+    // a refused push is still a call the node made: recorded, and the href stays (world.ts LOCATION)
+    try {
+      location.push(patch.push.url);
+    } catch {
+      /* the spec said what follows a refusal; the world only keeps the href */
+    }
+    record({ call: 'push', url: patch.push.url });
+  }
+  // NSP-016 s70 — THE SESSION HISTORY (world.ts LOCATION): a replace, refused as a push is; then the backs, each landing later
+  if (patch.replace) {
+    try {
+      location.replace(patch.replace.url);
+    } catch {
+      /* recorded below; the href stays */
+    }
+    record({ call: 'replace', url: patch.replace.url });
+  }
+  if (patch.historyBack !== undefined) {
+    if (!Number.isInteger(patch.historyBack) || patch.historyBack < 1) throw new SpecError(`${spec.type}.${port}: historyBack is how many times history.back() is called — a whole number from 1, not ${String(patch.historyBack)}`);
+    for (let n = 0; n < patch.historyBack; n++) {
+      location.back();
+      record({ call: 'back' });
+    }
+  }
+  if (patch.dispatch !== undefined) {
+    // recorded BEFORE the listeners run: a listener's own calls come after the dispatch, as they are made
+    record({ call: 'dispatch', event: patch.dispatch });
+    location.dispatch({ type: patch.dispatch });
+  }
+  // NSP-016 s57 — the person's Back or Forward: the href moves and the listeners run; nothing is recorded (the act is the trace's)
+  if (patch.traverse) {
+    try {
+      location.traverse(patch.traverse.url);
+    } catch (e) {
+      throw new SpecError(`${spec.type}.${port}: ${(e as Error).message}`);
+    }
+  }
+  stackEffects(inst, port, patch);
+}
+
+/** STACK (world.ts, NSP-015 s18): a push or replace recorded as handed, then the pops in order — each a `stack` event in the LOCATION group. */
+function stackEffects(inst: Instance, port: string, patch: PatchLike): void {
+  const { world, spec } = inst;
+  if (patch.stack) {
+    const c = patch.stack;
+    if (c.op !== 'push' && c.op !== 'replace') throw new SpecError(`${spec.type}.${port}: a stack effect's op is push or replace, not ${String(c.op)}`);
+    world.stack.record({ call: c.op, stack: c.stack, target: c.target, params: c.params, transition: c.transition });
+    inst.pending.location.push(world.stack.calls[world.stack.calls.length - 1]);
+  }
+  for (const b of patch.back ?? []) {
+    if (!world.stack.inPushedPage) throw new SpecError(`${spec.type}.${port}: popped a stack in a play where the node sits in no pushed page`);
+    world.stack.back(b.action, b.results);
+    inst.pending.location.push(world.stack.calls[world.stack.calls.length - 1]);
+  }
+  // ROUTE (world.ts, NSP-015 s19): a navigate recorded as handed — a `route` event in the same group
+  if (patch.route) {
+    world.router.record(patch.route);
+    inst.pending.location.push(world.router.calls[world.router.calls.length - 1]);
+  }
+  // POPUP (world.ts, NSP-015 s20): a show or a close recorded as handed — a `popup` event in the same group
+  if (patch.popup) {
+    if (patch.popup.op !== 'show' && patch.popup.op !== 'close') throw new SpecError(`${spec.type}.${port}: a popup effect's op is show or close, not ${String((patch.popup as { op?: unknown }).op)}`);
+    world.popup.record(patch.popup);
+    inst.pending.location.push(world.popup.calls[world.popup.calls.length - 1]);
+  }
+  // THE CALLERS (spec.ts, NSP-016 s56): the node's answers to the requests handed it — an `answer` event each, in the order made
+  for (const a of patch.answers ?? []) {
+    if (a.op === 'returned') {
+      const e: TraceEvent = { t: 'answer', op: 'returned', results: canonicalise(a.results) };
+      if (a.action !== undefined) e.action = canonicalise(a.action);
+      inst.pending.location.push(e);
+    } else if (a.op === 'history' || a.op === 'open') {
+      // NSP-016 s57 — a LOCATION call made between two answers, in its place (spec.ts `AnswerCall`)
+      const location = world.location;
+      if (!location) throw new SpecError(`${spec.type}.${port}: used the location in a play with no window`);
+      if (a.op === 'history' && a.how === 'back') {
+        // NSP-016 s70 — its traversal lands at the next yield (world.ts LOCATION, THE SESSION HISTORY)
+        location.back();
+        inst.pending.location.push(locationEvent({ call: 'back' }));
+      } else if (a.op === 'history') {
+        const how = a.how ?? 'push';
+        if (how !== 'push' && how !== 'replace') throw new SpecError(`${spec.type}.${port}: a history answer's how is push, replace or back, not ${String(how)}`);
+        try {
+          if (how === 'push') location.push(a.url);
+          else location.replace(a.url);
+        } catch {
+          /* recorded below; the href stays (world.ts LOCATION) */
+        }
+        inst.pending.location.push(locationEvent({ call: how, url: a.url }));
+      } else {
+        location.open(a.url, a.target, a.features);
+        inst.pending.location.push(locationEvent({ call: 'open', url: a.url, target: a.target, features: a.features }));
+      }
+    } else if (a.op === 'page') {
+      // NSP-016 s57 — the params a Page Router hands a Page Inputs of its page, canonical at the call
+      inst.pending.location.push({ t: 'answer', op: 'page', params: canonicalise(a.params) ?? null });
+    } else if (a.op === 'push' || a.op === 'replace' || a.op === 'back' || a.op === 'navigate') {
+      if (a.value === 'failure' && (typeof a.error !== 'string' || a.error.length === 0)) throw new SpecError(`${spec.type}.${port}: a failure answer carries its code`);
+      inst.pending.location.push(a.value === 'failure' ? { t: 'answer', op: a.op, value: a.value, error: a.error } : { t: 'answer', op: a.op, value: a.value });
+    } else throw new SpecError(`${spec.type}.${port}: an answer's op is push, replace, back, navigate, returned or page, not ${String((a as { op?: unknown }).op)}`);
+  }
+  // PICKER (world.ts, NSP-014 s31): a click recorded as the element holds it — a `picker` event in the same group; the
+  // answer fires at its moment, as a DOM event's handler runs at its dispatch (inside the `advance` that reaches it)
+  if (patch.picker) {
+    if (!world.picker.present) throw new SpecError(`${spec.type}.${port}: clicked a file input in a play with no picker (no document)`);
+    if (!spec.world?.picker) throw new SpecError(`${spec.type}.${port}: clicked a file input but the spec has no world.picker handler`);
+    const c = patch.picker;
+    if (typeof c.accept !== 'string' || typeof c.capture !== 'string') throw new SpecError(`${spec.type}.${port}: a click hands what the element holds — accept and capture are strings`);
+    world.picker.click({ accept: c.accept, capture: c.capture }, inst, (e) => handleInbound(inst, { kind: 'picker', event: e }));
+    inst.pending.location.push(world.picker.calls[world.picker.calls.length - 1]);
+  }
+}
+
+/**
+ * Hands the inbox — the world's answers, which land like promise resolutions — to the spec's
+ * world handlers, in arrival order, until it is empty: a handler may issue a request the world
+ * answers at once, which lands in the same delivery.
+ */
+function deliver(inst: Instance): void {
+  let rounds = 0;
+  for (;;) {
+    while (inst.inbox.length > 0) {
+      if (++rounds > 1000) throw new SpecError(`${inst.spec.type}: the world keeps delivering — a handler answers every delivery with a new request?`);
+      handleInbound(inst, inst.inbox.shift()!);
+    }
+    // NSP-016 s70 — a `history.back()` is a task: it lands after what this yield resolved, one at a time, and every node with a
+    // popstate handler hears it (world.ts LOCATION, THE SESSION HISTORY) — then what that delivered lands before the next
+    if (!landTraversal(inst.world)) return;
+  }
+}
+
+/** Lands the oldest waiting `history.back()` (world.ts LOCATION); `false` when none waited. A move queues popstate to every listener. */
+function landTraversal(world: World): boolean {
+  const landed = world.location?.land() ?? 'none';
+  if (landed === 'none') return false;
+  if (landed === 'moved') for (const i of instancesOf(world).all) if (i.spec.world?.popstate) i.inbox.push({ kind: 'popstate' });
+  return true;
+}
+
+/** One delivery through its handler: the patch applied like any reducer's, its `outcomes` settling `pending` invocations. */
+function handleInbound(inst: Instance, item: Inbound): void {
+  const { spec, view } = inst;
+  let patch: unknown;
+  let name: string;
+  if (item.kind === 'resume') {
+    name = 'world.resume';
+    if (!spec.world?.resume) throw new SpecError(`${spec.type}: awaited a promise and the spec has no world.resume handler`);
+    patch = asWriter(inst, () => spec.world!.resume!(inst.state as never, inst.inputs as never, item.tag, view));
+  } else if (item.kind === 'popstate') {
+    name = 'world.popstate';
+    patch = asWriter(inst, () => spec.world!.popstate!(inst.state as never, inst.inputs as never, view));
+  } else if (item.kind === 'timer') {
+    name = 'world.timer';
+    if (!spec.world?.timer) throw new SpecError(`${spec.type}: a timer fired and the spec has no world.timer handler`);
+    patch = asWriter(inst, () => spec.world!.timer!(inst.state as never, inst.inputs as never, item.tag, view));
+  } else if (item.kind === 'resize') {
+    name = 'world.resize';
+    if (!spec.world?.resize) throw new SpecError(`${spec.type}: the viewport was resized and the spec listens with no world.resize handler`);
+    patch = asWriter(inst, () => spec.world!.resize!(inst.state as never, inst.inputs as never, view));
+  } else if (item.kind === 'popup') {
+    name = 'world.popup';
+    if (!spec.world?.popup) throw new SpecError(`${spec.type}: the person did something to a popup and the spec has no world.popup handler`);
+    patch = asWriter(inst, () => spec.world!.popup!(inst.state as never, inst.inputs as never, item.event, view));
+  } else if (item.kind === 'backend' && item.auth) {
+    // s26 — an AUTH answer: the adapter's steps in their order (world.ts AUTH), the caller's own answer among them
+    const a = item.auth;
+    // s27 — the caller hears the STEP, not the delivery: a `logOut` the backend refused still lands as a success
+    const answerOf = (step: AuthStep): BackendAnswerEvent =>
+      step.do === 'success' && !('ok' in item.answer) ? ({ id: item.answer.id, ok: undefined } as BackendAnswerEvent) : item.answer;
+    inst.world.backend.landAuth(a.op, a.backend, a.args, a.atCall, a.delivery, (step) =>
+      performAuth(inst.world, step, (s) => handleInbound(inst, { kind: 'backend', answer: answerOf(s) }))
+    );
+    return;
+  } else if (item.kind === 'authReturn') {
+    name = 'world.authReturn';
+    patch = asWriter(inst, () => spec.world!.authReturn!(inst.state as never, inst.inputs as never, item.state, view));
+  } else if (item.kind === 'picker') {
+    name = 'world.picker';
+    patch = asWriter(inst, () => spec.world!.picker!(inst.state as never, inst.inputs as never, item.event, view));
+  } else if (item.kind === 'realtime') {
+    name = 'world.realtime';
+    patch = asWriter(inst, () => spec.world!.realtime!(inst.state as never, inst.inputs as never, item.event, view));
+  } else if (item.kind === 'socket') {
+    name = 'world.socket';
+    patch = asWriter(inst, () => spec.world!.socket!(inst.state as never, inst.inputs as never, item.event, view));
+  } else if (item.kind === 'stream') {
+    name = 'world.stream';
+    if (!spec.world?.stream) throw new SpecError(`${spec.type}: a streamed body said something and the spec has no world.stream handler`);
+    patch = asWriter(inst, () => spec.world!.stream!(inst.state as never, inst.inputs as never, item.event, view));
+    if (!('chunk' in item.event)) inst.requests.delete(item.event.id);
+  } else if (item.kind === 'mount') {
+    name = 'world.mount';
+    patch = asWriter(inst, () => spec.world!.mount!(inst.state as never, inst.inputs as never, view));
+  } else if (item.kind === 'place') {
+    name = 'world.place';
+    patch = asWriter(inst, () => spec.world!.place!(inst.state as never, inst.inputs as never, view));
+  } else if (item.kind === 'auth') {
+    name = 'world.auth';
+    if (!spec.world?.auth) throw new SpecError(`${spec.type}: a session event reached it and the spec has no world.auth handler`);
+    patch = asWriter(inst, () => spec.world!.auth!(inst.state as never, inst.inputs as never, item.event, view));
+  } else if (item.kind === 'backend') {
+    name = 'world.backend';
+    if (!spec.world?.backend) throw new SpecError(`${spec.type}: a backend answered and the spec has no world.backend handler`);
+    patch = asWriter(inst, () => spec.world!.backend!(inst.state as never, inst.inputs as never, item.answer, view));
+  } else if (item.kind === 'store') {
+    name = 'world.store';
+    patch = asWriter(inst, () => spec.world!.store!(inst.state as never, inst.inputs as never, item.event, view));
+  } else if (item.kind === 'group') {
+    name = 'world.group';
+    if (!spec.world?.group) throw new SpecError(`${spec.type}: the graph wrote its group's Value and the spec has no world.group handler`);
+    patch = asWriter(inst, () => spec.world!.group!(inst.state as never, inst.inputs as never, item.value, view));
+  } else if (item.kind === 'page') {
+    name = 'world.page';
+    if (!spec.world?.page) throw new SpecError(`${spec.type}: a Router handed its page params and the spec has no world.page handler`);
+    patch = asWriter(inst, () => spec.world!.page!(inst.state as never, inst.inputs as never, item.params, view));
+  } else {
+    name = 'world.response';
+    if (!spec.world?.response) throw new SpecError(`${spec.type}: an answer landed and the spec has no world.response handler`);
+    patch = asWriter(inst, () => spec.world!.response!(inst.state as never, inst.inputs as never, item.response, view));
+    // s34 — a head whose body streams keeps its request open (an abort still reaches it) until the body ends
+    if (!('stream' in item.response && item.response.stream)) inst.requests.delete(item.response.id);
+  }
+  const sends = apply(inst, `<${name}>`, patch, false);
+  resolveOpen(inst, name, (patch as { outcomes?: ReadonlyArray<{ port: string; outcome: Outcome; error?: string }> }).outcomes ?? [], ['pending']);
+  opened(inst, name, (patch as PatchLike).opens);
+  observe(inst, sends);
+  deliverChanges(inst);
+}
+
+/** s29 — invocations no input opened (spec.ts `AfterInputsPatch.opens`): each opened and reported at once, port `''`. */
+function opened(inst: Instance, by: string, opens: PatchLike['opens']): void {
+  for (const o of opens ?? []) {
+    if (o.outcome !== 'done' && o.outcome !== 'unchanged' && o.outcome !== 'failure') {
+      throw new SpecError(`${inst.spec.type}.<${by}>: opened an invocation reported as ${String(o.outcome)}, not an outcome`);
+    }
+    if (!inst.spec.outcomes || !(inst.spec.outcomes as readonly string[]).includes(o.outcome)) {
+      throw new SpecError(`${inst.spec.type}.<${by}>: opened an invocation reported as ${o.outcome}, which the spec's outcomes do not list`);
+    }
+    const slot: OutcomeSlot = o.error === undefined ? { port: '', outcome: o.outcome } : { port: '', outcome: o.outcome, error: o.error };
+    slot.reportedAt = inst.reports++;
+    inst.pending.outcomes.push(slot);
+  }
+}
+
+/**
+ * Hands the registry's notifications (NSP-012) to the spec's `change` handler, in notification
+ * order, until none is left — a handler's own writes queue more. Returns how many were handed
+ * over, so `settle` knows whether to run the frame-end reducer again.
+ */
+function deliverChanges(inst: Instance): number {
+  let delivered = 0;
+  while (inst.changes.length > 0) {
+    if (++delivered > 1000) throw new SpecError(`${inst.spec.type}: the registry keeps notifying — a change handler writes what it watches?`);
+    const event = inst.changes.shift()!;
+    const { spec, view } = inst;
+    if (!spec.world?.change) throw new SpecError(`${spec.type}: a watched entry changed and the spec has no world.change handler`);
+    const patch = asWriter(inst, () => spec.world!.change!(inst.state as never, inst.inputs as never, event, view));
+    const sends = apply(inst, '<world.change>', patch, false);
+    resolveOpen(inst, 'world.change', (patch as { outcomes?: ReadonlyArray<{ port: string; outcome: Outcome; error?: string }> }).outcomes ?? [], ['pending']);
+    opened(inst, 'world.change', (patch as PatchLike).opens);
+    observe(inst, sends);
+  }
+  return delivered;
+}
+
+export function settle(inst: Instance): void {
+  inst.trace.push({ t: 'settle' });
+  inst.settles++;
+  // the frame-end reducer (spec.ts `AfterInputs`): the deferred work of the frame, done once
+  // against the frame's final inputs and state, before the frame's observations are recorded —
+  // and again after a registry change it caused was delivered (the scheduler's callback loop)
+  for (let pass = 0; pass < MAX_PASSES; pass++) {
+    if (inst.spec.afterInputs) {
+      const patch = asWriter(inst, () => (inst.spec.afterInputs as (s: unknown, i: unknown, w: WorldView) => unknown)(inst.state, inst.inputs, inst.view));
+      const sends = apply(inst, '<afterInputs>', patch, false);
+      // the frame-end reducer settles what was deferred to it — and may settle a PENDING invocation
+      // whose world conversation ends before it starts (HTTP Request's no-URL failure, NSP-007)
+      resolveOpen(inst, 'afterInputs', (patch as { outcomes?: ReadonlyArray<{ port: string; outcome: Outcome; error?: string }> }).outcomes ?? [], ['deferred', 'pending']);
+      observe(inst, sends);
+    }
+    if (deliverChanges(inst) === 0 || !inst.spec.afterInputs) break;
+  }
+  const unresolved = inst.pending.outcomes.find((o) => o.outcome === 'deferred');
+  if (unresolved) throw new SpecError(`${inst.spec.type}: "${unresolved.port}" deferred its outcome and afterInputs did not resolve it this frame`);
+  // what the world delivered — answers scripted to land at once land in the frame that asked
+  deliver(inst);
+  // the first settle's connection-time read: every output nothing has sent (see the header)
+  if (inst.settles === 1) observe(inst, undefined, true);
+  for (const name of outputNames(inst).sort()) {
+    if (!(name in inst.frameLast)) continue; // C3 — nothing defined was produced this frame
+    const v = inst.frameLast[name];
+    const key = JSON.stringify(v);
+    if (inst.lastSent[name] === key) continue;
+    inst.lastSent[name] = key;
+    inst.trace.push({ t: 'value', port: name, value: v });
+  }
+  inst.frameLast = {};
+  for (const s of inst.pending.signals) inst.trace.push({ t: 'signal', port: s }); // C2, C4
+  // outcomes in REPORT order (trace.ts); a `pending` one stays for a later frame
+  const reported = inst.pending.outcomes.filter((o) => o.reportedAt !== undefined).sort((a, b) => a.reportedAt! - b.reportedAt!);
+  for (const o of reported) {
+    const value = o.outcome as Outcome;
+    inst.trace.push(o.error === undefined ? { t: 'outcome', port: o.port, value } : { t: 'outcome', port: o.port, value, error: o.error });
+  }
+  for (const r of inst.pending.requests) inst.trace.push(r);
+  for (const l of inst.pending.location) inst.trace.push(l);
+  inst.pending = { signals: [], outcomes: inst.pending.outcomes.filter((o) => o.reportedAt === undefined), requests: [], location: [] };
+}
+
+/**
+ * A frame-end or world handler's `outcomes` fill the open slots the invoking reducers left, per
+ * port oldest first (spec.ts `AfterInputsPatch`, `WorldHandlers`). Rule 3, kept at run time:
+ * exactly one outcome per invocation — a resolution with no open invocation behind it is a spec
+ * error, and `settle` refuses a `deferred` slot still open after the frame-end reducer.
+ */
+function resolveOpen(inst: Instance, by: string, outcomes: ReadonlyArray<{ port: string; outcome: Outcome; error?: string }>, kinds: ReadonlyArray<'deferred' | 'pending'>): void {
+  for (const r of outcomes) {
+    if (r.outcome !== 'done' && r.outcome !== 'unchanged' && r.outcome !== 'failure') {
+      throw new SpecError(`${inst.spec.type}.<${by}>: resolved "${r.port}" to ${String(r.outcome)}, not an outcome`);
+    }
+    const slot = inst.pending.outcomes.find((o) => o.port === r.port && (kinds as readonly string[]).includes(o.outcome));
+    if (!slot) {
+      throw new SpecError(
+        kinds.includes('deferred')
+          ? `${inst.spec.type}.<${by}>: resolved an outcome for "${r.port}" that no invocation deferred this frame${inst.spec.world ? ' or left pending' : ''}`
+          : `${inst.spec.type}.<${by}>: resolved an outcome for "${r.port}" that no invocation left pending`
+      );
+    }
+    slot.outcome = r.outcome;
+    slot.reportedAt = inst.reports++;
+    if (r.error !== undefined) slot.error = r.error;
+    else delete slot.error;
+  }
+}
+
+/** A copy of the trace so far. */
+export function trace(inst: Instance): TraceEvent[] {
+  return inst.trace.map((e) => ({ ...e }));
+}
+
+/** Runs a scripted sequence from a fresh mount and returns its trace. `wired` (P107-C155): the ports a wire reaches, as `mount` takes them; `context` (NSP-020) likewise. */
+export function run(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], world?: World, wired?: readonly string[], context?: Readonly<PlayContext>): TraceEvent[] {
+  // a play under a world runs in its zone (NSP-013, world.ts TIME ZONE), as the adapter's does
+  const restoreZone = world ? installTimeZone(world) : () => undefined;
+  try {
+    const inst = mount(spec, params, world, wired, context);
+    for (const step of steps) {
+      if (step === 'settle') settle(inst);
+      else if ('signal' in step) signal(inst, step.signal);
+      else if ('advance' in step) advance(inst, step.advance);
+      else if ('act' in step) act(inst, step.act, step.value);
+      else set(inst, step.set, step.value);
+    }
+    return trace(inst);
+  } finally {
+    restoreZone();
+  }
+}

@@ -28,6 +28,11 @@
  *   node tools/setup-signin.mjs --backend http://127.0.0.1:8577 --token <admin credential> \
  *     --app-origin http://127.0.0.1:8602 --smtp 127.0.0.1:1026 \
  *     --from no-reply@digitalbricks.example --from-name "Digital Bricks Training"
+ *
+ * For a real relay (Brevo; TASK-L183 §3), add the login and a FILE holding the SMTP key, and the
+ * public origin links should point at:
+ *   --smtp smtp-relay.brevo.com:587 --smtp-user <brevo login> --smtp-key-file <path> \
+ *   --base-url https://training.digitalbricks.io
  */
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
@@ -40,6 +45,13 @@ const SMTP = arg('smtp');
 const FROM = arg('from', 'no-reply@example.test');
 const FROM_NAME = arg('from-name', 'Digital Bricks Training');
 const TTL = Number(arg('ttl-minutes', 15));
+// An authenticated relay (TASK-L183 §3). The key is read from a FILE and never
+// taken on the command line: argv lands in shell history and in `ps`.
+const SMTP_USER = arg('smtp-user', '');
+const SMTP_KEY_FILE = arg('smtp-key-file');
+// Where sign-in links point. Empty, the backend falls back to its own LOCAL
+// address, and every link a real person receives would be 127.0.0.1.
+const BASE_URL = String(arg('base-url', '')).replace(/\/$/, '');
 
 if (!TOKEN || ORIGINS.length === 0 || !SMTP) {
   console.error('setup-signin: --token, --app-origin and --smtp host:port are required.');
@@ -47,6 +59,18 @@ if (!TOKEN || ORIGINS.length === 0 || !SMTP) {
 }
 const [host, portText] = SMTP.split(':');
 const port = Number(portText);
+let smtpKey = '';
+if (SMTP_USER) {
+  if (!SMTP_KEY_FILE) {
+    console.error('setup-signin: --smtp-user needs --smtp-key-file <path> (the key is never taken on the command line).');
+    process.exit(2);
+  }
+  smtpKey = (await import('node:fs')).readFileSync(SMTP_KEY_FILE, 'utf8').trim();
+  if (!smtpKey) {
+    console.error(`setup-signin: ${SMTP_KEY_FILE} is empty.`);
+    process.exit(2);
+  }
+}
 if (!host || !Number.isFinite(port)) {
   console.error(`setup-signin: --smtp must be host:port, got "${SMTP}".`);
   process.exit(2);
@@ -67,12 +91,18 @@ await call('PUT', '/admin/auth', {
   magicLink: { enabled: true, allowSignup: false, ttlMinutes: TTL },
   redirectAllowList: ORIGINS
 });
-await call('PUT', '/admin/email/config', {
+// Port 465 is TLS from the first byte; 587 (and Mailpit's 1026) upgrade with
+// STARTTLS or not at all. With no --smtp-user this is byte-for-byte the call it
+// always was, so the Mailpit set-up in START-HERE is unchanged.
+const emailConfig = {
   enabled: true,
-  smtp: { host, port, secure: false, username: '' },
+  smtp: { host, port, secure: port === 465, username: SMTP_USER },
   fromAddress: FROM,
   fromName: FROM_NAME
-});
+};
+if (BASE_URL) emailConfig.baseUrl = BASE_URL;
+if (smtpKey) emailConfig.smtpPassword = smtpKey;
+await call('PUT', '/admin/email/config', emailConfig);
 
 const auth = await call('GET', '/admin/auth');
 const email = await call('GET', '/admin/email/config');
@@ -86,6 +116,8 @@ for (const o of ORIGINS) if (!allow.includes(o)) problems.push(`origin ${o} is n
 if (auth.magicLinkReady === false) problems.push('the backend reports magic links NOT ready (magicLinkReady: false)');
 const cfg = email.config || email;
 if (!cfg.enabled || !cfg.smtp || cfg.smtp.host !== host || cfg.smtp.port !== port) problems.push('the SMTP relay did not read back as written');
+if (cfg.smtp && (cfg.smtp.username || '') !== SMTP_USER) problems.push('the SMTP username did not read back as written');
+if (BASE_URL && String(cfg.baseUrl || '').replace(/\/$/, '') !== BASE_URL) problems.push(`mail baseUrl reads back as '${cfg.baseUrl}', not ${BASE_URL}`);
 
 if (problems.length) {
   console.error('setup-signin: FAILED —\n  ' + problems.join('\n  '));

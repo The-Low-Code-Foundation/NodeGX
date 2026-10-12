@@ -23,6 +23,18 @@
     },
     {
       "fromId": "dpIn",
+      "fromProperty": "Reset",
+      "toId": "dpResets",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "dpResets",
+      "fromProperty": "out-resets",
+      "toId": "dpScript",
+      "toProperty": "in-resets"
+    },
+    {
+      "fromId": "dpIn",
       "fromProperty": "Value",
       "toId": "dpScript",
       "toProperty": "in-value"

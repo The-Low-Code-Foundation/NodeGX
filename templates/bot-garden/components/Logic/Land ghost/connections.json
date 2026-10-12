@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ee25d4f9-4a39-5c0a-8904-c473cb0a456c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "landghostIn",
+      "fromProperty": "bp",
+      "toId": "landghostFn",
+      "toProperty": "in-bp"
+    },
+    {
+      "fromId": "landghostIn",
+      "fromProperty": "ghost",
+      "toId": "landghostFn",
+      "toProperty": "in-ghost"
+    },
+    {
+      "fromId": "landghostIn",
+      "fromProperty": "mode",
+      "toId": "landghostFn",
+      "toProperty": "in-mode"
+    },
+    {
+      "fromId": "landghostIn",
+      "fromProperty": "model",
+      "toId": "landghostFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "landghostIn",
+      "fromProperty": "x",
+      "toId": "landghostFn",
+      "toProperty": "in-x"
+    },
+    {
+      "fromId": "landghostIn",
+      "fromProperty": "y",
+      "toId": "landghostFn",
+      "toProperty": "in-y"
+    },
+    {
+      "fromId": "landghostIn",
+      "fromProperty": "go",
+      "toId": "landghostFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "landghostFn",
+      "fromProperty": "out-ghost",
+      "toId": "landghostOut",
+      "toProperty": "ghost"
+    },
+    {
+      "fromId": "landghostFn",
+      "fromProperty": "out-model",
+      "toId": "landghostOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "landghostFn",
+      "fromProperty": "out-ok",
+      "toId": "landghostOut",
+      "toProperty": "ok"
+    },
+    {
+      "fromId": "landghostFn",
+      "fromProperty": "out-placed",
+      "toId": "landghostOut",
+      "toProperty": "placed"
+    },
+    {
+      "fromId": "landghostFn",
+      "fromProperty": "success",
+      "toId": "landghostOut",
+      "toProperty": "ran"
+    }
+  ]
+}

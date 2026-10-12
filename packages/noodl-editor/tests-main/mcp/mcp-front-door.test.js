@@ -7,7 +7,7 @@
  * hands out a command that dies at spawn time with a message the user never sees.
  *
  * The wording is asserted, not just the verdict: it is duplicated from `ProjectStore`'s
- * constructor on purpose (the editor cannot import `@noodl/mcp`), and duplicated strings drift.
+ * constructor on purpose (the editor cannot import `@nodegx/mcp`), and duplicated strings drift.
  */
 const fs = require('fs');
 const os = require('os');

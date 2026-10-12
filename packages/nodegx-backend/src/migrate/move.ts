@@ -277,6 +277,20 @@ interface MigrationContext {
   started: number;
 }
 
+/** Which of these tables exist in the target and hold at least one row. */
+async function tablesHoldingRows(pool: PgPoolLike, names: string[]): Promise<string[]> {
+  const present = await pool.query<{ name: string }>(
+    'SELECT n AS name FROM unnest(?::text[]) AS n WHERE to_regclass(quote_ident(n)) IS NOT NULL',
+    [names]
+  );
+  const occupied: string[] = [];
+  for (const { name } of present) {
+    const rows = await pool.query(`SELECT 1 FROM "${name.replace(/"/g, '""')}" LIMIT 1`);
+    if (rows.length > 0) occupied.push(name);
+  }
+  return occupied;
+}
+
 /** The phases themselves, with the pool's lifetime owned by the caller. */
 async function runMigration(
   options: MigrateOptions,
@@ -338,6 +352,7 @@ async function runMigration(
 
   const snapshotDb: PlanDb = openReadOnly(snapshotPath);
   const freshSnapshot = !options.resume;
+  let wroteCheckpoint = false;
   let batches = 0;
 
   try {
@@ -351,6 +366,23 @@ async function runMigration(
           `migration could not resume without duplicating rows: ${keyless.map((t) => `"${t.name}"`).join(', ')}. ` +
           'Refusing rather than copying rows this migration cannot promise anything about.'
       );
+    }
+
+    // 🔴 ISL-039 (P78-DBT-MIGRATE): a first run refuses a target that already
+    // holds rows in a table it would write, by name, before a row moves. The
+    // copy is an upsert over the source's values: right for a resume, which
+    // re-applies only its own rows, and wrong for a database that holds
+    // anybody else's. It replaced them, and only the verification noticed,
+    // after they were gone.
+    if (freshSnapshot) {
+      const occupied = await tablesHoldingRows(pool, plan.tables.map((t) => t.name));
+      if (occupied.length > 0) {
+        throw new Error(
+          `The database at ${redacted} already holds rows in ${occupied.map((t) => `"${t}"`).join(', ')}. ` +
+            'A migration copies over whatever is there, so those rows would be replaced. Point it at an empty ' +
+            'database, or, to finish a migration into this one that was interrupted, run it again with --resume.'
+        );
+      }
     }
 
     if (!checkpoint) {
@@ -368,6 +400,7 @@ async function runMigration(
         checkpoint.tables[t.name] = { rows: t.rows, copied: 0, lastRowid: 0, done: t.rows === 0 };
       }
       writeCheckpoint(checkpointPath, checkpoint);
+      wroteCheckpoint = true;
     }
 
     // ------------------------------------------------------------ schema
@@ -470,7 +503,10 @@ async function runMigration(
     // Refusals that happen before one is written (a keyless table, a schema
     // failure) would otherwise leave a whole copy of the database in the temp
     // directory, which is how a migration fills a disk a week later.
-    if (freshSnapshot && !fs.existsSync(checkpointPath)) {
+    // ISL-039: "this run wrote no checkpoint", not "there is no checkpoint
+    // file": a finished migration leaves its own behind, and a second run
+    // refused for a non-empty target would otherwise leave a snapshot each time.
+    if (freshSnapshot && !wroteCheckpoint) {
       fs.rmSync(path.dirname(path.dirname(snapshotPath)), { recursive: true, force: true });
     }
     throw e;

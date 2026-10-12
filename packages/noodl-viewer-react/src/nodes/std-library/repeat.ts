@@ -32,8 +32,12 @@ interface RepeatInstance extends NodeInstance {
     beat: number;
     /** Frame time the next tick is due. */
     nextAt: number;
+    /** ISL-004 — while a kept page is hidden: how long the next tick was still due when it was hidden. */
+    pausedLeft?: number;
   };
   _tick(): void;
+  _onPageHidden(): void;
+  _onPageShown(): void;
 }
 
 /** The time of the frame being run, in milliseconds: the scheduler's clock, which `runTimers` is handed. */
@@ -139,6 +143,7 @@ const Repeat: NodeDefinitionOptions = {
           return;
         }
         this._internal.running = false;
+        this._internal.pausedLeft = undefined;
         this._internal.timer.stop();
         this.reportOutcome(outcome, 'done');
       }
@@ -167,6 +172,27 @@ const Repeat: NodeDefinitionOptions = {
     })
   },
   methods: {
+    /**
+     * P109 ISL-004 — a kept page's clock does not tick while the page is hidden (ruled 2026-10-05, "Yes, if ticked"):
+     * the Router calls these when it hides and shows a page with Keep When Leaving. The beat resumes where it was, so
+     * the first tick after the return comes as long after it as the next tick was due when the page was left.
+     */
+    _onPageHidden: function (this: RepeatInstance) {
+      const internal = this._internal;
+      if (!internal.running || internal.pausedLeft !== undefined) return;
+      internal.pausedLeft = Math.max(0, internal.nextAt - frameTimeOf(this));
+      internal.timer.stop();
+    },
+    _onPageShown: function (this: RepeatInstance) {
+      const internal = this._internal;
+      if (internal.pausedLeft === undefined) return;
+      const left = internal.pausedLeft;
+      internal.pausedLeft = undefined;
+      if (!internal.running) return;
+      internal.nextAt = frameTimeOf(this) + left;
+      internal.timer.duration = left;
+      internal.timer.start();
+    },
     _tick: function (this: RepeatInstance) {
       const internal = this._internal;
       if (!internal.running) return;

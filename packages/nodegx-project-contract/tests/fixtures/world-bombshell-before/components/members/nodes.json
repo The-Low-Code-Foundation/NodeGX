@@ -1,0 +1,46 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c-members",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "m_list",
+      "type": "DbCollection2",
+      "label": "Every member",
+      "parameters": {
+        "collectionName": "Person"
+      }
+    },
+    {
+      "id": "m_add",
+      "type": "NewDbModelProperties",
+      "label": "Add a member",
+      "parameters": {
+        "collectionName": "Person"
+      }
+    },
+    {
+      "id": "m_name",
+      "type": "TextInput",
+      "parameters": {}
+    },
+    {
+      "id": "m_account",
+      "type": "Variable2",
+      "parameters": {}
+    },
+    {
+      "id": "m_one",
+      "type": "DbModel2",
+      "label": "The member",
+      "parameters": {
+        "collectionName": "Person"
+      }
+    },
+    {
+      "id": "m_shown",
+      "type": "Text",
+      "parameters": {}
+    }
+  ]
+}

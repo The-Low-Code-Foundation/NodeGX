@@ -1,0 +1,259 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fdc0d50f-755f-5015-8d7f-a5f2fb736c4b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "paletteIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "allowed",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "exam",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "narrow",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "needs",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "request",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "robot",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "rungs",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "paletteFn",
+      "type": "JavaScriptFunction",
+      "label": "Palette",
+      "parameters": {
+        "functionScript": "var { OLIVE, OLIVE_ORDER, OLIVE_RUNG_WORD, OLIVE_SHAPE_WORD, olivePickerSlots, oliveWithheld } = Scripts.olive;\nvar { iwlFirstSeek, iwlReadsEnvelope } = Scripts.requests;\nvar BAND1 = [\"fwd\",\"left\",\"right\",\"water\",\"fill\",\"pick\",\"put\",\"go_nearest\",\"go_to\"];\nvar ALL = [\"fwd\",\"left\",\"right\",\"water\",\"fill\",\"pick\",\"put\",\"say\",\"repeat\",\"until\",\"if\",\"when\",\"count_inc\",\"trick\",\"do\",\"ask\",\"go_nearest\",\"go_to\",\"set\",\"change\"];\nvar META = {\"fwd\":{\"kind\":\"motion\",\"body\":false,\"count\":false,\"slots\":[]},\"left\":{\"kind\":\"motion\",\"body\":false,\"count\":false,\"slots\":[]},\"right\":{\"kind\":\"motion\",\"body\":false,\"count\":false,\"slots\":[]},\"water\":{\"kind\":\"action\",\"body\":false,\"count\":false,\"slots\":[]},\"fill\":{\"kind\":\"action\",\"body\":false,\"count\":false,\"slots\":[]},\"pick\":{\"kind\":\"action\",\"body\":false,\"count\":false,\"slots\":[]},\"put\":{\"kind\":\"action\",\"body\":false,\"count\":false,\"slots\":[]},\"say\":{\"kind\":\"ask\",\"body\":false,\"count\":false,\"slots\":[\"text\"]},\"repeat\":{\"kind\":\"control\",\"body\":true,\"count\":true,\"slots\":[]},\"until\":{\"kind\":\"control\",\"body\":true,\"count\":false,\"slots\":[\"sensor\",\"arg\"]},\"if\":{\"kind\":\"control\",\"body\":true,\"count\":false,\"slots\":[\"sensor\",\"arg\"]},\"when\":{\"kind\":\"control\",\"body\":true,\"count\":false,\"slots\":[\"event\"]},\"count_inc\":{\"kind\":\"control\",\"body\":false,\"count\":false,\"slots\":[]},\"trick\":{\"kind\":\"ask\",\"body\":true,\"count\":false,\"slots\":[\"name\"]},\"do\":{\"kind\":\"ask\",\"body\":false,\"count\":false,\"slots\":[\"name\"]},\"ask\":{\"kind\":\"ask\",\"body\":false,\"count\":false,\"slots\":[\"rung\",\"args\",\"shape\",\"dial\"]},\"go_nearest\":{\"kind\":\"motion\",\"body\":false,\"count\":false,\"slots\":[\"kind\"]},\"go_to\":{\"kind\":\"motion\",\"body\":false,\"count\":false,\"slots\":[\"thing\"]},\"set\":{\"kind\":\"control\",\"body\":false,\"count\":false,\"slots\":[\"name\",\"value\"]},\"change\":{\"kind\":\"control\",\"body\":false,\"count\":false,\"slots\":[\"name\",\"by\"]}};\nvar LABEL = { fwd: 'Fwd', left: 'Left', right: 'Right', water: 'Water', fill: 'Fill', pick: 'Pick', put: 'Put', say: 'Say', repeat: 'Repeat', until: 'Until', 'if': 'If', when: 'When', count_inc: 'CountInc', trick: 'Trick', 'do': 'Do', ask: 'Ask', go_nearest: 'GoNearest', go_to: 'GoTo', set: 'Set', change: 'Change' };\nvar band = Number(Inputs.band) === 1 ? 1 : 2;\nvar allowed = Array.isArray(Inputs.allowed) && Inputs.allowed.length ? Inputs.allowed : null;\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\n// P106 IG-005 (R8): the palette is band × request × ROBOT. Robot is the robot doing the job (a row with its kind and\n// palette, or a catalogue kind); it keeps every move, the controls of the band and what it can do. Needs is the kind\n// the request asks for: another robot is refused (no palette at all). No robot (free play) filters nothing.\nvar ROBOTS = [{\"id\":\"pip\",\"defaultName\":{\"en\":\"Pip\",\"fr\":\"Pip\"},\"colour\":\"#FF7A59\",\"accessory\":\"can\",\"palette\":[\"water\",\"fill\",\"olive:read\"],\"canMax\":3,\"basket\":4,\"upgrade\":\"can+\",\"lentBy\":null,\"unlockedBy\":null},{\"id\":\"cobble\",\"defaultName\":{\"en\":\"Cobble\",\"fr\":\"Cobble\"},\"colour\":\"#7A8CA3\",\"accessory\":\"hod\",\"palette\":[\"pick\",\"put\"],\"canMax\":3,\"basket\":4,\"upgrade\":\"basket+\",\"lentBy\":\"sami\",\"unlockedBy\":\"path-postbox\"},{\"id\":\"pocket\",\"defaultName\":{\"en\":\"Pocket\",\"fr\":\"Poche\"},\"colour\":\"#FFB347\",\"accessory\":\"satchel\",\"palette\":[\"pick\",\"put\",\"say\",\"olive:say-thanks\",\"olive:read\"],\"canMax\":3,\"basket\":6,\"upgrade\":\"boots\",\"lentBy\":\"biscuit\",\"unlockedBy\":\"bowl-if\"},{\"id\":\"echo\",\"defaultName\":{\"en\":\"Echo\",\"fr\":\"Écho\"},\"colour\":\"#8F6BFF\",\"accessory\":\"bell\",\"palette\":[\"water\",\"fill\",\"say\",\"olive:read\",\"olive:is-it-a\",\"olive:say-thanks\"],\"canMax\":3,\"basket\":4,\"upgrade\":\"can+\",\"lentBy\":\"mamie\",\"unlockedBy\":\"mamie-note\"}];\nvar CAN_ALWAYS = [\"fwd\",\"left\",\"right\",\"pick\",\"put\",\"go_nearest\",\"go_to\",\"repeat\",\"until\",\"if\",\"when\",\"count_inc\",\"trick\",\"do\",\"set\",\"change\"];\nvar bot = Inputs.robot && typeof Inputs.robot === 'object' ? Inputs.robot : null;\nif (!bot && typeof Inputs.robot === 'string' && Inputs.robot) for (var rk = 0; rk < ROBOTS.length; rk++) if (ROBOTS[rk].id === Inputs.robot) bot = ROBOTS[rk];\nvar botKind = bot ? String(bot.kind || bot.id || '') : '';\nvar needs = String(Inputs.needs || '');\nvar refused = !!bot && needs !== '' && botKind !== needs;\nvar botCan = bot ? CAN_ALWAYS.concat(Array.isArray(bot.palette) ? bot.palette : []) : null;\nvar rows = Array.isArray(Inputs.words) ? Inputs.words : [];\nvar word = {};\nfor (var i = 0; i < rows.length; i++) word[rows[i].key] = rows[i][lang] || rows[i].en || '';\nvar ids = band === 1 ? BAND1 : ALL;\nvar out = [];\nfor (var j = 0; j < ids.length; j++) {\n  var id = ids[j];\n  if (allowed && allowed.indexOf(id) === -1) continue;\n  if (refused || (botCan && botCan.indexOf(id) === -1)) continue;\n  var m = META[id];\n  out.push({ id: id, kind: m.kind, label: word['b' + LABEL[id]] || id, caption: word['c' + LABEL[id]] || id, hasBody: m.body, hasCount: m.count, slots: m.slots, band: band });\n}\n// P108 IW-003 look (lane L): the request, when it is given (the Workshop's Start world) — \"go to nearest\" starts on the\n// first thing THIS job seeks (its reference program's first go to nearest; the drawer said \"egg\" on the stones and the\n// bench), and Olive's read says what it reads there (an envelope where the plot's letters carry a name).\nvar iwlReq = Inputs.request && typeof Inputs.request === 'object' ? Inputs.request : null;\n\nvar iwlSeek = iwlFirstSeek(iwlReq ? iwlReq.referenceProgram : null);\nif (iwlSeek) for (var gs = 0; gs < out.length; gs++) if (out[gs].id === 'go_nearest') out[gs].seek = iwlSeek;\n// Olive's rungs (CG-005): one entry per rung the request offers ('all' = the ladder), each with its picker. The exam\n// gate: a rung this machine's exam FAILED is withheld (the Skills page shows it as \"Olive can't do this here yet\").\nvar rungIds = Inputs.rungs === 'all' ? OLIVE_ORDER : Array.isArray(Inputs.rungs) ? Inputs.rungs : [];\nvar withheld = oliveWithheld(Inputs.exam);\nvar olive = [], offered = [], heldHere = [];\nfor (var r = 0; r < rungIds.length; r++) {\n  var rid = String(rungIds[r]), rr = OLIVE.rungs[rid];\n  // IG-006: only a BLOCK is placed (a lesson is asked on Skills, the voicing is the owl row's).\n  if (!rr || rid === 'voice-hint' || rr.use !== 'block' || (Number(rr.band) || 1) > band) continue;\n  if (refused || (botCan && botCan.indexOf('olive:' + rid) === -1)) continue;\n  if (withheld.indexOf(rid) !== -1) { heldHere.push(rid); continue; }\n  offered.push(rid);\n  var title = word[OLIVE_RUNG_WORD[rid]] || rid;\n  // P108 IW-003 look (lane L): the envelopes' read reads the envelope.\n  if (rid === 'read' && iwlReadsEnvelope(iwlReq) && word.iwlReadEnvelope) title = word.iwlReadEnvelope;\n  olive.push({ id: 'olive:' + rid, kind: 'ask', label: title, caption: title, hasBody: false, hasCount: false, slots: olivePickerSlots(rid, band, lang, Inputs.narrow, word), band: band, rung: rid, shape: rr.shape, shapeLabel: word[OLIVE_SHAPE_WORD[rr.shape]] || rr.shape, ladder: rr.ladder });\n}\nif (rungIds.length) { var kept = []; for (var o = 0; o < out.length; o++) if (out[o].id !== 'ask') kept.push(out[o]); out = kept.concat(olive); }\nOutputs.palette = out;\nOutputs.olive = olive;\nOutputs.offered = offered;\nOutputs.withheld = withheld;\nOutputs.heldHere = heldHere;\nOutputs.count = out.length;\nOutputs.band = band;\nOutputs.refused = refused;\n",
+        "uses": "olive.js,requests.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-band",
+          "displayName": "band",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-allowed",
+          "displayName": "allowed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robot",
+          "displayName": "robot",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-needs",
+          "displayName": "needs",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-request",
+          "displayName": "request",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rungs",
+          "displayName": "rungs",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-exam",
+          "displayName": "exam",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-narrow",
+          "displayName": "narrow",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-palette",
+          "displayName": "palette",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-olive",
+          "displayName": "olive",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-offered",
+          "displayName": "offered",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-withheld",
+          "displayName": "withheld",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-heldHere",
+          "displayName": "heldHere",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band",
+          "displayName": "band",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "paletteOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "band",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "heldHere",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "offered",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "olive",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "palette",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "refused",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "withheld",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

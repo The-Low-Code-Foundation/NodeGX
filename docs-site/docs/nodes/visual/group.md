@@ -75,6 +75,7 @@ Reach for Group whenever you need structure: rows, columns, cards, overlays, scr
 | `clip` | Boolean | `false` | Hides any child that overflows the group instead of letting it spill out |
 | `columnGap` | Number | `0` | Space between children on the horizontal axis |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `dragKind` | String | — | Optional name for what this is — "card", "task". A zone with an Accept Kind only takes sources whose Drag Kind matches |
 | `dragValue` | * | — | What this element carries — usually the id of the item it shows. A drop zone reports it as Dropped Value |
 | `draggable` | Boolean | `false` | Lets a person pick this element up and drop it on an element with Accept Drops on. A see-through copy follows the pointer; the element itself stays put until the graph moves it |
@@ -95,7 +96,7 @@ Reach for Group whenever you need structure: rows, columns, cards, overlays, scr
 | `minHeight` | Number | — | Smallest height the element may shrink to, taking priority over Height |
 | `minWidth` | Number | — | Smallest width the element may shrink to, taking priority over Width |
 | `mixBlendMode` | Enum (`normal`, `multiply`, `screen`, `overlay`, `darken`, `lighten`, `color-dodge`, `color-burn`, `hard-light`, `soft-light`, `difference`, `exclusion`, `hue`, `saturation`, `color`, `luminosity`) | `normal` | How this element's colours blend with whatever is painted behind it |
-| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
+| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen) |
 | `nativeScroll` | Boolean | `true` | Uses the browser's own scrolling, which is smoother; turn it off to get snapping and the Scroll To actions |
 | `opacity` | Number | `1` | How opaque this element is, from 0 for invisible to 1 for solid |
 | `paddingBottom` | Number | `0` | Space inside the element's bottom edge, between it and its content |
@@ -108,6 +109,7 @@ Reach for Group whenever you need structure: rows, columns, cards, overlays, scr
 | `rowGap` | Number | `0` | Space between children on the vertical axis |
 | `scrollBounceEnabled` | Boolean | `true` | Lets the content overscroll and spring back at the ends |
 | `scrollEnabled` | Boolean | `false` | Lets the user scroll the children when they do not all fit |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `scrollSnapEnabled` | Boolean | `false` | Makes scrolling settle on item boundaries rather than anywhere |
 | `scrollSnapToEveryItem` | Boolean | `false` | Snaps to each item in turn instead of allowing a fast flick past several |
 | `scrollToElement.duration` | Number | `500` | How long the scroll animation takes, in milliseconds; 0 jumps |
@@ -133,8 +135,109 @@ Reach for Group whenever you need structure: rows, columns, cards, overlays, scr
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `focus` | Signal | — | Gives this group keyboard focus, so key events reach it |
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 | `scrollToElement.do` | Signal | — | Scrolls to the element on Element; fired in the same frame the Group mounts, it is held until the Group exists rather than dropped |
 | `scrollToIndex.do` | Signal | — | Scrolls to the child at Index, then fires Done — or Failure with the reason it could not |
+
+### What each input does
+
+**Mounted** (`mounted`)
+
+- a change: the element is put on the page, or taken off it, at the next paint
+- the value it already holds: nothing
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the element can be seen
+
+**Tag** (`as`)
+
+- always: the HTML element the next paint draws (a div when empty) — a new Tag draws a new element
+
+**Visible** (`visible`)
+
+- always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer
+
+**Opacity** (`opacity`)
+
+- always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it
+
+**Pointer Events Mode** (`pointerEventsMode`)
+
+- Inherit: its own pointer style comes off
+- Explicit: the last Pointer Events Enabled is written back (on, before one was set)
+
+**Pointer Events Enabled** (`pointerEventsEnabled`)
+
+- always, whatever the mode: off, the pointer passes through to what is behind it
+
+**Block Pointer Events** (`blockTouch`)
+
+- always: on, a pointer act that lands here goes no further — the nodes it sits inside do not hear it
+
+**Draggable** (`draggable`)
+
+- always: on, every element it draws can be picked up, by pointer or keyboard; off, the one on the page cannot
+
+**Drag Value** (`dragValue`)
+
+- always: read by the zone it is dropped on, which reports it as Dropped Value
+
+**Drag Kind** (`dragKind`)
+
+- always: read by a zone with an Accept Kind as it is dragged over one
+
+**Hold To Drag** (`holdToDrag`)
+
+- always: read at the next press — whether it must be held before it picks up
+
+**Hold Time** (`holdTime`)
+
+- always: read at the next held press — how many seconds it is held before it picks up
+
+**Accept Drops** (`acceptDrops`)
+
+- on: a Draggable can be dropped here
+- off while a drag is over it: the drag leaves it — Is Drop Target goes false
+- off: nothing can be dropped here
+
+**Accept Kind** (`acceptKind`)
+
+- always: read as a drag comes over it — a source of another kind does not light it up
+
+**Accept File Drops** (`acceptFileDrops`)
+
+- on: a file dragged from the desktop can be dropped here
+- off: no file can be dropped here, and a drag over it is forgotten — Is Dragging Over goes false if it was true
+
+**Accepted file types** (`acceptedFileTypes`)
+
+- always: read at a drop — which files count as accepted
+
+**Focus** (`focus`)
+
+- off the page: nothing is listed → Unchanged; Focused stays silent
+- off the page, after outcomes this frame resolved and has not reported: nothing is listed, and Unchanged comes after them → Focused stays silent
+- already listed as focused → Done; Focused stays silent
+- already listed, after outcomes this frame has not reported: Done comes after them → Focused stays silent
+- on the page: listed as focused → Focused, Done
+- on the page, after outcomes this frame has not reported: listed as focused, and Done comes after them → Focused
+
+**Index** (`scrollToIndex.index`)
+
+- always: read when Scroll To Index runs, at the end of the frame
+
+**Element** (`scrollToElement.element`)
+
+- always: read when Scroll To Element runs, at the end of the frame
+
+**Scroll To Index** (`scrollToIndex.do`)
+
+- always: runs at the end of the frame — Done when there is a child at Index, else Failure; before the Group is on the page it waits for it (at most 16 wait, and the oldest pushed out reports Failure)
+
+**Scroll To Element** (`scrollToElement.do`)
+
+- always: runs at the end of the frame, waiting as Scroll To Index does — Done when Element is empty (nothing to scroll to), Failure for a value that is not an element
 
 ## Outputs
 
@@ -184,6 +287,7 @@ Reach for Group whenever you need structure: rows, columns, cards, overlays, scr
 | `pointerDown` | Signal | — | Fires when a mouse button is pressed or a finger touches this element |
 | `pointerEnter` | Signal | — | Fires when the pointer moves onto this element, not counting its children |
 | `pointerUp` | Signal | — | Fires when the mouse button is released or the finger lifts over this element |
+| `unchanged` | Signal | — | Fires when Focus arrived while this group was not on the page, so nothing was focused |
 | `willUnmount` | Signal | — | Fires just before this element is removed from the page, while it still exists |
 
 ### Failure outputs
@@ -222,6 +326,7 @@ Declares conditional/expandable port groups whose visibility depends on paramete
 | boxShadowEnabled = true | `boxShadowSource` | — |
 | boxShadowEnabled = true AND boxShadowSource = token | `boxShadowToken` | — |
 | boxShadowEnabled = true AND boxShadowSource != token | `boxShadowOffsetX`, `boxShadowOffsetY`, `boxShadowInset`, `boxShadowBlurRadius`, `boxShadowSpreadRadius`, `boxShadowColor` | — |
+| — | — | — |
 
 ## Ports at runtime
 

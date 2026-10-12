@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e038eb8e-98e2-59b1-8b2b-16c1330939a6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "SaveprojecIn",
+      "fromProperty": "projectId",
+      "toId": "SaveprojecWrite",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "SaveprojecIn",
+      "fromProperty": "name",
+      "toId": "SaveprojecWrite",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "SaveprojecIn",
+      "fromProperty": "sub",
+      "toId": "SaveprojecWrite",
+      "toProperty": "in-sub"
+    },
+    {
+      "fromId": "SaveprojecIn",
+      "fromProperty": "kind",
+      "toId": "SaveprojecWrite",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "SaveprojecIn",
+      "fromProperty": "billing",
+      "toId": "SaveprojecWrite",
+      "toProperty": "in-billing"
+    },
+    {
+      "fromId": "SaveprojecIn",
+      "fromProperty": "rate",
+      "toId": "SaveprojecWrite",
+      "toProperty": "in-rate"
+    },
+    {
+      "fromId": "SaveprojecIn",
+      "fromProperty": "termsDays",
+      "toId": "SaveprojecWrite",
+      "toProperty": "in-termsDays"
+    },
+    {
+      "fromId": "SaveprojecIn",
+      "fromProperty": "say",
+      "toId": "SaveprojecWrite",
+      "toProperty": "in-say"
+    },
+    {
+      "fromId": "SaveprojecIn",
+      "fromProperty": "do",
+      "toId": "SaveprojecWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "SaveprojecWrite",
+      "fromProperty": "out-done",
+      "toId": "SaveprojecOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "SaveprojecWrite",
+      "fromProperty": "out-error",
+      "toId": "SaveprojecOut",
+      "toProperty": "error"
+    },
+    {
+      "fromId": "SaveprojecWrite",
+      "fromProperty": "out-hasError",
+      "toId": "SaveprojecOut",
+      "toProperty": "hasError"
+    },
+    {
+      "fromId": "SaveprojecWrite",
+      "fromProperty": "out-failed",
+      "toId": "SaveprojecProblem",
+      "toProperty": "do"
+    }
+  ]
+}

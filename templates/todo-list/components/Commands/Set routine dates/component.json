@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1f707db9-0743-5618-8334-bda4144ce7bf",
+  "name": "Set routine dates",
+  "path": "/Commands/Set routine dates",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Sets when something that repeats starts or ends. Place it with Which set to start or end. It cannot end before it starts, and it always has a start."
+}

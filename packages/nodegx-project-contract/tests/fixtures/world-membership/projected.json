@@ -1,0 +1,1607 @@
+{
+  "vocabulary": {
+    "id": "nodegx-world-kinds",
+    "version": 1
+  },
+  "collections": [
+    {
+      "name": "Person",
+      "made": {
+        "noun": "person"
+      },
+      "sentence": "A person is anyone we know: a member, someone who came to a session, someone we wrote to.",
+      "notHeld": [],
+      "description": "A person is anyone we know: a member, someone who came to a session, someone we wrote to.",
+      "columns": [
+        {
+          "name": "name",
+          "kind": "text",
+          "type": "String"
+        },
+        {
+          "name": "endedAt",
+          "kind": "date",
+          "type": "Date",
+          "description": "A person can leave, and we keep what they did.",
+          "relation": "leaves"
+        }
+      ],
+      "checks": [],
+      "indexes": [],
+      "calledBy": "name",
+      "onlyWhile": {
+        "delete": "never"
+      }
+    },
+    {
+      "name": "Account",
+      "made": {
+        "noun": "account"
+      },
+      "sentence": "An account is what pays us: a company's membership, with the people on it.",
+      "notHeld": [],
+      "description": "An account is what pays us: a company's membership, with the people on it.",
+      "columns": [
+        {
+          "name": "name",
+          "kind": "text",
+          "type": "String"
+        },
+        {
+          "name": "company",
+          "kind": "link",
+          "type": "Pointer",
+          "targetClass": "Company",
+          "required": true,
+          "whenTargetGoes": "blocks",
+          "description": "Every account is one company's, and stays that company's.",
+          "relation": "account-company"
+        }
+      ],
+      "checks": [],
+      "indexes": [],
+      "calledBy": "name",
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "company"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "Company",
+      "made": {
+        "noun": "company"
+      },
+      "sentence": "A company is where people work; it may or may not have an account with us.",
+      "notHeld": [],
+      "description": "A company is where people work; it may or may not have an account with us.",
+      "columns": [
+        {
+          "name": "name",
+          "kind": "text",
+          "type": "String"
+        }
+      ],
+      "checks": [],
+      "indexes": [],
+      "calledBy": "name"
+    },
+    {
+      "name": "Session",
+      "made": {
+        "noun": "session"
+      },
+      "sentence": "A session is one meeting on one date that people sign up for and come to.",
+      "notHeld": [],
+      "description": "A session is one meeting on one date that people sign up for and come to.",
+      "columns": [
+        {
+          "name": "title",
+          "kind": "text",
+          "type": "String"
+        },
+        {
+          "name": "tag",
+          "kind": "links",
+          "type": "Relation",
+          "targetClass": "Tag",
+          "description": "A session has tags; a tag is on a session once.",
+          "relation": "session-tags"
+        },
+        {
+          "name": "person",
+          "kind": "list",
+          "type": "Array",
+          "description": "A session lists who speaks at it.",
+          "relation": "session-speakers"
+        }
+      ],
+      "checks": [],
+      "indexes": [],
+      "calledBy": "title"
+    },
+    {
+      "name": "Tag",
+      "made": {
+        "noun": "tag"
+      },
+      "sentence": "A tag is a word we put on sessions so people can find them.",
+      "notHeld": [],
+      "description": "A tag is a word we put on sessions so people can find them.",
+      "columns": [
+        {
+          "name": "label",
+          "kind": "text",
+          "type": "String"
+        }
+      ],
+      "checks": [],
+      "indexes": [],
+      "calledBy": "label"
+    },
+    {
+      "name": "Topic",
+      "made": {
+        "noun": "topic"
+      },
+      "sentence": "A topic is what a session is about; topics sit under broader topics.",
+      "notHeld": [
+        "no topic sits under itself"
+      ],
+      "description": "A topic is what a session is about; topics sit under broader topics. Not kept by the database yet: no topic sits under itself.",
+      "columns": [
+        {
+          "name": "title",
+          "kind": "text",
+          "type": "String"
+        },
+        {
+          "name": "parent",
+          "kind": "link",
+          "type": "Pointer",
+          "targetClass": "Topic",
+          "whenTargetGoes": "blocks",
+          "description": "A topic can sit under a broader topic.",
+          "relation": "topic-tree"
+        }
+      ],
+      "checks": [],
+      "indexes": [],
+      "calledBy": "title"
+    },
+    {
+      "name": "Membership",
+      "made": {
+        "relation": "membership"
+      },
+      "sentence": "A person is on an account, as its holder or as a member, from the day they join until they leave.",
+      "notHeld": [],
+      "description": "A person is on an account, as its holder or as a member, from the day they join until they leave.",
+      "columns": [
+        {
+          "name": "person",
+          "kind": "link",
+          "type": "Pointer",
+          "targetClass": "Person",
+          "required": true,
+          "whenTargetGoes": "goes-too",
+          "description": "A person is on an account, as its holder or as a member, from the day they join until they leave.",
+          "relation": "membership"
+        },
+        {
+          "name": "account",
+          "kind": "link",
+          "type": "Pointer",
+          "targetClass": "Account",
+          "required": true,
+          "whenTargetGoes": "goes-too",
+          "description": "A person is on an account, as its holder or as a member, from the day they join until they leave.",
+          "relation": "membership"
+        },
+        {
+          "name": "since",
+          "kind": "date",
+          "type": "Date",
+          "description": "A person is on an account, as its holder or as a member, from the day they join until they leave.",
+          "relation": "membership"
+        },
+        {
+          "name": "until",
+          "kind": "date",
+          "type": "Date",
+          "description": "A person is on an account, as its holder or as a member, from the day they join until they leave.",
+          "relation": "membership"
+        },
+        {
+          "name": "role",
+          "kind": "choice",
+          "type": "String"
+        }
+      ],
+      "checks": [
+        {
+          "field": "role",
+          "oneOf": [
+            "holder",
+            "member"
+          ]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "Employment",
+      "made": {
+        "relation": "employment"
+      },
+      "sentence": "A person works at a company, from a date until a date.",
+      "notHeld": [],
+      "description": "A person works at a company, from a date until a date.",
+      "columns": [
+        {
+          "name": "person",
+          "kind": "link",
+          "type": "Pointer",
+          "targetClass": "Person",
+          "required": true,
+          "whenTargetGoes": "goes-too",
+          "description": "A person works at a company, from a date until a date.",
+          "relation": "employment"
+        },
+        {
+          "name": "company",
+          "kind": "link",
+          "type": "Pointer",
+          "targetClass": "Company",
+          "required": true,
+          "whenTargetGoes": "goes-too",
+          "description": "A person works at a company, from a date until a date.",
+          "relation": "employment"
+        },
+        {
+          "name": "since",
+          "kind": "date",
+          "type": "Date",
+          "description": "A person works at a company, from a date until a date.",
+          "relation": "employment"
+        },
+        {
+          "name": "until",
+          "kind": "date",
+          "type": "Date",
+          "description": "A person works at a company, from a date until a date.",
+          "relation": "employment"
+        }
+      ],
+      "checks": [],
+      "indexes": []
+    },
+    {
+      "name": "Attended",
+      "made": {
+        "relation": "attended"
+      },
+      "sentence": "A person came to a session.",
+      "notHeld": [],
+      "description": "A person came to a session.",
+      "columns": [
+        {
+          "name": "person",
+          "kind": "link",
+          "type": "Pointer",
+          "targetClass": "Person",
+          "required": true,
+          "whenTargetGoes": "blocks",
+          "description": "A person came to a session.",
+          "relation": "attended"
+        },
+        {
+          "name": "at",
+          "kind": "date",
+          "type": "Date",
+          "required": true,
+          "description": "A person came to a session.",
+          "relation": "attended"
+        },
+        {
+          "name": "session",
+          "kind": "link",
+          "type": "Pointer",
+          "targetClass": "Session",
+          "description": "A person came to a session.",
+          "relation": "attended"
+        }
+      ],
+      "checks": [],
+      "indexes": [],
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": "*"
+          }
+        },
+        "delete": "never"
+      }
+    },
+    {
+      "name": "SignedUp",
+      "made": {
+        "relation": "signed-up"
+      },
+      "sentence": "A person signed up, with their own login.",
+      "notHeld": [],
+      "description": "A person signed up, with their own login.",
+      "columns": [
+        {
+          "name": "person",
+          "kind": "link",
+          "type": "Pointer",
+          "targetClass": "Person",
+          "required": true,
+          "whenTargetGoes": "blocks",
+          "description": "A person signed up, with their own login.",
+          "relation": "signed-up"
+        },
+        {
+          "name": "at",
+          "kind": "date",
+          "type": "Date",
+          "required": true,
+          "description": "A person signed up, with their own login.",
+          "relation": "signed-up"
+        },
+        {
+          "name": "doneBy",
+          "kind": "link",
+          "type": "Pointer",
+          "targetClass": "_User",
+          "description": "A person signed up, with their own login.",
+          "relation": "signed-up"
+        }
+      ],
+      "checks": [],
+      "indexes": [],
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": "*"
+          }
+        },
+        "delete": "never"
+      }
+    }
+  ],
+  "claims": [
+    {
+      "id": "account/company-is-required",
+      "says": "an account cannot exist without its company",
+      "from": {
+        "relation": "account-company"
+      },
+      "held": true,
+      "mutant": {
+        "dropRequired": {
+          "collection": "Account",
+          "field": "company"
+        }
+      },
+      "steps": [
+        {
+          "make": "Company",
+          "as": "company2",
+          "data": {}
+        },
+        {
+          "make": "Account",
+          "as": "whole",
+          "data": {
+            "company": {
+              "ref": "company2"
+            }
+          }
+        },
+        {
+          "make": "Company",
+          "as": "company4",
+          "data": {}
+        },
+        {
+          "refuse": "Account",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "id": "membership/person-is-required",
+      "says": "a membership cannot exist without its person",
+      "from": {
+        "relation": "membership"
+      },
+      "held": true,
+      "mutant": {
+        "dropRequired": {
+          "collection": "Membership",
+          "field": "person"
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person2",
+          "data": {}
+        },
+        {
+          "make": "Company",
+          "as": "company5",
+          "data": {}
+        },
+        {
+          "make": "Account",
+          "as": "account6",
+          "data": {
+            "company": {
+              "ref": "company5"
+            }
+          }
+        },
+        {
+          "make": "Membership",
+          "as": "whole",
+          "data": {
+            "person": {
+              "ref": "person2"
+            },
+            "account": {
+              "ref": "account6"
+            }
+          }
+        },
+        {
+          "make": "Person",
+          "as": "person8",
+          "data": {}
+        },
+        {
+          "make": "Company",
+          "as": "company11",
+          "data": {}
+        },
+        {
+          "make": "Account",
+          "as": "account12",
+          "data": {
+            "company": {
+              "ref": "company11"
+            }
+          }
+        },
+        {
+          "refuse": "Membership",
+          "data": {
+            "account": {
+              "ref": "account12"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "membership/account-is-required",
+      "says": "a membership cannot exist without its account",
+      "from": {
+        "relation": "membership"
+      },
+      "held": true,
+      "mutant": {
+        "dropRequired": {
+          "collection": "Membership",
+          "field": "account"
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person2",
+          "data": {}
+        },
+        {
+          "make": "Company",
+          "as": "company5",
+          "data": {}
+        },
+        {
+          "make": "Account",
+          "as": "account6",
+          "data": {
+            "company": {
+              "ref": "company5"
+            }
+          }
+        },
+        {
+          "make": "Membership",
+          "as": "whole",
+          "data": {
+            "person": {
+              "ref": "person2"
+            },
+            "account": {
+              "ref": "account6"
+            }
+          }
+        },
+        {
+          "make": "Person",
+          "as": "person8",
+          "data": {}
+        },
+        {
+          "make": "Company",
+          "as": "company11",
+          "data": {}
+        },
+        {
+          "make": "Account",
+          "as": "account12",
+          "data": {
+            "company": {
+              "ref": "company11"
+            }
+          }
+        },
+        {
+          "refuse": "Membership",
+          "data": {
+            "person": {
+              "ref": "person8"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "membership/role-is-one-of-its-list",
+      "says": "a membership's role is one of holder, member, and nothing else",
+      "from": {
+        "relation": "membership"
+      },
+      "held": true,
+      "mutant": {
+        "dropCheck": {
+          "collection": "Membership",
+          "field": "role"
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person2",
+          "data": {}
+        },
+        {
+          "make": "Company",
+          "as": "company5",
+          "data": {}
+        },
+        {
+          "make": "Account",
+          "as": "account6",
+          "data": {
+            "company": {
+              "ref": "company5"
+            }
+          }
+        },
+        {
+          "make": "Membership",
+          "as": "membership7",
+          "data": {
+            "person": {
+              "ref": "person2"
+            },
+            "account": {
+              "ref": "account6"
+            },
+            "role": "holder"
+          }
+        },
+        {
+          "make": "Person",
+          "as": "person9",
+          "data": {}
+        },
+        {
+          "make": "Company",
+          "as": "company12",
+          "data": {}
+        },
+        {
+          "make": "Account",
+          "as": "account13",
+          "data": {
+            "company": {
+              "ref": "company12"
+            }
+          }
+        },
+        {
+          "refuse": "Membership",
+          "data": {
+            "person": {
+              "ref": "person9"
+            },
+            "account": {
+              "ref": "account13"
+            },
+            "role": "not holder or member"
+          }
+        }
+      ]
+    },
+    {
+      "id": "employment/person-is-required",
+      "says": "an employment cannot exist without its person",
+      "from": {
+        "relation": "employment"
+      },
+      "held": true,
+      "mutant": {
+        "dropRequired": {
+          "collection": "Employment",
+          "field": "person"
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person2",
+          "data": {}
+        },
+        {
+          "make": "Company",
+          "as": "company4",
+          "data": {}
+        },
+        {
+          "make": "Employment",
+          "as": "whole",
+          "data": {
+            "person": {
+              "ref": "person2"
+            },
+            "company": {
+              "ref": "company4"
+            }
+          }
+        },
+        {
+          "make": "Person",
+          "as": "person6",
+          "data": {}
+        },
+        {
+          "make": "Company",
+          "as": "company8",
+          "data": {}
+        },
+        {
+          "refuse": "Employment",
+          "data": {
+            "company": {
+              "ref": "company8"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "employment/company-is-required",
+      "says": "an employment cannot exist without its company",
+      "from": {
+        "relation": "employment"
+      },
+      "held": true,
+      "mutant": {
+        "dropRequired": {
+          "collection": "Employment",
+          "field": "company"
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person2",
+          "data": {}
+        },
+        {
+          "make": "Company",
+          "as": "company4",
+          "data": {}
+        },
+        {
+          "make": "Employment",
+          "as": "whole",
+          "data": {
+            "person": {
+              "ref": "person2"
+            },
+            "company": {
+              "ref": "company4"
+            }
+          }
+        },
+        {
+          "make": "Person",
+          "as": "person6",
+          "data": {}
+        },
+        {
+          "make": "Company",
+          "as": "company8",
+          "data": {}
+        },
+        {
+          "refuse": "Employment",
+          "data": {
+            "person": {
+              "ref": "person6"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "attended/person-is-required",
+      "says": "an attended cannot exist without its person",
+      "from": {
+        "relation": "attended"
+      },
+      "held": true,
+      "mutant": {
+        "dropRequired": {
+          "collection": "Attended",
+          "field": "person"
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person2",
+          "data": {}
+        },
+        {
+          "make": "Attended",
+          "as": "whole",
+          "data": {
+            "person": {
+              "ref": "person2"
+            },
+            "at": {
+              "date": "2026-01-04T00:00:00.000Z"
+            }
+          }
+        },
+        {
+          "make": "Person",
+          "as": "person5",
+          "data": {}
+        },
+        {
+          "refuse": "Attended",
+          "data": {
+            "at": {
+              "date": "2026-01-07T00:00:00.000Z"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "attended/at-is-required",
+      "says": "an attended cannot exist without its at",
+      "from": {
+        "relation": "attended"
+      },
+      "held": true,
+      "mutant": {
+        "dropRequired": {
+          "collection": "Attended",
+          "field": "at"
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person2",
+          "data": {}
+        },
+        {
+          "make": "Attended",
+          "as": "whole",
+          "data": {
+            "person": {
+              "ref": "person2"
+            },
+            "at": {
+              "date": "2026-01-04T00:00:00.000Z"
+            }
+          }
+        },
+        {
+          "make": "Person",
+          "as": "person5",
+          "data": {}
+        },
+        {
+          "refuse": "Attended",
+          "data": {
+            "person": {
+              "ref": "person5"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "signed-up/person-is-required",
+      "says": "a signed-up cannot exist without its person",
+      "from": {
+        "relation": "signed-up"
+      },
+      "held": true,
+      "mutant": {
+        "dropRequired": {
+          "collection": "SignedUp",
+          "field": "person"
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person2",
+          "data": {}
+        },
+        {
+          "make": "SignedUp",
+          "as": "whole",
+          "data": {
+            "person": {
+              "ref": "person2"
+            },
+            "at": {
+              "date": "2026-01-04T00:00:00.000Z"
+            }
+          }
+        },
+        {
+          "make": "Person",
+          "as": "person5",
+          "data": {}
+        },
+        {
+          "refuse": "SignedUp",
+          "data": {
+            "at": {
+              "date": "2026-01-07T00:00:00.000Z"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "signed-up/at-is-required",
+      "says": "a signed-up cannot exist without its at",
+      "from": {
+        "relation": "signed-up"
+      },
+      "held": true,
+      "mutant": {
+        "dropRequired": {
+          "collection": "SignedUp",
+          "field": "at"
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person2",
+          "data": {}
+        },
+        {
+          "make": "SignedUp",
+          "as": "whole",
+          "data": {
+            "person": {
+              "ref": "person2"
+            },
+            "at": {
+              "date": "2026-01-04T00:00:00.000Z"
+            }
+          }
+        },
+        {
+          "make": "Person",
+          "as": "person5",
+          "data": {}
+        },
+        {
+          "refuse": "SignedUp",
+          "data": {
+            "person": {
+              "ref": "person5"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "session-tags/paired-once",
+      "says": "a session and a tag are paired once",
+      "from": {
+        "relation": "session-tags"
+      },
+      "held": true,
+      "mutant": {
+        "linksAsList": {
+          "collection": "Session",
+          "field": "tag"
+        }
+      },
+      "steps": [
+        {
+          "make": "Session",
+          "as": "session1",
+          "data": {}
+        },
+        {
+          "make": "Tag",
+          "as": "tag2",
+          "data": {}
+        },
+        {
+          "pair": "Session",
+          "row": "session1",
+          "field": "tag",
+          "with": "tag2"
+        },
+        {
+          "pair": "Session",
+          "row": "session1",
+          "field": "tag",
+          "with": "tag2"
+        },
+        {
+          "paired": "Session",
+          "row": "session1",
+          "field": "tag",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "account-company/company-is-set-once",
+      "says": "an account's company is set once",
+      "from": {
+        "relation": "account-company"
+      },
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "Account",
+          "setOnce": "company"
+        }
+      },
+      "steps": [
+        {
+          "make": "Company",
+          "as": "company2",
+          "data": {}
+        },
+        {
+          "make": "Company",
+          "as": "company4",
+          "data": {}
+        },
+        {
+          "make": "Account",
+          "as": "account5",
+          "data": {
+            "company": {
+              "ref": "company2"
+            }
+          }
+        },
+        {
+          "change": "Account",
+          "row": "account5",
+          "data": {
+            "company": {
+              "ref": "company4"
+            }
+          },
+          "refused": true,
+          "byPerson": true
+        }
+      ]
+    },
+    {
+      "id": "attended/is-never-edited",
+      "says": "nobody edits it",
+      "from": {
+        "relation": "attended"
+      },
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "Attended",
+          "neverEdited": true
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person2",
+          "data": {}
+        },
+        {
+          "make": "Attended",
+          "as": "attended4",
+          "data": {
+            "person": {
+              "ref": "person2"
+            },
+            "at": {
+              "date": "2026-01-04T00:00:00.000Z"
+            }
+          }
+        },
+        {
+          "change": "Attended",
+          "row": "attended4",
+          "data": {
+            "at": {
+              "date": "2026-01-06T00:00:00.000Z"
+            }
+          },
+          "refused": true,
+          "byPerson": true
+        }
+      ]
+    },
+    {
+      "id": "attended/is-never-deleted",
+      "says": "nobody deletes it",
+      "from": {
+        "relation": "attended"
+      },
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "Attended",
+          "neverDeleted": true
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person2",
+          "data": {}
+        },
+        {
+          "make": "Attended",
+          "as": "attended4",
+          "data": {
+            "person": {
+              "ref": "person2"
+            },
+            "at": {
+              "date": "2026-01-04T00:00:00.000Z"
+            }
+          }
+        },
+        {
+          "remove": "Attended",
+          "row": "attended4",
+          "refused": true,
+          "byPerson": true
+        }
+      ]
+    },
+    {
+      "id": "topic-tree/parent-never-leads-back",
+      "says": "no topic sits under itself",
+      "from": {
+        "relation": "topic-tree"
+      },
+      "held": false,
+      "steps": [
+        {
+          "make": "Topic",
+          "as": "topic1",
+          "data": {}
+        },
+        {
+          "change": "Topic",
+          "row": "topic1",
+          "data": {
+            "parent": {
+              "ref": "topic1"
+            }
+          },
+          "refused": true
+        }
+      ]
+    },
+    {
+      "id": "signed-up/is-never-edited",
+      "says": "nobody edits it",
+      "from": {
+        "relation": "signed-up"
+      },
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "SignedUp",
+          "neverEdited": true
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person2",
+          "data": {}
+        },
+        {
+          "make": "SignedUp",
+          "as": "signedUp4",
+          "data": {
+            "person": {
+              "ref": "person2"
+            },
+            "at": {
+              "date": "2026-01-04T00:00:00.000Z"
+            }
+          }
+        },
+        {
+          "change": "SignedUp",
+          "row": "signedUp4",
+          "data": {
+            "at": {
+              "date": "2026-01-06T00:00:00.000Z"
+            }
+          },
+          "refused": true,
+          "byPerson": true
+        }
+      ]
+    },
+    {
+      "id": "signed-up/is-never-deleted",
+      "says": "nobody deletes it",
+      "from": {
+        "relation": "signed-up"
+      },
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "SignedUp",
+          "neverDeleted": true
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person2",
+          "data": {}
+        },
+        {
+          "make": "SignedUp",
+          "as": "signedUp4",
+          "data": {
+            "person": {
+              "ref": "person2"
+            },
+            "at": {
+              "date": "2026-01-04T00:00:00.000Z"
+            }
+          }
+        },
+        {
+          "remove": "SignedUp",
+          "row": "signedUp4",
+          "refused": true,
+          "byPerson": true
+        }
+      ]
+    },
+    {
+      "id": "leaves/is-never-deleted",
+      "says": "nobody deletes a person; it ends",
+      "from": {
+        "relation": "leaves"
+      },
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "Person",
+          "neverDeleted": true
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person1",
+          "data": {}
+        },
+        {
+          "remove": "Person",
+          "row": "person1",
+          "refused": true,
+          "byPerson": true
+        }
+      ]
+    },
+    {
+      "id": "account-company/company-blocks",
+      "says": "a company cannot go while any accounts are linked to it",
+      "from": {
+        "relation": "account-company"
+      },
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Account",
+          "field": "company"
+        }
+      },
+      "steps": [
+        {
+          "make": "Company",
+          "as": "company1",
+          "data": {}
+        },
+        {
+          "make": "Account",
+          "as": "account2",
+          "data": {
+            "company": {
+              "ref": "company1"
+            }
+          }
+        },
+        {
+          "remove": "Company",
+          "row": "company1",
+          "refused": true
+        }
+      ]
+    },
+    {
+      "id": "membership/person-goes-too",
+      "says": "when a person goes, the 'membership' records linked to it go too",
+      "from": {
+        "relation": "membership"
+      },
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Membership",
+          "field": "person"
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person1",
+          "data": {}
+        },
+        {
+          "make": "Company",
+          "as": "company4",
+          "data": {}
+        },
+        {
+          "make": "Account",
+          "as": "account5",
+          "data": {
+            "company": {
+              "ref": "company4"
+            }
+          }
+        },
+        {
+          "make": "Membership",
+          "as": "membership6",
+          "data": {
+            "account": {
+              "ref": "account5"
+            },
+            "person": {
+              "ref": "person1"
+            }
+          }
+        },
+        {
+          "remove": "Person",
+          "row": "person1"
+        },
+        {
+          "gone": "Membership",
+          "row": "membership6"
+        }
+      ]
+    },
+    {
+      "id": "membership/account-goes-too",
+      "says": "when an account goes, the 'membership' records linked to it go too",
+      "from": {
+        "relation": "membership"
+      },
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Membership",
+          "field": "account"
+        }
+      },
+      "steps": [
+        {
+          "make": "Company",
+          "as": "company2",
+          "data": {}
+        },
+        {
+          "make": "Account",
+          "as": "account3",
+          "data": {
+            "company": {
+              "ref": "company2"
+            }
+          }
+        },
+        {
+          "make": "Person",
+          "as": "person5",
+          "data": {}
+        },
+        {
+          "make": "Membership",
+          "as": "membership6",
+          "data": {
+            "person": {
+              "ref": "person5"
+            },
+            "account": {
+              "ref": "account3"
+            }
+          }
+        },
+        {
+          "remove": "Account",
+          "row": "account3"
+        },
+        {
+          "gone": "Membership",
+          "row": "membership6"
+        }
+      ]
+    },
+    {
+      "id": "employment/person-goes-too",
+      "says": "when a person goes, the 'employment' records linked to it go too",
+      "from": {
+        "relation": "employment"
+      },
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Employment",
+          "field": "person"
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person1",
+          "data": {}
+        },
+        {
+          "make": "Company",
+          "as": "company3",
+          "data": {}
+        },
+        {
+          "make": "Employment",
+          "as": "employment4",
+          "data": {
+            "company": {
+              "ref": "company3"
+            },
+            "person": {
+              "ref": "person1"
+            }
+          }
+        },
+        {
+          "remove": "Person",
+          "row": "person1"
+        },
+        {
+          "gone": "Employment",
+          "row": "employment4"
+        }
+      ]
+    },
+    {
+      "id": "employment/company-goes-too",
+      "says": "when a company goes, the 'employment' records linked to it go too",
+      "from": {
+        "relation": "employment"
+      },
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Employment",
+          "field": "company"
+        }
+      },
+      "steps": [
+        {
+          "make": "Company",
+          "as": "company1",
+          "data": {}
+        },
+        {
+          "make": "Person",
+          "as": "person3",
+          "data": {}
+        },
+        {
+          "make": "Employment",
+          "as": "employment4",
+          "data": {
+            "person": {
+              "ref": "person3"
+            },
+            "company": {
+              "ref": "company1"
+            }
+          }
+        },
+        {
+          "remove": "Company",
+          "row": "company1"
+        },
+        {
+          "gone": "Employment",
+          "row": "employment4"
+        }
+      ]
+    },
+    {
+      "id": "attended/person-blocks",
+      "says": "a person cannot go while any 'attended' records are linked to it",
+      "from": {
+        "relation": "attended"
+      },
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Attended",
+          "field": "person"
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person1",
+          "data": {}
+        },
+        {
+          "make": "Attended",
+          "as": "attended3",
+          "data": {
+            "at": {
+              "date": "2026-01-03T00:00:00.000Z"
+            },
+            "person": {
+              "ref": "person1"
+            }
+          }
+        },
+        {
+          "remove": "Person",
+          "row": "person1",
+          "refused": true
+        }
+      ]
+    },
+    {
+      "id": "topic-tree/parent-blocks",
+      "says": "a topic cannot go while any topics are linked to it",
+      "from": {
+        "relation": "topic-tree"
+      },
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Topic",
+          "field": "parent"
+        }
+      },
+      "steps": [
+        {
+          "make": "Topic",
+          "as": "topic1",
+          "data": {}
+        },
+        {
+          "make": "Topic",
+          "as": "topic2",
+          "data": {
+            "parent": {
+              "ref": "topic1"
+            }
+          }
+        },
+        {
+          "remove": "Topic",
+          "row": "topic1",
+          "refused": true
+        }
+      ]
+    },
+    {
+      "id": "signed-up/person-blocks",
+      "says": "a person cannot go while any 'signed-up' records are linked to it",
+      "from": {
+        "relation": "signed-up"
+      },
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "SignedUp",
+          "field": "person"
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person1",
+          "data": {}
+        },
+        {
+          "make": "SignedUp",
+          "as": "signedUp3",
+          "data": {
+            "at": {
+              "date": "2026-01-03T00:00:00.000Z"
+            },
+            "person": {
+              "ref": "person1"
+            }
+          }
+        },
+        {
+          "remove": "Person",
+          "row": "person1",
+          "refused": true
+        }
+      ]
+    }
+  ],
+  "notHeld": [
+    {
+      "collection": "Topic",
+      "field": "parent",
+      "says": "no topic sits under itself",
+      "why": "the schema has no rule that follows a link from record to record",
+      "claim": "topic-tree/parent-never-leads-back"
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "acbf218f-df6e-5e70-8d2e-018e2497a5db",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "blockId",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-blockId"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "projectId",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "what",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-what"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "planned",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-planned"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "date",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "before",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-before"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "projects",
+      "toId": "SaveblockGuard",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "do",
+      "toId": "SaveblockGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-projectId",
+      "toId": "SaveblockWrite",
+      "toProperty": "prop-projectId"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-what",
+      "toId": "SaveblockWrite",
+      "toProperty": "prop-what"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-planned",
+      "toId": "SaveblockWrite",
+      "toProperty": "prop-planned"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-date",
+      "toId": "SaveblockWrite",
+      "toProperty": "prop-date"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "blockId",
+      "toId": "SaveblockWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-go",
+      "toId": "SaveblockWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "SaveblockIn",
+      "fromProperty": "blockId",
+      "toId": "SaveblockLog",
+      "toProperty": "prop-blockId"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-projectId",
+      "toId": "SaveblockLog",
+      "toProperty": "prop-projectId"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-hKind",
+      "toId": "SaveblockLog",
+      "toProperty": "prop-kind"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-hSummary",
+      "toId": "SaveblockLog",
+      "toProperty": "prop-summary"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-hBody",
+      "toId": "SaveblockLog",
+      "toProperty": "prop-body"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-hWhat",
+      "toId": "SaveblockLog",
+      "toProperty": "prop-what"
+    },
+    {
+      "fromId": "SaveblockGuard",
+      "fromProperty": "out-hSummary",
+      "toId": "SaveblockLogGate",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "SaveblockLogGate",
+      "fromProperty": "out-at",
+      "toId": "SaveblockLog",
+      "toProperty": "prop-at"
+    },
+    {
+      "fromId": "SaveblockWrite",
+      "fromProperty": "done",
+      "toId": "SaveblockLogGate",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "SaveblockLogGate",
+      "fromProperty": "out-log",
+      "toId": "SaveblockLog",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "SaveblockLogGate",
+      "fromProperty": "out-skip",
+      "toId": "SaveblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "SaveblockLog",
+      "fromProperty": "done",
+      "toId": "SaveblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "SaveblockLog",
+      "fromProperty": "failure",
+      "toId": "SaveblockProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "SaveblockLog",
+      "fromProperty": "failure",
+      "toId": "SaveblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "SaveblockWrite",
+      "fromProperty": "failure",
+      "toId": "SaveblockProblem",
+      "toProperty": "do"
+    }
+  ]
+}

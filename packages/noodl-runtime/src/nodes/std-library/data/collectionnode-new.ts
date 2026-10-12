@@ -1,8 +1,8 @@
 'use strict';
 
 import Collection = require('../../../collection');
-import { outcomeOutputs } from '../../../outcome';
-import type { CollectionLike, NodeDefinitionOptions, NodeInstance, NodeModule } from '@noodl/types';
+import { outcomeOutputs, reportOutcomes } from '../../../outcome';
+import type { CollectionLike, NodeDefinitionOptions, NodeInstance, NodeModule, OutcomeToken } from '@noodl/types';
 
 
 /** `this` inside the Create New Array node. */
@@ -13,6 +13,8 @@ interface CollectionNewInstance extends NodeInstance {
     sourceCollection?: CollectionLike;
   };
   hasScheduledNew?: boolean;
+  /** One token per `Do` of the frame: the presses share one array, and each is answered (P107-C9). */
+  pendingNewOutcomes?: OutcomeToken[];
   setCollection(collection: CollectionLike): void;
   scheduleNew(): void;
 }
@@ -70,12 +72,17 @@ const CollectionNewNode: NodeDefinitionOptions = {
       this.flagOutputDirty('id');
     },
     scheduleNew: function (this: CollectionNewInstance) {
+      // P107-C9: the token is opened BEFORE the guard. Two `Do` presses in a frame still make one
+      // array, but each press is answered — the guard used to sit first, so the second got nothing.
+      if (!this.pendingNewOutcomes) this.pendingNewOutcomes = [];
+      this.pendingNewOutcomes.push(this.beginOutcome());
       if (this.hasScheduledNew) return;
       this.hasScheduledNew = true;
-      const outcome = this.beginOutcome();
 
       this.scheduleAfterInputsHaveUpdated(() => {
         this.hasScheduledNew = false;
+        const tokens = this.pendingNewOutcomes || [];
+        this.pendingNewOutcomes = undefined;
 
         const collection = Collection.get();
         if (this._internal.sourceCollection !== undefined) collection.set(this._internal.sourceCollection);
@@ -84,7 +91,7 @@ const CollectionNewNode: NodeDefinitionOptions = {
         // `Done -> …` alongside `Id` already has the new id when the pulse lands.
         this.setCollection(collection);
 
-        this.reportOutcome(outcome, 'done');
+        reportOutcomes(this, tokens, 'done');
       });
     }
   }

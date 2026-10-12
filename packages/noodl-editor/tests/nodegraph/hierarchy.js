@@ -95,7 +95,10 @@ describe('Component instances', function () {
       })
     );
 
-    expect(c.allowChildrenWithCategory).toEqual(['modifiers', 'visuals']);
+    // The order is no contract: every reader asks `indexOf` (componentmodel, NodeGraphNode). P107 R23
+    // (`9da5979f9`) moved the derivation to `@nodegx/project-contract/hierarchy`, which keeps first-seen
+    // order where `_.union(newer, older)` kept newest-first (P112 OWN-013, the cut's one new red spec).
+    expect(c.allowChildrenWithCategory).toEqual(jasmine.arrayWithExactContents(['modifiers', 'visuals']));
   });
 
   it('can detect allow export root', function () {

@@ -45,6 +45,7 @@ import { ComponentLoader } from './ComponentLoader';
 import { ComponentSaver, hashComponent } from './ComponentSaver';
 import type { ComponentChangeSet } from './ComponentSaver';
 import { ProjectMigrator, type MigratorFilesystem } from './ProjectMigrator';
+import { ScriptFileStore, type ScriptReloadDecision } from './ScriptFileStore';
 
 export interface LoadResult {
   project: LegacyProject;
@@ -63,6 +64,13 @@ export interface SaveResult {
    * else wrote them while we held the project. See {@link findExternallyChanged}.
    */
   refused?: string[];
+  /** P109 ISL-005 — script paths (`engine/world.js`) written this save. */
+  scriptsWritten?: string[];
+  /**
+   * P109 ISL-005 — script paths NOT written or deleted because the file on disk moved off the text
+   * this editor last read or wrote (an agent or a text editor wrote it). The next save retries.
+   */
+  refusedScripts?: string[];
   /**
    * FLD-009. Project-level file names that were NOT written for the same reason:
    * the file on disk has moved off the baseline this editor recorded, so an
@@ -160,12 +168,33 @@ export class ProjectStructureService {
     this.saver.forgetBaselines();
     this.projectLevelHashes.clear();
     this.projectLevelDiskHashes.clear();
+    this.scriptStore.forget();
     this.seededProjectDir = projectDir;
+  }
+
+  /** P109 ISL-005 — `scripts/**.js`. */
+  private readonly scriptStore: ScriptFileStore;
+
+  /** P109 ISL-005 — what a watcher event for each script should do; see `ScriptFileStore.decideReload`. */
+  async decideScriptReloads(
+    projectDir: string,
+    paths: string[],
+    memory: Record<string, string>
+  ): Promise<Record<string, ScriptReloadDecision>> {
+    const out: Record<string, ScriptReloadDecision> = {};
+    for (const path of paths) out[path] = await this.scriptStore.decideReload(projectDir, path, memory[path]);
+    return out;
+  }
+
+  /** P109 ISL-005 — the editor adopted the disk copy of `path` (`null`: the file is gone). */
+  markScriptBaseline(path: string, text: string | null): void {
+    this.scriptStore.markBaseline(path, text);
   }
 
   constructor(private readonly fs: ProjectStructureFilesystem) {
     this.loader = new ComponentLoader(fs);
     this.saver = new ComponentSaver(fs);
+    this.scriptStore = new ScriptFileStore(fs);
     this.detector = new ProjectFormatDetector({
       exists: (p: string) => fs.exists(p),
       join: (...parts: string[]) => fs.join(...parts)
@@ -216,11 +245,15 @@ export class ProjectStructureService {
       components[path] = files;
     }
 
+    // P109 ISL-005. Read (and baselined) before the import, which carries them onto the project.
+    const scripts = await this.scriptStore.readAll(projectDir);
+
     const { project, warnings } = this.importer.import({
       project: projectFile,
       registry,
       routes,
       styles,
+      scripts,
       components
     });
 
@@ -327,9 +360,11 @@ export class ProjectStructureService {
     const baselineSnapshot = this.saver.snapshotBaselines();
     const projectLevelSnapshot = new Map(this.projectLevelHashes);
     const projectLevelDiskSnapshot = new Map(this.projectLevelDiskHashes);
+    const scriptSnapshot = this.scriptStore.snapshot();
 
     try {
       const refusedProjectFiles = await this.saveProjectLevelFiles(projectDir, project);
+      const scriptResult = await this.scriptStore.save(projectDir, project.scripts);
 
       for (const { path, component } of changeSet.changed) {
         await this.saver.saveComponent(projectDir, path, component);
@@ -346,10 +381,13 @@ export class ProjectStructureService {
         changed: changeSet.changed.map((c) => c.path),
         removed: changeSet.removed,
         refused: refused.size > 0 ? [...refused].sort() : undefined,
-        refusedProjectFiles: refusedProjectFiles.length > 0 ? refusedProjectFiles.sort() : undefined
+        refusedProjectFiles: refusedProjectFiles.length > 0 ? refusedProjectFiles.sort() : undefined,
+        scriptsWritten: scriptResult.written.length > 0 ? scriptResult.written.sort() : undefined,
+        refusedScripts: scriptResult.refused.length > 0 ? scriptResult.refused.sort() : undefined
       };
     } catch (err) {
       this.saver.restoreBaselines(baselineSnapshot);
+      this.scriptStore.restore(scriptSnapshot);
       this.projectLevelHashes.clear();
       for (const [k, v] of projectLevelSnapshot) this.projectLevelHashes.set(k, v);
       this.projectLevelDiskHashes.clear();

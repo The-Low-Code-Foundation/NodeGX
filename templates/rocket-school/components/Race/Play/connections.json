@@ -172,6 +172,42 @@
       "toProperty": "chargingWord"
     },
     {
+      "fromId": "rpIn",
+      "fromProperty": "armedWord",
+      "toId": "rpRound",
+      "toProperty": "armedWord"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "armedHintWord",
+      "toId": "rpRound",
+      "toProperty": "armedHintWord"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "focus",
+      "toId": "rpRound",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "customSet",
+      "toId": "rpRound",
+      "toProperty": "customSet"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "customSetId",
+      "toId": "rpRound",
+      "toProperty": "customSetId"
+    },
+    {
+      "fromId": "rpIn",
+      "fromProperty": "customSetBoth",
+      "toId": "rpRound",
+      "toProperty": "customSetBoth"
+    },
+    {
       "fromId": "rpA",
       "fromProperty": "value",
       "toId": "rpMineAt",
@@ -968,6 +1004,24 @@
       "fromProperty": "done",
       "toId": "rpMint",
       "toProperty": "run"
+    },
+    {
+      "fromId": "rpResetA",
+      "fromProperty": "done",
+      "toId": "rpFaceB",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rpFaceB",
+      "fromProperty": "out-look",
+      "toId": "rpTrack",
+      "toProperty": "lookB"
+    },
+    {
+      "fromId": "rpFaceB",
+      "fromProperty": "out-seed",
+      "toId": "rpTrack",
+      "toProperty": "seedB"
     },
     {
       "fromId": "rpMint",

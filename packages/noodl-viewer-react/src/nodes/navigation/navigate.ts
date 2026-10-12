@@ -178,7 +178,9 @@ const Navigate: NodeDefinitionOptions = {
         NavigationHandler.instance.navigate(this._internal.stack, {
           target: this._internal.target,
           transition: { ...{ type: this._internal.transition }, ...this._internal.transitionParams },
-          params: this._internal.pageParams,
+          // ISL-028 (P107-C27): a copy — the stack keeps what it is handed on the entry, and a later `pm-`
+          // write must not change the page already showing, or the next press reads as "already showing".
+          params: { ...this._internal.pageParams },
           backCallback: (action, results) => {
             this._internal.backResults = results;
 
@@ -207,7 +209,9 @@ const Navigate: NodeDefinitionOptions = {
           // could not animate. It defaults to `None` rather than push's `Push`, so every
           // replace already out there behaves exactly as it did.
           transition: { ...{ type: this._internal.transition || 'None' }, ...this._internal.transitionParams },
-          params: this._internal.pageParams,
+          // ISL-028 (P107-C27): a copy — the stack keeps what it is handed on the entry, and a later `pm-`
+          // write must not change the page already showing, or the next press reads as "already showing".
+          params: { ...this._internal.pageParams },
           hasNavigated: () => {
             this.scheduleAfterInputsHaveUpdated(() => {
               this.settle(pending, 'done');
@@ -222,6 +226,14 @@ const Navigate: NodeDefinitionOptions = {
             this.reportFailure(pending, code, message);
           }
         });
+      } else {
+        // P107-C28 (ISL-028, ruled "Fail and name the value"): Mode is an enum, but a wire carries anything — 'Push',
+        // '', null. There was no branch for it: nothing reached a stack and the presses were never answered.
+        this.reportFailure(
+          pending,
+          'push-component-stack/unknown-mode',
+          `Unknown mode '${String(this._internal.navigationMode)}' — Mode must be push or replace`
+        );
       }
     },
     setTransitionParam: function (this: NavigateInstance, param: string, value: unknown) {
@@ -261,6 +273,28 @@ const Navigate: NodeDefinitionOptions = {
           set: this.setPageParam.bind(this, name.substring('pm-'.length))
         });
       }
+    },
+    /**
+     * ISL-028 (P107-C26): the outputs the editor draws from the pushed component's Pop Component Stack nodes. The
+     * TypeScript port (PLAT-003 slice 8) dropped this method, so every wire from Back Results and Back Actions was
+     * refused when the component was built. Put back as it was — Show Popup's `closeResult-` / `closeAction-` shape.
+     */
+    registerOutputIfNeeded: function (this: NavigateInstance, name: string) {
+      if (this.hasOutput(name)) {
+        return;
+      }
+
+      if (name.startsWith('backResult-'))
+        return this.registerOutput(name, {
+          getter: this.getBackResult.bind(this, name.substring('backResult-'.length))
+        });
+
+      if (name.startsWith('backAction-'))
+        return this.registerOutput(name, {
+          getter: function () {
+            /** Not needed for signals */
+          }
+        });
     }
   }
 };

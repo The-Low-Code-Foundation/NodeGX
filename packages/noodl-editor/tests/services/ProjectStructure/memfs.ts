@@ -85,6 +85,22 @@ export class MemFs implements ProjectStructureFilesystem {
     }
   }
 
+  /** P109 ISL-005 — text read, for `scripts/**.js`. */
+  async readFile(p: string): Promise<string> {
+    const n = this.norm(p);
+    if (!this.files.has(n)) throw new Error('ENOENT: ' + n);
+    return this.files.get(n)!;
+  }
+
+  /** P109 ISL-005 — every file under a directory, recursively, as the platform filesystem lists them. */
+  async listDirectoryFiles(p: string): Promise<Array<{ fullPath: string; name: string; isDirectory: boolean }>> {
+    return this.pathsUnder(p).map((fullPath) => ({
+      fullPath,
+      name: fullPath.substring(fullPath.lastIndexOf('/') + 1),
+      isDirectory: false
+    }));
+  }
+
   /** Test helper: list every file path currently present. */
   paths(): string[] {
     return Array.from(this.files.keys()).sort();

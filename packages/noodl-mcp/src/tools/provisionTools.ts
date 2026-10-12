@@ -73,7 +73,9 @@ export function registerProvisionTools(server: McpServer, binding: ProjectBindin
         'making a second, and ADOPTS it if it is already running. ' +
         '⚠️ This is the one tool with an effect that is not undoable: it starts a process and creates a ' +
         'database. Refuses (changing nothing) if the project already points at a different endpoint. ' +
-        'The backend stops when this server does, and is reaped on the next start if this server is killed.',
+        'The backend stops when this server does, and is reaped on the next start if this server is killed. ' +
+        'Before this, when the app is somebody\'s world (members, accounts, bookings), call validate_world: it hands ' +
+        'you the brief and the questions to ask before any collection exists.',
       inputSchema: {
         name: z
           .string()

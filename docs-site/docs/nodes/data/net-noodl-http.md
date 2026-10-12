@@ -31,8 +31,23 @@ One-off or simple API calls where the response can be consumed directly or hande
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `cancel` | Signal | — | Abandons a request that is still in flight, which answers on Canceled rather than Failure; reports Unchanged when there is nothing to cancel |
+| `cancel` | Signal | — | Abandons every request still in flight, each answering on Canceled rather than Failure; reports Unchanged when there is nothing to cancel |
 | `fetch` | Signal | — | Sends the request using the values currently on the inputs |
+
+### What each input does
+
+**URL** (`url`)
+
+- always: kept as handed; read when the next Fetch goes — a request already running keeps the address it was sent to
+
+**Fetch** (`fetch`)
+
+- always: one request at the frame's end, however many Fetches arrived, with the values held then, beside any request already running: a 2xx answer sends Response, Status Code and Response Headers, then Done for each Fetch; any other status the same and Error, then Failure; a 304 is Not Modified and Unchanged; no URL, an input that is not text, a body that is not JSON, no answer by Timeout (ms) or none at all is Error and Failure
+
+**Cancel** (`cancel`)
+
+- a request still running: every one is abandoned — each lands as Canceled and Unchanged for its Fetches, Response and Status Code as they were — and this press is Done → Done
+- nothing running: Unchanged → Unchanged
 
 ## Outputs
 
@@ -69,7 +84,7 @@ Input and output ports derive from node parameters: configured headers and query
 
 ## Ports at runtime
 
-Header and body inputs are runtime-registered from the node's method/headers configuration; only the core trigger/result surface is static. Dynamic outputs minted from Response Mapping are all prefixed `out-`, so an author's mapping name can never collide with the node's own ports. NDA-012: exceeding `timeout` fires `failure` with a message naming the timeout — `canceled` fires only for an explicit `cancel`. ERG-001: failures now also reach the runtime error channel, so `On App Error` sees them in a deployed build — codes are `http/no-url`, `http/error-status`, `http/timeout` and `http/network-error`. Requests genuinely overlap: a second `fetch` while one is in flight starts a second request, and each invocation carries its own outcome. `statusCode` and `response` keep the *previous* request's answer when a request never reached the server, because a value output cannot be cleared. Deleting the node does not abandon a request already in flight.
+Header and body inputs are runtime-registered from the node's method/headers configuration; only the core trigger/result surface is static. Dynamic outputs minted from Response Mapping are all prefixed `out-`, so an author's mapping name can never collide with the node's own ports. NDA-012: exceeding `timeout` fires `failure` with a message naming the timeout — `canceled` fires only for an explicit `cancel`. ERG-001: failures now also reach the runtime error channel, so `On App Error` sees them in a deployed build — codes are `http/no-url`, `http/input-not-text` (a text input holding something else), `http/error-status`, `http/timeout`, `http/network-error` (the request never reached a server) and `http/bad-body` (the server answered, and its body could not be read as JSON). Requests genuinely overlap: a second `fetch` while one is in flight starts a second request, and each invocation carries its own outcome. `statusCode` and `response` keep the *previous* request's answer when a request never reached the server, because a value output cannot be cleared. Deleting the node does not abandon a request already in flight.
 
 ## Patterns
 

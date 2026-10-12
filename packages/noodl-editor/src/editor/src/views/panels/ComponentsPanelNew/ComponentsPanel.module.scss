@@ -929,3 +929,24 @@
   font-size: var(--font-size-xs);
   color: var(--theme-color-fg-muted);
 }
+
+/* P109 ISL-005 — the Scripts section (`components/ScriptsSection.tsx`). Its rows are `.TreeItem`s; these
+   are the three things a script row has that a component row does not. */
+.ScriptUses {
+  margin-left: auto;
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--theme-color-fg-muted);
+}
+
+.TreeItem.Selected .ScriptUses {
+  color: var(--theme-color-fg-highlight);
+}
+
+.ScriptNewIcon {
+  color: var(--theme-color-primary);
+}
+
+.ScriptNewLabel {
+  color: var(--theme-color-primary);
+}

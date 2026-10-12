@@ -71,7 +71,7 @@ function userProfilePath() {
  * ⚠️ **Two copies of these strings, deliberately named at both ends.** The originals are
  * `ProjectStore`'s constructor
  * (packages/noodl-mcp/src/project/ProjectStore.ts — `not-found` and `not-a-v2-project`), which
- * has a comment pointing back here. They cannot be imported: `@noodl/mcp` is not a dependency of
+ * has a comment pointing back here. They cannot be imported: `@nodegx/mcp` is not a dependency of
  * the editor, and making it one to reach three sentences would drag the whole server bundle into
  * the editor's main process. If you change the wording there, change it here.
  *

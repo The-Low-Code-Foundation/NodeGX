@@ -1,0 +1,812 @@
+[
+  {
+    "name": "no cloud services: Failure with the sentence, and no request",
+    "because": "cloudfunction2.ts :267-275",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "add"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {}
+  },
+  {
+    "name": "cloud services with no endpoint: the same Failure, no request",
+    "because": "cloudfunction2.ts :267 — `cloudServices.endpoint === undefined`",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "add"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1"
+      }
+    }
+  },
+  {
+    "name": "one call: POST to the function with the parameters as JSON, then the results and Done",
+    "because": "cloudfunction2.ts :286-290, :56-78; :301-315 — the outputs first, Done last",
+    "params": {},
+    "wiredOutputs": [
+      "out-message",
+      "out-sum"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "add"
+      },
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      {
+        "set": "in-b",
+        "value": 2
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "match": {
+            "method": "POST",
+            "url": "https://cloud.example/functions/add"
+          },
+          "answer": {
+            "status": 200,
+            "body": {
+              "result": {
+                "sum": 3,
+                "message": "hi"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "the parameters set after the press in the same frame are the ones sent",
+    "because": "cloudfunction2.ts :241 — the call is made at the frame end",
+    "params": {},
+    "wiredOutputs": [
+      "out-message",
+      "out-sum"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "add"
+      },
+      {
+        "signal": "call"
+      },
+      {
+        "set": "in-a",
+        "value": 7
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "result": {
+                "sum": 3,
+                "message": "hi"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "two presses in a frame: ONE request, two Dones",
+    "because": "cloudfunction2.ts :236-242 — a token per press before the guard; one call",
+    "params": {},
+    "wiredOutputs": [
+      "out-message",
+      "out-sum"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "add"
+      },
+      {
+        "signal": "call"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "result": {
+                "sum": 3,
+                "message": "hi"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a press while a call is out owns the next batch; the later call answers first",
+    "because": "cloudfunction2.ts :247-250 — the tokens taken before the request goes; each answer settles its own",
+    "params": {},
+    "wiredOutputs": [
+      "out-sum"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "slow"
+      },
+      {
+        "signal": "call"
+      },
+      "settle",
+      {
+        "set": "function",
+        "value": "fast"
+      },
+      {
+        "signal": "call"
+      },
+      "settle",
+      {
+        "advance": 100
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "match": {
+            "url": "https://cloud.example/functions/slow"
+          },
+          "answer": {
+            "status": 200,
+            "body": {
+              "result": {
+                "sum": 1
+              }
+            }
+          },
+          "after": 100
+        },
+        {
+          "match": {
+            "url": "https://cloud.example/functions/fast"
+          },
+          "answer": {
+            "status": 200,
+            "body": {
+              "result": {
+                "sum": 2
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a deployed backend and a signed-in browser: the version and the session token travel",
+    "because": "cloudfunction2.ts :61-64, :73-76",
+    "params": {},
+    "wiredOutputs": [
+      "out-message",
+      "out-sum"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "add"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example",
+        "deployVersion": "v7",
+        "sessionToken": "tok"
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "result": {
+                "sum": 3,
+                "message": "hi"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "no function set: the call goes to a function named undefined; a name is URI-encoded",
+    "because": "cloudfunction2.ts :286 — encodeURIComponent",
+    "params": {},
+    "wiredOutputs": [
+      "out-message",
+      "out-sum"
+    ],
+    "steps": [
+      "settle",
+      {
+        "signal": "call"
+      },
+      "settle",
+      {
+        "set": "function",
+        "value": "say hi/now"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "result": {
+                "sum": 3,
+                "message": "hi"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a parameter set to undefined is left out, null is sent, and a parameter once set travels on every later call",
+    "because": "cloudfunction2.ts :78 — JSON.stringify of the held parameters; :210-212 never cleared",
+    "params": {},
+    "wiredOutputs": [
+      "out-message",
+      "out-sum"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "add"
+      },
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      {
+        "set": "in-b",
+        "value": null
+      },
+      {
+        "signal": "call"
+      },
+      "settle",
+      {
+        "set": "in-b"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "result": {
+                "sum": 3,
+                "message": "hi"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "204 is a failure: only 200 and 201 succeed",
+    "because": "cloudfunction2.ts :50-52, :329-330",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "add"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 204
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "201 with a result is a success",
+    "because": "cloudfunction2.ts :50",
+    "params": {},
+    "wiredOutputs": [
+      "out-sum"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "add"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 201,
+            "body": {
+              "result": {
+                "sum": 9
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "an error body: Error is its error field",
+    "because": "cloudfunction2.ts :324-327",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "add"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 400,
+            "body": {
+              "code": 141,
+              "error": "Missing parameter a"
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "the backend never answered: Error names the endpoint",
+    "because": "cloudfunction2.ts :327-329 — status 0",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "add"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "answer": {
+            "error": "connect ECONNREFUSED"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a JSON string body on a failure is Error as it is; an object in the error field becomes text — its message, or the object as JSON (v2, D28)",
+    "because": "cloudfunction2.ts errorText (P109 ISL-030, P107-D28 ruled \"Always text\"); v1 put the object on the string port",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "a"
+      },
+      {
+        "signal": "call"
+      },
+      "settle",
+      {
+        "set": "function",
+        "value": "b"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "match": {
+            "url": "https://cloud.example/functions/a"
+          },
+          "answer": {
+            "status": 500,
+            "body": "\"plain text error\""
+          }
+        },
+        {
+          "match": {
+            "url": "https://cloud.example/functions/b"
+          },
+          "answer": {
+            "status": 404,
+            "body": {
+              "code": 141,
+              "error": {
+                "reason": "no such function"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "an error object with a message: Error is the message (v2, D28)",
+    "because": "cloudfunction2.ts errorText — the object's `message` when it has one (P109 ISL-030, P107-D28 ruled \"Always text\")",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "a"
+      },
+      {
+        "signal": "call"
+      },
+      "settle",
+      {
+        "set": "function",
+        "value": "b"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "match": {
+            "url": "https://cloud.example/functions/a"
+          },
+          "answer": {
+            "status": 500,
+            "body": "\"plain text error\""
+          }
+        },
+        {
+          "match": {
+            "url": "https://cloud.example/functions/b"
+          },
+          "answer": {
+            "status": 404,
+            "body": {
+              "code": "QUOTA",
+              "error": {
+                "message": "Quota exceeded",
+                "limit": 10
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a success with no body, or one that is not JSON: Done and nothing moves",
+    "because": "cloudfunction2.ts :43-48, :292-299",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "a"
+      },
+      {
+        "signal": "call"
+      },
+      "settle",
+      {
+        "set": "function",
+        "value": "b"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "match": {
+            "url": "https://cloud.example/functions/a"
+          },
+          "answer": {
+            "status": 200
+          }
+        },
+        {
+          "match": {
+            "url": "https://cloud.example/functions/b"
+          },
+          "answer": {
+            "status": 200,
+            "body": "not json"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "results and Error are never cleared: a later call that drops a result, or succeeds, leaves them",
+    "because": "cloudfunction2.ts :301-305 (only the keys returned move); :188-190 (Error set, never cleared)",
+    "params": {},
+    "wiredOutputs": [
+      "out-message",
+      "out-sum"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "a"
+      },
+      {
+        "signal": "call"
+      },
+      "settle",
+      {
+        "set": "function",
+        "value": "bad"
+      },
+      {
+        "signal": "call"
+      },
+      "settle",
+      {
+        "set": "function",
+        "value": "b"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "match": {
+            "url": "https://cloud.example/functions/a"
+          },
+          "answer": {
+            "status": 200,
+            "body": {
+              "result": {
+                "sum": 3,
+                "message": "hi"
+              }
+            }
+          }
+        },
+        {
+          "match": {
+            "url": "https://cloud.example/functions/bad"
+          },
+          "answer": {
+            "status": 500,
+            "body": {
+              "error": "bad"
+            }
+          }
+        },
+        {
+          "match": {
+            "url": "https://cloud.example/functions/b"
+          },
+          "answer": {
+            "status": 200,
+            "body": {
+              "result": {
+                "sum": 5
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a string result: its keys are its indices — nothing the graph wires moves, Done",
+    "because": "cloudfunction2.ts :301-305 — `for … in` over a string",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "add"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "result": "ok"
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "C54: a success whose body is JSON null is no result — Done, nothing moves",
+    "because": "P107-C54, ruled 2026-10-05 \"Treat it as empty\", fixed in P109 ISL-026; the runtime once read `res.result` of null (cloudfunction2.ts :301) inside readystatechange and never answered",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "add"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": null
+          }
+        }
+      ]
+    }
+  }
+]

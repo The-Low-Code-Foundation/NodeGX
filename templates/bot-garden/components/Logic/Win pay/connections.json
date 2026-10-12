@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ee11fea6-a7c2-56ec-8450-94357956c896",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "winpayIn",
+      "fromProperty": "done",
+      "toId": "winpayFn",
+      "toProperty": "in-done"
+    },
+    {
+      "fromId": "winpayIn",
+      "fromProperty": "lang",
+      "toId": "winpayFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "winpayIn",
+      "fromProperty": "plots",
+      "toId": "winpayFn",
+      "toProperty": "in-plots"
+    },
+    {
+      "fromId": "winpayIn",
+      "fromProperty": "requestId",
+      "toId": "winpayFn",
+      "toProperty": "in-requestId"
+    },
+    {
+      "fromId": "winpayIn",
+      "fromProperty": "requests",
+      "toId": "winpayFn",
+      "toProperty": "in-requests"
+    },
+    {
+      "fromId": "winpayIn",
+      "fromProperty": "words",
+      "toId": "winpayFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "winpayIn",
+      "fromProperty": "go",
+      "toId": "winpayFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "winpayFn",
+      "fromProperty": "out-has",
+      "toId": "winpayOut",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "winpayFn",
+      "fromProperty": "out-jobLive",
+      "toId": "winpayOut",
+      "toProperty": "jobLive"
+    },
+    {
+      "fromId": "winpayFn",
+      "fromProperty": "out-pay",
+      "toId": "winpayOut",
+      "toProperty": "pay"
+    },
+    {
+      "fromId": "winpayFn",
+      "fromProperty": "out-text",
+      "toId": "winpayOut",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "winpayFn",
+      "fromProperty": "success",
+      "toId": "winpayOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -26,13 +26,28 @@ Small computations and predicates inline in a graph: arithmetic, comparisons, st
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `evaluateAtLoad` | Boolean | `true` | Whether the expression runs when the page loads even though an input it reads has not arrived yet. Those inputs read as undefined, so `m !== false` is true and `m === true` is false. An expression that throws or gives NaN over them waits for its inputs instead. Untick to wait for an input to arrive |
-| `expression` | String | — | JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those |
+| `expression` | String | — | JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those, nor run, expression or evaluateAtLoad, which are this node's own inputs |
 
 ### Signals
 
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `run` | Signal | — | Evaluates the expression now. This is additional to the inputs that re-run it; untick an input under Run On Value Change to stop that one triggering a run |
+
+### What each input does
+
+**Expression** (`expression`)
+
+- new text, with Run wired: its inputs become the names it reads, and nothing is evaluated until Run or a changed ticked input
+- new text, with Run not wired: its inputs become the names it reads, and it is evaluated at the end of the frame — On True or On False; before any input has arrived, only if Evaluate At Load is ticked
+
+**Run** (`run`)
+
+- always: evaluated once at the end of the frame, however many Runs arrived — On True or On False, and Done for each Run; Error, and Failure for each Run, if it does not compile or throws
+
+**Evaluate At Load** (`evaluateAtLoad`)
+
+- always: whether an evaluation before any input has arrived goes ahead
 
 ## Outputs
 

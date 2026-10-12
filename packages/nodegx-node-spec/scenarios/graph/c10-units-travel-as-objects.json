@@ -1,0 +1,116 @@
+[
+  {
+    "name": "a value with a unit travels as { value, unit }; a bare number written over it on a port that is not a size arrives as sent",
+    "clauses": [
+      "C10"
+    ],
+    "because": "C10 — a unit-carrying value is `{ value, unit }` and travels intact; only a port built for sizes merges a later bare number into the unit it holds (node.ts `portHasUnits`). Two Logs pass Value (a * port) straight through: the object arrives downstream intact, and the later plain 5 arrives as 5. Until ISL-026 the runtime merged on every port and this scenario claimed { value: 5, unit: 'px' }: P107-C6, ruled R7 (a) 'Only on size inputs' (2026-10-05).",
+    "nodes": {
+      "a": {
+        "type": "net.noodl.Log"
+      },
+      "b": {
+        "type": "net.noodl.Log"
+      }
+    },
+    "wires": [
+      {
+        "from": "a.value",
+        "to": "b.value"
+      }
+    ],
+    "steps": [
+      {
+        "node": "a",
+        "set": "value",
+        "value": {
+          "value": 12,
+          "unit": "px"
+        }
+      },
+      "settle",
+      {
+        "node": "a",
+        "set": "value",
+        "value": 5
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "b",
+        "port": "value",
+        "value": {
+          "unit": "px",
+          "value": 12
+        }
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "value",
+        "value": 5
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "port": "value",
+        "value": 5
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "value",
+        "value": {
+          "unit": "px",
+          "value": 12
+        },
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": {
+          "unit": "px",
+          "value": 12
+        },
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": {
+          "unit": "px",
+          "value": 12
+        },
+        "subject": "b"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 5,
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 5,
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 5,
+        "subject": "b"
+      }
+    ]
+  }
+]

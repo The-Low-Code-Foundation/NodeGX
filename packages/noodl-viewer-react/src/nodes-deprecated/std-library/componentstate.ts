@@ -41,6 +41,7 @@ const ComponentState: NodeDefinitionOptions = {
   color: 'component',
   docs: 'https://docs.noodl.net/nodes/component-utilities/component-object',
   deprecated: true,
+  replacedBy: 'net.noodl.ComponentObject',
   initialize: function (this: ComponentStateInstance) {
     this._internal.inputValues = {};
 

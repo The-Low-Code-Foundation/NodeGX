@@ -41,7 +41,9 @@
             "/Pages/Hangar",
             "/Pages/Merge",
             "/Pages/Hunt",
-            "/Pages/Monster"
+            "/Pages/Monster",
+            "/Pages/Lists",
+            "/Pages/Moon"
           ]
         }
       },

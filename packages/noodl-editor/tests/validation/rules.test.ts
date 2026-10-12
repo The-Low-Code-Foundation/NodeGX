@@ -174,7 +174,20 @@ describe('SUB-006 rules', () => {
       expect(d!.severity).toBe('error');
       expect(d!.suggestion).toBe('value');
       expect(d!.alternatives).toContain('value');
-      // signal inputs lead the alternatives list
+      // GAM-019 (ruled 2026-09-14): the alternatives follow the wire. `text` carries a string, so the
+      // ports that take a value lead. This line said signals lead, from before the ruling; it was the
+      // editor suite's one red spec when 0.4.0 was cut (P112 OWN-013).
+      expect(d!.alternatives![0]).toBe('value');
+    });
+
+    it('leads with the signal inputs when the wire carries a signal (GAM-019)', () => {
+      const v = handValidator();
+      const p = oneComponent(
+        [node('a', 'Trigger'), node('b', 'Widget')],
+        [{ fromId: 'a', fromProperty: 'onClick', toId: 'b', toProperty: 'clik' }]
+      );
+      const d = v.validate(p).diagnostics.find((x) => x.code === DiagnosticCode.NonexistentPort);
+      expect(d).toBeDefined();
       expect(d!.alternatives![0]).toBe('onClick');
     });
 

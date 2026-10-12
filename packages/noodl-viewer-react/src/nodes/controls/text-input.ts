@@ -392,7 +392,7 @@ const TextInputNode = {
       type: 'signal',
       group: 'General',
       description:
-        'Fires whenever the Value output changes, so a graph can sequence off the new value rather than poll it',
+        'Fires each time a value is written into the field (Set, Value, Insert Text, Backspace, Clear or the person typing), whether or not it changed. A write made while the field is off the page is announced when the field comes back',
       index: 2
     },
 
@@ -487,7 +487,16 @@ const TextInputNode = {
       // have to ask what kind of field it is. Left as `''` it read "not empty" on every already
       // empty number field, and `Clear` reported `Done` for doing nothing.
       const empty = emptyValueForFieldType(this.props.type);
-      const wasEmpty = this._internal.text === empty && this.outputPropValues['onTextChanged'] === empty;
+      // P107-D33 (P109 ISL-031, ruled "Check the field's text"): the field's own text too — the
+      // component's on the page (`text`, kept at once: a Set that met a focused field wrote only
+      // the start value, and `state.value` lags a write earlier in the frame), the start value off
+      // it — so a Number field holding 'ab' (not a number, so Value is null) reports Done when
+      // Clear empties it.
+      const fieldText = this.innerReactComponentRef ? this.innerReactComponentRef.text : this.props.startValue;
+      const wasEmpty =
+        this._internal.text === empty &&
+        this.outputPropValues['onTextChanged'] === empty &&
+        (fieldText === null || fieldText === undefined || String(fieldText) === '');
       // NDA-012 (Visual), A1. This blanked `props.startValue` and the DOM and left the node's own
       // copy of the text holding the old string. `Set` reads `_internal.text`, so a later `Set`
       // pulse **restored text the author had explicitly cleared** — and it also did not flag
@@ -527,12 +536,17 @@ const TextInputNode = {
           return true;
         }
         return false;
-      } else if (this.outputPropValues['onTextChanged'] !== text) {
-        //text component isn't mounted yet, set the output manually
-        // FB-026 — mounted, `TextInput.setText` converts on the way out; unmounted, nothing
-        // does, so a Number field that was `Set` before it mounted published the raw string and
-        // the two paths disagreed about the type of the same port.
-        this.outputPropValues['onTextChanged'] = outwardValueForFieldType(this.props.type, text);
+      }
+      //text component isn't mounted yet, set the output manually
+      // FB-026 — mounted, `TextInput.setText` converts on the way out; unmounted, nothing
+      // did, so a Number field that was `Set` before it mounted published the raw string and
+      // the two paths disagreed about the type of the same port.
+      // P107-D32 (P109 ISL-031, ruled "Always text"): the value is made text first, as the
+      // component makes it on the page, so a text field given the number 5 off the page
+      // publishes '5' as it does on it. Compared as it would be published.
+      const next = outwardValueForFieldType(this.props.type, text === null || text === undefined ? '' : String(text));
+      if (this.outputPropValues['onTextChanged'] !== next) {
+        this.outputPropValues['onTextChanged'] = next;
         this.flagOutputDirty('onTextChanged');
         return true;
       }

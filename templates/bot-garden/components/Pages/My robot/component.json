@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "899e86c3-c9cc-5227-83b4-13d2d5c6745d",
+  "name": "My robot",
+  "path": "/Pages/My robot",
+  "type": "page",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "My robots (P106 IG-005): Pip big on his stage with his name, paint, eyes, hat (gifts, never bought) and stickers; then a card per robot of the island — the ones she has, each with its name, look, blocks, upgrade and where it works, and the ones an islander will lend, with who and after what."
+}

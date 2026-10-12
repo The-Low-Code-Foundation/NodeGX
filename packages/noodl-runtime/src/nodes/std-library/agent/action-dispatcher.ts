@@ -333,6 +333,8 @@ interface QueueEntry {
   token: HandlerToken | null;
   /** True between `onDispatched` and settlement. */
   started: boolean;
+  /** Set by `refuseEntry` — read by `dispatch` to tell an action refused inside its own call from one admitted (P107-C15). */
+  refused: boolean;
 }
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {
@@ -448,7 +450,9 @@ export class ActionDispatcher {
    *
    * @returns whether **anything at all** was admitted, which is what the node reports as the
    * outcome of one `Dispatch` (ERG-001 §4). A partial admission is `true`: some work was
-   * accepted, and the members that were not are separately visible on `Refused`.
+   * accepted, and the members that were not are separately visible on `Refused`. Admitted means
+   * queued, waiting for its handler or run — an action refused inside this call's own pump is not
+   * (P107-C15).
    */
   dispatch(raw: unknown): boolean {
     if (this.disposed) return false;
@@ -459,7 +463,7 @@ export class ActionDispatcher {
       return false;
     }
 
-    let admitted = false;
+    const pushed: QueueEntry[] = [];
 
     for (const candidate of coerced.actions) {
       if (!isPlainRecord(candidate)) {
@@ -491,14 +495,18 @@ export class ActionDispatcher {
         unlisten: null,
         inInvoke: false,
         token: null,
-        started: false
+        started: false,
+        refused: false
       });
-      admitted = true;
+      pushed.push(this.queue[this.queue.length - 1]);
     }
 
-    if (admitted) this.notifyQueue();
+    if (pushed.length > 0) this.notifyQueue();
     this.pump();
-    return admitted;
+    // P107-C15: an action refused inside this call's pump (no handler and no wait, a built-in not allowed, the rate
+    // limit) was never admitted, so a Dispatch whose every action was refused on the spot reports Failure, not Done.
+    // One still queued, waiting for its handler or running counts.
+    return pushed.some((entry) => !entry.refused);
   }
 
   /**
@@ -622,7 +630,12 @@ export class ActionDispatcher {
   }
 
   private unpark(entry: QueueEntry): void {
-    this.waiting = false;
+    // P107-C14: Waiting For goes blank when the wait ends. `park` flags it; the expiry path flagged nothing, so a label
+    // wired to it kept the refused type until the next queue change.
+    if (this.waiting) {
+      this.waiting = false;
+      this.notifyQueue();
+    }
     if (entry.unlisten) {
       entry.unlisten();
       entry.unlisten = null;
@@ -892,6 +905,7 @@ export class ActionDispatcher {
   }
 
   private refuseEntry(entry: QueueEntry, reason: RefusalReason, message: string): void {
+    entry.refused = true;
     this.clearEntryTimers(entry);
     this.workSinceIdle = true;
     this.idleEmitted = false;

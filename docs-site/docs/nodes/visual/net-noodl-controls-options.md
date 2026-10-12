@@ -62,6 +62,7 @@ One-of-many choices too numerous or space-constrained for radio buttons: country
 | `clickBubbling` | Enum (`auto`, `always`, `never`) | `auto` | Whether a click on this control also fires Click on the nodes it sits inside. Automatic keeps it here as soon as this control's own Click is connected, so a Favourite button inside a clickable card runs Favourite and not the card; Always is the older behaviour where both run; Never keeps every click here, wired or not |
 | `color` | Color | — | Colour of the text itself, not of the element behind it |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `enabled` | Boolean | `true` | Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing |
 | `fontFamily` | Font | — | Typeface to render the text in, either a web-safe family name or a font file added to the project |
 | `fontSize` | Number | — | Height of the text, in pixels |
@@ -100,7 +101,7 @@ One-of-many choices too numerous or space-constrained for radio buttons: country
 | `minHeight` | Number | — | Smallest height the element may shrink to, taking priority over Height |
 | `minWidth` | Number | — | Smallest width the element may shrink to, taking priority over Width |
 | `mixBlendMode` | Enum (`normal`, `multiply`, `screen`, `overlay`, `darken`, `lighten`, `color-dodge`, `color-burn`, `hard-light`, `soft-light`, `difference`, `exclusion`, `hue`, `saturation`, `color`, `luminosity`) | `normal` | How this element's colours blend with whatever is painted behind it |
-| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
+| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen) |
 | `opacity` | Number | `1` | How opaque this element is, from 0 for invisible to 1 for solid |
 | `paddingBottom` | Number | `6` | Space inside the element's bottom edge, between it and its content |
 | `paddingLeft` | Number | `8` | Space inside the element's left edge, between it and its content |
@@ -109,6 +110,7 @@ One-of-many choices too numerous or space-constrained for radio buttons: country
 | `placeholder` | String | — | Text shown while nothing is selected |
 | `placeholderOpacity` | Number | `0.5` | How faded the placeholder text is, from 0 to 1 |
 | `position` | Enum (`relative`, `absolute`, `sticky`, `fixed`) | `relative` | How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `showChevron` | Boolean | `true` | Draws the small downward arrow at the end of the control that marks it as a dropdown |
 | `sizeMode` | Enum (`explicit`, `contentWidth`, `contentHeight`, `contentSize`) | `contentSize` | Whether Width and Height are used as given, or the element sizes itself to fit its contents |
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
@@ -134,6 +136,52 @@ One-of-many choices too numerous or space-constrained for radio buttons: country
 |---|---|---|---|
 | `blur` | Signal | — | Takes the keyboard away from this dropdown, which is what fires Blurred |
 | `focus` | Signal | — | Puts the keyboard on this dropdown, so Enter, Space and the arrow keys go to it |
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
+
+### What each input does
+
+**Enabled** (`enabled`)
+
+- the value it already holds: nothing
+- a change: Enabled follows; disabled, the list takes no pick, no click and no focus
+
+**Items** (`items`)
+
+- nothing handed (undefined): the list it has stays
+- otherwise: the list is kept as handed and drawn at the next paint; the value stays, so a list handed again keeps the pick
+
+**Value** (`value`)
+
+- null: ignored
+- the value it already holds, as text: nothing
+- a change: kept as text, Value follows, and the list selects it at the next paint if it names an option — Changed does not fire (only a person's pick fires it)
+
+**Mounted** (`mounted`)
+
+- always: the list is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint
+
+**Enable Label** (`useLabel`)
+
+- always: a label is drawn beside the list, or not; the list, its keyboard and its pick stay
+
+**Focus** (`focus`)
+
+- not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent
+- it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent
+- otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done
+
+**Blur** (`blur`)
+
+- it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes → Done; Blurred stays silent
+- it holds the keyboard: it is taken off it, and the Focused state goes false → Blurred, Done
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the list can be seen
+
+**Visible** (`visible`)
+
+- always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it
 
 ## Outputs
 
@@ -160,9 +208,9 @@ One-of-many choices too numerous or space-constrained for radio buttons: country
 | `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
 | `didMount` | Signal | — | Fires once this element has been added to the page and can be measured |
 | `done` | Signal | — | Fires when Focus put the keyboard on this dropdown, or Blur took it away |
-| `hoverEnd` | Signal | — | Fires when the pointer leaves this control, including when it leaves while a button is still held |
+| `hoverEnd` | Signal | — | Fires when the pointer leaves this control, including when it leaves while a button is still held, or when the control leaves the page under it |
 | `hoverStart` | Signal | — | Fires when the pointer moves onto this control |
-| `onBlur` | Signal | — | Fires when keyboard focus leaves this control, which is the usual place to validate what was entered |
+| `onBlur` | Signal | — | Fires when keyboard focus leaves this control, or the control leaves the page while holding it, which is the usual place to validate what was entered |
 | `onChange` | Signal | — | Fires when the user picks a different option; a value arriving on the Value input does not fire it |
 | `onFocus` | Signal | — | Fires the moment this control takes keyboard focus, whether from a click, a tab or a Focus action |
 | `pointerDown` | Signal | — | Fires as a mouse button or finger goes down on this control, before any click has completed |
@@ -192,6 +240,7 @@ The port list above is complete — this node mints no ports. It republishes its
 | boxShadowEnabled = true | `boxShadowSource` | — |
 | boxShadowEnabled = true AND boxShadowSource = token | `boxShadowToken` | — |
 | boxShadowEnabled = true AND boxShadowSource != token | `boxShadowOffsetX`, `boxShadowOffsetY`, `boxShadowInset`, `boxShadowBlurRadius`, `boxShadowSpreadRadius`, `boxShadowColor` | — |
+| — | — | — |
 
 ## Ports at runtime
 

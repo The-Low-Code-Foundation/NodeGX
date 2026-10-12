@@ -127,6 +127,7 @@ export function ProblemsPanel() {
               : 'No project open'}
           </Text>
           <IconButton
+            ariaLabel="Refresh problems"
             variant={IconButtonVariant.Transparent}
             icon={IconName.Refresh}
             size={IconSize.Small}

@@ -31,11 +31,13 @@ import {
   componentIsPage,
   registerPages,
   registrationSummary,
+  unroutedPagesSummary,
   unregisterPages,
   unregistrationSummary
 } from '../project/pageRegistration';
 import type { NodeIdRemap } from '../project/nodeIds';
 import { deconflictNodeIds, remapNote } from '../project/nodeIds';
+import { tickedPayload } from '../project/runOnChangePins';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { RenderLedger } from '../renderVerdict';
 import { drawsSomething } from '../visualRoots';
@@ -88,7 +90,10 @@ const operationSchema = z.discriminatedUnion('op', [
         x: z.number().optional(),
         y: z.number().optional(),
         variant: z.string().optional(),
-        parent: z.string().nullable().optional().describe('Reparent; null detaches from the visual tree')
+        parent: z.string().nullable().optional().describe('Reparent; null detaches from the visual tree'),
+        // P112 OWN-006 — the editor suite's first finding: a reparent could not place the child. Said in
+        // add_node's words: the resident surface is 19 tokens under its budget (AWP-006).
+        index: z.number().optional().describe("Index among parent's children")
       })
       // AWP-002 A19 — strict, so an unnamed key is a refusal and not a silent
       // strip. The comment above says a field zod does not name is a field zod
@@ -231,9 +236,12 @@ export function assembleCreateFiles(args: {
    * catalog alone, which answers `false` for a component instance; pass
    * `projectVisualPredicate(store)` to resolve those too. */
   isVisualType?: VisualTypePredicate;
+  /** P109 ISL-019 — `store.componentIdFor(legacyName)`: a component made in the same place keeps its id. */
+  componentId: string;
+  /** P109 ISL-019 — `store.now()`, the one clock (the epoch on a reproducible server). */
+  now: string;
 }): ComponentFiles {
-  const now = new Date().toISOString();
-  const componentId = crypto.randomUUID();
+  const { now, componentId } = args;
   const component: ComponentV2File = {
     $schema: 'https://opennoodl.dev/schemas/component-v2.json',
     id: componentId,
@@ -284,7 +292,9 @@ export function assembleCreateFiles(args: {
 export function assembleSetFiles(
   baseline: ComponentFiles,
   set: { nodes: NodeV2[]; connections?: ConnectionV2[]; visualRoots?: string[] },
-  isVisualType: VisualTypePredicate = catalogVisualPredicate
+  isVisualType: VisualTypePredicate,
+  /** P109 ISL-019 — `store.now()` and `store.componentIdFor(legacyName)`: the one clock, the derived id. */
+  stamp: { now: string; componentId: string }
 ): ComponentFiles {
   const candidate: ComponentFiles = JSON.parse(JSON.stringify(baseline));
   // FIX-014 — the gap-fill-and-collide-only pass, with the ruling's second
@@ -312,9 +322,9 @@ export function assembleSetFiles(
       set.connections
     );
   }
-  candidate.component.modified = new Date().toISOString();
+  candidate.component.modified = stamp.now;
   candidate.component.modifiedBy = 'noodl-mcp';
-  backfillIds(candidate);
+  backfillIds(candidate, stamp.componentId);
   return candidate;
 }
 
@@ -393,8 +403,10 @@ function normalizeOperations(operations: OperationInput[]): UpdateOperation[] {
  * components are editable (Gate G1 finding) — the caller's payload is never
  * at fault here.
  */
-function backfillIds(files: ComponentFiles): void {
-  if (!files.component.id) files.component.id = crypto.randomUUID();
+function backfillIds(files: ComponentFiles, derivedId: string): void {
+  // P109 ISL-019 — the derived id (`store.componentIdFor`), not a random one: a backfilled
+  // component keeps the id it was given the first time, every time.
+  if (!files.component.id) files.component.id = derivedId;
   if (!files.nodes.componentId) files.nodes.componentId = files.component.id;
   if (!files.connections.componentId) files.connections.componentId = files.component.id;
 }
@@ -545,7 +557,9 @@ export function registerAuthorTools(
           connections: args.connections,
           visualRoots: args.visual_roots,
           description: args.description,
-          isVisualType: projectVisualPredicate(store)
+          isVisualType: projectVisualPredicate(store),
+          componentId: store.componentIdFor(legacyName),
+          now: store.now()
         });
 
         // AAQ-011/F12: before validating, move any id this project already uses
@@ -559,7 +573,7 @@ export function registerAuthorTools(
         });
         if (!validation.ok) rejectWith(validation, `create_component "${path}"`, examples);
 
-        const { revision } = store.writeComponent(path, candidate, { expectNew: true });
+        const { revision, ticked } = store.writeComponent(path, candidate, { expectNew: true });
         ledger.invalidate();
         // AAQ-005: a page component is not a page until a Router lists it. The
         // editor's apply has done this since AAQ-001; this door did not, so
@@ -575,7 +589,9 @@ export function registerAuthorTools(
           revision,
           registry: 'updated',
           ...registrationSummary(registration),
+          ...(isPage ? unroutedPagesSummary(store, [legacyName]) : {}),
           ...remapPayload(remapped),
+          ...tickedPayload(ticked),
           ...successPayload(validation),
           // AWP-006 — after the write, because a rejected candidate is not
           // evidence that anybody intends to build a data app.
@@ -651,7 +667,8 @@ export function registerAuthorTools(
           candidate = assembleSetFiles(
             baseline,
             { nodes: reconciled.nodes, connections: args.set.connections, visualRoots: args.set.visual_roots },
-            projectVisualPredicate(store)
+            projectVisualPredicate(store),
+            { now: store.now(), componentId: store.componentIdFor(stored.legacyName) }
           );
         } else {
           const result = applyOperations(baseline, normalizeOperations(args.operations!));
@@ -674,11 +691,17 @@ export function registerAuthorTools(
           // then reported `visualRootsDerived: true` over the stale array,
           // which is the reporting field saying the thing is fine.
           //
-          // `explicit` is undefined here by construction: a batch has no
-          // `visual_roots` argument, so this door only ever derives.
+          // 🔴 P109 ISL-015 AC5 (s12): a batch has no `visual_roots` argument, but
+          // it can carry a `set_visual_roots` op, and passing `undefined` here
+          // overwrote it — answered `applied` and `unchanged`, nothing written,
+          // wherever derivation disagrees (a kit type the server does not know
+          // yet, a deliberate subset). The op's roots are explicit, as AWP-001
+          // rules for `visual_roots`; a later `remove_node` in the batch has
+          // already pruned them (`graph.ts`).
+          const setsRoots = (args.operations ?? []).some((o) => o.op === 'set_visual_roots');
           const opRoots = resolveVisualRoots(
             candidate.nodes.nodes,
-            undefined,
+            setsRoots ? candidate.nodes.visualRoots ?? [] : undefined,
             projectVisualPredicate(store)
           );
           if (opRoots.visualRoots) candidate.nodes.visualRoots = opRoots.visualRoots;
@@ -692,9 +715,9 @@ export function registerAuthorTools(
             lockedIds: positionsUnchangedFrom(candidate.nodes.nodes, baseline.nodes.nodes ?? [])
           });
         }
-        candidate.component.modified = new Date().toISOString();
+        candidate.component.modified = store.now();
         candidate.component.modifiedBy = 'noodl-mcp';
-        backfillIds(candidate);
+        backfillIds(candidate, store.componentIdFor(stored.legacyName));
 
         // AAQ-011/F12. `baseline` is passed so ids the component *already* had
         // are never touched — a pre-existing collision is not this write's doing,
@@ -708,20 +731,22 @@ export function registerAuthorTools(
         });
         if (!validation.ok) rejectWith(validation, `update_component "${stored.key}"`, examples);
 
-        const { revision } = store.writeComponent(stored.key, candidate, { ifRevision: args.if_revision });
+        const { revision, unchanged, ticked } = store.writeComponent(stored.key, candidate, { ifRevision: args.if_revision });
         ledger.invalidate();
         // Updates register too, exactly as the editor's apply does: a page that
         // exists but was never listed is the state this task is about, and
         // re-listing one already listed is a no-op.
-        const registration = componentIsPage(stored.legacyName, candidate)
-          ? registerPages(store, [stored.legacyName])
-          : undefined;
+        const isPage = componentIsPage(stored.legacyName, candidate);
+        const registration = isPage ? registerPages(store, [stored.legacyName]) : undefined;
         const payload: UpdateComponentResponse = {
           updated: stored.key,
           revision,
+          ...(unchanged ? { unchanged } : {}),
           ...(applied ? { applied } : {}),
           ...registrationSummary(registration),
+          ...(isPage ? unroutedPagesSummary(store, [stored.legacyName]) : {}),
           ...remapPayload(remapped),
+          ...tickedPayload(ticked),
           ...successPayload(validation),
           ...backendRevealPayload(disclosure?.revealForNodes(candidate.nodes.nodes) ?? []),
           ...visualRootsPayload(candidate, args.set?.visual_roots),

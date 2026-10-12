@@ -209,11 +209,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      # `@noodl/preview`'s suite drives the built CLI over HTTP, not source —
+      # `@nodegx/preview`'s suite drives the built CLI over HTTP, not source —
       # `assertPrerequisites()` fails fast, naming these two commands, if either
       # is missing. This job runs independently of the `build` job (no shared
       # filesystem between jobs), so it has to produce its own copies. Found
-      # 2026-08-07: this job had never actually reached `@noodl/preview:test`
+      # 2026-08-07: this job had never actually reached `@nodegx/preview:test`
       # before — Nx bailed the whole run on an earlier package's failure every
       # time — so the gap was invisible until that earlier failure was fixed.
       - name: Build noodl-preview
@@ -263,6 +263,8 @@ jobs:
       # Regenerates the catalog from the live node registries and fails if
       # the committed artifact (packages/noodl-types/src/node-catalog.*)
       # doesn't match — i.e. node definitions changed without regenerating.
+      # It also fails when a node with an executable spec (phase 107) has a
+      # port description that differs from its spec's (NSP-018).
       - run: npm run catalog:check
       # SIG-003: every port must declare a `group`. An ungrouped port is not
       # filed under a category anyone chose — `ConnectionBar` renders it under
@@ -296,6 +298,24 @@ jobs:
       # nodes exporting while the corpus metric read a healthy 85%. This ratchets picker
       # coverage: a fall fails, and a rise fails until the floor is raised in the same commit.
       - run: npm run export-ledger:picker
+      # NSP-009 (phase 107): the same ratchet for the node specs. The number of picker nodes whose
+      # behaviour is written down and checked can only go up (a fall fails, a rise fails until
+      # `floor` in dev-docs/tasks/phase-107-the-node-says-what-it-does/spec-ledger.json is raised
+      # in the same commit), and a new picker node with no spec, no exemption and no owed entry
+      # fails, named. The grading itself is the `test-packages` job (every registered spec at 200
+      # sequences with its mutants, every graph scenario); this step counts, it does not re-run.
+      - run: npm run spec-ledger:check
+      # NSP-010 (phase 107): a behaviour change is a version. Every spec's hand scenarios, played on the
+      # interpreter, are committed as packages/nodegx-node-spec/golden/<type>.json; this fails a stale golden
+      # file, a golden trace that moved (or a port renamed) with the spec's `version` unchanged since the base,
+      # and a new version with no `changes` entry saying what happens to apps built on the old one. The base is
+      # the PR's base, or the commit before a push; the checkout is shallow, so it is fetched first.
+      - name: Golden traces and the version rule
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then BASE=HEAD; else git fetch --no-tags --depth=1 origin "$BASE"; fi
+          npm run spec-golden:check -- --base "$BASE"
       # SUB-012: the catalog validator's duplicate-node-id rule, against its
       # committed corrupt/clean fixture pair. A project with two nodes sharing
       # an id used to pass every gate with zero failures.

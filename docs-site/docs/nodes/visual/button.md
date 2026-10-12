@@ -48,6 +48,7 @@ Do not use in new graphs — use net.noodl.controls.button instead.
 | `clickBubbling` | Enum (`auto`, `always`, `never`) | `auto` | — |
 | `color` | Color | `#FFFFFF` | — |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `enabled` | Boolean | `true` | — |
 | `fontFamily` | Font | — | — |
 | `fontSize` | Number | — | — |
@@ -58,13 +59,14 @@ Do not use in new graphs — use net.noodl.controls.button instead.
 | `marginRight` | Number | — | Space outside the element's right edge, between it and its neighbours |
 | `marginTop` | Number | — | Space outside the element's top edge, between it and its neighbours |
 | `mixBlendMode` | Enum (`normal`, `multiply`, `screen`, `overlay`, `darken`, `lighten`, `color-dodge`, `color-burn`, `hard-light`, `soft-light`, `difference`, `exclusion`, `hue`, `saturation`, `color`, `luminosity`) | `normal` | How this element's colours blend with whatever is painted behind it |
-| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
+| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen) |
 | `opacity` | Number | `1` | How opaque this element is, from 0 for invisible to 1 for solid |
 | `paddingBottom` | Number | `5` | — |
 | `paddingLeft` | Number | `20` | — |
 | `paddingRight` | Number | `20` | — |
 | `paddingTop` | Number | `5` | — |
 | `position` | Enum (`relative`, `absolute`, `sticky`, `fixed`) | `relative` | How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `sizeMode` | Enum (`explicit`, `contentWidth`, `contentHeight`, `contentSize`) | `contentSize` | Whether Width and Height are used as given, or the element sizes itself to fit its contents |
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
 | `textStyle` | TextStyle | `None` | — |
@@ -78,6 +80,12 @@ Do not use in new graphs — use net.noodl.controls.button instead.
 | `visible` | Boolean | `true` | Hides the element while keeping the space it occupies in the layout |
 | `width` | Dimension | `100` | Width of the element; how the value is read depends on Size Mode |
 | `zIndex` | Number | — | Paint order among overlapping siblings; higher numbers paint on top |
+
+### Signals
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
 ## Outputs
 
@@ -123,6 +131,7 @@ Declares conditional/expandable port groups whose visibility depends on paramete
 | boxShadowEnabled = true | `boxShadowOffsetX`, `boxShadowOffsetY`, `boxShadowInset`, `boxShadowBlurRadius`, `boxShadowSpreadRadius`, `boxShadowColor` | — |
 | sizeMode = explicit OR sizeMode = contentHeight | `width` | — |
 | sizeMode = explicit OR sizeMode = contentWidth | `height` | — |
+| — | — | — |
 
 ## Ports at runtime
 

@@ -70,6 +70,8 @@ const MANIFEST_SCHEMA = {
     iconClass: { type: 'string' },
     codeAsClass: { type: 'boolean' },
     dependencies: { type: 'array', items: { type: 'string' } },
+    // ISL-013: the kits this one reads, by manifest name or folder — loaded first, and this kit is refused without them
+    requires: { type: 'array', items: { type: 'string' } },
     runtimes: { type: 'array', items: { type: 'string' } },
     kind: { type: 'string' },
     global: { type: 'string' },
@@ -279,7 +281,9 @@ function toInjectModules(scanned) {
       // answer the whole time and nothing gave it to the viewer.
       // The directory name is the fallback, because "material-icons" beats
       // "Unknown Module" and a manifest may legitimately omit `name`.
-      name: manifest.name || s.name
+      name: manifest.name || s.name,
+      folder: s.name,
+      requires: Array.isArray(manifest.requires) ? manifest.requires.filter((r) => typeof r === 'string') : []
     };
 
     if (manifest.main) {
@@ -305,7 +309,65 @@ function toInjectModules(scanned) {
   const withoutIndex = modules.filter((m) => !m.index);
   withIndex.sort((a, b) => a.index.localeCompare(b.index));
 
-  return withIndex.concat(withoutIndex);
+  return orderByRequires(withIndex.concat(withoutIndex));
+}
+
+/**
+ * 🔴 ISL-013 (ruled 2026-10-05, "A kit says what it needs") — the kits a kit `requires` load before it, whatever their folders
+ * are called, and a kit whose needed kit is missing is not loaded.
+ *
+ * Until this, the only order was the path sort above, so a kit reading another at definition worked only if its folder sorted
+ * after the other's — the island's 3D kit read the flat one at RENDER time instead, because "garden-3d-kit" sorts first.
+ *
+ * Depth first over the order it is given: a kit's needed kits are placed just before the first kit that needs them, and a list
+ * where nothing declares `requires` comes back in exactly its own order (the tags are byte-identical). A refused kit stays in the
+ * list with `refused` (the reason, a sentence) and no `index` or `dependencies`, so nothing loads it and `buildInjectionTags`
+ * names it on the page. Ruling 2 (a): refused, not half-registered — a kit that wants a fallback keeps its own copy and declares
+ * nothing. A kit needing a refused kit is refused too; a cycle refuses every kit in it.
+ *
+ * @template {{ name: string, folder?: string, requires?: string[] }} M
+ * @param {M[]} modules in their base order
+ * @returns {M[]} the same objects, required kits first; refused ones carry `refused`
+ */
+function orderByRequires(modules) {
+  /** @type {Map<string, M>} */
+  const byName = new Map();
+  for (const m of modules) {
+    for (const key of [m.name, m.folder]) if (key && !byName.has(key)) byName.set(key, m);
+  }
+
+  const VISITING = 1;
+  const DONE = 2;
+  /** @type {Map<M, number>} */
+  const state = new Map();
+  const ordered = [];
+  const refused = [];
+
+  /** @returns {boolean} whether `m` loads */
+  const visit = (m) => {
+    if (state.get(m) === DONE) return !('refused' in m);
+    state.set(m, VISITING);
+    let reason;
+    for (const needed of m.requires || []) {
+      const other = byName.get(needed);
+      if (!other) reason = reason || `it needs "${needed}", which is not installed in this project`;
+      else if (other === m || state.get(other) === VISITING) reason = reason || `it needs "${needed}", which needs it in turn`;
+      else if (!visit(other)) reason = reason || `it needs "${needed}", which was not loaded`;
+    }
+    state.set(m, DONE);
+    if (reason) {
+      m.refused = reason;
+      delete m.index;
+      m.dependencies = [];
+      refused.push(m);
+      return false;
+    }
+    ordered.push(m);
+    return true;
+  };
+  for (const m of modules) visit(m);
+
+  return ordered.concat(refused);
 }
 
 /**
@@ -437,8 +499,24 @@ function buildInjectionTags(modules, pathPrefix) {
 
   if (modules) {
     const browserModules = modules.filter((m) => m.runtimes.indexOf('browser') !== -1);
+    // ISL-013 — the kits some other kit requires. Only these get a folder marker, so a project where nothing declares
+    // `requires` is injected byte for byte as before.
+    const required = new Set();
+    for (const m of modules) for (const r of m.requires || []) required.add(r);
     for (let i = 0; i < browserModules.length; i++) {
       const m = browserModules[i];
+      const marksFolder = !!m.folder && (required.has(m.name) || required.has(m.folder));
+      // ISL-013 ruling 2 (a): a kit whose needed kit is missing is not loaded, and the page's console says which and why.
+      // The same fact goes on CN-015's failure list, which the viewer hands the editor, so Settings → Kits names it too —
+      // without it the kit there reads "Installed. Reload the preview", which no reload changes.
+      if (m.refused) {
+        modulesMain +=
+          '<script type="text/javascript">' +
+          'window.__noodl_module_failures = window.__noodl_module_failures || [];' +
+          'window.__noodl_module_failures.push({module: ' + jsString(m.name) + ', reason: "refused", message: ' + jsString(m.refused) + '});' +
+          'console.error(' + jsString('The kit "' + m.name + '" was not loaded: ' + m.refused) + ');</script>\n';
+        continue;
+      }
       if (m.index) {
         // CN-015: opened before the first kit script and closed after the last,
         // so exactly the kit-loading window is attributable. Emitted lazily —
@@ -460,7 +538,13 @@ function buildInjectionTags(modules, pathPrefix) {
         // ⚠️ Safe against an older deployed runtime: a `defineModule` that never
         // reads the global just sees a page that set one.
         modulesMain += '<script type="text/javascript">window.__noodl_module_name = ' + jsString(m.name) + ';</script>\n';
+        // ISL-013 — a required kit is found by `Noodl.getModule` under its folder as well as its name, and the bootstrap's
+        // `defineModule` only learns the folder from here. Cleared after the kit's script, so no later kit inherits it.
+        if (marksFolder) {
+          modulesMain += '<script type="text/javascript">window.__noodl_module_folder = ' + jsString(m.folder) + ';</script>\n';
+        }
         modulesMain += '<script type="text/javascript" src="' + pathPrefix + m.index + '"></script>\n';
+        if (marksFolder) modulesMain += '<script type="text/javascript">window.__noodl_module_folder = undefined;</script>\n';
       }
 
       // Module javascript dependencies
@@ -590,6 +674,7 @@ async function readCloudModuleSources(projectDirectory) {
   for (const m of modules) {
     const entry = {
       name: m.name,
+      folder: m.folder, // ISL-013: the cloud's `getModule` finds a required kit by folder too
       runtimes: m.runtimes,
       cloud: moduleRunsInCloud(m),
       index: m.index || null,
@@ -598,7 +683,9 @@ async function readCloudModuleSources(projectDirectory) {
     };
 
     if (entry.cloud) {
-      if (!m.index) {
+      if (m.refused) {
+        entry.error = `it was not loaded: ${m.refused}`; // ISL-013 — the same refusal the page names
+      } else if (!m.index) {
         entry.error = 'the manifest declares the cloud runtime but has no "main" entry script';
       } else {
         try {
@@ -657,9 +744,11 @@ module.exports = {
   MANIFEST_SCHEMA,
   DEPENDENCIES_PLACEHOLDER,
   MAIN_PLACEHOLDER,
+  manifestEntry,
   scanModuleManifests,
   scanModuleManifestsSync,
   toInjectModules,
+  orderByRequires,
   buildInjectionTags,
   injectIntoTemplate,
   scanProjectModules,

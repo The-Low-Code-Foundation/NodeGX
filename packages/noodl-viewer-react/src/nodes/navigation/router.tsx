@@ -6,7 +6,7 @@ import type { NodeOutcome, OutcomeFailureOptions, OutcomeToken } from '@noodl/ty
 import type { TSFixme } from '../../../typings/global';
 
 import ASyncQueue from '../../async-queue';
-import { noodlRootRef } from '../../components/noodl-root-ref';
+import { noodlRootRef, dataAttributeProps } from '../../components/noodl-root-ref';
 import guid from '../../guid';
 import { createNodeFromReactComponent } from '../../react-component-node';
 import { Noodl, Slot } from '../../types';
@@ -30,7 +30,10 @@ function RouterReactComponent(props: RouterReactComponentProps) {
   }, []);
 
   return (
-    <div ref={noodlRootRef((props as TSFixme).noodlNode)} className={props.className} style={style}>
+    <div
+      ref={noodlRootRef((props as TSFixme).noodlNode)}
+      {...dataAttributeProps((props as TSFixme).dom)}
+      className={props.className} style={style}>
       {children}
     </div>
   );
@@ -173,6 +176,9 @@ const RouterNode = {
     };
 
     this.props.layout = 'column';
+
+    // ISL-004: kept pages are detached, so the router's own deletion would not reach them.
+    this.addDeleteListener(() => this._deleteKeptPages());
   },
   getInspectInfo() {
     return this._internal.currentUrl;
@@ -220,7 +226,9 @@ const RouterNode = {
       description: 'Path segment prefixed to every page of this router, for nesting one router inside another',
       group: 'General',
       set: function (value) {
-        this._internal.urlPath = value;
+        // P107-C116: a null Url path is none — `_trimUrlPart(null)` threw at every match and every URL, so the router showed
+        // nothing and answered nothing. Any other value already reads as text where it is joined to a page's path.
+        this._internal.urlPath = value === null ? undefined : value;
       }
     },
     clip: {
@@ -409,12 +417,95 @@ const RouterNode = {
 
       for (const token of outcomes) this.reportOutcome(token, outcome, options);
     },
+    /**
+     * P109 ISL-004 — ruled 2026-10-05 "Yes, if ticked": a page whose Page node has Keep When Leaving set is hidden
+     * when its Router leaves it, not deleted, and the next visit with the same parameters shows that same page — every
+     * node in it, Component Objects included, is simply still there. Off (the default), a page is deleted on leaving
+     * and built fresh, as before.
+     *
+     * One kept copy per page component. A visit with different parameters deletes it and builds fresh (`/product/{id}`
+     * with another id is another page). While hidden, the page is not rendered (detached, as Page Stack detaches the
+     * page under a push), and its clocks pause: every node in it that has `_onPageHidden` / `_onPageShown` (Repeat,
+     * Delay) gets them, so a hidden page does not tick unseen (the ruling's condition).
+     */
+    _leaveCurrentPage() {
+      const children = this.getChildren();
+      for (const i in children) {
+        const c = children[i];
+        this.removeChild(c);
+        const page = c._isl004Page;
+        if (page && _keepsWhenLeaving(page.content)) {
+          if (!this._internal.keptPages) this._internal.keptPages = new Map();
+          const previous = this._internal.keptPages.get(page.key);
+          if (previous && previous !== c) this.nodeScope.deleteNode(previous);
+          _eachNodeOf(page.content, (n) => n._onPageHidden && n._onPageHidden());
+          this._internal.keptPages.set(page.key, c);
+        } else {
+          this.nodeScope.deleteNode(c);
+        }
+      }
+    },
+    _takeKeptPage(key, params) {
+      const kept = this._internal.keptPages && this._internal.keptPages.get(key);
+      if (!kept) return undefined;
+      this._internal.keptPages.delete(key);
+      if (!shallowObjectsEqual(kept._isl004Page.params, params)) {
+        this.nodeScope.deleteNode(kept);
+        return undefined;
+      }
+      return kept;
+    },
+    /**
+     * P109-S45-WIREDTITLE — the browser tab is named by the Page node's current Title, the typed one from the Pages list
+     * when it has none.
+     *
+     * The tab used to be set once, from the router index's entry, which the exporter builds from the Page node's
+     * *parameters*: a Title wired from a Translation or a record reached the Page node and never the tab. A wired value
+     * arrives after the page is shown, and can change while it shows, so the Page node calls back on every Title it is
+     * given, and the callback names the tab only while this Router is still showing that page (a page left, or kept and
+     * hidden, names nothing). Current Page Title still reads the Pages list, as its description says.
+     */
+    _nameTabFromPage(content) {
+      const pages = content && content.nodeScope ? content.nodeScope.getNodesWithType('Page') : undefined;
+      // A Page node always has both; the guard is for a stand-in without them (as `_keepsWhenLeaving` guards `_internal`).
+      const pageNode =
+        pages && pages.length === 1 && pages[0]._internal && typeof pages[0].getTitle === 'function' ? pages[0] : undefined;
+      const nameTab = () => {
+        if (this._internal.currentPageComponent !== content || !this._internal.currentPage) return;
+        const title = pageNode ? pageNode.getTitle() : undefined;
+        Noodl.SEO.setTitle(
+          title !== undefined && title !== null && title !== '' ? String(title) : this._internal.currentPage.title
+        );
+      };
+      if (pageNode) pageNode._internal.onTitleChanged = nameTab;
+      nameTab();
+    },
+    _showKeptPage(content) {
+      _eachNodeOf(content, (n) => n._onPageShown && n._onPageShown());
+    },
+    _deleteKeptPages() {
+      if (!this._internal.keptPages) return;
+      // forEach, not for…of: this file compiles without downlevel iteration, and a for…of over a Map runs zero times.
+      this._internal.keptPages.forEach((group) => this.nodeScope.deleteNode(group));
+      this._internal.keptPages.clear();
+    },
     createPageContainer() {
       const group = this.nodeScope.createPrimitiveNode('Group');
       group.setStyle({ flex: '1 0 100%' });
       return group;
     },
     reset(outcomes?: OutcomeToken[]) {
+      // P109-S38-SSRNOPAGES: a server render and a hydrate mount the router (`triggerDidMount`) before its inputs have
+      // been applied, so the mount's reset found no Pages and reported `router/no-pages` (a console error on every
+      // load at a start-page URL) while the Pages list was one update away. A tokenless reset with no Pages yet waits
+      // once for the inputs to land; the Pages setter's own reset joins it. A Router that really has no Pages still
+      // reports it, one update later.
+      if (outcomes === undefined && this._internal.pages === undefined && !this._internal.resetWaitedForInputs) {
+        this._internal.resetWaitedForInputs = true;
+        this.scheduleReset();
+        return;
+      }
+      this._internal.resetWaitedForInputs = false;
       this._internal.asyncQueue.enqueue(this.resetAsync.bind(this, outcomes));
     },
     scrollToTop() {
@@ -537,16 +628,11 @@ const RouterNode = {
 
       this.scrollToTop();
 
-      // Reset the current page for this router
-      // First remove all children
-      const children = this.getChildren();
-      for (const i in children) {
-        const c = children[i];
-        this.removeChild(c);
-        this.nodeScope.deleteNode(c);
-      }
+      // Reset the current page for this router: leave what is showing (deleted, or kept — ISL-004).
+      this._leaveCurrentPage();
 
-      const content = await this.nodeScope.createNode(component, guid());
+      const kept = this._takeKeptPage(component, params);
+      const content = kept ? kept._isl004Page.content : await this.nodeScope.createNode(component, guid());
 
       // Find the root page node
       const pageNodes = content.nodeScope.getNodesWithType('Page');
@@ -581,14 +667,18 @@ const RouterNode = {
 
       this.flagOutputDirty('currentPageTitle');
       this.flagOutputDirty('currentPageComponent');
-      Noodl.SEO.setTitle(this._internal.currentPage.title);
+      this._nameTabFromPage(content);
 
       this._updatePageInputs(this._internal.currentPageComponent.nodeScope, params);
 
-      const group = this.createPageContainer();
-      group.addChild(content);
+      const group = kept || this.createPageContainer();
+      if (!kept) {
+        group.addChild(content);
+        group._isl004Page = { key: component, params, content };
+      }
 
       this.addChild(group);
+      if (kept) this._showKeptPage(content);
 
       /*	this.setPageOutputs({
 				currentUrl: pageInfo.path,
@@ -702,8 +792,15 @@ const RouterNode = {
       // Regex for replacing addition symbol with a space
       const pl = /\+/g;
       const search = /([^&=]+)=?([^&]*)/g;
+      // P107-C115: a malformed escape (`?q=%zz`, `?off=50%`) is kept as written, as `_decodePathSegment` keeps a segment —
+      // decodeURIComponent threw, and the throw blanked every Page Router on the page
       const decode = function (s) {
-        return decodeURIComponent(s.replace(pl, ' '));
+        const text = s.replace(pl, ' ');
+        try {
+          return decodeURIComponent(text);
+        } catch {
+          return text;
+        }
       };
       const query = location.search.substring(1);
 
@@ -899,26 +996,25 @@ const RouterNode = {
     async _buildPage(newPage: ComponentPageInfo, args: NavigateArgs) {
       this.scrollToTop();
 
-      // Remove all current pages in the stack
-      const children = this.getChildren();
-      for (const i in children) {
-        const c = children[i];
-        this.removeChild(c);
-        this.nodeScope.deleteNode(c);
-      }
+      // Leave the page that is showing: deleted, or kept for the way back (ISL-004).
+      this._leaveCurrentPage();
 
-      const group = this.createPageContainer();
+      const kept = this._takeKeptPage(args.target, args.params);
+      const group = kept || this.createPageContainer();
 
-      // Create the page content
-      const content = await this.nodeScope.createNode(args.target, guid());
+      // Create the page content, unless it was kept
+      const content = kept ? kept._isl004Page.content : await this.nodeScope.createNode(args.target, guid());
 
+      // P107-C117: the page a Navigate builds is the one a later Reset onto it hands new parameters to (`resetAsync` reads
+      // this) — only a reset wrote it, so after a Navigate, Back to the same page with other parameters fed a deleted page
+      this._internal.currentPageComponent = content;
       this._internal.currentPage = newPage;
       this._internal.currentPageSnapshot = _snapshotPageInfo(newPage);
       this._internal.currentParams = args.params;
 
       this.flagOutputDirty('currentPageTitle');
       this.flagOutputDirty('currentPageComponent');
-      Noodl.SEO.setTitle(this._internal.currentPage.title);
+      this._nameTabFromPage(content);
 
       const pageInputNodes = content.nodeScope.getNodesWithType('PageInputs');
       if (pageInputNodes !== undefined && pageInputNodes.length > 0) {
@@ -927,8 +1023,12 @@ const RouterNode = {
         });
       }
 
-      group.addChild(content);
+      if (!kept) {
+        group.addChild(content);
+        group._isl004Page = { key: args.target, params: args.params, content };
+      }
       this.addChild(group);
+      if (kept) this._showKeptPage(content);
 
       this._updateUrlWithTopPage();
 
@@ -942,6 +1042,18 @@ const RouterNode = {
     }
   }
 };
+
+/** ISL-004 — whether a page component's Page node asks to be kept when its Router leaves it. */
+function _keepsWhenLeaving(content) {
+  const pages = content && content.nodeScope ? content.nodeScope.getNodesWithType('Page') : undefined;
+  return !!(pages && pages.length === 1 && pages[0]._internal && pages[0]._internal.keepWhenLeaving);
+}
+
+/** ISL-004 — every node of a page component, its child components' nodes included. */
+function _eachNodeOf(content, visit) {
+  if (!content || !content.nodeScope) return;
+  for (const n of content.nodeScope.getAllNodesRecursive()) visit(n);
+}
 
 function shallowObjectsEqual(object1, object2) {
   const keys1 = Object.keys(object1 || {});

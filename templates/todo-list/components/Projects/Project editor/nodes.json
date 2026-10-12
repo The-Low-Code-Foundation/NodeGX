@@ -1,0 +1,963 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9804abd6-0f5f-51cf-8b56-48c457d2fcb0",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "peIn",
+      "type": "Component Inputs",
+      "label": "The project as it is",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "billing",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "termsDays",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "say",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 530,
+      "y": 280
+    },
+    {
+      "id": "peOut",
+      "type": "Component Outputs",
+      "label": "The project as it should be",
+      "ports": [
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cancel",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "name",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "billing",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "termsDays",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "say",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 530,
+      "y": 2800
+    },
+    {
+      "id": "peRoot",
+      "type": "Group",
+      "label": "Edit the project",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--background)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "mounted": true
+      },
+      "children": [
+        "peHead",
+        "peName",
+        "peSub",
+        "peKindLabel",
+        "peKinds",
+        "peBill",
+        "peSay",
+        "peError",
+        "peBtns"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "peHead",
+      "type": "Text",
+      "label": "What this is",
+      "parent": "peRoot",
+      "parameters": {
+        "text": "Edit the project",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "peName",
+      "type": "net.noodl.controls.textinput",
+      "label": "Its name",
+      "parent": "peRoot",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Its name"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "peSub",
+      "type": "net.noodl.controls.textinput",
+      "label": "One line about it",
+      "parent": "peRoot",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "One line about it (optional)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "peKindLabel",
+      "type": "Text",
+      "label": "What kind",
+      "parent": "peRoot",
+      "parameters": {
+        "text": "What kind of project",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "peKinds",
+      "type": "Group",
+      "label": "The kinds",
+      "parent": "peRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "peEarning",
+        "peBuilding",
+        "peHobby",
+        "peDormant"
+      ],
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "peEarning",
+      "type": "net.noodl.controls.button",
+      "label": "A client who pays",
+      "parent": "peKinds",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "A client who pays"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "peBuilding",
+      "type": "net.noodl.controls.button",
+      "label": "Building",
+      "parent": "peKinds",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Building"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "peHobby",
+      "type": "net.noodl.controls.button",
+      "label": "Hobby",
+      "parent": "peKinds",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Hobby"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "peDormant",
+      "type": "net.noodl.controls.button",
+      "label": "Quiet",
+      "parent": "peKinds",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Quiet"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "peBill",
+      "type": "Group",
+      "label": "How it bills",
+      "parent": "peRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "mounted": false
+      },
+      "children": [
+        "peBillLabel",
+        "peBillings",
+        "peNums"
+      ],
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "peBillLabel",
+      "type": "Text",
+      "label": "How it bills",
+      "parent": "peBill",
+      "parameters": {
+        "text": "How it bills",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "peBillings",
+      "type": "Group",
+      "label": "Hourly or fixed",
+      "parent": "peBill",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "peHourly",
+        "peFixed"
+      ],
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "peHourly",
+      "type": "net.noodl.controls.button",
+      "label": "Hourly",
+      "parent": "peBillings",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Hourly"
+      },
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "peFixed",
+      "type": "net.noodl.controls.button",
+      "label": "A fixed price",
+      "parent": "peBillings",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "A fixed price"
+      },
+      "x": 220,
+      "y": 1720
+    },
+    {
+      "id": "peNums",
+      "type": "Group",
+      "label": "Rate and terms",
+      "parent": "peBill",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "peRateBox",
+        "peTerms"
+      ],
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "peRateBox",
+      "type": "Group",
+      "label": "The rate",
+      "parent": "peNums",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "styleCss": "flex: 1 1 180px; min-width: 0;"
+      },
+      "children": [
+        "peRate"
+      ],
+      "x": 220,
+      "y": 1960
+    },
+    {
+      "id": "peRate",
+      "type": "net.noodl.controls.textinput",
+      "label": "Rate per hour",
+      "parent": "peRateBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Rate per hour (€)"
+      },
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "peTerms",
+      "type": "net.noodl.controls.textinput",
+      "label": "Payment terms",
+      "parent": "peNums",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Pays within how many days (14 if empty)",
+        "styleCss": "flex: 1 1 220px; min-width: 0;"
+      },
+      "x": 220,
+      "y": 2200
+    },
+    {
+      "id": "peSay",
+      "type": "net.noodl.controls.textinput",
+      "label": "What to remember",
+      "parent": "peRoot",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "What to remember about it (optional)"
+      },
+      "x": 100,
+      "y": 2320
+    },
+    {
+      "id": "peError",
+      "type": "Text",
+      "label": "Why it was not saved",
+      "parent": "peRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "lineHeight": "var(--leading-snug)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 100,
+      "y": 2440
+    },
+    {
+      "id": "peBtns",
+      "type": "Group",
+      "label": "Save or cancel",
+      "parent": "peRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "peSave",
+        "peCancel"
+      ],
+      "x": 100,
+      "y": 2560
+    },
+    {
+      "id": "peSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save project",
+      "parent": "peBtns",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Save project"
+      },
+      "x": 160,
+      "y": 2680
+    },
+    {
+      "id": "peCancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "parent": "peBtns",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Cancel"
+      },
+      "x": 160,
+      "y": 2800
+    },
+    {
+      "id": "peKind",
+      "type": "States",
+      "label": "What kind",
+      "parameters": {
+        "states": "earning,building,hobby,dormant",
+        "currentState": "earning",
+        "values": "earningBg,buildingBg,hobbyBg,dormantBg",
+        "type-earningBg": "color",
+        "type-buildingBg": "color",
+        "type-hobbyBg": "color",
+        "type-dormantBg": "color",
+        "value-earning-earningBg": "var(--muted)",
+        "value-earning-buildingBg": "transparent",
+        "value-earning-hobbyBg": "transparent",
+        "value-earning-dormantBg": "transparent",
+        "value-building-earningBg": "transparent",
+        "value-building-buildingBg": "var(--muted)",
+        "value-building-hobbyBg": "transparent",
+        "value-building-dormantBg": "transparent",
+        "value-hobby-earningBg": "transparent",
+        "value-hobby-buildingBg": "transparent",
+        "value-hobby-hobbyBg": "var(--muted)",
+        "value-hobby-dormantBg": "transparent",
+        "value-dormant-earningBg": "transparent",
+        "value-dormant-buildingBg": "transparent",
+        "value-dormant-hobbyBg": "transparent",
+        "value-dormant-dormantBg": "var(--muted)",
+        "useTransitions": false
+      },
+      "x": 530,
+      "y": 760
+    },
+    {
+      "id": "peBilling",
+      "type": "States",
+      "label": "Hourly or fixed",
+      "parameters": {
+        "states": "hourly,fixed",
+        "currentState": "hourly",
+        "values": "hourlyBg,fixedBg",
+        "type-hourlyBg": "color",
+        "type-fixedBg": "color",
+        "value-hourly-hourlyBg": "var(--muted)",
+        "value-hourly-fixedBg": "transparent",
+        "value-fixed-hourlyBg": "transparent",
+        "value-fixed-fixedBg": "var(--muted)",
+        "useTransitions": false
+      },
+      "x": 530,
+      "y": 1600
+    },
+    {
+      "id": "peShape",
+      "type": "JavaScriptFunction",
+      "label": "Which billing fields it needs",
+      "parameters": {
+        "functionScript": "var earning = String(Inputs.kind || 'earning') === 'earning';\nOutputs.billShown = earning;\nOutputs.rateShown = earning && String(Inputs.billing || 'hourly') !== 'fixed';"
+      },
+      "x": 530,
+      "y": 1240,
+      "ports": [
+        {
+          "name": "in-kind",
+          "displayName": "kind",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-billing",
+          "displayName": "billing",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-billShown",
+          "displayName": "billShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rateShown",
+          "displayName": "rateShown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "peCheck",
+      "type": "JavaScriptFunction",
+      "label": "What the form says",
+      "parameters": {
+        "functionScript": "function pick(typed, start) {\n  if (typed !== undefined && typed !== null) return String(typed);\n  return start === undefined || start === null ? '' : String(start);\n}\nfunction projectProblem(v) {\n  var rate = String(v.rate === undefined || v.rate === null ? '' : v.rate).replace(/[€\\s,]/g, '');\n  var terms = String(v.termsDays === undefined || v.termsDays === null ? '' : v.termsDays).trim();\n  if (String(v.name || '').trim() === '') return 'The project needs a name.';\n  if (rate !== '' && !(Number(rate) >= 0)) return 'Type the rate as a number, like 85, or leave it empty.';\n  if (terms !== '' && !(Number(terms) >= 0 && Number(terms) <= 120 && Math.round(Number(terms)) === Number(terms))) return 'Payment terms are a number of days, like 30.';\n  return '';\n}\nvar v = {\n  name: pick(Inputs.typedName, Inputs.name).trim(),\n  sub: pick(Inputs.typedSub, Inputs.sub).trim(),\n  kind: pick(Inputs.pickedKind, Inputs.kind),\n  billing: pick(Inputs.pickedBilling, Inputs.billing),\n  rate: pick(Inputs.typedRate, Inputs.rate).trim(),\n  termsDays: pick(Inputs.typedTerms, Inputs.termsDays).trim(),\n  say: pick(Inputs.typedSay, Inputs.say).trim()\n};\nvar error = projectProblem(v);\nOutputs.error = error;\nOutputs.hasError = error !== '';\nif (error) return;\nOutputs.name = v.name;\nOutputs.sub = v.sub;\nOutputs.kind = v.kind;\nOutputs.billing = v.billing;\nOutputs.rate = v.rate;\nOutputs.termsDays = v.termsDays;\nOutputs.say = v.say;\nOutputs.go();",
+        "runOnChange-in-name": false,
+        "runOnChange-in-sub": false,
+        "runOnChange-in-kind": false,
+        "runOnChange-in-billing": false,
+        "runOnChange-in-termsDays": false,
+        "runOnChange-in-rate": false,
+        "runOnChange-in-say": false,
+        "runOnChange-in-typedName": false,
+        "runOnChange-in-typedSub": false,
+        "runOnChange-in-pickedKind": false,
+        "runOnChange-in-pickedBilling": false,
+        "runOnChange-in-typedRate": false,
+        "runOnChange-in-typedTerms": false,
+        "runOnChange-in-typedSay": false
+      },
+      "x": 530,
+      "y": 2440,
+      "ports": [
+        {
+          "name": "in-typedName",
+          "displayName": "typedName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-typedSub",
+          "displayName": "typedSub",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-sub",
+          "displayName": "sub",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pickedKind",
+          "displayName": "pickedKind",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-kind",
+          "displayName": "kind",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pickedBilling",
+          "displayName": "pickedBilling",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-billing",
+          "displayName": "billing",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-typedRate",
+          "displayName": "typedRate",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rate",
+          "displayName": "rate",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-typedTerms",
+          "displayName": "typedTerms",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-termsDays",
+          "displayName": "termsDays",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-typedSay",
+          "displayName": "typedSay",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-say",
+          "displayName": "say",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "displayName": "error",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasError",
+          "displayName": "hasError",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sub",
+          "displayName": "sub",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-kind",
+          "displayName": "kind",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-billing",
+          "displayName": "billing",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rate",
+          "displayName": "rate",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-termsDays",
+          "displayName": "termsDays",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-say",
+          "displayName": "say",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "peRoot"
+  ]
+}

@@ -1,0 +1,185 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4e208a58-c085-5d2d-8c78-b54d46fcc82c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "olivelessonIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lesson",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "timeoutMs",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "url",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "w",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "olivelessonFn",
+      "type": "JavaScriptFunction",
+      "label": "Olive lesson",
+      "parameters": {
+        "functionScript": "var { OLIVE, OLIVE_HEADER, OLIVE_TIMEOUT_MS, OLIVE_URL, fold, oliveListOf, writtenAnswer } = Scripts.olive;\nvar ASKS = {\"count-tulips\":[{\"slots\":{\"list\":\"@flowerlists\"}}],\"maths\":[{\"slots\":{\"a\":\"14\",\"b\":\"9\"}}],\"no-letter-e\":[{\"slots\":{}}],\"tall-tales\":[{\"slots\":{\"question\":\"@questions_tall:0\"},\"q\":\"@questions_tall:0\",\"book\":\"lsTrue1\"},{\"slots\":{\"question\":\"@questions_tall:1\"},\"q\":\"@questions_tall:1\",\"book\":\"lsTrue2\"},{\"slots\":{\"question\":\"@questions_tall:2\"},\"q\":\"@questions_tall:2\",\"book\":\"lsTrue3\"}],\"translate\":[{\"slots\":{\"note\":\"Les tulipes ont soif.\"},\"lang\":\"fr\",\"q\":\"lsFrEn\",\"book\":\"The tulips are thirsty.\"},{\"slots\":{\"note\":\"The tulips are thirsty.\"},\"lang\":\"en\",\"q\":\"lsEnFr\",\"book\":\"Les tulipes ont soif.\"}]};\nvar lesson = String(Inputs.lesson || '');\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar W = Inputs.w && typeof Inputs.w === 'object' ? Inputs.w : {};\nfunction fillIn(t, vars) { var out = String(t || ''); for (var k in vars) out = out.split('{' + k + '}').join(String(vars[k])); return out; }\nfunction listed(v, L) { var m = /^@(\\w+)(?::(\\d+))?$/.exec(String(v)); if (!m) return String(v); var l = oliveListOf(m[1], L); return l[Number(m[2]) || 0] || ''; }\nfunction isE(ch) { return fold(ch) === 'e'; }\nvar asks = ASKS[lesson] || [];\nvar lines = [], letters = [], fallback = false, eCount = 0;\nfor (var i = 0; i < asks.length; i++) {\n  var a = asks[i], L = a.lang || lang, slots = {};\n  for (var s in a.slots) slots[s] = listed(a.slots[s], L);\n  var reply = null;\n  try {\n    var ctl = typeof AbortController === 'function' ? new AbortController() : null;\n    var timer = ctl ? setTimeout(function () { ctl.abort(); }, Number(Inputs.timeoutMs) > 0 ? Number(Inputs.timeoutMs) : OLIVE_TIMEOUT_MS) : null;\n    var headers = { 'content-type': 'application/json' };\n    headers[OLIVE_HEADER] = '1';\n    var res = await fetch(String(Inputs.url || OLIVE_URL), { method: 'POST', headers: headers, body: JSON.stringify({ rung: lesson, slots: slots, lang: L }), signal: ctl ? ctl.signal : undefined });\n    if (timer) clearTimeout(timer);\n    if (res && res.ok) reply = await res.json();\n  } catch (e) { reply = null; }\n  var said;\n  if (reply && reply.ok === true && (reply.value !== undefined || typeof reply.text === 'string')) said = reply.value !== undefined ? reply.value : reply.text;\n  else { fallback = true; var wr = writtenAnswer(OLIVE, lesson, slots, L); said = wr ? (wr.value !== undefined ? wr.value : wr.text) : ''; }\n  said = String(said === undefined || said === null ? '' : said);\n  // A repeater's row is a Noodl Object, global by id: every card's rows carry the lesson in their id, or five cards share one row.\n  var line = { id: lesson + ':l' + i, q: '', a: fillIn(W.oliveSaysBubble || '{x}', { x: said }), check: '' };\n  if (lesson === 'count-tulips') { var n = 0, parts = String(slots.list).split(','); for (var p = 0; p < parts.length; p++) if (/^(tulip|tulipe)$/.test(parts[p].trim())) n++; line.check = fillIn(W.lsCheck7, { n: n }); }\n  else if (lesson === 'maths') line.check = fillIn(W.lsCheck8, { n: Number(slots.a) + Number(slots.b) });\n  else if (lesson === 'no-letter-e') {\n    var run = '', parts2 = [], chars = Array.from ? Array.from(said) : said.split('');\n    for (var c = 0; c < chars.length; c++) {\n      var ch = chars[c];\n      if (isE(ch) || ch === ' ') { if (run) parts2.push({ text: run, e: false }); run = ''; parts2.push({ text: ch === ' ' ? '\\u00a0' : ch, e: ch !== ' ' }); if (ch !== ' ') eCount++; }\n      else run += ch;\n    }\n    if (run) parts2.push({ text: run, e: false });\n    for (var q = 0; q < parts2.length; q++) letters.push({ id: lesson + ':c' + q, text: parts2[q].text, isE: parts2[q].e, ground: parts2[q].e ? 'var(--sun)' : 'transparent' });\n    line.a = '';\n    line.check = eCount ? fillIn(W.lsCheck9, { n: eCount }) : W.lsCheck9None || '';\n  } else if (lesson === 'tall-tales') { line.q = listed(a.q, L); line.check = fillIn(W.lsBook, { x: W[a.book] || '' }); }\n  else if (lesson === 'translate') { line.q = fillIn(W[a.q], { q: slots.note }); line.check = fillIn(W.lsBook, { x: a.book }); }\n  lines.push(line);\n}\nOutputs.lines = lines;\nOutputs.letters = letters;\nOutputs.hasLetters = letters.length > 0;\nOutputs.eCount = eCount;\nOutputs.fallback = fallback;\nOutputs.asked = asks.length > 0;\n",
+        "runOnChange-in-lang": false,
+        "runOnChange-in-lesson": false,
+        "runOnChange-in-timeoutMs": false,
+        "runOnChange-in-url": false,
+        "runOnChange-in-w": false,
+        "uses": "olive.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lesson",
+          "displayName": "lesson",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-w",
+          "displayName": "w",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-timeoutMs",
+          "displayName": "timeoutMs",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-url",
+          "displayName": "url",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-lines",
+          "displayName": "lines",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-letters",
+          "displayName": "letters",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasLetters",
+          "displayName": "hasLetters",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-eCount",
+          "displayName": "eCount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fallback",
+          "displayName": "fallback",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-asked",
+          "displayName": "asked",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "olivelessonOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "asked",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "eCount",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "fallback",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hasLetters",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "letters",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "lines",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

@@ -3,7 +3,7 @@ title: "Array Filter"
 ---
 Array Filter: filters, sorts and limits an input array into a new output array, re-running automatically when the source changes.
 
-Takes an array on `items`, applies the filter, sort and limit configured in its parameters, and outputs the result as a new array on `items` — the input array is never mutated, and each run produces a fresh array object. It re-runs automatically whenever `items`, `enabled`, the filter settings or the source array's contents change; each of those is a Run On Value Change tick-box, ticked by default, and connecting the `filter` signal does not turn any of them off. With `enabled` false the input passes through unfiltered (still as a copy). After each run `modified` (Filtered) fires and `count`/`firstItemId` describe the output; a run you triggered with `filter` or `refresh` also reports `done`/`failure` and then `completed`. Filter operators: eq/neq for all types, lt/gt/lte/gte for numbers, regex (with optional case sensitivity) for strings.
+Takes an array on `items`, applies the filter, sort and limit configured in its parameters, and outputs the result as a new array on `items` — the input array is never mutated, and each run produces a fresh array object. It re-runs automatically whenever `items`, `enabled`, the filter settings or the source array's contents change; each of those is a Run On Value Change tick-box, ticked by default, and connecting the `filter` signal does not turn any of them off. With `enabled` false the input passes through unfiltered (still as a copy). After each run `modified` (Filtered) fires and `count`/`firstItemId` describe the output; a run you triggered with `filter` or `refresh` also reports `done`/`failure` and then `completed`. Filter operators: eq/neq for all types, lt/gt/lte/gte for numbers, regex (with optional case sensitivity) for strings, and in/nin ("Is one of" / "Is not one of") for strings and numbers: their Values port takes a wired Array (a record counts by its id) or typed text "a, b, c"; like neq, nin keeps a row without the property.
 
 ## When to use it
 
@@ -39,6 +39,40 @@ Client-side filtering, searching and sorting of arrays already in memory — e.g
 | `filter` | Signal | — | Runs the filter now and replaces Items with the result. This is additional to it re-running when Items, Enabled, the filter settings or the array contents change; untick any of those under Run On Value Change to stop it |
 | `refresh` | Signal | — | Runs the filter now — the same action as Filter, under the name the rest of the Array family uses |
 
+### What each input does
+
+**Items** (`items`)
+
+- always: kept, and watched when it is a shared array; ticked under Run On Value Change, the filter runs at the frame's end
+
+**Enabled** (`enabled`)
+
+- always: kept; a change, ticked under Run On Value Change, runs the filter at the frame's end — off, the array passes through unfiltered, unsorted and unlimited
+
+**Filter** (`filter`)
+
+- always: the filter runs at the frame's end, one run for the frame's presses — Items, First Item Id and Count are sent, Filtered fires, then each press's Done or Failure
+
+**Refresh** (`refresh`)
+
+- always: the same as Filter
+
+**Items** (`runOnChange-items`)
+
+- always: read when the next Items arrives
+
+**Enabled** (`runOnChange-enabled`)
+
+- always: read when Enabled next changes
+
+**Array contents** (`runOnChange-array`)
+
+- always: read when the bound array's contents next change
+
+**Filter settings** (`runOnChange-filterSettings`)
+
+- always: kept; read when a filter setting next changes
+
 ## Outputs
 
 ### Values
@@ -72,7 +106,7 @@ Some ports are discovered at runtime from user code, parameters or connected com
 
 ## Ports at runtime
 
-The filter/sort/limit configuration creates its own input ports, pushed to the editor per instance: `filterFilter` (a stringlist of property names) generates, per property &lt;p>, `filterFilterType-<p>` (string/number/boolean), `filterFilterOp-<p>` (eq, neq, regex for strings; eq, neq, lt, gt, gte, lte for numbers), `filterFilterValue-<p>` (a connectable value — wire a text input here for live search) and, for regex, `filterFilterOption-case-<p>`. `filterSort` (stringlist) generates `filterSort-<p>` (ascending/descending) per property. `filterEnableLimit` (boolean) reveals `filterLimit` (default 10) and `filterSkip` (default 0). An authoring tool must set `filterFilter`/`filterSort` first and use exactly these generated names.
+The filter/sort/limit configuration creates its own input ports, pushed to the editor per instance: `filterFilter` (a stringlist of property names — a dotted name such as `owner.id` reads the field inside a field, unless a row has a field with that exact name) generates, per property &lt;p>, `filterFilterType-<p>` (string/number/boolean), `filterFilterOp-<p>` (eq, neq, regex, in, nin for strings; eq, neq, lt, gt, gte, lte, in, nin for numbers), `filterFilterValue-<p>` (a connectable value — wire a text input here for live search) and, for regex, `filterFilterOption-case-<p>`. `filterSort` (stringlist) generates `filterSort-<p>` (ascending/descending) per property. `filterEnableLimit` (boolean) reveals `filterLimit` (default 10) and `filterSkip` (default 0). An authoring tool must set `filterFilter`/`filterSort` first and use exactly these generated names.
 
 ## Patterns
 

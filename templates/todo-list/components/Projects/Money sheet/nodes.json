@@ -1,0 +1,745 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "03928df7-0c7b-5d11-84ff-b8758d34718f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "msIn",
+      "type": "Component Inputs",
+      "label": "The money",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "editing",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "editKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "upRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "recRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "pastRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "projectOptions",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "items",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "marks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "projects",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 530,
+      "y": 40
+    },
+    {
+      "id": "msOut",
+      "type": "Component Outputs",
+      "label": "What you did in it",
+      "ports": [
+        {
+          "name": "close",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "add",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "edit",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "itemKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "back",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 530,
+      "y": 520
+    },
+    {
+      "id": "msScrim",
+      "type": "Group",
+      "label": "Behind the popup",
+      "parameters": {
+        "position": "fixed",
+        "zIndex": 45,
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "styleCss": "top: 0; left: 0; background-color: rgba(20, 22, 24, 0.45);",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "msPanel"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "msPanel",
+      "type": "Group",
+      "label": "The popup",
+      "parent": "msScrim",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 720,
+          "unit": "px"
+        },
+        "rowGap": "var(--space-3)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-5)",
+        "styleCss": "max-height: 88vh; overflow-y: auto;"
+      },
+      "children": [
+        "msTop",
+        "msList",
+        "msForm"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "msTop",
+      "type": "Group",
+      "label": "Title and close",
+      "parent": "msPanel",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "msTitle",
+        "msClose"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "msTitle",
+      "type": "Text",
+      "label": "Money in and out",
+      "parent": "msTop",
+      "parameters": {
+        "text": "Money in and out",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h2",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "msClose",
+      "type": "net.noodl.controls.button",
+      "label": "Close",
+      "parent": "msTop",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "✕",
+        "fontSize": "var(--text-base)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "msList",
+      "type": "Group",
+      "label": "The lists",
+      "parent": "msPanel",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "msBar",
+        "msHint",
+        "msEmpty",
+        "msUpBox",
+        "msRecBox",
+        "msPastBox"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "msBar",
+      "type": "Group",
+      "label": "Which list, and add",
+      "parent": "msList",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "msUp",
+        "msRec",
+        "msPast",
+        "msAdd"
+      ],
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "msUp",
+      "type": "net.noodl.controls.button",
+      "label": "Upcoming",
+      "parent": "msBar",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Upcoming"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "msRec",
+      "type": "net.noodl.controls.button",
+      "label": "Recurring",
+      "parent": "msBar",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Recurring"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "msPast",
+      "type": "net.noodl.controls.button",
+      "label": "Past",
+      "parent": "msBar",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Past"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "msAdd",
+      "type": "net.noodl.controls.button",
+      "label": "Add money",
+      "parent": "msBar",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "+ Add money",
+        "styleCss": "margin-left: auto;"
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "msHint",
+      "type": "Text",
+      "label": "What this list is",
+      "parent": "msList",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "msEmpty",
+      "type": "Text",
+      "label": "When there is nothing",
+      "parent": "msList",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "msUpBox",
+      "type": "Group",
+      "label": "Upcoming",
+      "parent": "msList",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "msUpEach"
+      ],
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "msUpEach",
+      "type": "For Each",
+      "label": "One line per repeat to come",
+      "parent": "msUpBox",
+      "parameters": {
+        "template": "/Projects/Money line",
+        "templateType": "explicit"
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "msRecBox",
+      "type": "Group",
+      "label": "Recurring",
+      "parent": "msList",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "mounted": false
+      },
+      "children": [
+        "msRecEach"
+      ],
+      "x": 220,
+      "y": 1840
+    },
+    {
+      "id": "msRecEach",
+      "type": "For Each",
+      "label": "One line per item",
+      "parent": "msRecBox",
+      "parameters": {
+        "template": "/Projects/Money line",
+        "templateType": "explicit"
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "msPastBox",
+      "type": "Group",
+      "label": "Past",
+      "parent": "msList",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "mounted": false
+      },
+      "children": [
+        "msPastEach"
+      ],
+      "x": 220,
+      "y": 2080
+    },
+    {
+      "id": "msPastEach",
+      "type": "For Each",
+      "label": "One line per repeat ticked",
+      "parent": "msPastBox",
+      "parameters": {
+        "template": "/Projects/Money line",
+        "templateType": "explicit"
+      },
+      "x": 280,
+      "y": 2200
+    },
+    {
+      "id": "msForm",
+      "type": "Group",
+      "label": "The form",
+      "parent": "msPanel",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "mounted": false
+      },
+      "children": [
+        "msFormEach"
+      ],
+      "x": 160,
+      "y": 2320
+    },
+    {
+      "id": "msFormEach",
+      "type": "For Each",
+      "label": "The money form, when one is open",
+      "parent": "msForm",
+      "parameters": {
+        "template": "/Projects/Money editor",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 2440
+    },
+    {
+      "id": "msFilter",
+      "type": "States",
+      "label": "Which list",
+      "parameters": {
+        "states": "up,rec,past",
+        "currentState": "up",
+        "values": "upBg,recBg,pastBg",
+        "type-upBg": "color",
+        "type-recBg": "color",
+        "type-pastBg": "color",
+        "value-up-upBg": "var(--muted)",
+        "value-up-recBg": "transparent",
+        "value-up-pastBg": "transparent",
+        "value-rec-upBg": "transparent",
+        "value-rec-recBg": "var(--muted)",
+        "value-rec-pastBg": "transparent",
+        "value-past-upBg": "transparent",
+        "value-past-recBg": "transparent",
+        "value-past-pastBg": "var(--muted)",
+        "useTransitions": false
+      },
+      "x": 530,
+      "y": 880
+    },
+    {
+      "id": "msShow",
+      "type": "JavaScriptFunction",
+      "label": "List or form",
+      "parameters": {
+        "functionScript": "var open = Inputs.open === true, editing = Inputs.editing === true;\nOutputs.showList = open && !editing;\nOutputs.showForm = open && editing;"
+      },
+      "x": 530,
+      "y": 640,
+      "ports": [
+        {
+          "name": "in-open",
+          "displayName": "open",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-editing",
+          "displayName": "editing",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-showList",
+          "displayName": "showList",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showForm",
+          "displayName": "showForm",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "msLook",
+      "type": "JavaScriptFunction",
+      "label": "What the popup shows",
+      "parameters": {
+        "functionScript": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction fmtDay(d) { return DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()]; }\nfunction fmtTime(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }\nfunction when(v) {\n  if (v === undefined || v === null || v === '') return null;\n  var d = v instanceof Date ? v : new Date(v);\n  return isNaN(d.getTime()) ? null : d;\n}\nfunction dayLabel(d) {\n  var t = startOfToday();\n  if (d.getTime() >= t) return 'Today';\n  if (d.getTime() >= t - 86400000) return 'Yesterday';\n  return fmtDay(d);\n}\nfunction due(s) {\n  var d = toDay(s);\n  if (!d) return { text: '', late: false };\n  var n = Math.round((d.getTime() - startOfToday()) / 86400000);\n  if (n < 0) return { text: 'Overdue by ' + (-n) + (n === -1 ? ' day' : ' days'), late: true };\n  if (n === 0) return { text: 'Due today', late: true };\n  if (n === 1) return { text: 'Due tomorrow', late: false };\n  if (n <= 7) return { text: 'Due in ' + n + ' days', late: false };\n  return { text: 'Due ' + fmtDay(d), late: false };\n}\nfunction ago(d) {\n  var ms = Date.now() - d.getTime();\n  if (ms < 3600000) return 'just now';\n  if (ms < 86400000) return Math.round(ms / 3600000) + ' h ago';\n  var n = Math.round(ms / 86400000);\n  return n === 1 ? 'yesterday' : n + ' days ago';\n}\nfunction num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction byPosition(a, b) { return num(a.position, 0) - num(b.position, 0); }\nvar PJ_PREFIX = new RegExp(\"^(?:(?:→|!) |✓ (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) \\\\d{1,2} · )+\");\nfunction pjClean(s) { return String(s === undefined || s === null ? '' : s).replace(PJ_PREFIX, '').trim(); }\nfunction pjId(r) { return r ? String(r.objectId || r.id || '') : ''; }\n/**\n * A row as plain fields with its 'id'. 🔴 A viewer built before 2026-09-23 (HLT-022) ignores\n * 'plain: true' and hands back the record itself — todo.digitalbricks.io runs one — so both shapes\n * are read, and never mutated: a record's own fields are the shared copy every view draws.\n */\nfunction pjPlain(r) {\n  var model = !!r && typeof r.getId === 'function';\n  var src = model ? r.data || {} : r || {}, o = {};\n  for (var k in src) if (Object.prototype.hasOwnProperty.call(src, k)) o[k] = src[k];\n  o.id = model ? String(r.getId()) : pjId(r);\n  if (!o.objectId) o.objectId = o.id;\n  return o;\n}\nfunction pjIso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction pjToday() { return pjIso(new Date()); }\n/** '' stays '', \"today\" and \"tomorrow\" are days, YYYY-MM-DD must be a real day; anything else is null. */\nfunction pjDate(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).trim().toLowerCase();\n  if (s === '') return '';\n  if (s === 'today' || s === 'tomorrow') {\n    var d = new Date();\n    if (s === 'tomorrow') d.setDate(d.getDate() + 1);\n    return pjIso(d);\n  }\n  var m = /^(\\d{4})-(\\d{1,2})-(\\d{1,2})$/.exec(s);\n  if (!m) return null;\n  var y = Number(m[1]), mo = Number(m[2]), da = Number(m[3]);\n  var dt = new Date(y, mo - 1, da);\n  return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === da ? pjIso(dt) : null;\n}\n/** \"2,140\", \"€ 2140\", \"−380\" → a number; anything else NaN. */\nfunction pjAmount(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).replace(/[€\\s,]/g, '').replace('−', '-');\n  if (s === '') return NaN;\n  var n = Number(s);\n  return isFinite(n) ? n : NaN;\n}\nvar filter = String(Inputs.filter || 'up');\nvar up = Inputs.upRows || [], rec = Inputs.recRows || [], past = Inputs.pastRows || [];\nOutputs.hint = filter === 'rec'\n  ? 'Everything that comes in or goes out, and how often. Press one to change it, end it or remove it.'\n  : filter === 'past'\n    ? 'What was ticked off in the last three months. Untick one if it did not happen after all.'\n    : 'The next three months, and anything late. Paid ticks it off; press one to change it.';\nOutputs.empty = (filter === 'rec' ? rec : filter === 'past' ? past : up).length === 0;\nOutputs.emptyText = filter === 'rec' ? 'Nothing yet. Add money: rent, a retainer, a bill.' : filter === 'past' ? 'Nothing ticked in the last three months.' : 'Nothing coming in or going out in the next three months.';\nvar key = String(Inputs.editKey || ''), forms = [];\nif (Inputs.editing === true) {\n  var items = Inputs.items || [], projects = Inputs.projects || [], it = null, names = {};\n  for (var p = 0; p < projects.length; p++) if (projects[p]) names[projects[p].id] = String(projects[p].name || '');\n  if (key.indexOf('item:') === 0) for (var i = 0; i < items.length; i++) if (items[i] && String(items[i].id) === key.slice(5)) it = items[i];\n  var common = { projectOptions: Inputs.projectOptions || [] };\n  if (it) {\n    var a = num(it.amount, 0), once = String(it.repeat || 'once') === 'once', like = Math.round(num(it.likelihood, 100));\n    forms.push(Object.assign({\n      id: 'me-' + it.id, key: key, heading: 'Change: ' + String(it.label || 'money'),\n      label: String(it.label || ''), dir: a < 0 ? 'out' : 'in', amount: a === 0 ? '' : String(Math.abs(a)),\n      repeat: String(it.repeat || 'once'), date: String(it.date || ''), until: it.until ? String(it.until) : '',\n      projectId: it.projectId ? String(it.projectId) : 'none', likelihood: like < 100 ? String(like) : '', note: String(it.note || ''),\n      isNew: false, endLabel: once ? 'Remove it' : 'End it',\n      endHint: once ? 'Remove it: it is kept, but never counted.' : 'End it: nothing after today. What was ticked stays ticked.'\n    }, common));\n  } else {\n    var pid = key.indexOf('new:') === 0 ? key.slice(4) : '';\n    forms.push(Object.assign({\n      id: 'me-new-' + (pid || 'none'), key: 'new', heading: pid && names[pid] ? 'Add money for ' + names[pid] : 'Add money',\n      label: pid && names[pid] ? names[pid] : '', dir: pid ? 'in' : 'out', amount: '', repeat: 'once', date: pjToday(), until: '',\n      projectId: pid || 'none', likelihood: '', note: '', isNew: true, endLabel: '', endHint: ''\n    }, common));\n  }\n}\nOutputs.formRows = forms;"
+      },
+      "x": 530,
+      "y": 1360,
+      "ports": [
+        {
+          "name": "in-filter",
+          "displayName": "filter",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-upRows",
+          "displayName": "upRows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-recRows",
+          "displayName": "recRows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pastRows",
+          "displayName": "pastRows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-editKey",
+          "displayName": "editKey",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-editing",
+          "displayName": "editing",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-items",
+          "displayName": "items",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projects",
+          "displayName": "projects",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectOptions",
+          "displayName": "projectOptions",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-hint",
+          "displayName": "hint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-emptyText",
+          "displayName": "emptyText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-formRows",
+          "displayName": "formRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "cmdSaveItem",
+      "type": "/Projects/Save money item",
+      "label": "Save the item",
+      "x": 530,
+      "y": 2440
+    },
+    {
+      "id": "cmdEndItem",
+      "type": "/Projects/End money item",
+      "label": "End the item",
+      "x": 530,
+      "y": 2560
+    },
+    {
+      "id": "cmdLineTick",
+      "type": "/Projects/Mark money",
+      "label": "Paid",
+      "parameters": {
+        "action": "tick"
+      },
+      "x": 530,
+      "y": 1720
+    },
+    {
+      "id": "cmdLineUntick",
+      "type": "/Projects/Mark money",
+      "label": "Untick",
+      "parameters": {
+        "action": "untick"
+      },
+      "x": 530,
+      "y": 2200
+    }
+  ],
+  "visualRoots": [
+    "msScrim"
+  ]
+}

@@ -14,6 +14,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 
 import { reapOrphanedBackends } from './backend/reaper';
 import { ToolError } from './errors';
+import { parseReproducibleFlag, type ReproducibleOutput } from './project/writeClock';
 import { createServer } from './server';
 import { BOOTSTRAP_ADVERTISED } from './toolGroups';
 
@@ -38,6 +39,12 @@ Options:
                    theme groups are revealed on demand via find_tools — 60 of the
                    89 tools are backend admin, and they are re-sent every turn.
                    Use this for a client that ignores tools/list_changed.
+  --reproducible <namespace>@<epoch>
+                   Write the same bytes for the same plan: component ids derived
+                   from <namespace> and each component's path, and every
+                   created/modified stamp set to <epoch> (a full ISO-8601 UTC
+                   time). For template generators and CI; a person's session
+                   keeps the wall clock.
   --version        Print version and exit.
   --help           Show this help.
 
@@ -62,7 +69,23 @@ async function main(): Promise<void> {
 
   const allowWrites = argv.includes('--allow-writes');
   const deferTools = !argv.includes('--all-tools');
-  const positional = argv.filter((a) => !a.startsWith('--'));
+  // P109 ISL-019 — `--reproducible <namespace>@<epoch>` or `--reproducible=<namespace>@<epoch>`.
+  let reproducible: ReproducibleOutput | undefined;
+  const reproducibleAt = argv.findIndex((a) => a === '--reproducible' || a.startsWith('--reproducible='));
+  let reproducibleValueAt = -1;
+  if (reproducibleAt >= 0) {
+    const flag = argv[reproducibleAt];
+    if (flag === '--reproducible') reproducibleValueAt = reproducibleAt + 1;
+    const value = flag === '--reproducible' ? argv[reproducibleValueAt] ?? '' : flag.slice('--reproducible='.length);
+    try {
+      reproducible = parseReproducibleFlag(value);
+    } catch (err) {
+      process.stderr.write(`noodl-mcp: ${(err as Error).message}\n`);
+      process.exitCode = 2;
+      return;
+    }
+  }
+  const positional = argv.filter((a, i) => !a.startsWith('--') && i !== reproducibleValueAt);
   // BST-001 — zero is bootstrap mode, one is a served project, two is still a
   // mistake. `createServer` refuses zero-without---allow-writes with a message
   // naming the flag, rather than this branch printing the whole usage at
@@ -96,7 +119,12 @@ async function main(): Promise<void> {
   }
 
   try {
-    const { server, binding, disclosure } = createServer({ projectDir: positional[0], allowWrites, deferTools });
+    const { server, binding, disclosure } = createServer({
+      projectDir: positional[0],
+      allowWrites,
+      deferTools,
+      ...(reproducible ? { reproducible } : {})
+    });
     // AWP-006 — the surface is now a decision, so it is stated at startup rather
     // than inferred from a tools/list. `--all-tools` is named here because the
     // one failure mode of deferral is a client that never re-lists, and the

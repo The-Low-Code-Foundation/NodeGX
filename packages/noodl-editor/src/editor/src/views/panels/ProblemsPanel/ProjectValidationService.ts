@@ -16,7 +16,8 @@
 import { ProjectModel } from '@noodl-models/projectmodel';
 import { Model } from '@noodl-utils/model';
 
-import { catalogGeneration } from '../../../validation/catalog';
+import { catalogGeneration, loadDefaultCatalog } from '../../../validation/catalog';
+import { drawnPortLookup, portProjectFromLegacy } from '../../../validation/drawnPortLookup';
 import { SemanticValidator } from '../../../validation/SemanticValidator';
 import { fromLegacyProject, LegacyProjectLike } from '../../../validation/normalize';
 import { ValidationReport } from '../../../validation/diagnostics';
@@ -131,7 +132,10 @@ export class ProjectValidationService extends Model<ProjectValidationEvent> {
         this.validator = new SemanticValidator();
         this.validatorGeneration = catalogGeneration();
       }
-      return this.validator.validate(fromLegacyProject(json), this._options);
+      // P107 R20 ("Error, as the agent does") — a wire to a port the node's spec does not draw, on a type whose ports
+      // appear at run time, is an error here as it is for the agent server, with the right name suggested
+      const drawnPorts = drawnPortLookup(() => portProjectFromLegacy(json as unknown as Parameters<typeof portProjectFromLegacy>[0]), loadDefaultCatalog());
+      return this.validator.validate(fromLegacyProject(json), { drawnPorts, ...this._options });
     } catch {
       // A malformed in-flight model shouldn't crash the panel; report "unknown".
       return null;

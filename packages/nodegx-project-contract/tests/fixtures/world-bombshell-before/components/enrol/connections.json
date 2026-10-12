@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c-enrol",
+  "version": 1,
+  "connections": [
+    { "fromId": "e_req", "fromProperty": "out-name", "toId": "e_make", "toProperty": "prop-name" },
+    { "fromId": "e_req", "fromProperty": "out-account", "toId": "e_make", "toProperty": "prop-account" }
+  ]
+}

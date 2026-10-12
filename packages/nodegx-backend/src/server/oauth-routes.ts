@@ -52,6 +52,7 @@ import type * as http from 'http';
 
 import type { IStorageFacade } from '@noodl/backend-contract';
 import type { AuthConfigState } from '../auth/AuthConfigState';
+import type { Sessions } from '../auth/sessions';
 import type { AuthProvider } from '../auth/model';
 import type { EmailConfigState } from '../email/EmailConfigState';
 import type { Mailer } from '../email/Mailer';
@@ -98,10 +99,6 @@ const FLOW_COOKIE_MAX_AGE_SECONDS = 600;
  */
 const DEFAULT_REDIRECT_PATH = '/auth/signed-in';
 
-function newSessionToken(): string {
-  return 'r:' + randomToken(24);
-}
-
 function parseCookies(header: string | undefined): Record<string, string> {
   const out: Record<string, string> = {};
   if (!header) return out;
@@ -123,6 +120,8 @@ function redirectTo(res: http.ServerResponse, url: string): void {
 export interface OAuthRoutesDeps {
   facade: IStorageFacade;
   auth: AuthConfigState;
+  /** ISL-040: a provider or magic-link sign-in is minted like any other (`SecurityState.sessions`). */
+  sessions: Sessions;
   emailConfig: EmailConfigState;
   mailer: Mailer;
   tokens: EmailTokenStore;
@@ -471,8 +470,7 @@ export class OAuthRoutes {
       throw e;
     }
 
-    const sessionToken = newSessionToken();
-    await this.deps.facade.rawCreate('_Session', { sessionToken, userId: result.userId });
+    const sessionToken = await this.deps.sessions.mint(result.userId);
 
     void this.deps.audit.record({
       action: result.outcome === 'linked-credentials-revoked' ? AUDIT_AUTH_CREDENTIALS_REVOKED : AUDIT_AUTH_SIGN_IN,

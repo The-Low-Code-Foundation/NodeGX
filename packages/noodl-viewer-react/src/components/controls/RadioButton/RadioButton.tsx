@@ -1,11 +1,12 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 
 import RadioButtonContext from '../../../contexts/radiobuttoncontext';
 import Layout from '../../../layout';
 import Utils from '../../../nodes/controls/utils';
 import { Noodl } from '../../../types';
-import { noodlRootRef } from '../../noodl-root-ref';
+import { noodlRootRef, dataAttributeProps, clearedRootStyles } from '../../noodl-root-ref';
 import { IconGlyph } from '../../visual/Icon/IconGlyph';
+import { labelText } from '../labelText';
 
 export interface RadioButtonProps extends Noodl.ReactProps {
   id: string;
@@ -75,11 +76,20 @@ export function RadioButton(props: RadioButtonProps) {
   // Reporting to the graph is a side effect and belongs after commit. `checkedChanged` already
   // no-ops when the value has not changed, so the extra render this costs on a real change is the
   // one the old code needed anyway.
+  //
+  // P107-D37 (P109 ISL-031, ruled "Fire from the click"): `Changed` comes from a person's click — on the button clicked, and
+  // on the button that loses the selection to it. It read the group's "the last selection was a person's" flag, so any move
+  // of Checked while that held fired Changed: a sibling carrying the same Value, its own Value written in a pick's frame, a
+  // remount. Each click is reported once (`seen`), and a button that mounts after it has seen it already.
+  const click = radioButtonGroup ? radioButtonGroup.click : null;
+  const seen = useRef(click ? click.seq : 0);
   useEffect(() => {
-    // A1: the second argument is what lets the node fire `Changed` for a click and stay silent
-    // for the graph setting the group's `Value` — the same distinction `Checkbox` and
-    // `Radio Button Group` already make.
-    props.checkedChanged && props.checkedChanged(checked, radioButtonGroup ? radioButtonGroup.selectionFromUser : false);
+    let fromClick = false;
+    if (click && click.seq !== seen.current) {
+      seen.current = click.seq;
+      fromClick = checked ? click.by === props.id : click.from === props.value;
+    }
+    props.checkedChanged && props.checkedChanged(checked, fromClick);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checked, props.checkedChanged]);
 
@@ -171,9 +181,10 @@ export function RadioButton(props: RadioButtonProps) {
 
   const radioButton = (
     <div
-      ref={noodlRootRef(props.noodlNode)}
+      ref={props.useLabel ? undefined : noodlRootRef(props.noodlNode)}
+      {...(props.useLabel ? undefined : dataAttributeProps(props.dom))}
       className="ndl-controls-pointer"
-      style={inputWrapperStyle}
+      style={props.useLabel ? { ...clearedRootStyles(style), ...inputWrapperStyle } : inputWrapperStyle}
       noodl-style-tag="radio"
     >
       <div style={fillStyle} noodl-style-tag="fill" />
@@ -184,7 +195,7 @@ export function RadioButton(props: RadioButtonProps) {
         {...inputProps}
         checked={checked}
         onChange={(e) => {
-          radioButtonGroup && radioButtonGroup.checkedChanged && radioButtonGroup.checkedChanged(props.value);
+          radioButtonGroup && radioButtonGroup.checkedChanged && radioButtonGroup.checkedChanged(props.value, props.id);
         }}
       />
     </div>
@@ -209,14 +220,22 @@ export function RadioButton(props: RadioButtonProps) {
     }
 
     return (
-      <div ref={noodlRootRef(props.noodlNode)} style={wrapperStyle} {...Utils.controlEvents(props)}>
+      <div ref={noodlRootRef(props.noodlNode)} {...dataAttributeProps(props.dom)} style={wrapperStyle} {...Utils.controlEvents(props)}>
         {radioButton}
         <label className="ndl-controls-pointer" style={labelStyle} htmlFor={props.id} noodl-style-tag="label">
-          {props.label}
+          {labelText(props.label)}
         </label>
       </div>
     );
   } else {
-    return radioButton;
+    // P107-C80 / C66 (P109 ISL-031, ruled "keeps the keyboard" and "Fix it with the label work"): ONE tree whether the label
+    // shows or not, so React keeps the box (and the keyboard on it) when Enable Label changes, and one element carries
+    // the root ref. Without a label the outer div makes no box (display: contents) and the box is the root, as before.
+    return (
+      <div style={{ ...clearedRootStyles(style), display: 'contents' }}>
+        {radioButton}
+        {null}
+      </div>
+    );
   }
 }

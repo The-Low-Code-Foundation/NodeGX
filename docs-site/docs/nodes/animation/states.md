@@ -35,6 +35,26 @@ Reach for States whenever several properties must change together between named 
 |---|---|---|---|
 | `toggle` | Signal | — | Moves to the next state in the list, wrapping round after the last |
 
+### What each input does
+
+**States** (`states`)
+
+- always: the list of states; while none is current, the first (or Start State) is entered at the end of the frame
+
+**Values** (`values`)
+
+- always: the values that differ between states, each an output
+
+**Use Transitions** (`useTransitions`)
+
+- always: whether the next move animates its values or jumps
+
+**Toggle** (`toggle`)
+
+- no States: refused, and Error says so → Failure
+- already in, or already heading to, the next state → Unchanged
+- otherwise it moves to the next state, wrapping round after the last, at the end of the frame — State Changed, then Done
+
 ## Outputs
 
 ### Values

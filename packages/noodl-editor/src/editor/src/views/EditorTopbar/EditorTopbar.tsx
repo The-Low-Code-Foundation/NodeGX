@@ -209,6 +209,7 @@ export function EditorTopbar({
               treatment (UIX-004 accent pill) on the shared primitive. */}
           <Tooltip content="Add node to graph">
             <IconButton
+              ariaLabel="Add node to graph"
               icon={IconName.Plus}
               state={IconButtonState.Active}
               variant={IconButtonVariant.Transparent}
@@ -220,6 +221,7 @@ export function EditorTopbar({
         <div className={css['is-padded']}>
           <Tooltip content="Navigate back">
             <IconButton
+              ariaLabel="Navigate back"
               variant={IconButtonVariant.Transparent}
               icon={IconName.CaretLeft}
               onClick={onUrlNavigateBack}
@@ -228,6 +230,7 @@ export function EditorTopbar({
           </Tooltip>
           <Tooltip content="Navigate forward">
             <IconButton
+              ariaLabel="Navigate forward"
               variant={IconButtonVariant.Transparent}
               icon={IconName.CaretRight}
               onClick={onUrlNavigateForward}
@@ -236,6 +239,7 @@ export function EditorTopbar({
           </Tooltip>
           <Tooltip content="Refresh preview" fineType={Keybindings.REFRESH_PREVIEW.label}>
             <IconButton
+              ariaLabel="Refresh preview"
               icon={IconName.Refresh}
               variant={IconButtonVariant.Transparent}
               onClick={() => EventDispatcher.instance.emit('viewer-refresh')}
@@ -299,6 +303,7 @@ export function EditorTopbar({
             <div className={css['is-padded-s']}>
               <Tooltip content="Open dev tools" fineType={Keybindings.OPEN_DEVTOOLS.label}>
                 <IconButton
+                  ariaLabel="Open dev tools"
                   icon={IconName.Bug}
                   variant={IconButtonVariant.Transparent}
                   onClick={() => EventDispatcher.instance.emit('viewer-open-devtools')}
@@ -389,6 +394,7 @@ export function EditorTopbar({
           <div ref={moreMenuTrigger}>
             <Tooltip content="More: preview layout, dev tools" UNSAFE_triggerClassName={css.TooltipPositioner}>
               <IconButton
+                ariaLabel="More: preview layout, dev tools"
                 icon={IconName.DotsThreeHorizontal}
                 variant={IconButtonVariant.Transparent}
                 onClick={() => setIsMoreMenuVisible(true)}
@@ -443,6 +449,7 @@ export function EditorTopbar({
           <div className={css['is-padded']}>
             <Tooltip content="Split workspace vertically">
               <IconButton
+                ariaLabel="Split workspace vertically"
                 icon={IconName.VerticalSplit}
                 variant={IconButtonVariant.Transparent}
                 onClick={() => setDocumentLayout('vertical')}
@@ -452,6 +459,7 @@ export function EditorTopbar({
 
             <Tooltip content="Split workspace horizontally">
               <IconButton
+                ariaLabel="Split workspace horizontally"
                 icon={IconName.HorizontalSplit}
                 variant={IconButtonVariant.Transparent}
                 onClick={() => setDocumentLayout('horizontal')}
@@ -461,6 +469,7 @@ export function EditorTopbar({
 
             <Tooltip content="Detach preview from editor">
               <IconButton
+                ariaLabel="Detach preview from editor"
                 icon={IconName.Cards}
                 variant={IconButtonVariant.Transparent}
                 onClick={() => {
@@ -482,6 +491,7 @@ export function EditorTopbar({
               <button
                 className={classNames(css.ModeSegmentedButton, !previewMode && css['is-active'])}
                 aria-pressed={!previewMode}
+                aria-label={isSmall ? 'Design' : undefined}
                 onClick={() => onPreviewModeChanged(false)}
               >
                 {isSmall ? <Icon icon={IconName.Pencil} size={IconSize.Small} /> : 'Design'}
@@ -491,6 +501,7 @@ export function EditorTopbar({
               <button
                 className={classNames(css.ModeSegmentedButton, previewMode && css['is-active'])}
                 aria-pressed={previewMode}
+                aria-label={isSmall ? 'Preview' : undefined}
                 onClick={() => onPreviewModeChanged(true)}
               >
                 {isSmall ? <Icon icon={IconName.PlayCircle} size={IconSize.Small} /> : 'Preview'}
@@ -502,6 +513,7 @@ export function EditorTopbar({
         <span ref={deployButtonRef}>
           <PrimaryButton
             label={isSmall ? '' : 'Deploy'}
+            ariaLabel={isSmall ? 'Deploy' : undefined}
             icon={IconName.Deploy}
             isDisabled={deployIsDisabled}
             onClick={() => setIsDeployVisible(true)}

@@ -1,0 +1,153 @@
+[
+  {
+    "name": "The default script maps nothing: one empty record per row, Changed",
+    "because": "mapcollectionnode.ts :102, :339-353",
+    "params": {
+      "items": [
+        {
+          "name": "Ada"
+        },
+        {
+          "name": "Lin"
+        }
+      ]
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "v2 (C60 fixed): a script copying a property and computing another, over a PLAIN array of plain objects (what a Function outputs): the string mapping reads the row's own property — one record, name Ada, twice 2",
+    "because": ":347-348 v2 — a record through `get`, any other row's own property; v1 failed here with map-failed (row C60)",
+    "params": {
+      "items": [
+        {
+          "name": "Ada",
+          "n": 1
+        }
+      ],
+      "mapScript": "map({ name: 'name', twice: function (o) { return o.n * 2; } })"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "A script copying a property under another name and computing another, over records: `title` from `name`, `twice` from the record",
+    "because": ":339-353 — each record mapped into a new record; a string mapping is `model.get`, a function is handed the record",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "mapScript": "map({ title: 'name', twice: function (o) { return o.get('n') * 2; } })"
+    },
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "name": "Ada",
+            "n": 1
+          },
+          "r2": {
+            "name": "Lin",
+            "n": 2
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "name": "A script that will not compile: Failure once on the value path, then script-failed on Refresh",
+    "because": ":208-218, :327-335, :255-279",
+    "params": {
+      "items": [
+        {
+          "a": 1
+        }
+      ],
+      "mapScript": "map("
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "refresh"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "A script that throws: map-failed with its message",
+    "because": ":354-362",
+    "params": {
+      "items": [
+        {
+          "a": 1
+        }
+      ],
+      "mapScript": "throw new Error('boom')"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "Refresh with no array: no-items",
+    "because": ":292-305",
+    "params": {},
+    "steps": [
+      {
+        "signal": "refresh"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "null on Items throws inside the run: map-failed",
+    "because": ":339 inside the try",
+    "params": {
+      "items": null,
+      "mapScript": "map({ name: 'name' })"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "A number on Items is not a list: the run fails with array-map/not-a-list (row C10)",
+    "because": "P107-C10, ruled 2026-10-05 \"Refuse it with a Failure\", fixed in P109 ISL-026 (data/itemsinput.ts); the setter once called `collection.on` on it and threw (:233)",
+    "params": {},
+    "steps": [
+      {
+        "set": "items",
+        "value": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "v2: a plain array holding a null row — the string mapping cannot read null: map-failed",
+    "because": ":347-348, :354-362 — `null[mapping]` throws inside the `try`",
+    "params": {
+      "items": [
+        {
+          "name": "Ada",
+          "n": 1
+        },
+        null
+      ],
+      "mapScript": "map({ name: 'name' })"
+    },
+    "steps": [
+      "settle"
+    ]
+  }
+]

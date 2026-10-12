@@ -1,0 +1,2803 @@
+[
+  {
+    "name": "A Connect on an open socket with the heartbeat on: the reopen is On Reconnect and the Connect's Done; the new socket talks",
+    "params": {
+      "url": "ws://srv/a",
+      "heartbeatInterval": 2
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 3,
+                  "message": "on the new socket"
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :410-420, :693-713 — a replaced socket; the heartbeat restarts on the open"
+  },
+  {
+    "name": "Auto Connect at mount: connecting, then open, a JSON message, a text one, a binary one",
+    "params": {
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "advance": 4
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 2,
+                  "message": "{\"a\":1}"
+                },
+                {
+                  "at": 4,
+                  "message": "plain"
+                },
+                {
+                  "at": 8,
+                  "binary": [
+                    104,
+                    105
+                  ]
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 3
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :831-833 — no connection yet, Auto Connect on (ws :166) and a URL: it connects; conn :693-744 — open, then messages parsed as JSON when they are JSON, a binary frame as its bytes"
+  },
+  {
+    "name": "Connect then Disconnect while it shakes hands: Connect Unchanged, Disconnect Done, closed",
+    "params": {
+      "autoConnect": false,
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 2,
+                  "message": "{\"a\":1}"
+                },
+                {
+                  "at": 4,
+                  "message": "plain"
+                },
+                {
+                  "at": 8,
+                  "binary": [
+                    104,
+                    105
+                  ]
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 3
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :375-386 — a pending Connect is cancelled, not failed; conn :496-529 — a connecting connection is something to close"
+  },
+  {
+    "name": "Disconnect with nothing made: Unchanged, no connection",
+    "params": {
+      "autoConnect": false
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {}
+    },
+    "because": "ws :384 — no connection: nothing to close"
+  },
+  {
+    "name": "Disconnect after a Send made an idle connection: Unchanged, but the state is closed",
+    "params": {
+      "autoConnect": false,
+      "message": "x"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "send"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {}
+    },
+    "because": "ws :397 getConnection() makes one; conn :518-522 — nothing to close, yet the state becomes closed and is told"
+  },
+  {
+    "name": "Sends while connecting are queued and flushed in order on open, after On Open",
+    "params": {
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "message",
+        "value": "one"
+      },
+      {
+        "signal": "send"
+      },
+      {
+        "set": "message",
+        "value": {
+          "n": 2
+        }
+      },
+      {
+        "signal": "send"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 2,
+                  "message": "{\"a\":1}"
+                },
+                {
+                  "at": 4,
+                  "message": "plain"
+                },
+                {
+                  "at": 8,
+                  "binary": [
+                    104,
+                    105
+                  ]
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 3
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :596-613 queue; :709-712 the flush after onOpen, FIFO, each On Message Sent"
+  },
+  {
+    "name": "Drop policy: a Send while not open is Unchanged and counted",
+    "params": {
+      "autoConnect": false,
+      "whenDisconnected": "drop",
+      "message": "m"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {}
+    },
+    "because": "conn :582-587; ws :403-408 — the author asked for the drop: Unchanged"
+  },
+  {
+    "name": "Report Error policy: a Send while not open fails and is counted",
+    "params": {
+      "autoConnect": false,
+      "whenDisconnected": "error",
+      "message": "m"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {}
+    },
+    "because": "conn :589-594 — websocket/not-connected, On Error"
+  },
+  {
+    "name": "Nothing to send: an empty Message fails",
+    "params": {
+      "autoConnect": false
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "send"
+      },
+      "settle",
+      {
+        "set": "message",
+        "value": null
+      },
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {}
+    },
+    "because": "conn :572-578 — websocket/nothing-to-send"
+  },
+  {
+    "name": "A full queue refuses the newest",
+    "params": {
+      "autoConnect": false,
+      "maxQueueSize": 1,
+      "message": "m"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "send"
+      },
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {}
+    },
+    "because": "conn :598-608 — websocket/queue-full, Dropped counts it"
+  },
+  {
+    "name": "A URL that is not ws:// fails the Connect at once",
+    "params": {
+      "autoConnect": false,
+      "url": "http://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {}
+    },
+    "because": "conn :437-440 — a terminal failure; ws :689-695 — the Connect reports Failure"
+  },
+  {
+    "name": "A blank URL (after trimming) fails the Connect",
+    "params": {
+      "autoConnect": false,
+      "url": "   "
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {}
+    },
+    "because": "conn :432-436"
+  },
+  {
+    "name": "A constructor that throws fails the Connect, after the call is made",
+    "params": {
+      "autoConnect": false,
+      "url": "wss://bad host/"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "throws": "The URL 'wss://bad host/' is invalid."
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :451-458 — Could not open WebSocket: <message>"
+  },
+  {
+    "name": "A drop reconnects with backoff; the reopen fires On Reconnect and the Connect is one Done",
+    "params": {
+      "autoConnect": false,
+      "url": "ws://srv/a",
+      "jitter": false,
+      "reconnectDelay": 10
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "times": 1,
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 5,
+                  "close": {}
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 3,
+                  "message": "after the reopen"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :800-820 — 1006 is retryable; the delay is the base for the first attempt; :696-707 isReconnect"
+  },
+  {
+    "name": "A first attempt that errors, then a retry that opens: one Done, never a Failure",
+    "params": {
+      "autoConnect": false,
+      "url": "ws://srv/a",
+      "jitter": false,
+      "reconnectDelay": 4
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 4
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "times": 1,
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "error": true
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :704-708 — the token rides the whole outage; conn :746-761 — Could not connect to <url> before it ever opened"
+  },
+  {
+    "name": "Jitter draws one number per reconnect from the world's stream",
+    "params": {
+      "url": "ws://srv/a",
+      "reconnectDelay": 100,
+      "maxRetries": -1
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1000
+      },
+      "settle",
+      {
+        "advance": 1000
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "close": {
+                    "code": 1011,
+                    "reason": "busy"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "seed": 7
+    },
+    "because": "conn :221-236 — equal jitter, Math.round(raw * (0.5 + 0.5 * random())); a negative Max Retries never gives up"
+  },
+  {
+    "name": "A policy close (1008) is not retried: error, the Connect fails",
+    "params": {
+      "autoConnect": false,
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 2,
+                  "open": true
+                },
+                {
+                  "at": 4,
+                  "close": {
+                    "code": 1008,
+                    "reason": "policy"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :196, :836-845 — this will not be retried; On Error, On Close"
+  },
+  {
+    "name": "A goodbye (1000) with Auto Reconnect off is closed, not an error",
+    "params": {
+      "url": "ws://srv/a",
+      "autoReconnect": false
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 15
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 16,
+                  "close": {
+                    "code": 1000,
+                    "reason": "done"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :828-834"
+  },
+  {
+    "name": "A drop with Auto Reconnect off is an error",
+    "params": {
+      "url": "ws://srv/a",
+      "autoReconnect": false
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 4
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 5,
+                  "close": {}
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :839-840 — Auto Reconnect is off"
+  },
+  {
+    "name": "Max Retries 0: the first drop gives up",
+    "params": {
+      "url": "ws://srv/a",
+      "maxRetries": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 4
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 5,
+                  "close": {
+                    "code": 1001
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :848-854 — retryCount < 0 is false; :841 gave up after 0 reconnect attempts"
+  },
+  {
+    "name": "Heartbeat: ping sent, pong measured as Latency and hidden from On Message",
+    "params": {
+      "url": "ws://srv/a",
+      "heartbeatInterval": 5
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 2,
+                  "message": "{\"a\":1}"
+                },
+                {
+                  "at": 4,
+                  "message": "plain"
+                },
+                {
+                  "at": 8,
+                  "binary": [
+                    104,
+                    105
+                  ]
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 3
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :715-737, :873-908 — the reply is bookkeeping; Latency is now - the time the ping went"
+  },
+  {
+    "name": "Heartbeat unanswered: the connection is dead and reconnects",
+    "params": {
+      "url": "ws://srv/a",
+      "heartbeatInterval": 5,
+      "heartbeatMessage": "hb",
+      "jitter": false,
+      "reconnectDelay": 20
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "advance": 20
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :884-894 — a heartbeat still unanswered a whole interval later; the ordinary 1006 path"
+  },
+  {
+    "name": "Heartbeat with no reply expected only sends",
+    "params": {
+      "url": "ws://srv/a",
+      "heartbeatInterval": 5,
+      "heartbeatReply": ""
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 11
+      },
+      "settle",
+      {
+        "set": "heartbeatInterval",
+        "value": 0
+      },
+      {
+        "advance": 20
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :877-903 — no reply marker, nothing to be unanswered; :391-393 a new interval takes effect at once"
+  },
+  {
+    "name": "A URL change while open rebuilds: the old socket closed as Node deleted, a new one made",
+    "params": {
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "wss://srv/b"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 2,
+                  "message": "{\"a\":1}"
+                },
+                {
+                  "at": 4,
+                  "message": "plain"
+                },
+                {
+                  "at": 8,
+                  "binary": [
+                    104,
+                    105
+                  ]
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 3
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :791-826 — identity changed; dispose closes with 1000 Node deleted; the status outputs fall to the resting values, then connecting"
+  },
+  {
+    "name": "Writing the same URL again does not rebuild",
+    "params": {
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "ws://srv/a"
+      },
+      {
+        "set": "autoConnect",
+        "value": true
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 2,
+                  "message": "{\"a\":1}"
+                },
+                {
+                  "at": 4,
+                  "message": "plain"
+                },
+                {
+                  "at": 8,
+                  "binary": [
+                    104,
+                    105
+                  ]
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 3
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :800-802 — nothing identifying changed"
+  },
+  {
+    "name": "Protocols are offered, trimmed and split",
+    "params": {
+      "url": "ws://srv/a",
+      "protocols": " json , chat.v1 ,"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 2,
+                  "message": "{\"a\":1}"
+                },
+                {
+                  "at": 4,
+                  "message": "plain"
+                },
+                {
+                  "at": 8,
+                  "binary": [
+                    104,
+                    105
+                  ]
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 3
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :125-131; conn :448"
+  },
+  {
+    "name": "Message Type Binary sends UTF-8 bytes",
+    "params": {
+      "url": "ws://srv/a",
+      "messageType": "binary",
+      "message": "é"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 2,
+                  "message": "{\"a\":1}"
+                },
+                {
+                  "at": 4,
+                  "message": "plain"
+                },
+                {
+                  "at": 8,
+                  "binary": [
+                    104,
+                    105
+                  ]
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 3
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :654-659"
+  },
+  {
+    "name": "A second Connect supersedes the first: Unchanged, then the new one's Done",
+    "params": {
+      "autoConnect": false,
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 2,
+                  "message": "{\"a\":1}"
+                },
+                {
+                  "at": 4,
+                  "message": "plain"
+                },
+                {
+                  "at": 8,
+                  "binary": [
+                    104,
+                    105
+                  ]
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 3
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :366-368 — the old socket torn down without a close report"
+  },
+  {
+    "name": "A Connect still pending when the URL changes is Unchanged; the rebuild reconnects silently",
+    "params": {
+      "autoConnect": false,
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "wss://srv/b"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 2,
+                  "message": "{\"a\":1}"
+                },
+                {
+                  "at": 4,
+                  "message": "plain"
+                },
+                {
+                  "at": 8,
+                  "binary": [
+                    104,
+                    105
+                  ]
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 3
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :816-823 — superseded, not failed; the rebuild's reconnect mints no token"
+  },
+  {
+    "name": "Auto Reconnect turned off on a live connection: the next drop is an error",
+    "params": {
+      "url": "ws://srv/a",
+      "jitter": false,
+      "reconnectDelay": 7
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "autoReconnect",
+        "value": false
+      },
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 10,
+                  "close": {}
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :254-258 → conn :382-394 — tuning lands on the live connection; :839-840"
+  },
+  {
+    "name": "Reconnect Delay changed on a live connection is the next backoff",
+    "params": {
+      "url": "ws://srv/a",
+      "jitter": false,
+      "reconnectDelay": 7
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "reconnectDelay",
+        "value": 40
+      },
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle",
+      {
+        "advance": 40
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 10,
+                  "close": {}
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :382-387, :803-812"
+  },
+  {
+    "name": "Max Reconnect Delay changed on a live connection caps the next backoff",
+    "params": {
+      "url": "ws://srv/a",
+      "jitter": false,
+      "reconnectDelay": 1000
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "maxReconnectDelay",
+        "value": 3
+      },
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 10,
+                  "close": {}
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :228-233"
+  },
+  {
+    "name": "Max Reconnect Delay set before any connection caps the first backoff",
+    "params": {
+      "url": "ws://srv/a",
+      "jitter": false,
+      "reconnectDelay": 1000,
+      "maxReconnectDelay": 4
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle",
+      {
+        "advance": 4
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 10,
+                  "close": {}
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :762-767 — onto the node's config; the connection copies it (conn :335-350)"
+  },
+  {
+    "name": "Max Retries changed on a live connection: 0 gives up at the next drop",
+    "params": {
+      "url": "ws://srv/a",
+      "jitter": false,
+      "reconnectDelay": 7
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "maxRetries",
+        "value": 0
+      },
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 10,
+                  "close": {}
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :848-854"
+  },
+  {
+    "name": "Backoff Jitter turned on on a live connection draws at the next drop",
+    "params": {
+      "url": "ws://srv/a",
+      "jitter": false,
+      "reconnectDelay": 7
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "jitter",
+        "value": true
+      },
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle",
+      {
+        "advance": 7
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 10,
+                  "close": {}
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :234-235"
+  },
+  {
+    "name": "Heartbeat Interval set on a live connection starts the heartbeat at once",
+    "params": {
+      "url": "ws://srv/a",
+      "jitter": false,
+      "reconnectDelay": 7
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "heartbeatInterval",
+        "value": 3
+      },
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :389-393 — a changed interval restarts it while open"
+  },
+  {
+    "name": "Heartbeat Interval set to 0 stops it; a later reopen has none",
+    "params": {
+      "url": "ws://srv/a",
+      "jitter": false,
+      "reconnectDelay": 7,
+      "heartbeatInterval": 4
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 4
+      },
+      "settle",
+      {
+        "set": "heartbeatInterval",
+        "value": 0
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "advance": 7
+      },
+      "settle",
+      {
+        "advance": 20
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 10,
+                  "close": {}
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :389-393, :863-871 — 0 starts nothing"
+  },
+  {
+    "name": "Heartbeat Message changed on a live connection is the next heartbeat",
+    "params": {
+      "url": "ws://srv/a",
+      "jitter": false,
+      "reconnectDelay": 7,
+      "heartbeatInterval": 3
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "heartbeatMessage",
+        "value": "hb"
+      },
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :896-902"
+  },
+  {
+    "name": "Heartbeat Reply cleared: the server's pong is an ordinary message",
+    "params": {
+      "url": "ws://srv/a",
+      "jitter": false,
+      "reconnectDelay": 7,
+      "heartbeatInterval": 3
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "heartbeatReply",
+        "value": ""
+      },
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :723-728 — with no reply marker nothing is filtered"
+  },
+  {
+    "name": "When Disconnected changed after a Send made a connection applies to the next Send",
+    "params": {
+      "autoConnect": false,
+      "message": "m"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "send"
+      },
+      "settle",
+      {
+        "set": "whenDisconnected",
+        "value": "drop"
+      },
+      {
+        "signal": "send"
+      },
+      "settle",
+      {
+        "set": "whenDisconnected",
+        "value": "error"
+      },
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {}
+    },
+    "because": "ws :461-465 → conn :581-594"
+  },
+  {
+    "name": "Max Queue Size changed after a Send made a connection refuses the next",
+    "params": {
+      "autoConnect": false,
+      "message": "m"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "send"
+      },
+      "settle",
+      {
+        "set": "maxQueueSize",
+        "value": 1
+      },
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {}
+    },
+    "because": "ws :476-480 → conn :598-608"
+  },
+  {
+    "name": "Message Type Binary set on a live connection encodes the next Send",
+    "params": {
+      "url": "ws://srv/a",
+      "jitter": false,
+      "reconnectDelay": 7
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "messageType",
+        "value": "binary"
+      },
+      "settle",
+      {
+        "set": "message",
+        "value": {
+          "k": "é"
+        }
+      },
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :439-443 → conn :654-659"
+  },
+  {
+    "name": "Auto Connect turned on later connects at the frame's end",
+    "params": {
+      "autoConnect": false,
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "autoConnect",
+        "value": true
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :231-234, :831-833"
+  },
+  {
+    "name": "Auto Connect turned off and a URL change: the rebuild reconnects only because it was active",
+    "params": {
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "autoConnect",
+        "value": false
+      },
+      {
+        "set": "url",
+        "value": "wss://srv/b"
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "ws://srv/c"
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :808-823 — wasActive keeps an active connection connected; an idle one is not reconnected"
+  },
+  {
+    "name": "A first message that is binary: Received is its bytes, Received Raw stays blank",
+    "params": {
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 2,
+                  "binary": [
+                    1,
+                    2,
+                    255
+                  ]
+                },
+                {
+                  "at": 3,
+                  "message": "again"
+                },
+                {
+                  "at": 4,
+                  "message": "again"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :743 — binary is handed over as received; :739 text after it"
+  },
+  {
+    "name": "The same text twice fires On Message twice",
+    "params": {
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 2,
+                  "message": "again"
+                },
+                {
+                  "at": 3,
+                  "message": "again"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :739 — never de-duplicated"
+  },
+  {
+    "name": "Protocols changed on a live connection rebuild it",
+    "params": {
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "protocols",
+        "value": "json"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "protocols",
+        "value": " json "
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :117-122 — the protocol list is identity; the same list again is not a change"
+  },
+  {
+    "name": "A URL change and Auto Connect turned on in one frame connect once",
+    "params": {
+      "autoConnect": false,
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "url",
+        "value": "wss://srv/b"
+      },
+      {
+        "set": "autoConnect",
+        "value": true
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :781-789 — one rebuild per frame, reading the frame's final inputs; Auto Connect written while a rebuild is already scheduled still counts"
+  },
+  {
+    "name": "Auto Connect written off again while off: a later URL change still does not connect",
+    "params": {
+      "autoConnect": false,
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "autoConnect",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "wss://srv/b"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :231-234 — !!value; the rebuild needs Auto Connect on (or an active connection) to connect"
+  },
+  {
+    "name": "A URL change with Auto Connect written off again in the same frame does not connect",
+    "params": {
+      "autoConnect": false,
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "url",
+        "value": "wss://srv/b"
+      },
+      {
+        "set": "autoConnect",
+        "value": false
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :831-833 — no connection and Auto Connect off: idle until a Connect"
+  },
+  {
+    "name": "Connect with the heartbeat on: the open is the Connect's Done and starts the heartbeat",
+    "params": {
+      "autoConnect": false,
+      "url": "ws://srv/a",
+      "heartbeatInterval": 3
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 20,
+                  "close": {}
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :697-709 then conn :709 — Done, then the heartbeat"
+  },
+  {
+    "name": "A Connect whose socket errors before it opens, with no retries, fails",
+    "params": {
+      "autoConnect": false,
+      "url": "ws://srv/a",
+      "maxRetries": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "error": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :746-761 then :836-845 — gave up after 0 reconnect attempts; ws :689-695 the Connect's Failure"
+  },
+  {
+    "name": "Heartbeat Interval left blank is NaN on the inputs and 0 on a new connection; written again on a live one, it moves only the connection's",
+    "params": {
+      "url": "ws://srv/a",
+      "jitter": false,
+      "reconnectDelay": 5
+    },
+    "steps": [
+      {
+        "set": "heartbeatInterval"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "heartbeatInterval"
+      },
+      "settle",
+      {
+        "set": "message",
+        "value": "m"
+      },
+      {
+        "signal": "send"
+      },
+      "settle",
+      {
+        "advance": 19
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "wss://srv/b"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 12
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 20,
+                  "close": {}
+                }
+              ],
+              "replies": [
+                {
+                  "to": "ping",
+                  "with": "pong",
+                  "after": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :320-322 Number(undefined) is NaN; conn :344 NaN || 0; conn :384-393 the configure copies NaN and, NaN !== 0 while open, restarts the heartbeat — which starts nothing; a connection made later from the node's config has no heartbeat either"
+  },
+  {
+    "name": "Connect on a socket Auto Connect opened replaces it: closed with no On Close, a new one, Done at its open",
+    "params": {
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 2,
+                  "message": "from the server"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :410-420 — the app asked for the replacement, so no close is reported; :696 On Reconnect, it opened before"
+  },
+  {
+    "name": "An empty Heartbeat Message keeps the heartbeat running silently; a message set later is the next heartbeat",
+    "params": {
+      "url": "ws://srv/a",
+      "heartbeatInterval": 3,
+      "heartbeatMessage": ""
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 7
+      },
+      "settle",
+      {
+        "set": "heartbeatMessage",
+        "value": "hb"
+      },
+      {
+        "advance": 3
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :896-907 — no message, nothing sent, the next heartbeat still scheduled"
+  },
+  {
+    "name": "Disconnect twice on a socket Auto Connect opened: Done, then Unchanged",
+    "params": {
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :502-528 — a disconnected connection has nothing to close"
+  },
+  {
+    "name": "Auto Connect written on again after a Disconnect: a URL change reconnects",
+    "params": {
+      "url": "ws://srv/a"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle",
+      {
+        "set": "autoConnect",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "url",
+        "value": "wss://srv/b"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :822-823 — not active, but Auto Connect on"
+  },
+  {
+    "name": "Disconnect during the wait before a reconnect: Done, and a second Disconnect is Unchanged",
+    "params": {
+      "url": "ws://srv/a",
+      "jitter": false,
+      "reconnectDelay": 50
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 4
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle",
+      {
+        "signal": "disconnect"
+      },
+      "settle",
+      {
+        "advance": 100
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                },
+                {
+                  "at": 5,
+                  "close": {}
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "conn :496-529 — a backoff wait is something to stop; after it, nothing"
+  },
+  {
+    "name": "Every tuning input written as it already is, before any connection: the connection made later is the inputs'",
+    "params": {
+      "autoConnect": false,
+      "url": "wss://srv/b",
+      "maxQueueSize": 100,
+      "reconnectDelay": 1000,
+      "maxReconnectDelay": 30000,
+      "maxRetries": 10,
+      "jitter": true,
+      "heartbeatInterval": 0,
+      "heartbeatMessage": "ping",
+      "heartbeatReply": "pong",
+      "whenDisconnected": "queue",
+      "messageType": "auto",
+      "autoReconnect": true
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "connect"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :762-767 — a same value changes nothing; conn :335-350 the connection copies the node's config"
+  },
+  {
+    "name": "A URL written twice before the first frame: one socket, at that URL",
+    "params": {
+      "url": "ws://srv/only-here"
+    },
+    "steps": [
+      {
+        "set": "url",
+        "value": "ws://srv/only-here"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "sockets": {
+        "answers": [
+          {
+            "answer": {
+              "events": [
+                {
+                  "at": 1,
+                  "open": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "because": "ws :781-789 — one rebuild per frame"
+  }
+]

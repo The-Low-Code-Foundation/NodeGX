@@ -36,6 +36,7 @@ Any static or data-bound text: headings, labels, list-item fields, error message
 | `clickBubbling` | Enum (`auto`, `always`, `never`) | `auto` | Whether a click here also fires Click on the nodes this one sits inside. Automatic keeps it here as soon as this node's own Click is connected, so a button inside a clickable card runs the button and not the card; Always is the older behaviour where both run; Never keeps every click here, wired or not. Note that an element at zero opacity takes no pointer events at all |
 | `color` | Color | — | Colour of the text itself, not of the element behind it |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `dragKind` | String | — | Optional name for what this is — "card", "task". A zone with an Accept Kind only takes sources whose Drag Kind matches |
 | `dragValue` | * | — | What this element carries — usually the id of the item it shows. A drop zone reports it as Dropped Value |
 | `draggable` | Boolean | `false` | Lets a person pick this element up and drop it on an element with Accept Drops on. A see-through copy follows the pointer; the element itself stays put until the graph moves it |
@@ -60,11 +61,12 @@ Any static or data-bound text: headings, labels, list-item fields, error message
 | `minHeight` | Number | — | Smallest height the element may shrink to, taking priority over Height |
 | `minWidth` | Number | — | Smallest width the element may shrink to, taking priority over Width |
 | `mixBlendMode` | Enum (`normal`, `multiply`, `screen`, `overlay`, `darken`, `lighten`, `color-dodge`, `color-burn`, `hard-light`, `soft-light`, `difference`, `exclusion`, `hue`, `saturation`, `color`, `luminosity`) | `normal` | How this element's colours blend with whatever is painted behind it |
-| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
+| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen) |
 | `opacity` | Number | `1` | How opaque this element is, from 0 for invisible to 1 for solid |
 | `pointerEventsEnabled` | Boolean | `true` | When disabled, mouse and touch events pass through to whatever is behind this element |
 | `pointerEventsMode` | Enum (`inherit`, `explicit`) | `inherit` | Whether pointer handling is inherited from the parent or set explicitly on this element |
 | `position` | Enum (`relative`, `absolute`, `sticky`, `fixed`) | `relative` | How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `sizeMode` | Enum (`explicit`, `contentWidth`, `contentHeight`, `contentSize`) | `contentHeight` | Whether Width and Height are used as given, or the element sizes itself to fit its contents |
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
 | `text` | String | `Text` | The text to show; an empty value renders nothing rather than the words null or undefined |
@@ -84,6 +86,83 @@ Any static or data-bound text: headings, labels, list-item fields, error message
 | `width` | Dimension | `100` | Width of the element; how the value is read depends on Size Mode |
 | `wordBreak` | Enum (`normal`, `break-all`) | `normal` | Word break Control where line breaks are allowed - Normal: Break on spaces and other whitespace characters - Break All: Allow line breaks between any two characters, including inside words |
 | `zIndex` | Number | — | Paint order among overlapping siblings; higher numbers paint on top |
+
+### Signals
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
+
+### What each input does
+
+**Mounted** (`mounted`)
+
+- a change: the element is put on the page, or taken off it, at the next paint
+- the value it already holds: nothing
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the element can be seen
+
+**Tag** (`as`)
+
+- always: the HTML element the next paint draws (a div when empty) — a new Tag draws a new element
+
+**Visible** (`visible`)
+
+- always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer
+
+**Opacity** (`opacity`)
+
+- always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it
+
+**Pointer Events Mode** (`pointerEventsMode`)
+
+- Inherit: its own pointer style comes off
+- Explicit: the last Pointer Events Enabled is written back (on, before one was set)
+
+**Pointer Events Enabled** (`pointerEventsEnabled`)
+
+- always, whatever the mode: off, the pointer passes through to what is behind it
+
+**Draggable** (`draggable`)
+
+- always: on, every element it draws can be picked up, by pointer or keyboard; off, the one on the page cannot
+
+**Drag Value** (`dragValue`)
+
+- always: read by the zone it is dropped on, which reports it as Dropped Value
+
+**Drag Kind** (`dragKind`)
+
+- always: read by a zone with an Accept Kind as it is dragged over one
+
+**Hold To Drag** (`holdToDrag`)
+
+- always: read at the next press — whether it must be held before it picks up
+
+**Hold Time** (`holdTime`)
+
+- always: read at the next held press — how many seconds it is held before it picks up
+
+**Accept Drops** (`acceptDrops`)
+
+- on: a Draggable can be dropped here
+- off while a drag is over it: the drag leaves it — Is Drop Target goes false
+- off: nothing can be dropped here
+
+**Accept Kind** (`acceptKind`)
+
+- always: read as a drag comes over it — a source of another kind does not light it up
+
+**Accept File Drops** (`acceptFileDrops`)
+
+- on: a file dragged from the desktop can be dropped here
+- off: no file can be dropped here, and a drag over it is forgotten — Is Dragging Over goes false if it was true
+
+**Accepted file types** (`acceptedFileTypes`)
+
+- always: read at a drop — which files count as accepted
 
 ## Outputs
 
@@ -141,6 +220,7 @@ Declares conditional/expandable port groups whose visibility depends on paramete
 | acceptFileDrops = true | `acceptedFileTypes` | `filesDropped`, `filesRejected`, `droppedFile`, `droppedFiles`, `droppedFileName`, `droppedFileType`, `droppedFileSizeInBytes`, `isDragOver` |
 | draggable = true | `dragValue`, `dragKind`, `holdToDrag`, `holdTime` | `pickedUp`, `landed`, `dragCancelled`, `isLifted` |
 | acceptDrops = true | `acceptKind`, `makeRoom`, `dropZoneName` | `dropped`, `droppedValue`, `dropIndex`, `isDropTarget` |
+| — | — | — |
 
 ## Ports at runtime
 

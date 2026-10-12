@@ -14,16 +14,6 @@
           "type": "boolean"
         },
         {
-          "name": "mathsWord",
-          "plug": "output",
-          "type": "string"
-        },
-        {
-          "name": "typingWord",
-          "plug": "output",
-          "type": "string"
-        },
-        {
           "name": "onePlayerWord",
           "plug": "output",
           "type": "string"
@@ -62,22 +52,138 @@
           "name": "challengeRuleWord",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "practisingWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "changeWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "app",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "curriculum",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "sets",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "level",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "subject0",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "skills0",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "everythingWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "countWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "listWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "titleWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "subjectWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "topicWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "skillsHint",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "allWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "noneWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "saveWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cancelWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "listsWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "editListsWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "noListsWord",
+          "plug": "output",
+          "type": "string"
         }
       ],
-      "x": 350,
-      "y": 1840
+      "x": 470,
+      "y": 1960
     },
     {
       "id": "rsCard",
       "type": "Group",
       "label": "The setup",
       "children": [
-        "rsMode",
-        "rsPlayers",
-        "rsTimed",
-        "rsRule",
-        "rsNameB",
-        "rsStart"
+        "rsRows",
+        "rsPicker"
       ],
       "parameters": {
         "width": {
@@ -120,48 +226,196 @@
       "y": 40
     },
     {
-      "id": "rsMode",
-      "type": "/Game/Choice row",
-      "label": "Maths or typing",
+      "id": "rsRows",
+      "type": "Group",
+      "label": "The setup rows",
       "parent": "rsCard",
+      "children": [
+        "rsFocusRow",
+        "rsPlayers",
+        "rsTimed",
+        "rsRule",
+        "rsNameB",
+        "rsStart"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)"
+      },
       "x": 100,
       "y": 160
+    },
+    {
+      "id": "rsFocusRow",
+      "type": "Group",
+      "label": "What to practise",
+      "parent": "rsRows",
+      "children": [
+        "rsFocusLabel",
+        "rsFocusLine",
+        "rsChange"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "rsFocusLabel",
+      "type": "Text",
+      "label": "Practising",
+      "parent": "rsFocusRow",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "rsFocusLine",
+      "type": "Text",
+      "label": "The focus, in words",
+      "parent": "rsFocusRow",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "rsChange",
+      "type": "net.noodl.controls.button",
+      "label": "Change what to practise",
+      "parent": "rsFocusRow",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Change"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "rsPicker",
+      "type": "/Game/Focus picker",
+      "label": "The chooser",
+      "parent": "rsCard",
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "rsFocus",
+      "type": "/Logic/Resolve focus",
+      "label": "What to practise, resolved",
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "rsSetFocus",
+      "type": "/Logic/Update settings",
+      "label": "Keep what the chooser saved",
+      "x": 470,
+      "y": 2080
+    },
+    {
+      "id": "rsChoosing",
+      "type": "States",
+      "label": "The setup, or the chooser",
+      "parameters": {
+        "states": "setup,picking",
+        "values": "setup,picking",
+        "useTransitions": false,
+        "type-setup": "boolean",
+        "value-setup-setup": true,
+        "value-picking-setup": false,
+        "type-picking": "boolean",
+        "value-setup-picking": false,
+        "value-picking-picking": true
+      },
+      "x": 470,
+      "y": 280
     },
     {
       "id": "rsPlayers",
       "type": "/Game/Choice row",
       "label": "One or two",
-      "parent": "rsCard",
-      "x": 100,
-      "y": 280
+      "parent": "rsRows",
+      "x": 160,
+      "y": 760
     },
     {
       "id": "rsTimed",
       "type": "/Game/Choice row",
       "label": "Practice or challenge",
-      "parent": "rsCard",
-      "x": 100,
-      "y": 400
+      "parent": "rsRows",
+      "x": 160,
+      "y": 880
     },
     {
       "id": "rsRule",
       "type": "Text",
       "label": "What this mode rewards",
-      "parent": "rsCard",
+      "parent": "rsRows",
       "parameters": {
         "text": "",
         "sizeMode": "contentHeight",
         "fontSize": "var(--text-sm)",
         "color": "var(--muted-foreground)"
       },
-      "x": 100,
-      "y": 520
+      "x": 160,
+      "y": 1000
     },
     {
       "id": "rsNameB",
       "type": "net.noodl.controls.textinput",
       "label": "Player two's name",
-      "parent": "rsCard",
+      "parent": "rsRows",
       "parameters": {
         "sizeMode": "contentHeight",
         "width": {
@@ -182,14 +436,14 @@
         "paddingRight": "var(--space-3)",
         "placeholder": "Player 2"
       },
-      "x": 100,
-      "y": 640
+      "x": 160,
+      "y": 1120
     },
     {
       "id": "rsStart",
       "type": "net.noodl.controls.button",
       "label": "Start",
-      "parent": "rsCard",
+      "parent": "rsRows",
       "parameters": {
         "backgroundColor": "var(--primary)",
         "color": "var(--primary-foreground)",
@@ -221,41 +475,8 @@
         "boxShadowColor": "var(--foreground)",
         "label": "Start"
       },
-      "x": 100,
-      "y": 760
-    },
-    {
-      "id": "rsModeItems",
-      "type": "JavaScriptFunction",
-      "label": "The two modes, in words",
-      "parameters": {
-        "functionScript": "Outputs.items = [{ label: Inputs.maths, value: 'maths' }, { label: Inputs.typing, value: 'typing' }];"
-      },
-      "x": 350,
-      "y": 280,
-      "ports": [
-        {
-          "name": "in-maths",
-          "displayName": "maths",
-          "plug": "input",
-          "type": "*",
-          "group": "Inputs"
-        },
-        {
-          "name": "in-typing",
-          "displayName": "typing",
-          "plug": "input",
-          "type": "*",
-          "group": "Inputs"
-        },
-        {
-          "name": "out-items",
-          "displayName": "items",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        }
-      ]
+      "x": 160,
+      "y": 1240
     },
     {
       "id": "rsPlayerItems",
@@ -264,8 +485,8 @@
       "parameters": {
         "functionScript": "Outputs.items = [{ label: Inputs.one, value: '1' }, { label: Inputs.two, value: '2' }];"
       },
-      "x": 350,
-      "y": 640,
+      "x": 470,
+      "y": 760,
       "ports": [
         {
           "name": "in-one",
@@ -297,8 +518,8 @@
       "parameters": {
         "functionScript": "Outputs.items = [{ label: Inputs.practice, value: 'practice' }, { label: Inputs.challenge, value: 'challenge' }];"
       },
-      "x": 350,
-      "y": 1000,
+      "x": 470,
+      "y": 1120,
       "ports": [
         {
           "name": "in-practice",
@@ -324,34 +545,14 @@
       ]
     },
     {
-      "id": "rsModeVar",
-      "type": "Variable2",
-      "label": "The mode",
-      "parameters": {
-        "name": "raceMode"
-      },
-      "x": 350,
-      "y": 400
-    },
-    {
-      "id": "rsSetMode",
-      "type": "Set Variable",
-      "label": "Choose a mode",
-      "parameters": {
-        "name": "raceMode"
-      },
-      "x": 350,
-      "y": 520
-    },
-    {
       "id": "rsPlayersVar",
       "type": "Variable2",
       "label": "How many",
       "parameters": {
         "name": "racePlayers"
       },
-      "x": 350,
-      "y": 760
+      "x": 470,
+      "y": 880
     },
     {
       "id": "rsSetPlayers",
@@ -360,8 +561,8 @@
       "parameters": {
         "name": "racePlayers"
       },
-      "x": 350,
-      "y": 880
+      "x": 470,
+      "y": 1000
     },
     {
       "id": "rsTimedVar",
@@ -370,8 +571,8 @@
       "parameters": {
         "name": "raceTimed"
       },
-      "x": 350,
-      "y": 1120
+      "x": 470,
+      "y": 1240
     },
     {
       "id": "rsSetTimed",
@@ -380,8 +581,8 @@
       "parameters": {
         "name": "raceTimed"
       },
-      "x": 350,
-      "y": 1240
+      "x": 470,
+      "y": 1360
     },
     {
       "id": "rsNameKeep",
@@ -390,8 +591,8 @@
       "parameters": {
         "name": "raceNameB"
       },
-      "x": 350,
-      "y": 1480
+      "x": 470,
+      "y": 1600
     },
     {
       "id": "rsIsTwo",
@@ -400,8 +601,8 @@
       "parameters": {
         "expression": "players === '2'"
       },
-      "x": 350,
-      "y": 1600
+      "x": 470,
+      "y": 1720
     },
     {
       "id": "rsPlayersNum",
@@ -410,8 +611,8 @@
       "parameters": {
         "expression": "players === '2' ? 2 : 1"
       },
-      "x": 350,
-      "y": 1960
+      "x": 470,
+      "y": 2200
     },
     {
       "id": "rsIsTimed",
@@ -420,8 +621,8 @@
       "parameters": {
         "expression": "timed === 'challenge'"
       },
-      "x": 350,
-      "y": 2080
+      "x": 470,
+      "y": 2320
     },
     {
       "id": "rsRuleText",
@@ -430,8 +631,8 @@
       "parameters": {
         "expression": "timed === 'challenge' ? challenge : practice"
       },
-      "x": 350,
-      "y": 1360
+      "x": 470,
+      "y": 1480
     },
     {
       "id": "rsShown",
@@ -440,18 +641,8 @@
       "parameters": {
         "expression": "m !== false"
       },
-      "x": 350,
+      "x": 470,
       "y": 40
-    },
-    {
-      "id": "rsDefMode",
-      "type": "Expression",
-      "label": "maths",
-      "parameters": {
-        "expression": "'maths'"
-      },
-      "x": 350,
-      "y": 2200
     },
     {
       "id": "rsDefPlayers",
@@ -460,8 +651,8 @@
       "parameters": {
         "expression": "'1'"
       },
-      "x": 350,
-      "y": 2320
+      "x": 470,
+      "y": 2440
     },
     {
       "id": "rsDefTimed",
@@ -470,17 +661,7 @@
       "parameters": {
         "expression": "'practice'"
       },
-      "x": 350,
-      "y": 2440
-    },
-    {
-      "id": "rsInitMode",
-      "type": "Set Variable",
-      "label": "Start on maths",
-      "parameters": {
-        "name": "raceMode"
-      },
-      "x": 350,
+      "x": 470,
       "y": 2560
     },
     {
@@ -490,7 +671,7 @@
       "parameters": {
         "name": "racePlayers"
       },
-      "x": 350,
+      "x": 470,
       "y": 2680
     },
     {
@@ -500,7 +681,7 @@
       "parameters": {
         "name": "raceTimed"
       },
-      "x": 350,
+      "x": 470,
       "y": 2800
     },
     {
@@ -515,7 +696,7 @@
         "value-fresh-seeded": false,
         "value-seeded-seeded": true
       },
-      "x": 350,
+      "x": 470,
       "y": 2920
     },
     {
@@ -525,7 +706,7 @@
       "parameters": {
         "runOnChange-condition": false
       },
-      "x": 350,
+      "x": 470,
       "y": 160
     },
     {
@@ -537,11 +718,6 @@
           "name": "start",
           "plug": "input",
           "type": "signal"
-        },
-        {
-          "name": "mode",
-          "plug": "input",
-          "type": "string"
         },
         {
           "name": "players",
@@ -557,10 +733,50 @@
           "name": "nameB",
           "plug": "input",
           "type": "string"
+        },
+        {
+          "name": "app",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "write",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "mode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "focus",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "customSet",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "customSetId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "customSetBoth",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "editLists",
+          "plug": "input",
+          "type": "signal"
         }
       ],
-      "x": 350,
-      "y": 1720
+      "x": 470,
+      "y": 1840
     }
   ],
   "visualRoots": [

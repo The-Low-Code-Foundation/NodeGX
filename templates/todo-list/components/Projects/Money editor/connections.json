@@ -1,0 +1,415 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9280dab8-d0c7-5470-8264-946119948d5e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "meIn",
+      "fromProperty": "heading",
+      "toId": "meHead",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "label",
+      "toId": "meLabel",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "amount",
+      "toId": "meAmount",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "likelihood",
+      "toId": "meLikelihood",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "note",
+      "toId": "meNote",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "dir",
+      "toId": "meDir",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "repeat",
+      "toId": "meRepeat",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "date",
+      "toId": "meDate",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "until",
+      "toId": "meUntil",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "projectOptions",
+      "toId": "meProject",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "projectId",
+      "toId": "meProject",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "meDirIn",
+      "fromProperty": "onClick",
+      "toId": "meDir",
+      "toProperty": "to-in"
+    },
+    {
+      "fromId": "meDir",
+      "fromProperty": "inBg",
+      "toId": "meDirIn",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "meDirOut",
+      "fromProperty": "onClick",
+      "toId": "meDir",
+      "toProperty": "to-out"
+    },
+    {
+      "fromId": "meDir",
+      "fromProperty": "outBg",
+      "toId": "meDirOut",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "meOnce",
+      "fromProperty": "onClick",
+      "toId": "meRepeat",
+      "toProperty": "to-once"
+    },
+    {
+      "fromId": "meRepeat",
+      "fromProperty": "onceBg",
+      "toId": "meOnce",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "meWeekly",
+      "fromProperty": "onClick",
+      "toId": "meRepeat",
+      "toProperty": "to-weekly"
+    },
+    {
+      "fromId": "meRepeat",
+      "fromProperty": "weeklyBg",
+      "toId": "meWeekly",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "meMonthly",
+      "fromProperty": "onClick",
+      "toId": "meRepeat",
+      "toProperty": "to-monthly"
+    },
+    {
+      "fromId": "meRepeat",
+      "fromProperty": "monthlyBg",
+      "toId": "meMonthly",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "meQuarterly",
+      "fromProperty": "onClick",
+      "toId": "meRepeat",
+      "toProperty": "to-quarterly"
+    },
+    {
+      "fromId": "meRepeat",
+      "fromProperty": "quarterlyBg",
+      "toId": "meQuarterly",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "meYearly",
+      "fromProperty": "onClick",
+      "toId": "meRepeat",
+      "toProperty": "to-yearly"
+    },
+    {
+      "fromId": "meRepeat",
+      "fromProperty": "yearlyBg",
+      "toId": "meYearly",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "meRepeat",
+      "fromProperty": "currentState",
+      "toId": "meShape",
+      "toProperty": "in-repeat"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "isNew",
+      "toId": "meShape",
+      "toProperty": "in-isNew"
+    },
+    {
+      "fromId": "meShape",
+      "fromProperty": "out-untilShown",
+      "toId": "meUntilBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "meShape",
+      "fromProperty": "out-dateLabel",
+      "toId": "meDate",
+      "toProperty": "Label"
+    },
+    {
+      "fromId": "meShape",
+      "fromProperty": "out-existing",
+      "toId": "meEnd",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "meShape",
+      "fromProperty": "out-existing",
+      "toId": "meEndHint",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "endLabel",
+      "toId": "meEnd",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "endHint",
+      "toId": "meEndHint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "label",
+      "toId": "meCheck",
+      "toProperty": "in-label"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "dir",
+      "toId": "meCheck",
+      "toProperty": "in-dir"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "amount",
+      "toId": "meCheck",
+      "toProperty": "in-amount"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "repeat",
+      "toId": "meCheck",
+      "toProperty": "in-repeat"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "date",
+      "toId": "meCheck",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "until",
+      "toId": "meCheck",
+      "toProperty": "in-until"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "projectId",
+      "toId": "meCheck",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "likelihood",
+      "toId": "meCheck",
+      "toProperty": "in-likelihood"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "note",
+      "toId": "meCheck",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "meLabel",
+      "fromProperty": "onTextChanged",
+      "toId": "meCheck",
+      "toProperty": "in-typedLabel"
+    },
+    {
+      "fromId": "meDir",
+      "fromProperty": "currentState",
+      "toId": "meCheck",
+      "toProperty": "in-pickedDir"
+    },
+    {
+      "fromId": "meAmount",
+      "fromProperty": "onTextChanged",
+      "toId": "meCheck",
+      "toProperty": "in-typedAmount"
+    },
+    {
+      "fromId": "meRepeat",
+      "fromProperty": "currentState",
+      "toId": "meCheck",
+      "toProperty": "in-pickedRepeat"
+    },
+    {
+      "fromId": "meDate",
+      "fromProperty": "Value",
+      "toId": "meCheck",
+      "toProperty": "in-pickedDate"
+    },
+    {
+      "fromId": "meUntil",
+      "fromProperty": "Value",
+      "toId": "meCheck",
+      "toProperty": "in-pickedUntil"
+    },
+    {
+      "fromId": "meProject",
+      "fromProperty": "value",
+      "toId": "meCheck",
+      "toProperty": "in-pickedProject"
+    },
+    {
+      "fromId": "meLikelihood",
+      "fromProperty": "onTextChanged",
+      "toId": "meCheck",
+      "toProperty": "in-typedLikelihood"
+    },
+    {
+      "fromId": "meNote",
+      "fromProperty": "onTextChanged",
+      "toId": "meCheck",
+      "toProperty": "in-typedNote"
+    },
+    {
+      "fromId": "meLabel",
+      "fromProperty": "didMount",
+      "toId": "meLabel",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "meSave",
+      "fromProperty": "onClick",
+      "toId": "meCheck",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "meCheck",
+      "fromProperty": "out-error",
+      "toId": "meError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "meCheck",
+      "fromProperty": "out-hasError",
+      "toId": "meError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "meCheck",
+      "fromProperty": "out-label",
+      "toId": "meOut",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "meCheck",
+      "fromProperty": "out-dir",
+      "toId": "meOut",
+      "toProperty": "dir"
+    },
+    {
+      "fromId": "meCheck",
+      "fromProperty": "out-amount",
+      "toId": "meOut",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "meCheck",
+      "fromProperty": "out-repeat",
+      "toId": "meOut",
+      "toProperty": "repeat"
+    },
+    {
+      "fromId": "meCheck",
+      "fromProperty": "out-date",
+      "toId": "meOut",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "meCheck",
+      "fromProperty": "out-until",
+      "toId": "meOut",
+      "toProperty": "until"
+    },
+    {
+      "fromId": "meCheck",
+      "fromProperty": "out-projectId",
+      "toId": "meOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "meCheck",
+      "fromProperty": "out-likelihood",
+      "toId": "meOut",
+      "toProperty": "likelihood"
+    },
+    {
+      "fromId": "meCheck",
+      "fromProperty": "out-note",
+      "toId": "meOut",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "meIn",
+      "fromProperty": "key",
+      "toId": "meOut",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "meCheck",
+      "fromProperty": "out-go",
+      "toId": "meOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "meCancel",
+      "fromProperty": "onClick",
+      "toId": "meOut",
+      "toProperty": "cancel"
+    },
+    {
+      "fromId": "meEnd",
+      "fromProperty": "onClick",
+      "toId": "meOut",
+      "toProperty": "end"
+    }
+  ]
+}

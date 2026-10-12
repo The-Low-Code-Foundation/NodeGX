@@ -667,7 +667,8 @@ export interface NodeContextLike {
    * No-ops (resolving immediately) where no popup layer is attached, e.g. the cloud
    * runtime.
    */
-  showPopup(popupComponent: string, params: Record<string, unknown>, args?: unknown): Promise<void>;
+  /** Resolves `'dismissed'` for a popup replaced before it opened: its opener already heard Dismissed (P107-C32). */
+  showPopup(popupComponent: string, params: Record<string, unknown>, args?: unknown): Promise<'dismissed' | void>;
   /**
    * Runs `callback` at the end of the current update, once every dirty node has been
    * processed. The escape hatch for work that needs the whole node tree to exist — the
@@ -1236,6 +1237,8 @@ export interface NodeDefinitionOptions {
   version?: string;
   /** Hides the node from the picker while keeping existing projects working. */
   deprecated?: boolean;
+  /** For a deprecated node: the type that replaced it, which the agent's checker names (P107 R25). */
+  replacedBy?: string;
   /** Server-side-rendering compatibility. Absent means `safe`. */
   ssr?: NodeSSRCompat;
 
@@ -1386,6 +1389,7 @@ export interface NodeMetadata {
   module?: string;
   version?: string;
   deprecated?: boolean;
+  replacedBy?: string;
   /** Server-side-rendering compatibility. Absent means `safe`. */
   ssr?: NodeSSRCompat;
 

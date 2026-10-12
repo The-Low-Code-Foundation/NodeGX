@@ -1,0 +1,90 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7fa0af01-5d12-5f10-8676-24334cb07482",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "oliveplayedIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "answer",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "run",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "oliveplayedFn",
+      "type": "JavaScriptFunction",
+      "label": "Olive played",
+      "parameters": {
+        "functionScript": "\nvar RUNG_OF = {\"say-thanks\":1,\"read\":2,\"is-it-a\":3};\nvar a = Inputs.answer && typeof Inputs.answer === 'object' ? Inputs.answer : null;\nvar run = Inputs.run && typeof Inputs.run === 'object' ? Inputs.run : null;\nvar runId = run && run.runId !== undefined && run.runId !== null ? String(run.runId) : '';\nvar mine = !!a && a.sent === true && runId !== '' && String(a.run) === runId && String(a.rung) !== 'voice-hint';\nOutputs.oliveRung = mine ? RUNG_OF[String(a.rung)] || 0 : 0;\nOutputs.oliveFallback = mine && a.fallback === true;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-answer",
+          "displayName": "answer",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-run",
+          "displayName": "run",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-oliveRung",
+          "displayName": "oliveRung",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveFallback",
+          "displayName": "oliveFallback",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "oliveplayedOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "oliveFallback",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "oliveRung",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

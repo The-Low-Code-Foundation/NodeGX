@@ -9,8 +9,18 @@ import { describeUpgradeReport, UpgradeFile, upgradeOnLoad } from '@noodl-models
 import { filesystem } from '@noodl/platform';
 import { projectStructureService } from '../services/ProjectStructure';
 import { isV2FormatEnabled } from '../services/ProjectStructure/featureFlags';
+import { RUN_ON_VALUE_CHANGE_FORMAT_VERSION } from '@noodl-models/ProjectPatches/runOnValueChangeMigration';
+import {
+  describeFormatCopy,
+  describeFormatCopyFailure,
+  FORMAT_COPY_SUFFIX,
+  owesFormatCopy
+} from '@noodl-models/ProjectPatches/formatCopy';
 
-const supportedProjectVersion = 4;
+// P109 ISL-018: the newest project format this editor opens. 5 = the run-on-value-change migration ran (a one-time
+// step, `ProjectModel.Upgraders[4]`). It moves with that constant: a project an older editor cannot read is refused
+// below rather than opened and mis-read, and an editor that writes 5 must open what it wrote.
+const supportedProjectVersion = Number(RUN_ON_VALUE_CHANGE_FORMAT_VERSION);
 
 export function projectFromDirectory(projectdir: string, callback: (project?: ProjectModel) => void, args?: TSFixme) {
   bugtracker.debug('ProjectModel.fromDirectory');
@@ -20,6 +30,14 @@ export function projectFromDirectory(projectdir: string, callback: (project?: Pr
   // importer reconstructs exactly the same shape `fromJSON` and `applyPatches`
   // already consume, so everything downstream is format-agnostic.
   const openFromContent = (content: TSFixme, format: 'legacy' | 'v2') => {
+    // P112 OWN-013 (R17) — read before anything patches `content`. Not owed for a project read only
+    // as an import source (nothing saves it), nor for a folder that was a template a moment ago
+    // (`copyBeforeFormatUpdate: false`: a new project, an unzipped one — no work in it to keep).
+    const formatCopyOwed =
+      args?.upgradeOnLoad !== false &&
+      args?.copyBeforeFormatUpdate !== false &&
+      owesFormatCopy(content.version, supportedProjectVersion);
+
     const build = (loaded: TSFixme, upgraded: boolean) => {
       // Disable model listeners while loading project, otherwise this will bog down large projects
       Model._listenersEnabled = false;
@@ -51,6 +69,27 @@ export function projectFromDirectory(projectdir: string, callback: (project?: Pr
       // Upgraded on a copy, because whether a backup is owed is only known once something changed.
       const upgradedContent = JSON.parse(JSON.stringify(content));
       const { sections, files } = upgradeOnLoad(upgradedContent);
+      if (sections.length === 0 && formatCopyOwed) {
+        // R17: the format step alone. The copy comes before the save that makes 0.3 refuse the
+        // project, and `build(…, true)` makes that save at once, so the copy is made only once.
+        backupBeforeUpgrade(projectdir, FORMAT_COPY_SUFFIX).then(
+          (backupPath) => {
+            const { title, message } = describeFormatCopy(backupPath);
+            ToastLayer.showInfo(message, { title, duration: Infinity, id: 'project-upgrade-report' });
+            build(content, true);
+          },
+          (err) => {
+            // Not opened: opening converts it, and converting with no way back is what R17 and
+            // P100 R10 rule out. A 4 left as 4 is not an option either — the runtime would read
+            // every unticked-by-omission input as ticked (the double send NDA-017 was about).
+            console.error('[upgrade] could not copy the project before its format update; not opened', err);
+            ToastLayer.showError(describeFormatCopyFailure(err?.message ?? String(err)));
+            callback();
+          }
+        );
+        return;
+      }
+      // A 0.2 project takes the branch below: its `.before-0.3` copy is made before any save too.
       if (sections.length === 0) return build(content, false);
 
       // R10: the files as they were, beside the project, before the upgrade is saved over them —
@@ -185,13 +224,33 @@ export function projectFromDirectory(projectdir: string, callback: (project?: Pr
 }
 
 /**
- * P100 R10 — copy the project folder to a unique sibling (`<project>.before-0.3`) and check the copy
- * holds a project file. Same mechanism as the v2 migrator's backup (`ProjectMigrator`), so an
- * upgrade is undone the same way: put the folder back.
+ * P100 R10 — copy the project folder to a unique sibling (`<project>.before-0.3`, or `.before-0.4`
+ * before the format step alone — P112 R17) and check the copy holds a project file. Same mechanism
+ * as the v2 migrator's backup (`ProjectMigrator`), so an upgrade is undone the same way: put the
+ * folder back.
  */
-async function backupBeforeUpgrade(projectdir: string): Promise<string> {
+async function backupBeforeUpgrade(projectdir: string, suffix = '.before-0.3'): Promise<string> {
+  const key = `${projectdir}\n${suffix}`;
+  const made = await copiesMadeThisRun.get(key)?.catch(() => undefined);
+  if (made && filesystem.exists(made)) return made;
+  const making = copyProjectFolder(projectdir, suffix);
+  copiesMadeThisRun.set(key, making);
+  making.catch(() => copiesMadeThisRun.delete(key));
+  return making;
+}
+
+/**
+ * P112 s12 — one copy per folder per editor run. *Open project…* loads the folder twice
+ * (`openProjectFromFolder`, then `loadProject`), both before the first save, so each load made its
+ * own copy: `Desk A.before-0.4` and `Desk A.before-0.4-1`, identical, in the same second (measured
+ * 2026-10-12; `CMG Drive Tokens.before-0.3-1` says 0.3.0's copy did the same). A later load in the
+ * same run that still owes a copy reuses the first one while it exists.
+ */
+const copiesMadeThisRun = new Map<string, Promise<string>>();
+
+async function copyProjectFolder(projectdir: string, suffix: string): Promise<string> {
   const backupPath = filesystem.makeUniquePath(
-    filesystem.join(filesystem.dirname(projectdir), `${filesystem.basename(projectdir)}.before-0.3`)
+    filesystem.join(filesystem.dirname(projectdir), `${filesystem.basename(projectdir)}${suffix}`)
   );
   await filesystem.copyFolder(projectdir, backupPath);
   const holdsProject = ['project.json', 'nodegx.project.json'].some((f) =>
@@ -253,7 +312,7 @@ export async function unzipIntoDirectory(
     return;
   }
 
-  // Project extracted successfully, load it
+  // Project extracted successfully, load it. A folder unzipped a moment ago holds no work to copy (R17).
   projectFromDirectory(dirEntry, function (project) {
     if (!project) {
       callback({
@@ -279,7 +338,7 @@ export async function unzipIntoDirectory(
           message: 'Failed to clone project'
         });
     });
-  });
+  }, { copyBeforeFormatUpdate: false });
 }
 
 export function setCloudServices(project: ProjectModel, b: CloudServiceMetadata) {

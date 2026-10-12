@@ -64,16 +64,6 @@
           "type": "boolean"
         },
         {
-          "name": "canUp",
-          "plug": "output",
-          "type": "boolean"
-        },
-        {
-          "name": "canDown",
-          "plug": "output",
-          "type": "boolean"
-        },
-        {
           "name": "checkBg",
           "plug": "output",
           "type": "string"
@@ -90,7 +80,7 @@
         }
       ],
       "x": 470,
-      "y": 280
+      "y": 520
     },
     {
       "id": "arOut",
@@ -104,16 +94,6 @@
         },
         {
           "name": "untick",
-          "plug": "input",
-          "type": "signal"
-        },
-        {
-          "name": "up",
-          "plug": "input",
-          "type": "signal"
-        },
-        {
-          "name": "down",
           "plug": "input",
           "type": "signal"
         },
@@ -159,7 +139,7 @@
         }
       ],
       "x": 470,
-      "y": 880
+      "y": 760
     },
     {
       "id": "arRoot",
@@ -176,6 +156,7 @@
         "borderBottomStyle": "solid",
         "borderBottomWidth": "var(--border-1)",
         "borderBottomColor": "var(--border-subtle)",
+        "cssClassName": "todo-drag-row",
         "paddingTop": "var(--space-1)",
         "paddingBottom": "var(--space-1)"
       },
@@ -204,14 +185,56 @@
         "columnGap": "var(--space-2)"
       },
       "children": [
+        "arGripSlot",
         "arNum",
         "arCheck",
         "arTitle",
-        "arDescOpen",
-        "arMove"
+        "arDescOpen"
       ],
       "x": 100,
       "y": 160
+    },
+    {
+      "id": "arGripSlot",
+      "type": "Group",
+      "label": "Where the grip goes",
+      "parent": "arTop",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 24,
+          "unit": "px"
+        },
+        "height": {
+          "value": 32,
+          "unit": "px"
+        }
+      },
+      "children": [
+        "arGrip"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "arGrip",
+      "type": "Group",
+      "label": "Drag to move",
+      "parent": "arGripSlot",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 24,
+          "unit": "px"
+        },
+        "height": {
+          "value": 32,
+          "unit": "px"
+        },
+        "cssClassName": "todo-drag-handle"
+      },
+      "x": 220,
+      "y": 400
     },
     {
       "id": "arNum",
@@ -231,7 +254,7 @@
         "fontVariantNumeric": "tabular-nums"
       },
       "x": 160,
-      "y": 280
+      "y": 520
     },
     {
       "id": "arCheck",
@@ -262,7 +285,7 @@
         "paddingBottom": "var(--space-0)"
       },
       "x": 160,
-      "y": 400
+      "y": 640
     },
     {
       "id": "arTitle",
@@ -290,7 +313,7 @@
         "paddingBottom": "var(--space-1)"
       },
       "x": 160,
-      "y": 520
+      "y": 760
     },
     {
       "id": "arDescOpen",
@@ -311,66 +334,7 @@
         "paddingRight": "var(--space-2)"
       },
       "x": 160,
-      "y": 640
-    },
-    {
-      "id": "arMove",
-      "type": "Group",
-      "label": "Move buttons",
-      "parent": "arTop",
-      "parameters": {
-        "flexDirection": "row",
-        "alignItems": "center",
-        "sizeMode": "contentSize"
-      },
-      "children": [
-        "arUp",
-        "arDown"
-      ],
-      "x": 160,
-      "y": 760
-    },
-    {
-      "id": "arUp",
-      "type": "net.noodl.controls.button",
-      "label": "Move up",
-      "parent": "arMove",
-      "parameters": {
-        "backgroundColor": "transparent",
-        "color": "var(--muted-foreground)",
-        "borderStyle": "none",
-        "borderRadius": "var(--radius-md)",
-        "paddingTop": "var(--space-1)",
-        "paddingBottom": "var(--space-1)",
-        "sizeMode": "contentSize",
-        "label": "▲",
-        "fontSize": "var(--text-base)",
-        "paddingLeft": "var(--space-2)",
-        "paddingRight": "var(--space-2)"
-      },
-      "x": 220,
       "y": 880
-    },
-    {
-      "id": "arDown",
-      "type": "net.noodl.controls.button",
-      "label": "Move down",
-      "parent": "arMove",
-      "parameters": {
-        "backgroundColor": "transparent",
-        "color": "var(--muted-foreground)",
-        "borderStyle": "none",
-        "borderRadius": "var(--radius-md)",
-        "paddingTop": "var(--space-1)",
-        "paddingBottom": "var(--space-1)",
-        "sizeMode": "contentSize",
-        "label": "▼",
-        "fontSize": "var(--text-base)",
-        "paddingLeft": "var(--space-2)",
-        "paddingRight": "var(--space-2)"
-      },
-      "x": 220,
-      "y": 1000
     },
     {
       "id": "arPreview",
@@ -385,14 +349,14 @@
           "unit": "%"
         },
         "rowGap": "var(--space-0)",
-        "paddingLeft": 62,
+        "paddingLeft": 94,
         "mounted": false
       },
       "children": [
         "arPreviewText"
       ],
       "x": 100,
-      "y": 1120
+      "y": 1000
     },
     {
       "id": "arPreviewText",
@@ -410,7 +374,7 @@
         }
       },
       "x": 160,
-      "y": 1240
+      "y": 1120
     },
     {
       "id": "arEditor",
@@ -425,7 +389,7 @@
           "unit": "%"
         },
         "rowGap": "var(--space-1)",
-        "paddingLeft": 62,
+        "paddingLeft": 94,
         "paddingBottom": "var(--space-2)",
         "mounted": false
       },
@@ -434,7 +398,7 @@
         "arSave"
       ],
       "x": 100,
-      "y": 1360
+      "y": 1240
     },
     {
       "id": "arDescField",
@@ -462,7 +426,7 @@
         "placeholder": "Add a description"
       },
       "x": 160,
-      "y": 1480
+      "y": 1360
     },
     {
       "id": "arSave",
@@ -486,7 +450,7 @@
         "label": "Save"
       },
       "x": 160,
-      "y": 1600
+      "y": 1480
     },
     {
       "id": "arNote",
@@ -503,13 +467,13 @@
           "unit": "%"
         },
         "marginLeft": {
-          "value": 62,
+          "value": 94,
           "unit": "px"
         },
         "marginBottom": "var(--space-1)"
       },
       "x": 100,
-      "y": 1720
+      "y": 1600
     },
     {
       "id": "arWhich",
@@ -519,7 +483,7 @@
         "runOnChange-condition": false
       },
       "x": 470,
-      "y": 400
+      "y": 640
     }
   ],
   "visualRoots": [

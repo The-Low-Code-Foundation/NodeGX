@@ -1,0 +1,116 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a41cb61e-5617-54f8-8e2c-e94c7399c8b2",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "llIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "q",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "a",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "check",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "llBox",
+      "type": "Group",
+      "label": "The answer",
+      "children": [
+        "llQ",
+        "llA",
+        "llCheck"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-0-5)",
+        "cssClassName": "bg-lesson-line"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "llQ",
+      "type": "Text",
+      "label": "The question",
+      "parent": "llBox",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "llA",
+      "type": "Text",
+      "label": "What Olive said",
+      "parent": "llBox",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "fontWeight": "700",
+        "cssClassName": "bg-lesson-said"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "llCheck",
+      "type": "Text",
+      "label": "The check",
+      "parent": "llBox",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 15,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "cssClassName": "bg-lesson-check"
+      },
+      "x": 100,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "llBox"
+  ]
+}

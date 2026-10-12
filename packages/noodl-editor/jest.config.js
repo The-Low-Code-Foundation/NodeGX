@@ -66,6 +66,9 @@ module.exports = {
     // …and the root, for the pre-flight modal's one value import (`plainReason`). Only the modal
     // spec reaches it, and that spec already compiles the exporter to build its summaries.
     '^@nodegx/export$': '<rootDir>/../nodegx-export/src/index.ts',
+    // NSP-019: the spec package's browser entry (the interpreter and every spec; no `fs`), by source —
+    // its package `main` is a gitignored `dist/`. Only `propertyeditor/spec/tryNodeModel.ts` names it.
+    '^@nodegx/node-spec$': '<rootDir>/../nodegx-node-spec/src/browser.ts',
     // FIX-003: the AI link policy moved to its neutral home in core-ui
     // (`components/ai/AiMarkdown/linkActions`). Mapping the alias does NOT make
     // core-ui's components importable here — anything that names React or a

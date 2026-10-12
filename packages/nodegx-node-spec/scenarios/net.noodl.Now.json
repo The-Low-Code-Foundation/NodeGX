@@ -1,0 +1,26 @@
+[
+  {
+    "name": "created at time 0: the first settle publishes the epoch three ways, no pulse",
+    "because": "now.ts :45-47 initialize reads Date.now() — the world's clock at 0 (world.ts CLOCK); the connection-time read hands a wire the getters' values",
+    "params": {},
+    "steps": ["settle"]
+  },
+  {
+    "name": "Read after the clock moved 1500 ms: all three outputs move to 1.5 s, done",
+    "because": "now.ts :98-107 _read; :99 `new Date(Date.now())`",
+    "params": {},
+    "steps": ["settle", { "advance": 1500 }, { "signal": "read" }, "settle"]
+  },
+  {
+    "name": "Read without time passing re-reads the same instant: nothing on the wire, done",
+    "because": "now.ts :84-85 no Unchanged — the re-read happens; the wire sees no new value (adapter.ts)",
+    "params": {},
+    "steps": ["settle", { "signal": "read" }, "settle"]
+  },
+  {
+    "name": "two Reads in one frame after 42 ms: one value on the wire, two dones; a later Read after 0 ms adds nothing",
+    "because": "now.ts :104-106 flagged on every read; the frame sends the last defined value",
+    "params": {},
+    "steps": ["settle", { "advance": 42 }, { "signal": "read" }, { "signal": "read" }, "settle", { "advance": 0 }, { "signal": "read" }, "settle"]
+  }
+]

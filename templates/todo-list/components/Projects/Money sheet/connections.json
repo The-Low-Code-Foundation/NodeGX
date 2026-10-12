@@ -1,0 +1,421 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "03928df7-0c7b-5d11-84ff-b8758d34718f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "msIn",
+      "fromProperty": "open",
+      "toId": "msScrim",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "open",
+      "toId": "msShow",
+      "toProperty": "in-open"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "editing",
+      "toId": "msShow",
+      "toProperty": "in-editing"
+    },
+    {
+      "fromId": "msShow",
+      "fromProperty": "out-showList",
+      "toId": "msList",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "msShow",
+      "fromProperty": "out-showForm",
+      "toId": "msForm",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "msClose",
+      "fromProperty": "onClick",
+      "toId": "msOut",
+      "toProperty": "close"
+    },
+    {
+      "fromId": "msUp",
+      "fromProperty": "onClick",
+      "toId": "msFilter",
+      "toProperty": "to-up"
+    },
+    {
+      "fromId": "msFilter",
+      "fromProperty": "upBg",
+      "toId": "msUp",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "msRec",
+      "fromProperty": "onClick",
+      "toId": "msFilter",
+      "toProperty": "to-rec"
+    },
+    {
+      "fromId": "msFilter",
+      "fromProperty": "recBg",
+      "toId": "msRec",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "msPast",
+      "fromProperty": "onClick",
+      "toId": "msFilter",
+      "toProperty": "to-past"
+    },
+    {
+      "fromId": "msFilter",
+      "fromProperty": "pastBg",
+      "toId": "msPast",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "msFilter",
+      "fromProperty": "at-up",
+      "toId": "msUpBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "msFilter",
+      "fromProperty": "at-rec",
+      "toId": "msRecBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "msFilter",
+      "fromProperty": "at-past",
+      "toId": "msPastBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "msFilter",
+      "fromProperty": "currentState",
+      "toId": "msLook",
+      "toProperty": "in-filter"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "upRows",
+      "toId": "msLook",
+      "toProperty": "in-upRows"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "recRows",
+      "toId": "msLook",
+      "toProperty": "in-recRows"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "pastRows",
+      "toId": "msLook",
+      "toProperty": "in-pastRows"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "projectOptions",
+      "toId": "msLook",
+      "toProperty": "in-projectOptions"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "items",
+      "toId": "msLook",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "projects",
+      "toId": "msLook",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "editKey",
+      "toId": "msLook",
+      "toProperty": "in-editKey"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "editing",
+      "toId": "msLook",
+      "toProperty": "in-editing"
+    },
+    {
+      "fromId": "msLook",
+      "fromProperty": "out-hint",
+      "toId": "msHint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "msLook",
+      "fromProperty": "out-empty",
+      "toId": "msEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "msLook",
+      "fromProperty": "out-emptyText",
+      "toId": "msEmpty",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "msLook",
+      "fromProperty": "out-formRows",
+      "toId": "msFormEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "upRows",
+      "toId": "msUpEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "recRows",
+      "toId": "msRecEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "pastRows",
+      "toId": "msPastEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "msAdd",
+      "fromProperty": "onClick",
+      "toId": "msOut",
+      "toProperty": "add"
+    },
+    {
+      "fromId": "msUpEach",
+      "fromProperty": "itemOutput-itemKey",
+      "toId": "msOut",
+      "toProperty": "itemKey"
+    },
+    {
+      "fromId": "msUpEach",
+      "fromProperty": "itemOutputSignal-edit",
+      "toId": "msOut",
+      "toProperty": "edit"
+    },
+    {
+      "fromId": "msRecEach",
+      "fromProperty": "itemOutput-itemKey",
+      "toId": "msOut",
+      "toProperty": "itemKey"
+    },
+    {
+      "fromId": "msRecEach",
+      "fromProperty": "itemOutputSignal-edit",
+      "toId": "msOut",
+      "toProperty": "edit"
+    },
+    {
+      "fromId": "msPastEach",
+      "fromProperty": "itemOutput-itemKey",
+      "toId": "msOut",
+      "toProperty": "itemKey"
+    },
+    {
+      "fromId": "msPastEach",
+      "fromProperty": "itemOutputSignal-edit",
+      "toId": "msOut",
+      "toProperty": "edit"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "items",
+      "toId": "cmdLineTick",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "items",
+      "toId": "cmdLineUntick",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "marks",
+      "toId": "cmdLineTick",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "marks",
+      "toId": "cmdLineUntick",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "projects",
+      "toId": "cmdLineTick",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "projects",
+      "toId": "cmdLineUntick",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "msUpEach",
+      "fromProperty": "itemOutput-key",
+      "toId": "cmdLineTick",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "msUpEach",
+      "fromProperty": "itemOutputSignal-tick",
+      "toId": "cmdLineTick",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "msPastEach",
+      "fromProperty": "itemOutput-key",
+      "toId": "cmdLineUntick",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "msPastEach",
+      "fromProperty": "itemOutputSignal-untick",
+      "toId": "cmdLineUntick",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdLineTick",
+      "fromProperty": "done",
+      "toId": "msOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "cmdLineUntick",
+      "fromProperty": "done",
+      "toId": "msOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "msFormEach",
+      "fromProperty": "itemOutput-label",
+      "toId": "cmdSaveItem",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "msFormEach",
+      "fromProperty": "itemOutput-dir",
+      "toId": "cmdSaveItem",
+      "toProperty": "dir"
+    },
+    {
+      "fromId": "msFormEach",
+      "fromProperty": "itemOutput-amount",
+      "toId": "cmdSaveItem",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "msFormEach",
+      "fromProperty": "itemOutput-repeat",
+      "toId": "cmdSaveItem",
+      "toProperty": "repeat"
+    },
+    {
+      "fromId": "msFormEach",
+      "fromProperty": "itemOutput-date",
+      "toId": "cmdSaveItem",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "msFormEach",
+      "fromProperty": "itemOutput-until",
+      "toId": "cmdSaveItem",
+      "toProperty": "until"
+    },
+    {
+      "fromId": "msFormEach",
+      "fromProperty": "itemOutput-projectId",
+      "toId": "cmdSaveItem",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "msFormEach",
+      "fromProperty": "itemOutput-likelihood",
+      "toId": "cmdSaveItem",
+      "toProperty": "likelihood"
+    },
+    {
+      "fromId": "msFormEach",
+      "fromProperty": "itemOutput-note",
+      "toId": "cmdSaveItem",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "msFormEach",
+      "fromProperty": "itemOutput-key",
+      "toId": "cmdSaveItem",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "msFormEach",
+      "fromProperty": "itemOutputSignal-save",
+      "toId": "cmdSaveItem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "msFormEach",
+      "fromProperty": "itemOutput-key",
+      "toId": "cmdEndItem",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "msIn",
+      "fromProperty": "items",
+      "toId": "cmdEndItem",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "msFormEach",
+      "fromProperty": "itemOutputSignal-end",
+      "toId": "cmdEndItem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "msFormEach",
+      "fromProperty": "itemOutputSignal-cancel",
+      "toId": "msOut",
+      "toProperty": "back"
+    },
+    {
+      "fromId": "cmdSaveItem",
+      "fromProperty": "done",
+      "toId": "msOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "cmdSaveItem",
+      "fromProperty": "done",
+      "toId": "msOut",
+      "toProperty": "back"
+    },
+    {
+      "fromId": "cmdEndItem",
+      "fromProperty": "done",
+      "toId": "msOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "cmdEndItem",
+      "fromProperty": "done",
+      "toId": "msOut",
+      "toProperty": "back"
+    }
+  ]
+}

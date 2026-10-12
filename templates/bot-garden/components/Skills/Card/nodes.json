@@ -1,0 +1,265 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8a3938ee-4f1b-5e87-8f50-6111fa431e18",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "skIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cardClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stateClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stateText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "text",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "blockWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "blockClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "prog",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isBlooming",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "skCard",
+      "type": "Group",
+      "label": "The card",
+      "children": [
+        "skState",
+        "skTitle",
+        "skBlockRow",
+        "skText",
+        "skProg"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "paddingTop": "var(--space-3-5)",
+        "paddingBottom": "var(--space-3-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "cssClassName": "bg-notion"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "skState",
+      "type": "Text",
+      "label": "How far it grew",
+      "parent": "skCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "cssClassName": "bg-caps"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "skTitle",
+      "type": "Text",
+      "label": "The trick",
+      "parent": "skCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "skBlockRow",
+      "type": "Group",
+      "label": "Its block",
+      "parent": "skCard",
+      "children": [
+        "skBlock"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "skBlock",
+      "type": "Group",
+      "label": "The block",
+      "parent": "skBlockRow",
+      "children": [
+        "skBlockText"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "cssClassName": "bg-blk"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "skBlockText",
+      "type": "Text",
+      "label": "The block’s word",
+      "parent": "skBlock",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 15,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--on-fill)"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "skText",
+      "type": "Text",
+      "label": "What it does",
+      "parent": "skCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "skProg",
+      "type": "Text",
+      "label": "In the programme",
+      "parent": "skCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-prog"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "skIsBloom",
+      "type": "Condition",
+      "label": "Blooming?",
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "skGrowth",
+      "type": "States",
+      "label": "Grown or not",
+      "parameters": {
+        "states": "seed,bloom",
+        "values": "weight",
+        "useTransitions": false,
+        "type-weight": "string",
+        "value-seed-weight": "600",
+        "value-bloom-weight": "800"
+      },
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "skOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "clicked",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "skCard"
+  ]
+}

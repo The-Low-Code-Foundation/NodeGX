@@ -1,0 +1,66 @@
+{
+  "name": "@nodegx/node-spec",
+  "version": "0.1.0",
+  "description": "Each NodeGX node's behaviour written once, as an executable spec (pure reducers), plus the interpreter that runs a spec as a node and records a JSON trace, and the conformance runner that grades any target against it. Phase 107 (NSP-001); a browser entry and a build since phase 112 (OWN-002). No dependency on the runtime, the editor, React or Node \u2014 `@nodegx/node-spec` runs in a page; `@nodegx/node-spec/node` adds the scenario files on disk.",
+  "author": "The Low Code Foundation <contact@thelowcodefoundation.com>",
+  "license": "MIT",
+  "homepage": "https://nodegx.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/The-Low-Code-Foundation/NodeGX.git",
+    "directory": "packages/nodegx-node-spec"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/types/nodegx-node-spec/src/browser.d.ts",
+  "sideEffects": [
+    "./dist/node.cjs"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/nodegx-node-spec/src/browser.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./node": {
+      "types": "./dist/types/nodegx-node-spec/src/index.d.ts",
+      "default": "./dist/node.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "node": [
+        "./dist/types/nodegx-node-spec/src/index.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist",
+    "scenarios",
+    "schema",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node build.mjs",
+    "prepack": "node build.mjs",
+    "size": "node scripts/bundle-size.mjs",
+    "browser-check": "node scripts/browser-check.mjs",
+    "test": "jest",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^4.5.7"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.0.1",
+    "@types/node": "^20.0.0",
+    "ajv": "^8.18.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.1",
+    "typescript": "^5.9.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

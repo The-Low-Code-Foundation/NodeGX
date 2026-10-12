@@ -173,7 +173,7 @@ function serveFolder(dir, port, backendPort) {
 }
 
 /**
- * Boot the deploy folder in a headless Chrome, hand the page to `fn`, tear down.
+ * Boot the deploy folder in a headless Chrome (a visible one with `visible`), hand the page to `fn`, tear down.
  *
  * @param {{dir: string, port?: number}} options
  * @param {(page: object) => Promise<any>} fn
@@ -201,16 +201,22 @@ async function withDeployedSite(options, fn) {
   const base = origin || `http://127.0.0.1:${servePort}`;
 
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'nodegx-deployed-'));
+  // IG-007: a WebGL drive needs a GL context. `gpu: true` drops `--disable-gpu`; `chromeArgs` appends flags such as
+  // `--use-angle=swiftshader` (software GL, so the reading is about the page, not this Mac's GPU).
+  // P109 ISL-005 AC2: `visible: true` (or DRIVE_VISIBLE=1 for any drive) opens a real window, for an AC that asks
+  // to be watched. Everything else is the same session; the window closes at tear-down.
+  const visible = options.visible === true || process.env.DRIVE_VISIBLE === '1';
   const proc = spawn(
     chrome,
     [
-      '--headless=new',
+      ...(visible ? [] : ['--headless=new']),
       `--remote-debugging-port=${cdpPort}`,
       `--user-data-dir=${profile}`,
       '--no-first-run',
       '--no-default-browser-check',
       '--hide-scrollbars',
-      '--disable-gpu',
+      ...(options.gpu ? [] : ['--disable-gpu']),
+      ...(Array.isArray(options.chromeArgs) ? options.chromeArgs : []),
       'about:blank'
     ],
     { stdio: 'ignore' }
@@ -250,6 +256,10 @@ async function withDeployedSite(options, fn) {
     // through `client.on(fn)`. `render-report.js` has a same-named helper
     // taking `(wsUrl, handler)`. Two APIs, one name.
     client = await connect(target);
+    // P109 ISL-008 AC6: opt-in census of the island's `!important`s, run before every press (isl008-important-census.js).
+    const importantCensus = process.env.ISL008_IMPORTANT_CENSUS
+      ? require('./isl008-important-census.js').attach(client, path.resolve(process.env.ISL008_IMPORTANT_CENSUS), path.basename(process.argv[1] || 'drive'))
+      : null;
     client.on((msg) => {
       if (msg.method === 'Runtime.exceptionThrown') {
         const d = msg.params.exceptionDetails || {};
@@ -269,7 +279,7 @@ async function withDeployedSite(options, fn) {
     await client.send('Page.navigate', { url: `${base}/` });
     await wait(BOOT_MS);
 
-    return await fn({
+    const result = await fn({
       client,
       servePort,
       consoleErrors,
@@ -294,6 +304,8 @@ async function withDeployedSite(options, fn) {
         return file;
       }
     });
+    if (importantCensus) await importantCensus.run();
+    return result;
   } finally {
     cleanup();
   }

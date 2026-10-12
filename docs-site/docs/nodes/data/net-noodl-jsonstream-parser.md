@@ -36,6 +36,34 @@ A stream whose payloads are JSON but do not arrive one-per-event: NDJSON logs, a
 | `clear` | Signal | — | Discards the pending text, the parsed values and the error counter |
 | `parse` | Signal | — | Appends the current Chunk and emits every value that is now complete; the chunk is retained between pulses |
 
+### What each input does
+
+**Chunk** (`chunk`)
+
+- always: kept as text (nothing as empty) for the next Parse, and retained after it — a second Parse appends it again
+
+**Format** (`format`)
+
+- always: read at the next Parse — one value per line, any run of complete values, or one whole document (empty reads as NDJSON; anything else as Stream)
+
+**Max Pending (characters)** (`maxLength`)
+
+- always: read at the next Parse — the pending text a Parse gives up on when longer (not above 0: no cap)
+
+**Parse** (`parse`)
+
+- nothing pending and an empty Chunk: nothing to read → Unchanged; Success stays silent
+- the Chunk appended makes the pending text longer than Max Pending: all of it is dropped unread, the reason on Error, Error Count grows — Pending Characters and Is Complete are not re-sent → Failure; Success stays silent
+- some values came out complete and something would not parse (a bad line, or a value that scans whole but is not JSON): the values are on Values and Parsed, the last reason on Error, Error Count grows by each — the Parse still fails → Success, Failure
+- at least one value came out complete and nothing failed: Values holds them, Parsed the last, Value Count grows; what is left waits as Pending Characters → Success, Done
+- nothing came out complete and something would not parse: the last reason on Error, Error Count grows by each → Failure; Success stays silent
+- no value is complete yet and nothing failed: the text waits as Pending Characters, Is Complete false → Done; Success stays silent
+
+**Clear** (`clear`)
+
+- anything pending, parsed or failed: the pending text, Values, both counts and the Error are emptied — Parsed keeps its last value on the wire, and the Chunk is retained → Cleared, Done
+- nothing held: the same empty values are sent again → Cleared, Unchanged
+
 ## Outputs
 
 ### Values

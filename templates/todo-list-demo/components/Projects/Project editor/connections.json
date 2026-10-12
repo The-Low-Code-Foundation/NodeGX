@@ -1,0 +1,301 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9466ccdf-cb58-5cfb-85d6-8f6c6f7107db",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "peIn",
+      "fromProperty": "name",
+      "toId": "peName",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "sub",
+      "toId": "peSub",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "rate",
+      "toId": "peRate",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "termsDays",
+      "toId": "peTerms",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "say",
+      "toId": "peSay",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "kind",
+      "toId": "peKind",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "billing",
+      "toId": "peBilling",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "peEarning",
+      "fromProperty": "onClick",
+      "toId": "peKind",
+      "toProperty": "to-earning"
+    },
+    {
+      "fromId": "peKind",
+      "fromProperty": "earningBg",
+      "toId": "peEarning",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "peBuilding",
+      "fromProperty": "onClick",
+      "toId": "peKind",
+      "toProperty": "to-building"
+    },
+    {
+      "fromId": "peKind",
+      "fromProperty": "buildingBg",
+      "toId": "peBuilding",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "peHobby",
+      "fromProperty": "onClick",
+      "toId": "peKind",
+      "toProperty": "to-hobby"
+    },
+    {
+      "fromId": "peKind",
+      "fromProperty": "hobbyBg",
+      "toId": "peHobby",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "peDormant",
+      "fromProperty": "onClick",
+      "toId": "peKind",
+      "toProperty": "to-dormant"
+    },
+    {
+      "fromId": "peKind",
+      "fromProperty": "dormantBg",
+      "toId": "peDormant",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "peHourly",
+      "fromProperty": "onClick",
+      "toId": "peBilling",
+      "toProperty": "to-hourly"
+    },
+    {
+      "fromId": "peBilling",
+      "fromProperty": "hourlyBg",
+      "toId": "peHourly",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "peFixed",
+      "fromProperty": "onClick",
+      "toId": "peBilling",
+      "toProperty": "to-fixed"
+    },
+    {
+      "fromId": "peBilling",
+      "fromProperty": "fixedBg",
+      "toId": "peFixed",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "peKind",
+      "fromProperty": "currentState",
+      "toId": "peShape",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "peBilling",
+      "fromProperty": "currentState",
+      "toId": "peShape",
+      "toProperty": "in-billing"
+    },
+    {
+      "fromId": "peShape",
+      "fromProperty": "out-billShown",
+      "toId": "peBill",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "peShape",
+      "fromProperty": "out-rateShown",
+      "toId": "peRateBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "name",
+      "toId": "peCheck",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "sub",
+      "toId": "peCheck",
+      "toProperty": "in-sub"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "kind",
+      "toId": "peCheck",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "billing",
+      "toId": "peCheck",
+      "toProperty": "in-billing"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "termsDays",
+      "toId": "peCheck",
+      "toProperty": "in-termsDays"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "rate",
+      "toId": "peCheck",
+      "toProperty": "in-rate"
+    },
+    {
+      "fromId": "peIn",
+      "fromProperty": "say",
+      "toId": "peCheck",
+      "toProperty": "in-say"
+    },
+    {
+      "fromId": "peName",
+      "fromProperty": "onTextChanged",
+      "toId": "peCheck",
+      "toProperty": "in-typedName"
+    },
+    {
+      "fromId": "peSub",
+      "fromProperty": "onTextChanged",
+      "toId": "peCheck",
+      "toProperty": "in-typedSub"
+    },
+    {
+      "fromId": "peKind",
+      "fromProperty": "currentState",
+      "toId": "peCheck",
+      "toProperty": "in-pickedKind"
+    },
+    {
+      "fromId": "peBilling",
+      "fromProperty": "currentState",
+      "toId": "peCheck",
+      "toProperty": "in-pickedBilling"
+    },
+    {
+      "fromId": "peRate",
+      "fromProperty": "onTextChanged",
+      "toId": "peCheck",
+      "toProperty": "in-typedRate"
+    },
+    {
+      "fromId": "peTerms",
+      "fromProperty": "onTextChanged",
+      "toId": "peCheck",
+      "toProperty": "in-typedTerms"
+    },
+    {
+      "fromId": "peSay",
+      "fromProperty": "onTextChanged",
+      "toId": "peCheck",
+      "toProperty": "in-typedSay"
+    },
+    {
+      "fromId": "peSave",
+      "fromProperty": "onClick",
+      "toId": "peCheck",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "peCheck",
+      "fromProperty": "out-error",
+      "toId": "peError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "peCheck",
+      "fromProperty": "out-hasError",
+      "toId": "peError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "peCheck",
+      "fromProperty": "out-name",
+      "toId": "peOut",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "peCheck",
+      "fromProperty": "out-sub",
+      "toId": "peOut",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "peCheck",
+      "fromProperty": "out-kind",
+      "toId": "peOut",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "peCheck",
+      "fromProperty": "out-billing",
+      "toId": "peOut",
+      "toProperty": "billing"
+    },
+    {
+      "fromId": "peCheck",
+      "fromProperty": "out-termsDays",
+      "toId": "peOut",
+      "toProperty": "termsDays"
+    },
+    {
+      "fromId": "peCheck",
+      "fromProperty": "out-rate",
+      "toId": "peOut",
+      "toProperty": "rate"
+    },
+    {
+      "fromId": "peCheck",
+      "fromProperty": "out-say",
+      "toId": "peOut",
+      "toProperty": "say"
+    },
+    {
+      "fromId": "peCheck",
+      "fromProperty": "out-go",
+      "toId": "peOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "peCancel",
+      "fromProperty": "onClick",
+      "toId": "peOut",
+      "toProperty": "cancel"
+    }
+  ]
+}

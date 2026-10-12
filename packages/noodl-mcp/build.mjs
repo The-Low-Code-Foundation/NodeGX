@@ -12,45 +12,15 @@
  * the spec's standing warning is that the two must not be *confused* — which one
  * `npm install` producing both worked directly against.
  */
-import { copyFileSync, readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
+import { copyFileSync } from 'node:fs';
 import path from 'node:path';
 
 import esbuild from 'esbuild';
 
-/**
- * The release this bundle is shipping inside, stamped into the server's MCP handshake.
- *
- * 🔴 `@noodl/mcp`'s own version has been `0.1.0` since the package was created and has never been
- * bumped, so the handshake reported `0.1.0` from every release — which made "my MCP server is
- * stuck on an old version" unanswerable. The packaged directory carries no `package.json` either,
- * so there was no second place to look.
- *
- * Read from `noodl-editor` rather than from here because that is the number the user sees in the
- * app and quotes in a bug report, and because taking it from a file somebody already has to bump
- * every release is what stops the two drifting.
- */
-const APP_VERSION = JSON.parse(readFileSync('../noodl-editor/package.json', 'utf8')).version;
+import { common } from './build-common.mjs';
+import { buildCloudBundle } from './build-cloud-bundle.mjs';
+import { buildKitExtract } from './build-kit-extract.mjs';
 
-const common = {
-  define: { __NODEGX_APP_VERSION__: JSON.stringify(APP_VERSION) },
-  bundle: true,
-  platform: 'node',
-  format: 'cjs',
-  sourcemap: false,
-  logLevel: 'info',
-  /**
-   * HLS-008 — the third of the three resolvers that have to agree, after
-   * `tsconfig.json`'s `paths` and `jest.config.js`'s `moduleNameMapper`.
-   *
-   * 🔴 Without it esbuild follows `@nodegx/export`'s `main` into
-   * `../nodegx-export/dist/index.cjs`, and the server would ship whatever the
-   * exporter looked like the last time somebody ran `npm run build` in a
-   * sibling package. The editor already carries this alias in its own three
-   * resolvers for the same reason; this package is now the second consumer.
-   */
-  alias: { '@nodegx/export': path.resolve('../nodegx-export/src/index.ts') }
-};
 
 await esbuild.build({
   ...common,
@@ -82,25 +52,9 @@ await esbuild.build({
  */
 copyFileSync('../noodl-types/src/node-catalog.json', 'dist/node-catalog.json');
 
-/**
- * HLS-013 — the headless cloud-function bundler, bundled as its own artifact.
- *
- * A second bundle rather than part of the server for the reason its own header
- * gives: it reaches `ProjectModel`, whose import chain does not belong in a
- * server bundle (it drags renderer view modules in) and whose singletons must
- * not outlive one build. `dist/` is where it has to land — `files: ["bin","dist"]`
- * is what ships.
- */
-await esbuild.build({
-  ...common,
-  entryPoints: ['src/cloud/bundleEntry.js'],
-  target: 'node18',
-  outfile: 'dist/cloud-bundle.cjs',
-  // The editor sources it reaches import CSS-module and asset paths through
-  // modules that are never executed on this path; keep esbuild from trying to
-  // resolve them into a Node bundle.
-  loader: { '.css': 'empty', '.scss': 'empty', '.svg': 'empty', '.png': 'empty' }
-});
+// HLS-013 — the headless cloud-function bundler. P109 ISL-042: built by `build-cloud-bundle.mjs`, which a spec
+// also runs into a temp path.
+await buildCloudBundle(path.resolve('dist/cloud-bundle.cjs'));
 
 /**
  * CN-003 — the headless kit extractor, bundled as its own artifact.
@@ -120,14 +74,8 @@ await esbuild.build({
  * from `scripts/` is fine *here*: this runs at build time in the checkout, and
  * esbuild inlines what it reaches.
  */
-const require = createRequire(import.meta.url);
-const { extractorBuildOptions } = require('../../scripts/node-catalog/lib/bundle.js');
-
-await esbuild.build({
-  ...extractorBuildOptions(
-    path.resolve('src/kitExtract/entry.js'),
-    path.resolve('dist/kit-extract.cjs')
-  ),
-  target: 'node18',
-  logLevel: 'info'
-});
+//
+// P109 ISL-014: the build itself lives in `build-kit-extract.mjs`, which a server running from a
+// checkout also spawns when the reader is missing or older than one of its inputs; it writes the
+// input list (`dist/kit-extract.inputs.json`) that decides "older".
+await buildKitExtract(path.resolve('dist/kit-extract.cjs'));

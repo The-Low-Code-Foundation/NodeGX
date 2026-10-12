@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d51c2008-5e65-52c0-b6d4-1e9c1070d24c",
+  "name": "conceptList",
+  "path": "/#__cloud__/conceptList",
+  "type": "cloud",
+  "created": "2026-10-01T09:00:00.000Z",
+  "modified": "2026-10-01T09:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Every concept's id and title, for a coach choosing a path. Nothing about any person (TASK-L184)."
+}

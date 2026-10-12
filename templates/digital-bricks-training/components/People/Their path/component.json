@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c7e59d6a-6809-4ebe-9c9e-5a6695033039",
+  "name": "Their path",
+  "path": "/People/Their path",
+  "type": "visual",
+  "created": "2026-10-01T09:24:44.561Z",
+  "modified": "2026-10-01T09:24:44.561Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach chooses a learner's path by hand: the concepts on it, in order, and the course's other concepts to add. Seeded from their current path; Save writes a NEW path through setLearnerPath and keeps what they finished. No planner (TASK-L184)."
+}

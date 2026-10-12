@@ -1,0 +1,134 @@
+{
+ "dir": "/Users/richardosborne/vscode_projects/OpenNoodl-worktrees/ig007-placement-scratch/d7/deploy",
+ "mode": "nogl",
+ "results": [
+  {
+   "name": "BOOT (nogl): a new profile lands on the island; nothing is stored for the renderer yet",
+   "ok": true,
+   "saw": {
+    "island": "/island",
+    "stored": null
+   }
+  },
+  {
+   "name": "AC4: with 3D APIs disabled there is no WebGL2 (the forced arm is real)",
+   "ok": true,
+   "saw": false
+  },
+  {
+   "name": "AC4: Supported false — the page writes { 2d, unsupported } and the Workshop draws the 2D Garden (the 3D node tried once and is gone)",
+   "ok": true,
+   "saw": {
+    "settled": {
+     "gd": 1,
+     "gd3": 0,
+     "stored": {
+      "mode": "2d",
+      "why": "unsupported"
+     }
+    },
+    "mounts": {
+     "gd": 2,
+     "gd3": 1
+    },
+    "webgl2": false
+   }
+  },
+  {
+   "name": "AC4: the tulips pass end to end on the 2D Garden (teach 15, fold to 6, play, the win card)",
+   "ok": true,
+   "saw": true
+  },
+  {
+   "name": "AC4: the next Workshop open is instant — the 3D node is never mounted again, the 2D Garden is",
+   "ok": true,
+   "saw": {
+    "before": {
+     "gd": 3,
+     "gd3": 1
+    },
+    "after": {
+     "gd": 4,
+     "gd3": 1
+    },
+    "worlds": {
+     "gd": 1,
+     "gd3": 0
+    }
+   }
+  },
+  {
+   "name": "AC4: the Grown-ups page names the renderer — the flat garden, because this computer cannot draw 3D — and the switch shows Flat garden pressed",
+   "ok": true,
+   "saw": {
+    "line": "The flat garden is on: this computer cannot draw 3D.",
+    "on": [
+     {
+      "text": "3D island",
+      "bg": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "text": "Flat garden",
+      "bg": "rgb(46, 42, 61)"
+     }
+    ]
+   }
+  },
+  {
+   "name": "0 console errors through the nogl drive",
+   "ok": true,
+   "saw": []
+  },
+  {
+   "name": "0 network errors through the nogl drive",
+   "ok": true,
+   "saw": []
+  }
+ ],
+ "readings": {
+  "nogl": {
+   "settled": {
+    "gd": 1,
+    "gd3": 0,
+    "stored": {
+     "mode": "2d",
+     "why": "unsupported"
+    }
+   },
+   "mounts": {
+    "gd": 2,
+    "gd3": 1
+   },
+   "webgl2": false
+  },
+  "nextOpen": {
+   "before": {
+    "gd": 3,
+    "gd3": 1
+   },
+   "after": {
+    "gd": 4,
+    "gd3": 1
+   },
+   "worlds": {
+    "gd": 1,
+    "gd3": 0
+   }
+  },
+  "grown": {
+   "line": "The flat garden is on: this computer cannot draw 3D.",
+   "on": [
+    {
+     "text": "3D island",
+     "bg": "rgba(0, 0, 0, 0)"
+    },
+    {
+     "text": "Flat garden",
+     "bg": "rgb(46, 42, 61)"
+    }
+   ]
+  }
+ },
+ "consoleErrors": [],
+ "networkErrors": []
+}

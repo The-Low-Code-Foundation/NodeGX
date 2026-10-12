@@ -97,9 +97,18 @@ the turn.
 
 `update` calls `_updateDependencies` first, which calls `update()` on every node feeding an input
 ([node.ts:562-563](../noodl-runtime/src/node.ts#L562-L563),
-[node.ts:650-657](../noodl-runtime/src/node.ts#L650-L657)). A node therefore never computes from a
-half-updated upstream, regardless of the order the dirty list happened to be built in. This is what
-makes the graph glitch-free, and it is a pull, not a topological sort.
+[node.ts:650-657](../noodl-runtime/src/node.ts#L650-L657)). The nodes feeding a node have therefore
+updated before it processes its own inputs, regardless of the order the dirty list happened to be
+built in. It is a pull, not a topological sort.
+
+That is not the same as never computing from a half-updated upstream. A node that computes at the
+end of the frame (String Format) sees all of its new inputs together. A node that recomputes in each
+input's setter (And) takes them one at a time, because C7 applies one entry per port per pass, and
+it can send a passing result built from one new input and one old one: `x AND NOT x` carries `true`
+and then `false` on the wire inside one pass, and a Value Changed behind it fires twice. The export
+computes such a node from all of its inputs at once and sends no passing result; that difference
+stays on the export's list (P107 G1, ruled 2026-10-05: the sentence is corrected, the runtime does
+not change).
 
 ### C7. Multiple input ports advance in lockstep
 
@@ -132,10 +141,11 @@ so the app degrades instead of freezing.
 
 ### C10. Unit-carrying values travel as objects
 
-A value with a unit is `{ value, unit }`, and a bare number written over one inherits the existing
-unit rather than dropping it ([node.ts:341-348](../noodl-runtime/src/node.ts#L341-L348),
-[node.ts:1031-1040](../noodl-runtime/src/node.ts#L1031-L1040)). Exported code that flattens
-`{value: 12, unit: 'px'}` to `12` loses the unit permanently.
+A value with a unit is `{ value, unit }` and travels intact. On a port built for sizes (its type
+declares `units`), a bare number written over one inherits the existing unit rather than dropping it;
+every other port receives exactly what was sent (P107-C6, ruled R7 (a) "Only on size inputs", P109
+ISL-026: `portHasUnits` in node.ts `setInputValue` and the first update's queue). Exported code that
+flattens `{value: 12, unit: 'px'}` to `12` loses the unit permanently.
 
 ### C11. A connection made late catches up
 

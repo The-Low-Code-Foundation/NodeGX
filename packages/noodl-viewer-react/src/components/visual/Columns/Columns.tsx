@@ -1,7 +1,9 @@
 import React, { useRef, useState, useEffect, useLayoutEffect, useCallback, isValidElement } from 'react';
 
 import { ForEachComponent } from '../../../nodes/std-library/data/foreach';
+import { dataAttributeProps } from '../../noodl-root-ref';
 import { Noodl, Slot } from '../../../types';
+import { layerDefaults, withDefaultsClass, type LayerableStyle } from '../../../default-style-layer';
 
 export interface ColumnsProps extends Noodl.ReactProps {
   marginX: string;
@@ -220,7 +222,9 @@ export function resolveColumnLayout(
     ColumnsProps,
     'minWidth' | 'marginX' | 'sizing' | 'mediumBreakpoint' | 'mediumLayout' | 'smallBreakpoint' | 'smallLayout'
   >,
-  containerWidth: number | null
+  containerWidth: number | null,
+  /** How many children the columns hold — Auto Fit never draws more columns (P107-C134). */
+  childCount?: number
 ) {
   const minWidth = toPixels(props.minWidth);
   const marginX = toPixels(props.marginX);
@@ -243,7 +247,7 @@ export function resolveColumnLayout(
     // breakpoint ones — so no band is in force and `Default` is the honest reading. Reporting
     // the band the width falls in would name a layout that is not on screen, which is the one
     // thing these ports exist to make impossible.
-    return { ...calcAutoFit(minWidth, containerWidth, marginX), breakpoint: 'Default' as ColumnsBreakpoint };
+    return { ...calcAutoFit(minWidth, containerWidth, marginX, childCount), breakpoint: 'Default' as ColumnsBreakpoint };
   }
 
   const picked = pickBreakpointLayout(columnLayout, props, containerWidth);
@@ -277,14 +281,20 @@ export function pickBreakpointLayout(
   props: Pick<ColumnsProps, 'mediumBreakpoint' | 'mediumLayout' | 'smallBreakpoint' | 'smallLayout'>,
   containerWidth: number
 ): { breakpoint: ColumnsBreakpoint; layoutString: string } {
+  // P109 ISL-050 (P107-C133), ruled "Read a number as its text, and anything else as no layout": the band layouts were picked
+  // by truthiness and handed to `parseLayout` as they came, so a number (or `true`, or an object) reached `.split` in render and
+  // blanked the page. Read as Layout String is: a value that is no layout leaves the band to the base layout. The band is still
+  // picked only by a truthy layout, so `0` stays inert, as it always was.
   const small = toPixels(props.smallBreakpoint);
-  if (small > 0 && props.smallLayout && containerWidth < small) {
-    return { breakpoint: 'Small', layoutString: props.smallLayout };
+  const smallLayout = props.smallLayout ? readColumnLayoutString(props.smallLayout) : null;
+  if (small > 0 && smallLayout && containerWidth < small) {
+    return { breakpoint: 'Small', layoutString: smallLayout };
   }
 
   const medium = toPixels(props.mediumBreakpoint);
-  if (medium > 0 && props.mediumLayout && containerWidth < medium) {
-    return { breakpoint: 'Medium', layoutString: props.mediumLayout };
+  const mediumLayout = props.mediumLayout ? readColumnLayoutString(props.mediumLayout) : null;
+  if (medium > 0 && mediumLayout && containerWidth < medium) {
+    return { breakpoint: 'Medium', layoutString: mediumLayout };
   }
 
   return { breakpoint: 'Default', layoutString: base };
@@ -297,9 +307,14 @@ export function pickBreakpointLayout(
  * zero, so it degrades to a single column, which is the honest answer to "fit columns of no
  * minimum width".
  */
-export function calcAutoFit(minWidth: number, containerWidth: number, marginX: number) {
-  const columnAmount =
-    minWidth > 0 ? Math.max(1, Math.floor((containerWidth + marginX) / (minWidth + marginX))) : 1;
+export function calcAutoFit(minWidth: number, containerWidth: number, marginX: number, childCount?: number) {
+  // P109 ISL-050 (P107-C134), ruled "Treat it as one column, and never draw more columns than there are children": only
+  // `minWidth > 0` was guarded, so a gap of minus the minimum divided by zero, and `new Array(Infinity)` threw in render and
+  // blanked the page; a step just above 0 asked for an enormous count. A step at or below 0 is one column, and the count never
+  // passes the children — as CSS `auto-fit` collapses the empty tracks.
+  const step = minWidth + marginX;
+  const fit = minWidth > 0 && step > 0 ? Math.floor((containerWidth + marginX) / step) : 1;
+  const columnAmount = Math.max(1, childCount === undefined ? fit : Math.min(fit, childCount));
 
   return {
     layout: new Array(columnAmount).fill(1) as number[],
@@ -429,6 +444,25 @@ export function readColumnLayoutString(value: unknown): string | null {
   }
 }
 
+
+/**
+ * P109 ISL-008 — the Columns inputs each container key is computed from (`layerDefaults`). A key whose inputs the
+ * author never set is a default; an empty list is a constant the container always writes.
+ */
+const COLUMNS_CONTAINER_SOURCES: Readonly<Record<string, readonly string[]>> = {
+  marginTop: ['marginY'],
+  marginLeft: ['marginX'],
+  display: [],
+  flexWrap: [],
+  alignItems: ['packing'],
+  justifyContent: ['justifyContent'],
+  flexDirection: ['direction'],
+  width: ['marginX'],
+  boxSizing: [],
+  position: ['packing'],
+  height: ['packing']
+};
+
 export function Columns(props: ColumnsProps) {
   const [containerWidth, setContainerWidth] = useState(null);
 
@@ -553,7 +587,7 @@ export function Columns(props: ColumnsProps) {
   // It sits above the early returns because the effect is a hook. `resolveColumnLayout` is pure
   // and cheap, so running it on a render that goes on to return `null` costs an object.
   const columnLayout = readColumnLayoutString(props.layoutString);
-  const resolved = columnLayout === null ? null : resolveColumnLayout(columnLayout, props, containerWidth);
+  const resolved = columnLayout === null ? null : resolveColumnLayout(columnLayout, props, containerWidth, children.length);
   const breakpoint: ColumnsBreakpoint = resolved?.breakpoint ?? 'Default';
 
   /**
@@ -598,46 +632,52 @@ export function Columns(props: ColumnsProps) {
   const columnLefts = masonry ? computeColumnOffsets(layout, fractionSize) : null;
   const packed = masonry && masonryOffsets !== null && masonryOffsets.tops.length === children.length;
 
+  const containerStyle: LayerableStyle = {
+    // Deliberately not `visibility: hidden until measured`. That painted blank on first
+    // render and, because a server render never gets a `ResizeObserver` callback, blank
+    // for the entire SSR/SSG output. The authored layout is right at the width the author
+    // designed for; autofold reflows it once measured.
+    marginTop: `calc(${toCssLength(props.marginY)} * -1)`,
+    marginLeft: `calc(${toCssLength(props.marginX)} * -1)`,
+    display: 'flex',
+    flexWrap: 'wrap',
+    // Masonry's items must keep their natural height, both because that is the point and
+    // because the *unpacked* pass is what gets measured — `stretch` would report every item
+    // in a wrap line as being as tall as the tallest, and the packing would be built out of
+    // heights no item actually has.
+    alignItems: masonry ? 'flex-start' : 'stretch',
+    justifyContent: props.justifyContent,
+    flexDirection: props.direction,
+    // The negative-margin gutter's other half: the container starts `marginX` to the left,
+    // so it has to be `marginX` wider for its right edge to land back on the parent's.
+    //
+    // The parenthesis here used to be unbalanced (`calc(100% + (0px)`), and it survived
+    // because the two paths that consume this style disagree about what that means. React
+    // sets each property through the CSSOM on the client, where the value is parsed in
+    // isolation and CSS's end-of-input rule closes the block for you — so `width` was fine
+    // and nothing upstream ever looked wrong. A **server** render serialises the same object
+    // into one `style` attribute, and there the unclosed block swallows the `;` and every
+    // declaration after it: `width` and `box-sizing` both vanished, the container fell back
+    // to shrink-to-fit, and every percentage-width child computed to zero. The whole of an
+    // SSR/SSG page's Columns content was a zero-width strip until hydration replaced it.
+    width: `calc(100% + ${toCssLength(props.marginX)})`,
+    boxSizing: 'border-box',
+    // Every item is out of flow once packed, so the container has no content to size itself
+    // from. `position: relative` is what the items' percentage `left` resolves against.
+    ...(masonry ? { position: 'relative' as const } : null),
+    ...(packed ? { height: masonryOffsets.height } : null),
+    ...props.style
+  };
+  // P109 ISL-008 — the container's defaults go to the defaults sheet, each named by the input it is computed from,
+  // so an author's class on the Columns node can lay the container out. What the author set stays inline.
+  const defaultsClass = layerDefaults(containerStyle, COLUMNS_CONTAINER_SOURCES);
+
   return (
     <div
-      className={['columns-container', props.className].join(' ')}
+      className={withDefaultsClass(['columns-container', props.className].join(' '), defaultsClass)}
       ref={rootRef}
-      style={{
-        // Deliberately not `visibility: hidden until measured`. That painted blank on first
-        // render and, because a server render never gets a `ResizeObserver` callback, blank
-        // for the entire SSR/SSG output. The authored layout is right at the width the author
-        // designed for; autofold reflows it once measured.
-        marginTop: `calc(${toCssLength(props.marginY)} * -1)`,
-        marginLeft: `calc(${toCssLength(props.marginX)} * -1)`,
-        display: 'flex',
-        flexWrap: 'wrap',
-        // Masonry's items must keep their natural height, both because that is the point and
-        // because the *unpacked* pass is what gets measured — `stretch` would report every item
-        // in a wrap line as being as tall as the tallest, and the packing would be built out of
-        // heights no item actually has.
-        alignItems: masonry ? 'flex-start' : 'stretch',
-        justifyContent: props.justifyContent,
-        flexDirection: props.direction,
-        // The negative-margin gutter's other half: the container starts `marginX` to the left,
-        // so it has to be `marginX` wider for its right edge to land back on the parent's.
-        //
-        // The parenthesis here used to be unbalanced (`calc(100% + (0px)`), and it survived
-        // because the two paths that consume this style disagree about what that means. React
-        // sets each property through the CSSOM on the client, where the value is parsed in
-        // isolation and CSS's end-of-input rule closes the block for you — so `width` was fine
-        // and nothing upstream ever looked wrong. A **server** render serialises the same object
-        // into one `style` attribute, and there the unclosed block swallows the `;` and every
-        // declaration after it: `width` and `box-sizing` both vanished, the container fell back
-        // to shrink-to-fit, and every percentage-width child computed to zero. The whole of an
-        // SSR/SSG page's Columns content was a zero-width strip until hydration replaced it.
-        width: `calc(100% + ${toCssLength(props.marginX)})`,
-        boxSizing: 'border-box',
-        // Every item is out of flow once packed, so the container has no content to size itself
-        // from. `position: relative` is what the items' percentage `left` resolves against.
-        ...(masonry ? { position: 'relative' as const } : null),
-        ...(packed ? { height: masonryOffsets.height } : null),
-        ...props.style
-      }}
+      {...dataAttributeProps((props as { dom?: Record<string, unknown> }).dom)}
+      style={containerStyle as React.CSSProperties}
     >
       {forEachComponents}
 

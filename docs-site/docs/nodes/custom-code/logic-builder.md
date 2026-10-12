@@ -34,6 +34,25 @@ Reach for it when logic must be authorable without writing JavaScript, or when t
 |---|---|---|---|
 | `run` | Signal | — | Runs the block program once; the blocks never run on their own, so a value arriving at an input changes nothing until this fires |
 
+### What each input does
+
+**Generated Code** (`generatedCode`)
+
+- always: kept, and compiled at the next Run or declared signal — nothing runs now, and a text that will not compile is reported then
+
+**Logic Blocks** (`workspace`)
+
+- always: nothing on the wire — the blocks decide the ports when the node is placed, and the code that runs is Generated Code
+
+**Run** (`run`)
+
+- no Generated Code: nothing runs → Unchanged
+- code that will not compile: Error says so, in the engine's words — nothing runs → Failure
+- the code throws: the signals it sent before the throw have fired, the values it wrote are dropped, what it wrote to Inputs stays; Error is the message (or the thrown text) → Failure
+- a signal sent to a name the node owns (Done, Failure, Success …): that send does nothing; the other signals have fired, the values written land, then Error names it — no Success → Failure
+- a value written to a name the node owns (Error, Done …): the signals have fired, the other values land, then Error names it — no Success → Failure
+- the code runs through: the signals it sent have fired, in its order; the values it wrote land after it, each sent every run, the same value too (undefined never); Error goes blank, then Success → Done
+
 ## Outputs
 
 ### Signals

@@ -63,6 +63,7 @@ import {
 } from '../editor-deps';
 import type { ConnectionV2 } from '../editor-deps';
 import { catalogGeneration, catalogIndex } from '../catalog';
+import { KitAwareValidator } from '../kitRefusal';
 import { ToolError } from '../errors';
 import { automaticRenderDisabled, runRenderReport } from '../render';
 import type { RenderLedger, RenderVerdict } from '../renderVerdict';
@@ -71,12 +72,14 @@ import { completionPayload } from './completion';
 import type { ComponentFiles } from '../graph';
 import { reconcileHierarchy } from '../graph';
 import { deconflictNodeIds, remapNote } from '../project/nodeIds';
+import { type TickedBox, tickedPayload } from '../project/runOnChangePins';
 import { pathToLegacyName, toPathForm, validateComponentPath } from '../paths';
-import { componentIsPage, registerPages, registrationSummary } from '../project/pageRegistration';
+import { componentIsPage, registerPages, registrationSummary, unroutedPagesSummary } from '../project/pageRegistration';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
 import { authoredProjectViews, preconditionDiagnostics } from '../validate';
 import type { WriteValidation } from '../validate';
+import { drawnPortCheck } from '../specPorts';
 import type { WriteValidationSummary } from './responses';
 import type { NodeInput } from './author';
 import { assembleCreateFiles, assembleSetFiles, nodeIdsOf, normalizeAuthoredNodes, projectVisualPredicate } from './author';
@@ -192,7 +195,8 @@ function validator(): SemanticValidator {
   // generation, not forever, because the project overlay is installed after this
   // module loads and a validator that predates it silently knows no kit types.
   if (!semanticValidator || validatorGeneration !== catalogGeneration()) {
-    semanticValidator = new SemanticValidator(catalogIndex());
+    // ISL-014 — the same kit-aware validator as `validate.ts`, so both doors refuse in one voice.
+    semanticValidator = new KitAwareValidator(catalogIndex());
     validatorGeneration = catalogGeneration();
   }
   return semanticValidator;
@@ -470,7 +474,8 @@ function validateStaged(
   const legacyName = pathToLegacyName(operation.target);
   const project = overlayProject(store, plan, { opId: operation.id, files: candidate });
   const validatorOptions = { strict: !options.allowUnknownTypes };
-  const report = validator().validateComponent(project, legacyName, validatorOptions);
+  // NSP-020 R19 — a wire to a port the node's spec does not draw is refused, judged on the project the plan leaves
+  const report = validator().validateComponent(project, legacyName, { ...validatorOptions, drawnPorts: drawnPortCheck(store, stagedOverlay(plan, { opId: operation.id, files: candidate })) });
 
   const views = authoredProjectViews(store, stagedOverlay(plan, { opId: operation.id, files: candidate }));
   // Deduped for the reason `dedupeDiagnostics` records: since D13 the validator
@@ -504,7 +509,7 @@ function validateStaged(
     const baselineReport = validator().validateComponent(
       store.buildNormProject({ replace: { key: stored.key, files: baseline } }),
       legacyName,
-      validatorOptions
+      { ...validatorOptions, drawnPorts: drawnPortCheck(store, new Map([[legacyName, baseline]])) }
     );
     const baselineViews = authoredProjectViews(store, stagedOverlay(plan, { opId: operation.id, files: baseline }));
     const baselineDiagnostics = [
@@ -856,13 +861,16 @@ export function registerPlanTools(
             connections: args.connections,
             visualRoots: args.visual_roots,
             description: args.description,
-            isVisualType: projectVisualPredicate(store)
+            isVisualType: projectVisualPredicate(store),
+            componentId: store.componentIdFor(legacyName),
+            now: store.now()
           });
         } else {
           candidate = assembleSetFiles(
             baseline!,
             { nodes: reconciled.nodes, connections: args.connections, visualRoots: args.visual_roots },
-            projectVisualPredicate(store)
+            projectVisualPredicate(store),
+            { now: store.now(), componentId: store.componentIdFor(legacyName) }
           );
         }
 
@@ -1040,14 +1048,16 @@ export function registerPlanTools(
       // a doc that names a component the component write then failed on would
       // be the more misleading leftover of the two.
       const applied: Array<{ operation: string; target: string; revision: string }> = [];
+      const ticked: TickedBox[] = [];
       for (const op of componentOps) {
         const files = serverPlan.staged.get(op.id);
         if (!files) continue;
         const key = op.kind === 'create' ? op.target : store.readComponent(op.target).key;
-        const { revision } = store.writeComponent(key, files, {
+        const written = store.writeComponent(key, files, {
           expectNew: op.kind === 'create'
         });
-        applied.push({ operation: op.id, target: op.target, revision });
+        applied.push({ operation: op.id, target: op.target, revision: written.revision });
+        for (const box of written.ticked ?? []) ticked.push({ component: key, ...box });
       }
       // AAQ-005 — register the pages this plan put into the project, in plan
       // order, after the components are in. Same rule and same shared decision
@@ -1103,6 +1113,8 @@ export function registerPlanTools(
         docs: docsWritten,
         skipped: [...skip],
         ...registrationSummary(registration),
+        ...unroutedPagesSummary(store, pages),
+        ...tickedPayload(ticked),
         ...(settingsWritten.length > 0 ? { settings: settingsWritten } : {}),
         ...validationBlock(surviving, summarize(surviving)),
         ...(rendered ? { render: rendered.summary } : {}),

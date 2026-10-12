@@ -38,8 +38,9 @@ const StringMapperNode: NodeDefinitionOptions = {
       group: 'Inputs',
       index: 10,
       createSetter(index: number) {
-        return function (this: StringMapperNodeInstance, value: { toString(): string } | undefined) {
-          this._internal.inputs[index] = value === undefined ? '' : value.toString();
+        // P107-C4 (ISL-026): null is empty text, as undefined always was — `null.toString()` threw
+        return function (this: StringMapperNodeInstance, value: { toString(): string } | null | undefined) {
+          this._internal.inputs[index] = value === undefined || value === null ? '' : value.toString();
           this.scheduleMapping();
         };
       }
@@ -50,8 +51,8 @@ const StringMapperNode: NodeDefinitionOptions = {
       index: 1001,
       group: 'Mappings',
       createSetter(index: number) {
-        return function (this: StringMapperNodeInstance, value: { toString(): string } | undefined) {
-          this._internal.mappings[index] = value === undefined ? '' : value.toString();
+        return function (this: StringMapperNodeInstance, value: { toString(): string } | null | undefined) {
+          this._internal.mappings[index] = value === undefined || value === null ? '' : value.toString();
           this.scheduleMapping();
         };
       }
@@ -66,8 +67,9 @@ const StringMapperNode: NodeDefinitionOptions = {
       index: 1,
       displayName: 'Input String',
       description: 'The string to look up among the numbered inputs',
-      set: function (this: StringMapperNodeInstance, value: { toString(): string } | undefined) {
-        this._internal.currentInputString = value !== undefined ? value.toString() : undefined;
+      // P107-C4 (ISL-026): null is empty text; undefined stays "no input string"
+      set: function (this: StringMapperNodeInstance, value: { toString(): string } | null | undefined) {
+        this._internal.currentInputString = value === undefined ? undefined : value === null ? '' : value.toString();
         this.scheduleMapping();
       }
     },

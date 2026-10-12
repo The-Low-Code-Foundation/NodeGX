@@ -46,6 +46,11 @@ export interface BackupManifest {
   includesSecrets: boolean;
   /** The db snapshot entry name, e.g. `db/local.db`. */
   dbEntry: string;
+  /**
+   * ISL-039: the folders captured whole, which a restore replaces whole.
+   * Absent on an archive written before the list existed (`files`, `workflows`).
+   */
+  folders?: string[];
   /** Hash + size of every non-manifest entry. */
   entries: ManifestEntry[];
 }

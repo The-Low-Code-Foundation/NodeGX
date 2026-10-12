@@ -1,0 +1,232 @@
+[
+  {
+    "name": "not in a pushed page: Failure no-stack-in-scope and Error says why",
+    "because": "navigate-back.ts :146-152",
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "in a pushed page: Navigate hands the stack a pop with no action and the results so far, and is Done",
+    "because": "navigate-back.ts :154-168",
+    "world": {
+      "stack": {
+        "back": "done"
+      }
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a back action pops with its full port name and the result values by name",
+    "because": "navigate-back.ts :177-183, :143",
+    "world": {
+      "stack": {
+        "back": "done"
+      }
+    },
+    "params": {
+      "results": "x",
+      "backActions": "Save"
+    },
+    "steps": [
+      {
+        "set": "result-x",
+        "value": "hi"
+      },
+      {
+        "signal": "backAction-Save"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two presses in a frame pop twice: the first carries the action, the stack tells the second it is still animating",
+    "because": "navigate-back.ts :118 one navigate per token; :143-144 the first takes the action; the stack's back() :1048-1050",
+    "world": {
+      "stack": {
+        "back": [
+          "done",
+          {
+            "failure": {
+              "code": "pop-component-stack/transition-in-progress",
+              "message": "Ignored — the Component Stack is still animating the previous navigation"
+            }
+          }
+        ]
+      }
+    },
+    "params": {
+      "backActions": "Save"
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      {
+        "signal": "backAction-Save"
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "the stack at its first page: Unchanged",
+    "because": "navigate-back.ts :164; navigation-stack.tsx :1045-1046",
+    "world": {
+      "stack": {
+        "back": "unchanged"
+      }
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the back action is taken by one pop: a later plain Navigate carries none",
+    "because": "navigate-back.ts :143-144 clears it",
+    "world": {
+      "stack": {
+        "back": "done"
+      }
+    },
+    "params": {
+      "backActions": "Save"
+    },
+    "steps": [
+      {
+        "signal": "backAction-Save"
+      },
+      "settle",
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two back actions in one frame: the first pop carries the LAST one pressed",
+    "because": "navigate-back.ts :180-183 overwrites backAction before the frame end",
+    "world": {
+      "stack": {
+        "back": [
+          "done",
+          "unchanged"
+        ]
+      }
+    },
+    "params": {
+      "backActions": "Save,Cancel"
+    },
+    "steps": [
+      {
+        "signal": "backAction-Save"
+      },
+      {
+        "signal": "backAction-Cancel"
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "not in a pushed page, a back action still fails, and its action is dropped",
+    "because": "navigate-back.ts :143-152",
+    "params": {
+      "backActions": "Save"
+    },
+    "steps": [
+      {
+        "signal": "backAction-Save"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "results are handed whatever Results names: a result- port written but not listed travels too",
+    "because": "navigate-back.ts :177-179 stores every result- write; :155 hands resultValues",
+    "world": {
+      "stack": {
+        "back": "done"
+      }
+    },
+    "params": {
+      "results": "x"
+    },
+    "steps": [
+      {
+        "set": "result-x",
+        "value": 1
+      },
+      {
+        "set": "result-y",
+        "value": {
+          "a": 1
+        }
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a failed pop then a Done: Error keeps the failure's message",
+    "because": "nothing clears lastError",
+    "world": {
+      "stack": {
+        "back": [
+          {
+            "failure": {
+              "code": "pop-component-stack/transition-in-progress",
+              "message": "Ignored — the Component Stack is still animating the previous navigation"
+            }
+          },
+          "done"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two pops both Unchanged, then a quiet frame: nothing pops again",
+    "because": "navigate-back.ts :111-119 — the frame's presses are taken once",
+    "world": {
+      "stack": {
+        "back": "unchanged"
+      }
+    },
+    "params": {
+      "backActions": "Save"
+    },
+    "steps": [
+      {
+        "signal": "backAction-Save"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      "settle"
+    ]
+  }
+]

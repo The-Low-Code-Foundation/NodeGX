@@ -1,0 +1,1319 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8480223d-a86f-5ece-8967-2d50e10b6e83",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "prIn",
+      "type": "Component Inputs",
+      "label": "The project",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "projectId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "moneyText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "moneyColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "moveText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "moveColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "metaText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasMeta",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "metaColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edge",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "open",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "facts",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasFacts",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "history",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasHistory",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "taskId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasMove",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "moveTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "waitingRaw",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "deadlineRaw",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "doneLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "billKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasBill",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "billLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sendKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasSend",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "sendLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isHeading",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "heading",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "taskRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasTasks",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "tasksHeading",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "moneyRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasMoneyRows",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "pName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pSub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pKind",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pBilling",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pTerms",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pRate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pSay",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "otherTasks",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "hasOtherTasks",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canMove",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "position",
+          "plug": "output",
+          "type": "number"
+        }
+      ],
+      "x": 590,
+      "y": 280
+    },
+    {
+      "id": "prOut",
+      "type": "Component Outputs",
+      "label": "What you did",
+      "ports": [
+        {
+          "name": "toggle",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "tick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "sent",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "projectId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "projectName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "taskId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "waitingOn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "deadline",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "billKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sendKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "openTask",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openTaskId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "editMoney",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "moneyKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "addMoney",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "saveProject",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "pName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pSub",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pKind",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pBilling",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pTerms",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pRate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pSay",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "linkTask",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "linkTaskId",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 590,
+      "y": 3880
+    },
+    {
+      "id": "prWrap",
+      "type": "Group",
+      "label": "Row",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "prHeadingBox",
+        "prRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "prHeadingBox",
+      "type": "Group",
+      "label": "Group name",
+      "parent": "prWrap",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-2)",
+        "mounted": false
+      },
+      "children": [
+        "prHeading"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "prHeading",
+      "type": "Text",
+      "label": "Group name",
+      "parent": "prHeadingBox",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "prRoot",
+      "type": "Group",
+      "label": "Project",
+      "parent": "prWrap",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "borderLeftStyle": "solid",
+        "borderLeftWidth": {
+          "value": 3,
+          "unit": "px"
+        },
+        "borderLeftColor": "transparent",
+        "cssClassName": "todo-drag-row"
+      },
+      "children": [
+        "prLine",
+        "prDetail"
+      ],
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "prLine",
+      "type": "Group",
+      "label": "Grip, then the project",
+      "parent": "prRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-0)"
+      },
+      "children": [
+        "prGrip",
+        "prHead"
+      ],
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "prGrip",
+      "type": "Group",
+      "label": "Drag to change the order",
+      "parent": "prLine",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 24,
+          "unit": "px"
+        },
+        "height": {
+          "value": 32,
+          "unit": "px"
+        },
+        "cssClassName": "todo-drag-handle",
+        "marginTop": "var(--space-2)",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "prHead",
+      "type": "Group",
+      "label": "Name, money and next move",
+      "parent": "prLine",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0-5)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "styleCss": "cursor: pointer; flex: 1 1 auto; min-width: 0;"
+      },
+      "children": [
+        "prTop",
+        "prMove",
+        "prMeta"
+      ],
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "prTop",
+      "type": "Group",
+      "label": "Name and money",
+      "parent": "prHead",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "justifyContent": "space-between",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "prName",
+        "prMoney"
+      ],
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "prName",
+      "type": "Text",
+      "label": "Project",
+      "parent": "prTop",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize"
+      },
+      "x": 340,
+      "y": 1000
+    },
+    {
+      "id": "prMoney",
+      "type": "Text",
+      "label": "Its money",
+      "parent": "prTop",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 340,
+      "y": 1120
+    },
+    {
+      "id": "prMove",
+      "type": "Text",
+      "label": "Its next move",
+      "parent": "prHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "prMeta",
+      "type": "Text",
+      "label": "Deadline, or who it waits on",
+      "parent": "prHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "prDetail",
+      "type": "Group",
+      "label": "Opened",
+      "parent": "prRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-4)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-2)",
+        "paddingBottom": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "prFacts",
+        "prHistory",
+        "prTasks",
+        "prMoneyList",
+        "prButtons",
+        "prFormEach",
+        "prEditEach",
+        "prLinkEach"
+      ],
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "prFacts",
+      "type": "Text",
+      "label": "Its money, in full",
+      "parent": "prDetail",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "prHistory",
+      "type": "Text",
+      "label": "What was done",
+      "parent": "prDetail",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1720
+    },
+    {
+      "id": "prTasks",
+      "type": "Group",
+      "label": "Its tasks",
+      "parent": "prDetail",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "mounted": false
+      },
+      "children": [
+        "prTasksHead",
+        "prTaskEach"
+      ],
+      "x": 220,
+      "y": 1840
+    },
+    {
+      "id": "prTasksHead",
+      "type": "Text",
+      "label": "Its tasks",
+      "parent": "prTasks",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "marginBottom": "var(--space-1)"
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "prTaskEach",
+      "type": "For Each",
+      "label": "One line per task",
+      "parent": "prTasks",
+      "parameters": {
+        "template": "/Projects/Project task",
+        "templateType": "explicit"
+      },
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "prMoneyList",
+      "type": "Group",
+      "label": "Its money items",
+      "parent": "prDetail",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "mounted": false
+      },
+      "children": [
+        "prMoneyHead",
+        "prMoneyEach"
+      ],
+      "x": 220,
+      "y": 2200
+    },
+    {
+      "id": "prMoneyHead",
+      "type": "Text",
+      "label": "Its money items",
+      "parent": "prMoneyList",
+      "parameters": {
+        "text": "Its money",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "marginBottom": "var(--space-1)"
+      },
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "prMoneyEach",
+      "type": "For Each",
+      "label": "One line per money item",
+      "parent": "prMoneyList",
+      "parameters": {
+        "template": "/Projects/Project money",
+        "templateType": "explicit"
+      },
+      "x": 280,
+      "y": 2440
+    },
+    {
+      "id": "prButtons",
+      "type": "Group",
+      "label": "What you can do",
+      "parent": "prDetail",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "prDone",
+        "prChange",
+        "prAdd",
+        "prAddMoney",
+        "prLink",
+        "prEdit",
+        "prTick",
+        "prSend"
+      ],
+      "x": 220,
+      "y": 2560
+    },
+    {
+      "id": "prDone",
+      "type": "net.noodl.controls.button",
+      "label": "Done",
+      "parent": "prButtons",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Done"
+      },
+      "x": 280,
+      "y": 2680
+    },
+    {
+      "id": "prChange",
+      "type": "net.noodl.controls.button",
+      "label": "Change the move",
+      "parent": "prButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Change the move",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 2800
+    },
+    {
+      "id": "prAdd",
+      "type": "net.noodl.controls.button",
+      "label": "Add a task",
+      "parent": "prButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Add a task"
+      },
+      "x": 280,
+      "y": 2920
+    },
+    {
+      "id": "prAddMoney",
+      "type": "net.noodl.controls.button",
+      "label": "Add money",
+      "parent": "prButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Add money"
+      },
+      "x": 280,
+      "y": 3040
+    },
+    {
+      "id": "prLink",
+      "type": "net.noodl.controls.button",
+      "label": "Add an existing task",
+      "parent": "prButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Add an existing task",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3160
+    },
+    {
+      "id": "prEdit",
+      "type": "net.noodl.controls.button",
+      "label": "Edit project",
+      "parent": "prButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Edit project"
+      },
+      "x": 280,
+      "y": 3280
+    },
+    {
+      "id": "prTick",
+      "type": "net.noodl.controls.button",
+      "label": "Been paid? Tick it",
+      "parent": "prButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Been paid? Tick it",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3400
+    },
+    {
+      "id": "prSend",
+      "type": "net.noodl.controls.button",
+      "label": "Sent the invoice? Mark it",
+      "parent": "prButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Sent the invoice? Mark it",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3520
+    },
+    {
+      "id": "prFormEach",
+      "type": "For Each",
+      "label": "The move form, when one is open",
+      "parent": "prDetail",
+      "parameters": {
+        "template": "/Projects/Move form",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 3640
+    },
+    {
+      "id": "prEditEach",
+      "type": "For Each",
+      "label": "The project form, when it is open",
+      "parent": "prDetail",
+      "parameters": {
+        "template": "/Projects/Project editor",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 3760
+    },
+    {
+      "id": "prLinkEach",
+      "type": "For Each",
+      "label": "The task picker, when it is open",
+      "parent": "prDetail",
+      "parameters": {
+        "template": "/Projects/Link task form",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 3880
+    },
+    {
+      "id": "prMode",
+      "type": "States",
+      "label": "Which form is open",
+      "parameters": {
+        "states": "none,done,change,add,edit,link",
+        "currentState": "none",
+        "useTransitions": false
+      },
+      "x": 590,
+      "y": 3160
+    },
+    {
+      "id": "prLook",
+      "type": "JavaScriptFunction",
+      "label": "Heading or project",
+      "parameters": {
+        "functionScript": "var h = !!Inputs.isHeading;\nOutputs.showHeading = h;\nOutputs.showProject = !h;"
+      },
+      "x": 590,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-isHeading",
+          "displayName": "isHeading",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-showHeading",
+          "displayName": "showHeading",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showProject",
+          "displayName": "showProject",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "prForms",
+      "type": "JavaScriptFunction",
+      "label": "Which form to draw",
+      "parameters": {
+        "functionScript": "var mode = String(Inputs.mode || 'none'), n = String(Inputs.name || ''), pid = String(Inputs.projectId || '');\nvar forms = [];\nif (mode === 'done' || mode === 'add' || mode === 'change') {\n  var change = mode === 'change';\n  forms.push({\n    id: 'mf-' + mode + '-' + pid,\n    heading: mode === 'add' ? 'Add a task for ' + n : change ? 'Change the move for ' + n : Inputs.hasMove ? 'Done. What is the next move for ' + n + '?' : 'What is the next move for ' + n + '?',\n    help: mode === 'done' && Inputs.hasMove ? 'Leave it empty if nothing is next for now.' : mode === 'add' ? 'It goes at the end of your list, under ' + n + '.' : '',\n    title: change ? String(Inputs.moveTitle || '') : '',\n    who: change ? String(Inputs.waitingRaw || '') : '',\n    deadline: change ? String(Inputs.deadlineRaw || '') : '',\n    saveLabel: 'Save',\n    cancelLabel: 'Cancel',\n    titleOptional: mode === 'done' && !!Inputs.hasMove\n  });\n}\nOutputs.formRows = forms;\nOutputs.linkRows = mode === 'link' ? [{ id: 'lf-' + pid, heading: 'Add an existing task to ' + n, options: Inputs.otherTasks || [] }] : [];\nOutputs.editRows = mode === 'edit'\n  ? [{ id: 'pe-' + pid, name: String(Inputs.pName || ''), sub: String(Inputs.pSub || ''), kind: String(Inputs.pKind || 'earning'), billing: String(Inputs.pBilling || 'hourly'), termsDays: String(Inputs.pTerms || ''), rate: String(Inputs.pRate || ''), say: String(Inputs.pSay || '') }]\n  : [];"
+      },
+      "x": 590,
+      "y": 4000,
+      "ports": [
+        {
+          "name": "in-mode",
+          "displayName": "mode",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectId",
+          "displayName": "projectId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-hasMove",
+          "displayName": "hasMove",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-moveTitle",
+          "displayName": "moveTitle",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-waitingRaw",
+          "displayName": "waitingRaw",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-deadlineRaw",
+          "displayName": "deadlineRaw",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-otherTasks",
+          "displayName": "otherTasks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pName",
+          "displayName": "pName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pSub",
+          "displayName": "pSub",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pKind",
+          "displayName": "pKind",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pBilling",
+          "displayName": "pBilling",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pTerms",
+          "displayName": "pTerms",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pRate",
+          "displayName": "pRate",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pSay",
+          "displayName": "pSay",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-formRows",
+          "displayName": "formRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-linkRows",
+          "displayName": "linkRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-editRows",
+          "displayName": "editRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "prSubmit",
+      "type": "JavaScriptFunction",
+      "label": "What kind of write it is",
+      "parameters": {
+        "functionScript": "var mode = String(Inputs.mode || '');\nif (mode !== 'done' && mode !== 'change' && mode !== 'add') return;\nvar taskId = String(Inputs.taskId || '');\nif (mode === 'change' && taskId === '') return;\nOutputs.mode = mode === 'add' ? 'new' : mode === 'done' && taskId === '' ? 'new' : mode;\nOutputs.go();",
+        "runOnChange-in-mode": false,
+        "runOnChange-in-taskId": false
+      },
+      "x": 590,
+      "y": 3640,
+      "ports": [
+        {
+          "name": "in-mode",
+          "displayName": "mode",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-taskId",
+          "displayName": "taskId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mode",
+          "displayName": "mode",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "prWrap"
+  ]
+}

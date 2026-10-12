@@ -29,6 +29,26 @@ Deadlines, trial expiry, renewal dates, 'thirty days from now', 'the same day ne
 | `input` | Date | — | The instant to shift. A string or a millisecond timestamp arriving here is read as a date |
 | `unit` | Enum (`milliseconds`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, `years`) | `days` | What Amount counts. Months and years are calendar steps and CLAMP: 31 January plus one month is 28 (or 29) February, never 2 March |
 
+### What each input does
+
+**Date** (`input`)
+
+- no Date yet: kept for when one arrives; nothing is sent → Invalid Date, Changed stay silent
+- the Date cannot be read as a date: Result goes empty → Invalid Date; Changed stays silent
+- otherwise Result is the Date moved by Amount (0 when not a number) in Unit (days when not one of the eight); in months and years Amount counts whole steps only, and the day stops at the month's last → Changed; Invalid Date stays silent
+
+**Amount** (`amount`)
+
+- no Date yet: kept for when one arrives; nothing is sent → Invalid Date, Changed stay silent
+- the Date cannot be read as a date: Result goes empty → Invalid Date; Changed stays silent
+- otherwise Result is the Date moved by Amount (0 when not a number) in Unit (days when not one of the eight); in months and years Amount counts whole steps only, and the day stops at the month's last → Changed; Invalid Date stays silent
+
+**Unit** (`unit`)
+
+- no Date yet: kept for when one arrives; nothing is sent → Invalid Date, Changed stay silent
+- the Date cannot be read as a date: Result goes empty → Invalid Date; Changed stays silent
+- otherwise Result is the Date moved by Amount (0 when not a number) in Unit (days when not one of the eight); in months and years Amount counts whole steps only, and the day stops at the month's last → Changed; Invalid Date stays silent
+
 ## Outputs
 
 ### Values

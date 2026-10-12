@@ -35,6 +35,25 @@ The action node behind a registration form. For signing in an existing user use 
 |---|---|---|---|
 | `signup` | Signal | — | Creates an account from the values below and signs it in |
 
+### What each input does
+
+**Do** (`signup`)
+
+- the first press this frame: the call goes to the backend at the frame's end, with the values held then
+- another press this frame: it joins that call, and is answered with it
+
+**Username** (`username`)
+
+- always: held as handed; read when the next sign-up goes
+
+**Password** (`password`)
+
+- always: held as handed; read when the next sign-up goes
+
+**Email** (`email`)
+
+- always: held as handed; read when the next sign-up goes
+
 ## Outputs
 
 ### Signals

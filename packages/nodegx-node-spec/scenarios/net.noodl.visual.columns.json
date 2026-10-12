@@ -1,0 +1,1313 @@
+[
+ {
+  "name": "a fresh Columns on a 1024 page: Did Mount, Breakpoint Default, Child Index 0, Children Count 2, This — no band pulse",
+  "because": "react-component-node.ts :982-990, :1428-1444; Columns.tsx :598-604 — the effect keyed on the band — the first run publishes Default",
+  "steps": [
+   "settle"
+  ]
+ },
+ {
+  "name": "mounted with Small Below 1200 on a 1024 page: Breakpoint Small and At Small in the first frame — entering the band from unmeasured counts",
+  "because": "the first observation reports at the first rendering step; Columns.tsx :598-604 — the effect keyed on the band",
+  "params": {
+   "smallBreakpoint": {
+    "value": 1200,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle",
+   "settle"
+  ]
+ },
+ {
+  "name": "mounted with Medium Below 1100 and Small Below 480: Medium and At Medium only",
+  "because": "Small is checked first and misses; Columns.tsx `pickBreakpointLayout` :277-293",
+  "params": {
+   "mediumBreakpoint": {
+    "value": 1100,
+    "unit": "px"
+   },
+   "mediumLayout": "1",
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle"
+  ]
+ },
+ {
+  "name": "Small wins over Medium when the width is below both",
+  "because": "Small is checked first; Columns.tsx `pickBreakpointLayout` :277-293",
+  "params": {
+   "mediumBreakpoint": {
+    "value": 1100,
+    "unit": "px"
+   },
+   "mediumLayout": "1",
+   "smallBreakpoint": {
+    "value": 1100,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle"
+  ]
+ },
+ {
+  "name": "narrowing through both bands: Medium then Small, each with its pulse, each in the frame after the resize",
+  "because": "a report lands at the resize; an act's outputs land in the next settle",
+  "params": {
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1",
+   "mediumBreakpoint": {
+    "value": 800,
+    "unit": "px"
+   },
+   "mediumLayout": "1 1"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "resize",
+    "value": 700
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 320
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "widening back: Small to Medium to Default — At Medium on the way, nothing for Default",
+  "because": "Default has no pulse; Columns.tsx :598-604 — the effect keyed on the band",
+  "params": {
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1",
+   "mediumBreakpoint": {
+    "value": 800,
+    "unit": "px"
+   },
+   "mediumLayout": "1 1"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "resize",
+    "value": 320
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 700
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 1024
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a width exactly at Medium Below is not below it: Default; one pixel less is Medium",
+  "because": "`containerWidth < medium` — strictly below; the gap is subtracted first (1024 page, 16 gap: 816 → 800, 815 → 799)",
+  "params": {
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1",
+   "mediumBreakpoint": {
+    "value": 800,
+    "unit": "px"
+   },
+   "mediumLayout": "1 1"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "resize",
+    "value": 816
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 815
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a resize within a band sends nothing",
+  "because": "the effect's dep did not change",
+  "params": {
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1",
+   "mediumBreakpoint": {
+    "value": 800,
+    "unit": "px"
+   },
+   "mediumLayout": "1 1"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "resize",
+    "value": 700
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 600
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 500
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "two resizes before a frame: both reports land, both pulses fire, the value is the last band",
+  "because": "each resize is its own rendering step; the trace keeps a frame's last value",
+  "params": {
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1",
+   "mediumBreakpoint": {
+    "value": 800,
+    "unit": "px"
+   },
+   "mediumLayout": "1 1"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "resize",
+    "value": 300
+   },
+   {
+    "act": "resize",
+    "value": 700
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 300
+   },
+   {
+    "act": "resize",
+    "value": 1024
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a resize to the same width reports nothing",
+  "because": "an observation reports only a width it has not reported",
+  "params": {
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1",
+   "mediumBreakpoint": {
+    "value": 800,
+    "unit": "px"
+   },
+   "mediumLayout": "1 1"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "resize",
+    "value": 700
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 700
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a resize that is not a number lays nothing out again: no report",
+  "because": "THE WIDTH: the page keeps its width",
+  "params": {
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1",
+   "mediumBreakpoint": {
+    "value": 800,
+    "unit": "px"
+   },
+   "mediumLayout": "1 1"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "resize",
+    "value": "wide"
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 700
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a page 0 wide measures 0: Small; the gap cannot take it below 0",
+  "because": "`measureContainerWidth` :116-118 clamps at 0",
+  "params": {
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "resize",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 15.5
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "Small Below set as a size while on the page: the band changes at the next frame, without a resize",
+  "because": "the band is read at every render from the props as they are",
+  "steps": [
+   "settle",
+   {
+    "set": "smallBreakpoint",
+    "value": {
+     "value": 2000,
+     "unit": "px"
+    }
+   },
+   {
+    "set": "smallLayout",
+    "value": "1"
+   },
+   "settle",
+   {
+    "set": "smallBreakpoint",
+    "value": {
+     "value": 100,
+     "unit": "px"
+    }
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "Small Below without Small Layout is inert; Small Layout arriving later makes it apply",
+  "because": "`props.smallLayout` must be truthy; Columns.tsx `pickBreakpointLayout` :277-293",
+  "steps": [
+   "settle",
+   {
+    "set": "smallBreakpoint",
+    "value": {
+     "value": 2000,
+     "unit": "px"
+    }
+   },
+   "settle",
+   {
+    "set": "smallLayout",
+    "value": "1"
+   },
+   "settle",
+   {
+    "set": "smallLayout",
+    "value": ""
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "row C133 — a Small Layout of 0 or null is inert; 2 applies: Small",
+  "because": "`props.smallLayout` is read for truthiness (pickBreakpointLayout :277-293); R11 — the band applies. P107-C133: the runtime hands the number to `parseLayout`, whose `split` throws in render — P109 s32: fixed (ISL-050), the row mark dropped",
+  "params": {
+   "smallBreakpoint": {
+    "value": 2000,
+    "unit": "px"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "smallLayout",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "smallLayout",
+    "value": null
+   },
+   "settle",
+   {
+    "set": "smallLayout",
+    "value": 2
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "row C133 — a Small Layout that is no layout (a list, an object, spaces) leaves the band to the base layout; \"1\" then applies: Small",
+  "because": "P109 s32 (ISL-050, Columns v2, ruled \"Read a number as its text, and anything else as no layout\") — read as Layout String is; v1 picked the band for any truthy value, and the runtime threw on one that was not a string",
+  "params": {
+   "smallBreakpoint": {
+    "value": 2000,
+    "unit": "px"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "smallLayout",
+    "value": [
+     1,
+     2
+    ]
+   },
+   "settle",
+   {
+    "set": "smallLayout",
+    "value": {
+     "a": 1
+    }
+   },
+   "settle",
+   {
+    "set": "smallLayout",
+    "value": "   "
+   },
+   "settle",
+   {
+    "set": "smallLayout",
+    "value": "1"
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a Small Below of 0 or below is inert",
+  "because": "`small > 0`; Columns.tsx `pickBreakpointLayout` :277-293",
+  "params": {
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "smallBreakpoint",
+    "value": {
+     "value": 0,
+     "unit": "px"
+    }
+   },
+   "settle",
+   {
+    "set": "smallBreakpoint",
+    "value": {
+     "value": -1,
+     "unit": "px"
+    }
+   },
+   "settle",
+   {
+    "set": "smallBreakpoint",
+    "value": {
+     "value": 2000,
+     "unit": "px"
+    }
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a bare number on Medium Below that has never held a size is read in pixels: Medium applies (v3, row C132)",
+  "because": "P107-C132 (ruled \"Read the number as pixels\") — node.ts `isBareMagnitude`: a size port with nothing to merge into reads a number in its default unit, px; v2 kept it bare and the setter refused it",
+  "steps": [
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": 900
+   },
+   {
+    "set": "mediumLayout",
+    "value": "1 1"
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 700
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a numeric string on Small Below that has never held a size is read in pixels too (v3, row C132)",
+  "because": "P107-C132 — node.ts `isBareMagnitude`: text that is not blank and reads as a number",
+  "steps": [
+   "settle",
+   {
+    "set": "smallBreakpoint",
+    "value": "2000"
+   },
+   {
+    "set": "smallLayout",
+    "value": "1"
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a size port that refused a value reads the next number in pixels; text that is not a number is still refused (v3, row C132)",
+  "because": "P107-C132 — a refused value is no size to merge into; node.ts `isBareMagnitude` leaves blank and non-numeric text to the setter, which refuses it and keeps the prop",
+  "params": {
+   "mediumLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": "wide"
+   },
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": 2000
+   },
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": " "
+   },
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": "500"
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "once Medium Below holds a size, a bare number or a numeric string merges into it and applies",
+  "because": "node.ts :430-437 — merged into the held `{ value, unit }`",
+  "steps": [
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": {
+     "value": 100,
+     "unit": "px"
+    }
+   },
+   {
+    "set": "mediumLayout",
+    "value": "1"
+   },
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": 2000
+   },
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": "50"
+   },
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": "2000"
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "null on a size port that holds one clears it: Medium Below off, and the next number merges into its unit and applies",
+  "because": "null merges as `{ value: null }` — an empty size, the prop cleared; the port then holds that object, whose unit the next number merges into",
+  "params": {
+   "mediumBreakpoint": {
+    "value": 2000,
+    "unit": "px"
+   },
+   "mediumLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": null
+   },
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": 2000
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a var(--token) Medium Below is kept as written and reads as 0: inert; a number after it is read in pixels (v3, row C132)",
+  "because": "isTokenReference :614-616; `toPixels` — parseFloat of `var(` is NaN, so 0; a token is no size, so the number is read in px (P107-C132)",
+  "params": {
+   "mediumBreakpoint": {
+    "value": 2000,
+    "unit": "px"
+   },
+   "mediumLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": "var(--md)"
+   },
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": 2000
+   },
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": {
+     "value": 2000,
+     "unit": "px"
+    }
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a size with no unit is value + undefined: NaN for a number, so inert; a numeric string still reads",
+  "because": "react-component-node.ts :707 `value.value + value.unit`; `dimensionIsUsable` passes a size with no unit",
+  "params": {
+   "mediumBreakpoint": {
+    "value": 2000,
+    "unit": "px"
+   },
+   "mediumLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": {
+     "value": 2000
+    }
+   },
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": {
+     "value": "2000"
+    }
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "an empty size ({ value: null }) on a size port clears it",
+  "because": "`isEmptyMagnitude` — a size with a null value is empty",
+  "params": {
+   "mediumBreakpoint": {
+    "value": 2000,
+    "unit": "px"
+   },
+   "mediumLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": {
+     "value": null,
+     "unit": "px"
+    }
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "an empty Layout String draws the children bare: Default, and the width is forgotten",
+  "because": "`readColumnLayoutString` :421-433; :487-492",
+  "params": {
+   "smallBreakpoint": {
+    "value": 2000,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "layoutString",
+    "value": ""
+   },
+   "settle",
+   {
+    "set": "layoutString",
+    "value": "1 1"
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a Layout String of 0 or 3 is read as a string; true or null is not",
+  "because": "`readColumnLayoutString` — a number is its String",
+  "params": {
+   "smallBreakpoint": {
+    "value": 2000,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "layoutString",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "layoutString",
+    "value": true
+   },
+   "settle",
+   {
+    "set": "layoutString",
+    "value": 3
+   },
+   "settle",
+   {
+    "set": "layoutString",
+    "value": null
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a Layout String of spaces is no layout; one that drops entries ('1 a 1') still has a container",
+  "because": "`trim()`; the drop is reported off the wire (columns.ts `revalidateLayoutStrings`)",
+  "params": {
+   "smallBreakpoint": {
+    "value": 2000,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "layoutString",
+    "value": "  "
+   },
+   "settle",
+   {
+    "set": "layoutString",
+    "value": "1 a 1"
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Layout String emptied and restored before a frame keeps the container: nothing sent",
+  "because": "the render sees only the props at the paint",
+  "params": {
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "layoutString",
+    "value": ""
+   },
+   {
+    "set": "layoutString",
+    "value": "2 1"
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 300
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a resize while the Layout String is empty is measured when the container comes back",
+  "because": "a new element is a new observer; its first observation reports the page as it is",
+  "params": {
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "layoutString",
+    "value": ""
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 300
+   },
+   "settle",
+   {
+    "set": "layoutString",
+    "value": "1"
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "Auto Fit is always Default; back to Layout String, the band returns with its pulse",
+  "because": "`resolveColumnLayout` :241-247",
+  "params": {
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "sizing",
+    "value": "autoFit"
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 300
+   },
+   "settle",
+   {
+    "set": "sizing",
+    "value": "layoutString"
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a Column Sizing that is not autoFit is Layout String",
+  "because": "only `=== 'autoFit'` changes anything",
+  "params": {
+   "smallBreakpoint": {
+    "value": 2000,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "sizing",
+    "value": null
+   },
+   "settle",
+   {
+    "set": "sizing",
+    "value": "masonry"
+   },
+   "settle",
+   {
+    "set": "sizing",
+    "value": "autoFit"
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "row C134 — Auto Fit with Min Column Width 16 and Horizontal Gap −16: Default, and a resize sends nothing",
+  "because": "Auto Fit is Default (`resolveColumnLayout` :241-247); R11. P107-C134: `calcAutoFit` :302-311 counts `(width + gap) / (min + gap)` — Infinity at min + gap = 0 — and `new Array(Infinity)` throws in render — P109 s32: fixed (ISL-050), the row mark dropped",
+  "params": {
+   "sizing": "autoFit",
+   "minWidth": 16,
+   "marginX": -16
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "resize",
+    "value": 700
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a wider Horizontal Gap measures the same page narrower: Medium without a resize",
+  "because": "a new gap is a new observer; it reports at once (816 page − 40)",
+  "params": {
+   "mediumBreakpoint": {
+    "value": 800,
+    "unit": "px"
+   },
+   "mediumLayout": "1 1"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "resize",
+    "value": 830
+   },
+   "settle",
+   {
+    "set": "marginX",
+    "value": 40
+   },
+   "settle",
+   {
+    "set": "marginX",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a Horizontal Gap that is not a size is refused and kept; null clears it to 0",
+  "because": "react-component-node.ts :720-739; `toPixels(undefined)` is 0",
+  "params": {
+   "mediumBreakpoint": {
+    "value": 1010,
+    "unit": "px"
+   },
+   "mediumLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "marginX",
+    "value": "wide"
+   },
+   "settle",
+   {
+    "set": "marginX",
+    "value": null
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a var(--gap) Horizontal Gap reads as 0, and a number after it is read in pixels (v3, row C132)",
+  "because": "isTokenReference; the port holds the token, which has no unit to merge into",
+  "params": {
+   "mediumBreakpoint": {
+    "value": 1010,
+    "unit": "px"
+   },
+   "mediumLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "marginX",
+    "value": "var(--gap)"
+   },
+   "settle",
+   {
+    "set": "marginX",
+    "value": 100
+   },
+   "settle",
+   {
+    "set": "marginX",
+    "value": {
+     "value": 100,
+     "unit": "px"
+    }
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a Horizontal Gap in % is read as its number",
+  "because": "`toPixels` reads '10%' as 10",
+  "params": {
+   "mediumBreakpoint": {
+    "value": 1000,
+    "unit": "px"
+   },
+   "mediumLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "marginX",
+    "value": {
+     "value": 30,
+     "unit": "%"
+    }
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a negative Horizontal Gap widens the measure",
+  "because": "width − (−5)",
+  "params": {
+   "mediumBreakpoint": {
+    "value": 806,
+    "unit": "px"
+   },
+   "mediumLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "marginX",
+    "value": -5
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 800
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the gap a numeric string or true merges as: '20' applies, true is refused",
+  "because": "node.ts `isNaN('20')` and `isNaN(true)` are false; `dimensionIsUsable` refuses a boolean",
+  "params": {
+   "mediumBreakpoint": {
+    "value": 1005,
+    "unit": "px"
+   },
+   "mediumLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "marginX",
+    "value": "20"
+   },
+   "settle",
+   {
+    "set": "marginX",
+    "value": true
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "Mounted off: Will Unmount and nothing else; on again: Did Mount, and the band's pulse again",
+  "because": "a new component publishes its first band; Columns.tsx :598-604 — the effect keyed on the band",
+  "params": {
+   "smallBreakpoint": {
+    "value": 2000,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "off and on before a frame: the component stays — nothing",
+  "because": "the paint sees Mounted as it is",
+  "params": {
+   "smallBreakpoint": {
+    "value": 2000,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a resize while unmounted is measured when it mounts again",
+  "because": "the page keeps its width; the new observer reports it",
+  "params": {
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 300
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "Mounted off and a resize before the frame: the resize paints the leaving first — Will Unmount, nothing measured; back on, the new width's band",
+  "because": "adapter.ts `act`: the page follows first; a component gone takes its observer with it",
+  "params": {
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   {
+    "act": "resize",
+    "value": 300
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "mounted false in the params: never on the page — Did Mount and Breakpoint wait for Mounted",
+  "because": "react-component-node.ts :2302-2321",
+  "params": {
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1",
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "resize",
+    "value": 300
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "Mounted set false before the first frame: the placing drew it, so Did Mount and Will Unmount both land in that frame",
+  "because": "react-component-node.ts :982-990 — the placing renders it; the frame's paint takes it off",
+  "steps": [
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 300
+   },
+   "settle"
+  ],
+  "params": {
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  }
+ },
+ {
+  "name": "Mounted on and a resize into Medium before the frame: the resize paints the mounting, then reports — Did Mount, Medium, At Medium",
+  "because": "adapter.ts `act`: the page follows first; the new observer reports at the resize",
+  "params": {
+   "mounted": false,
+   "mediumBreakpoint": {
+    "value": 800,
+    "unit": "px"
+   },
+   "mediumLayout": "1 1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   {
+    "act": "resize",
+    "value": 700
+   },
+   "settle",
+   {
+    "act": "resize",
+    "value": 1024
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "Mounted on and a resize into Medium, then Medium Layout emptied before the frame: At Medium has fired at the resize; the frame reports Default",
+  "because": "the resize is a rendering step of its own: its report lands before the frame's paint reads the emptied layout",
+  "params": {
+   "mounted": false,
+   "mediumBreakpoint": {
+    "value": 800,
+    "unit": "px"
+   },
+   "mediumLayout": "1 1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   {
+    "act": "resize",
+    "value": 700
+   },
+   {
+    "set": "mediumLayout",
+    "value": ""
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a set and a resize before any frame: the resize paints the set first",
+  "because": "adapter.ts `act`: the page follows first",
+  "steps": [
+   "settle",
+   {
+    "set": "smallBreakpoint",
+    "value": {
+     "value": 2000,
+     "unit": "px"
+    }
+   },
+   {
+    "set": "smallLayout",
+    "value": "1"
+   },
+   {
+    "act": "resize",
+    "value": 1024
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "Scroll Into View sends nothing",
+  "because": "react-component-node.ts :1380-1395",
+  "steps": [
+   "settle",
+   {
+    "signal": "scrollIntoView"
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the look ports send nothing",
+  "because": "stored, written to the style (R10)",
+  "params": {
+   "smallBreakpoint": {
+    "value": 480,
+    "unit": "px"
+   },
+   "smallLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "direction",
+    "value": "column"
+   },
+   {
+    "set": "packing",
+    "value": "masonry"
+   },
+   {
+    "set": "minWidth",
+    "value": 200
+   },
+   {
+    "set": "marginY",
+    "value": 4
+   },
+   {
+    "set": "justifyContent",
+    "value": "center"
+   },
+   "settle"
+  ]
+ }
+]

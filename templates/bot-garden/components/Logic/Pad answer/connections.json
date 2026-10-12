@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2e028d80-cfbb-55d2-8f22-b97484b0b060",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "padanswerIn",
+      "fromProperty": "answer",
+      "toId": "padanswerFn",
+      "toProperty": "in-answer"
+    },
+    {
+      "fromId": "padanswerIn",
+      "fromProperty": "run",
+      "toId": "padanswerFn",
+      "toProperty": "in-run"
+    },
+    {
+      "fromId": "padanswerIn",
+      "fromProperty": "stepMs",
+      "toId": "padanswerFn",
+      "toProperty": "in-stepMs"
+    },
+    {
+      "fromId": "padanswerIn",
+      "fromProperty": "world",
+      "toId": "padanswerFn",
+      "toProperty": "in-world"
+    },
+    {
+      "fromId": "padanswerIn",
+      "fromProperty": "go",
+      "toId": "padanswerFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "padanswerFn",
+      "fromProperty": "out-bubble",
+      "toId": "padanswerOut",
+      "toProperty": "bubble"
+    },
+    {
+      "fromId": "padanswerFn",
+      "fromProperty": "out-said",
+      "toId": "padanswerOut",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "padanswerFn",
+      "fromProperty": "success",
+      "toId": "padanswerOut",
+      "toProperty": "ran"
+    }
+  ]
+}

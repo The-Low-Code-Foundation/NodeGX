@@ -1,0 +1,129 @@
+{
+  "name": "header-row",
+  "rule": "a centred row with a gap: a fixed avatar, a 100% Group that fills (two Texts in it), and a hugging Text — and a space-between row of a Text and a Button",
+  "nodes": [
+    {
+      "id": "rows",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 360,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "rowGap": {
+          "value": 16,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "hr",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "contentHeight",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "flexDirection": "row",
+            "alignItems": "center",
+            "columnGap": {
+              "value": 12,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "avatar",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            },
+            {
+              "id": "words",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "contentHeight",
+                "width": {
+                  "value": 100,
+                  "unit": "%"
+                },
+                "flexDirection": "column"
+              },
+              "children": [
+                {
+                  "id": "name",
+                  "type": "Text",
+                  "parameters": {
+                    "text": "Ada Lovelace"
+                  }
+                },
+                {
+                  "id": "role",
+                  "type": "Text",
+                  "parameters": {
+                    "text": "Analyst"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "when",
+              "type": "Text",
+              "parameters": {
+                "text": "2 min",
+                "sizeMode": "contentSize"
+              }
+            }
+          ]
+        },
+        {
+          "id": "sb",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "contentHeight",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "flexDirection": "row",
+            "justifyContent": "space-between",
+            "alignItems": "center",
+            "columnGap": {
+              "value": 8,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "sbt",
+              "type": "Text",
+              "parameters": {
+                "text": "Settings",
+                "sizeMode": "contentSize"
+              }
+            },
+            {
+              "id": "sbb",
+              "type": "net.noodl.controls.button",
+              "parameters": {
+                "label": "Edit"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

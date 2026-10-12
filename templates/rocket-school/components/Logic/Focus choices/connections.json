@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2ff1cb99-b107-59c4-8634-1ce6b82cc45a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "focuschoicesIn",
+      "fromProperty": "curriculum",
+      "toId": "focuschoicesFn",
+      "toProperty": "in-curriculum"
+    },
+    {
+      "fromId": "focuschoicesIn",
+      "fromProperty": "sets",
+      "toId": "focuschoicesFn",
+      "toProperty": "in-sets"
+    },
+    {
+      "fromId": "focuschoicesIn",
+      "fromProperty": "level",
+      "toId": "focuschoicesFn",
+      "toProperty": "in-level"
+    },
+    {
+      "fromId": "focuschoicesIn",
+      "fromProperty": "lang",
+      "toId": "focuschoicesFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "focuschoicesIn",
+      "fromProperty": "subject",
+      "toId": "focuschoicesFn",
+      "toProperty": "in-subject"
+    },
+    {
+      "fromId": "focuschoicesIn",
+      "fromProperty": "topic",
+      "toId": "focuschoicesFn",
+      "toProperty": "in-topic"
+    },
+    {
+      "fromId": "focuschoicesIn",
+      "fromProperty": "skills",
+      "toId": "focuschoicesFn",
+      "toProperty": "in-skills"
+    },
+    {
+      "fromId": "focuschoicesIn",
+      "fromProperty": "listsWord",
+      "toId": "focuschoicesFn",
+      "toProperty": "in-listsWord"
+    },
+    {
+      "fromId": "focuschoicesFn",
+      "fromProperty": "out-subjectRows",
+      "toId": "focuschoicesOut",
+      "toProperty": "subjectRows"
+    },
+    {
+      "fromId": "focuschoicesFn",
+      "fromProperty": "out-topicRows",
+      "toId": "focuschoicesOut",
+      "toProperty": "topicRows"
+    },
+    {
+      "fromId": "focuschoicesFn",
+      "fromProperty": "out-skillRows",
+      "toId": "focuschoicesOut",
+      "toProperty": "skillRows"
+    },
+    {
+      "fromId": "focuschoicesFn",
+      "fromProperty": "out-topic",
+      "toId": "focuschoicesOut",
+      "toProperty": "topic"
+    },
+    {
+      "fromId": "focuschoicesFn",
+      "fromProperty": "out-topicIds",
+      "toId": "focuschoicesOut",
+      "toProperty": "topicIds"
+    },
+    {
+      "fromId": "focuschoicesFn",
+      "fromProperty": "out-saveSubject",
+      "toId": "focuschoicesOut",
+      "toProperty": "saveSubject"
+    },
+    {
+      "fromId": "focuschoicesFn",
+      "fromProperty": "out-isLists",
+      "toId": "focuschoicesOut",
+      "toProperty": "isLists"
+    },
+    {
+      "fromId": "focuschoicesFn",
+      "fromProperty": "out-hasSets",
+      "toId": "focuschoicesOut",
+      "toProperty": "hasSets"
+    },
+    {
+      "fromId": "focuschoicesFn",
+      "fromProperty": "out-hasSkills",
+      "toId": "focuschoicesOut",
+      "toProperty": "hasSkills"
+    },
+    {
+      "fromId": "focuschoicesFn",
+      "fromProperty": "out-hasTopics",
+      "toId": "focuschoicesOut",
+      "toProperty": "hasTopics"
+    },
+    {
+      "fromId": "focuschoicesFn",
+      "fromProperty": "out-tickedCount",
+      "toId": "focuschoicesOut",
+      "toProperty": "tickedCount"
+    },
+    {
+      "fromId": "focuschoicesFn",
+      "fromProperty": "out-allTicked",
+      "toId": "focuschoicesOut",
+      "toProperty": "allTicked"
+    },
+    {
+      "fromId": "focuschoicesFn",
+      "fromProperty": "success",
+      "toId": "focuschoicesOut",
+      "toProperty": "done"
+    }
+  ]
+}

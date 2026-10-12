@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "44d88f48-4299-51fb-85ae-e1d865e2e60b",
+  "name": "Job robot",
+  "path": "/Logic/Job robot",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The robot this request needs, hers of that kind, its look, its step time. Runs when an input changes; Ran after each run."
+}

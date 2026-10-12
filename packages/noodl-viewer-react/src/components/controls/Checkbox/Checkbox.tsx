@@ -3,8 +3,9 @@ import React, { useEffect, useState } from 'react';
 import Layout from '../../../layout';
 import Utils from '../../../nodes/controls/utils';
 import { Noodl } from '../../../types';
-import { noodlRootRef } from '../../noodl-root-ref';
+import { noodlRootRef, dataAttributeProps, clearedRootStyles } from '../../noodl-root-ref';
 import { IconGlyph } from '../../visual/Icon/IconGlyph';
+import { labelText } from '../labelText';
 
 export interface CheckboxProps extends Noodl.ReactProps {
   id: string;
@@ -26,6 +27,8 @@ export interface CheckboxProps extends Noodl.ReactProps {
   iconColor: Noodl.Color;
 
   checkedChanged: (checked: boolean) => void;
+  /** P107-C67 — counts the node's writes of Checked; the box redraws the node's value at each one */
+  checkedWrites?: number;
 }
 
 export function Checkbox(props: CheckboxProps) {
@@ -38,7 +41,7 @@ export function Checkbox(props: CheckboxProps) {
 
   useEffect(() => {
     setChecked(!!props.checked);
-  }, [props.checked]);
+  }, [props.checked, props.checkedWrites]);
 
   const style: React.CSSProperties = { ...props.style };
 
@@ -168,9 +171,10 @@ export function Checkbox(props: CheckboxProps) {
 
   const checkbox = (
     <div
-      ref={noodlRootRef(props.noodlNode)}
+      ref={props.useLabel ? undefined : noodlRootRef(props.noodlNode)}
+      {...(props.useLabel ? undefined : dataAttributeProps(props.dom))}
       className="ndl-controls-pointer"
-      style={inputWrapperStyle}
+      style={props.useLabel ? { ...clearedRootStyles(style), ...inputWrapperStyle } : inputWrapperStyle}
       noodl-style-tag="checkbox"
     >
       {props.useIcon ? _renderIcon() || _renderDefaultCheck() : null}
@@ -202,16 +206,25 @@ export function Checkbox(props: CheckboxProps) {
     return (
       <div
         ref={noodlRootRef(props.noodlNode)}
+        {...dataAttributeProps(props.dom)}
         style={{ display: 'flex', alignItems: 'center', ...style }}
         {...Utils.controlEvents(props)}
       >
         {checkbox}
         <label className="ndl-controls-pointer" style={labelStyle} htmlFor={props.id} noodl-style-tag="label">
-          {props.label}
+          {labelText(props.label)}
         </label>
       </div>
     );
   } else {
-    return checkbox;
+    // P107-C80 / C66 (P109 ISL-031, ruled "keeps the keyboard" and "Fix it with the label work"): ONE tree whether the label
+    // shows or not, so React keeps the box (and the keyboard on it) when Enable Label changes, and one element carries
+    // the root ref. Without a label the outer div makes no box (display: contents) and the box is the root, as before.
+    return (
+      <div style={{ ...clearedRootStyles(style), display: 'contents' }}>
+        {checkbox}
+        {null}
+      </div>
+    );
   }
 }

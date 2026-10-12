@@ -1,0 +1,98 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "61bf3afa-6972-5e69-8368-fc2867e4de9b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "selectprofileIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "selectprofileFn",
+      "type": "JavaScriptFunction",
+      "label": "Select profile",
+      "parameters": {
+        "functionScript": "var { activate, modelOf } = Scripts.save;\nvar model = modelOf(Inputs.model && typeof Inputs.model === 'object' ? Inputs.model : {});\nvar id = String(Inputs.profileId || '');\nvar found = false;\nfor (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === id) found = true;\nif (found) activate(model, id);\nOutputs.model = model;\nOutputs.found = found;\n",
+        "runOnChange-in-model": false,
+        "runOnChange-in-profileId": false,
+        "uses": "save.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-profileId",
+          "displayName": "profileId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-model",
+          "displayName": "model",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-found",
+          "displayName": "found",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "selectprofileOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "found",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

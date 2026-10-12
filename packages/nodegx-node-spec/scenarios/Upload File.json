@@ -1,0 +1,840 @@
+[
+  {
+    "name": "no file: the press fails at the frame end — No file specified, status 0, no call",
+    "because": "uploadfile.ts :175-178 → setError :390-403",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "name": "k3j_photo.png",
+                "url": "https://files.example/k3j_photo.png",
+                "contentType": "image/png",
+                "size": 3
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a file: one uploadFile call, then the stored file and Done",
+    "because": "uploadfile.ts :183-215 — the call as handed; :209 a CloudFile from the FileRef; :212 Done last",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "uploadFile"
+            },
+            "answer": {
+              "ok": {
+                "name": "k3j_photo.png",
+                "url": "https://files.example/k3j_photo.png",
+                "contentType": "image/png",
+                "size": 3
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Directus's FileRef: the filename it reports is kept on the stored file — over the sent file's name — the id is not (v3, C52)",
+    "because": "uploadfile.ts: the backend's `filename` kept (P109 ISL-030, P107-C52 ruled \"Keep the real name\"); v2 dropped it",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "name": "6f1c0a52",
+                "url": "https://directus.example/assets/6f1c0a52",
+                "id": "6f1c0a52",
+                "filename": "Holiday photo.png"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a FileRef with no filename (PocketBase): the stored file keeps the sent file's name (v3, C52)",
+    "because": "uploadfile.ts: no `filename` reported, so the name of the file this upload sent (P109 ISL-030, P107-C52 ruled \"Keep the real name\")",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "name": "photo_g235k8arvj.png",
+                "url": "https://pb.example/api/files/notes/r1/photo_g235k8arvj.png",
+                "target": {
+                  "kind": "record",
+                  "collection": "notes",
+                  "recordId": "r1",
+                  "field": "attachment"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the file set AFTER the press in the same frame is the one uploaded",
+    "because": "uploadfile.ts :172-173 — the press schedules; the file is read at the frame end",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "upload"
+      },
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "name": "k3j_photo.png",
+                "url": "https://files.example/k3j_photo.png",
+                "contentType": "image/png",
+                "size": 3
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "two presses in a frame: two calls, two Dones",
+    "because": "uploadfile.ts :170-172 — each press its own token and its own after-inputs callback (measured s30)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "name": "k3j_photo.png",
+                "url": "https://files.example/k3j_photo.png",
+                "contentType": "image/png",
+                "size": 3
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a string on File: the adapter refuses it inside the call",
+    "because": "RestDataAdapter.ts :1738-1749 (world.ts FILES) → setError",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": "photo.png"
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "name": "k3j_photo.png",
+                "url": "https://files.example/k3j_photo.png",
+                "contentType": "image/png",
+                "size": 3
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Private and a Supabase bucket: the target's path is the file's own name",
+    "because": "uploadfile.ts :185-186; fileTarget :369-374",
+    "params": {
+      "private": true,
+      "bucket": "avatars"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "name": "k3j_photo.png",
+                "url": "https://files.example/k3j_photo.png",
+                "contentType": "image/png",
+                "size": 3
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a bucket and a path: the path as given",
+    "because": "uploadfile.ts :373",
+    "params": {
+      "bucket": "avatars",
+      "path": "me/photo.png"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "name": "k3j_photo.png",
+                "url": "https://files.example/k3j_photo.png",
+                "contentType": "image/png",
+                "size": 3
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Collection without a Field is no target at all",
+    "because": "uploadfile.ts :376-382 — a partly filled group is undefined",
+    "params": {
+      "collection": "notes",
+      "recordId": "r1"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "name": "k3j_photo.png",
+                "url": "https://files.example/k3j_photo.png",
+                "contentType": "image/png",
+                "size": 3
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Collection, Field and Record ID: a record target",
+    "because": "uploadfile.ts :376-380",
+    "params": {
+      "collection": "notes",
+      "field": "attachment",
+      "recordId": "r1"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "name": "k3j_photo.png",
+                "url": "https://files.example/k3j_photo.png",
+                "contentType": "image/png",
+                "size": 3
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Collection and Field, no Record ID: a record target that creates the record",
+    "because": "uploadfile.ts :377-379",
+    "params": {
+      "collection": "notes",
+      "field": "attachment"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "name": "k3j_photo.png",
+                "url": "https://files.example/k3j_photo.png",
+                "contentType": "image/png",
+                "size": 3
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a REST refusal: Error is the message, Error Status Code the HTTP status (v2, C51)",
+    "because": "RestDataAdapter.ts request → fail(message, status) → fileFailure: { error, status }; fileRef.ts fileFailureOf (P109 ISL-030, P107-C51 ruled \"Send the real status\"); v1 showed 0 — the adapter dropped the status",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": "HTTP 403: {\"errors\":[{\"message\":\"Forbidden\"}]}",
+              "detail": {
+                "status": 403
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a request that never got an answer: Error is the message, Error Status Code 0 (v2, C51)",
+    "because": "RestDataAdapter.ts request .catch → fail(message) with no status; fileRef.ts fileFailureOf (P109 ISL-030, P107-C51 ruled \"Send the real status\")",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": "Failed to fetch"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Parse-wire refusal: Error Status Code is the HTTP status, not the Parse error code (v2, C51)",
+    "because": "fileRef.ts fileFailureOf (P109 ISL-030, P107-C51 ruled \"Send the real status\"); v1 read `code || status || 0` and showed 119",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": "Permission denied",
+              "detail": {
+                "code": 119,
+                "status": 403
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a refusal with no message: Error is a sentence naming the status (v2, C51)",
+    "because": "fileRef.ts fileFailureOf (P109 ISL-030, P107-C51 ruled \"Send the real status\"); v1 put the whole envelope on Error",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": null,
+              "detail": {
+                "status": 500
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Backend the project does not have: the not-configured sentence, no call",
+    "because": "uploadfile.ts :339-351",
+    "params": {
+      "backendId": "nope"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "name": "k3j_photo.png",
+                "url": "https://files.example/k3j_photo.png",
+                "contentType": "image/png",
+                "size": 3
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the Backend picker names the second backend: the call goes there",
+    "because": "uploadfile.ts :340-342 → resolveBackend",
+    "params": {
+      "backendId": "other"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "answers": [
+          {
+            "match": {
+              "backend": "other"
+            },
+            "answer": {
+              "error": "Bucket not found"
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "name": "k3j_photo.png",
+                "url": "https://files.example/k3j_photo.png",
+                "contentType": "image/png",
+                "size": 3
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a late answer: nothing until it lands; a press while it is out makes a second call",
+    "because": "uploadfile.ts :170 — no coalescing guard",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      {
+        "signal": "upload"
+      },
+      "settle",
+      {
+        "advance": 20
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "name": "k3j_photo.png",
+                "url": "https://files.example/k3j_photo.png",
+                "contentType": "image/png",
+                "size": 3
+              }
+            },
+            "after": 25
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a failure, then a success: Error and its status are kept",
+    "because": "uploadfile.ts :202-214 — the success writes Cloud File only",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle",
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "times": 1,
+            "answer": {
+              "error": "Permission denied",
+              "detail": {
+                "status": 403
+              }
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "name": "k3j_photo.png",
+                "url": "https://files.example/k3j_photo.png",
+                "contentType": "image/png",
+                "size": 3
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "never answered: the press stays open",
+    "because": "uploadfile.ts :170 — the token is held by the closure until an answer",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle",
+      {
+        "advance": 1000
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  }
+]

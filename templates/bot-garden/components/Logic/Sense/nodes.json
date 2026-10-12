@@ -1,0 +1,151 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7e45b2d5-97e1-584b-8d88-d7b1bf5295f8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "senseIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "answer",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "arg",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "count",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "robotId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "run",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "sensor",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "world",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "senseFn",
+      "type": "JavaScriptFunction",
+      "label": "Sense",
+      "parameters": {
+        "functionScript": "var { sense, worldOf } = Scripts.engine;\nvar w = worldOf(Inputs.world);\nvar run = Inputs.run && typeof Inputs.run === 'object' ? Inputs.run : { robotId: Inputs.robotId, count: Inputs.count, lastAnswer: Inputs.answer };\nif (!run.robotId) run.robotId = Inputs.robotId;\nOutputs.value = sense(w, run, String(Inputs.sensor || ''), Inputs.arg);\nOutputs.sensor = String(Inputs.sensor || '');\n",
+        "uses": "engine.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-world",
+          "displayName": "world",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-run",
+          "displayName": "run",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robotId",
+          "displayName": "robotId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-count",
+          "displayName": "count",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-answer",
+          "displayName": "answer",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-sensor",
+          "displayName": "sensor",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-arg",
+          "displayName": "arg",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-value",
+          "displayName": "value",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sensor",
+          "displayName": "sensor",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "senseOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "sensor",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "value",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

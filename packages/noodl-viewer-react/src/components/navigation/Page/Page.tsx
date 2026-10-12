@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
 
 import type { TSFixme } from '../../../../typings/global';
+import { layerDefaults, withDefaultsClass } from '../../../default-style-layer';
 import Layout from '../../../layout';
 import { Noodl, Slot } from '../../../types';
-import { noodlRootRef } from '../../noodl-root-ref';
+import { noodlRootRef, dataAttributeProps } from '../../noodl-root-ref';
 
 type MetaTag = {
   isProperty: boolean;
@@ -198,7 +199,10 @@ export interface PageProps extends Noodl.ReactProps {
 }
 
 export function Page(props: PageProps) {
-  const { style, children } = props;
+  const { children } = props;
+  // P109 ISL-008 — a copy: `layerDefaults` below takes keys OFF the object it is given, and `props.style` is the
+  // node's own style. (Layout used to write straight into it too, a render at a time.)
+  const style = { ...props.style };
 
   Layout.size(style, props);
   Layout.align(style, props);
@@ -239,8 +243,14 @@ export function Page(props: PageProps) {
     applyMetaTags();
   });
 
+  // P109 ISL-008 — defaults leave the inline style for the defaults sheet, so an author's class can override them.
+  const defaultsClass = layerDefaults(style);
+
   return (
-    <div ref={noodlRootRef((props as TSFixme).noodlNode)} style={style} className={props.className}>
+    <div
+      ref={noodlRootRef((props as TSFixme).noodlNode)}
+      {...dataAttributeProps((props as TSFixme).dom)}
+      style={style} className={withDefaultsClass(props.className, defaultsClass)}>
       {children}
     </div>
   );

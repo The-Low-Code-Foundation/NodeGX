@@ -1,0 +1,9 @@
+{
+  "name": "Bot Garden fonts",
+  "browser": {
+    "stylesheets": [
+      "noodl_modules/bot-garden-fonts/styles.css"
+    ]
+  },
+  "_note": "P105 CG-007: Fredoka for titles and buttons, as the mockup draws them, bundled rather than fetched so the game renders offline and asks nothing of fonts.googleapis.com (the mockup's own link). Variable font, latin and latin-extended subsets from @fontsource-variable/fredoka 5.2.8 (French needs the latin-extended œ). SIL Open Font License 1.1; the licence travels beside it. Nunito comes with the Playful preset (noodl_modules/preset-font-nunito)."
+}

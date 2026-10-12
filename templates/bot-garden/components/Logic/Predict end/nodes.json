@@ -1,0 +1,222 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5c653766-8493-5326-8983-a0522058feb3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "predictendIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "robotId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tapX",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "tapY",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "world",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "predictendFn",
+      "type": "JavaScriptFunction",
+      "label": "Predict end",
+      "parameters": {
+        "functionScript": "var { robotOf, runToEnd, worldOf } = Scripts.engine;\nvar w = worldOf(Inputs.world);\nvar robotId = String(Inputs.robotId || (w.robots[0] ? w.robots[0].id : ''));\nvar end = runToEnd(Inputs.program, w, robotId, Inputs.lang);\nvar r = robotOf(end.world, robotId);\nOutputs.x = r ? r.x : -1;\nOutputs.y = r ? r.y : -1;\nOutputs.d = r ? r.d : 0;\nOutputs.ticks = end.ticks;\nOutputs.known = end.known;\nvar asked = Inputs.tapX !== undefined && Inputs.tapX !== null && Inputs.tapX !== '' && Inputs.tapY !== undefined && Inputs.tapY !== null && Inputs.tapY !== '';\nOutputs.asked = asked;\nOutputs.hit = asked && !!r && Number(Inputs.tapX) === r.x && Number(Inputs.tapY) === r.y;\nOutputs.bumps = end.run.bumps;\n",
+        "runOnChange-in-lang": false,
+        "runOnChange-in-program": false,
+        "runOnChange-in-robotId": false,
+        "runOnChange-in-tapX": false,
+        "runOnChange-in-tapY": false,
+        "runOnChange-in-world": false,
+        "uses": "engine.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-world",
+          "displayName": "world",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robotId",
+          "displayName": "robotId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-program",
+          "displayName": "program",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tapX",
+          "displayName": "tapX",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tapY",
+          "displayName": "tapY",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-x",
+          "displayName": "x",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-y",
+          "displayName": "y",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-d",
+          "displayName": "d",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ticks",
+          "displayName": "ticks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-known",
+          "displayName": "known",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-asked",
+          "displayName": "asked",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hit",
+          "displayName": "hit",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bumps",
+          "displayName": "bumps",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "predictendOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "asked",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "bumps",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "d",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hit",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "known",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ticks",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "x",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "y",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

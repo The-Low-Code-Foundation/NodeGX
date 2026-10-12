@@ -102,7 +102,22 @@ const FUNCTION_NODE_GLOBALS: Record<string, 'readonly' | 'writable'> = {
   Outputs: 'writable',
   Noodl: 'readonly',
   Component: 'readonly',
-  Script: 'readonly'
+  Script: 'readonly',
+  // P109 ISL-005 — the fifth argument: one entry per file in the node's Uses.
+  Scripts: 'readonly'
+};
+
+/**
+ * P109 ISL-005 — a project script file sees `use`, `exports` and `module`, and
+ * nothing of the browser's on purpose: it runs the same in a server render and in
+ * an export, where `window` is not there. `console` is the one browser name kept,
+ * because it is there in all three. See `configFor`'s `'scriptfile'` case.
+ */
+const SCRIPT_FILE_GLOBALS: Record<string, 'readonly' | 'writable'> = {
+  use: 'readonly',
+  exports: 'writable',
+  module: 'writable',
+  console: 'readonly'
 };
 
 const SCRIPT_NODE_GLOBALS: Record<string, 'readonly' | 'writable'> = {
@@ -183,6 +198,20 @@ function configFor(validationType: ValidationType) {
     case 'script':
       return {
         ...shared(SCRIPT_NODE_GLOBALS),
+        rules: { ...STRUCTURAL_RULES, 'no-undef': 'warn' }
+      };
+
+    case 'scriptfile':
+      // Not `shared()`: a file gets no browser globals and no registered library's
+      // `window` global. `Noodl`, `window` and `document` are passed to it as
+      // `undefined`, so saying "not defined" about them is the true sentence.
+      return {
+        languageOptions: {
+          ecmaVersion: 2022 as const,
+          sourceType: 'script' as const,
+          parserOptions: { ecmaFeatures: { globalReturn: true } },
+          globals: { ...SCRIPT_FILE_GLOBALS }
+        },
         rules: { ...STRUCTURAL_RULES, 'no-undef': 'warn' }
       };
 

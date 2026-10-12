@@ -86,7 +86,17 @@ const MAX_INTERFACE_PORTS = 12;
  * runtime dropping one. It cannot catch the runtime *adding* one; that surfaces
  * as a stray inherited port in the handout, not as a wrong answer.
  */
-export const KIT_BASE_INPUT_PORTS = new Set(['cssClassName', 'styleCss', 'mounted', 'variant']);
+// P109 ISL-009 added three, and the warning above came true: until the kit recording was re-made
+// (2026-10-03) nothing noticed, and the handout would have listed them as each kit author's own ports.
+export const KIT_BASE_INPUT_PORTS = new Set([
+  'cssClassName',
+  'styleCss',
+  'dataAttributes',
+  'scrollIntoView',
+  'scrollIntoViewAlign',
+  'mounted',
+  'variant'
+]);
 export const KIT_BASE_OUTPUT_PORTS = new Set([
   'childIndex',
   'this',

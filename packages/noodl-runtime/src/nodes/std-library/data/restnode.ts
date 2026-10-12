@@ -96,6 +96,7 @@ const RestNode: NodeDefinitionOptions = {
   // would strand the one capability that has no mechanical conversion. The conversion path
   // belongs to LIB-006.
   deprecated: true,
+  replacedBy: 'net.noodl.HTTP',
   category: 'Data',
   color: 'data',
   searchTags: ['http', 'request', 'fetch'],

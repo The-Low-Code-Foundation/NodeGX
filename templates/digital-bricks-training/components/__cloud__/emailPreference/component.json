@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5614bdf3-0ba7-58cb-b80a-388d4fc42bdb",
+  "name": "emailPreference",
+  "path": "/#__cloud__/emailPreference",
+  "type": "cloud",
+  "created": "2026-10-01T20:00:00.000Z",
+  "modified": "2026-10-01T20:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Whether the signed-in account is emailed about new messages, for the switch on /settings (TASK-L187)."
+}

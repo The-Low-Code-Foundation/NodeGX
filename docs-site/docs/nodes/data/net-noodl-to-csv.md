@@ -30,6 +30,24 @@ Answering with a spreadsheet: a cloud function replying to an export request, a 
 | `includeHeader` | Boolean | `true` | Write the column names as the first row |
 | `items` | Array | — | The array to write. Records become rows; an array of arrays is written cell for cell |
 
+### What each input does
+
+**Items** (`items`)
+
+- always: written at the end of the frame (once, however many inputs moved) — CSV, Count and Changed; nothing (undefined or null) is not written; rows that are all arrays go cell for cell with no header, anything else as records
+
+**Columns** (`columns`)
+
+- always: the Items are written again at the end of the frame, once any have arrived — these properties in this order (comma-separated, blanks dropped), or every property first seen when empty
+
+**Delimiter** (`delimiter`)
+
+- always: the Items are written again at the end of the frame, once any have arrived, with this between cells (cleared reads as a comma)
+
+**Include Header** (`includeHeader`)
+
+- always: the Items are written again at the end of the frame, once any have arrived, with the column names as the first row or not — rows of cells never get one
+
 ## Outputs
 
 ### Values

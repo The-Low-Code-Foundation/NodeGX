@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "73ec15d9-8315-5061-8959-f4616f195383",
+  "name": "Set task project",
+  "path": "/Projects/Set task project",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Puts a task in a project (Project Id), or takes it out of any (none), and says so in its history. Current is the project it is in now; nothing is written when they are the same."
+}

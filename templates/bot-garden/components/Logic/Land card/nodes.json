@@ -1,0 +1,247 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "275d3b34-cc7b-5551-8c47-894cbdf05a7d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "landcardIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "ghost",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "requestId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "landcardFn",
+      "type": "JavaScriptFunction",
+      "label": "Land card",
+      "parameters": {
+        "functionScript": "var { DX, DY, blocked, buildStage, isSet, worldOf } = Scripts.engine;\nvar { LAND_H, LAND_LEFT_MAX, LAND_W, SHOP, animalSpec, blueprintSpec, landOf, modelOf, newId } = Scripts.save;\nvar LAND_ID = \"land\";\nvar LAND_PLOT = {\"x\":46,\"y\":15};\nvar LAND_MAP = [\"GGGGGGTG\",\"GGGGGGGG\",\"GTGGGGGG\",\"GGGGGGGG\",\"GGGGGGGG\",\"GGGGGTGG\"];\nvar LAND_HOME = {\"x\":0,\"y\":0,\"d\":1};\nvar LAND_SOURCES = [{\"kind\":\"tree\",\"id\":\"tree\",\"x\":7,\"y\":0,\"left\":6,\"max\":8},{\"kind\":\"rock\",\"id\":\"rock\",\"x\":7,\"y\":5,\"left\":6,\"max\":8},{\"kind\":\"patch\",\"id\":\"patch\",\"x\":0,\"y\":5,\"left\":3,\"max\":4}];\nvar LAND_FOOD = {\"rabbit\":\"carrot\",\"sheep\":\"carrot\"};\nfunction landParts(b) {\n  var spec = b ? blueprintSpec(b.bp) : null, out = [];\n  if (!spec) return out;\n  for (var i = 0; i < spec.parts.length; i++) out.push({ x: Number(b.x) + spec.parts[i].dx, y: Number(b.y), item: spec.parts[i].item, need: spec.parts[i].need });\n  return out;\n}\nfunction landPen(b) {\n  var spec = b ? blueprintSpec(b.bp) : null, out = [];\n  if (!spec || !spec.pen) return out;\n  for (var i = 0; i < spec.pen; i++) out.push({ x: Number(b.x) + i, y: Number(b.y) + 1, slot: i });\n  return out;\n}\nfunction landThings(raw) {\n  var land = landOf(raw), out = JSON.parse(JSON.stringify(LAND_SOURCES));\n  // P108 s8: each source as the island last left it (land.left, landKeep), so the Workshop shows the real amount.\n  if (land.left) for (var sl = 0; sl < out.length; sl++) if (land.left[out[sl].id] !== undefined) out[sl].left = land.left[out[sl].id];\n  for (var i = 0; i < land.buildings.length; i++) {\n    var b = land.buildings[i], parts = landParts(b);\n    for (var k = 0; k < parts.length; k++) out.push({ kind: 'site', id: b.id + '-' + parts[k].item, of: b.id, build: b.bp, keep: true, item: parts[k].item, need: parts[k].need, have: Number(b.have[parts[k].item]) || 0, x: parts[k].x, y: parts[k].y });\n  }\n  for (var j = 0; j < land.animals.length; j++) {\n    var a = land.animals[j], spec = animalSpec(a.kind), home = null;\n    for (var q = 0; q < land.buildings.length; q++) if (land.buildings[q].id === a.at) home = land.buildings[q];\n    var pen = landPen(home), at = null;\n    for (var s = 0; s < pen.length; s++) if (pen[s].slot === a.slot) at = pen[s];\n    if (!at || !spec) continue;\n    out.push({ kind: 'bowl', id: a.id, item: LAND_FOOD[a.kind] || spec.eats, capacity: spec.capacity, count: a.fed, food: a.fed, animal: a.kind, name: a.name, x: at.x, y: at.y });\n  }\n  return out;\n}\nfunction landJob(raw) {\n  var things = landThings(raw), targets = [];\n  for (var i = 0; i < things.length; i++) if (things[i].kind === 'site' || (things[i].kind === 'bowl' && things[i].animal)) targets.push(String(things[i].id));\n  if (!targets.length) return null;\n  var job = { targets: targets, home: { x: LAND_HOME.x, y: LAND_HOME.y, d: LAND_HOME.d } };\n  // P108 s7: a building that is for resting (the spa, does 'rest') gives its robots a tile each in front of it; the engine\n  // walks them there once it is finished (restOf).\n  var land = landOf(raw);\n  for (var b = 0; b < land.buildings.length && !job.rest; b++) {\n    var spec = blueprintSpec(land.buildings[b].bp);\n    if (!spec || spec.does !== 'rest') continue;\n    var tiles = landRestTiles(land, land.buildings[b]);\n    if (tiles.length) job.rest = { of: String(land.buildings[b].id), tiles: tiles };\n  }\n  return job;\n}\n/**\n * P108 s7: where robots rest at a building — up to two grass tiles a robot can reach, nothing on them and no pen. First\n * two rows in front of it, one tile out at each end (on the 2D island a robot is ~2½ tiles wide: on the row right under\n * the building the two robots hid it and each other — seen on the touch drive's shot); then under each part, over each\n * part, its two ends. Plot coordinates, d facing it.\n */\nfunction landRestTiles(land, b) {\n  var parts = landParts(b), cand = [];\n  if (parts.length) { cand.push({ x: parts[0].x - 1, y: parts[0].y + 2, d: 0 }); cand.push({ x: parts[parts.length - 1].x + 1, y: parts[0].y + 2, d: 0 }); }\n  for (var i = 0; i < parts.length; i++) cand.push({ x: parts[i].x, y: parts[i].y + 1, d: 0 });\n  for (var j = 0; j < parts.length; j++) cand.push({ x: parts[j].x, y: parts[j].y - 1, d: 2 });\n  if (parts.length) { cand.push({ x: parts[0].x - 1, y: parts[0].y, d: 1 }); cand.push({ x: parts[parts.length - 1].x + 1, y: parts[0].y, d: 3 }); }\n  var things = landThings(land), taken = {};\n  for (var t = 0; t < things.length; t++) taken[things[t].x + ',' + things[t].y] = 1;\n  for (var o = 0; o < land.buildings.length; o++) { var pen = landPen(land.buildings[o]); for (var p = 0; p < pen.length; p++) taken[pen[p].x + ',' + pen[p].y] = 1; }\n  taken[LAND_HOME.x + ',' + LAND_HOME.y] = 1;\n  var seen = landReach(worldOf({ map: LAND_MAP.slice(), things: things, robots: [] })), out = [];\n  for (var c = 0; c < cand.length && out.length < 2; c++) {\n    var x = cand[c].x, y = cand[c].y, k = x + ',' + y;\n    if (!(x >= 0 && y >= 0 && x < LAND_W && y < LAND_H) || String(LAND_MAP[y]).charAt(x) !== 'G' || taken[k] || !seen[k]) continue;\n    taken[k] = 1;\n    out.push(cand[c]);\n  }\n  return out;\n}\nfunction landRequest(raw) {\n  var job = landJob(raw), req = { id: LAND_ID, islander: '', band: 1, plot: { x: LAND_PLOT.x, y: LAND_PLOT.y }, tricks: [], map: LAND_MAP.slice(), things: landThings(raw), robotStart: { x: LAND_HOME.x, y: LAND_HOME.y, d: LAND_HOME.d }, goal: { name: 'job_done' }, palette: [], referenceProgram: [] };\n  if (job) req.job = job;\n  return req;\n}\n/** The tiles a robot can stand on, reached from home (breadth first over tiles that do not block). */\nfunction landReach(w) {\n  var seen = {}, q = [[LAND_HOME.x, LAND_HOME.y]], head = 0;\n  seen[LAND_HOME.x + ',' + LAND_HOME.y] = 1;\n  while (head < q.length) {\n    var c = q[head++];\n    for (var d = 0; d < 4; d++) { var nx = c[0] + DX[d], ny = c[1] + DY[d], k = nx + ',' + ny; if (seen[k] || blocked(w, nx, ny)) continue; seen[k] = 1; q.push([nx, ny]); }\n  }\n  return seen;\n}\nfunction landBeside(seen, x, y) { for (var d = 0; d < 4; d++) if (seen[(x + DX[d]) + ',' + (y + DY[d])]) return true; return false; }\nfunction landLegal(raw, bp, x, y) {\n  var land = landOf(raw), spec = blueprintSpec(bp);\n  if (!spec) return 'unknown';\n  for (var i = 0; i < land.buildings.length; i++) if (land.buildings[i].bp === spec.id) return 'built';\n  var b = { id: '?', bp: spec.id, x: Math.floor(Number(x)), y: Math.floor(Number(y)), have: {} };\n  var tiles = landParts(b).concat(landPen(b));\n  var things = landThings(land), taken = {};\n  for (var t = 0; t < things.length; t++) taken[things[t].x + ',' + things[t].y] = 1;\n  for (var o = 0; o < land.buildings.length; o++) { var pen = landPen(land.buildings[o]); for (var p = 0; p < pen.length; p++) taken[pen[p].x + ',' + pen[p].y] = 1; }\n  taken[LAND_HOME.x + ',' + LAND_HOME.y] = 1;\n  for (var k = 0; k < tiles.length; k++) {\n    var tx = tiles[k].x, ty = tiles[k].y;\n    if (!(tx >= 0 && ty >= 0 && tx < LAND_W && ty < LAND_H)) return 'edge';\n    if (String(LAND_MAP[ty]).charAt(tx) !== 'G') return 'ground';\n    if (taken[tx + ',' + ty]) return 'taken';\n  }\n  // Placed (its pen places counted as standing too: an animal's bowl will), can a robot from home still reach every part,\n  // every pen place, every source and every other building's part?\n  land.buildings.push(b);\n  var after = landThings(land);\n  var w = worldOf({ map: LAND_MAP.slice(), things: after.concat(landPen(b).map(function (pp) { return { kind: 'bowl', x: pp.x, y: pp.y }; })), robots: [] });\n  var seen = landReach(w);\n  for (var a = 0; a < after.length; a++) if (!landBeside(seen, after[a].x, after[a].y)) return 'reach';\n  var penB = landPen(b);\n  for (var pb = 0; pb < penB.length; pb++) if (!landBeside(seen, penB[pb].x, penB[pb].y)) return 'reach';\n  return '';\n}\nfunction landPlace(raw, bp, x, y, id) {\n  var why = landLegal(raw, bp, x, y);\n  if (why) return { ok: false, error: why, id: '' };\n  var nid = typeof id === 'string' && id ? id.slice(0, 40) : newId('b');\n  var spec = blueprintSpec(bp), have = {};\n  for (var i = 0; i < spec.parts.length; i++) have[spec.parts[i].item] = 0;\n  raw.buildings = Array.isArray(raw.buildings) ? raw.buildings : [];\n  raw.animals = Array.isArray(raw.animals) ? raw.animals : [];\n  raw.buildings.push({ id: nid, bp: spec.id, x: Math.floor(Number(x)), y: Math.floor(Number(y)), have: have });\n  return { ok: true, error: '', id: nid };\n}\nfunction landKeep(raw, things) {\n  var list = Array.isArray(things) ? things : [], changed = false;\n  var bs = raw && Array.isArray(raw.buildings) ? raw.buildings : [], as = raw && Array.isArray(raw.animals) ? raw.animals : [];\n  for (var i = 0; i < list.length; i++) {\n    var t = list[i];\n    if (!t) continue;\n    if (t.kind === 'site' && isSet(t.of)) for (var b = 0; b < bs.length; b++) {\n      if (bs[b].id !== String(t.of)) continue;\n      var h = Math.floor(Number(t.have)) || 0, was = Math.floor(Number(bs[b].have && bs[b].have[t.item])) || 0;\n      if (!bs[b].have) bs[b].have = {};\n      if (h > was) { bs[b].have[t.item] = Math.min(h, Number(t.need) || h); changed = true; }\n    }\n    if (t.kind === 'bowl' && t.animal) for (var a = 0; a < as.length; a++) {\n      if (as[a].id !== String(t.id)) continue;\n      var f = Math.max(0, Math.floor(Number(t.count)) || 0);\n      if (f !== Number(as[a].fed)) { as[a].fed = f; changed = true; }\n    }\n    // P108 s8: a source's left follows the island's (mined down, grown back), for the Workshop's land (landThings).\n    if (isSet(t.id) && String(t.id) === t.kind && LAND_LEFT_MAX[t.kind] !== undefined && t.left !== undefined && raw) {\n      var lv = Math.max(0, Math.floor(Number(t.left)) || 0);\n      if (!raw.left || typeof raw.left !== 'object') raw.left = {};\n      if (raw.left[String(t.id)] !== lv) { raw.left[String(t.id)] = lv; changed = true; }\n    }\n  }\n  return changed;\n}\n\n// ── P108 IW-007 (lane B): placing ──\nvar IW7B_SHOP = SHOP;\nfunction iw7bW(rows, lang) { var map = {}, list = Array.isArray(rows) ? rows : []; for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || ''); return map; }\nfunction iw7bFill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction iw7bActive(model) { for (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === model.island.activeId) return model.profiles[i]; return null; }\nfunction iw7bItemOf(bp) { for (var i = 0; i < IW7B_SHOP.length; i++) if (IW7B_SHOP[i].kind === 'blueprint' && IW7B_SHOP[i].blueprint === String(bp)) return IW7B_SHOP[i]; return null; }\n/** The blueprints she owns and has not placed yet, in the shop's order. */\nfunction iw7bToPlace(p) {\n  var out = [], land = landOf(p && p.island ? p.island.land : null);\n  for (var i = 0; i < IW7B_SHOP.length; i++) {\n    var it = IW7B_SHOP[i];\n    if (it.kind !== 'blueprint' || !p || p.owned.indexOf(it.id) === -1) continue;\n    var placed = false;\n    for (var b = 0; b < land.buildings.length; b++) if (land.buildings[b].bp === it.blueprint) placed = true;\n    if (!placed) out.push(it.blueprint);\n  }\n  return out;\n}\n/** The ghost as the Variable holds it: '{ bp, x, y }' (plot coordinates), or none ('{ bp: \"\" }'). */\nfunction iw7bGhostOf(v) { var g = v && typeof v === 'object' ? v : {}; return blueprintSpec(g.bp) ? { bp: String(g.bp), x: Math.floor(Number(g.x)) || 0, y: Math.floor(Number(g.y)) || 0 } : null; }\n\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en', W = iw7bW(Inputs.words, lang);\nvar model = modelOf(Inputs.model && typeof Inputs.model === 'object' ? Inputs.model : {}), p = iw7bActive(model);\nvar land = landOf(p && p.island ? p.island.land : null);\nvar ghost = iw7bGhostOf(Inputs.ghost);\nvar STAGE_WORDS = ['iw7bStage0', 'iw7bStage1', 'iw7bStage2'];\nvar stands = [];\nfor (var i = 0; i < land.buildings.length; i++) {\n  var b = land.buildings[i], spec = blueprintSpec(b.bp), it = iw7bItemOf(b.bp), have = 0, need = 0;\n  for (var k = 0; k < spec.parts.length; k++) { need += spec.parts[k].need; have += Math.min(spec.parts[k].need, Number(b.have[spec.parts[k].item]) || 0); }\n  var st = buildStage(have, need, spec.stages);\n  var stage = st >= spec.stages - 1 ? W.iw7bStageDone || '' : W[STAGE_WORDS[Math.min(st, STAGE_WORDS.length - 1)]] || '';\n  stands.push(iw7bFill(W.iw7bStands, { what: it ? it.name[lang] || it.name.en : b.bp, stage: stage, n: have, m: need }));\n}\nvar toPlace = p ? iw7bToPlace(p) : [];\nvar chips = [];\nfor (var c = 0; c < toPlace.length; c++) { var ci = iw7bItemOf(toPlace[c]); chips.push({ id: 'landbp|' + toPlace[c], label: iw7bFill(W.iw7bPlaceChip, { what: ci ? ci.name[lang] || ci.name.en : toPlace[c] }), selected: !!ghost && ghost.bp === toPlace[c], locked: false }); }\nvar why = ghost ? landLegal(land, ghost.bp, ghost.x, ghost.y) : '';\nvar WHY = { edge: 'iw7bWhyEdge', ground: 'iw7bWhyGround', taken: 'iw7bWhyTaken', reach: 'iw7bWhyReach', built: 'iw7bWhyBuilt' };\nvar lines = stands.slice();\nif (!land.buildings.length && !toPlace.length) lines.push(W.iw7bLandEmpty || '');\nOutputs.show = String(Inputs.requestId || '') === LAND_ID;\nOutputs.line = lines.join(' · ');\nOutputs.chips = ghost ? [] : chips;\nOutputs.showChips = !ghost && chips.length > 0;\nOutputs.chipsLabel = W.iw7bLandToPlace || '';\nOutputs.ghostShow = !!ghost;\nOutputs.ghostOk = !!ghost && !why;\nOutputs.ghostLine = !ghost ? '' : why ? iw7bFill(W.iw7bGhostNo, { why: W[WHY[why]] || why }) : W.iw7bGhostOk || '';\nOutputs.why = why;\nOutputs.putText = W.iw7bPutHere || '';\nOutputs.cancelText = W.iw7bNotNow || '';\nvar gs = ghost ? blueprintSpec(ghost.bp) : null;\nOutputs.ghostThing = ghost ? { kind: 'ghost', bp: ghost.bp, x: LAND_PLOT.x + ghost.x, y: LAND_PLOT.y + ghost.y, w: gs.parts.length, pen: gs.pen || 0, ok: !why, why: why } : null;\n",
+        "uses": "engine.js,save.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ghost",
+          "displayName": "ghost",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-requestId",
+          "displayName": "requestId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-show",
+          "displayName": "show",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-line",
+          "displayName": "line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-chips",
+          "displayName": "chips",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showChips",
+          "displayName": "showChips",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-chipsLabel",
+          "displayName": "chipsLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ghostShow",
+          "displayName": "ghostShow",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ghostOk",
+          "displayName": "ghostOk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ghostLine",
+          "displayName": "ghostLine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-why",
+          "displayName": "why",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-putText",
+          "displayName": "putText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cancelText",
+          "displayName": "cancelText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ghostThing",
+          "displayName": "ghostThing",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "landcardOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "cancelText",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "chips",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "chipsLabel",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ghostLine",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ghostOk",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ghostShow",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ghostThing",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "line",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "putText",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "show",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "showChips",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "why",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

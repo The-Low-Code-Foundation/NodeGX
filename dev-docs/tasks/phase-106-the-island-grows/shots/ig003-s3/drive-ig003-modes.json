@@ -1,0 +1,1039 @@
+{
+ "dir": "/Users/richardosborne/vscode_projects/OpenNoodl-worktrees/ig003-drive-scratch/pages/deploy",
+ "results": [
+  {
+   "name": "AC1 1368-en: the bar is Drive · Teach · Play · One step · Start over (no Predict), and it opens in Drive (Drive ringed, the pad up)",
+   "ok": true,
+   "saw": {
+    "bar": [
+     "drive",
+     "rec",
+     "play",
+     "step",
+     "reset"
+    ],
+    "ringed": [
+     "drive"
+    ],
+    "pad": true
+   }
+  },
+  {
+   "name": "AC1 1368-en: Drive says so — the tag \"Just driving\", the line \"Just driving: nothing is remembered.\", and the steps on the paper (not faded) with \"Just driving: nothing here changes. Press Teach and every move becomes a block.\"",
+   "ok": true,
+   "saw": {
+    "tag": "Just driving",
+    "line": "Just driving: nothing is remembered.",
+    "note": "Just driving: nothing here changes. Press Teach and every move becomes a block.",
+    "driving": true,
+    "ground": "rgb(255, 240, 211)",
+    "opacity": "1"
+   }
+  },
+  {
+   "name": "AC1 1368-en: four Drive presses move the robot four tiles (0,3 → 4,3, the engine and the drawn robot), the program stays [] and the count reads \"0 blocks\"",
+   "ok": true,
+   "saw": {
+    "at": "4,3|4,3",
+    "blocks": 0,
+    "progLen": 0,
+    "zero": "0 blocks",
+    "hasZero": true
+   }
+  },
+  {
+   "name": "AC5 1368-en: a Drive press does not fire the hint table (the owl says what it said before the presses)",
+   "ok": true,
+   "saw": {
+    "before": "Drive Pip yourself first: press Teach and use the arrows. Pip remembers every step.",
+    "after": "Drive Pip yourself first: press Teach and use the arrows. Pip remembers every step."
+   }
+  },
+  {
+   "name": "AC5 1368-en: a bump while driving is the bump animation (data-bump 1), not a hint (the owl unchanged)",
+   "ok": true,
+   "saw": {
+    "drawn": {
+     "x": 7,
+     "y": 3,
+     "d": 1,
+     "bump": 1
+    },
+    "owl": "Drive Pip yourself first: press Teach and use the arrows. Pip remembers every step.",
+    "blocks": 0
+   }
+  },
+  {
+   "name": "AC2 1368-en: Teach puts the robot back at the start (0,3) and says \"Back to the start. Now show Pip the moves.\"; Teach is ringed; the steps are off the paper",
+   "ok": true,
+   "saw": {
+    "at": "0,3|0,3",
+    "line": "Back to the start. Now show Pip the moves.",
+    "tag": "Pip is learning…",
+    "ringed": [
+     "rec"
+    ]
+   }
+  },
+  {
+   "name": "AC5 1368-en: the first hint after Teach begins is hintEmpty (\"Drive Pip yourself first: pres…\"), never the bump",
+   "ok": true,
+   "saw": {
+    "firstHint": "Drive Pip yourself first: press Teach and use the arrows. Pip remembers every step.",
+    "want": "Drive Pip yourself first: press Teach and use the arrows. Pip remembers every step."
+   }
+  },
+  {
+   "name": "AC2 1368-en: the same four presses record four blocks, and the robot is on the same end tile as in Drive (4,3)",
+   "ok": true,
+   "saw": {
+    "blocks": 4,
+    "at": "4,3|4,3",
+    "line": ""
+   }
+  },
+  {
+   "name": "AC2 1368-en: Play replays from the start (seen at 0,3) and ends on 4,3; the pad goes away",
+   "ok": true,
+   "saw": {
+    "via": "0,3|0,3",
+    "end": "4,3|4,3",
+    "pad": false
+   }
+  },
+  {
+   "name": "AC3 1368-en: Drive keeps the four blocks (the same ids), the robot moves (to 4,4), and the program does not change",
+   "ok": true,
+   "saw": {
+    "ids": "1,2,3,4",
+    "fourIds": "1,2,3,4",
+    "at": "4,4|4,4"
+   }
+  },
+  {
+   "name": "AC3 1368-en: Play still runs it — from the start to 4,3, the same four blocks",
+   "ok": true,
+   "saw": {
+    "at": "4,3|4,3",
+    "ids": "1,2,3,4"
+   }
+  },
+  {
+   "name": "AC2 1368-en: Teach with blocks already there puts the robot where they end (4,3) and says \"Pip is where your steps end. Show Pip what comes next.\"",
+   "ok": true,
+   "saw": {
+    "at": "4,3|4,3",
+    "line": "Pip is where your steps end. Show Pip what comes next."
+   }
+  },
+  {
+   "name": "AC5 1368-en: after a run that bumped (the owl said so), Teach’s first hint is about the program — the start line — never the bump",
+   "ok": true,
+   "saw": {
+    "bumpLine": "Pip bumped into something. Which step sent Pip the wrong way?",
+    "owl": "Hello! Someone on the island is waiting. Press Teach and show Pip what to do."
+   }
+  },
+  {
+   "name": "IG-003 / IG-006 dev. 2 1368-en: the ? on a placed forward block opens its card (\"forward\") and edits nothing",
+   "ok": true,
+   "saw": {
+    "card": "forward",
+    "ids": "1,2,3,4,5,6",
+    "before": "1,2,3,4,5,6"
+   }
+  },
+  {
+   "name": "AC4 1368-en: the tulips open in Drive with the islander’s own line (no program, no challenge)",
+   "ok": true,
+   "saw": {
+    "card": "Mamie Rose\n\"My tulips are thirsty. Fill the can at the pond, and come back!\"",
+    "ringed": [
+     "drive"
+    ]
+   }
+  },
+  {
+   "name": "AC4 1368-en: with a program not yet played the islander asks \"Before you press Play, tap where Pip will stop.\", and Drive puts the robot back at the start (1,1)",
+   "ok": true,
+   "saw": {
+    "card": "Mamie Rose\nBefore you press Play, tap where Pip will stop.",
+    "at": "1,1|1,1"
+   }
+  },
+  {
+   "name": "AC4 1368-en: a wrong tap (0,5) shows the flag on the real end (2,1) and the miss hint; the card goes back to the islander’s line; no tick",
+   "ok": true,
+   "saw": {
+    "flag": "2,1",
+    "missOwl": "You tapped one tile, Pip stopped on another. Follow the steps with your finger, one by one.",
+    "card": "Mamie Rose\n\"My tulips are thirsty. Fill the can at the pond, and come back!\"",
+    "tick": null
+   }
+  },
+  {
+   "name": "AC4 1368-en: a right tap says \"You were right!\" on the islander’s card with the tick on 2,1, the flag gone",
+   "ok": true,
+   "saw": {
+    "card": "Mamie Rose\nYou were right!",
+    "tick": "2,1",
+    "flag": null
+   }
+  },
+  {
+   "name": "AC4 1368-en: … then it plays: from the start to 2,1, the tick and the line still there",
+   "ok": true,
+   "saw": {
+    "played": "1,1|1,1",
+    "end": "2,1|2,1",
+    "tick": "2,1"
+   }
+  },
+  {
+   "name": "AC4 1368-en: One step cancels the challenge for that run (the islander’s line again; a tap flags nothing, ticks nothing)",
+   "ok": true,
+   "saw": {
+    "card": "Mamie Rose\n\"My tulips are thirsty. Fill the can at the pond, and come back!\"",
+    "flag": null,
+    "tick": null
+   }
+  },
+  {
+   "name": "AC4 1368-en: at band 7–9 the challenge never shows (the islander’s line; a tap flags nothing)",
+   "ok": true,
+   "saw": {
+    "blocks": 3,
+    "card": "Mamie Rose\n\"My tulips are thirsty. Fill the can at the pond, and come back!\"",
+    "flag": null
+   }
+  },
+  {
+   "name": "AC6 1368-en: nothing wider than the screen; 0 console errors so far",
+   "ok": true,
+   "saw": {
+    "sx": 1368,
+    "vw": 1368,
+    "errors": []
+   }
+  },
+  {
+   "name": "AC1 1368-fr: the bar is Drive · Teach · Play · One step · Start over (no Predict), and it opens in Drive (Drive ringed, the pad up)",
+   "ok": true,
+   "saw": {
+    "bar": [
+     "drive",
+     "rec",
+     "play",
+     "step",
+     "reset"
+    ],
+    "ringed": [
+     "drive"
+    ],
+    "pad": true
+   }
+  },
+  {
+   "name": "AC1 1368-fr: Drive says so — the tag \"Juste conduire\", the line \"Juste conduire : rien n’est retenu.\", and the steps on the paper (not faded) with \"Tu conduis : rien ne change ici. Appuie sur Apprendre et chaque geste devient un bloc.\"",
+   "ok": true,
+   "saw": {
+    "tag": "Juste conduire",
+    "line": "Juste conduire : rien n’est retenu.",
+    "note": "Tu conduis : rien ne change ici. Appuie sur Apprendre et chaque geste devient un bloc.",
+    "driving": true,
+    "ground": "rgb(255, 240, 211)",
+    "opacity": "1"
+   }
+  },
+  {
+   "name": "AC1 1368-fr: four Drive presses move the robot four tiles (0,3 → 4,3, the engine and the drawn robot), the program stays [] and the count reads \"0 blocs\"",
+   "ok": true,
+   "saw": {
+    "at": "4,3|4,3",
+    "blocks": 0,
+    "progLen": 0,
+    "zero": "0 blocs",
+    "hasZero": true
+   }
+  },
+  {
+   "name": "AC5 1368-fr: a Drive press does not fire the hint table (the owl says what it said before the presses)",
+   "ok": true,
+   "saw": {
+    "before": "Conduis Pip toi-même d’abord : appuie sur Apprendre et utilise les flèches. Pip retient chaque pas.",
+    "after": "Conduis Pip toi-même d’abord : appuie sur Apprendre et utilise les flèches. Pip retient chaque pas."
+   }
+  },
+  {
+   "name": "AC5 1368-fr: a bump while driving is the bump animation (data-bump 1), not a hint (the owl unchanged)",
+   "ok": true,
+   "saw": {
+    "drawn": {
+     "x": 7,
+     "y": 3,
+     "d": 1,
+     "bump": 1
+    },
+    "owl": "Conduis Pip toi-même d’abord : appuie sur Apprendre et utilise les flèches. Pip retient chaque pas.",
+    "blocks": 0
+   }
+  },
+  {
+   "name": "AC2 1368-fr: Teach puts the robot back at the start (0,3) and says \"Retour au départ. Maintenant, montre les gestes à Pip.\"; Teach is ringed; the steps are off the paper",
+   "ok": true,
+   "saw": {
+    "at": "0,3|0,3",
+    "line": "Retour au départ. Maintenant, montre les gestes à Pip.",
+    "tag": "Pip apprend…",
+    "ringed": [
+     "rec"
+    ]
+   }
+  },
+  {
+   "name": "AC5 1368-fr: the first hint after Teach begins is hintEmpty (\"Conduis Pip toi-même d’abord :…\"), never the bump",
+   "ok": true,
+   "saw": {
+    "firstHint": "Conduis Pip toi-même d’abord : appuie sur Apprendre et utilise les flèches. Pip retient chaque pas.",
+    "want": "Conduis Pip toi-même d’abord : appuie sur Apprendre et utilise les flèches. Pip retient chaque pas."
+   }
+  },
+  {
+   "name": "AC2 1368-fr: the same four presses record four blocks, and the robot is on the same end tile as in Drive (4,3)",
+   "ok": true,
+   "saw": {
+    "blocks": 4,
+    "at": "4,3|4,3",
+    "line": ""
+   }
+  },
+  {
+   "name": "AC2 1368-fr: Play replays from the start (seen at 0,3) and ends on 4,3; the pad goes away",
+   "ok": true,
+   "saw": {
+    "via": "0,3|0,3",
+    "end": "4,3|4,3",
+    "pad": false
+   }
+  },
+  {
+   "name": "AC3 1368-fr: Drive keeps the four blocks (the same ids), the robot moves (to 4,4), and the program does not change",
+   "ok": true,
+   "saw": {
+    "ids": "1,2,3,4",
+    "fourIds": "1,2,3,4",
+    "at": "4,4|4,4"
+   }
+  },
+  {
+   "name": "AC3 1368-fr: Play still runs it — from the start to 4,3, the same four blocks",
+   "ok": true,
+   "saw": {
+    "at": "4,3|4,3",
+    "ids": "1,2,3,4"
+   }
+  },
+  {
+   "name": "AC2 1368-fr: Teach with blocks already there puts the robot where they end (4,3) and says \"Pip est là où tes pas finissent. Montre-lui la suite.\"",
+   "ok": true,
+   "saw": {
+    "at": "4,3|4,3",
+    "line": "Pip est là où tes pas finissent. Montre-lui la suite."
+   }
+  },
+  {
+   "name": "AC5 1368-fr: after a run that bumped (the owl said so), Teach’s first hint is about the program — the start line — never the bump",
+   "ok": true,
+   "saw": {
+    "bumpLine": "Pip s’est cogné. Quel pas l’a envoyé du mauvais côté ?",
+    "owl": "Coucou ! Quelqu’un t’attend sur l’île. Appuie sur Apprendre et montre à Pip quoi faire."
+   }
+  },
+  {
+   "name": "IG-003 / IG-006 dev. 2 1368-fr: the ? on a placed forward block opens its card (\"avancer\") and edits nothing",
+   "ok": true,
+   "saw": {
+    "card": "avancer",
+    "ids": "1,2,3,4,5,6",
+    "before": "1,2,3,4,5,6"
+   }
+  },
+  {
+   "name": "AC4 1368-fr: the tulips open in Drive with the islander’s own line (no program, no challenge)",
+   "ok": true,
+   "saw": {
+    "card": "Mamie Rose\n« Mes tulipes ont soif. Remplis l’arrosoir à la mare, et reviens ! »",
+    "ringed": [
+     "drive"
+    ]
+   }
+  },
+  {
+   "name": "AC4 1368-fr: with a program not yet played the islander asks \"Avant d’appuyer sur Jouer, touche la case où Pip va s’arrêter.\", and Drive puts the robot back at the start (1,1)",
+   "ok": true,
+   "saw": {
+    "card": "Mamie Rose\nAvant d’appuyer sur Jouer, touche la case où Pip va s’arrêter.",
+    "at": "1,1|1,1"
+   }
+  },
+  {
+   "name": "AC4 1368-fr: a wrong tap (0,5) shows the flag on the real end (2,1) and the miss hint; the card goes back to the islander’s line; no tick",
+   "ok": true,
+   "saw": {
+    "flag": "2,1",
+    "missOwl": "Tu as touché une case, Pip s’est arrêté sur une autre. Suis les pas avec ton doigt, un par un.",
+    "card": "Mamie Rose\n« Mes tulipes ont soif. Remplis l’arrosoir à la mare, et reviens ! »",
+    "tick": null
+   }
+  },
+  {
+   "name": "AC4 1368-fr: a right tap says \"Tu avais raison !\" on the islander’s card with the tick on 2,1, the flag gone",
+   "ok": true,
+   "saw": {
+    "card": "Mamie Rose\nTu avais raison !",
+    "tick": "2,1",
+    "flag": null
+   }
+  },
+  {
+   "name": "AC4 1368-fr: … then it plays: from the start to 2,1, the tick and the line still there",
+   "ok": true,
+   "saw": {
+    "played": "1,1|1,1",
+    "end": "2,1|2,1",
+    "tick": "2,1"
+   }
+  },
+  {
+   "name": "AC4 1368-fr: One step cancels the challenge for that run (the islander’s line again; a tap flags nothing, ticks nothing)",
+   "ok": true,
+   "saw": {
+    "card": "Mamie Rose\n« Mes tulipes ont soif. Remplis l’arrosoir à la mare, et reviens ! »",
+    "flag": null,
+    "tick": null
+   }
+  },
+  {
+   "name": "AC4 1368-fr: at band 7–9 the challenge never shows (the islander’s line; a tap flags nothing)",
+   "ok": true,
+   "saw": {
+    "blocks": 3,
+    "card": "Mamie Rose\n« Mes tulipes ont soif. Remplis l’arrosoir à la mare, et reviens ! »",
+    "flag": null
+   }
+  },
+  {
+   "name": "AC6 1368-fr: nothing wider than the screen; 0 console errors so far",
+   "ok": true,
+   "saw": {
+    "sx": 1368,
+    "vw": 1368,
+    "errors": []
+   }
+  },
+  {
+   "name": "AC1 390-en: the bar is Drive · Teach · Play · One step · Start over (no Predict), and it opens in Drive (Drive ringed, the pad up)",
+   "ok": true,
+   "saw": {
+    "bar": [
+     "drive",
+     "rec",
+     "play",
+     "step",
+     "reset"
+    ],
+    "ringed": [
+     "drive"
+    ],
+    "pad": true
+   }
+  },
+  {
+   "name": "AC1 390-en: Drive says so — the tag \"Just driving\", the line \"Just driving: nothing is remembered.\", and the steps on the paper (not faded) with \"Just driving: nothing here changes. Press Teach and every move becomes a block.\"",
+   "ok": true,
+   "saw": {
+    "tag": "Just driving",
+    "line": "Just driving: nothing is remembered.",
+    "note": "Just driving: nothing here changes. Press Teach and every move becomes a block.",
+    "driving": true,
+    "ground": "rgb(255, 240, 211)",
+    "opacity": "1"
+   }
+  },
+  {
+   "name": "AC1 390-en: four Drive presses move the robot four tiles (0,3 → 4,3, the engine and the drawn robot), the program stays [] and the count reads \"0 blocks\"",
+   "ok": true,
+   "saw": {
+    "at": "4,3|4,3",
+    "blocks": 0,
+    "progLen": 0,
+    "zero": "0 blocks",
+    "hasZero": true
+   }
+  },
+  {
+   "name": "AC5 390-en: a Drive press does not fire the hint table (the owl says what it said before the presses)",
+   "ok": true,
+   "saw": {
+    "before": "Drive Pip yourself first: press Teach and use the arrows. Pip remembers every step.",
+    "after": "Drive Pip yourself first: press Teach and use the arrows. Pip remembers every step."
+   }
+  },
+  {
+   "name": "AC5 390-en: a bump while driving is the bump animation (data-bump 1), not a hint (the owl unchanged)",
+   "ok": true,
+   "saw": {
+    "drawn": {
+     "x": 7,
+     "y": 3,
+     "d": 1,
+     "bump": 1
+    },
+    "owl": "Drive Pip yourself first: press Teach and use the arrows. Pip remembers every step.",
+    "blocks": 0
+   }
+  },
+  {
+   "name": "AC2 390-en: Teach puts the robot back at the start (0,3) and says \"Back to the start. Now show Pip the moves.\"; Teach is ringed; the steps are off the paper",
+   "ok": true,
+   "saw": {
+    "at": "0,3|0,3",
+    "line": "Back to the start. Now show Pip the moves.",
+    "tag": "Pip is learning…",
+    "ringed": [
+     "rec"
+    ]
+   }
+  },
+  {
+   "name": "AC5 390-en: the first hint after Teach begins is hintEmpty (\"Drive Pip yourself first: pres…\"), never the bump",
+   "ok": true,
+   "saw": {
+    "firstHint": "Drive Pip yourself first: press Teach and use the arrows. Pip remembers every step.",
+    "want": "Drive Pip yourself first: press Teach and use the arrows. Pip remembers every step."
+   }
+  },
+  {
+   "name": "AC2 390-en: the same four presses record four blocks, and the robot is on the same end tile as in Drive (4,3)",
+   "ok": true,
+   "saw": {
+    "blocks": 4,
+    "at": "4,3|4,3",
+    "line": ""
+   }
+  },
+  {
+   "name": "AC2 390-en: Play replays from the start (seen at 0,3) and ends on 4,3; the pad goes away",
+   "ok": true,
+   "saw": {
+    "via": "0,3|0,3",
+    "end": "4,3|4,3",
+    "pad": false
+   }
+  },
+  {
+   "name": "AC3 390-en: Drive keeps the four blocks (the same ids), the robot moves (to 4,4), and the program does not change",
+   "ok": true,
+   "saw": {
+    "ids": "1,2,3,4",
+    "fourIds": "1,2,3,4",
+    "at": "4,4|4,4"
+   }
+  },
+  {
+   "name": "AC3 390-en: Play still runs it — from the start to 4,3, the same four blocks",
+   "ok": true,
+   "saw": {
+    "at": "4,3|4,3",
+    "ids": "1,2,3,4"
+   }
+  },
+  {
+   "name": "AC2 390-en: Teach with blocks already there puts the robot where they end (4,3) and says \"Pip is where your steps end. Show Pip what comes next.\"",
+   "ok": true,
+   "saw": {
+    "at": "4,3|4,3",
+    "line": "Pip is where your steps end. Show Pip what comes next."
+   }
+  },
+  {
+   "name": "AC5 390-en: after a run that bumped (the owl said so), Teach’s first hint is about the program — the start line — never the bump",
+   "ok": true,
+   "saw": {
+    "bumpLine": "Pip bumped into something. Which step sent Pip the wrong way?",
+    "owl": "Hello! Someone on the island is waiting. Press Teach and show Pip what to do."
+   }
+  },
+  {
+   "name": "IG-003 / IG-006 dev. 2 390-en: the ? on a placed forward block opens its card (\"forward\") and edits nothing",
+   "ok": true,
+   "saw": {
+    "card": "forward",
+    "ids": "1,2,3,4,5,6",
+    "before": "1,2,3,4,5,6"
+   }
+  },
+  {
+   "name": "AC4 390-en: the tulips open in Drive with the islander’s own line (no program, no challenge)",
+   "ok": true,
+   "saw": {
+    "card": "Mamie Rose\n\"My tulips are thirsty. Fill the can at the pond, and come back!\"",
+    "ringed": [
+     "drive"
+    ]
+   }
+  },
+  {
+   "name": "AC4 390-en: with a program not yet played the islander asks \"Before you press Play, tap where Pip will stop.\", and Drive puts the robot back at the start (1,1)",
+   "ok": true,
+   "saw": {
+    "card": "Mamie Rose\nBefore you press Play, tap where Pip will stop.",
+    "at": "1,1|1,1"
+   }
+  },
+  {
+   "name": "AC4 390-en: a wrong tap (0,5) shows the flag on the real end (2,1) and the miss hint; the card goes back to the islander’s line; no tick",
+   "ok": true,
+   "saw": {
+    "flag": "2,1",
+    "missOwl": "You tapped one tile, Pip stopped on another. Follow the steps with your finger, one by one.",
+    "card": "Mamie Rose\n\"My tulips are thirsty. Fill the can at the pond, and come back!\"",
+    "tick": null
+   }
+  },
+  {
+   "name": "AC4 390-en: a right tap says \"You were right!\" on the islander’s card with the tick on 2,1, the flag gone",
+   "ok": true,
+   "saw": {
+    "card": "Mamie Rose\nYou were right!",
+    "tick": "2,1",
+    "flag": null
+   }
+  },
+  {
+   "name": "AC4 390-en: … then it plays: from the start to 2,1, the tick and the line still there",
+   "ok": true,
+   "saw": {
+    "played": "1,1|1,1",
+    "end": "2,1|2,1",
+    "tick": "2,1"
+   }
+  },
+  {
+   "name": "AC4 390-en: One step cancels the challenge for that run (the islander’s line again; a tap flags nothing, ticks nothing)",
+   "ok": true,
+   "saw": {
+    "card": "Mamie Rose\n\"My tulips are thirsty. Fill the can at the pond, and come back!\"",
+    "flag": null,
+    "tick": null
+   }
+  },
+  {
+   "name": "AC4 390-en: at band 7–9 the challenge never shows (the islander’s line; a tap flags nothing)",
+   "ok": true,
+   "saw": {
+    "blocks": 3,
+    "card": "Mamie Rose\n\"My tulips are thirsty. Fill the can at the pond, and come back!\"",
+    "flag": null
+   }
+  },
+  {
+   "name": "AC6 390-en: nothing wider than the screen; 0 console errors so far",
+   "ok": true,
+   "saw": {
+    "sx": 390,
+    "vw": 390,
+    "errors": []
+   }
+  },
+  {
+   "name": "AC1 390-fr: the bar is Drive · Teach · Play · One step · Start over (no Predict), and it opens in Drive (Drive ringed, the pad up)",
+   "ok": true,
+   "saw": {
+    "bar": [
+     "drive",
+     "rec",
+     "play",
+     "step",
+     "reset"
+    ],
+    "ringed": [
+     "drive"
+    ],
+    "pad": true
+   }
+  },
+  {
+   "name": "AC1 390-fr: Drive says so — the tag \"Juste conduire\", the line \"Juste conduire : rien n’est retenu.\", and the steps on the paper (not faded) with \"Tu conduis : rien ne change ici. Appuie sur Apprendre et chaque geste devient un bloc.\"",
+   "ok": true,
+   "saw": {
+    "tag": "Juste conduire",
+    "line": "Juste conduire : rien n’est retenu.",
+    "note": "Tu conduis : rien ne change ici. Appuie sur Apprendre et chaque geste devient un bloc.",
+    "driving": true,
+    "ground": "rgb(255, 240, 211)",
+    "opacity": "1"
+   }
+  },
+  {
+   "name": "AC1 390-fr: four Drive presses move the robot four tiles (0,3 → 4,3, the engine and the drawn robot), the program stays [] and the count reads \"0 blocs\"",
+   "ok": true,
+   "saw": {
+    "at": "4,3|4,3",
+    "blocks": 0,
+    "progLen": 0,
+    "zero": "0 blocs",
+    "hasZero": true
+   }
+  },
+  {
+   "name": "AC5 390-fr: a Drive press does not fire the hint table (the owl says what it said before the presses)",
+   "ok": true,
+   "saw": {
+    "before": "Conduis Pip toi-même d’abord : appuie sur Apprendre et utilise les flèches. Pip retient chaque pas.",
+    "after": "Conduis Pip toi-même d’abord : appuie sur Apprendre et utilise les flèches. Pip retient chaque pas."
+   }
+  },
+  {
+   "name": "AC5 390-fr: a bump while driving is the bump animation (data-bump 1), not a hint (the owl unchanged)",
+   "ok": true,
+   "saw": {
+    "drawn": {
+     "x": 7,
+     "y": 3,
+     "d": 1,
+     "bump": 1
+    },
+    "owl": "Conduis Pip toi-même d’abord : appuie sur Apprendre et utilise les flèches. Pip retient chaque pas.",
+    "blocks": 0
+   }
+  },
+  {
+   "name": "AC2 390-fr: Teach puts the robot back at the start (0,3) and says \"Retour au départ. Maintenant, montre les gestes à Pip.\"; Teach is ringed; the steps are off the paper",
+   "ok": true,
+   "saw": {
+    "at": "0,3|0,3",
+    "line": "Retour au départ. Maintenant, montre les gestes à Pip.",
+    "tag": "Pip apprend…",
+    "ringed": [
+     "rec"
+    ]
+   }
+  },
+  {
+   "name": "AC5 390-fr: the first hint after Teach begins is hintEmpty (\"Conduis Pip toi-même d’abord :…\"), never the bump",
+   "ok": true,
+   "saw": {
+    "firstHint": "Conduis Pip toi-même d’abord : appuie sur Apprendre et utilise les flèches. Pip retient chaque pas.",
+    "want": "Conduis Pip toi-même d’abord : appuie sur Apprendre et utilise les flèches. Pip retient chaque pas."
+   }
+  },
+  {
+   "name": "AC2 390-fr: the same four presses record four blocks, and the robot is on the same end tile as in Drive (4,3)",
+   "ok": true,
+   "saw": {
+    "blocks": 4,
+    "at": "4,3|4,3",
+    "line": ""
+   }
+  },
+  {
+   "name": "AC2 390-fr: Play replays from the start (seen at 0,3) and ends on 4,3; the pad goes away",
+   "ok": true,
+   "saw": {
+    "via": "0,3|0,3",
+    "end": "4,3|4,3",
+    "pad": false
+   }
+  },
+  {
+   "name": "AC3 390-fr: Drive keeps the four blocks (the same ids), the robot moves (to 4,4), and the program does not change",
+   "ok": true,
+   "saw": {
+    "ids": "1,2,3,4",
+    "fourIds": "1,2,3,4",
+    "at": "4,4|4,4"
+   }
+  },
+  {
+   "name": "AC3 390-fr: Play still runs it — from the start to 4,3, the same four blocks",
+   "ok": true,
+   "saw": {
+    "at": "4,3|4,3",
+    "ids": "1,2,3,4"
+   }
+  },
+  {
+   "name": "AC2 390-fr: Teach with blocks already there puts the robot where they end (4,3) and says \"Pip est là où tes pas finissent. Montre-lui la suite.\"",
+   "ok": true,
+   "saw": {
+    "at": "4,3|4,3",
+    "line": "Pip est là où tes pas finissent. Montre-lui la suite."
+   }
+  },
+  {
+   "name": "AC5 390-fr: after a run that bumped (the owl said so), Teach’s first hint is about the program — the start line — never the bump",
+   "ok": true,
+   "saw": {
+    "bumpLine": "Pip s’est cogné. Quel pas l’a envoyé du mauvais côté ?",
+    "owl": "Coucou ! Quelqu’un t’attend sur l’île. Appuie sur Apprendre et montre à Pip quoi faire."
+   }
+  },
+  {
+   "name": "IG-003 / IG-006 dev. 2 390-fr: the ? on a placed forward block opens its card (\"avancer\") and edits nothing",
+   "ok": true,
+   "saw": {
+    "card": "avancer",
+    "ids": "1,2,3,4,5,6",
+    "before": "1,2,3,4,5,6"
+   }
+  },
+  {
+   "name": "AC4 390-fr: the tulips open in Drive with the islander’s own line (no program, no challenge)",
+   "ok": true,
+   "saw": {
+    "card": "Mamie Rose\n« Mes tulipes ont soif. Remplis l’arrosoir à la mare, et reviens ! »",
+    "ringed": [
+     "drive"
+    ]
+   }
+  },
+  {
+   "name": "AC4 390-fr: with a program not yet played the islander asks \"Avant d’appuyer sur Jouer, touche la case où Pip va s’arrêter.\", and Drive puts the robot back at the start (1,1)",
+   "ok": true,
+   "saw": {
+    "card": "Mamie Rose\nAvant d’appuyer sur Jouer, touche la case où Pip va s’arrêter.",
+    "at": "1,1|1,1"
+   }
+  },
+  {
+   "name": "AC4 390-fr: a wrong tap (0,5) shows the flag on the real end (2,1) and the miss hint; the card goes back to the islander’s line; no tick",
+   "ok": true,
+   "saw": {
+    "flag": "2,1",
+    "missOwl": "Tu as touché une case, Pip s’est arrêté sur une autre. Suis les pas avec ton doigt, un par un.",
+    "card": "Mamie Rose\n« Mes tulipes ont soif. Remplis l’arrosoir à la mare, et reviens ! »",
+    "tick": null
+   }
+  },
+  {
+   "name": "AC4 390-fr: a right tap says \"Tu avais raison !\" on the islander’s card with the tick on 2,1, the flag gone",
+   "ok": true,
+   "saw": {
+    "card": "Mamie Rose\nTu avais raison !",
+    "tick": "2,1",
+    "flag": null
+   }
+  },
+  {
+   "name": "AC4 390-fr: … then it plays: from the start to 2,1, the tick and the line still there",
+   "ok": true,
+   "saw": {
+    "played": "1,1|1,1",
+    "end": "2,1|2,1",
+    "tick": "2,1"
+   }
+  },
+  {
+   "name": "AC4 390-fr: One step cancels the challenge for that run (the islander’s line again; a tap flags nothing, ticks nothing)",
+   "ok": true,
+   "saw": {
+    "card": "Mamie Rose\n« Mes tulipes ont soif. Remplis l’arrosoir à la mare, et reviens ! »",
+    "flag": null,
+    "tick": null
+   }
+  },
+  {
+   "name": "AC4 390-fr: at band 7–9 the challenge never shows (the islander’s line; a tap flags nothing)",
+   "ok": true,
+   "saw": {
+    "blocks": 3,
+    "card": "Mamie Rose\n« Mes tulipes ont soif. Remplis l’arrosoir à la mare, et reviens ! »",
+    "flag": null
+   }
+  },
+  {
+   "name": "AC6 390-fr: nothing wider than the screen; 0 console errors so far",
+   "ok": true,
+   "saw": {
+    "sx": 390,
+    "vw": 390,
+    "errors": []
+   }
+  },
+  {
+   "name": "AC6: 0 console errors through the whole drive",
+   "ok": true,
+   "saw": []
+  },
+  {
+   "name": "AC6: 0 network errors through the whole drive",
+   "ok": true,
+   "saw": []
+  }
+ ],
+ "readings": {
+  "open-1368-en": {
+   "bar": [
+    "drive",
+    "rec",
+    "play",
+    "step",
+    "reset"
+   ],
+   "ringed": [
+    "drive"
+   ],
+   "pad": true,
+   "tag": "Just driving",
+   "line": "Just driving: nothing is remembered.",
+   "note": "Just driving: nothing here changes. Press Teach and every move becomes a block.",
+   "card": "Free play\nNo request. Plant, build, teach Pip anything.",
+   "owl": "Drive Pip yourself first: press Teach and use the arrows. Pip remembers every step.",
+   "blocks": 0,
+   "ids": "",
+   "progLen": 0,
+   "drawn": {
+    "x": 0,
+    "y": 3,
+    "d": 1,
+    "bump": 0
+   },
+   "engine": {
+    "x": 0,
+    "y": 3,
+    "d": 1
+   },
+   "driving": true,
+   "progGround": "rgb(255, 240, 211)",
+   "progOpacity": "1",
+   "flag": null,
+   "tick": null,
+   "locked": false,
+   "sx": 1368,
+   "vw": 1368
+  },
+  "open-1368-fr": {
+   "bar": [
+    "drive",
+    "rec",
+    "play",
+    "step",
+    "reset"
+   ],
+   "ringed": [
+    "drive"
+   ],
+   "pad": true,
+   "tag": "Juste conduire",
+   "line": "Juste conduire : rien n’est retenu.",
+   "note": "Tu conduis : rien ne change ici. Appuie sur Apprendre et chaque geste devient un bloc.",
+   "card": "Jeu libre\nSans demande. Plante, construis, apprends n’importe quoi à Pip.",
+   "owl": "Conduis Pip toi-même d’abord : appuie sur Apprendre et utilise les flèches. Pip retient chaque pas.",
+   "blocks": 0,
+   "ids": "",
+   "progLen": 0,
+   "drawn": {
+    "x": 0,
+    "y": 3,
+    "d": 1,
+    "bump": 0
+   },
+   "engine": {
+    "x": 0,
+    "y": 3,
+    "d": 1
+   },
+   "driving": true,
+   "progGround": "rgb(255, 240, 211)",
+   "progOpacity": "1",
+   "flag": null,
+   "tick": null,
+   "locked": false,
+   "sx": 1368,
+   "vw": 1368
+  },
+  "open-390-en": {
+   "bar": [
+    "drive",
+    "rec",
+    "play",
+    "step",
+    "reset"
+   ],
+   "ringed": [
+    "drive"
+   ],
+   "pad": true,
+   "tag": "Just driving",
+   "line": "Just driving: nothing is remembered.",
+   "note": "Just driving: nothing here changes. Press Teach and every move becomes a block.",
+   "card": "Free play\nNo request. Plant, build, teach Pip anything.",
+   "owl": "Drive Pip yourself first: press Teach and use the arrows. Pip remembers every step.",
+   "blocks": 0,
+   "ids": "",
+   "progLen": 0,
+   "drawn": {
+    "x": 0,
+    "y": 3,
+    "d": 1,
+    "bump": 0
+   },
+   "engine": {
+    "x": 0,
+    "y": 3,
+    "d": 1
+   },
+   "driving": true,
+   "progGround": "rgb(255, 240, 211)",
+   "progOpacity": "1",
+   "flag": null,
+   "tick": null,
+   "locked": false,
+   "sx": 390,
+   "vw": 390
+  },
+  "open-390-fr": {
+   "bar": [
+    "drive",
+    "rec",
+    "play",
+    "step",
+    "reset"
+   ],
+   "ringed": [
+    "drive"
+   ],
+   "pad": true,
+   "tag": "Juste conduire",
+   "line": "Juste conduire : rien n’est retenu.",
+   "note": "Tu conduis : rien ne change ici. Appuie sur Apprendre et chaque geste devient un bloc.",
+   "card": "Jeu libre\nSans demande. Plante, construis, apprends n’importe quoi à Pip.",
+   "owl": "Conduis Pip toi-même d’abord : appuie sur Apprendre et utilise les flèches. Pip retient chaque pas.",
+   "blocks": 0,
+   "ids": "",
+   "progLen": 0,
+   "drawn": {
+    "x": 0,
+    "y": 3,
+    "d": 1,
+    "bump": 0
+   },
+   "engine": {
+    "x": 0,
+    "y": 3,
+    "d": 1
+   },
+   "driving": true,
+   "progGround": "rgb(255, 240, 211)",
+   "progOpacity": "1",
+   "flag": null,
+   "tick": null,
+   "locked": false,
+   "sx": 390,
+   "vw": 390
+  }
+ },
+ "consoleErrors": [],
+ "networkErrors": []
+}

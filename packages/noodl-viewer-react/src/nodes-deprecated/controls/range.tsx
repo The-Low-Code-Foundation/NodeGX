@@ -5,6 +5,7 @@ import Layout from '../../layout';
 import NodeSharedPortDefinitions from '../../node-shared-port-definitions';
 import { createNodeFromReactComponent, type ReactNodeDefinition, type StyleObject } from '../../react-component-node';
 import type { Noodl } from '../../types';
+import { dataAttributeProps } from '../../components/noodl-root-ref';
 import Utils from './utils';
 
 interface RangeProps extends Noodl.ReactProps {
@@ -129,6 +130,7 @@ function Range(props: RangeProps) {
   return (
     <input
       className={className}
+      {...dataAttributeProps(props.dom)}
       {...Utils.controlEvents(props)}
       type="range"
       {...tagProps}
@@ -150,6 +152,7 @@ const RangeNode: ReactNodeDefinition = {
   // `displayName`. The picker therefore offered two entries reading the same word, and
   // the one an author was most likely to reach for was this one.
   deprecated: true,
+  replacedBy: 'net.noodl.controls.range',
   docs: 'https://docs.noodl.net/nodes/visual/range',
   allowChildren: false,
   noodlNodeAsProp: true,

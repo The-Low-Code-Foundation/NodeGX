@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4ed56109-f8e2-5516-8ab8-d41f840feaf8",
+  "name": "Pick thing",
+  "path": "/Logic/Pick thing",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The thing on a tapped tile, for the chip that is picking. Runs on Go; answers Ran once its outputs are set."
+}

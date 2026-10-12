@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9d6e6d6c-0dd2-5d6c-84f3-ff21d9d07f14",
+  "name": "Alien tile",
+  "path": "/Moon/Alien tile",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One alien: the kit draws it (species, colour, what it wears, how grown), its name and a line under it. Selected fills it sunshine. Publishes Tap with its Id — only the card answers, never the picture as well."
+}

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b98d6a06-3a45-5a7d-833c-37d8fcebb046",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "buyIn",
+      "fromProperty": "itemId",
+      "toId": "buyFn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "buyIn",
+      "fromProperty": "model",
+      "toId": "buyFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "buyIn",
+      "fromProperty": "name",
+      "toId": "buyFn",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "buyIn",
+      "fromProperty": "robotId",
+      "toId": "buyFn",
+      "toProperty": "in-robotId"
+    },
+    {
+      "fromId": "buyIn",
+      "fromProperty": "go",
+      "toId": "buyFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "buyFn",
+      "fromProperty": "out-bought",
+      "toId": "buyOut",
+      "toProperty": "bought"
+    },
+    {
+      "fromId": "buyFn",
+      "fromProperty": "out-error",
+      "toId": "buyOut",
+      "toProperty": "error"
+    },
+    {
+      "fromId": "buyFn",
+      "fromProperty": "out-left",
+      "toId": "buyOut",
+      "toProperty": "left"
+    },
+    {
+      "fromId": "buyFn",
+      "fromProperty": "out-model",
+      "toId": "buyOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "buyFn",
+      "fromProperty": "out-ok",
+      "toId": "buyOut",
+      "toProperty": "ok"
+    },
+    {
+      "fromId": "buyFn",
+      "fromProperty": "out-robotId",
+      "toId": "buyOut",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "buyFn",
+      "fromProperty": "out-short",
+      "toId": "buyOut",
+      "toProperty": "short"
+    },
+    {
+      "fromId": "buyFn",
+      "fromProperty": "success",
+      "toId": "buyOut",
+      "toProperty": "ran"
+    }
+  ]
+}

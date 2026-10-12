@@ -24,6 +24,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { ProjectImporter, type ImportInput } from '../../noodl-editor/src/editor/src/io/ProjectImporter';
+import { normalizeScriptPath } from '../../noodl-runtime/src/scriptfiles';
 import type { LegacyProject } from '../../noodl-editor/src/editor/src/io/ProjectExporter';
 import type {
   ComponentV2File,
@@ -38,6 +39,7 @@ import { ProjectModel } from '@noodl-models/projectmodel';
 import * as Exporter from '@noodl-utils/exporter';
 import { HtmlProcessor } from '@noodl-utils/compilation/build/processors/html-processor';
 
+import { PREVIEW_EXPORT_OPTIONS, projectModelFromLegacy } from './projectExport';
 import { validateLegacyProject, type PreviewReport } from './validate';
 
 /** Everything the preview server serves for one snapshot of the project. */
@@ -96,6 +98,25 @@ export function resolveTarget(target: string): { dir: string; format: ProjectFor
   );
 }
 
+/** P109 ISL-005 — `scripts/**.js` as `{ 'engine/world.js': source }`, as the editor's `ScriptFileStore` reads it. */
+export function readScriptFiles(dir: string): Record<string, string> {
+  const root = path.join(dir, 'scripts');
+  const scripts: Record<string, string> = {};
+  if (!fs.existsSync(root)) return scripts;
+  const walk = (folder: string) => {
+    for (const entry of fs.readdirSync(folder, { withFileTypes: true })) {
+      const full = path.join(folder, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.name.endsWith('.js')) {
+        const p = normalizeScriptPath(path.relative(root, full).split(path.sep).join('/'));
+        if (p !== undefined) scripts[p] = fs.readFileSync(full, 'utf8');
+      }
+    }
+  };
+  walk(root);
+  return scripts;
+}
+
 /** Reads a v2 directory into the legacy project object, via the io engine. */
 function readV2(dir: string): { project: LegacyProject; warnings: string[] } {
   const registry = readJson<RegistryV2File>(path.join(dir, 'components', '_registry.json'));
@@ -121,38 +142,11 @@ function readV2(dir: string): { project: LegacyProject; warnings: string[] } {
     registry,
     routes: optional<RoutesV2File>('nodegx.routes.json'),
     styles: optional<StylesV2File>('nodegx.styles.json'),
+    scripts: readScriptFiles(dir),
     components
   });
 
   return { project: result.project, warnings: result.warnings };
-}
-
-/**
- * Picks a root node when the project file does not name one.
- *
- * `ProjectModel.fromJSON` resolves `rootNodeId` and `rootComponent`; projects
- * written by the editor always carry one. Projects authored from outside (an
- * agent writing v2 files, the MCP server) frequently do not, and the exporter
- * returns `undefined` without a root — a blank page with no explanation. So we
- * guess, using the editor's own predicate (`allowAsExportRoot`, via
- * `setRootComponent`), and tell the user we guessed.
- */
-function resolveRootNode(project: ProjectModel): string | null {
-  const components = project.getComponents();
-  const byName = (name: string) => components.find((c) => c.name === name);
-
-  const candidates = [byName('/%rootcomponent'), byName('/App'), byName('/#App'), ...components].filter(
-    Boolean
-  ) as ReturnType<typeof byName>[];
-
-  for (const component of candidates) {
-    project.setRootComponent(component);
-    if (project.getRootNode()) {
-      return `No root node declared — previewing "${component.name}". ` +
-        `Set "rootNodeId" in the project file to pin it.`;
-    }
-  }
-  return null;
 }
 
 /**
@@ -183,23 +177,11 @@ export function buildProjectModel(
   legacy: LegacyProject,
   dir: string
 ): { project: ProjectModel; warnings: string[] } {
-  const warnings: string[] = [];
-  const project = ProjectModel.fromJSON(legacy);
+  const built = projectModelFromLegacy(legacy);
   // The HtmlProcessor reads noodl_modules from here, and asset URLs resolve
   // against it — the deploy path sets the same field.
-  project._retainedProjectDirectory = dir;
-
-  if (!project.getRootNode()) {
-    const note = resolveRootNode(project);
-    if (!note) {
-      throw new Error(
-        'No renderable root node found. The project has no "rootNodeId" and no component ' +
-          'with a node that can be an export root (a Group, Page Router, …).'
-      );
-    }
-    warnings.push(note);
-  }
-  return { project, warnings };
+  built.project._retainedProjectDirectory = dir;
+  return built;
 }
 
 /**
@@ -258,18 +240,19 @@ export async function loadPreview(dir: string, format: ProjectFormat): Promise<P
     return { status: 'invalid', report };
   }
 
+  // P112-S3-DISPOSE. Released when the build is made: a `ProjectModel` registers listeners on the one `NodeLibrary`
+  // (and its components with it) that only `dispose()` removes, so every rebuild made the next one slower —
+  // measured on the todo template, 256 → 1,668 ms over eight saves. The build keeps no reference to it.
+  let project: ProjectModel | undefined;
   try {
     const built = buildProjectModel(legacy, dir);
-    const project = built.project;
+    project = built.project;
     warnings.push(...built.warnings);
 
-    // `environment: null` blanks the cloud-services metadata: a local preview
-    // must never inherit a deployed backend by accident.
     const exportJson = Exporter.exportToJSON(project, {
+      ...PREVIEW_EXPORT_OPTIONS,
       useBundles: true,
-      useBundleHashes: true,
-      environment: null,
-      ignoreComponentFilter: (c) => !c.name.startsWith('/#__cloud__/')
+      useBundleHashes: true
     });
     if (!exportJson) {
       return { status: 'error', message: 'Export produced nothing — the root component may have been deleted.' };
@@ -309,17 +292,35 @@ export async function loadPreview(dir: string, format: ProjectFormat): Promise<P
     };
   } catch (err) {
     return { status: 'error', message: err instanceof Error ? err.message : String(err) };
+  } finally {
+    project?.dispose();
   }
 }
 
 // ─── Deploy assets ────────────────────────────────────────────────────────────
 
 /**
- * The deployed runtime template + bundle, shared with the real deploy path.
- * This directory is a build artifact (gitignored) produced by
- * `npm run build:editor:_viewer`, so its absence is a first-class error.
+ * P112 OWN-011 — the viewer runtime's folder (`deploy/` inside it), for this preview and for `nodegx-deploy`.
+ *
+ * Two places, the first that holds `deploy/index.json` wins:
+ *   1. the editor's build output in a checkout (`npm run build:editor:_viewer`, or `npm run dev`'s watcher), so a
+ *      contributor's preview keeps reading the runtime their own build just rewrote;
+ *   2. `external/` beside this bundle — the production runtime `npm pack` builds into `dist/external/`
+ *      (`scripts/pack-runtime.mjs`). This is the one an installed package has. Before OWN-011 there was no second
+ *      place, and `@nodegx/preview` from npm refused every project (P112-S9-NORUNTIME).
+ *
+ * ⚠️ `../..` from `dist/` and from `src/` both land on `packages/` in a checkout. Installed, it lands inside
+ * `node_modules/@noodl/`, where nothing is, and the second place answers. With neither, the first is returned so the
+ * refusal names the folder a contributor has to build.
  */
-export const DEPLOY_DIR = path.resolve(__dirname, '../../noodl-editor/src/external/deploy');
+const CHECKOUT_EXTERNAL_DIR = path.resolve(__dirname, '../../noodl-editor/src/external');
+export const EXTERNAL_DIR =
+  [CHECKOUT_EXTERNAL_DIR, path.join(__dirname, 'external')].find((dir) =>
+    fs.existsSync(path.join(dir, 'deploy', 'index.json'))
+  ) ?? CHECKOUT_EXTERNAL_DIR;
+
+/** The deployed runtime template + bundle, shared with the real deploy path. Its absence is a first-class error. */
+export const DEPLOY_DIR = path.join(EXTERNAL_DIR, 'deploy');
 
 export function deployAssetPath(file: string): string {
   return path.join(DEPLOY_DIR, file);

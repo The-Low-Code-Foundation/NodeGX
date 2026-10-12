@@ -33,10 +33,10 @@
  * @module noodl-editor/services/ProjectFileWatcher
  */
 
-import { componentPathFromRelativePath, projectLevelFileFromRelativePath } from './decide';
+import { componentPathFromRelativePath, projectLevelFileFromRelativePath, scriptPathFromRelativePath } from './decide';
 import type { ProjectLevelFile } from './decide';
 
-export { componentPathFromRelativePath, projectLevelFileFromRelativePath, decideComponentReload } from './decide';
+export { componentPathFromRelativePath, projectLevelFileFromRelativePath, scriptPathFromRelativePath, decideComponentReload } from './decide';
 export type { ReloadDecision, ProjectLevelFile } from './decide';
 
 /** The subset of `fs.FSWatcher` this needs. */
@@ -88,6 +88,8 @@ export class ProjectFileWatcher {
   private handle: WatchHandle | null = null;
   private pending = new Set<string>();
   private pendingProjectLevel = new Set<ProjectLevelFile>();
+  /** P109 ISL-005 — script paths (`engine/world.js`) changed in this window. */
+  private pendingScripts = new Set<string>();
   private timer: unknown = null;
 
   private readonly debounceMs: number;
@@ -117,7 +119,8 @@ export class ProjectFileWatcher {
   start(
     directory: string,
     onComponentsChanged: (componentPaths: string[]) => void,
-    onProjectLevelChanged?: (files: ProjectLevelFile[]) => void
+    onProjectLevelChanged?: (files: ProjectLevelFile[]) => void,
+    onScriptsChanged?: (scriptPaths: string[]) => void
   ): void {
     this.stop();
 
@@ -127,20 +130,25 @@ export class ProjectFileWatcher {
       // a component file was dropped here, so the editor learned nothing about
       // an agent writing `nodegx.project.json`.
       const projectLevelFile = componentPath === null ? projectLevelFileFromRelativePath(relativePath) : null;
-      if (componentPath === null && projectLevelFile === null) return;
+      const scriptPath = componentPath === null && projectLevelFile === null ? scriptPathFromRelativePath(relativePath) : null;
+      if (componentPath === null && projectLevelFile === null && scriptPath === null) return;
 
       if (componentPath !== null) this.pending.add(componentPath);
       if (projectLevelFile !== null) this.pendingProjectLevel.add(projectLevelFile);
+      if (scriptPath !== null) this.pendingScripts.add(scriptPath);
 
       if (this.timer !== null) this.clearTimeoutFn(this.timer);
       this.timer = this.setTimeoutFn(() => {
         this.timer = null;
         const batch = Array.from(this.pending);
         const projectLevelBatch = Array.from(this.pendingProjectLevel);
+        const scriptBatch = Array.from(this.pendingScripts);
         this.pending.clear();
         this.pendingProjectLevel.clear();
+        this.pendingScripts.clear();
         if (batch.length > 0) onComponentsChanged(batch);
         if (projectLevelBatch.length > 0 && onProjectLevelChanged) onProjectLevelChanged(projectLevelBatch);
+        if (scriptBatch.length > 0 && onScriptsChanged) onScriptsChanged(scriptBatch);
       }, this.debounceMs);
     });
   }
@@ -153,6 +161,7 @@ export class ProjectFileWatcher {
     }
     this.pending.clear();
     this.pendingProjectLevel.clear();
+    this.pendingScripts.clear();
     if (this.handle) {
       try {
         this.handle.close();

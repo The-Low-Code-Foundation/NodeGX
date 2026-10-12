@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4e208a58-c085-5d2d-8c78-b54d46fcc82c",
+  "name": "Olive lesson",
+  "path": "/Logic/Olive lesson",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A lesson asked of Olive, her answer, and the page’s check underneath. Runs on Go; answers Ran once its outputs are set."
+}

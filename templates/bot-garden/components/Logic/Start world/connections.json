@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8aaab0a0-0588-5adb-86b6-c57679d03c59",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "startworldIn",
+      "fromProperty": "nonce",
+      "toId": "startworldFn",
+      "toProperty": "in-nonce"
+    },
+    {
+      "fromId": "startworldIn",
+      "fromProperty": "requestId",
+      "toId": "startworldFn",
+      "toProperty": "in-requestId"
+    },
+    {
+      "fromId": "startworldIn",
+      "fromProperty": "requests",
+      "toId": "startworldFn",
+      "toProperty": "in-requests"
+    },
+    {
+      "fromId": "startworldIn",
+      "fromProperty": "robot",
+      "toId": "startworldFn",
+      "toProperty": "in-robot"
+    },
+    {
+      "fromId": "startworldIn",
+      "fromProperty": "robotKey",
+      "toId": "startworldFn",
+      "toProperty": "in-robotKey"
+    },
+    {
+      "fromId": "startworldIn",
+      "fromProperty": "seed",
+      "toId": "startworldFn",
+      "toProperty": "in-seed"
+    },
+    {
+      "fromId": "startworldFn",
+      "fromProperty": "out-allowed",
+      "toId": "startworldOut",
+      "toProperty": "allowed"
+    },
+    {
+      "fromId": "startworldFn",
+      "fromProperty": "out-challenge",
+      "toId": "startworldOut",
+      "toProperty": "challenge"
+    },
+    {
+      "fromId": "startworldFn",
+      "fromProperty": "out-found",
+      "toId": "startworldOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "startworldFn",
+      "fromProperty": "out-goal",
+      "toId": "startworldOut",
+      "toProperty": "goal"
+    },
+    {
+      "fromId": "startworldFn",
+      "fromProperty": "out-isFree",
+      "toId": "startworldOut",
+      "toProperty": "isFree"
+    },
+    {
+      "fromId": "startworldFn",
+      "fromProperty": "out-islander",
+      "toId": "startworldOut",
+      "toProperty": "islander"
+    },
+    {
+      "fromId": "startworldFn",
+      "fromProperty": "out-needs",
+      "toId": "startworldOut",
+      "toProperty": "needs"
+    },
+    {
+      "fromId": "startworldFn",
+      "fromProperty": "out-nonce",
+      "toId": "startworldOut",
+      "toProperty": "nonce"
+    },
+    {
+      "fromId": "startworldFn",
+      "fromProperty": "out-referenceCount",
+      "toId": "startworldOut",
+      "toProperty": "referenceCount"
+    },
+    {
+      "fromId": "startworldFn",
+      "fromProperty": "out-request",
+      "toId": "startworldOut",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "startworldFn",
+      "fromProperty": "out-requestId",
+      "toId": "startworldOut",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "startworldFn",
+      "fromProperty": "out-robotKey",
+      "toId": "startworldOut",
+      "toProperty": "robotKey"
+    },
+    {
+      "fromId": "startworldFn",
+      "fromProperty": "out-rungs",
+      "toId": "startworldOut",
+      "toProperty": "rungs"
+    },
+    {
+      "fromId": "startworldFn",
+      "fromProperty": "out-world",
+      "toId": "startworldOut",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "startworldFn",
+      "fromProperty": "success",
+      "toId": "startworldOut",
+      "toProperty": "ran"
+    }
+  ]
+}

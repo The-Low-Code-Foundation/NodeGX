@@ -12,7 +12,7 @@
     "packages/noodl-editor/src/editor/src/views/panels/propertyeditor": 4,
     "packages/noodl-core-ui/src/components/property-panel": 2
   },
-  "commit": "f74b47eee",
+  "commit": "169a44ac8",
   "max": {
     "noodl-core-ui": 161,
     "noodl-editor": 610

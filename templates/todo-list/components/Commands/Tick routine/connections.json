@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d284304e-9d35-544e-82f4-5155dba76f1f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "TickroutinIn",
+      "fromProperty": "rows",
+      "toId": "TickroutinGuard",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "TickroutinIn",
+      "fromProperty": "rowId",
+      "toId": "TickroutinGuard",
+      "toProperty": "in-rowId"
+    },
+    {
+      "fromId": "TickroutinIn",
+      "fromProperty": "note",
+      "toId": "TickroutinGuard",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "TickroutinIn",
+      "fromProperty": "do",
+      "toId": "TickroutinGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "TickroutinGuard",
+      "fromProperty": "out-routineId",
+      "toId": "TickroutinCreate",
+      "toProperty": "prop-routineId"
+    },
+    {
+      "fromId": "TickroutinGuard",
+      "fromProperty": "out-date",
+      "toId": "TickroutinCreate",
+      "toProperty": "prop-date"
+    },
+    {
+      "fromId": "TickroutinGuard",
+      "fromProperty": "out-time",
+      "toId": "TickroutinCreate",
+      "toProperty": "prop-time"
+    },
+    {
+      "fromId": "TickroutinGuard",
+      "fromProperty": "out-doneAt",
+      "toId": "TickroutinCreate",
+      "toProperty": "prop-doneAt"
+    },
+    {
+      "fromId": "TickroutinGuard",
+      "fromProperty": "out-note",
+      "toId": "TickroutinCreate",
+      "toProperty": "prop-note"
+    },
+    {
+      "fromId": "TickroutinGuard",
+      "fromProperty": "out-go",
+      "toId": "TickroutinCreate",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "TickroutinGuard",
+      "fromProperty": "out-routineId",
+      "toId": "TickroutinHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "TickroutinGuard",
+      "fromProperty": "out-summary",
+      "toId": "TickroutinHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "TickroutinGuard",
+      "fromProperty": "out-note",
+      "toId": "TickroutinHistory",
+      "toProperty": "body"
+    },
+    {
+      "fromId": "TickroutinCreate",
+      "fromProperty": "done",
+      "toId": "TickroutinHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "TickroutinHistory",
+      "fromProperty": "done",
+      "toId": "TickroutinOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "TickroutinCreate",
+      "fromProperty": "failure",
+      "toId": "TickroutinProblem",
+      "toProperty": "do"
+    }
+  ]
+}

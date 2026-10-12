@@ -185,10 +185,17 @@ const GroupNode: ReactNodeDefinition = {
       group: 'Focus',
       valueChangedToTrue() {
         const outcome = this.beginOutcome();
-        this.context.setNodeFocused(this, true);
-        // `setNodeFocused` is synchronous and has no failure path of its own; `Focused` still
-        // fires separately when the DOM actually takes focus, which is a different fact.
-        this.reportOutcome(outcome, 'done');
+        // P107-C95 (R16: "Unchanged, like the field") — a Group off the page lists nothing and fires nothing; a Focus is
+        // not kept for later (R13). `_canFocus` is what the tracker asks.
+        const took = this.context.setNodeFocused(this, true) !== false;
+        this.setDiagnostic(
+          'focus/not-mounted',
+          took
+            ? null
+            : 'Focus arrived while this group was not on the page, so nothing was focused. A Focus is not kept ' +
+                'for later: send it once the group has mounted, for example from its Did Mount'
+        );
+        this.reportOutcome(outcome, took ? 'done' : 'unchanged');
       }
     }
   },
@@ -435,6 +442,7 @@ const GroupNode: ReactNodeDefinition = {
      */
     ...outcomeOutputs({
       done: 'Fires once Focus, Scroll To Element or Scroll To Index has been carried out',
+      unchanged: 'Fires when Focus arrived while this group was not on the page, so nothing was focused',
       failure:
         'Fires when the action did nothing and says why on Error — most often a scroll target ' +
         'that is not inside this group, or a group that has still not mounted'
@@ -490,6 +498,10 @@ const GroupNode: ReactNodeDefinition = {
     },
     _blur() {
       this.sendSignalOnOutput('focusLost');
+    },
+    /** P107-C95 — the focus tracker asks before it lists a Focus: on the page is the inner component existing. */
+    _canFocus() {
+      return !!this.innerReactComponentRef;
     }
   }
 };

@@ -1,0 +1,50 @@
+[
+  {
+    "name": "authored State announces a switch nothing switched, at boot",
+    "because": "switch.ts :64-68 — the setter pulses the sibling then Switched on every write; NDA-012 Logic row 1 (nda-012-logic-category.test.ts)",
+    "params": { "onFromStart": true },
+    "steps": ["settle"]
+  },
+  {
+    "name": "no State: the first settle publishes false and no pulse",
+    "because": "connectInput delivers the getter's value to a wire made before the first frame (node.ts :555-565); switch.ts :23",
+    "params": {},
+    "steps": ["settle"]
+  },
+  {
+    "name": "On when already on: Unchanged, none of the Switched signals",
+    "because": "switch.ts :120-123 — ERG-001 §4's register, the bare return that stopped a chain dead",
+    "params": { "onFromStart": true },
+    "steps": ["settle", { "signal": "on" }, "settle"]
+  },
+  {
+    "name": "Off when already off: Unchanged (NDA-012)",
+    "because": "switch.ts :120-123; nda-012-logic-category.test.ts 'Off when already off fires none of the Switched signals'",
+    "params": {},
+    "steps": ["settle", { "signal": "off" }, "settle"]
+  },
+  {
+    "name": "Flip flips, and flips back, Done both times",
+    "because": "switch.ts :48-56 — Flip cannot no-op",
+    "params": {},
+    "steps": ["settle", { "signal": "flip" }, "settle", { "signal": "flip" }, "settle"]
+  },
+  {
+    "name": "On then Off in one frame: the state is back where it was, both pulse pairs and both outcomes delivered",
+    "because": "C2/C4 — pulses are never coalesced; the value did not change across the settle so no value event",
+    "params": {},
+    "steps": ["settle", { "signal": "on" }, { "signal": "off" }, "settle"]
+  },
+  {
+    "name": "State written to the value it already has still announces",
+    "because": "switch.ts :62 'announces a switch on Switched even though nothing switched' — the setter has no same-value guard",
+    "params": {},
+    "steps": ["settle", { "set": "onFromStart", "value": false }, "settle"]
+  },
+  {
+    "name": "coercion !!: the string 'false' is on, 0 is off, an empty object is on",
+    "because": "switch.ts :65 `!!value`",
+    "params": { "onFromStart": "false" },
+    "steps": ["settle", { "set": "onFromStart", "value": 0 }, "settle", { "set": "onFromStart", "value": {} }, "settle"]
+  }
+]

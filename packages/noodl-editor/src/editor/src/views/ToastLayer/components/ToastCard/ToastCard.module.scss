@@ -14,6 +14,10 @@
   color: var(--theme-color-fg-highlight);
   box-shadow: var(--shadow-toast);
   overflow: hidden;
+  // P109-S20-LONGTOAST: never taller than the room above the stack (58px from the bottom,
+  // ToastLayerContainer) and under the window's top (react-hot-toast's 16px), so a long
+  // report keeps its title on screen and scrolls its message instead.
+  max-height: calc(100vh - 90px);
   animation: show 300ms animation.$easing-base both;
 }
 
@@ -54,6 +58,11 @@
 .Body {
   flex: 1;
   min-width: 0;
+  min-height: 0;
+  // The card's limit less its padding and border: the title and actions stay, the message scrolls.
+  max-height: calc(100vh - 90px - 28px);
+  display: flex;
+  flex-direction: column;
 }
 
 .Title {
@@ -69,6 +78,8 @@
   font-size: 12.5px;
   line-height: 1.45;
   word-break: break-word;
+  min-height: 0;
+  overflow-y: auto;
 
   code {
     font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;

@@ -1,0 +1,582 @@
+{
+  "name": "scroll-slides",
+  "rule": "a 300 × 200 px row that scrolls: slides at Width 100% Fixed are one window wide each (300), at 100% not Fixed they share the window (100 each), at 50% Fixed half of it (150) — on both paths. n… native, i… Native platform scroll off (ruled 2026-10-09, P109 ISL-052)",
+  "nodes": [
+    {
+      "id": "nf",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "row",
+        "scrollEnabled": true,
+        "nativeScroll": true
+      },
+      "children": [
+        {
+          "id": "nf0",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "%",
+              "isFixed": true
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "nf0t",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "nf1",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "%",
+              "isFixed": true
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "nf1t",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "nf2",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "%",
+              "isFixed": true
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "nf2t",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "if",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "row",
+        "scrollEnabled": true,
+        "nativeScroll": false
+      },
+      "children": [
+        {
+          "id": "if0",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "%",
+              "isFixed": true
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "if0t",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "if1",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "%",
+              "isFixed": true
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "if1t",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "if2",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "%",
+              "isFixed": true
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "if2t",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ns",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "row",
+        "scrollEnabled": true,
+        "nativeScroll": true
+      },
+      "children": [
+        {
+          "id": "ns0",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "ns0t",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "ns1",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "ns1t",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "ns2",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "ns2t",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "is",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "row",
+        "scrollEnabled": true,
+        "nativeScroll": false
+      },
+      "children": [
+        {
+          "id": "is0",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "is0t",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "is1",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "is1t",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "is2",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "is2t",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nh",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "row",
+        "scrollEnabled": true,
+        "nativeScroll": true
+      },
+      "children": [
+        {
+          "id": "nh0",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 50,
+              "unit": "%",
+              "isFixed": true
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "nh0t",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ih",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "row",
+        "scrollEnabled": true,
+        "nativeScroll": false
+      },
+      "children": [
+        {
+          "id": "ih0",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 50,
+              "unit": "%",
+              "isFixed": true
+            },
+            "height": {
+              "value": 100,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "ih0t",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -87,6 +87,7 @@ import {
   recordSchemaContext,
   type SchemaCollection
 } from './record-ports';
+import { valueDidChange } from '../../../run-on-value-change';
 import { sendSchemaPorts, staticPortNames } from './schema-ports';
 
 /**
@@ -324,24 +325,33 @@ const SubscribeToChangesNode: NodeDefinitionOptions = {
       return this._internal.enabled !== false;
     },
 
+    // P107-C55 (P109 ISL-030, ruled "Ignore repeated values"): each setting reconnects only when it really changes, as
+    // Query Records' query does. A write of the value already held used to tear the subscription down and open a new one,
+    // and a change made before the backend confirmed it was never delivered (the realtime wire keeps no replay log).
+    // An object (a filter, a filter value from a Function node) is never "the same" (`valueDidChange`), as before.
     setEnabled: function (this: SubscribeToChangesInstance, value: boolean) {
+      const previous = this._internal.enabled;
       this._internal.enabled = !!value;
-      this.scheduleReconfigure();
+      if (valueDidChange(previous, this._internal.enabled)) this.scheduleReconfigure();
     },
 
     setCollectionName: function (this: SubscribeToChangesInstance, name: string) {
+      const previous = this._internal.name;
       this._internal.name = name;
       // A subscription is to a named class; the old one is watching the wrong thing.
-      this.scheduleReconfigure();
+      if (valueDidChange(previous, name)) this.scheduleReconfigure();
     },
 
     setVisualFilter: function (this: SubscribeToChangesInstance, value: unknown) {
+      const previous = this._internal.visualFilter;
       this._internal.visualFilter = value;
-      this.scheduleReconfigure();
+      if (valueDidChange(previous, value)) this.scheduleReconfigure();
     },
 
     setQueryParameter: function (this: SubscribeToChangesInstance, name: string, value: unknown) {
+      const previous = this._internal.queryParameters[name];
       this._internal.queryParameters[name] = value;
+      if (!valueDidChange(previous, value)) return;
       // A filter value moving means a different subscription, not a different local view:
       // the server decides what is delivered, so it has to be told again.
       this.scheduleReconfigure();
@@ -565,10 +575,11 @@ const SubscribeToChangesNode: NodeDefinitionOptions = {
         collectionName: this.setCollectionName.bind(this) as (value: never) => void,
         visualFilter: this.setVisualFilter.bind(this) as (value: never) => void,
         backendId: ((value: string) => {
+          const previous = this._internal.backendId;
           this._internal.backendId = value;
           // Or it stays connected to whichever backend happened to be selected when the
-          // node first ran.
-          this.scheduleReconfigure();
+          // node first ran. P107-C55: only when it moved.
+          if (valueDidChange(previous, value)) this.scheduleReconfigure();
         }) as (value: never) => void
       };
 

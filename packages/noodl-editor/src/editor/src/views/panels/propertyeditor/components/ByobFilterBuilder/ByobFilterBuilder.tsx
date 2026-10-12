@@ -213,6 +213,7 @@ export const ByobFilterBuilder = forwardRef<ByobFilterBuilderRef, ByobFilterBuil
         <Text textType={TextType.DefaultContrast}>Filter Conditions</Text>
         <div className={css.ByobFilterBuilderActions}>
           <IconButton
+            ariaLabel={showJson ? 'Hide JSON' : 'Show JSON'}
             icon={IconName.Code}
             size={IconSize.Small}
             variant={showJson ? IconButtonVariant.Default : IconButtonVariant.Transparent}
@@ -245,12 +246,14 @@ export const ByobFilterBuilder = forwardRef<ByobFilterBuilderRef, ByobFilterBuil
               {!jsonEditMode ? (
                 <>
                   <IconButton
+                    ariaLabel="Copy JSON"
                     icon={IconName.Copy}
                     size={IconSize.Small}
                     variant={IconButtonVariant.Transparent}
                     onClick={handleCopyJson}
                   />
                   <IconButton
+                    ariaLabel="Edit JSON"
                     icon={IconName.Pencil}
                     size={IconSize.Small}
                     variant={IconButtonVariant.Transparent}
@@ -260,12 +263,14 @@ export const ByobFilterBuilder = forwardRef<ByobFilterBuilderRef, ByobFilterBuil
               ) : (
                 <>
                   <IconButton
+                    ariaLabel="Save JSON"
                     icon={IconName.Check}
                     size={IconSize.Small}
                     variant={IconButtonVariant.Transparent}
                     onClick={handleSaveJson}
                   />
                   <IconButton
+                    ariaLabel="Cancel editing"
                     icon={IconName.Close}
                     size={IconSize.Small}
                     variant={IconButtonVariant.Transparent}

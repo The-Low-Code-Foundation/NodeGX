@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "70fcc78b-6310-49ed-9167-3d7e5560a596",
+  "name": "Privacy",
+  "path": "/Pages/Privacy",
+  "type": "page",
+  "created": "2026-10-01T08:54:12.374Z",
+  "modified": "2026-10-01T08:54:12.374Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The privacy notice: what this course holds about a person, why, where, how long, and what they can do about it. Public, and outside both gates in App, because declining it must never take away the way to read it (TASK-L185)."
+}

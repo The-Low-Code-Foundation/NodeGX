@@ -1,0 +1,122 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "cc0ff807-1bfd-5fb8-85b1-31a8f5c9f7e7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "islandtickIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "built",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "state",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "islandtickFn",
+      "type": "JavaScriptFunction",
+      "label": "Island tick",
+      "parameters": {
+        "functionScript": "var { islTick, islWorld } = Scripts.island;\n// The state held by name, unless it is from an older build than the island's latest (a tick's write that landed after\n// a rebuild's): then the latest build is where the island goes on from.\nvar held = Inputs.state && typeof Inputs.state === 'object' ? Inputs.state : null;\nvar built = Inputs.built && typeof Inputs.built === 'object' && Array.isArray(Inputs.built.plots) ? Inputs.built : null;\nvar next = islTick(built && (!held || held.build !== built.build) ? built : held);\nif (next) {\n  Outputs.state = next;\n  Outputs.world = islWorld(next);\n  Outputs.ticks = next.tick;\n}\nOutputs.ok = !!next;\n",
+        "runOnChange-in-built": false,
+        "runOnChange-in-state": false,
+        "uses": "engine.js,island.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-state",
+          "displayName": "state",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-built",
+          "displayName": "built",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-state",
+          "displayName": "state",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-world",
+          "displayName": "world",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ticks",
+          "displayName": "ticks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "islandtickOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "ok",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "state",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ticks",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "world",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

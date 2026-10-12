@@ -138,7 +138,10 @@ describe('AC3 — the dynamic-port description reaches the answer', () => {
    */
   it('every shipped type that declares dynamic ports states how, not just that', () => {
     const declared = enriched.nodes.filter((n) => n.dynamicPorts);
-    expect(declared.length).toBe(88); // pin the population; a drop here is a catalog regression
+    // 88 → 92 (P109 ISL-009, 2026-10-03): every visual node now declares its Data Attributes list as a
+    // `namedports/derived` rule, and four had declared no dynamic ports before — Checkbox, Radio
+    // Button, Range and Columns. Each was given a `runtimeBehavior` saying so.
+    expect(declared.length).toBe(92); // pin the population; a drop here is a catalog regression
 
     const silent = declared
       .map((n) => n.typeName)
@@ -234,7 +237,11 @@ describe('AC3 — declaredPortGroups, the half that was fully knowable', () => {
     useDynportsKit();
 
     const dp = detail('dynports.kit.Feed').dynamicPorts;
-    expect(dp?.mechanisms).toEqual(['runtime-discovered']);
+    // P109 ISL-009 (2026-10-03): a kit visual node now inherits the Data Attributes rule, so Feed has
+    // an enumerable half after all — its `data-*` list — and `declared-port-groups` is true of it.
+    // What this row guards is unchanged: the channel port is not turned into a fabricated group.
+    // `get_node_type` projects only conditional groups, so the field is still absent.
+    expect(dp?.mechanisms).toEqual(['declared-port-groups', 'runtime-discovered']);
     expect(dp && 'declaredPortGroups' in dp).toBe(false);
   });
 
@@ -268,7 +275,8 @@ describe('AC3 — a kit summary explains its own flag', () => {
     const dynamic = enriched.nodes.filter((n) => n.dynamicPorts);
     const withPn = dynamic.filter((n) => n.enrichment?.runtimeBehavior);
 
-    expect([dynamic.length, withPn.length]).toEqual([88, 88]);
+    // 88 → 92: P109 ISL-009's Data Attributes list — see the population row above.
+    expect([dynamic.length, withPn.length]).toEqual([92, 92]);
   });
 
   it("a kit's flag arrives with the sentence that explains it", () => {

@@ -23,6 +23,24 @@
     },
     {
       "fromId": "tdAuth",
+      "fromProperty": "ontrue",
+      "toId": "tdLinkOpen",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tdAuth",
+      "fromProperty": "ontrue",
+      "toId": "tdViewOpen",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tdClock",
+      "fromProperty": "out-wake",
+      "toId": "tdAuth",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "tdAuth",
       "fromProperty": "onfalse",
       "toId": "tdToSignIn",
       "toProperty": "navigate"
@@ -40,8 +58,8 @@
       "toProperty": "navigate"
     },
     {
-      "fromId": "tdSel",
-      "fromProperty": "found",
+      "fromId": "tdLayout",
+      "fromProperty": "out-found",
       "toId": "tdData",
       "toProperty": "hasTask"
     },
@@ -106,6 +124,84 @@
       "toProperty": "openActionId"
     },
     {
+      "fromId": "tdData",
+      "fromProperty": "tasks",
+      "toId": "tdTodayRows",
+      "toProperty": "tasks"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "actions",
+      "toId": "tdTodayRows",
+      "toProperty": "actions"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "routines",
+      "toId": "tdTodayRows",
+      "toProperty": "routines"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "checks",
+      "toId": "tdTodayRows",
+      "toProperty": "checks"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "tdTodayRows",
+      "toProperty": "selectedId"
+    },
+    {
+      "fromId": "tdClock",
+      "fromProperty": "out-now",
+      "toId": "tdTodayRows",
+      "toProperty": "now"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "routines",
+      "toId": "tdRoutine",
+      "toProperty": "routines"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "checks",
+      "toId": "tdRoutine",
+      "toProperty": "checks"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "events",
+      "toId": "tdRoutine",
+      "toProperty": "events"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "tdRoutine",
+      "toProperty": "selectedId"
+    },
+    {
+      "fromId": "tdDays",
+      "fromProperty": "value",
+      "toId": "tdRoutine",
+      "toProperty": "days"
+    },
+    {
+      "fromId": "tdClock",
+      "fromProperty": "out-now",
+      "toId": "tdRoutine",
+      "toProperty": "now"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "routines",
+      "toId": "tdLogRows",
+      "toProperty": "routines"
+    },
+    {
       "fromId": "tdTab",
       "fromProperty": "currentState",
       "toId": "tdHeader",
@@ -124,10 +220,28 @@
       "toProperty": "doneLabel"
     },
     {
+      "fromId": "tdTodayRows",
+      "fromProperty": "todayLabel",
+      "toId": "tdHeader",
+      "toProperty": "todayLabel"
+    },
+    {
       "fromId": "tdHeader",
       "fromProperty": "pickList",
       "toId": "tdTab",
       "toProperty": "to-list"
+    },
+    {
+      "fromId": "tdHeader",
+      "fromProperty": "pickToday",
+      "toId": "tdTab",
+      "toProperty": "to-today"
+    },
+    {
+      "fromId": "tdViewOpen",
+      "fromProperty": "out-today",
+      "toId": "tdTab",
+      "toProperty": "to-today"
     },
     {
       "fromId": "tdHeader",
@@ -145,6 +259,12 @@
       "fromId": "tdTab",
       "fromProperty": "at-list",
       "toId": "tdListView",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tdTab",
+      "fromProperty": "at-today",
+      "toId": "tdTodayView",
       "toProperty": "mounted"
     },
     {
@@ -172,6 +292,12 @@
       "toProperty": "in-found"
     },
     {
+      "fromId": "tdRoutine",
+      "fromProperty": "found",
+      "toId": "tdLayout",
+      "toProperty": "in-routineFound"
+    },
+    {
       "fromId": "tdLayout",
       "fromProperty": "out-showLeft",
       "toId": "tdLeft",
@@ -187,6 +313,12 @@
       "fromId": "tdLayout",
       "fromProperty": "out-narrow",
       "toId": "tdSummary",
+      "toProperty": "narrow"
+    },
+    {
+      "fromId": "tdLayout",
+      "fromProperty": "out-narrow",
+      "toId": "tdRoutineSummary",
       "toProperty": "narrow"
     },
     {
@@ -220,10 +352,124 @@
       "toProperty": "mounted"
     },
     {
-      "fromId": "tdSel",
-      "fromProperty": "notFound",
+      "fromId": "tdLayout",
+      "fromProperty": "out-nothing",
       "toId": "tdEmpty",
       "toProperty": "mounted"
+    },
+    {
+      "fromId": "tdTodayRows",
+      "fromProperty": "rows",
+      "toId": "tdToday",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdTodayRows",
+      "fromProperty": "routineRows",
+      "toId": "tdRoutines",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "found",
+      "toId": "tdRoutineDetail",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "title",
+      "toId": "tdRoutineSummary",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "scheduleLine",
+      "toId": "tdRoutineSummary",
+      "toProperty": "scheduleLine"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "statusLine",
+      "toId": "tdRoutineSummary",
+      "toProperty": "statusLine"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "statusColor",
+      "toId": "tdRoutineSummary",
+      "toProperty": "statusColor"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "cadence",
+      "toId": "tdRoutineSummary",
+      "toProperty": "cadence"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "slotRows",
+      "toId": "tdRoutineSummary",
+      "toProperty": "slotRows"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "noSlots",
+      "toId": "tdRoutineSummary",
+      "toProperty": "noSlots"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "dayChips",
+      "toId": "tdRoutineSummary",
+      "toProperty": "dayChips"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "showDays",
+      "toId": "tdRoutineSummary",
+      "toProperty": "showDays"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "addHint",
+      "toId": "tdRoutineSummary",
+      "toProperty": "addHint"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "startDate",
+      "toId": "tdRoutineSummary",
+      "toProperty": "startDate"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "endDate",
+      "toId": "tdRoutineSummary",
+      "toProperty": "endDate"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "canStop",
+      "toId": "tdRoutineSummary",
+      "toProperty": "canStop"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "isStopped",
+      "toId": "tdRoutineSummary",
+      "toProperty": "isStopped"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "stopNote",
+      "toId": "tdRoutineSummary",
+      "toProperty": "stopNote"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "historyRows",
+      "toId": "tdRoutineHistory",
+      "toProperty": "rows"
     },
     {
       "fromId": "tdSel",
@@ -334,6 +580,60 @@
       "toProperty": "do"
     },
     {
+      "fromId": "tdLinkOpen",
+      "fromProperty": "out-taskId",
+      "toId": "tdSelectFromLink",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tdLinkOpen",
+      "fromProperty": "out-open",
+      "toId": "tdSelectFromLink",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdToday",
+      "fromProperty": "targetId",
+      "toId": "tdSelectFromToday",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tdToday",
+      "fromProperty": "open",
+      "toId": "tdSelectFromToday",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdRoutines",
+      "fromProperty": "routineId",
+      "toId": "tdSelectFromRoutines",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tdRoutines",
+      "fromProperty": "open",
+      "toId": "tdSelectFromRoutines",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdAddRoutine",
+      "fromProperty": "id",
+      "toId": "tdSelectNewRoutine",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cmdAddRoutine",
+      "fromProperty": "done",
+      "toId": "tdSelectNewRoutine",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "back",
+      "toId": "tdDeselect",
+      "toProperty": "do"
+    },
+    {
       "fromId": "tdSelectFromList",
       "fromProperty": "done",
       "toId": "tdData",
@@ -352,6 +652,36 @@
       "toProperty": "loadHistory"
     },
     {
+      "fromId": "tdSelectFromLink",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "loadHistory"
+    },
+    {
+      "fromId": "tdSelectFromToday",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "loadHistory"
+    },
+    {
+      "fromId": "tdSelectFromRoutines",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "loadHistory"
+    },
+    {
+      "fromId": "tdSelectNewRoutine",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "loadHistory"
+    },
+    {
+      "fromId": "tdSelectFromProject",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "loadHistory"
+    },
+    {
       "fromId": "tdSelectFromList",
       "fromProperty": "done",
       "toId": "tdCloseDesc",
@@ -365,6 +695,36 @@
     },
     {
       "fromId": "tdSelectFromLog",
+      "fromProperty": "done",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectFromLink",
+      "fromProperty": "done",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectFromToday",
+      "fromProperty": "done",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectFromRoutines",
+      "fromProperty": "done",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectNewRoutine",
+      "fromProperty": "done",
+      "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectFromProject",
       "fromProperty": "done",
       "toId": "tdCloseDesc",
       "toProperty": "do"
@@ -373,6 +733,90 @@
       "fromId": "tdDeselect",
       "fromProperty": "done",
       "toId": "tdCloseDesc",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectFromList",
+      "fromProperty": "done",
+      "toId": "tdClearDays",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectFromDone",
+      "fromProperty": "done",
+      "toId": "tdClearDays",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectFromLog",
+      "fromProperty": "done",
+      "toId": "tdClearDays",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectFromLink",
+      "fromProperty": "done",
+      "toId": "tdClearDays",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectFromToday",
+      "fromProperty": "done",
+      "toId": "tdClearDays",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectFromRoutines",
+      "fromProperty": "done",
+      "toId": "tdClearDays",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectNewRoutine",
+      "fromProperty": "done",
+      "toId": "tdClearDays",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelectFromProject",
+      "fromProperty": "done",
+      "toId": "tdClearDays",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdDeselect",
+      "fromProperty": "done",
+      "toId": "tdClearDays",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "dayKey",
+      "toId": "tdPickDay",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "tdDays",
+      "fromProperty": "value",
+      "toId": "tdPickDay",
+      "toProperty": "in-days"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "pickDay",
+      "toId": "tdPickDay",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tdPickDay",
+      "fromProperty": "out-days",
+      "toId": "tdSetDays",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tdPickDay",
+      "fromProperty": "out-go",
+      "toId": "tdSetDays",
       "toProperty": "do"
     },
     {
@@ -466,6 +910,54 @@
       "toProperty": "untick"
     },
     {
+      "fromId": "tdToday",
+      "fromProperty": "targetId",
+      "toId": "tdDialog",
+      "toProperty": "todayTaskId"
+    },
+    {
+      "fromId": "tdToday",
+      "fromProperty": "title",
+      "toId": "tdDialog",
+      "toProperty": "todayTaskTitle"
+    },
+    {
+      "fromId": "tdToday",
+      "fromProperty": "close",
+      "toId": "tdDialog",
+      "toProperty": "todayClose"
+    },
+    {
+      "fromId": "tdToday",
+      "fromProperty": "rowId",
+      "toId": "tdDialog",
+      "toProperty": "occurrenceId"
+    },
+    {
+      "fromId": "tdToday",
+      "fromProperty": "title",
+      "toId": "tdDialog",
+      "toProperty": "occurrenceTitle"
+    },
+    {
+      "fromId": "tdToday",
+      "fromProperty": "check",
+      "toId": "tdDialog",
+      "toProperty": "check"
+    },
+    {
+      "fromId": "tdRoutine",
+      "fromProperty": "title",
+      "toId": "tdDialog",
+      "toProperty": "routineTitle"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "stop",
+      "toId": "tdDialog",
+      "toProperty": "detailStop"
+    },
+    {
       "fromId": "tdList",
       "fromProperty": "newTitle",
       "toId": "cmdAdd",
@@ -498,37 +990,25 @@
     {
       "fromId": "tdRows",
       "fromProperty": "openRows",
-      "toId": "cmdUp",
+      "toId": "cmdDrag",
       "toProperty": "rows"
     },
     {
       "fromId": "tdList",
-      "fromProperty": "taskId",
-      "toId": "cmdUp",
+      "fromProperty": "moveId",
+      "toId": "cmdDrag",
       "toProperty": "taskId"
     },
     {
       "fromId": "tdList",
-      "fromProperty": "up",
-      "toId": "cmdUp",
-      "toProperty": "do"
-    },
-    {
-      "fromId": "tdRows",
-      "fromProperty": "openRows",
-      "toId": "cmdDown",
-      "toProperty": "rows"
+      "fromProperty": "moveTo",
+      "toId": "cmdDrag",
+      "toProperty": "toIndex"
     },
     {
       "fromId": "tdList",
-      "fromProperty": "taskId",
-      "toId": "cmdDown",
-      "toProperty": "taskId"
-    },
-    {
-      "fromId": "tdList",
-      "fromProperty": "down",
-      "toId": "cmdDown",
+      "fromProperty": "moved",
+      "toId": "cmdDrag",
       "toProperty": "do"
     },
     {
@@ -696,31 +1176,31 @@
     {
       "fromId": "tdSel",
       "fromProperty": "actionRows",
-      "toId": "cmdTick",
+      "toId": "cmdTick-2",
       "toProperty": "rows"
     },
     {
       "fromId": "tdSelected",
       "fromProperty": "value",
-      "toId": "cmdTick",
+      "toId": "cmdTick-2",
       "toProperty": "taskId"
     },
     {
       "fromId": "tdDialog",
       "fromProperty": "dialogActionId",
-      "toId": "cmdTick",
+      "toId": "cmdTick-2",
       "toProperty": "actionId"
     },
     {
       "fromId": "tdDialog",
       "fromProperty": "note",
-      "toId": "cmdTick",
+      "toId": "cmdTick-2",
       "toProperty": "note"
     },
     {
       "fromId": "tdDialog",
       "fromProperty": "confirmTick",
-      "toId": "cmdTick",
+      "toId": "cmdTick-2",
       "toProperty": "do"
     },
     {
@@ -762,49 +1242,31 @@
     {
       "fromId": "tdSel",
       "fromProperty": "openActionRows",
-      "toId": "cmdActUp",
+      "toId": "cmdActDrag",
       "toProperty": "rows"
     },
     {
       "fromId": "tdSelected",
       "fromProperty": "value",
-      "toId": "cmdActUp",
+      "toId": "cmdActDrag",
       "toProperty": "taskId"
     },
     {
       "fromId": "tdNext",
-      "fromProperty": "actionId",
-      "toId": "cmdActUp",
+      "fromProperty": "moveId",
+      "toId": "cmdActDrag",
       "toProperty": "actionId"
     },
     {
       "fromId": "tdNext",
-      "fromProperty": "up",
-      "toId": "cmdActUp",
-      "toProperty": "do"
-    },
-    {
-      "fromId": "tdSel",
-      "fromProperty": "openActionRows",
-      "toId": "cmdActDown",
-      "toProperty": "rows"
-    },
-    {
-      "fromId": "tdSelected",
-      "fromProperty": "value",
-      "toId": "cmdActDown",
-      "toProperty": "taskId"
+      "fromProperty": "moveTo",
+      "toId": "cmdActDrag",
+      "toProperty": "toIndex"
     },
     {
       "fromId": "tdNext",
-      "fromProperty": "actionId",
-      "toId": "cmdActDown",
-      "toProperty": "actionId"
-    },
-    {
-      "fromId": "tdNext",
-      "fromProperty": "down",
-      "toId": "cmdActDown",
+      "fromProperty": "moved",
+      "toId": "cmdActDrag",
       "toProperty": "do"
     },
     {
@@ -892,19 +1354,865 @@
       "toProperty": "clearNote"
     },
     {
+      "fromId": "tdRoutines",
+      "fromProperty": "newTitle",
+      "toId": "cmdAddRoutine",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "tdRoutines",
+      "fromProperty": "add",
+      "toId": "cmdAddRoutine",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdAddRoutine",
+      "fromProperty": "done",
+      "toId": "tdRoutines",
+      "toProperty": "clearNew"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "routines",
+      "toId": "cmdRenameRoutine",
+      "toProperty": "routines"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdRenameRoutine",
+      "toProperty": "routineId"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "newTitle",
+      "toId": "cmdRenameRoutine",
+      "toProperty": "newTitle"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "rename",
+      "toId": "cmdRenameRoutine",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "routines",
+      "toId": "cmdDaily",
+      "toProperty": "routines"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdDaily",
+      "toProperty": "routineId"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "pickDaily",
+      "toId": "cmdDaily",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "routines",
+      "toId": "cmdWeekly",
+      "toProperty": "routines"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdWeekly",
+      "toProperty": "routineId"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "pickWeekly",
+      "toId": "cmdWeekly",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "routines",
+      "toId": "cmdMonthly",
+      "toProperty": "routines"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdMonthly",
+      "toProperty": "routineId"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "pickMonthly",
+      "toId": "cmdMonthly",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "routines",
+      "toId": "cmdAddTime",
+      "toProperty": "routines"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdAddTime",
+      "toProperty": "routineId"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "addTime",
+      "toId": "cmdAddTime",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "routines",
+      "toId": "cmdRemoveSlot",
+      "toProperty": "routines"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdRemoveSlot",
+      "toProperty": "routineId"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "removeSlot",
+      "toId": "cmdRemoveSlot",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdDays",
+      "fromProperty": "value",
+      "toId": "cmdAddTime",
+      "toProperty": "days"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "timeText",
+      "toId": "cmdAddTime",
+      "toProperty": "timeText"
+    },
+    {
+      "fromId": "cmdAddTime",
+      "fromProperty": "error",
+      "toId": "tdRoutineSummary",
+      "toProperty": "timeError"
+    },
+    {
+      "fromId": "cmdAddTime",
+      "fromProperty": "hasError",
+      "toId": "tdRoutineSummary",
+      "toProperty": "hasTimeError"
+    },
+    {
+      "fromId": "cmdAddTime",
+      "fromProperty": "done",
+      "toId": "tdRoutineSummary",
+      "toProperty": "clearTime"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "slotKey",
+      "toId": "cmdRemoveSlot",
+      "toProperty": "slotKey"
+    },
+    {
+      "fromId": "cmdDaily",
+      "fromProperty": "done",
+      "toId": "tdClearDays",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdWeekly",
+      "fromProperty": "done",
+      "toId": "tdClearDays",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdMonthly",
+      "fromProperty": "done",
+      "toId": "tdClearDays",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdAddTime",
+      "fromProperty": "done",
+      "toId": "tdClearDays",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "routines",
+      "toId": "cmdStart",
+      "toProperty": "routines"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "tdRoutineSummary",
+      "toProperty": "routineId"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdStart",
+      "toProperty": "routineId"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "startText",
+      "toId": "cmdStart",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "setStart",
+      "toId": "cmdStart",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdStart",
+      "fromProperty": "error",
+      "toId": "tdRoutineSummary",
+      "toProperty": "startError"
+    },
+    {
+      "fromId": "cmdStart",
+      "fromProperty": "hasError",
+      "toId": "tdRoutineSummary",
+      "toProperty": "hasStartError"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "routines",
+      "toId": "cmdEnd",
+      "toProperty": "routines"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdEnd",
+      "toProperty": "routineId"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "endText",
+      "toId": "cmdEnd",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tdRoutineSummary",
+      "fromProperty": "setEnd",
+      "toId": "cmdEnd",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdEnd",
+      "fromProperty": "error",
+      "toId": "tdRoutineSummary",
+      "toProperty": "endError"
+    },
+    {
+      "fromId": "cmdEnd",
+      "fromProperty": "hasError",
+      "toId": "tdRoutineSummary",
+      "toProperty": "hasEndError"
+    },
+    {
+      "fromId": "tdTodayRows",
+      "fromProperty": "rows",
+      "toId": "cmdCheck",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "dialogOccurrenceId",
+      "toId": "cmdCheck",
+      "toProperty": "rowId"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "note",
+      "toId": "cmdCheck",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "confirmCheck",
+      "toId": "cmdCheck",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "dialogTaskId",
+      "toId": "cmdStop",
+      "toProperty": "routineId"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "note",
+      "toId": "cmdStop",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "confirmStop",
+      "toId": "cmdStop",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "cmdRoutineNote",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdRoutineHistory",
+      "fromProperty": "noteText",
+      "toId": "cmdRoutineNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tdRoutineHistory",
+      "fromProperty": "addNote",
+      "toId": "cmdRoutineNote",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdRoutineNote",
+      "fromProperty": "done",
+      "toId": "tdRoutineHistory",
+      "toProperty": "clearNote"
+    },
+    {
+      "fromId": "tdAuth",
+      "fromProperty": "ontrue",
+      "toId": "tdProjects",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "tasks",
+      "toId": "tdProjects",
+      "toProperty": "tasks"
+    },
+    {
+      "fromId": "tdOpenProject",
+      "fromProperty": "value",
+      "toId": "tdProjects",
+      "toProperty": "openId"
+    },
+    {
+      "fromId": "tdFlag",
+      "fromProperty": "value",
+      "toId": "tdProjects",
+      "toProperty": "flag"
+    },
+    {
+      "fromId": "tdClock",
+      "fromProperty": "out-now",
+      "toId": "tdProjects",
+      "toProperty": "now"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "projectNames",
+      "toId": "tdRows",
+      "toProperty": "projectNames"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "changed",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "showTab",
+      "toId": "tdHeader",
+      "toProperty": "projectsOn"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "showTurnOn",
+      "toId": "tdProjectsOn",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tdHeader",
+      "fromProperty": "pickProjects",
+      "toId": "tdTab",
+      "toProperty": "to-projects"
+    },
+    {
+      "fromId": "tdTab",
+      "fromProperty": "main",
+      "toId": "tdMain",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tdTab",
+      "fromProperty": "at-projects",
+      "toId": "tdProjectsView",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "balanceText",
+      "toId": "tdProjectsPane",
+      "toProperty": "balanceText"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "balanceWhen",
+      "toId": "tdProjectsPane",
+      "toProperty": "balanceWhen"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "bars",
+      "toId": "tdProjectsPane",
+      "toProperty": "bars"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "lowText",
+      "toId": "tdProjectsPane",
+      "toProperty": "lowText"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "lowColor",
+      "toId": "tdProjectsPane",
+      "toProperty": "lowColor"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "incomeRows",
+      "toId": "tdProjectsPane",
+      "toProperty": "incomeRows"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "hasIncome",
+      "toId": "tdProjectsPane",
+      "toProperty": "hasIncome"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "rows",
+      "toId": "tdProjectsPane",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "noProjects",
+      "toId": "tdProjectsPane",
+      "toProperty": "noProjects"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "projectPosition",
+      "toId": "tdProjectsPane",
+      "toProperty": "projectPosition"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "nextPosition",
+      "toId": "tdProjectsPane",
+      "toProperty": "nextPosition"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "items",
+      "toId": "tdProjectsPane",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "marks",
+      "toId": "tdProjectsPane",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "projects",
+      "toId": "tdProjectsPane",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "tdProjectsPane",
+      "fromProperty": "changed",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "tdProjectsPane",
+      "fromProperty": "changed",
+      "toId": "tdProjects",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "tdProjectsPane",
+      "fromProperty": "projectId",
+      "toId": "tdToggleProject",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "tdOpenProject",
+      "fromProperty": "value",
+      "toId": "tdToggleProject",
+      "toProperty": "in-current"
+    },
+    {
+      "fromId": "tdProjectsPane",
+      "fromProperty": "toggle",
+      "toId": "tdToggleProject",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tdToggleProject",
+      "fromProperty": "out-value",
+      "toId": "tdSetOpenProject",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tdToggleProject",
+      "fromProperty": "out-go",
+      "toId": "tdSetOpenProject",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdFlagRead",
+      "fromProperty": "out-flag",
+      "toId": "tdFlagLoad",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tdFlagRead",
+      "fromProperty": "out-go",
+      "toId": "tdFlagLoad",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdFlag",
+      "fromProperty": "value",
+      "toId": "tdFlagKeep",
+      "toProperty": "in-flag"
+    },
+    {
+      "fromId": "tdProjectsOn",
+      "fromProperty": "onClick",
+      "toId": "tdFlagOn",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdProjectsOn",
+      "fromProperty": "onClick",
+      "toId": "tdTab",
+      "toProperty": "to-projects"
+    },
+    {
+      "fromId": "tdProjectsPane",
+      "fromProperty": "hide",
+      "toId": "tdFlagOff",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdProjectsPane",
+      "fromProperty": "hide",
+      "toId": "tdTab",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "tdDialog",
+      "fromProperty": "dialogTaskId",
+      "toId": "tdNextFor",
+      "toProperty": "in-taskId"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "tasks",
+      "toId": "tdNextFor",
+      "toProperty": "in-tasks"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "projectNames",
+      "toId": "tdNextFor",
+      "toProperty": "in-projectNames"
+    },
+    {
+      "fromId": "cmdClose",
+      "fromProperty": "done",
+      "toId": "tdNextFor",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tdNextFor",
+      "fromProperty": "out-show",
+      "toId": "tdPromptState",
+      "toProperty": "to-shown"
+    },
+    {
+      "fromId": "tdNextFor",
+      "fromProperty": "out-projectId",
+      "toId": "tdPrompt",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "tdNextFor",
+      "fromProperty": "out-projectName",
+      "toId": "tdPrompt",
+      "toProperty": "projectName"
+    },
+    {
+      "fromId": "tdRows",
+      "fromProperty": "nextPosition",
+      "toId": "tdPrompt",
+      "toProperty": "position"
+    },
+    {
+      "fromId": "tdPromptState",
+      "fromProperty": "at-shown",
+      "toId": "tdPrompt",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "tdPrompt",
+      "fromProperty": "done",
+      "toId": "tdPromptState",
+      "toProperty": "to-hidden"
+    },
+    {
+      "fromId": "tdPrompt",
+      "fromProperty": "skip",
+      "toId": "tdPromptState",
+      "toProperty": "to-hidden"
+    },
+    {
+      "fromId": "tdPrompt",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "upRows",
+      "toId": "tdProjectsPane",
+      "toProperty": "upRows"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "recRows",
+      "toId": "tdProjectsPane",
+      "toProperty": "recRows"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "pastRows",
+      "toId": "tdProjectsPane",
+      "toProperty": "pastRows"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "projectOptions",
+      "toId": "tdProjectsPane",
+      "toProperty": "projectOptions"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "projectNames",
+      "toId": "tdProjectsPane",
+      "toProperty": "projectNames"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "payingRows",
+      "toId": "tdProjectsPane",
+      "toProperty": "payingRows"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "hasPaying",
+      "toId": "tdProjectsPane",
+      "toProperty": "hasPaying"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "buildingRows",
+      "toId": "tdProjectsPane",
+      "toProperty": "buildingRows"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "hasBuilding",
+      "toId": "tdProjectsPane",
+      "toProperty": "hasBuilding"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "hobbyRows",
+      "toId": "tdProjectsPane",
+      "toProperty": "hobbyRows"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "hasHobby",
+      "toId": "tdProjectsPane",
+      "toProperty": "hasHobby"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "quietRows",
+      "toId": "tdProjectsPane",
+      "toProperty": "quietRows"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "hasQuiet",
+      "toId": "tdProjectsPane",
+      "toProperty": "hasQuiet"
+    },
+    {
+      "fromId": "tdProjectsPane",
+      "fromProperty": "openTaskId",
+      "toId": "tdSelectFromProject",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tdProjectsPane",
+      "fromProperty": "openTask",
+      "toId": "tdSelectFromProject",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdProjectsPane",
+      "fromProperty": "openTask",
+      "toId": "tdTab",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "tdData",
+      "fromProperty": "tasks",
+      "toId": "tdTaskProject",
+      "toProperty": "in-tasks"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "tdTaskProject",
+      "toProperty": "in-selectedId"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "projectNames",
+      "toId": "tdTaskProject",
+      "toProperty": "in-projectNames"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "showTab",
+      "toId": "tdTaskProject",
+      "toProperty": "in-showTab"
+    },
+    {
+      "fromId": "tdTaskProject",
+      "fromProperty": "out-projectValue",
+      "toId": "tdSummary",
+      "toProperty": "projectValue"
+    },
+    {
+      "fromId": "tdTaskProject",
+      "fromProperty": "out-showProject",
+      "toId": "tdSummary",
+      "toProperty": "showProject"
+    },
+    {
+      "fromId": "tdTaskProject",
+      "fromProperty": "out-hasProject",
+      "toId": "tdSummary",
+      "toProperty": "hasProject"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "projectOptions",
+      "toId": "tdSummary",
+      "toProperty": "projectOptions"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
+      "toId": "tdSetTaskProject",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "tdSummary",
+      "fromProperty": "pickedProject",
+      "toId": "tdSetTaskProject",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "tdTaskProject",
+      "fromProperty": "out-projectId",
+      "toId": "tdSetTaskProject",
+      "toProperty": "current"
+    },
+    {
+      "fromId": "tdProjects",
+      "fromProperty": "projectNames",
+      "toId": "tdSetTaskProject",
+      "toProperty": "projectNames"
+    },
+    {
+      "fromId": "tdSummary",
+      "fromProperty": "setProject",
+      "toId": "tdSetTaskProject",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSetTaskProject",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "tdSetTaskProject",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "loadHistory"
+    },
+    {
+      "fromId": "tdTaskProject",
+      "fromProperty": "out-projectId",
+      "toId": "tdOpenFromTask",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tdSummary",
+      "fromProperty": "openProject",
+      "toId": "tdOpenFromTask",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tdSummary",
+      "fromProperty": "openProject",
+      "toId": "tdTab",
+      "toProperty": "to-projects"
+    },
+    {
       "fromId": "cmdAdd",
       "fromProperty": "done",
       "toId": "tdData",
       "toProperty": "refresh"
     },
     {
-      "fromId": "cmdUp",
-      "fromProperty": "done",
-      "toId": "tdData",
-      "toProperty": "refresh"
-    },
-    {
-      "fromId": "cmdDown",
+      "fromId": "cmdDrag",
       "fromProperty": "done",
       "toId": "tdData",
       "toProperty": "refresh"
@@ -946,7 +2254,7 @@
       "toProperty": "refresh"
     },
     {
-      "fromId": "cmdTick",
+      "fromId": "cmdTick-2",
       "fromProperty": "done",
       "toId": "tdData",
       "toProperty": "refresh"
@@ -958,13 +2266,7 @@
       "toProperty": "refresh"
     },
     {
-      "fromId": "cmdActUp",
-      "fromProperty": "done",
-      "toId": "tdData",
-      "toProperty": "refresh"
-    },
-    {
-      "fromId": "cmdActDown",
+      "fromId": "cmdActDrag",
       "fromProperty": "done",
       "toId": "tdData",
       "toProperty": "refresh"
@@ -983,6 +2285,78 @@
     },
     {
       "fromId": "cmdNote",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdAddRoutine",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdRenameRoutine",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdDaily",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdWeekly",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdMonthly",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdAddTime",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdRemoveSlot",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdStart",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdEnd",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdCheck",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdStop",
+      "fromProperty": "done",
+      "toId": "tdData",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "cmdRoutineNote",
       "fromProperty": "done",
       "toId": "tdData",
       "toProperty": "refresh"

@@ -279,6 +279,7 @@ function CommentControls(props) {
       />
 
       <IconButton
+        ariaLabel="Toggle large text"
         icon={IconName.TextInBox}
         buttonSize={IconButtonSize.Bigger}
         onClick={() =>
@@ -290,6 +291,7 @@ function CommentControls(props) {
       />
 
       <IconButton
+        ariaLabel="Delete comment"
         icon={IconName.Trash}
         iconVariant={FeedbackType.Danger}
         buttonSize={IconButtonSize.Bigger}

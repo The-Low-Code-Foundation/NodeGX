@@ -296,6 +296,51 @@ describe('GAM-011 (b) AC3 — a key tapped while the caret is in the box', () =>
   });
 });
 
+/**
+ * P107-C69 (P109 ISL-031, ruled "each sees the last") — writes from the graph in one frame, before React draws: each works on the
+ * text AND the cursor the one before it left. The cursor half needs a cursor a person put mid-text, which the node-spec face never
+ * does (every graph write on a focused field happens at the end), so it is graded here.
+ */
+describe('P107-C69 — two writes in one frame, mid-text: the second starts where the first left the cursor', () => {
+  it('two Backspaces at 123|4 remove the 3, then the 2: 14, the cursor after the 1, Done twice', async () => {
+    const v = await build();
+    await v.focusAt(0);
+    await v.type('1234');
+    await v.focusAt(3);
+    await act(async () => {
+      for (let i = 0; i < 2; i++) {
+        v.node.setInputValue('backspace', true);
+        v.node.setInputValue('backspace', false);
+      }
+      v.graph.update();
+    });
+    await v.paint();
+    expect(v.input()!.value).toBe('14');
+    expect(v.input()!.selectionStart).toBe(1);
+    expect(v.outcomes()).toEqual(['done', 'done']);
+    await v.unmount();
+  });
+
+  it('a Backspace at 12|34 and an Insert Text 9 in one frame: the 9 goes where the 2 was — 1934, the cursor after the 9', async () => {
+    const v = await build();
+    await v.focusAt(0);
+    await v.type('1234');
+    await v.focusAt(2);
+    await act(async () => {
+      v.node.setInputValue('backspace', true);
+      v.node.setInputValue('backspace', false);
+      v.node.setInputValue('textToInsert', '9');
+      v.node.setInputValue('insert', true);
+      v.node.setInputValue('insert', false);
+      v.graph.update();
+    });
+    await v.paint();
+    expect(v.input()!.value).toBe('1934');
+    expect(v.input()!.selectionStart).toBe(2);
+    await v.unmount();
+  });
+});
+
 describe('GAM-011 (b) — R12 and the edges', () => {
   it('Max length holds: what does not fit is not written, and a full field says Unchanged', async () => {
     const v = await build({ maxLength: 3 });

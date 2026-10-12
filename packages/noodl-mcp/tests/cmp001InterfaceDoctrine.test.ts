@@ -37,7 +37,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { INTERFACE_DOCTRINE_MD } from '../src/editor-deps';
+import { CORPUS_PUBLISH_RATE, INTERFACE_DOCTRINE_MD, SHELF_PUBLISH_RATE } from '../src/editor-deps';
 import { resolveLibraryRoot } from '../src/libraryShelf';
 
 import { call, connect, copyFixture } from './helpers';
@@ -186,6 +186,23 @@ describe('CMP-001 AC2 — the playbook reaches the agent', () => {
     expect(received).toMatch(/A logic component with no .Component Outputs. is a node with extra steps/);
   });
 
+  it('P109 ISL-003: says two lists may number rows the same, and what a lookup by id then finds', () => {
+    // Ruled 2026-10-03 "Each list keeps its rows"; the first list keeps the app-wide records (collection.ts).
+    expect(received).toMatch(/Two lists may number their plain rows the same/);
+    expect(received).toMatch(/finds the first list's row/);
+    expect(received).toMatch(/From repeater/);
+  });
+
+  it('P109 ISL-004 AC3: names Component Object as a component\'s own state, and says what a copy survives', () => {
+    // Ruled 2026-10-05 "Component Object" (ruling 2 (b)); the lifetime is the s18 browser reading
+    // (`scripts/devtools/drive-isl004-remount.js`): hidden and shown keeps it, a Refresh, a row leaving
+    // the list and a page left each start a new copy at 0.
+    expect(received).toMatch(/A component's own state is a `States` node, a `Component Object` \(every instance\s+has its own\)/);
+    expect(received).toMatch(/hidden and shown again\s+\(`mounted` off, then on\) it keeps its value/);
+    expect(received).toMatch(/A `For Each` Refresh, a row that leaves the list and comes back, and a page left and\s+returned to each build a NEW copy that starts empty/);
+    expect(received).toMatch(/`Keep When Leaving`/);
+  });
+
   it('states the floors nowhere — a graded build must not be able to count its way to a pass', () => {
     // CMP-001 AC3's three floors (50% / 20% / 0.15) grade the CMP-002 build, which reads this field.
     // 🔴 An absence is only evidence beside a signal known to fire: on a blank field every
@@ -324,8 +341,8 @@ describe('CMP-001 AC2 — the numbers it argues from are the numbers the artefac
 
   it('the shipped library publishes outputs at the rate the doctrine states', () => {
     const rate = publishRate([...SHELF.values()].map(ports));
-    expect(rate).toBe(84);
-    expect(received).toMatch(/\*\*84%\*\*/);
+    expect(rate).toBe(SHELF_PUBLISH_RATE);
+    expect(received).toContain(`**${SHELF_PUBLISH_RATE}%**`);
   });
 
   it('the corpus an agent learns from publishes at the rate the doctrine states', () => {
@@ -345,21 +362,23 @@ describe('CMP-001 AC2 — the numbers it argues from are the numbers the artefac
     // spec said the doctrine's sentence had gone stale within the session that moved it.
     // Re-run `measure-interfaces.py corpus` before touching it — count the artefact, never the
     // literal.
-    // ⚠️ The count is 13 of 40, which is 32.5% — a knife-edge. `measure-interfaces.py` prints
-    // **32** here and this spec reads **33**, because Python's round() breaks a tie to even and
-    // JavaScript's Math.round breaks it upward. Same numerator, same denominator, different
-    // rounding rule; the doctrine states the figure this spec pins. If the two ever need to
-    // agree exactly, fix the tie-break, not the literal.
-    expect(publishRate(comps)).toBe(33);
-    expect(received).toMatch(/\*\*33%\*\*/);
+    // ⚠️ At 13 of 40 (32.5%) `measure-interfaces.py` printed **32** where this spec read **33**: Python's round() breaks
+    // a tie to even and JavaScript's Math.round breaks it upward. The doctrine states the figure this spec counts. If
+    // the two ever need to agree exactly, fix the tie-break, not the figure.
+    // P109-S9: the figure lives once, in `CORPUS_PUBLISH_RATE` (prompts/interfaces.ts), and the doctrine prints it. When
+    // the corpus moves this reads the counted figure against it; move the constant (and check the sentence still holds
+    // against the shelf), never a copy of the number. It read 39 on 2026-10-10.
+    expect(publishRate(comps)).toBe(CORPUS_PUBLISH_RATE);
+    expect(received).toContain(`**${CORPUS_PUBLISH_RATE}%**`);
   });
 
-  it('the fifty-four components that publish a failure port are still fifty-four', () => {
+  it('the fifty-five components that publish a failure port are still fifty-five', () => {
     const failing = [...SHELF.values()]
       .map(ports)
       .filter((p) => p.outputs.some((o) => ['Success', 'Failure', 'Failed', 'Error'].includes(o)));
-    expect(failing).toHaveLength(54);
-    expect(received).toContain('**Fifty-four**');
+    // 54 until P109 ISL-010 (2026-10-05) shipped `ask-a-local-model`, which publishes Failure; counted, not bumped.
+    expect(failing).toHaveLength(55);
+    expect(received).toContain('**Fifty-five**');
   });
 });
 

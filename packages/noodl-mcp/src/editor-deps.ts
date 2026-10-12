@@ -70,6 +70,9 @@ export type {
 // without one yields a component with no such input, silently. This package's
 // port schema did not even declare the field until AAQ-005.
 export { checkInstancePorts } from '../../noodl-editor/src/editor/src/validation';
+// P107 R19 / R20 — the validator's `drawnPorts` callback, one body for the agent server and the editor's Problems panel.
+// Imported by path, not through the validation index: it brings `@nodegx/node-spec`.
+export { drawnPortLookup } from '../../noodl-editor/src/editor/src/validation/drawnPortLookup';
 // AWP-006 — the same reviewed table, used for a second decision. `Record` nodes
 // in a graph already produce a backend precondition diagnostic; they now also
 // reveal the backend tool group, so an agent is never in the position of having
@@ -153,6 +156,7 @@ export type {
   Diagnostic,
   ValidationReport,
   ValidatorOptions,
+  DrawnPortsLookup,
   NormProject,
   NormComponent,
   NodeCatalog,
@@ -227,7 +231,9 @@ export type {
 } from '../../noodl-editor/src/editor/src/models/AiAssistant/authoring/layout';
 
 // ─── Schemas + structural validator (STRUCT-001) ──────────────────────────────
-export { SchemaValidator, SCHEMA_IDS, formatValidationErrors } from '../../noodl-editor/src/editor/src/schemas';
+// P112 OWN-001 — the format lives in `@nodegx/project-contract/format` now (slice 1 moved it, slice 2
+// imports it from there); the editor's `schemas/` re-exports the same names for one release.
+export { SchemaValidator, SCHEMA_IDS, formatValidationErrors } from '@nodegx/project-contract/format';
 export type {
   ProjectV2File,
   ComponentV2File,
@@ -242,7 +248,7 @@ export type {
   StylesV2File,
   PortDefinition,
   ValidationError
-} from '../../noodl-editor/src/editor/src/schemas';
+} from '@nodegx/project-contract/format';
 
 // ─── Creation defaults (DEF-025) ──────────────────────────────────────────────
 // Richard's ruling of 2026-08-30 is "flip at creation, in BOTH doors", and this
@@ -428,11 +434,14 @@ export { AUTHORING_TRAPS } from '../../noodl-editor/src/editor/src/models/AiAssi
 // Same containment rule (`prompts/interfaces` imports nothing) and the same
 // channel as the three above: a result field on `get_project_info`, because the
 // `instructions` surface is budgeted and this text is not small. Phase 85
-// measured why it has to ship somewhere: 33% of the components in the corpus an
-// agent copies publish any outputs (10% before CMP-001 AC3 added four that do
-// and repaired two rows that could not),
-// against 84% of the ones the Noodl team shipped.
-export { INTERFACE_DOCTRINE_MD } from '../../noodl-editor/src/editor/src/models/AiAssistant/authoring/prompts/interfaces';
+// measured why it has to ship somewhere: far fewer of the components in the corpus
+// an agent copies publish any outputs than of the ones the Noodl team shipped
+// (`CORPUS_PUBLISH_RATE` against `SHELF_PUBLISH_RATE`, counted by CMP-001's spec).
+export {
+  CORPUS_PUBLISH_RATE,
+  INTERFACE_DOCTRINE_MD,
+  SHELF_PUBLISH_RATE
+} from '../../noodl-editor/src/editor/src/models/AiAssistant/authoring/prompts/interfaces';
 
 // SB-002, same containment rule again: the backend idiom the prefab library
 // already practices, taught nowhere until phase 76. A result field rather than

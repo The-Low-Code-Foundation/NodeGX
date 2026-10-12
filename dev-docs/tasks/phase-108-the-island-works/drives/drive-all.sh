@@ -1,0 +1,116 @@
+#!/bin/zsh
+# P108: the whole drive set on ONE deploy of a tree — the page drive (drive-pages.sh's steps: template:garden, a COPY
+# assembled, deployed, driven with --mockup), the two kit fixtures, then every drive one at a time (1-min load < 6 before
+# each; a drive is SKIPPED, and says so, under 2 GB free — the s4 disk filled mid-drive).
+#
+#   R=<tree> X=<out dir> zsh drive-all.sh [drive …]     (default R = this checkout, X = <R>-drives; no names = all)
+#
+# Writes <X>/summary.txt (one line per drive: its exit code and its last "N/M" line) and ends it with DONE.
+# Run it in the background and wait for DONE: the set takes over an hour (the page drive alone > 10 min).
+# History: every session before s4 kept this as a scratch script in ../OpenNoodl-worktrees/*-scratch; the folder was
+# deleted to free the disk (2026-10-01) and it was rebuilt from the transcripts. It lives here now.
+R=${R:-$(cd "$(dirname "$0")/../../../.." && pwd)}
+X=${X:-$R-drives}
+P=$X/pages; D=$P/deploy; J=(--project $P/project)
+mkdir -p $X; rm -rf $P $X/kit2d $X/kit3d $X/olive; mkdir -p $P; : > $X/summary.txt
+waitload() { until [ $(uptime | awk -F'load averages: ' '{print $2}' | cut -d' ' -f1 | cut -d. -f1) -lt 6 ]; do sleep 20; done }
+cd $R || exit 2
+waitload
+# the page drive: drive-pages.sh's steps against THIS tree
+# P108 s6: the generator called directly — `npm run template:garden` is this command (s6 found the root package.json
+# overwritten; restored in s7, Richard's ruling — the direct call is kept: it works with or without npm).
+TS_NODE_COMPILER_OPTIONS='{"module":"CommonJS"}' npx ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-garden-template.ts > $P/generate.log 2>&1; echo $? > $P/generate.exit
+git -C $R status --short templates/bot-garden | head -5 > $P/drift.txt
+node scripts/devtools/drive-cg003-pages.js assemble $P/project > $P/assemble.log 2>&1; echo $? > $P/assemble.exit
+# P109 ISL-025 W2: the PRODUCT command, gated on its exit code. (The internal bundle it spawns exits 0 by its own
+# contract — the JSON is its report — which is why this runner once compared index.html's mtime with a marker.) A
+# refusal is non-zero and nothing is written: 11 a development engine without the flag, 2 not a project, 3 the target.
+node node_modules/.bin/nodegx deploy $P/project $D --allow-development-engine > $P/deploy.log 2>&1; echo $? > $P/deploy.exit
+if [[ $(cat $P/deploy.exit) != 0 ]]; then
+  echo "pages generate $(cat $P/generate.exit) drift [$(cat $P/drift.txt | tr '\n' ' ')] assemble $(cat $P/assemble.exit) deploy REFUSED exit $(cat $P/deploy.exit) — nothing driven ($P/deploy.log)" >> $X/summary.txt
+  echo DONE >> $X/summary.txt; exit 1
+fi
+node scripts/devtools/drive-cg003-pages.js $D $J --shots $P/shots --json $P/drive.json --mockup > $P/drive.log 2>&1; echo $? > $P/drive.exit
+echo "pages generate $(cat $P/generate.exit) drift [$(cat $P/drift.txt | tr '\n' ' ')] assemble $(cat $P/assemble.exit) deploy $(cat $P/deploy.exit) drive $(cat $P/drive.exit) | $(tail -1 $P/drive.log)" >> $X/summary.txt
+# the kit fixtures
+for k in kit2d kit3d; do
+  mkdir -p $X/$k
+  [[ $k == kit2d ]] && node scripts/devtools/drive-cg001-kit.js assemble $X/$k/project > $X/$k/assemble.log 2>&1
+  [[ $k == kit3d ]] && node scripts/devtools/drive-ig007-3d.js assemble $X/$k/project > $X/$k/assemble.log 2>&1
+  # P109 ISL-025 W2: the product command; its exit code is the gate, read again before the kit's drive runs.
+  node node_modules/.bin/nodegx deploy $X/$k/project $X/$k/deploy --allow-development-engine > $X/$k/deploy.log 2>&1; echo $? > $X/$k/deploy.exit
+  [[ $(cat $X/$k/deploy.exit) == 0 ]] && echo "$k deploy exit 0" >> $X/summary.txt || echo "$k deploy REFUSED exit $(cat $X/$k/deploy.exit) — its drive will be skipped" >> $X/summary.txt
+done
+ALL=(look earn shop crew crew-perf modes iw001 iw004 iw004-3d island island-3d robots robots-3d ws3d wsnogl olive mamie-ws mamie-isl mamie-isl3d mamie-look3d stones stones-3d post post-3d biscuit kit2d kit3d)
+# P108 s5 lane O (iw006-owed): the owed items' drive.
+ALL+=(owed)
+# P108 s5 lane B (IW-007 building): her land — the Build tab, the ghost, the spa built by two robots, 2D and 3D.
+ALL+=(build build-3d)
+# P108 IW-007 (lane A): her animals — the Animals tab, a rabbit bought, fed, worn, fed again (2D, 3D) and AC4's frame gate.
+ALL+=(animals animals-3d animals-perf)
+# P108 s6: her land by touch — Pip and Cobble taught there, the spa built, feeding taught (drive-iw007-touch.js).
+ALL+=(touch)
+# P108 s7: the touch path on Garden 3D.
+ALL+=(touch-3d)
+# P108 s8: Richard's play (drive-p108s8-feedback.js).
+ALL+=(s8 s8-3d)
+# P108 s9: what the tablets found (drive-p108s9.js): 2d = the hints and buildings that stay built, 3d = a grown-up's 3D held.
+ALL+=(s9 s9-3d)
+(( $# )) && ALL=("$@")
+for n in $ALL; do
+  waitload
+  free=$(df -k /Users/richardosborne | tail -1 | awk '{print $4}')
+  if [ $free -lt 2000000 ]; then echo "$n SKIPPED: disk $free KB" >> $X/summary.txt; continue; fi
+  case $n in
+    look) node scripts/devtools/drive-iw-look.js $D $J --shots $P/look-shots --json $P/look.json ;;
+    earn) node scripts/devtools/drive-iw006-earn.js $D $J --shots $P/earn-shots --json $P/earn.json ;;
+    shop) node scripts/devtools/drive-iw006-shop.js $D $J --shots $P/shop-shots --json $P/shop.json ;;
+    crew) node scripts/devtools/drive-iw008-crew.js $D $J --shots $P/crew-shots --json $P/crew.json ;;
+    crew-perf) node scripts/devtools/drive-iw008-crew.js $D $J --perf --shots $P/crew-perf-shots --json $P/crew-perf.json ;;
+    iw001) node scripts/devtools/drive-iw001-workshop.js $D $J --shots $P/iw001-shots --json $P/iw001.json ;;
+    iw004) node scripts/devtools/drive-iw004-blocks.js $D $J --shots $P/iw004-shots --json $P/iw004.json ;;
+    iw004-3d) node scripts/devtools/drive-iw004-blocks.js $D $J --mode 3d --shots $P/iw004-3d-shots --json $P/iw004-3d.json ;;
+    modes) node scripts/devtools/drive-ig003-modes.js $D $J --shots $P/modes-shots --json $P/modes.json ;;
+    robots) node scripts/devtools/drive-ig005-robots.js $D $J --shots $P/robots-shots --json $P/robots.json ;;
+    robots-3d) node scripts/devtools/drive-ig005-robots.js $D $J --mode 3d --json $P/robots-3d.json ;;
+    ws3d) node scripts/devtools/drive-ig007-workshop.js $D --mode 3d --shots $P/ws3d-shots --json $P/ws3d.json ;;
+    wsnogl) node scripts/devtools/drive-ig007-workshop.js $D --mode nogl --json $P/wsnogl.json ;;
+    island) node scripts/devtools/drive-ig004-island.js $D $J --perf --shots $P/island-shots --json $P/island.json ;;
+    island-3d) node scripts/devtools/drive-ig004-island.js $D $J --mode 3d --shots $P/island-3d-shots --json $P/island-3d.json ;;
+    olive) REPO=$R OUT=$X/olive DEPLOY=$D zsh $R/dev-docs/tasks/phase-105-the-coding-garden/drives/drive-olive.sh pages; cat $X/olive/pages.log; exit_olive=$(cat $X/olive/pages.exit); (exit $exit_olive) ;;
+    mamie-ws) node scripts/devtools/drive-iw003-mamie.js $D $J --part workshop --shots $P/mamie-ws --json $P/mamie-ws.json ;;
+    mamie-isl) node scripts/devtools/drive-iw003-mamie.js $D $J --part island --shots $P/mamie-isl --json $P/mamie-isl.json ;;
+    mamie-isl3d) node scripts/devtools/drive-iw003-mamie.js $D $J --part island --mode 3d --shots $P/mamie-isl3d --json $P/mamie-isl3d.json ;;
+    mamie-look3d) node scripts/devtools/drive-iw003-mamie.js $D $J --part look3d --mode 3d --shots $P/mamie-look3d --json $P/mamie-look3d.json ;;
+    stones) node scripts/devtools/drive-iw003-stones.js $D $J --shots $P/stones --json $P/stones.json ;;
+    stones-3d) node scripts/devtools/drive-iw003-stones.js $D $J --mode 3d --shots $P/stones-3d --json $P/stones-3d.json ;;
+    post) node scripts/devtools/drive-iw003-post.js $D $J --shots $P/post --json $P/post.json ;;
+    post-3d) node scripts/devtools/drive-iw003-post.js $D $J --mode 3d --shots $P/post-3d --json $P/post-3d.json ;;
+    biscuit) node scripts/devtools/drive-iw003-biscuit.js $D $J --shots $P/biscuit --json $P/biscuit.json ;;
+    kit2d) [[ $(cat $X/kit2d/deploy.exit) == 0 ]] || { echo "kit2d deploy refused: not driven"; (exit 3); } && node scripts/devtools/drive-cg001-kit.js $X/kit2d/deploy --shots $X/kit2d/shots --json $X/kit2d/kit2d.json ;;
+    kit3d) [[ $(cat $X/kit3d/deploy.exit) == 0 ]] || { echo "kit3d deploy refused: not driven"; (exit 3); } && node scripts/devtools/drive-ig007-3d.js $X/kit3d/deploy --shots $X/kit3d/shots --json $X/kit3d/kit3d.json ;;
+    # P108 s5 lane O (iw006-owed).
+    owed) node scripts/devtools/drive-iw006-owed.js $D $J --shots $P/owed-shots --json $P/owed.json ;;
+    # P108 s5 lane B (IW-007 building).
+    build) node scripts/devtools/drive-iw007-build.js $D $J --shots $P/build-shots --json $P/build.json ;;
+    # P108 s6 (IW-007 by touch).
+    touch) node scripts/devtools/drive-iw007-touch.js $D $J --shots $P/touch-shots --json $P/touch.json ;;
+    # P108 s7: the same taps on Garden 3D (swiftshader).
+    touch-3d) node scripts/devtools/drive-iw007-touch.js $D $J --mode 3d --shots $P/touch-3d-shots --json $P/touch-3d.json ;;
+    # P108 s8: what Richard found playing — the can, the walk, the divider, no Workshop tab, the refuge's lines.
+    s8) node scripts/devtools/drive-p108s8-feedback.js $D $J --shots $P/s8-shots --json $P/s8.json ;;
+    s8-3d) node scripts/devtools/drive-p108s8-feedback.js $D $J --mode 3d --shots $P/s8-3d-shots --json $P/s8-3d.json ;;
+    # P108 s9: the hints lead with the blocks; a part built in the Workshop stays built; a grown-up's 3D survives Too Slow.
+    s9) node scripts/devtools/drive-p108s9.js $D $J --shots $P/s9-shots --json $P/s9.json ;;
+    s9-3d) node scripts/devtools/drive-p108s9.js $D $J --mode 3d --shots $P/s9-3d-shots --json $P/s9-3d.json ;;
+    build-3d) node scripts/devtools/drive-iw007-build.js $D $J --mode 3d --shots $P/build-3d-shots --json $P/build-3d.json ;;
+    # P108 IW-007 (lane A).
+    animals) node scripts/devtools/drive-iw007-animals.js $D $J --shots $P/animals --json $P/animals.json ;;
+    animals-3d) node scripts/devtools/drive-iw007-animals.js $D $J --mode 3d --shots $P/animals-3d --json $P/animals-3d.json ;;
+    animals-perf) node scripts/devtools/drive-iw007-animals.js $D $J --perf --shots $P/animals-perf --json $P/animals-perf.json ;;
+    *) echo "unknown drive $n"; (exit 2) ;;
+  esac > $P/$n.log 2>&1
+  rc=$?
+  echo "$n exit $rc | $(grep -E '[0-9]+ ?/ ?[0-9]+' $P/$n.log | tail -1 | cut -c1-160)" >> $X/summary.txt
+done
+echo DONE >> $X/summary.txt

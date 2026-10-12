@@ -1,0 +1,88 @@
+{
+  "name": "align-spacers",
+  "rule": "Align X across a column is the child's own alignment; Align Y along it is a spacer that takes the free space",
+  "nodes": [
+    {
+      "id": "col",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 400,
+          "unit": "px"
+        },
+        "height": {
+          "value": 300,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "paddingTop": {
+          "value": 10,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 10,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 10,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 10,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "centred",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 50,
+              "unit": "px"
+            },
+            "alignX": "center"
+          }
+        },
+        {
+          "id": "right",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 50,
+              "unit": "px"
+            },
+            "alignX": "right"
+          }
+        },
+        {
+          "id": "pushed",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 50,
+              "unit": "px"
+            },
+            "alignY": "bottom"
+          }
+        }
+      ]
+    }
+  ]
+}

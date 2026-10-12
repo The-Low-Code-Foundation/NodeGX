@@ -68,7 +68,7 @@ const CircleNode: ReactNodeDefinition = {
     },
     points: {
       displayName: 'Points',
-      description: 'How many sides a Polygon has, or how many points a Star has; the minimum is 3',
+      description: 'How many sides a Polygon has, or how many points a Star has, from 3 to 500; a value that is not a number draws 5',
       default: 5,
       group: 'General',
       type: {

@@ -1,0 +1,223 @@
+[
+  {
+    "name": "the build hands the params: each port named sends its value in the first frame",
+    "because": "router.tsx :923-927 hands args.params before the page is added; page-inputs.ts :55-60",
+    "world": {
+      "router": {
+        "page": [
+          {
+            "params": {
+              "id": 1,
+              "tab": "a"
+            }
+          }
+        ]
+      }
+    },
+    "params": {
+      "pathParams": "id",
+      "queryParams": "tab"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "a param with no port is stored and sends nothing",
+    "because": "page-inputs.ts :58 — `hasOutput` guards the flag",
+    "world": {
+      "router": {
+        "page": [
+          {
+            "params": {
+              "id": 1,
+              "other": 2
+            }
+          }
+        ]
+      }
+    },
+    "params": {
+      "pathParams": "id"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "a reset onto the same page merges: a key not handed keeps its old value",
+    "because": "router.tsx :520 TODO, :528-531; page-inputs.ts :56-57 assigns, never clears",
+    "world": {
+      "router": {
+        "page": [
+          {
+            "params": {
+              "id": 1,
+              "tab": "a"
+            }
+          },
+          {
+            "at": 5,
+            "params": {
+              "id": 2
+            }
+          }
+        ]
+      }
+    },
+    "params": {
+      "pathParams": "id",
+      "queryParams": "tab"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a name in both lists is one port; the lists are split on commas, untrimmed, empty names dropped",
+    "because": "page-inputs.ts setup :103-114",
+    "world": {
+      "router": {
+        "page": [
+          {
+            "params": {
+              "id": 1,
+              " tab": "spaced",
+              "tab": "plain"
+            }
+          }
+        ]
+      }
+    },
+    "params": {
+      "pathParams": "id,,",
+      "queryParams": "id, tab"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "a value handed as null is sent; undefined is never sent",
+    "because": "page-inputs.ts :57-58; node.ts sends no undefined",
+    "world": {
+      "router": {
+        "page": [
+          {
+            "params": {
+              "id": null
+            }
+          },
+          {
+            "at": 1,
+            "params": {
+              "id": 3
+            }
+          }
+        ]
+      }
+    },
+    "params": {
+      "pathParams": "id"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the same value handed again sends nothing new on the wire",
+    "because": "page-inputs.ts :58 flags it; the trace records a value only when it changed",
+    "world": {
+      "router": {
+        "page": [
+          {
+            "params": {
+              "id": 1
+            }
+          },
+          {
+            "at": 1,
+            "params": {
+              "id": 1
+            }
+          }
+        ]
+      }
+    },
+    "params": {
+      "pathParams": "id"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a hand-off scheduled later lands only when the clock reaches it",
+    "because": "world.ts ROUTE `page` — `at` on the clock",
+    "world": {
+      "router": {
+        "page": [
+          {
+            "at": 10,
+            "params": {
+              "tab": "later"
+            }
+          }
+        ]
+      }
+    },
+    "params": {
+      "queryParams": "tab"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "writing Path Parameters after mount moves no port and sends nothing",
+    "because": "page-inputs.ts :38-40 — the setter stores; ports are the editor's (setup)",
+    "world": {
+      "router": {
+        "page": [
+          {
+            "params": {
+              "id": 1,
+              "tab": "t"
+            }
+          }
+        ]
+      }
+    },
+    "params": {
+      "pathParams": "id"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pathParams",
+        "value": "id,tab"
+      },
+      "settle"
+    ]
+  }
+]

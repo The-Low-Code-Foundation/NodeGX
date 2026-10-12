@@ -276,3 +276,67 @@ describe('Date To String keeps its old behaviour and gains a Timezone (CWF-011 s
     expect(node.signals).toContain('onError');
   });
 });
+
+/**
+ * P107-C16 / D15 (ISL-026, ruled 2026-10-05 "Use days and warn once"): a Unit the list does not have counts
+ * as days, the port's default, and the node shows one warning until the Unit is one it knows. Date Add once
+ * threw in its setter and stayed dead; Date Difference counted the unknown unit as YEARS.
+ */
+describe('an unknown Unit counts as days, with one warning (P107-C16, D15)', () => {
+  const withWarnings = <T extends { context: { editorConnection?: unknown } }>(driven: T) => {
+    const warnings: { key: string; message: string }[] = [];
+    driven.context.editorConnection = {
+      isConnected: () => false,
+      sendWarning: (_c: string, _id: string, key: string, w: { message: string }) => {
+        const i = warnings.findIndex((x) => x.key === key);
+        if (i !== -1) warnings.splice(i, 1);
+        warnings.push({ key, message: w.message });
+      },
+      clearWarning: (_c: string, _id: string, key: string) => {
+        const i = warnings.findIndex((x) => x.key === key);
+        if (i !== -1) warnings.splice(i, 1);
+      }
+    };
+    return warnings;
+  };
+
+  it('Date Add: "fortnights" adds days, keeps working, and the warning names the value until the Unit is fixed', () => {
+    const node = createNode(DateAddModule, 'net.noodl.DateAdd');
+    const warnings = withWarnings(node);
+    node.node.nodeScope = { componentOwner: { name: '/Probe' } } as never;
+    node.node.setInputValue('input', local(2026, 1, 1));
+    node.node.setInputValue('amount', 2);
+    expect(() => node.node.setInputValue('unit', 'fortnights')).not.toThrow();
+    expect(node.out('result')).toEqual(local(2026, 1, 3));
+    expect(warnings).toEqual([{ key: 'date-add/unknown-unit', message: expect.stringContaining('"fortnights"') }]);
+    expect(warnings[0].message).toContain('counted as days');
+
+    node.node.setInputValue('amount', 3); // still alive: a later input recomputes
+    expect(node.out('result')).toEqual(local(2026, 1, 4));
+    node.node.setInputValue('unit', 'weeks');
+    expect(node.out('result')).toEqual(local(2026, 1, 22));
+    expect(warnings).toEqual([]);
+  });
+
+  it('Date Difference: an unknown Unit counts days, not years', () => {
+    const node = createNode(DateDifferenceModule, 'net.noodl.DateDifference');
+    const warnings = withWarnings(node);
+    node.node.nodeScope = { componentOwner: { name: '/Probe' } } as never;
+    node.node.setInputValue('unit', 'fortnights');
+    node.node.setInputValue('from', local(2026, 1, 1));
+    node.node.setInputValue('to', local(2026, 1, 11));
+    expect(node.out('difference')).toBe(10);
+    expect(warnings.map((w) => w.key)).toEqual(['date-difference/unknown-unit']);
+  });
+
+  it('an empty Unit counts as days without a warning', () => {
+    const node = createNode(DateAddModule, 'net.noodl.DateAdd');
+    const warnings = withWarnings(node);
+    node.node.nodeScope = { componentOwner: { name: '/Probe' } } as never;
+    node.node.setInputValue('input', local(2026, 1, 1));
+    node.node.setInputValue('unit', '');
+    node.node.setInputValue('amount', 1);
+    expect(node.out('result')).toEqual(local(2026, 1, 2));
+    expect(warnings).toEqual([]);
+  });
+});

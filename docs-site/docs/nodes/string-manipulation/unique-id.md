@@ -27,6 +27,12 @@ Use it when client-side logic needs a throwaway identifier: keying a locally cre
 |---|---|---|---|
 | `new` | Signal | — | Generates a fresh id, replacing the one on Id |
 
+### What each input does
+
+**New** (`new`)
+
+- always: a fresh ten-character id replaces the one on Id — never the one it held, and it cannot fail → Done
+
 ## Outputs
 
 ### Values

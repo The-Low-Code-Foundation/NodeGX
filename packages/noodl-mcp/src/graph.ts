@@ -134,6 +134,12 @@ export type UpdateOperation =
        */
       set?: Partial<Pick<NodeV2, 'label' | 'x' | 'y' | 'variant'>> & {
         parent?: string | null;
+        /**
+         * P112 OWN-006 — where among `parent`'s children the node goes (0 = first); appended when
+         * absent. Read only with `parent`: the editor suite found that a reparent could not place a
+         * child, so an agent could not build what a person drags into a row at a position.
+         */
+        index?: number;
         comment?: string;
       };
       parameters?: Record<string, unknown>;
@@ -206,7 +212,7 @@ export function applyOperations(
           break;
         }
         if (op.set) {
-          const { parent: newParent, comment, ...rest } = op.set;
+          const { parent: newParent, index, comment, ...rest } = op.set;
           Object.assign(node, rest);
           // LEG-001 — the authored field is flat and the stored one is not, so
           // it is destructured out above rather than assigned: a top-level
@@ -234,7 +240,10 @@ export function applyOperations(
               node.parent = newParent;
               const parent = byId().get(newParent)!;
               if (!parent.children) parent.children = [];
-              if (!parent.children.includes(node.id)) parent.children.push(node.id);
+              if (!parent.children.includes(node.id)) {
+                const at = index !== undefined ? Math.max(0, Math.min(index, parent.children.length)) : parent.children.length;
+                parent.children.splice(at, 0, node.id);
+              }
             }
           }
         }

@@ -15,10 +15,12 @@ import * as path from 'path';
 import type { LegacyComponent, LegacyNode } from '../../noodl-editor/src/editor/src/io/ProjectExporter';
 import { validateSecurityConfig } from '../../nodegx-backend/src/security/model';
 
-import { C, COLLECTIONS, PLANNER_FNS, TPL010_COMPONENTS } from './tpl010Components';
+import { C, COLLECTIONS, LOGGED_PREFIX, PLANNED_PREFIX, PLANNER_FNS, SENT_SUMMARY, TPL010_COMPONENTS, VAR } from './tpl010Components';
 import { MONEY_FNS } from './tpl010Money';
 import {
+  ADDED_LATER,
   BACKEND_NODE_TYPES,
+  BORROWED,
   DEMO_CHANGED,
   DEMO_EMPTY_ARMED,
   DEMO_EMPTY_LABEL,
@@ -102,7 +104,7 @@ function files(dir: string): string[] {
 }
 
 /** Run one of the template's own Functions. Signals are recorded by name, values by key. */
-function run(script: string, inputs: Record<string, unknown>): { outputs: Record<string, unknown>; signals: string[] } {
+function run(script: string, inputs: Record<string, unknown>, self?: object): { outputs: Record<string, unknown>; signals: string[] } {
   const signals: string[] = [];
   const outputs = new Proxy({} as Record<string, unknown>, {
     get(target, key: string) {
@@ -111,8 +113,17 @@ function run(script: string, inputs: Record<string, unknown>): { outputs: Record
     }
   });
   // eslint-disable-next-line no-new-func
-  new Function('Inputs', 'Outputs', script).call({}, inputs, outputs);
+  new Function('Inputs', 'Outputs', script).call(self ?? {}, inputs, outputs);
   return { outputs: { ...outputs }, signals };
+}
+
+/**
+ * TPL-010-T T3 — a command's guard now also names its history line (`hKind`, `hSummary`, …) and, for
+ * Add time, what the todo list is told. The record a guard writes is everything else.
+ */
+const TOLD = ['becameDone', 'doneNote', 'doneHours'];
+function recordOnly(outputs: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(outputs).filter(([k]) => !/^h[A-Z]/.test(k) && !TOLD.includes(k)));
 }
 
 beforeAll(async () => {
@@ -137,16 +148,24 @@ describe('§1 the artefact is the build', () => {
    */
   it('the door refused nothing, and the only warning it raised is the one the bars are built on', () => {
     const codes = [...new Set(built.diagnostics.filter((d) => d.severity !== 'info').map((d) => d.code))].sort();
-    expect(codes).toEqual(['wired-dimension-becomes-grow']);
+    expect(codes).toEqual(['row-cannot-wrap', 'wired-dimension-becomes-grow']);
+    // P109 ISL-022 (2026-10-02): `row-cannot-wrap` on `Week/App bar#abRight` is TRUE of the graph — a content-sized
+    // row set to wrap, inside the bar's row, never wraps — and only the stylesheet's `.planner-shrink-wrap
+    // { max-width: 100% }` rescues it (rendered: 3 lines at 390). The graph's own exit is `maxWidth: pct(100)` on
+    // `abRight` and the class rule deleted; then this pin drops the code. Filed P109-S4-ROWWRAP.
+    // The builder keeps the step's label, not the node: `Week/App bar` is abRight's component, and `apply` is
+    // apply_plan's re-validation of the same node.
+    const rowWrap = built.diagnostics.filter((d) => d.code === 'row-cannot-wrap').map((d) => String(d.component).replace(/^\//, ''));
+    expect([...new Set(rowWrap)].sort()).toEqual(['Week/App bar', 'apply']);
   });
 
-  it('templates/planner is byte-identical to a fresh build — the same files, the same bytes', () => {
+  it('templates/planning is byte-identical to a fresh build — the same files, the same bytes', () => {
     expect(files(ARTEFACT)).toEqual(files(rebuilt));
     const differing = files(rebuilt).filter((f) => !fs.readFileSync(path.join(ARTEFACT, f)).equals(fs.readFileSync(path.join(rebuilt, f))));
     expect(differing).toEqual([]);
   });
 
-  it('templates/planner-demo is byte-identical to a fresh build, so the demo can never be older than the template', () => {
+  it('templates/planning-demo is byte-identical to a fresh build, so the demo can never be older than the template', () => {
     expect(files(DEMO_ARTEFACT)).toEqual(files(demoRebuilt));
     const differing = files(demoRebuilt).filter(
       (f) => !fs.readFileSync(path.join(DEMO_ARTEFACT, f)).equals(fs.readFileSync(path.join(demoRebuilt, f)))
@@ -222,11 +241,12 @@ describe('§2 the policy, on a database holding somebody’s income', () => {
     expect(fs.readFileSync(path.join(ARTEFACT, POLICY_FILE))).toEqual(fs.readFileSync(POLICY_SOURCE));
   });
 
-  it('names exactly the seven collections, keeps every row private, and lets nothing but a Block be deleted (M10: ending money keeps it)', () => {
+  it('names exactly the eight collections, keeps every row private, lets nothing but a Block be deleted (M10: ending money keeps it), and lets nothing change the history (T3)', () => {
     expect(Object.keys(policy.collections).sort()).toEqual([...COLLECTIONS].sort());
     for (const [name, rules] of Object.entries(policy.collections)) {
       expect(`${name} creatorOwns=${rules.creatorOwns}`).toBe(`${name} creatorOwns=true`);
       expect(`${name} delete=${rules.permissions.delete}`).toBe(`${name} delete=${name === 'Block' ? 'authenticated' : 'nobody'}`);
+      expect(`${name} update=${rules.permissions.update}`).toBe(`${name} update=${name === 'PlanEvent' ? 'nobody' : 'authenticated'}`);
     }
     // 🔴 The one public door, and the START-HERE says to shut it once your account exists.
     expect(policy.signup).toBe('public');
@@ -236,7 +256,7 @@ describe('§2 the policy, on a database holding somebody’s income', () => {
 // ── §3 ─────────────────────────────────────────────────────────────────────
 
 describe('§3 the rules the week depends on', () => {
-  it('only Logic/Planner data reads the backend, and every query it makes is bounded', () => {
+  it('only Logic/Planning data reads the backend, and every query it makes is bounded', () => {
     const queries = allNodes(built).filter((n) => n.node.type === 'DbCollection2');
     expect([...new Set(queries.map((q) => q.component))]).toEqual([C.plannerData]);
     for (const q of queries) {
@@ -281,7 +301,13 @@ describe('§3 the rules the week depends on', () => {
     // A Button's words are its `label`; wiring them into `text` lands nothing and says nothing.
     expect(wires.filter((w) => w.toId === 'bkWhat' || w.toId === 'bkHours').map((w) => `${w.fromProperty}→${w.toId}.${w.toProperty}`).sort())
       .toEqual(['hoursText→bkHours.label', 'what→bkWhat.label']);
-    expect(wires.filter((w) => w.toProperty === 'openLog').map((w) => w.fromId).sort()).toEqual(['bkHours', 'bkWhat']);
+    // TPL-010-L — through a Condition on fromTodo: a task from the todo list opens there instead.
+    expect(wires.filter((w) => w.toId === 'bkLogTodo' && w.toProperty === 'eval').map((w) => `${w.fromId}.${w.fromProperty}`).sort())
+      .toEqual(['bkHours.onClick', 'bkWhat.onClick']);
+    // …and a task's every press opens the sheet too, to be made into a block (L3, 2026-09-23).
+    expect(wires.filter((w) => w.toProperty === 'openLog').map((w) => `${w.fromId}.${w.fromProperty}`).sort()).toEqual([
+      'bkLogTodo.onfalse', 'bkLogTodo.ontrue', 'bkTickTodo.ontrue', 'bkWhoTodo.ontrue'
+    ]);
   });
 
   it('🔴 AC4 / R2.4 — every box on the week is filled through startValue and read back from onTextChanged', () => {
@@ -342,6 +368,26 @@ describe('§3 the rules the week depends on', () => {
   });
 
   /**
+   * 🔴 TPL-010-T, found by the deploy's wire check: the door declares a Function's inputs by reading
+   * its script, so a wire into `in-<name>` whose script never reads `Inputs.<name>` goes to a port that
+   * does not exist — kept in the file, dropped at run time, and every gate above was green.
+   */
+  it('🔴 every wire into a Function names an input its script actually reads', () => {
+    const missing: string[] = [];
+    for (const c of componentsOf(built)) {
+      const nodes = new Map(nodesOf(c).map((n) => [n.id, n]));
+      for (const w of connectionsOf(built, c.name)) {
+        const n = nodes.get(w.toId);
+        if (!n || n.type !== 'JavaScriptFunction' || !w.toProperty.startsWith('in-')) continue;
+        const name = w.toProperty.slice(3);
+        const src = String((n.parameters as { functionScript?: string })?.functionScript ?? '');
+        if (!new RegExp(`Inputs\\.${name}\\b`).test(src)) missing.push(`${c.name} ${n.id}.${name}`);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+
+  /**
    * 🔴 Driven, R2.4: a Text Input compares an arriving start value with the last one it was
    * sent, so a sheet opening with '' on a box last sent '' kept the note typed and abandoned
    * last time. Every box in the three editors is cleared as its sheet closes.
@@ -388,9 +434,12 @@ describe('§3 the rules the week depends on', () => {
       'twCard.plan>do', 'twCard.planDate>date', 'twCard.planHours>planned', 'twCardRows.move>move', 'twCardRows.placed>placed', 'twCardRows.resolvedId>projectId'
     ]);
     expect(typeOf('cmdMoveBlock')).toBe('/Commands/Move block');
-    expect(into('cmdMoveBlock')).toEqual(['twCard.moveIt>do', 'twCard.planDate>date', 'twCardRows.placedBlockId>blockId', 'twCardRows.planDate>from']);
+    // TPL-010-T T3 — and the move blocks, so the history line can name the project and the block.
+    expect(into('cmdMoveBlock')).toEqual([
+      'twCard.moveIt>do', 'twCard.planDate>date', 'twCardRows.placedBlockId>blockId', 'twCardRows.planDate>from', 'twData.moveBlocks>blocks'
+    ]);
     expect(typeOf('cmdTakeOut')).toBe(C.dropBlock);
-    expect(into('cmdTakeOut')).toEqual(['twCard.takeOut>do', 'twCardRows.placedBlockId>blockId']);
+    expect(into('cmdTakeOut')).toEqual(['twCard.takeOut>do', 'twCardRows.placedBlockId>blockId', 'twData.moveBlocks>blocks']);
     // R7c — the strip and the card read the move blocks, not the week's.
     expect(into('twMovesLogic')).toContain('twData.moveBlocks>moveBlocks');
     expect(into('twMovesLogic')).not.toContain('twData.blocks>blocks');
@@ -521,7 +570,7 @@ describe('§4 the arithmetic, run rather than read', () => {
       block('2026-09-09', 'p-earn', 21, true),
       block('2026-09-23', 'p-earn', 8, false) // planned, not logged: it has not been spent
     ];
-    // M22 — the target arrives from Logic/Money; the envelopes spend it.
+    // M22 — the target arrives from Logic/Money; the budgets spend it.
     const { outputs } = run(ENVELOPES(), { projects: PROJECTS, blocks, monthPlans: [], settings, weekStart: MONDAY, targetHours: 55 });
     expect(outputs.target).toBe(55);
     expect(outputs.billableUsed).toBe(41);
@@ -537,7 +586,7 @@ describe('§4 the arithmetic, run rather than read', () => {
    * 🔴 The defect this whole gate exists for. A logged block whose hours were the hours
    * planned carries `actual: ''` — the commands write emptiness rather than copying the plan
    * in, so that nothing looks measured that was not. `Number('')` is 0, so reading it as a
-   * number counted every logged block as nought: the envelopes stayed empty however much
+   * number counted every logged block as nought: the budgets stayed empty however much
    * work went into them, and every block on the week read "0 h".
    */
   it('🔴 a logged block with an empty actual counts for the hours it was planned at', () => {
@@ -621,12 +670,12 @@ describe('§4 the arithmetic, run rather than read', () => {
     const CARD = scriptOf(built, '/Logic/Card rows', 'kdWork');
     const ins = { projects: PROJECTS, blocks: [], weekStart: MONDAY, firstOpenDay: '2026-09-26' };
     const listRow = (out: Record<string, unknown>, id: string) =>
-      (out.groups as Array<{ rows: Array<Record<string, unknown>> }>).flatMap((g) => g.rows).find((r) => r.id === id) as Record<string, unknown>;
+      (out.groups as Array<{ rows: Array<Record<string, unknown>> }>).flatMap((g) => g.rows).find((r) => r.projectId === id) as Record<string, unknown>;
 
     const open = run(CARD, { ...ins, moveBlocks: [], selectedId: 'p-earn' }).outputs;
     expect([open.placed, open.unplaced, open.planDate, open.planHours, open.minDate, open.hasLast]).toEqual([false, true, '2026-09-26', '0.5', '2026-09-25', false]);
     expect(open.placedBlockId).toBe('');
-    expect(listRow(open, 'p-earn').move).toBe('\u2192 Offer the add-on');
+    expect(listRow(open, 'p-earn').moveText).toBe('\u2192 Offer the add-on');
     expect(listRow(open, 'p-earn').moveColor).toBe('var(--foreground)');
     // A late move that is not placed stays red — red is for exactly this (R13).
     expect(listRow(open, 'p-dormant').moveColor).toBe('var(--destructive)');
@@ -635,7 +684,7 @@ describe('§4 the arithmetic, run rather than read', () => {
     const placed = run(CARD, { ...ins, moveBlocks: [live], selectedId: 'p-earn' }).outputs;
     expect([placed.placed, placed.unplaced, placed.placedBlockId, placed.planDate]).toEqual([true, false, 'mv1', '2026-09-29']);
     expect(placed.placedLine).toBe('In the week: Tue 29 \u00b7 1 h');
-    expect(listRow(placed, 'p-earn').move).toBe('\u2713 Tue 29 \u00b7 Offer the add-on');
+    expect(listRow(placed, 'p-earn').moveText).toBe('\u2713 Tue 29 \u00b7 Offer the add-on');
     expect(listRow(placed, 'p-earn').moveColor).toBe('var(--muted-foreground)');
     // The hours box is put back whenever the project or its state changes.
     expect(placed.moveKey).not.toBe(open.moveKey);
@@ -664,7 +713,7 @@ describe('§4 the arithmetic, run rather than read', () => {
     expect(moved.signals).toEqual([]); // the past: a move put there would stop being placed
     const ahead = run(moveIt, { blockId: 'mv1', date: '2026-10-01', from: '2026-09-29' });
     expect(ahead.signals).toEqual(['go']);
-    expect(ahead.outputs).toEqual({ date: '2026-10-01' });
+    expect(recordOnly(ahead.outputs)).toEqual({ date: '2026-10-01' });
     expect(run(moveIt, { blockId: 'mv1', date: '2026-09-29', from: '2026-09-29' }).signals).toEqual([]);
   });
 
@@ -673,7 +722,7 @@ describe('§4 the arithmetic, run rather than read', () => {
     const guard = scriptOf(built, C.saveBlock, 'SaveblockGuard');
     const moved = run(guard, { blockId: 'b1', projectId: 'p-build', what: '  Security review  ', planned: 1.3, date: '2026-09-24' });
     expect(moved.signals).toEqual(['go']);
-    expect(moved.outputs).toEqual({ projectId: 'p-build', what: 'Security review', planned: 1.25, date: '2026-09-24' });
+    expect(recordOnly(moved.outputs)).toEqual({ projectId: 'p-build', what: 'Security review', planned: 1.25, date: '2026-09-24' });
     // A block with no words, no project, no day or no hours is not a block. Nothing is written at all.
     const ok = { blockId: 'b1', projectId: 'p-earn', what: 'Work', planned: 1, date: '2026-09-24' };
     for (const bad of [{ what: '   ' }, { blockId: '' }, { projectId: '' }, { date: 'Thursday' }, { planned: 0 }]) {
@@ -691,7 +740,7 @@ describe('§4 the arithmetic, run rather than read', () => {
     // No entries yet: half an hour with a note is logged, and the block stays open.
     const first = run(guard, { blockId: 'b1', entries: [], actual: '', hours: 0.5, note: ' Login flow ', day: '2026-09-23', logged: false });
     expect(first.signals).toEqual(['go']);
-    expect(first.outputs).toEqual({ entries: [{ day: '2026-09-23', hours: 0.5, note: 'Login flow' }], actual: 0.5, done: false });
+    expect(recordOnly(first.outputs)).toEqual({ entries: [{ day: '2026-09-23', hours: 0.5, note: 'Login flow' }], actual: 0.5, done: false });
 
     // One entry already: a second half hour with Done ticked appends, sums and closes it.
     const second = run(guard, { blockId: 'b1', entries: first.outputs.entries, actual: 0.5, hours: 0.5, note: 'Sessions', day: '2026-09-24', logged: true });
@@ -756,6 +805,112 @@ describe('§4 the arithmetic, run rather than read', () => {
     });
     expect(edit.outputs).toMatchObject({ kind: 'earning', rate: 0, move: 'Offer the testing add-on', moveDue: '', moveStop: true });
     expect(run(scriptOf(built, C.editProject, 'EditprojecGuard'), { projectId: '', name: 'X' }).signals).toEqual([]);
+  });
+
+  /**
+   * P78-TPL010-MOVEARROW (ruled s45, "fix the old planner now"). A For Each turns each plain row into the record with
+   * that row's id and writes every field of the row onto it. The card's project rows wore the Project's id, so its
+   * decorated words ("→ ", "✓ Tue 29 · ") went into `Project.move`, one more each time the card's script ran, and a save
+   * stored them. Every list the planner draws now gives a row its own id and carries the record's in a field of its own.
+   */
+  const LISTS: Array<[string, string, string, string, (out: Record<string, unknown>) => Array<Record<string, unknown>>]> = [
+    ['the project card', '/Logic/Card rows', 'kdWork', "'card:' + proj.id", (o) => (o.groups as Array<{ rows: Array<Record<string, unknown>> }>).flatMap((g) => g.rows)],
+    ['the day columns', C.dayColumns, 'dlWork', "'day:' + blk.id", (o) => (o.columns as Array<{ blocks: Array<Record<string, unknown>> }>).flatMap((c) => c.blocks)],
+    ['the shutdown’s carry list', C.shutdown, 'suWork', "'carry:' + cb.id", (o) => o.carryRows as Array<Record<string, unknown>>]
+  ];
+  const TODAY = '2026-09-25';
+  const listInputs = {
+    projects: PROJECTS,
+    blocks: [block(MONDAY, 'p-earn', 2, false), block(TODAY, 'p-build', 1, false), block(TODAY, 'p-earn', 1, true)],
+    moveBlocks: [],
+    weekStart: MONDAY,
+    firstOpenDay: '2026-09-26',
+    selectedId: 'p-earn',
+    focusHours: 6,
+    newBlockId: '',
+    todayKey: TODAY,
+    tomorrowKey: '2026-09-26',
+    todayLong: 'Friday 25',
+    tomorrowLong: 'Saturday',
+    target: 55,
+    billableUsed: 41,
+    billableLeft: 14,
+    perDay: 2.75,
+    buildingLeft: 16.25,
+    daysLeft: 5,
+    unplacedDormant: ''
+  };
+  const recordIds = new Set([...PROJECTS, ...listInputs.blocks].map((r) => String(r.id)));
+
+  it.each(LISTS)('🔴 MOVEARROW — no row %s draws carries a record’s id, and it still names its record', (_label, component, node, own, rowsOf) => {
+    const script = scriptOf(built, component, node);
+    const rows = rowsOf(run(script, listInputs).outputs);
+    // Known-firing: the list drew rows, and each still names the record it stands for.
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.filter((r) => recordIds.has(String(r.id)))).toEqual([]);
+    expect(rows.every((r) => recordIds.has(String(node === 'kdWork' ? r.projectId : r.blockId)))).toBe(true);
+    // ARM: the row's id back to the record's — this check sees every row.
+    expect(script).toContain(`id: ${own},`);
+    const record = own.slice(own.indexOf('+ ') + 2);
+    const arm = rowsOf(run(script.replace(`id: ${own},`, `id: ${record},`), listInputs).outputs);
+    expect(arm.filter((r) => recordIds.has(String(r.id)))).toHaveLength(rows.length);
+  });
+
+  it('🔴 MOVEARROW — the block sheet’s next actions: no row carries the todo action’s id, and the press still sends it', () => {
+    const acts = [
+      { id: 'a-draft', title: 'Draft the invoice' },
+      { id: 'a-send', title: 'Send it' }
+    ];
+    const b = { id: 'todo-t-inv', projectId: '', date: TODAY, what: 'Invoice', planned: 0.25, todoProjected: true, todoTaskId: 't-inv', todoActions: acts };
+    const out = run(scriptOf(built, C.pageWeek, 'twSheetRow'), { id: b.id, newDay: '', mode: '', blocks: [b], projects: PROJECTS, todoUrl: '', picked: '', history: [] }).outputs;
+    const rows = out.actionRows as Array<Record<string, unknown>>;
+    expect(rows.map((r) => r.actionId)).toEqual(['a-draft', 'a-send']);
+    expect(rows.filter((r) => r.id === 'a-draft' || r.id === 'a-send')).toEqual([]);
+    expect(connectionsOf(built, C.actionPick).some((w) => w.fromId === 'apIn' && w.fromProperty === 'actionId' && w.toId === 'apOut' && w.toProperty === 'id')).toBe(true);
+  });
+
+  /**
+   * The consequence, on the runtime's own Model and Collection (what a For Each does with its items): the card's script
+   * run twice over a project the query holds, its rows set into a list each time.
+   */
+  function cardTwice(script: string, id: string): { move: string; hoursText: unknown } {
+    /* eslint-disable @typescript-eslint/no-var-requires */
+    const M = require('../../noodl-runtime/src/model');
+    const L = require('../../noodl-runtime/src/collection');
+    /* eslint-enable @typescript-eslint/no-var-requires */
+    const Model = M.default ?? M;
+    const Collection = L.default ?? L;
+    const record = Model.create({ id, name: 'Bramble & Co', kind: 'earning', move: 'Offer the add-on', moveDue: '2026-09-25' });
+    // One For Each, its items set again each time the script runs (opening the card, then closing it).
+    const list = Collection.create();
+    Collection.keepPlainRowsApart(list);
+    for (let pass = 0; pass < 2; pass++) {
+      const projects = [{ ...PROJECTS[0], id, move: record.get('move') }];
+      const out = run(script, { ...listInputs, projects, selectedId: id }).outputs;
+      list.set((out.groups as Array<{ rows: unknown[] }>).flatMap((g) => g.rows));
+    }
+    return { move: String(record.get('move')), hoursText: record.get('hoursText') };
+  }
+
+  it('🔴 MOVEARROW — opening and closing the card twice leaves the project’s move as it was', () => {
+    const script = scriptOf(built, '/Logic/Card rows', 'kdWork');
+    expect(cardTwice(script, 'mv-fixed')).toEqual({ move: 'Offer the add-on', hoursText: undefined });
+    // ARMS: the row wearing the project's id again — its fields land on the project; and with its words back in `move`,
+    // the arrow goes into the project's move, one more each time (the bug as it was found).
+    const cut = "id: 'card:' + proj.id,", words = 'moveText: live ?';
+    expect([script.includes(cut), script.includes(words)]).toEqual([true, true]);
+    const sameId = script.replace(cut, 'id: proj.id,');
+    expect(cardTwice(sameId, 'mv-arm-id')).toEqual({ move: 'Offer the add-on', hoursText: '\u2014' });
+    expect(cardTwice(sameId.replace(words, 'move: live ?'), 'mv-arm-move').move).toBe('\u2192 \u2192 Offer the add-on');
+  });
+
+  it('🔴 MOVEARROW — a move saved with the card’s arrows and days loses them, and a move of its own words is kept', () => {
+    const guard = scriptOf(built, C.editProject, 'EditprojecGuard');
+    const save = (move: string) => run(guard, { projectId: 'p-earn', name: 'Bramble & Co', kind: 'earning', move }).outputs.move;
+    expect(save('\u2192 \u2192 Find out from Joss')).toBe('Find out from Joss');
+    expect(save('\u2713 Wed 30 \u00b7 \u2713 Wed 30 \u00b7 Ade work')).toBe('Ade work');
+    expect(save('! \u2192 Chase it')).toBe('Chase it');
+    expect(save('Find out from Joss \u2192 then call')).toBe('Find out from Joss \u2192 then call');
   });
 
   /**
@@ -873,7 +1028,7 @@ describe('§4 the arithmetic, run rather than read', () => {
     // back to the recommendation rather than to a nought nobody chose.
     const rows = outputs.rows as Array<Record<string, string>>;
     expect([rows[1].budgetText, rows[2].budgetText, rows[3].budgetText]).toEqual(['0', '13.25', '0']);
-    // A split that IS typed is the one the envelopes spend, plan or no plan.
+    // A split that IS typed is the one the budgets spend, plan or no plan.
     const typed = run(ENVELOPES(), {
       projects: PROJECTS, blocks: [], monthPlans: [], weekStart: MONDAY, targetHours: 55,
       settings: [{ ...monFri[0], buildingHours: 40, adminHours: 8, hobbyHours: 2 }]
@@ -1199,7 +1354,12 @@ describe('§6 the money, run rather than read (TPL-010-M)', () => {
     expect(rows(money({ marks })).some((r) => r.key === 'salon1|2026-09-16')).toBe(false);
     const past = rows(money({ marks, filter: 'past' })).find((r) => r.key === 'salon1|2026-09-16' && r.kind === 'pay');
     expect(past?.sub).toContain('paid Fri 25 · 9 days late');
-    expect(money({ marks }).lateConcern).toBe('');
+    // TPL-010-B B7 — with no late money left, the bill that should have gone out yesterday is the concern, and opens its goes-out line.
+    const after = money({ marks });
+    expect(after.lateConcern).toBe('One thing: Northline Languages’s bill (€1,120) was to go out Thu 24 Sep and isn’t marked sent. Send it and mark it sent, or change its day.');
+    expect(after.lateKey).toBe('north1|2026-10-08|bill');
+    const sent = applyMark(marks, markRun({ key: 'north1|2026-10-08|bill', action: 'sent', sentOn: '2026-09-25' }).outputs);
+    expect(money({ marks: sent }).lateConcern).toBe('');
   });
 
   it('M-7 — + Add a bill pre-fills the project and a due date its payment terms after the bill; the terms changing changes no bill', () => {
@@ -1346,6 +1506,38 @@ describe('§6 the money, run rather than read (TPL-010-M)', () => {
     expect(wires.filter((w) => w.toId === 'twMarkPane' && w.toProperty === 'go').length).toBe(8);
     expect(wires.filter((w) => w.toId === 'twMarkBal' && w.toProperty === 'go').length).toBe(2);
   });
+
+  /**
+   * TPL-010-B B5 / B6 — the card says what to do with a bill. Northline's workshop bill has never
+   * been sent (the invoice words appear, once per project); Bramble has sent bills before (only
+   * the button); Salon's next is sent and late (the payment); a project with no bills says what
+   * adding one does.
+   */
+  it('B-6 — the card’s next-bill button: Mark it until sent, then Tick it, opening that line in Money; the invoice words come once per project', () => {
+    const lines = (out: Record<string, unknown>) => Object.fromEntries((out.billingRows as Array<{ key: string; text: string }>).map((r) => [r.key, r.text]));
+    const north = pane({ cardProject: 'northline' });
+    expect([north.nextBillShown, north.nextBillLabel, north.nextBillSel]).toEqual([true, 'Sent the invoice? Mark it', 'north1|2026-10-08|bill']);
+    expect(lines(north)['When it’s done']).toBe('Planning doesn’t make the invoice. Send yours as usual, then mark the bill sent. Tick the payment when the money arrives.');
+    expect([north.cardHasBills, north.cardBillsLine]).toEqual([true, 'one bill, €1,120, goes out Thu 24 Sep, due Thu 8 Oct']);
+    const bramble = pane({ cardProject: 'bramble' });
+    expect([bramble.nextBillLabel, bramble.nextBillSel]).toEqual(['Sent the invoice? Mark it', 'bramble|2026-10-07|bill']);
+    expect(lines(bramble)['When it’s done']).toBeUndefined();
+    const salon = pane({ cardProject: 'salon' });
+    expect([salon.nextBillLabel, salon.nextBillSel]).toEqual(['Been paid? Tick it', 'salon1|2026-09-16|pay']);
+    // The line it opens is the one with Mark as sent, and it says who makes the invoice (B6).
+    const opened = pane({ sel: 'north1|2026-10-08|bill' });
+    expect([opened.rpSendShown, opened.rpBillText]).toEqual([
+      true,
+      'Goes out Thu 24 Sep. Planning doesn’t make the invoice: send yours as usual, then mark it sent here. The payment is its own tick, due Thu 8 Oct.'
+    ]);
+    const fresh = pane({ cardProject: 'lx', projects: [...MPROJECTS, { id: 'lx', name: 'LX campus', kind: 'earning', billing: 'fixed', termsDays: 14 }] });
+    expect([lines(fresh).Bills, fresh.nextBillShown, fresh.cardHasBills]).toEqual(['None yet. Add the bill, so the month counts its money.', false, false]);
+    const wires = connectionsOf(built, C.pageWeek);
+    const into = (to: string, port: string) => wires.filter((w) => w.toId === to && w.toProperty === port).map((w) => `${w.fromId}.${w.fromProperty}`);
+    expect(into('twSelFromCard', 'value')).toEqual(['twMoneyView.nextBillSel']);
+    for (const to of ['twSelFromCard', 'twPaneNone', 'twMoneyOn', 'twClearCard', 'twEditOff']) expect(into(to, 'do')).toContain('twCard.openBill');
+    expect(into('twEditRow', 'in-hasBills')).toEqual(['twMoneyView.cardHasBills']);
+  });
 });
 
 // ── §5 ─────────────────────────────────────────────────────────────────────
@@ -1413,8 +1605,8 @@ describe('§5 the demo is the template with the backend taken out', () => {
     expect(second.outputs.label).toBe(DEMO_EMPTY_LABEL);
     expect(second.signals).toEqual(['done']);
     const emptied = JSON.parse(store[DEMO_STORAGE_KEY]);
-    expect(Object.keys(emptied).sort()).toEqual([...COLLECTIONS].sort());
-    for (const name of COLLECTIONS) expect(emptied[name]).toEqual([]);
+    expect(Object.keys(emptied).sort()).toEqual([...COLLECTIONS, ...BORROWED].sort());
+    for (const name of [...COLLECTIONS, ...BORROWED]) expect(emptied[name]).toEqual([]);
 
     // 🔴 An emptied store must not read as a broken one: the reader seeds the example week back
     // when a collection is MISSING, and every one of them is here, holding nothing.
@@ -1443,9 +1635,25 @@ describe('§5 the demo is the template with the backend taken out', () => {
       const writeIds = (c.nodes as Array<Record<string, string>>)
         .filter((n) => ['NewDbModelProperties', 'SetDbModelProperties', 'DeleteDbModelProperties'].includes(n.type))
         .map((n) => n.id);
-      expect(writeIds.length).toBe(1);
-      const twin = (shipped?.nodes as Array<Record<string, string>>).find((n) => n.id === writeIds[0]);
-      expect(`${c.path} ${twin?.type}`).toBe(`${c.path} JavaScriptFunction`);
+      // One write per command, and TPL-010-T T3's history line after it on every block and project command.
+      // Add block also tells the todo list (T2); Send to todo writes the task, its line, then the project's
+      // (L4, T3); Tell todo ticks the action and writes the task's line (T1b, T2).
+      const WRITES: Record<string, number> = {
+        'Commands/Add block': 3,
+        'Commands/Send to todo': 3,
+        'Commands/Tell todo': 2,
+        // TPL-010-B — the project, its bill when it was given one, and the history line.
+        'Commands/Add project': 3,
+        'Commands/Edit project': 3,
+        ...Object.fromEntries(
+          ['Save block', 'Add time', 'Carry block', 'Drop block', 'Place move', 'Move block'].map((n) => [`Commands/${n}`, 2])
+        )
+      };
+      expect(`${c.path} ${writeIds.length}`).toBe(`${c.path} ${WRITES[c.path] ?? 1}`);
+      for (const id of writeIds) {
+        const twin = (shipped?.nodes as Array<Record<string, string>>).find((n) => n.id === id);
+        expect(`${c.path} ${twin?.type}`).toBe(`${c.path} JavaScriptFunction`);
+      }
     }
   });
 
@@ -1475,12 +1683,14 @@ describe('§5 the demo is the template with the backend taken out', () => {
     const outputs = new Proxy({} as Record<string, unknown>, {
       get: (t, k: string) => (k in t ? t[k] : () => signals.push(k))
     });
-    read.call({}, { from: '2026-09-01', to: '2026-09-30', month: '2026-09', moveSince: '2026-08-01', marksSince: '2025-08-01' }, outputs, win);
+    read.call({}, { from: '2026-09-01', to: '2026-09-30', month: '2026-09', moveSince: '2026-08-01', marksSince: '2025-08-01', openStatus: 'open' }, outputs, win);
 
     expect(signals).toContain('loaded');
     expect(store[DEMO_STORAGE_KEY]).toBeTruthy();
     const seeded = JSON.parse(store[DEMO_STORAGE_KEY]) as Record<string, unknown[]>;
-    expect(Object.keys(seeded).sort()).toEqual([...COLLECTIONS].sort());
+    expect(Object.keys(seeded).sort()).toEqual([...COLLECTIONS, ...BORROWED].sort());
+    // TPL-010-L — the two example tasks come back through the same read, open ones only.
+    expect((outputs as Record<string, unknown[]>).tasks.length).toBe(2);
     expect((outputs as Record<string, unknown[]>).projects.length).toBe(seeded.Project.length);
     expect((outputs as Record<string, unknown[]>).settings.length).toBe(1);
     // TPL-010-M — the example money is there: items, their marks, and the reading.
@@ -1497,5 +1707,552 @@ describe('§5 the demo is the template with the backend taken out', () => {
     const words = JSON.stringify(seeded);
     expect(words).toContain('Bramble & Co');
     expect(words).not.toMatch(/digitalbricks|richard/i);
+  });
+});
+
+describe('§7 the todo list’s tasks in the week (TPL-010-L)', () => {
+  const pad = (n: number) => (n < 10 ? '0' : '') + n;
+  const dayFrom = (offset: number) => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + offset);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+  const tasks = [
+    { id: 't-late', title: 'Invoice Bramble for September', status: 'open', deadline: dayFrom(-3), position: 4 },
+    { id: 't-today', title: 'Call the accountant', status: 'open', deadline: dayFrom(0), position: 2 },
+    { id: 't-later', title: '€ chase the Uplift payment', status: 'open', deadline: dayFrom(9), position: 7 },
+    { id: 't-sent', title: 'Send the proposal', status: 'open', deadline: dayFrom(-1), position: 3 },
+    { id: 't-planned', title: 'Already a block', status: 'open', deadline: dayFrom(0), position: 5 },
+    { id: 't-none', title: 'Someday', status: 'open', deadline: '', position: 1 },
+    { id: 't-done', title: 'Invoice last month', status: 'done', deadline: dayFrom(-1), position: 9 }
+  ];
+  const sent = [{ taskId: 't-sent', kind: 'created', summary: SENT_SUMMARY }];
+  const stored = [{ id: 'b1', projectId: 'p1', date: dayFrom(0), what: 'Stored work', planned: 2, position: 1 }];
+  const earlier = [{ id: 'b0', projectId: 'p1', date: dayFrom(-7), what: 'Already a block', planned: 1, todoTaskId: 't-planned' }];
+  const project = (inputs: Record<string, unknown>) => run(scriptOf(built, C.todoTasks, 'ttWork'), inputs).outputs;
+
+  it('L2 — an open task with a deadline is a quarter-hour on its day, a late one at the top of today; one made into a block is not drawn', () => {
+    const outputs = project({ tasks, sent, blocks: stored, moveBlocks: earlier, todoUrl: 'https://todo.example.org/' });
+    const blocks = outputs.blocks as Array<Record<string, unknown>>;
+    expect(blocks[0]).toBe(stored[0]);
+    const byTask = Object.fromEntries(blocks.filter((b) => b.todoProjected).map((b) => [b.todoTaskId, b]));
+    expect(Object.keys(byTask).sort()).toEqual(['t-late', 't-later', 't-sent', 't-today']);
+    expect(byTask['t-late']).toMatchObject({ date: dayFrom(0), todoLate: true, todoDue: dayFrom(-3), planned: 0.25, done: false, todoMoney: true });
+    expect(byTask['t-today']).toMatchObject({ date: dayFrom(0), todoLate: false, todoMoney: false });
+    expect(byTask['t-later']).toMatchObject({ date: dayFrom(9), todoMoney: true });
+    expect(Number(byTask['t-late'].position)).toBeLessThan(Number(byTask['t-today'].position));
+    expect(Number(byTask['t-today'].position)).toBeLessThan(1);
+    expect(byTask['t-late'].todoHref).toBe('https://todo.example.org/?task=t-late');
+  });
+
+  it('L7 — money is a € or Invoice title, or a task Planning sent; AC6 counts the late ones and names the first', () => {
+    const outputs = project({ tasks, sent, blocks: [], moveBlocks: [], todoUrl: '' });
+    const byTask = Object.fromEntries((outputs.blocks as Array<Record<string, unknown>>).map((b) => [b.todoTaskId, b]));
+    expect(byTask['t-sent'].todoMoney).toBe(true);
+    expect(outputs.lateMoney).toBe(2);
+    expect(outputs.lateMoneyTitle).toBe('Invoice Bramble for September');
+    // Without the history line it is a plain task.
+    const plain = project({ tasks, sent: [], blocks: [], moveBlocks: [], todoUrl: '' });
+    expect(Object.fromEntries((plain.blocks as Array<Record<string, unknown>>).map((b) => [b.todoTaskId, b]))['t-sent'].todoMoney).toBe(false);
+  });
+
+  it('the column draws a task as From todo, red only when it is money, first in its day — and a block made from one as a block', () => {
+    const projected = project({ tasks, sent, blocks: [...stored, { ...earlier[0], id: 'b2', date: dayFrom(0), position: 2 }], moveBlocks: [], todoUrl: '' });
+    const monday = (() => {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    })();
+    const { outputs } = run(scriptOf(built, C.dayColumns, 'dlWork'), {
+      projects: [{ id: 'p1', name: 'Stored project', kind: 'earning' }],
+      blocks: projected.blocks,
+      weekStart: monday,
+      focusHours: 6
+    });
+    const today = (outputs.columns as Array<{ key: string; blocks: Array<Record<string, unknown>> }>).find((c) => c.key === dayFrom(0));
+    if (!today) return; // Sunday is not one of the six columns.
+    expect(today.blocks.map((b) => b.id)).toEqual(['todo-t-late', 'todo-t-sent', 'todo-t-today', 'b1', 'b2']);
+    expect(today.blocks[0]).toMatchObject({ fromTodo: true, mark: 'var(--destructive)', hoursText: '0.25 h' });
+    expect(String(today.blocks[0].projectName)).toMatch(/^From todo · was due /);
+    expect(today.blocks[2]).toMatchObject({ fromTodo: true, projectName: 'From todo', mark: 'var(--env-admin)' });
+    expect(today.blocks[4]).toMatchObject({ fromTodo: false, projectName: 'Stored project' });
+  });
+
+  it('L3 — every press on a task opens the block sheet, never the tick or the card', () => {
+    const wires = connectionsOf(built, C.block);
+    const from = (id: string, prop: string) => wires.filter((w) => w.fromId === id && w.fromProperty === prop).map((w) => `${w.toId}.${w.toProperty}`).sort();
+    expect(from('bkTick', 'onClick')).toEqual(['bkTickTodo.eval']);
+    expect(from('bkWho', 'onClick')).toEqual(['bkWhoTodo.eval']);
+    for (const g of ['bkTickTodo', 'bkLogTodo', 'bkWhoTodo']) expect(from(g, 'ontrue')).toEqual(['bkOut.openLog']);
+    expect(from('bkTickTodo', 'onfalse')).toEqual(['bkOut.toggle']);
+    expect(from('bkWhoTodo', 'onfalse')).toEqual(['bkOut.openProject']);
+  });
+
+  it('L3 — the sheet opens a task as a new block with its words and day, and saving writes the task’s id on it', () => {
+    const row = scriptOf(built, C.pageWeek, 'twSheetRow');
+    const projected = project({ tasks, sent, blocks: [], moveBlocks: [], todoUrl: 'https://todo.example.org' }).blocks as Array<Record<string, unknown>>;
+    const late = projected.find((b) => b.todoTaskId === 't-late') as Record<string, unknown>;
+    const opened = run(row, { id: late.id, newDay: '', mode: 'tick', blocks: projected, projects: [{ id: 'p1', name: 'P' }], todoUrl: 'https://todo.example.org' }).outputs;
+    expect(opened).toMatchObject({
+      shown: true, isNew: true, timeShown: false, projectId: '', what: 'Invoice Bramble for September', planned: '0.5',
+      date: dayFrom(0), saveLabel: 'Make it a block', todoTaskId: 't-late', todoHref: 'https://todo.example.org?task=t-late'
+    });
+    // A block made from a task links back to it; a plain new block carries no task.
+    const madeBlock = { id: 'b9', projectId: 'p1', date: dayFrom(0), what: 'x', planned: 1, todoTaskId: 't-late' };
+    const existing = run(row, { id: 'b9', newDay: '', mode: '', blocks: [madeBlock], projects: [], todoUrl: 'https://todo.example.org' }).outputs;
+    expect([existing.isNew, existing.todoHref, existing.todoTaskId]).toEqual([false, 'https://todo.example.org?task=t-late', '']);
+    const fresh = run(row, { id: '', newDay: dayFrom(1), mode: '', blocks: [], projects: [], todoUrl: 'https://todo.example.org' }).outputs;
+    expect([fresh.todoTaskId, fresh.todoHref]).toEqual(['', '']);
+
+    const add = run(scriptOf(built, C.addBlock, 'abQueue'), {
+      start: 1, step: 0, projectId: 'p1', date: dayFrom(0), what: 'Invoice Bramble', planned: 0.5, todoTaskId: 't-late', items: [], fromActions: false, projects: []
+    });
+    expect(add.signals).toEqual(['go']);
+    expect(add.outputs.todoTaskId).toBe('t-late');
+    const wires = connectionsOf(built, C.addBlock);
+    expect(wires.some((w) => w.fromId === 'abQueue' && w.fromProperty === 'out-todoTaskId' && w.toId === 'abWrite' && w.toProperty === 'prop-todoTaskId')).toBe(true);
+    const page = connectionsOf(built, C.pageWeek);
+    expect(page.some((w) => w.fromId === 'twSheetRow' && w.fromProperty === 'out-todoTaskId' && w.toId === 'cmdAddBlock' && w.toProperty === 'todoTaskId')).toBe(true);
+    expect(page.some((w) => w.fromId === 'twTodo' && w.fromProperty === 'blocks' && w.toId === 'twSheetRow')).toBe(true);
+  });
+
+  /**
+   * L1, as T1b amended it (Richard, 2026-09-23): Planning never closes, renames, moves or deletes a Task.
+   * It creates one (Send to todo), writes lines in a task's history (L4, T2), and ticks a next action
+   * off when the block made from it is done (T1b) — `done` and its note, nothing else.
+   */
+  it('L1 / T1b — the planner reads Task, open ones only; it creates tasks and history lines, and only ever ticks an Action', () => {
+    const data = nodesOf(component(built, C.plannerData));
+    const query = data.find((n) => n.id === 'pnTasks') as { parameters: Record<string, unknown> };
+    expect(query.parameters.collectionName).toBe('Task');
+    expect(query.parameters.visualFilter).toEqual({ combinator: 'and', rules: [{ property: 'status', operator: 'equal to', input: 'openStatus' }] });
+    const writers: string[] = [];
+    for (const c of componentsOf(built)) {
+      for (const n of nodesOf(c)) {
+        const coll = (n.parameters as Record<string, unknown>)?.collectionName;
+        if (['NewDbModelProperties', 'SetDbModelProperties', 'DeleteDbModelProperties'].includes(String(n.type)) && ['Task', 'Event', 'Action'].includes(String(coll))) {
+          writers.push(`${c.name} ${n.type} ${coll}`);
+        }
+      }
+    }
+    expect(writers.sort()).toEqual([
+      `${C.addBlock} NewDbModelProperties Event`,
+      `${C.sendToTodo} NewDbModelProperties Event`,
+      `${C.sendToTodo} NewDbModelProperties Task`,
+      `${C.tellTodo} NewDbModelProperties Event`,
+      `${C.tellTodo} SetDbModelProperties Action`
+    ]);
+    // The tick writes the two fields the todo list's own tick writes, and nothing else.
+    const tick = connectionsOf(built, C.tellTodo).filter((w) => w.toId === 'ttdAction' && w.toProperty.startsWith('prop-'));
+    expect(tick.map((w) => w.toProperty).sort()).toEqual(['prop-done', 'prop-note']);
+  });
+
+  it('L4 — the chip says “in todo” once the move is an open task, and only with a todo list', () => {
+    const moves = scriptOf(built, C.moves, 'mvWork');
+    const projects = [{ id: 'p1', name: 'Bramble & Co', kind: 'earning', move: 'Offer the add-on' }, { id: 'p2', name: 'Uplift', kind: 'earning', move: 'Ask about testing' }];
+    const open = [{ id: 't1', title: 'offer the add-on ', status: 'open' }, { id: 't2', title: 'Ask about testing', status: 'done' }];
+    const rows = (inputs: Record<string, unknown>) =>
+      Object.fromEntries((run(moves, { projects, moveBlocks: [], ...inputs }).outputs.rows as Array<Record<string, unknown>>).map((r) => [r.projectId, r.inTodo]));
+    expect(rows({ tasks: open, todoUrl: 'https://todo.example.org' })).toEqual({ p1: true, p2: false });
+    expect(rows({ tasks: open, todoUrl: '' })).toEqual({ p1: false, p2: false });
+    const chip = connectionsOf(built, C.moveChip);
+    expect(chip.some((w) => w.fromProperty === 'inTodo' && w.toId === 'mcInTodo' && w.toProperty === 'mounted')).toBe(true);
+  });
+
+  it('L6 — Task and the sent lines are asked for only after the settings arrive with a todo address', () => {
+    const wires = connectionsOf(built, C.plannerData);
+    for (const q of ['pnTasks', 'pnSent']) {
+      expect(wires.filter((w) => w.toId === q && w.toProperty === 'storageFetch').map((w) => `${w.fromId}.${w.fromProperty}`)).toEqual(['pnTodoGate.out-fetch']);
+    }
+    const gate = scriptOf(built, C.plannerData, 'pnTodoGate');
+    expect(run(gate, { settings: [{ todoUrl: 'https://todo.example.org' }] }).signals).toEqual(['fetch']);
+    expect(run(gate, { settings: [{ todoUrl: '  ' }] }).signals).toEqual([]);
+  });
+
+  it('L4 — Send to todo puts the move after the last open task with its day, once', () => {
+    const guard = scriptOf(built, C.sendToTodo, 'tqGuard');
+    const sentOnce = run(guard, { title: ' Offer the add-on ', deadline: dayFrom(2), tasks });
+    expect(sentOnce.signals).toEqual(['go']);
+    expect(sentOnce.outputs).toMatchObject({ title: 'Offer the add-on', position: 8, status: 'open', deadline: dayFrom(2), kind: 'created', summary: SENT_SUMMARY });
+    expect(run(guard, { title: 'call the ACCOUNTANT', deadline: '', tasks }).signals).toEqual([]);
+    expect(run(guard, { title: 'x', deadline: 'Friday', tasks: [] }).outputs).toMatchObject({ position: 1, deadline: '' });
+    const wires = connectionsOf(built, C.sendToTodo);
+    expect(wires.some((w) => w.fromId === 'tqTask' && w.fromProperty === 'id' && w.toId === 'tqEvent' && w.toProperty === 'prop-taskId')).toBe(true);
+    expect(wires.some((w) => w.fromId === 'tqTask' && w.fromProperty === 'done' && w.toId === 'tqEvent' && w.toProperty === 'store')).toBe(true);
+  });
+
+  it('L4 — the card offers Send to todo only with a todo list, and says so once the move is in it', () => {
+    const card = scriptOf(built, '/Logic/Card rows', 'kdWork');
+    const p = { id: 'p1', name: 'Bramble', kind: 'earning', move: 'Call the accountant', moveDue: dayFrom(2) };
+    const base = { projects: [p], blocks: [], moveBlocks: [], weekStart: '', selectedId: 'p1', firstOpenDay: '' };
+    const inList = run(card, { ...base, tasks, todoUrl: 'https://todo.example.org' }).outputs;
+    expect([inList.inTodo, inList.canSend]).toEqual([true, false]);
+    expect(String(inList.todoLine)).toMatch(/^✓ In your todo list, due /);
+    const notYet = run(card, { ...base, tasks: [], todoUrl: 'https://todo.example.org' }).outputs;
+    expect([notYet.inTodo, notYet.canSend, notYet.sendTitle, notYet.sendDeadline]).toEqual([false, true, 'Call the accountant', dayFrom(2)]);
+    const noList = run(card, { ...base, tasks: [], todoUrl: '' }).outputs;
+    expect([noList.inTodo, noList.canSend]).toEqual([false, false]);
+  });
+
+  it('AC6 — a late money todo is the concern, before any other', () => {
+    const shutdown = scriptOf(built, C.shutdown, 'suWork');
+    const base = { projects: [], blocks: [], todayKey: dayFrom(0), tomorrowKey: dayFrom(1), todayLong: 'Today', tomorrowLong: 'Tomorrow', focusHours: 6 };
+    const one = run(shutdown, { ...base, lateTodoCount: 1, lateTodoTitle: 'Invoice Bramble', lateConcern: 'Salon is late', unplacedDormant: 'Founder A' }).outputs;
+    expect(one.concern).toMatch(/^One money todo is overdue: "Invoice Bramble"/);
+    expect(one.chaseShown).toBe(false);
+    expect(run(shutdown, { ...base, lateTodoCount: 2, lateTodoTitle: 'A' }).outputs.concern).toMatch(/^2 money todos are overdue, the first: "A"/);
+    expect(run(shutdown, { ...base, lateTodoCount: 0, lateConcern: 'Salon is late' }).outputs.concern).toBe('Salon is late');
+  });
+});
+
+// ── §8 ─────────────────────────────────────────────────────────────────────
+
+/**
+ * TPL-010-T — next actions into blocks, and a history on both sides. Richard's rulings, 2026-09-23:
+ * T1 (a) each ticked next action becomes its own block; T1b finishing it ticks the action in Todo with
+ * the block's note; T2 both lines in the task's history; T3 one log, shown on the block and the card.
+ */
+describe('§8 next actions into blocks, and the history on both sides (TPL-010-T)', () => {
+  const pad = (n: number) => (n < 10 ? '0' : '') + n;
+  const dayFrom = (offset: number) => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + offset);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+  const task = { id: 't-inv', title: 'Invoice Bramble', status: 'open', deadline: dayFrom(0), position: 1 };
+  const actions = [
+    { id: 'a-send', taskId: 't-inv', title: 'Send it', position: 2, done: false },
+    { id: 'a-draft', taskId: 't-inv', title: 'Draft the invoice', position: 1, done: false },
+    { id: 'a-chase', taskId: 't-inv', title: 'Chase in a week', position: 3, done: false },
+    { id: 'a-old', taskId: 't-inv', title: 'Ask for the PO number', position: 0, done: true }
+  ];
+  const PROJECTS = [{ id: 'p-bramble', name: 'Bramble & Co', kind: 'earning' }];
+  const project = (inputs: Record<string, unknown>) => run(scriptOf(built, C.todoTasks, 'ttWork'), { sent: [], todoUrl: '', ...inputs }).outputs;
+  const projected = (inputs: Record<string, unknown>) => (project(inputs).blocks as Array<Record<string, unknown>>).filter((b) => b.todoProjected);
+
+  it('T1 — a task carries its open next actions, in the todo list’s order; one already a block is not offered again', () => {
+    const [one] = projected({ tasks: [task], actions, blocks: [], moveBlocks: [] });
+    expect((one.todoActions as Array<Record<string, string>>).map((a) => a.title)).toEqual(['Draft the invoice', 'Send it', 'Chase in a week']);
+    const block = { id: 'b1', projectId: 'p-bramble', date: dayFrom(0), what: 'Draft the invoice', planned: 0.5, todoTaskId: 't-inv', todoActionId: 'a-draft' };
+    const [after] = projected({ tasks: [task], actions, blocks: [block], moveBlocks: [] });
+    expect((after.todoActions as Array<Record<string, string>>).map((a) => a.id)).toEqual(['a-send', 'a-chase']);
+  });
+
+  it('T1c — a task leaves the week once every open action is a block; a task with no actions leaves once it is one', () => {
+    const blocks = ['a-draft', 'a-send', 'a-chase'].map((a, i) => ({ id: `b${i}`, projectId: 'p-bramble', date: dayFrom(0), what: a, planned: 0.5, todoTaskId: 't-inv', todoActionId: a }));
+    expect(projected({ tasks: [task], actions, blocks: blocks.slice(0, 2), moveBlocks: [] })).toHaveLength(1);
+    // The four weeks back count too: a block made last week still stands for its action.
+    expect(projected({ tasks: [task], actions, blocks: blocks.slice(0, 2), moveBlocks: blocks.slice(2) })).toHaveLength(0);
+    const bare = { ...task, id: 't-bare' };
+    expect(projected({ tasks: [bare], actions: [], blocks: [], moveBlocks: [] })).toHaveLength(1);
+    expect(projected({ tasks: [bare], actions: [], blocks: [{ id: 'b', date: dayFrom(0), todoTaskId: 't-bare' }], moveBlocks: [] })).toHaveLength(0);
+    // Every action done in Planning — they are no longer open — and the task still does not come back.
+    const allDone = actions.map((a) => ({ ...a, done: true }));
+    expect(projected({ tasks: [task], actions: allDone, blocks: blocks, moveBlocks: [] })).toHaveLength(0);
+  });
+
+  it('T1 — the sheet lists the actions to tick, the first one ticked; ticks are kept for that task only', () => {
+    const row = scriptOf(built, C.pageWeek, 'twSheetRow');
+    const blocks = projected({ tasks: [task], actions, blocks: [], moveBlocks: [] });
+    const id = String(blocks[0].id);
+    const open = (picked: string) => run(row, { id, newDay: '', mode: '', blocks, projects: PROJECTS, todoUrl: '', picked, history: [] }).outputs;
+    const fresh = open('');
+    expect([fresh.whatShown, fresh.actionsShown, fresh.fromActions, fresh.saveLabel]).toEqual([false, true, true, 'Make it a block']);
+    expect((fresh.actionRows as Array<Record<string, string>>).map((r) => r.label)).toEqual(['\u2611 Draft the invoice', '\u2610 Send it', '\u2610 Chase in a week']);
+    expect(fresh.items).toEqual([{ what: 'Draft the invoice', todoActionId: 'a-draft' }]);
+    expect(fresh.pickedNow).toBe(`${id}|a-draft`);
+    // Pressing Send it ticks it too — the toggle writes the variable the sheet reads.
+    const toggle = scriptOf(built, C.pageWeek, 'twPickToggle');
+    const pressed = run(toggle, { actionId: 'a-send', current: fresh.pickedNow });
+    expect(pressed.signals).toEqual(['go']);
+    expect(pressed.outputs.value).toBe(`${id}|a-draft,a-send`);
+    const two = open(String(pressed.outputs.value));
+    expect(two.saveLabel).toBe('Make 2 blocks');
+    expect(two.items).toEqual([{ what: 'Draft the invoice', todoActionId: 'a-draft' }, { what: 'Send it', todoActionId: 'a-send' }]);
+    // Unticking the last leaves nothing to make, and says so.
+    const none = open(`${id}|`);
+    expect([none.items, none.saveLabel]).toEqual([[], 'Tick one to plan it']);
+    // Ticks left from another task are that task's: this one opens on its own first action.
+    expect(open('todo-other|a-send,a-chase').items).toEqual([{ what: 'Draft the invoice', todoActionId: 'a-draft' }]);
+    // A task with no actions is the L3a sheet, unchanged: one box for the words.
+    const bare = projected({ tasks: [{ ...task, id: 't-bare' }], actions: [], blocks: [], moveBlocks: [] });
+    const plain = run(row, { id: bare[0].id, newDay: '', mode: '', blocks: bare, projects: PROJECTS, todoUrl: '', picked: '', history: [] }).outputs;
+    expect([plain.whatShown, plain.actionsShown, plain.fromActions, plain.items]).toEqual([true, false, false, []]);
+  });
+
+  it('T1 / T2 — Add block writes one block per ticked action, each with its action, a history line and a Planned line in Todo', () => {
+    const queue = scriptOf(built, C.addBlock, 'abQueue');
+    const self = {};
+    const common = { projectId: 'p-bramble', date: '2026-09-23', what: 'Invoice Bramble', planned: 0.5, todoTaskId: 't-inv', fromActions: true, projects: PROJECTS };
+    const items = [{ what: 'Draft the invoice', todoActionId: 'a-draft' }, { what: 'Send it', todoActionId: 'a-send' }];
+    const first = run(queue, { ...common, items, start: 1, step: 0 }, self);
+    expect(first.signals).toEqual(['go']);
+    expect(recordOnly(first.outputs)).toMatchObject({ what: 'Draft the invoice', todoActionId: 'a-draft', todoTaskId: 't-inv', planned: 0.5, date: '2026-09-23' });
+    expect(first.outputs.tSummary).toBe(`${PLANNED_PREFIX}: Draft the invoice \u2014 Bramble & Co, Wed 23, 0.5 h`);
+    expect([first.outputs.hKind, first.outputs.hSummary, first.outputs.hasTodo]).toEqual(['created', 'Made from the todo list \u00b7 Wed 23 \u00b7 0.5 h', true]);
+    const second = run(queue, { ...common, items, start: 1, step: 1 }, self);
+    expect([second.signals, second.outputs.what, second.outputs.todoActionId]).toEqual([['go'], 'Send it', 'a-send']);
+    expect(run(queue, { ...common, items, start: 1, step: 2 }, self).signals).toEqual(['finished']);
+    // Nothing ticked on a task with actions: nothing is written, not a block for the whole task.
+    expect(run(queue, { ...common, items: [], start: 2, step: 2 }, self).signals).toEqual([]);
+    // A plain new block is one block from the words, with no task and so no line in Todo.
+    const plain = run(queue, { ...common, todoTaskId: '', fromActions: false, items: [], what: 'Retainer hours', start: 3, step: 2 }, self);
+    expect([plain.outputs.what, plain.outputs.todoActionId, plain.outputs.hasTodo, plain.outputs.hSummary]).toEqual(['Retainer hours', '', false, 'Put in Wed 23 \u00b7 0.5 h']);
+    // The chain: block, then its line, then — from a task — the todo list's line, then the next.
+    const w = connectionsOf(built, C.addBlock).map((x) => `${x.fromId}.${x.fromProperty}>${x.toId}.${x.toProperty}`);
+    for (const link of ['abQueue.out-go>abWrite.store', 'abWrite.done>abLog.store', 'abWrite.id>abLog.prop-blockId', 'abLog.done>abRoute.run', 'abRoute.out-todo>abTodo.store', 'abTodo.done>abStep.increase', 'abRoute.out-next>abStep.increase', 'abStep.currentCount>abQueue.in-step', 'abIn.do>abStart.increase', 'abQueue.out-finished>abOut.done']) {
+      expect(w).toContain(link);
+    }
+    // The queue runs on the two counts only; every value it reads is signal-only.
+    const q = nodesOf(component(built, C.addBlock)).find((n) => n.id === 'abQueue') as { parameters: Record<string, unknown> };
+    expect(q.parameters['runOnChange-in-start']).toBeUndefined();
+    expect(q.parameters['runOnChange-in-items']).toBe(false);
+  });
+
+  it('T1b / T2 — Add time says when a block has just been done; Tell todo ticks an open action, or writes the Logged line', () => {
+    const time = scriptOf(built, C.addTime, 'AddtimeGuard');
+    const base = { blockId: 'b1', entries: [], actual: '', hours: 0.5, note: 'sent Tuesday', day: '2026-09-23', planned: 0.5, projectId: 'p-bramble', what: 'Send it' };
+    const done = run(time, { ...base, logged: true, wasDone: false }).outputs;
+    expect([done.becameDone, done.doneNote, done.doneHours]).toEqual([true, 'sent Tuesday', 0.5]);
+    expect([done.hKind, done.hSummary, done.hBody]).toEqual(['done', '0.5 h logged \u00b7 done', 'sent Tuesday']);
+    expect(run(time, { ...base, logged: true, wasDone: true }).outputs.becameDone).toBe(false);
+    expect(run(time, { ...base, hours: '', note: '', logged: false, wasDone: true }).outputs.hSummary).toBe('Opened again');
+    // Done with nothing typed: the plan's hours, and the last sitting's note.
+    const quiet = run(time, { ...base, hours: '', note: '', entries: [{ day: '2026-09-22', hours: 1, note: 'first pass' }], actual: 1, logged: true, wasDone: false }).outputs;
+    expect([quiet.doneHours, quiet.doneNote]).toEqual([1, 'first pass']);
+
+    const tell = scriptOf(built, C.tellTodo, 'ttdGuard');
+    const acts = [{ id: 'a-send', taskId: 't-inv', title: 'Send it', done: false }, { id: 'a-gone', taskId: 't-inv', title: 'Old', done: true }];
+    const ticked = run(tell, { taskId: 't-inv', actionId: 'a-send', actions: acts, becameDone: true, note: 'sent Tuesday', hours: 0.5 });
+    expect(ticked.signals).toEqual(['tick']);
+    expect(ticked.outputs).toMatchObject({ actionId: 'a-send', done: true, actionNote: 'sent Tuesday', kind: 'action-done', taskId: 't-inv', body: 'sent Tuesday' });
+    expect(ticked.outputs.summary).toBe('Ticked off \u201cSend it\u201d in Planning \u00b7 0.5 h');
+    // No note: the todo list's tick always has an answer, so Planning gives one.
+    expect(run(tell, { taskId: 't-inv', actionId: 'a-send', actions: acts, becameDone: true, note: '', hours: 0.5 }).outputs.actionNote).toBe('Done in Planning, 0.5 h.');
+    // A block from the task itself, or from an action already ticked in Todo: the Logged line only.
+    const whole = run(tell, { taskId: 't-inv', actionId: '', actions: acts, becameDone: true, note: 'sent it', hours: 0.5 });
+    expect(whole.signals).toEqual(['line']);
+    expect([whole.outputs.kind, whole.outputs.summary, whole.outputs.body]).toEqual(['logged', `${LOGGED_PREFIX}: 0.5 h`, 'sent it']);
+    expect(run(tell, { taskId: 't-inv', actionId: 'a-gone', actions: acts, becameDone: true, note: '', hours: 1 }).signals).toEqual(['line']);
+    // Not done by this save, or no task: the todo list is told nothing.
+    expect(run(tell, { taskId: 't-inv', actionId: 'a-send', actions: acts, becameDone: false, note: '', hours: 1 }).signals).toEqual(['skip']);
+    expect(run(tell, { taskId: '', actionId: '', actions: acts, becameDone: true, note: '', hours: 1 }).signals).toEqual(['skip']);
+  });
+
+  it('T1b — the sheet saves, logs the time, tells the todo list, and only then closes', () => {
+    const page = connectionsOf(built, C.pageWeek).map((x) => `${x.fromId}.${x.fromProperty}>${x.toId}.${x.toProperty}`);
+    for (const link of [
+      'cmdSave.done>cmdTime.do', 'cmdTime.done>cmdTellTodo.do', 'cmdTellTodo.done>twClearLog.do', 'cmdTellTodo.done>twData.refresh',
+      'cmdTime.becameDone>cmdTellTodo.becameDone', 'twSheetRow.out-blockActionId>cmdTellTodo.actionId', 'twSheetRow.out-wasDone>cmdTime.wasDone',
+      'twLog.pickAction>twPickToggle.run', 'twPickToggle.out-go>twSetPicked.do', 'twVarPicked.value>twSheetRow.in-picked',
+      'twSheetRow.out-items>cmdAddBlock.items', 'twData.history>twSheetRow.in-history', 'twData.history>twCardRows.history'
+    ]) {
+      expect(page).toContain(link);
+    }
+    expect(page).not.toContain('cmdTime.done>twClearLog.do');
+    const picked = nodesOf(component(built, C.pageWeek)).filter((n) => (n.parameters as Record<string, unknown>)?.name === VAR.pickedActions);
+    expect(picked.map((n) => n.type).sort()).toEqual(['Set Variable', 'Variable2']);
+  });
+
+  it('T3 — every block and project command writes one line to PlanEvent after its record, and waits for it', () => {
+    const logged = ['Add block', 'Save block', 'Add time', 'Carry block', 'Drop block', 'Place move', 'Move block', 'Add project', 'Edit project', 'Send to todo'];
+    for (const name of logged) {
+      const nodes = nodesOf(component(built, `/Commands/${name}`));
+      const logs = nodes.filter((n) => n.type === 'NewDbModelProperties' && (n.parameters as Record<string, unknown>).collectionName === 'PlanEvent');
+      expect(`${name} ${logs.length}`).toBe(`${name} 1`);
+      const wires = connectionsOf(built, `/Commands/${name}`);
+      const fields = wires.filter((x) => x.toId === logs[0].id && x.toProperty.startsWith('prop-')).map((x) => x.toProperty).sort();
+      expect(fields).toEqual(expect.arrayContaining(['prop-at', 'prop-kind', 'prop-projectId', 'prop-summary']));
+      // Done follows the line (or a line with nothing to say), never the record alone.
+      const outNode = nodes.find((n) => n.type === 'Component Outputs') as LegacyNode;
+      const intoDone = wires.filter((x) => x.toId === outNode.id && x.toProperty === 'done').map((x) => x.fromId);
+      expect(intoDone).not.toContain(nodes.find((n) => n.type === 'NewDbModelProperties' && (n.parameters as Record<string, unknown>).collectionName !== 'PlanEvent' && n.id.endsWith('Write'))?.id ?? '-');
+    }
+    // Nothing updates or deletes a line, anywhere.
+    for (const c of componentsOf(built)) {
+      for (const n of nodesOf(c)) {
+        if (['SetDbModelProperties', 'DeleteDbModelProperties'].includes(String(n.type))) expect(`${c.name} ${(n.parameters as Record<string, unknown>).collectionName}`).not.toMatch(/PlanEvent$/);
+      }
+    }
+  });
+
+  it('T3 — the lines say what happened: a save names what changed and a save that changed nothing says nothing', () => {
+    const save = scriptOf(built, C.saveBlock, 'SaveblockGuard');
+    const before = { id: 'b1', projectId: 'p-bramble', date: '2026-09-23', what: 'Draft', planned: 0.5 };
+    const same = { blockId: 'b1', projectId: 'p-bramble', what: 'Draft', planned: 0.5, date: '2026-09-23', before, projects: PROJECTS };
+    expect(run(save, same).outputs.hSummary).toBe('');
+    const moved = run(save, { ...same, date: '2026-09-24' }).outputs;
+    expect([moved.hKind, moved.hSummary]).toEqual(['moved', 'Moved Wed 23 \u2192 Thu 24']);
+    expect(run(save, { ...same, planned: 1, what: 'Draft it' }).outputs.hSummary).toBe('Planned 0.5 h \u2192 1 h \u00b7 was \u201cDraft\u201d');
+
+    const move = run(scriptOf(built, '/Commands/Move block', 'MoveblockGuard'), { blockId: 'mv', date: dayFrom(2), from: dayFrom(1), blocks: [{ id: 'mv', projectId: 'p-x', what: 'Email' }] }).outputs;
+    expect([move.hProjectId, move.hWhat]).toEqual(['p-x', 'Email']);
+    const drop = run(scriptOf(built, C.dropBlock, 'DropblockGuard'), { blockId: 'b1', blocks: [{ ...before, done: false }] }).outputs;
+    expect(drop.hSummary).toBe('Taken out of the week (it was Wed 23, 0.5 h)');
+
+    const edit = scriptOf(built, C.editProject, 'EditprojecGuard');
+    const was = { id: 'p-bramble', name: 'Bramble & Co', kind: 'earning', move: 'Offer the add-on', rate: 80, termsDays: 14 };
+    const ins = { projectId: 'p-bramble', name: 'Bramble & Co', kind: 'earning', move: 'Offer the add-on', rate: 80, termsDays: 14, projects: [was] };
+    expect(run(edit, ins).outputs.hSummary).toBe('');
+    expect(run(edit, { ...ins, move: 'Send the renewal' }).outputs.hSummary).toBe('Next move: \u201cSend the renewal\u201d');
+    expect(run(edit, { ...ins, rate: 90 }).outputs.hSummary).toBe('Details changed');
+  });
+
+  it('T3 — the block sheet shows its own lines and the card the project’s, newest first, the card naming each block', () => {
+    const history = [
+      { id: 'h1', blockId: 'b1', projectId: 'p-bramble', what: 'Draft', kind: 'created', summary: 'Put in Wed 23 \u00b7 0.5 h', body: '', at: '2026-09-22T09:00:00.000Z' },
+      { id: 'h2', blockId: 'b1', projectId: 'p-bramble', what: 'Draft', kind: 'done', summary: '0.5 h logged \u00b7 done', body: 'first pass', at: '2026-09-23T15:00:00.000Z' },
+      { id: 'h3', blockId: 'b2', projectId: 'p-bramble', what: 'Send', kind: 'created', summary: 'Put in Thu 24 \u00b7 0.5 h', body: '', at: '2026-09-23T10:00:00.000Z' },
+      { id: 'h4', projectId: 'p-other', kind: 'created', summary: 'Project started', body: '', at: '2026-09-23T11:00:00.000Z' }
+    ];
+    const row = scriptOf(built, C.pageWeek, 'twSheetRow');
+    const b1 = { id: 'b1', projectId: 'p-bramble', date: '2026-09-23', what: 'Draft', planned: 0.5, done: true, todoTaskId: 't-inv', todoActionId: 'a-draft' };
+    const sheet = run(row, { id: 'b1', newDay: '', mode: '', blocks: [b1], projects: PROJECTS, todoUrl: '', picked: '', history }).outputs;
+    expect(sheet.logShown).toBe(true);
+    const lines = sheet.logRows as Array<Record<string, unknown>>;
+    expect(lines.map((l) => String(l.line).replace(/^.*? \d\d:\d\d \u00b7 /, ''))).toEqual(['0.5 h logged \u00b7 done', 'Put in Wed 23 \u00b7 0.5 h']);
+    expect([lines[0].body, lines[0].hasBody, lines[1].hasBody]).toEqual(['first pass', true, false]);
+    expect([sheet.blockTaskId, sheet.blockActionId, sheet.wasDone, sheet.block]).toEqual(['t-inv', 'a-draft', true, b1]);
+
+    const card = run(scriptOf(built, '/Logic/Card rows', 'kdWork'), {
+      projects: PROJECTS, blocks: [], moveBlocks: [], weekStart: '2026-09-21', selectedId: 'p-bramble', firstOpenDay: '', tasks: [], todoUrl: '', history
+    }).outputs;
+    const cardLines = (card.logRows as Array<Record<string, string>>).map((l) => l.line.replace(/^.*? \d\d:\d\d \u00b7 /, ''));
+    expect(cardLines).toEqual(['\u201cDraft\u201d \u00b7 0.5 h logged \u00b7 done', '\u201cSend\u201d \u00b7 Put in Thu 24 \u00b7 0.5 h', '\u201cDraft\u201d \u00b7 Put in Wed 23 \u00b7 0.5 h']);
+    expect(card.hasLog).toBe(true);
+  });
+
+  it('T3 — the history is read newest first and bounded; Action only with a todo list', () => {
+    const data = nodesOf(component(built, C.plannerData));
+    const q = (id: string) => (data.find((n) => n.id === id) as { parameters: Record<string, unknown> }).parameters;
+    expect([q('pnHistory').collectionName, q('pnHistory').storageLimit, q('pnHistory').visualSort]).toEqual(['PlanEvent', 1000, [{ property: 'at', order: 'descending' }]]);
+    expect([q('pnActions').collectionName, q('pnActions').storageLimit]).toEqual(['Action', 1000]);
+    const wires = connectionsOf(built, C.plannerData);
+    expect(wires.filter((w) => w.toId === 'pnActions' && w.toProperty === 'storageFetch').map((w) => `${w.fromId}.${w.fromProperty}`)).toEqual(['pnTodoGate.out-fetch']);
+    expect(wires.filter((w) => w.toId === 'pnHistory' && w.toProperty === 'storageFetch').map((w) => `${w.fromId}.${w.fromProperty}`)).toEqual(['pnReady.ontrue']);
+  });
+
+  it('T3 — the demo carries the history and the actions, and a week kept before them is not reseeded', () => {
+    expect(BORROWED).toContain('Action');
+    expect(ADDED_LATER).toEqual(['PlanEvent']);
+    const kept = { Project: [{ id: 'mine', name: 'My own project', kind: 'earning' }], Block: [], MonthPlan: [], MoneyItem: [], MoneyMark: [], BalanceReading: [], Settings: [] };
+    const store: Record<string, string> = { [DEMO_STORAGE_KEY]: JSON.stringify(kept) };
+    const win = { localStorage: { getItem: (k: string) => (k in store ? store[k] : null), setItem: (k: string, v: string) => { store[k] = v; }, removeItem: () => undefined } } as unknown as Window;
+    // eslint-disable-next-line no-new-func
+    const read = new Function('Inputs', 'Outputs', 'window', DEMO_READ_SCRIPT);
+    const outputs = new Proxy({} as Record<string, unknown>, { get: (t, k: string) => (k in t ? t[k] : () => undefined) });
+    read.call({}, { from: '2026-09-01', to: '2026-09-30', month: '2026-09', moveSince: '2026-08-01', marksSince: '2025-08-01', openStatus: 'open' }, outputs, win);
+    expect((outputs as Record<string, Array<Record<string, string>>>).projects.map((p) => p.id)).toEqual(['mine']);
+    expect((outputs as Record<string, unknown[]>).history).toEqual([]);
+    expect((outputs as Record<string, unknown[]>).actions).toEqual([]);
+  });
+});
+
+// ── §9 ─────────────────────────────────────────────────────────────────────
+
+/**
+ * TPL-010-B — **the bill is typed where the project is.** Richard's €2,400 fixed job had one home,
+ * *+ Add a bill* on the card after saving, and the form pointed everywhere else. These run the
+ * shipped scripts: the form's shape and its sentence, what the page opens it with, and the two
+ * commands that now write the bill after the project.
+ */
+describe('§9 billing made clear (TPL-010-B)', () => {
+  beforeAll(() => {
+    jest.useFakeTimers({ doNotFake: ['performance'] }).setSystemTime(new Date(2026, 8, 23, 18, 0, 0));
+  });
+  afterAll(() => jest.useRealTimers());
+
+  const SHAPE = () => scriptOf(built, C.projectEditor, 'peShape');
+  const shape = (over: Record<string, unknown>) => run(SHAPE(), { kind: 'earning', billing: 'fixed', when: 'once', terms: '14', amount: '', rate: '', billDate: '', until: '', hasBills: false, billsLine: '', ...over }).outputs;
+  const LINGUAID = {
+    name: 'Linguaid LangueXpert eLearning content', sub: 'Videos and assignments', kind: 'earning', rate: 90, move: '', moveWorth: '', moveWhen: '', moveDue: '', moveStop: false, say: '',
+    billing: 'fixed', termsDays: 14, agreedHours: '', billWhen: 'once', billAmount: '2400', billDate: '2026-10-16', billUntil: ''
+  };
+
+  it('B-1 / B-2 — the form says what Save will do about the bill, and asks for what is missing', () => {
+    const ready = shape({ amount: '2400', billDate: '2026-10-16' });
+    expect(ready.plan).toBe(
+      'Saving adds the bill: €2,400, goes out Fri 16 Oct, due Fri 30 Oct. The hours you log are a record and never change it. When the work’s done, send your invoice as usual and mark the bill sent on the card.'
+    );
+    expect([ready.billWhen, ready.billingShown, ready.rateShown, ready.agreedShown, ready.offerShown, ready.amountShown, ready.datesShown, ready.untilShown]).toEqual(['once', true, false, true, true, true, true, false]);
+    expect(shape({}).plan).toBe('Type the amount and pick the day the bill goes out, and saving adds the bill.');
+    expect(shape({ amount: '2400' }).plan).toBe('Pick the day the bill goes out, and saving adds the bill.');
+    expect(shape({ when: 'later' }).plan).toBe('No bill yet. Until it has one, the month doesn’t count this project’s money. You can add it later on the card, under Billing.');
+    const monthly = shape({ billing: 'hourly', when: 'monthly', rate: '90', billDate: '2026-09-30' });
+    expect([monthly.plan, monthly.dateLabel, monthly.rateShown, monthly.agreedShown, monthly.amountShown, monthly.untilShown]).toEqual([
+      'Saving adds a bill every month: filled from the hours you log × €90, the first going out Wed 30 Sep, each due 14 days after it goes out, until you end it in Money.',
+      'First bill goes out', true, false, false, true
+    ]);
+    expect(shape({ billing: 'hourly', when: 'monthly', rate: '90', billDate: '2026-09-30', until: '2027-03-31' }).plan).toContain(', the last going out Wed 31 Mar.');
+    expect(shape({}).moveHint).toBe('The next thing to do on it. What it’s worth is a note in words; the money agreed goes in Billing, above.');
+  });
+
+  it('B-4 / B-5 — a project with bills, or work that is not Billable, is never offered one', () => {
+    const has = shape({ hasBills: true, billsLine: 'one bill, €2,400, goes out Fri 16 Oct, due Fri 30 Oct', amount: '99', billDate: '2026-10-01' });
+    expect([has.billWhen, has.offerShown, has.billingShown]).toEqual(['later', false, true]);
+    expect(has.plan).toBe('Its bills are on the card, under Billing: one bill, €2,400, goes out Fri 16 Oct, due Fri 30 Oct. Change them there.');
+    const building = shape({ kind: 'building', amount: '2400', billDate: '2026-10-16' });
+    expect([building.billWhen, building.billingShown, building.rateShown, building.agreedShown, building.plan]).toEqual(['later', false, false, false, '']);
+    expect(building.moveHint).toBe('The next thing to do on it, and what it could lead to, in words.');
+    // What the page opens the form with: a new project on One bill; an existing one on Not now, whatever it has.
+    const EDIT_ROW = scriptOf(built, C.pageWeek, 'twEditRow');
+    const projects = [{ id: 'p1', name: 'Bramble & Co', kind: 'earning', billing: 'fixed', termsDays: 7 }];
+    const open = (mode: string, over: Record<string, unknown> = {}) => run(EDIT_ROW, { mode, id: 'p1', projects, hasBills: true, billsLine: 'x', ...over }).outputs;
+    expect([open('new').billWhen, open('new').hasBills, open('new').billDate]).toEqual(['once', false, '']);
+    expect([open('edit').billWhen, open('edit').hasBills, open('edit').billsLine]).toEqual(['later', true, 'x']);
+    expect(open('edit', { hasBills: false }).billWhen).toBe('later');
+    // 🔴 Closed, the three days are a day nobody picks, so the next opening's '' reaches the picker.
+    const closed = open('');
+    expect([closed.billDate, closed.billUntil, closed.moveDue]).toEqual(['1900-01-01', '1900-01-01', '1900-01-01']);
+    // B9 — no Slot, no Rung.
+    const ids = nodesOf(component(built, C.projectEditor)).map((n) => n.id);
+    expect(ids).not.toContain('peSlot');
+    expect(ids).not.toContain('peRung');
+  });
+
+  it('B-1 / B-3 — Add project works out the bill at the press: Richard’s €2,400, an hourly month, and every way of having none', () => {
+    const GUARD = () => scriptOf(built, C.addProject, 'AddprojectGuard');
+    const add = run(GUARD(), LINGUAID);
+    expect(add.signals).toEqual(['go']);
+    expect(add.outputs).toMatchObject({
+      bill: true, bLabel: 'Linguaid LangueXpert eLearning content', bAmount: 2400, bRepeat: 'once', bDate: '2026-10-30', bBillDate: '2026-10-16',
+      bLead: '', bUntil: '', bFromHours: false, bLikelihood: 100, billing: 'fixed', termsDays: 14
+    });
+    expect(add.outputs.hSummary).toBe('Project started as “Linguaid LangueXpert eLearning content”, with its bill: €2,400, goes out Fri 16 Oct');
+    const hourly = run(GUARD(), { ...LINGUAID, billing: 'hourly', termsDays: 7, billWhen: 'monthly', billAmount: '', billDate: '2026-09-30', billUntil: '2027-03-31' }).outputs;
+    expect(hourly).toMatchObject({ bill: true, bAmount: 0, bRepeat: 'monthly', bDate: '2026-10-07', bBillDate: '', bLead: 7, bUntil: '2027-04-07', bFromHours: true });
+    for (const none of [{ billAmount: '' }, { billDate: '' }, { billWhen: 'later' }, { billWhen: '' }, { kind: 'building' }]) {
+      const out = run(GUARD(), { ...LINGUAID, ...none });
+      expect(`${JSON.stringify(none)} ${out.outputs.bill} ${out.signals}`).toBe(`${JSON.stringify(none)} false go`);
+      expect(out.outputs.hSummary).toBe('Project started as “Linguaid LangueXpert eLearning content”');
+    }
+    // The project keeps no bill fields and no Slot or Rung; the bill goes to a MoneyItem, after the project.
+    const wires = connectionsOf(built, C.addProject);
+    const props = (to: string) => wires.filter((w) => w.toId === to && w.toProperty.startsWith('prop-')).map((w) => w.toProperty.slice(5)).sort();
+    expect(props('AddprojectWrite').filter((f) => /^bill(?!ing)|slot|rung/.test(f))).toEqual([]);
+    expect(props('AddprojectThen')).toEqual(['amount', 'billDate', 'billLeadDays', 'date', 'fromHours', 'label', 'likelihood', 'monthEnd', 'note', 'position', 'projectId', 'repeat', 'until']);
+    const from = (to: string, port: string) => wires.filter((w) => w.toId === to && w.toProperty === port).map((w) => `${w.fromId}.${w.fromProperty}`).sort();
+    expect(from('AddprojectThen', 'prop-projectId')).toEqual(['AddprojectWrite.id']);
+    expect(from('AddprojectThenGate', 'run')).toEqual(['AddprojectWrite.done']);
+    expect(from('AddprojectThen', 'store')).toEqual(['AddprojectThenGate.out-yes']);
+    expect(from('AddprojectLogGate', 'run')).toEqual(['AddprojectThen.done', 'AddprojectThen.failure', 'AddprojectThenGate.out-no']);
+    const collection = nodesOf(component(built, C.addProject)).find((n) => n.id === 'AddprojectThen')?.parameters as Record<string, unknown>;
+    expect(collection.collectionName).toBe('MoneyItem');
+    expect(connectionsOf(built, C.editProject).filter((w) => w.toId === 'EditprojecThen' && w.toProperty === 'prop-projectId').map((w) => `${w.fromId}.${w.fromProperty}`)).toEqual(['EditprojecIn.projectId']);
+  });
+
+  it('B-4 — Edit project adds a bill only when the form sent one, and its history line says so', () => {
+    const GUARD = () => scriptOf(built, C.editProject, 'EditprojecGuard');
+    const was = { id: 'p-lx', ...LINGUAID, billWhen: undefined, billAmount: undefined, billDate: undefined, billUntil: undefined };
+    const added = run(GUARD(), { projectId: 'p-lx', projects: [was], ...LINGUAID });
+    expect([added.outputs.bill, added.outputs.hSummary]).toEqual([true, 'Bill added: €2,400, goes out Fri 16 Oct']);
+    const renamed = run(GUARD(), { projectId: 'p-lx', projects: [was], ...LINGUAID, name: 'Linguaid Training', billWhen: 'later' });
+    expect([renamed.outputs.bill, renamed.outputs.hSummary]).toEqual([false, 'Renamed from “Linguaid LangueXpert eLearning content”']);
+    // A project saved with a Slot, edited now: nothing about it changed, so nothing is said.
+    const same = run(GUARD(), { projectId: 'p-lx', projects: [{ ...was, slot: '1 of 3', rung: 'r' }], ...LINGUAID, billWhen: 'later' });
+    expect(same.outputs.hSummary).toBe('');
   });
 });

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "169961a3-9ace-5661-8b19-e52a6e31e43c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "grIn",
+      "fromProperty": "words",
+      "toId": "grT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "grIn",
+      "fromProperty": "lang",
+      "toId": "grT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "grT",
+      "fromProperty": "guRulesH",
+      "toId": "grH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "grT",
+      "fromProperty": "guR1",
+      "toId": "gr_guR1",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "grT",
+      "fromProperty": "guR2",
+      "toId": "gr_guR2",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "grT",
+      "fromProperty": "guR3",
+      "toId": "gr_guR3",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "grT",
+      "fromProperty": "guR4",
+      "toId": "gr_guR4",
+      "toProperty": "text"
+    }
+  ]
+}

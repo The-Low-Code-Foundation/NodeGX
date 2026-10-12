@@ -298,3 +298,49 @@ describe('QueryBuilder.uniqueConstraintProblem (FED-002)', () => {
     expect(QueryBuilder.uniqueConstraintProblem('')).toBeNull();
   });
 });
+
+describe('a unique refusal of a number the store handed out names it (P116-S22-SERIESMSG)', () => {
+  const { QueryBuilder } = require('../../src/api/adapters/local-sql');
+  const { translatePgError } = require('../../src/api/adapters/postgres/errors');
+
+  it('carries the values the store filled for the colliding fields, and the reading gives them back', () => {
+    const said = QueryBuilder.uniqueConstraintWithValues('UNIQUE constraint failed: Invoice.number', { number: 'T-0003', other: 'x' });
+    expect(said).toBe('UNIQUE constraint failed: Invoice.number; values {"number":"T-0003"}');
+    expect(QueryBuilder.uniqueConstraintProblem(said)).toEqual({ collection: 'Invoice', fields: ['number'], values: { number: 'T-0003' } });
+  });
+
+  it('leaves every other message as it was: no field filled, another error, or one already carrying values', () => {
+    const plain = 'UNIQUE constraint failed: Invoice.code';
+    expect(QueryBuilder.uniqueConstraintWithValues(plain, { number: 'T-0003' })).toBe(plain);
+    expect(QueryBuilder.uniqueConstraintWithValues('CHECK constraint failed: Invoice.chk_x', { number: 'T-0003' })).toBe('CHECK constraint failed: Invoice.chk_x');
+    const once = QueryBuilder.uniqueConstraintWithValues('UNIQUE constraint failed: Invoice.number', { number: 'T-0003' });
+    expect(QueryBuilder.uniqueConstraintWithValues(once, { number: 'T-0009' })).toBe(once);
+    expect(QueryBuilder.uniqueConstraintProblem('UNIQUE constraint failed: Invoice.number; values {not json}')).toBeNull();
+  });
+
+  it('a PostgreSQL error translated twice keeps its words (the create adds the number in between)', () => {
+    const raw = Object.assign(new Error('duplicate key value violates unique constraint "Invoice_number_key"'), {
+      code: '23505',
+      detail: 'Key (number)=(T-0003) already exists.',
+      table: 'Invoice'
+    });
+    const once = translatePgError(raw);
+    expect(once.message).toBe('UNIQUE constraint failed: Invoice.number');
+    once.message = QueryBuilder.uniqueConstraintWithValues(once.message, { number: 'T-0003' });
+    expect(translatePgError(once)).toBe(once);
+    expect(translatePgError(once).message).toBe('UNIQUE constraint failed: Invoice.number; values {"number":"T-0003"}');
+  });
+});
+
+describe('seriesRaises — a number brought in the look moves its counter (P116-S22-SERIESCARRY)', () => {
+  const { seriesRaises } = require('../../src/api/adapters/series');
+  const schema = (series) => ({ columns: [{ name: 'number', type: 'String', series }, { name: 'code', type: 'String' }] });
+
+  it('reads the period and the next number off a value in the look, and nothing off one in another', () => {
+    expect(seriesRaises(schema({ format: 'T-{####}' }), 'Invoice', { number: 'T-0003' })).toEqual([{ name: 'Invoice.number', period: '', next: 4 }]);
+    expect(seriesRaises(schema({ format: 'B-{YYYY}-{####}', restart: 'year' }), 'Bill', { number: 'B-2025-0042' })).toEqual([{ name: 'Bill.number', period: '2025', next: 43 }]);
+    expect(seriesRaises(schema({ format: 'T-{####}' }), 'Invoice', { number: 'OLD-7' })).toEqual([]);
+    expect(seriesRaises(schema({ format: 'T-{####}' }), 'Invoice', { code: 'a' })).toEqual([]);
+    expect(seriesRaises({ columns: [{ name: 'number', type: 'String' }] }, 'Invoice', { number: 'T-0003' })).toEqual([]);
+  });
+});

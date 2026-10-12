@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "16a07cd4-7a46-5181-86e3-d609456fa28f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "foldIn",
+      "fromProperty": "containerId",
+      "toId": "foldFn",
+      "toProperty": "in-containerId"
+    },
+    {
+      "fromId": "foldIn",
+      "fromProperty": "count",
+      "toId": "foldFn",
+      "toProperty": "in-count"
+    },
+    {
+      "fromId": "foldIn",
+      "fromProperty": "i",
+      "toId": "foldFn",
+      "toProperty": "in-i"
+    },
+    {
+      "fromId": "foldIn",
+      "fromProperty": "len",
+      "toId": "foldFn",
+      "toProperty": "in-len"
+    },
+    {
+      "fromId": "foldIn",
+      "fromProperty": "program",
+      "toId": "foldFn",
+      "toProperty": "in-program"
+    },
+    {
+      "fromId": "foldIn",
+      "fromProperty": "go",
+      "toId": "foldFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "foldFn",
+      "fromProperty": "out-blocks",
+      "toId": "foldOut",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "foldFn",
+      "fromProperty": "out-folded",
+      "toId": "foldOut",
+      "toProperty": "folded"
+    },
+    {
+      "fromId": "foldFn",
+      "fromProperty": "out-program",
+      "toId": "foldOut",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "foldFn",
+      "fromProperty": "out-repeatId",
+      "toId": "foldOut",
+      "toProperty": "repeatId"
+    },
+    {
+      "fromId": "foldFn",
+      "fromProperty": "success",
+      "toId": "foldOut",
+      "toProperty": "ran"
+    }
+  ]
+}

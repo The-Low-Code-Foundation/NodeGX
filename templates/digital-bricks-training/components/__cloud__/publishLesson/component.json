@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c2aa1bdb-9fb2-46b5-b5bc-303b86efd880",
+  "name": "publishLesson",
+  "path": "/#__cloud__/publishLesson",
+  "type": "cloud",
+  "created": "2026-10-01T18:00:00.000Z",
+  "modified": "2026-10-01T18:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Publish one learner's draft so they see it when its step is open: checked again, never while it is still about another learner's project, written as a new version beside the old ones (TASK-L189)."
+}

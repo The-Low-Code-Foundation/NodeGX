@@ -1,0 +1,279 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "477b7953-652b-528d-8140-d08d332c1158",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "choosehintIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "allowed",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "capped",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "done",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "freePlay",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "goalMet",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "mode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "oliveFallback",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "oliveRung",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "predictAsked",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "predictHit",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "referenceCount",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "run",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "total",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "world",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "choosehintFn",
+      "type": "JavaScriptFunction",
+      "label": "Choose hint",
+      "parameters": {
+        "functionScript": "var { countBlocks, hasContainer, jobOf, jobProgress, mailRan, meterOf, thingById, tulipsOf, worldOf } = Scripts.engine;\nvar { findRepeat } = Scripts.fold;\nvar program = Array.isArray(Inputs.program) ? Inputs.program : [];\nvar run = Inputs.run && typeof Inputs.run === 'object' ? Inputs.run : null;\nvar w = worldOf(Inputs.world);\nvar ran = !!run && Number(run.tick) > 0;\nvar bumps = run ? Number(run.bumps) || 0 : 0;\nvar puddles = run ? Number(run.puddles) || 0 : 0;\nvar dries = run ? Number(run.dries) || 0 : 0;\nvar rockGone = run ? Number(run.rockGone) || 0 : 0;\nvar noCans = run ? Number(run.noCans) || 0 : 0;\nvar job = jobOf(w) ? jobProgress(w) : null;\n// P108 IW-003 look (lane L): the one target's meter, as the job card reads it ({ w: have, t: need }).\nfunction iwlOneMeter(wd) { var m = meterOf(thingById(wd, jobOf(wd).targets[0])); return { w: m.have, t: isFinite(m.need) ? m.need : 0 }; }\nvar blocks = countBlocks(program);\nvar rep = findRepeat(program);\n// IG-003 (P106 s3): a win is a run's. Goal met keeps its last answer until the next run finishes, so after Stop has\n// emptied the run (Teach, Drive, Start over) a met goal with no run behind it is a leftover, never the hint.\nvar goalMetNow = Inputs.goalMet === true && ran;\nvar referenceCount = Math.max(0, Math.floor(Number(Inputs.referenceCount)) || 0);\nvar freePlay = Inputs.freePlay === true;\nvar predictAsked = Inputs.predictAsked === true, predictHit = Inputs.predictHit === true;\n// The pattern hint nudges toward a repeat: only where the request has one (or nothing is restricted), as the fold.\nvar allowedBlocks = Array.isArray(Inputs.allowed) ? Inputs.allowed : [];\nvar mayRepeat = allowedBlocks.length === 0 || allowedBlocks.indexOf('repeat') !== -1;\nvar rung = Math.floor(Number(Inputs.oliveRung)) || 0;\nvar oliveFallback = Inputs.oliveFallback === true;\nvar tul = tulipsOf(w);\nvar done = Inputs.done === undefined || Inputs.done === null ? tul.watered : Number(Inputs.done) || 0;\nvar total = Inputs.total === undefined || Inputs.total === null ? tul.total : Number(Inputs.total) || 0;\nvar key = 'hintStart', vars = {};\nif (!blocks) key = 'hintEmpty';\nelse if (mayRepeat && rep && rep.cover >= 4 && rep.containerId === null && !hasContainer(program)) { key = 'hintPattern'; vars = { n: rep.count }; }\nelse if (oliveFallback) key = rung >= 1 && rung <= 3 ? 'oliveResting' + rung : 'oliveResting';\n// P108 IW-001 F2: the Runner stopped a played run at the cap (the run is kept): a loop that never ends.\nelse if (Inputs.capped === true && ran) key = 'iw1Loop';\nelse if (predictAsked && !predictHit) key = 'hintPredictMiss';\nelse if (goalMetNow) { key = referenceCount > 0 && blocks <= referenceCount ? 'hintPerfect' : blocks > 8 ? 'hintDoneMany' : 'hintDone'; vars = { k: blocks }; }\nelse if (rockGone > 0) key = 'hintRockGone';\nelse if (dries > 0) key = 'hintDry';\nelse if (bumps > 0) key = 'hintBump';\nelse if (puddles > 0) key = 'hintWet';\n// P108 IW-003 (s3 base): no can in hand; then (after Olive's line and free play) how much of the job is done.\nelse if (noCans > 0) key = 'iw3NoCan';\n// P108 IW-003 (lane P): Olive read an envelope — the line names go to, not the if of Mamie's note.\nelse if (rung === 2 && mailRan(run)) key = 'iw3pRead';\nelse if (rung >= 1 && rung <= 3) key = 'oliveRung' + rung;\nelse if (freePlay && ran) key = 'hintFree';\n// P108 IW-003 (lane B): every target full and the robot home, yet no win — the goal wants the mission's own block (an if,\n// an until, a when): \"3 of 3 done. What is still waiting?\" would send her looking for a job that is not there.\nelse if (ran && job && job.total > 0 && job.full === job.total) key = 'iw3bTrick';\n// P108 IW-003 look (lane L): a job of ONE target counts what fills it — the basket's eggs of its 4, the bench's stones of\n// its 8, the tulip's drinks of its 3 (the job card's rule); \"0 of 1 done\" on the eggs told a child nothing.\nelse if (ran && job && job.total === 1 && iwlOneMeter(w).t > 1) { key = 'iw3Job'; vars = iwlOneMeter(w); }\nelse if (ran && job && job.total > 0) { key = 'iw3Job'; vars = { w: job.full, t: job.total }; }\nelse if (ran && total > 0) { key = 'hintMissed'; vars = { w: done, t: total }; }\nelse if (ran) key = 'hintNotYet';\n// P106 s4: a program not run yet, in Drive: Play it or Teach more — the start line (\"press Teach and show\") is Teach's.\nelse if (String(Inputs.mode || '') === 'drive') key = 'hintDriveReady';\nOutputs.key = key;\nOutputs.vars = vars;\nOutputs.isOlive = key.indexOf('olive') === 0;\n",
+        "runOnChange-in-allowed": false,
+        "runOnChange-in-capped": false,
+        "runOnChange-in-done": false,
+        "runOnChange-in-freePlay": false,
+        "runOnChange-in-goalMet": false,
+        "runOnChange-in-mode": false,
+        "runOnChange-in-oliveFallback": false,
+        "runOnChange-in-oliveRung": false,
+        "runOnChange-in-predictAsked": false,
+        "runOnChange-in-predictHit": false,
+        "runOnChange-in-program": false,
+        "runOnChange-in-referenceCount": false,
+        "runOnChange-in-run": false,
+        "runOnChange-in-total": false,
+        "runOnChange-in-world": false,
+        "uses": "engine.js,fold.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-program",
+          "displayName": "program",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-run",
+          "displayName": "run",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-world",
+          "displayName": "world",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-goalMet",
+          "displayName": "goalMet",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-referenceCount",
+          "displayName": "referenceCount",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-freePlay",
+          "displayName": "freePlay",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-predictAsked",
+          "displayName": "predictAsked",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-predictHit",
+          "displayName": "predictHit",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-allowed",
+          "displayName": "allowed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-oliveRung",
+          "displayName": "oliveRung",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-oliveFallback",
+          "displayName": "oliveFallback",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-done",
+          "displayName": "done",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-total",
+          "displayName": "total",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-capped",
+          "displayName": "capped",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-mode",
+          "displayName": "mode",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-key",
+          "displayName": "key",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-vars",
+          "displayName": "vars",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isOlive",
+          "displayName": "isOlive",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "choosehintOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "isOlive",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "key",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "vars",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

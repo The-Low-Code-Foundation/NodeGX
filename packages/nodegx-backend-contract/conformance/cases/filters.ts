@@ -114,6 +114,18 @@ export const filterCases: readonly ConformanceCase[] = Object.freeze([
   },
 
   {
+    id: 'filters/null-short-form-is-empty',
+    area: 'filters',
+    pins: '`{ f: null }` asks "is empty", exactly as `{ f: { $eq: null } }` does — not `= NULL`, which is never true (P116-S17-NULLEQ)',
+    async run(ctx) {
+      const c = await seed(ctx, 'Flt');
+      deepEq(await names(ctx, c, { note: { $eq: null } }), ['fay'], '$eq: null is wrong');
+      deepEq(await names(ctx, c, { note: null }), ['fay'], 'the short form for "empty" matched a different set');
+      deepEq(await names(ctx, c, { note: null, tag: 'gamma' }), ['fay'], 'the short form did not compose as AND');
+    }
+  },
+
+  {
     id: 'filters/regex',
     area: 'filters',
     pins: '$regex matches on a pattern, anchored where the pattern says',
@@ -171,6 +183,74 @@ export const filterCases: readonly ConformanceCase[] = Object.freeze([
         return; // Refusing outright is an acceptable answer.
       }
       ok(matched === 0, `a filter on an unknown column returned ${String(matched)} rows instead of 0 or an error`);
+    }
+  },
+
+  {
+    id: 'filters/equality-on-an-array-matches-an-element',
+    area: 'filters',
+    pins: 'a bare value against an Array field matches the rows whose array holds it, as Parse does',
+    async run(ctx) {
+      // P109 ISL-039 (P100-UPG001-ARRAYEQ): the equality compared the value with the array's stored
+      // JSON text, so `tags = "fantasy"` matched nothing, with no error.
+      const c = ctx.collection('Arr');
+      ctx.createTable(c, [
+        { name: 'name', type: 'String' },
+        { name: 'tags', type: 'Array' }
+      ]);
+      await ctx.create(c, { name: 'ada', tags: ['fantasy', 'sea'] });
+      await ctx.create(c, { name: 'bo', tags: ['crime'] });
+      await ctx.create(c, { name: 'cy', tags: ['fantasy'] });
+      await ctx.create(c, { name: 'di', tags: [] });
+      await ctx.create(c, { name: 'eve', tags: [1, 2] });
+      deepEq(await names(ctx, c, { tags: 'fantasy' }), ['ada', 'cy'], 'equality on an array did not match by element');
+      deepEq(await names(ctx, c, { tags: { $eq: 'crime' } }), ['bo'], '$eq on an array did not match by element');
+      deepEq(await names(ctx, c, { tags: 2 }), ['eve'], 'a number did not match its element');
+      deepEq(await names(ctx, c, { tags: 'nothing' }), [], 'a value no array holds matched');
+      // An array value is the whole array (the admin's "is empty" asks `$eq: []`).
+      deepEq(await names(ctx, c, { tags: { $eq: [] } }), ['di'], '$eq with an empty array did not find the empty array');
+      deepEq(await names(ctx, c, { tags: { $eq: ['crime'] } }), ['bo'], '$eq with an array did not compare the whole array');
+    }
+  },
+
+  {
+    id: 'filters/a-nul-in-a-value-matches-nothing-on-every-engine',
+    area: 'filters',
+    pins: 'a string holding \\u0000 compares like any value no row holds — never an error on one engine',
+    async run(ctx) {
+      // P109 ISL-039 (P78-DBT-NUL): DBT used '\u0000none' as an impossible value for an empty
+      // `containedIn`. SQLite answered [] and PostgreSQL, whose text cannot hold a NUL, a 400.
+      const c = await seed(ctx, 'Nul');
+      deepEq(await names(ctx, c, { name: 'a\u0000b' }), [], 'equality with a NUL matched a row');
+      deepEq(await names(ctx, c, { name: { $eq: '\u0000none' } }), [], '$eq with a NUL matched a row');
+      deepEq(await names(ctx, c, { name: { $in: ['\u0000none', 'ada'] } }), ['ada'], '$in with a NUL lost its other value');
+      deepEq(await names(ctx, c, { name: { $in: ['\u0000none'] } }), [], '$in of only a NUL matched a row');
+      deepEq(await names(ctx, c, { name: { $nin: ['\u0000none', 'ada'] } }), ['bo', 'cy', 'di', 'eve', 'fay'], '$nin with a NUL is wrong');
+      deepEq(await names(ctx, c, { tag: { $ne: '\u0000x' } }), ['ada', 'bo', 'cy', 'di', 'eve', 'fay'], '$ne with a NUL is wrong');
+    }
+  },
+
+  {
+    id: 'filters/a-pointer-written-as-a-parse-pointer-is-a-value',
+    area: 'filters',
+    pins: 'a condition `{__type: "Pointer", objectId}` matches like the bare id, rather than being read as operators',
+    async run(ctx) {
+      // P109 ISL-039 (P100-UPG001-PTREQ): every key of the object was read as an operator, and
+      // `__type` was refused as one the backend "cannot translate" — a 500 for the way a Parse
+      // client writes a pointer match.
+      const c = ctx.collection('Ptr');
+      ctx.createTable(c, [
+        { name: 'name', type: 'String' },
+        { name: 'author', type: 'Pointer', targetClass: '_User' }
+      ]);
+      await ctx.create(c, { name: 'ada', author: { __type: 'Pointer', className: '_User', objectId: 'u1' } });
+      await ctx.create(c, { name: 'bo', author: { __type: 'Pointer', className: '_User', objectId: 'u2' } });
+      deepEq(await names(ctx, c, { author: 'u1' }), ['ada'], 'the bare id (the control) did not match');
+      deepEq(
+        await names(ctx, c, { author: { __type: 'Pointer', className: '_User', objectId: 'u1' } }),
+        ['ada'],
+        'a Parse pointer did not match like its id'
+      );
     }
   }
 ]);

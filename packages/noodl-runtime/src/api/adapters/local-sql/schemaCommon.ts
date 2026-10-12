@@ -16,6 +16,8 @@
  * @module adapters/local-sql/schemaCommon
  */
 
+import type { SeriesOption } from '../series';
+
 /** One column of a collection schema, as the editor's data model persists it. */
 export interface SchemaColumn {
   name: string;
@@ -24,6 +26,10 @@ export interface SchemaColumn {
   targetClass?: string;
   required?: boolean;
   defaultValue?: unknown;
+  /** P116 R10 — a Pointer only: what happens to this record when the one it points at goes. Kept by the backend at delete time, never DDL. */
+  whenTargetGoes?: 'goes-too' | 'stays-unlinked' | 'blocks';
+  /** P116 ONT-015 — a text column only: the number the store hands out on create (`adapters/series.ts`). */
+  series?: SeriesOption;
   /**
    * BMG-003 R6: `addColumn` only — the value the rows ALREADY in the table get,
    * once. It is not a default and it is never declared: a required field
@@ -195,6 +201,32 @@ export function quoteLiteral(value: string): string {
  */
 export function junctionTableName(owningClass: string, relationName: string): string {
   return `_Join_${relationName}_${owningClass}`;
+}
+
+/**
+ * P116-ONT-007-junctions — the junction tables a collection owns, of the ones that `exist`.
+ * A junction's name alone cannot say whose it is: `_Join_tags_My_Account` is key `tags` on
+ * "My_Account" or key `tags_My` on "Account", and a `LIKE '_Join_%_Account'` (where `_` is any
+ * one character) also matched `_Join_tags_MyAccount`. So: the junctions the collection's own
+ * Relation fields name are its own; a junction another collection's declaration names is never
+ * its; and one nobody declares (made by `addRelation` alone) is its only when no longer-named
+ * collection that exists ends it too.
+ *
+ * @param declared every collection's declared Relation field names, by collection
+ */
+export function ownedJunctions(table: string, exist: Iterable<string>, declared: ReadonlyMap<string, readonly string[]>): string[] {
+  const all = [...exist];
+  const mine = new Set((declared.get(table) || []).map((key) => junctionTableName(table, key)));
+  const theirs = new Set<string>();
+  for (const [t, keys] of declared) if (t !== table) for (const key of keys) theirs.add(junctionTableName(t, key));
+  const ends = (j: string, t: string): boolean => j.length > `_Join__${t}`.length && j.endsWith(`_${t}`);
+  const collections = all.filter((t) => !t.startsWith('_Join_'));
+  for (const j of all) {
+    if (!j.startsWith('_Join_') || mine.has(j) || theirs.has(j) || !ends(j, table)) continue;
+    if (collections.some((t) => t !== table && t.length > table.length && ends(j, t))) continue;
+    mine.add(j);
+  }
+  return all.filter((j) => mine.has(j));
 }
 
 /** The two indexes every table gets on creation. They cannot be declared away. */
@@ -762,35 +794,137 @@ export class ColumnInUseError extends Error {
 }
 
 /**
- * Refuse a drop while a declared index, a declared check or a search opt-in
- * reads the column. Shared by both managers so the two engines refuse in the
- * same words — PostgreSQL would otherwise drop an index silently and SQLite
- * would refuse the DDL in its own.
+ * Refuse a drop or a rename while a declared index, a declared check or a
+ * search opt-in reads the column. Shared by both managers so the two engines
+ * refuse in the same words — PostgreSQL would otherwise drop an index silently
+ * and SQLite would refuse the DDL in its own. An index reads the fields it is
+ * over AND the ones its `where` names (s14: a drop of a field only the
+ * predicate read took the index with it on PostgreSQL). A rename that went
+ * through left the declaration naming a field that is gone, still reported
+ * built, and the same declaration pushed again was refused
+ * (P116-ONT-007-renamecolumn) — so it is taken off first and put back after,
+ * as a world migration does.
  */
 export function refuseColumnInUse(
   tableName: string,
   columnName: string,
-  indexes: Array<{ name: string; fields: string[] }>,
+  indexes: Array<{ name: string; fields: string[]; where?: Record<string, unknown> }>,
   checks: CheckDecl[],
-  searchFields?: string[]
+  searchFields?: string[],
+  verb: 'drop' | 'rename' = 'drop'
 ): void {
-  const index = indexes.find((i) => i.fields.includes(columnName));
+  const what = verb === 'drop' ? `drop "${columnName}" from "${tableName}"` : `rename "${columnName}" in "${tableName}"`;
+  const index = indexes.find((i) => i.fields.includes(columnName) || Object.keys(i.where || {}).includes(columnName));
   if (index) {
-    throw new ColumnInUseError(
-      `Cannot drop "${columnName}" from "${tableName}": the index ${index.name} (${index.fields.join(', ')}) reads it. Drop that index first.`
-    );
+    throw new ColumnInUseError(`Cannot ${what}: the index ${index.name} (${index.fields.join(', ')}) reads it. Drop that index first.`);
   }
   const check = checks.find((c) => checkFields(c).includes(columnName));
   if (check) {
-    throw new ColumnInUseError(
-      `Cannot drop "${columnName}" from "${tableName}": the rule "${describeCheck(check)}" reads it. Remove that rule first.`
-    );
+    throw new ColumnInUseError(`Cannot ${what}: the rule "${describeCheck(check)}" reads it. Remove that rule first.`);
   }
   if (searchFields && searchFields.includes(columnName)) {
-    throw new ColumnInUseError(
-      `Cannot drop "${columnName}" from "${tableName}": full-text search indexes it. Take it out of the search fields first.`
+    throw new ColumnInUseError(`Cannot ${what}: full-text search indexes it. Take it out of the search fields first.`);
+  }
+}
+
+/**
+ * P116 ONT-007 — thrown by `renameTable` while something is built under the
+ * collection's name: a declared index, a check or a search index. Their names
+ * are derived from the table's, so a rename would leave them describing a
+ * table that is gone. They are taken off first and put back after (a world
+ * migration does exactly that), never renamed silently.
+ */
+export class TableInUseError extends Error {
+  code = 'TABLE_IN_USE';
+  constructor(message: string) {
+    super(message);
+    this.name = 'TableInUseError';
+  }
+}
+
+/**
+ * The checks `renameTable` makes before anything moves, shared by both
+ * managers so the two engines refuse in the same words. `exists` answers for
+ * a collection or any table by that name.
+ */
+export function refuseTableRename(
+  oldName: string,
+  newName: string,
+  exists: (name: string) => boolean,
+  inUse: { indexes: Array<{ name: string }>; checks: Array<{ name: string }>; search: boolean }
+): void {
+  if (!newName || !/^[a-zA-Z][a-zA-Z0-9_]*$/.test(newName)) throw new Error(`"${newName}" cannot be a collection's name`);
+  if (oldName.startsWith('_') || newName.startsWith('_')) {
+    throw new Error(`"${oldName.startsWith('_') ? oldName : newName}" is one of the backend's own collections`);
+  }
+  if (!exists(oldName)) throw new Error(`There is no collection called "${oldName}"`);
+  if (exists(newName)) throw new Error(`There is already a collection called "${newName}"`);
+  const what = [
+    ...inUse.indexes.map((i) => `the index ${i.name}`),
+    ...inUse.checks.map((c) => `the rule ${c.name}`),
+    ...(inUse.search ? ['its search index'] : [])
+  ];
+  if (what.length) {
+    throw new TableInUseError(
+      `Cannot rename "${oldName}": ${what.join(', ')} ${what.length === 1 ? 'is' : 'are'} built under its name. ` +
+        'Take them off first and put them back after the rename.'
     );
   }
+}
+
+/**
+ * P116-ONT-007-required — thrown by `setRequired` when records already in the
+ * collection hold nothing in the field. Both managers throw it in the same
+ * words (SQLite before it touches the table, PostgreSQL inside its queued
+ * transaction); `byob-admin` matches `code` and answers 409 with the message.
+ */
+export class FieldEmptyError extends Error {
+  code = 'FIELD_EMPTY';
+  table: string;
+  field: string;
+  count: number;
+  constructor(table: string, field: string, count: number) {
+    super(
+      `Cannot make "${field}" required on "${table}": ${count} ${count === 1 ? 'record has' : 'records have'} none. ` +
+        `Give ${count === 1 ? 'it' : 'each of them'} one first, or keep it optional.`
+    );
+    this.name = 'FieldEmptyError';
+    this.table = table;
+    this.field = field;
+    this.count = count;
+  }
+}
+
+/**
+ * P116-ONT-007-required — `setRequired`'s reading of the declaration, shared by
+ * both managers so the two engines refuse in the same words. Writes the change
+ * into `fresh` (the manager's own copy) and returns the fields whose rule
+ * actually changes; a field already as asked is left out, so a re-run reports
+ * nothing done. Throws on a collection or field the declaration does not have,
+ * a field every record carries anyway, and a list of links (a junction table,
+ * not a column — there is nothing for NOT NULL to hold).
+ */
+export function applyRequired(
+  fresh: TableSchema,
+  tableName: string,
+  columns: Record<string, boolean>
+): Array<{ name: string; required: boolean }> {
+  const changes: Array<{ name: string; required: boolean }> = [];
+  for (const [name, required] of Object.entries(columns)) {
+    if (typeof required !== 'boolean') throw new Error(`"${tableName}.${name}": say true (required) or false (optional)`);
+    if (SYSTEM_COLUMNS.includes(name)) throw new Error(`"${name}" is set by the backend on every record`);
+    const col = (fresh.columns || []).find((c) => c.name === name);
+    if (!col) throw new Error(`"${tableName}" has no field "${name}"`);
+    if (col.type === 'Relation') throw new Error(`"${tableName}.${name}" is a list of links, so it cannot be required`);
+    if (Boolean(col.required) === required) continue;
+    if (required && col.whenTargetGoes === 'stays-unlinked') {
+      throw new Error(`"${tableName}.${name}" stays without one when its record goes, so it cannot be required — say what happens then first`);
+    }
+    if (required) col.required = true;
+    else delete col.required;
+    changes.push({ name, required });
+  }
+  return changes;
 }
 
 /** A person's reading of a check. */

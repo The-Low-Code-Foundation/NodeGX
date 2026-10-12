@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6814c238-2e5b-5315-8702-dc8317d19e3c",
+  "name": "Decode save code",
+  "path": "/Logic/Decode save code",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A code back into a family, migrated if it is old. Runs on Go; answers Ran once its outputs are set."
+}

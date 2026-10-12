@@ -47,6 +47,24 @@ export const UNIT_ENUMS = [
 ];
 
 /**
+ * The unit a date node counts in, for whatever arrived on its Unit port (P107-C16 / D15, ruled
+ * 2026-10-05 "Use days and warn once"). Empty and unknown both count as days, the port's default;
+ * the node shows the warning {@link unknownUnitMessage} names while the value is one the list does
+ * not have. An unknown unit once threw in Date Add's setter (the node dead) and counted as YEARS
+ * in Date Difference.
+ */
+export function unitOrDays(unit: unknown): DateUnit {
+  return UNIT_ENUMS.some((u) => u.value === unit) ? (unit as DateUnit) : 'days';
+}
+
+/** The warning for a Unit the list does not have, or `null` (clears it) for an empty or known one. */
+export function unknownUnitMessage(unit: unknown): string | null {
+  if (unit === undefined || unit === null || unit === '' || UNIT_ENUMS.some((u) => u.value === unit)) return null;
+  const shown = typeof unit === 'string' ? `"${unit.length > 40 ? unit.slice(0, 40) + '…' : unit}"` : String(unit);
+  return `Unit ${shown} is not one of ${UNIT_ENUMS.map((u) => u.value).join(', ')}, so it is counted as days.`;
+}
+
+/**
  * Read anything a port might carry as a `Date`, or `undefined` when it cannot be read.
  *
  * `undefined` is the node's only validity check and is what drives the `Invalid Date` signal —

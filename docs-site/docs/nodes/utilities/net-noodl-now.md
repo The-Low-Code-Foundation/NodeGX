@@ -27,6 +27,12 @@ Stamping when something happened, comparing a stored date against the present, o
 |---|---|---|---|
 | `read` | Signal | — | Re-reads the clock. The outputs hold the instant of the last Read, not a live value |
 
+### What each input does
+
+**Read** (`read`)
+
+- always: the clock is read, and Date, Timestamp and ISO String all say that moment → Done
+
 ## Outputs
 
 ### Values

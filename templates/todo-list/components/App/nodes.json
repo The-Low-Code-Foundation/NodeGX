@@ -63,6 +63,16 @@
       },
       "x": 350,
       "y": 160
+    },
+    {
+      "id": "app_link",
+      "type": "JavaScriptFunction",
+      "label": "Remember the task a link asked for",
+      "parameters": {
+        "functionScript": "try {\n  var m = /[?&]task=([^&#]*)/.exec(window.location.search || '');\n  if (m) window.sessionStorage.setItem(\"todo-open-task\", decodeURIComponent(m[1]));\n} catch (e) {}"
+      },
+      "x": 350,
+      "y": 280
     }
   ],
   "visualRoots": [

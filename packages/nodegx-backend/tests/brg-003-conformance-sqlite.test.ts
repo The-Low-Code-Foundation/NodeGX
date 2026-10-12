@@ -70,7 +70,7 @@ describe('BRG-003 — conformance, SQLite', () => {
     // a capability the suite silently does not test, which rule 2 of the phase
     // README names as the failure mode: "a capability the built-in backend has
     // and the suite does not test is a capability that silently will not cross".
-    for (const area of ['records', 'filters', 'acl', 'relations', 'schema']) {
+    for (const area of ['records', 'filters', 'acl', 'relations', 'paths', 'schema']) {
       expect(byArea.get(area) ?? 0).toBeGreaterThan(0);
     }
 

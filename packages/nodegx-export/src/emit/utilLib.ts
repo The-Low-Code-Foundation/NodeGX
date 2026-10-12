@@ -32,13 +32,20 @@
  * — so the conversion is a typing device here and not a behaviour change.
  */
 
+import { ParseHelper, isParseHelper, parseOutputMayBeUndefined, parseSelectorOf } from './parseLib';
+
 /** Where the module lands in the exported app. */
 export const UTIL_LIB_PATH = 'src/lib/util.ts';
 
 /** The exported helpers, one per translated node. Sorted — the import list is sorted too. */
 export const UTIL_HELPERS = ['blendColor', 'booleanToString', 'log', 'mapString', 'pickFile', 'remapNumber', 'substring'] as const;
 
-export type UtilHelper = (typeof UTIL_HELPERS)[number];
+/**
+ * A `util-call`'s verb. EXP-011 §75 widens it by the four parse helpers, which live in `src/lib/parse.ts`
+ * ({@link ./parseLib.ts}) and NOT in this module's source: the plan and the emitter treat the two families
+ * as one kind (a pure call, arguments in port order), and the import line is split by module at emit.
+ */
+export type UtilHelper = (typeof UTIL_HELPERS)[number] | ParseHelper;
 
 /**
  * Which helpers can answer `undefined`, and it is exactly one.
@@ -62,8 +69,25 @@ export const UTIL_HELPER_MAY_BE_UNDEFINED: Record<UtilHelper, boolean> = {
   // EXP-011 §45: an action, not a read — its promise is awaited and tested by the emitted arm, never bound as a value.
   pickFile: false,
   remapNumber: false,
-  substring: false
+  substring: false,
+  // EXP-011 §75. Per OUTPUT, not per helper — read through `utilCallMayBeUndefined`, which consults the
+  // parse module's own table by the call's selector. `true` here is the guarded answer for a call whose
+  // selector nothing can read.
+  parseCsv: true,
+  parseFeed: true,
+  parseXml: true,
+  toCsv: true
 };
+
+/**
+ * Whether a `util-call` can answer `undefined` — {@link UTIL_HELPER_MAY_BE_UNDEFINED} for the utilities,
+ * and the parse module's per-output table for a parse helper (EXP-011 §75: `count` is never undefined,
+ * `items` is until the text arrives). 🔴 The one function both `maybeUndefinedExpr` (plan.ts) and
+ * `maybeUndefined` (component.ts) call, so the two cannot drift.
+ */
+export function utilCallMayBeUndefined(expr: { fn: UtilHelper; args: ReadonlyArray<{ kind: string; value?: unknown }> }): boolean {
+  return isParseHelper(expr.fn) ? parseOutputMayBeUndefined(expr.fn, parseSelectorOf(expr)) : UTIL_HELPER_MAY_BE_UNDEFINED[expr.fn];
+}
 
 /**
  * The module's source.

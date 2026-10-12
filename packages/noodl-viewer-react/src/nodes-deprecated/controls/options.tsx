@@ -12,6 +12,7 @@ import {
   type StyleObject
 } from '../../react-component-node';
 import type { Noodl } from '../../types';
+import { dataAttributeProps } from '../../components/noodl-root-ref';
 import Utils from './utils';
 
 interface OptionsProps extends Noodl.ReactProps {
@@ -93,6 +94,7 @@ function Options(props: OptionsProps) {
   return (
     <select
       className={className}
+      {...dataAttributeProps(props.dom)}
       ref={(el) => {
         if (el) el.selectedIndex = selectedIndex;
       }}
@@ -128,6 +130,7 @@ const OptionsNode: ReactNodeDefinition = {
   // `displayName`. The picker therefore offered two entries reading the same word, and
   // the one an author was most likely to reach for was this one.
   deprecated: true,
+  replacedBy: 'net.noodl.controls.options',
   displayName: 'Options',
   docs: 'https://docs.noodl.net/nodes/visual/options',
   allowChildren: false,

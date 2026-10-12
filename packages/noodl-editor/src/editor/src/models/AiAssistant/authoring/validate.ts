@@ -146,6 +146,12 @@ export interface ValidateCandidateOptions {
    */
   bodyScroll?: boolean | null;
   /**
+   * P109 ISL-005 — the project's script files (`engine/world.js`), for a Function's `uses`.
+   * **Omitted means "do not check"**; the MCP gate always supplies it, so the panels bind it from
+   * `ProjectModel.getScriptPaths()` to keep the two gates reporting the same (`gateParity.test.ts`).
+   */
+  scripts?: readonly string[];
+  /**
    * AAQ-001 — component names a plan in flight will create, on top of the ones
    * the graph already has.
    *
@@ -292,7 +298,8 @@ function preconditionDiagnostics(
     backend: options.backend,
     // REL-002a — threaded rather than read here: this module is pure over an ExplainGraph and has
     // no project root. Omitted by a caller that does not know, which reads as "do not check".
-    bodyScroll: options.bodyScroll
+    bodyScroll: options.bodyScroll,
+    scripts: options.scripts
   });
 }
 

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d2e4172c-d599-55f1-8749-d337a5ef605a",
+  "name": "Project task",
+  "path": "/Projects/Project task",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One open task of a project: its words, and whose it is or when it is due. Pressed, it opens in the List."
+}

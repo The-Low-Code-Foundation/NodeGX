@@ -1,0 +1,1118 @@
+/**
+ * P116 ONT-003 — the projection: what a person said about their world, as a schema.
+ *
+ * `projectWorld(files)` is a pure function of `docs/world/`: the same three files give the same
+ * schema, byte for byte, on every run and every machine (no clock, no randomness, no locale).
+ * Its output is written in the backend contract's neutral terms — collections, the storage
+ * types P104's eleven tiles become, declared indexes and checks — and names no engine; the
+ * backend applies it through its schema API, never by SQL.
+ *
+ * Every rule a kind's projection produces lands in exactly one of two places:
+ *
+ * - **held**: the store keeps it (a required field, a unique rule, a choice's list, a pair kept
+ *   once). Each becomes a claim: steps that must pass on every engine, and a `mutant` (the
+ *   schema with that one rule taken out) on which the same steps must fail.
+ * - **not held**: no engine behind the contract keeps it today (what happens to the records a
+ *   link points from when its target goes; a field set once; a record never edited). It goes
+ *   into the collection's description in words, so the person reads what is not yet kept, and
+ *   where steps can say it, a claim that is MEASURED to fail — the label is a measurement, not
+ *   an assumption.
+ *
+ * Nothing is dropped. The test counts every rule in and every rule out.
+ */
+import type { FieldKind, ProjectedField, ProjectedRule } from './kind';
+import type { Noun, OnlyWhen, Relation, WorldFiles, WorldProperty, WorldRule } from './files';
+import { kindById, WORLD_VOCABULARY } from './vocabulary';
+import { fieldsAnswered, validateWorld } from './validate';
+import { numberSeries, type NumberSeries } from './noun';
+
+/** The storage type each of P104's eleven tiles becomes (`nodegx-backend/src/admin/app/fieldKinds.ts`, pinned by test). */
+export const STORAGE_TYPE: Readonly<Record<FieldKind, string>> = Object.freeze({
+  text: 'String',
+  number: 'Number',
+  yesno: 'Boolean',
+  date: 'Date',
+  choice: 'String',
+  link: 'Pointer',
+  links: 'Relation',
+  file: 'File',
+  location: 'GeoPoint',
+  list: 'Array',
+  anything: 'Object'
+});
+
+/** The collection a `link` with no `points` names: whoever was signed in. */
+export const USERS_COLLECTION = '_User';
+/** The link to the users collection on the noun that `signsIn` (ONT-002): where a permission rule starts. */
+export const LOGIN_FIELD = 'login';
+/** P116 ONT-011 step 2: the field on a noun whose number people read aloud (ONT-015's series lands on it). */
+export const NUMBER_FIELD = 'number';
+
+/** The series in words: what the store would hand out, as the person said it (ONT-015 §3.1, R-g). */
+function seriesWords(noun: string, s: { looksLike?: string; maySkip?: boolean; restarts?: string }): string {
+  const parts = [`${a(noun)}'s number is handed out by the store, going up by one, and never used again`];
+  if (s.looksLike) parts.push(`it looks like ${s.looksLike}`);
+  if (s.maySkip === false) parts.push('a number is never skipped: a save that fails gives it back');
+  else if (s.maySkip === true) parts.push('a save that fails may leave a gap');
+  if (s.restarts && s.restarts !== 'never') parts.push(`it starts again ${s.restarts}`);
+  return parts.join('; ');
+}
+
+/**
+ * The hop a permission rule starts from, read off the schema: the collection of the noun that
+ * signs in and its `login` link. Undefined when no noun signs in — the runner's question.
+ */
+export function loginHop(schema: WorldSchema): { collection: string; by: string } | undefined {
+  for (const c of schema.collections) {
+    const col = c.columns.find((x) => x.name === LOGIN_FIELD && x.kind === 'link' && x.targetClass === USERS_COLLECTION && !x.relation);
+    if (col) return { collection: c.name, by: col.name };
+  }
+  return undefined;
+}
+
+/** The backend manager's name rule (`format.ts` `NAME_RULE`): a letter, then letters, digits or `_`. */
+const STORAGE_NAME = /^[a-zA-Z][a-zA-Z0-9_]*$/;
+
+export interface WorldColumn {
+  name: string;
+  /** The tile it is, of P104's eleven — Text and Choice are both a String, and the person picked one. */
+  kind: FieldKind;
+  type: string;
+  targetClass?: string;
+  required?: true;
+  /**
+   * P116 R10: a link to a noun — what happens to this record when the one it points at goes. Kept
+   * by the backend at delete time (`@noodl/backend-contract` `targetGoes.ts`), so it is held.
+   */
+  whenTargetGoes?: 'goes-too' | 'stays-unlinked' | 'blocks';
+  description?: string;
+  /** The relation that made it, when one did (ONT-004: a path is compiled by reading these back). */
+  relation?: string;
+  /**
+   * P116 ONT-015: a number the store hands out on create in this format, going up by one and never
+   * used again (`@noodl/backend-contract` `StorageSeries`). Held: the read-aloud noun's `number`,
+   * once its look is said.
+   */
+  series?: NumberSeries;
+}
+/**
+ * A rule every row must satisfy, as the backend's declared checks take it: a choice's list, or
+ * (P116 ONT-011 step 2, *only sometimes*) two fields both set or both empty — a detail that
+ * matters only once another is set, and must be there then.
+ */
+export type WorldCheck = { field: string; oneOf: string[] } | { allOrNone: string[] };
+/** The field a check is about (a choice's), or the fields it joins. */
+export const checkFields = (k: WorldCheck): string[] => ('allOrNone' in k ? k.allOrNone : [k.field]);
+export interface WorldIndex {
+  fields: string[];
+  unique: true;
+  /** Only the rows where these fields are empty — a link still running. */
+  where?: Record<string, { exists: false }>;
+}
+export interface WorldCollection {
+  name: string;
+  /**
+   * What it was made from: a noun, a relation that is a record of its own, or (P116 ONT-011 step
+   * 2) a noun's history — who changed what on it, one record per change.
+   */
+  made: { noun: string } | { relation: string } | { noun: string; history: true };
+  /** The person's sentence. */
+  sentence: string;
+  /**
+   * P116 ONT-011 step 2, *what you call one*: the field that names a record in a list — the
+   * person's answer, for every view that lists them (ONT-008). The store holds nothing for it.
+   */
+  calledBy?: string;
+  /** What the database does not keep yet, in words. Empty when it keeps everything said. */
+  notHeld: string[];
+  /** The sentence, then what is not held — what the backend shows under the collection's name. */
+  description: string;
+  columns: WorldColumn[];
+  checks: WorldCheck[];
+  indexes: WorldIndex[];
+  /**
+   * P116 ONT-014 — the rules on a record's OLD values, as `security.json` takes them under the
+   * collection's `onlyWhile`, kept by the backend inside every write a person makes: *set once*
+   * and *never edited* are frozen fields (`"*"` = the whole record), *never deleted* is
+   * `delete: "never"`. Absent when the world says none.
+   */
+  onlyWhile?: WorldOnlyWhile;
+  /**
+   * P116 ONT-011 step 4 — who reads one field, as `security.json` takes it under the collection's
+   * `fields` (R-a), kept by the backend at every door that returns a record: a detail the person
+   * marked secret is read by nobody but the admin and functions (a world names no role). Absent when
+   * nothing on it is secret.
+   */
+  fields?: Record<string, { read: 'nobody' }>;
+}
+
+/** P116 ONT-014 — the part of a collection's `onlyWhile` a world says (`@noodl/backend-contract` `OnlyWhileRule`, restated). */
+export interface WorldOnlyWhile {
+  update?: {
+    /**
+     * Fields that do not change; `unless` (ONT-011 step 2, *settled*) a condition on the old record
+     * holds. `says` (ONT-013, R-f): the person's sentence, which the backend's 409 then carries — only
+     * a rule from `rules.json` has one; a kind's rule leaves the backend's own words.
+     */
+    frozen?: { fields: string[] | '*'; unless?: Record<string, unknown>; says?: string };
+    /** With `frozen: "*"`: the fields that still change (a status, a note). */
+    except?: string[];
+    /** A value's allowed moves per old value (*settled*: draft → agreed → withdrawn, never back). No `by`: a world names no role. `says` as for `frozen`. */
+    moves?: Record<string, Record<string, { to: string[]; says?: string }>>;
+  };
+  /** `"never"`, or (*settled*) only while the old record matches (a draft may go), with `says` as for `frozen`. */
+  delete?: 'never' | { where: Record<string, unknown>; says?: string };
+}
+
+/** A value a claim step writes. `ref` is the id of a row an earlier step made; `date` an ISO date. */
+export type ClaimValue = string | number | boolean | { ref: string } | { date: string };
+export type ClaimData = Record<string, ClaimValue>;
+
+/** One step of a claim, in the contract's data plane. Collections are named as in the schema. */
+export type ClaimStep =
+  /** create; must succeed. `as` names the row for later steps. */
+  | { make: string; as: string; data: ClaimData }
+  /** create; the store must refuse it */
+  | { refuse: string; data: ClaimData }
+  /**
+   * save; must succeed, or with `refused` the store must refuse it. `byPerson` (ONT-014): made by a
+   * person the collection's `onlyWhile` binds — every other step is the store's own key, which no
+   * `onlyWhile` binds (the admin, a function: how an amend or an erasure is made).
+   */
+  | { change: string; row: string; data: ClaimData; refused?: true; byPerson?: true }
+  /** delete; must succeed, or with `refused` the store must refuse it. `byPerson` as for `change`. */
+  | { remove: string; row: string; refused?: true; byPerson?: true }
+  /** add `with` to a `links` field (or append it, if the field is a list) */
+  | { pair: string; row: string; field: string; with: string }
+  /** the field holds exactly `count` entries */
+  | { paired: string; row: string; field: string; count: number }
+  /** the row is no longer there */
+  | { gone: string; row: string }
+  /** the row is there and the field is empty */
+  | { empty: string; row: string; field: string }
+  /** the row is still there (P116 ONT-006: a verb's `keep` and `end` rows) */
+  | { there: string; row: string }
+  /** the row is there and the field holds exactly `value` (ONT-006: what an `end` or an `update` wrote) */
+  | { holds: string; row: string; field: string; value: ClaimValue }
+  /** ONT-011 step 4: a person signed in with no role reads the row, and it comes back without the field */
+  | { unseen: string; row: string; field: string }
+  /**
+   * ONT-015: each row holds a value in the field the store gave it, and no two hold the same. A row
+   * removed since is read as an earlier `numbered` step saw it — a number is never handed out again.
+   */
+  | { numbered: string; field: string; rows: string[] };
+
+/** What taking one held rule out of the schema means — the claim's mutant. */
+export type ClaimMutant =
+  | { dropRequired: { collection: string; field: string } }
+  | { dropIndex: { collection: string; fields: string[] } }
+  | { dropCheck: { collection: string; field: string } }
+  /** ONT-011 step 2: the all-or-none check over these fields taken out — the detail is optional again whatever the other holds. */
+  | { dropAllOrNone: { collection: string; fields: string[] } }
+  | { linksAsList: { collection: string; field: string } }
+  /** R10: the link says nothing about when its record goes. */
+  | { dropWhenTargetGoes: { collection: string; field: string } }
+  /** ONT-011 step 4: the field read by whoever reads the record — its read rule taken out. */
+  | { dropFieldRule: { collection: string; field: string } }
+  /** ONT-015: the field is plain text again — nothing hands out its number. */
+  | { dropSeries: { collection: string; field: string } }
+  /** ONT-014: the collection's `onlyWhile` without one rule — a field no longer frozen, the record editable, or deletable. */
+  | {
+      dropOnlyWhile:
+        | { collection: string; setOnce: string }
+        | { collection: string; neverEdited: true }
+        | { collection: string; neverDeleted: true }
+        /** ONT-011 step 2: the status moves freely / the freeze is off. */
+        | { collection: string; moves: string }
+        | { collection: string; frozen: true };
+    };
+
+export interface WorldClaim {
+  /** `<relation or noun id>/<what>`, unique in the schema. */
+  id: string;
+  /** The claim in the person's words. */
+  says: string;
+  /** The relation, or the noun, whose words it comes from (a noun's own answers make noun claims — ONT-011 step 2); or (ONT-013) a rule of `rules.json`, by id. */
+  from: { relation: string } | { noun: string } | { rule: string };
+  /** True: every engine must pass it. False: no engine keeps it today, and the claim measures that. */
+  held: boolean;
+  /** For a held claim: the schema it must fail on. */
+  mutant?: ClaimMutant;
+  steps: ClaimStep[];
+}
+
+export interface NotHeldRule {
+  collection: string;
+  field?: string;
+  says: string;
+  /** Why the store does not keep it — which part of the product would. */
+  why: string;
+  /** The claim that measures it, when steps can say it. */
+  claim?: string;
+}
+
+export interface WorldSchema {
+  vocabulary: { id: string; version: number };
+  collections: WorldCollection[];
+  claims: WorldClaim[];
+  notHeld: NotHeldRule[];
+}
+
+export type WorldProjection = { ok: true; schema: WorldSchema } | { ok: false; problems: string[] };
+
+// --------------------------------------------------------------------- names --
+
+const words = (s: string): string[] => s.split(/[^A-Za-z0-9]+/).filter(Boolean);
+/** "a person", "an account". */
+const a = (word: string): string => (/^[aeiou]/i.test(word) ? 'an ' : 'a ') + word;
+const cap = (w: string): string => w.charAt(0).toUpperCase() + w.slice(1);
+
+/** `course-run` → `CourseRun`: a collection's name. */
+export function collectionName(id: string): string {
+  return words(id).map(cap).join('');
+}
+/** `first name` → `firstName`, `course-run` → `courseRun`: a field's name. A name already fit is kept as it is. */
+export function fieldName(word: string): string {
+  if (STORAGE_NAME.test(word)) return word;
+  const w = words(word);
+  return w.length ? w[0].charAt(0).toLowerCase() + w[0].slice(1) + w.slice(1).map(cap).join('') : '';
+}
+
+// ------------------------------------------------------------- what is held --
+
+/** Why the store does not keep a rule of this shape, in words. */
+const WHY: Record<string, string> = {
+  // R10: a link to a noun keeps it (held). What is left is an id that names no one collection.
+  whenTargetGoes: 'the id is text beside a kind, not a link to one collection, so the backend cannot tell which records point at the one that goes',
+  notUnderItself: 'the schema has no rule that follows a link from record to record',
+  onlyThrough: 'who may see a record is its collection’s permissions (BMG-006), not the schema; a rule through a chain is ONT-004’s',
+  logged: 'an exchange with another system is a workflow’s to keep, not the schema’s',
+  retiredStays: 'what a list offers is the screen’s choice; the store keeps whatever value is written',
+  pairTwice: 'a Links field keeps a pair once; a pair made twice needs a record of its own (an is-on)',
+  // ONT-011 step 2, the facts about a thing and the two property answers: each names the step that keeps it.
+  onlyOne: 'a rule across records (at most one) is none of the store’s checks, which are each on one row; ONT-013 step 4 measures it',
+  history: 'the store keeps the history records, and does not write one on every save; a verb or a trigger does',
+  series: 'the store hands out a number only in a look someone said, and nobody has said what this one looks like; until then the field is text, unique and set once',
+  onlyWhenIs: 'a detail that matters only for one value of another is none of the store’s checks; the screen hides it, and nothing refuses it',
+  onlyWhenOptional: 'a detail allowed only once another is set, and not required then, is none of the store’s checks (all-or-none would make it required)',
+  // ONT-013: the two shapes a rule can say that nothing keeps yet, each naming its home.
+  atMost: 'a count over the records linked to one parent, held inside the create, is none of the store’s checks, which are each on one row; ONT-016 builds it (a count made before the create lets two saves at the limit both pass)',
+  onlyBy: 'who may make a change is a role, and a world names no role; the backend keeps it as the move’s "by" in its permissions, set in the manager (ONT-014) — a rule on who may change one field is ONT-012 §7’s, unruled'
+};
+
+/**
+ * Whether the backend keeps a link's "when it goes" rule on this column (R10): a link to one
+ * noun's collection. A text id (`points-at-one-of`) names no collection; a link to the app's users
+ * is never given one by a kind, and a claim could not make a user to delete.
+ */
+const keepsWhenTargetGoes = (col: WorldColumn): boolean => col.type === 'Pointer' && !!col.targetClass && col.targetClass !== USERS_COLLECTION;
+
+/** `from` is what holds the link, already in words: "accounts", "'membership' records". */
+function goesWords(field: ProjectedField, from: string): string {
+  if (!field.points) {
+    // `points-at-one-of`: the id names one of several kinds of thing.
+    if (field.whenTargetGoes === 'goes-too') return `when what they point at goes, the ${from} pointing at it go too`;
+    if (field.whenTargetGoes === 'stays-unlinked') return `when what they point at goes, the ${from} pointing at it stay, pointing at nothing`;
+    return `nothing can go while any ${from} point at it`;
+  }
+  const to = field.points;
+  if (field.whenTargetGoes === 'goes-too') return `when ${a(to)} goes, the ${from} linked to it go too`;
+  if (field.whenTargetGoes === 'stays-unlinked') return `when ${a(to)} goes, the ${from} linked to it stay, without one`;
+  return `${a(to)} cannot go while any ${from} are linked to it`;
+}
+/** What holds a link, in words: a noun's plural, or a relation's own records by its id. */
+const holders = (made: WorldCollection['made']): string => ('noun' in made ? `${made.noun}s` : `'${made.relation}' records`);
+
+/**
+ * P116 ONT-013 — a rule of `rules.json` as the projection holds it: its details renamed to the
+ * fields they became (the person wrote "closed on"; the store has `closedOn`), and, for a rule
+ * with an `unless`, the row hints its claim needs — `freeOn` is the condition itself, `heldOn`
+ * the same detail with another of its values (a choice's next value; a yes/no's other answer).
+ */
+function asProjected(rule: WorldRule, d: Draft): ProjectedRule['holds'] {
+  const h = rule.holds;
+  if (!('frozen' in h || 'neverDeleted' in h) || !h.unless) return h;
+  const freeOn: Record<string, string | number | boolean> = {};
+  const heldOn: Record<string, string | number | boolean> = {};
+  for (const [detail, v] of Object.entries(h.unless)) {
+    const field = fieldName(detail);
+    const value = v as string | number | boolean;
+    freeOn[field] = value;
+    const other = d.choices.get(field)?.find((x) => x !== value);
+    heldOn[field] = other !== undefined ? other : typeof value === 'boolean' ? !value : value;
+  }
+  return { ...h, unless: freeOn, heldOn, freeOn } as ProjectedRule['holds'];
+}
+
+// --------------------------------------------------------------- the function --
+
+interface Draft {
+  collection: WorldCollection;
+  /** field name → the choice list it was given, for seeding rows */
+  choices: Map<string, string[]>;
+  /** field name → the relation that made it, when one did */
+  madeBy: Map<string, string>;
+}
+
+/**
+ * The schema `docs/world/` projects to, or the sentences that say why it cannot. A world the
+ * validator refuses is refused with the validator's words; then two things only this step can
+ * see: two relations making a field of one name on one record, and a name the store cannot hold.
+ */
+export function projectWorld(files: WorldFiles): WorldProjection {
+  const verdict = validateWorld(files as unknown as Record<string, unknown>);
+  if (!verdict.ok) return { ok: false, problems: verdict.problems.map((p) => p.message) };
+
+  const problems: string[] = [];
+  const nouns = files.nouns.nouns;
+  const relations = files.relations.relations;
+  const drafts = new Map<string, Draft>();
+  const nameOf = new Map<string, string>(); // noun or own-record relation id → collection name
+  const notHeld: NotHeldRule[] = [];
+
+  const label = (made: WorldCollection['made']): string => ('relation' in made ? `the relation "${made.relation}"` : 'history' in made ? `the history of the noun "${made.noun}"` : `the noun "${made.noun}"`);
+  const open = (key: string, name: string, made: WorldCollection['made'], sentence: string): Draft | undefined => {
+    if (!STORAGE_NAME.test(name)) {
+      problems.push(`${label(made)} cannot be a collection: its name must start with a letter, then letters, digits or _ ("${name}").`);
+      return undefined;
+    }
+    for (const d of drafts.values())
+      if (d.collection.name.toLowerCase() === name.toLowerCase()) {
+        problems.push(`${label(d.collection.made)} and ${label(made)} would both be the collection ${name}.`);
+        return undefined;
+      }
+    const draft: Draft = {
+      collection: { name, made, sentence, notHeld: [], description: '', columns: [], checks: [], indexes: [] },
+      choices: new Map(),
+      madeBy: new Map()
+    };
+    drafts.set(key, draft);
+    nameOf.set(key, name);
+    return draft;
+  };
+
+  const addColumn = (d: Draft, by: string, col: WorldColumn, values?: readonly string[]): void => {
+    if (!col.name || !STORAGE_NAME.test(col.name)) {
+      problems.push(`${by}: "${col.name}" cannot be a field's name on ${d.collection.name}: it must start with a letter, then letters, digits or _.`);
+      return;
+    }
+    if (d.collection.columns.some((c) => c.name.toLowerCase() === col.name.toLowerCase())) {
+      problems.push(`${by} makes a field called "${col.name}" on ${d.collection.name}, which already has one: two things would share one field.`);
+      return;
+    }
+    d.collection.columns.push(col);
+    if (values) {
+      d.collection.checks.push({ field: col.name, oneOf: values.slice() });
+      d.choices.set(col.name, values.slice());
+    }
+  };
+
+  const propertyColumn = (d: Draft, by: string, p: WorldProperty): void => {
+    const col: WorldColumn = { name: fieldName(p.name), kind: p.kind, type: STORAGE_TYPE[p.kind] };
+    if (p.sentence) col.description = p.sentence;
+    addColumn(d, by, col, p.kind === 'choice' ? p.values || [] : undefined);
+  };
+  /** ONT-011 step 2: a property's `onlyWhen`, as the rule the noun's collection keeps or says. */
+  const onlyWhenRule = (owner: string, p: WorldProperty, ow: OnlyWhen): ProjectedRule => ({
+    on: 'from',
+    says:
+      ow.is !== undefined
+        ? `${a(owner)}'s ${p.name} matters only when its ${ow.field} is ${JSON.stringify(ow.is)}${ow.required ? ', and is there then' : ''}`
+        : ow.required
+          ? `${a(owner)} with its ${ow.field} set has its ${p.name}, and one without has none`
+          : `${a(owner)}'s ${p.name} matters only once its ${ow.field} is set`,
+    holds: { onlyWhen: p.name, when: ow.field, ...(ow.is !== undefined ? { is: ow.is } : {}), required: ow.required === true }
+  });
+
+  // The rules of every relation and every noun, gathered for step 4 and the claims: `src` says
+  // whose words a claim comes from, `key` prefixes its id.
+  const ruled: Array<{ src: WorldClaim['from']; key: string; d: Draft; rule: ProjectedRule }> = [];
+
+  // 1. A collection per noun, its properties as fields, in file order. The noun that signs in
+  //    gets a link to the app's users (`login`): the hop a permission rule starts from. Then
+  //    (ONT-011 step 2) what the noun's own answers add: a field that names one, a history, a
+  //    number, and the rules only one / secret / only-when.
+  for (const n of nouns) {
+    const d = open(n.id, collectionName(n.id), { noun: n.id }, n.sentence);
+    if (!d) continue;
+    const by = `the noun "${n.id}"`;
+    for (const p of n.properties || []) propertyColumn(d, by, p);
+    if (n.signsIn) addColumn(d, by, { name: LOGIN_FIELD, kind: 'link', type: STORAGE_TYPE.link, targetClass: USERS_COLLECTION, description: `${a(n.id)} is who signs in` });
+    const src = { noun: n.id };
+    for (const p of n.properties || []) {
+      if (p.onlyWhen) ruled.push({ src, key: n.id, d, rule: onlyWhenRule(n.id, p, p.onlyWhen) });
+      if (p.secret) ruled.push({ src, key: n.id, d, rule: { on: 'from', says: `${a(n.id)}'s ${p.name} is not for everyone who can see the ${n.id}`, holds: { secret: p.name } } });
+    }
+    const answers = n.answers || {};
+    const called = fieldsAnswered(answers.calledBy)[0];
+    if (called) d.collection.calledBy = fieldName(called);
+    if (answers.onlyOne === true) ruled.push({ src, key: n.id, d, rule: { on: 'from', says: `there is only one ${n.id}`, holds: { onlyOne: true } } });
+    if (answers.readAloud === true) {
+      // ONT-015: held once its look is said — the store hands it out (the column's series).
+      const handedOut = numberSeries(answers);
+      addColumn(d, by, { name: NUMBER_FIELD, kind: 'text', type: STORAGE_TYPE.text, description: `${a(n.id)}'s number, which people read aloud`, ...(handedOut ? { series: handedOut } : {}) });
+      d.collection.indexes.push({ fields: [NUMBER_FIELD], unique: true });
+      ruled.push({ src, key: n.id, d, rule: { on: 'from', says: `${a(n.id)}'s number is written once and never changed`, holds: { setOnce: NUMBER_FIELD } } });
+      const series: Extract<ProjectedRule['holds'], { series: string }> = { series: NUMBER_FIELD };
+      if (typeof answers.looksLike === 'string') series.looksLike = answers.looksLike;
+      if (typeof answers.maySkip === 'boolean') series.maySkip = answers.maySkip;
+      if (answers.restarts === 'never' || answers.restarts === 'each year' || answers.restarts === 'each month') series.restarts = answers.restarts;
+      ruled.push({ src, key: n.id, d, rule: { on: 'from', says: seriesWords(n.id, series), holds: series } });
+    }
+    if (answers.history === true) historyCollection(n, d);
+  }
+
+  /** ONT-011 step 2, *who changed what*: `<Noun>History`, one record per change — the record, when, by whom, what. */
+  function historyCollection(n: Noun, of: Draft): void {
+    const h = open(`${n.id}/history`, `${collectionName(n.id)}History`, { noun: n.id, history: true }, `who changed what on ${a(n.id)}, and when: one record per change`);
+    if (!h) return;
+    const by = `the history of the noun "${n.id}"`;
+    addColumn(h, by, { name: fieldName(n.id), kind: 'link', type: STORAGE_TYPE.link, targetClass: of.collection.name, required: true, whenTargetGoes: 'goes-too', description: `the ${n.id} that changed` });
+    addColumn(h, by, { name: 'at', kind: 'date', type: STORAGE_TYPE.date, required: true, description: 'when' });
+    // `who`, not `by`: BY is a word the manager refuses for a field (the write spec's list), and nobody said it.
+    addColumn(h, by, { name: 'who', kind: 'link', type: STORAGE_TYPE.link, targetClass: USERS_COLLECTION, description: 'who changed it' });
+    addColumn(h, by, { name: 'changed', kind: 'anything', type: STORAGE_TYPE.anything, description: 'what changed: each detail, before and after' });
+    ruled.push({ src: { noun: n.id }, key: n.id, d: h, rule: { on: 'own', says: `every change to ${a(n.id)} is written to its history`, holds: { history: true } } });
+  }
+
+  // 2. A collection per relation that is a record of its own, with the details on the link.
+  const projected = relations.map((r) => {
+    const kind = kindById(r.kind)!;
+    return { r, out: kind.projection({ id: r.id, from: r.from, to: r.to, property: r.property, answers: r.answers || {} }) };
+  });
+  for (const { r, out } of projected) if (out.ownRecord) open(r.id, collectionName(r.id), { relation: r.id }, r.sentence);
+
+  // 3. Every relation's fields, then its rules.
+  const linked: Array<{ r: Relation; d: Draft; field: ProjectedField; col: string }> = [];
+  for (const { r, out } of projected) {
+    const by = `the relation "${r.id}"`;
+    const own = drafts.get(r.id);
+    const from = drafts.get(r.from);
+    const to = typeof r.to === 'string' ? drafts.get(r.to) : undefined;
+    for (const f of out.fields) {
+      const d = f.on === 'own' ? own : f.on === 'to' ? to : from;
+      if (!d) {
+        problems.push(`${by} puts a field on its ${f.on === 'to' ? 'target' : f.on} record, and it has none.`);
+        continue;
+      }
+      if (f.kind === 'choice' && !f.values && r.kind === 'one-of') {
+        // `one-of` names a property the noun already has: the field and its list are there; the
+        // relation adds the person's sentence to it.
+        const col = d.collection.columns.find((c) => c.name === fieldName(f.name));
+        if (col && !col.description) col.description = r.sentence;
+        if (col) {
+          d.madeBy.set(col.name, r.id);
+          col.relation = r.id;
+        }
+        continue;
+      }
+      const col: WorldColumn = { name: fieldName(f.name), kind: f.kind, type: STORAGE_TYPE[f.kind] };
+      if (f.kind === 'link' || f.kind === 'links') {
+        const target = f.points === undefined ? USERS_COLLECTION : nameOf.get(f.points);
+        if (!target) {
+          problems.push(`${by} links to "${f.points}", which is not a noun.`);
+          continue;
+        }
+        col.targetClass = target;
+      }
+      if (f.required) col.required = true;
+      if (f.whenTargetGoes && keepsWhenTargetGoes(col)) col.whenTargetGoes = f.whenTargetGoes;
+      col.description = r.sentence;
+      col.relation = r.id;
+      d.madeBy.set(col.name, r.id);
+      addColumn(d, by, col, f.kind === 'choice' ? f.values || [] : undefined);
+      if (f.unique) d.collection.indexes.push({ fields: [col.name], unique: true });
+      if (f.whenTargetGoes) linked.push({ r, d, field: f, col: col.name });
+    }
+    for (const rule of out.rules) {
+      const d = rule.on === 'own' ? own : from;
+      if (d) ruled.push({ src: { relation: r.id }, key: r.id, d, rule });
+    }
+    // The details on a link that is a record of its own.
+    if (own)
+      for (const p of r.properties || []) {
+        propertyColumn(own, by, p);
+        own.madeBy.set(fieldName(p.name), r.id);
+        if (p.onlyWhen) ruled.push({ src: { relation: r.id }, key: r.id, d: own, rule: { ...onlyWhenRule(`'${r.id}' record`, p, p.onlyWhen), on: 'own' } });
+      }
+  }
+
+  // 3b. ONT-013: the rules of `rules.json` — a sentence no kind asked for, on a noun or a relation
+  //     that is a record of its own, in the person's names for its details; held or said exactly as
+  //     a kind's rule is, and claimed under the rule's own id. A rule with an `unless` gets the row
+  //     hints its claim needs (a row the rule binds, one it frees) from the condition itself, which
+  //     the validator holds to a choice or yes/no detail with one of its values.
+  for (const rule of files.rules?.rules ?? []) {
+    const d = drafts.get(rule.on);
+    if (!d) continue; // its noun did not open: the problem is already recorded above
+    ruled.push({ src: { rule: rule.id }, key: rule.id, d, rule: { on: 'relation' in d.collection.made ? 'own' : 'from', says: rule.says, holds: asProjected(rule, d) } });
+  }
+
+  if (problems.length) return { ok: false, problems };
+
+  // 4. Rules: a unique rule is an index; the rest are said, not held.
+  for (const { src, d, rule } of ruled) {
+    const h = rule.holds;
+    // ONT-013 (R-f): a rule a person said carries its sentence into the backend's rule, so the 409 says it.
+    const says = 'rule' in src ? rule.says : undefined;
+    if ('unique' in h) {
+      const fields = h.unique.map(fieldName);
+      d.collection.indexes.push(h.whileEmpty ? { fields, unique: true, where: { [fieldName(h.whileEmpty)]: { exists: false } } } : { fields, unique: true });
+    } else if ('pairOnce' in h || 'shape' in h) {
+      // pairOnce: held by the Links field itself, and claimed below. shape: a fact, not a rule.
+    } else if ('setOnce' in h || 'neverEdited' in h || 'neverDeleted' in h || 'frozen' in h || 'moves' in h) {
+      // ONT-014: kept by the backend inside the write (`onlyWhile`), and claimed below. One
+      // `frozen` per collection: `"*"` wins over a list, a list is the union, and an `unless` is
+      // the one a rule said (two rules with different conditions cannot both be exact — said in §7).
+      const ow = (d.collection.onlyWhile ??= {});
+      const update = (ow.update ??= {});
+      const freeze = (fields: string[] | '*', unless?: Record<string, unknown>, except?: string[]) => {
+        const have = update.frozen;
+        const all = fields === '*' || have?.fields === '*';
+        const merged = all ? ('*' as const) : [...new Set([...(have?.fields ?? []), ...(fields as string[])])];
+        // Two sentences on one collection are both carried: the 409 says both, in file order.
+        const said = [have?.says, says].filter(Boolean).join(' ');
+        update.frozen = { fields: merged, ...((unless ?? have?.unless) ? { unless: unless ?? have?.unless } : {}), ...(said ? { says: said } : {}) };
+        if (except?.length) update.except = [...new Set([...(update.except ?? []), ...except])];
+      };
+      if ('neverDeleted' in h) {
+        if (h.unless && ow.delete !== 'never') ow.delete = { where: h.unless, ...(says ? { says } : {}) };
+        else ow.delete = 'never';
+      } else if ('neverEdited' in h) freeze('*');
+      else if ('setOnce' in h) freeze([fieldName(h.setOnce)]);
+      else if ('frozen' in h) freeze(h.frozen === '*' ? '*' : h.frozen.map(fieldName), h.unless as Record<string, unknown> | undefined, h.except?.map(fieldName));
+      else {
+        const moves = (update.moves ??= {});
+        moves[fieldName(h.moves)] = Object.fromEntries(Object.entries(h.from).map(([old, m]) => [old, { to: [...m.to], ...(says ? { says } : {}) }]));
+      }
+      if (!Object.keys(update).length) delete ow.update;
+    } else if ('onlyWhen' in h) {
+      // ONT-011 step 2: required once the other is set, and allowed only then, is both-or-neither — a declared
+      // check the backend keeps on every engine (HLT-016 `allOrNone`). The other two readings are said.
+      if (h.required && h.is === undefined) d.collection.checks.push({ allOrNone: [fieldName(h.onlyWhen), fieldName(h.when)] });
+      else notHeld.push({ collection: d.collection.name, field: fieldName(h.onlyWhen), says: rule.says, why: h.is !== undefined ? WHY.onlyWhenIs : WHY.onlyWhenOptional });
+    } else if ('secret' in h) {
+      // ONT-011 step 4: held — a per-field read rule (R-a), kept by the backend at every door; nobody but the admin and functions.
+      (d.collection.fields ??= {})[fieldName(h.secret)] = { read: 'nobody' };
+    } else if ('series' in h) {
+      // ONT-015: held when the column carries the series (its look was said); claimed below either way.
+      const field = fieldName(h.series);
+      if (!d.collection.columns.find((x) => x.name === field)?.series) notHeld.push({ collection: d.collection.name, field, says: rule.says, why: WHY.series });
+    } else if ('onlyOne' in h || 'history' in h) {
+      notHeld.push({ collection: d.collection.name, says: rule.says, why: 'onlyOne' in h ? WHY.onlyOne : WHY.history });
+    } else {
+      // ONT-013's `atMost` and `onlyBy` land here too: said, each naming its home (WHY).
+      const key = Object.keys(h)[0];
+      const field = 'notUnderItself' in h ? fieldName(h.notUnderItself) : 'onlyBy' in h ? fieldName(h.changes) : undefined;
+      notHeld.push({ collection: d.collection.name, ...(field ? { field } : {}), says: rule.says, why: WHY[key] });
+    }
+  }
+  for (const { d, field, col } of linked) {
+    if (d.collection.columns.find((c) => c.name === col)?.whenTargetGoes) continue;
+    notHeld.push({ collection: d.collection.name, field: col, says: goesWords(field, holders(d.collection.made)), why: WHY.whenTargetGoes });
+  }
+
+  const collections = [...drafts.values()].map((d) => d.collection);
+  for (const c of collections) {
+    c.notHeld = notHeld.filter((n) => n.collection === c.name).map((n) => n.says);
+    // A rule's sentence (ONT-013) may end in a full stop of its own; the list carries one at its end.
+    c.description = c.notHeld.length ? `${c.sentence} Not kept by the database yet: ${c.notHeld.map((s) => s.replace(/\.$/, '')).join('; ')}.` : c.sentence;
+  }
+
+  const schema: WorldSchema = { vocabulary: { id: WORLD_VOCABULARY.id, version: WORLD_VOCABULARY.version }, collections, claims: [], notHeld };
+  try {
+    schema.claims = claimsFor(schema, ruled, linked, [...drafts.values()]);
+  } catch (e) {
+    return { ok: false, problems: [e instanceof Error ? e.message : String(e)] };
+  }
+  return { ok: true, schema };
+}
+
+// ------------------------------------------------------------------- claims --
+
+/**
+ * Makes the rows a claim needs, deterministically: every required field gets a value that fits
+ * its column (a choice its first value, a link a row made first), and every value is distinct
+ * so no unique rule refuses a row the claim did not mean it to.
+ */
+class Seeder {
+  private n = 0;
+  private making = new Set<string>();
+  steps: ClaimStep[] = [];
+  constructor(private readonly byName: Map<string, Draft>) {}
+
+  next(): number {
+    return ++this.n;
+  }
+
+  valueFor(d: Draft, col: WorldColumn): ClaimValue | undefined {
+    const k = this.next();
+    const choices = d.choices.get(col.name);
+    if (choices && choices.length) return choices[0];
+    if (col.type === 'String') return `${col.name}-${k}`;
+    if (col.type === 'Number') return k;
+    if (col.type === 'Boolean') return true;
+    if (col.type === 'Date') return { date: `2026-01-${String(1 + (k % 28)).padStart(2, '0')}T00:00:00.000Z` };
+    if (col.type === 'Pointer' && col.targetClass && col.targetClass !== USERS_COLLECTION) return { ref: this.row(col.targetClass) };
+    return undefined;
+  }
+
+  /** A value for `col` that is not `than` — what a claim writes to show a value changing. Undefined when the field has only one. */
+  other(d: Draft, col: WorldColumn, than: ClaimValue | undefined): ClaimValue | undefined {
+    const choices = d.choices.get(col.name);
+    if (choices && choices.length) return choices.find((c) => c !== than);
+    if (col.type === 'Boolean') return than === true ? false : true;
+    return this.valueFor(d, col);
+  }
+
+  /** Makes a valid row of `collection` (and what it links to), and returns its name. */
+  row(collection: string, override: ClaimData = {}): string {
+    if (this.making.has(collection))
+      throw new Error(`A ${collection} cannot be made: following its required links leads back to ${collection}, so each needs the other to exist first.`);
+    this.making.add(collection);
+    const data = this.data(collection, override);
+    this.making.delete(collection);
+    const as = `${collection.charAt(0).toLowerCase()}${collection.slice(1)}${this.next()}`;
+    this.steps.push({ make: collection, as, data });
+    return as;
+  }
+
+  /** The data a valid row would carry, without making it. */
+  data(collection: string, override: ClaimData = {}): ClaimData {
+    const d = this.byName.get(collection)!;
+    const data: ClaimData = {};
+    for (const col of d.collection.columns) {
+      if (col.name in override || !col.required) continue;
+      const v = this.valueFor(d, col);
+      if (v !== undefined) data[col.name] = v;
+    }
+    return Object.assign(data, override);
+  }
+}
+
+function claimsFor(
+  schema: WorldSchema,
+  ruled: Array<{ src: WorldClaim['from']; key: string; d: Draft; rule: ProjectedRule }>,
+  linked: Array<{ r: Relation; d: Draft; field: ProjectedField; col: string }>,
+  drafts: Draft[]
+): WorldClaim[] {
+  const byName = new Map(drafts.map((d) => [d.collection.name, d]));
+  const claims: WorldClaim[] = [];
+  const idOf = (d: Draft): string => ('relation' in d.collection.made ? d.collection.made.relation : 'history' in d.collection.made ? `${d.collection.made.noun}-history` : d.collection.made.noun);
+  const relationOf = (c: WorldColumn, d: Draft): WorldClaim['from'] => {
+    const r = d.madeBy.get(c.name);
+    const made = d.collection.made;
+    return r ? { relation: r } : 'relation' in made ? { relation: made.relation } : { noun: made.noun };
+  };
+
+  for (const d of drafts) {
+    const c = d.collection.name;
+    // A required field: a row without it is refused; the same row with it is made (the control).
+    for (const col of d.collection.columns.filter((x) => x.required)) {
+      const s = new Seeder(byName);
+      const full = s.data(c);
+      s.steps.push({ make: c, as: 'whole', data: full });
+      const without = { ...s.data(c) };
+      delete without[col.name];
+      s.steps.push({ refuse: c, data: without });
+      claims.push({
+        id: `${idOf(d)}/${col.name}-is-required`,
+        says: `${a(idOf(d))} cannot exist without its ${col.name}`,
+        from: relationOf(col, d),
+        held: true,
+        mutant: { dropRequired: { collection: c, field: col.name } },
+        steps: s.steps
+      });
+    }
+    // A choice: its first value is taken; a value off the list is refused.
+    for (const check of d.collection.checks) {
+      if (!('oneOf' in check)) continue; // all-or-none: claimed with its rule below
+      const s = new Seeder(byName);
+      s.row(c, { [check.field]: check.oneOf[0] });
+      s.steps.push({ refuse: c, data: s.data(c, { [check.field]: `not ${check.oneOf.join(' or ')}` }) });
+      const col = d.collection.columns.find((x) => x.name === check.field)!;
+      claims.push({
+        id: `${idOf(d)}/${check.field}-is-one-of-its-list`,
+        says: `${a(idOf(d))}'s ${check.field} is one of ${check.oneOf.join(', ')}, and nothing else`,
+        from: relationOf(col, d),
+        held: true,
+        mutant: { dropCheck: { collection: c, field: check.field } },
+        steps: s.steps
+      });
+    }
+    // A unique rule: one value once; another value is taken (the control); with `where`, a closed
+    // row with the same value is taken too, so the claim also fails if the rule forgets `where`.
+    for (const ix of d.collection.indexes) {
+      const s = new Seeder(byName);
+      const shared: ClaimData = {};
+      for (const f of ix.fields) {
+        const col = d.collection.columns.find((x) => x.name === f)!;
+        shared[f] = s.valueFor(d, col)!;
+      }
+      s.row(c, shared);
+      const other: ClaimData = {};
+      for (const f of ix.fields) other[f] = s.valueFor(d, d.collection.columns.find((x) => x.name === f)!)!;
+      s.row(c, other);
+      s.steps.push({ refuse: c, data: s.data(c, shared) });
+      if (ix.where) {
+        const closed: ClaimData = { ...shared };
+        for (const f of Object.keys(ix.where)) closed[f] = { date: '2026-02-01T00:00:00.000Z' };
+        s.row(c, closed);
+      }
+      const rule = ruled.find((x) => x.d === d && 'unique' in x.rule.holds && x.rule.holds.unique.map(fieldName).join() === ix.fields.join());
+      const col = d.collection.columns.find((x) => x.name === ix.fields[0])!;
+      claims.push({
+        id: `${idOf(d)}/${ix.fields.join('-')}-is-unique`,
+        says: rule ? rule.rule.says : `no two ${idOf(d)}s have the same ${ix.fields.join(' and ')}`,
+        from: rule ? rule.src : relationOf(col, d),
+        held: true,
+        mutant: { dropIndex: { collection: c, fields: ix.fields.slice() } },
+        steps: s.steps
+      });
+    }
+  }
+
+  // Pairs on a Links field: made twice, kept once (held); or said to be twice (measured not held).
+  for (const { key, src, d, rule } of ruled) {
+    const h = rule.holds;
+    if (!('pairOnce' in h) && !('pairTwice' in h)) continue;
+    const field = fieldName('pairOnce' in h ? h.pairOnce : h.pairTwice);
+    const col = d.collection.columns.find((x) => x.name === field)!;
+    const s = new Seeder(byName);
+    const a = s.row(d.collection.name);
+    const b = s.row(col.targetClass!);
+    s.steps.push({ pair: d.collection.name, row: a, field, with: b }, { pair: d.collection.name, row: a, field, with: b });
+    s.steps.push({ paired: d.collection.name, row: a, field, count: 'pairOnce' in h ? 1 : 2 });
+    const id = `${key}/${'pairOnce' in h ? 'paired-once' : 'paired-twice'}`;
+    if ('pairOnce' in h) {
+      claims.push({ id, says: rule.says, from: src, held: true, mutant: { linksAsList: { collection: d.collection.name, field } }, steps: s.steps });
+    } else {
+      claims.push({ id, says: rule.says, from: src, held: false, steps: s.steps });
+      const n = schema.notHeld.find((x) => x.collection === d.collection.name && x.says === rule.says);
+      if (n) n.claim = id;
+    }
+  }
+
+  // ONT-011 step 2: a detail that must be there once another is set, and not before — both or neither
+  // (held, an all-or-none check): a row with both is made; one with only the case, and one with only the
+  // detail, are refused.
+  for (const { key, src, d, rule } of ruled) {
+    const h = rule.holds;
+    if (!('onlyWhen' in h) || !h.required || h.is !== undefined) continue;
+    const c = d.collection.name;
+    const f = fieldName(h.onlyWhen);
+    const w = fieldName(h.when);
+    const fc = d.collection.columns.find((x) => x.name === f);
+    const wc = d.collection.columns.find((x) => x.name === w);
+    if (!fc || !wc) continue;
+    const s = new Seeder(byName);
+    const fv = s.valueFor(d, fc);
+    const wv = s.valueFor(d, wc);
+    if (fv === undefined || wv === undefined) continue;
+    s.row(c, { [f]: fv, [w]: wv });
+    s.steps.push({ refuse: c, data: s.data(c, { [w]: wv }) });
+    s.steps.push({ refuse: c, data: s.data(c, { [f]: fv }) });
+    claims.push({ id: `${key}/${f}-with-${w}`, says: rule.says, from: src, held: true, mutant: { dropAllOrNone: { collection: c, fields: [f, w] } }, steps: s.steps });
+  }
+
+  // ONT-011 step 4: a secret detail (held, a per-field read rule) — the record is made with it, the store's
+  // own key reads it back, and a person signed in reads the record without it.
+  for (const { key, src, d, rule } of ruled) {
+    const h = rule.holds;
+    if (!('secret' in h)) continue;
+    const c = d.collection.name;
+    const f = fieldName(h.secret);
+    const col = d.collection.columns.find((x) => x.name === f);
+    const s = new Seeder(byName);
+    const v = col && s.valueFor(d, col);
+    if (v === undefined || typeof v === 'object') continue;
+    const row = s.row(c, { [f]: v });
+    s.steps.push({ holds: c, row, field: f, value: v });
+    s.steps.push({ unseen: c, row, field: f });
+    claims.push({ id: `${key}/${f}-is-not-for-everyone`, says: rule.says, from: src, held: true, mutant: { dropFieldRule: { collection: c, field: f } }, steps: s.steps });
+  }
+
+  // ONT-015: a number the store hands out (held, the column's series) — two records made without one each get
+  // one, the second goes, and the next record made does not get its number back.
+  for (const { key, src, d, rule } of ruled) {
+    const h = rule.holds;
+    if (!('series' in h)) continue;
+    const c = d.collection.name;
+    const f = fieldName(h.series);
+    if (!d.collection.columns.find((x) => x.name === f)?.series) continue;
+    const s = new Seeder(byName);
+    const first = s.row(c);
+    const second = s.row(c);
+    s.steps.push({ numbered: c, field: f, rows: [first, second] });
+    s.steps.push({ remove: c, row: second });
+    const third = s.row(c);
+    s.steps.push({ numbered: c, field: f, rows: [first, second, third] });
+    claims.push({ id: `${key}/${f}-never-used-again`, says: rule.says, from: src, held: true, mutant: { dropSeries: { collection: c, field: f } }, steps: s.steps });
+  }
+
+  // Not held, measured: steps that say the rule, which no engine passes today.
+  for (const { key, src, d, rule } of ruled) {
+    const h = rule.holds;
+    const c = d.collection.name;
+    const s = new Seeder(byName);
+    let what = '';
+    // ONT-014: held — the backend keeps these inside the write (`onlyWhile`), on every engine.
+    const frozen = d.collection.onlyWhile?.update?.frozen?.fields;
+    const hint = (row: Record<string, string | number | boolean> | undefined): ClaimData => ({ ...(row ?? {}) });
+    if ('moves' in h) {
+      // ONT-011 step 2: a move the rule allows goes through; the move back is refused.
+      const field = fieldName(h.moves);
+      const step = Object.entries(h.from).find(([old, m]) => m.to.length > 0 && h.from[m.to[0]] !== undefined && !h.from[m.to[0]].to.includes(old));
+      if (!step) continue;
+      const [old, m] = step;
+      const row = s.row(c, { [field]: old });
+      s.steps.push({ change: c, row, data: { [field]: m.to[0] }, byPerson: true });
+      s.steps.push({ change: c, row, data: { [field]: old }, refused: true, byPerson: true });
+      s.steps.push({ holds: c, row, field, value: m.to[0] });
+      claims.push({ id: `${key}/${field}-never-goes-back`, says: rule.says, from: src, held: true, mutant: { dropOnlyWhile: { collection: c, moves: field } }, steps: s.steps });
+      continue;
+    } else if ('frozen' in h) {
+      // ONT-011 step 2: on a row the rule binds, a frozen field is refused and an excepted one changes; on a row it frees, the field changes.
+      const own = new Set([...(h.except ?? []).map(fieldName), ...Object.keys(h.heldOn ?? {})]);
+      const col = d.collection.columns.find((x) => !own.has(x.name) && (h.frozen === '*' || h.frozen.map(fieldName).includes(x.name)) && (x.type === 'String' || x.type === 'Number' || x.type === 'Boolean' || x.type === 'Date'));
+      if (!col) continue;
+      const first = s.valueFor(d, col);
+      const then = s.other(d, col, first);
+      if (first === undefined || then === undefined) continue;
+      const bound = s.row(c, { ...hint(h.heldOn), [col.name]: first });
+      s.steps.push({ change: c, row: bound, data: { [col.name]: then }, refused: true, byPerson: true });
+      // Every excepted field still changes on the bound row — the person's answer ("note may still change")
+      // as much as the kind's own (`agreedAt`), so the mutant that forgets the answer is caught by it.
+      for (const free of (h.except ?? []).map(fieldName)) {
+        if (Object.keys(h.heldOn ?? {}).includes(free)) continue;
+        const fc = d.collection.columns.find((x) => x.name === free && (x.type === 'String' || x.type === 'Number' || x.type === 'Boolean' || x.type === 'Date'));
+        const v = fc && s.valueFor(d, fc);
+        if (v !== undefined) s.steps.push({ change: c, row: bound, data: { [free]: v }, byPerson: true });
+      }
+      if (h.unless && h.freeOn) {
+        const loose = s.row(c, { ...hint(h.freeOn), [col.name]: first });
+        s.steps.push({ change: c, row: loose, data: { [col.name]: then }, byPerson: true });
+      }
+      claims.push({ id: `${key}/frozen-once-${Object.values(h.heldOn ?? { on: 'made' })[0]}`, says: rule.says, from: src, held: true, mutant: { dropOnlyWhile: { collection: c, frozen: true } }, steps: s.steps });
+      continue;
+    } else if ('setOnce' in h) {
+      const field = fieldName(h.setOnce);
+      if (frozen === '*' && !d.collection.onlyWhile?.update?.frozen?.unless) continue; // the whole record is never edited: that claim says it
+      const col = d.collection.columns.find((x) => x.name === field)!;
+      const first = s.valueFor(d, col);
+      const then = s.other(d, col, first);
+      if (first === undefined || then === undefined) continue;
+      // Under a freeze with an `unless` on the same collection (a settled noun's `"*"`, or ONT-013's rule on
+      // a list of fields: the store keeps one condition per collection, so it binds this field too), the
+      // row must be one the freeze binds.
+      const conditioned = ruled.find((x) => x.d === d && 'frozen' in x.rule.holds && x.rule.holds.unless)?.rule.holds as { heldOn?: Record<string, string | number | boolean> } | undefined;
+      const bound = Object.fromEntries(Object.entries(conditioned?.heldOn ?? {}));
+      const row = s.row(c, { ...bound, [field]: first });
+      s.steps.push({ change: c, row, data: { [field]: then }, refused: true, byPerson: true });
+      claims.push({ id: `${key}/${field}-is-set-once`, says: rule.says, from: src, held: true, mutant: { dropOnlyWhile: { collection: c, setOnce: field } }, steps: s.steps });
+      continue;
+    } else if ('neverEdited' in h) {
+      const col = d.collection.columns.find((x) => x.type === 'String' || x.type === 'Date' || x.type === 'Boolean' || x.type === 'Number');
+      if (!col) continue;
+      const first = col.required ? undefined : s.valueFor(d, col);
+      const row = s.row(c, first === undefined ? {} : { [col.name]: first });
+      const made = s.steps.find((x) => 'make' in x && x.as === row) as { data: ClaimData } | undefined;
+      const then = s.other(d, col, made?.data[col.name]);
+      if (then === undefined) continue;
+      s.steps.push({ change: c, row, data: { [col.name]: then }, refused: true, byPerson: true });
+      claims.push({ id: `${key}/is-never-edited`, says: rule.says, from: src, held: true, mutant: { dropOnlyWhile: { collection: c, neverEdited: true } }, steps: s.steps });
+      continue;
+    } else if ('neverDeleted' in h) {
+      const row = s.row(c, hint(h.heldOn));
+      s.steps.push({ remove: c, row, refused: true, byPerson: true });
+      if (h.unless && h.freeOn) {
+        const loose = s.row(c, hint(h.freeOn));
+        s.steps.push({ remove: c, row: loose, byPerson: true });
+        s.steps.push({ gone: c, row: loose });
+      }
+      claims.push({ id: `${key}/is-never-deleted`, says: rule.says, from: src, held: true, mutant: { dropOnlyWhile: { collection: c, neverDeleted: true } }, steps: s.steps });
+      continue;
+    } else if ('notUnderItself' in h) {
+      const field = fieldName(h.notUnderItself);
+      const row = s.row(c);
+      s.steps.push({ change: c, row, data: { [field]: { ref: row } }, refused: true });
+      what = `${field}-never-leads-back`;
+    } else if ('onlyOne' in h) {
+      // ONT-011 step 2: a second record is taken today — measured, so the day a create rule holds it, this flips.
+      s.row(c);
+      s.steps.push({ refuse: c, data: s.data(c) });
+      what = 'is-the-only-one';
+    } else if ('series' in h) {
+      // ONT-011 step 2: with no look said there is no series, and a number used again after a delete is taken —
+      // measured, so a world that says the look gets ONT-015's held claim above instead.
+      const field = fieldName(h.series);
+      const col = d.collection.columns.find((x) => x.name === field)!;
+      if (col.series) continue;
+      const value = s.valueFor(d, col)!;
+      const row = s.row(c, { [field]: value });
+      s.steps.push({ remove: c, row });
+      s.steps.push({ refuse: c, data: s.data(c, { [field]: value }) });
+      what = `${field}-never-used-again`;
+    } else continue;
+    const id = `${key}/${what}`;
+    claims.push({ id, says: rule.says, from: src, held: false, steps: s.steps });
+    const n = schema.notHeld.find((x) => x.collection === c && x.says === rule.says);
+    if (n) n.claim = id;
+  }
+  for (const { r, d, field, col } of linked) {
+    const c = d.collection.name;
+    const column = d.collection.columns.find((x) => x.name === col)!;
+    if (column.type !== 'Pointer' || !column.targetClass || column.targetClass === USERS_COLLECTION) continue;
+    const s = new Seeder(byName);
+    const target = s.row(column.targetClass);
+    const row = s.row(c, { [col]: { ref: target } });
+    if (field.whenTargetGoes === 'blocks') s.steps.push({ remove: column.targetClass, row: target, refused: true });
+    else {
+      s.steps.push({ remove: column.targetClass, row: target });
+      s.steps.push(field.whenTargetGoes === 'goes-too' ? { gone: c, row } : { empty: c, row, field: col });
+    }
+    const id = `${r.id}/${col}-${field.whenTargetGoes}`;
+    const held = column.whenTargetGoes !== undefined;
+    claims.push({
+      id,
+      says: goesWords(field, holders(d.collection.made)),
+      from: { relation: r.id },
+      held,
+      ...(held ? { mutant: { dropWhenTargetGoes: { collection: c, field: col } } } : {}),
+      steps: s.steps
+    });
+    const n = schema.notHeld.find((x) => x.collection === c && x.field === col && x.why === WHY.whenTargetGoes);
+    if (n) n.claim = id;
+  }
+
+  const seen = new Set<string>();
+  for (const cl of claims) {
+    if (seen.has(cl.id)) throw new Error(`two claims are called ${cl.id}`);
+    seen.add(cl.id);
+  }
+  return claims;
+}
+
+/** The schema with one held rule taken out: what the claim that names it must fail on. */
+export function applyMutant(schema: WorldSchema, mutant: ClaimMutant): WorldSchema {
+  const copy: WorldSchema = JSON.parse(JSON.stringify(schema));
+  const where = JSON.stringify(mutant);
+  const coll = (name: string): WorldCollection => {
+    const c = copy.collections.find((x) => x.name === name);
+    if (!c) throw new Error(`The mutant ${where} names a collection the schema does not have.`);
+    return c;
+  };
+  const column = (c: WorldCollection, field: string): WorldColumn => {
+    const col = c.columns.find((x) => x.name === field);
+    if (!col) throw new Error(`The mutant ${where} names a field ${c.name} does not have.`);
+    return col;
+  };
+  // A mutant that takes out nothing would leave the claim passing for a reason the claim never names.
+  const takesOut = (before: number, after: number): void => {
+    if (before === after) throw new Error(`The mutant ${where} takes nothing out of the schema.`);
+  };
+  if ('dropRequired' in mutant) {
+    const col = column(coll(mutant.dropRequired.collection), mutant.dropRequired.field);
+    takesOut(col.required ? 1 : 0, 0);
+    delete col.required;
+  } else if ('dropIndex' in mutant) {
+    const c = coll(mutant.dropIndex.collection);
+    const before = c.indexes.length;
+    c.indexes = c.indexes.filter((i) => i.fields.join() !== mutant.dropIndex.fields.join());
+    takesOut(before, c.indexes.length);
+  } else if ('dropCheck' in mutant) {
+    const c = coll(mutant.dropCheck.collection);
+    const before = c.checks.length;
+    c.checks = c.checks.filter((k) => !('oneOf' in k) || k.field !== mutant.dropCheck.field);
+    takesOut(before, c.checks.length);
+  } else if ('dropAllOrNone' in mutant) {
+    const c = coll(mutant.dropAllOrNone.collection);
+    const before = c.checks.length;
+    const fields = [...mutant.dropAllOrNone.fields].sort().join();
+    c.checks = c.checks.filter((k) => !('allOrNone' in k) || [...k.allOrNone].sort().join() !== fields);
+    takesOut(before, c.checks.length);
+  } else if ('dropFieldRule' in mutant) {
+    const c = coll(mutant.dropFieldRule.collection);
+    takesOut(c.fields?.[mutant.dropFieldRule.field] ? 1 : 0, 0);
+    delete c.fields![mutant.dropFieldRule.field];
+    if (!Object.keys(c.fields!).length) delete c.fields;
+  } else if ('dropSeries' in mutant) {
+    const col = column(coll(mutant.dropSeries.collection), mutant.dropSeries.field);
+    takesOut(col.series ? 1 : 0, 0);
+    delete col.series;
+  } else if ('dropWhenTargetGoes' in mutant) {
+    const col = column(coll(mutant.dropWhenTargetGoes.collection), mutant.dropWhenTargetGoes.field);
+    takesOut(col.whenTargetGoes ? 1 : 0, 0);
+    delete col.whenTargetGoes;
+  } else if ('dropOnlyWhile' in mutant) {
+    const m = mutant.dropOnlyWhile;
+    const c = coll(m.collection);
+    const ow = c.onlyWhile ?? {};
+    if ('neverDeleted' in m) {
+      takesOut(ow.delete ? 1 : 0, 0);
+      delete ow.delete;
+    } else if ('neverEdited' in m) {
+      takesOut(ow.update?.frozen?.fields === '*' ? 1 : 0, 0);
+      delete ow.update;
+    } else if ('moves' in m) {
+      const moves = ow.update?.moves ?? {};
+      takesOut(moves[m.moves] ? 1 : 0, 0);
+      delete moves[m.moves];
+      if (ow.update && !Object.keys(moves).length) delete ow.update.moves;
+    } else if ('frozen' in m) {
+      takesOut(ow.update?.frozen ? 1 : 0, 0);
+      if (ow.update) {
+        delete ow.update.frozen;
+        delete ow.update.except;
+      }
+    } else {
+      const fields = ow.update?.frozen?.fields;
+      const left = Array.isArray(fields) ? fields.filter((f) => f !== m.setOnce) : [];
+      takesOut(Array.isArray(fields) ? fields.length : 0, left.length);
+      if (left.length) ow.update = { ...(ow.update ?? {}), frozen: { ...(ow.update?.frozen ?? {}), fields: left } };
+      else if (ow.update) delete ow.update.frozen;
+    }
+    if (ow.update && !Object.keys(ow.update).length) delete ow.update;
+    if (ow.update || ow.delete) c.onlyWhile = ow;
+    else delete c.onlyWhile;
+  } else {
+    const col = column(coll(mutant.linksAsList.collection), mutant.linksAsList.field);
+    takesOut(col.type === 'Relation' ? 1 : 0, 0);
+    col.kind = 'list';
+    col.type = 'Array';
+    delete col.targetClass;
+  }
+  return copy;
+}
+
+/** One `POST /admin/schema` body: a collection, its fields, rules and indexes, and what it is in words. */
+export interface SchemaPush {
+  action: 'createTable';
+  table: string;
+  description: string;
+  columns: Array<Omit<WorldColumn, 'kind'>>;
+  checks: WorldCheck[];
+  indexes: WorldIndex[];
+}
+
+/**
+ * The write (ONT-003 §3.4): the schema as the backend's own schema route takes it, one body per
+ * collection, in the schema's order. Never SQL — the backend owns the engine, and the manager then
+ * shows what was made. `kind` stays behind: the route stores a storage type, and the manager reads
+ * the tile back from it and the collection's rules (`fieldKinds.ts` `kindOf`).
+ */
+export function schemaPushes(schema: WorldSchema): SchemaPush[] {
+  return schema.collections.map((c) => ({
+    action: 'createTable',
+    table: c.name,
+    description: c.description,
+    columns: c.columns.map(({ kind, relation, ...col }) => (void kind, void relation, col)),
+    checks: c.checks.map((k) => ('allOrNone' in k ? { allOrNone: k.allOrNone.slice() } : { field: k.field, oneOf: k.oneOf.slice() })),
+    indexes: c.indexes.map((i) => ({ ...i, fields: i.fields.slice() }))
+  }));
+}
+
+/** The schema as text: two-space JSON and a final newline, so two runs compare byte for byte. */
+export function schemaText(schema: WorldSchema): string {
+  return JSON.stringify(schema, null, 2) + '\n';
+}

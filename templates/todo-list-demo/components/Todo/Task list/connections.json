@@ -71,18 +71,6 @@
     },
     {
       "fromId": "tlEach",
-      "fromProperty": "itemOutputSignal-up",
-      "toId": "tlOut",
-      "toProperty": "up"
-    },
-    {
-      "fromId": "tlEach",
-      "fromProperty": "itemOutputSignal-down",
-      "toId": "tlOut",
-      "toProperty": "down"
-    },
-    {
-      "fromId": "tlEach",
       "fromProperty": "itemOutputSignal-close",
       "toId": "tlOut",
       "toProperty": "close"
@@ -98,6 +86,48 @@
       "fromProperty": "itemOutput-title",
       "toId": "tlOut",
       "toProperty": "taskTitle"
+    },
+    {
+      "fromId": "tlRows",
+      "fromProperty": "this",
+      "toId": "tlDrag",
+      "toProperty": "in-host"
+    },
+    {
+      "fromId": "tlRows",
+      "fromProperty": "didMount",
+      "toId": "tlMounts",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tlMounts",
+      "fromProperty": "out-mounts",
+      "toId": "tlDrag",
+      "toProperty": "in-mounted"
+    },
+    {
+      "fromId": "tlIn",
+      "fromProperty": "rows",
+      "toId": "tlDrag",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "tlDrag",
+      "fromProperty": "out-itemId",
+      "toId": "tlOut",
+      "toProperty": "moveId"
+    },
+    {
+      "fromId": "tlDrag",
+      "fromProperty": "out-toIndex",
+      "toId": "tlOut",
+      "toProperty": "moveTo"
+    },
+    {
+      "fromId": "tlDrag",
+      "fromProperty": "out-moved",
+      "toId": "tlOut",
+      "toProperty": "moved"
     }
   ]
 }

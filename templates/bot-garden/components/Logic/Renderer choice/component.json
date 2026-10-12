@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b46bd4a7-97cb-50be-8d93-429059eb3ced",
+  "name": "Renderer choice",
+  "path": "/Logic/Renderer choice",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The renderer after a fallback or the grown-ups’ switch. Runs on Go; answers Ran once its outputs are set."
+}

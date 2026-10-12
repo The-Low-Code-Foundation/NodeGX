@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "66f63e4f-a02e-48c6-a754-2f61ed0ec345",
+  "name": "saveLessonDraft",
+  "path": "/#__cloud__/saveLessonDraft",
+  "type": "cloud",
+  "created": "2026-10-01T18:00:00.000Z",
+  "modified": "2026-10-01T18:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Save a lesson for one learner and one step as a DRAFT nobody else sees, after the product's own lesson check. Send `version` to replace an existing draft (TASK-L189)."
+}

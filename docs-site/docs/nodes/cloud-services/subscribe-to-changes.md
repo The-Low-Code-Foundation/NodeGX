@@ -27,6 +27,13 @@ When something in the app should react to a change another user made, without ow
 |---|---|---|---|
 | `enabled` | Boolean | `true` | Hold the subscription open. Turn it off to stop receiving changes without deleting the node — the connection is closed and Subscribed goes false. On by default: this node has nothing else to do |
 
+### What each input does
+
+**Enabled** (`enabled`)
+
+- a change (on is anything truthy): at the frame's end the subscription held is closed — Subscribed and Realtime Status sent when one was held — and, on, with a Class and a Backend the project has, a new one is opened: Realtime Status is connecting, then whatever the backend tells
+- the value it already holds: nothing — the subscription stays as it is
+
 ## Outputs
 
 ### Values

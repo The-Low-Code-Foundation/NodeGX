@@ -69,6 +69,36 @@
  */
 
 /**
+ * P109 ISL-009 — the encoding of a kit node whose dynamism is declared groups only, at least one of
+ * them a `namedports/derived` rule; `null` for anything else (a runtime half needs its hook driven).
+ * Same pattern shape as the built-in generator's `withDerivedRules` (`scripts/node-catalog/lib/
+ * derive-encoding.js`), which this package cannot import.
+ *
+ * @param {{ mechanisms: string[], declaredPortGroups?: unknown[] }} dynamicPorts
+ */
+function derivedOnlyEncoding(dynamicPorts) {
+  if (dynamicPorts.mechanisms.some((m) => m !== 'declared-port-groups')) return null;
+  const rules = (dynamicPorts.declaredPortGroups || []).filter(
+    (g) => g && /** @type {any} */ (g).name === 'namedports/derived'
+  );
+  if (!rules.length) return null;
+  const patterns = rules.map((/** @type {any} */ rule) => {
+    const accept = rule.accept || {};
+    return {
+      pattern: rule.port.name.split('{{*}}').join('<name>'),
+      plug: rule.port.plug || 'input',
+      variables: {
+        name: `one of the names listed in the \`${rule.parameter}\` parameter` + (accept.rule ? `; ${accept.rule}` : '')
+      },
+      ...(rule.port.group ? { group: rule.port.group } : {}),
+      ...(typeof rule.port.type === 'string' ? { valueType: rule.port.type } : {}),
+      example: rule.port.name.split('{{*}}').join(accept.example || 'name')
+    };
+  });
+  return { known: true, seededBy: rules.map((/** @type {any} */ r) => r.parameter), patterns };
+}
+
+/**
  * `providedBy` for a node a project's own kit declares.
  *
  * The generated `CatalogNode['providedBy']` union covers the four shipped
@@ -235,6 +265,15 @@ function toDynamicPorts(nodeType) {
   for (const entry of declared) {
     if (!entry || typeof entry !== 'object') continue;
     const e = /** @type {Record<string, unknown>} */ (entry);
+    // P109 ISL-009 — a `namedports/derived` rule (every visual node's Data Attributes list, which a
+    // kit node built with `createNodeFromReactComponent` inherits) is DECLARED: its ports are the
+    // names in the node's own list parameter, and the validator enumerates them from this very entry
+    // (`CatalogIndex.derivedPortNames`). Kept verbatim. Read as a `port` entry, it made every kit
+    // visual node `runtime-discovered`, and CN-010's port checks on kit nodes stopped running.
+    if (e.name === 'namedports/derived') {
+      declaredPortGroups.push(/** @type {any} */ (JSON.parse(JSON.stringify(e))));
+      continue;
+    }
     // Checked first and independently of the group shape: an entry may carry
     // both, and the runtime half is the one that must not be under-claimed.
     if (e.template !== undefined || e.port !== undefined || e.channelPort !== undefined) runtime = true;
@@ -350,8 +389,8 @@ function sameRuntimeList(a, b) {
  * Map one runtime node-library entry to a catalog-shaped overlay node.
  *
  * Derivations mirror `buildCatalog` exactly where the payload allows it —
- * `isVisual` is `category === 'Visual'`, `allowAsChild`/`allowAsExportRoot`
- * follow from it, `displayName` falls back to the type name. `inNodePicker` is
+ * `isVisual` is `category === 'Visual'`, the child/parent rules are the
+ * payload's own, `displayName` falls back to the type name. `inNodePicker` is
  * true for every non-deprecated kit node because `buildCatalog`'s own rule is
  * `!deprecated && (inPickerIndex || !!module)` and `registerModule` stamps
  * `module` onto every node a module registers.
@@ -395,13 +434,19 @@ function toOverlayNode(nodeType, origin) {
   if (nodeType.searchTags !== undefined) node.searchTags = nodeType.searchTags;
   if (nodeType.module !== undefined) node.module = nodeType.module;
   if (nodeType.shortDocs !== undefined) node.shortDesc = nodeType.shortDocs;
+  // The child/parent rules are the export's own answer, copied rather than derived again (P107 s90, as the
+  // built-in catalog has done since s89): `generateNodeLibrary` already makes a Visual node a child and an export
+  // root. Until s90 this re-applied that derivation; over the kits in 203 projects (65 types) the two never
+  // differed, so the copy only ever disagreed with a hand-written payload the runtime cannot produce.
   if (nodeType.singleton) node.singleton = true;
-  if (isVisual || nodeType.allowAsChild) node.allowAsChild = true;
+  if (nodeType.allowAsChild) node.allowAsChild = true;
   if (nodeType.allowChildrenWithCategory !== undefined) {
     node.allowChildrenWithCategory = nodeType.allowChildrenWithCategory;
   }
   if (nodeType.allowAsExportRoot !== undefined) node.allowAsExportRoot = nodeType.allowAsExportRoot;
-  else if (isVisual) node.allowAsExportRoot = true;
+  // P107 R24 (s90): the port whose value titles the card, which the agent names a kit node by, as a built-in.
+  if (nodeType.usePortAsLabel !== undefined) node.usePortAsLabel = nodeType.usePortAsLabel;
+  if (nodeType.portLabelTruncationMode !== undefined) node.portLabelTruncationMode = nodeType.portLabelTruncationMode;
   if (nodeType.useVariants) node.useVariants = true;
   if (nodeType.visualStates !== undefined) node.visualStates = nodeType.visualStates;
 
@@ -427,8 +472,13 @@ function toOverlayNode(nodeType, origin) {
   // A node that DOES declare `dynamicports` keeps `known: false`, which stays true
   // for the reason the module header gives: the formulas come from driving the
   // hook, and a node-library payload cannot express that.
+  //
+  // P109 ISL-009 — except where there is no hook to drive. Every kit visual node inherits the Data
+  // Attributes rule (`namedports/derived`), whose names are the node's own list: when that and
+  // conditional groups are ALL it declares, the formulas are known, read from the rule itself the way
+  // the built-in generator's `withDerivedRules` reads them.
   node.parameterEncoding = node.dynamicPorts
-    ? {
+    ? derivedOnlyEncoding(node.dynamicPorts) || {
         known: false,
         reason:
           'Kit node. Parameter-key formulas are derived by driving the node’s dynamic-port hook, ' +

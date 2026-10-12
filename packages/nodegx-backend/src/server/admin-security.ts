@@ -43,6 +43,7 @@ import {
   PUBLIC_WRITE_DEFAULT_RATE_LIMIT,
   canAccessRecord,
   effectiveFunctionRule,
+  onlyWhileSchemaProblems,
   validateSecurityConfig,
   validateScopes,
   ruleAllows
@@ -89,6 +90,12 @@ function roleDescription(raw: unknown): string | undefined {
 export function configEtag(config: SecurityConfig): string {
   return '"' + createHash('sha1').update(JSON.stringify(config)).digest('hex').slice(0, 20) + '"';
 }
+
+/**
+ * P116 ONT-012 — the collection keys the permissions page does not draw, so a save or a revert from
+ * it keeps them (see `putCollection`).
+ */
+const UNDRAWN_KEYS = ['onlyWhile', 'fields'] as const;
 
 export class AdminSecurityRoutes {
   private readonly security: SecurityState;
@@ -140,6 +147,12 @@ export class AdminSecurityRoutes {
     );
   }
 
+  /** P116 ONT-014 AC3: the rules a write sends, read against the schema they will be kept on. */
+  private schemaProblems(collections: SecurityConfig['collections']): string[] {
+    const sm = this.facade.schemaManager;
+    return sm ? onlyWhileSchemaProblems(collections, (c) => sm.getTableSchema(c)) : [];
+  }
+
   async putPermissions(ctx: RequestContext): Promise<void> {
     const body = await readJSONBody(ctx.req);
     const candidate = (body.config !== undefined ? body.config : body) as SecurityConfig;
@@ -156,6 +169,7 @@ export class AdminSecurityRoutes {
       }
     }
     const errors = validateSecurityConfig(candidate);
+    if (errors.length === 0) errors.push(...this.schemaProblems(candidate.collections));
     if (errors.length > 0) {
       throw new HttpError(400, `Invalid security config:\n${errors.map((e) => `- ${e}`).join('\n')}`);
     }
@@ -186,27 +200,41 @@ export class AdminSecurityRoutes {
     const name = ctx.params.name;
     const body = await readJSONBody(ctx.req);
 
-    const KNOWN = ['permissions', 'creatorOwns'];
+    const KNOWN = ['permissions', 'creatorOwns', ...UNDRAWN_KEYS];
     const unknown = Object.keys(body).filter((k) => !KNOWN.includes(k));
     if (unknown.length > 0) {
       throw new HttpError(
         400,
         `Unknown field(s) ${unknown.map((k) => `"${k}"`).join(', ')} for collection "${name}". ` +
-          `Expected { "permissions": { find, get, create, update, delete, count }, "creatorOwns": boolean }. ` +
+          `Expected { "permissions": { find, get, create, update, delete, count }, "creatorOwns": boolean, "onlyWhile": { update?, delete? }, "fields": { <field>: { read } } }. ` +
           `Per-operation rules go INSIDE "permissions".`
       );
     }
-    if (body.permissions === undefined && body.creatorOwns === undefined) {
+    if (body.permissions === undefined && body.creatorOwns === undefined && UNDRAWN_KEYS.every((k) => body[k] === undefined)) {
       throw new HttpError(
         400,
-        `Nothing to set for collection "${name}". Send "permissions" and/or "creatorOwns"; ` +
+        `Nothing to set for collection "${name}". Send "permissions", "creatorOwns", "onlyWhile" and/or "fields"; ` +
           `to remove this collection's rules use DELETE.`
       );
     }
 
+    // P116 ONT-012: `onlyWhile` (WHEN) and `fields` (who reads one detail) are not drawn by the
+    // permissions page, which sends only the collection's WHO. So a body without one of them KEEPS
+    // the collection's (measured: the page's own save dropped `onlyWhile`, and a sent bill became
+    // editable), `null` takes it away, and a value replaces it. A body with only those keys keeps
+    // the WHO it had. `permissions` and `creatorOwns` keep their old meaning: the body says both.
+    const prior = this.security.config.collections[name];
     const entry: Record<string, unknown> = {};
     if (body.permissions !== undefined) entry.permissions = body.permissions;
     if (body.creatorOwns !== undefined) entry.creatorOwns = body.creatorOwns;
+    if (body.permissions === undefined && body.creatorOwns === undefined) {
+      if (prior?.permissions) entry.permissions = prior.permissions;
+      if (prior?.creatorOwns !== undefined) entry.creatorOwns = prior.creatorOwns;
+    }
+    for (const key of UNDRAWN_KEYS) {
+      if (body[key] !== undefined && body[key] !== null) entry[key] = body[key];
+      else if (body[key] === undefined && prior?.[key]) entry[key] = prior[key];
+    }
     ctx.audit({ collection: name, rules: entry });
 
     // Validate by candidate-mutating a copy of the whole config — one
@@ -214,6 +242,7 @@ export class AdminSecurityRoutes {
     const candidate = JSON.parse(JSON.stringify(this.security.config)) as SecurityConfig;
     candidate.collections[name] = entry as SecurityConfig['collections'][string];
     const errors = validateSecurityConfig(candidate);
+    if (errors.length === 0) errors.push(...this.schemaProblems({ [name]: candidate.collections[name] }));
     if (errors.length > 0) {
       throw new HttpError(400, `Invalid collection rules:\n${errors.map((e) => `- ${e}`).join('\n')}`);
     }
@@ -225,7 +254,13 @@ export class AdminSecurityRoutes {
   async deleteCollection(ctx: RequestContext): Promise<void> {
     const name = ctx.params.name;
     const existed = this.security.config.collections[name] !== undefined;
+    // P116 ONT-012: "revert to defaults" is about the collection's WHO; `onlyWhile` and `fields`
+    // have no default to revert to, so they stay — taken away only by sending them as `null`.
+    const prior = this.security.config.collections[name];
     delete this.security.config.collections[name];
+    const kept: Record<string, unknown> = {};
+    for (const key of UNDRAWN_KEYS) if (prior?.[key]) kept[key] = prior[key];
+    if (Object.keys(kept).length) this.security.config.collections[name] = kept as SecurityConfig['collections'][string];
     this.security.save();
     sendJSON(ctx.res, 200, { success: true, collection: name, removed: existed });
   }
@@ -465,6 +500,9 @@ export class AdminSecurityRoutes {
       reason: decision.reason,
       devOpen: this.security.devOpenActive
     };
+    // P116 ONT-004: allowed, but only the rows a path rule reaches — the manager
+    // shows a short list with this beside it rather than as a mystery.
+    if (decision.narrow) result.narrow = decision.narrow;
     // Optional row-level answer when a record (or its ACL) is supplied.
     if (decision.allowed && body.record !== undefined && body.record !== null) {
       const access = op === 'find' || op === 'get' ? 'read' : 'write';

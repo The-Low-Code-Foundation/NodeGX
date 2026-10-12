@@ -611,6 +611,52 @@ describe('§A States against states.ts, the whole node, frame by frame', () => {
     ]);
   });
 
+  test('A5 ISL-002 — the first state publishes a false as false and an empty text as the empty text, in both worlds, typed', () => {
+    const params = {
+      states: 'off,on',
+      values: 'flag,label,word',
+      'type-flag': 'boolean',
+      'type-label': 'string',
+      'type-word': 'string',
+      'value-off-flag': false,
+      'value-on-flag': true,
+      'value-off-label': '',
+      'value-on-label': 'x',
+      'value-off-word': 'no',
+      'value-on-word': 'yes'
+    };
+    const def = {
+      states: ['off', 'on'],
+      values: {
+        flag: { type: 'boolean', byState: { off: false, on: true } },
+        label: { type: 'string', byState: { off: '', on: 'x' } },
+        word: { type: 'string', byState: { off: 'no', on: 'yes' } }
+      },
+      useTransitions: true
+    };
+    const reads = ['flag', 'label', 'word', 'currentState'];
+    const script = passes({ 50: { pulses: ['to-on'] }, 100: { pulses: ['to-off'] } }, 150);
+    const typed = (trace: Trace) => trace.frames.map(([now, values]) => [now, Object.fromEntries(Object.entries(values).map(([k, v]) => [k, `${typeof v}:${String(v)}`]))]);
+    const want = interpreter(params, script, reads);
+    const got = emitted(statesLib, animateLib, def, undefined, script, reads);
+    // Before the fix both worlds read `number:0` for flag and label at 0 ms, and agreed with each other.
+    expect(typed(want)[0][1]).toEqual({ flag: 'boolean:false', label: 'string:', word: 'string:no', currentState: 'string:off' });
+    expect(typed(got)).toEqual(typed(want));
+    expect(got.events).toEqual(want.events);
+    // CONTROL — the emitted library with `|| 0` put back at the first jump disagrees on the first frame only.
+    const broken = loadStatesLib(
+      animateLib,
+      statesLibSource().replace(
+        '    m.values[v] = typed ? typed.value : m.def.values[v].byState[state] || 0;',
+        '    m.values[v] = m.def.values[v].byState[state] || 0;'
+      )
+    );
+    expect(statesLibSource()).toContain('    m.values[v] = typed ? typed.value : m.def.values[v].byState[state] || 0;');
+    const sabotaged = typed(emitted(broken, animateLib, def, undefined, script, reads));
+    expect(sabotaged[0][1]).toMatchObject({ flag: 'number:0', label: 'number:0' });
+    expect(sabotaged).not.toEqual(typed(want));
+  });
+
   test('A5 an authored State that is not the first: the node boots in the first state and animates to it, State Changed and all', () => {
     const script = passes({}, 800);
     const want = interpreter({ ...PANEL_PARAMS, currentState: 'bright' }, script, READS);
@@ -967,7 +1013,7 @@ describe('§B the translation — the fixture, then graphs mutated one fact at a
       expect(entry.status).toBe('translated');
       expect(entry.note).toContain('EXP-011 §49');
     }
-    expect(ledger.pickerCoverageFloor).toBe(118); // GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §61 the component-stack trio + §60 the component-object trio + §62 the relation pair + §63 Drag (session 86); §57 + §58 + §59 (session 85) // §51 added Component Children (session 79); §52 Script (session 80); §53 Run Tasks (session 81); §54 On App Error (session 82) §56 Filter Records
+    expect(ledger.pickerCoverageFloor).toBe(122); // EXP-011 §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §61 the component-stack trio + §60 the component-object trio + §62 the relation pair + §63 Drag (session 86); §57 + §58 + §59 (session 85) // §51 added Component Children (session 79); §52 Script (session 80); §53 Run Tasks (session 81); §54 On App Error (session 82) §56 Filter Records
   });
 });
 

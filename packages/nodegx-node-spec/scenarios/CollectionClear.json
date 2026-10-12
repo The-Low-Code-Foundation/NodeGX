@@ -1,0 +1,168 @@
+[
+  {
+    "name": "Do with no array bound: failure no-array, the reason on Error",
+    "because": "collectionnode-clear.ts :51-54 → collection-failure.ts :149-157",
+    "params": {},
+    "steps": [
+      {
+        "signal": "clear"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "A seeded array is emptied in place: done; emptying it again: unchanged",
+    "because": ":60-62 — wasEmpty read before set([])",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "collectionId": "abc"
+    },
+    "steps": [
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "signal": "clear"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Two Do pulses in one frame: done then unchanged, in press order — and the next frame re-reports nothing",
+    "because": ":42 a token per press, :44 each press's callback in order; the presses are consumed (NSP-013 s12: the trailing settle is what grades the reset — the generated sequences only killed it by luck, T4)",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "collectionId": "abc"
+    },
+    "steps": [
+      {
+        "signal": "clear"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "null on Array Id unbinds: the next Do fails",
+    "because": "collection-failure.ts :95-98",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "collectionId": "abc"
+    },
+    "steps": [
+      {
+        "set": "collectionId",
+        "value": null
+      },
+      {
+        "signal": "clear"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Do twice with no array bound (the second keeps the same Error), then bind and Do once: one done",
+    "because": ":44-63 — each frame's presses are settled and forgotten; s30: closes a mutant seed 20729's sequences left alive (afterInputs drop-set on the failure branch whose Error is unchanged)",
+    "params": {},
+    "steps": [
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "signal": "clear"
+      },
+      "settle",
+      "settle",
+      {
+        "set": "collectionId",
+        "value": "abc"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    }
+  }
+]

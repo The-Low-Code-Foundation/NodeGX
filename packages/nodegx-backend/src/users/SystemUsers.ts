@@ -70,6 +70,7 @@ import {
   AUDIT_SYSTEM_USER_DELETE,
   AUDIT_SYSTEM_USER_UPDATE
 } from '../ops/audit-actions';
+import { Sessions } from '../auth/sessions';
 import { hashPassword } from '../server/users';
 import { isAccountDisabled } from './accountColumns';
 
@@ -133,6 +134,8 @@ const CREATE_RESERVED_KEYS = ['username', 'email', 'emailVerified'];
 
 export interface SystemUsersDeps {
   facade: IStorageFacade;
+  /** ISL-040: the backend's one session reader (`SecurityState.sessions`). Absent: the default rule. */
+  sessions?: Sessions;
   /** Called after every write, for the audit trail. Never throws. */
   onAudit?(entry: { action: string; outcome: 'success' | 'failure'; target: Record<string, unknown> }): void;
 }
@@ -212,9 +215,11 @@ function checkProperties(
 export class SystemUsers {
   private readonly facade: IStorageFacade;
   private readonly onAudit: SystemUsersDeps['onAudit'];
+  private readonly sessions: Sessions;
 
   constructor(deps: SystemUsersDeps) {
     this.facade = deps.facade;
+    this.sessions = deps.sessions || new Sessions(deps.facade);
     this.onAudit = deps.onAudit;
   }
 
@@ -447,12 +452,11 @@ export class SystemUsers {
    * not sessions and answer `valid: false` here, so this cannot be turned into
    * an oracle for either.
    *
-   * There is no expiry to report. `POST /login` and `POST /users` write
-   * `_Session` rows carrying `sessionToken` and `userId` and nothing else, and
-   * `_Session` has no `expiresAt` column (`service.ts` `ensureSystemTables`) —
-   * so a session on this backend lives until a password change or a delete
-   * revokes it. An `Expires At` output would be blank on every session this
-   * backend has ever minted, which is a port that lies.
+   * The token is read through `Sessions.resolve`, the reader the access check
+   * uses (ISL-040): a session whose end has passed answers `valid: false`, and
+   * a verify counts as a use, so it moves a sign-in's end on like any request
+   * the person makes. There is still no `Expires At` output: the end moves on
+   * every use, so the instant it reported would be stale by the next request.
    */
   private async verifyToken(request: Extract<SystemUserRequest, { op: 'verifyToken' }>): Promise<SystemUserResult> {
     const token = optionalString(request.token);
@@ -460,8 +464,7 @@ export class SystemUsers {
       return fail('user/token-required', 'Verify Session Token: a Token is required.');
     }
 
-    const { results } = await this.facade.rawQuery('_Session', { where: { sessionToken: token }, limit: 1 });
-    const session = results[0];
+    const session = await this.sessions.resolve(token);
     if (!session) {
       return { outcome: 'unchanged', code: 'user/token-invalid', valid: false };
     }

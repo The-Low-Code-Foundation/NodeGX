@@ -1,0 +1,818 @@
+[
+  {
+    "name": "no Router registered: the navigate is handed, queued at +1 ms, and never answered",
+    "because": "router-handler.ts :63-65 queues a name with no router; nothing registers during a play",
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Main registered: the navigate is handed at the frame's end and answered Done only once the handler hands it on (+1 ms)",
+    "because": "router-navigate.ts :119-147; router-handler.ts :53 setTimeout(…, 1); the Router calls hasNavigated once it built the page",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Detail"
+      },
+      {
+        "set": "pm-id",
+        "value": 1
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the answer is not there before the millisecond: advance 0 answers nothing",
+    "because": "router-handler.ts :53 — a world timer is at least 1 ms (world.ts CLOCK)",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 0
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "one registered name takes every navigate, whatever Router the node names",
+    "because": "router-handler.ts :54-57 — `routerNames.length === 1` ⇒ that name",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "params": {
+      "router": "Sidebar"
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two names registered: a Router nobody registered is queued — no answer",
+    "because": "router-handler.ts :59-65",
+    "world": {
+      "router": {
+        "names": [
+          "Main",
+          "Other"
+        ]
+      }
+    },
+    "params": {
+      "router": "Sidebar"
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two names registered: a blank Router is Main — Main answers (v3, row C118)",
+    "because": "router-handler.ts :54-56 `name || 'Main'` (P107-C118, fixed in P109 ISL-048), as registerRouter (:70) reads it",
+    "world": {
+      "router": {
+        "names": [
+          "Main",
+          "Other"
+        ]
+      }
+    },
+    "params": {
+      "router": ""
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two names registered: Router never set (undefined) is Main too (v3, row C118)",
+    "because": "router-handler.ts :54-56 — `undefined || 'Main'`",
+    "world": {
+      "router": {
+        "names": [
+          "Main",
+          "Other"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two names registered: the named Router answers",
+    "because": "router-handler.ts :59-62",
+    "world": {
+      "router": {
+        "names": [
+          "Main",
+          "Other"
+        ]
+      }
+    },
+    "params": {
+      "router": "Other"
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "no Target: the Router's failure lands at +1 ms with Error set first",
+    "because": "router.tsx :847-849 hasFailed('navigate/no-target-page'); router-navigate.ts :104-111 Error, then Failure",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ],
+        "answers": [
+          {
+            "match": {
+              "noTarget": true
+            },
+            "answer": {
+              "failure": {
+                "code": "navigate/no-target-page",
+                "message": "No Target Page is set on this Navigate node"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Target that is not a page: page-not-found; Error keeps its message after a later Done",
+    "because": "router.tsx :852-859; nothing clears lastError",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ],
+        "answers": [
+          {
+            "match": {
+              "target": "/Nope"
+            },
+            "answer": {
+              "failure": {
+                "code": "navigate/page-not-found",
+                "message": "\"/Nope\" is not a page of this Router — check the Target Page against the Router's Pages"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Nope"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two presses in one frame: one navigate, both answered alike",
+    "because": "router-navigate.ts :112-128 — one scheduled navigate carries the frame's tokens",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two frames before the millisecond: two navigates, each with its own target, answered in order",
+    "because": "router-navigate.ts :129-147 — target is read at the call; two timers fire in the order scheduled",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ],
+        "answers": [
+          {
+            "match": {
+              "target": "/Nope"
+            },
+            "answer": {
+              "failure": {
+                "code": "navigate/page-not-found",
+                "message": "\"/Nope\" is not a page of this Router — check the Target Page against the Router's Pages"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Nope"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Router answers Unchanged",
+    "because": "router.tsx :888-895 — already showing that page with those parameters",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ],
+        "answers": [
+          {
+            "answer": "unchanged"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an Unchanged is reported once: a later frame with no press reports nothing (v3)",
+    "because": "router-navigate.ts :134-143 — each settle callback runs once; P109 s33 pins it, a seed-20735 survivor (the cleared list, dropped)",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ],
+        "answers": [
+          {
+            "answer": "unchanged"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "target",
+        "value": "/Detail"
+      },
+      "settle",
+      {
+        "set": "pm-id",
+        "value": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two routers under one name: the press is answered once",
+    "because": "router-navigate.ts :99-103 — settle guards the fan-out",
+    "world": {
+      "router": {
+        "names": [
+          "Main",
+          "Main"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Open in new tab is handed as a boolean: !!'yes' is true",
+    "because": "router-navigate.ts :57-59",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "openInNewTab",
+        "value": "yes"
+      },
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "parameters are handed by name, raw; the last write in the frame wins",
+    "because": "router-navigate.ts :149-151, :132",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Detail"
+      },
+      {
+        "set": "pm-id",
+        "value": 1
+      },
+      {
+        "set": "pm-name",
+        "value": null
+      },
+      {
+        "signal": "navigate"
+      },
+      {
+        "set": "pm-id",
+        "value": 2
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a press with no router answers nothing even long after; a later press after registering nothing stays pending too",
+    "because": "router-handler.ts :63-65",
+    "world": {
+      "router": {
+        "names": [
+          "Other",
+          "Main"
+        ]
+      }
+    },
+    "params": {
+      "router": "Nope"
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two names registered, two frames before the millisecond: the first is queued, the second is answered — each by its own Router",
+    "because": "router-handler.ts :53-65 — each timer hands on its own navigate; router-navigate.ts :129-133 reads Router at the call",
+    "world": {
+      "router": {
+        "names": [
+          "Main",
+          "Other"
+        ]
+      }
+    },
+    "params": {
+      "router": "Nope"
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "set": "router",
+        "value": "Other"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two frames before the millisecond: the first is told Unchanged, the second Done",
+    "because": "router.tsx :888-895 for the page already showing; each navigate is answered for its own Target",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ],
+        "answers": [
+          {
+            "match": {
+              "target": "/Home"
+            },
+            "answer": "unchanged"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "set": "target",
+        "value": "/Detail"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two navigates answered in one millisecond: the later one's Failure is reported before the earlier one's Done",
+    "because": "router-navigate.ts :134-138 defers Done to the frame's end, :144-146 reports Failure at once (deep run s19, seed 3333277567)",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ],
+        "answers": [
+          {
+            "match": {
+              "noTarget": true
+            },
+            "answer": {
+              "failure": {
+                "code": "navigate/no-target-page",
+                "message": "No Target Page is set on this Navigate node"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "set": "target"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "answers are reported once: after a Done and an Unchanged land together, a later press waits for its own millisecond",
+    "because": "router-navigate.ts :134-143 — each settle callback runs once; the next press is answered only when its own navigate is handed on",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ],
+        "answers": [
+          {
+            "match": {
+              "target": "/Home"
+            },
+            "answer": "unchanged"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Detail"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a press in the frame an Unchanged lands in: the answer is reported, and the new press waits for its own millisecond",
+    "because": "router-navigate.ts :139-143 registers the answer's callback before the press registers its own (:119-127); one frame end runs both",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ],
+        "answers": [
+          {
+            "match": {
+              "target": "/Home"
+            },
+            "answer": "unchanged"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      {
+        "set": "target",
+        "value": "/Detail"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an answer is reported once: the frame after the one that reported Done reports nothing more",
+    "because": "router-navigate.ts :134-143 — the frame-end callback reports the answer and is spent; found s20 as a mutant survivor on one day's seed (20728) only — no hand scenario settled after an answer-only frame",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "params": {
+      "target": "/Home"
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      "settle",
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      "settle"
+    ]
+  }
+]

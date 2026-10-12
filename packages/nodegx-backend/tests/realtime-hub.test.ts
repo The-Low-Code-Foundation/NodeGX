@@ -9,7 +9,7 @@
  */
 import { ChangeBus, ChangeSource, RawChange } from '../src/realtime/ChangeBus';
 import { RealtimeHub, SSEResponse, HubSecurity } from '../src/realtime/RealtimeHub';
-import { Principal } from '../src/security/model';
+import { defaultSecurityConfig, fieldMask, Principal, type SecurityConfig } from '../src/security/model';
 
 // --- Fake adapter: an on/off/emit surface ChangeBus can tap. ----------------
 // Declared as a `ChangeSource` so this stub is checked *as an adapter*: if the
@@ -252,6 +252,76 @@ describe('RealtimeHub', () => {
     const before = res.frames().length;
     adapter.emitRaw('create', change('Doc', 'create', { objectId: 'x', ACL: null }));
     expect(res.frames().length).toBe(before); // nothing new
+    hub.close();
+  });
+});
+
+/**
+ * P116 ONT-012 AC3 (R-a) — live updates keep the per-field read rules. The stand-in security
+ * answers `hiddenFor` with the REAL mask (`fieldMask`) over a real config, so this grades the
+ * model and the hub together.
+ */
+describe('ONT-012 AC3 — a detail you may not read is not in a live frame', () => {
+  const config = {
+    ...defaultSecurityConfig(),
+    devOpen: false,
+    collections: {
+      Account: {
+        fields: {
+          healthNeeds: { read: 'role:care' as const },
+          note: { read: [{ path: { hops: [{ from: 'Account', by: 'login' }], maxDepth: 1 } }] }
+        }
+      }
+    }
+  };
+  const security = (fields: SecurityConfig['collections'][string]['fields']): HubSecurity => ({
+    devOpenActive: false,
+    checkClp: () => ({ allowed: true, reason: 'ok' }),
+    hiddenFor: (p) => fieldMask({ ...config, collections: { Account: { fields } } }, p)
+  });
+  const rep: Principal = { kind: 'user', userId: 'rep', roles: [] };
+  const nurse: Principal = { kind: 'user', userId: 'nurse', roles: ['care'] };
+
+  it('a field hidden on every row is taken out of the frame; a caller it is granted to receives it', () => {
+    const adapter = makeFakeAdapter();
+    const hub = new RealtimeHub(new ChangeBus(adapter), security({ healthNeeds: { read: 'role:care' } }), { heartbeatMs: 0 });
+    const repRes = makeRes();
+    const nurseRes = makeRes();
+    hub.setSubscriptions(connect(hub, repRes, rep), [{ collection: 'Account' }]);
+    hub.setSubscriptions(connect(hub, nurseRes, nurse), [{ collection: 'Account' }]);
+    adapter.emitRaw('save', change('Account', 'update', { objectId: 'a1', name: 'bob', healthNeeds: 'asthma', ACL: null }));
+    const record = (res: ReturnType<typeof makeRes>) =>
+      (res.frames().find((f) => f.event === 'change')!.data as { record: Record<string, unknown> }).record;
+    expect(record(repRes)).toEqual({ objectId: 'a1', name: 'bob', ACL: null });
+    expect(record(nurseRes).healthNeeds).toBe('asthma');
+    hub.close();
+  });
+
+  it('a live filter that names the hidden field is refused by name', () => {
+    const hub = new RealtimeHub(new ChangeBus(makeFakeAdapter()), security({ healthNeeds: { read: 'role:care' } }), { heartbeatMs: 0 });
+    const id = connect(hub, makeRes(), rep);
+    const result = hub.setSubscriptions(id, [{ collection: 'Account', filter: { $or: [{ name: 'x' }, { healthNeeds: 'asthma' }] } }]);
+    expect(result!.accepted).toEqual([]);
+    expect(result!.rejected[0].reason).toMatch(/"healthNeeds" on "Account" is a detail you may not read/);
+    hub.close();
+  });
+
+  it('a field shown only on some rows (a path rule) is refused at subscribe, in words', () => {
+    const hub = new RealtimeHub(new ChangeBus(makeFakeAdapter()), security({ note: config.collections.Account.fields.note }), { heartbeatMs: 0 });
+    const result = hub.setSubscriptions(connect(hub, makeRes(), rep), [{ collection: 'Account' }]);
+    expect(result!.accepted).toEqual([]);
+    expect(result!.rejected[0].reason).toMatch(/shown to you only on some records, through a path rule/);
+    hub.close();
+  });
+
+  it('MUTANT — a hub that forgets the mask streams the hidden detail: the first case is what catches it', () => {
+    const adapter = makeFakeAdapter();
+    const forgetful: HubSecurity = { devOpenActive: false, checkClp: () => ({ allowed: true, reason: 'ok' }) };
+    const hub = new RealtimeHub(new ChangeBus(adapter), forgetful, { heartbeatMs: 0 });
+    const res = makeRes();
+    hub.setSubscriptions(connect(hub, res, rep), [{ collection: 'Account' }]);
+    adapter.emitRaw('save', change('Account', 'update', { objectId: 'a1', healthNeeds: 'asthma', ACL: null }));
+    expect((res.frames().find((f) => f.event === 'change')!.data as { record: Record<string, unknown> }).record.healthNeeds).toBe('asthma');
     hub.close();
   });
 });

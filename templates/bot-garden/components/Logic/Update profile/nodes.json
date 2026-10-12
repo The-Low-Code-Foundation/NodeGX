@@ -1,0 +1,124 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6536ef1b-eda6-5413-8132-b424ce9eba75",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "updateprofileIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "field",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "updateprofileFn",
+      "type": "JavaScriptFunction",
+      "label": "Update profile",
+      "parameters": {
+        "functionScript": "var { ROBOT_NAME_MAX, cardsOf, modelOf } = Scripts.save;\nvar model = modelOf(Inputs.model && typeof Inputs.model === 'object' ? Inputs.model : {});\nvar id = String(Inputs.profileId || model.island.activeId);\nvar field = String(Inputs.field || '');\nvar v = Inputs.value;\nvar p = null, changed = false;\nfor (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === id) p = model.profiles[i];\nif (p) {\n  if (field === 'name') { var n = String(v || '').trim().slice(0, 24); if (n && n !== p.name) { p.name = n; changed = true; } }\n  else if (field === 'band') { var b = Number(v) === 1 ? 1 : 2; if (b !== p.band) { p.band = b; changed = true; } }\n  else if (field === 'lang') { var l = String(v) === 'fr' ? 'fr' : 'en'; if (l !== p.lang) { p.lang = l; changed = true; } }\n  else if (field === 'robotName') { var rn = String(v || '').trim().slice(0, ROBOT_NAME_MAX); if (rn && rn !== p.robot.name) { p.robot.name = rn; changed = true; } }\n  else if (field === 'color') { var c = String(v || ''); if (/^#[0-9A-Fa-f]{6}$/.test(c) && c !== p.robot.color) { p.robot.color = c; changed = true; } }\n  else if (field === 'eye') { var e = String(v || ''); if ((e === 'round' || e === 'happy' || e === 'wink') && e !== p.robot.eye) { p.robot.eye = e; changed = true; } }\n  else if (field === 'hat') { var h = String(v || ''); if ((h === 'none' || p.hats.indexOf(h) !== -1) && h !== p.robot.hat) { p.robot.hat = h; changed = true; } }\n  // P108 IW-001 F8: the block cards she has seen (Got it), kept on her profile.\n  else if (field === 'cardsSeen') { var cs = cardsOf(v); if (JSON.stringify(cs) !== JSON.stringify(p.cardsSeen || [])) { if (cs.length) p.cardsSeen = cs; else delete p.cardsSeen; changed = true; } }\n}\nOutputs.model = model;\nOutputs.changed = changed;\n",
+        "runOnChange-in-field": false,
+        "runOnChange-in-model": false,
+        "runOnChange-in-profileId": false,
+        "runOnChange-in-value": false,
+        "uses": "save.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-profileId",
+          "displayName": "profileId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-field",
+          "displayName": "field",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-value",
+          "displayName": "value",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-model",
+          "displayName": "model",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-changed",
+          "displayName": "changed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "updateprofileOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

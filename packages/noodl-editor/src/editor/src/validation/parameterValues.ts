@@ -938,6 +938,22 @@ export function checkParameterValues(
      */
     const dynamicSkips: string[] = [];
 
+    // P109 ISL-009 — the type's derived-port rule (a visual node's Data Attributes list) mints a
+    // port per listed name: a parameter for one is read, one for an unlisted name is not. And a
+    // listed name the rule refuses is reported here, once, with the rule — the door refuses
+    // `onclick` at write time rather than leaving the runtime to ignore it.
+    const derivedInputs = new Set(catalog.derivedPortNames(node.type, 'input', parameters));
+    for (const refused of catalog.refusedDerivedNames(node.type, parameters)) {
+      diagnostics.push({
+        code: DiagnosticCode.InvalidParameterValue,
+        severity: 'error',
+        message:
+          `"${refused.parameter}" lists ${JSON.stringify(refused.name)}, which is not a name this list takes — ` +
+          `${refused.rule}. It mints no port and is never written.`,
+        location: locate(component, node, refused.parameter)
+      });
+    }
+
     // LAS-003/F7 — node-level, because the defect is the combination of
     // parameters and no single one of them is wrong on its own.
     const unsized = unsizedAbsoluteBox(component, node, parameters);
@@ -952,6 +968,7 @@ export function checkParameterValues(
       if (value === undefined || value === null) continue;
 
       const port = catalog.getPort(node.type, 'input', name);
+      if (!port && derivedInputs.has(name)) continue;
       if (!port) {
         // Checked ahead of the dynamic-node exemption: the port it pairs with
         // must be statically declared for the trap to fire at all, and a

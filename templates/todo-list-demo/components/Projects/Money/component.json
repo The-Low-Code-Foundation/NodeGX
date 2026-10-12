@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6c54119b-c58e-510d-8c72-977249383ba6",
+  "name": "Money",
+  "path": "/Projects/Money",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The money at the top of the Projects tab: the bank balance and when it was read, the next 30 days as a line, the lowest point, money due in soon with Paid, a box for a new balance, and the way into the money popup (Add money, All money in and out). Changed says something was written."
+}

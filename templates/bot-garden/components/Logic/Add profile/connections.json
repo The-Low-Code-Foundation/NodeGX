@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "018abab9-856c-5885-8469-e94eca7cb017",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "addprofileIn",
+      "fromProperty": "band",
+      "toId": "addprofileFn",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "addprofileIn",
+      "fromProperty": "color",
+      "toId": "addprofileFn",
+      "toProperty": "in-color"
+    },
+    {
+      "fromId": "addprofileIn",
+      "fromProperty": "eye",
+      "toId": "addprofileFn",
+      "toProperty": "in-eye"
+    },
+    {
+      "fromId": "addprofileIn",
+      "fromProperty": "face",
+      "toId": "addprofileFn",
+      "toProperty": "in-face"
+    },
+    {
+      "fromId": "addprofileIn",
+      "fromProperty": "lang",
+      "toId": "addprofileFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "addprofileIn",
+      "fromProperty": "model",
+      "toId": "addprofileFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "addprofileIn",
+      "fromProperty": "name",
+      "toId": "addprofileFn",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "addprofileIn",
+      "fromProperty": "robotName",
+      "toId": "addprofileFn",
+      "toProperty": "in-robotName"
+    },
+    {
+      "fromId": "addprofileIn",
+      "fromProperty": "go",
+      "toId": "addprofileFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "addprofileFn",
+      "fromProperty": "out-count",
+      "toId": "addprofileOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "addprofileFn",
+      "fromProperty": "out-error",
+      "toId": "addprofileOut",
+      "toProperty": "error"
+    },
+    {
+      "fromId": "addprofileFn",
+      "fromProperty": "out-model",
+      "toId": "addprofileOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "addprofileFn",
+      "fromProperty": "out-ok",
+      "toId": "addprofileOut",
+      "toProperty": "ok"
+    },
+    {
+      "fromId": "addprofileFn",
+      "fromProperty": "out-profileId",
+      "toId": "addprofileOut",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "addprofileFn",
+      "fromProperty": "success",
+      "toId": "addprofileOut",
+      "toProperty": "ran"
+    }
+  ]
+}

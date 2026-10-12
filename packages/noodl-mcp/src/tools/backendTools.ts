@@ -231,6 +231,22 @@ export function registerBackendReadTools(server: McpServer): void {
   );
 
   server.registerTool(
+    'list_function_secrets',
+    {
+      title: 'List cloud function secrets',
+      description:
+        'The NAMES of the secrets a running backend holds for its cloud functions (set_function_secret), and the ' +
+        'NODEGX_SECRET_* environment variables it can also resolve. Never a value.',
+      inputSchema: { backendId: z.string().optional().describe('Which backend (omit if exactly one is running)') }
+    },
+    guarded(async ({ backendId }) => {
+      const client = await requireBackend(backendId);
+      const { json } = await client.request('GET', '/admin/secrets');
+      return jsonResult(json);
+    })
+  );
+
+  server.registerTool(
     'list_backend_email_templates',
     {
       title: 'List backend email templates',
@@ -766,6 +782,33 @@ export function registerBackendWriteTools(server: McpServer): void {
     guarded(async ({ backendId, templateId }) => {
       const client = await requireBackend(backendId);
       const { json } = await client.request('DELETE', `/admin/email/templates/${encodeURIComponent(templateId)}`);
+      return jsonResult(json);
+    })
+  );
+
+  /**
+   * P112 OWN-015 — the key a cloud function's Secret node reads, set without it ever reaching the project or the
+   * browser. CWF-009 built the store, the node and `PUT /admin/secrets/:name`; nothing an agent could call reached
+   * it, so on the npm path an API key could only sit in an HTTP Request node in the page. The value goes to the
+   * backend's secrets.json and nowhere else: it is not echoed, and no tool reads it back (admin-secrets.ts rule 2).
+   */
+  server.registerTool(
+    'set_function_secret',
+    {
+      title: 'Set a cloud function secret',
+      description:
+        'Store a credential (an API key, a token) on a running backend for cloud functions to read with a Secret ' +
+        'node of the same name. The value is stored in the backend\'s secrets.json, never in the project and never ' +
+        'echoed back. Use this for any key a page must not see. Setting a name again replaces its value.',
+      inputSchema: {
+        backendId: z.string().optional(),
+        name: z.string().describe('The name a Secret node asks for, e.g. "GOOGLE_TTS_KEY". Letters, digits, _ . -'),
+        value: z.string().describe('The secret itself — write-only')
+      }
+    },
+    guarded(async ({ backendId, name, value }) => {
+      const client = await requireBackend(backendId);
+      const { json } = await client.request('PUT', `/admin/secrets/${encodeURIComponent(name)}`, { value });
       return jsonResult(json);
     })
   );

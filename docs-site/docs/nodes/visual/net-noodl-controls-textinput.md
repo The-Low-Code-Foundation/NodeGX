@@ -62,6 +62,7 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | `clickBubbling` | Enum (`auto`, `always`, `never`) | `auto` | Whether a click on this control also fires Click on the nodes it sits inside. Automatic keeps it here as soon as this control's own Click is connected, so a Favourite button inside a clickable card runs Favourite and not the card; Always is the older behaviour where both run; Never keeps every click here, wired or not |
 | `color` | Color | — | Colour of the text itself, not of the element behind it |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `enabled` | Boolean | `true` | Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing |
 | `enterKeyHint` | Enum (`enter`, `done`, `go`, `next`, `previous`, `search`, `send`) | — | The word on the Enter key of a phone or tablet keyboard, such as Next, Go or Send |
 | `fontFamily` | Font | — | Typeface to render the text in, either a web-safe family name or a font file added to the project |
@@ -102,7 +103,7 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | `minHeight` | Number | — | Smallest height the element may shrink to, taking priority over Height |
 | `minWidth` | Number | — | Smallest width the element may shrink to, taking priority over Width |
 | `mixBlendMode` | Enum (`normal`, `multiply`, `screen`, `overlay`, `darken`, `lighten`, `color-dodge`, `color-burn`, `hard-light`, `soft-light`, `difference`, `exclusion`, `hue`, `saturation`, `color`, `luminosity`) | `normal` | How this element's colours blend with whatever is painted behind it |
-| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
+| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen) |
 | `opacity` | Number | `1` | How opaque this element is, from 0 for invisible to 1 for solid |
 | `paddingBottom` | Number | `0` | Space inside the element's bottom edge, between it and its content |
 | `paddingLeft` | Number | `0` | Space inside the element's left edge, between it and its content |
@@ -112,6 +113,7 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | `placeholder` | String | `` | Greyed-out hint shown while the field is empty |
 | `position` | Enum (`relative`, `absolute`, `sticky`, `fixed`) | `relative` | How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space |
 | `runOnChange-startValue` | Boolean | `true` | Whether a new value on Value re-runs this node. On by default; untick to make this input passive so only the control signal runs it |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `sizeMode` | Enum (`explicit`, `contentWidth`, `contentHeight`, `contentSize`) | `contentSize` | Whether Width and Height are used as given, or the element sizes itself to fit its contents |
 | `startValue` | * | — | The value to put in the field. Applied as it arrives, unless you untick it under Run On Value Change, in which case it waits for a Set pulse |
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
@@ -142,7 +144,89 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | `clear` | Signal | — | Empties the field |
 | `focus` | Signal | — | Puts the keyboard cursor in this field |
 | `insert` | Signal | — | Writes Text To Insert at the caret, replacing any selection, as if it had been typed — even while the field has focus. Max length still applies |
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 | `set` | Signal | — | Writes the current Value into the field now. This is additional to Value applying as it arrives; untick Value under Run On Value Change to stop that |
+
+### What each input does
+
+**Enabled** (`enabled`)
+
+- the value it already holds: nothing
+- a change: Enabled follows; disabled, the field takes no typing, no key and no focus
+
+**Type** (`type`)
+
+- always: read at the next paint and the next write — what the field accepts, and whether Value hands on a number or text
+
+**Value** (`startValue`)
+
+- undefined: ignored
+- the value it already holds (null as empty): nothing
+- a new value, with Run On Value Change unticked: held for the next Set
+- a new value, with Run On Value Change ticked: written now — on the page the field takes it (Value, Value Changed) unless it holds the keyboard; off the page Value alone, when it differs
+
+**Value** (`runOnChange-startValue`)
+
+- always: whether a new Value is written at once, or waits for Set
+
+**Set** (`set`)
+
+- always: at the end of the frame (or a pointer act's drain before it) the Value as it stands is written, as a ticked Value writes it — Done if it wrote, else Unchanged
+
+**Text To Insert** (`textToInsert`)
+
+- always: read by the next Insert Text, as text (nothing as empty)
+
+**Insert Text** (`insert`)
+
+- always: at the end of the frame Text To Insert goes in at the caret (at the end, off the page), within Max length — Value, Value Changed on the page, and Done; Unchanged when nothing fits
+
+**Backspace** (`backspace`)
+
+- always, at once: the character before the caret goes (the last one, off the page) — Value, Value Changed on the page, and Done; Unchanged when there is none
+
+**Clear** (`clear`)
+
+- always, at once: the field and Value are emptied (Value Changed on the page, focused or not) — Done; Unchanged when they were empty already
+
+**Max length** (`maxLength`)
+
+- always: read at the next keystroke and Insert Text — above 0, no more characters than this
+
+**Mounted** (`mounted`)
+
+- always: the field is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint
+
+**Enable Label** (`useLabel`)
+
+- always: a label is drawn above the field, or not; the field and its keyboard stay
+
+**Focus** (`focus`)
+
+- not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent
+- it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent
+- otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done
+
+**Blur** (`blur`)
+
+- it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes → Done; Blurred stays silent
+- it holds the keyboard: it is taken off it, and the Focused state goes false → Blurred, Done
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the field can be seen
+
+**Block Pointer Events** (`blockTouch`)
+
+- always: on, a pointer act that lands here goes no further — the nodes it sits inside do not hear it
+
+**Visible** (`visible`)
+
+- always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it
+
+**Opacity** (`opacity`)
+
+- always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it
 
 ## Outputs
 
@@ -169,14 +253,14 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
 | `didMount` | Signal | — | Fires once this element has been added to the page and can be measured |
 | `done` | Signal | — | Fires when Set, Clear, Insert Text, Backspace, Focus or Blur did something |
-| `hoverEnd` | Signal | — | Fires when the pointer leaves this control, including when it leaves while a button is still held |
+| `hoverEnd` | Signal | — | Fires when the pointer leaves this control, including when it leaves while a button is still held, or when the control leaves the page under it |
 | `hoverStart` | Signal | — | Fires when the pointer moves onto this control |
-| `onBlur` | Signal | — | Fires when keyboard focus leaves this control, which is the usual place to validate what was entered |
+| `onBlur` | Signal | — | Fires when keyboard focus leaves this control, or the control leaves the page while holding it, which is the usual place to validate what was entered |
 | `onEnter` | Signal | — | Fires when the user presses Enter in the field, which is the usual place to submit |
 | `onFocus` | Signal | — | Fires the moment this control takes keyboard focus, whether from a click, a tab or a Focus action |
 | `pointerDown` | Signal | — | Fires as a mouse button or finger goes down on this control, before any click has completed |
 | `pointerUp` | Signal | — | Fires when the mouse button or finger is lifted, and also when a touch is cancelled by the system |
-| `textChanged` | Signal | — | Fires whenever the Value output changes, so a graph can sequence off the new value rather than poll it |
+| `textChanged` | Signal | — | Fires each time a value is written into the field (Set, Value, Insert Text, Backspace, Clear or the person typing), whether or not it changed. A write made while the field is off the page is announced when the field comes back |
 | `unchanged` | Signal | — | Fires when a Set or Clear left the field as it was — most often a Set while the field has focus, which is deliberately absorbed so it cannot overwrite what is being typed — when Insert Text or Backspace had nothing to write (a full Max length, or an empty field), or when a Focus arrived while the field was not on the page |
 | `willUnmount` | Signal | — | Fires just before this element is removed from the page, while it still exists |
 
@@ -202,6 +286,7 @@ The port list above is complete — this node mints no ports. It republishes its
 | boxShadowEnabled = true | `boxShadowSource` | — |
 | boxShadowEnabled = true AND boxShadowSource = token | `boxShadowToken` | — |
 | boxShadowEnabled = true AND boxShadowSource != token | `boxShadowOffsetX`, `boxShadowOffsetY`, `boxShadowInset`, `boxShadowBlurRadius`, `boxShadowSpreadRadius`, `boxShadowColor` | — |
+| — | — | — |
 
 ## Ports at runtime
 

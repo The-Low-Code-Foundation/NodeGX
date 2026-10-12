@@ -3,6 +3,7 @@ import React from 'react';
 import Layout from '../../layout';
 import NodeSharedPortDefinitions from '../../node-shared-port-definitions';
 import { createNodeFromReactComponent, type ReactNodeDefinition, type StyleObject } from '../../react-component-node';
+import { dataAttributeProps } from '../../components/noodl-root-ref';
 import type { Noodl } from '../../types';
 
 interface LabelProps extends Noodl.ReactProps {
@@ -32,7 +33,7 @@ function Label(props: LabelProps) {
   if (props.className) className = className + ' ' + props.className;
 
   return (
-    <label className={className} style={style} {...tagProps}>
+    <label className={className} style={style} {...tagProps} {...dataAttributeProps(props.dom)}>
       {props.text}
     </label>
   );
@@ -45,6 +46,7 @@ const LabelNode: ReactNodeDefinition = {
   allowChildren: true,
   noodlNodeAsProp: true,
   deprecated: true,
+  replacedBy: 'Text',
   getReactComponent() {
     return Label;
   },

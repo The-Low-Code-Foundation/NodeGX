@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8a4f0c25-8820-5fc4-88e3-9ca8296c4124",
+  "name": "Mark money",
+  "path": "/Projects/Mark money",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Ticks one repeat of a money item as paid today in full (Action tick), marks its bill sent today (Action sent), or takes its payments off again (Action untick). Key is \"<item id>|<the day it was due>\"."
+}

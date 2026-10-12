@@ -1,0 +1,227 @@
+[
+  {
+    "name": "no params: the first settle publishes the empty string",
+    "because": "stringformat.ts :40-41 — format '' and cachedResult ''; connectInput's read of the getter",
+    "params": {},
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "a placeholder fills from its port; while unset it is nothing",
+    "because": "stringformat.ts :89-94, :93 `v !== undefined ? String(v) : ''`",
+    "params": {
+      "format": "Hello, {name}!"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "name",
+        "value": "Ada"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a placeholder used twice fills EVERY time, as the port description says (was row D2: it said only the first)",
+    "because": "stringformat.ts :89-94 — one replace per match, each on the first occurrence still standing; the description at :52 said only the first copy filled until P109 ISL-033 (P107-D2, ruled \"Correct the words\")",
+    "params": {
+      "format": "{a}{a}"
+    },
+    "steps": [
+      {
+        "set": "a",
+        "value": "x"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a value set before the format mentions it is remembered",
+    "because": "stringformat.ts :102-109 — any name is registered on first write; :128 stores it",
+    "params": {},
+    "steps": [
+      {
+        "set": "name",
+        "value": "Ada"
+      },
+      "settle",
+      {
+        "set": "format",
+        "value": "Hi {name}"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "$-patterns in a value come out as typed: '$&' prints '$&', '$$' prints '$$', '$`' and \"$'\" print themselves (v2; was row D3: replace expanded them)",
+    "because": "stringformat.ts — the value goes in through a function replacement, so no $-pattern applies; ruled 2026-10-05 (P107-D3, \"Insert values exactly\")",
+    "params": {
+      "format": "[{v}]"
+    },
+    "steps": [
+      {
+        "set": "v",
+        "value": "$&"
+      },
+      "settle",
+      {
+        "set": "v",
+        "value": "$$"
+      },
+      "settle",
+      {
+        "set": "v",
+        "value": "$5"
+      },
+      "settle",
+      {
+        "set": "v",
+        "value": "$`"
+      },
+      "settle",
+      {
+        "set": "v",
+        "value": "$'"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the empty placeholder {} names the port ''",
+    "because": "stringformat.ts :81 — the regex allows zero name characters",
+    "params": {
+      "format": "a{}b"
+    },
+    "steps": [
+      {
+        "set": "",
+        "value": "X"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "non-string values are stringified: 5, [1,2], {a:1}, null, true",
+    "because": "stringformat.ts :93 `String(v)`",
+    "params": {
+      "format": "{a}|{b}|{c}|{d}|{e}"
+    },
+    "steps": [
+      {
+        "set": "a",
+        "value": 5
+      },
+      {
+        "set": "b",
+        "value": [
+          1,
+          2
+        ]
+      },
+      {
+        "set": "c",
+        "value": {
+          "a": 1
+        }
+      },
+      {
+        "set": "d",
+        "value": null
+      },
+      {
+        "set": "e",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a wired number on Format is read as its text: '5'",
+    "because": "P107-C3, ruled 2026-10-05 \"Fix both halves\": the setter converts on arrival (String(value)); it once stored the number and .match threw in the frame",
+    "params": {
+      "format": 5
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "characters outside [A-Za-z0-9_] make it not a placeholder",
+    "because": "stringformat.ts :81",
+    "params": {
+      "format": "{first-name} {x}"
+    },
+    "steps": [
+      {
+        "set": "first-name",
+        "value": "A"
+      },
+      {
+        "set": "x",
+        "value": "B"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a value parameter before the format parameter, in the caller's order",
+    "because": "nodescope.ts Object.keys(parameters); registerInputIfNeeded runs before hasInput",
+    "params": {
+      "name": "Ada",
+      "format": "{name}"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "a later format keeps the values and drops the ports it no longer names from the output only",
+    "because": "stringformat.ts :54-60 — inputValues survive a format change (:128 is never cleared)",
+    "params": {
+      "format": "{a}-{b}"
+    },
+    "steps": [
+      {
+        "set": "a",
+        "value": "1"
+      },
+      {
+        "set": "b",
+        "value": "2"
+      },
+      "settle",
+      {
+        "set": "format",
+        "value": "{b}"
+      },
+      "settle",
+      {
+        "set": "format",
+        "value": "{a}{b}"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "after a non-string Format the node formats again — a later good format is sent",
+    "because": "P107-C3, ruled 2026-10-05 \"Fix both halves\": formatScheduled is cleared in a finally, so a frame that throws cannot leave the node dead; it once returned early forever after the .match TypeError",
+    "params": {},
+    "steps": [
+      {
+        "set": "format",
+        "value": 5
+      },
+      "settle",
+      {
+        "set": "format",
+        "value": "ok {a}"
+      },
+      {
+        "set": "a",
+        "value": "1"
+      },
+      "settle"
+    ]
+  }
+]

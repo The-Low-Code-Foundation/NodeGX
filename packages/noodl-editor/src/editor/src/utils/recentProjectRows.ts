@@ -187,3 +187,30 @@ export function findDurableIdCollisions<T extends RecentProjectRow & { id?: stri
 
   return collisions;
 }
+
+/**
+ * P112-S11-IDREPLACE (ruled 2026-10-11) — the launcher row's id for a project folder being **opened**, as opposed to made.
+ *
+ * Every row id becomes `project.id` (`LocalProjectsModel.loadProject`), and `project.id` is the durable identity a
+ * backend is bound to. Opening a folder used to mint a fresh one regardless, so a project an agent made, or one cloned
+ * from a repository, got a new identity on its first open on every machine — and since DSG-007 that new id is saved
+ * over the file's. Ruled: **opening keeps the id in the file; only making a new project creates one.**
+ *
+ * One exception, and it is the property {@link findDurableIdCollisions} defends: when another row already carries
+ * that id for a *different* folder, this folder is a copy, and adopting the id would make two cards one identity (a
+ * click on one opens the other). The copy gets a fresh id — exactly what opening it did before — so no path inside
+ * the editor produces a collision. A folder whose file has no id gets one too, as before.
+ *
+ * Returns the id to use, or `undefined` when the caller should mint.
+ */
+export function idForOpenedFolder<T extends RecentProjectRow & { id?: string }>(
+  fileId: string | undefined,
+  directory: string,
+  rows: readonly T[]
+): string | undefined {
+  const id = typeof fileId === 'string' ? fileId.trim() : '';
+  if (id === '') return undefined;
+  const key = projectRowKey(directory);
+  const taken = rows.some((row) => row && row.id === id && projectRowKey(row.retainedProjectDirectory) !== key);
+  return taken ? undefined : id;
+}

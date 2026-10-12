@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f6d39233-5cec-5ba0-8c36-3e561e6aaffe",
+  "name": "Shop rows",
+  "path": "/Logic/Shop rows",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The shop: the balance on its button, the five tabs, the open tab’s items. Runs when an input changes; Ran after each run."
+}

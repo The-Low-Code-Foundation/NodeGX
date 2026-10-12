@@ -36,6 +36,22 @@ Use it to defer an action (auto-dismiss a toast, poll once after mount) or, via 
 | `start` | Signal | — | Starts the countdown, or fires Unchanged while one is already running — use Restart to begin again |
 | `stop` | Signal | — | Abandons the countdown, so Finished never fires for it |
 
+### What each input does
+
+**Start** (`start`)
+
+- a countdown running: nothing — Restart begins one again → Unchanged
+- otherwise (a Start earlier this frame included): the countdown is queued, and begins at the frame's end, Start Delay later — Started fires then → Done
+
+**Restart** (`restart`)
+
+- always: a running countdown is dropped without Finished, and a new one is queued from zero for the frame's end → Done
+
+**Stop** (`stop`)
+
+- a countdown running or queued: it is dropped, and Finished never fires for it → Done
+- no countdown: nothing → Unchanged
+
 ## Outputs
 
 ### Signals

@@ -47,7 +47,8 @@ import { ExportIR, ITEM_OUTPUT_SIGNAL, NodeIR } from '../ir/types';
 import { KitBinding, tsTypeOf as kitPortTsType } from './kits';
 import { assignClassNames, ClassCandidate, partitionMergeGroup, pascalCase, propIdentifier, propIdentifiers } from './naming';
 import { tsLiteral } from './state';
-import { UTIL_HELPER_MAY_BE_UNDEFINED, UTIL_LIB_PATH } from './utilLib';
+import { UTIL_LIB_PATH, utilCallMayBeUndefined } from './utilLib';
+import { FEED_ITEM_FIELDS, PARSE_LIB_PATH, isParseHelper } from './parseLib';
 import { TIMER_LIB_PATH } from './timerLib';
 import { ANIMATE_LIB_PATH } from './animateLib';
 import { DRAG_LIB_PATH } from './dragLib';
@@ -56,6 +57,7 @@ import { RUN_TASKS_LIB_PATH } from './runTasksLib';
 import { ERRORS_LIB_PATH } from './errorsLib';
 import { RECORD_FILTER_LIB_PATH } from './recordFilterLib';
 import { SCRIPT_LIB_PATH } from './scriptLib';
+import { PROJECT_SCRIPT_FILES_PATH, PROJECT_SCRIPTS_SYMBOL } from './projectScriptsLib';
 import { STREAMING_LIB_PATH } from './streamingLib';
 import { SSE_LIB_PATH } from './sseLib';
 import { WEBSOCKET_LIB_PATH } from './websocketLib';
@@ -253,6 +255,8 @@ export interface EmittedComponent {
   statesLib: boolean;
   /** EXP-011 §52. Whether this component imports `src/lib/script.ts`. */
   scriptLib: boolean;
+  /** P109 ISL-005. Whether this component imports the script-file registry (`src/lib/projectScriptFiles.ts`). */
+  projectScripts: boolean;
   /** EXP-011 §53. `src/lib/runTasks.ts` is owed when any component keeps a Run Tasks node. */
   runTasksLib: boolean;
   /** EXP-011 §54. `src/lib/errors.ts` is owed when this component keeps a boundary or raises on the channel. */
@@ -1570,7 +1574,7 @@ export function emitComponent(
       // Per helper, off the emitted library's own table (EXP-011 Tier 2.7). Must agree with
       // plan.ts maybeUndefinedExpr, which reads the same table.
       case 'util-call':
-        return UTIL_HELPER_MAY_BE_UNDEFINED[expr.fn];
+        return utilCallMayBeUndefined(expr);
       // Never: the row is seeded at mount by a lazy initializer and every write is a fresh Date,
       // which is what lets `now.getTime()` print without a guard.
       case 'now-out':
@@ -1695,6 +1699,9 @@ export function emitComponent(
       const declared = ir.project.collections.find((c) => c.name === expr.collectionName);
       return new Set(['id', ...(declared?.columns ?? []).map((c) => c.name)]);
     }
+    // EXP-011 §75. A feed's items carry exactly the twelve fields `FeedItem` declares; a CSV's rows carry whatever
+    // the header row said, which is not knowable here (null: every mapped input kept, fields read as `any`).
+    if (expr.kind === 'util-call' && expr.fn === 'parseFeed') return new Set(FEED_ITEM_FIELDS);
     return null;
   };
   /**
@@ -4284,9 +4291,16 @@ export function emitComponent(
     const specifier = `${relRoot}/${RECORD_FILTER_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
     internalImports.set(specifier, `import { filterRecords } from '${specifier}';`);
   }
-  if (usedUtilHelpers.size > 0) {
+  // EXP-011 §75. One kind, two modules: the parse helpers import from `src/lib/parse.ts`, the rest from `util.ts`.
+  const usedPlainUtilHelpers = [...usedUtilHelpers].filter((fn) => !isParseHelper(fn)).sort();
+  const usedParseHelpers = [...usedUtilHelpers].filter(isParseHelper).sort();
+  if (usedPlainUtilHelpers.length > 0) {
     const specifier = `${relRoot}/${UTIL_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
-    internalImports.set(specifier, `import { ${[...usedUtilHelpers].sort().join(', ')} } from '${specifier}';`);
+    internalImports.set(specifier, `import { ${usedPlainUtilHelpers.join(', ')} } from '${specifier}';`);
+  }
+  if (usedParseHelpers.length > 0) {
+    const specifier = `${relRoot}/${PARSE_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
+    internalImports.set(specifier, `import { ${usedParseHelpers.join(', ')} } from '${specifier}';`);
   }
   /**
    * EXP-011 §37 — `src/lib/id.ts`, earned from the two places the calls actually are.
@@ -6020,6 +6034,15 @@ export function emitComponent(
       if (hasInputs) lines.push(`  const Inputs = ${scopeCast(INPUTS_PARAM)};`);
       lines.push(`  const Outputs: ${outputsType} = {${seeds.length > 0 ? ` ${seeds.join(', ')} ` : ''}};`);
       lines.push('  try {');
+      /*
+       * P109 ISL-005 AC7. The files the Function lists under Uses, from the one registry — never pasted
+       * here. Inside the try, as the runtime's `scriptsFor` runs before the body: a file that fails runs
+       * none of it. Keyed by the exact aliases, so `Scripts.<typo>` is a compile error, not `undefined`.
+       */
+      if (def.scripts !== undefined && def.scripts.length > 0) {
+        const rows = def.scripts.map((u) => `${fieldKey(u.alias)}: ${PROJECT_SCRIPTS_SYMBOL}.load(${JSON.stringify(u.path)})`);
+        lines.push(`    const Scripts = { ${rows.join(', ')} };`);
+      }
       lines.push('    (() => {');
       lines.push(...def.body.split('\n'));
       lines.push('    })();');
@@ -6308,6 +6331,13 @@ export function emitComponent(
   if (usedMediaHelpers.size > 0) {
     const specifier = `${relRoot}/${MEDIA_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
     internalImports.set(specifier, `import { ${[...usedMediaHelpers].sort().join(', ')} } from '${specifier}';`);
+  }
+
+  // P109 ISL-005 AC7. The script-file registry, earned by a printed wrapper that binds `Scripts`.
+  const usesProjectScripts = Object.values(jsFunByNode).some((def) => referencedJsIds.has(def.nodeId) && (def.scripts?.length ?? 0) > 0);
+  if (usesProjectScripts) {
+    const specifier = `${relRoot}/${PROJECT_SCRIPT_FILES_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
+    internalImports.set(specifier, `import { ${PROJECT_SCRIPTS_SYMBOL} } from '${specifier}';`);
   }
 
   const importLines: string[] = [];
@@ -7076,6 +7106,8 @@ export function emitComponent(
     statesLib: plan.statesMachines.length > 0,
     // EXP-011 §52.
     scriptLib: plan.scripts.length > 0,
+    // P109 ISL-005.
+    projectScripts: usesProjectScripts,
     // EXP-011 §53.
     runTasksLib: plan.runTasks.length > 0,
     // EXP-011 §54.

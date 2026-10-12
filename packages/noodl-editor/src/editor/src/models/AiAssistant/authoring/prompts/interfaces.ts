@@ -7,11 +7,12 @@
  * AAQ-008. Nothing anywhere said what to put ON one. Phase 85 measured the
  * consequence across three populations with a single instrument
  * (`measure-interfaces.py`, beside the phase-85 task): of the components in the
- * examples an agent learns from, **33%** publish any `Component Outputs` — 10%
- * until CMP-001 AC3 added four that do and repaired two rows that could not, then
- * 26% until P86's COM-001 added seventeen examples and gave four of them the
- * outputs their own subjects already computed; of the components the original
- * Noodl team shipped in `library/prefabs`, **84%** do.
+ * examples an agent learns from, `CORPUS_PUBLISH_RATE` publish any `Component Outputs`
+ * (10% until CMP-001 AC3 added four that do and repaired two rows that could not,
+ * then 26% until P86's COM-001 added seventeen examples and gave four of them the
+ * outputs their own subjects already computed, then 33%, then 39% by 2026-10-10);
+ * of the components the original Noodl team shipped in `library/prefabs`,
+ * `SHELF_PUBLISH_RATE` do.
  * The corpus teaches a component that receives text and draws it. The library
  * teaches a two-way part. A model copying the corpus builds display sinks, and
  * the landing-page template (TPL-003) is what that looks like at scale: 233
@@ -59,14 +60,24 @@
  * Ten patterns, each one a wire rather than a preference, and each one taken
  * from a component that ships in `library/prefabs` unless it says otherwise.
  */
+/**
+ * The two figures the doctrine argues from, each the share of components with an interface that publish any
+ * `Component Outputs`. The corpus moves whenever examples are added, so the figure lives here once and
+ * `noodl-mcp/tests/cmp001InterfaceDoctrine.test.ts` counts the artefacts and says when this has gone stale (P109-S9:
+ * the doctrine said 33 for months while the corpus read 37, then 39; P107 s89's `/Post Row`, a row that only shows two
+ * fields, made it 38). Count the artefact; move this; never a copy.
+ */
+export const CORPUS_PUBLISH_RATE = 38;
+export const SHELF_PUBLISH_RATE = 84;
+
 export const INTERFACE_DOCTRINE_MD = `## What goes on a component's interface
 
 You know what becomes a component. This is the other half — what its interface carries — and it is
 the half that decides whether the next person can use the thing you built.
 
-**Why this is written down.** Across the examples an agent learns from, **33%** of components publish
+**Why this is written down.** Across the examples an agent learns from, **${CORPUS_PUBLISH_RATE}%** of components publish
 any \`Component Outputs\`. Across the components the original Noodl team shipped in the prefab
-library, **84%** do. That gap is the whole difference between a part and a display sink: a sink takes
+library, **${SHELF_PUBLISH_RATE}%** do. That gap is the whole difference between a part and a display sink: a sink takes
 text, draws it in one fixed place, and tells nobody anything, so every wire it should have owned ends
 up back on the page around it — including a wrapper \`Group\` whose only job is to push it into
 position.
@@ -110,9 +121,13 @@ node, one input, every property it implies.
 placed. Keep an open flag, a selected tab, a pick or a draft in one, place the component twice, and
 every copy opens, selects, picks and drafts together. It looks fine with one copy on the page, which
 is why it ships. A component's own state is a \`States\` node, a \`Component Object\` (every instance
-has its own), or a \`Counter\` or \`Switch\`. When every copy really should share the value, like a
-row of filter pills writing one filter, write "shared on purpose" in that node's comment: the
-validator warns about a Variable in a component drawn twice until it says so.
+has its own), or a \`Counter\` or \`Switch\`. It lasts as long as that copy: hidden and shown again
+(\`mounted\` off, then on) it keeps its value, and so does a \`For Each\` row whose id is still in the
+new list. A \`For Each\` Refresh, a row that leaves the list and comes back, and a page left and
+returned to each build a NEW copy that starts empty; tick the page's \`Keep When Leaving\` to keep
+the page. When every copy really should share the value, like a row of filter pills writing one
+filter, write "shared on purpose" in that node's comment: the validator warns about a Variable in a
+component drawn twice until it says so.
 
 ### 5. A component can be a parameter
 \`Multi Select/Dropdown\` exposes \`Option Template\` and \`Pill Template\` and wires them straight
@@ -135,13 +150,18 @@ picture of a table.
 
 ### 8. Failure is a port
 \`Success\` / \`Failure\` on every cloud action component; \`Error\`, \`Failed\` and \`State\` on
-\`File Upload\`; \`Has Error\` on \`Form Fields/Labelled Select\`. **Fifty-four** components in the
+\`File Upload\`; \`Has Error\` on \`Form Fields/Labelled Select\`. **Fifty-five** components in the
 shipped library publish one of these. If your component can fail, its failure is an output, not a
 console message — the page cannot show what it is never told.
 
 ### 9. Data-shaped inputs
 One array port feeding a \`For Each\`: \`Items\`, \`Options\`, \`Headers\`, \`Filters\`,
 \`Rows Per Page Options\`. Never one port per row, and never a component per row.
+Two lists may number their plain rows the same (\`l0\`, \`l1\`…): each list keeps its own rows. An id still
+names one record for the whole app, though, so anything that finds a row *by its id* (an \`Object\` node
+given the row's \`Id\`, a page writing to \`itemActionItemId\`) finds the first list's row. Inside a row,
+read it with an \`Object\` node set to \`From repeater\`; give rows the page edits by id ids no other
+list uses.
 
 ### 10. The named utility publishes too
 \`Component Inputs\` → one or two working nodes → \`Component Outputs\`, under a name that is a job:

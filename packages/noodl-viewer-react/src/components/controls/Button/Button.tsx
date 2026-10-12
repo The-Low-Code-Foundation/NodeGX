@@ -1,9 +1,10 @@
 import React from 'react';
 
+import { layerDefaults, withDefaultsClass } from '../../../default-style-layer';
 import Layout from '../../../layout';
 import Utils from '../../../nodes/controls/utils';
 import { Noodl, Slot } from '../../../types';
-import { noodlRootRef } from '../../noodl-root-ref';
+import { noodlRootRef, dataAttributeProps } from '../../noodl-root-ref';
 import { IconGlyph } from '../../visual/Icon/IconGlyph';
 
 export interface ButtonProps extends Noodl.ReactProps {
@@ -136,10 +137,14 @@ export function Button(props: ButtonProps) {
   // mousedown/mouseup/touchstart and let the click through to the parent Group anyway, which
   // is exactly the "it doesn't work" report. `controlEvents` already supplies `onClick`
   // (`pointerProps` picks `props.onClick` up off the props root), so the line was pure loss.
+  // P109 ISL-008 — defaults leave the inline style for the defaults sheet, so an author's class can override them.
+  const defaultsClass = layerDefaults(style);
+
   return (
     <button
       ref={noodlRootRef(props.noodlNode)}
-      className={className}
+      {...dataAttributeProps(props.dom)}
+      className={withDefaultsClass(className, defaultsClass)}
       disabled={!props.enabled}
       {...events}
       type={props.buttonType}

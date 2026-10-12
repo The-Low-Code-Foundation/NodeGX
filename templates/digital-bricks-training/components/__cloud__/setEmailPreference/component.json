@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e403d422-c321-5c18-b4d1-e9f09873e344",
+  "name": "setEmailPreference",
+  "path": "/#__cloud__/setEmailPreference",
+  "type": "cloud",
+  "created": "2026-10-01T20:00:00.000Z",
+  "modified": "2026-10-01T20:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Turn message emails on or off for the signed-in account; the only thing that clears an opt-out (TASK-L187)."
+}

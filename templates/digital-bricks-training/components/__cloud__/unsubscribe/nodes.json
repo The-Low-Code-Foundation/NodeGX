@@ -1,0 +1,142 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "486559e1-9798-51e8-8a99-e01476097cc1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "Anyone (security: public) — the link has no session",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "u,s",
+        "allowNoAuth": true,
+        "ptype-u": "string",
+        "preq-u": true,
+        "ptype-s": "string",
+        "preq-s": true
+      }
+    },
+    {
+      "id": "v_start",
+      "type": "JavaScriptFunction",
+      "label": "What was signed",
+      "x": 300,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/* The same purpose string shared/Unsubscribe link signs (TASK-L187 §4). */\nif (Inputs.u !== undefined && Inputs.s !== undefined) {\n  Outputs.value = 'dbt-unsubscribe:v1:' + String(Inputs.u || '');\n  Outputs.go();\n}\n",
+        "runOnChange-in-u": true,
+        "runOnChange-in-s": true
+      },
+      "ports": [
+        {
+          "name": "in-u",
+          "plug": "input",
+          "type": "*",
+          "displayName": "u",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-s",
+          "plug": "input",
+          "type": "*",
+          "displayName": "s",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-value",
+          "plug": "output",
+          "type": "*",
+          "displayName": "value",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "v_key",
+      "type": "noodl.cloud.secret",
+      "label": "The signing key",
+      "x": 540,
+      "y": 220,
+      "parameters": {
+        "name": "UNSUBSCRIBE_KEY"
+      }
+    },
+    {
+      "id": "v_hmac",
+      "type": "noodl.cloud.hmac",
+      "label": "HMAC-SHA256, hex",
+      "x": 780,
+      "y": 220,
+      "parameters": {}
+    },
+    {
+      "id": "v_fn",
+      "type": "JavaScriptFunction",
+      "label": "Same signature? Then stop the mail. One answer either way",
+      "x": 1020,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * ONE PRESS FROM A LINK IN A MAIL, WITH NO SESSION (TASK-L187 §4).\n *\n * The signature is recomputed and compared in constant time. A match sets\n * `emailOptOutAt`, keeping the FIRST stamp if there is one. EVERY OUTCOME\n * ANSWERS THE SAME — a bad signature, an unknown account, a success — so this\n * public route cannot be used to learn which accounts exist. It can only ever\n * turn mail OFF: nothing here clears an opt-out.\n *\n * It runs on the page's PRESS, never on a GET (the page calls it from a button),\n * because a mail scanner follows links (L125).\n */\n(async () => {\n  const u = String(Inputs.u || '');\n  const s = String(Inputs.s || '').toLowerCase();\n  const want = String(Inputs.signature || '').toLowerCase();\n  let same = s.length === want.length && want.length === 64;\n  let diff = 0;\n  for (let i = 0; i < want.length; i++) diff |= (s.charCodeAt(i) || 0) ^ want.charCodeAt(i);\n  same = same && diff === 0;\n  try {\n    if (same && u) {\n      const users = await Noodl.Records.query('_User', { objectId: { equalTo: u } }, { limit: 2, plain: true });\n      if (users.length === 1 && !users[0].emailOptOutAt) {\n        await Noodl.Records.save(u, { emailOptOutAt: new Date().toISOString() }, { className: '_User' });\n      }\n    } else {\n      console.warn('[dbt:unsubscribe] a link that does not verify');\n    }\n  } catch (e) {\n    console.error('[dbt:unsubscribe] ' + String((e && e.message) || e));\n  }\n  Outputs.done();\n})();\n",
+        "runOnChange-in-u": false,
+        "runOnChange-in-s": false,
+        "runOnChange-in-signature": false
+      },
+      "ports": [
+        {
+          "name": "in-u",
+          "plug": "input",
+          "type": "*",
+          "displayName": "u",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-s",
+          "plug": "input",
+          "type": "*",
+          "displayName": "s",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-signature",
+          "plug": "input",
+          "type": "*",
+          "displayName": "signature",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "One answer for every outcome",
+      "x": 1280,
+      "y": 40,
+      "parameters": {
+        "params": ""
+      }
+    },
+    {
+      "id": "deny",
+      "type": "noodl.cloud.response",
+      "label": "Not set up: the key is missing (an operator's fault, loud)",
+      "x": 1280,
+      "y": 220,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "unavailable"
+      }
+    }
+  ]
+}

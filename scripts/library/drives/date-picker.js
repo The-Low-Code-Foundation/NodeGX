@@ -18,7 +18,9 @@
  *   7. a half-deleted date puts the last value back instead of clearing it;
  *   8. if the calendar throws on open, the field hands itself back to the system picker;
  *   9. unmounted and mounted again, it draws a fresh field holding the date it last held;
- *  10. on a touch screen the system picker is the picker from the start.
+ *  10. on a touch screen the system picker is the picker from the start;
+ *  11. reused for the next record (P78-D81), Reset puts that record's day over a pick, even when it
+ *      is the same day the field was given before — and a pick survives any other input changing.
  *
  * Run: node scripts/library/drives/date-picker.js [--shots <dir>]
  */
@@ -229,6 +231,87 @@ const READ = `JSON.stringify({
     const coarse = await s.evaluate(`matchMedia('(pointer: fine)').matches`);
     r.check('touch: the system picker is the picker (no enhancement)', coarse === false && touch.input === '2026-09-14' && !touch.enhanced,
       `pointer:fine=${coarse} value=${touch.input} enhanced=${touch.enhanced}`);
+  });
+
+  // 11 — P78-D81: one field reused for the next record. Value arrives from a Variable, the way a form
+  // reads a record's day. Setting it to the value it already holds re-runs nothing (DEF-046), so only
+  // Reset can put the next record's day back over a pick. Relabel is the control: another input re-runs
+  // the script (its aria-label moves) and a pick must survive that.
+  const dir2 = buildDriveProject('date-picker', {
+    subjectParameters: { 'First Day Of Week': 1 },
+    nodes: [
+      { id: 'day', type: 'Variable2', parameters: { name: 'dpDay' } },
+      { id: 'label', type: 'Variable2', parameters: { name: 'dpLabel' } },
+      { id: 'setEmpty', type: 'Set Variable', parameters: { name: 'dpDay', setWith: 'emptyString' } },
+      { id: 'set14', type: 'Set Variable', parameters: { name: 'dpDay', setWith: 'string', value: '2026-09-14' } },
+      { id: 'setLabel', type: 'Set Variable', parameters: { name: 'dpLabel', setWith: 'string', value: 'Ends' } },
+      { id: 'next', type: 'net.noodl.controls.button', parameters: { label: 'next record' }, onPage: true },
+      { id: 'open14', type: 'net.noodl.controls.button', parameters: { label: 'open the 14th' }, onPage: true },
+      { id: 'relabel', type: 'net.noodl.controls.button', parameters: { label: 'relabel' }, onPage: true },
+      { id: 'valueText', type: 'Text', parameters: { text: 'value=' }, onPage: true },
+      { id: 'countText', type: 'Text', parameters: { text: 'changed=0' }, onPage: true },
+      { id: 'counter', type: 'Counter', parameters: { startValue: 0 } },
+      { id: 'fmtV', type: 'String Format', parameters: { format: 'value={v}' } },
+      { id: 'fmtC', type: 'String Format', parameters: { format: 'changed={n}' } }
+    ],
+    connections: [
+      { sourceId: 'day', sourcePort: 'value', targetId: 'subject', targetPort: 'Value' },
+      { sourceId: 'label', sourcePort: 'value', targetId: 'subject', targetPort: 'Label' },
+      { sourceId: 'next', sourcePort: 'onClick', targetId: 'setEmpty', targetPort: 'do' },
+      { sourceId: 'next', sourcePort: 'onClick', targetId: 'subject', targetPort: 'Reset' },
+      { sourceId: 'open14', sourcePort: 'onClick', targetId: 'set14', targetPort: 'do' },
+      { sourceId: 'open14', sourcePort: 'onClick', targetId: 'subject', targetPort: 'Reset' },
+      { sourceId: 'relabel', sourcePort: 'onClick', targetId: 'setLabel', targetPort: 'do' },
+      { sourceId: 'subject', sourcePort: 'Value', targetId: 'fmtV', targetPort: 'v' },
+      { sourceId: 'fmtV', sourcePort: 'formatted', targetId: 'valueText', targetPort: 'text' },
+      { sourceId: 'subject', sourcePort: 'Changed', targetId: 'counter', targetPort: 'increase' },
+      { sourceId: 'counter', sourcePort: 'currentCount', targetId: 'fmtC', targetPort: 'n' },
+      { sourceId: 'fmtC', sourcePort: 'formatted', targetId: 'countText', targetPort: 'text' }
+    ]
+  });
+  await withRenderedPage({ projectDir: dir2 }, async (s) => {
+    const send = (m, p) => s.client.send(m, p);
+    await s.setViewport({ width: 1280, height: 900 });
+    await send('Emulation.setFocusEmulationEnabled', { enabled: true });
+    const read = async () => JSON.parse(await s.evaluate(READ));
+    const aria = async () => s.evaluate(`(document.querySelector('.ndg-dp-input') || {}).getAttribute('aria-label')`);
+    const text = (st, prefix) => (st.texts.find((t) => t.startsWith(prefix)) || prefix).slice(prefix.length);
+    const press = async (js) => {
+      const at = JSON.parse(await s.evaluate(`(() => { const e = ${js}; if (!e) return 'null';
+        const b = e.getBoundingClientRect(); return JSON.stringify({ x: b.left + b.width / 2, y: b.top + b.height / 2 }); })()`));
+      if (!at) throw new Error(`nothing to press at ${js}`);
+      await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: at.x, y: at.y });
+      await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: at.x, y: at.y, button: 'left', clickCount: 1 });
+      await wait(60);
+      await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: at.x, y: at.y, button: 'left', clickCount: 1 });
+      await wait(300);
+    };
+    const css = (sel) => `document.querySelector(${JSON.stringify(sel)})`;
+    const button = (label) => `Array.from(document.querySelectorAll('button')).find((b) => b.textContent.trim() === ${JSON.stringify(label)})`;
+
+    await wait(500);
+    const boot = await read();
+    r.check('D81: an empty record shows an empty field', boot.input === '', boot.input);
+    await press(css('.ndg-dp-input'));
+    await press(css('.ndg-dp-pop [data-day="2026-09-30"]'));
+    const picked = await read();
+    r.check('D81: a day picked on it shows and fires', picked.input === '2026-09-30' && text(picked, 'changed=') === '1', `${picked.input} changed=${text(picked, 'changed=')}`);
+    await press(button('relabel'));
+    const relabelled = await read();
+    const label = await aria();
+    r.check('D81 control: another input re-runs the script (the label moves) and the pick stays', label === 'Ends' && relabelled.input === '2026-09-30', `aria-label=${label} field=${relabelled.input}`);
+    await press(button('next record'));
+    const next = await read();
+    r.check('D81: the next empty record, with Reset, shows an empty field', next.input === '' && text(next, 'value=') === '', `field="${next.input}" value="${text(next, 'value=')}"`);
+    r.check('D81: Reset is not a person changing the date (Changed stays quiet)', text(next, 'changed=') === '1', text(next, 'changed='));
+    await press(button('open the 14th'));
+    const opened = await read();
+    r.check('D81: a record with a day shows it', opened.input === '2026-09-14', opened.input);
+    await press(css('.ndg-dp-input'));
+    await press(css('.ndg-dp-pop [data-day="2026-09-30"]'));
+    await press(button('open the 14th'));
+    const again = await read();
+    r.check('D81: the next record holding the same day, with Reset, shows that day over the pick', again.input === '2026-09-14' && text(again, 'value=') === '2026-09-14', `field="${again.input}" value="${text(again, 'value=')}"`);
     r.finish(s);
   });
 })().catch((e) => {

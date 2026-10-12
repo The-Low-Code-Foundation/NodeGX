@@ -1,0 +1,1123 @@
+[
+  {
+    "name": "a text that reads no port answers at load: Result, the three booleans, the typed results and On True",
+    "because": "expression.ts :587 → :234-244 (no referenced port: an ordinary evaluation), :278-307",
+    "params": {
+      "expression": "2 + 2"
+    },
+    "steps": [
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "the load's evaluation over ports that never arrived: a NaN is no answer — nothing sent, nothing fires, Result stays null",
+    "because": "expression.ts :437-454 (`value !== value`), :269-277; NDA-017 §2 constraint 4",
+    "params": {
+      "expression": "a + b"
+    },
+    "steps": [
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "the load's evaluation over an unset port that gives an answer publishes it (`a !== false` is true)",
+    "because": "expression.ts :234-244, :269-282 — GAM-001 (P78 D55) R3, the Evaluate At Load description",
+    "params": {
+      "expression": "a !== false"
+    },
+    "steps": [
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "Evaluate At Load unticked: the load does not evaluate",
+    "because": "expression.ts :273 `internal.evaluateAtLoad ? … : NOT_EVALUATED`, :611-621",
+    "params": {
+      "expression": "a !== false",
+      "evaluateAtLoad": false
+    },
+    "steps": [
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "the load's evaluation over unset ports that throws is no answer: no Failure, no Error",
+    "because": "expression.ts :443-448 — NDA-004 'an unset input is not a failure'",
+    "params": {
+      "expression": "a.b"
+    },
+    "steps": [
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "the first port to arrive runs the text over the other's undefined: NaN is published; the second gives the sum",
+    "because": "expression.ts :215-228, :269-282 (an arrival ends the load path), :286 (`!==`)",
+    "params": {
+      "expression": "a + b"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "b",
+        "value": 2
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the same value again is not an arrival worth re-running for",
+    "because": "expression.ts :218-227 DEF-046, run-on-value-change.ts `valueDidChange`",
+    "params": {
+      "expression": "a * 2"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 3
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 3
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two Runs in one frame: one evaluation, two Dones after On True",
+    "because": "expression.ts :245-258 (the coalescing flag), :310-319 (one Done per token)",
+    "params": {
+      "expression": "a * 2"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 3
+      },
+      {
+        "signal": "run"
+      },
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a value and a Run in one frame: one evaluation, one Done",
+    "because": "expression.ts :255-258",
+    "params": {
+      "expression": "a + 1"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Run over ports that never arrived is never gated: NaN is published and Run is answered Done",
+    "because": "expression.ts :59 'An explicit Run is never gated', :269-270 (`tokens.length === 0`)",
+    "params": {
+      "expression": "a + b"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an unticked port is passive: its value runs nothing, a Run uses it",
+    "because": "expression.ts :227, run-on-value-change.ts :121-139",
+    "params": {
+      "expression": "a * 2",
+      "runOnChange-a": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 3
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an unticked port's value runs nothing, and the quiet frame keeps the function compiled for this text: a Run then reads c through it (Result 6)",
+    "because": "expression.ts `_compileFunction` records `compiledWith` once per text and `_argumentsForEvaluation` hands those names' values, then the API (row C151, v5) — a frame that schedules nothing must not touch them",
+    "params": {
+      "expression": "c * 2",
+      "runOnChange-c": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "c",
+        "value": 3
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a text that will not compile, run by a value: answers 0, writes Error, pulses Failure once, then only On False — and a settle with nothing new does nothing",
+    "because": "expression.ts :397-405, :346-378 (the report once per message); the trailing settle is the shape that kills dropping a repeat's state (seed 20729: the frame's flag left set re-runs the text)",
+    "params": {
+      "expression": "a +"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 2
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "a text that will not compile, run by Run: every Run is answered failure with the code, and Failure is not pulsed separately",
+    "because": "expression.ts :373-377, :315-319 (a token already settled is not answered twice)",
+    "params": {
+      "expression": "a +"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a text with no port that will not compile fails at load",
+    "because": "expression.ts :234-244 (no referenced port: not the load path), :397-405",
+    "params": {
+      "expression": "2 +"
+    },
+    "steps": [
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "an empty text does not compile (`return ();`) and fails at load",
+    "because": "expression.ts :504 — the setter wraps whatever is typed",
+    "params": {
+      "expression": ""
+    },
+    "steps": [
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "a throw answers 0, writes Error and pulses Failure; a later evaluation that works sends Error as blank text, once (row C144)",
+    "because": "expression.ts :416-423, :411-414 (lastError emptied, never flagged) — NSP-017 §6 C144 — renamed in P109 s32 (Expression v2: Error cleared to blank text, as ruled for D25)",
+    "params": {
+      "expression": "a.b.c"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": {
+          "b": {
+            "c": 5
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Run and a throw: the Run is answered failure; the next value-run's repeat of the same message pulses nothing more",
+    "because": "expression.ts :357-377",
+    "params": {
+      "expression": "a.b.c"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 2
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a new message is reported again; fixing the text sends a result and clears Error on the wire (row C144)",
+    "because": "expression.ts :357-361 (dedup by message), :411-414 — NSP-017 §6 C144 — renamed in P109 s32 (Expression v2: Error cleared to blank text, as ruled for D25)",
+    "params": {
+      "expression": "a.b.c"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "expression",
+        "value": "a +"
+      },
+      "settle",
+      {
+        "set": "expression",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "editing the text keeps a failure's dedup: the same compile message is not reported again",
+    "because": "expression.ts :357 — lastReportedError is cleared only by an evaluation that works",
+    "params": {
+      "expression": "a +"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "expression",
+        "value": "a -"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 2
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "editing the text: the old port goes, the new one reads undefined until it arrives; the old port written again is a stray",
+    "because": "expression.ts :510-535, :186-214",
+    "params": {
+      "expression": "a * 2"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 3
+      },
+      "settle",
+      {
+        "set": "expression",
+        "value": "b + 1"
+      },
+      "settle",
+      {
+        "set": "b",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 7
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the same text set again re-evaluates",
+    "because": "expression.ts :502-588 — the setter has no same-value guard",
+    "params": {
+      "expression": "a * 2"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 3
+      },
+      "settle",
+      {
+        "set": "expression",
+        "value": "a * 2"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a port the text stops reading loses its checkbox's answer: back in the text, it is ticked again",
+    "because": "expression.ts :514-518, node.ts :235-239",
+    "params": {
+      "expression": "a * 2",
+      "runOnChange-a": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "expression",
+        "value": "b * 2"
+      },
+      "settle",
+      {
+        "set": "expression",
+        "value": "a * 2"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 4
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a name the text does not read is accepted as a stray: its arrival re-runs the text",
+    "because": "expression.ts :186-214, :215-228",
+    "params": {
+      "expression": "a + 1"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "z",
+        "value": 9
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a stray the text later reads keeps its value",
+    "because": "expression.ts :520-524 (`hasInput` — no new port, no reset)",
+    "params": {
+      "expression": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "z",
+        "value": 4
+      },
+      "settle",
+      {
+        "set": "expression",
+        "value": "a + z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a checkbox written before its stray makes the stray passive",
+    "because": "nodedefinition.ts :519-527, expression.ts :227",
+    "params": {
+      "expression": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "runOnChange-z",
+        "value": false
+      },
+      {
+        "set": "z",
+        "value": 4
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a reserved name is a port that does nothing",
+    "because": "expression.ts :194-197 (GAM-002)",
+    "params": {
+      "expression": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "String",
+        "value": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a text reading run gets no port for it and fails as a reserved name, at load and on Run (v3, row C145)",
+    "because": "P107-C145, ruled \"Block the three names\" — expression-ports.ts reserves the node's own inputs; `_calculateExpression` fails `expression/reserved-name` before compiling",
+    "params": {
+      "expression": "run + 1"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a reserved name beside a port: the load waits for the port, then the evaluation fails as a reserved name (v3, row C145)",
+    "because": "`_scheduleLoadEvaluation` — `a` is the only referenced port; the load over it unset throws and is silent; `a` arriving runs `_calculateExpression`",
+    "params": {
+      "expression": "a + evaluateAtLoad"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two reserved names are named together, and renaming the variable clears Error (v3, rows C145, C144)",
+    "because": "`reservedNameMessage` lists every name read; a working evaluation after a failure sends Error as blank text",
+    "params": {
+      "expression": "expression + run"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "expression",
+        "value": "runCount + 1"
+      },
+      {
+        "set": "runCount",
+        "value": 2
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a null result: Is False and On False, the typed results blank, 0 and false",
+    "because": "expression.ts :639-749",
+    "params": {
+      "expression": "null"
+    },
+    "steps": [
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "an object result is new every evaluation; the typed results read it as text and 0",
+    "because": "expression.ts :286 (`!==`), :721-749",
+    "params": {
+      "expression": "({ v: a })"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Math shortcuts the preamble declares are not ports",
+    "because": "expression.ts :753-768, expression-ports.ts EXPRESSION_MATH_ALIASES",
+    "params": {
+      "expression": "max(a, 3) + pi"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a string over an unset port at load is the text 'undefined'",
+    "because": "expression.ts :269-282 — a load answer that is not NaN is published",
+    "params": {
+      "expression": "a + ''"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": "42"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "no text: Run evaluates an empty function — Result undefined (never sent), Is False",
+    "because": "expression.ts :163 (`currentExpression` ''), :455-477",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "NaN from an arrival twice: sent once (the wire does not repeat it), On False both times",
+    "because": "expression.ts :286 (NaN !== NaN flags every time); trace.ts — an unchanged value is not sent again",
+    "params": {
+      "expression": "a * 1"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": "x"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": "y"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Variable the text reads: a write of it elsewhere re-runs the node (Result, On True); a write of another Variable does not, nor the same value written again; a new value does",
+    "because": "expression.ts :555-579 subscribes at the text's write to what detectDependencies finds; expression-evaluator.ts :249-261 hears the Variables record's changes that name a Variable the text reads (v4)",
+    "params": {
+      "expression": "Variables.v"
+    },
+    "world": {
+      "registry": {
+        "models": {
+          "--ndl--global-variables": {
+            "v": 1,
+            "w": "x"
+          }
+        },
+        "writes": [
+          {
+            "at": 1,
+            "record": "--ndl--global-variables",
+            "key": "v",
+            "value": 2
+          },
+          {
+            "at": 10,
+            "record": "--ndl--global-variables",
+            "key": "w",
+            "value": "y"
+          },
+          {
+            "at": 20,
+            "record": "--ndl--global-variables",
+            "key": "v",
+            "value": 2
+          },
+          {
+            "at": 30,
+            "record": "--ndl--global-variables",
+            "key": "v",
+            "value": 0
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an Object the text reads: a write of ANY key of it elsewhere re-runs the node — the key it reads (Result) and another (On True again, Result unchanged); another Object's write does not",
+    "because": "expression-evaluator.ts :263-271 — every change of the record re-runs it, whichever key (v4)",
+    "params": {
+      "expression": "Objects.o.k"
+    },
+    "world": {
+      "registry": {
+        "models": {
+          "o": {
+            "k": "a"
+          }
+        },
+        "writes": [
+          {
+            "at": 1,
+            "record": "o",
+            "key": "k",
+            "value": "b"
+          },
+          {
+            "at": 10,
+            "record": "o",
+            "key": "z",
+            "value": 1
+          },
+          {
+            "at": 20,
+            "record": "p",
+            "key": "k",
+            "value": "c"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an Array the text reads is heard (row C150, v5): an item added, the list replaced — it re-runs, Result 2 then 1; a member's key written is not heard; a write to a RECORD named like the array is not heard",
+    "because": "expression-evaluator.ts subscribes to the array itself (`Collection.get(arrId)`, its `change`), which is what `Arrays.x` reads; v4 subscribed to `scope.get(arrId)`, a record of that name (row C150). The array does not re-notify a member's own change",
+    "params": {
+      "expression": "Arrays.list.size()"
+    },
+    "world": {
+      "registry": {
+        "models": {
+          "a": {
+            "k": 1
+          },
+          "b": {
+            "k": 2
+          }
+        },
+        "collections": {
+          "list": [
+            "a"
+          ]
+        },
+        "writes": [
+          {
+            "at": 1,
+            "array": "list",
+            "add": "b"
+          },
+          {
+            "at": 10,
+            "array": "list",
+            "set": [
+              "a"
+            ]
+          },
+          {
+            "at": 20,
+            "record": "a",
+            "key": "k",
+            "value": 5
+          },
+          {
+            "at": 40,
+            "record": "list",
+            "key": "x",
+            "value": 1
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "advance": 20
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a port beside a global: while the port has never had a value a global's change runs nothing (the load ran over it unset); once it has, a change re-runs the node",
+    "because": "expression.ts :572-578 → `_scheduleAutomaticEvaluation` :232-236 — a global moving is an always-ticked arrival, gated like the load on a port that never arrived (v4)",
+    "params": {
+      "expression": "Variables.v + a",
+      "evaluateAtLoad": false
+    },
+    "world": {
+      "registry": {
+        "models": {
+          "--ndl--global-variables": {
+            "v": 1
+          }
+        },
+        "writes": [
+          {
+            "at": 1,
+            "record": "--ndl--global-variables",
+            "key": "v",
+            "value": 2
+          },
+          {
+            "at": 10,
+            "record": "--ndl--global-variables",
+            "key": "v",
+            "value": 3
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 10
+      },
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a new text drops the last one's subscription: after Variables.v is replaced by Objects.o.k, a write of v runs nothing and a write of o re-runs it; replaced again by a text with no global, neither does",
+    "because": "expression.ts :558-562 unsubscribes before it subscribes again (v4)",
+    "params": {
+      "expression": "Variables.v"
+    },
+    "world": {
+      "registry": {
+        "models": {
+          "--ndl--global-variables": {
+            "v": 1
+          },
+          "o": {
+            "k": "a"
+          }
+        },
+        "writes": [
+          {
+            "at": 1,
+            "record": "--ndl--global-variables",
+            "key": "v",
+            "value": 2
+          },
+          {
+            "at": 2,
+            "record": "o",
+            "key": "k",
+            "value": "b"
+          },
+          {
+            "at": 10,
+            "record": "--ndl--global-variables",
+            "key": "v",
+            "value": 3
+          },
+          {
+            "at": 11,
+            "record": "o",
+            "key": "k",
+            "value": "c"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "expression",
+        "value": "Objects.o.k"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "expression",
+        "value": "2 + 2"
+      },
+      "settle",
+      {
+        "advance": 8
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Noodl API lands after the names the function was compiled with (row C151, v5): beside a STRAY input the text does not read, Variables.v reads 7; after a text that read two ports, a text reading one reads Variables again (8)",
+    "because": "expression.ts `_argumentsForEvaluation` builds the arguments from `compiledWith`, then the API; v4 wrote them over one argument array never shortened and appended the API after all of it, so a stray or a longer old array put Noodl in the wrong parameter (row C151)",
+    "params": {
+      "expression": "Variables.v",
+      "s": 5
+    },
+    "world": {
+      "registry": {
+        "models": {
+          "--ndl--global-variables": {
+            "v": 7
+          }
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "expression",
+        "value": "a + b"
+      },
+      {
+        "set": "a",
+        "value": 1
+      },
+      {
+        "set": "b",
+        "value": 2
+      },
+      "settle",
+      {
+        "set": "expression",
+        "value": "Variables.v + c"
+      },
+      {
+        "set": "c",
+        "value": 1
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the forms the runtime finds: Noodl.Variables.v, Variables['v'] and Noodl.Objects.o.k are each heard; a name only inside a string is not",
+    "because": "expression-evaluator.ts :73-117 detectDependencies — the `Noodl.` prefix, bracket keys, strings stripped (v4)",
+    "params": {
+      "expression": "Noodl.Variables.v + Variables['v'] + Noodl.Objects.o.k + 'Variables.q'"
+    },
+    "world": {
+      "registry": {
+        "models": {
+          "--ndl--global-variables": {
+            "v": 1,
+            "q": 0
+          },
+          "o": {
+            "k": "a"
+          }
+        },
+        "writes": [
+          {
+            "at": 1,
+            "record": "--ndl--global-variables",
+            "key": "v",
+            "value": 2
+          },
+          {
+            "at": 10,
+            "record": "o",
+            "key": "k",
+            "value": "b"
+          },
+          {
+            "at": 20,
+            "record": "--ndl--global-variables",
+            "key": "q",
+            "value": 9
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "with Run wired, a new text is not evaluated at load: Result stays null until Run (P107-C155)",
+    "because": "expression.ts :611 `if (!this.isInputConnected('run')) this._scheduleLoadEvaluation()` — NDA-017 §2's surviving guard; P109 ISL-033 measured it (wired: null at load). The unwired twin is the first scenario",
+    "wired": [
+      "run"
+    ],
+    "params": {
+      "expression": "2 + 2"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "with Run wired, a port's arrival still evaluates the text (P107-C155)",
+    "because": "expression.ts :215-228 — Run adds a trigger and takes nothing away (NDA-017 §2); ISL-033's measurement: wired, 6 after the input",
+    "wired": [
+      "run"
+    ],
+    "params": {
+      "expression": "a + 1"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "with Run wired, editing the text re-derives its ports and evaluates nothing: the new port's arrival does (P107-C155)",
+    "because": "expression.ts :502-535 (the ports taken either way), :611 (no load evaluation while Run is wired)",
+    "wired": [
+      "run"
+    ],
+    "params": {
+      "expression": "a + 1"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "expression",
+        "value": "b * 2"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 5
+      },
+      "settle",
+      {
+        "set": "b",
+        "value": 4
+      },
+      "settle"
+    ]
+  }
+]

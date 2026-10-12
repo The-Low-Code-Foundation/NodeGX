@@ -36,8 +36,8 @@
     {
       "fromId": "t_pl_page_title",
       "fromProperty": "Translation",
-      "toId": "seo_pl_page",
-      "toProperty": "in-title"
+      "toId": "pl_page",
+      "toProperty": "title"
     }
   ]
 }

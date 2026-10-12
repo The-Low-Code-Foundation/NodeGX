@@ -142,6 +142,8 @@ for (const root of componentDirs(CLOUD)) {
 
   components.push({
     name: meta.path,
+    /* The sentence the backend's MCP tool tells the model choosing this function (P109 ISL-042, NodeGX R10). */
+    ...(meta.description ? { description: meta.description } : {}),
     nodes: nodes.map((n) => ({
       id: n.id,
       type: n.type,
@@ -199,6 +201,23 @@ const served = (health.workflows?.functions || []).filter((f) => f.workflow === 
 const missing = endpoints.filter((n) => !served.includes(n));
 if (missing.length) {
   console.error(`deploy-functions: deployed, but the backend does not serve ${missing.join(', ')}.`);
+  process.exit(1);
+}
+/* EVERY SERVED ENDPOINT HAS A RULE IN THE LIVE POLICY (TASK-L190's finding).
+   A backend applies nodegx.security.json once, on its FIRST start, and keeps it.
+   A function deployed later with no rule of its own runs under the default — for
+   a function with no Allow Unauthenticated, any signed-in caller. Measured, not
+   argued: previewLesson, deployed to a backend started before its rule was
+   written, ran for a learner-bound key. So a deploy that would leave an endpoint
+   unruled fails here, naming it, and says how to apply the file. */
+const live = await call('GET', '/admin/permissions');
+const liveFunctions = (live.config || live).functions || {};
+const unruled = served.filter((n) => !liveFunctions[n]);
+if (unruled.length) {
+  console.error(
+    `deploy-functions: deployed, but the live policy has no rule for ${unruled.join(', ')}, so each runs for ANY signed-in caller. ` +
+      'Apply nodegx.security.json: PUT /admin/permissions with the file as the body (setup-backend.mjs and setup-production.mjs do), then run this again.'
+  );
   process.exit(1);
 }
 const helpers = components.length - endpoints.length;

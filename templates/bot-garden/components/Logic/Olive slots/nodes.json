@@ -1,0 +1,223 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "edf9d75e-7fa2-5c02-84fc-1f7d7babfe51",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "oliveslotsIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "narrow",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "rung",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "selected",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "slots",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "oliveslotsFn",
+      "type": "JavaScriptFunction",
+      "label": "Olive slots",
+      "parameters": {
+        "functionScript": "var { OLIVE_PREFIX, OLIVE_REASON_WORD, oliveAskBlocks, oliveBlockSlots, oliveCheckForBand, olivePickerSlots,\n  oliveWords } = Scripts.olive;\nvar lang = String(Inputs.lang) === 'en' ? 'en' : 'fr';\nvar band = Number(Inputs.band) === 1 ? 1 : 2;\nvar slots = Inputs.slots && typeof Inputs.slots === 'object' ? Inputs.slots : {};\nvar rung = String(Inputs.rung || slots.rung || '');\nvar blockId = '';\nvar prog = Inputs.program;\nif (typeof prog === 'string' && prog) { try { prog = JSON.parse(prog); } catch (e) { prog = null; } }\nif (Array.isArray(prog)) {\n  var asks = oliveAskBlocks(prog, []), pick = null, sel = Inputs.selected === undefined || Inputs.selected === null ? '' : String(Inputs.selected);\n  for (var a = 0; a < asks.length && !pick; a++) if (sel !== '' && String(asks[a].id) === sel) pick = asks[a];\n  for (var f = 0; f < asks.length && !pick; f++) if (!oliveCheckForBand(asks[f].rung, oliveBlockSlots(asks[f].rung, asks[f].slots, lang), band, lang, Inputs.narrow).ok) pick = asks[f];\n  if (!pick && asks.length) pick = asks[0];\n  rung = pick ? pick.rung : '';\n  slots = pick ? pick.slots : {};\n  blockId = pick ? String(pick.id) : '';\n}\nif (rung.indexOf(OLIVE_PREFIX) === 0) rung = rung.slice(OLIVE_PREFIX.length);\nvar word = oliveWords(Inputs.words, lang);\nvar c = rung ? oliveCheckForBand(rung, oliveBlockSlots(rung, slots, lang), band, lang, Inputs.narrow) : { ok: true };\nOutputs.slots = olivePickerSlots(rung, band, lang, Inputs.narrow, word);\nOutputs.ok = c.ok;\nOutputs.reason = c.ok ? '' : String(c.reason);\nOutputs.slot = c.ok ? '' : String(c.slot || '');\nOutputs.message = c.ok ? '' : word[OLIVE_REASON_WORD[c.reason]] || String(c.reason);\nOutputs.show = !c.ok;\nOutputs.blockId = blockId;\n",
+        "uses": "olive.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-band",
+          "displayName": "band",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-slots",
+          "displayName": "slots",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rung",
+          "displayName": "rung",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-program",
+          "displayName": "program",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-selected",
+          "displayName": "selected",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-narrow",
+          "displayName": "narrow",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-slots",
+          "displayName": "slots",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-slot",
+          "displayName": "slot",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-message",
+          "displayName": "message",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-show",
+          "displayName": "show",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blockId",
+          "displayName": "blockId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "oliveslotsOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "blockId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "message",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ok",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "reason",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "show",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "slot",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "slots",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

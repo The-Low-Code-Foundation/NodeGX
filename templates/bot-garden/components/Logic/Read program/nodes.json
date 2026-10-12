@@ -1,0 +1,102 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3def5462-2fee-5eb1-860e-84aec2d51544",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "readprogramIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "readprogramFn",
+      "type": "JavaScriptFunction",
+      "label": "Read program",
+      "parameters": {
+        "functionScript": "\nvar raw = Inputs.program, list = [];\nif (Array.isArray(raw)) list = raw;\nelse if (typeof raw === 'string' && raw) { try { var parsed = JSON.parse(raw); if (Array.isArray(parsed)) list = parsed; } catch (e) { list = []; } }\nfunction count(l) { var n = 0; for (var i = 0; i < l.length; i++) { if (!l[i]) continue; n++; if (Array.isArray(l[i].body)) n += count(l[i].body); } return n; }\nvar copy = JSON.parse(JSON.stringify(list));\nOutputs.program = copy;\nOutputs.blocks = count(copy);\nOutputs.text = JSON.stringify(copy);\nOutputs.empty = copy.length === 0;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-program",
+          "displayName": "program",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-program",
+          "displayName": "program",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blocks",
+          "displayName": "blocks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "readprogramOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "blocks",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "empty",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "program",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "text",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

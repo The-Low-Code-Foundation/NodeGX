@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3a597373-946c-5b49-8aee-6c18e03f12ce",
+  "name": "Tab",
+  "path": "/Garden/Tab",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One screen on the bar: a pill, lit when Selected (the mockup’s .tab). Publishes Clicked."
+}

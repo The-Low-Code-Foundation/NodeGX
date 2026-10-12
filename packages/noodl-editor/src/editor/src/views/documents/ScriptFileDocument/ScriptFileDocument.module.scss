@@ -1,0 +1,145 @@
+/*
+ * P109 ISL-005 — the script file document: `CodeFileDocument`'s bar and surface (imported from its
+ * module, so the two cannot drift), with a column beside the code saying what the file gives, uses,
+ * who uses it and where it runs. The column is the Inspector's width and ground, as on the mockup.
+ *
+ * ⚠️ `box-sizing` is declared where a rule carries both padding and a width: this repo has no global
+ * `* { box-sizing: border-box }`.
+ */
+
+.Body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+}
+
+.Body > :first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.Facts {
+  box-sizing: border-box;
+  flex: 0 0 300px;
+  overflow-y: auto;
+  background-color: var(--theme-color-bg-2);
+  border-left: 1px solid var(--theme-color-border-default);
+}
+
+.Group {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--theme-color-border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.GroupHeading {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--theme-color-fg-default-shy);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.Count {
+  font-weight: 500;
+  color: var(--theme-color-secondary-as-fg);
+}
+
+.Alias {
+  font-family: var(--font-family-code, ui-monospace, 'SF Mono', Menlo, Consolas, monospace);
+  font-size: var(--font-size-md);
+  color: var(--theme-color-fg-accent);
+}
+
+.Help {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  line-height: 1.45;
+  color: var(--theme-color-secondary-as-fg);
+}
+
+.Pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.Pill {
+  font-family: var(--font-family-code, ui-monospace, 'SF Mono', Menlo, Consolas, monospace);
+  font-size: var(--font-size-xs);
+  padding: 2px 7px;
+  border-radius: 5px;
+  background-color: var(--theme-color-bg-3);
+  border: 1px solid var(--theme-color-border-default);
+  color: var(--theme-color-fg-default);
+}
+
+.LinkRow {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background-color: var(--theme-color-bg-1);
+  color: var(--theme-color-fg-default);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--theme-color-bg-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-color-focus-ring);
+    outline-offset: 1px;
+  }
+}
+
+.FileName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.RowMeta {
+  margin-left: auto;
+  flex: 0 0 auto;
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-secondary-as-fg);
+}
+
+.Runs {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  row-gap: 6px;
+  font-size: var(--font-size-sm);
+
+  dt {
+    color: var(--theme-color-fg-default-shy);
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+.Yes {
+  color: var(--theme-color-fg-success);
+}
+
+.NotYet {
+  color: var(--theme-color-fg-notice);
+}

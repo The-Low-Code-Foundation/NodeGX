@@ -60,6 +60,7 @@ export function FilterBuilderButton({
           <Text textType={hasFilter ? TextType.DefaultContrast : TextType.Shy}>{summary}</Text>
         </div>
         <IconButton
+          ariaLabel="Edit filter"
           icon={IconName.Pencil}
           size={IconSize.Small}
           variant={IconButtonVariant.Transparent}

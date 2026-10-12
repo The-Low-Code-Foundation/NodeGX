@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "423245a4-1c47-5c84-8ede-5886cc10c04a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "proposalcardIn",
+      "fromProperty": "handled",
+      "toId": "proposalcardFn",
+      "toProperty": "in-handled"
+    },
+    {
+      "fromId": "proposalcardIn",
+      "fromProperty": "lang",
+      "toId": "proposalcardFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "proposalcardIn",
+      "fromProperty": "program",
+      "toId": "proposalcardFn",
+      "toProperty": "in-program"
+    },
+    {
+      "fromId": "proposalcardIn",
+      "fromProperty": "run",
+      "toId": "proposalcardFn",
+      "toProperty": "in-run"
+    },
+    {
+      "fromId": "proposalcardIn",
+      "fromProperty": "words",
+      "toId": "proposalcardFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "proposalcardFn",
+      "fromProperty": "out-blocksText",
+      "toId": "proposalcardOut",
+      "toProperty": "blocksText"
+    },
+    {
+      "fromId": "proposalcardFn",
+      "fromProperty": "out-proposal",
+      "toId": "proposalcardOut",
+      "toProperty": "proposal"
+    },
+    {
+      "fromId": "proposalcardFn",
+      "fromProperty": "out-show",
+      "toId": "proposalcardOut",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "proposalcardFn",
+      "fromProperty": "out-sig",
+      "toId": "proposalcardOut",
+      "toProperty": "sig"
+    },
+    {
+      "fromId": "proposalcardFn",
+      "fromProperty": "success",
+      "toId": "proposalcardOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f3ea6969-476c-42ed-b8f1-8bd9f69b8116",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ps_in-2",
+      "type": "Component Inputs",
+      "label": "One section of the notice",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "heading",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "ps_box",
+      "type": "Group",
+      "label": "The section",
+      "x": 40,
+      "y": 240,
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "ps_h",
+        "ps_b"
+      ]
+    },
+    {
+      "id": "ps_h",
+      "type": "Text",
+      "label": "Heading",
+      "x": 100,
+      "y": 360,
+      "parent": "ps_box",
+      "parameters": {
+        "as": "h2",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": 800,
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "ps_b",
+      "type": "Text",
+      "label": "Paragraph",
+      "x": 100,
+      "y": 480,
+      "parent": "ps_box",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)",
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        }
+      }
+    }
+  ],
+  "visualRoots": [
+    "ps_box"
+  ]
+}

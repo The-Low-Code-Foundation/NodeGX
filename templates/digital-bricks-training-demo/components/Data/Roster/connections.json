@@ -32,6 +32,12 @@
       "fromProperty": "out-rows",
       "toId": "fr_order",
       "toProperty": "in-items"
+    },
+    {
+      "fromId": "ro_in",
+      "fromProperty": "refresh",
+      "toId": "ro_call",
+      "toProperty": "run"
     }
   ]
 }

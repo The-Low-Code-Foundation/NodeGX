@@ -1,0 +1,283 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "16b2f62b-37ef-513e-81e1-ca48b22a0db8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "abIn",
+      "fromProperty": "projectId",
+      "toId": "abQueue",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "abIn",
+      "fromProperty": "date",
+      "toId": "abQueue",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "abIn",
+      "fromProperty": "what",
+      "toId": "abQueue",
+      "toProperty": "in-what"
+    },
+    {
+      "fromId": "abIn",
+      "fromProperty": "planned",
+      "toId": "abQueue",
+      "toProperty": "in-planned"
+    },
+    {
+      "fromId": "abIn",
+      "fromProperty": "todoTaskId",
+      "toId": "abQueue",
+      "toProperty": "in-todoTaskId"
+    },
+    {
+      "fromId": "abIn",
+      "fromProperty": "items",
+      "toId": "abQueue",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "abIn",
+      "fromProperty": "fromActions",
+      "toId": "abQueue",
+      "toProperty": "in-fromActions"
+    },
+    {
+      "fromId": "abIn",
+      "fromProperty": "projects",
+      "toId": "abQueue",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "abIn",
+      "fromProperty": "do",
+      "toId": "abStart",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "abStart",
+      "fromProperty": "currentCount",
+      "toId": "abQueue",
+      "toProperty": "in-start"
+    },
+    {
+      "fromId": "abStep",
+      "fromProperty": "currentCount",
+      "toId": "abQueue",
+      "toProperty": "in-step"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-projectId",
+      "toId": "abWrite",
+      "toProperty": "prop-projectId"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-date",
+      "toId": "abWrite",
+      "toProperty": "prop-date"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-what",
+      "toId": "abWrite",
+      "toProperty": "prop-what"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-planned",
+      "toId": "abWrite",
+      "toProperty": "prop-planned"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-empty",
+      "toId": "abWrite",
+      "toProperty": "prop-actual"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-done",
+      "toId": "abWrite",
+      "toProperty": "prop-done"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-isMove",
+      "toId": "abWrite",
+      "toProperty": "prop-isMove"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-todoTaskId",
+      "toId": "abWrite",
+      "toProperty": "prop-todoTaskId"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-todoActionId",
+      "toId": "abWrite",
+      "toProperty": "prop-todoActionId"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-position",
+      "toId": "abWrite",
+      "toProperty": "prop-position"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-go",
+      "toId": "abWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "abWrite",
+      "fromProperty": "id",
+      "toId": "abLog",
+      "toProperty": "prop-blockId"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-projectId",
+      "toId": "abLog",
+      "toProperty": "prop-projectId"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-hKind",
+      "toId": "abLog",
+      "toProperty": "prop-kind"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-hSummary",
+      "toId": "abLog",
+      "toProperty": "prop-summary"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-hBody",
+      "toId": "abLog",
+      "toProperty": "prop-body"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-hWhat",
+      "toId": "abLog",
+      "toProperty": "prop-what"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-at",
+      "toId": "abLog",
+      "toProperty": "prop-at"
+    },
+    {
+      "fromId": "abWrite",
+      "fromProperty": "done",
+      "toId": "abLog",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-hasTodo",
+      "toId": "abRoute",
+      "toProperty": "in-hasTodo"
+    },
+    {
+      "fromId": "abLog",
+      "fromProperty": "done",
+      "toId": "abRoute",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-todoTaskId",
+      "toId": "abTodo",
+      "toProperty": "prop-taskId"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-tKind",
+      "toId": "abTodo",
+      "toProperty": "prop-kind"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-tSummary",
+      "toId": "abTodo",
+      "toProperty": "prop-summary"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-empty",
+      "toId": "abTodo",
+      "toProperty": "prop-body"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-at",
+      "toId": "abTodo",
+      "toProperty": "prop-at"
+    },
+    {
+      "fromId": "abRoute",
+      "fromProperty": "out-todo",
+      "toId": "abTodo",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "abRoute",
+      "fromProperty": "out-next",
+      "toId": "abStep",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "abTodo",
+      "fromProperty": "done",
+      "toId": "abStep",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "abQueue",
+      "fromProperty": "out-finished",
+      "toId": "abOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "abWrite",
+      "fromProperty": "failure",
+      "toId": "abProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "abLog",
+      "fromProperty": "failure",
+      "toId": "abProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "abLog",
+      "fromProperty": "failure",
+      "toId": "abRoute",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "abTodo",
+      "fromProperty": "failure",
+      "toId": "abProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "abTodo",
+      "fromProperty": "failure",
+      "toId": "abStep",
+      "toProperty": "increase"
+    }
+  ]
+}

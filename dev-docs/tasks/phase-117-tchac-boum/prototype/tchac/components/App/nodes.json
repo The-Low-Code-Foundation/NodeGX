@@ -1,0 +1,238 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7c4a6b10-0000-4000-8000-0000000000b1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "screen",
+      "type": "Group",
+      "label": "Le tableau",
+      "children": ["title", "ballonTxt", "billesTxt", "chatsRow", "btn", "btnReset"],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": { "value": 100, "unit": "%" },
+        "height": { "value": 100, "unit": "%" },
+        "backgroundColor": "#1b1f3a",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "rowGap": { "value": 18, "unit": "px" },
+        "paddingLeft": { "value": 28, "unit": "px" },
+        "paddingRight": { "value": 28, "unit": "px" }
+      },
+      "x": 1600,
+      "y": 80
+    },
+    {
+      "id": "title",
+      "type": "Text",
+      "label": "Titre",
+      "parent": "screen",
+      "parameters": {
+        "text": "TCHAC-BOUM",
+        "sizeMode": "contentSize",
+        "fontSize": { "value": 26, "unit": "px" },
+        "fontWeight": 900,
+        "letterSpacing": { "value": 5, "unit": "px" },
+        "color": "#ffd166",
+        "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif"
+      },
+      "x": 1340,
+      "y": -80
+    },
+    {
+      "id": "ballonTxt",
+      "type": "Text",
+      "label": "Écran : le ballon",
+      "parent": "screen",
+      "parameters": {
+        "text": "🎈",
+        "sizeMode": "contentSize",
+        "fontSize": { "value": 120, "unit": "px" },
+        "textAlign": "center",
+        "color": "#ffffff",
+        "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif"
+      },
+      "x": 1340,
+      "y": 300
+    },
+    {
+      "id": "billesTxt",
+      "type": "Text",
+      "label": "Écran : le compte",
+      "parent": "screen",
+      "parameters": {
+        "text": "0 bille",
+        "sizeMode": "contentSize",
+        "fontSize": { "value": 28, "unit": "px" },
+        "fontWeight": 600,
+        "color": "#c9d6ff",
+        "fontVariantNumeric": "tabular-nums",
+        "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif"
+      },
+      "x": 1340,
+      "y": 120
+    },
+    {
+      "id": "chatsRow",
+      "type": "Group",
+      "label": "Les chats",
+      "parent": "screen",
+      "children": ["chatGTxt", "chatDTxt"],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "columnGap": { "value": 48, "unit": "px" }
+      },
+      "x": 1600,
+      "y": 600
+    },
+    {
+      "id": "chatGTxt",
+      "type": "Text",
+      "label": "Écran : chat de gauche",
+      "parent": "chatsRow",
+      "parameters": {
+        "text": "😴",
+        "sizeMode": "contentSize",
+        "fontSize": { "value": 56, "unit": "px" },
+        "color": "#ffffff",
+        "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif"
+      },
+      "x": 1340,
+      "y": 520
+    },
+    {
+      "id": "chatDTxt",
+      "type": "Text",
+      "label": "Écran : chat de droite",
+      "parent": "chatsRow",
+      "parameters": {
+        "text": "😴",
+        "sizeMode": "contentSize",
+        "fontSize": { "value": 56, "unit": "px" },
+        "color": "#ffffff",
+        "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif"
+      },
+      "x": 1340,
+      "y": 700
+    },
+    {
+      "id": "btn",
+      "type": "net.noodl.controls.button",
+      "label": "Le gros bouton rouge",
+      "parent": "screen",
+      "metadata": { "tchac": { "skin": "bouton" } },
+      "parameters": {
+        "label": "Lâcher une bille",
+        "sizeMode": "explicit",
+        "width": { "value": 240, "unit": "px" },
+        "height": { "value": 64, "unit": "px" },
+        "backgroundColor": "#ff3b30",
+        "color": "#ffffff",
+        "fontSize": { "value": 22, "unit": "px" },
+        "fontWeight": 800,
+        "borderRadius": { "value": 32, "unit": "px" },
+        "borderStyle": "none",
+        "marginTop": { "value": 12, "unit": "px" },
+        "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif"
+      },
+      "x": 40,
+      "y": 300
+    },
+    {
+      "id": "btnReset",
+      "type": "net.noodl.controls.button",
+      "label": "Le petit bouton",
+      "parent": "screen",
+      "metadata": { "tchac": { "skin": "bouton-petit" } },
+      "parameters": {
+        "label": "Tout remettre",
+        "sizeMode": "explicit",
+        "width": { "value": 160, "unit": "px" },
+        "height": { "value": 40, "unit": "px" },
+        "backgroundColor": "rgba(255,255,255,0.14)",
+        "color": "#ffffff",
+        "fontSize": { "value": 15, "unit": "px" },
+        "fontWeight": 600,
+        "borderRadius": { "value": 20, "unit": "px" },
+        "borderStyle": "none",
+        "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif"
+      },
+      "x": 40,
+      "y": 560
+    },
+    {
+      "id": "tourniquet",
+      "type": "Counter",
+      "label": "Le tourniquet",
+      "x": 300,
+      "y": 300
+    },
+    {
+      "id": "compteur",
+      "type": "String Format",
+      "label": "L'afficheur",
+      "parameters": { "format": "{n} bille(s)" },
+      "x": 820,
+      "y": 120
+    },
+    {
+      "id": "rampe",
+      "type": "Timer",
+      "label": "La rampe",
+      "parameters": { "duration": 700 },
+      "x": 560,
+      "y": 300
+    },
+    {
+      "id": "ballon",
+      "type": "Switch",
+      "label": "Le ballon",
+      "metadata": { "tchac": { "skin": "ballon" } },
+      "x": 820,
+      "y": 300
+    },
+    {
+      "id": "pancarte",
+      "type": "Boolean To String",
+      "label": "La pancarte",
+      "parameters": { "trueString": "💥", "falseString": "🎈" },
+      "x": 1080,
+      "y": 300
+    },
+    {
+      "id": "chatG",
+      "type": "Switch",
+      "label": "Le chat de gauche",
+      "metadata": { "tchac": { "skin": "chat" } },
+      "x": 820,
+      "y": 520
+    },
+    {
+      "id": "pancG",
+      "type": "Boolean To String",
+      "label": "Sa pancarte",
+      "parameters": { "trueString": "😼", "falseString": "😴" },
+      "x": 1080,
+      "y": 520
+    },
+    {
+      "id": "chatD",
+      "type": "Switch",
+      "label": "Le chat de droite",
+      "metadata": { "tchac": { "skin": "chat" } },
+      "x": 820,
+      "y": 700
+    },
+    {
+      "id": "pancD",
+      "type": "Boolean To String",
+      "label": "Sa pancarte",
+      "parameters": { "trueString": "😼", "falseString": "😴" },
+      "x": 1080,
+      "y": 700
+    }
+  ],
+  "visualRoots": ["screen"]
+}

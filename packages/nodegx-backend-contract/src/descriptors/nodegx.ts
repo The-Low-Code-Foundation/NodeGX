@@ -183,6 +183,15 @@ export const nodegxDescriptor: BackendDescriptor = {
     withinBox: supported(
       `${SQL} — two range comparisons on json_extract'd coordinates; exact, but unindexed`
     ),
+    // P116 ONT-004. A path through several links, compiled into the same
+    // statement as the rest of the query — nested id subqueries for fixed hops,
+    // a recursive common table expression for a repeated one — with the
+    // caller's row ACL applied at every hop. Proven on both engines by the
+    // suite, which asserts the rows and never the SQL (BRG-003 §3.3).
+    path: supported(
+      `${SQL} buildPathPredicate — conformance/cases/paths.ts on SQLite and PostgreSQL: a membership business's four paths (depth 1, 2, 4 and 5), a repeated hop bounded at 3, dedupe, the ACL at every hop, and five refusals by name; ceiling ${'8'} hops`
+    ),
+
     withinPolygon: supported(
       `${SQL} — nodegx_point_in_polygon(), ray casting. Planar, which is what Mongo's legacy $polygon is too, so this agrees with Parse rather than diverging from it`
     )

@@ -56,7 +56,7 @@ const EventReceiver: NodeDefinitionOptions = {
         ]
       },
       default: 'never',
-      description: 'Whether receiving an event stops it reaching other receivers on the same channel',
+      description: 'Whether receiving an event stops it reaching other receivers on the same channel. Applies to Parent, Children and Siblings events; a Global event reaches every receiver',
       set: function (this: EventReceiverInstance, value: 'never' | 'always') {
         this._internal.consume = value;
       }

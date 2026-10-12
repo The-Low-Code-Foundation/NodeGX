@@ -135,8 +135,25 @@ done
 # and the total drops from **2349 to 2303** while the failure count stays at
 # zero. That is the shape to watch for: a green board with 46 fewer tests in it.
 # Always compare the TOTAL against primary's, never just the failures.
-for artifact in packages/nodegx-backend/dist packages/noodl-runtime/dist-types; do
+#
+# ⚠️ The garden lanes (P105/P106) need five more: `noodl-preview/dist` (the
+# deploy tool the page drives use), `noodl-mcp/dist` (the kit extractor — linked file by file below,
+# since ISL-014),
+# `nodegx-export/dist` and `nodegx-core/dist`, and the P105 desktop shell's own
+# `node_modules`. P106 session 1 linked them by hand in three lanes.
+# ⚠️ P109 s12: `packages/noodl-editor/src/external/viewer` is the viewer bundle `render_report` renders with
+# (`scripts/devtools/render-report.js` probes it beside the server). Without it every agent round run from a
+# worktree answers "The viewer bundle is missing", and two agents in a row lost their one visual check to it.
+# Its parent `src/external` is itself ignored, so the link's parent is made first.
+# ⚠️ P109 s46: `nodegx-node-spec` and `nodegx-canvas-look` gained a `dist/` build in P112 (their `main` points there), and
+# without the link every template generator in a worktree died on `Cannot find module '@nodegx/node-spec'`.
+for artifact in packages/nodegx-backend/dist packages/noodl-runtime/dist-types \
+  packages/noodl-preview/dist packages/nodegx-export/dist packages/nodegx-core/dist \
+  packages/nodegx-node-spec/dist packages/nodegx-canvas-look/dist \
+  packages/noodl-editor/src/external/viewer \
+  dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/node_modules; do
   if [ -d "$PRIMARY/$artifact" ] && [ ! -e "$WT/$artifact" ]; then
+    mkdir -p "$(dirname "$WT/$artifact")"
     ln -s "$PRIMARY/$artifact" "$WT/$artifact"
     echo "make-worktree: linked $artifact from primary (gitignored build output)"
   elif [ ! -d "$PRIMARY/$artifact" ]; then
@@ -144,9 +161,26 @@ for artifact in packages/nodegx-backend/dist packages/noodl-runtime/dist-types; 
   fi
 done
 
+# P109 ISL-014 (Richard's ruling 2026-10-02, "Build it automatically"): `noodl-mcp/dist` is NOT linked
+# whole any more. A server running from a checkout builds its own kit reader (`dist/kit-extract.cjs`)
+# when it is missing or older than any file it was built from — and through a directory link that
+# build wrote the PRIMARY's reader from the worktree's sources (ISL-014 §7). So the worktree gets a
+# real `dist/` with every other primary file linked (the server, the cloud bundle, the catalog), and
+# its first kit bind builds its own reader inside the worktree (~150 ms).
+if [ -d "$PRIMARY/packages/noodl-mcp/dist" ] && [ ! -e "$WT/packages/noodl-mcp/dist" ]; then
+  mkdir -p "$WT/packages/noodl-mcp/dist"
+  for f in "$PRIMARY"/packages/noodl-mcp/dist/*; do
+    case "$(basename "$f")" in
+      kit-extract.cjs | kit-extract.inputs.json | *.tmp) ;;
+      *) ln -s "$f" "$WT/packages/noodl-mcp/dist/$(basename "$f")" ;;
+    esac
+  done
+  echo "make-worktree: linked packages/noodl-mcp/dist/* from primary, except the kit reader (built here on first bind)"
+fi
+
 echo "make-worktree: verifying resolution points INSIDE the worktree"
 fail=0
-for spec in '@noodl/runtime/package.json' '@nodegx/render-measure/package.json' '@noodl/mcp/package.json'; do
+for spec in '@noodl/runtime/package.json' '@nodegx/render-measure/package.json' '@nodegx/mcp/package.json'; do
   resolved="$(node -e "try{console.log(require.resolve('$spec',{paths:['$WT']}))}catch(e){console.log('UNRESOLVED')}")"
   case "$resolved" in
     "$WT"/*) echo "  ok   $spec" ;;

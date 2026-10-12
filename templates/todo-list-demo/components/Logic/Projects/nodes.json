@@ -1,0 +1,427 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e3c0f10f-9c94-5f96-8fb3-b936583bd842",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pjIn",
+      "type": "Component Inputs",
+      "label": "What it needs",
+      "ports": [
+        {
+          "name": "tasks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "openId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "flag",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "now",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "refresh",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pjOut",
+      "type": "Component Outputs",
+      "label": "The projects",
+      "ports": [
+        {
+          "name": "projectNames",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "showTab",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "showTurnOn",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "noProjects",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "projectPosition",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "nextPosition",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "balanceText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "balanceWhen",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "bars",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "lowText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "lowColor",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "incomeRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasIncome",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "payingRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasPaying",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "buildingRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasBuilding",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "hobbyRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasHobby",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "quietRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasQuiet",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "upRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "recRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "pastRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "projectOptions",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "projects",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "marks",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "readings",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "pjNone",
+      "type": "JavaScriptFunction",
+      "label": "No projects in the demo",
+      "parameters": {
+        "functionScript": "Outputs.projectNames = {};\nOutputs.showTab = false;\nOutputs.showTurnOn = false;\nOutputs.noProjects = true;\nOutputs.projectPosition = 1;\nOutputs.nextPosition = 1;\nOutputs.balanceText = '';\nOutputs.balanceWhen = '';\nOutputs.bars = [];\nOutputs.lowText = '';\nOutputs.lowColor = '';\nOutputs.incomeRows = [];\nOutputs.hasIncome = false;\nOutputs.rows = [];\nOutputs.projects = [];\nOutputs.items = [];\nOutputs.marks = [];\nOutputs.readings = [];\nOutputs.upRows = [];\nOutputs.recRows = [];\nOutputs.pastRows = [];\nOutputs.projectOptions = [];\nOutputs.payingRows = [];\nOutputs.buildingRows = [];\nOutputs.hobbyRows = [];\nOutputs.quietRows = [];\nOutputs.hasPaying = false;\nOutputs.hasBuilding = false;\nOutputs.hasHobby = false;\nOutputs.hasQuiet = false;"
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "out-projectNames",
+          "displayName": "projectNames",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showTab",
+          "displayName": "showTab",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showTurnOn",
+          "displayName": "showTurnOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noProjects",
+          "displayName": "noProjects",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-projectPosition",
+          "displayName": "projectPosition",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-nextPosition",
+          "displayName": "nextPosition",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-balanceText",
+          "displayName": "balanceText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-balanceWhen",
+          "displayName": "balanceWhen",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bars",
+          "displayName": "bars",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lowText",
+          "displayName": "lowText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lowColor",
+          "displayName": "lowColor",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-incomeRows",
+          "displayName": "incomeRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasIncome",
+          "displayName": "hasIncome",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-projects",
+          "displayName": "projects",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-marks",
+          "displayName": "marks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-readings",
+          "displayName": "readings",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-upRows",
+          "displayName": "upRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-recRows",
+          "displayName": "recRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pastRows",
+          "displayName": "pastRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-projectOptions",
+          "displayName": "projectOptions",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-payingRows",
+          "displayName": "payingRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-buildingRows",
+          "displayName": "buildingRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hobbyRows",
+          "displayName": "hobbyRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-quietRows",
+          "displayName": "quietRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasPaying",
+          "displayName": "hasPaying",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasBuilding",
+          "displayName": "hasBuilding",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasHobby",
+          "displayName": "hasHobby",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasQuiet",
+          "displayName": "hasQuiet",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ]
+}

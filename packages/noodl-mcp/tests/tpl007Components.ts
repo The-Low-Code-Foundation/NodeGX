@@ -57,6 +57,8 @@ import {
   FINISH_MERGE_SCRIPT,
   FINISH_MONSTER_SCRIPT,
   FINISH_RACE_SCRIPT,
+  FOCUS_CHOICES_SCRIPT,
+  FOCUS_SCRIPT,
   GRADE_ANSWER_SCRIPT,
   HANGAR_SHELF_SCRIPT,
   HUNT_MOVE_SCRIPT,
@@ -64,6 +66,8 @@ import {
   LIST_SETS_SCRIPT,
   MARK_SELECTED_SCRIPT,
   MONSTER_LOOKS,
+  MOON_ACT_SCRIPT,
+  MOON_VIEW_SCRIPT,
   MONSTER_MOVE_SCRIPT,
   NEW_BOARD_SCRIPT,
   NEW_HUNT_SCRIPT,
@@ -76,6 +80,7 @@ import {
   SELECT_PROFILE_SCRIPT,
   SLIDE_MERGE_SCRIPT,
   TEACH_CARD_SCRIPT,
+  TOGGLE_ID_SCRIPT,
   TOGGLE_INDEX_SCRIPT,
   TRANSLATE_SCRIPT,
   UPDATE_SETTINGS_SCRIPT,
@@ -129,6 +134,7 @@ const KIT_KEYBOARD = 'game-kit.KeyboardMap';
 const KIT_PAD = 'game-kit.AnswerPad';
 const KIT_SOUND = 'game-kit.Sound';
 const KIT_KEEP = 'game-kit.KeepStorage';
+const KIT_ALIEN = 'game-kit.Alien';
 
 // ── Component names, spelled once ───────────────────────────────────────────
 
@@ -186,7 +192,18 @@ export const C = {
   monsterLane: '/Monster/Lane',
   monsterSetup: '/Monster/Setup',
   monsterPlay: '/Monster/Play',
-  pageMonster: '/Pages/Monster'
+  pageMonster: '/Pages/Monster',
+  // P113 REV-001 / REV-002 — the chooser, and the revision lists.
+  focusPicker: '/Game/Focus picker',
+  listRow: '/Lists/Set row',
+  listEditor: '/Lists/Editor',
+  pageLists: '/Pages/Lists',
+  // P113 REV-005 — the moon.
+  moonTile: '/Moon/Alien tile',
+  moonItem: '/Moon/Shop tile',
+  moonCare: '/Moon/Care',
+  moonAdopt: '/Moon/Adopt',
+  pageMoon: '/Pages/Moon'
 } as const;
 
 /** The arrow keys, from the `keyboard-shortcuts` library module (TPL-005 vendored it for the same job). */
@@ -377,14 +394,14 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
   {
     name: 'Logic/Pick next question', script: PICK_QUESTION_SCRIPT, triggers: ['nonce'],
     description: 'Which skill is due for this profile, and one question on it. Re-runs when Nonce changes — wire a Counter to it and pulse the Counter to ask.',
-    ins: [['nonce', 'number'], ['curriculum', 'array'], ['model', 'object'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['mode', 'string'], ['answerMode', 'string'], ['customSet', 'array'], ['wordLists', 'array'], ['limitScale', 'number']],
-    outs: [['skillId', 'string'], ['skillName', 'string'], ['prompt', 'string'], ['answer', 'string'], ['options', 'array'], ['optionValues', 'array'], ['choices', 'array'], ['kind', 'string'], ['isTyping', 'boolean'], ['nextKey', 'string'], ['fluentMs', 'number'], ['limitMs', 'number'], ['strategy', 'string'], ['teach', 'string'], ['itemDiff', 'number'], ['predicted', 'number'], ['shownAt', 'number'], ['worked', 'string'], ['padKeys', 'string'], ['padNumeric', 'boolean']]
+    ins: [['nonce', 'number'], ['curriculum', 'array'], ['model', 'object'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['mode', 'string'], ['answerMode', 'string'], ['customSet', 'array'], ['wordLists', 'array'], ['limitScale', 'number'], ['focus', 'array'], ['customSetId', 'string'], ['customSetBoth', 'boolean']],
+    outs: [['skillId', 'string'], ['skillName', 'string'], ['prompt', 'string'], ['answer', 'string'], ['options', 'array'], ['optionValues', 'array'], ['choices', 'array'], ['kind', 'string'], ['isTyping', 'boolean'], ['nextKey', 'string'], ['fluentMs', 'number'], ['limitMs', 'number'], ['strategy', 'string'], ['teach', 'string'], ['itemDiff', 'number'], ['predicted', 'number'], ['shownAt', 'number'], ['worked', 'string'], ['padKeys', 'string'], ['padNumeric', 'boolean'], ['itemKey', 'string'], ['itemCount', 'number'], ['learned', 'number'], ['subject', 'string'], ['topic', 'string']]
   },
   {
     name: 'Logic/Grade answer', script: GRADE_ANSWER_SCRIPT, run: true,
     description: 'Was it right, was it fast, and what the learner model now believes. Publishes the new model — store it.',
-    ins: [['model', 'object'], ['skillId', 'string'], ['level', 'string'], ['lang', 'string'], ['timedOut', 'boolean'], ['answer', 'string'], ['typed', 'string'], ['fluentMs', 'number'], ['itemDiff', 'number'], ['shownAt', 'number'], ['elapsedOverride', 'number'], ['wasDue', 'boolean'], ['strategy', 'string'], ['worked', 'string'], ['raceId', 'string'], ['forB', 'boolean'], ['mistakes', 'number'], ['game', 'string'], ['myAt', 'number'], ['cpuAt', 'number'], ['useTurbo', 'boolean'], ['startTurbo', 'number']],
-    outs: [['correct', 'boolean'], ['fluent', 'boolean'], ['outcome', 'string'], ['elapsedMs', 'number'], ['model', 'object'], ['gain', 'number'], ['speed', 'number'], ['boost', 'string'], ['boostPct', 'number'], ['cpuGain', 'number'], ['message', 'string'], ['mastery', 'number'], ['ratingDelta', 'number'], ['streak', 'number'], ['missCount', 'number'], ['starsEarned', 'number'], ['stars', 'number'], ['slip', 'number'], ['slipPct', 'number'], ['behind', 'boolean'], ['turboUsed', 'boolean'], ['chain', 'number'], ['turbo', 'number'], ['chainReady', 'boolean'], ['chainOf', 'number']]
+    ins: [['model', 'object'], ['skillId', 'string'], ['level', 'string'], ['lang', 'string'], ['timedOut', 'boolean'], ['answer', 'string'], ['typed', 'string'], ['fluentMs', 'number'], ['itemDiff', 'number'], ['shownAt', 'number'], ['elapsedOverride', 'number'], ['wasDue', 'boolean'], ['strategy', 'string'], ['worked', 'string'], ['raceId', 'string'], ['forB', 'boolean'], ['mistakes', 'number'], ['game', 'string'], ['myAt', 'number'], ['cpuAt', 'number'], ['useTurbo', 'boolean'], ['startTurbo', 'number'], ['itemKey', 'string'], ['itemCount', 'number']],
+    outs: [['correct', 'boolean'], ['fluent', 'boolean'], ['outcome', 'string'], ['elapsedMs', 'number'], ['model', 'object'], ['gain', 'number'], ['speed', 'number'], ['boost', 'string'], ['boostPct', 'number'], ['cpuGain', 'number'], ['message', 'string'], ['mastery', 'number'], ['ratingDelta', 'number'], ['streak', 'number'], ['missCount', 'number'], ['starsEarned', 'number'], ['stars', 'number'], ['slip', 'number'], ['slipPct', 'number'], ['behind', 'boolean'], ['turboUsed', 'boolean'], ['chain', 'number'], ['turbo', 'number'], ['chainReady', 'boolean'], ['chainOf', 'number'], ['itemLearned', 'boolean'], ['listDone', 'boolean'], ['learned', 'number']]
   },
   {
     name: 'Logic/Slide and merge', script: SLIDE_MERGE_SCRIPT, run: true,
@@ -504,7 +521,7 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
     name: 'Logic/Active profile', script: ACTIVE_PROFILE_SCRIPT,
     description: 'The active profile, field by field, and an honest hasProfile=false when there is none. RKT-011: what the face and rocket wear, the 🎁 picks waiting, and the way to the next one.',
     ins: [['app', 'object']],
-    outs: [['hasProfile', 'boolean'], ['profileId', 'string'], ['name', 'string'], ['look', 'string'], ['seed', 'string'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['sound', 'boolean'], ['soundMode', 'string'], ['answerMode', 'string'], ['mergeMode', 'string'], ['model', 'object'], ['due', 'number'], ['days7', 'number'], ['answered', 'number'], ['stars', 'number'], ['faceOptions', 'object'], ['paint', 'string'], ['pattern', 'string'], ['picks', 'number'], ['hasPicks', 'boolean'], ['nextAt', 'number'], ['nextPct', 'number'], ['nextText', 'string'], ['sets', 'array']]
+    outs: [['hasProfile', 'boolean'], ['profileId', 'string'], ['name', 'string'], ['look', 'string'], ['seed', 'string'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['sound', 'boolean'], ['soundMode', 'string'], ['answerMode', 'string'], ['mergeMode', 'string'], ['model', 'object'], ['due', 'number'], ['days7', 'number'], ['answered', 'number'], ['stars', 'number'], ['faceOptions', 'object'], ['paint', 'string'], ['pattern', 'string'], ['picks', 'number'], ['hasPicks', 'boolean'], ['nextAt', 'number'], ['nextPct', 'number'], ['nextText', 'string'], ['sets', 'array'], ['focusSubject', 'string'], ['focusSkills', 'array']]
   },
   {
     name: 'Logic/Save model', script: SAVE_MODEL_SCRIPT, run: true,
@@ -521,7 +538,7 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
   {
     name: 'Logic/Update settings', script: UPDATE_SETTINGS_SCRIPT, run: true,
     description: 'The store with a profile\'s name, language, layout, level, sound, answer mode or face changed. A name is trimmed to 24 characters, and an empty one is refused.',
-    ins: [['app', 'object'], ['profileId', 'string'], ['name', 'string'], ['lang', 'string'], ['layout', 'string'], ['layoutSeen', 'string'], ['level', 'string'], ['sound', 'boolean'], ['soundMode', 'string'], ['answerMode', 'string'], ['look', 'string'], ['seed', 'string'], ['mergeMode', 'string']],
+    ins: [['app', 'object'], ['profileId', 'string'], ['name', 'string'], ['lang', 'string'], ['layout', 'string'], ['layoutSeen', 'string'], ['level', 'string'], ['sound', 'boolean'], ['soundMode', 'string'], ['answerMode', 'string'], ['look', 'string'], ['seed', 'string'], ['mergeMode', 'string'], ['focusSubject', 'string'], ['focusSkills', 'array']],
     outs: [['app', 'object']]
   },
   {
@@ -550,14 +567,14 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
   },
   {
     name: 'Logic/Parse question set', script: PARSE_SET_SCRIPT,
-    description: 'Editor rows or pasted JSON into a clean list of { q, a, opts } questions.',
+    description: 'Editor rows, pasted JSON, or plain text one line per question (question = answer) into a clean list of { q, a, opts } questions. Skipped counts the lines with no separator.',
     ins: [['json', 'string'], ['rows', 'array']],
-    outs: [['items', 'array'], ['count', 'number'], ['error', 'string'], ['valid', 'boolean']]
+    outs: [['items', 'array'], ['count', 'number'], ['error', 'string'], ['valid', 'boolean'], ['skipped', 'number']]
   },
   {
     name: 'Logic/Save question set', script: UPSERT_SET_SCRIPT, run: true,
-    description: 'The store with a question set added or replaced.',
-    ins: [['app', 'object'], ['setId', 'string'], ['name', 'string'], ['items', 'array']],
+    description: 'The store with a question set added or replaced. Both says the list may be asked backwards too.',
+    ins: [['app', 'object'], ['setId', 'string'], ['name', 'string'], ['items', 'array'], ['both', 'boolean']],
     outs: [['app', 'object'], ['setId', 'string']]
   },
   {
@@ -568,9 +585,27 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
   },
   {
     name: 'Logic/List question sets', script: LIST_SETS_SCRIPT,
-    description: 'The question sets, and the chosen one with its items.',
-    ins: [['app', 'object'], ['setId', 'string']],
-    outs: [['sets', 'array'], ['count', 'number'], ['hasSets', 'boolean'], ['chosenId', 'string'], ['chosenName', 'string'], ['chosenItems', 'array'], ['chosenJson', 'string']]
+    description: 'The question sets as rows (with the words a row shows, since a repeated row cannot translate), and the chosen one with its items as JSON and as text.',
+    ins: [['app', 'object'], ['setId', 'string'], ['countWord', 'string'], ['editWord', 'string'], ['deleteWord', 'string'], ['askWord', 'string'], ['yesWord', 'string'], ['noWord', 'string'], ['bothWord', 'string']],
+    outs: [['sets', 'array'], ['count', 'number'], ['hasSets', 'boolean'], ['chosenId', 'string'], ['chosenName', 'string'], ['chosenItems', 'array'], ['chosenJson', 'string'], ['chosenText', 'string'], ['chosenBoth', 'boolean']]
+  },
+  {
+    name: 'Logic/Resolve focus', script: FOCUS_SCRIPT,
+    description: 'P113 REV-001: the profile’s focus (a subject and the skills ticked in it, or a list) as the picker and the setup need it: Mode, the Focus skill ids, the list’s items, and one line that says it.',
+    ins: [['curriculum', 'array'], ['sets', 'array'], ['level', 'string'], ['lang', 'string'], ['subject', 'string'], ['skills', 'array'], ['everythingWord', 'string'], ['countWord', 'string'], ['listWord', 'string']],
+    outs: [['mode', 'string'], ['focus', 'array'], ['customSet', 'array'], ['customSetId', 'string'], ['customSetBoth', 'boolean'], ['line', 'string'], ['subject', 'string'], ['subjectName', 'string'], ['count', 'number'], ['isList', 'boolean'], ['hasFocus', 'boolean']]
+  },
+  {
+    name: 'Logic/Focus choices', script: FOCUS_CHOICES_SCRIPT,
+    description: 'P113 REV-001: the chooser’s three steps as rows — the subjects with anything at this level (and My lists), the subject’s topics (a list’s are the sets), the topic’s skills with their ticks. Nothing above the child’s level.',
+    ins: [['curriculum', 'array'], ['sets', 'array'], ['level', 'string'], ['lang', 'string'], ['subject', 'string'], ['topic', 'string'], ['skills', 'array'], ['listsWord', 'string']],
+    outs: [['subjectRows', 'array'], ['topicRows', 'array'], ['skillRows', 'array'], ['topic', 'string'], ['topicIds', 'array'], ['saveSubject', 'string'], ['isLists', 'boolean'], ['hasSets', 'boolean'], ['hasSkills', 'boolean'], ['hasTopics', 'boolean'], ['tickedCount', 'number'], ['allTicked', 'boolean']]
+  },
+  {
+    name: 'Logic/Toggle id', script: TOGGLE_ID_SCRIPT, run: true,
+    description: 'A list of ids with one toggled (Action toggle, the default), several added (all) or removed (none), replaced (set) or emptied (clear). Action is a parameter: place it once per action.',
+    ins: [['list', 'array'], ['id', 'string'], ['action', 'string'], ['ids', 'array']],
+    outs: [['list', 'array'], ['count', 'number']]
   },
   {
     name: 'Logic/Encode save code', script: ENCODE_SAVE_SCRIPT,
@@ -595,6 +630,18 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
     description: 'Rows with the chosen one flagged selected — what a segmented control repeats over.',
     ins: [['items', 'array'], ['value', 'string']],
     outs: [['rows', 'array'], ['count', 'number']]
+  },
+  {
+    name: 'Logic/Moon view', script: MOON_VIEW_SCRIPT,
+    description: 'P113 REV-005: the moon as the active player sees it — their aliens as rows, the chosen one close up and its lines, the food and the things to wear as tiles with what a tap does, and the adopt card (each species in the Draft Colour, the next alien’s price, a name to suggest). Every line in their language.',
+    ins: [['app', 'object'], ['draftSpecies', 'string'], ['draftColour', 'string']],
+    outs: [['aliens', 'array'], ['has', 'boolean'], ['count', 'number'], ['full', 'boolean'], ['purse', 'number'], ['purseLine', 'string'], ['selId', 'string'], ['selName', 'string'], ['selSpecies', 'string'], ['selColour', 'string'], ['selGrown', 'number'], ['selHat', 'string'], ['selEyes', 'string'], ['selNeck', 'string'], ['selHappy', 'number'], ['selLine', 'string'], ['favLine', 'string'], ['foods', 'array'], ['wear', 'array'], ['adoptSpecies', 'array'], ['adoptColours', 'array'], ['draftSpecies', 'string'], ['draftColour', 'string'], ['adoptCost', 'number'], ['adoptFree', 'boolean'], ['canAdopt', 'boolean'], ['suggestedName', 'string'], ['adoptButton', 'string'], ['anotherLine', 'string']]
+  },
+  {
+    name: 'Logic/Moon act', script: MOON_ACT_SCRIPT, run: true,
+    description: 'P113 REV-005: one thing done on the moon. Action is a parameter, placed once per action: adopt (Species, Colour, Name; the first alien free), select (Alien Id), feed (Food Id), buy (Wear Id: bought once and put on) or wear (Wear Id, owned: on, or off). Refused with nothing changed when the purse is short, the moon is full or the thing is not theirs (Why). Said is the line to show.',
+    ins: [['app', 'object'], ['profileId', 'string'], ['action', 'string'], ['alienId', 'string'], ['foodId', 'string'], ['wearId', 'string'], ['species', 'string'], ['colour', 'string'], ['name', 'string']],
+    outs: [['app', 'object'], ['ok', 'boolean'], ['why', 'string'], ['said', 'string'], ['alienId', 'string']]
   },
   {
     name: 'Logic/Teach card', script: TEACH_CARD_SCRIPT,
@@ -817,13 +864,14 @@ const CHOICE: Tpl007Component = {
 const CHOICE_ROW: Tpl007Component = {
   path: 'Game/Choice row',
   description: 'A row of pills, one selected. Items is [{ label, value }]. Value in, Value and Changed out — hold the value in a Variable and wire it back.',
-  inputs: [port('items', 'array'), port('value', 'string'), port('label', 'string')],
+  inputs: [port('items', 'array'), port('value', 'string'), port('label', 'string'), port('mounted', 'boolean', 'P113: a row a page shows only sometimes (the chooser’s topic row)')],
   outputs: [port('value', 'string'), port('changed', 'signal')],
   repeats: { source: 'array', rowFields: ['label', 'value', 'selected'] },
   instantiates: [C.choice, logicName('Logic/Mark selected')],
   nodes: [
-    inputs('crIn', 'The options and the value', [['items', 'array'], ['value', 'string'], ['label', 'string']]),
+    inputs('crIn', 'The options and the value', [['items', 'array'], ['value', 'string'], ['label', 'string'], ['mounted', 'boolean']]),
     group('crWrap', 'The control', undefined, column({ rowGap: 'var(--space-2)' }), ['crLabel', 'crRow']),
+    logic('crShown', EXPRESSION_NODE, 'Shown unless told not to', { expression: 'm !== false' }),
     text('crLabel', 'What is being chosen', 'crWrap', '', { ...T_META, fontWeight: 'var(--font-semibold)' }),
     // 🔴 RKT-001: a content-sized row never wraps (its width IS its pills), so on a phone the French
     // pills ran 43px past the screen. The row takes the control's width, and then it wraps.
@@ -833,6 +881,8 @@ const CHOICE_ROW: Tpl007Component = {
     outputs('crOut', 'What was chosen', [['value', 'string'], ['changed', 'signal']])
   ],
   connections: [
+    wire('crIn', 'mounted', 'crShown', 'm'),
+    wire('crShown', 'result', 'crWrap', 'mounted'),
     wire('crIn', 'label', 'crLabel', 'text'),
     wire('crIn', 'items', 'crMark', 'items'),
     wire('crIn', 'value', 'crMark', 'value'),
@@ -842,6 +892,154 @@ const CHOICE_ROW: Tpl007Component = {
     // item ports go straight to the outputs.
     wire('crEach', 'itemOutput-value', 'crOut', 'value'),
     wire('crEach', 'itemOutputSignal-picked', 'crOut', 'changed')
+  ]
+};
+
+
+// ── P113 REV-001 — the chooser: what to practise ──────────────────────────────
+
+/**
+ * Richard, 2026-10-04: *"one extra menu in the game start bit … where the user can choose a theme and specific subject, or
+ * group of subjects, to practise … if my youngest wants to just learn multiplication, and just the tables of 5 and 8, she
+ * can do that through some sort of multi step easy to customise menu."*
+ *
+ * Three steps, three rows of pills: the SUBJECT (maths, French, English, history, typing, and My lists), the TOPIC in it
+ * (the programme's own headings: times tables, fractions, conjugation, the verb…), and the SKILLS of that topic, each a
+ * pill that ticks. Nothing ticked means everything in the topic the child's class allows; ticks carry across topics, so
+ * "tables of 5 and 8, and the pairs that make 100" is one focus. Under My lists the topics are the person's own revision
+ * lists (REV-002), and a button leads to the page that makes them.
+ *
+ * The draft lives in three Variables (global by name — one picker is on screen at a time, the way the player form's draft
+ * is); Open loads it from the profile's saved focus, Practise this publishes it, and the page writes it to the profile.
+ * `Logic/Focus choices` turns the draft into the three rows, so the picker holds no list logic of its own.
+ */
+/** The door's warning, answered: the chooser is placed by the race's setup and the monster game's, and only one of those pages is ever mounted. */
+const SHARED_FOCUS_DRAFT = 'Shared on purpose: one chooser on screen at a time (a race’s setup or a monster game’s, never both), and Open rewrites the draft each time it opens.';
+
+const FOCUS_PICKER: Tpl007Component = {
+  path: 'Game/Focus picker',
+  description: 'What to practise, in three steps: a subject, a topic in it, and the skills of that topic ticked or not (none ticked is the whole topic). Under My lists the topics are the person’s revision lists. Open loads the draft from Subject0 and Skills0; Practise this publishes Save with Subject and Skills; Cancel and Edit Lists are signals for the page.',
+  inputs: [port('mounted', 'boolean'), port('curriculum', 'array'), port('sets', 'array'), port('level', 'string'), port('lang', 'string'), port('subject0', 'string'), port('skills0', 'array'), port('open', 'signal'), port('titleWord', 'string'), port('subjectWord', 'string'), port('topicWord', 'string'), port('skillsHint', 'string'), port('allWord', 'string'), port('noneWord', 'string'), port('saveWord', 'string'), port('cancelWord', 'string'), port('listsWord', 'string'), port('editListsWord', 'string'), port('noListsWord', 'string')],
+  outputs: [port('save', 'signal'), port('subject', 'string'), port('skills', 'array'), port('cancel', 'signal'), port('editLists', 'signal')],
+  repeats: { source: 'array', rowFields: ['label', 'value', 'selected'] },
+  instantiates: [C.choiceRow, C.choice, logicName('Logic/Focus choices'), logicName('Logic/Toggle id')],
+  nodes: [
+    inputs('fpIn', 'The school, the player and the words', [['mounted', 'boolean'], ['curriculum', 'array'], ['sets', 'array'], ['level', 'string'], ['lang', 'string'], ['subject0', 'string'], ['skills0', 'array'], ['open', 'signal'], ['titleWord', 'string'], ['subjectWord', 'string'], ['topicWord', 'string'], ['skillsHint', 'string'], ['allWord', 'string'], ['noneWord', 'string'], ['saveWord', 'string'], ['cancelWord', 'string'], ['listsWord', 'string'], ['editListsWord', 'string'], ['noListsWord', 'string']]),
+    group('fpCard', 'What to practise', undefined, column({ rowGap: 'var(--space-4)' }), ['fpTitle', 'fpSubject', 'fpTopic', 'fpHint', 'fpSkills', 'fpAllRow', 'fpNoLists', 'fpEditLists', 'fpActions']),
+    text('fpTitle', 'What do you want to practise?', 'fpCard', '', T_CARD),
+    place('fpSubject', C.choiceRow, 'The subject', 'fpCard'),
+    place('fpTopic', C.choiceRow, 'The topic', 'fpCard'),
+    text('fpHint', 'Tick what to practise', 'fpCard', '', T_META),
+    // The skills: one tick-pill each, in a row that wraps (RKT-001: a content-sized row never wraps).
+    group('fpSkills', 'The skills, ticked or not', 'fpCard', row({ width: pct(100), sizeMode: 'contentHeight' }), ['fpEach']),
+    logic('fpEach', FOR_EACH_NODE, 'One pill per skill', { template: C.choice, templateType: 'explicit' }),
+    group('fpAllRow', 'All of the topic, or none of it', 'fpCard', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: 'var(--space-2)' }), ['fpAll', 'fpNone']),
+    place('fpAll', BUTTON_NODE, 'All of this topic', 'fpAllRow', { ...BTN_OUTLINE, label: 'All', fontSize: 'var(--text-sm)' }),
+    place('fpNone', BUTTON_NODE, 'Clear', 'fpAllRow', { ...BTN_OUTLINE, label: 'Clear', fontSize: 'var(--text-sm)' }),
+    text('fpNoLists', 'No list yet', 'fpCard', '', T_META),
+    place('fpEditLists', BUTTON_NODE, 'Make or edit a list', 'fpCard', { ...BTN_OUTLINE, label: 'Make or edit a list' }),
+    group('fpActions', 'Practise this, or cancel', 'fpCard', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: 'var(--space-2)' }), ['fpSave', 'fpCancel']),
+    place('fpSave', BUTTON_NODE, 'Practise this', 'fpActions', { ...BTN_PRIMARY, label: 'Practise this' }),
+    place('fpCancel', BUTTON_NODE, 'Cancel', 'fpActions', { ...BTN_OUTLINE, label: 'Cancel' }),
+    // The draft. Global by name, on purpose: one picker is on screen at a time (a race's or a monster game's setup, never both).
+    { ...(logic('fpSubjectVar', VARIABLE_NODE, 'The subject being chosen', { name: 'focusDraftSubject' }) as object), comment: SHARED_FOCUS_DRAFT },
+    { ...(logic('fpTopicVar', VARIABLE_NODE, 'The topic being looked at', { name: 'focusDraftTopic' }) as object), comment: SHARED_FOCUS_DRAFT },
+    { ...(logic('fpSkillsVar', VARIABLE_NODE, 'The skills ticked so far', { name: 'focusDraftSkills' }) as object), comment: SHARED_FOCUS_DRAFT },
+    logic('fpSetSubject', SET_VARIABLE_NODE, 'Choose a subject', { name: 'focusDraftSubject' }),
+    logic('fpSetTopic', SET_VARIABLE_NODE, 'Choose a topic', { name: 'focusDraftTopic' }),
+    // One Set Variable per writer (a value port fed by three scripts would hold whichever published last).
+    logic('fpSetSkills', SET_VARIABLE_NODE, 'Tick or untick one', { name: 'focusDraftSkills' }),
+    logic('fpSetAll', SET_VARIABLE_NODE, 'Tick the whole topic', { name: 'focusDraftSkills' }),
+    logic('fpSetNone', SET_VARIABLE_NODE, 'Untick the whole topic', { name: 'focusDraftSkills' }),
+    // Open: the draft starts from the profile's saved focus, on the first topic that has anything.
+    logic('fpLoadSubject', SET_VARIABLE_NODE, 'Start from the saved subject', { name: 'focusDraftSubject' }),
+    logic('fpLoadTopic', SET_VARIABLE_NODE, 'Start on the first topic', { name: 'focusDraftTopic' }),
+    logic('fpLoadSkills', SET_VARIABLE_NODE, 'Start from the saved ticks', { name: 'focusDraftSkills' }),
+    logic('fpNoTopic', EXPRESSION_NODE, 'No topic yet', { expression: "''" }),
+    logic('fpChoices', logicName('Logic/Focus choices'), 'The three steps, as rows'),
+    // The one toggle rule, placed once per action with the action as a parameter (Logic/Hunt move's shape).
+    logic('fpToggle', logicName('Logic/Toggle id'), 'Tick or untick one', { action: 'toggle' }),
+    logic('fpTickAll', logicName('Logic/Toggle id'), 'Tick the whole topic', { action: 'all' }),
+    logic('fpTickNone', logicName('Logic/Toggle id'), 'Untick the whole topic', { action: 'none' }),
+    // A saved list is subject 'set:<id>'; the pill that is on is My lists.
+    logic('fpSubjectPill', EXPRESSION_NODE, 'Which subject pill is on', { expression: "isLists === true ? 'lists' : subject" }),
+    logic('fpNoListsShown', EXPRESSION_NODE, 'My lists, and none made yet', { expression: 'isLists === true && hasSets !== true' }),
+    logic('fpShown', EXPRESSION_NODE, 'Shown unless told not to', { expression: 'm !== false' }),
+    outputs('fpOut', 'What was chosen', [['save', 'signal'], ['subject', 'string'], ['skills', 'array'], ['cancel', 'signal'], ['editLists', 'signal']])
+  ],
+  connections: [
+    wire('fpIn', 'mounted', 'fpShown', 'm'),
+    wire('fpShown', 'result', 'fpCard', 'mounted'),
+    // The words.
+    wire('fpIn', 'titleWord', 'fpTitle', 'text'),
+    wire('fpIn', 'subjectWord', 'fpSubject', 'label'),
+    wire('fpIn', 'topicWord', 'fpTopic', 'label'),
+    wire('fpIn', 'skillsHint', 'fpHint', 'text'),
+    wire('fpIn', 'allWord', 'fpAll', 'label'),
+    wire('fpIn', 'noneWord', 'fpNone', 'label'),
+    wire('fpIn', 'saveWord', 'fpSave', 'label'),
+    wire('fpIn', 'cancelWord', 'fpCancel', 'label'),
+    wire('fpIn', 'editListsWord', 'fpEditLists', 'label'),
+    wire('fpIn', 'noListsWord', 'fpNoLists', 'text'),
+    // The rows, from the draft.
+    wire('fpIn', 'curriculum', 'fpChoices', 'curriculum'),
+    wire('fpIn', 'sets', 'fpChoices', 'sets'),
+    wire('fpIn', 'level', 'fpChoices', 'level'),
+    wire('fpIn', 'lang', 'fpChoices', 'lang'),
+    wire('fpIn', 'listsWord', 'fpChoices', 'listsWord'),
+    wire('fpSubjectVar', 'value', 'fpChoices', 'subject'),
+    wire('fpTopicVar', 'value', 'fpChoices', 'topic'),
+    wire('fpSkillsVar', 'value', 'fpChoices', 'skills'),
+    wire('fpChoices', 'subjectRows', 'fpSubject', 'items'),
+    wire('fpChoices', 'topicRows', 'fpTopic', 'items'),
+    wire('fpChoices', 'skillRows', 'fpEach', 'items'),
+    wire('fpChoices', 'isLists', 'fpSubjectPill', 'isLists'),
+    wire('fpSubjectVar', 'value', 'fpSubjectPill', 'subject'),
+    wire('fpSubjectPill', 'result', 'fpSubject', 'value'),
+    // The topic row shows the topic the script resolved (the first one when the draft names none, or one of another subject).
+    wire('fpChoices', 'topic', 'fpTopic', 'value'),
+    wire('fpSubject', 'value', 'fpSetSubject', 'value'),
+    wire('fpSubject', 'changed', 'fpSetSubject', 'do'),
+    wire('fpTopic', 'value', 'fpSetTopic', 'value'),
+    wire('fpTopic', 'changed', 'fpSetTopic', 'do'),
+    // A tap on a skill pill toggles it (the repeater publishes the row's value before its signal, TPL-006).
+    wire('fpSkillsVar', 'value', 'fpToggle', 'list'),
+    wire('fpEach', 'itemOutput-value', 'fpToggle', 'id'),
+    wire('fpEach', 'itemOutputSignal-picked', 'fpToggle', 'run'),
+    wire('fpToggle', 'list', 'fpSetSkills', 'value'),
+    wire('fpToggle', 'done', 'fpSetSkills', 'do'),
+    wire('fpSkillsVar', 'value', 'fpTickAll', 'list'),
+    wire('fpChoices', 'topicIds', 'fpTickAll', 'ids'),
+    wire('fpAll', 'onClick', 'fpTickAll', 'run'),
+    wire('fpTickAll', 'list', 'fpSetAll', 'value'),
+    wire('fpTickAll', 'done', 'fpSetAll', 'do'),
+    wire('fpSkillsVar', 'value', 'fpTickNone', 'list'),
+    wire('fpChoices', 'topicIds', 'fpTickNone', 'ids'),
+    wire('fpNone', 'onClick', 'fpTickNone', 'run'),
+    wire('fpTickNone', 'list', 'fpSetNone', 'value'),
+    wire('fpTickNone', 'done', 'fpSetNone', 'do'),
+    // What shows: skills and their buttons only when the topic has skills; the lists' own line and button under My lists.
+    wire('fpChoices', 'hasTopics', 'fpTopic', 'mounted'),
+    wire('fpChoices', 'hasSkills', 'fpHint', 'mounted'),
+    wire('fpChoices', 'hasSkills', 'fpSkills', 'mounted'),
+    wire('fpChoices', 'hasSkills', 'fpAllRow', 'mounted'),
+    wire('fpChoices', 'isLists', 'fpNoListsShown', 'isLists'),
+    wire('fpChoices', 'hasSets', 'fpNoListsShown', 'hasSets'),
+    wire('fpNoListsShown', 'result', 'fpNoLists', 'mounted'),
+    wire('fpChoices', 'isLists', 'fpEditLists', 'mounted'),
+    // Open: load the draft, values before signals, one Set Variable after another.
+    wire('fpIn', 'subject0', 'fpLoadSubject', 'value'),
+    wire('fpIn', 'open', 'fpLoadSubject', 'do'),
+    wire('fpNoTopic', 'result', 'fpLoadTopic', 'value'),
+    wire('fpLoadSubject', 'done', 'fpLoadTopic', 'do'),
+    wire('fpIn', 'skills0', 'fpLoadSkills', 'value'),
+    wire('fpLoadTopic', 'done', 'fpLoadSkills', 'do'),
+    // Out: the subject to save (a list is 'set:<id>'), the ticks, and the three signals.
+    wire('fpChoices', 'saveSubject', 'fpOut', 'subject'),
+    wire('fpSkillsVar', 'value', 'fpOut', 'skills'),
+    wire('fpSave', 'onClick', 'fpOut', 'save'),
+    wire('fpCancel', 'onClick', 'fpOut', 'cancel'),
+    wire('fpEditLists', 'onClick', 'fpOut', 'editLists')
   ]
 };
 
@@ -1786,25 +1984,37 @@ const NEW_PLAYER_FORM: Tpl007Component = {
 
 const RACE_SETUP: Tpl007Component = {
   path: 'Race/Setup',
-  description: 'Before a race: maths or typing, one player or two, practice or challenge, and the second player\'s name. Publishes Start with the four choices.',
-  inputs: [port('mounted', 'boolean'), port('mathsWord', 'string'), port('typingWord', 'string'), port('onePlayerWord', 'string'), port('twoPlayersWord', 'string'), port('practiceWord', 'string'), port('challengeWord', 'string'), port('startWord', 'string'), port('nameWord', 'string'), port('practiceRuleWord', 'string'), port('challengeRuleWord', 'string')],
-  outputs: [port('start', 'signal'), port('mode', 'string'), port('players', 'number'), port('timed', 'boolean'), port('nameB', 'string')],
-  instantiates: [C.choiceRow],
+  description: 'Before a race: what to practise (the profile’s focus, with the chooser to change it — P113), one player or two, practice or challenge, and the second player’s name. Publishes Start with the choices, and Focus Changed with the subject and skills the chooser saved.',
+  inputs: [port('mounted', 'boolean'), port('onePlayerWord', 'string'), port('twoPlayersWord', 'string'), port('practiceWord', 'string'), port('challengeWord', 'string'), port('startWord', 'string'), port('nameWord', 'string'), port('practiceRuleWord', 'string'), port('challengeRuleWord', 'string'), port('practisingWord', 'string'), port('changeWord', 'string'), port('app', 'object'), port('profileId', 'string'), port('curriculum', 'array'), port('sets', 'array'), port('level', 'string'), port('lang', 'string'), port('subject0', 'string'), port('skills0', 'array'), port('everythingWord', 'string'), port('countWord', 'string'), port('listWord', 'string'), port('titleWord', 'string'), port('subjectWord', 'string'), port('topicWord', 'string'), port('skillsHint', 'string'), port('allWord', 'string'), port('noneWord', 'string'), port('saveWord', 'string'), port('cancelWord', 'string'), port('listsWord', 'string'), port('editListsWord', 'string'), port('noListsWord', 'string')],
+  outputs: [port('start', 'signal'), port('players', 'number'), port('timed', 'boolean'), port('nameB', 'string'), port('app', 'object'), port('write', 'signal'), port('mode', 'string'), port('focus', 'array'), port('customSet', 'array'), port('customSetId', 'string'), port('customSetBoth', 'boolean'), port('editLists', 'signal')],
+  instantiates: [C.choiceRow, C.focusPicker, logicName('Logic/Resolve focus'), logicName('Logic/Update settings')],
   nodes: [
-    inputs('rsIn', 'The words', [['mounted', 'boolean'], ['mathsWord', 'string'], ['typingWord', 'string'], ['onePlayerWord', 'string'], ['twoPlayersWord', 'string'], ['practiceWord', 'string'], ['challengeWord', 'string'], ['startWord', 'string'], ['nameWord', 'string'], ['practiceRuleWord', 'string'], ['challengeRuleWord', 'string']]),
-    group('rsCard', 'The setup', undefined, { ...CARD, rowGap: 'var(--space-5)', paddingTop: 'var(--space-6)', paddingBottom: 'var(--space-6)', paddingLeft: 'var(--space-6)', paddingRight: 'var(--space-6)', maxWidth: px(560) }, ['rsMode', 'rsPlayers', 'rsTimed', 'rsRule', 'rsNameB', 'rsStart']),
-    place('rsMode', C.choiceRow, 'Maths or typing', 'rsCard'),
-    place('rsPlayers', C.choiceRow, 'One or two', 'rsCard'),
-    place('rsTimed', C.choiceRow, 'Practice or challenge', 'rsCard'),
+    inputs('rsIn', 'The words', [['mounted', 'boolean'], ['onePlayerWord', 'string'], ['twoPlayersWord', 'string'], ['practiceWord', 'string'], ['challengeWord', 'string'], ['startWord', 'string'], ['nameWord', 'string'], ['practiceRuleWord', 'string'], ['challengeRuleWord', 'string'], ['practisingWord', 'string'], ['changeWord', 'string'], ['app', 'object'], ['profileId', 'string'], ['curriculum', 'array'], ['sets', 'array'], ['level', 'string'], ['lang', 'string'], ['subject0', 'string'], ['skills0', 'array'], ['everythingWord', 'string'], ['countWord', 'string'], ['listWord', 'string'], ['titleWord', 'string'], ['subjectWord', 'string'], ['topicWord', 'string'], ['skillsHint', 'string'], ['allWord', 'string'], ['noneWord', 'string'], ['saveWord', 'string'], ['cancelWord', 'string'], ['listsWord', 'string'], ['editListsWord', 'string'], ['noListsWord', 'string']]),
+    group('rsCard', 'The setup', undefined, { ...CARD, rowGap: 'var(--space-5)', paddingTop: 'var(--space-6)', paddingBottom: 'var(--space-6)', paddingLeft: 'var(--space-6)', paddingRight: 'var(--space-6)', maxWidth: px(560) }, ['rsRows', 'rsPicker']),
+    // P113 REV-001: what this player is practising, and the way to change it. The chooser takes the card while it is open.
+    group('rsRows', 'The setup rows', 'rsCard', column({ rowGap: 'var(--space-5)' }), ['rsFocusRow', 'rsPlayers', 'rsTimed', 'rsRule', 'rsNameB', 'rsStart']),
+    group('rsFocusRow', 'What to practise', 'rsRows', column({ rowGap: 'var(--space-2)' }), ['rsFocusLabel', 'rsFocusLine', 'rsChange']),
+    text('rsFocusLabel', 'Practising', 'rsFocusRow', '', { ...T_META, fontWeight: 'var(--font-semibold)' }),
+    text('rsFocusLine', 'The focus, in words', 'rsFocusRow', '', { ...T_BODY, fontWeight: 'var(--font-bold)' }),
+    place('rsChange', BUTTON_NODE, 'Change what to practise', 'rsFocusRow', { ...BTN_OUTLINE, label: 'Change', fontSize: 'var(--text-sm)' }),
+    place('rsPicker', C.focusPicker, 'The chooser', 'rsCard'),
+    // The focus, resolved here (the setup owns the chooser): the line it says, and what the game asks. What the chooser saves is written
+    // to the profile through the store the page hands in — the Header's shape (app in; app and write out).
+    logic('rsFocus', logicName('Logic/Resolve focus'), 'What to practise, resolved'),
+    logic('rsSetFocus', logicName('Logic/Update settings'), 'Keep what the chooser saved'),
+    withStates('rsChoosing', 'The setup, or the chooser', ['setup', 'picking'], {
+      setup: { type: 'boolean', by: { setup: true, picking: false } },
+      picking: { type: 'boolean', by: { setup: false, picking: true } }
+    }),
+    // P113: the "Maths or typing" row is gone — typing is a subject in the chooser, beside maths, French, English and history.
+    place('rsPlayers', C.choiceRow, 'One or two', 'rsRows'),
+    place('rsTimed', C.choiceRow, 'Practice or challenge', 'rsRows'),
     // RKT-007: two bare words on a pill row said nothing about the clock. The chosen mode says what it rewards and what happens at zero.
-    text('rsRule', 'What this mode rewards', 'rsCard', '', T_META),
-    place('rsNameB', TEXT_INPUT_NODE, 'Player two\'s name', 'rsCard', { ...FIELD, placeholder: 'Player 2' }),
-    place('rsStart', BUTTON_NODE, 'Start', 'rsCard', { ...BTN_PRIMARY, label: 'Start', fontSize: 'var(--text-lg)' }),
-    logic('rsModeItems', FUNCTION_NODE, 'The two modes, in words', { functionScript: "Outputs.items = [{ label: Inputs.maths, value: 'maths' }, { label: Inputs.typing, value: 'typing' }];" }),
+    text('rsRule', 'What this mode rewards', 'rsRows', '', T_META),
+    place('rsNameB', TEXT_INPUT_NODE, 'Player two\'s name', 'rsRows', { ...FIELD, placeholder: 'Player 2' }),
+    place('rsStart', BUTTON_NODE, 'Start', 'rsRows', { ...BTN_PRIMARY, label: 'Start', fontSize: 'var(--text-lg)' }),
     logic('rsPlayerItems', FUNCTION_NODE, 'One or two, in words', { functionScript: "Outputs.items = [{ label: Inputs.one, value: '1' }, { label: Inputs.two, value: '2' }];" }),
     logic('rsTimedItems', FUNCTION_NODE, 'Practice or challenge, in words', { functionScript: "Outputs.items = [{ label: Inputs.practice, value: 'practice' }, { label: Inputs.challenge, value: 'challenge' }];" }),
-    logic('rsModeVar', VARIABLE_NODE, 'The mode', { name: 'raceMode' }),
-    logic('rsSetMode', SET_VARIABLE_NODE, 'Choose a mode', { name: 'raceMode' }),
     logic('rsPlayersVar', VARIABLE_NODE, 'How many', { name: 'racePlayers' }),
     logic('rsSetPlayers', SET_VARIABLE_NODE, 'Choose how many', { name: 'racePlayers' }),
     logic('rsTimedVar', VARIABLE_NODE, 'Timed?', { name: 'raceTimed' }),
@@ -1817,33 +2027,27 @@ const RACE_SETUP: Tpl007Component = {
     logic('rsIsTimed', EXPRESSION_NODE, 'Challenge?', { expression: "timed === 'challenge'" }),
     logic('rsRuleText', EXPRESSION_NODE, 'The chosen mode’s rule, in words', { expression: "timed === 'challenge' ? challenge : practice" }),
     logic('rsShown', EXPRESSION_NODE, 'Shown unless told not to', { expression: 'm !== false' }),
-    // The defaults, written when the card first appears: maths, one player, practice.
-    logic('rsDefMode', EXPRESSION_NODE, 'maths', { expression: "'maths'" }),
+    // The defaults, written when the card first appears: one player, practice.
     logic('rsDefPlayers', EXPRESSION_NODE, 'one', { expression: "'1'" }),
     logic('rsDefTimed', EXPRESSION_NODE, 'practice', { expression: "'practice'" }),
-    logic('rsInitMode', SET_VARIABLE_NODE, 'Start on maths', { name: 'raceMode' }),
     logic('rsInitPlayers', SET_VARIABLE_NODE, 'Start solo', { name: 'racePlayers' }),
     logic('rsInitTimed', SET_VARIABLE_NODE, 'Start untimed', { name: 'raceTimed' }),
     // 🔴 RKT-006: the card remounts every time the setup comes back, and it wrote the defaults on every mount, so "Change the race"
     // put a Défi two-player race back to practice and solo (measured, RKT-006 build 1, 4 of 4 cells). The defaults are written once.
     withStates('rsSeeded', 'Defaults written yet?', ['fresh', 'seeded'], { seeded: { type: 'boolean', by: { fresh: false, seeded: true } } }),
     gate('rsFirst', 'The first time the setup shows?'),
-    outputs('rsOut', 'Go', [['start', 'signal'], ['mode', 'string'], ['players', 'number'], ['timed', 'boolean'], ['nameB', 'string']])
+    outputs('rsOut', 'Go', [['start', 'signal'], ['players', 'number'], ['timed', 'boolean'], ['nameB', 'string'], ['app', 'object'], ['write', 'signal'], ['mode', 'string'], ['focus', 'array'], ['customSet', 'array'], ['customSetId', 'string'], ['customSetBoth', 'boolean'], ['editLists', 'signal']])
   ],
   connections: [
     wire('rsIn', 'mounted', 'rsShown', 'm'),
     wire('rsShown', 'result', 'rsCard', 'mounted'),
-    wire('rsDefMode', 'result', 'rsInitMode', 'value'),
     wire('rsSeeded', 'seeded', 'rsFirst', 'condition'),
     wire('rsCard', 'didMount', 'rsFirst', 'eval'),
-    wire('rsFirst', 'onfalse', 'rsInitMode', 'do'),
     wire('rsDefPlayers', 'result', 'rsInitPlayers', 'value'),
-    wire('rsInitMode', 'done', 'rsInitPlayers', 'do'),
+    wire('rsFirst', 'onfalse', 'rsInitPlayers', 'do'),
     wire('rsDefTimed', 'result', 'rsInitTimed', 'value'),
     wire('rsInitPlayers', 'done', 'rsInitTimed', 'do'),
     wire('rsInitTimed', 'done', 'rsSeeded', 'to-seeded'),
-    wire('rsIn', 'mathsWord', 'rsModeItems', 'in-maths'),
-    wire('rsIn', 'typingWord', 'rsModeItems', 'in-typing'),
     wire('rsIn', 'onePlayerWord', 'rsPlayerItems', 'in-one'),
     wire('rsIn', 'twoPlayersWord', 'rsPlayerItems', 'in-two'),
     wire('rsIn', 'practiceWord', 'rsTimedItems', 'in-practice'),
@@ -1856,12 +2060,8 @@ const RACE_SETUP: Tpl007Component = {
     wire('rsIn', 'nameWord', 'rsNameB', 'placeholder'),
     wire('rsNameB', 'onTextChanged', 'rsNameKeep', 'value'),
     wire('rsNameKeep', 'value', 'rsNameB', 'startValue'),
-    wire('rsModeItems', 'out-items', 'rsMode', 'items'),
     wire('rsPlayerItems', 'out-items', 'rsPlayers', 'items'),
     wire('rsTimedItems', 'out-items', 'rsTimed', 'items'),
-    wire('rsModeVar', 'value', 'rsMode', 'value'),
-    wire('rsMode', 'value', 'rsSetMode', 'value'),
-    wire('rsMode', 'changed', 'rsSetMode', 'do'),
     wire('rsPlayersVar', 'value', 'rsPlayers', 'value'),
     wire('rsPlayers', 'value', 'rsSetPlayers', 'value'),
     wire('rsPlayers', 'changed', 'rsSetPlayers', 'do'),
@@ -1870,13 +2070,51 @@ const RACE_SETUP: Tpl007Component = {
     wire('rsTimed', 'changed', 'rsSetTimed', 'do'),
     wire('rsPlayersVar', 'value', 'rsIsTwo', 'players'),
     wire('rsIsTwo', 'result', 'rsNameB', 'mounted'),
-    wire('rsModeVar', 'value', 'rsOut', 'mode'),
     wire('rsPlayersVar', 'value', 'rsPlayersNum', 'players'),
     wire('rsPlayersNum', 'result', 'rsOut', 'players'),
     wire('rsTimedVar', 'value', 'rsIsTimed', 'timed'),
     wire('rsIsTimed', 'result', 'rsOut', 'timed'),
     wire('rsNameB', 'onTextChanged', 'rsOut', 'nameB'),
-    wire('rsStart', 'onClick', 'rsOut', 'start')
+    wire('rsStart', 'onClick', 'rsOut', 'start'),
+    // P113 REV-001: the focus line, the chooser, and what it publishes.
+    wire('rsIn', 'practisingWord', 'rsFocusLabel', 'text'),
+    wire('rsIn', 'changeWord', 'rsChange', 'label'),
+    ...(['curriculum', 'sets', 'level', 'lang', 'everythingWord', 'countWord', 'listWord'] as const).map((f) => wire('rsIn', f, 'rsFocus', f)),
+    wire('rsIn', 'subject0', 'rsFocus', 'subject'),
+    wire('rsIn', 'skills0', 'rsFocus', 'skills'),
+    wire('rsFocus', 'line', 'rsFocusLine', 'text'),
+    ...(['mode', 'focus', 'customSet', 'customSetId', 'customSetBoth'] as const).map((f) => wire('rsFocus', f, 'rsOut', f)),
+    wire('rsIn', 'app', 'rsSetFocus', 'app'),
+    wire('rsIn', 'profileId', 'rsSetFocus', 'profileId'),
+    wire('rsPicker', 'subject', 'rsSetFocus', 'focusSubject'),
+    wire('rsPicker', 'skills', 'rsSetFocus', 'focusSkills'),
+    wire('rsPicker', 'save', 'rsSetFocus', 'run'),
+    wire('rsSetFocus', 'app', 'rsOut', 'app'),
+    wire('rsSetFocus', 'done', 'rsOut', 'write'),
+    wire('rsChoosing', 'setup', 'rsRows', 'mounted'),
+    wire('rsChoosing', 'picking', 'rsPicker', 'mounted'),
+    wire('rsChange', 'onClick', 'rsPicker', 'open'),
+    wire('rsChange', 'onClick', 'rsChoosing', 'to-picking'),
+    wire('rsPicker', 'save', 'rsChoosing', 'to-setup'),
+    wire('rsPicker', 'cancel', 'rsChoosing', 'to-setup'),
+    wire('rsPicker', 'editLists', 'rsOut', 'editLists'),
+    wire('rsIn', 'curriculum', 'rsPicker', 'curriculum'),
+    wire('rsIn', 'sets', 'rsPicker', 'sets'),
+    wire('rsIn', 'level', 'rsPicker', 'level'),
+    wire('rsIn', 'lang', 'rsPicker', 'lang'),
+    wire('rsIn', 'subject0', 'rsPicker', 'subject0'),
+    wire('rsIn', 'skills0', 'rsPicker', 'skills0'),
+    wire('rsIn', 'titleWord', 'rsPicker', 'titleWord'),
+    wire('rsIn', 'subjectWord', 'rsPicker', 'subjectWord'),
+    wire('rsIn', 'topicWord', 'rsPicker', 'topicWord'),
+    wire('rsIn', 'skillsHint', 'rsPicker', 'skillsHint'),
+    wire('rsIn', 'allWord', 'rsPicker', 'allWord'),
+    wire('rsIn', 'noneWord', 'rsPicker', 'noneWord'),
+    wire('rsIn', 'saveWord', 'rsPicker', 'saveWord'),
+    wire('rsIn', 'cancelWord', 'rsPicker', 'cancelWord'),
+    wire('rsIn', 'listsWord', 'rsPicker', 'listsWord'),
+    wire('rsIn', 'editListsWord', 'rsPicker', 'editListsWord'),
+    wire('rsIn', 'noListsWord', 'rsPicker', 'noListsWord'),
   ]
 };
 
@@ -1884,17 +2122,20 @@ const RACE_SETUP: Tpl007Component = {
 const RACE_ROUND: Tpl007Component = {
   path: 'Race/Round',
   description: 'One question of a race: Ask picks it, the box or the clock answers it, the grader scores it, the banner shows it. Publishes Graded with the gains and the new model, then Next or ShowMe when the banner is dismissed. Abandon stops the clock, so a question left behind never grades.',
-  inputs: [port('ask', 'signal'), port('abandon', 'signal'), port('raceId', 'string'), port('forB', 'boolean'), port('level', 'string'), port('lang', 'string'), port('layout', 'string'), port('mode', 'string'), port('answerMode', 'string'), port('model', 'object'), port('curriculum', 'array'), port('wordLists', 'array'), port('timed', 'boolean'), port('soundOn', 'boolean'), port('placeholder', 'string'), port('checkWord', 'string'), port('fluentWord', 'string'), port('correctWord', 'string'), port('wrongWord', 'string'), port('timeUpWord', 'string'), port('nextWord', 'string'), port('showMeWord', 'string'), port('limitScale', 'number', 'TPL-007 §16: the clock as a share of the skill’s; the race sends none'), port('game', 'string', 'TPL-007 §16: gate or push, so the verdict says a hit or a push; the race sends none'), port('myAt', 'number', 'PLY-006: where this player’s rocket is, so the grader can see the gap'), port('cpuAt', 'number', 'PLY-006: where the other rocket is'), port('turboWord', 'string'), port('chargingWord', 'string')],
+  inputs: [port('ask', 'signal'), port('abandon', 'signal'), port('raceId', 'string'), port('forB', 'boolean'), port('level', 'string'), port('lang', 'string'), port('layout', 'string'), port('mode', 'string'), port('answerMode', 'string'), port('model', 'object'), port('curriculum', 'array'), port('wordLists', 'array'), port('timed', 'boolean'), port('soundOn', 'boolean'), port('placeholder', 'string'), port('checkWord', 'string'), port('fluentWord', 'string'), port('correctWord', 'string'), port('wrongWord', 'string'), port('timeUpWord', 'string'), port('nextWord', 'string'), port('showMeWord', 'string'), port('limitScale', 'number', 'TPL-007 §16: the clock as a share of the skill’s; the race sends none'), port('game', 'string', 'TPL-007 §16: gate or push, so the verdict says a hit or a push; the race sends none'), port('myAt', 'number', 'PLY-006: where this player’s rocket is, so the grader can see the gap'), port('cpuAt', 'number', 'PLY-006: where the other rocket is'), port('turboWord', 'string'), port('chargingWord', 'string'), port('armedWord', 'string'), port('armedHintWord', 'string'), port('focus', 'array', 'P113: the skills the chooser ticked; none is everything'), port('customSet', 'array', 'P113: the person’s list, when the focus is one'), port('customSetId', 'string'), port('customSetBoth', 'boolean')],
   outputs: [port('graded', 'signal'), port('correct', 'boolean'), port('gain', 'number'), port('cpuGain', 'number'), port('slipPct', 'number'), port('chain', 'number'), port('chainOf', 'number'), port('chainReady', 'boolean'), port('turboUsed', 'boolean'), port('behind', 'boolean'), port('model', 'object'), port('outcome', 'string'), port('teach', 'string'), port('next', 'signal'), port('showMe', 'signal'), port('isTyping', 'boolean'), port('nextKey', 'string'), port('missCount', 'number'), port('worked', 'string'), port('prompt', 'string'), port('layoutSeen', 'string'), port('layoutSeenNow', 'signal'), port('layoutPick', 'string'), port('layoutPickNow', 'signal'), port('clockLeft', 'number')],
   instantiates: [C.questionBox, C.countdown, C.banner, C.keyboard, logicName('Logic/Pick next question'), logicName('Logic/Grade answer'), C.sounds],
   nodes: [
-    inputs('rdIn', 'The profile and the words', [['ask', 'signal'], ['abandon', 'signal'], ['raceId', 'string'], ['forB', 'boolean'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['mode', 'string'], ['answerMode', 'string'], ['model', 'object'], ['curriculum', 'array'], ['wordLists', 'array'], ['timed', 'boolean'], ['soundOn', 'boolean'], ['placeholder', 'string'], ['checkWord', 'string'], ['fluentWord', 'string'], ['correctWord', 'string'], ['wrongWord', 'string'], ['timeUpWord', 'string'], ['nextWord', 'string'], ['showMeWord', 'string'], ['limitScale', 'number'], ['game', 'string'], ['myAt', 'number'], ['cpuAt', 'number'], ['turboWord', 'string'], ['chargingWord', 'string']]),
+    inputs('rdIn', 'The profile and the words', [['ask', 'signal'], ['abandon', 'signal'], ['raceId', 'string'], ['forB', 'boolean'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['mode', 'string'], ['answerMode', 'string'], ['model', 'object'], ['curriculum', 'array'], ['wordLists', 'array'], ['timed', 'boolean'], ['soundOn', 'boolean'], ['placeholder', 'string'], ['checkWord', 'string'], ['fluentWord', 'string'], ['correctWord', 'string'], ['wrongWord', 'string'], ['timeUpWord', 'string'], ['nextWord', 'string'], ['showMeWord', 'string'], ['limitScale', 'number'], ['game', 'string'], ['myAt', 'number'], ['cpuAt', 'number'], ['turboWord', 'string'], ['chargingWord', 'string'], ['armedWord', 'string'], ['armedHintWord', 'string'], ['focus', 'array'], ['customSet', 'array'], ['customSetId', 'string'], ['customSetBoth', 'boolean']]),
     group('rdWrap', 'The round', undefined, column({ alignItems: 'center', rowGap: 'var(--space-3)' }), ['rdClock', 'rdChainRow', 'rdBox', 'rdBanner', 'rdKeys']),
     // 🔴 PLY-006: the chain, above the question where the child is already looking. It says how far along they are, and
     // when it is charged it becomes the button that spends it. The turbo is never spent for them: firing it is the
     // decision that makes a comeback theirs.
     group('rdChainRow', 'The chain, and the turbo it charges', 'rdWrap', column({ alignItems: 'center', rowGap: 'var(--space-2)' }), ['rdCharging', 'rdTurbo']),
-    text('rdCharging', 'Right answers in a row', 'rdChainRow', '', { ...T_META, fontWeight: 'var(--font-semibold)' }),
+    // 🔴 The row centres its children, but this Text is full width, so its WORDS sat against the left edge of the screen
+    // while the button they belong to was in the middle — visible in Richard's own screenshot of the chain line, and
+    // worse once the line became the sentence that explains the armed button above it. Centred, the two read as one thing.
+    text('rdCharging', 'Right answers in a row', 'rdChainRow', '', { ...T_META, fontWeight: 'var(--font-semibold)', textAlignX: 'center' }),
     place('rdTurbo', BUTTON_NODE, 'Fire the turbo', 'rdChainRow', { ...BTN_PRIMARY, label: '⚡', mounted: false }),
     place('rdClock', C.countdown, 'The clock', 'rdWrap'),
     place('rdBox', C.questionBox, 'The question', 'rdWrap'),
@@ -1906,9 +2147,14 @@ const RACE_ROUND: Tpl007Component = {
     // 🔴 The armed turbo is a States node, not a Variable. D56: a Variable is global BY NAME, and Race/Round is placed
     // twice — once by Race/Play and once by Monster/Play — so one name would have been one flag shared between a race
     // and a monster game. The door said so; this is per instance.
+    // 🔴 Richard, 2026-09-20: arming used to be invisible — `on` went to the grader and nowhere else, so a tap changed
+    // nothing on the screen and the child could only learn it had worked by answering. `bg` is the same state said in a
+    // colour: tomato (every other primary button) while it can be fired, gold once it is armed.
     withStates('rdArmed', 'Is the turbo armed?', ['idle', 'armed'], {
-      on: { type: 'boolean', by: { idle: false, armed: true } }
+      on: { type: 'boolean', by: { idle: false, armed: true } },
+      bg: { type: 'color', by: { idle: 'var(--primary)', armed: ROLE.picked } }
     }),
+    logic('rdTurboLabel', EXPRESSION_NODE, 'What the turbo button says', { expression: "armed === true ? armedWord : word" }),
     // It can only be fired while it would do something: charged, and the question still open.
     //
     // 🔴 R5 (Richard, 2026-09-18): `behind` is GONE from this expression, and the wire that carried it with it. The
@@ -1919,8 +2165,11 @@ const RACE_ROUND: Tpl007Component = {
       functionScript: [
         "var n = Math.max(0, Math.floor(Number(Inputs.n) || 0));",
         "var of = Math.max(1, Math.floor(Number(Inputs.of) || 3));",
+        "// Armed, this line is the one that says what happens next: the turbo is spent by the NEXT right answer, and",
+        "// nothing on the old screen said so (Richard, 2026-09-20).",
+        "if (Inputs.armed === true) { Outputs.line = String(Inputs.hint || ''); }",
         "// Nothing to say before the first right answer of a run, or once it is charged (the button speaks then).",
-        "Outputs.line = n > 0 && Inputs.ready !== true ? String(Inputs.word || '').replace('{n}', n).replace('{of}', of) : '';"
+        "else Outputs.line = n > 0 && Inputs.ready !== true ? String(Inputs.word || '').replace('{n}', n).replace('{of}', of) : '';"
       ].join('\n')
     }),
     logic('rdSounds', C.sounds, 'The sounds'),
@@ -1948,7 +2197,14 @@ const RACE_ROUND: Tpl007Component = {
     wire('rdGrade', 'chainReady', 'rdChainLine', 'in-ready'),
     wire('rdIn', 'chargingWord', 'rdChainLine', 'in-word'),
     wire('rdChainLine', 'out-line', 'rdCharging', 'text'),
-    wire('rdIn', 'turboWord', 'rdTurbo', 'label'),
+    // The button says which of the two things it is: "Fire the turbo!" while it can be fired, "Turbo on!" once it is.
+    wire('rdIn', 'turboWord', 'rdTurboLabel', 'word'),
+    wire('rdIn', 'armedWord', 'rdTurboLabel', 'armedWord'),
+    wire('rdArmed', 'on', 'rdTurboLabel', 'armed'),
+    wire('rdTurboLabel', 'result', 'rdTurbo', 'label'),
+    wire('rdArmed', 'bg', 'rdTurbo', 'backgroundColor'),
+    wire('rdArmed', 'on', 'rdChainLine', 'in-armed'),
+    wire('rdIn', 'armedHintWord', 'rdChainLine', 'in-hint'),
     wire('rdGrade', 'chainReady', 'rdCanFire', 'ready'),
     wire('rdBanner', 'isOpen', 'rdCanFire', 'open'),
     wire('rdCanFire', 'result', 'rdTurbo', 'mounted'),
@@ -1969,6 +2225,13 @@ const RACE_ROUND: Tpl007Component = {
     wire('rdIn', 'wordLists', 'rdPick', 'wordLists'),
     // TPL-007 §16: a monster that crept closer arrives sooner. The race wires no scale, and the picker hears none.
     wire('rdIn', 'limitScale', 'rdPick', 'limitScale'),
+    // P113 REV-001 / REV-002: the chooser's ticks, and the person's own list, reach the picker; the item asked reaches the grader.
+    wire('rdIn', 'focus', 'rdPick', 'focus'),
+    wire('rdIn', 'customSet', 'rdPick', 'customSet'),
+    wire('rdIn', 'customSetId', 'rdPick', 'customSetId'),
+    wire('rdIn', 'customSetBoth', 'rdPick', 'customSetBoth'),
+    wire('rdPick', 'itemKey', 'rdGrade', 'itemKey'),
+    wire('rdPick', 'itemCount', 'rdGrade', 'itemCount'),
     // The question, shown.
     wire('rdPick', 'prompt', 'rdBox', 'prompt'),
     wire('rdPick', 'kind', 'rdBox', 'kind'),
@@ -2137,15 +2400,32 @@ const RACE_RESULT: Tpl007Component = {
  */
 const MINT_RACE_SCRIPT = "Outputs.raceId = 'r' + Date.now().toString(36) + Math.floor(Math.random() * 1000000).toString(36);";
 
+/**
+ * 🔴 Richard, 2026-09-20: *"wtf is the avatar in the CPU rocket? it's some creepy orange thing."* Rocket B's face was never
+ * fed, so the kit's own defaults drew it — style `thumbs`, seed `Computer`, which is a thumb, in orange, in a cockpit.
+ * `thumbs` is one of the two collections R3 dropped from the child's chooser. The opponent now gets a face of its own,
+ * minted on the same reset that mints the race id, so every race is against somebody new: a look from HANGAR_LOOKS (the
+ * three the child picks from) and a random seed. In a two-player race rocket B is a sibling who only typed a name — they
+ * get a face the same way.
+ */
+const MINT_FACE_B_SCRIPT = [
+  `var LOOKS = ${JSON.stringify(HANGAR_LOOKS)};`,
+  "var ABC = 'abcdefghijklmnopqrstuvwxyz0123456789';",
+  "var seed = '';",
+  'for (var i = 0; i < 8; i++) seed += ABC.charAt(Math.floor(Math.random() * ABC.length));',
+  'Outputs.look = LOOKS[Math.floor(Math.random() * LOOKS.length)];',
+  'Outputs.seed = seed;'
+].join('\n');
+
 /** The race: two rockets, rounds until one lands. */
 const RACE_PLAY: Tpl007Component = {
   path: 'Race/Play',
   description: 'The race itself: rounds until a rocket reaches the planet. One player races the computer (its speed follows the player\'s rating); two players take turns on one keyboard. Publishes Finished with the winner, and the model after every round. RKT-002: a right answer bursts sparks from the rocket it moved; when a rocket lands, Race/Result takes the round\'s place under the track, Cheer or Sigh says which fanfare, and ChangeRace hands back to setup. RKT-004: Show me puts the missed skill\'s Teach card where the round was, and Got it asks the next question. RKT-006: Restart (while racing or teaching) sends both rockets home through the same reset as Start, and Change the race stops the clock and hands back to setup. The rockets\' progress lives in the Variables raceProgressA/B, global by name (D57): harmless with one race per page. RKT-010: every start mints a race id; answers pay stars as they are graded (none on player two\'s turns), and a landing runs Logic/Finish race once, whose model goes out through Model and Graded like a round\'s, and whose take the result screen shows.',
-  inputs: [port('start', 'signal'), port('level', 'string'), port('lang', 'string'), port('layout', 'string'), port('mode', 'string'), port('answerMode', 'string'), port('model', 'object'), port('curriculum', 'array'), port('wordLists', 'array'), port('timed', 'boolean'), port('players', 'number'), port('soundOn', 'boolean'), port('nameA', 'string'), port('lookA', 'string'), port('seedA', 'string'), port('nameB', 'string'), port('mounted', 'boolean'), port('placeholder', 'string'), port('checkWord', 'string'), port('fluentWord', 'string'), port('correctWord', 'string'), port('wrongWord', 'string'), port('timeUpWord', 'string'), port('nextWord', 'string'), port('showMeWord', 'string'), port('yourTurnWord', 'string'), port('youWinWord', 'string'), port('computerWinsWord', 'string'), port('winsWord', 'string'), port('againWord', 'string'), port('otherRaceWord', 'string'), port('rightAnswersWord', 'string'), port('teachCards', 'array'), port('anExampleWord', 'string'), port('gotItWord', 'string'), port('restartWord', 'string'), port('optionsA', 'object'), port('paintA', 'string'), port('patternA', 'string'), port('pickWord', 'string'), port('hangarWord', 'string'), port('turboWord', 'string'), port('chargingWord', 'string')],
+  inputs: [port('start', 'signal'), port('level', 'string'), port('lang', 'string'), port('layout', 'string'), port('mode', 'string'), port('answerMode', 'string'), port('model', 'object'), port('curriculum', 'array'), port('wordLists', 'array'), port('timed', 'boolean'), port('players', 'number'), port('soundOn', 'boolean'), port('nameA', 'string'), port('lookA', 'string'), port('seedA', 'string'), port('nameB', 'string'), port('mounted', 'boolean'), port('placeholder', 'string'), port('checkWord', 'string'), port('fluentWord', 'string'), port('correctWord', 'string'), port('wrongWord', 'string'), port('timeUpWord', 'string'), port('nextWord', 'string'), port('showMeWord', 'string'), port('yourTurnWord', 'string'), port('youWinWord', 'string'), port('computerWinsWord', 'string'), port('winsWord', 'string'), port('againWord', 'string'), port('otherRaceWord', 'string'), port('rightAnswersWord', 'string'), port('teachCards', 'array'), port('anExampleWord', 'string'), port('gotItWord', 'string'), port('restartWord', 'string'), port('optionsA', 'object'), port('paintA', 'string'), port('patternA', 'string'), port('pickWord', 'string'), port('hangarWord', 'string'), port('turboWord', 'string'), port('chargingWord', 'string'), port('armedWord', 'string'), port('armedHintWord', 'string'), port('focus', 'array'), port('customSet', 'array'), port('customSetId', 'string'), port('customSetBoth', 'boolean')],
   outputs: [port('finished', 'signal'), port('winner', 'string'), port('model', 'object'), port('graded', 'signal'), port('rounds', 'number'), port('showMe', 'signal'), port('teach', 'string'), port('cheer', 'signal'), port('sigh', 'signal'), port('changeRace', 'signal'), port('hangar', 'signal'), port('layoutSeen', 'string'), port('layoutSeenNow', 'signal'), port('layoutPick', 'string'), port('layoutPickNow', 'signal')],
   instantiates: [C.raceRound, C.track, C.raceResult, C.teachCard, logicName('Logic/Teach card'), logicName('Logic/Finish race')],
   nodes: [
-    inputs('rpIn', 'The race', [['start', 'signal'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['mode', 'string'], ['answerMode', 'string'], ['model', 'object'], ['curriculum', 'array'], ['wordLists', 'array'], ['timed', 'boolean'], ['players', 'number'], ['soundOn', 'boolean'], ['nameA', 'string'], ['lookA', 'string'], ['seedA', 'string'], ['nameB', 'string'], ['mounted', 'boolean'], ['placeholder', 'string'], ['checkWord', 'string'], ['fluentWord', 'string'], ['correctWord', 'string'], ['wrongWord', 'string'], ['timeUpWord', 'string'], ['nextWord', 'string'], ['showMeWord', 'string'], ['yourTurnWord', 'string'], ['youWinWord', 'string'], ['computerWinsWord', 'string'], ['winsWord', 'string'], ['againWord', 'string'], ['otherRaceWord', 'string'], ['rightAnswersWord', 'string'], ['teachCards', 'array'], ['anExampleWord', 'string'], ['gotItWord', 'string'], ['restartWord', 'string'], ['optionsA', 'object'], ['paintA', 'string'], ['patternA', 'string'], ['pickWord', 'string'], ['hangarWord', 'string'], ['turboWord', 'string'], ['chargingWord', 'string']]),
+    inputs('rpIn', 'The race', [['start', 'signal'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['mode', 'string'], ['answerMode', 'string'], ['model', 'object'], ['curriculum', 'array'], ['wordLists', 'array'], ['timed', 'boolean'], ['players', 'number'], ['soundOn', 'boolean'], ['nameA', 'string'], ['lookA', 'string'], ['seedA', 'string'], ['nameB', 'string'], ['mounted', 'boolean'], ['placeholder', 'string'], ['checkWord', 'string'], ['fluentWord', 'string'], ['correctWord', 'string'], ['wrongWord', 'string'], ['timeUpWord', 'string'], ['nextWord', 'string'], ['showMeWord', 'string'], ['yourTurnWord', 'string'], ['youWinWord', 'string'], ['computerWinsWord', 'string'], ['winsWord', 'string'], ['againWord', 'string'], ['otherRaceWord', 'string'], ['rightAnswersWord', 'string'], ['teachCards', 'array'], ['anExampleWord', 'string'], ['gotItWord', 'string'], ['restartWord', 'string'], ['optionsA', 'object'], ['paintA', 'string'], ['patternA', 'string'], ['pickWord', 'string'], ['hangarWord', 'string'], ['turboWord', 'string'], ['chargingWord', 'string'], ['armedWord', 'string'], ['armedHintWord', 'string'], ['focus', 'array'], ['customSet', 'array'], ['customSetId', 'string'], ['customSetBoth', 'boolean']]),
     group('rpWrap', 'The race', undefined, column({ alignItems: 'center', rowGap: 'var(--space-3)' }), ['rpControls', 'rpTrack', 'rpTurn', 'rpRoundSlot', 'rpTeach', 'rpResult']),
     // RKT-006: the way out of a race that is going badly, above the course and away from the answer and Next.
     group('rpControls', 'Restart, or change the race', 'rpWrap', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'flex-end', columnGap: 'var(--space-2)' }), ['rpRestart', 'rpSettings']),
@@ -2213,6 +2493,7 @@ const RACE_PLAY: Tpl007Component = {
     logic('rpResultLine', EXPRESSION_NODE, 'How many were right', { expression: "players === 2 ? '' : right + ' / ' + rounds + ' ' + word" }),
     // RKT-010 — the stars.
     logic('rpMint', FUNCTION_NODE, 'A new race id', { functionScript: MINT_RACE_SCRIPT }),
+    logic('rpFaceB', FUNCTION_NODE, 'A face for the other rocket', { functionScript: MINT_FACE_B_SCRIPT }),
     logic('rpFinish', logicName('Logic/Finish race'), 'Pay the landing, and a new best'),
     outputs('rpOut', 'How it went', [['finished', 'signal'], ['winner', 'string'], ['model', 'object'], ['graded', 'signal'], ['rounds', 'number'], ['showMe', 'signal'], ['teach', 'string'], ['cheer', 'signal'], ['sigh', 'signal'], ['changeRace', 'signal'], ['hangar', 'signal'], ['layoutSeen', 'string'], ['layoutSeenNow', 'signal'], ['layoutPick', 'string'], ['layoutPickNow', 'signal']])
   ],
@@ -2247,6 +2528,10 @@ const RACE_PLAY: Tpl007Component = {
     wire('rpIn', 'showMeWord', 'rpRound', 'showMeWord'),
     wire('rpIn', 'turboWord', 'rpRound', 'turboWord'),
     wire('rpIn', 'chargingWord', 'rpRound', 'chargingWord'),
+    wire('rpIn', 'armedWord', 'rpRound', 'armedWord'),
+    wire('rpIn', 'armedHintWord', 'rpRound', 'armedHintWord'),
+    // P113: what to practise, down to the round.
+    ...(['focus', 'customSet', 'customSetId', 'customSetBoth'] as const).map((p) => wire('rpIn', p, 'rpRound', p)),
     wire('rpA', 'value', 'rpMineAt', 'a'),
     wire('rpB', 'value', 'rpMineAt', 'b'),
     wire('rpTurnIsB', 'result', 'rpMineAt', 'isB'),
@@ -2398,6 +2683,10 @@ const RACE_PLAY: Tpl007Component = {
     // RKT-010: Start, Play again and Restart all enter rpResetA, so each gets a new id there, before the first question is asked.
     // Change the race does not enter it, and starts no race. A restarted race never lands, so it never pays a landing.
     wire('rpResetA', 'done', 'rpMint', 'run'),
+    // The opponent's face is minted on the same reset as the race id — Start, Restart and Play again all pass through it.
+    wire('rpResetA', 'done', 'rpFaceB', 'run'),
+    wire('rpFaceB', 'out-look', 'rpTrack', 'lookB'),
+    wire('rpFaceB', 'out-seed', 'rpTrack', 'seedB'),
     wire('rpMint', 'out-raceId', 'rpRound', 'raceId'),
     wire('rpMint', 'out-raceId', 'rpFinish', 'raceId'),
     wire('rpTurnIsB', 'result', 'rpRound', 'forB'),
@@ -2918,6 +3207,40 @@ function headerWires(p: string, { hangar = true }: { hangar?: boolean } = {}): u
   ];
 }
 
+/**
+ * P113 REV-001: what a game page does with the focus. `Logic/Focus` turns the profile's saved focus into the picker's mode, the
+ * skill ids and the list; the setup shows its line and hosts the chooser; what the chooser saves goes to the profile through
+ * `Logic/Update settings`; Edit lists goes to the lists page. The setup holds the resolving and the writing (a page holds 32 nodes, and
+ * the race page was at 31), so a page places one node for this: `${p}GoLists`.
+ */
+function focusWires(p: string, setup: string, play: string): unknown[] {
+  const me = `${p}Me`;
+  return [
+    // The game asks what the setup's focus says (a subject, or a list), not a mode row.
+    ...(['mode', 'focus', 'customSet', 'customSetId', 'customSetBoth'] as const).map((f) => wire(setup, f, play, f)),
+    // The setup: the profile's focus, the chooser's data, and the words.
+    wire(`${p}T`, 'everythingAtLevel', setup, 'everythingWord'),
+    wire(`${p}T`, 'skillsCount', setup, 'countWord'),
+    wire(`${p}T`, 'myList', setup, 'listWord'),
+    wire(`${p}Curriculum`, 'skills', setup, 'curriculum'),
+    wire(me, 'sets', setup, 'sets'),
+    wire(me, 'level', setup, 'level'),
+    wire(me, 'lang', setup, 'lang'),
+    wire(me, 'focusSubject', setup, 'subject0'),
+    wire(me, 'focusSkills', setup, 'skills0'),
+    ...([
+      ['practising', 'practisingWord'], ['changeFocus', 'changeWord'], ['whatToPractise', 'titleWord'], ['pickSubject', 'subjectWord'], ['pickTopic', 'topicWord'], ['pickSkills', 'skillsHint'],
+      ['tickAll', 'allWord'], ['tickNone', 'noneWord'], ['saveFocus', 'saveWord'], ['cancel', 'cancelWord'], ['myLists', 'listsWord'], ['editLists', 'editListsWord'], ['noListsYet', 'noListsWord']
+    ] as const).map(([word, portName]) => wire(`${p}T`, word, setup, portName)),
+    // What the chooser saved goes to the profile through the store (the Header's shape), and Edit lists goes to the lists page.
+    wire(`${p}Store`, 'app', setup, 'app'),
+    wire(me, 'profileId', setup, 'profileId'),
+    wire(setup, 'app', `${p}Store`, 'app'),
+    wire(setup, 'write', `${p}Store`, 'write'),
+    wire(setup, 'editLists', `${p}GoLists`, 'navigate')
+  ];
+}
+
 const PAGE_PROFILES: Tpl007Component = {
   path: 'Pages/Profiles',
   description: 'Who is playing: the profiles in this browser as cards, and the new-player form. Choosing one goes Home.',
@@ -3100,7 +3423,9 @@ const PAGE_RACE: Tpl007Component = {
     logic('rcNotPlaying', EXPRESSION_NODE, 'Setting up?', { expression: '!playing' }),
     logic('rcNameB', EXPRESSION_NODE, 'Player two, or the computer', { expression: "players === 2 && ((nameB || '') + '').trim() ? nameB : 'CPU'" }),
     logic('rcSoundsEnd', C.sounds, 'The fanfare'),
-    logic('rcTeachCards', C.teachCards, 'The Teach cards')
+    logic('rcTeachCards', C.teachCards, 'The Teach cards'),
+    // P113 REV-001: what to practise, resolved from the profile; what the chooser saves, kept; the way to the lists.
+    logic('rcGoLists', NAVIGATE_NODE, 'To the revision lists', { router: ROUTER, target: C.pageLists })
   ],
   connections: [
     ...pageCommon('rc').connections,
@@ -3116,8 +3441,6 @@ const PAGE_RACE: Tpl007Component = {
     wire('rcHeader', 'home', 'rcGoHome', 'navigate'),
     wire('rcT', 'gameRace', 'rcTitle', 'text'),
     // Setup words.
-    wire('rcT', 'mathsMode', 'rcSetup', 'mathsWord'),
-    wire('rcT', 'typingMode', 'rcSetup', 'typingWord'),
     wire('rcT', 'onePlayer', 'rcSetup', 'onePlayerWord'),
     wire('rcT', 'twoPlayers', 'rcSetup', 'twoPlayersWord'),
     wire('rcT', 'practice', 'rcSetup', 'practiceWord'),
@@ -3154,9 +3477,12 @@ const PAGE_RACE: Tpl007Component = {
     wire('rcMe', 'pattern', 'rcPlay', 'patternA'),
     wire('rcT', 'turboReady', 'rcPlay', 'turboWord'),
     wire('rcT', 'turboCharging', 'rcPlay', 'chargingWord'),
+    wire('rcT', 'turboArmed', 'rcPlay', 'armedWord'),
+    wire('rcT', 'turboArmedHint', 'rcPlay', 'armedHintWord'),
     wire('rcCurriculum', 'skills', 'rcPlay', 'curriculum'),
     wire('rcWordLists', 'lists', 'rcPlay', 'wordLists'),
-    wire('rcSetup', 'mode', 'rcPlay', 'mode'),
+    // P113: the mode comes from the focus (a subject, or a list), not from a row.
+    ...focusWires('rc', 'rcSetup', 'rcPlay'),
     wire('rcSetup', 'players', 'rcPlay', 'players'),
     wire('rcSetup', 'timed', 'rcPlay', 'timed'),
     wire('rcSetup', 'players', 'rcNameB', 'players'),
@@ -3224,9 +3550,11 @@ const PAGE_HANGAR: Tpl007Component = {
   nodes: [
     { id: 'hgPage', type: 'Page', label: 'Hangar', parameters: { title: 'Rocket School', urlPath: 'hangar' }, children: ['hgOuter'] },
     group('hgOuter', 'The ground', 'hgPage', column({ alignItems: 'center' }), ['hgWrap']),
-    group('hgWrap', 'The screen', 'hgOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['hgHeader', 'hgTitle', 'hgPreview', 'hgStack']),
+    group('hgWrap', 'The screen', 'hgOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['hgHeader', 'hgTitle', 'hgMoon', 'hgPreview', 'hgStack']),
     place('hgHeader', C.header, 'The bar', 'hgWrap', { showHome: true, showHangar: false }),
     text('hgTitle', 'Hangar', 'hgWrap', '', T_SECTION),
+    // P113 REV-005: the way to the moon, where the stars adopt and feed aliens. The hangar is where a child spends; so is the moon.
+    place('hgMoon', BUTTON_NODE, 'To the moon', 'hgWrap', { ...BTN_PRIMARY, label: 'Visit your aliens on the Moon', fontSize: 'var(--text-lg)' }),
     place('hgPreview', C.hangarPreview, 'Your face and rocket', 'hgWrap'),
     /*
      * 🔴 R6 (Richard, 2026-09-18) — the buy card sits OVER the shelf, and the shelf keeps the tab the child was on.
@@ -3259,7 +3587,8 @@ const PAGE_HANGAR: Tpl007Component = {
     logic('hgNoOne', EXPRESSION_NODE, 'Nobody signed in?', { expression: 'has === false' }),
     gate('hgGuard', 'Send them to the profiles?'),
     logic('hgGoProfiles', NAVIGATE_NODE, 'To the profiles', { router: ROUTER, target: C.pageProfiles }),
-    logic('hgGoHome', NAVIGATE_NODE, 'Home', { router: ROUTER, target: C.pageHome })
+    logic('hgGoHome', NAVIGATE_NODE, 'Home', { router: ROUTER, target: C.pageHome }),
+    logic('hgGoMoon', NAVIGATE_NODE, 'To the moon', { router: ROUTER, target: C.pageMoon })
   ],
   connections: [
     ...pageCommon('hg').connections,
@@ -3271,6 +3600,8 @@ const PAGE_HANGAR: Tpl007Component = {
     ...headerWires('hg', { hangar: false }),
     wire('hgHeader', 'home', 'hgGoHome', 'navigate'),
     wire('hgT', 'hangar', 'hgTitle', 'text'),
+    wire('hgT', 'visitMoon', 'hgMoon', 'label'),
+    wire('hgMoon', 'onClick', 'hgGoMoon', 'navigate'),
     // The preview: what the next race will show.
     wire('hgMe', 'name', 'hgPreview', 'name'),
     wire('hgMe', 'look', 'hgPreview', 'look'),
@@ -3879,24 +4210,32 @@ const MONSTER_LANE: Tpl007Component = {
 
 const MONSTER_SETUP: Tpl007Component = {
   path: 'Monster/Setup',
-  description: 'Before a Monster Gate game: what to answer (Maths or Typing — PLY-004), the way to play (Beat it to the gate, or Push it back) and the pace (Practice or Challenge), the chosen pair\'s rule in one line, and Start. Opens on Maths, Beat it to the gate and Practice (§16 ruling 3), written once, so coming back keeps the child\'s choices. Publishes Start with Mode, Style and Timed.',
-  inputs: [port('mounted', 'boolean'), port('mathsWord', 'string'), port('typingWord', 'string'), port('gateWord', 'string'), port('pushWord', 'string'), port('practiceWord', 'string'), port('challengeWord', 'string'), port('startWord', 'string'), port('gatePracticeWord', 'string'), port('gateChallengeWord', 'string'), port('pushPracticeWord', 'string'), port('pushChallengeWord', 'string')],
-  outputs: [port('start', 'signal'), port('style', 'string'), port('timed', 'boolean'), port('mode', 'string')],
-  instantiates: [C.choiceRow],
+  description: 'Before a Monster Gate game: what to practise (the profile’s focus, with the chooser to change it — P113; PLY-004’s Maths or Typing row became the chooser’s subject step), the way to play (Beat it to the gate, or Push it back) and the pace (Practice or Challenge), the chosen pair\'s rule in one line, and Start. Opens on Beat it to the gate and Practice (§16 ruling 3), written once, so coming back keeps the child\'s choices. Publishes Start with Style and Timed, and Focus Changed with what the chooser saved.',
+  inputs: [port('mounted', 'boolean'), port('gateWord', 'string'), port('pushWord', 'string'), port('practiceWord', 'string'), port('challengeWord', 'string'), port('startWord', 'string'), port('gatePracticeWord', 'string'), port('gateChallengeWord', 'string'), port('pushPracticeWord', 'string'), port('pushChallengeWord', 'string'), port('practisingWord', 'string'), port('changeWord', 'string'), port('app', 'object'), port('profileId', 'string'), port('curriculum', 'array'), port('sets', 'array'), port('level', 'string'), port('lang', 'string'), port('subject0', 'string'), port('skills0', 'array'), port('everythingWord', 'string'), port('countWord', 'string'), port('listWord', 'string'), port('titleWord', 'string'), port('subjectWord', 'string'), port('topicWord', 'string'), port('skillsHint', 'string'), port('allWord', 'string'), port('noneWord', 'string'), port('saveWord', 'string'), port('cancelWord', 'string'), port('listsWord', 'string'), port('editListsWord', 'string'), port('noListsWord', 'string')],
+  outputs: [port('start', 'signal'), port('style', 'string'), port('timed', 'boolean'), port('app', 'object'), port('write', 'signal'), port('mode', 'string'), port('focus', 'array'), port('customSet', 'array'), port('customSetId', 'string'), port('customSetBoth', 'boolean'), port('editLists', 'signal')],
+  instantiates: [C.choiceRow, C.focusPicker, logicName('Logic/Resolve focus'), logicName('Logic/Update settings')],
   nodes: [
-    inputs('zsIn', 'The words', [['mounted', 'boolean'], ['mathsWord', 'string'], ['typingWord', 'string'], ['gateWord', 'string'], ['pushWord', 'string'], ['practiceWord', 'string'], ['challengeWord', 'string'], ['startWord', 'string'], ['gatePracticeWord', 'string'], ['gateChallengeWord', 'string'], ['pushPracticeWord', 'string'], ['pushChallengeWord', 'string']]),
-    group('zsCard', 'The setup', undefined, { ...CARD, rowGap: 'var(--space-5)', paddingTop: 'var(--space-6)', paddingBottom: 'var(--space-6)', paddingLeft: 'var(--space-6)', paddingRight: 'var(--space-6)', maxWidth: px(560) }, ['zsMode', 'zsStyle', 'zsTimed', 'zsRule', 'zsStart']),
-    // PLY-004: Monster Gate asks the race's questions, so it can ask the race's typing questions too. Nothing else had to change.
-    place('zsMode', C.choiceRow, 'Maths or typing', 'zsCard'),
-    place('zsStyle', C.choiceRow, 'The way to play', 'zsCard'),
-    place('zsTimed', C.choiceRow, 'Practice or challenge', 'zsCard'),
-    text('zsRule', 'What the chosen way and pace do', 'zsCard', '', T_META),
-    place('zsStart', BUTTON_NODE, 'Start', 'zsCard', { ...BTN_PRIMARY, label: 'Start', fontSize: 'var(--text-lg)' }),
-    logic('zsModeItems', FUNCTION_NODE, 'Maths or typing, in words', { functionScript: "Outputs.items = [{ label: Inputs.maths, value: 'maths' }, { label: Inputs.typing, value: 'typing' }];" }),
-    logic('zsModeVar', VARIABLE_NODE, 'Maths or typing?', { name: 'monsterMode' }),
-    logic('zsSetMode', SET_VARIABLE_NODE, 'Choose maths or typing', { name: 'monsterMode' }),
-    logic('zsDefMode', EXPRESSION_NODE, 'maths', { expression: "'maths'" }),
-    logic('zsInitMode', SET_VARIABLE_NODE, 'Start on Maths', { name: 'monsterMode' }),
+    inputs('zsIn', 'The words', [['mounted', 'boolean'], ['gateWord', 'string'], ['pushWord', 'string'], ['practiceWord', 'string'], ['challengeWord', 'string'], ['startWord', 'string'], ['gatePracticeWord', 'string'], ['gateChallengeWord', 'string'], ['pushPracticeWord', 'string'], ['pushChallengeWord', 'string'], ['practisingWord', 'string'], ['changeWord', 'string'], ['app', 'object'], ['profileId', 'string'], ['curriculum', 'array'], ['sets', 'array'], ['level', 'string'], ['lang', 'string'], ['subject0', 'string'], ['skills0', 'array'], ['everythingWord', 'string'], ['countWord', 'string'], ['listWord', 'string'], ['titleWord', 'string'], ['subjectWord', 'string'], ['topicWord', 'string'], ['skillsHint', 'string'], ['allWord', 'string'], ['noneWord', 'string'], ['saveWord', 'string'], ['cancelWord', 'string'], ['listsWord', 'string'], ['editListsWord', 'string'], ['noListsWord', 'string']]),
+    group('zsCard', 'The setup', undefined, { ...CARD, rowGap: 'var(--space-5)', paddingTop: 'var(--space-6)', paddingBottom: 'var(--space-6)', paddingLeft: 'var(--space-6)', paddingRight: 'var(--space-6)', maxWidth: px(560) }, ['zsRows', 'zsPicker']),
+    // P113 REV-001: what this player is practising, and the way to change it. The chooser takes the card while it is open.
+    group('zsRows', 'The setup rows', 'zsCard', column({ rowGap: 'var(--space-5)' }), ['zsFocusRow', 'zsStyle', 'zsTimed', 'zsRule', 'zsStart']),
+    group('zsFocusRow', 'What to practise', 'zsRows', column({ rowGap: 'var(--space-2)' }), ['zsFocusLabel', 'zsFocusLine', 'zsChange']),
+    text('zsFocusLabel', 'Practising', 'zsFocusRow', '', { ...T_META, fontWeight: 'var(--font-semibold)' }),
+    text('zsFocusLine', 'The focus, in words', 'zsFocusRow', '', { ...T_BODY, fontWeight: 'var(--font-bold)' }),
+    place('zsChange', BUTTON_NODE, 'Change what to practise', 'zsFocusRow', { ...BTN_OUTLINE, label: 'Change', fontSize: 'var(--text-sm)' }),
+    place('zsPicker', C.focusPicker, 'The chooser', 'zsCard'),
+    // The focus, resolved here (the setup owns the chooser): the line it says, and what the game asks. What the chooser saves is written
+    // to the profile through the store the page hands in — the Header's shape (app in; app and write out).
+    logic('zsFocus', logicName('Logic/Resolve focus'), 'What to practise, resolved'),
+    logic('zsSetFocus', logicName('Logic/Update settings'), 'Keep what the chooser saved'),
+    withStates('zsChoosing', 'The setup, or the chooser', ['setup', 'picking'], {
+      setup: { type: 'boolean', by: { setup: true, picking: false } },
+      picking: { type: 'boolean', by: { setup: false, picking: true } }
+    }),
+    place('zsStyle', C.choiceRow, 'The way to play', 'zsRows'),
+    place('zsTimed', C.choiceRow, 'Practice or challenge', 'zsRows'),
+    text('zsRule', 'What the chosen way and pace do', 'zsRows', '', T_META),
+    place('zsStart', BUTTON_NODE, 'Start', 'zsRows', { ...BTN_PRIMARY, label: 'Start', fontSize: 'var(--text-lg)' }),
     logic('zsStyleItems', FUNCTION_NODE, 'The two ways, in words', { functionScript: "Outputs.items = [{ label: Inputs.gate, value: 'gate' }, { label: Inputs.push, value: 'push' }];" }),
     logic('zsTimedItems', FUNCTION_NODE, 'Practice or challenge, in words', { functionScript: "Outputs.items = [{ label: Inputs.practice, value: 'practice' }, { label: Inputs.challenge, value: 'challenge' }];" }),
     logic('zsStyleVar', VARIABLE_NODE, 'The way to play', { name: 'monsterStyle' }),
@@ -3913,7 +4252,7 @@ const MONSTER_SETUP: Tpl007Component = {
     logic('zsInitTimed', SET_VARIABLE_NODE, 'Start on Practice', { name: 'monsterTimed' }),
     withStates('zsSeeded', 'Defaults written yet?', ['fresh', 'seeded'], { seeded: { type: 'boolean', by: { fresh: false, seeded: true } } }),
     gate('zsFirst', 'The first time the setup shows?'),
-    outputs('zsOut', 'Go', [['start', 'signal'], ['style', 'string'], ['timed', 'boolean'], ['mode', 'string']])
+    outputs('zsOut', 'Go', [['start', 'signal'], ['style', 'string'], ['timed', 'boolean'], ['app', 'object'], ['write', 'signal'], ['mode', 'string'], ['focus', 'array'], ['customSet', 'array'], ['customSetId', 'string'], ['customSetBoth', 'boolean'], ['editLists', 'signal']])
   ],
   connections: [
     wire('zsIn', 'mounted', 'zsShown', 'm'),
@@ -3921,19 +4260,10 @@ const MONSTER_SETUP: Tpl007Component = {
     wire('zsDefStyle', 'result', 'zsInitStyle', 'value'),
     wire('zsSeeded', 'seeded', 'zsFirst', 'condition'),
     wire('zsCard', 'didMount', 'zsFirst', 'eval'),
-    wire('zsFirst', 'onfalse', 'zsInitMode', 'do'),
-    wire('zsDefMode', 'result', 'zsInitMode', 'value'),
-    wire('zsInitMode', 'done', 'zsInitStyle', 'do'),
+    wire('zsFirst', 'onfalse', 'zsInitStyle', 'do'),
     wire('zsDefTimed', 'result', 'zsInitTimed', 'value'),
     wire('zsInitStyle', 'done', 'zsInitTimed', 'do'),
     wire('zsInitTimed', 'done', 'zsSeeded', 'to-seeded'),
-    wire('zsIn', 'mathsWord', 'zsModeItems', 'in-maths'),
-    wire('zsIn', 'typingWord', 'zsModeItems', 'in-typing'),
-    wire('zsModeItems', 'out-items', 'zsMode', 'items'),
-    wire('zsModeVar', 'value', 'zsMode', 'value'),
-    wire('zsMode', 'value', 'zsSetMode', 'value'),
-    wire('zsMode', 'changed', 'zsSetMode', 'do'),
-    wire('zsModeVar', 'value', 'zsOut', 'mode'),
     wire('zsIn', 'gateWord', 'zsStyleItems', 'in-gate'),
     wire('zsIn', 'pushWord', 'zsStyleItems', 'in-push'),
     wire('zsIn', 'practiceWord', 'zsTimedItems', 'in-practice'),
@@ -3957,12 +4287,52 @@ const MONSTER_SETUP: Tpl007Component = {
     wire('zsTimedVar', 'value', 'zsIsTimed', 'timed'),
     wire('zsIsTimed', 'result', 'zsOut', 'timed'),
     wire('zsStyleVar', 'value', 'zsOut', 'style'),
-    wire('zsStart', 'onClick', 'zsOut', 'start')
+    wire('zsStart', 'onClick', 'zsOut', 'start'),
+    // P113 REV-001: the focus line, the chooser, and what it publishes.
+    wire('zsIn', 'practisingWord', 'zsFocusLabel', 'text'),
+    wire('zsIn', 'changeWord', 'zsChange', 'label'),
+    ...(['curriculum', 'sets', 'level', 'lang', 'everythingWord', 'countWord', 'listWord'] as const).map((f) => wire('zsIn', f, 'zsFocus', f)),
+    wire('zsIn', 'subject0', 'zsFocus', 'subject'),
+    wire('zsIn', 'skills0', 'zsFocus', 'skills'),
+    wire('zsFocus', 'line', 'zsFocusLine', 'text'),
+    ...(['mode', 'focus', 'customSet', 'customSetId', 'customSetBoth'] as const).map((f) => wire('zsFocus', f, 'zsOut', f)),
+    wire('zsIn', 'app', 'zsSetFocus', 'app'),
+    wire('zsIn', 'profileId', 'zsSetFocus', 'profileId'),
+    wire('zsPicker', 'subject', 'zsSetFocus', 'focusSubject'),
+    wire('zsPicker', 'skills', 'zsSetFocus', 'focusSkills'),
+    wire('zsPicker', 'save', 'zsSetFocus', 'run'),
+    wire('zsSetFocus', 'app', 'zsOut', 'app'),
+    wire('zsSetFocus', 'done', 'zsOut', 'write'),
+    wire('zsChoosing', 'setup', 'zsRows', 'mounted'),
+    wire('zsChoosing', 'picking', 'zsPicker', 'mounted'),
+    wire('zsChange', 'onClick', 'zsPicker', 'open'),
+    wire('zsChange', 'onClick', 'zsChoosing', 'to-picking'),
+    wire('zsPicker', 'save', 'zsChoosing', 'to-setup'),
+    wire('zsPicker', 'cancel', 'zsChoosing', 'to-setup'),
+    wire('zsPicker', 'editLists', 'zsOut', 'editLists'),
+    wire('zsIn', 'curriculum', 'zsPicker', 'curriculum'),
+    wire('zsIn', 'sets', 'zsPicker', 'sets'),
+    wire('zsIn', 'level', 'zsPicker', 'level'),
+    wire('zsIn', 'lang', 'zsPicker', 'lang'),
+    wire('zsIn', 'subject0', 'zsPicker', 'subject0'),
+    wire('zsIn', 'skills0', 'zsPicker', 'skills0'),
+    wire('zsIn', 'titleWord', 'zsPicker', 'titleWord'),
+    wire('zsIn', 'subjectWord', 'zsPicker', 'subjectWord'),
+    wire('zsIn', 'topicWord', 'zsPicker', 'topicWord'),
+    wire('zsIn', 'skillsHint', 'zsPicker', 'skillsHint'),
+    wire('zsIn', 'allWord', 'zsPicker', 'allWord'),
+    wire('zsIn', 'noneWord', 'zsPicker', 'noneWord'),
+    wire('zsIn', 'saveWord', 'zsPicker', 'saveWord'),
+    wire('zsIn', 'cancelWord', 'zsPicker', 'cancelWord'),
+    wire('zsIn', 'listsWord', 'zsPicker', 'listsWord'),
+    wire('zsIn', 'editListsWord', 'zsPicker', 'editListsWord'),
+    wire('zsIn', 'noListsWord', 'zsPicker', 'noListsWord'),
   ]
 };
 
 const MONSTER_PLAY_INPUTS: Array<[string, string]> = [
   ['start', 'signal'], ['style', 'string'], ['timed', 'boolean'], ['mode', 'string'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['answerMode', 'string'], ['model', 'object'], ['curriculum', 'array'], ['wordLists', 'array'], ['soundOn', 'boolean'], ['mounted', 'boolean'],
+  ['focus', 'array'], ['customSet', 'array'], ['customSetId', 'string'], ['customSetBoth', 'boolean'],
   ['placeholder', 'string'], ['checkWord', 'string'], ['fluentWord', 'string'], ['correctWord', 'string'], ['wrongWord', 'string'], ['timeUpWord', 'string'], ['nextWord', 'string'], ['showMeWord', 'string'],
   ['teachCards', 'array'], ['anExampleWord', 'string'], ['gotItWord', 'string'], ['restartWord', 'string'], ['changeWord', 'string'], ['againWord', 'string'], ['pickWord', 'string'], ['hangarWord', 'string']
 ];
@@ -4044,7 +4414,7 @@ const MONSTER_PLAY: Tpl007Component = {
     wire('zpNew', 'done', 'zpRound', 'ask'),
     wire('zpNew', 'done', 'zpWalkDelay', 'restart'),
     // The round gets the player and the words, and is told which game it grades for.
-    ...(['mode', 'level', 'lang', 'layout', 'answerMode', 'model', 'curriculum', 'wordLists', 'timed', 'soundOn', 'placeholder', 'checkWord', 'fluentWord', 'correctWord', 'wrongWord', 'timeUpWord', 'nextWord', 'showMeWord'] as const).map((p) => wire('zpIn', p, 'zpRound', p)),
+    ...(['mode', 'level', 'lang', 'layout', 'answerMode', 'model', 'curriculum', 'wordLists', 'timed', 'soundOn', 'placeholder', 'checkWord', 'fluentWord', 'correctWord', 'wrongWord', 'timeUpWord', 'nextWord', 'showMeWord', 'focus', 'customSet', 'customSetId', 'customSetBoth'] as const).map((p) => wire('zpIn', p, 'zpRound', p)),
     wire('zpIn', 'style', 'zpRound', 'game'),
     // A graded answer: the walk stops, and the move turns the verdict into the game after it.
     wire('zpRound', 'graded', 'zpWalkDelay', 'stop'),
@@ -4135,7 +4505,7 @@ const MONSTER_PLAY: Tpl007Component = {
 const PAGE_MONSTER: Tpl007Component = {
   path: 'Pages/Monster',
   description: 'Monster Gate (TPL-007 §2.2 D, §16): the setup, then the game and its end card (both in Monster/Play), with the model saved after every answer and at the finish. While playing, the page\'s bar gives its row to the game\'s controls, as the race\'s does.',
-  instantiates: [C.header, C.monsterSetup, C.monsterPlay, C.store, C.sounds, logicName('Logic/Active profile'), logicName('Logic/Translate words'), logicName('Logic/Save model'), C.words, C.curriculum, C.wordLists, C.teachCards],
+  instantiates: [C.header, C.monsterSetup, C.monsterPlay, C.store, C.sounds, logicName('Logic/Active profile'), logicName('Logic/Translate words'), logicName('Logic/Save model'), logicName('Logic/Update settings'), C.words, C.curriculum, C.wordLists, C.teachCards],
   nodes: [
     { id: 'zgPage', type: 'Page', label: 'Monster', parameters: { title: 'Monster Gate', urlPath: 'monster' }, children: ['zgOuter'] },
     group('zgOuter', 'The ground', 'zgPage', column({ alignItems: 'center' }), ['zgWrap']),
@@ -4159,7 +4529,9 @@ const PAGE_MONSTER: Tpl007Component = {
     logic('zgFalse', EXPRESSION_NODE, 'False', { expression: 'false' }),
     logic('zgNotPlaying', EXPRESSION_NODE, 'Setting up?', { expression: '!playing' }),
     logic('zgSounds', C.sounds, 'The fanfare'),
-    logic('zgTeachCards', C.teachCards, 'The Teach cards')
+    logic('zgTeachCards', C.teachCards, 'The Teach cards'),
+    // P113 REV-001: the focus, as on the race page.
+    logic('zgGoLists', NAVIGATE_NODE, 'To the revision lists', { router: ROUTER, target: C.pageLists })
   ],
   connections: [
     ...pageCommon('zg').connections,
@@ -4175,8 +4547,6 @@ const PAGE_MONSTER: Tpl007Component = {
     wire('zgHeader', 'home', 'zgGoHome', 'navigate'),
     wire('zgT', 'gameMonster', 'zgTitle', 'text'),
     // The setup's words.
-    wire('zgT', 'mathsMode', 'zgSetup', 'mathsWord'),
-    wire('zgT', 'typingMode', 'zgSetup', 'typingWord'),
     wire('zgT', 'monsterGate', 'zgSetup', 'gateWord'),
     wire('zgT', 'monsterPush', 'zgSetup', 'pushWord'),
     wire('zgT', 'practice', 'zgSetup', 'practiceWord'),
@@ -4198,7 +4568,8 @@ const PAGE_MONSTER: Tpl007Component = {
     wire('zgPlaying', 'value', 'zgPlay', 'mounted'),
     wire('zgSetup', 'style', 'zgPlay', 'style'),
     wire('zgSetup', 'timed', 'zgPlay', 'timed'),
-    wire('zgSetup', 'mode', 'zgPlay', 'mode'),
+    // P113: the mode comes from the focus (a subject, or a list), not from a row.
+    ...focusWires('zg', 'zgSetup', 'zgPlay'),
     // The game gets the player and the words.
     ...(['level', 'lang', 'layout', 'answerMode', 'model'] as const).map((field) => wire('zgMe', field, 'zgPlay', field)),
     wire('zgMe', 'sound', 'zgPlay', 'soundOn'),
@@ -4236,6 +4607,670 @@ const PAGE_MONSTER: Tpl007Component = {
   ]
 };
 
+
+// ── P113 REV-002 — the revision lists ───────────────────────────────────────
+
+/**
+ * Richard, 2026-10-04: his eldest has to revise "l'étude du verbe" (a long list of what a verb can be) and a teacher's list of
+ * prehistory dates for Monday — and the teacher's dates are not the ones a current source gives, so a shipped quiz would
+ * teach her the wrong answers for THAT test. The way out is her own list: what the teacher gave, typed in as it was given,
+ * one line per question, and every game then asks it (through `listQ`, the same engine as the shipped lists, so it learns
+ * which items she knows and pays the same stars). The chooser offers it under My lists.
+ *
+ * The editor is deliberately a text box, not a row-per-question form: a parent pastes or types "question = answer" lines
+ * (a tab, →, : and - are read too), and the count under the box says what will be saved. The old JSON door still opens.
+ */
+const LIST_ROW: Tpl007Component = {
+  path: 'Lists/Set row',
+  description: 'One revision list: its name and how many questions, Edit, and Delete (which asks first). The words come in the row, since a repeated row cannot translate. Publishes Edit and Delete with the list’s Id.',
+  inputs: [port('id', 'string'), port('name', 'string'), port('line', 'string'), port('editWord', 'string'), port('deleteWord', 'string'), port('askWord', 'string'), port('yesWord', 'string'), port('noWord', 'string')],
+  outputs: [port('edit', 'signal'), port('delete', 'signal'), port('id', 'string')],
+  nodes: [
+    inputs('lrIn', 'The list', [['id', 'string'], ['name', 'string'], ['line', 'string'], ['editWord', 'string'], ['deleteWord', 'string'], ['askWord', 'string'], ['yesWord', 'string'], ['noWord', 'string']]),
+    group('lrCard', 'The list', undefined, { ...CARD, width: pct(100), rowGap: 'var(--space-3)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-4)', paddingLeft: 'var(--space-5)', paddingRight: 'var(--space-5)' }, ['lrName', 'lrLine', 'lrButtons', 'lrAsk']),
+    text('lrName', 'The name', 'lrCard', '', T_CARD),
+    text('lrLine', 'How many questions', 'lrCard', '', T_META),
+    group('lrButtons', 'Edit or delete', 'lrCard', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: 'var(--space-2)' }), ['lrEdit', 'lrDelete']),
+    place('lrEdit', BUTTON_NODE, 'Edit', 'lrButtons', { ...BTN_OUTLINE, label: 'Edit', fontSize: 'var(--text-sm)' }),
+    place('lrDelete', BUTTON_NODE, 'Delete', 'lrButtons', { ...BTN_OUTLINE, label: 'Delete', fontSize: 'var(--text-sm)' }),
+    // Delete asks first, like the player form does (RKT-008): the first tap only asks.
+    group('lrAsk', 'Are you sure?', 'lrCard', column({ rowGap: 'var(--space-2)' }), ['lrAskText', 'lrAskButtons']),
+    text('lrAskText', 'Delete this list?', 'lrAsk', '', { ...T_BODY, fontWeight: 'var(--font-semibold)' }),
+    group('lrAskButtons', 'Keep or delete', 'lrAsk', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: 'var(--space-2)' }), ['lrNo', 'lrYes']),
+    place('lrNo', BUTTON_NODE, 'No, keep it', 'lrAskButtons', { ...BTN_PRIMARY, label: 'No', fontSize: 'var(--text-sm)' }),
+    place('lrYes', BUTTON_NODE, 'Yes, delete it', 'lrAskButtons', { ...BTN_OUTLINE, label: 'Yes', fontSize: 'var(--text-sm)' }),
+    withStates('lrAskState', 'Asked yet?', ['idle', 'asking'], {
+      asking: { type: 'boolean', by: { idle: false, asking: true } },
+      idle: { type: 'boolean', by: { idle: true, asking: false } }
+    }),
+    outputs('lrOut', 'What was pressed', [['edit', 'signal'], ['delete', 'signal'], ['id', 'string']])
+  ],
+  connections: [
+    wire('lrIn', 'name', 'lrName', 'text'),
+    wire('lrIn', 'line', 'lrLine', 'text'),
+    wire('lrIn', 'editWord', 'lrEdit', 'label'),
+    wire('lrIn', 'deleteWord', 'lrDelete', 'label'),
+    wire('lrIn', 'askWord', 'lrAskText', 'text'),
+    wire('lrIn', 'yesWord', 'lrYes', 'label'),
+    wire('lrIn', 'noWord', 'lrNo', 'label'),
+    wire('lrAskState', 'asking', 'lrAsk', 'mounted'),
+    wire('lrAskState', 'idle', 'lrButtons', 'mounted'),
+    wire('lrDelete', 'onClick', 'lrAskState', 'to-asking'),
+    wire('lrNo', 'onClick', 'lrAskState', 'to-idle'),
+    wire('lrYes', 'onClick', 'lrAskState', 'to-idle'),
+    wire('lrYes', 'onClick', 'lrOut', 'delete'),
+    wire('lrEdit', 'onClick', 'lrOut', 'edit'),
+    wire('lrIn', 'id', 'lrOut', 'id')
+  ]
+};
+
+/** Fill: the list named by Set Id, or an empty draft when it names none (a new list). Signal-driven: the page writes the id, then fires Fill. */
+const LIST_FILL_SCRIPT = [
+  'var sets = Array.isArray(Inputs.sets) ? Inputs.sets : [];',
+  "var id = String(Inputs.setId || '');",
+  'var set = null;',
+  'for (var i = 0; i < sets.length; i++) if (sets[i] && sets[i].id === id) set = sets[i];',
+  "Outputs.name = set ? String(set.name || '') : '';",
+  "Outputs.text = set ? (set.items || []).map(function (it) { return it.q + ' = ' + it.a; }).join('\\n') : '';",
+  'Outputs.both = !!(set && set.both === true);',
+  "Outputs.id = set ? String(set.id) : '';"
+].join('\n');
+
+const LIST_EDITOR: Tpl007Component = {
+  path: 'Lists/Editor',
+  description: 'Make or edit a revision list: a name, a box for the questions one line each ("question = answer"), the count that will be saved, whether to ask both ways, Save and Cancel. Fill loads the list Set Id names from Sets (none: an empty new list). Publishes Save with Name, Items, Both and Set Id, or Cancel.',
+  inputs: [port('mounted', 'boolean'), port('sets', 'array'), port('setId', 'string'), port('fill', 'signal'), port('nameWord', 'string'), port('nameHint', 'string'), port('linesWord', 'string'), port('linesHint', 'string'), port('countWord', 'string'), port('emptyWord', 'string'), port('bothWord', 'string'), port('oneWayWord', 'string'), port('saveWord', 'string'), port('cancelWord', 'string')],
+  outputs: [port('save', 'signal'), port('cancel', 'signal'), port('name', 'string'), port('items', 'array'), port('both', 'boolean'), port('setId', 'string')],
+  instantiates: [C.choiceRow, logicName('Logic/Parse question set')],
+  nodes: [
+    inputs('leIn', 'The lists and the words', [['mounted', 'boolean'], ['sets', 'array'], ['setId', 'string'], ['fill', 'signal'], ['nameWord', 'string'], ['nameHint', 'string'], ['linesWord', 'string'], ['linesHint', 'string'], ['countWord', 'string'], ['emptyWord', 'string'], ['bothWord', 'string'], ['oneWayWord', 'string'], ['saveWord', 'string'], ['cancelWord', 'string']]),
+    group('leCard', 'The editor', undefined, { ...CARD, rowGap: 'var(--space-4)', paddingTop: 'var(--space-6)', paddingBottom: 'var(--space-6)', paddingLeft: 'var(--space-6)', paddingRight: 'var(--space-6)', maxWidth: px(640) }, ['leNameLabel', 'leName', 'leLinesLabel', 'leText', 'leCount', 'leBoth', 'leActions']),
+    text('leNameLabel', 'Name of the list', 'leCard', '', { ...T_META, fontWeight: 'var(--font-semibold)' }),
+    place('leName', TEXT_INPUT_NODE, 'The name box', 'leCard', { ...FIELD, fontSize: 'var(--text-xl)' }),
+    text('leLinesLabel', 'One line per question', 'leCard', '', { ...T_META, fontWeight: 'var(--font-semibold)' }),
+    // A text area: a parent pastes the teacher's list, or types it, one line each.
+    place('leText', TEXT_INPUT_NODE, 'The questions, one line each', 'leCard', { ...FIELD, type: 'textArea', sizeMode: 'explicit', width: pct(100), height: px(220), fontSize: 'var(--text-base)' }),
+    text('leCount', 'How many will be saved', 'leCard', '', T_META),
+    place('leBoth', C.choiceRow, 'Both ways, or one', 'leCard'),
+    group('leActions', 'Save or cancel', 'leCard', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: 'var(--space-2)' }), ['leSave', 'leCancel']),
+    place('leSave', BUTTON_NODE, 'Save', 'leActions', { ...BTN_PRIMARY, label: 'Save' }),
+    place('leCancel', BUTTON_NODE, 'Cancel', 'leActions', { ...BTN_OUTLINE, label: 'Cancel' }),
+    // The draft, in Variables: a Text Input mounts from Start Value and typing never writes it (RKT-006), so what is typed is kept here.
+    { ...(logic('leNameVar', VARIABLE_NODE, 'The name so far', { name: 'listDraftName' }) as object), comment: 'One editor on screen at a time: Fill rewrites the draft every time it opens.' },
+    logic('leTextVar', VARIABLE_NODE, 'The lines so far', { name: 'listDraftText' }),
+    logic('leBothVar', VARIABLE_NODE, 'Both ways?', { name: 'listDraftBoth' }),
+    logic('leIdVar', VARIABLE_NODE, 'Which list is being edited', { name: 'listDraftId' }),
+    logic('leSetName', SET_VARIABLE_NODE, 'Fill the name', { name: 'listDraftName' }),
+    logic('leSetText', SET_VARIABLE_NODE, 'Fill the lines', { name: 'listDraftText' }),
+    logic('leSetBoth', SET_VARIABLE_NODE, 'Fill both ways', { name: 'listDraftBoth' }),
+    logic('leSetId', SET_VARIABLE_NODE, 'Fill the id', { name: 'listDraftId' }),
+    logic('leSetBothPick', SET_VARIABLE_NODE, 'Choose both ways or one', { name: 'listDraftBoth' }),
+    logic('leFill', FUNCTION_NODE, 'The list to edit, or an empty one', { functionScript: LIST_FILL_SCRIPT, ...signalOnly('in-sets', 'in-setId') }),
+    logic('leParse', logicName('Logic/Parse question set'), 'The lines, read'),
+    logic('leCountLine', FUNCTION_NODE, 'How many, in words', { functionScript: "var n = Math.max(0, Math.floor(Number(Inputs.n) || 0));\nOutputs.line = n ? String(Inputs.word || '{n}').replace('{n}', n) : String(Inputs.empty || '');" }),
+    logic('leBothItems', FUNCTION_NODE, 'Both ways or one, in words', { functionScript: "Outputs.items = [{ label: Inputs.both, value: 'both' }, { label: Inputs.one, value: 'one' }];" }),
+    logic('leBothVal', EXPRESSION_NODE, 'Which pill is on', { expression: "both === true ? 'both' : 'one'" }),
+    logic('leIsBoth', EXPRESSION_NODE, 'Both ways chosen?', { expression: "v === 'both'" }),
+    logic('leShown', EXPRESSION_NODE, 'Shown unless told not to', { expression: 'm !== false' }),
+    outputs('leOut', 'The list to save', [['save', 'signal'], ['cancel', 'signal'], ['name', 'string'], ['items', 'array'], ['both', 'boolean'], ['setId', 'string']])
+  ],
+  connections: [
+    wire('leIn', 'mounted', 'leShown', 'm'),
+    wire('leShown', 'result', 'leCard', 'mounted'),
+    wire('leIn', 'nameWord', 'leNameLabel', 'text'),
+    wire('leIn', 'nameHint', 'leName', 'placeholder'),
+    wire('leIn', 'linesWord', 'leLinesLabel', 'text'),
+    wire('leIn', 'linesHint', 'leText', 'placeholder'),
+    wire('leIn', 'saveWord', 'leSave', 'label'),
+    wire('leIn', 'cancelWord', 'leCancel', 'label'),
+    wire('leIn', 'bothWord', 'leBothItems', 'in-both'),
+    wire('leIn', 'oneWayWord', 'leBothItems', 'in-one'),
+    wire('leBothItems', 'out-items', 'leBoth', 'items'),
+    // Fill: the list's fields into the draft, one Set Variable after another, then the boxes are told to show them.
+    wire('leIn', 'sets', 'leFill', 'in-sets'),
+    wire('leIn', 'setId', 'leFill', 'in-setId'),
+    wire('leIn', 'fill', 'leFill', 'run'),
+    wire('leFill', 'out-name', 'leSetName', 'value'),
+    wire('leFill', 'success', 'leSetName', 'do'),
+    wire('leFill', 'out-text', 'leSetText', 'value'),
+    wire('leSetName', 'done', 'leSetText', 'do'),
+    wire('leFill', 'out-both', 'leSetBoth', 'value'),
+    wire('leSetText', 'done', 'leSetBoth', 'do'),
+    wire('leFill', 'out-id', 'leSetId', 'value'),
+    wire('leSetBoth', 'done', 'leSetId', 'do'),
+    wire('leNameVar', 'value', 'leName', 'startValue'),
+    wire('leSetName', 'done', 'leName', 'set'),
+    wire('leTextVar', 'value', 'leText', 'startValue'),
+    wire('leSetText', 'done', 'leText', 'set'),
+    // Typing is kept.
+    wire('leName', 'onTextChanged', 'leNameVar', 'value'),
+    wire('leText', 'onTextChanged', 'leTextVar', 'value'),
+    // The lines, read as they are typed: the count under the box says what Save will keep, and Save shows only when there is something.
+    wire('leTextVar', 'value', 'leParse', 'json'),
+    wire('leParse', 'count', 'leCountLine', 'in-n'),
+    wire('leIn', 'countWord', 'leCountLine', 'in-word'),
+    wire('leIn', 'emptyWord', 'leCountLine', 'in-empty'),
+    wire('leCountLine', 'out-line', 'leCount', 'text'),
+    wire('leParse', 'valid', 'leSave', 'mounted'),
+    // Both ways, or one.
+    wire('leBothVar', 'value', 'leBothVal', 'both'),
+    wire('leBothVal', 'result', 'leBoth', 'value'),
+    wire('leBoth', 'value', 'leIsBoth', 'v'),
+    wire('leIsBoth', 'result', 'leSetBothPick', 'value'),
+    wire('leBoth', 'changed', 'leSetBothPick', 'do'),
+    // Out.
+    wire('leNameVar', 'value', 'leOut', 'name'),
+    wire('leParse', 'items', 'leOut', 'items'),
+    wire('leBothVar', 'value', 'leOut', 'both'),
+    wire('leIdVar', 'value', 'leOut', 'setId'),
+    wire('leSave', 'onClick', 'leOut', 'save'),
+    wire('leCancel', 'onClick', 'leOut', 'cancel')
+  ]
+};
+
+const PAGE_LISTS: Tpl007Component = {
+  path: 'Pages/Lists',
+  description: 'My revision lists (P113 REV-002): the lists in the store as rows, New list, and the editor. A saved list is written to the store and offered by the chooser under My lists.',
+  instantiates: [C.header, C.listRow, C.listEditor, C.store, logicName('Logic/Active profile'), logicName('Logic/Translate words'), logicName('Logic/List question sets'), logicName('Logic/Save question set'), logicName('Logic/Delete question set'), C.words],
+  repeats: { source: 'array', rowFields: ['id', 'name', 'line', 'editWord', 'deleteWord', 'askWord', 'yesWord', 'noWord', 'count', 'both', 'selected', 'itemsJson', 'itemsText'] },
+  nodes: [
+    { id: 'lsPage', type: 'Page', label: 'Lists', parameters: { title: 'My lists', urlPath: 'lists' }, children: ['lsOuter'] },
+    group('lsOuter', 'The ground', 'lsPage', column({ alignItems: 'center' }), ['lsWrap']),
+    group('lsWrap', 'The screen', 'lsOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-6)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['lsHeader', 'lsTitle', 'lsBlurb', 'lsList', 'lsNew', 'lsEditor']),
+    place('lsHeader', C.header, 'The bar', 'lsWrap', { showHome: true, showHangar: true }),
+    text('lsTitle', 'My revision lists', 'lsWrap', '', T_SECTION),
+    text('lsBlurb', 'What this page is for', 'lsWrap', '', T_LEAD),
+    group('lsList', 'The lists', 'lsWrap', column({ rowGap: 'var(--space-3)' }), ['lsEach']),
+    logic('lsEach', FOR_EACH_NODE, 'One row per list', { template: C.listRow, templateType: 'explicit' }),
+    place('lsNew', BUTTON_NODE, 'New list', 'lsWrap', { ...BTN_PRIMARY, label: 'New list' }),
+    place('lsEditor', C.listEditor, 'The editor', 'lsWrap'),
+    ...pageCommon('ls').nodes,
+    logic('lsNoOne', EXPRESSION_NODE, 'Nobody signed in?', { expression: 'has === false' }),
+    gate('lsGuard', 'Send them to the profiles?'),
+    logic('lsGoProfiles', NAVIGATE_NODE, 'To the profiles', { router: ROUTER, target: C.pageProfiles }),
+    logic('lsGoHome', NAVIGATE_NODE, 'Home', { router: ROUTER, target: C.pageHome }),
+    logic('lsGoHangar', NAVIGATE_NODE, 'To the hangar', { router: ROUTER, target: C.pageHangar }),
+    logic('lsSets', logicName('Logic/List question sets'), 'The lists, as rows'),
+    logic('lsSave', logicName('Logic/Save question set'), 'Save the list'),
+    logic('lsDelete', logicName('Logic/Delete question set'), 'Delete a list'),
+    // Which list the editor holds: written before Fill fires (values before signals). '' is a new list.
+    logic('lsEditId', VARIABLE_NODE, 'Which list is being edited', { name: 'listEditId' }),
+    logic('lsSetEditId', SET_VARIABLE_NODE, 'Edit this one', { name: 'listEditId' }),
+    logic('lsClearId', SET_VARIABLE_NODE, 'A new one', { name: 'listEditId' }),
+    logic('lsEmpty', EXPRESSION_NODE, 'No list', { expression: "''" }),
+    // `closed` FIRST: a States node starts in its first state.
+    withStates('lsPanel', 'The rows, or the editor', ['closed', 'editing'], {
+      closed: { type: 'boolean', by: { closed: true, editing: false } },
+      open: { type: 'boolean', by: { closed: false, editing: true } }
+    })
+  ],
+  connections: [
+    ...pageCommon('ls').connections,
+    wire('lsMe', 'hasProfile', 'lsNoOne', 'has'),
+    wire('lsNoOne', 'result', 'lsGuard', 'condition'),
+    wire('lsPage', 'didMount', 'lsGuard', 'eval'),
+    wire('lsGuard', 'ontrue', 'lsGoProfiles', 'navigate'),
+    ...headerWires('ls'),
+    wire('lsHeader', 'home', 'lsGoHome', 'navigate'),
+    wire('lsT', 'listsTitle', 'lsTitle', 'text'),
+    wire('lsT', 'listsBlurb', 'lsBlurb', 'text'),
+    wire('lsT', 'newList', 'lsNew', 'label'),
+    // The rows, with their words.
+    wire('lsStore', 'app', 'lsSets', 'app'),
+    wire('lsT', 'listCount', 'lsSets', 'countWord'),
+    wire('lsT', 'listEdit', 'lsSets', 'editWord'),
+    wire('lsT', 'listDelete', 'lsSets', 'deleteWord'),
+    wire('lsT', 'listDeleteAsk', 'lsSets', 'askWord'),
+    wire('lsT', 'deleteYes', 'lsSets', 'yesWord'),
+    wire('lsT', 'deleteNo', 'lsSets', 'noWord'),
+    wire('lsT', 'listBothWays', 'lsSets', 'bothWord'),
+    wire('lsSets', 'sets', 'lsEach', 'items'),
+    // New: an empty id, then the editor fills from it.
+    wire('lsEmpty', 'result', 'lsClearId', 'value'),
+    wire('lsNew', 'onClick', 'lsClearId', 'do'),
+    wire('lsClearId', 'done', 'lsEditor', 'fill'),
+    wire('lsClearId', 'done', 'lsPanel', 'to-editing'),
+    // Edit: the row's id, then the editor fills from it.
+    wire('lsEach', 'itemOutput-id', 'lsSetEditId', 'value'),
+    wire('lsEach', 'itemOutputSignal-edit', 'lsSetEditId', 'do'),
+    wire('lsSetEditId', 'done', 'lsEditor', 'fill'),
+    wire('lsSetEditId', 'done', 'lsPanel', 'to-editing'),
+    wire('lsMe', 'sets', 'lsEditor', 'sets'),
+    wire('lsEditId', 'value', 'lsEditor', 'setId'),
+    wire('lsT', 'listName', 'lsEditor', 'nameWord'),
+    wire('lsT', 'listNameHint', 'lsEditor', 'nameHint'),
+    wire('lsT', 'listLines', 'lsEditor', 'linesWord'),
+    wire('lsT', 'listLinesHint', 'lsEditor', 'linesHint'),
+    wire('lsT', 'listCount', 'lsEditor', 'countWord'),
+    wire('lsT', 'listEmpty', 'lsEditor', 'emptyWord'),
+    wire('lsT', 'listBothWays', 'lsEditor', 'bothWord'),
+    wire('lsT', 'listOneWay', 'lsEditor', 'oneWayWord'),
+    wire('lsT', 'save', 'lsEditor', 'saveWord'),
+    wire('lsT', 'cancel', 'lsEditor', 'cancelWord'),
+    // Save: into the store, then back to the rows.
+    wire('lsStore', 'app', 'lsSave', 'app'),
+    wire('lsEditor', 'setId', 'lsSave', 'setId'),
+    wire('lsEditor', 'name', 'lsSave', 'name'),
+    wire('lsEditor', 'items', 'lsSave', 'items'),
+    wire('lsEditor', 'both', 'lsSave', 'both'),
+    wire('lsEditor', 'save', 'lsSave', 'run'),
+    wire('lsSave', 'app', 'lsStore', 'app'),
+    wire('lsSave', 'done', 'lsStore', 'write'),
+    wire('lsSave', 'done', 'lsPanel', 'to-closed'),
+    wire('lsEditor', 'cancel', 'lsPanel', 'to-closed'),
+    // Delete, once the row has asked.
+    wire('lsStore', 'app', 'lsDelete', 'app'),
+    wire('lsEach', 'itemOutput-id', 'lsDelete', 'setId'),
+    wire('lsEach', 'itemOutputSignal-delete', 'lsDelete', 'run'),
+    wire('lsDelete', 'app', 'lsStore', 'app'),
+    wire('lsDelete', 'done', 'lsStore', 'write'),
+    // The rows and New, or the editor.
+    wire('lsPanel', 'closed', 'lsList', 'mounted'),
+    wire('lsPanel', 'closed', 'lsNew', 'mounted'),
+    wire('lsPanel', 'open', 'lsEditor', 'mounted')
+  ]
+};
+
+// ── P113 REV-005 — the moon ─────────────────────────────────────────────────
+
+/**
+ * One alien in a row: drawn by the kit, its name, and what stage it is at. The chosen one is sunshine. Used for the moon's own
+ * aliens (a tap chooses) and for the adopt card's species (a tap picks the species). Publishes Tap with the Id.
+ */
+const MOON_TILE: Tpl007Component = {
+  path: 'Moon/Alien tile',
+  description: 'One alien: the kit draws it (species, colour, what it wears, how grown), its name and a line under it. Selected fills it sunshine. Publishes Tap with its Id — only the card answers, never the picture as well.',
+  inputs: [port('id', 'string'), port('name', 'string'), port('species', 'string'), port('colour', 'string'), port('grown', 'number'), port('hat', 'string'), port('eyes', 'string'), port('neck', 'string'), port('happy', 'number'), port('selected', 'boolean'), port('line', 'string')],
+  outputs: [port('tap', 'signal'), port('id', 'string')],
+  nodes: [
+    inputs('mtIn', 'The alien', [['id', 'string'], ['name', 'string'], ['species', 'string'], ['colour', 'string'], ['grown', 'number'], ['hat', 'string'], ['eyes', 'string'], ['neck', 'string'], ['happy', 'number'], ['selected', 'boolean'], ['line', 'string']]),
+    group('mtCard', 'The tile', undefined, { ...CARD, width: px(120), sizeMode: 'contentHeight', alignItems: 'center', rowGap: 'var(--space-1)', paddingTop: 'var(--space-3)', paddingBottom: 'var(--space-3)', paddingLeft: 'var(--space-2)', paddingRight: 'var(--space-2)' }, ['mtAlien', 'mtName', 'mtLine']),
+    place('mtAlien', KIT_ALIEN, 'The alien', 'mtCard', { size: 92 }),
+    text('mtName', 'Its name', 'mtCard', '', { ...T_BODY, fontWeight: 'var(--font-bold)', textAlignX: 'center' }),
+    text('mtLine', 'How grown', 'mtCard', '', { ...T_META, textAlignX: 'center' }),
+    logic('mtToneOf', EXPRESSION_NODE, 'Chosen?', { expression: "selected === true ? 'on' : 'off'" }),
+    withStates('mtTone', 'Chosen, or not', ['off', 'on'], { ground: { type: 'color', by: { off: 'var(--surface)', on: ROLE.picked } } }),
+    outputs('mtOut', 'Tapped', [['tap', 'signal'], ['id', 'string']])
+  ],
+  connections: [
+    ...(['species', 'name', 'grown', 'hat', 'eyes', 'neck', 'happy'] as const).map((f) => wire('mtIn', f, 'mtAlien', f)),
+    wire('mtIn', 'colour', 'mtAlien', 'color'),
+    wire('mtIn', 'name', 'mtName', 'text'),
+    wire('mtIn', 'line', 'mtLine', 'text'),
+    wire('mtIn', 'selected', 'mtToneOf', 'selected'),
+    wire('mtToneOf', 'result', 'mtTone', 'currentState'),
+    wire('mtTone', 'ground', 'mtCard', 'backgroundColor'),
+    wire('mtCard', 'onClick', 'mtOut', 'tap'),
+    wire('mtIn', 'id', 'mtOut', 'id')
+  ]
+};
+
+/**
+ * One thing the moon offers: a food (its glyph) or something to wear (the chosen alien drawn wearing it), its name and what a
+ * tap does — its price, Put it on, or On ✓. Use (theirs to use: feed, or put on and take off) and Ask (not theirs yet: the buy
+ * card) are worked out by Logic/Moon view; a tile that can do neither (too dear) is greyed and answers nothing.
+ */
+const MOON_ITEM: Tpl007Component = {
+  path: 'Moon/Shop tile',
+  description: 'One food or one thing to wear: a glyph, or the chosen alien wearing it; its name; and its price or what a tap does. Worn fills it sunshine; Dim greys it (not enough stars yet). Publishes Use (feed it, or put it on or take it off) or Ask (buy it first), with the Id, Label and Cost.',
+  inputs: [port('id', 'string'), port('glyph', 'string'), port('label', 'string'), port('line', 'string'), port('cost', 'number'), port('use', 'boolean'), port('ask', 'boolean'), port('dim', 'boolean'), port('worn', 'boolean'), port('showAlien', 'boolean'), port('species', 'string'), port('colour', 'string'), port('grown', 'number'), port('hat', 'string'), port('eyes', 'string'), port('neck', 'string')],
+  outputs: [port('use', 'signal'), port('ask', 'signal'), port('id', 'string'), port('label', 'string'), port('cost', 'number')],
+  nodes: [
+    inputs('miIn', 'The thing', [['id', 'string'], ['glyph', 'string'], ['label', 'string'], ['line', 'string'], ['cost', 'number'], ['use', 'boolean'], ['ask', 'boolean'], ['dim', 'boolean'], ['worn', 'boolean'], ['showAlien', 'boolean'], ['species', 'string'], ['colour', 'string'], ['grown', 'number'], ['hat', 'string'], ['eyes', 'string'], ['neck', 'string']]),
+    group('miCard', 'The tile', undefined, { ...CARD, width: px(112), sizeMode: 'contentHeight', alignItems: 'center', rowGap: 'var(--space-1)', paddingTop: 'var(--space-3)', paddingBottom: 'var(--space-3)', paddingLeft: 'var(--space-2)', paddingRight: 'var(--space-2)' }, ['miGlyph', 'miAlienBox', 'miLabel', 'miLine']),
+    text('miGlyph', 'The food', 'miCard', '', { ...T_BODY, fontSize: 'var(--text-4xl)', textAlignX: 'center' }),
+    // A placed node has no Mounted of its own, so the alien sits in a Group that has one.
+    group('miAlienBox', 'Wearing it', 'miCard', { sizeMode: 'contentSize', mounted: false }, ['miAlien']),
+    place('miAlien', KIT_ALIEN, 'The alien, wearing it', 'miAlienBox', { size: 88 }),
+    text('miLabel', 'Its name', 'miCard', '', { ...T_BODY, fontWeight: 'var(--font-bold)', textAlignX: 'center' }),
+    text('miLine', 'Its price, or what a tap does', 'miCard', '', { ...T_META, textAlignX: 'center' }),
+    logic('miGlyphShown', EXPRESSION_NODE, 'A food?', { expression: 'showAlien !== true' }),
+    logic('miToneOf', EXPRESSION_NODE, 'Worn, plain or greyed?', { expression: "worn === true ? 'worn' : dim === true ? 'dim' : 'plain'" }),
+    withStates('miTone', 'Worn, plain or greyed', ['plain', 'worn', 'dim'], {
+      ground: { type: 'color', by: { plain: 'var(--surface)', worn: ROLE.picked, dim: 'var(--muted)' } },
+      opacity: { type: 'number', by: { plain: 1, worn: 1, dim: 0.8 } }
+    }),
+    gate('miCanUse', 'Theirs to use?'),
+    gate('miCanAsk', 'To buy first?'),
+    outputs('miOut', 'Tapped', [['use', 'signal'], ['ask', 'signal'], ['id', 'string'], ['label', 'string'], ['cost', 'number']])
+  ],
+  connections: [
+    wire('miIn', 'glyph', 'miGlyph', 'text'),
+    wire('miIn', 'showAlien', 'miGlyphShown', 'showAlien'),
+    wire('miGlyphShown', 'result', 'miGlyph', 'mounted'),
+    wire('miIn', 'showAlien', 'miAlienBox', 'mounted'),
+    ...(['species', 'grown', 'hat', 'eyes', 'neck'] as const).map((f) => wire('miIn', f, 'miAlien', f)),
+    wire('miIn', 'colour', 'miAlien', 'color'),
+    wire('miIn', 'label', 'miLabel', 'text'),
+    wire('miIn', 'line', 'miLine', 'text'),
+    wire('miIn', 'worn', 'miToneOf', 'worn'),
+    wire('miIn', 'dim', 'miToneOf', 'dim'),
+    wire('miToneOf', 'result', 'miTone', 'currentState'),
+    wire('miTone', 'ground', 'miCard', 'backgroundColor'),
+    wire('miTone', 'opacity', 'miCard', 'opacity'),
+    wire('miIn', 'use', 'miCanUse', 'condition'),
+    wire('miIn', 'ask', 'miCanAsk', 'condition'),
+    wire('miCard', 'onClick', 'miCanUse', 'eval'),
+    wire('miCard', 'onClick', 'miCanAsk', 'eval'),
+    wire('miCanUse', 'ontrue', 'miOut', 'use'),
+    wire('miCanAsk', 'ontrue', 'miOut', 'ask'),
+    wire('miIn', 'id', 'miOut', 'id'),
+    wire('miIn', 'label', 'miOut', 'label'),
+    wire('miIn', 'cost', 'miOut', 'cost')
+  ]
+};
+
+const MOON_ROW_FIELDS = ['id', 'name', 'species', 'colour', 'grown', 'hat', 'eyes', 'neck', 'happy', 'selected', 'line'];
+const MOON_ITEM_FIELDS = ['id', 'glyph', 'label', 'line', 'cost', 'use', 'ask', 'dim', 'worn', 'showAlien', 'species', 'colour', 'grown', 'hat', 'eyes', 'neck'];
+/** The hangar's buy card, worded for the moon: what the child has, what it costs, what is left. */
+const moonConfirmWords = (from: string, to: string): unknown[] => [
+  wire(from, 'haveWord', to, 'haveWord'),
+  wire(from, 'costWord', to, 'costWord'),
+  wire(from, 'leftWord', to, 'leftWord'),
+  wire(from, 'yesWord', to, 'yesWord'),
+  wire(from, 'noWord', to, 'noWord')
+];
+const MOON_CONFIRM_PORTS: Array<[string, string]> = [['haveWord', 'string'], ['costWord', 'string'], ['leftWord', 'string'], ['yesWord', 'string'], ['noWord', 'string']];
+
+/**
+ * The chosen alien, close up: big, its name, how grown it is, its favourite food (❓ until found), what it just said, then the
+ * food and the things to wear. A food tap feeds at once (its price is on the tile, and a meal is small). Something not owned
+ * asks first, on the hangar's card (P95 PLY-002: the balance, the price, what is left). The setup's shape: the store goes in,
+ * and the store to write comes out.
+ */
+const MOON_CARE: Tpl007Component = {
+  path: 'Moon/Care',
+  description: 'The chosen alien close up, then Something to eat and Something to wear. A food tap feeds it (Logic/Moon act, feed); something already owned goes on or off; something not owned asks first on Hangar/Confirm, then is bought and put on. App in; App and Write out.',
+  inputs: [port('mounted', 'boolean'), port('app', 'object'), port('profileId', 'string'), port('name', 'string'), port('species', 'string'), port('colour', 'string'), port('grown', 'number'), port('hat', 'string'), port('eyes', 'string'), port('neck', 'string'), port('happy', 'number'), port('line', 'string'), port('favLine', 'string'), port('said', 'string'), port('foods', 'array'), port('wear', 'array'), port('purse', 'number'), port('feedWord', 'string'), port('dressWord', 'string'), port('buyTitle', 'string'), ...MOON_CONFIRM_PORTS.map(([n, t]) => port(n, t))],
+  outputs: [port('app', 'object'), port('write', 'signal')],
+  repeats: { source: 'array', rowFields: MOON_ITEM_FIELDS },
+  instantiates: [C.moonItem, C.hangarConfirm, logicName('Logic/Moon act')],
+  nodes: [
+    inputs('mcIn', 'The chosen alien, and the store', [['mounted', 'boolean'], ['app', 'object'], ['profileId', 'string'], ['name', 'string'], ['species', 'string'], ['colour', 'string'], ['grown', 'number'], ['hat', 'string'], ['eyes', 'string'], ['neck', 'string'], ['happy', 'number'], ['line', 'string'], ['favLine', 'string'], ['said', 'string'], ['foods', 'array'], ['wear', 'array'], ['purse', 'number'], ['feedWord', 'string'], ['dressWord', 'string'], ['buyTitle', 'string'], ...MOON_CONFIRM_PORTS]),
+    group('mcCard', 'Close up', undefined, { ...CARD, alignItems: 'center', rowGap: 'var(--space-3)', paddingTop: 'var(--space-5)', paddingBottom: 'var(--space-5)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)' }, ['mcAlien', 'mcName', 'mcLine', 'mcFav', 'mcSaid', 'mcFeedLabel', 'mcFoods', 'mcDressLabel', 'mcStack']),
+    place('mcAlien', KIT_ALIEN, 'The chosen alien', 'mcCard', { size: 200 }),
+    text('mcName', 'Its name', 'mcCard', '', { ...T_CARD, textAlignX: 'center' }),
+    text('mcLine', 'How grown, and how far to go', 'mcCard', '', { ...T_BODY, textAlignX: 'center' }),
+    text('mcFav', 'Its favourite food', 'mcCard', '', { ...T_META, textAlignX: 'center' }),
+    text('mcSaid', 'What just happened', 'mcCard', '', { ...T_BODY, fontWeight: 'var(--font-bold)', textAlignX: 'center' }),
+    text('mcFeedLabel', 'Something to eat', 'mcCard', '', { ...T_META, fontWeight: 'var(--font-semibold)', textAlignX: 'center' }),
+    group('mcFoods', 'The food', 'mcCard', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch' }), ['mcFoodEach']),
+    logic('mcFoodEach', FOR_EACH_NODE, 'One tile per food', { template: C.moonItem, templateType: 'explicit' }),
+    text('mcDressLabel', 'Something to wear', 'mcCard', '', { ...T_META, fontWeight: 'var(--font-semibold)', textAlignX: 'center' }),
+    // The buy card is fixed over the screen by .rkt-buy-over (APP_CSS), so the tiles stay where they are under it.
+    group('mcStack', 'The things to wear, and the question over them', 'mcCard', { ...column({ alignItems: 'stretch' }), cssClassName: 'rkt-shelf-stack' }, ['mcWearBox', 'mcOver']),
+    group('mcWearBox', 'The things to wear', 'mcStack', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch' }), ['mcWearEach']),
+    logic('mcWearEach', FOR_EACH_NODE, 'One tile per thing to wear', { template: C.moonItem, templateType: 'explicit' }),
+    group('mcOver', 'The question, over the tiles', 'mcStack', { ...column({ alignItems: 'center' }), cssClassName: 'rkt-buy-over', mounted: false }, ['mcConfirm']),
+    place('mcConfirm', C.hangarConfirm, 'Buy it?', 'mcOver', { mounted: false }),
+    withStates('mcAsk', 'The tiles, or the question', ['idle', 'asking'], {
+      idle: { type: 'boolean', by: { idle: true, asking: false } },
+      asking: { type: 'boolean', by: { idle: false, asking: true } }
+    }),
+    logic('mcBuyTitle', EXPRESSION_NODE, 'Buy what?', { expression: "String(word || '').replace('{item}', String(label || ''))" }),
+    logic('mcFeed', logicName('Logic/Moon act'), 'Feed it', { action: 'feed' }),
+    logic('mcWear', logicName('Logic/Moon act'), 'Put it on, or take it off', { action: 'wear' }),
+    logic('mcBuy', logicName('Logic/Moon act'), 'Buy it, and put it on', { action: 'buy' }),
+    logic('mcShown', EXPRESSION_NODE, 'Shown unless told not to', { expression: 'm !== false' }),
+    outputs('mcOut', 'The store to write', [['app', 'object'], ['write', 'signal']])
+  ],
+  connections: [
+    wire('mcIn', 'mounted', 'mcShown', 'm'),
+    wire('mcShown', 'result', 'mcCard', 'mounted'),
+    ...(['species', 'name', 'grown', 'hat', 'eyes', 'neck', 'happy'] as const).map((f) => wire('mcIn', f, 'mcAlien', f)),
+    wire('mcIn', 'colour', 'mcAlien', 'color'),
+    wire('mcIn', 'name', 'mcName', 'text'),
+    wire('mcIn', 'line', 'mcLine', 'text'),
+    wire('mcIn', 'favLine', 'mcFav', 'text'),
+    wire('mcIn', 'feedWord', 'mcFeedLabel', 'text'),
+    wire('mcIn', 'dressWord', 'mcDressLabel', 'text'),
+    wire('mcIn', 'foods', 'mcFoodEach', 'items'),
+    wire('mcIn', 'wear', 'mcWearEach', 'items'),
+    // What just happened: the adopt card's welcome (from the page), or this card's own yum and it's-wearing-it.
+    wire('mcIn', 'said', 'mcSaid', 'text'),
+    wire('mcFeed', 'said', 'mcSaid', 'text'),
+    wire('mcWear', 'said', 'mcSaid', 'text'),
+    wire('mcBuy', 'said', 'mcSaid', 'text'),
+    // Feed: the repeater publishes the row's values before its signal.
+    wire('mcIn', 'app', 'mcFeed', 'app'),
+    wire('mcIn', 'profileId', 'mcFeed', 'profileId'),
+    wire('mcFoodEach', 'itemOutput-id', 'mcFeed', 'foodId'),
+    wire('mcFoodEach', 'itemOutputSignal-use', 'mcFeed', 'run'),
+    // On or off: owned, so no question.
+    wire('mcIn', 'app', 'mcWear', 'app'),
+    wire('mcIn', 'profileId', 'mcWear', 'profileId'),
+    wire('mcWearEach', 'itemOutput-id', 'mcWear', 'wearId'),
+    wire('mcWearEach', 'itemOutputSignal-use', 'mcWear', 'run'),
+    // Not owned: the hangar's card asks, with the purse, the price and what is left.
+    wire('mcWearEach', 'itemOutputSignal-ask', 'mcAsk', 'to-asking'),
+    wire('mcAsk', 'asking', 'mcOver', 'mounted'),
+    wire('mcAsk', 'asking', 'mcConfirm', 'mounted'),
+    wire('mcIn', 'buyTitle', 'mcBuyTitle', 'word'),
+    wire('mcWearEach', 'itemOutput-label', 'mcBuyTitle', 'label'),
+    wire('mcBuyTitle', 'result', 'mcConfirm', 'title'),
+    wire('mcWearEach', 'itemOutput-cost', 'mcConfirm', 'cost'),
+    wire('mcIn', 'purse', 'mcConfirm', 'purse'),
+    ...moonConfirmWords('mcIn', 'mcConfirm'),
+    wire('mcConfirm', 'no', 'mcAsk', 'to-idle'),
+    wire('mcConfirm', 'yes', 'mcAsk', 'to-idle'),
+    wire('mcIn', 'app', 'mcBuy', 'app'),
+    wire('mcIn', 'profileId', 'mcBuy', 'profileId'),
+    wire('mcWearEach', 'itemOutput-id', 'mcBuy', 'wearId'),
+    wire('mcConfirm', 'yes', 'mcBuy', 'run'),
+    // Out: the store to write.
+    ...(['mcFeed', 'mcWear', 'mcBuy'] as const).flatMap((a) => [wire(a, 'app', 'mcOut', 'app'), wire(a, 'done', 'mcOut', 'write')])
+  ]
+};
+
+/**
+ * The adopt card: pick a species (each drawn in the colour being chosen), a colour and a name, then Adopt. The first alien is
+ * free and comes at once; a later one shows its price on the button and asks first on the hangar's card. With aliens already
+ * on the moon, the card is folded to one button until the child opens it. The draft lives in Variables (RKT-006: a Text Input
+ * mounts from Start Value, and typing never writes it), and its species and colour go out so the page's view draws them.
+ */
+const MOON_ADOPT: Tpl007Component = {
+  path: 'Moon/Adopt',
+  description: 'Adopt an alien: a species (drawn in the colour being chosen), a colour and a name, then Adopt (free for the first; a later one asks first on Hangar/Confirm). Folded to one button once the moon has aliens. App in; App, Write and Said out, and the draft Species and Colour for the view.',
+  inputs: [port('app', 'object'), port('profileId', 'string'), port('has', 'boolean'), port('full', 'boolean'), port('canAdopt', 'boolean'), port('free', 'boolean'), port('cost', 'number'), port('purse', 'number'), port('button', 'string'), port('another', 'string'), port('suggestedName', 'string'), port('species', 'array'), port('colours', 'array'), port('colour', 'string'), port('firstWord', 'string'), port('moreWord', 'string'), port('nameWord', 'string'), port('askWord', 'string'), port('cancelWord', 'string'), ...MOON_CONFIRM_PORTS.map(([n, t]) => port(n, t))],
+  outputs: [port('app', 'object'), port('write', 'signal'), port('said', 'string'), port('draftSpecies', 'string'), port('draftColour', 'string')],
+  repeats: { source: 'array', rowFields: MOON_ROW_FIELDS },
+  instantiates: [C.moonTile, C.choiceRow, C.hangarConfirm, logicName('Logic/Moon act')],
+  nodes: [
+    inputs('maIn', 'The adopt card', [['app', 'object'], ['profileId', 'string'], ['has', 'boolean'], ['full', 'boolean'], ['canAdopt', 'boolean'], ['free', 'boolean'], ['cost', 'number'], ['purse', 'number'], ['button', 'string'], ['another', 'string'], ['suggestedName', 'string'], ['species', 'array'], ['colours', 'array'], ['colour', 'string'], ['firstWord', 'string'], ['moreWord', 'string'], ['nameWord', 'string'], ['askWord', 'string'], ['cancelWord', 'string'], ...MOON_CONFIRM_PORTS]),
+    group('maCard', 'Adopt an alien', undefined, { ...CARD, alignItems: 'center', rowGap: 'var(--space-3)', paddingTop: 'var(--space-5)', paddingBottom: 'var(--space-5)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)' }, ['maMore', 'maBody', 'maOver']),
+    place('maMore', BUTTON_NODE, 'Adopt another', 'maCard', { ...BTN_OUTLINE, label: 'Adopt another alien' }),
+    group('maBody', 'The choices', 'maCard', column({ alignItems: 'center', rowGap: 'var(--space-3)' }), ['maTitle', 'maSpecies', 'maColours', 'maNameLabel', 'maName', 'maButtons']),
+    text('maTitle', 'Adopt an alien', 'maBody', '', { ...T_CARD, textAlignX: 'center' }),
+    group('maSpecies', 'The species', 'maBody', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch' }), ['maSpeciesEach']),
+    logic('maSpeciesEach', FOR_EACH_NODE, 'One tile per species', { template: C.moonTile, templateType: 'explicit' }),
+    place('maColours', C.choiceRow, 'The colour', 'maBody'),
+    text('maNameLabel', 'Its name', 'maBody', '', { ...T_META, fontWeight: 'var(--font-semibold)', textAlignX: 'center' }),
+    place('maName', TEXT_INPUT_NODE, 'The name box', 'maBody', { ...FIELD, fontSize: 'var(--text-xl)', maxWidth: px(320) }),
+    group('maButtons', 'Adopt, or not now', 'maBody', row({ justifyContent: 'center' }), ['maAdopt', 'maCancel']),
+    place('maAdopt', BUTTON_NODE, 'Adopt', 'maButtons', { ...BTN_PRIMARY, label: 'Adopt' }),
+    place('maCancel', BUTTON_NODE, 'Not now', 'maButtons', { ...BTN_OUTLINE, label: 'Cancel' }),
+    group('maOver', 'The question, over the screen', 'maCard', { ...column({ alignItems: 'center' }), cssClassName: 'rkt-buy-over', mounted: false }, ['maConfirm']),
+    place('maConfirm', C.hangarConfirm, 'Adopt it?', 'maOver', { mounted: false }),
+    // The draft. One adopt card on screen at a time.
+    { ...(logic('maSpVar', VARIABLE_NODE, 'The species so far', { name: 'moonDraftSpecies' }) as object), comment: 'One adopt card on screen at a time: the draft is the card’s own.' },
+    logic('maColVar', VARIABLE_NODE, 'The colour so far', { name: 'moonDraftColour' }),
+    logic('maNameVar', VARIABLE_NODE, 'The name so far', { name: 'moonDraftName' }),
+    logic('maSetSp', SET_VARIABLE_NODE, 'Pick a species', { name: 'moonDraftSpecies' }),
+    logic('maSetCol', SET_VARIABLE_NODE, 'Pick a colour', { name: 'moonDraftColour' }),
+    logic('maEmpty', EXPRESSION_NODE, 'No name', { expression: "''" }),
+    logic('maClearName', SET_VARIABLE_NODE, 'Clear the name', { name: 'moonDraftName' }),
+    // Folded or open: open when there is no alien yet, or the child asked.
+    withStates('maOpen', 'Folded, or open', ['folded', 'open'], { open: { type: 'boolean', by: { folded: false, open: true } } }),
+    logic('maBodyShown', EXPRESSION_NODE, 'Open?', { expression: 'open === true || has !== true' }),
+    logic('maMoreShown', EXPRESSION_NODE, 'The fold button?', { expression: 'has === true && open !== true && full !== true' }),
+    logic('maTitleText', EXPRESSION_NODE, 'The first, or another', { expression: 'has === true ? more : first' }),
+    gate('maIsFree', 'Free, or ask first?'),
+    withStates('maAsk', 'The card, or the question', ['idle', 'asking'], { asking: { type: 'boolean', by: { idle: false, asking: true } } }),
+    logic('maDo', logicName('Logic/Moon act'), 'Adopt it', { action: 'adopt' }),
+    outputs('maOut', 'Adopted', [['app', 'object'], ['write', 'signal'], ['said', 'string'], ['draftSpecies', 'string'], ['draftColour', 'string']])
+  ],
+  connections: [
+    // Folded or open.
+    wire('maOpen', 'open', 'maBodyShown', 'open'),
+    wire('maIn', 'has', 'maBodyShown', 'has'),
+    wire('maBodyShown', 'result', 'maBody', 'mounted'),
+    wire('maOpen', 'open', 'maMoreShown', 'open'),
+    wire('maIn', 'has', 'maMoreShown', 'has'),
+    wire('maIn', 'full', 'maMoreShown', 'full'),
+    wire('maMoreShown', 'result', 'maMore', 'mounted'),
+    wire('maIn', 'another', 'maMore', 'label'),
+    wire('maMore', 'onClick', 'maOpen', 'to-open'),
+    wire('maCancel', 'onClick', 'maOpen', 'to-folded'),
+    wire('maIn', 'has', 'maCancel', 'mounted'),
+    wire('maIn', 'firstWord', 'maTitleText', 'first'),
+    wire('maIn', 'moreWord', 'maTitleText', 'more'),
+    wire('maIn', 'has', 'maTitleText', 'has'),
+    wire('maTitleText', 'result', 'maTitle', 'text'),
+    wire('maIn', 'cancelWord', 'maCancel', 'label'),
+    // The species: drawn in the colour being chosen; a tap picks it.
+    wire('maIn', 'species', 'maSpeciesEach', 'items'),
+    wire('maSpeciesEach', 'itemOutput-id', 'maSetSp', 'value'),
+    wire('maSpeciesEach', 'itemOutputSignal-tap', 'maSetSp', 'do'),
+    // The colour.
+    wire('maIn', 'colours', 'maColours', 'items'),
+    wire('maIn', 'colour', 'maColours', 'value'),
+    wire('maColours', 'value', 'maSetCol', 'value'),
+    wire('maColours', 'changed', 'maSetCol', 'do'),
+    // The name: the suggestion shows in the empty box, and an empty box adopts with it.
+    wire('maIn', 'nameWord', 'maNameLabel', 'text'),
+    wire('maIn', 'suggestedName', 'maName', 'placeholder'),
+    wire('maNameVar', 'value', 'maName', 'startValue'),
+    wire('maName', 'onTextChanged', 'maNameVar', 'value'),
+    // Adopt: free comes at once; a price asks first.
+    wire('maIn', 'button', 'maAdopt', 'label'),
+    wire('maIn', 'canAdopt', 'maAdopt', 'mounted'),
+    wire('maIn', 'free', 'maIsFree', 'condition'),
+    wire('maAdopt', 'onClick', 'maIsFree', 'eval'),
+    wire('maIsFree', 'ontrue', 'maDo', 'run'),
+    wire('maIsFree', 'onfalse', 'maAsk', 'to-asking'),
+    wire('maAsk', 'asking', 'maOver', 'mounted'),
+    wire('maAsk', 'asking', 'maConfirm', 'mounted'),
+    wire('maIn', 'askWord', 'maConfirm', 'title'),
+    wire('maIn', 'cost', 'maConfirm', 'cost'),
+    wire('maIn', 'purse', 'maConfirm', 'purse'),
+    ...moonConfirmWords('maIn', 'maConfirm'),
+    wire('maConfirm', 'no', 'maAsk', 'to-idle'),
+    wire('maConfirm', 'yes', 'maAsk', 'to-idle'),
+    wire('maConfirm', 'yes', 'maDo', 'run'),
+    wire('maIn', 'app', 'maDo', 'app'),
+    wire('maIn', 'profileId', 'maDo', 'profileId'),
+    wire('maSpVar', 'value', 'maDo', 'species'),
+    wire('maColVar', 'value', 'maDo', 'colour'),
+    wire('maNameVar', 'value', 'maDo', 'name'),
+    // Adopted: written, folded, and the name box emptied for the next one.
+    wire('maDo', 'app', 'maOut', 'app'),
+    wire('maDo', 'done', 'maOut', 'write'),
+    wire('maDo', 'said', 'maOut', 'said'),
+    wire('maDo', 'done', 'maOpen', 'to-folded'),
+    wire('maEmpty', 'result', 'maClearName', 'value'),
+    wire('maDo', 'done', 'maClearName', 'do'),
+    wire('maClearName', 'done', 'maName', 'set'),
+    wire('maSpVar', 'value', 'maOut', 'draftSpecies'),
+    wire('maColVar', 'value', 'maOut', 'draftColour')
+  ]
+};
+
+/**
+ * Pages/Moon — Richard's ruling 4 (2026-10-04): the prize is the moon. The child's aliens in a row (a tap chooses one), the
+ * chosen one close up with food and things to wear, and the adopt card. Reached from the hangar (the hangar is not a game, so
+ * the moon is not a Home card either: Richard, 2026-09-14), and back to it.
+ */
+const PAGE_MOON: Tpl007Component = {
+  path: 'Pages/Moon',
+  description: 'The moon (P113 REV-005): the player’s aliens as tiles, the chosen one close up (Moon/Care: feed it, dress it), and Moon/Adopt. Spends the same purse as the hangar. Reached from the hangar.',
+  instantiates: [C.header, C.moonTile, C.moonCare, C.moonAdopt, C.store, logicName('Logic/Active profile'), logicName('Logic/Translate words'), logicName('Logic/Moon view'), logicName('Logic/Moon act'), C.words],
+  repeats: { source: 'array', rowFields: MOON_ROW_FIELDS },
+  nodes: [
+    { id: 'mnPage', type: 'Page', label: 'Moon', parameters: { title: 'Rocket School', urlPath: 'moon' }, children: ['mnOuter'] },
+    group('mnOuter', 'The ground', 'mnPage', column({ alignItems: 'center' }), ['mnWrap']),
+    group('mnWrap', 'The screen', 'mnOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['mnHeader', 'mnTitle', 'mnPurse', 'mnAliens', 'mnCare', 'mnAdopt', 'mnBack']),
+    place('mnHeader', C.header, 'The bar', 'mnWrap', { showHome: true, showHangar: true }),
+    text('mnTitle', 'The Moon', 'mnWrap', '', T_SECTION),
+    text('mnPurse', 'The stars to spend', 'mnWrap', '', { ...T_LEAD, fontWeight: 'var(--font-bold)' }),
+    group('mnAliens', 'The aliens', 'mnWrap', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch' }), ['mnEach']),
+    logic('mnEach', FOR_EACH_NODE, 'One tile per alien', { template: C.moonTile, templateType: 'explicit' }),
+    place('mnCare', C.moonCare, 'The chosen alien', 'mnWrap'),
+    place('mnAdopt', C.moonAdopt, 'Adopt an alien', 'mnWrap'),
+    place('mnBack', BUTTON_NODE, 'Back to the hangar', 'mnWrap', { ...BTN_OUTLINE, label: 'Back to the hangar' }),
+    logic('mnStore', C.store, 'The store'),
+    logic('mnMe', logicName('Logic/Active profile'), 'Who is playing'),
+    logic('mnWords', C.words, 'The words'),
+    logic('mnT', logicName('Logic/Translate words'), 'In their language'),
+    logic('mnView', logicName('Logic/Moon view'), 'The moon, as they see it'),
+    logic('mnSelect', logicName('Logic/Moon act'), 'Choose an alien', { action: 'select' }),
+    logic('mnNoOne', EXPRESSION_NODE, 'Nobody signed in?', { expression: 'has === false' }),
+    gate('mnGuard', 'Send them to the profiles?'),
+    logic('mnGoProfiles', NAVIGATE_NODE, 'To the profiles', { router: ROUTER, target: C.pageProfiles }),
+    logic('mnGoHome', NAVIGATE_NODE, 'Home', { router: ROUTER, target: C.pageHome }),
+    logic('mnGoHangar', NAVIGATE_NODE, 'To the hangar', { router: ROUTER, target: C.pageHangar })
+  ],
+  connections: [
+    wire('mnStore', 'app', 'mnMe', 'app'),
+    wire('mnWords', 'words', 'mnT', 'words'),
+    wire('mnMe', 'lang', 'mnT', 'lang'),
+    wire('mnMe', 'hasProfile', 'mnNoOne', 'has'),
+    wire('mnNoOne', 'result', 'mnGuard', 'condition'),
+    wire('mnPage', 'didMount', 'mnGuard', 'eval'),
+    wire('mnGuard', 'ontrue', 'mnGoProfiles', 'navigate'),
+    ...headerWires('mn'),
+    wire('mnHeader', 'home', 'mnGoHome', 'navigate'),
+    wire('mnBack', 'onClick', 'mnGoHangar', 'navigate'),
+    wire('mnT', 'backToHangar', 'mnBack', 'label'),
+    wire('mnT', 'moonTitle', 'mnTitle', 'text'),
+    // The moon, as the player sees it, with the adopt card's draft drawn in.
+    wire('mnStore', 'app', 'mnView', 'app'),
+    wire('mnAdopt', 'draftSpecies', 'mnView', 'draftSpecies'),
+    wire('mnAdopt', 'draftColour', 'mnView', 'draftColour'),
+    wire('mnView', 'purseLine', 'mnPurse', 'text'),
+    wire('mnView', 'aliens', 'mnEach', 'items'),
+    wire('mnView', 'has', 'mnAliens', 'mounted'),
+    // A tap on a tile chooses that alien.
+    wire('mnStore', 'app', 'mnSelect', 'app'),
+    wire('mnMe', 'profileId', 'mnSelect', 'profileId'),
+    wire('mnEach', 'itemOutput-id', 'mnSelect', 'alienId'),
+    wire('mnEach', 'itemOutputSignal-tap', 'mnSelect', 'run'),
+    wire('mnSelect', 'app', 'mnStore', 'app'),
+    wire('mnSelect', 'done', 'mnStore', 'write'),
+    // Close up.
+    wire('mnView', 'has', 'mnCare', 'mounted'),
+    wire('mnStore', 'app', 'mnCare', 'app'),
+    wire('mnMe', 'profileId', 'mnCare', 'profileId'),
+    ...([['selName', 'name'], ['selSpecies', 'species'], ['selColour', 'colour'], ['selGrown', 'grown'], ['selHat', 'hat'], ['selEyes', 'eyes'], ['selNeck', 'neck'], ['selHappy', 'happy'], ['selLine', 'line'], ['favLine', 'favLine'], ['foods', 'foods'], ['wear', 'wear'], ['purse', 'purse']] as const).map(([from, to]) => wire('mnView', from, 'mnCare', to)),
+    wire('mnAdopt', 'said', 'mnCare', 'said'),
+    wire('mnT', 'moonFeed', 'mnCare', 'feedWord'),
+    wire('mnT', 'moonDress', 'mnCare', 'dressWord'),
+    wire('mnT', 'buyTitle', 'mnCare', 'buyTitle'),
+    wire('mnT', 'youHave', 'mnCare', 'haveWord'),
+    wire('mnT', 'itCosts', 'mnCare', 'costWord'),
+    wire('mnT', 'youllHave', 'mnCare', 'leftWord'),
+    wire('mnT', 'yesBuy', 'mnCare', 'yesWord'),
+    wire('mnT', 'noThanks', 'mnCare', 'noWord'),
+    wire('mnCare', 'app', 'mnStore', 'app'),
+    wire('mnCare', 'write', 'mnStore', 'write'),
+    // Adopt.
+    wire('mnStore', 'app', 'mnAdopt', 'app'),
+    wire('mnMe', 'profileId', 'mnAdopt', 'profileId'),
+    ...([['has', 'has'], ['full', 'full'], ['canAdopt', 'canAdopt'], ['adoptFree', 'free'], ['adoptCost', 'cost'], ['purse', 'purse'], ['adoptButton', 'button'], ['anotherLine', 'another'], ['suggestedName', 'suggestedName'], ['adoptSpecies', 'species'], ['adoptColours', 'colours'], ['draftColour', 'colour']] as const).map(([from, to]) => wire('mnView', from, 'mnAdopt', to)),
+    wire('mnT', 'moonAdoptFirst', 'mnAdopt', 'firstWord'),
+    wire('mnT', 'moonAdoptMore', 'mnAdopt', 'moreWord'),
+    wire('mnT', 'moonName', 'mnAdopt', 'nameWord'),
+    wire('mnT', 'moonAdoptQ', 'mnAdopt', 'askWord'),
+    wire('mnT', 'cancel', 'mnAdopt', 'cancelWord'),
+    wire('mnT', 'youHave', 'mnAdopt', 'haveWord'),
+    wire('mnT', 'itCosts', 'mnAdopt', 'costWord'),
+    wire('mnT', 'youllHave', 'mnAdopt', 'leftWord'),
+    wire('mnT', 'yesBuy', 'mnAdopt', 'yesWord'),
+    wire('mnT', 'noThanks', 'mnAdopt', 'noWord'),
+    wire('mnAdopt', 'app', 'mnStore', 'app'),
+    wire('mnAdopt', 'write', 'mnStore', 'write')
+  ]
+};
+
 /** Every component, in the order the plan creates them — a component before anything that places it. */
 export const TPL007_COMPONENTS: ReadonlyArray<Tpl007Component> = [
   ...DATA_COMPONENTS,
@@ -4246,6 +5281,8 @@ export const TPL007_COMPONENTS: ReadonlyArray<Tpl007Component> = [
   PROFILE_CARD,
   CHOICE,
   CHOICE_ROW,
+  // P113 REV-001: the chooser places Choice and Choice row, and the setups place it.
+  FOCUS_PICKER,
   GAME_CARD,
   // RKT-008: the header places the form (Edit player), so the form comes first.
   NEW_PLAYER_FORM,
@@ -4278,17 +5315,27 @@ export const TPL007_COMPONENTS: ReadonlyArray<Tpl007Component> = [
   MONSTER_LANE,
   MONSTER_SETUP,
   MONSTER_PLAY,
+  // P113 REV-002: the lists page's parts.
+  LIST_ROW,
+  LIST_EDITOR,
+  // P113 REV-005: the moon's parts.
+  MOON_TILE,
+  MOON_ITEM,
+  MOON_CARE,
+  MOON_ADOPT,
   PAGE_PROFILES,
   PAGE_HOME,
   PAGE_RACE,
   PAGE_HANGAR,
   PAGE_MERGE,
   PAGE_HUNT,
-  PAGE_MONSTER
+  PAGE_MONSTER,
+  PAGE_LISTS,
+  PAGE_MOON
 ];
 
 /** The library modules the door must find installed before authoring. */
 export const REQUIRED_MODULES = ['game-kit', 'keyboard-shortcuts'] as const;
 
 /** The pages, for the gate and the start page. */
-export const PAGES = [C.pageProfiles, C.pageHome, C.pageRace, C.pageHangar, C.pageMerge, C.pageHunt, C.pageMonster] as const;
+export const PAGES = [C.pageProfiles, C.pageHome, C.pageRace, C.pageHangar, C.pageMerge, C.pageHunt, C.pageMonster, C.pageLists, C.pageMoon] as const;

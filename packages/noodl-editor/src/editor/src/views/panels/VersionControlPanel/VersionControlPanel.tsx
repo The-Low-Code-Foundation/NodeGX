@@ -165,6 +165,7 @@ function BaseVersionControlPanel() {
         <HStack hasSpacing={1}>
           {git.Provider === 'github' && (
             <IconButton
+              ariaLabel="Open on GitHub"
               icon={IconName.ExternalLink}
               size={IconSize.Small}
               variant={IconButtonVariant.OpaqueOnHover}
@@ -177,6 +178,7 @@ function BaseVersionControlPanel() {
           )}
           {git.Provider && (
             <IconButton
+              ariaLabel="Open Git settings"
               ref={settingsButtonRef}
               icon={IconName.Setting}
               size={IconSize.Small}

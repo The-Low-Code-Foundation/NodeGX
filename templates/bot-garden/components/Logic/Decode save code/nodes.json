@@ -1,0 +1,121 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6814c238-2e5b-5315-8702-dc8317d19e3c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "decodesavecodeIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "code",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "decodesavecodeFn",
+      "type": "JavaScriptFunction",
+      "label": "Decode save code",
+      "parameters": {
+        "functionScript": "var { SAVE_VERSION, TRICK_KEYS, fromB64, modelOf } = Scripts.save;\nvar code = String(Inputs.code || '').trim();\nvar ok = false, error = '', migrated = false, model = null;\ntry {\n  if (code.indexOf('BG1.') !== 0) throw new Error('prefix');\n  var packed = JSON.parse(fromB64(code.slice(4)));\n  if (!packed || [1, 2, 3, 4, 5].indexOf(packed.v) === -1 || !Array.isArray(packed.p) || !Array.isArray(packed.f)) throw new Error('shape');\n  var v2 = packed.v >= 2, v3 = packed.v >= 3, v4 = packed.v >= 4, v5 = packed.v >= 5;\n  var family = { done: Array.isArray(packed.d) ? packed.d : [] };\n  var profiles = [];\n  for (var i = 0; i < packed.p.length; i++) {\n    var a = packed.p[i];\n    var tricks = {};\n    if (v2 && typeof a[9] === 'string') for (var k = 0; k < TRICK_KEYS.length; k++) tricks[TRICK_KEYS[k]] = a[9].charAt(k) === 'b' ? 'bloom' : a[9].charAt(k) === 's' ? 'sprout' : 'seed';\n    var plots = {};\n    if (v4 && Array.isArray(a[13])) for (var q = 0; q < a[13].length; q++) { var row = a[13][q]; if (Array.isArray(row) && row[0]) plots[String(row[0])] = { program: row[1], robotId: row[2], wonAt: row[3], live: v5 ? row[4] : undefined }; }\n    // IG-005: a robot is its id (session 3, and r1) or [id, kind, name, color, eye, hat] (a lent robot and its look).\n    var robots = [];\n    if (v4 && Array.isArray(a[14])) for (var rb = 0; rb < a[14].length; rb++) { var ro = a[14][rb]; robots.push(Array.isArray(ro) ? { id: ro[0], kind: ro[1], name: ro[2], color: ro[3], eye: ro[4], hat: ro[5], brain: v5 ? ro[6] : undefined, program: v5 ? ro[7] : undefined, helps: v5 ? ro[8] : undefined } : ro); }\n    var island = v4 ? { done: a[12], plots: plots, robots: robots } : v3 ? { done: a[12] } : family;\n    // P108 IW-007 (s5 base): row 18, her land (landOf in islandOf keeps only what is sound).\n    if (v5 && a[18] && typeof a[18] === 'object') island.land = a[18];\n    profiles.push({ id: a[0], name: a[1], band: a[2], lang: a[3], face: a[4], robot: { name: a[5], color: a[6], eye: a[7], hat: a[8] }, tricks: v2 ? tricks : undefined, stickers: v2 ? a[10] : [], hats: v2 ? a[11] : [], island: island, cardsSeen: v4 && Array.isArray(a[15]) ? a[15] : undefined, shells: v5 && Array.isArray(a[16]) ? { earned: a[16][0], spent: a[16][1] } : undefined, owned: v5 ? a[17] : undefined });\n  }\n  model = modelOf({ v: SAVE_VERSION, family: { id: packed.f[0], created: packed.f[1] }, profiles: profiles, island: { activeId: packed.a } });\n  migrated = !v5;\n  ok = true;\n} catch (e) {\n  error = 'bad';\n}\n// A bad code publishes NO model: a null on the page's store input would be written by the next writer that fires.\nif (ok) Outputs.model = model;\nOutputs.ok = ok;\nOutputs.error = error;\nOutputs.migrated = migrated;\nOutputs.profiles = model ? model.profiles.length : 0;\n",
+        "runOnChange-in-code": false,
+        "uses": "save.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-code",
+          "displayName": "code",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-model",
+          "displayName": "model",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "displayName": "error",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-migrated",
+          "displayName": "migrated",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-profiles",
+          "displayName": "profiles",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "decodesavecodeOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "error",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "migrated",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ok",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "profiles",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

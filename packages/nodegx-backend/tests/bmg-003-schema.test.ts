@@ -173,6 +173,28 @@ function engineSuite(engine: 'sqlite' | 'postgres', storageUrl: () => string | n
     expect((await admin({ action: 'dropColumn', table: 'Thing', column: 'status' })).json.dropped).toBe(true);
   });
 
+  it('P116-ONT-007-renamecolumn: a rename is refused like a drop, naming the index or the rule that reads the field', async () => {
+    // A rename that went through left the rule naming a field that was gone, still "built", and the same
+    // declaration pushed again was refused. ONT-007's planner takes the rule off first; so must anyone else.
+    const indexed = await admin({ action: 'renameColumn', table: 'Thing', oldName: 'title', newName: 'heading' });
+    expect(indexed.status).toBe(409);
+    expect(indexed.json.error).toMatch(/Cannot rename "title": the index idx_Thing_title \(title, unique\) reads it\. Drop that index first\./);
+    expect((await admin({ action: 'setChecks', table: 'Thing', checks: [{ field: 'price', min: 0 }] })).status).toBe(200);
+    const ruled = await admin({ action: 'renameColumn', table: 'Thing', oldName: 'price', newName: 'cost' });
+    expect(ruled.status).toBe(409);
+    expect(ruled.json.error).toMatch(/Cannot rename "price": the rule "price is at least 0" reads it\. Remove that rule first\./);
+    const names = async () => ((await table('Thing')).columns as Array<{ name: string }>).map((c) => c.name);
+    expect(await names()).toEqual(expect.arrayContaining(['title', 'price']));
+    expect(await names()).not.toEqual(expect.arrayContaining(['heading']));
+    // The rule still reads true: pushed again as it stands, it is accepted.
+    expect((await admin({ action: 'setChecks', table: 'Thing', checks: [{ field: 'price', min: 0 }] })).status).toBe(200);
+    // With the rule taken off, the rename goes through (and back, for the cases after this one).
+    expect((await admin({ action: 'setChecks', table: 'Thing', checks: [] })).status).toBe(200);
+    expect((await admin({ action: 'renameColumn', table: 'Thing', oldName: 'price', newName: 'cost' })).status).toBe(200);
+    expect(await names()).toContain('cost');
+    expect((await admin({ action: 'renameColumn', table: 'Thing', oldName: 'cost', newName: 'price' })).status).toBe(200);
+  });
+
   it('AC4: refuses the sign-in columns and the backend’s own account columns on _User, and the four system fields anywhere', async () => {
     for (const column of ['email', 'username']) {
       const res = await admin({ action: 'dropColumn', table: '_User', column });

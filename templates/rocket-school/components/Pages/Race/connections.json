@@ -167,18 +167,6 @@
     },
     {
       "fromId": "rcT",
-      "fromProperty": "mathsMode",
-      "toId": "rcSetup",
-      "toProperty": "mathsWord"
-    },
-    {
-      "fromId": "rcT",
-      "fromProperty": "typingMode",
-      "toId": "rcSetup",
-      "toProperty": "typingWord"
-    },
-    {
-      "fromId": "rcT",
       "fromProperty": "onePlayer",
       "toId": "rcSetup",
       "toProperty": "onePlayerWord"
@@ -358,6 +346,18 @@
       "toProperty": "chargingWord"
     },
     {
+      "fromId": "rcT",
+      "fromProperty": "turboArmed",
+      "toId": "rcPlay",
+      "toProperty": "armedWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "turboArmedHint",
+      "toId": "rcPlay",
+      "toProperty": "armedHintWord"
+    },
+    {
       "fromId": "rcCurriculum",
       "fromProperty": "skills",
       "toId": "rcPlay",
@@ -374,6 +374,192 @@
       "fromProperty": "mode",
       "toId": "rcPlay",
       "toProperty": "mode"
+    },
+    {
+      "fromId": "rcSetup",
+      "fromProperty": "focus",
+      "toId": "rcPlay",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "rcSetup",
+      "fromProperty": "customSet",
+      "toId": "rcPlay",
+      "toProperty": "customSet"
+    },
+    {
+      "fromId": "rcSetup",
+      "fromProperty": "customSetId",
+      "toId": "rcPlay",
+      "toProperty": "customSetId"
+    },
+    {
+      "fromId": "rcSetup",
+      "fromProperty": "customSetBoth",
+      "toId": "rcPlay",
+      "toProperty": "customSetBoth"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "everythingAtLevel",
+      "toId": "rcSetup",
+      "toProperty": "everythingWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "skillsCount",
+      "toId": "rcSetup",
+      "toProperty": "countWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "myList",
+      "toId": "rcSetup",
+      "toProperty": "listWord"
+    },
+    {
+      "fromId": "rcCurriculum",
+      "fromProperty": "skills",
+      "toId": "rcSetup",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "sets",
+      "toId": "rcSetup",
+      "toProperty": "sets"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "level",
+      "toId": "rcSetup",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "lang",
+      "toId": "rcSetup",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "focusSubject",
+      "toId": "rcSetup",
+      "toProperty": "subject0"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "focusSkills",
+      "toId": "rcSetup",
+      "toProperty": "skills0"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "practising",
+      "toId": "rcSetup",
+      "toProperty": "practisingWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "changeFocus",
+      "toId": "rcSetup",
+      "toProperty": "changeWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "whatToPractise",
+      "toId": "rcSetup",
+      "toProperty": "titleWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "pickSubject",
+      "toId": "rcSetup",
+      "toProperty": "subjectWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "pickTopic",
+      "toId": "rcSetup",
+      "toProperty": "topicWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "pickSkills",
+      "toId": "rcSetup",
+      "toProperty": "skillsHint"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "tickAll",
+      "toId": "rcSetup",
+      "toProperty": "allWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "tickNone",
+      "toId": "rcSetup",
+      "toProperty": "noneWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "saveFocus",
+      "toId": "rcSetup",
+      "toProperty": "saveWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "cancel",
+      "toId": "rcSetup",
+      "toProperty": "cancelWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "myLists",
+      "toId": "rcSetup",
+      "toProperty": "listsWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "editLists",
+      "toId": "rcSetup",
+      "toProperty": "editListsWord"
+    },
+    {
+      "fromId": "rcT",
+      "fromProperty": "noListsYet",
+      "toId": "rcSetup",
+      "toProperty": "noListsWord"
+    },
+    {
+      "fromId": "rcStore",
+      "fromProperty": "app",
+      "toId": "rcSetup",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "rcMe",
+      "fromProperty": "profileId",
+      "toId": "rcSetup",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rcSetup",
+      "fromProperty": "app",
+      "toId": "rcStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "rcSetup",
+      "fromProperty": "write",
+      "toId": "rcStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "rcSetup",
+      "fromProperty": "editLists",
+      "toId": "rcGoLists",
+      "toProperty": "navigate"
     },
     {
       "fromId": "rcSetup",

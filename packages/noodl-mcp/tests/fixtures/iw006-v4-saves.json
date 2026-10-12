@@ -1,0 +1,974 @@
+{
+  "note": "v4 save codes written by the P106/P108 v4 encoder (cg002Scripts.ts at 98f5d92fe, SAVE_VERSION 4), one family per band; `model` is the v4 model each code was encoded from. The IW-006 gate decodes each with the v5 decoder: every profile, done request, hat, sticker, pinned plot, lent robot and card seen survives, and it says migrated.",
+  "band1": {
+    "code": "BG1.eyJ2Ijo0LCJmIjpbImZtdW9qYnZiazFvYSIsMTc5MDc5ODczNDkyOF0sInAiOltbInBtdW9qYnZiazVmZCIsIkzDqWEiLDEsImZyIiwiZjIiLCJQaXAiLCIjRkY3QTU5Iiwicm91bmQiLCJub25lIiwiYi0tLS0tLSIsWyJ0dWxpcCJdLFtdLFsidHVsaXAtZG9vciJdLFtbInR1bGlwLWRvb3IiLFt7ImlkIjoxMSwidCI6InBpY2sifSx7ImlkIjoxMiwidCI6ImxlZnQifSx7ImlkIjoxMywidCI6ImZpbGwifSx7ImlkIjoxNCwidCI6ImxlZnQifSx7ImlkIjoxNSwidCI6ImZ3ZCJ9LHsiaWQiOjE2LCJ0IjoiZndkIn0seyJpZCI6MTcsInQiOiJ3YXRlciJ9LHsiaWQiOjE4LCJ0Ijoid2F0ZXIifSx7ImlkIjoxOSwidCI6IndhdGVyIn1dLCJyMSIsMTc1OTIwMDc4MDAwMF1dLFsicjEiXV1dLCJhIjoicG11b2pidmJrNWZkIn0",
+    "model": {
+      "v": 4,
+      "family": {
+        "id": "fmuojbvbk1oa",
+        "created": 1790798734928
+      },
+      "profiles": [
+        {
+          "id": "pmuojbvbk5fd",
+          "name": "Léa",
+          "band": 1,
+          "lang": "fr",
+          "face": "f2",
+          "robot": {
+            "name": "Pip",
+            "color": "#FF7A59",
+            "eye": "round",
+            "hat": "none"
+          },
+          "tricks": {
+            "n1": "bloom",
+            "n2": "seed",
+            "n3": "seed",
+            "n4": "seed",
+            "n5": "seed",
+            "n6": "seed",
+            "n7": "seed"
+          },
+          "stickers": [
+            "tulip"
+          ],
+          "hats": [],
+          "island": {
+            "done": [
+              "tulip-door"
+            ],
+            "plots": {
+              "tulip-door": {
+                "program": [
+                  {
+                    "id": 11,
+                    "t": "pick"
+                  },
+                  {
+                    "id": 12,
+                    "t": "left"
+                  },
+                  {
+                    "id": 13,
+                    "t": "fill"
+                  },
+                  {
+                    "id": 14,
+                    "t": "left"
+                  },
+                  {
+                    "id": 15,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 16,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 17,
+                    "t": "water"
+                  },
+                  {
+                    "id": 18,
+                    "t": "water"
+                  },
+                  {
+                    "id": 19,
+                    "t": "water"
+                  }
+                ],
+                "robotId": "r1",
+                "wonAt": 1759200780000
+              }
+            },
+            "robots": [
+              {
+                "id": "r1"
+              }
+            ]
+          }
+        }
+      ],
+      "island": {
+        "activeId": "pmuojbvbk5fd",
+        "done": [
+          "tulip-door"
+        ],
+        "plots": {
+          "tulip-door": {
+            "program": [
+              {
+                "id": 11,
+                "t": "pick"
+              },
+              {
+                "id": 12,
+                "t": "left"
+              },
+              {
+                "id": 13,
+                "t": "fill"
+              },
+              {
+                "id": 14,
+                "t": "left"
+              },
+              {
+                "id": 15,
+                "t": "fwd"
+              },
+              {
+                "id": 16,
+                "t": "fwd"
+              },
+              {
+                "id": 17,
+                "t": "water"
+              },
+              {
+                "id": 18,
+                "t": "water"
+              },
+              {
+                "id": 19,
+                "t": "water"
+              }
+            ],
+            "robotId": "r1",
+            "wonAt": 1759200780000
+          }
+        },
+        "robots": [
+          {
+            "id": "r1"
+          }
+        ]
+      }
+    }
+  },
+  "band2": {
+    "code": "BG1.eyJ2Ijo0LCJmIjpbImZtdW9qYnZiZzlpdyIsMTc5MDc5ODczNDkyNF0sInAiOltbInBtdW9qYnZiZ2JsZyIsIk5vYSIsMiwiZnIiLCJmMyIsIkJpcCIsIiMzRkE3RDYiLCJoYXBweSIsIm5vbmUiLCJiYmJiLWJiIixbInR1bGlwIiwibm90ZSIsImdub21lIiwiY2FuKyIsInNlZWRzIiwiYmFza2V0KyIsInBhdyIsImJvb3RzIiwiYmFza2V0Il0sWyJjYXAiLCJjcm93biIsInN1biJdLFsidHVsaXAtZG9vciIsInBhdGgtcG9zdGJveCIsImJvd2wtaWYiLCJtYW1pZS1ub3RlIiwicm93cy10cmljayIsInBhdGgtc3RvbmVzIiwid2FsbC11bnRpbCIsInR1bGlwcy10aHJlZSIsImVnZ3MtY291bnQiXSxbWyJib3dsLWlmIixbeyJpZCI6MzgsInQiOiJsZWZ0In0seyJpZCI6MzksInQiOiJwaWNrIn0seyJpZCI6NDAsInQiOiJwaWNrIn0seyJpZCI6NDEsInQiOiJyaWdodCJ9LHsiaWQiOjQ4LCJ0IjoicmVwZWF0IiwibiI6MywiYm9keSI6W3siaWQiOjQyLCJ0IjoiZndkIn0seyJpZCI6NDMsInQiOiJmd2QifSx7ImlkIjo0NCwidCI6ImxlZnQifSx7ImlkIjo0NiwidCI6ImlmIiwic2xvdHMiOnsic2Vuc29yIjoiYm93bF9lbXB0eSJ9LCJib2R5IjpbeyJpZCI6NDUsInQiOiJwdXQifV19LHsiaWQiOjQ3LCJ0IjoicmlnaHQifV19XSwiIiwxNzU5MjAwMTgwMDAwXSxbImVnZ3MtY291bnQiLFt7ImlkIjo3NCwidCI6InVudGlsIiwic2xvdHMiOnsiY29uZCI6eyJvcCI6ImNtcCIsImNtcCI6ImVxIiwiYSI6eyJvcCI6ImNvdW50Iiwid2hhdCI6ImVnZyIsInRoaW5nIjp7ImlkIjoiYmFza2V0Iiwia2luZCI6ImJhc2tldCIsIngiOjYsInkiOjF9fSwiYiI6eyJvcCI6Im51bSIsIm4iOjR9fX0sImJvZHkiOlt7ImlkIjo3MCwidCI6ImdvX25lYXJlc3QiLCJzbG90cyI6eyJraW5kIjoiZWdnIn19LHsiaWQiOjcxLCJ0IjoicGljayJ9LHsiaWQiOjcyLCJ0IjoiZ29fdG8iLCJzbG90cyI6eyJ0aGluZyI6eyJpZCI6ImJhc2tldCIsImtpbmQiOiJiYXNrZXQiLCJ4Ijo2LCJ5IjoxfX19LHsiaWQiOjczLCJ0IjoicHV0In1dfV0sInBvY2tldCIsMTc1OTIwMDU0MDAwMF0sWyJtYW1pZS1ub3RlIixbeyJpZCI6OTMsInQiOiJvbGl2ZTpyZWFkIn0seyJpZCI6OTQsInQiOiJmaWxsIn0seyJpZCI6OTcsInQiOiJpZiIsInNsb3RzIjp7InNlbnNvciI6Im9saXZlX3JlYWQ6cmVkX3R1bGlwIn0sImJvZHkiOlt7ImlkIjo5NSwidCI6ImxlZnQifV0sImVsc2UiOlt7ImlkIjo5NiwidCI6InJpZ2h0In1dfSx7ImlkIjoxMDIsInQiOiJyZXBlYXQiLCJuIjozLCJib2R5IjpbeyJpZCI6OTgsInQiOiJmd2QifSx7ImlkIjo5OSwidCI6ImxlZnQifSx7ImlkIjoxMDAsInQiOiJ3YXRlciJ9LHsiaWQiOjEwMSwidCI6InJpZ2h0In1dfV0sIiIsMTc1OTIwMDI0MDAwMF0sWyJwYXRoLXBvc3Rib3giLFt7ImlkIjoxLCJ0IjoiZndkIn0seyJpZCI6MiwidCI6ImZ3ZCJ9LHsiaWQiOjMsInQiOiJsZWZ0In0seyJpZCI6NCwidCI6InBpY2sifSx7ImlkIjo1LCJ0IjoicmlnaHQifSx7ImlkIjo2LCJ0IjoiZndkIn0seyJpZCI6NywidCI6ImZ3ZCJ9LHsiaWQiOjgsInQiOiJmd2QifSx7ImlkIjo5LCJ0IjoiZndkIn0seyJpZCI6MTAsInQiOiJwdXQifV0sIiIsMTc1OTIwMDEyMDAwMF0sWyJwYXRoLXN0b25lcyIsW3siaWQiOjM3LCJ0IjoicmVwZWF0IiwibiI6NCwiYm9keSI6W3siaWQiOjMxLCJ0IjoiZ29fbmVhcmVzdCIsInNsb3RzIjp7ImtpbmQiOiJyb2NrIn19LHsiaWQiOjMzLCJ0IjoicmVwZWF0IiwibiI6NCwiYm9keSI6W3siaWQiOjMyLCJ0IjoicGljayJ9XX0seyJpZCI6MzQsInQiOiJnb19uZWFyZXN0Iiwic2xvdHMiOnsia2luZCI6InNpdGUifX0seyJpZCI6MzYsInQiOiJyZXBlYXQiLCJuIjo0LCJib2R5IjpbeyJpZCI6MzUsInQiOiJwdXQifV19XX1dLCJjb2JibGUiLDE3NTkyMDA2MDAwMDBdLFsicm93cy10cmljayIsW3siaWQiOjgzLCJ0IjoidHJpY2siLCJzbG90cyI6eyJuYW1lIjoicm93In0sImJvZHkiOlt7ImlkIjo3NSwidCI6ImZpbGwifSx7ImlkIjo3NiwidCI6ImxlZnQifSx7ImlkIjo3NywidCI6ImxlZnQifSx7ImlkIjo4MiwidCI6InJlcGVhdCIsIm4iOjMsImJvZHkiOlt7ImlkIjo3OCwidCI6ImZ3ZCJ9LHsiaWQiOjc5LCJ0IjoibGVmdCJ9LHsiaWQiOjgwLCJ0Ijoid2F0ZXIifSx7ImlkIjo4MSwidCI6InJpZ2h0In1dfV19LHsiaWQiOjg0LCJ0IjoiZG8iLCJzbG90cyI6eyJuYW1lIjoicm93In19LHsiaWQiOjg1LCJ0IjoiZG8iLCJzbG90cyI6eyJuYW1lIjoicm93In19XSwiIiwxNzU5MjAwMzAwMDAwXSxbInR1bGlwLWRvb3IiLFt7ImlkIjoxMSwidCI6InBpY2sifSx7ImlkIjoxMiwidCI6ImxlZnQifSx7ImlkIjoxMywidCI6ImZpbGwifSx7ImlkIjoxNCwidCI6ImxlZnQifSx7ImlkIjoxNSwidCI6ImZ3ZCJ9LHsiaWQiOjE2LCJ0IjoiZndkIn0seyJpZCI6MTcsInQiOiJ3YXRlciJ9LHsiaWQiOjE4LCJ0Ijoid2F0ZXIifSx7ImlkIjoxOSwidCI6IndhdGVyIn1dLCIiLDE3NTkyMDAwNjAwMDBdLFsidHVsaXBzLXRocmVlIixbeyJpZCI6MzAsInQiOiJyZXBlYXQiLCJuIjozLCJib2R5IjpbeyJpZCI6MjAsInQiOiJmaWxsIn0seyJpZCI6MjEsInQiOiJsZWZ0In0seyJpZCI6MjIsInQiOiJsZWZ0In0seyJpZCI6MjMsInQiOiJmd2QifSx7ImlkIjoyNSwidCI6InJlcGVhdCIsIm4iOjMsImJvZHkiOlt7ImlkIjoyNCwidCI6IndhdGVyIn1dfSx7ImlkIjoyNiwidCI6InJpZ2h0In0seyJpZCI6MjcsInQiOiJmd2QifSx7ImlkIjoyOCwidCI6InJpZ2h0In0seyJpZCI6MjksInQiOiJmd2QifV19XSwicjEiLDE3NTkyMDA0ODAwMDBdLFsid2FsbC11bnRpbCIsW3siaWQiOjU4LCJ0IjoidW50aWwiLCJzbG90cyI6eyJzZW5zb3IiOiJ3YWxsX2FoZWFkIn0sImJvZHkiOlt7ImlkIjo1NywidCI6ImZ3ZCJ9XX0seyJpZCI6NTksInQiOiJsZWZ0In0seyJpZCI6NjAsInQiOiJwaWNrIn0seyJpZCI6NjEsInQiOiJsZWZ0In0seyJpZCI6NjMsInQiOiJ1bnRpbCIsInNsb3RzIjp7InNlbnNvciI6IndhbGxfYWhlYWQifSwiYm9keSI6W3siaWQiOjYyLCJ0IjoiZndkIn1dfSx7ImlkIjo2NCwidCI6InB1dCJ9XSwiIiwxNzU5MjAwNDIwMDAwXV0sWyJyMSIsWyJjb2JibGUiLCJjb2JibGUiLCJDYWlsbG91IiwiIzdBOENBMyIsInJvdW5kIiwibm9uZSJdLFsicG9ja2V0IiwicG9ja2V0IiwiUG9jaGUiLCIjRkZCMzQ3Iiwicm91bmQiLCJub25lIl0sWyJlY2hvIiwiZWNobyIsIsOJY2hvIiwiIzhGNkJGRiIsInJvdW5kIiwibm9uZSJdXSxbImZ3ZCIsInJlcGVhdCIsImdvX25lYXJlc3QiXV0sWyJwbXVvamJ2Ymp6b3AiLCJTYW0iLDIsImVuIiwiZjEiLCJQaXAiLCIjRkY3QTU5Iiwicm91bmQiLCJub25lIiwiYi0tLS0tLSIsWyJ0dWxpcCJdLFsiY2FwIl0sWyJ0dWxpcC1kb29yIiwicGF0aC1wb3N0Ym94Il0sW1sicGF0aC1wb3N0Ym94IixbeyJpZCI6MSwidCI6ImZ3ZCJ9LHsiaWQiOjIsInQiOiJmd2QifSx7ImlkIjozLCJ0IjoibGVmdCJ9LHsiaWQiOjQsInQiOiJwaWNrIn0seyJpZCI6NSwidCI6InJpZ2h0In0seyJpZCI6NiwidCI6ImZ3ZCJ9LHsiaWQiOjcsInQiOiJmd2QifSx7ImlkIjo4LCJ0IjoiZndkIn0seyJpZCI6OSwidCI6ImZ3ZCJ9LHsiaWQiOjEwLCJ0IjoicHV0In1dLCJyMSIsMTc1OTIwMDcyMDAwMF0sWyJ0dWxpcC1kb29yIixbeyJpZCI6MTEsInQiOiJwaWNrIn0seyJpZCI6MTIsInQiOiJsZWZ0In0seyJpZCI6MTMsInQiOiJmaWxsIn0seyJpZCI6MTQsInQiOiJsZWZ0In0seyJpZCI6MTUsInQiOiJmd2QifSx7ImlkIjoxNiwidCI6ImZ3ZCJ9LHsiaWQiOjE3LCJ0Ijoid2F0ZXIifSx7ImlkIjoxOCwidCI6IndhdGVyIn0seyJpZCI6MTksInQiOiJ3YXRlciJ9XSwiIiwxNzU5MjAwNjYwMDAwXV0sWyJyMSIsWyJjb2JibGUiLCJjb2JibGUiLCJDb2JibGUiLCIjN0E4Q0EzIiwicm91bmQiLCJub25lIl1dXV0sImEiOiJwbXVvamJ2Ymp6b3AifQ",
+    "model": {
+      "v": 4,
+      "family": {
+        "id": "fmuojbvbg9iw",
+        "created": 1790798734924
+      },
+      "profiles": [
+        {
+          "id": "pmuojbvbgblg",
+          "name": "Noa",
+          "band": 2,
+          "lang": "fr",
+          "face": "f3",
+          "robot": {
+            "name": "Bip",
+            "color": "#3FA7D6",
+            "eye": "happy",
+            "hat": "none"
+          },
+          "tricks": {
+            "n1": "bloom",
+            "n2": "bloom",
+            "n3": "bloom",
+            "n4": "bloom",
+            "n5": "seed",
+            "n6": "bloom",
+            "n7": "bloom"
+          },
+          "stickers": [
+            "tulip",
+            "note",
+            "gnome",
+            "can+",
+            "seeds",
+            "basket+",
+            "paw",
+            "boots",
+            "basket"
+          ],
+          "hats": [
+            "cap",
+            "crown",
+            "sun"
+          ],
+          "island": {
+            "done": [
+              "tulip-door",
+              "path-postbox",
+              "bowl-if",
+              "mamie-note",
+              "rows-trick",
+              "path-stones",
+              "wall-until",
+              "tulips-three",
+              "eggs-count"
+            ],
+            "plots": {
+              "tulip-door": {
+                "program": [
+                  {
+                    "id": 11,
+                    "t": "pick"
+                  },
+                  {
+                    "id": 12,
+                    "t": "left"
+                  },
+                  {
+                    "id": 13,
+                    "t": "fill"
+                  },
+                  {
+                    "id": 14,
+                    "t": "left"
+                  },
+                  {
+                    "id": 15,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 16,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 17,
+                    "t": "water"
+                  },
+                  {
+                    "id": 18,
+                    "t": "water"
+                  },
+                  {
+                    "id": 19,
+                    "t": "water"
+                  }
+                ],
+                "robotId": "",
+                "wonAt": 1759200060000
+              },
+              "path-postbox": {
+                "program": [
+                  {
+                    "id": 1,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 2,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 3,
+                    "t": "left"
+                  },
+                  {
+                    "id": 4,
+                    "t": "pick"
+                  },
+                  {
+                    "id": 5,
+                    "t": "right"
+                  },
+                  {
+                    "id": 6,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 7,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 8,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 9,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 10,
+                    "t": "put"
+                  }
+                ],
+                "robotId": "",
+                "wonAt": 1759200120000
+              },
+              "bowl-if": {
+                "program": [
+                  {
+                    "id": 38,
+                    "t": "left"
+                  },
+                  {
+                    "id": 39,
+                    "t": "pick"
+                  },
+                  {
+                    "id": 40,
+                    "t": "pick"
+                  },
+                  {
+                    "id": 41,
+                    "t": "right"
+                  },
+                  {
+                    "id": 48,
+                    "t": "repeat",
+                    "n": 3,
+                    "body": [
+                      {
+                        "id": 42,
+                        "t": "fwd"
+                      },
+                      {
+                        "id": 43,
+                        "t": "fwd"
+                      },
+                      {
+                        "id": 44,
+                        "t": "left"
+                      },
+                      {
+                        "id": 46,
+                        "t": "if",
+                        "slots": {
+                          "sensor": "bowl_empty"
+                        },
+                        "body": [
+                          {
+                            "id": 45,
+                            "t": "put"
+                          }
+                        ]
+                      },
+                      {
+                        "id": 47,
+                        "t": "right"
+                      }
+                    ]
+                  }
+                ],
+                "robotId": "",
+                "wonAt": 1759200180000
+              },
+              "mamie-note": {
+                "program": [
+                  {
+                    "id": 93,
+                    "t": "olive:read"
+                  },
+                  {
+                    "id": 94,
+                    "t": "fill"
+                  },
+                  {
+                    "id": 97,
+                    "t": "if",
+                    "slots": {
+                      "sensor": "olive_read:red_tulip"
+                    },
+                    "body": [
+                      {
+                        "id": 95,
+                        "t": "left"
+                      }
+                    ],
+                    "else": [
+                      {
+                        "id": 96,
+                        "t": "right"
+                      }
+                    ]
+                  },
+                  {
+                    "id": 102,
+                    "t": "repeat",
+                    "n": 3,
+                    "body": [
+                      {
+                        "id": 98,
+                        "t": "fwd"
+                      },
+                      {
+                        "id": 99,
+                        "t": "left"
+                      },
+                      {
+                        "id": 100,
+                        "t": "water"
+                      },
+                      {
+                        "id": 101,
+                        "t": "right"
+                      }
+                    ]
+                  }
+                ],
+                "robotId": "",
+                "wonAt": 1759200240000
+              },
+              "rows-trick": {
+                "program": [
+                  {
+                    "id": 83,
+                    "t": "trick",
+                    "slots": {
+                      "name": "row"
+                    },
+                    "body": [
+                      {
+                        "id": 75,
+                        "t": "fill"
+                      },
+                      {
+                        "id": 76,
+                        "t": "left"
+                      },
+                      {
+                        "id": 77,
+                        "t": "left"
+                      },
+                      {
+                        "id": 82,
+                        "t": "repeat",
+                        "n": 3,
+                        "body": [
+                          {
+                            "id": 78,
+                            "t": "fwd"
+                          },
+                          {
+                            "id": 79,
+                            "t": "left"
+                          },
+                          {
+                            "id": 80,
+                            "t": "water"
+                          },
+                          {
+                            "id": 81,
+                            "t": "right"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": 84,
+                    "t": "do",
+                    "slots": {
+                      "name": "row"
+                    }
+                  },
+                  {
+                    "id": 85,
+                    "t": "do",
+                    "slots": {
+                      "name": "row"
+                    }
+                  }
+                ],
+                "robotId": "",
+                "wonAt": 1759200300000
+              },
+              "path-stones": {
+                "program": [
+                  {
+                    "id": 37,
+                    "t": "repeat",
+                    "n": 4,
+                    "body": [
+                      {
+                        "id": 31,
+                        "t": "go_nearest",
+                        "slots": {
+                          "kind": "rock"
+                        }
+                      },
+                      {
+                        "id": 33,
+                        "t": "repeat",
+                        "n": 4,
+                        "body": [
+                          {
+                            "id": 32,
+                            "t": "pick"
+                          }
+                        ]
+                      },
+                      {
+                        "id": 34,
+                        "t": "go_nearest",
+                        "slots": {
+                          "kind": "site"
+                        }
+                      },
+                      {
+                        "id": 36,
+                        "t": "repeat",
+                        "n": 4,
+                        "body": [
+                          {
+                            "id": 35,
+                            "t": "put"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "robotId": "cobble",
+                "wonAt": 1759200600000
+              },
+              "wall-until": {
+                "program": [
+                  {
+                    "id": 58,
+                    "t": "until",
+                    "slots": {
+                      "sensor": "wall_ahead"
+                    },
+                    "body": [
+                      {
+                        "id": 57,
+                        "t": "fwd"
+                      }
+                    ]
+                  },
+                  {
+                    "id": 59,
+                    "t": "left"
+                  },
+                  {
+                    "id": 60,
+                    "t": "pick"
+                  },
+                  {
+                    "id": 61,
+                    "t": "left"
+                  },
+                  {
+                    "id": 63,
+                    "t": "until",
+                    "slots": {
+                      "sensor": "wall_ahead"
+                    },
+                    "body": [
+                      {
+                        "id": 62,
+                        "t": "fwd"
+                      }
+                    ]
+                  },
+                  {
+                    "id": 64,
+                    "t": "put"
+                  }
+                ],
+                "robotId": "",
+                "wonAt": 1759200420000
+              },
+              "tulips-three": {
+                "program": [
+                  {
+                    "id": 30,
+                    "t": "repeat",
+                    "n": 3,
+                    "body": [
+                      {
+                        "id": 20,
+                        "t": "fill"
+                      },
+                      {
+                        "id": 21,
+                        "t": "left"
+                      },
+                      {
+                        "id": 22,
+                        "t": "left"
+                      },
+                      {
+                        "id": 23,
+                        "t": "fwd"
+                      },
+                      {
+                        "id": 25,
+                        "t": "repeat",
+                        "n": 3,
+                        "body": [
+                          {
+                            "id": 24,
+                            "t": "water"
+                          }
+                        ]
+                      },
+                      {
+                        "id": 26,
+                        "t": "right"
+                      },
+                      {
+                        "id": 27,
+                        "t": "fwd"
+                      },
+                      {
+                        "id": 28,
+                        "t": "right"
+                      },
+                      {
+                        "id": 29,
+                        "t": "fwd"
+                      }
+                    ]
+                  }
+                ],
+                "robotId": "r1",
+                "wonAt": 1759200480000
+              },
+              "eggs-count": {
+                "program": [
+                  {
+                    "id": 74,
+                    "t": "until",
+                    "slots": {
+                      "cond": {
+                        "op": "cmp",
+                        "cmp": "eq",
+                        "a": {
+                          "op": "count",
+                          "what": "egg",
+                          "thing": {
+                            "id": "basket",
+                            "kind": "basket",
+                            "x": 6,
+                            "y": 1
+                          }
+                        },
+                        "b": {
+                          "op": "num",
+                          "n": 4
+                        }
+                      }
+                    },
+                    "body": [
+                      {
+                        "id": 70,
+                        "t": "go_nearest",
+                        "slots": {
+                          "kind": "egg"
+                        }
+                      },
+                      {
+                        "id": 71,
+                        "t": "pick"
+                      },
+                      {
+                        "id": 72,
+                        "t": "go_to",
+                        "slots": {
+                          "thing": {
+                            "id": "basket",
+                            "kind": "basket",
+                            "x": 6,
+                            "y": 1
+                          }
+                        }
+                      },
+                      {
+                        "id": 73,
+                        "t": "put"
+                      }
+                    ]
+                  }
+                ],
+                "robotId": "pocket",
+                "wonAt": 1759200540000
+              }
+            },
+            "robots": [
+              {
+                "id": "r1"
+              },
+              {
+                "id": "cobble",
+                "kind": "cobble",
+                "name": "Caillou",
+                "color": "#7A8CA3",
+                "eye": "round",
+                "hat": "none"
+              },
+              {
+                "id": "pocket",
+                "kind": "pocket",
+                "name": "Poche",
+                "color": "#FFB347",
+                "eye": "round",
+                "hat": "none"
+              },
+              {
+                "id": "echo",
+                "kind": "echo",
+                "name": "Écho",
+                "color": "#8F6BFF",
+                "eye": "round",
+                "hat": "none"
+              }
+            ]
+          },
+          "cardsSeen": [
+            "fwd",
+            "repeat",
+            "go_nearest"
+          ]
+        },
+        {
+          "id": "pmuojbvbjzop",
+          "name": "Sam",
+          "band": 2,
+          "lang": "en",
+          "face": "f1",
+          "robot": {
+            "name": "Pip",
+            "color": "#FF7A59",
+            "eye": "round",
+            "hat": "none"
+          },
+          "tricks": {
+            "n1": "bloom",
+            "n2": "seed",
+            "n3": "seed",
+            "n4": "seed",
+            "n5": "seed",
+            "n6": "seed",
+            "n7": "seed"
+          },
+          "stickers": [
+            "tulip"
+          ],
+          "hats": [
+            "cap"
+          ],
+          "island": {
+            "done": [
+              "tulip-door",
+              "path-postbox"
+            ],
+            "plots": {
+              "tulip-door": {
+                "program": [
+                  {
+                    "id": 11,
+                    "t": "pick"
+                  },
+                  {
+                    "id": 12,
+                    "t": "left"
+                  },
+                  {
+                    "id": 13,
+                    "t": "fill"
+                  },
+                  {
+                    "id": 14,
+                    "t": "left"
+                  },
+                  {
+                    "id": 15,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 16,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 17,
+                    "t": "water"
+                  },
+                  {
+                    "id": 18,
+                    "t": "water"
+                  },
+                  {
+                    "id": 19,
+                    "t": "water"
+                  }
+                ],
+                "robotId": "",
+                "wonAt": 1759200660000
+              },
+              "path-postbox": {
+                "program": [
+                  {
+                    "id": 1,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 2,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 3,
+                    "t": "left"
+                  },
+                  {
+                    "id": 4,
+                    "t": "pick"
+                  },
+                  {
+                    "id": 5,
+                    "t": "right"
+                  },
+                  {
+                    "id": 6,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 7,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 8,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 9,
+                    "t": "fwd"
+                  },
+                  {
+                    "id": 10,
+                    "t": "put"
+                  }
+                ],
+                "robotId": "r1",
+                "wonAt": 1759200720000
+              }
+            },
+            "robots": [
+              {
+                "id": "r1"
+              },
+              {
+                "id": "cobble",
+                "kind": "cobble",
+                "name": "Cobble",
+                "color": "#7A8CA3",
+                "eye": "round",
+                "hat": "none"
+              }
+            ]
+          }
+        }
+      ],
+      "island": {
+        "activeId": "pmuojbvbjzop",
+        "done": [
+          "tulip-door",
+          "path-postbox"
+        ],
+        "plots": {
+          "tulip-door": {
+            "program": [
+              {
+                "id": 11,
+                "t": "pick"
+              },
+              {
+                "id": 12,
+                "t": "left"
+              },
+              {
+                "id": 13,
+                "t": "fill"
+              },
+              {
+                "id": 14,
+                "t": "left"
+              },
+              {
+                "id": 15,
+                "t": "fwd"
+              },
+              {
+                "id": 16,
+                "t": "fwd"
+              },
+              {
+                "id": 17,
+                "t": "water"
+              },
+              {
+                "id": 18,
+                "t": "water"
+              },
+              {
+                "id": 19,
+                "t": "water"
+              }
+            ],
+            "robotId": "",
+            "wonAt": 1759200660000
+          },
+          "path-postbox": {
+            "program": [
+              {
+                "id": 1,
+                "t": "fwd"
+              },
+              {
+                "id": 2,
+                "t": "fwd"
+              },
+              {
+                "id": 3,
+                "t": "left"
+              },
+              {
+                "id": 4,
+                "t": "pick"
+              },
+              {
+                "id": 5,
+                "t": "right"
+              },
+              {
+                "id": 6,
+                "t": "fwd"
+              },
+              {
+                "id": 7,
+                "t": "fwd"
+              },
+              {
+                "id": 8,
+                "t": "fwd"
+              },
+              {
+                "id": 9,
+                "t": "fwd"
+              },
+              {
+                "id": 10,
+                "t": "put"
+              }
+            ],
+            "robotId": "r1",
+            "wonAt": 1759200720000
+          }
+        },
+        "robots": [
+          {
+            "id": "r1"
+          },
+          {
+            "id": "cobble",
+            "kind": "cobble",
+            "name": "Cobble",
+            "color": "#7A8CA3",
+            "eye": "round",
+            "hat": "none"
+          }
+        ]
+      }
+    }
+  }
+}

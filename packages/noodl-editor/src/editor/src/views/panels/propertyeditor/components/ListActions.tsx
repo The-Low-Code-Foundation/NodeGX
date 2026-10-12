@@ -29,6 +29,7 @@ export function ListIconButton({
   return (
     <span className={css['IconButton']} title={title}>
       <IconButton
+        ariaLabel={title}
         icon={icon}
         size={IconSize.Tiny}
         variant={IconButtonVariant.OpaqueOnHover}

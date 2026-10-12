@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b98d6a06-3a45-5a7d-833c-37d8fcebb046",
+  "name": "Buy",
+  "path": "/Logic/Buy",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The purchase card’s Buy: the one purchase rule on her profile. Runs on Go; answers Ran once its outputs are set."
+}

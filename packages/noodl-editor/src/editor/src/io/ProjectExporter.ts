@@ -97,6 +97,12 @@ export interface LegacyComponent {
   created?: string;
   /** LEG-006 (L3) — who last wrote it ("noodl-mcp" for an agent-authored component). */
   modifiedBy?: string;
+  /**
+   * P112-S7-LOGICTYPE — the `type` its `component.json` declares, carried only when the name would
+   * not say it (`inferComponentType`). Without it the first editor save of a `logic` component wrote
+   * `visual`, while the registry kept `logic`.
+   */
+  componentType?: 'root' | 'page' | 'visual' | 'logic' | 'cloud';
   metadata?: Record<string, unknown>;
   graph: LegacyGraph;
 }
@@ -125,6 +131,8 @@ export interface LegacyProject {
   metadata?: Record<string, unknown>;
   lesson?: unknown;
   variants?: LegacyVariant[];
+  /** P109 ISL-005 — the project's script files, `{ 'engine/world.js': source }`, kept on disk as `scripts/**.js`. */
+  scripts?: Record<string, string>;
   components: LegacyComponent[];
 }
 
@@ -317,7 +325,7 @@ export function buildComponentV2Files(component: LegacyComponent, now: string): 
     id: component.id as string,
     name: localName,
     path: component.name, // preserve original legacy path for round-trip
-    type: inferComponentType(component.name),
+    type: component.componentType ?? inferComponentType(component.name),
     modified: now
   };
 
@@ -451,6 +459,11 @@ export function buildProjectV2File(project: LegacyProject, now: string): Project
   if (project.metadata) {
     const rest = { ...(project.metadata as Record<string, unknown>) };
     delete rest.styles;
+    // P112-S11-OPENWRITES — a key holding `undefined` is not on disk (`JSON.stringify` drops it), so it
+    // is not content. A project's metadata carries three (`dbCollections`, `systemCollections`,
+    // `dbVersionMajor`, measured 2026-10-12), so every save wrote `"metadata": {}` while the baseline,
+    // built from the importer's project, had none: the hashes never agreed and every open rewrote the file.
+    for (const key of Object.keys(rest)) if (rest[key] === undefined) delete rest[key];
     if (Array.isArray(rest.routes)) {
       delete rest.routes;
     }

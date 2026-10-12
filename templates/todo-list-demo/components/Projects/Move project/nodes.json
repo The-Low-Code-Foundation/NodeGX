@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ef2edc89-591d-56fb-8c66-d9deabc432c1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "MoveprojecIn",
+      "type": "Component Inputs",
+      "label": "What to write",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "rowId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "toIndex",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "MoveprojecOut",
+      "type": "Component Outputs",
+      "label": "Written",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "MoveprojecWrite",
+      "type": "JavaScriptFunction",
+      "label": "Write it",
+      "parameters": {
+        "functionScript": "var rows = Inputs.rows || [], id = String(Inputs.rowId || ''), to = Number(Inputs.toIndex);\nvar from = -1;\nfor (var i = 0; i < rows.length; i++) if (rows[i] && rows[i].id === id) from = i;\nif (from < 0 || !isFinite(to) || to < 0 || to >= rows.length || to === from) return;\nvar order = rows.slice();\nvar moved = order.splice(from, 1)[0];\norder.splice(to, 0, moved);\nvar slots = rows.map(function (r) { var n = Number(r.position); return isFinite(n) ? n : 0; }).sort(function (a, b) { return a - b; });\nfor (var s = 1; s < slots.length; s++) if (slots[s] <= slots[s - 1]) slots[s] = slots[s - 1] + 1;\nvar steps = Promise.resolve(), R = Noodl.Records;\norder.forEach(function (r, k) {\n  if (Number(r.position) === slots[k]) return;\n  steps = steps.then(function () { return R.save(String(r.projectId), { position: slots[k] }, { className: 'Project' }); });\n});\nsteps.then(function () { Outputs.done(); }, function () { Outputs.failed(); });",
+        "runOnChange-in-rows": false,
+        "runOnChange-in-rowId": false,
+        "runOnChange-in-toIndex": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "done",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "failed",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rowId",
+          "displayName": "rowId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-toIndex",
+          "displayName": "toIndex",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "MoveprojecProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "string",
+        "value": "That change did not save in this browser. Try again, or reset the demo."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

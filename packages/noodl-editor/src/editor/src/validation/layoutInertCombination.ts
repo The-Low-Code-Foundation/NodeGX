@@ -42,6 +42,13 @@
  *    combination strictly, but it lives here because a Columns child is D28's, and one module
  *    decides the cardinality: D28 speaks, this does not.
  *
+ *  - **`row-cannot-wrap`** (P109 ISL-022, AUDIT F29): a wrapping row `Group` at `contentSize`/
+ *    `contentWidth` inside a row parent. `layout.ts` gives a content-sized node no width and every
+ *    node `flexShrink: 0`, so the row is as wide as its children on one line and the wrap never
+ *    happens. Measured at 390px (`isl022-wrapped-row/`): one 566px line, clipped, or with
+ *    `bodyScroll` the whole page zoomed out. The island's top tabs did exactly that, and
+ *    `uncollapsible-multi-column` named the bar around them instead (CG-003 §7.2).
+ *
  *  - **`justify-content-distributes-nothing`** (D32): every visual node's `width` defaults to
  *    `100%` (`node-shared-port-definitions.ts`), and `layout.ts` turns a percentage width inside
  *    a `row` parent into `flexGrow`. So growing is what a child of a row does unless something
@@ -86,7 +93,8 @@ import { DiagnosticCode, type Diagnostic } from './diagnostics';
 import { isComponentRef } from './model';
 import type { ParameterizedNode } from './parameterValues';
 import { resolveAgainstDefaults } from './portConditions';
-import { COLUMNS_TYPE } from './responsiveArrangement';
+import { REPEATER_TYPE } from './repeaterTemplate';
+import { COLUMNS_TYPE, componentVisualRoot, MIN_TRACKS, type ItemComponentView } from './responsiveArrangement';
 
 /** The one general-purpose container whose `flexDirection` makes a row. */
 const GROUP_TYPE = 'Group';
@@ -106,6 +114,9 @@ export const SENTENCE_MIN_CHARS = 26;
 
 /** `textOverflow` values with which the author asked for one line on purpose (DEF-031). */
 const ONE_LINE_ON_PURPOSE = new Set(['ellipsis', 'clip']);
+
+/** ISL-022 — the fewest items a wrapping row must hold to be reported: arm A's "a pair is a pair" floor. */
+export const MIN_WRAPPING_ITEMS = MIN_TRACKS;
 
 /** `justifyContent` values that exist to distribute free space along the main axis. */
 const DISTRIBUTING = new Set(['space-between', 'space-around', 'space-evenly']);
@@ -147,6 +158,11 @@ export interface CheckLayoutInertCombinationOptions {
   catalog: CatalogIndex;
   /** `"nodeId::portName"` for every wired input; a connected sizing port makes a child unknowable. */
   connectedInputs?: ReadonlySet<string>;
+  /**
+   * P109-S40-ROWWRAPINSTANCE — the project's components, so `row-cannot-wrap` can read the root of a component placed
+   * in a row. Omitted means "do not check" that half: a caller that cannot read the placed component judges this one.
+   */
+  views?: readonly ItemComponentView[];
 }
 
 /**
@@ -277,6 +293,173 @@ function checkTextCannotWrap(
         plug: 'input' as const
       },
       suggestion: 'sizeMode: "contentHeight"'
+    }
+  ];
+}
+
+/**
+ * ISL-022's exit, both halves measured at 390px (`isl022-wrapped-row/`, rows C and A): `maxWidth` 100% keeps the row
+ * as narrow as its children until it meets the edge and then wraps (2 lines, against the control's one 566px line),
+ * which is what a cluster at the end of a `space-between` header needs; `contentHeight` at 100% makes it the full row.
+ */
+const ISL022_EXIT =
+  'Give it maxWidth 100% so it stays as wide as its children until it reaches the edge and then wraps, or sizeMode ' +
+  '"contentHeight" with width 100% so it takes the whole row.';
+
+/** Inline CSS that sets a width or a flex sizing rescues the row in a way this rule cannot weigh (todo-list's header). */
+const CSS_SIZING = /(^|[;{\s])(max-width|width|flex|flex-shrink|flex-basis)\s*:/i;
+
+/**
+ * ISL-022 — a wrapping row Group sized to its own content, inside a row parent: the wrap is inert.
+ *
+ * Reported on the Group, because the repair is its own `sizeMode`. The abstentions:
+ *
+ *  - the parent does not lay out as a row (see {@link parentAxis}): in a column a content-sized Group
+ *    is no wider than the column, and its wrap works — the recipe library's three wrapped button
+ *    rows (`ui-cta-band#actions`, `ui-landing-page#hero_actions`, `#cta_actions`) are exactly that;
+ *  - the Group has no parent in this graph — a component's root, whose parent is whoever places it;
+ *  - any of `flexDirection`, `flexWrap`, `sizeMode` on it, or `flexDirection` on the parent, is wired;
+ *  - it is out of flow (`position` absolute or fixed): no longer a flex item, it is not held at one line;
+ *  - it has fewer than {@link MIN_WRAPPING_ITEMS} visual children and no `For Each`: a pair (a logo and a name, two
+ *    segment buttons) is a pair, the same floor `uncollapsible-multi-column`'s arm A uses. The 2026-10-02 census
+ *    fired on six such pairs across the templates, measured 38-118px wide at 390;
+ *  - it carries an authored or wired `maxWidth`, or inline `styleCss` that sets a width or a flex size: the author
+ *    bounded it (`maxWidth` 100% is the measured exit, and todo-list's header does the same in `styleCss`).
+ *
+ * 🔴 A `cssClassName` is NOT an abstention, though a class can rescue the row from the project's stylesheet (the
+ * garden's `.bg-tabs`, planning's `.planner-shrink-wrap`): a stylesheet is not in this graph, and three templates
+ * meeting the same defect and each patching it in CSS is the reason the code exists.
+ */
+function checkRowCannotWrap(
+  node: LayoutNode,
+  byId: Map<string, LayoutNode>,
+  parentOf: Map<string, LayoutNode>,
+  component: string,
+  catalog: CatalogIndex,
+  connected: ReadonlySet<string> | undefined
+): Diagnostic[] {
+  const parent = parentOf.get(node.id);
+  if (!parent) return [];
+  if (connected?.has(`${parent.id}::flexDirection`)) return [];
+  if (parentAxis(parent, catalog) !== 'row') return [];
+  const children = (node.children ?? []).map((id) => byId.get(id)).filter((c): c is LayoutNode => !!c);
+  const sizeMode = rowSizedToItsContent(node, children, catalog, connected);
+  if (sizeMode === undefined) return [];
+
+  return [
+    {
+      code: DiagnosticCode.RowCannotWrap,
+      severity: 'warning',
+      message:
+        `This Group is set to wrap, but it is sized to its own content (sizeMode "${sizeMode}") and sits in a row ` +
+        `(${parent.label ? `"${parent.label}", ` : ''}Layout: Horizontal). ${ROW_CANNOT_WRAP_WHY} ${ISL022_EXIT}`,
+      location: {
+        component,
+        nodeId: node.id,
+        nodeType: node.type,
+        ...(node.label ? { nodeLabel: node.label } : {}),
+        port: 'sizeMode',
+        plug: 'input' as const
+      },
+      suggestion: 'maxWidth: 100%'
+    }
+  ];
+}
+
+/** Why a content-sized wrapping row in a row never wraps, and what a person sees: one sentence, both placements. */
+const ROW_CANNOT_WRAP_WHY =
+  'A content-sized Group in a row is as wide as all its children side by side, so the wrap never happens: once they ' +
+  'add up to more than a phone, the row runs past the screen and the browser either cuts it off or zooms the whole ' +
+  'page out to fit it, which makes everything small and every tap land off target.';
+
+/**
+ * ISL-022's row half, whoever its parent is: the `sizeMode` of a wrapping row Group sized to its own content that holds
+ * enough items to be a row, or `undefined` when it is not one or the graph cannot say (every abstention on
+ * {@link checkRowCannotWrap} except the parent's).
+ */
+function rowSizedToItsContent(
+  node: LayoutNode,
+  children: readonly LayoutNode[],
+  catalog: CatalogIndex,
+  connected: ReadonlySet<string> | undefined
+): string | undefined {
+  if (node.type !== GROUP_TYPE) return undefined;
+  if (['flexDirection', 'flexWrap', 'sizeMode', 'position', 'maxWidth'].some((port) => connected?.has(`${node.id}::${port}`)))
+    return undefined;
+  const resolved = resolveAgainstDefaults(node.parameters ?? {}, catalog.inputDefaults(node.type));
+  if (resolved['flexDirection'] !== 'row') return undefined;
+  if (resolved['flexWrap'] !== 'wrap' && resolved['flexWrap'] !== 'wrap-reverse') return undefined;
+  const sizeMode = resolved['sizeMode'];
+  if (typeof sizeMode !== 'string' || !CONTENT_WIDTH_MODES.has(sizeMode)) return undefined;
+  const position = resolved['position'];
+  if (position === 'absolute' || position === 'fixed') return undefined;
+  const maxWidth = resolved['maxWidth'];
+  if (maxWidth !== undefined && maxWidth !== null && maxWidth !== '') return undefined;
+  const styleCss = node.parameters?.['styleCss'];
+  if (typeof styleCss === 'string' && CSS_SIZING.test(styleCss)) return undefined;
+  const wrapsARepeater = children.some((c) => c.type === REPEATER_TYPE);
+  const items = children.filter((c) => isComponentRef(c.type) || !!catalog.getNode(c.type)?.isVisual);
+  if (!wrapsARepeater && items.length < MIN_WRAPPING_ITEMS) return undefined;
+  return sizeMode;
+}
+
+/**
+ * P109-S40-ROWWRAPINSTANCE — `brTabs`' shape split across two components: a component whose root is a wrapping row
+ * sized to its content, placed in a row in this one. ISL-022 AC6's first agent built exactly that split (`Tab Bar`'s root
+ * is the row of tabs, placed in `Top Bar`), and the one-component rule abstains on a root by construction.
+ *
+ * Reported on the PLACEMENT, here, because the placement is what makes it a defect (the same root placed in a column
+ * wraps), and because in leaves-first authoring this is the only write that holds both halves. The message names the
+ * component and its root, where the repair goes. Abstains as the one-component rule does, plus: no views (the caller
+ * cannot read the placed component), a component the views do not hold, or no single visual root (see
+ * {@link componentVisualRoot}).
+ *
+ * Honest limit: the views carry nodes, not wires, so a root whose `sizeMode` or `flexWrap` is wired inside its own
+ * component reads as its authored value here.
+ */
+function checkPlacedRowCannotWrap(
+  node: LayoutNode,
+  parentOf: Map<string, LayoutNode>,
+  component: string,
+  catalog: CatalogIndex,
+  views: readonly ItemComponentView[] | undefined,
+  connected: ReadonlySet<string> | undefined
+): Diagnostic[] {
+  if (!views || !isComponentRef(node.type)) return [];
+  const parent = parentOf.get(node.id);
+  if (!parent) return [];
+  if (connected?.has(`${parent.id}::flexDirection`)) return [];
+  if (parentAxis(parent, catalog) !== 'row') return [];
+  const found = componentVisualRoot(node.type, views, catalog);
+  if (!found || found.root.id === undefined) return [];
+  const { view, root } = found;
+  const byId = new Map(view.nodes.filter((n) => n.id !== undefined).map((n) => [n.id as string, n]));
+  const children = (root.children ?? []).map((id) => byId.get(id)).filter((c): c is NonNullable<typeof c> => !!c);
+  const sizeMode = rowSizedToItsContent(
+    root as LayoutNode,
+    children.map((c) => c as LayoutNode),
+    catalog,
+    undefined
+  );
+  if (sizeMode === undefined) return [];
+  const rootLabel = (root as { label?: string }).label;
+  const rootName = rootLabel ? `"${rootLabel}"` : `"${root.id}"`;
+
+  return [
+    {
+      code: DiagnosticCode.RowCannotWrap,
+      severity: 'warning',
+      message:
+        `This places "${node.type}", whose root Group (${rootName}) is set to wrap but is sized to its own content ` +
+        `(sizeMode "${sizeMode}"), in a row (${parent.label ? `"${parent.label}", ` : ''}Layout: Horizontal). ` +
+        `${ROW_CANNOT_WRAP_WHY} The repair is on that root, in "${node.type}": ${ISL022_EXIT}`,
+      location: {
+        component,
+        nodeId: node.id,
+        nodeType: node.type,
+        ...(node.label ? { nodeLabel: node.label } : {})
+      },
+      suggestion: 'maxWidth: 100%'
     }
   ];
 }
@@ -508,7 +691,7 @@ export function checkLayoutInertCombination(
   nodes: readonly LayoutNode[],
   options: CheckLayoutInertCombinationOptions
 ): Diagnostic[] {
-  const { component, catalog, connectedInputs } = options;
+  const { component, catalog, connectedInputs, views } = options;
   const diagnostics: Diagnostic[] = [];
   const byId = new Map<string, LayoutNode>(nodes.map((n) => [n.id, n]));
   const parentOf = new Map<string, LayoutNode>();
@@ -517,6 +700,10 @@ export function checkLayoutInertCombination(
   for (const node of nodes) {
     // ── GAM-020: a sentence in a content-sized Text ─────────────────────────
     diagnostics.push(...checkTextCannotWrap(node, parentOf, component, catalog, connectedInputs));
+
+    // ── ISL-022: a content-sized wrapping row inside a row ──────────────────
+    diagnostics.push(...checkRowCannotWrap(node, byId, parentOf, component, catalog, connectedInputs));
+    diagnostics.push(...checkPlacedRowCannotWrap(node, parentOf, component, catalog, views, connectedInputs));
 
     // ── FLD-004: a number wired into the child's main-axis dimension ────────
     diagnostics.push(...checkWiredMainAxisDimensions(node, byId, component, catalog, connectedInputs));

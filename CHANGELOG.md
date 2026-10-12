@@ -17,7 +17,139 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
-## 0.3.0 · 2026-09-24
+## 0.4.0 · 2026-10-12
+
+**NodeGX now opens the apps you make with `npm create nodegx`. This release also brings script files, new kinds of
+backend rule, and many fixes to how nodes behave.**
+
+### New
+
+- **Apps made with `npm create nodegx` open in the editor.** 0.3.0 refused them, because the npm tools save projects
+  in a newer format. Opening one keeps its project id.
+- **Functions can share code through script files.** Put `.js` files in your project's `scripts` folder. Scripts have
+  their own section in the Components panel. A script opens in its own tab. A Function picks the scripts it needs
+  in its Uses list. Code export includes the scripts.
+- **A node's properties now end with two folded sections.** *What this node does* explains each input in a sentence.
+  *Try this node* lets you set the inputs, press its signals and see what comes out.
+- **The Problems panel flags a wire to a port the node doesn't have.**
+- **Keep When Leaving** on Page keeps a page as it was when someone navigates away and comes back. Component Stack has
+  the same option, *Keep Pages When Unmounted*.
+- **Data Attributes** on every visual node, for example `data-testid`. Every visual node also has a *Scroll Into View*
+  signal.
+- **Your own CSS can place a Group.** A node now writes inline styles only for the values you set. The properties panel
+  says when a stylesheet decides a value.
+- **Array Filter** has *Is one of* and *Is not one of*, and can filter on a nested field such as `owner.id`.
+- **Model Request can use a model on your own computer,** such as one run with Ollama, through the OpenAI-compatible
+  option. In 0.3.0 that option didn't work.
+- **Code export:** Parse CSV, To CSV, Parse XML and Parse Feed now export.
+- **The backend can keep more kinds of rule.** A field can be readable by some people only. A record can be locked
+  once it stops being a draft. A field can be set once and never edited. A record can be protected from deletion.
+  Records can be numbered like invoices, so a number is never used twice. Your agent writes these rules from what you
+  tell it. The backend manager doesn't have a screen for them yet.
+- **When your agent renames a field or a collection,** the backend moves the records and the permission rules with
+  it. It makes a backup first.
+- **An existing field can be made required.**
+- **The Permissions page has an *Enforce my rules on this machine* switch,** to test your real rules locally.
+
+### Changed
+
+- **A sign-in ends after 30 days without use.** The person signs in again.
+
+### Fixed
+
+- **A cloud function could make someone the backend's admin.** It can't now. Update if your backend runs cloud
+  functions.
+- Restoring a backup now brings back every setting: sign-in, search, files, saved views and workflows.
+- `nodegx-backend migrate` refuses a PostgreSQL database that already holds records, before it moves anything.
+- HTTP Request's Authentication now sends the credential you give it.
+- A Function or node that throws an error, or a value of the wrong kind, no longer blanks the whole page.
+- One timer's error no longer stops every other timer in the app.
+- Repeater rows are no longer lost.
+- Form controls show what the person did and report it.
+- Component Stack, Router and Navigate handle addresses and the browser's back button properly.
+- JSON Stream Parser no longer freezes the app on a stray `}`.
+- Signing out clears the User.
+- Editor icon buttons have names a screen reader can read.
+- When your agent renders your app to check it, the render now has the default spacing, corners and fonts. In
+  0.3.0 it had none, so the app looked broken.
+- Your agent can deploy your cloud functions from the installed app. In 0.3.0 this failed unless the project folder
+  was an npm package.
+- A deploy no longer publishes your agent's files, such as `.mcp.json` and `CLAUDE.md`. `.mcp.json` names folders on
+  your computer.
+- Many smaller fixes to how nodes behave.
+
+### Good to know
+
+- **A project opened in 0.4.0 can't be opened in 0.3.0 any more.** The first time you open a 0.3.0 project, NodeGX
+  copies the project folder to `<project>.before-0.4`. Then it updates the project to the new format. Your app works
+  as before. Keep the copy until you're happy with the updated project. It's the only copy 0.3.0 can still
+  open.
+- 0.3.0 refuses a project saved by 0.4.0 with two wrong messages. One names Noodl, and the other says `project.json`
+  is missing. The person needs to update to 0.4.0.
+- The first time you open a page your agent wrote, NodeGX rewrites that page's files. In a project kept in git, this
+  leaves them changed.
+- Code export is still in alpha.
+- Windows installers aren't signed, so SmartScreen will warn you. Choose More info, then Run anyway.
+- If you use the MCP server with an assistant, restart the assistant's session after updating.
+
+## npm packages 0.2.0 · 2026-10-12
+
+**Your agent can now look at the pages it builds. It can also keep an API key on a server and put your app in a
+folder you can host.**
+
+### New
+
+- **Your agent sees what it built.** `render_report` now works from npm. The agent renders each page and reads what it
+  measured before it says the work is done. It needs Chrome, Edge or Chromium on your machine.
+- **Your agent can start a backend.** `provision_backend` runs a NodeGX backend on your machine. Nothing else needs
+  installing.
+- **A cloud function can keep a key secret.** `set_function_secret` stores the key on the backend. A cloud function
+  reads it with a Secret node. The page never sees it.
+- **`nodegx-deploy`** writes your app to a folder you can host:
+  `npx --package @nodegx/preview nodegx-deploy <app folder> <output folder>`.
+- **`npm create nodegx`** now sets a folder up with `@nodegx/mcp` 0.2.0.
+
+### Fixed
+
+- Deploying cloud functions failed unless the agent was started inside an npm package.
+- A deploy copied `.mcp.json` and `CLAUDE.md` into the output folder. They are now left out.
+- A page with warnings was reported as clean. The report's first line now names the warnings.
+
+### Good to know
+
+- The backend needs Node 22.13 or later.
+- A folder set up with 0.1.0 keeps using 0.1.0. To move it to 0.2.0, change the version in its `.mcp.json` files.
+
+## npm packages 0.1.0 · 2026-10-11
+
+**One command from npm now sets a folder up for your AI agent to build NodeGX apps in. The same release
+publishes the packages for building your own NodeGX editor.**
+
+### New
+
+- **`npm create nodegx my-apps`** writes one file, `my-apps/.mcp.json`. Run Claude Code in that folder
+  and your agent can scope and build a NodeGX app with you. It does not need the editor or this repository.
+- **`@nodegx/mcp`** is the NodeGX server your agent talks to. Any agent that speaks MCP can start it
+  with `npx -y @nodegx/mcp --allow-writes`.
+- **`@nodegx/preview`** shows the app in your browser and reloads it when its files change:
+  `npx @nodegx/preview <app folder> --open`.
+- **`@nodegx/node-spec`** describes what each node does, runs it, and grades any runtime against it.
+- **`@nodegx/project-contract`** is the project file format: its types, schemas and validator, the
+  design tokens, and a test suite that grades any editor against the format.
+- **`@nodegx/canvas-look`** holds the colours and sizes of the editor's canvas, for an editor that
+  wants to look like NodeGX.
+
+### Good to know
+
+- `@nodegx/mcp`, `@nodegx/preview`, `@nodegx/project-contract` and `create-nodegx` are GPL-3.0, because
+  the first three contain the editor's code. `@nodegx/node-spec` and `@nodegx/canvas-look` are MIT.
+  The runtime your apps run on is MIT.
+- These are 0.x versions: a minor version may change how they are used.
+- Known issues in each package are tracked in the bug ledger in the NodeGX repository
+  (`dev-docs/bugs/`). None of them blocks a release.
+- Coming soon: a guide your AI coding assistant can follow to build you your own NodeGX editor.
+
+## 0.3.0 · 2026-09-27
 
 **Projects made in 0.2 are upgraded when you open them, there is a new Styles panel, and your
 backend has its own page in the browser.**

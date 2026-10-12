@@ -1,0 +1,159 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "89e6fce7-19dc-5a5e-a7ff-f4fd5b31a4c5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "th_in",
+      "type": "Component Inputs",
+      "label": "The one request",
+      "x": 40,
+      "y": 40,
+      "parameters": {},
+      "ports": [
+        {
+          "name": "request",
+          "plug": "output",
+          "type": "object"
+        }
+      ]
+    },
+    {
+      "id": "th_fn",
+      "type": "JavaScriptFunction",
+      "label": "The thread's rules, once",
+      "x": 300,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * THE THREAD'S RULES, ONCE (TASK-L186 §1). Every one of the four functions —\n * openThread, sendMessage (the learner's) and openThreadAsCoach, replyAsCoach\n * (the coach's) — hands this ONE request and reads ONE answer, so the limit,\n * the subject, the anchor vocabulary and who marks what read have a single\n * spelling. Ported from the product's src/lib/server/conversations/service.ts.\n *\n * WHO IS ASKING IS DECIDED BEFORE THIS NODE AND CANNOT BE CHANGED BY A CALLER.\n * The learner's half fills `learnerId` from `Caller learner` (the session) and\n * never takes one as an argument, so a learner can only ever reach their own\n * threads. The coach's half has no learner id at all: it names a thread, and\n * the thread says whose it is. `reader` is set by the calling function's own\n * graph, never by a caller.\n *\n * READ-MARKING (the product's L118, verbatim in behaviour):\n *  - OPENING marks the OTHER party's turns read, and reports which were new\n *    BEFORE marking — so the reader still sees which turn is new this once.\n *  - A reader's OWN turns are never marked (that would make \"unread\" mean\n *    \"unwritten\").\n *  - SENDING marks nothing: answering is not evidence you read the one before.\n *  - `readAt` never leaves this node. A turn carries `unread: boolean`.\n *\n * A MESSAGE IS REFUSED, NEVER TRIMMED, over 4,000 characters: half a question\n * addressed to a human reads as a whole one and neither party can tell.\n *\n * Every refusal is a REASON, not a sentence: 'too_long', 'empty',\n * 'notice-not-accepted', or 'refused' for everything else — \"not yours\", \"not\n * there\" and \"not a thing a thread can be about\" cannot be told apart by a\n * caller (the mcp/auth.ts rule). The log carries ids, never a body.\n */\nif (Inputs.request !== undefined && Inputs.request !== null) {\n  (async () => {\n    /* WHAT A THREAD CAN BE ABOUT — the product's NOTE_ANCHOR_KINDS, verbatim.\n       The kit's THREAD_ANCHOR_KINDS is the same list; tools/check-thread.mjs\n       fails if they part company. */\n    const ANCHOR_KINDS = ['lesson', 'session', 'evaluation', 'assignment', 'submission', 'message', 'signal'];\n    const MAX_CHARS = 4000;\n    const SUBJECT_MAX_CHARS = 80;\n    const r = Inputs.request || {};\n    const tag = '[dbt:Thread] ' + String(r.op || '-') + '/' + String(r.reader || '-');\n    const refuse = (reason, why) => {\n      Outputs.reason = reason;\n      console.warn(tag + ' refused: ' + (why || reason) + ' learner=' + String(r.learnerId || '-') + ' conversation=' + String(r.conversationId || '-'));\n      Outputs.failed();\n    };\n    const q = (c, where, limit) => Noodl.Records.query(c, where, { limit: limit || 1000, plain: true });\n    const newId = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));\n    const byTime = (a, b) => (String(a.createdAt || '') < String(b.createdAt || '') ? -1 : String(a.createdAt || '') > String(b.createdAt || '') ? 1 : 0);\n\n    /** The first line, cut at 80 with an ellipsis — the product's deriveSubject, verbatim. */\n    const deriveSubject = (body) => {\n      const firstLine = (body.trim().split('\\n')[0] || '').trim();\n      const source = firstLine.length > 0 ? firstLine : body.trim();\n      return source.length > SUBJECT_MAX_CHARS ? source.slice(0, SUBJECT_MAX_CHARS - 1).trimEnd() + '…' : source;\n    };\n\n    /** The turns as the READER sees them: unread is the other party's and not yet read. */\n    const view = (messages, reader) =>\n      [...messages].sort(byTime).map((m) => ({\n        id: m.messageId,\n        authorRole: m.authorRole === 'coach' ? 'coach' : 'learner',\n        body: String(m.body || ''),\n        createdAt: m.createdAt || null,\n        unread: m.authorRole !== reader && (m.readAt === null || m.readAt === undefined || m.readAt === '')\n      }));\n\n    try {\n      const op = String(r.op || '');\n      const reader = String(r.reader || '');\n      if (op !== 'open' && op !== 'send') return refuse('refused', 'unknown op');\n      if (reader !== 'learner' && reader !== 'coach') return refuse('refused', 'unknown reader');\n\n      // ── WHICH THREAD ─────────────────────────────────────────────────────\n      let thread = null;\n      if (reader === 'learner') {\n        const learnerId = String(r.learnerId || '');\n        if (!learnerId) return refuse('refused', 'no learner');\n        const anchorKind = String(r.anchorKind || '');\n        const anchorId = String(r.anchorId || '');\n        if (ANCHOR_KINDS.indexOf(anchorKind) === -1) return refuse('refused', 'anchor kind');\n        if (anchorId.indexOf(anchorKind + ':') !== 0 || anchorId.length > 300) return refuse('refused', 'anchor id');\n        // One-key filters (the backend refuses two): the learner's threads, then the anchor in JS.\n        const mine = await q('Conversation', { learnerId: { equalTo: learnerId } });\n        thread = mine.filter((c) => c.anchorKind === anchorKind && c.anchorId === anchorId).sort(byTime).pop() || null;\n        if (!thread && op === 'open') {\n          Outputs.turns = [];\n          Outputs.learnerId = learnerId;\n          Outputs.conversationId = '';\n          Outputs.done();\n          return;\n        }\n        if (!thread) thread = { learnerId, anchorKind, anchorId, conversationId: '' };\n      } else {\n        const conversationId = String(r.conversationId || '');\n        if (!conversationId || conversationId.length > 200) return refuse('refused', 'no conversation');\n        const found = await q('Conversation', { conversationId: { equalTo: conversationId } }, 2);\n        if (found.length !== 1) return refuse('refused', found.length ? 'two conversations for one id' : 'no such conversation');\n        thread = found[0];\n      }\n\n      const messages = thread.conversationId ? await q('ConversationMessage', { conversationId: { equalTo: thread.conversationId } }) : [];\n\n      // ── OPEN: report what was new, THEN mark the other party's turns read ──\n      if (op === 'open') {\n        const turns = view(messages, reader);\n        const now = new Date().toISOString();\n        for (const m of messages) {\n          if (m.authorRole !== reader && (m.readAt === null || m.readAt === undefined || m.readAt === '')) {\n            await Noodl.Records.save(m.objectId, { readAt: now }, { className: 'ConversationMessage' });\n          }\n        }\n        Outputs.turns = turns;\n        Outputs.learnerId = thread.learnerId;\n        Outputs.conversationId = thread.conversationId;\n        Outputs.done();\n        return;\n      }\n\n      // ── SEND: refuse rather than trim, under the current notice only ────\n      if (r.noticeCurrent !== true) return refuse('notice-not-accepted');\n      const body = String(r.body === null || r.body === undefined ? '' : r.body).trim();\n      if (body.length === 0) return refuse('empty');\n      if (body.length > MAX_CHARS) return refuse('too_long');\n      const authorUserId = String(r.authorUserId || '');\n      if (!authorUserId) return refuse('refused', 'no author');\n\n      if (!thread.conversationId) {\n        const conversationId = newId();\n        await Noodl.Records.create('Conversation', {\n          conversationId,\n          learnerId: thread.learnerId,\n          anchorKind: thread.anchorKind,\n          anchorId: thread.anchorId,\n          subject: deriveSubject(body)\n        });\n        thread = Object.assign({}, thread, { conversationId });\n      }\n      const turn = {\n        messageId: newId(),\n        conversationId: thread.conversationId,\n        // TYPED BY THE CALLING FUNCTION'S OWN GRAPH, never derived from roles\n        // (the product's L116: a role can change, a message already written cannot).\n        authorRole: reader,\n        authorUserId,\n        body,\n        readAt: null\n      };\n      await Noodl.Records.create('ConversationMessage', turn);\n      const createdAt = new Date().toISOString();\n      const written = Object.assign({}, turn, { createdAt });\n      // The thread as it now stands. Sending marks nothing.\n      Outputs.turns = view(messages.concat([written]), reader);\n      Outputs.turn = { id: written.messageId, authorRole: reader, body, createdAt };\n      Outputs.learnerId = thread.learnerId;\n      Outputs.conversationId = thread.conversationId;\n      Outputs.anchorKind = thread.anchorKind || '';\n      Outputs.anchorId = thread.anchorId || '';\n      Outputs.done();\n    } catch (e) {\n      Outputs.reason = 'refused';\n      console.error(tag + ' failed: ' + String((e && e.message) || e) + ' learner=' + String(r.learnerId || '-') + ' conversation=' + String(r.conversationId || '-'));\n      Outputs.failed();\n    }\n  })();\n}\n",
+        "runOnChange-in-request": true
+      },
+      "ports": [
+        {
+          "name": "in-request",
+          "plug": "input",
+          "type": "*",
+          "displayName": "request",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-turns",
+          "plug": "output",
+          "type": "*",
+          "displayName": "turns",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-turn",
+          "plug": "output",
+          "type": "*",
+          "displayName": "turn",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reason",
+          "plug": "output",
+          "type": "*",
+          "displayName": "reason",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-learnerId",
+          "plug": "output",
+          "type": "*",
+          "displayName": "learnerId",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-conversationId",
+          "plug": "output",
+          "type": "*",
+          "displayName": "conversationId",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-anchorKind",
+          "plug": "output",
+          "type": "*",
+          "displayName": "anchorKind",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-anchorId",
+          "plug": "output",
+          "type": "*",
+          "displayName": "anchorId",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "RECORDS CALLS: open = 2 reads + one save per unread turn of the other party; send = 2 reads + 1 create (2 on a thread's first turn). One request in, one answer out; see the script's header for who decides what."
+      }
+    },
+    {
+      "id": "th_out",
+      "type": "Component Outputs",
+      "label": "The answer",
+      "x": 600,
+      "y": 40,
+      "parameters": {},
+      "ports": [
+        {
+          "name": "turns",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "turn",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "reason",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "learnerId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "conversationId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "anchorKind",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "anchorId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "failed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}

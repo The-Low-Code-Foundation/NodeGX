@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { layerDefaults, withDefaultsClass } from '../../../default-style-layer';
 import Layout from '../../../layout';
 import PointerListeners from '../../../pointerlisteners';
 import { withMediaFragment } from '../../../media-fragment';
@@ -216,6 +217,9 @@ export class Video extends React.Component<VideoProps> {
 
     style.objectPosition = `${props.objectPositionX} ${props.objectPositionY}`;
 
+    // P109 ISL-008 — defaults leave the inline style for the defaults sheet, so an author's class can override them.
+    const defaultsClass = layerDefaults(style);
+
     /**
      * §2 — a YouTube or Vimeo link plays in an `<iframe>` rather than failing in a `<video>`.
      *
@@ -241,7 +245,7 @@ export class Video extends React.Component<VideoProps> {
     if (embed.kind === 'iframe') {
       return (
         <iframe
-          className={props.className}
+          className={withDefaultsClass(props.className, defaultsClass)}
           style={{ ...style, border: 'none' }}
           src={embed.url}
           title={embed.title}
@@ -263,7 +267,7 @@ export class Video extends React.Component<VideoProps> {
     return (
       <CachedVideo
         {...props.dom}
-        className={props.className}
+        className={withDefaultsClass(props.className, defaultsClass)}
         style={style}
         innerRef={(video) => {
           this.video = video;

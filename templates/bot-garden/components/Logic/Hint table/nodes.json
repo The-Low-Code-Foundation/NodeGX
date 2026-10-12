@@ -1,0 +1,426 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "346f2d39-d56a-5246-85d0-40358b562fa7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hinttableIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hints",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hinttableFn",
+      "type": "JavaScriptFunction",
+      "label": "Hint table",
+      "parameters": {
+        "functionScript": "\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar rows = Inputs.hints || [];\nvar name = String(Inputs.botName || 'Pip');\nvar map = {};\nfor (var i = 0; i < rows.length; i++) map[rows[i].key] = String(rows[i][lang] || rows[i].en || '').split('{b}').join(name);\nOutputs.lang = lang;\nOutputs.hintStart = map.hintStart || '';\nOutputs.hintEmpty = map.hintEmpty || '';\nOutputs.hintPattern = map.hintPattern || '';\nOutputs.hintMissed = map.hintMissed || '';\nOutputs.hintNotYet = map.hintNotYet || '';\nOutputs.hintBump = map.hintBump || '';\nOutputs.hintWet = map.hintWet || '';\nOutputs.hintDone = map.hintDone || '';\nOutputs.hintDoneMany = map.hintDoneMany || '';\nOutputs.hintPerfect = map.hintPerfect || '';\nOutputs.hintFree = map.hintFree || '';\nOutputs.hintDry = map.hintDry || '';\nOutputs.hintRockGone = map.hintRockGone || '';\nOutputs.hintPredictMiss = map.hintPredictMiss || '';\nOutputs.hintDriveReady = map.hintDriveReady || '';\nOutputs.oliveThinking = map.oliveThinking || '';\nOutputs.oliveResting = map.oliveResting || '';\nOutputs.oliveRung1 = map.oliveRung1 || '';\nOutputs.oliveRung2 = map.oliveRung2 || '';\nOutputs.oliveRung3 = map.oliveRung3 || '';\nOutputs.oliveResting1 = map.oliveResting1 || '';\nOutputs.oliveResting2 = map.oliveResting2 || '';\nOutputs.oliveResting3 = map.oliveResting3 || '';\nOutputs.iw1Loop = map.iw1Loop || '';\nOutputs.iw3NoCan = map.iw3NoCan || '';\nOutputs.iw3Job = map.iw3Job || '';\nOutputs.iw3pRead = map.iw3pRead || '';\nOutputs.iw3bTrick = map.iw3bTrick || '';\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-hints",
+          "displayName": "hints",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-lang",
+          "displayName": "lang",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintStart",
+          "displayName": "hintStart",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintEmpty",
+          "displayName": "hintEmpty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintPattern",
+          "displayName": "hintPattern",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintMissed",
+          "displayName": "hintMissed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintNotYet",
+          "displayName": "hintNotYet",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintBump",
+          "displayName": "hintBump",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintWet",
+          "displayName": "hintWet",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintDone",
+          "displayName": "hintDone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintDoneMany",
+          "displayName": "hintDoneMany",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintPerfect",
+          "displayName": "hintPerfect",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintFree",
+          "displayName": "hintFree",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintDry",
+          "displayName": "hintDry",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintRockGone",
+          "displayName": "hintRockGone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintPredictMiss",
+          "displayName": "hintPredictMiss",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hintDriveReady",
+          "displayName": "hintDriveReady",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveThinking",
+          "displayName": "oliveThinking",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveResting",
+          "displayName": "oliveResting",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung1",
+          "displayName": "oliveRung1",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung2",
+          "displayName": "oliveRung2",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveRung3",
+          "displayName": "oliveRung3",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveResting1",
+          "displayName": "oliveResting1",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveResting2",
+          "displayName": "oliveResting2",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-oliveResting3",
+          "displayName": "oliveResting3",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-iw1Loop",
+          "displayName": "iw1Loop",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-iw3NoCan",
+          "displayName": "iw3NoCan",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-iw3Job",
+          "displayName": "iw3Job",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-iw3pRead",
+          "displayName": "iw3pRead",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-iw3bTrick",
+          "displayName": "iw3bTrick",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "hinttableOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "hintBump",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintDone",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintDoneMany",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintDriveReady",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintDry",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintEmpty",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintFree",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintMissed",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintNotYet",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintPattern",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintPerfect",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintPredictMiss",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintRockGone",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintStart",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "hintWet",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "iw1Loop",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "iw3Job",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "iw3NoCan",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "iw3bTrick",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "iw3pRead",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "lang",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "oliveResting",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveResting1",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveResting2",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveResting3",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung1",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung2",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveRung3",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "oliveThinking",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

@@ -56,6 +56,7 @@ Embedded video content, background/hero loops, and camera previews (wire a media
 | `clickBubbling` | Enum (`auto`, `always`, `never`) | `auto` | Whether a click here also fires Click on the nodes this one sits inside. Automatic keeps it here as soon as this node's own Click is connected, so a button inside a clickable card runs the button and not the card; Always is the older behaviour where both run; Never keeps every click here, wired or not. Note that an element at zero opacity takes no pointer events at all |
 | `controls` | Boolean | — | Shows the browser's own play, seek and volume controls |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `dragKind` | String | — | Optional name for what this is — "card", "task". A zone with an Accept Kind only takes sources whose Drag Kind matches |
 | `dragValue` | * | — | What this element carries — usually the id of the item it shows. A drop zone reports it as Dropped Value |
 | `draggable` | Boolean | `false` | Lets a person pick this element up and drop it on an element with Accept Drops on. A see-through copy follows the pointer; the element itself stays put until the graph moves it |
@@ -75,7 +76,7 @@ Embedded video content, background/hero loops, and camera previews (wire a media
 | `minHeight` | Number | — | Smallest height the element may shrink to, taking priority over Height |
 | `minWidth` | Number | — | Smallest width the element may shrink to, taking priority over Width |
 | `mixBlendMode` | Enum (`normal`, `multiply`, `screen`, `overlay`, `darken`, `lighten`, `color-dodge`, `color-burn`, `hard-light`, `soft-light`, `difference`, `exclusion`, `hue`, `saturation`, `color`, `luminosity`) | `normal` | How this element's colours blend with whatever is painted behind it |
-| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
+| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen) |
 | `muted` | Boolean | — | Silences the video without changing Volume, and is what lets Autoplay work |
 | `objectFit` | Enum (`contain`, `cover`, `fill`, `none`) | `contain` | How the video fills its box when the two have different proportions |
 | `objectPositionX` | Number | `50` | Which part of the video stays visible horizontally when Object Fit crops it |
@@ -85,6 +86,7 @@ Embedded video content, background/hero loops, and camera previews (wire a media
 | `pointerEventsMode` | Enum (`inherit`, `explicit`) | `inherit` | Whether pointer handling is inherited from the parent or set explicitly on this element |
 | `position` | Enum (`relative`, `absolute`, `sticky`, `fixed`) | `relative` | How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space |
 | `poster` | Image | — | Still image shown until the video has enough data to play; leave blank to show nothing |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `sizeMode` | Enum (`explicit`, `contentWidth`, `contentHeight`, `contentSize`) | `contentSize` | Whether Width and Height are used as given, or the element sizes itself to fit its contents |
 | `src` | String | — | What to play: an mp4, webm or ogg URL, a file in your project, or a YouTube or Vimeo link. A YouTube or Vimeo link is recognised automatically and plays in an embedded player, where Play, Pause, Reset and the failure outputs do not apply. Leave blank to load nothing rather than fail on a missing source |
 | `srcObject` | Mediastream | `null` | A live MediaStream to play, from a camera or screen capture, instead of a URL |
@@ -110,6 +112,124 @@ Embedded video content, background/hero loops, and camera previews (wire a media
 | `play` | Signal | — | Starts or resumes playback; fired before the element exists, it is held until the element exists rather than dropped |
 | `reset` | Signal | — | Stops playback and seeks to the beginning |
 | `restart` | Signal | — | Seeks to the beginning and plays, then fires Done |
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
+
+### What each input does
+
+**Mounted** (`mounted`)
+
+- a change: the element is put on the page, or taken off it, at the next paint
+- the value it already holds: nothing
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the element can be seen
+
+**Visible** (`visible`)
+
+- always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer
+
+**Opacity** (`opacity`)
+
+- always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it
+
+**Pointer Events Mode** (`pointerEventsMode`)
+
+- Inherit: its own pointer style comes off
+- Explicit: the last Pointer Events Enabled is written back (on, before one was set)
+
+**Pointer Events Enabled** (`pointerEventsEnabled`)
+
+- always, whatever the mode: off, the pointer passes through to what is behind it
+
+**Draggable** (`draggable`)
+
+- always: on, every element it draws can be picked up, by pointer or keyboard; off, the one on the page cannot
+
+**Drag Value** (`dragValue`)
+
+- always: read by the zone it is dropped on, which reports it as Dropped Value
+
+**Drag Kind** (`dragKind`)
+
+- always: read by a zone with an Accept Kind as it is dragged over one
+
+**Hold To Drag** (`holdToDrag`)
+
+- always: read at the next press — whether it must be held before it picks up
+
+**Hold Time** (`holdTime`)
+
+- always: read at the next held press — how many seconds it is held before it picks up
+
+**Accept Drops** (`acceptDrops`)
+
+- on: a Draggable can be dropped here
+- off while a drag is over it: the drag leaves it — Is Drop Target goes false
+- off: nothing can be dropped here
+
+**Accept Kind** (`acceptKind`)
+
+- always: read as a drag comes over it — a source of another kind does not light it up
+
+**Accept File Drops** (`acceptFileDrops`)
+
+- on: a file dragged from the desktop can be dropped here
+- off: no file can be dropped here, and a drag over it is forgotten — Is Dragging Over goes false if it was true
+
+**Accepted file types** (`acceptedFileTypes`)
+
+- always: read at a drop — which files count as accepted
+
+**Source** (`src`)
+
+- always: what is drawn at the end of the frame — a project file or a URL as a video, a YouTube or Vimeo link in an embedded player, or nothing; a different file loads afresh, paused and back at the start
+
+**Start Time** (`startTime`)
+
+- always: where the video begins, put into the address it loads from (blank: the start; below 0 is 0); a change that moves it loads the video again at the next paint, paused
+
+**End Time** (`endTime`)
+
+- always: where the first play-through stops, put into the address with Start Time (ignored unless later than Start Time; approximate on YouTube, ignored on Vimeo); a change that moves it loads the video again at the next paint, paused
+
+**Muted** (`muted`)
+
+- always: drawn at the next paint — on, the video is silent, and Play or Autoplay may start it before a person has pressed, clicked or typed on the page
+
+**Autoplay** (`autoplay`)
+
+- always: drawn at the next paint, and read as a load completes — on, a video that may play (Muted, or a person has acted on the page) and that Pause or Reset has not stopped since the load began starts by itself: On Can Play, then On Play
+
+**Loop** (`loop`)
+
+- always: drawn at the next paint, and read as the video reaches its end — on, it goes back to the start and plays on; off, it pauses there (On Pause)
+
+**Source Object** (`srcObject`)
+
+- off the page: waits for the element behind the actions already waiting, in order, and is written at the paint that puts the video there (at most 16 wait, and the oldest is pushed out)
+- null (what it already has), a value that is not a stream, or anything on an embedded player: nothing changes — a live stream itself plays in place of Source, and no scenario holds one
+- nothing (undefined) on a video: the browser is handed null, so it loads Source again — paused, back at the start (Playback Position 0 when it had moved) — and Play waits for the new On Can Play before it can start it
+
+**Play** (`play`)
+
+- on the page: wants the video playing and, once it has loaded, starts it — On Play if it was paused (from the start again after its end); Error then Playback Failure if the browser refuses (not Muted and no person has acted on the page) or the load failed; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved
+- off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and plays at the paint that puts the video there — Done then
+
+**Restart** (`restart`)
+
+- on the page: wants the video playing and, once it has loaded, goes back to second 0 (Playback Position 0 — not Start Time) and starts it as Play does; before the load, only the wanting; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved
+- off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and restarts at the paint that puts the video there — Done then
+
+**Pause** (`pause`)
+
+- on the page: stops wanting the video playing, and pauses one that is playing — Playback Position, then On Pause; one already paused stays so; Autoplay no longer starts it on this load; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved
+- off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and pauses at the paint that puts the video there — Done then
+
+**Reset** (`reset`)
+
+- on the page: stops wanting the video playing, goes back to second 0 (Playback Position 0 once loaded — not Start Time) and pauses it — On Pause if it was playing; Autoplay no longer starts it on this load; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved
+- off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and resets at the paint that puts the video there — Done then
 
 ## Outputs
 
@@ -189,6 +309,7 @@ Declares conditional/expandable port groups whose visibility depends on paramete
 | borderTopStyle = solid OR borderTopStyle = dashed OR borderTopStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `borderTopWidth`, `borderTopColor` | — |
 | borderRightStyle = solid OR borderRightStyle = dashed OR borderRightStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `borderRightWidth`, `borderRightColor` | — |
 | borderBottomStyle = solid OR borderBottomStyle = dashed OR borderBottomStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `borderBottomWidth`, `borderBottomColor` | — |
+| — | — | — |
 
 ## Ports at runtime
 

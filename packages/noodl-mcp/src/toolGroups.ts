@@ -180,6 +180,11 @@ const CORE_WRITE_TOOLS = [
 ] as const;
 
 const BACKEND_TOOLS = [
+  // worldTools.ts — P116 ONT-002. Before any collection exists: the brief, the questions, the
+  // write. In this group because a project that never asks for a backend must never read the
+  // brief (R5), and here it costs the resident surface nothing (measured on both arms).
+  'validate_world',
+  'write_world',
   // provisionTools.ts — the entry point and its lifecycle pair. Grouped with the
   // admin set deliberately: an agent that needs one needs the others in the same
   // breath, and splitting them would cost a second discovery round trip at the
@@ -203,6 +208,7 @@ const BACKEND_TOOLS = [
   'get_backend_workflow',
   'list_backend_step_kinds',
   'get_backend_email_config',
+  'list_function_secrets',
   'list_backend_email_templates',
   'preview_backend_email_template',
   'get_backend_admin_dashboard',
@@ -226,6 +232,7 @@ const BACKEND_TOOLS = [
   'send_backend_test_email',
   'set_backend_email_template',
   'reset_backend_email_template',
+  'set_function_secret',
   'create_backend_api_key',
   'revoke_backend_api_key',
   'create_backend_trigger',
@@ -315,7 +322,12 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
     // the fourth library tool is free too. "publish" and "share" are here
     // because somebody who has built a good part reaches for those words, not
     // for "export".
-    keywords: ['prefab', 'shelf', 'recipe', 'find', 'search', 'where is', 'understand', 'publish', 'share', 'reuse'],
+    // P109 ISL-021 — `drive_page` appended (ruling 3 (a), 0 resident tokens: "7 tools" and "8 tools" are the
+    // same length), and the words for it: a model that wants to press a button searches in those.
+    keywords: [
+      'prefab', 'shelf', 'recipe', 'find', 'search', 'where is', 'understand', 'publish', 'share', 'reuse',
+      'press', 'click', 'tap', 'drive', 'interact', 'play', 'test the page'
+    ],
     tools: [
       'search_project',
       'explain_component',
@@ -323,7 +335,8 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       'list_library',
       'get_library_entry',
       'install_prefab',
-      'export_to_library'
+      'export_to_library',
+      'drive_page'
     ],
     resident: false
   },
@@ -357,8 +370,8 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
     id: 'project',
     title: 'Project lifecycle',
     purpose:
-      'list the NodeGX projects on this machine; create a new project elsewhere on disk; read an imported ' +
-      'project\'s conversion report.',
+      'list the NodeGX projects on this machine; create a new project elsewhere on disk; scaffold a node kit; ' +
+      'read an imported project\'s conversion report.',
     // ✅ CN-006 — `create_node_kit` is here, and the placement was measured
     // rather than chosen (2026-08-16, same fixture and normalisation as
     // `tests/toolDisclosure.test.ts`):
@@ -384,6 +397,11 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
     // door works rather than assuming it. Widening the purpose is the fix, and
     // it costs resident tokens, so it belongs in the same conversation as
     // CN-009's spend rather than being taken quietly here.
+    // ✅ P109 `P109-S12-KITGROUPPURPOSE` (s13, 2026-10-04) — taken: "scaffold a node kit" is in
+    // `purpose` now. Measured both sides with `tests/toolDisclosure.test.ts`: **8,255 → 8,261,
+    // 6 tokens; 19 free after.** Why now: ISL-015's stranger agent saw 20 tools, never called
+    // `find_tools`, and wrote its kit by hand — the name-keyword door above only opens for a model
+    // that already suspects a kit tool exists.
     // 🔴 FIX-008 D — `open_project` is here and **not named in `purpose` above**,
     // which is the same trade `create_node_kit` records and lands the opposite
     // way round for a reason worth stating. Naming a tool in `purpose` costs
@@ -451,7 +469,24 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       'who',
       'unsaved',
       'conflict',
-      'is anyone'
+      'is anyone',
+      // P109 ISL-016 — `set_project_settings`. The words for what it sets, none of them in the
+      // purpose line; matched server-side, never sent.
+      'settings',
+      'title',
+      'home',
+      'make home',
+      'root',
+      'rename',
+      'app name',
+      // P109 ISL-005 — the script-file tools below. Their names carry "script", which `find_tools`
+      // matches by name; these are the other words somebody asking for them would use.
+      'script',
+      'shared code',
+      'module',
+      'engine',
+      'helper',
+      'uses'
     ],
     tools: [
       'list_projects',
@@ -461,7 +496,19 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       'create_node_kit',
       'open_in_editor',
       'export_react',
-      'session_status'
+      'session_status',
+      // P109 ISL-016 — appended on the arithmetic the notes above record: 0 resident tokens ("8
+      // tools" and "9 tools" are the same length). `tests/isl016ProjectSettings.test.ts` measures
+      // that and reaches it through `find_tools` by keyword.
+      'set_project_settings',
+      // P109 ISL-005 — the project's script files (scripts/**.js). Appended on the same arithmetic: a
+      // deferred group's only resident trace is `find_tools`' "(N tools)", and "9 tools" and "14 tools"
+      // differ by one character. Measured in `tests/isl005ScriptFiles.test.ts`.
+      'list_script_files',
+      'get_script_file',
+      'write_script_file',
+      'edit_script_file',
+      'delete_script_file'
     ],
     resident: false
   },
@@ -528,6 +575,7 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
   'send_backend_test_email',
   'set_backend_email_template',
   'reset_backend_email_template',
+  'set_function_secret',
   'create_backend_api_key',
   'revoke_backend_api_key',
   'create_backend_trigger',
@@ -554,6 +602,7 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
   'remove_backend_auth_provider',
   'configure_backend_auth_policy',
   'write_project_doc',
+  'write_world',
   'seed_project_docs',
   'create_project',
   // FIX-008 D. Binding is not a write, and this is still honest rather than
@@ -564,8 +613,14 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
   'open_project',
   // CN-006 — writes a folder into the project.
   'create_node_kit',
+  // P109 ISL-016 — writes `nodegx.project.json`.
+  'set_project_settings',
   'set_project_tokens',
-  'set_style_preset'
+  'set_style_preset',
+  // P109 ISL-005.
+  'write_script_file',
+  'edit_script_file',
+  'delete_script_file'
 ]);
 
 /**

@@ -1,7 +1,7 @@
 {
   "id": "code-rest-list",
   "title": "REST node feeding a repeater",
-  "description": "The REST node wraps a request/response pair in two scripts: the request script assembles the call from the node's script-declared inputs, and the response script maps the payload onto script-declared outputs — here an `items` array. Ports come from those scripts (that is its dynamism). `fetch` on mount loads the list; `success`/`failure` sequence what follows. For a one-off GET without mapping scripts, HTTP Request is the lighter tool.",
+  "description": "The REST node is retired: the editor no longer offers it, and HTTP Request replaces it in new work. This example is here for the projects that still have one. It wraps a request/response pair in two scripts: the request script assembles the call from the node's script-declared inputs, and the response script maps the payload onto script-declared outputs — here an `items` array. Ports come from those scripts (that is its dynamism). `fetch` on mount loads the list; `success`/`failure` sequence what follows. For a one-off GET without mapping scripts, HTTP Request is the lighter tool.",
   "demonstrates": ["REST2"],
   "components": [
     {

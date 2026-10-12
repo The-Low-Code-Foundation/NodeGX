@@ -47,20 +47,10 @@
           "name": "bg",
           "plug": "output",
           "type": "string"
-        },
-        {
-          "name": "canUp",
-          "plug": "output",
-          "type": "boolean"
-        },
-        {
-          "name": "canDown",
-          "plug": "output",
-          "type": "boolean"
         }
       ],
       "x": 410,
-      "y": 160
+      "y": 280
     },
     {
       "id": "trOut",
@@ -69,16 +59,6 @@
       "ports": [
         {
           "name": "open",
-          "plug": "input",
-          "type": "signal"
-        },
-        {
-          "name": "up",
-          "plug": "input",
-          "type": "signal"
-        },
-        {
-          "name": "down",
           "plug": "input",
           "type": "signal"
         },
@@ -99,7 +79,7 @@
         }
       ],
       "x": 410,
-      "y": 280
+      "y": 400
     },
     {
       "id": "trRow",
@@ -117,20 +97,40 @@
         "borderBottomStyle": "solid",
         "borderBottomWidth": "var(--border-1)",
         "borderBottomColor": "var(--border-subtle)",
-        "paddingLeft": "var(--space-2)",
+        "cssClassName": "todo-drag-row",
+        "paddingLeft": "var(--space-1)",
         "paddingRight": "var(--space-2)",
         "paddingTop": "var(--space-2)",
         "paddingBottom": "var(--space-2)"
       },
       "children": [
+        "trGrip",
         "trRank",
         "trMain",
-        "trUp",
-        "trDown",
         "trClose"
       ],
       "x": 40,
       "y": 40
+    },
+    {
+      "id": "trGrip",
+      "type": "Group",
+      "label": "Drag to move",
+      "parent": "trRow",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 24,
+          "unit": "px"
+        },
+        "height": {
+          "value": 32,
+          "unit": "px"
+        },
+        "cssClassName": "todo-drag-handle"
+      },
+      "x": 100,
+      "y": 160
     },
     {
       "id": "trRank",
@@ -143,14 +143,14 @@
         "color": "var(--muted-foreground)",
         "sizeMode": "contentHeight",
         "width": {
-          "value": 28,
+          "value": 20,
           "unit": "px"
         },
         "textAlignX": "right",
         "fontVariantNumeric": "tabular-nums"
       },
       "x": 100,
-      "y": 160
+      "y": 280
     },
     {
       "id": "trMain",
@@ -173,7 +173,7 @@
         "trMeta"
       ],
       "x": 100,
-      "y": 280
+      "y": 400
     },
     {
       "id": "trTitle",
@@ -191,7 +191,7 @@
         }
       },
       "x": 160,
-      "y": 400
+      "y": 520
     },
     {
       "id": "trMeta",
@@ -209,49 +209,7 @@
         }
       },
       "x": 160,
-      "y": 520
-    },
-    {
-      "id": "trUp",
-      "type": "net.noodl.controls.button",
-      "label": "Move up",
-      "parent": "trRow",
-      "parameters": {
-        "backgroundColor": "transparent",
-        "color": "var(--muted-foreground)",
-        "borderStyle": "none",
-        "borderRadius": "var(--radius-md)",
-        "paddingTop": "var(--space-1)",
-        "paddingBottom": "var(--space-1)",
-        "sizeMode": "contentSize",
-        "label": "▲",
-        "fontSize": "var(--text-base)",
-        "paddingLeft": "var(--space-2)",
-        "paddingRight": "var(--space-2)"
-      },
-      "x": 100,
       "y": 640
-    },
-    {
-      "id": "trDown",
-      "type": "net.noodl.controls.button",
-      "label": "Move down",
-      "parent": "trRow",
-      "parameters": {
-        "backgroundColor": "transparent",
-        "color": "var(--muted-foreground)",
-        "borderStyle": "none",
-        "borderRadius": "var(--radius-md)",
-        "paddingTop": "var(--space-1)",
-        "paddingBottom": "var(--space-1)",
-        "sizeMode": "contentSize",
-        "label": "▼",
-        "fontSize": "var(--text-base)",
-        "paddingLeft": "var(--space-2)",
-        "paddingRight": "var(--space-2)"
-      },
-      "x": 100,
-      "y": 760
     },
     {
       "id": "trClose",
@@ -283,7 +241,7 @@
         "marginLeft": "var(--space-1)"
       },
       "x": 100,
-      "y": 880
+      "y": 760
     }
   ],
   "visualRoots": [

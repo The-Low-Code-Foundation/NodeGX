@@ -77,6 +77,17 @@ export enum DiagnosticCode {
    * `Page` node rather than inside it, so the page renders blank.
    */
   DetachedPageContent = 'detached-page-content',
+  /**
+   * P107 R23: a node sits where the editor does not let it sit in the visual tree — a logic node (or a component with
+   * no visual root) inside another node, a child its parent does not hold, children under a node that holds none, or
+   * visual roots of different categories. `error`, as the editor marks it (`@nodegx/project-contract/hierarchy`).
+   */
+  InvalidHierarchy = 'invalid-hierarchy',
+  /**
+   * P107 R25: a node of a retired type the editor no longer offers, named with the type that replaced it when its
+   * definition says (`replacedBy`). `warning`: the old node still runs.
+   */
+  DeprecatedNode = 'deprecated-node',
   TypeIncompatibleConnection = 'type-incompatible-connection',
   /**
    * NDA-017: a control signal fires without waiting for the asynchronous producer of a value
@@ -773,6 +784,26 @@ export enum DiagnosticCode {
   TextCannotWrap = 'text-cannot-wrap',
 
   /**
+   * P109 ISL-022 (AUDIT F29) — a wrapping row `Group` sized to its own content (`contentSize` /
+   * `contentWidth`) inside a row parent. `layout.ts` gives such a node no width and every node
+   * `flexShrink: 0`, so in a row parent it is as wide as all its children on one line and its
+   * `flexWrap` never takes effect. Measured (`isl022-wrapped-row/`, 2026-10-02): five 110px items
+   * stay one 566px line at 390px; without `bodyScroll` the row is clipped, with it mobile Chrome
+   * zooms the whole page out to 566px (Olive's Island's top tabs, 506px, CG-003 §7.2).
+   *
+   * In a COLUMN parent the same Group can wrap, and is not reported. A **warning**, advisory.
+   */
+  RowCannotWrap = 'row-cannot-wrap',
+
+  /**
+   * P109 ISL-007 AC6 — a word typed into a Text, a label, a placeholder or a page title, with no wire into it, in an
+   * app that places at least one `Translation` node (the translation add-on). The word has no key, so it stays the same
+   * when the app switches language. Opt-in by a PLACED Translation node, not by the add-on being installed
+   * ("Warn if app translates", Richard, 2026-10-03). A **warning**, advisory. See `typedWordNotTranslated.ts`.
+   */
+  TypedWordNotTranslated = 'typed-word-not-translated',
+
+  /**
    * DEF-020 (P78 D32) — a row `Group` whose `justifyContent` distributes free
    * space, with two or more children that grow: the free space never exists,
    * the children split the row evenly, and the parameter is silently inert.
@@ -880,6 +911,16 @@ export enum DiagnosticCode {
    * construction. See `oneWayGate.ts` for the abstentions and the calibration.
    */
   GateOnlyTurnsOn = 'gate-only-turns-on',
+
+  /**
+   * P78-TPL011-MOUNTED (P109 ISL-045) — a visual node whose `mounted` is wired
+   * but whose own `mounted` is not `false`: it is on the page until the wire's
+   * first value arrives, so a gated screen can flash.
+   *
+   * An **info**, as ruled: 409 fires on the templates, most of them harmless
+   * one-frame shows. See `gateStartsShown.ts`.
+   */
+  GateStartsShown = 'gate-starts-shown',
 
   /**
    * DEF-012 §2 (P76 SB-011 §2) — a cloud Query Records node that filters on
@@ -1047,6 +1088,19 @@ export enum DiagnosticCode {
    * that provably has the prefixed one, is not something anyone means to write.
    */
   UnprefixedFunctionPort = 'unprefixed-function-port',
+  /**
+   * P109 ISL-006 AC4 (closes P78 D80) — a connection naming a Function's `in-…` / `out-…` port that
+   * neither its written list (`scriptInputs` / `scriptOutputs`), nor its code (`Inputs.x` / `Outputs.y`),
+   * nor a port saved on the node makes.
+   *
+   * Those three are exactly what the editor's port list holds (`NodeGraphNode.getPorts`), so the canvas
+   * paints the wire "Target port doesn't exist" at `level: 'error'` and `exportComponent` deletes it from
+   * the build (DEF-034). Measured s19: the runtime alone would have kept it (an unread input still re-runs
+   * the Function; `Outputs[k]` reaches `out-<k>`), which is why the fix this names is the list, not the code.
+   *
+   * Error severity: every hit is a wire the built app does not have.
+   */
+  UnknownFunctionPort = 'unknown-function-port',
   /**
    * DEF-002 §1(b)/§1(c) — a connection naming an `in-…`, `out-…` or `pm-…` port
    * that **no adapter would mint**.
@@ -1248,7 +1302,17 @@ export enum DiagnosticCode {
    * `Collection.set` raises `collection/reserved-field-name` for the same rows at
    * runtime. The list is pinned to the runtime (`reservedRowField.ts`).
    */
-  ReservedRowField = 'reserved-row-field'
+  ReservedRowField = 'reserved-row-field',
+  /**
+   * P109 ISL-005: a Function's `uses` names a script file the project does not have. The runtime
+   * refuses the run (`function/script-missing`) before any of the body runs.
+   */
+  FunctionUsesMissingScript = 'function-uses-missing-script',
+  /**
+   * P109 ISL-005: a Function's `uses` names two script files with one file name, which would both be
+   * `Scripts.<name>`. The runtime refuses the run (`function/script-name-clash`).
+   */
+  FunctionUsesScriptNameClash = 'function-uses-script-name-clash'
 }
 
 // ─── Location ─────────────────────────────────────────────────────────────────

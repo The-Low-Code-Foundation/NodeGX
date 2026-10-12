@@ -206,6 +206,7 @@ export function CommunityPanel() {
             {view.standing ? `  ·  ${view.standing.points} points` : ''}
           </Text>
           <IconButton
+            ariaLabel="Refresh"
             variant={IconButtonVariant.Transparent}
             icon={IconName.Refresh}
             size={IconSize.Small}

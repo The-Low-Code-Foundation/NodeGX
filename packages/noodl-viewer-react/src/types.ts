@@ -58,6 +58,11 @@ export namespace Noodl {
     styles: Record<string, React.CSSProperties>;
     className: string;
     parentLayout: 'none' | 'row' | 'column';
+    /**
+     * Attributes for the root element: Image's and Video's media ports, a popup's role, and the
+     * `data-*` names a node's Data Attributes list writes (P109 ISL-009).
+     */
+    dom?: Record<string, any>;
   }
 }
 

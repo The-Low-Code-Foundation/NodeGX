@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b46bd4a7-97cb-50be-8d93-429059eb3ced",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rendererchoiceIn",
+      "fromProperty": "event",
+      "toId": "rendererchoiceFn",
+      "toProperty": "in-event"
+    },
+    {
+      "fromId": "rendererchoiceIn",
+      "fromProperty": "stored",
+      "toId": "rendererchoiceFn",
+      "toProperty": "in-stored"
+    },
+    {
+      "fromId": "rendererchoiceIn",
+      "fromProperty": "go",
+      "toId": "rendererchoiceFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rendererchoiceFn",
+      "fromProperty": "out-changed",
+      "toId": "rendererchoiceOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "rendererchoiceFn",
+      "fromProperty": "out-renderer",
+      "toId": "rendererchoiceOut",
+      "toProperty": "renderer"
+    },
+    {
+      "fromId": "rendererchoiceFn",
+      "fromProperty": "success",
+      "toId": "rendererchoiceOut",
+      "toProperty": "ran"
+    }
+  ]
+}

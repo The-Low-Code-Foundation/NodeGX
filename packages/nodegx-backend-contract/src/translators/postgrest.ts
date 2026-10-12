@@ -197,6 +197,10 @@ function createPostgrestDialect(): FilterDialect<PostgrestFilter> {
       return ctx.fail('PostgREST cannot filter by Parse-style relations', { operator: 'relatedTo' });
     },
 
+    path(node, ctx) {
+      return ctx.fail('PostgREST cannot follow a path through several links in one request', { operator: 'path' });
+    },
+
     condition(node, ctx) {
       // Built twice, with the two encodings the two positions need. Cheaper
       // than threading a pair through every branch, and it keeps each branch

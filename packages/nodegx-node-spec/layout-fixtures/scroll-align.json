@@ -1,0 +1,490 @@
+{
+  "name": "scroll-align",
+  "rule": "a scrolling Group centred on both axes with a 10 px gap, a column and a row, each with and without wrap, on the native path (n…) and with Native platform scroll off (i…): the children sit in the same place on both",
+  "nodes": [
+    {
+      "id": "nc",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "scrollEnabled": true,
+        "nativeScroll": true,
+        "alignItems": "center",
+        "justifyContent": "center",
+        "rowGap": {
+          "value": 10,
+          "unit": "px"
+        },
+        "columnGap": {
+          "value": 10,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "nca",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "ncb",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ic",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "scrollEnabled": true,
+        "nativeScroll": false,
+        "alignItems": "center",
+        "justifyContent": "center",
+        "rowGap": {
+          "value": 10,
+          "unit": "px"
+        },
+        "columnGap": {
+          "value": 10,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "ica",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "icb",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ncw",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "flexWrap": "wrap",
+        "scrollEnabled": true,
+        "nativeScroll": true,
+        "alignItems": "center",
+        "justifyContent": "center",
+        "rowGap": {
+          "value": 10,
+          "unit": "px"
+        },
+        "columnGap": {
+          "value": 10,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "ncwa",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "ncwb",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "icw",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "flexWrap": "wrap",
+        "scrollEnabled": true,
+        "nativeScroll": false,
+        "alignItems": "center",
+        "justifyContent": "center",
+        "rowGap": {
+          "value": 10,
+          "unit": "px"
+        },
+        "columnGap": {
+          "value": 10,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "icwa",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "icwb",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "nr",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "row",
+        "scrollEnabled": true,
+        "nativeScroll": true,
+        "alignItems": "center",
+        "justifyContent": "center",
+        "rowGap": {
+          "value": 10,
+          "unit": "px"
+        },
+        "columnGap": {
+          "value": 10,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "nra",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "nrb",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ir",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "row",
+        "scrollEnabled": true,
+        "nativeScroll": false,
+        "alignItems": "center",
+        "justifyContent": "center",
+        "rowGap": {
+          "value": 10,
+          "unit": "px"
+        },
+        "columnGap": {
+          "value": 10,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "ira",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "irb",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "nrw",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "scrollEnabled": true,
+        "nativeScroll": true,
+        "alignItems": "center",
+        "justifyContent": "center",
+        "rowGap": {
+          "value": 10,
+          "unit": "px"
+        },
+        "columnGap": {
+          "value": 10,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "nrwa",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "nrwb",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "irw",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "scrollEnabled": true,
+        "nativeScroll": false,
+        "alignItems": "center",
+        "justifyContent": "center",
+        "rowGap": {
+          "value": 10,
+          "unit": "px"
+        },
+        "columnGap": {
+          "value": 10,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "irwa",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "irwb",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 60,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

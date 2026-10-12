@@ -23,8 +23,8 @@
  *
  * ## 🔴 The three-answer row is the one that would not be written from the fix
  *
- * `undefined` (nobody signed in, or a backend that does not track roles) and
- * `[]` (signed in, in no roles) are different facts. Collapsing them would make
+ * `undefined` (a backend that does not track roles), `null` (nobody signed in —
+ * P107-C47, P109 ISL-030) and `[]` (signed in, in no roles) are different facts. Collapsing them would make
  * *"we could not ask"* render as *"you are not a member"* — the confident-wrong
  * version of the exact screen this port exists to draw, and a regression that
  * every other row here would stay green through.
@@ -195,16 +195,17 @@ describe('DEF-005 (a) — the branch a membership app needs', () => {
 // ---------------------------------------------------------------------------
 
 describe('DEF-005 (a) — “we could not ask” is not “you are not a member”', () => {
-  it('reads undefined while nobody is signed in', async () => {
+  it('reads null — sent, and never [] — while nobody is signed in', async () => {
     currentUser = undefined;
     const seen: Array<{ roles: unknown }> = [];
     const graph = await graphWithUser(seen);
 
-    // Read at the port rather than the wire: `sendValue` returns early on
-    // `undefined` (node.ts), so nothing crosses — which is itself the correct
-    // behaviour and is why this one row cannot use the receiver.
-    expect(graph.node('user').getOutput('roles').value).toBeUndefined();
-    expect(seen.map((s) => s.roles)).not.toContain(null);
+    // P107-C47 (P109 ISL-030, ruled 2026-10-05 "Blank text, empty for others"): nobody signed in is `null`, which
+    // crosses the wire so a list lets go of the person who left. It was `undefined`, never sent, and a wire kept the
+    // last user's roles. Still never `[]`: that is "signed in, in no roles", the answer this row exists to keep apart.
+    expect(graph.node('user').getOutput('roles').value).toBeNull();
+    expect(seen.map((s) => s.roles)).toContain(null);
+    expect(seen.map((s) => s.roles)).not.toContainEqual([]);
   });
 
   it('reads undefined — NOT [] — when the backend did not report roles at all', async () => {

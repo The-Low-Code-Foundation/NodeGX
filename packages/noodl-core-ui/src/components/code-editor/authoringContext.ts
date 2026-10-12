@@ -46,6 +46,19 @@ export interface AuthoringLibrary {
 }
 
 /**
+ * A project script file (`scripts/**.js`), as far as completing `Scripts.` is
+ * concerned. P109 ISL-005.
+ */
+export interface AuthoringScript {
+  /** As the project names it: `engine/world.js`. */
+  readonly path: string;
+  /** The name a Function's code reaches it by: `world`. */
+  readonly alias: string;
+  /** The names it gives, read from its `exports.name =` lines. */
+  readonly gives: readonly string[];
+}
+
+/**
  * One port a node declares, as far as writing code about it is concerned.
  *
  * `name` is the **display name** — what a consumer puts between the quotes of
@@ -84,6 +97,11 @@ export interface OpenNodeFact {
   readonly declaredInputs: readonly PortFact[];
   /** Declared in the property panel's `scriptOutputs` proplist. */
   readonly declaredOutputs: readonly PortFact[];
+  /**
+   * A Function's Uses (P109 ISL-005): the script files its `Scripts` holds, as
+   * paths. Absent for a node that has none to give.
+   */
+  readonly uses?: readonly string[];
 }
 
 /**
@@ -105,6 +123,8 @@ export interface CodeAuthoringContext {
   readonly objects: readonly string[];
   /** Ids used with `Noodl.Arrays.` / an Expression's `Arrays.`. */
   readonly arrays: readonly string[];
+  /** The project's script files (P109 ISL-005). Optional so older publishers stay valid. */
+  readonly scripts?: readonly AuthoringScript[];
   /**
    * The node whose code editor is open, when one is and when its mode has
    * declared ports at all (FUN-003).

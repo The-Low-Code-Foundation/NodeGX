@@ -12,6 +12,7 @@
  * than silently at the consumer.
  */
 
+import type { RunOnChangeTickedSummary } from '../project/runOnChangePins';
 import type {
   CatalogExample,
   ExampleRow,
@@ -34,6 +35,7 @@ import type {
 import type { ToolError } from '../errors';
 import type { NodeIdRemap } from '../project/nodeIds';
 import type { ComponentListRow, Usage } from '../project/ProjectStore';
+import type { DrawnPort } from '../specPorts';
 import type { StructuralFailure, WriteValidation } from '../validate';
 
 /**
@@ -92,7 +94,13 @@ export interface ProjectInfoResponse {
   version?: string;
   runtimeVersion?: string;
   settings?: Record<string, unknown>;
-  rootComponent?: { path: string };
+  /**
+   * The home: the component the project starts from (the editor's "Make home"). P109 ISL-016 — read
+   * from `rootNodeId` only, where the editor reads it, with `nodeId` the node it points at. `missing`
+   * (with `fix`) when there is no `rootNodeId` or no component holds it — the editor then shows
+   * "No HOME component selected".
+   */
+  rootComponent?: { path?: string; nodeId?: string; missing?: true; fix?: string };
   routes?: unknown;
   styles?: { colors?: unknown; textStyles?: string[]; variantCount?: number };
   stats: RegistryV2File['stats'] | { totalComponents: number };
@@ -119,8 +127,8 @@ export interface ProjectInfoResponse {
    * CMP-001 — the component interface playbook: what to put ON a component,
    * which `authoringDoctrine` never said. Same read-write gate and the same
    * shared-module rule as the fields around it. Phase 85's measurement is the
-   * reason it ships at all — 33% of the corpus's components publish any
-   * outputs against 84% of the shipped library's — and the reason it ships
+   * reason it ships at all — far fewer of the corpus's components publish any
+   * outputs than of the shipped library's (`CORPUS_PUBLISH_RATE`, `SHELF_PUBLISH_RATE`) — and the reason it ships
    * HERE is the one SB-002 gives: the instruction surface is budgeted, a
    * result field is not.
    */
@@ -188,8 +196,11 @@ export interface ProjectKitsReport {
    * `@nodegx/kit-catalog` is the wording that states both halves.
    */
   collisions?: Array<{ typeName: string; kitModule: string }>;
-  /** Kits that threw at import or failed to register. Their nodes are absent. */
-  failures?: Array<{ kitModule: string; message: string }>;
+  /**
+   * Kits that threw at import or failed to register. Their nodes are absent. `note` (P109 ISL-012
+   * ruling 2): said when the failing kit lists `dependencies`, which this reader never loads.
+   */
+  failures?: Array<{ kitModule: string; message: string; note?: string }>;
   /**
    * GAM-018 AC6 — kits whose script ran without throwing and registered no nodes. A kit whose
    * guard returns early throws nothing, so it is absent from `failures` and reads as an empty
@@ -200,6 +211,11 @@ export interface ProjectKitsReport {
   warnings?: string[];
   /** 🔴 Set when extraction could not run. Not the same as "there are none". */
   unavailable?: string;
+  /**
+   * P109 ISL-014 — this bind built the kit reader first (a checkout whose reader was missing or out of
+   * date), or tried to and could not. The file it wrote is the checkout's `dist/kit-extract.cjs`.
+   */
+  readerBuilt?: string;
 }
 
 export interface ListComponentsResponse {
@@ -207,6 +223,7 @@ export interface ListComponentsResponse {
   /** Present only when a `type` filter matched nothing but the project has components. */
   note?: string;
 }
+
 
 export interface GetComponentResponse {
   path: string;
@@ -225,6 +242,13 @@ export interface GetComponentResponse {
   connections: ConnectionV2[];
   /** Only when `include_usages` was set. */
   usages?: Usage[];
+  /**
+   * NSP-020 R19 — by node id, the ports each node's spec draws NOW from its settings and the project (name, plug, type),
+   * for the node types whose spec is graded against the runtime or, where no runtime hook draws them, the editor's adapter
+   * (`DRAWN_PORT_TYPES`). A node's saved `dynamicports` is
+   * the last list a running editor saved and can be out of date; where the two differ, this one is the node's ports.
+   */
+  drawnPorts?: Record<string, DrawnPort[]>;
 }
 
 export interface SearchMatch {
@@ -321,6 +345,8 @@ export interface NodeTypePortsView {
   export?: NodeTypeExportForPorts;
   inputs: NodeTypeDetail['inputs'];
   outputs: NodeTypeDetail['outputs'];
+  /** NSP-018 — `NodeTypeDetail.rules`, narrowed to the asked ports; absent when none of them has any. */
+  rules?: NodeTypeDetail['rules'];
   runtimeBehavior?: string;
   /** Names that matched no port. Reported rather than dropped. */
   notFound?: string[];
@@ -431,6 +457,15 @@ export interface PageRegistrationSummary {
     /** One human-readable sentence: what happened, in the user's terms. */
     summary: string;
   };
+  /**
+   * P109-S4 — pages this write left reachable from nowhere: the project has no Router to list them in, and they are not
+   * the component the app opens on. Saved, said, never refused.
+   */
+  unroutedPages?: {
+    pages: string[];
+    /** What happened and the two ways out, in the user's terms. */
+    summary: string;
+  };
 }
 
 /**
@@ -480,7 +515,8 @@ export interface CreateComponentResponse
     PageRegistrationSummary,
     NodeIdRemapSummary,
     BackendDisclosureSummary,
-    VisualRootsSummary {
+    VisualRootsSummary,
+    RunOnChangeTickedSummary {
   created: string;
   legacyName: string;
   type: string;
@@ -499,11 +535,17 @@ export interface UpdateComponentResponse
     PageRegistrationSummary,
     NodeIdRemapSummary,
     BackendDisclosureSummary,
-    VisualRootsSummary {
+    VisualRootsSummary,
+    RunOnChangeTickedSummary {
   updated: string;
   revision: string;
   /** Present for the `operations` form; absent for `set`. */
   applied?: string[];
+  /**
+   * P109 ISL-019 — present when the write changed nothing but its own timestamp, so nothing was
+   * written: the files on disk (and git) are exactly as they were.
+   */
+  unchanged?: true;
 }
 
 /**

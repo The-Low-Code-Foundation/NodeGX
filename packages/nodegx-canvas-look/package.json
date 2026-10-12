@@ -1,0 +1,41 @@
+{
+  "name": "@nodegx/canvas-look",
+  "version": "0.1.0",
+  "description": "The NodeGX canvas look as data — category colour schemes, wire colours, card metrics, the structure lane, fonts — for a home-made editor that wants to look like NodeGX. GENERATED from the editor's CanvasTheme and token CSS (scripts/canvas-look/generate.js); a gate fails when it drifts. Phase 112 (OWN-005). No dependency on the editor at run time.",
+  "license": "MIT",
+  "homepage": "https://nodegx.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/The-Low-Code-Foundation/NodeGX.git",
+    "directory": "packages/nodegx-canvas-look"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node build.mjs",
+    "prepack": "node build.mjs",
+    "test": "jest --config jest.config.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "typescript": "^5.9.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "The Low Code Foundation <contact@thelowcodefoundation.com>"
+}

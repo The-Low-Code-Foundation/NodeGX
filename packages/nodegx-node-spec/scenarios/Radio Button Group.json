@@ -1,0 +1,584 @@
+[
+  {
+    "name": "a fresh group on the page: Did Mount, Children Count 4 (its buttons), Child Index 0, This itself — no Value, no Changed",
+    "because": "react-component-node.ts :982-990 (Did Mount), :1599-1620 (each addChild schedules the count), :1428-1444; radiobuttongroup.ts sends Value only on a write",
+    "steps": [
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "Value from the graph: sent, never Changed; the same value again: nothing; another: sent",
+    "because": "radiobuttongroup.ts :84-99 — a change sends Value and nothing else (the description: a value arriving on Value does not fire Changed)",
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Value that is not text: a number, a boolean, a list and an object are converted by their toString; null and undefined are ignored (a text write beside them is sent)",
+    "because": "radiobuttongroup.ts :89-90 — `value?.toString !== undefined` then `typeof value !== 'string'` returns",
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": [
+          1,
+          2
+        ]
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": {
+          "k": 1
+        }
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": null
+      },
+      "settle",
+      {
+        "set": "value"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "x"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick on a fresh group: Value and Changed; the same button again: nothing (it is selected); another: Value and Changed",
+    "because": "RadioButton.tsx :187-189 → RadioButtonGroup.tsx :27-30 → radiobuttongroup.ts :20-29; a click on a selected radio raises no change",
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the button with no Value is the selected one while the group's Value was never written: picking it raises nothing; once a Value is written it can be picked, and the Value goes back to nothing",
+    "because": "RadioButton.tsx :58 `selected === props.value` — undefined === undefined; radiobuttongroup.ts :21 `_internal.value !== value`",
+    "steps": [
+      "settle",
+      {
+        "act": "pick"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle",
+      {
+        "act": "pick"
+      },
+      "settle",
+      {
+        "act": "pick"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a strict compare: Value \"1\" does not select the button whose Value is the number 1 — picking it sends the number and fires Changed; the number written back is converted to \"1\": sent, no Changed",
+    "because": "RadioButton.tsx :58 `===`; radiobuttongroup.ts :89 converts the number, :92 `value !== this._internal.value`",
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": "1"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 1
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of a Value no button on the page carries: nothing to click (a pick of one that is there, beside it, fires)",
+    "because": "the group's page holds its four buttons (THE FIRST VISUAL WITH CHILDREN); a person clicks what is on the page",
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "zzz"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "1"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Value written then the same button picked in one frame: the page paints first, so the button is already selected — nothing from the pick; the other button in the same frame fires",
+    "because": "adapter.ts `act`: an act happens on a painted page; RadioButtonGroup.tsx :37-39 the effect sets the selection at the paint",
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of 'a', then Value written back to 'b' in the same frame: Changed for the pick, and the Value back at 'b' — the buttons show what the Value says, so picking 'a' again sends it with Changed",
+    "because": "the selection is the node's Value (Richard, 2026-10-05, on C76: \"Show what Value says\"); on the runtime the component's effect keys on the Value the last paint rendered (RadioButtonGroup.tsx :37-39 — the pick's own re-render reused that paint's props, react-component-node.ts :1076-1103), which the write-back did not change: the picked button stays selected and picking it again raises nothing (was row C76, fixed in P109 ISL-031)",
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "after a pick written back in its frame, picking the button the Value names raises nothing — it is the selected one; the next pick of 'a' fires (the runtime agrees for another reason: its screen still selects 'a', and the node already holds 'b')",
+    "because": "the selection is the node's Value (\"Show what Value says\"); RadioButton.tsx :58 a selected radio raises no change; on the runtime RadioButtonGroup.tsx :27-30 selects 'b' and radiobuttongroup.ts :21 finds the Value unchanged (row C76's state)",
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of 'a', then Value written back to 'b' in the NEXT frame: the buttons show 'b', so picking 'a' again sends it with Changed — C76's twin: a frame between the pick and the write-back, graded on both targets",
+    "because": "the pick's frame end renders 'a', so the write-back is a change to the runtime's effect too (NSP-016 §7.7 C76)",
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off: Will Unmount, and a pick reaches no button; on: Did Mount, and the pick fires",
+    "because": "react-component-node.ts :2302-2321; the buttons are rendered inside the group, so off the page there is nothing to click",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off and a pick in the same frame: the paint takes the group off first — Will Unmount, nothing picked",
+    "because": "adapter.ts `act`: the page follows first",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "placed off the page: no Did Mount, but Children Count is sent — the buttons are its children either way; a pick reaches nothing; Mounted on: Did Mount",
+    "because": "react-component-node.ts :1611-1620 `addChild` is not a render; :2302-2321",
+    "params": {
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "placed with a Value: sent in the first frame; picking that button raises nothing, another fires",
+    "because": "the params are set before the first render: useState starts from the Value (RadioButtonGroup.tsx :21)",
+    "params": {
+      "value": "b"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick before the first frame: the act paints the page (Did Mount) and picks — Value, Changed, Children Count all in frame 1",
+    "because": "adapter.ts `act`; react-component-node.ts :982-990",
+    "steps": [
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a remount keeps the Value: the selection starts from it again, so the picked button is still selected",
+    "because": "RadioButtonGroup.tsx :21 `useState({ value: props.value })` at the new mount",
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Scroll Into View and the look ports: nothing on the wire (a Value write beside them is sent)",
+    "because": "react-component-node.ts :1380-1395; the look and layout ports are stored and read by no output (R10)",
+    "steps": [
+      "settle",
+      {
+        "signal": "scrollIntoView"
+      },
+      {
+        "set": "flexDirection",
+        "value": "row"
+      },
+      {
+        "set": "opacity",
+        "value": 0.5
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's own paint: Mounted off, a pick, Mounted on in one frame — Will Unmount at the pick, Did Mount at the frame's end; and from off, on, a pick, off — Did Mount, then Will Unmount",
+    "because": "adapter.ts `act`: the page follows at the act; only a Mounted write AFTER the act in the same frame tells the act's paint from the frame end's (the Icon's, NSP-016 §7.6)",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "zzz"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's own paint, nothing picked: placed off, Mounted on, a pick of no button, Mounted off in one frame — Did Mount at the pick, Will Unmount at the frame's end",
+    "because": "adapter.ts `act`: the page follows at the act even when the act itself does nothing (the deep run at 10,000 reached this branch; 200 sequences did not)",
+    "params": {
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "zzz"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Margin Top wired null: the style is removed, as for undefined — nothing moves on the wire and the node keeps working",
+    "because": "P107-C62, ruled 2026-10-05 \"Remove the style\", fixed in P109 ISL-026: the `inputCss` units setter treats null as empty; it once read `.value` of null and threw (react-component-node.ts, every node with margins)",
+    "steps": [
+      "settle",
+      {
+        "set": "marginTop",
+        "value": null
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Pos X wired undefined: back to 0 — nothing moves on the wire and the node keeps working",
+    "because": "P107-C63, ruled 2026-10-05 \"Use the default\", fixed in P109 ISL-026: an empty Placement value stores nothing (position and rotation 0, origin 50%); the setters once read `.value` of it and threw (node-shared-port-definitions.ts, every node with Placement inputs)",
+    "steps": [
+      "settle",
+      {
+        "set": "transformX"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Visible off: a hidden group's buttons inherit the visibility — a pick reaches none, so nothing changes; shown again, a pick selects",
+    "because": "node-shared-port-definitions.ts :366-375 `visibility: hidden` is inherited; the browser hit-tests past a hidden element",
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle"
+    ]
+  }
+]

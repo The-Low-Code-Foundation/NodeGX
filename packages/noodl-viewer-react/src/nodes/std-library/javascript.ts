@@ -1,6 +1,27 @@
 import { Node } from '@noodl/runtime';
 import JavascriptNodeParser from '@noodl/runtime/src/javascriptnodeparser';
 import { logJavaScriptNodeError } from '@noodl/runtime/src/utils';
+
+/**
+ * P109 ISL-051 (P107-C148): what a thrown value says, and its console line, for any value — `throw null` included. Every catch
+ * below read `.message` or `Object.getPrototypeOf(e)` off it, threw inside the catch before the frame-end callback cleared its
+ * scheduled flag, and that code never ran again. Kept here rather than imported: `utils.ts`'s `thrownMessage` is the same rule,
+ * but a new runtime export reaches this file through the runtime's generated declarations (see `logJavaScriptNodeError`).
+ */
+function thrownMessage(e: unknown): string {
+  if (e && (e as Error).message) return String((e as Error).message);
+  try {
+    return String(e);
+  } catch {
+    return typeof e;
+  }
+}
+
+function logScriptError(where: string, e: unknown): void {
+  const proto = e !== null && typeof e === 'object' ? Object.getPrototypeOf(e) : null;
+  const kind = proto && proto.constructor && proto.constructor.name ? proto.constructor.name + ': ' : '';
+  console.log('Error in JS node ' + where + ' code.', kind + thrownMessage(e));
+}
 import type {
   GraphNodeModel,
   NodeContextLike,
@@ -497,12 +518,14 @@ const Javascript: NodeDefinitionOptions = {
           internal.changedInputs
         );
       } catch (e) {
+        // P109 ISL-051 (P107-C148): every catch here is safe for any thrown value — a `throw null` used to throw inside the
+        // catch, before the frame-end callback cleared its scheduled flag, so the code never ran again
         logJavaScriptNodeError(e);
 
         if (this.context.editorConnection && this.context.isWarningTypeEnabled('javascriptExecution')) {
           this.context.editorConnection.sendWarning(this.nodeScope.componentOwner.name, this.id, 'js-run-waring', {
             showGlobally: true,
-            message: '<strong>run</strong>: ' + e.message
+            message: '<strong>run</strong>: ' + thrownMessage(e)
           });
         }
       }
@@ -524,14 +547,11 @@ const Javascript: NodeDefinitionOptions = {
           internal.outputProperties
         );
       } catch (e) {
-        console.log(
-          'Error in JS node signal function code.',
-          Object.getPrototypeOf(e).constructor.name + ': ' + e.message
-        );
+        logScriptError('signal function', e);
         if (this.context.editorConnection && this.context.isWarningTypeEnabled('javascriptExecution')) {
           this.context.editorConnection.sendWarning(this.nodeScope.componentOwner.name, this.id, 'js-run-waring', {
             showGlobally: true,
-            message: '<strong>run</strong>: ' + e.message
+            message: '<strong>run</strong>: ' + thrownMessage(e)
           });
         }
       }
@@ -546,11 +566,11 @@ const Javascript: NodeDefinitionOptions = {
       try {
         internal.destroyFunction.call(internal.userFunctionScope, internal.inputValues, internal.outputProperties);
       } catch (e) {
-        console.log('Error in JS node destroy code.', Object.getPrototypeOf(e).constructor.name + ': ' + e.message);
+        logScriptError('destroy', e);
         if (this.context.editorConnection && this.context.isWarningTypeEnabled('javascriptExecution')) {
           this.context.editorConnection.sendWarning(this.nodeScope.componentOwner.name, this.id, 'js-destroy-waring', {
             showGlobally: true,
-            message: '<strong>setup</strong>: ' + e.message
+            message: '<strong>setup</strong>: ' + thrownMessage(e)
           });
         }
       }
@@ -564,11 +584,11 @@ const Javascript: NodeDefinitionOptions = {
       try {
         internal.setupFunction.call(internal.userFunctionScope, internal.inputValues, internal.outputProperties);
       } catch (e) {
-        console.log('Error in JS node setup code.', Object.getPrototypeOf(e).constructor.name + ': ' + e.message);
+        logScriptError('setup', e);
         if (this.context.editorConnection && this.context.isWarningTypeEnabled('javascriptExecution')) {
           this.context.editorConnection.sendWarning(this.nodeScope.componentOwner.name, this.id, 'js-setup-waring', {
             showGlobally: true,
-            message: '<strong>setup</strong>: ' + e.message
+            message: '<strong>setup</strong>: ' + thrownMessage(e)
           });
         }
       }
@@ -742,7 +762,13 @@ const JavascriptModule: NodeModule = {
           }
         ];
 
+        // P109-S20-LISTDEFAULTTYPE (ruled 2026-10-11): an output's port is `outtype-<name> || '*'` and a default is never
+        // written, so the select's default is Any (`*`), as the Function's is.
         const _outputTypeEnums = [
+          {
+            value: '*',
+            label: 'Any'
+          },
           {
             value: 'string',
             label: 'String'
@@ -785,7 +811,7 @@ const JavascriptModule: NodeModule = {
                 enums: _outputTypeEnums,
                 allowEditOnly: true
               },
-              default: 'string',
+              default: '*',
               parent: 'scriptOutputs',
               parentItemId: p.id
             });

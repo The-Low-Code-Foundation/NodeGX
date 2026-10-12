@@ -35,6 +35,10 @@ const CheckBoxNode = {
     this.props.sizeMode = 'explicit';
     this.props.id = 'input-' + guid();
     this.props.checked = this._internal.checked = false;
+    // P107-C67 (P109 ISL-031, ruled "Draw the last word"): bumped by every write of Checked — a click, the Checked input, Check
+    // and Uncheck — so the box redraws what the node holds even when React's last render already held that value (a click then
+    // an Uncheck in one frame: React drew false before the click, and false again after the Uncheck looked like no change)
+    this.props.checkedWrites = 0;
 
     this.props.checkedChanged = (checked) => {
       const changed = this._internal.checked !== checked;
@@ -44,6 +48,7 @@ const CheckBoxNode = {
       // — and because `_internal.checked` was still true, the next click computed `changed` as
       // false and fired nothing at all. A box that had been ticked once could go quiet.
       this.props.checked = this._internal.checked = checked;
+      this.props.checkedWrites++;
       if (changed) {
         this.flagOutputDirty('checked');
         this.sendSignalOnOutput('onChange');
@@ -66,6 +71,7 @@ const CheckBoxNode = {
         value = !!value;
         const changed = value !== this._internal.checked;
         this.props.checked = this._internal.checked = value;
+        this.props.checkedWrites++;
 
         if (changed) {
           this.forceUpdate();
@@ -182,6 +188,7 @@ const CheckBoxNode = {
       }
 
       this.props.checked = this._internal.checked = next;
+      this.props.checkedWrites++;
 
       this.forceUpdate();
       this.flagOutputDirty('checked');

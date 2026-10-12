@@ -1,0 +1,144 @@
+/*
+ * P109 ISL-005 — a Function's Uses rows. A row is a file chip: path on the left, the name the code uses
+ * on the right in the accent colour, a remove button at the end. 32px rows, as on the mockup.
+ *
+ * ⚠️ `box-sizing` is declared where padding and a height meet (no global border-box here).
+ */
+
+.Root {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 0 8px;
+}
+
+.Row {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: 7px;
+  background-color: var(--theme-color-bg-3);
+}
+
+.Missing {
+  border-color: var(--theme-color-danger, var(--theme-color-error));
+
+  .Alias {
+    color: var(--theme-color-danger, var(--theme-color-error));
+  }
+}
+
+.Open {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 0 10px;
+  border: 0;
+  background: transparent;
+  color: var(--theme-color-fg-default);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+  border-radius: 7px 0 0 7px;
+
+  &:hover {
+    background-color: var(--theme-color-bg-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-color-focus-ring);
+    outline-offset: -2px;
+  }
+}
+
+.Glyph {
+  display: flex;
+  flex: none;
+  color: var(--theme-color-fg-accent);
+}
+
+.Path {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.Alias {
+  margin-left: auto;
+  flex: none;
+  font-family: var(--font-family-code, ui-monospace, 'SF Mono', Menlo, Consolas, monospace);
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-fg-accent);
+}
+
+.Remove {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  margin-right: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--theme-color-fg-default-shy);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--theme-color-bg-hover);
+    color: var(--theme-color-fg-highlight);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-color-focus-ring);
+  }
+}
+
+/* A native select laid over a link-styled label: the keyboard and screen readers get a real control,
+   the panel gets the "+ Use a script…" line the mockup shows. */
+.Picker {
+  position: relative;
+  align-self: flex-start;
+  height: 26px;
+  display: flex;
+  align-items: center;
+}
+
+.PickerLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  color: var(--theme-color-primary);
+  pointer-events: none;
+}
+
+.Select {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.Picker:focus-within .PickerLabel {
+  outline: 2px solid var(--theme-color-focus-ring);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.Help {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  line-height: 1.45;
+  color: var(--theme-color-fg-default-shy);
+}

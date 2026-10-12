@@ -25,7 +25,13 @@ The idiomatic way to put values inside text: 'Saved at {time}', '{count} items',
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `format` | String | — | Template text; each {placeholder} becomes an input port, and a placeholder used twice fills only the first time |
+| `format` | String | — | Template text; each {placeholder} becomes an input port, and every copy of a placeholder is filled |
+
+### What each input does
+
+**Format** (`format`)
+
+- always: the new template — each {name} in it becomes a text input, and Formatted follows
 
 ## Outputs
 

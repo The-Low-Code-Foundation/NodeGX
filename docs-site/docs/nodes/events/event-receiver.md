@@ -26,7 +26,7 @@ The reacting end of decoupled notifications: refresh triggers, toasts, logout cl
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `channelName` | String (EventChannelName id) | — | Name to listen on, which must match a Send Event exactly; nothing reports a name no sender uses |
-| `consume` | Enum (`never`, `always`) | `never` | Whether receiving an event stops it reaching other receivers on the same channel |
+| `consume` | Enum (`never`, `always`) | `never` | Whether receiving an event stops it reaching other receivers on the same channel. Applies to Parent, Children and Siblings events; a Global event reaches every receiver |
 | `enabled` | Boolean | `true` | Whether events on this channel are acted on; while off they are ignored and not passed to another receiver either |
 
 ## Outputs

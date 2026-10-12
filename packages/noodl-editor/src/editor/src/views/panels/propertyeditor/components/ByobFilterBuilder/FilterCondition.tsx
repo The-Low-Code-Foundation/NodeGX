@@ -441,6 +441,7 @@ export function FilterCondition({
         {needsValue && (
           <span title={isConnected ? 'Use a typed value instead' : 'Connect the value to a node input port'}>
             <IconButton
+              ariaLabel={isConnected ? 'Use a typed value instead' : 'Connect the value to a node input port'}
               icon={IconName.Link}
               size={IconSize.Small}
               variant={isConnected ? IconButtonVariant.Default : IconButtonVariant.Transparent}
@@ -452,6 +453,7 @@ export function FilterCondition({
 
         {/* Delete Button */}
         <IconButton
+          ariaLabel="Remove condition"
           icon={IconName.Trash}
           size={IconSize.Small}
           variant={IconButtonVariant.Transparent}

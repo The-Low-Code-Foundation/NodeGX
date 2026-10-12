@@ -12,9 +12,12 @@ interface ColorBlendInstance extends NodeInstance {
     colors: string[];
     /** The last value warned about, so one bad colour reports once and not once per frame. */
     warnedAbout?: string;
+    /** P107-D8: the last Blend Value warned about, deduped the same way. */
+    warnedBlend?: string;
   };
   updateColor(): void;
   warnUnreadableColor(value: string): void;
+  warnUnreadableBlend(value: unknown): void;
 }
 
 function clamp(min: number, max: number, value: number) {
@@ -142,17 +145,41 @@ const ColorBlendNode: NodeDefinitionOptions = {
           `token is defined on the page.`
       );
     },
+    /**
+     * P107-D8 (ISL-026, ruled 2026-10-05 "Keep last colour, warn once"): reported once per distinct value, on the same
+     * channel and with the same guard as an unreadable colour.
+     */
+    warnUnreadableBlend(this: ColorBlendInstance, value: unknown) {
+      const shown = typeof value === 'string' ? JSON.stringify(value) : String(value);
+      if (this._internal.warnedBlend === shown) return;
+      this._internal.warnedBlend = shown;
+      const report = (this as { raiseRuntimeError?: (c: string, m: string) => void }).raiseRuntimeError;
+      if (typeof report !== 'function') return;
+      report.call(
+        this,
+        'color-blend/unreadable-blend-value',
+        `Color Blend cannot read the Blend Value ${shown} as a number, so it is keeping the colour it last showed.`
+      );
+    },
     updateColor(this: ColorBlendInstance) {
       const colors = this._internal.colors;
       if (colors.length === 0) {
         return;
       }
 
+      // P107-D8: a Blend Value that is not a number keeps the last good colour; it rendered `#NaNNaNNaN`
+      const blendValue = Number(this._internal.blendValue);
+      if (Number.isNaN(blendValue)) {
+        this.warnUnreadableBlend(this._internal.blendValue);
+        return;
+      }
+      this._internal.warnedBlend = undefined;
+
       function getColor(index: number) {
         return colors[index] ? colors[index] : '#000000';
       }
 
-      const clampedBlendValue = clamp(0, colors.length - 1, this._internal.blendValue);
+      const clampedBlendValue = clamp(0, colors.length - 1, blendValue);
       const index = Math.floor(clampedBlendValue);
       const t = clampedBlendValue - index;
 

@@ -1,0 +1,157 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6c54119b-c58e-510d-8c72-977249383ba6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mnIn",
+      "fromProperty": "balanceText",
+      "toId": "mnBalance",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mnIn",
+      "fromProperty": "balanceWhen",
+      "toId": "mnWhen",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mnIn",
+      "fromProperty": "bars",
+      "toId": "mnEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mnIn",
+      "fromProperty": "lowText",
+      "toId": "mnLow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mnIn",
+      "fromProperty": "lowColor",
+      "toId": "mnLow",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "mnIn",
+      "fromProperty": "incomeRows",
+      "toId": "mnIncomeEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mnIn",
+      "fromProperty": "hasIncome",
+      "toId": "mnIncome",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mnIn",
+      "fromProperty": "items",
+      "toId": "cmdBalance",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mnIn",
+      "fromProperty": "items",
+      "toId": "cmdPaid",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mnIn",
+      "fromProperty": "marks",
+      "toId": "cmdBalance",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "mnIn",
+      "fromProperty": "marks",
+      "toId": "cmdPaid",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "mnIn",
+      "fromProperty": "projects",
+      "toId": "cmdBalance",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "mnIn",
+      "fromProperty": "projects",
+      "toId": "cmdPaid",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "mnField",
+      "fromProperty": "onTextChanged",
+      "toId": "cmdBalance",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "mnSave",
+      "fromProperty": "onClick",
+      "toId": "cmdBalance",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "mnField",
+      "fromProperty": "onEnter",
+      "toId": "cmdBalance",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdBalance",
+      "fromProperty": "error",
+      "toId": "mnError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cmdBalance",
+      "fromProperty": "hasError",
+      "toId": "mnError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cmdBalance",
+      "fromProperty": "done",
+      "toId": "mnField",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "cmdBalance",
+      "fromProperty": "done",
+      "toId": "mnOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "mnIncomeEach",
+      "fromProperty": "itemOutput-key",
+      "toId": "cmdPaid",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "mnIncomeEach",
+      "fromProperty": "itemOutputSignal-paid",
+      "toId": "cmdPaid",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdPaid",
+      "fromProperty": "done",
+      "toId": "mnOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "mnAdd",
+      "fromProperty": "onClick",
+      "toId": "mnOut",
+      "toProperty": "addMoney"
+    },
+    {
+      "fromId": "mnAll",
+      "fromProperty": "onClick",
+      "toId": "mnOut",
+      "toProperty": "allMoney"
+    }
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "64718844-2dc2-55e0-8e25-4d9e196e7be7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "findrepeatIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "allowed",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "findrepeatFn",
+      "type": "JavaScriptFunction",
+      "label": "Find repeat",
+      "parameters": {
+        "functionScript": "var { findBlock, findRepeat } = Scripts.fold;\nvar program = Array.isArray(Inputs.program) ? Inputs.program : [];\nvar band = Number(Inputs.band) === 1 ? 1 : 2;\n// The request's blocks (Start world's allowed): a fold makes a repeat, so it is offered only where repeat is one of\n// them, or where nothing is restricted (free play; no list given). s4: Sami's path (fwd/left/right) offered it, and\n// the kit drew a repeat it had no palette entry for — no count.\nvar allowed = Array.isArray(Inputs.allowed) ? Inputs.allowed : [];\nvar mayRepeat = allowed.length === 0 || allowed.indexOf('repeat') !== -1;\nvar plan = findRepeat(program);\nOutputs.found = !!plan;\nOutputs.i = plan ? plan.i : -1;\nOutputs.len = plan ? plan.len : 0;\nOutputs.count = plan ? plan.count : 0;\nOutputs.cover = plan ? plan.cover : 0;\nOutputs.containerId = plan ? plan.containerId : null;\nOutputs.offer = !!plan && band === 2 && mayRepeat && plan.cover >= 3;\nOutputs.textKey = plan ? (plan.len === 1 ? 'tidyFound1' : 'tidyFound') : '';\nvar list = plan ? (plan.containerId === null ? program : findBlock(program, plan.containerId).body) : [];\nOutputs.sample = plan ? String(list[plan.i].t) : '';\nOutputs.vars = plan ? { n: plan.count, len: plan.len } : {};\n",
+        "uses": "fold.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-program",
+          "displayName": "program",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-band",
+          "displayName": "band",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-allowed",
+          "displayName": "allowed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-found",
+          "displayName": "found",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-i",
+          "displayName": "i",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-len",
+          "displayName": "len",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cover",
+          "displayName": "cover",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-containerId",
+          "displayName": "containerId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-offer",
+          "displayName": "offer",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-textKey",
+          "displayName": "textKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sample",
+          "displayName": "sample",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-vars",
+          "displayName": "vars",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "findrepeatOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "containerId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "cover",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "found",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "i",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "len",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "offer",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "sample",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "textKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "vars",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

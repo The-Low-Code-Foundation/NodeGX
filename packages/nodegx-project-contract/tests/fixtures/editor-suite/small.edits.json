@@ -1,0 +1,14 @@
+[
+  { "edit": "add_node", "component": "Pages/Home", "type": "Text", "parent": "home-root", "index": 1, "label": "Subtitle", "parameters": { "text": "Second line" } },
+  { "edit": "add_node", "component": "Pages/Home", "id": "home-button", "type": "net.noodl.controls.button", "parent": "home-root", "parameters": { "label": "Press" }, "x": 0, "y": 360 },
+  { "edit": "set_parameter", "component": "Pages/Home", "id": "home-title", "name": "fontSize", "value": 32 },
+  { "edit": "set_parameter", "component": "Pages/Home", "id": "home-title", "name": "text" },
+  { "edit": "rename", "component": "Pages/Home", "id": "home-count", "label": "Counter readout" },
+  { "edit": "move", "component": "Logic/Counter", "id": "counter", "x": 40, "y": 480 },
+  { "edit": "connect", "component": "Logic/Counter", "from": { "node": "counter", "port": "count" }, "to": { "node": "limit", "port": "value" } },
+  { "edit": "disconnect", "component": "Logic/Counter", "from": { "node": "limit", "port": "value" }, "to": { "node": "counter", "port": "limit" } },
+  { "edit": "add_node", "component": "Pages/Home", "id": "home-box", "type": "Group", "parent": "home-root" },
+  { "edit": "add_child", "component": "Pages/Home", "id": "home-count", "parent": "home-box", "index": 0 },
+  { "edit": "add_child", "component": "Pages/Home", "id": "home-title", "parent": "home-box", "index": 0 },
+  { "edit": "remove_node", "component": "Pages/Home", "id": "home-button" }
+]

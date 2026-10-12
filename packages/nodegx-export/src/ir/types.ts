@@ -107,6 +107,22 @@ export interface ProjectIR {
    * seven shipped templates.
    */
   styles?: StylesIR;
+  /**
+   * P109 ISL-005. The project's script files — `scripts/**.js`, code kept once for any Function to
+   * use (a Function lists the files under its `uses` parameter and reaches each as `Scripts.<name>`).
+   * Sorted by `path`, codepoint order (D1).
+   *
+   * Absent when the project has no `scripts/` folder, which is every fixture before ISL-005's.
+   */
+  scripts?: ScriptFileIR[];
+}
+
+/** One script file, as the runtime keys it (`noodl-runtime/src/scriptfiles.ts`). */
+export interface ScriptFileIR {
+  /** Relative to `scripts/`, with `.js`: `engine/world.js`. */
+  path: string;
+  /** Verbatim. */
+  source: string;
 }
 
 /**

@@ -1,0 +1,123 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "07b9145c-f1dc-599f-837b-bd1f6ef10a5d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "teachstartIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "start",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "teachstartFn",
+      "type": "JavaScriptFunction",
+      "label": "Teach start",
+      "parameters": {
+        "functionScript": "var { countBlocks, runToEnd, worldOf } = Scripts.engine;\nvar start = Inputs.start && typeof Inputs.start === 'object' ? Inputs.start : null;\nvar program = Array.isArray(Inputs.program) ? Inputs.program : [];\nvar n = countBlocks(program);\nif (start) {\n  var w0 = worldOf(start);\n  var rid = w0.robots.length ? w0.robots[0].id : 'me';\n  Outputs.world = n ? runToEnd(program, w0, rid, Inputs.lang).world : w0;\n} else Outputs.world = null;\nOutputs.blocks = n;\nOutputs.resumed = n > 0;\n",
+        "runOnChange-in-lang": false,
+        "runOnChange-in-program": false,
+        "runOnChange-in-start": false,
+        "uses": "engine.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-start",
+          "displayName": "start",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-program",
+          "displayName": "program",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-world",
+          "displayName": "world",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blocks",
+          "displayName": "blocks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-resumed",
+          "displayName": "resumed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "teachstartOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "blocks",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "resumed",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "world",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

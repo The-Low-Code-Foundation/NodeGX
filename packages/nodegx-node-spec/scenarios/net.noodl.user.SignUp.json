@@ -1,0 +1,466 @@
+[
+  {
+    "name": "Do with the held values — Username, Password, Email and the properties: one call, then Done",
+    "because": "signup.ts :135-148 — the frame's batch, one call to the active backend",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "username",
+        "value": "bea"
+      },
+      {
+        "set": "password",
+        "value": "secret"
+      },
+      {
+        "set": "email",
+        "value": "bea@example.com"
+      },
+      {
+        "set": "prop-nick",
+        "value": "Bea"
+      },
+      {
+        "signal": "signup"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signUp"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u2",
+                "email": "bea@example.com",
+                "username": "bea",
+                "nick": "Bea",
+                "n": 2
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Two Dos in one frame: one call, two Dones",
+    "because": "signup.ts — a token per press minted before the guard; one call per frame",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "username",
+        "value": "bea"
+      },
+      {
+        "signal": "signup"
+      },
+      {
+        "signal": "signup"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signUp"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u2",
+                "email": "bea@example.com",
+                "username": "bea",
+                "nick": "Bea",
+                "n": 2
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A refusal: Error is the message as given, Failure",
+    "because": "signup.ts → setError — RestAuthAdapter fail: options.error(error.error)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "username",
+        "value": "bea"
+      },
+      {
+        "signal": "signup"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signUp"
+            },
+            "answer": {
+              "error": "Invalid credentials."
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A refusal with no message: Failure, and nothing on Error — the node has no fallback sentence",
+    "because": "signup.ts setError — undefined is never sent (CONTRACT C3)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "signup"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signUp"
+            },
+            "answer": {
+              "error": null
+            },
+            "after": 1
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A late answer: the presses wait, then Done at the answer",
+    "because": "signup.ts — the outcome reported from the answer's callback",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "username",
+        "value": "bea"
+      },
+      {
+        "signal": "signup"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signUp"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u2",
+                "email": "bea@example.com",
+                "username": "bea",
+                "nick": "Bea",
+                "n": 2
+              }
+            },
+            "after": 20
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A Do while a call is out is a second call, with the values as they are at its own frame end",
+    "because": "signup.ts — the batch taken into a local before the call goes out",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "username",
+        "value": "a"
+      },
+      {
+        "signal": "signup"
+      },
+      "settle",
+      {
+        "set": "username",
+        "value": "b"
+      },
+      {
+        "signal": "signup"
+      },
+      "settle",
+      {
+        "advance": 20
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signUp"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u2",
+                "email": "bea@example.com",
+                "username": "bea",
+                "nick": "Bea",
+                "n": 2
+              }
+            },
+            "after": 20
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A value written after the press in the same frame goes out: the call reads the frame end",
+    "because": "signup.ts — the held values read inside the frame-end callback",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "signup"
+      },
+      {
+        "set": "username",
+        "value": "late"
+      },
+      {
+        "set": "password",
+        "value": ""
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signUp"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u2",
+                "email": "bea@example.com",
+                "username": "bea",
+                "nick": "Bea",
+                "n": 2
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Somebody already signed in: the service's start-up check is made (no node's), the call goes out, Done",
+    "because": "userservice.ts :140-160 — the first reach makes the service; world.ts AUTH THE START-UP CHECK",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "username",
+        "value": "bea"
+      },
+      {
+        "signal": "signup"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "signUp"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u2",
+                "email": "bea@example.com",
+                "username": "bea",
+                "nick": "Bea",
+                "n": 2
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A refusal while somebody is signed in: Error, Failure — the session stays",
+    "because": "world.ts AUTH — a failed sign-in moves nothing",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "signup"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "signUp"
+            },
+            "answer": {
+              "error": "HTTP 503: {}"
+            },
+            "after": 5
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A call that never comes back: the presses wait — no outcome",
+    "because": "signup.ts — no timeout of its own",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "signup"
+      },
+      "settle",
+      {
+        "advance": 1000
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signUp"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "The held properties accumulate: a property written once goes out in every later call, and one written undefined is still held",
+    "because": "signup.ts :72, :180-182 — one object for the node's life, nothing removed",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "prop-nick",
+        "value": "A"
+      },
+      {
+        "signal": "signup"
+      },
+      "settle",
+      {
+        "set": "prop-n",
+        "value": 2
+      },
+      {
+        "signal": "signup"
+      },
+      "settle",
+      {
+        "set": "prop-nick"
+      },
+      {
+        "signal": "signup"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signUp"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u2",
+                "email": "bea@example.com",
+                "username": "bea",
+                "nick": "Bea",
+                "n": 2
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+]

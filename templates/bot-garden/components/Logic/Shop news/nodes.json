@@ -1,0 +1,150 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "040b6587-07af-5ea0-8418-7613c0d3ee3a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "shopnewsIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "newlyDone",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "requestId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "shopnewsFn",
+      "type": "JavaScriptFunction",
+      "label": "Shop news",
+      "parameters": {
+        "functionScript": "var { UPGRADES, modelOf, robotRowsOf, shopItem } = Scripts.save;\nvar { fill, langOf, wordMap } = Scripts.words;\nvar model = modelOf(Inputs.model && typeof Inputs.model === 'object' ? Inputs.model : {});\nvar pid = String(Inputs.profileId || model.island.activeId);\nvar lang = langOf(Inputs.lang);\nvar w = wordMap(Inputs.words, lang, 'Pip');\nvar id = String(Inputs.requestId || ''), fresh = Inputs.newlyDone === true;\nvar p = null;\nfor (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === pid) p = model.profiles[i];\nvar news = [], kinds = [];\nif (p) { var rows = robotRowsOf(p); for (var r = 0; r < rows.length; r++) kinds.push(rows[r].kind); }\nif (p && fresh && id) for (var u = 0; u < UPGRADES.length; u++) {\n  var up = UPGRADES[u], item = shopItem(up.id), fits = false;\n  if (up.unlockedBy !== id || !item) continue;\n  if (p.stickers.indexOf(up.id) !== -1 || p.owned.indexOf(up.id) !== -1) continue;\n  for (var k = 0; k < kinds.length; k++) if (up.fits.indexOf(kinds[k]) !== -1) fits = true;\n  if (!fits) continue;\n  var nm = String(item.name[lang] || item.name.en);\n  news.push(fill(w.iw6oNewsItem, { up: nm.charAt(0).toLowerCase() + nm.slice(1), n: item.price }));\n}\nOutputs.text = news.length ? fill(w.iw6oNews, { what: news.join(' · ') }) : '';\nOutputs.has = news.length > 0;\n",
+        "runOnChange-in-lang": false,
+        "runOnChange-in-model": false,
+        "runOnChange-in-newlyDone": false,
+        "runOnChange-in-profileId": false,
+        "runOnChange-in-requestId": false,
+        "runOnChange-in-words": false,
+        "uses": "save.js,words.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-profileId",
+          "displayName": "profileId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-requestId",
+          "displayName": "requestId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-newlyDone",
+          "displayName": "newlyDone",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-has",
+          "displayName": "has",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "shopnewsOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "has",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "text",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

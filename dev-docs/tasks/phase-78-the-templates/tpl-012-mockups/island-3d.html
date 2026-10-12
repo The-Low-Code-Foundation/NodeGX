@@ -1,0 +1,1212 @@
+<title>Olive's Island 3D</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* ── Palette, fonts and chrome copied from the P105 mockup (bot-garden.html), not linked ── */
+:root{
+  --paper:#FFF7E8; --paper-2:#FFF0D3; --card:#FFFFFF; --ink:#2E2A3D; --ink-2:#6E6784; --line:#EBDFC4;
+  --leaf:#3FA66B; --leaf-2:#DDF3E4; --leaf-3:#BFE8CC; --soil:#C79A63; --sand:#F1DFB5; --pond:#7CC6F0; --pond-2:#4FA7DC;
+  --coral:#FF7A59; --sun:#FFD166; --violet:#8F6BFF; --violet-2:#EEE8FF; --sky:#5FB4E8;
+  --motion:#4C8DFF; --action:#3FA66B; --control:#FF9F1C; --ask:#8F6BFF; --ok:#3FA66B;
+  --bot:#FF7A59; --bot-eye:#2E2A3D;
+  --r:18px; --shadow:0 6px 18px rgba(72,52,20,.10);
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Nunito,system-ui,sans-serif;font-size:16px;line-height:1.45}
+h1,h2,h3{font-family:Fredoka,Nunito,sans-serif;font-weight:600;margin:0;text-wrap:balance;letter-spacing:.005em}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,[tabindex]:focus-visible,input:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.wrap{max-width:1360px;margin:0 auto;padding-block:12px 40px;padding-inline:16px}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 14px;background:var(--card);border-radius:22px;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:10px;font-family:Fredoka,sans-serif;font-weight:700;font-size:24px}
+.brand svg{width:38px;height:38px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.tab{padding:9px 14px;border-radius:999px;font-weight:800;color:var(--ink-2)}
+.tab[aria-selected="true"]{background:var(--leaf-2);color:var(--ink)}
+.seg{display:flex;background:var(--paper-2);border-radius:999px;padding:3px}
+.seg button{padding:6px 12px;border-radius:999px;font-weight:800;color:var(--ink-2);font-size:14px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.who{display:flex;align-items:center;gap:8px;font-weight:800}
+.who .av{width:34px;height:34px;border-radius:50%;background:var(--sun);display:grid;place-items:center}
+
+.screen{margin-top:14px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.head h1{font-size:34px}
+.head p{margin:2px 0 0;color:var(--ink-2);max-width:60ch}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--leaf)}
+.panel{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:14px}
+
+/* ── the 3D stage (replaces the P105 CSS grid world) ── */
+.stage3d{position:relative;width:100%;max-width:100%;border-radius:16px;overflow:hidden;background:#9FD9F3;border:4px solid #A8D9B4;touch-action:none;user-select:none;-webkit-user-select:none}
+.stage3d canvas{display:block;width:100%;height:100%}
+.stage3d .ovl{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.chip{position:absolute;left:0;top:0;transform:translate(-50%,-100%);background:#fff;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:800;box-shadow:var(--shadow);white-space:nowrap;will-change:transform}
+.chip.bot{background:var(--ink);color:#fff}
+.bub{position:absolute;left:0;top:0;z-index:5;background:#fff;border-radius:14px;padding:8px 12px;font-weight:800;font-size:14px;box-shadow:var(--shadow);max-width:230px;transform:translate(-30%,-115%);will-change:transform;animation:pop .3s ease-out}
+.bub:after{content:"";position:absolute;left:34%;bottom:-8px;border:8px solid transparent;border-top-color:#fff;border-bottom:0}
+.bub.ai{background:var(--violet-2);color:#4A2FA6}
+.bub.ai:after{border-top-color:var(--violet-2)}
+.bub small{display:block;font-weight:700;color:var(--ink-2);font-size:11px}
+.bub.ask{cursor:pointer;pointer-events:auto}
+@keyframes pop{from{transform:translate(-30%,-115%) scale(.4);opacity:0}to{transform:translate(-30%,-115%) scale(1);opacity:1}}
+.hud{position:absolute;right:10px;top:10px;z-index:6;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.hud button{background:#fff;border-radius:999px;padding:8px 14px;font-weight:800;font-size:14px;box-shadow:var(--shadow);display:inline-flex;gap:6px;align-items:center}
+.hud button svg{width:18px;height:18px}
+.hud button:active{transform:scale(.96)}
+.hint3d{position:absolute;left:10px;bottom:10px;z-index:6;background:rgba(255,255,255,.88);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:800;color:var(--ink-2);pointer-events:none}
+.stats{position:fixed;left:12px;bottom:12px;z-index:60;background:rgba(46,42,61,.9);color:#fff;font:700 12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;padding:8px 12px;border-radius:10px;white-space:pre;font-variant-numeric:tabular-nums}
+
+/* ── island ── */
+.island3{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+@media (max-width:980px){.island3{grid-template-columns:1fr}}
+.island3 .stage3d{aspect-ratio:16/10}
+.plots{display:flex;flex-direction:column;gap:10px}
+.plot{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;padding:12px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);text-align:left;width:100%;border:2px solid transparent}
+.plot[aria-pressed="true"]{border-color:var(--leaf)}
+.plot .face{width:52px;height:52px;border-radius:50%;background:var(--paper-2);display:grid;place-items:center}
+.plot .face svg{width:40px;height:40px}
+.plot h3{font-size:17px}
+.plot p{margin:2px 0 0;font-size:14px;color:var(--ink-2)}
+.plot .tag{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;color:#fff}
+.plot .tag.won{background:var(--leaf)}.plot .tag.open{background:var(--coral)}.plot .tag.locked{background:var(--ink-2)}
+.plot.locked{opacity:.78}
+.isline{margin-top:4px;background:var(--violet-2);border-radius:14px;padding:10px 12px;font-weight:700;min-height:44px;color:#4A2FA6}
+
+/* ── workshop ── */
+.ws{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:16px;align-items:start}
+@media (max-width:980px){.ws{grid-template-columns:1fr}}
+.task{display:flex;gap:14px;align-items:center;margin-bottom:12px}
+.task .face{width:56px;height:56px;border-radius:50%;background:var(--paper-2);display:grid;place-items:center;flex:none}
+.task .face svg{width:44px;height:44px}
+.task h2{font-size:22px}
+.task p{margin:0;color:var(--ink-2)}
+.tulips{margin-left:auto;display:flex;gap:6px;align-items:center;font-weight:800;color:var(--ink-2)}
+.tulips span.d{width:26px;height:26px;border-radius:50%;background:var(--paper-2);display:grid;place-items:center;font-size:14px}
+.tulips span.d.on{background:#E3E1EA}
+.ws .stage3d{aspect-ratio:8/5.6;max-width:680px;margin:0 auto}
+.pad{position:absolute;right:10px;bottom:10px;z-index:6;display:grid;grid-template-columns:repeat(3,54px);grid-template-rows:repeat(2,54px);gap:6px}
+.pad button{background:#fff;border-radius:14px;box-shadow:0 4px 10px rgba(0,0,0,.15);font-size:22px;display:grid;place-items:center}
+.pad button:active{transform:scale(.94)}
+.pad .fwd{grid-column:2;grid-row:1}
+.pad .pk{grid-column:1;grid-row:1;background:#E9F6EE}.pad .pt{grid-column:3;grid-row:1;background:#E9F6EE}
+.pad .l{grid-column:1;grid-row:2}.pad .r{grid-column:3;grid-row:2}
+.pad svg{width:26px;height:26px}
+.rec{position:absolute;left:10px;top:10px;z-index:6;background:#fff;border-radius:999px;padding:6px 12px;font-weight:800;font-size:14px;display:flex;gap:8px;align-items:center;box-shadow:var(--shadow)}
+.rec i{width:10px;height:10px;border-radius:50%;background:var(--coral);animation:blink 1s infinite}
+.rec.drive i{background:var(--motion);animation:none}
+@keyframes blink{50%{opacity:.2}}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:999px;font-weight:800;font-size:16px;background:var(--paper-2);transition:transform .1s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--leaf);color:#fff}
+.btn.teach{background:var(--coral);color:#fff}
+.btn.drive{background:var(--motion);color:#fff}
+.btn.quiet{background:transparent;color:var(--ink-2)}
+.btn.ask{background:var(--violet);color:#fff}
+.btn svg{width:20px;height:20px}
+.btn[disabled]{opacity:.45;cursor:default}
+.modes .btn[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ink),0 0 0 7px #fff}
+.owl{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:start;margin-top:14px;background:var(--violet-2);border-radius:16px;padding:12px}
+.owl svg.o{width:64px;height:64px}
+.owl .say{font-weight:700}
+.owl .meta{font-size:12px;color:#6a5aa8;margin-top:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.owl .meta .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+
+/* script panel (the P105 block panel) */
+.script h2{font-size:20px;display:flex;align-items:center;gap:8px}
+.script .count{margin-left:auto;font-size:13px;color:var(--ink-2);font-weight:800}
+.palette{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 12px;padding-bottom:12px;border-bottom:2px dashed var(--line)}
+.blk{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:12px;color:#fff;font-weight:800;font-size:15px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18);user-select:none}
+.blk svg{width:20px;height:20px;flex:none}
+.blk.motion{background:var(--motion)}.blk.action{background:var(--action)}.blk.control{background:var(--control)}.blk.ask{background:var(--ask)}
+.blk .slot{background:rgba(255,255,255,.28);border-radius:8px;padding:1px 7px;font-size:13px}
+.palette .blk{cursor:pointer}
+.palette .blk:hover{filter:brightness(1.06)}
+.band1 .blk{font-size:0;padding:10px 12px}.band1 .blk svg{width:24px;height:24px}
+.band1 .blk .n{font-size:15px}
+.prog{display:flex;flex-direction:column;gap:6px;min-height:120px;transition:opacity .2s}
+.prog.driving{opacity:.45}
+.prog .row{display:flex;align-items:center;gap:6px}
+.prog .blk{position:relative;cursor:pointer;transition:transform .12s,box-shadow .12s}
+/* IG-001 D5: the running block wears a 3 px ink ring, a 4 px white halo and a 1.04 lift (measured >= 3:1 on white and on #FFF0DA) */
+.prog .blk.run,.exprog .blk.run{box-shadow:inset 0 -3px 0 rgba(0,0,0,.18),0 0 0 3px var(--ink),0 0 0 7px #fff;transform:scale(1.04);z-index:2}
+.prog .blk .x{margin-left:4px;opacity:.7;font-size:13px}
+.prog .rep,.exprog .rep{border-radius:14px;background:#FFF0DA;padding:6px;display:flex;flex-direction:column;gap:6px;border:2px solid transparent}
+.prog .rep.sel{border-color:var(--control)}
+.prog .rep .hd,.exprog .rep .hd{display:flex;align-items:center;gap:6px}
+.prog .rep .body,.exprog .rep .body{margin-left:22px;display:flex;flex-direction:column;gap:6px;border-left:4px solid var(--control);padding-left:8px}
+.exprog .rep.skip{opacity:.45}
+.prog .rep .nctl{display:inline-flex;gap:2px;margin-left:2px}
+.prog .rep .nctl button{width:26px;height:26px;border-radius:8px;background:rgba(255,255,255,.35);color:#fff;font-weight:800}
+.empty{color:var(--ink-2);font-weight:700;padding:18px 10px;border:2px dashed var(--line);border-radius:14px;text-align:center}
+
+/* win */
+.win{position:absolute;inset:0;z-index:8;display:grid;place-items:center;background:rgba(255,247,232,.72);backdrop-filter:blur(2px)}
+.win .card{background:#fff;border-radius:22px;padding:22px 26px;box-shadow:var(--shadow);text-align:center;max-width:380px;animation:popc .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popc{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+.win h3{font-size:26px}
+.win p{margin:6px 0 12px;color:var(--ink-2);font-weight:700}
+.reward{display:inline-flex;gap:8px;align-items:center;background:var(--paper-2);border-radius:999px;padding:8px 14px;font-weight:800;margin:4px}
+.reward.learn{background:#FFF0DA}
+
+/* ── my robots ── */
+.robots{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}
+.rcard{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:10px;position:relative}
+.rcard.locked{opacity:.72;background:var(--paper-2)}
+.rcard .rtop{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center}
+.rcard .stage{background:linear-gradient(180deg,#FFF3DE,#FFE7BE);border-radius:18px;display:grid;place-items:center;aspect-ratio:1/1}
+.rcard .stage svg{width:82%;height:82%;overflow:visible}
+.rcard input.name{font:inherit;font-weight:800;font-size:20px;padding:8px 12px;border-radius:12px;border:2px solid var(--line);width:100%;background:#fff;color:var(--ink);font-family:Fredoka,Nunito,sans-serif}
+.rcard input.name[disabled]{background:transparent;border-color:transparent;padding-left:0}
+.rcard .rtag{position:absolute;right:12px;top:12px;font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;background:var(--leaf-2);color:var(--ink)}
+.rcard.locked .rtag{background:var(--ink-2);color:#fff}
+.rcard h4{margin:0;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.rcard .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw button{width:32px;height:32px;border-radius:50%;box-shadow:inset 0 -3px 0 rgba(0,0,0,.15)}
+.sw button[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:2px}
+.hats button,.upg span{padding:6px 12px;border-radius:999px;background:var(--paper-2);font-weight:800;font-size:14px}
+.hats button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.hats button.lock{opacity:.5}
+.upg span{background:#FFF0DA}
+.upg span.none{background:transparent;border:2px dashed var(--line);color:var(--ink-2)}
+.rcard .abil .blk{font-size:13px;padding:5px 9px;border-radius:9px}
+.rcard .abil .blk svg{width:16px;height:16px}
+.rcard .where{font-weight:700;color:var(--ink-2);font-size:14px}
+
+/* ── olive reads ── */
+.olv{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:16px}
+.ocard{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:8px}
+.ocard h3{font-size:18px;display:flex;align-items:center;gap:8px}
+.ocard p{margin:0;font-size:14px;color:var(--ink-2)}
+.ocard .ex{font-size:13px;font-weight:800;color:#4A2FA6;background:var(--violet-2);border-radius:10px;padding:8px 10px}
+.olex{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:16px;align-items:start}
+@media (max-width:980px){.olex{grid-template-columns:1fr}}
+.olex .stage3d{aspect-ratio:8/5.6;max-width:680px;margin:0 auto}
+.exprog{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.exprog .row{display:flex;align-items:center;gap:6px}
+.exprog .blk{position:relative;transition:transform .12s,box-shadow .12s}
+.note{margin-top:18px;font-size:13px;color:var(--ink-2);text-align:center}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-fwd" viewBox="0 0 24 24"><path d="M12 4l7 8h-4v8H9v-8H5z" fill="currentColor"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="M9 6L3 11l6 5v-3h6a4 4 0 010 8h-2v-3h2a1 1 0 000-2H9v3z" fill="currentColor" transform="scale(1,-1) translate(0,-24)"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="M15 6l6 5-6 5v-3H9a4 4 0 000 8h2v-3H9a1 1 0 010-2h6v3z" fill="currentColor" transform="scale(1,-1) translate(0,-24)"/></symbol>
+    <symbol id="i-water" viewBox="0 0 24 24"><path d="M12 3s6 7 6 11a6 6 0 01-12 0c0-4 6-11 6-11z" fill="currentColor"/><path d="M9.5 15.5a2.5 2.5 0 002 2.4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" fill="none"/></symbol>
+    <symbol id="i-fill" viewBox="0 0 24 24"><path d="M6 9h9v11H6z" fill="currentColor"/><path d="M15 12l5-3v3l-5 3z" fill="currentColor"/><path d="M8 4h5v5H8z" fill="currentColor" opacity=".7"/></symbol>
+    <symbol id="i-loop" viewBox="0 0 24 24"><path d="M17 4l3 3-3 3V8H8a3 3 0 000 6h1v2H8a5 5 0 010-10h9zM7 20l-3-3 3-3v2h9a3 3 0 000-6h-1V8h1a5 5 0 010 10H7z" fill="currentColor"/></symbol>
+    <symbol id="i-if" viewBox="0 0 24 24"><path d="M12 2l10 10-10 10L2 12z" fill="currentColor"/><path d="M10 8h4v5h-4zm0 6.5h4v2h-4z" fill="#fff"/></symbol>
+    <symbol id="i-wall" viewBox="0 0 24 24"><path d="M3 5h18v4H3zm0 5h18v4H3zm0 5h18v4H3z" fill="currentColor" opacity=".9"/><path d="M11 5v4m-4 5v4m8-4v4M7 10v4m8 0V9" stroke="#fff" stroke-width="1.5"/></symbol>
+    <symbol id="i-say" viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 012 2v9a2 2 0 01-2 2h-8l-5 4v-4H4a2 2 0 01-2-2V6a2 2 0 012-2z" fill="currentColor"/><circle cx="8" cy="10.5" r="1.4" fill="#fff"/><circle cx="12" cy="10.5" r="1.4" fill="#fff"/><circle cx="16" cy="10.5" r="1.4" fill="#fff"/></symbol>
+    <symbol id="i-pick" viewBox="0 0 24 24"><path d="M12 3l2.4 5 5.6.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.6-.8z" fill="currentColor"/></symbol>
+    <symbol id="i-put" viewBox="0 0 24 24"><path d="M4 14h16v6H4zM11 3h2v7h3l-4 4-4-4h3z" fill="currentColor"/></symbol>
+    <symbol id="i-read" viewBox="0 0 24 24"><path d="M4 4h12l4 4v12H4z" fill="currentColor"/><path d="M7 11h10M7 14h10M7 17h6" stroke="#fff" stroke-width="1.6"/></symbol>
+    <symbol id="i-goto" viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 5-7 13-7 13S5 14 5 9a7 7 0 017-7z" fill="currentColor"/><circle cx="12" cy="9" r="2.6" fill="#fff"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z" fill="currentColor"/></symbol>
+    <symbol id="i-step" viewBox="0 0 24 24"><path d="M5 4l10 8-10 8z" fill="currentColor"/><rect x="17" y="4" width="3" height="16" fill="currentColor"/></symbol>
+    <symbol id="i-rec" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="currentColor"/></symbol>
+    <symbol id="i-drive" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 4v5M4 12h5M12 20v-5M20 12h-5" stroke="currentColor" stroke-width="3"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M12 5a7 7 0 106.3 4H16l4-5 2 5h-1.6A9 9 0 1112 3z" fill="currentColor"/></symbol>
+    <symbol id="i-find" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" stroke-width="3"/><path d="M16 16l5 5" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol>
+    <symbol id="tulip" viewBox="0 0 48 64"><path d="M24 62V30" stroke="#3FA66B" stroke-width="4" stroke-linecap="round"/><path d="M24 48c-6-2-10-8-12-14 6 0 11 4 12 8-1-4 6-8 12-8-2 6-6 12-12 14z" fill="#3FA66B"/><path d="M10 12c0 14 6 22 14 24 8-2 14-10 14-24-4 4-8 6-14 2-6 4-10 2-14-2z" fill="#FF6B9A"/><path d="M24 14v22" stroke="#E04E7E" stroke-width="2"/></symbol>
+    <symbol id="granny" viewBox="0 0 64 64"><circle cx="32" cy="30" r="18" fill="#F7D3B5"/><path d="M14 26c0-14 36-14 36 0 0 4-2 6-4 6-4-8-24-8-28 0-2 0-4-2-4-6z" fill="#E9E4EF"/><circle cx="25" cy="30" r="2.5" fill="#2E2A3D"/><circle cx="39" cy="30" r="2.5" fill="#2E2A3D"/><circle cx="25" cy="30" r="5" fill="none" stroke="#2E2A3D" stroke-width="1.5"/><circle cx="39" cy="30" r="5" fill="none" stroke="#2E2A3D" stroke-width="1.5"/><path d="M30 30h4" stroke="#2E2A3D" stroke-width="1.5"/><path d="M26 38q6 5 12 0" stroke="#C0574A" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M14 62c2-12 34-12 36 0z" fill="#8F6BFF"/></symbol>
+    <symbol id="cat" viewBox="0 0 64 64"><path d="M14 30l4-16 10 8h8l10-8 4 16z" fill="#F3B76A"/><ellipse cx="32" cy="38" rx="18" ry="16" fill="#F3B76A"/><circle cx="25" cy="36" r="3" fill="#2E2A3D"/><circle cx="39" cy="36" r="3" fill="#2E2A3D"/><path d="M29 43h6l-3 3z" fill="#E06B8A"/><path d="M10 40h10M10 46h10M44 40h10M44 46h10" stroke="#2E2A3D" stroke-width="1.5"/></symbol>
+    <symbol id="postie" viewBox="0 0 64 64"><circle cx="32" cy="28" r="16" fill="#C98A5E"/><path d="M14 24c2-12 34-12 36 0z" fill="#3E63C8"/><rect x="10" y="20" width="44" height="6" rx="3" fill="#3E63C8"/><circle cx="26" cy="30" r="2.5" fill="#2E2A3D"/><circle cx="38" cy="30" r="2.5" fill="#2E2A3D"/><path d="M27 37q5 4 10 0" stroke="#7A3F2D" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M14 62c2-12 34-12 36 0z" fill="#3E63C8"/></symbol>
+    <symbol id="owl" viewBox="0 0 64 64"><ellipse cx="32" cy="36" rx="22" ry="24" fill="#8F6BFF"/><path d="M12 18l8 8h24l8-8-6 2-4-4-6 4-6-4-4 4z" fill="#8F6BFF"/><ellipse cx="32" cy="42" rx="14" ry="14" fill="#EEE8FF"/><circle cx="24" cy="32" r="8" fill="#fff"/><circle cx="40" cy="32" r="8" fill="#fff"/><circle cx="25" cy="33" r="4" fill="#2E2A3D"/><circle cx="39" cy="33" r="4" fill="#2E2A3D"/><path d="M32 38l-4 5h8z" fill="#FFB347"/><path d="M26 58l-3 4M38 58l3 4" stroke="#FFB347" stroke-width="3" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#owl"></use></svg><span data-t="brand">Olive's Island</span></div>
+    <nav class="tabs" role="tablist" aria-label="Screens">
+      <button class="tab" role="tab" data-screen="island" aria-selected="true" data-t="navIsland">Island</button>
+      <button class="tab" role="tab" data-screen="workshop" aria-selected="false" data-t="navWorkshop">Workshop</button>
+      <button class="tab" role="tab" data-screen="robots" aria-selected="false" data-t="navRobots">My robots</button>
+      <button class="tab" role="tab" data-screen="olive" aria-selected="false" data-t="navOlive">Olive reads</button>
+    </nav>
+    <div class="seg" role="group" aria-label="Age band"><button id="band1" aria-pressed="false">7–9</button><button id="band2" aria-pressed="true">10–12</button></div>
+    <div class="seg" role="group" aria-label="Language"><button id="langEN" aria-pressed="true">EN</button><button id="langFR" aria-pressed="false">FR</button></div>
+    <div class="who"><span class="av"><svg width="22" height="22" viewBox="0 0 64 64"><use href="#owl"></use></svg></span><span id="whoName">Léa</span></div>
+  </header>
+
+  <!-- ================= ISLAND ================= -->
+  <section class="screen" id="s-island">
+    <div class="head"><div><div class="eyebrow" data-t="isEyebrow">Your island</div><h1 data-t="isTitle">Three plots, three jobs</h1><p data-t="isSub">Pan with a finger, pinch to zoom. The robots you taught keep working while you look around.</p></div></div>
+    <div class="island3">
+      <div class="stage3d" id="islandStage" aria-label="The island in 3D">
+        <div class="hud"><button id="findBots"><svg><use href="#i-find"></use></svg><span data-t="findBots">Find my robots</span></button></div>
+        <div class="hint3d" data-t="hintPan">Drag to pan · pinch or wheel to zoom · tap a plot</div>
+      </div>
+      <div class="plots">
+        <div class="eyebrow" data-t="isPlots">The plots</div>
+        <div id="plotCards"></div>
+        <div class="isline" id="isLine"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WORKSHOP ================= -->
+  <section class="screen" id="s-workshop" hidden>
+    <div class="head">
+      <div><div class="eyebrow" data-t="wsEyebrow">Sami's request</div><h1 data-t="wsTitle">Teach Cobble to lay the stones</h1><p data-t="wsSub">Drive Cobble around first: nothing is remembered. When you have the moves, press Teach and do them again.</p></div>
+    </div>
+    <div class="ws" id="ws">
+      <div class="panel">
+        <div class="task">
+          <div class="face"><svg><use href="#postie"></use></svg></div>
+          <div><h2 data-t="taskH">Sami</h2><p data-t="taskP">"Three stones are missing on the path to my post box."</p></div>
+          <div class="tulips" id="stoneCount" title="Stones laid"><span class="d"></span><span class="d"></span><span class="d"></span></div>
+        </div>
+        <div class="stage3d" id="wsStage" aria-label="The plot">
+          <div class="rec" id="recBadge" hidden><i></i><span id="recText"></span></div>
+          <div class="pad" id="pad" hidden></div>
+          <div class="win" id="win" hidden><div class="card">
+            <svg width="72" height="72" viewBox="0 0 64 64"><use href="#postie"></use></svg>
+            <h3 id="winH"></h3>
+            <p id="winP"></p>
+            <div><span class="reward" id="rewardRobot">🤖 <span data-t="winRobot">Cobble is yours now</span></span><span class="reward learn" id="rewardLearn" hidden>🔁 <span id="winLearn"></span></span></div>
+            <div class="controls" style="justify-content:center"><button class="btn primary" id="winIsland" data-t="winIsland">Back to the island</button><button class="btn" id="winStay" data-t="winStay">Keep tinkering</button></div>
+          </div></div>
+        </div>
+        <div class="controls modes" role="group" aria-label="Mode">
+          <button class="btn drive" id="btnDrive" aria-pressed="false"><svg><use href="#i-drive"></use></svg><span data-t="drive">Drive</span></button>
+          <button class="btn teach" id="btnTeach" aria-pressed="false"><svg><use href="#i-rec"></use></svg><span data-t="teach">Teach</span></button>
+          <button class="btn primary" id="btnPlay" aria-pressed="false"><svg><use href="#i-play"></use></svg><span data-t="play">Play</span></button>
+          <button class="btn" id="btnStep"><svg><use href="#i-step"></use></svg><span data-t="step">One step</span></button>
+          <button class="btn" id="btnReset"><svg><use href="#i-reset"></use></svg><span data-t="reset">Start over</span></button>
+        </div>
+        <div class="owl">
+          <svg class="o" viewBox="0 0 64 64" aria-hidden="true"><use href="#owl"></use></svg>
+          <div><div class="say" id="owlSay"></div><div class="meta"><span class="dot"></span><span data-t="owlMeta">Olive lives on this computer. No internet needed.</span></div></div>
+        </div>
+      </div>
+      <div class="panel script" id="scriptPanel">
+        <h2><span id="scriptH"></span><span class="count" id="blockCount"></span></h2>
+        <div class="palette" id="palette"></div>
+        <div class="prog" id="prog"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MY ROBOTS ================= -->
+  <section class="screen" id="s-robots" hidden>
+    <div class="head"><div><div class="eyebrow" data-t="rbEyebrow">My robots</div><h1 data-t="rbTitle">The right robot for the job</h1><p data-t="rbSub">Each robot has its own blocks, a name you can change, a colour and a hat. Islanders lend you new robots.</p></div></div>
+    <div class="robots" id="robotCards"></div>
+  </section>
+
+  <!-- ================= OLIVE READS ================= -->
+  <section class="screen" id="s-olive" hidden>
+    <div class="head"><div><div class="eyebrow" data-t="olEyebrow">Olive reads</div><h1 data-t="olTitle">The owl is the only one who can read</h1><p data-t="olSub">A program knows the whole island, except what an islander wrote. Olive reads it for you. Three blocks, each with an answer you can see.</p></div></div>
+    <div class="olv" id="oliveCards"></div>
+    <div class="olex">
+      <div class="panel">
+        <div class="task">
+          <div class="face"><svg><use href="#granny"></use></svg></div>
+          <div><h2 data-t="olExH">Played example: Mamie's note</h2><p data-t="olExSub">The note says which tulips want water today. Olive reads it, and the if block steers Echo to the right ones.</p></div>
+        </div>
+        <div class="stage3d" id="olvStage" aria-label="Mamie's plot"></div>
+        <div class="controls"><button class="btn ask" id="olvPlay"><svg><use href="#i-play"></use></svg><span data-t="olPlay">Play the example</span></button><span class="isline" id="olvLine" style="flex:1"></span></div>
+      </div>
+      <div class="panel script">
+        <h2><span data-t="olProgH">Echo's steps</span></h2>
+        <div class="exprog" id="exprog"></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="note" data-t="note">Interactive mockup. The island, the three modes and the played example really run in this page. Olive's replies are written examples: no model runs here.</p>
+</div>
+<div class="stats" id="stats" hidden></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.158.0/three.min.js"></script>
+<script id="scene-builder">
+/* ═══════════════════════════════════════════════════════════════════════════════════════════════
+   Garden 3D — the scene builder. Pure three.js over the engine's world shape; NO page code in this
+   block, so IG-007 lifts it verbatim into the garden-3d-kit node. Reads only the THREE global.
+
+   var scene = GardenScene.buildScene(world, opts)
+     world  = { map, things, robots }                        — the shape documented at the top of kit.js
+       map     { rows: ["GGTGGGTH", ...], legend?: { G: "grass" } } or just the rows
+               kinds: grass path water tree rock house bed   (a bed draws a dry tulip; a Thing waters it)
+       things  [{ kind, x, y, ... }]  kinds this builder draws:
+               tulip {watered?, colour?: pink|yellow}   puddle   letter   bowl {full?}   label {text?}
+               note   sign   stone   postbox   rock {left: 0..3, on a rock tile}
+               fence {w, h}  padlock   islander {who: granny|postie|cat}       (IG-004's island vocabulary)
+       robots  [{ x, y, d, colour, eyes, hat, name, bump?, accessory?: can|hod|satchel|bell, can?, canMax?, load? }]
+               d 0..3 clockwise from up; bump is a COUNT that rises once per bump
+     opts   = { stepMs: 420 }                                — the glide / turn duration
+   scene.group        THREE.Group  — add it to your THREE.Scene
+   scene.w, scene.h   the map size in tiles; world x → +x, world y (rows) → +z; tile (x,y) centre is (x+.5, top, y+.5)
+   scene.update(world) resync things and robots; a moved robot glides from where it is drawn now
+   scene.tick(now)    advance glides, turns, bumps, hops, idles; call once per frame
+   scene.tileAt(ray)  {x, y} of the tile a THREE.Ray hits, or null
+   scene.pointOf(sel) THREE.Vector3 above a robot ({robot: i}) or a thing ({thing: i}) or a tile ({x, y}) — for DOM bubbles
+   scene.celebrate(i) the robot hops
+   scene.dispose()    frees geometries and materials
+   No shadow maps, no textures, no post-processing: MeshLambertMaterial flatShading only.
+   ═══════════════════════════════════════════════════════════════════════════════════════════════ */
+var GardenScene = (function () {
+  var TOP = { grass: 0.4, path: 0.34, water: 0.14, tree: 0.4, rock: 0.4, house: 0.4, bed: 0.3 };
+  var LEGEND = { G: 'grass', P: 'path', W: 'water', T: 'tree', R: 'rock', H: 'house', F: 'bed', '.': 'grass', ' ': 'grass' };
+  var C = {
+    grassA: 0xBDE6C9, grassB: 0xB4E0C2, path: 0xF1DFB5, water: 0x7CC6F0, soil: 0xC79A63, sand: 0xF1DFB5, sea: 0x7CC6F0,
+    trunk: 0xA9773F, leaf: 0x3E9B62, leaf2: 0x48AF70, rock: 0x9C9AA6, rock2: 0xB7B5C2,
+    wall: 0xFFE3B3, roof: 0xE86A5E, door: 0x8B5A2B, glass: 0x7CC6F0,
+    stem: 0x3FA66B, pink: 0xFF6B9A, pinkDry: 0xE6B7C6, yellow: 0xFFD166, yellowDry: 0xEBD9A9,
+    ink: 0x2E2A3D, white: 0xFFFFFF, can: 0x4FA7DC, canWater: 0xBFE7FF, gold: 0xFFD166, iron: 0x8E8CA0,
+    skin: 0xF7D3B5, granny: 0x8F6BFF, hair: 0xE9E4EF, postie: 0x3E63C8, cat: 0xF3B76A, nose: 0xE06B8A,
+    paper: 0xFFFFFF, coral: 0xFF7A59, wheel: 0x3A3646, cap: 0x3E63C8, hod: 0xA9773F, satchel: 0xC98A5E, bowl: 0xE86A5E, food: 0x8B5A2B
+  };
+  var DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0];
+  var mats = {};
+  function mat(hex, extra) {
+    var key = hex + (extra ? JSON.stringify(extra) : '');
+    if (!mats[key]) {
+      var p = { color: hex, flatShading: true };
+      if (extra) for (var k in extra) p[k] = extra[k];
+      mats[key] = new THREE.MeshLambertMaterial(p);
+    }
+    return mats[key];
+  }
+  var geos = {};
+  function geo(key, make) { if (!geos[key]) geos[key] = make(); return geos[key]; }
+  function box(sx, sy, sz) { return geo('b' + sx + ',' + sy + ',' + sz, function () { return new THREE.BoxGeometry(sx, sy, sz); }); }
+  function mesh(g, m, x, y, z) { var o = new THREE.Mesh(g, m); o.position.set(x || 0, y || 0, z || 0); return o; }
+  function ease(p) { return p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p; }
+
+  /* ── the world shape ── */
+  function parseMap(map) {
+    var rows = Array.isArray(map) ? map : (map && map.rows) || [];
+    var legend = {};
+    for (var k in LEGEND) legend[k] = LEGEND[k];
+    if (map && map.legend) for (var c in map.legend) legend[c] = map.legend[c];
+    var w = 0;
+    rows.forEach(function (r) { if (r.length > w) w = r.length; });
+    var cells = [];
+    for (var y = 0; y < rows.length; y++) {
+      cells.push([]);
+      for (var x = 0; x < w; x++) { var kind = legend[rows[y][x]] || 'grass'; if (!(kind in TOP)) kind = 'grass'; cells[y].push(kind); }
+    }
+    return { w: w, h: rows.length, cells: cells };
+  }
+
+  /* ── one mesh for every tile: box per tile, colour per vertex ── */
+  function mergeBoxes(items) {
+    var pos = [], nor = [], col = [], idx = [], base = 0, tmp = new THREE.Color();
+    items.forEach(function (it) {
+      var g = new THREE.BoxGeometry(it.sx, it.sy, it.sz);
+      g.translate(it.x, it.y, it.z);
+      var p = g.attributes.position.array, n = g.attributes.normal.array, ix = g.index.array;
+      tmp.set(it.color);
+      for (var i = 0; i < p.length; i += 3) { pos.push(p[i], p[i + 1], p[i + 2]); nor.push(n[i], n[i + 1], n[i + 2]); col.push(tmp.r, tmp.g, tmp.b); }
+      for (var j = 0; j < ix.length; j++) idx.push(ix[j] + base);
+      base += p.length / 3;
+      g.dispose();
+    });
+    var out = new THREE.BufferGeometry();
+    out.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    out.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+    out.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+    out.setIndex(idx);
+    return out;
+  }
+
+  /* ── props ── */
+  function tree(x, y, top, seed) {
+    var g = new THREE.Group();
+    var s = 0.85 + ((seed * 7) % 5) * 0.06;
+    g.add(mesh(geo('trunk', function () { return new THREE.CylinderGeometry(0.07, 0.1, 0.36, 6); }), mat(C.trunk), 0, 0.18, 0));
+    g.add(mesh(geo('cone1', function () { return new THREE.ConeGeometry(0.4, 0.62, 6); }), mat(C.leaf), 0, 0.6, 0));
+    g.add(mesh(geo('cone2', function () { return new THREE.ConeGeometry(0.3, 0.5, 6); }), mat(C.leaf2), 0, 0.95, 0));
+    g.scale.set(s, s, s);
+    g.rotation.y = (seed % 6) * 0.5;
+    g.position.set(x + 0.5, top, y + 0.5);
+    return g;
+  }
+  function rock(x, y, top, left, seed) {
+    var size = [0, 0.16, 0.24, 0.32][Math.max(0, Math.min(3, left))];
+    if (!size) return null;
+    var g = new THREE.Group();
+    var m = mesh(geo('ico', function () { return new THREE.IcosahedronGeometry(1, 0); }), mat(C.rock), 0, size * 0.75, 0);
+    m.scale.set(size, size * 0.75, size);
+    m.rotation.set(0.3, (seed || 0) * 0.7, 0.2);
+    g.add(m);
+    if (left >= 2) { var m2 = mesh(geo('ico', function () { return new THREE.IcosahedronGeometry(1, 0); }), mat(C.rock2), 0.22, 0.09, 0.16); m2.scale.set(0.12, 0.09, 0.12); g.add(m2); }
+    g.position.set(x + 0.5, top, y + 0.5);
+    return g;
+  }
+  function prism(w, h, d) {
+    return geo('prism' + w + ',' + h + ',' + d, function () {
+      var hw = w / 2, hd = d / 2;
+      var v = [
+        -hw, 0, hd, hw, 0, hd, 0, h, hd,          // front
+        hw, 0, -hd, -hw, 0, -hd, 0, h, -hd,       // back
+        -hw, 0, hd, 0, h, hd, 0, h, -hd, -hw, 0, hd, 0, h, -hd, -hw, 0, -hd,   // left roof
+        hw, 0, -hd, 0, h, -hd, 0, h, hd, hw, 0, -hd, 0, h, hd, hw, 0, hd,      // right roof
+        -hw, 0, -hd, hw, 0, -hd, hw, 0, hd, -hw, 0, -hd, hw, 0, hd, -hw, 0, hd  // bottom
+      ];
+      var g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
+      g.computeVertexNormals();
+      return g;
+    });
+  }
+  function house(x, y, top) {
+    var g = new THREE.Group();
+    g.add(mesh(box(0.8, 0.5, 0.66), mat(C.wall), 0, 0.25, 0));
+    g.add(mesh(prism(0.96, 0.4, 0.8), mat(C.roof), 0, 0.5, 0));
+    g.add(mesh(box(0.18, 0.28, 0.04), mat(C.door), 0, 0.14, 0.34));
+    g.add(mesh(box(0.14, 0.14, 0.04), mat(C.glass), -0.24, 0.3, 0.34));
+    g.add(mesh(box(0.14, 0.14, 0.04), mat(C.glass), 0.24, 0.3, 0.34));
+    g.position.set(x + 0.5, top, y + 0.5);
+    return g;
+  }
+  function tulip(x, y, top, watered, colour) {
+    var g = new THREE.Group();
+    var petal = colour === 'yellow' ? (watered ? C.yellow : C.yellowDry) : (watered ? C.pink : C.pinkDry);
+    g.add(mesh(geo('stem', function () { return new THREE.CylinderGeometry(0.025, 0.03, 0.34, 5); }), mat(C.stem), 0, 0.17, 0));
+    g.add(mesh(geo('cup', function () { return new THREE.CylinderGeometry(0.12, 0.05, 0.2, 5); }), mat(petal), 0, 0.42, 0));
+    var l1 = mesh(box(0.05, 0.16, 0.02), mat(C.stem), -0.07, 0.14, 0); l1.rotation.z = 0.7; g.add(l1);
+    var l2 = mesh(box(0.05, 0.16, 0.02), mat(C.stem), 0.07, 0.14, 0); l2.rotation.z = -0.7; g.add(l2);
+    if (!watered) { g.rotation.z = 0.32; g.scale.set(0.9, 0.85, 0.9); }
+    g.position.set(x + 0.5, top, y + 0.5);
+    return g;
+  }
+  function stone(x, y, top) { var m = mesh(geo('ico', function () { return new THREE.IcosahedronGeometry(1, 0); }), mat(C.rock2), x + 0.5, top + 0.07, y + 0.5); m.scale.set(0.14, 0.08, 0.14); m.rotation.y = (x * 3 + y) * 0.6; return m; }
+  function puddle(x, y, top) { var m = mesh(geo('disc', function () { return new THREE.CylinderGeometry(0.3, 0.3, 0.02, 8); }), mat(C.water), x + 0.5, top + 0.01, y + 0.5); return m; }
+  function letter(x, y, top) { var m = mesh(box(0.3, 0.02, 0.2), mat(C.paper), x + 0.5, top + 0.02, y + 0.5); m.rotation.y = 0.4; return m; }
+  function note(x, y, top) {
+    var g = new THREE.Group();
+    g.add(mesh(box(0.34, 0.02, 0.44), mat(C.paper), 0, 0.02, 0));
+    g.add(mesh(box(0.22, 0.02, 0.03), mat(C.coral), 0, 0.03, -0.1));
+    g.add(mesh(box(0.22, 0.02, 0.03), mat(C.ink), 0, 0.03, 0));
+    g.add(mesh(box(0.14, 0.02, 0.03), mat(C.ink), -0.04, 0.03, 0.1));
+    g.rotation.y = -0.3;
+    g.position.set(x + 0.5, top, y + 0.5);
+    return g;
+  }
+  function sign(x, y, top) {
+    var g = new THREE.Group();
+    g.add(mesh(box(0.05, 0.5, 0.05), mat(C.trunk), 0, 0.25, 0));
+    g.add(mesh(box(0.44, 0.26, 0.04), mat(C.paper), 0, 0.5, 0));
+    g.add(mesh(box(0.3, 0.03, 0.05), mat(C.ink), 0, 0.53, 0));
+    g.add(mesh(box(0.2, 0.03, 0.05), mat(C.ink), -0.05, 0.46, 0));
+    g.position.set(x + 0.5, top, y + 0.5);
+    return g;
+  }
+  function postbox(x, y, top) {
+    var g = new THREE.Group();
+    g.add(mesh(box(0.08, 0.4, 0.08), mat(C.iron), 0, 0.2, 0));
+    g.add(mesh(box(0.34, 0.4, 0.3), mat(C.roof), 0, 0.6, 0));
+    g.add(mesh(box(0.2, 0.04, 0.04), mat(C.paper), 0, 0.68, -0.15));
+    g.position.set(x + 0.5, top, y + 0.5);
+    return g;
+  }
+  function bowl(x, y, top, full) {
+    var g = new THREE.Group();
+    g.add(mesh(geo('bowl', function () { return new THREE.CylinderGeometry(0.22, 0.15, 0.12, 8); }), mat(C.bowl), 0, 0.06, 0));
+    if (full) g.add(mesh(geo('food', function () { return new THREE.CylinderGeometry(0.16, 0.16, 0.06, 8); }), mat(C.food), 0, 0.14, 0));
+    g.position.set(x + 0.5, top, y + 0.5);
+    return g;
+  }
+  function fence(x, y, w, h, top) {
+    var items = [];
+    var post = function (px, pz) { items.push({ x: px, y: top + 0.2, z: pz, sx: 0.07, sy: 0.4, sz: 0.07, color: C.trunk }); };
+    for (var i = 0; i <= w; i++) { post(x + i, y); post(x + i, y + h); }
+    for (var j = 1; j < h; j++) { post(x, y + j); post(x + w, y + j); }
+    items.push({ x: x + w / 2, y: top + 0.3, z: y, sx: w, sy: 0.05, sz: 0.04, color: C.hod });
+    items.push({ x: x + w / 2, y: top + 0.3, z: y + h, sx: w, sy: 0.05, sz: 0.04, color: C.hod });
+    items.push({ x: x, y: top + 0.3, z: y + h / 2, sx: 0.04, sy: 0.05, sz: h, color: C.hod });
+    items.push({ x: x + w, y: top + 0.3, z: y + h / 2, sx: 0.04, sy: 0.05, sz: h, color: C.hod });
+    items.push({ x: x + w / 2, y: top + 0.14, z: y, sx: w, sy: 0.05, sz: 0.04, color: C.hod });
+    items.push({ x: x + w / 2, y: top + 0.14, z: y + h, sx: w, sy: 0.05, sz: 0.04, color: C.hod });
+    items.push({ x: x, y: top + 0.14, z: y + h / 2, sx: 0.04, sy: 0.05, sz: h, color: C.hod });
+    items.push({ x: x + w, y: top + 0.14, z: y + h / 2, sx: 0.04, sy: 0.05, sz: h, color: C.hod });
+    var m = new THREE.Mesh(mergeBoxes(items), mat(C.white, { vertexColors: true }));
+    m.userData.own = true;
+    return m;
+  }
+  function padlock(x, y, top) {
+    var g = new THREE.Group();
+    g.add(mesh(box(0.56, 0.44, 0.2), mat(C.gold), 0, 0.22, 0));
+    g.add(mesh(box(0.1, 0.14, 0.06), mat(C.ink), 0, 0.2, 0.11));
+    var sh = mesh(geo('shackle', function () { return new THREE.TorusGeometry(0.17, 0.045, 6, 12, Math.PI); }), mat(C.iron), 0, 0.44, 0);
+    g.add(sh);
+    g.position.set(x, top + 0.9, y);
+    g.userData.idle = 'padlock';
+    return g;
+  }
+  function islander(x, y, top, who) {
+    var g = new THREE.Group();
+    if (who === 'cat') {
+      g.add(mesh(box(0.42, 0.22, 0.22), mat(C.cat), 0, 0.11, 0));
+      g.add(mesh(box(0.24, 0.22, 0.22), mat(C.cat), 0.28, 0.24, 0));
+      g.add(mesh(geo('ear', function () { return new THREE.ConeGeometry(0.05, 0.1, 4); }), mat(C.cat), 0.2, 0.4, -0.07));
+      g.add(mesh(geo('ear', function () { return new THREE.ConeGeometry(0.05, 0.1, 4); }), mat(C.cat), 0.2, 0.4, 0.07));
+      g.add(mesh(box(0.03, 0.03, 0.03), mat(C.ink), 0.41, 0.28, -0.06));
+      g.add(mesh(box(0.03, 0.03, 0.03), mat(C.ink), 0.41, 0.28, 0.06));
+      g.add(mesh(box(0.04, 0.03, 0.03), mat(C.nose), 0.41, 0.22, 0));
+      var tail = mesh(box(0.28, 0.05, 0.05), mat(C.cat), -0.3, 0.2, 0); tail.rotation.z = 0.6; g.add(tail);
+      g.rotation.y = -0.6;
+    } else {
+      var dress = who === 'postie' ? C.postie : C.granny;
+      g.add(mesh(geo('body', function () { return new THREE.CylinderGeometry(0.14, 0.2, 0.42, 6); }), mat(dress), 0, 0.21, 0));
+      g.add(mesh(geo('head', function () { return new THREE.SphereGeometry(0.15, 6, 5); }), mat(C.skin), 0, 0.55, 0));
+      if (who === 'postie') { g.add(mesh(box(0.34, 0.06, 0.34), mat(C.postie), 0, 0.66, 0)); g.add(mesh(box(0.2, 0.08, 0.2), mat(C.postie), 0, 0.72, 0)); g.add(mesh(box(0.18, 0.2, 0.08), mat(C.satchel), 0.16, 0.26, 0)); }
+      else { g.add(mesh(geo('hair', function () { return new THREE.SphereGeometry(0.16, 6, 4, 0, Math.PI * 2, 0, Math.PI / 2); }), mat(C.hair), 0, 0.57, 0)); g.add(mesh(box(0.1, 0.02, 0.1), mat(C.ink), 0, 0.53, -0.14)); }
+      g.add(mesh(box(0.03, 0.03, 0.02), mat(C.ink), -0.05, 0.57, -0.14));
+      g.add(mesh(box(0.03, 0.03, 0.02), mat(C.ink), 0.05, 0.57, -0.14));
+    }
+    g.position.set(x + 0.5, top, y + 0.5);
+    g.userData.idle = 'bob';
+    return g;
+  }
+
+  /* ── the robot: box body + visor + eyes + antenna + hat + accessory (IG-005) + can level + load ── */
+  function robotMesh(r) {
+    var g = new THREE.Group();
+    var body = new THREE.Color(r.colour || '#FF7A59').getHex();
+    g.add(mesh(box(0.5, 0.5, 0.44), mat(body), 0, 0.37, 0));
+    g.add(mesh(box(0.36, 0.18, 0.06), mat(C.white), 0, 0.46, -0.23));
+    if (r.eyes === 'happy') {
+      g.add(mesh(box(0.08, 0.03, 0.02), mat(C.ink), -0.09, 0.47, -0.27));
+      g.add(mesh(box(0.08, 0.03, 0.02), mat(C.ink), 0.09, 0.47, -0.27));
+    } else {
+      g.add(mesh(box(0.07, 0.07, 0.02), mat(C.ink), -0.09, 0.46, -0.27));
+      g.add(mesh(box(r.eyes === 'wink' ? 0.09 : 0.07, r.eyes === 'wink' ? 0.03 : 0.07, 0.02), mat(C.ink), 0.09, 0.46, -0.27));
+    }
+    g.add(mesh(box(0.16, 0.05, 0.02), mat(C.ink), 0, 0.28, -0.23));
+    g.add(mesh(box(0.1, 0.2, 0.28), mat(C.wheel), -0.3, 0.12, 0));
+    g.add(mesh(box(0.1, 0.2, 0.28), mat(C.wheel), 0.3, 0.12, 0));
+    g.add(mesh(geo('ant', function () { return new THREE.CylinderGeometry(0.015, 0.015, 0.16, 4); }), mat(C.ink), 0, 0.7, 0));
+    if (r.accessory === 'bell') g.add(mesh(geo('bell', function () { return new THREE.SphereGeometry(0.07, 6, 5); }), mat(C.gold), 0, 0.8, 0));
+    else g.add(mesh(geo('ball', function () { return new THREE.SphereGeometry(0.045, 5, 4); }), mat(C.gold), 0, 0.8, 0));
+    if (r.hat === 'cap') { g.add(mesh(box(0.42, 0.09, 0.42), mat(C.cap), 0, 0.66, 0)); g.add(mesh(box(0.34, 0.03, 0.2), mat(C.cap), 0, 0.63, -0.3)); }
+    else if (r.hat === 'sun') {
+      var sun = new THREE.Group();
+      sun.add(mesh(geo('sunc', function () { return new THREE.CylinderGeometry(0.1, 0.1, 0.05, 8); }), mat(C.hod), 0, 0, 0));
+      for (var i = 0; i < 8; i++) { var p = mesh(box(0.08, 0.03, 0.16), mat(C.gold), Math.sin(i * Math.PI / 4) * 0.16, 0, Math.cos(i * Math.PI / 4) * 0.16); p.rotation.y = i * Math.PI / 4; sun.add(p); }
+      sun.position.set(0.06, 0.66, 0.06); sun.rotation.z = -0.25; g.add(sun);
+    } else if (r.hat === 'crown') { g.add(mesh(geo('crown', function () { return new THREE.CylinderGeometry(0.17, 0.14, 0.14, 5, 1, true); }), mat(C.gold, { side: THREE.DoubleSide }), 0, 0.68, 0)); }
+    var acc = r.accessory || 'can';
+    if (acc === 'can') {
+      var can = new THREE.Group();
+      can.add(mesh(box(0.16, 0.2, 0.16), mat(C.can), 0, 0.1, 0));
+      var sp = mesh(geo('spout', function () { return new THREE.CylinderGeometry(0.02, 0.03, 0.18, 4); }), mat(C.can), 0, 0.16, -0.12); sp.rotation.x = 0.9; can.add(sp);
+      var lvl = mesh(box(0.17, 0.2, 0.17), mat(C.canWater), 0, 0.1, 0); lvl.name = 'level'; can.add(lvl);
+      can.position.set(0.38, 0.14, 0.02); g.add(can);
+      g.userData.level = lvl;
+    } else if (acc === 'hod') {
+      var hod = new THREE.Group();
+      hod.add(mesh(box(0.34, 0.22, 0.18), mat(C.hod), 0, 0.11, 0));
+      hod.add(mesh(box(0.04, 0.34, 0.04), mat(C.trunk), 0, 0.3, -0.06));
+      var stones = [];
+      for (var s = 0; s < 4; s++) { var st = mesh(geo('ico', function () { return new THREE.IcosahedronGeometry(1, 0); }), mat(C.rock2), -0.11 + (s % 2) * 0.13, 0.26 + Math.floor(s / 2) * 0.1, 0.02); st.scale.set(0.08, 0.06, 0.08); st.visible = false; stones.push(st); hod.add(st); }
+      hod.position.set(0, 0.2, 0.32); g.add(hod);
+      g.userData.stones = stones;
+    } else if (acc === 'satchel') {
+      var bag = new THREE.Group();
+      bag.add(mesh(box(0.18, 0.2, 0.1), mat(C.satchel), 0, 0.1, 0));
+      bag.add(mesh(box(0.02, 0.36, 0.04), mat(C.satchel), 0, 0.36, 0));
+      bag.position.set(-0.36, 0.14, 0.04); g.add(bag);
+    }
+    return g;
+  }
+
+  function buildScene(world, opts) {
+    opts = opts || {};
+    var stepMs = opts.stepMs || 420;
+    var grid = parseMap(world.map);
+    var w = grid.w, h = grid.h;
+    var group = new THREE.Group();
+    var own = [];
+    var thingsGroup = new THREE.Group(), robotsGroup = new THREE.Group();
+    var idlers = [];
+
+    /* the ground: the sea, a sand rim, then every tile as one mesh */
+    var sea = new THREE.Mesh(geo('sea', function () { return new THREE.PlaneGeometry(400, 400); }), mat(C.sea));
+    sea.rotation.x = -Math.PI / 2; sea.position.set(w / 2, -0.06, h / 2); group.add(sea);
+    group.add(mesh(box(w + 1.4, 0.3, h + 1.4), mat(C.sand), w / 2, -0.16, h / 2));
+    group.add(mesh(box(w, 0.06, h), mat(0x9BD3AF), w / 2, 0.0, h / 2));
+    var tiles = [], props = new THREE.Group();
+    var rockThings = {};
+    (world.things || []).forEach(function (t) { if (t.kind === 'rock') rockThings[t.x + ',' + t.y] = true; });
+    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+      var kind = grid.cells[y][x], top = TOP[kind];
+      var color = kind === 'path' ? C.path : kind === 'water' ? C.water : kind === 'bed' ? C.soil : ((x + y) % 2 ? C.grassB : C.grassA);
+      tiles.push({ x: x + 0.5, y: top / 2, z: y + 0.5, sx: kind === 'water' ? 1.02 : 0.98, sy: top, sz: kind === 'water' ? 1.02 : 0.98, color: color });
+      if (kind === 'tree') props.add(tree(x, y, top, x * 31 + y * 17));
+      if (kind === 'house') props.add(house(x, y, top));
+      if (kind === 'rock' && !rockThings[x + ',' + y]) props.add(rock(x, y, top, 3, x + y));
+    }
+    var tileMesh = new THREE.Mesh(mergeBoxes(tiles), mat(C.white, { vertexColors: true }));
+    own.push(tileMesh.geometry);
+    group.add(tileMesh); group.add(props); group.add(thingsGroup); group.add(robotsGroup);
+
+    function topAt(x, y) { if (x < 0 || y < 0 || x >= w || y >= h) return TOP.grass; return TOP[grid.cells[y][x]]; }
+
+    /* things: rebuilt when their JSON changes (the port fires on change) */
+    var thingsKey = null, thingAnchors = [];
+    function syncThings(things) {
+      var key = JSON.stringify(things || []);
+      if (key === thingsKey) return;
+      thingsKey = key;
+      while (thingsGroup.children.length) { var c = thingsGroup.children[0]; thingsGroup.remove(c); if (c.userData.own) c.geometry.dispose(); }
+      idlers = []; thingAnchors = [];
+      var beds = {};
+      (things || []).forEach(function (t, i) {
+        var top = topAt(t.x, t.y), o = null;
+        if (t.kind === 'tulip') { beds[t.x + ',' + t.y] = true; o = tulip(t.x, t.y, top, !!t.watered, t.colour); }
+        else if (t.kind === 'puddle') o = puddle(t.x, t.y, top);
+        else if (t.kind === 'letter') o = letter(t.x, t.y, top);
+        else if (t.kind === 'bowl') o = bowl(t.x, t.y, top, !!t.full);
+        else if (t.kind === 'note') o = note(t.x, t.y, top);
+        else if (t.kind === 'sign' || t.kind === 'label') o = sign(t.x, t.y, top);
+        else if (t.kind === 'stone') o = stone(t.x, t.y, top);
+        else if (t.kind === 'postbox') o = postbox(t.x, t.y, top);
+        else if (t.kind === 'rock') o = rock(t.x, t.y, top, t.left == null ? 3 : t.left, t.x + t.y);
+        else if (t.kind === 'fence') o = fence(t.x, t.y, t.w || 1, t.h || 1, top);
+        else if (t.kind === 'padlock') o = padlock(t.x, t.y, top);
+        else if (t.kind === 'islander') o = islander(t.x, t.y, top, t.who);
+        thingAnchors[i] = { x: t.x + 0.5, y: top + (t.kind === 'islander' ? 0.9 : t.kind === 'postbox' ? 0.9 : 0.6), z: t.y + 0.5 };
+        if (!o) return;
+        if (o.userData.idle) { o.userData.baseY = o.position.y; o.userData.phase = i; idlers.push(o); }
+        thingsGroup.add(o);
+      });
+      for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) if (grid.cells[y][x] === 'bed' && !beds[x + ',' + y]) thingsGroup.add(tulip(x, y, TOP.bed, false));
+    }
+
+    /* robots: one group each, rebuilt when the look changes, animated between ports */
+    var bots = [];
+    function lookKey(r) { return [r.colour, r.eyes, r.hat, r.accessory].join('|'); }
+    function syncRobots(robots) {
+      robots = robots || [];
+      while (bots.length > robots.length) { var b = bots.pop(); robotsGroup.remove(b.mesh); }
+      robots.forEach(function (r, i) {
+        var b = bots[i];
+        var now = performance.now();
+        if (!b) {
+          b = { mesh: robotMesh(r), key: lookKey(r), x: r.x, z: r.y, y: topAt(r.x, r.y), yaw: -r.d * Math.PI / 2, fx: r.x, fz: r.y, fy: topAt(r.x, r.y), fyaw: -r.d * Math.PI / 2, tx: r.x, tz: r.y, ty: topAt(r.x, r.y), tyaw: -r.d * Math.PI / 2, t0: now, dur: 1, bump: r.bump || 0, bumpAt: -1e9, hopAt: -1e9, d: r.d };
+          bots.push(b); robotsGroup.add(b.mesh);
+        } else if (b.key !== lookKey(r)) { robotsGroup.remove(b.mesh); b.mesh = robotMesh(r); b.key = lookKey(r); robotsGroup.add(b.mesh); }
+        var tyaw = -r.d * Math.PI / 2;
+        if (r.x !== b.tx || r.y !== b.tz || tyaw !== b.tyaw) {
+          b.fx = b.x; b.fz = b.z; b.fy = b.y; b.fyaw = b.yaw;
+          b.tx = r.x; b.tz = r.y; b.ty = topAt(r.x, r.y);
+          var dy = tyaw - b.yaw; while (dy > Math.PI) dy -= 2 * Math.PI; while (dy < -Math.PI) dy += 2 * Math.PI;
+          b.tyaw = b.yaw + dy; b.t0 = now; b.dur = stepMs;
+        }
+        if ((r.bump || 0) > b.bump) { b.bump = r.bump; b.bumpAt = now; }
+        b.d = r.d;
+        var u = b.mesh.userData;
+        if (u.level) { var max = r.canMax || 3, lv = r.can == null ? max : r.can; u.level.scale.y = Math.max(0.02, lv / max); u.level.position.y = 0.1 * (lv / max); }
+        if (u.stones) u.stones.forEach(function (s, k) { s.visible = k < (r.load || 0); });
+      });
+    }
+    function update(next) { syncThings(next.things); syncRobots(next.robots); }
+    update(world);
+
+    function tick(now) {
+      bots.forEach(function (b) {
+        var p = Math.min(1, (now - b.t0) / b.dur), e = ease(p);
+        b.x = b.fx + (b.tx - b.fx) * e; b.z = b.fz + (b.tz - b.fz) * e; b.y = b.fy + (b.ty - b.fy) * e;
+        b.yaw = b.fyaw + (b.tyaw - b.fyaw) * e;
+        var ox = 0, oz = 0, oy = 0;
+        var bt = now - b.bumpAt;
+        if (bt >= 0 && bt < 360) { var k = Math.sin(bt / 360 * Math.PI) * 0.16; ox = -DX[b.d] * k; oz = -DY[b.d] * k; }
+        var ht = now - b.hopAt;
+        if (ht >= 0 && ht < 700) { oy = Math.abs(Math.sin(ht / 700 * Math.PI * 2)) * 0.28; }
+        else if (p >= 1 && b.tx === b.fx && b.tz === b.fz) { oy = 0; }
+        b.mesh.position.set(b.x + 0.5 + ox, b.y + oy, b.z + 0.5 + oz);
+        b.mesh.rotation.y = b.yaw;
+      });
+      idlers.forEach(function (o) {
+        if (o.userData.idle === 'bob') o.position.y = o.userData.baseY + Math.sin(now / 700 + o.userData.phase) * 0.02;
+        else if (o.userData.idle === 'padlock') { o.position.y = o.userData.baseY + Math.sin(now / 900) * 0.06; o.rotation.y = now / 1800; }
+      });
+    }
+    var plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -TOP.grass), hit = new THREE.Vector3();
+    function tileAt(ray) {
+      if (!ray.intersectPlane(plane, hit)) return null;
+      var x = Math.floor(hit.x), y = Math.floor(hit.z);
+      if (x < 0 || y < 0 || x >= w || y >= h) return null;
+      return { x: x, y: y };
+    }
+    function pointOf(sel) {
+      if (sel.robot != null && bots[sel.robot]) { var b = bots[sel.robot]; return new THREE.Vector3(b.x + 0.5, b.y + 1.0, b.z + 0.5); }
+      if (sel.thing != null && thingAnchors[sel.thing]) { var a = thingAnchors[sel.thing]; return new THREE.Vector3(a.x, a.y, a.z); }
+      if (sel.x == null) return null;
+      return new THREE.Vector3(sel.x + 0.5, topAt(sel.x, sel.y) + 0.6, sel.y + 0.5);
+    }
+    function celebrate(i) { if (bots[i]) bots[i].hopAt = performance.now(); }
+    function robotAt(i) { var b = bots[i]; return b ? { x: b.x, y: b.y, z: b.z } : null; }
+    function dispose() { own.forEach(function (g) { g.dispose(); }); }
+    return { group: group, w: w, h: h, update: update, tick: tick, tileAt: tileAt, pointOf: pointOf, celebrate: celebrate, robotAt: robotAt, dispose: dispose, TOP: TOP };
+  }
+  return { buildScene: buildScene, TOP: TOP, LEGEND: LEGEND, COLOURS: C, parseMap: parseMap };
+})();
+</script>
+<script>
+/* ═══════════════════ the page: strings, robots, plots, the engine-lite, the views, the screens ═══════════════════ */
+
+/* ---------------- strings (P105's word table copied, then extended for the new screens) ---------------- */
+const STR = {
+en:{brand:"Olive's Island",navIsland:'Island',navWorkshop:'Workshop',navRobots:'My robots',navOlive:'Olive reads',
+ isEyebrow:'Your island',isTitle:'Three plots, three jobs',isSub:'Pan with a finger, pinch to zoom. The robots you taught keep working while you look around.',
+ isPlots:'The plots',findBots:'Find my robots',hintPan:'Drag to pan · pinch or wheel to zoom · tap a plot',
+ plMamie:'Mamie Rose',plSami:'Sami',plBiscuit:'Biscuit',
+ plAreq:'Water my three tulips',plBreq:'Lay the stones to my post box',plCreq:'Feed me, but only if my bowl is empty',
+ stWon:'Won · {r} is watering',stWonB:'Won · {r} is laying stones',stOpen:'Open · {w} is asking',stLocked:'Locked · needs {r}',
+ wonLine:'{r} keeps running the program you taught. Zoom in and watch the can empty.',
+ openLine:'Sami lends you {b} for this plot. Tap the plot or Sami to go to the Workshop.',
+ lockedLine:'This plot needs {r}. {w} lends {r} when Sami has his path. Nothing is timed.',
+ unlockedLine:'{w} lends you {r}! This plot opens in the next build; Sami\'s plot is the Workshop for now.',
+ samiBubble:'Who can lay the stones to my post box?',mamieBubble:'Thank you, {p}!',biscuitBubble:'Miaow. Feed me?',biscuitLater:'Miaow. Later.',
+ wsEyebrow:"Sami's request",wsTitle:'Teach {b} to lay the stones',wsSub:'Drive {b} around first: nothing is remembered. When you have the moves, press Teach and do them again.',
+ taskH:'Sami',taskP:'"Three stones are missing on the path to my post box. {b} can carry stones. Can you teach {b}?"',
+ drive:'Drive',teach:'Teach',play:'Play',step:'One step',reset:'Start over',
+ recording:'{b} is learning…',driving:'Just driving',driveOn:'Drive mode: {b} moves, nothing is remembered.',teachOn:'Back to the start. Now show {b} the moves.',
+ owlMeta:'Olive lives on this computer. No internet needed.',
+ scriptH:"{b}'s steps",blocks:'{n} blocks',block1:'1 block',empty:'No steps yet. Press Teach and drive, or tap a block.',
+ bFwd:'forward',bLeft:'turn left',bRight:'turn right',bWater:'water',bFill:'fill the can',bPick:'pick a stone',bPut:'put a stone',bRepeat:'repeat',bTimes:'times',bUntil:'until the wall',bIf:'if a tulip is ahead',bSay:'say thanks',bRead:'read',bIfRead:'if Olive read',bGoTo:'go to',bIsIt:'is it a…?',
+ slNote:'the note',slRed:'red tulips',slYellow:'yellow tulips',slFlower:'a flower',slThanks:'thank you',slMamie:'to Mamie',
+ padFwd:'Forward',padLeft:'Turn left',padRight:'Turn right',padPick:'Pick a stone',padPut:'Put a stone',padWater:'Water',padFill:'Fill the can',
+ hintStart:'Hello! Sami is waiting. Press Drive and try the moves, then Teach.',hintDrive:'Driving. Try things: nothing is remembered until you press Teach.',hintEmpty:'Press Teach and drive {b}: every press becomes a block.',hintBump:'{b} bumped into something. Which step sent {b} the wrong way?',hintNoStone:'The hod was empty. Face the rock and pick a stone first.',hintMissed:'{b} laid {w} of 3 stones. Which gap did {b} walk past?',hintDone:'Perfect! Could you do it with fewer blocks? A repeat counts as one.',hintPattern:'Look at the steps: the same little dance, over and over. What if {b} could "do this {n} times"?',
+ sayBump:'Boing!',sayPick:'Clack!',sayPut:'Tock.',sayFill:'Glug glug!',sayDrink:'Glug glug!',saySplash:'Splash!',sayEmpty:'Nothing to put.',sayEmptyCan:'The can is empty.',
+ winH:'"My path! Thank you, {b}."',winP:'{k} blocks. {b} stays on Sami\'s plot and keeps laying stones. Biscuit lends you Pocket.',winIsland:'Back to the island',winStay:'Keep tinkering',winRobot:'{b} is yours now',winLearn:'{b} learned: repeat',
+ rbEyebrow:'My robots',rbTitle:'The right robot for the job',rbSub:'Each robot has its own blocks, a name you can change, a colour and a hat. Islanders lend you new robots.',
+ rbName:'Name',rbColour:'Colour',rbHat:'Hat',rbAbil:'What it can do',rbUpg:'Upgrade',rbWhere:'Where it works',
+ hatNone:'None',hatCap:'Cap',hatSun:'Sunflower',hatCrown:'Crown',hatFrom:'· Mamie Rose',hatCrownFrom:'· Sami',
+ upgCan:'Bigger can · 6 waters',upgBasket:'Bigger basket · 8',upgBoots:'Boots · faster steps',upgNone:'Empty slot',upgFrom:'from {w}',
+ atPlot:"At work on {w}'s plot",atWs:'In the Workshop with you',atHome:'At home',lentBy:'{w} lends {r}',lentWhen:'after {q}',lockedTag:'Locked',ownedTag:'Yours',lentTag:'Lent by {w}',
+ accCan:'carries the can',accHod:'carries a hod',accSatchel:'carries a satchel',accBell:'wears a bell',
+ olEyebrow:'Olive reads',olTitle:'The owl is the only one who can read',olSub:'A program knows the whole island, except what an islander wrote. Olive reads it for you. Three blocks, each with an answer you can see.',
+ olReadL:'Olive reads a note or a sign and says what it names. Wire the answer into an if.',olReadE:'read the note → Olive read: the red ones',
+ olIsL:'Olive looks at the thing in front of {e} and says yes or no. If she wobbles, ask three times and take the vote.',olIsE:'is it a flower? → Olive: yes (3 of 3)',
+ olSayL:'{e} says it out loud in a bubble. Olive writes the words.',olSayE:'say thank you to Mamie → "Thank you, Mamie Rose!"',
+ olExH:"Played example: Mamie's note",olExSub:'The note says which tulips want water today. Olive reads it, and the if block steers {e} to the right ones.',olProgH:"{e}'s steps",olPlay:'Play the example',olReplay:'Play again',
+ olNote:'"Water the red ones today, not the yellow."',olRead:'Olive read: the red ones',olDone:'{e} watered the red ones and walked past the yellow. The second if never ran.',olIdle:'The note is on the plot. Press Play.',
+ note:"Interactive mockup. The island, the three modes and the played example really run in this page. Olive's replies are written examples: no model runs here."},
+fr:{brand:"L'île d'Olive",navIsland:'Île',navWorkshop:'Atelier',navRobots:'Mes robots',navOlive:'Olive lit',
+ isEyebrow:'Ton île',isTitle:'Trois parcelles, trois missions',isSub:'Fais glisser avec un doigt, pince pour zoomer. Les robots que tu as formés continuent de travailler pendant que tu regardes.',
+ isPlots:'Les parcelles',findBots:'Trouver mes robots',hintPan:'Glisse pour bouger · pince ou molette pour zoomer · touche une parcelle',
+ plMamie:'Mamie Rose',plSami:'Sami',plBiscuit:'Biscuit',
+ plAreq:'Arrose mes trois tulipes',plBreq:'Pose les pierres jusqu\'à ma boîte aux lettres',plCreq:'Nourris-moi, mais seulement si ma gamelle est vide',
+ stWon:'Gagnée · {r} arrose',stWonB:'Gagnée · {r} pose des pierres',stOpen:'Ouverte · {w} demande',stLocked:'Fermée · il faut {r}',
+ wonLine:'{r} continue le programme que tu lui as appris. Zoome et regarde l\'arrosoir se vider.',
+ openLine:'Sami te prête {b} pour cette parcelle. Touche la parcelle ou Sami pour aller à l\'atelier.',
+ lockedLine:'Cette parcelle a besoin de {r}. {w} prête {r} quand Sami aura son chemin. Rien n\'est chronométré.',
+ unlockedLine:'{w} te prête {r} ! Cette parcelle s\'ouvre dans la prochaine version ; la parcelle de Sami est l\'atelier pour l\'instant.',
+ samiBubble:'Qui peut poser les pierres jusqu\'à ma boîte aux lettres ?',mamieBubble:'Merci, {p} !',biscuitBubble:'Miaou. À manger ?',biscuitLater:'Miaou. Plus tard.',
+ wsEyebrow:'La demande de Sami',wsTitle:'Apprends à {b} à poser les pierres',wsSub:'Conduis {b} d\'abord : rien n\'est retenu. Quand tu as les bons gestes, appuie sur Apprendre et refais-les.',
+ taskH:'Sami',taskP:'« Il manque trois pierres sur le chemin de ma boîte aux lettres. {b} sait porter des pierres. Tu peux lui apprendre ? »',
+ drive:'Conduire',teach:'Apprendre',play:'Jouer',step:'Un pas',reset:'Recommencer',
+ recording:'{b} apprend…',driving:'Juste conduire',driveOn:'Mode conduite : {b} bouge, rien n\'est retenu.',teachOn:'Retour au départ. Maintenant, montre les gestes à {b}.',
+ owlMeta:'Olive habite dans cet ordinateur. Pas besoin d\'internet.',
+ scriptH:'Les pas de {b}',blocks:'{n} blocs',block1:'1 bloc',empty:'Pas encore de pas. Appuie sur Apprendre et conduis, ou touche un bloc.',
+ bFwd:'avancer',bLeft:'tourner à gauche',bRight:'tourner à droite',bWater:'arroser',bFill:'remplir l\'arrosoir',bPick:'prendre une pierre',bPut:'poser une pierre',bRepeat:'répéter',bTimes:'fois',bUntil:'jusqu\'au mur',bIf:'si une tulipe devant',bSay:'dire merci',bRead:'lire',bIfRead:'si Olive a lu',bGoTo:'aller à',bIsIt:'est-ce que c\'est…?',
+ slNote:'le mot',slRed:'tulipes rouges',slYellow:'tulipes jaunes',slFlower:'une fleur',slThanks:'merci',slMamie:'à Mamie',
+ padFwd:'Avancer',padLeft:'Tourner à gauche',padRight:'Tourner à droite',padPick:'Prendre une pierre',padPut:'Poser une pierre',padWater:'Arroser',padFill:'Remplir l\'arrosoir',
+ hintStart:'Coucou ! Sami attend. Appuie sur Conduire et essaie les gestes, puis Apprendre.',hintDrive:'Tu conduis. Essaie : rien n\'est retenu tant que tu n\'appuies pas sur Apprendre.',hintEmpty:'Appuie sur Apprendre et conduis {b} : chaque touche devient un bloc.',hintBump:'{b} s\'est cogné. Quel pas l\'a envoyé du mauvais côté ?',hintNoStone:'La hotte était vide. Mets-toi face au rocher et prends une pierre d\'abord.',hintMissed:'{b} a posé {w} pierres sur 3. Quel trou a-t-il dépassé ?',hintDone:'Parfait ! Tu peux le faire avec moins de blocs ? Un « répéter » compte pour un.',hintPattern:'Regarde les pas : la même petite danse, encore et encore. Et si {b} pouvait « faire ça {n} fois » ?',
+ sayBump:'Boing !',sayPick:'Clac !',sayPut:'Toc.',sayFill:'Glou glou !',sayDrink:'Glou glou !',saySplash:'Splash !',sayEmpty:'Rien à poser.',sayEmptyCan:'L\'arrosoir est vide.',
+ winH:'« Mon chemin ! Merci, {b}. »',winP:'{k} blocs. {b} reste sur la parcelle de Sami et continue de poser des pierres. Biscuit te prête Pocket.',winIsland:'Retour à l\'île',winStay:'Continuer à bricoler',winRobot:'{b} est à toi maintenant',winLearn:'{b} a appris : répéter',
+ rbEyebrow:'Mes robots',rbTitle:'Le bon robot pour la mission',rbSub:'Chaque robot a ses propres blocs, un nom que tu peux changer, une couleur et un chapeau. Les habitants te prêtent de nouveaux robots.',
+ rbName:'Nom',rbColour:'Couleur',rbHat:'Chapeau',rbAbil:'Ce qu\'il sait faire',rbUpg:'Amélioration',rbWhere:'Où il travaille',
+ hatNone:'Aucun',hatCap:'Casquette',hatSun:'Tournesol',hatCrown:'Couronne',hatFrom:'· Mamie Rose',hatCrownFrom:'· Sami',
+ upgCan:'Grand arrosoir · 6 arrosages',upgBasket:'Grand panier · 8',upgBoots:'Bottes · pas plus rapides',upgNone:'Emplacement vide',upgFrom:'de {w}',
+ atPlot:'Au travail sur la parcelle de {w}',atWs:'À l\'atelier avec toi',atHome:'À la maison',lentBy:'{w} prête {r}',lentWhen:'après {q}',lockedTag:'Fermé',ownedTag:'À toi',lentTag:'Prêté par {w}',
+ accCan:'porte l\'arrosoir',accHod:'porte une hotte',accSatchel:'porte une sacoche',accBell:'porte une clochette',
+ olEyebrow:'Olive lit',olTitle:'La chouette est la seule à savoir lire',olSub:'Un programme connaît toute l\'île, sauf ce qu\'un habitant a écrit. Olive le lit pour toi. Trois blocs, chacun avec une réponse que tu peux voir.',
+ olReadL:'Olive lit un mot ou une pancarte et dit ce qu\'il nomme. Branche la réponse dans un si.',olReadE:'lire le mot → Olive a lu : les rouges',
+ olIsL:'Olive regarde ce qu\'il y a devant {e} et dit oui ou non. Si elle hésite, demande trois fois et prends le vote.',olIsE:'est-ce que c\'est une fleur ? → Olive : oui (3 sur 3)',
+ olSayL:'{e} le dit à voix haute dans une bulle. Olive écrit les mots.',olSayE:'dire merci à Mamie → « Merci, Mamie Rose ! »',
+ olExH:'Exemple joué : le mot de Mamie',olExSub:'Le mot dit quelles tulipes veulent de l\'eau aujourd\'hui. Olive le lit, et le bloc si guide {e} vers les bonnes.',olProgH:'Les pas de {e}',olPlay:'Jouer l\'exemple',olReplay:'Rejouer',
+ olNote:'« Arrose les rouges aujourd\'hui, pas les jaunes. »',olRead:'Olive a lu : les rouges',olDone:'{e} a arrosé les rouges et a dépassé les jaunes. Le deuxième si n\'a jamais tourné.',olIdle:'Le mot est sur la parcelle. Appuie sur Jouer.',
+ note:'Maquette interactive. L\'île, les trois modes et l\'exemple joué tournent vraiment dans cette page. Les réponses d\'Olive sont des exemples écrits : aucun modèle ne tourne ici.'}
+};
+let lang='en', band=2;
+/* ---------------- robots (IG-005 §2's catalogue) ---------------- */
+const ROBOTS=[
+ {id:'pip',name:'Pip',colour:'#FF7A59',eyes:'round',hat:'sun',accessory:'can',palette:['fwd','left','right','water','fill','repeat','until','if'],canMax:3,basket:4,status:'owned',upgrade:'can',upgradeFrom:'plMamie',where:'plotA',lentBy:null},
+ {id:'cobble',name:'Cobble',colour:'#7A8CA3',eyes:'happy',hat:'cap',accessory:'hod',palette:['fwd','left','right','pick','put','repeat','until'],basket:4,status:'lent',upgrade:null,upgradeSlot:'basket',upgradeFrom:'plSami',where:'ws',lentBy:'plSami'},
+ {id:'pocket',name:'Pocket',colour:'#FFB347',eyes:'round',hat:'none',accessory:'satchel',palette:['fwd','left','right','pick','put','if','repeat'],basket:6,status:'locked',upgrade:null,upgradeSlot:'boots',upgradeFrom:'plBiscuit',where:'home',lentBy:'plBiscuit',lentWhen:'plBreq'},
+ {id:'echo',name:'Echo',colour:'#8F6BFF',eyes:'wink',hat:'none',accessory:'bell',palette:['fwd','left','right','water','say','read','isit','repeat'],canMax:3,status:'locked',upgrade:null,upgradeSlot:'can',upgradeFrom:'plMamie',where:'home',lentBy:'plMamie',lentWhen:'olExH'}
+];
+const R=Object.fromEntries(ROBOTS.map(r=>[r.id,r]));
+const t=(k,v={})=>{let s=STR[lang][k]??STR.en[k]??k; s=s.replaceAll('{b}',R.cobble.name).replaceAll('{p}',R.pip.name).replaceAll('{e}',R.echo.name); for(const [a,b] of Object.entries(v)) s=s.replaceAll('{'+a+'}',b); return s;};
+/* AC2: every key in both languages, or a console error at load */
+(function wordTableCheck(){ const en=Object.keys(STR.en), fr=Object.keys(STR.fr); const notFr=en.filter(k=>!(k in STR.fr)), notEn=fr.filter(k=>!(k in STR.en)); if(notFr.length||notEn.length) console.error('word table: keys missing', {missingInFR:notFr, missingInEN:notEn}); else console.info('word table ok: '+en.length+' keys in EN and in FR'); })();
+
+/* ---------------- the robot on a card (P105's botSVG, plus the accessory) ---------------- */
+const COLORS=['#FF7A59','#FFB347','#FFD166','#3FA66B','#5FB4E8','#8F6BFF','#F06BA8','#7A8CA3'];
+function botSVG(r){
+  const eyes = r.eyes==='happy' ? '<path d="M22 24q4-5 8 0M34 24q4-5 8 0" stroke="#2E2A3D" stroke-width="3" fill="none" stroke-linecap="round"/>'
+    : r.eyes==='wink' ? '<circle cx="26" cy="24" r="3.5" fill="#2E2A3D"/><path d="M34 24h8" stroke="#2E2A3D" stroke-width="3" stroke-linecap="round"/>'
+    : '<circle cx="26" cy="24" r="3.5" fill="#2E2A3D"/><circle cx="38" cy="24" r="3.5" fill="#2E2A3D"/><circle cx="27" cy="23" r="1.2" fill="#fff"/><circle cx="39" cy="23" r="1.2" fill="#fff"/>';
+  const hat = r.hat==='cap' ? '<path d="M18 14h28v6H18z" fill="#3E63C8"/><path d="M14 20h36v3H14z" fill="#3E63C8"/>'
+    : r.hat==='sun' ? '<g transform="translate(46,10)"><circle r="7" fill="#7A4B1F"/>'+[0,45,90,135,180,225,270,315].map(a=>'<ellipse rx="3" ry="6" cx="0" cy="-10" fill="#FFD166" transform="rotate('+a+')"/>').join('')+'</g>'
+    : r.hat==='crown' ? '<path d="M18 16l6 6 8-10 8 10 6-6v8H18z" fill="#FFD166"/>' : '';
+  const acc = r.accessory==='hod' ? '<rect x="0" y="30" width="10" height="14" rx="2" fill="#A9773F"/><circle cx="3" cy="29" r="2.5" fill="#B7B5C2"/><circle cx="7" cy="28" r="2.5" fill="#B7B5C2"/>'
+    : r.accessory==='satchel' ? '<rect x="0" y="34" width="9" height="11" rx="2" fill="#C98A5E"/><path d="M4 34V22" stroke="#C98A5E" stroke-width="2"/>'
+    : r.accessory==='bell' ? '' : '<path d="M50 44l6 2v6l-6 2z" fill="#4FA7DC"/><rect x="54" y="40" width="6" height="12" rx="2" fill="#4FA7DC"/>';
+  const ant = r.accessory==='bell' ? '<path d="M32 10V5" stroke="#2E2A3D" stroke-width="2"/><circle cx="32" cy="4" r="4.5" fill="#FFD166"/>' : '<path d="M32 10V4" stroke="#2E2A3D" stroke-width="2"/><circle cx="32" cy="3" r="3" fill="#FFD166"/>';
+  return '<g><ellipse cx="32" cy="58" rx="18" ry="4" fill="rgba(0,0,0,.12)"/>'
+   +'<rect x="12" y="10" width="40" height="46" rx="16" fill="'+r.colour+'"/>'
+   +'<rect x="18" y="16" width="28" height="16" rx="8" fill="#fff"/>'+eyes
+   +'<rect x="24" y="38" width="16" height="6" rx="3" fill="rgba(0,0,0,.18)"/>'
+   +'<rect x="6" y="26" width="6" height="16" rx="3" fill="'+r.colour+'" stroke="rgba(0,0,0,.15)"/><rect x="52" y="26" width="6" height="16" rx="3" fill="'+r.colour+'" stroke="rgba(0,0,0,.15)"/>'
+   +ant+acc+hat+'</g>';
+}
+
+/* ---------------- plots: each one an 8×6 world in the engine's shape, stamped on the island ---------------- */
+const DX=[0,1,0,-1],DY=[-1,0,1,0];
+const mk=(tp,extra={})=>({id:uid++,t:tp,...extra}); let uid=1;
+const PLOTS=[
+ {id:'A',who:'granny',name:'plMamie',req:'plAreq',ox:2,oy:2,state:'won',robot:'pip',
+  rows:['GGGGGGGH','GFGFGFGG','WGGGGGGG','GGGGGGGG','TGGGGGGG','GGGGGGTG'],
+  things:[{kind:'tulip',x:1,y:1},{kind:'tulip',x:3,y:1},{kind:'tulip',x:5,y:1},{kind:'islander',who:'granny',x:5,y:3}],
+  start:{x:1,y:2,d:0},
+  prog:[mk('fill'),mk('repeat',{n:3,body:[mk('water'),mk('right'),mk('fwd'),mk('fwd'),mk('left')]}),mk('left'),mk('repeat',{n:6,body:[mk('fwd')]}),mk('right')]},
+ {id:'B',who:'postie',name:'plSami',req:'plBreq',ox:14,oy:2,state:'open',robot:'cobble',
+  rows:['GGGGGGGG','GGGGGGTG','RGGGGGGG','PGPGPGPP','GGGGGGGG','GGGGHGGG'],
+  things:[{kind:'rock',x:0,y:2,left:3},{kind:'postbox',x:7,y:3},{kind:'islander',who:'postie',x:6,y:4}],
+  gaps:[[1,3],[3,3],[5,3]],start:{x:0,y:3,d:0},prog:null},
+ {id:'C',who:'cat',name:'plBiscuit',req:'plCreq',ox:8,oy:9,state:'locked',robot:'pocket',
+  rows:['GGGGGGGG','GGGGGGGG','GGGGHGGG','GGGGGGGG','GTGGGGGG','GGGGGGGG'],
+  things:[{kind:'bowl',x:5,y:3},{kind:'islander',who:'cat',x:3,y:3},{kind:'fence',x:0,y:0,w:8,h:6},{kind:'padlock',x:4,y:3}],
+  start:{x:1,y:1,d:1},prog:null}
+];
+const PLOT_D={id:'D',robot:'echo',rows:['GGGGGGGH','GFGFGFGF','WGGGGGGG','GGGGGGGG','GGGGGGGG','TGGGGGTG'],
+  things:[{kind:'tulip',x:1,y:1,colour:'pink'},{kind:'tulip',x:3,y:1,colour:'yellow'},{kind:'tulip',x:5,y:1,colour:'pink'},{kind:'tulip',x:7,y:1,colour:'yellow'},{kind:'note',x:3,y:3},{kind:'islander',who:'granny',x:6,y:3}],
+  start:{x:3,y:4,d:0},noteAnswer:'pink'};
+const BASE_ROWS=[
+ 'TGGGGGGGGGGGTGGGGGGGGGGT','GGGGGGGGGGGGGGGGGGGGGGGG','GG........GGGG........GG','GG........GGTG........GG','GG........GGGG........GG','GG........GGGG........GG','GG........GGTG........GG','GG........GGGG........GG',
+ 'GGGGGGGGGGGGGGGGGGGGGGGG','TGGGGGGG........GGGWWGGG','GGGRGGGG........GGWWWGGG','GGGGGGGG........GGGWGGGG','GTGGGGGG........GGGGGGGT','GGGGGGGG........GGGGRGGG','GGGGTGGG........GGGGGGGG','TGGGGGGGGGGGGGGTGGGGGGGT'];
+const ISLAND_ROWS=BASE_ROWS.map(r=>r.split(''));
+PLOTS.forEach(p=>p.rows.forEach((row,y)=>row.split('').forEach((ch,x)=>{ ISLAND_ROWS[p.oy+y][p.ox+x]=ch; })));
+const ISLAND_MAP={rows:ISLAND_ROWS.map(r=>r.join(''))};
+
+/* ---------------- the engine-lite: a plot state and the ops (fwd left right water fill pick put say read) ---------------- */
+function makeState(def){
+  const rd=R[def.robot];
+  return { def, rows:def.rows, things:JSON.parse(JSON.stringify(def.things)), oliveRead:null,
+    robot:{x:def.start.x,y:def.start.y,d:def.start.d,bump:0,can:rd.canMax??null,canMax:rd.canMax??null,load:0,basket:rd.basket??4} };
+}
+const BLOCKING_TILES='WRTHF', BLOCKING_THINGS=['postbox','islander','sign','padlock'];
+function inb(st,x,y){ return x>=0&&y>=0&&y<st.rows.length&&x<st.rows[0].length; }
+function thingAt(st,x,y,kind){ return st.things.find(t=>t.x===x&&t.y===y&&(!kind||t.kind===kind)); }
+function blocked(st,x,y){ if(!inb(st,x,y)) return true; if(BLOCKING_TILES.includes(st.rows[y][x])) return true; return st.things.some(t=>t.x===x&&t.y===y&&BLOCKING_THINGS.includes(t.kind)); }
+function exec(st,op){
+  const r=st.robot;
+  if(op==='left'){ r.d=(r.d+3)%4; return 'turn'; }
+  if(op==='right'){ r.d=(r.d+1)%4; return 'turn'; }
+  const ax=r.x+DX[r.d], ay=r.y+DY[r.d];
+  if(op==='fwd'){ if(blocked(st,ax,ay)){ r.bump++; return 'bump'; } r.x=ax; r.y=ay; return 'move'; }
+  if(op==='water'){ if(r.canMax!=null&&r.can<=0) return 'emptycan'; const tl=thingAt(st,ax,ay,'tulip'); if(tl){ if(!tl.watered){ tl.watered=true; if(r.canMax!=null) r.can--; } return 'water'; } if(inb(st,ax,ay)&&!blocked(st,ax,ay)){ if(!thingAt(st,ax,ay,'puddle')) st.things.push({kind:'puddle',x:ax,y:ay}); if(r.canMax!=null) r.can--; return 'splash'; } return 'nothing'; }
+  if(op==='fill'){ for(let d=0;d<4;d++){ const nx=r.x+DX[d], ny=r.y+DY[d]; if(inb(st,nx,ny)&&st.rows[ny][nx]==='W'){ r.can=r.canMax; return 'fill'; } } return 'nothing'; }
+  if(op==='pick'){ const rk=thingAt(st,ax,ay,'rock'); if(rk&&rk.left>0&&r.load<r.basket){ rk.left--; r.load++; return 'pick'; } return 'empty'; }
+  if(op==='put'){ if(r.load>0&&inb(st,ax,ay)&&!blocked(st,ax,ay)&&!thingAt(st,ax,ay,'stone')){ st.things.push({kind:'stone',x:ax,y:ay}); r.load--; return 'put'; } return 'empty'; }
+  if(op==='say') return 'say';
+  if(op==='read'){ st.oliveRead=st.def.noteAnswer||null; return 'read'; }
+  if(op==='isit') return 'yes';
+  return 'nothing';
+}
+function frontIsTulip(st){ const r=st.robot; return !!thingAt(st,r.x+DX[r.d],r.y+DY[r.d],'tulip'); }
+function frontBlocked(st){ const r=st.robot; return blocked(st,r.x+DX[r.d],r.y+DY[r.d]); }
+/* go to [what Olive read]: the nearest unwatered tulip of that colour, as turn/forward ops (BFS over walkable tiles) */
+function pathOps(st,colour){
+  const r=st.robot, W=st.rows[0].length, H=st.rows.length;
+  const targets=st.things.filter(t=>t.kind==='tulip'&&!t.watered&&(t.colour||'pink')===colour);
+  if(!targets.length) return [];
+  const key=(x,y)=>y*W+x; const prev=new Map(); prev.set(key(r.x,r.y),null); const q=[[r.x,r.y]]; const dist=new Map([[key(r.x,r.y),0]]);
+  while(q.length){ const [x,y]=q.shift(); for(let d=0;d<4;d++){ const nx=x+DX[d], ny=y+DY[d]; if(blocked(st,nx,ny)||prev.has(key(nx,ny))) continue; prev.set(key(nx,ny),[x,y]); dist.set(key(nx,ny),dist.get(key(x,y))+1); q.push([nx,ny]); } }
+  let best=null;
+  targets.forEach(tg=>{ for(let d=0;d<4;d++){ const sx=tg.x+DX[d], sy=tg.y+DY[d]; if(!dist.has(key(sx,sy))) continue; const n=dist.get(key(sx,sy)); if(!best||n<best.n) best={n,sx,sy,face:(d+2)%4}; } });
+  if(!best) return [];
+  const path=[]; let cur=[best.sx,best.sy]; while(cur){ path.unshift(cur); cur=prev.get(key(cur[0],cur[1])); }
+  const ops=[]; let d=r.d;
+  const turnTo=(dd)=>{ const diff=(dd-d+4)%4; if(diff===1) ops.push('right'); else if(diff===3) ops.push('left'); else if(diff===2){ ops.push('right'); ops.push('right'); } d=dd; };
+  for(let i=1;i<path.length;i++){ const dx=path[i][0]-path[i-1][0], dy=path[i][1]-path[i-1][1]; turnTo(DX.findIndex((v,k)=>v===dx&&DY[k]===dy)); ops.push('fwd'); }
+  turnTo(best.face);
+  return ops;
+}
+/* the program → steps (P105's flatten), and a runner on a timer (never on a frame: a hidden window has no frames) */
+function flatten(list,out=[]){ for(const b of list){ if(b.t==='repeat'){ for(let k=0;k<b.n;k++){ out.push({id:b.id,op:'noop'}); flatten(b.body,out);} } else if(b.body){ out.push({id:b.id,op:b.t,body:b.body,slot:b.slot}); } else out.push({id:b.id,op:b.t,slot:b.slot}); } return out; }
+function makeRun(st,prog,hooks,stepMs){
+  let steps=flatten(prog), pc=0, timer=null, alive=true; const seen={bump:false,empty:false};
+  function step(){
+    if(!alive) return false;
+    if(pc>=steps.length){ alive=false; hooks.end&&hooks.end(seen); return false; }
+    const s=steps[pc]; hooks.hi&&hooks.hi(s.id,s);
+    if(s.op==='until'){ if(frontBlocked(st)||(s.guard||0)>=40){ pc++; return true; } s.guard=(s.guard||0)+1; steps.splice(pc+1,0,...flatten(s.body)); pc++; return true; }
+    if(s.op==='if'){ if(frontIsTulip(st)) steps.splice(pc+1,0,...flatten(s.body)); else hooks.skip&&hooks.skip(s.id); pc++; return true; }
+    if(s.op==='ifread'){ if(st.oliveRead===s.slot) steps.splice(pc+1,0,...flatten(s.body)); else hooks.skip&&hooks.skip(s.id); pc++; return true; }
+    if(s.op==='goto'){ const ops=pathOps(st,s.slot); steps.splice(pc+1,0,...ops.map(op=>({id:s.id,op}))); pc++; return true; }
+    if(s.op!=='noop'){ const ev=exec(st,s.op); if(ev==='bump') seen.bump=true; if(ev==='empty'||ev==='emptycan') seen.empty=true; hooks.ev&&hooks.ev(ev,s); }
+    pc++; return true;
+  }
+  function tick(){ if(!alive) return; if(step()) timer=setTimeout(tick,stepMs); }
+  return { start(){ tick(); }, step, stop(){ alive=false; clearTimeout(timer); }, get done(){ return pc>=steps.length; }, get alive(){ return alive; } };
+}
+function robotPort(rd,st){ const r=st.robot; return {x:r.x,y:r.y,d:r.d,colour:rd.colour,eyes:rd.eyes,hat:rd.hat,name:rd.name,accessory:rd.accessory,bump:r.bump,can:r.can,canMax:r.canMax,load:r.load}; }
+
+/* ---------------- one renderer, one canvas, a view per screen, a pan/zoom camera ---------------- */
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
+renderer.setClearColor(0x9FD9F3);
+const canvas=renderer.domElement;
+const DEG=Math.PI/180, TILT=35*DEG, FOV=38;
+function makeView(hostId,opts){
+  const host=document.getElementById(hostId);
+  const scene=new THREE.Scene();
+  scene.add(new THREE.HemisphereLight(0xE8F6FF,0xC79A63,1.5));
+  const sun=new THREE.DirectionalLight(0xFFFFFF,2.1); sun.position.set(6,12,4); scene.add(sun);
+  const cam=new THREE.PerspectiveCamera(FOV,1.6,0.1,300);
+  const ovl=document.createElement('div'); ovl.className='ovl';
+  const v={host,scene,cam,ovl,gs:null,overlays:[],tx:0,tz:0,dist:10,yaw:opts.yaw??0.42,bounds:{x0:0,x1:8,z0:0,z1:6,dMin:4,dMax:14},onTap:opts.onTap||null,world:null,worldKey:null};
+  v.apply=()=>{ v.tx=Math.max(v.bounds.x0,Math.min(v.bounds.x1,v.tx)); v.tz=Math.max(v.bounds.z0,Math.min(v.bounds.z1,v.tz)); v.dist=Math.max(v.bounds.dMin,Math.min(v.bounds.dMax,v.dist));
+    cam.position.set(v.tx+v.dist*Math.sin(TILT)*Math.sin(v.yaw), v.dist*Math.cos(TILT), v.tz+v.dist*Math.sin(TILT)*Math.cos(v.yaw)); cam.lookAt(v.tx,0.4,v.tz); };
+  v.fit=(x,y,w,h)=>{ v.home=v.home||[x,y,w,h]; v.tx=x+w/2; v.tz=y+h/2; const tan=Math.tan(FOV/2*DEG); const dw=w/(2*tan*cam.aspect), dh=h*Math.cos(TILT)/(2*tan); v.dist=Math.max(dw,dh)*1.18+1.2; v.apply(); };
+  v.setWorld=(world)=>{ if(!v.gs){ v.gs=GardenScene.buildScene(world,{stepMs:opts.stepMs||420}); scene.add(v.gs.group); v.bounds={x0:0,x1:v.gs.w,z0:0,z1:v.gs.h,dMin:opts.dMin||4,dMax:opts.dMax||14}; } else v.gs.update(world); v.world=world; };
+  /* pointer: one finger / drag pans, two fingers pinch, wheel zooms, a tap (≤ 8 px, < 500 ms) raycasts to a tile */
+  const ptrs=new Map(); let down=null, pinchD=0;
+  host.addEventListener('pointerdown',e=>{ if(e.target.closest('button,input,.bub')) return; host.setPointerCapture(e.pointerId); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); if(ptrs.size===1) down={x:e.clientX,y:e.clientY,t:performance.now(),moved:0}; if(ptrs.size===2){ const a=[...ptrs.values()]; pinchD=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y); } });
+  host.addEventListener('pointermove',e=>{ const p=ptrs.get(e.pointerId); if(!p) return; const dx=e.clientX-p.x, dy=e.clientY-p.y; p.x=e.clientX; p.y=e.clientY;
+    if(ptrs.size===1){ if(down) down.moved+=Math.hypot(dx,dy); const k=2*v.dist*Math.tan(FOV/2*DEG)/host.clientHeight; const rx=Math.cos(v.yaw), rz=-Math.sin(v.yaw), fx=-Math.sin(v.yaw), fz=-Math.cos(v.yaw); v.tx-=rx*dx*k+fx*dy*k/Math.cos(TILT); v.tz-=rz*dx*k+fz*dy*k/Math.cos(TILT); v.apply(); }
+    else if(ptrs.size===2){ const a=[...ptrs.values()]; const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y); if(pinchD>0&&d>0){ v.dist*=pinchD/d; v.apply(); } pinchD=d; down=null; } });
+  const up=e=>{ ptrs.delete(e.pointerId); if(ptrs.size===0&&down&&down.moved<=8&&performance.now()-down.t<500&&v.onTap&&v.gs){ const rect=host.getBoundingClientRect(); const nd=new THREE.Vector2(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1); const rc=new THREE.Raycaster(); rc.setFromCamera(nd,cam); const tile=v.gs.tileAt(rc.ray); if(tile) v.onTap(tile); } if(ptrs.size===0) down=null; };
+  host.addEventListener('pointerup',up); host.addEventListener('pointercancel',up);
+  host.addEventListener('wheel',e=>{ e.preventDefault(); v.dist*=Math.pow(1.12,e.deltaY/100); v.apply(); },{passive:false});
+  v.resize=()=>{ const w=host.clientWidth, h=host.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); cam.aspect=w/h; cam.updateProjectionMatrix(); v.apply(); };
+  v.attach=()=>{ if(canvas.parentNode!==host){ host.insertBefore(canvas,host.firstChild); host.insertBefore(ovl,canvas.nextSibling); } v.resize(); if(!v.fitted&&host.clientWidth&&v.home){ v.fitted=true; v.fit.apply(null,v.home); } };
+  v.bubble=(sel,text,style,ms)=>{ v.overlays=v.overlays.filter(o=>{ if(o.kind==='bub'&&o.sel.robot===sel.robot&&sel.robot!=null){ o.el.remove(); return false;} return true; }); const el=document.createElement('div'); el.className='bub'+(style?' '+style:''); el.textContent=text; ovl.appendChild(el); const o={kind:'bub',sel,el}; v.overlays.push(o); if(ms) setTimeout(()=>{ el.remove(); v.overlays=v.overlays.filter(x=>x!==o); },ms); return o; };
+  v.chip=(sel,text,cls)=>{ const el=document.createElement('div'); el.className='chip'+(cls?' '+cls:''); el.textContent=text; ovl.appendChild(el); const o={kind:'chip',sel,el}; v.overlays.push(o); return o; };
+  v.clearOverlays=()=>{ v.overlays.forEach(o=>o.el.remove()); v.overlays=[]; };
+  v.project=()=>{ if(!v.gs) return; const rect=host.getBoundingClientRect(); v.overlays.forEach(o=>{ const p=v.gs.pointOf(o.sel); if(!p){ o.el.style.display='none'; return; } if(o.sel.lift) p.y+=o.sel.lift; p.project(cam); const vis=p.z<1&&p.x>-1.2&&p.x<1.2&&p.y>-1.2&&p.y<1.2; o.el.style.display=vis?'':'none'; if(vis){ o.el.style.left=((p.x+1)/2*rect.width)+'px'; o.el.style.top=((1-p.y)/2*rect.height)+'px'; } }); };
+  return v;
+}
+let active=null;
+const views={};
+/* stats: a rolling p95 of the frame time, fps and draw calls; hidden until the s key */
+const frameTimes=[]; let lastFrame=0, statFrames=0; const statsEl=document.getElementById('stats'); let statsOn=false;
+function frame(now){
+  requestAnimationFrame(frame);
+  if(!active||!active.gs) return;
+  if(active===views.island&&islandDirty){ islandDirty=false; views.island.setWorld(islandWorld()); }
+  active.gs.tick(now);
+  renderer.render(active.scene,active.cam);
+  active.project();
+  if(lastFrame){ frameTimes.push(now-lastFrame); if(frameTimes.length>60) frameTimes.shift(); }
+  lastFrame=now;
+  if(statsOn&&(++statFrames%15===0)&&frameTimes.length>10){ const s=[...frameTimes].sort((a,b)=>a-b); const p95=s[Math.floor(s.length*0.95)-1]||s[s.length-1]; const mean=s.reduce((a,b)=>a+b,0)/s.length; statsEl.textContent='p95 '+p95.toFixed(1)+' ms · '+(1000/mean).toFixed(0)+' fps · '+renderer.info.render.calls+' draw calls · '+renderer.info.render.triangles+' tris · '+Object.keys(views).find(k=>views[k]===active); }
+}
+window.addEventListener('keydown',e=>{ if(e.key==='s'&&!e.target.closest('input')){ statsOn=!statsOn; statsEl.hidden=!statsOn; } });
+window.addEventListener('resize',()=>{ if(active) active.resize(); });
+
+/* ---------------- the island: three plots composed into one world; won plots loop their program on a timer ---------------- */
+let islandDirty=true;
+PLOTS.forEach(p=>{ p.st=makeState(p); p.run=null; });
+function islandWorld(){
+  const things=[], robots=[];
+  PLOTS.forEach(p=>{
+    p.st.things.forEach(t=>things.push({...t,x:t.x+p.ox,y:t.y+p.oy}));
+    if(p.state==='won'){ const port=robotPort(R[p.robot],p.st); port.x+=p.ox; port.y+=p.oy; p.robotIndex=robots.length; robots.push(port); } else p.robotIndex=null;
+  });
+  return {map:ISLAND_MAP,things,robots};
+}
+function startLoop(p){
+  if(p.run) p.run.stop();
+  p.run=makeRun(p.st,p.prog,{ev:(ev)=>{ islandDirty=true; if(ev==='water'&&active===views.island&&p.robotIndex!=null) views.island.bubble({robot:p.robotIndex},t('sayDrink'),'',700); },
+    end:()=>{ islandDirty=true; if(p.id==='A'&&active===views.island) views.island.bubble(islanderAnchor(p),t('mamieBubble'),'',1600);
+      setTimeout(()=>{ if(p.state!=='won') return; p.st=makeState(p); islandDirty=true; startLoop(p); },1500); }},560);
+  p.run.start();
+}
+function islanderAnchor(p){ const i=p.st.things.find(t=>t.kind==='islander'); return {x:p.ox+i.x,y:p.oy+i.y,lift:0.45}; }
+let selectedPlot=null;
+function plotAt(tile){ return PLOTS.find(p=>tile.x>=p.ox&&tile.x<p.ox+8&&tile.y>=p.oy&&tile.y<p.oy+6)||null; }
+function plotState(p){ const rn=R[p.robot].name, who=t(p.name); if(p.state==='won') return {cls:'won',text:t(p.id==='B'?'stWonB':'stWon',{r:rn})}; if(p.state==='open') return {cls:'open',text:t('stOpen',{w:who})}; return {cls:'locked',text:t('stLocked',{r:rn})}; }
+function renderPlotCards(){
+  const host=document.getElementById('plotCards'); host.innerHTML='';
+  PLOTS.forEach(p=>{ const s=plotState(p); const b=document.createElement('button'); b.className='plot'+(p.state==='locked'?' locked':''); b.setAttribute('aria-pressed',selectedPlot===p?'true':'false');
+    b.innerHTML='<div class="face"><svg><use href="#'+p.who+'"></use></svg></div><div><h3>'+t(p.name)+'</h3><p>'+t(p.req)+'</p><span class="tag '+s.cls+'">'+(s.cls==='locked'?'🔒 ':s.cls==='won'?'✓ ':'')+s.text+'</span></div>';
+    b.onclick=()=>selectPlot(p,true); host.appendChild(b); });
+}
+function selectPlot(p,fromCard){
+  selectedPlot=p; renderPlotCards();
+  const v=views.island; v.fit(p.ox-0.5,p.oy-0.5,9,7);
+  document.getElementById('isLine').textContent=plotLine(p);
+  if(p.state==='open'&&p.id==='B'&&fromCard) setTimeout(()=>go('workshop'),350);
+  if(p.id==='C') catSays(p.state==='locked'?'biscuitLater':'biscuitBubble');
+}
+function plotLine(p){ const rn=R[p.robot].name, who=t(p.name); if(p.state==='won') return t('wonLine',{r:rn}); if(p.state==='open') return p.id==='B'?t('openLine'):t('unlockedLine',{w:who,r:rn}); return t('lockedLine',{r:rn,w:who}); }
+function catSays(key){ views.island.bubble(islanderAnchor(PLOTS[2]),t(key),'',1800); }
+function islandChips(){
+  const v=views.island; v.clearOverlays();
+  PLOTS.forEach(p=>{ if(p.state==='won'&&p.robotIndex!=null) v.chip({robot:p.robotIndex},R[p.robot].name,'bot'); });
+  const b=PLOTS[1]; if(b.state==='open'){ const o=v.bubble(islanderAnchor(b),t('samiBubble'),'ask'); o.el.onclick=()=>go('workshop'); }
+}
+function findRobots(){ const v=views.island; const w=v.world||islandWorld(); if(!w.robots.length) return; let x0=99,y0=99,x1=-1,y1=-1; w.robots.forEach(r=>{ x0=Math.min(x0,r.x); y0=Math.min(y0,r.y); x1=Math.max(x1,r.x+1); y1=Math.max(y1,r.y+1); }); const pad=2.5; v.fit(x0-pad,y0-pad,(x1-x0)+2*pad,(y1-y0)+2*pad); }
+document.getElementById('findBots').onclick=findRobots;
+
+/* ---------------- the workshop: Drive · Teach · Play · One step · Start over on Sami's plot with Cobble ---------------- */
+const WS_PLOT=PLOTS[1];
+const ws={st:makeState(WS_PLOT),mode:null,prog:[],selRep:null,run:null,usedRepeat:false,lastHint:'hintStart',lastVars:{}};
+const PAL_ACTIONS={fwd:['fwd','padFwd','i-fwd'],left:['l','padLeft','i-left'],right:['r','padRight','i-right'],pick:['pk','padPick','i-pick'],put:['pt','padPut','i-put'],water:['pt','padWater','i-water'],fill:['pk','padFill','i-fill']};
+const BLK={fwd:['motion','i-fwd','bFwd'],left:['motion','i-left','bLeft'],right:['motion','i-right','bRight'],water:['action','i-water','bWater'],fill:['action','i-fill','bFill'],pick:['action','i-pick','bPick'],put:['action','i-put','bPut'],repeat:['control','i-loop','bRepeat'],until:['control','i-wall','bUntil'],if:['control','i-if','bIf'],say:['ask','i-say','bSay'],read:['ask','i-read','bRead'],ifread:['control','i-if','bIfRead'],goto:['motion','i-goto','bGoTo'],isit:['ask','i-if','bIsIt']};
+const SLOT_DEFAULT={read:'slNote',isit:'slFlower',say:'slThanks',goto:'slRed',ifread:'slRed'};
+function slotText(tp,slot){ if(slot==='pink') return t('slRed'); if(slot==='yellow') return t('slYellow'); return t(SLOT_DEFAULT[tp]||slot); }
+function blkHTML(tp,label,extra='',slot){ const [cls,ic,key]=BLK[tp]; const sl=(tp in SLOT_DEFAULT)?'<span class="slot">'+slotText(tp,slot)+'</span>':''; return '<span class="blk '+cls+'"><svg><use href="#'+ic+'"></use></svg><span class="n">'+(label??t(key))+'</span>'+sl+extra+'</span>'; }
+function wsPalette(){ const p=R.cobble.palette; return band===1?p.filter(x=>!['repeat','until','if'].includes(x)):p; }
+function renderPalette(){ const p=document.getElementById('palette'); p.innerHTML=''; wsPalette().forEach(tp=>{ const w=document.createElement('span'); w.innerHTML=blkHTML(tp); const el=w.firstChild; el.tabIndex=0; el.setAttribute('role','button'); el.title=t(BLK[tp][2]); const add=()=>addBlock(tp); el.onclick=add; el.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); add(); } }; p.appendChild(el); }); document.getElementById('scriptPanel').classList.toggle('band1',band===1); document.getElementById('ws').classList.toggle('band1',band===1); }
+function addBlock(tp){ let b; if(tp==='repeat') b=mk('repeat',{n:3,body:[]}); else if(tp==='until') b=mk('until',{body:[]}); else if(tp==='if') b=mk('if',{body:[mk('water')]}); else b=mk(tp); const target=ws.selRep?findBlock(ws.prog,ws.selRep):null; (target?target.body:ws.prog).push(b); if(b.body&&tp!=='if') ws.selRep=b.id; renderProg(); }
+function findBlock(list,id){ for(const b of list){ if(b.id===id) return b; if(b.body){ const f=findBlock(b.body,id); if(f) return f; } } return null; }
+function removeBlock(list,id){ const i=list.findIndex(b=>b.id===id); if(i>=0){ list.splice(i,1); return true; } for(const b of list) if(b.body&&removeBlock(b.body,id)) return true; return false; }
+function countBlocks(list){ return list.reduce((n,b)=>n+1+(b.body?countBlocks(b.body):0),0); }
+function renderList(list,host,live){
+  list.forEach(b=>{
+    if(b.body){ const r=document.createElement('div'); r.className='rep'+(live&&ws.selRep===b.id?' sel':''); r.dataset.id=b.id;
+      const hd=document.createElement('div'); hd.className='hd';
+      const nctl=b.t==='repeat'?(live?'<span class="nctl"><button data-dec>−</button><b style="min-width:22px;text-align:center">'+b.n+'</b><button data-inc>+</button></span>':'<b style="margin-left:4px">'+b.n+'</b>')+'<span class="n">'+t('bTimes')+'</span>':'';
+      hd.innerHTML=blkHTML(b.t,null,nctl+(live?'<span class="x">✕</span>':''),b.slot);
+      const blk=hd.firstChild; blk.dataset.id=b.id;
+      if(live) blk.onclick=e=>{ if(e.target.closest('[data-dec]')){ b.n=Math.max(1,b.n-1); renderProg(); return; } if(e.target.closest('[data-inc]')){ b.n=Math.min(9,b.n+1); renderProg(); return; } if(e.target.closest('.x')){ removeBlock(ws.prog,b.id); if(ws.selRep===b.id) ws.selRep=null; renderProg(); return; } ws.selRep=(ws.selRep===b.id?null:b.id); renderProg(); };
+      r.appendChild(hd); const body=document.createElement('div'); body.className='body'; renderList(b.body,body,live); if(!b.body.length) body.innerHTML='<span style="font-size:13px;color:var(--ink-2);font-weight:700">…</span>'; r.appendChild(body); host.appendChild(r);
+    } else { const row=document.createElement('div'); row.className='row'; row.innerHTML=blkHTML(b.t,null,live?'<span class="x">✕</span>':'',b.slot); const el=row.firstChild; el.dataset.id=b.id; if(live) el.onclick=()=>{ removeBlock(ws.prog,b.id); renderProg(); }; host.appendChild(row); }
+  });
+}
+function renderProg(){ const p=document.getElementById('prog'); p.innerHTML=''; if(!ws.prog.length) p.innerHTML='<div class="empty">'+t('empty')+'</div>'; else renderList(ws.prog,p,true); const n=countBlocks(ws.prog); document.getElementById('blockCount').textContent=n===1?t('block1'):t('blocks',{n}); document.getElementById('scriptH').textContent=t('scriptH'); }
+function highlight(host,id){ host.querySelectorAll('.blk.run').forEach(e=>e.classList.remove('run')); if(id!=null){ const el=host.querySelector('.blk[data-id="'+id+'"]'); if(el) el.classList.add('run'); } }
+function owl(key,vars={}){ ws.lastHint=key; ws.lastVars=vars; document.getElementById('owlSay').textContent=t(key,vars); }
+function wsWorld(){ return {map:{rows:WS_PLOT.rows},things:ws.st.things,robots:[robotPort(R.cobble,ws.st)]}; }
+function wsSync(){ views.ws.setWorld(wsWorld()); renderStones(); }
+function renderStones(){ const n=WS_PLOT.gaps.filter(([x,y])=>thingAt(ws.st,x,y,'stone')).length; document.querySelectorAll('#stoneCount .d').forEach((d,i)=>{ d.classList.toggle('on',i<n); d.textContent=i<n?'●':''; }); return n; }
+function wsEvent(ev,inPlay){
+  const v=views.ws;
+  if(ev==='bump') v.bubble({robot:0},t('sayBump'),'',900);
+  else if(ev==='pick') v.bubble({robot:0},t('sayPick'),'',700);
+  else if(ev==='put') v.bubble({robot:0},t('sayPut'),'',700);
+  else if(ev==='empty') v.bubble({robot:0},t('sayEmpty'),'',900);
+  else if(ev==='water') v.bubble({robot:0},t('sayDrink'),'',700);
+  wsSync();
+}
+function renderPad(){ const pad=document.getElementById('pad'); pad.innerHTML=''; R.cobble.palette.filter(a=>PAL_ACTIONS[a]).forEach(a=>{ const [cls,key,ic]=PAL_ACTIONS[a]; const b=document.createElement('button'); b.className=cls; b.dataset.op=a; b.title=t(key); b.innerHTML='<svg><use href="#'+ic+'"></use></svg>'; pad.appendChild(b); }); }
+document.getElementById('pad').onclick=e=>{ const b=e.target.closest('button'); if(!b||!ws.mode||ws.mode==='play') return; const op=b.dataset.op; const ev=exec(ws.st,op); wsEvent(ev,false); if(ws.mode==='teach'){ const target=ws.selRep?findBlock(ws.prog,ws.selRep):null; (target?target.body:ws.prog).push(mk(op)); renderProg(); } };
+function stopRun(){ if(ws.run){ ws.run.stop(); ws.run=null; } highlight(document.getElementById('prog'),null); }
+function resetPlot(){ ws.st=makeState(WS_PLOT); wsSync(); document.getElementById('win').hidden=true; }
+function setMode(m){
+  stopRun(); ws.mode=m;
+  ['btnDrive','btnTeach','btnPlay'].forEach((id,i)=>document.getElementById(id).setAttribute('aria-pressed',String(['drive','teach','play'][i]===m)));
+  const pad=document.getElementById('pad'), rec=document.getElementById('recBadge');
+  pad.hidden=!(m==='drive'||m==='teach'); rec.hidden=!(m==='drive'||m==='teach');
+  rec.classList.toggle('drive',m==='drive'); document.getElementById('recText').textContent=m==='drive'?t('driving'):t('recording');
+  document.getElementById('prog').classList.toggle('driving',m==='drive');
+  if(m==='drive') owl('driveOn');
+  if(m==='teach'){ resetPlot(); owl('teachOn'); }
+}
+function prepareRun(){ resetPlot(); ws.usedRepeat=ws.usedRepeat||ws.prog.some(b=>b.t==='repeat'||b.t==='until'); ws.run=makeRun(ws.st,ws.prog,{hi:id=>highlight(document.getElementById('prog'),id),ev:ev=>wsEvent(ev,true),end:finish},420); }
+function play(){ if(!ws.prog.length){ setMode(null); owl('hintEmpty'); return; } setMode('play'); ws.auto=true; prepareRun(); ws.run.start(); }
+function stepOnce(){ if(ws.auto&&ws.run&&ws.run.alive) return; if(ws.mode!=='play'||!ws.run||!ws.run.alive){ if(!ws.prog.length){ owl('hintEmpty'); return; } setMode('play'); ws.auto=false; prepareRun(); } ws.run.step(); }
+function finish(seen){ document.getElementById('btnPlay').setAttribute('aria-pressed','false'); ws.mode=null; highlight(document.getElementById('prog'),null); const n=renderStones(); if(n===3) win(); else if(seen.bump) owl('hintBump'); else if(seen.empty) owl('hintNoStone'); else owl('hintMissed',{w:n}); }
+function win(){
+  const k=countBlocks(ws.prog); document.getElementById('winH').textContent=t('winH'); document.getElementById('winP').textContent=t('winP',{k}); document.getElementById('winLearn').textContent=t('winLearn'); document.getElementById('rewardLearn').hidden=!ws.usedRepeat; document.getElementById('win').hidden=false;
+  views.ws.gs.celebrate(0);
+  /* the world model: the won plot keeps its robot and its program; Biscuit lends Pocket and plot C opens */
+  WS_PLOT.state='won'; WS_PLOT.prog=JSON.parse(JSON.stringify(ws.prog)); WS_PLOT.st=makeState(WS_PLOT); R.cobble.status='owned'; R.cobble.where='plotB'; startLoop(WS_PLOT);
+  const c=PLOTS[2]; if(c.state==='locked'){ c.state='open'; c.things=c.things.filter(t=>t.kind!=='fence'&&t.kind!=='padlock'); c.st=makeState(c); R.pocket.status='lent'; }
+  islandDirty=true; renderPlotCards(); renderRobots(); owl('hintDone');
+}
+document.getElementById('btnDrive').onclick=()=>setMode(ws.mode==='drive'?null:'drive');
+document.getElementById('btnTeach').onclick=()=>setMode(ws.mode==='teach'?null:'teach');
+document.getElementById('btnPlay').onclick=play;
+document.getElementById('btnStep').onclick=stepOnce;
+document.getElementById('btnReset').onclick=()=>{ setMode(null); resetPlot(); ws.prog=[]; ws.selRep=null; ws.usedRepeat=false; renderProg(); owl('hintStart'); };
+document.getElementById('winIsland').onclick=()=>{ document.getElementById('win').hidden=true; go('island'); };
+document.getElementById('winStay').onclick=()=>{ document.getElementById('win').hidden=true; };
+
+/* ---------------- my robots: a card per robot ---------------- */
+function renderRobots(){
+  const host=document.getElementById('robotCards'); host.innerHTML='';
+  ROBOTS.forEach(r=>{
+    const locked=r.status==='locked'; const c=document.createElement('div'); c.className='rcard'+(locked?' locked':'');
+    const tag=r.status==='owned'?t('ownedTag'):r.status==='lent'?t('lentTag',{w:t(r.lentBy)}):t('lockedTag');
+    let where; if(r.where==='plotA') where=t('atPlot',{w:t('plMamie')}); else if(r.where==='plotB') where=t('atPlot',{w:t('plSami')}); else if(r.where==='ws') where=t('atWs'); else if(locked) where=t('lentBy',{w:t(r.lentBy),r:r.name})+' · '+t('lentWhen',{q:t(r.lentWhen)}); else where=t('atHome');
+    const upg=r.upgrade?'<span>'+t(r.upgrade==='can'?'upgCan':r.upgrade==='basket'?'upgBasket':'upgBoots')+' · '+t('upgFrom',{w:t(r.upgradeFrom)})+'</span>':'<span class="none">'+t('upgNone')+' · '+t(r.upgradeSlot==='can'?'upgCan':r.upgradeSlot==='basket'?'upgBasket':'upgBoots')+' · '+t('upgFrom',{w:t(r.upgradeFrom)})+'</span>';
+    c.innerHTML='<span class="rtag">'+tag+'</span><div class="rtop"><div class="stage"><svg viewBox="0 0 64 64">'+botSVG(r)+'</svg></div><div><h4>'+t('rbName')+'</h4><input class="name" maxlength="16" value="'+r.name.replace(/"/g,'&quot;')+'"'+(locked?' disabled':'')+'><div class="where" style="margin-top:6px">'+t('acc'+r.accessory[0].toUpperCase()+r.accessory.slice(1))+'</div></div></div>'
+      +'<h4>'+t('rbColour')+'</h4><div class="row sw"></div>'
+      +'<h4>'+t('rbHat')+'</h4><div class="row hats"></div>'
+      +'<h4>'+t('rbAbil')+'</h4><div class="row abil">'+r.palette.map(tp=>blkHTML(tp)).join('')+'</div>'
+      +'<h4>'+t('rbUpg')+'</h4><div class="row upg">'+upg+'</div>'
+      +'<h4>'+t('rbWhere')+'</h4><div class="where">'+where+'</div>';
+    const sw=c.querySelector('.sw'); COLORS.forEach(col=>{ const b=document.createElement('button'); b.style.background=col; b.setAttribute('aria-pressed',String(col.toLowerCase()===r.colour.toLowerCase())); b.disabled=locked; b.onclick=()=>{ r.colour=col; robotChanged(r); }; sw.appendChild(b); });
+    const hats=c.querySelector('.hats'); [['none','hatNone',''],['cap','hatCap',''],['sun','hatSun','hatFrom'],['crown','hatCrown','hatCrownFrom']].forEach(([h,key,from])=>{ const b=document.createElement('button'); const lock=h==='crown'; b.className=lock?'lock':''; b.setAttribute('aria-pressed',String(r.hat===h)); b.disabled=locked||lock; b.innerHTML=(h==='sun'?'🌻 ':h==='crown'?'👑 ':'')+t(key)+(from?' <small>'+t(from)+'</small>':''); b.onclick=()=>{ r.hat=h; robotChanged(r); }; hats.appendChild(b); });
+    c.querySelector('input.name').oninput=e=>{ r.name=e.target.value.trim()||r.name; islandDirty=true; if(r.id==='cobble') applyStrings(false); if(active===views.island) islandChips(); };
+    host.appendChild(c);
+  });
+}
+function robotChanged(r){ islandDirty=true; if(r.id==='cobble') wsSync(); if(r.id==='echo') olvSync(); renderRobots(); }
+
+/* ---------------- Olive reads: three cards and one played example ---------------- */
+const olv={st:makeState(PLOT_D),run:null,prog:null};
+uid=100;
+olv.prog=[mk('read',{slot:'note'}),mk('ifread',{slot:'pink',body:[mk('goto',{slot:'pink'}),mk('water'),mk('goto',{slot:'pink'}),mk('water')]}),mk('ifread',{slot:'yellow',body:[mk('goto',{slot:'yellow'}),mk('water'),mk('goto',{slot:'yellow'}),mk('water')]})];
+function renderOliveCards(){
+  const host=document.getElementById('oliveCards'); host.innerHTML='';
+  [['read','olReadL','olReadE'],['isit','olIsL','olIsE'],['say','olSayL','olSayE']].forEach(([tp,line,ex])=>{ const c=document.createElement('div'); c.className='ocard'; c.innerHTML='<h3>'+blkHTML(tp)+'</h3><p>'+t(line)+'</p><div class="ex">'+t(ex)+'</div>'; host.appendChild(c); });
+  const p=document.getElementById('exprog'); p.innerHTML=''; renderList(olv.prog,p,false);
+  document.getElementById('olvLine').textContent=t('olIdle');
+}
+function olvWorld(){ return {map:{rows:PLOT_D.rows},things:olv.st.things,robots:[robotPort(R.echo,olv.st)]}; }
+function olvSync(){ views.olv.setWorld(olvWorld()); }
+function olvPlay(){
+  if(olv.run) olv.run.stop(); olv.st=makeState(PLOT_D); olvSync(); const host=document.getElementById('exprog'); host.querySelectorAll('.rep.skip').forEach(e=>e.classList.remove('skip')); highlight(host,null); views.olv.clearOverlays();
+  views.olv.bubble({x:3,y:3,lift:0},t('olNote'),'',2400);
+  document.getElementById('olvLine').textContent='…';
+  olv.run=makeRun(olv.st,olv.prog,{hi:id=>highlight(host,id),skip:id=>{ const el=host.querySelector('.rep[data-id="'+id+'"]'); if(el) el.classList.add('skip'); },
+    ev:(ev)=>{ olvSync(); const v=views.olv; if(ev==='read') v.bubble({robot:0},t('olRead'),'ai',2600); else if(ev==='water') v.bubble({robot:0},t('sayDrink'),'',700); },
+    end:()=>{ highlight(host,null); document.getElementById('olvLine').textContent=t('olDone'); views.olv.gs.celebrate(0); document.querySelector('#olvPlay span').textContent=t('olReplay'); }},520);
+  olv.run.start();
+}
+document.getElementById('olvPlay').onclick=olvPlay;
+
+/* ---------------- navigation, band, language ---------------- */
+function go(name){
+  document.querySelectorAll('.screen').forEach(s=>s.hidden=(s.id!=='s-'+name)); document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.screen===name))); window.scrollTo({top:0});
+  const v=name==='island'?views.island:name==='workshop'?views.ws:name==='olive'?views.olv:null;
+  active=v; frameTimes.length=0;
+  if(v){ v.attach(); if(v===views.island){ islandDirty=true; v.setWorld(islandWorld()); islandChips(); } }
+}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>go(b.dataset.screen));
+document.getElementById('band1').onclick=()=>{ band=1; document.getElementById('band1').setAttribute('aria-pressed','true'); document.getElementById('band2').setAttribute('aria-pressed','false'); document.getElementById('whoName').textContent='Maya'; renderPalette(); renderProg(); };
+document.getElementById('band2').onclick=()=>{ band=2; document.getElementById('band2').setAttribute('aria-pressed','true'); document.getElementById('band1').setAttribute('aria-pressed','false'); document.getElementById('whoName').textContent='Léa'; renderPalette(); renderProg(); };
+document.getElementById('langEN').onclick=()=>{ lang='en'; document.getElementById('langEN').setAttribute('aria-pressed','true'); document.getElementById('langFR').setAttribute('aria-pressed','false'); applyStrings(true); };
+document.getElementById('langFR').onclick=()=>{ lang='fr'; document.getElementById('langFR').setAttribute('aria-pressed','true'); document.getElementById('langEN').setAttribute('aria-pressed','false'); applyStrings(true); };
+function applyStrings(all){
+  document.querySelectorAll('[data-t]').forEach(el=>{ el.textContent=t(el.dataset.t); }); document.documentElement.lang=lang;
+  renderPalette(); renderProg(); renderPad(); renderPlotCards(); renderOliveCards(); owl(ws.lastHint,ws.lastVars);
+  document.getElementById('recText').textContent=ws.mode==='drive'?t('driving'):t('recording');
+  if(all) renderRobots();
+  if(active===views.island) islandChips();
+  if(selectedPlot){ const line=document.getElementById('isLine'); if(line.textContent) line.textContent=plotLine(selectedPlot); }
+}
+
+/* ---------------- boot ---------------- */
+function start(){
+  views.island=makeView('islandStage',{yaw:0.42,stepMs:520,dMin:4,dMax:34,onTap:tile=>{ const p=plotAt(tile); if(p) selectPlot(p,true); }});
+  views.ws=makeView('wsStage',{yaw:0.42,stepMs:400,dMin:4,dMax:14,onTap:null});
+  views.olv=makeView('olvStage',{yaw:0.42,stepMs:500,dMin:4,dMax:14,onTap:null});
+  views.island.setWorld(islandWorld()); views.island.attach(); views.island.fit(0,0,24,16);
+  wsSync(); views.ws.attach(); views.ws.fit(0,0,8,6);
+  olvSync(); views.olv.attach(); views.olv.fit(0,0,8,6);
+  startLoop(PLOTS[0]);
+  applyStrings(true); owl('hintStart'); setMode(null);
+  go('island');
+  requestAnimationFrame(frame);
+}
+start();
+</script>

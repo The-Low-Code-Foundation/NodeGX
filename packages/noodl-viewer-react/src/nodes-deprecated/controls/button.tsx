@@ -6,6 +6,7 @@ import guid from '../../guid';
 import Layout from '../../layout';
 import NodeSharedPortDefinitions from '../../node-shared-port-definitions';
 import { createNodeFromReactComponent, type ReactNodeDefinition, type StyleObject } from '../../react-component-node';
+import { dataAttributeProps } from '../../components/noodl-root-ref';
 import type { Noodl, Slot } from '../../types';
 import Utils from './utils';
 
@@ -71,6 +72,7 @@ function Button(props: ButtonProps) {
   return (
     <button
       className={className}
+      {...dataAttributeProps(props.dom)}
       disabled={!props.enabled}
       {...Utils.controlEvents(props)}
       type={props.buttonType}
@@ -90,6 +92,7 @@ const ButtonNode: ReactNodeDefinition = {
   // `displayName`. The picker therefore offered two entries reading the same word, and
   // the one an author was most likely to reach for was this one.
   deprecated: true,
+  replacedBy: 'net.noodl.controls.button',
   docs: 'https://docs.noodl.net/nodes/visual/button',
   allowChildren: true,
   noodlNodeAsProp: true,

@@ -571,14 +571,15 @@ NodeScope.prototype.sendEventFromThisScope = function (
     var nodes = this.nodes;
     for (var nodeId in nodes) {
       var children = nodes[nodeId].children;
-      if (children)
-        children.forEach((child) => {
-          if (child.name && this.context.hasComponentModelWithName(child.name)) {
-            // This is a component instance child
-            var consumed = child.nodeScope.sendEventFromThisScope(eventName, data, propagation, true);
-            if (consumed) return true;
-          }
-        });
+      if (!children) continue;
+      // An indexed loop, not forEach: a consumed event stops the whole walk, not one callback (P107-C13).
+      for (var c = 0; c < children.length; c++) {
+        var child = children[c];
+        if (child.name && this.context.hasComponentModelWithName(child.name)) {
+          // This is a component instance child
+          if (child.nodeScope.sendEventFromThisScope(eventName, data, propagation, true)) return true;
+        }
+      }
     }
   } else if (propagation === 'siblings') {
     // Send event to all siblings, that is all children of the parent scope except this scope
@@ -598,10 +599,9 @@ NodeScope.prototype.sendEventFromThisScope = function (
         var _c = siblingChildren.filter(
           (child) => child.name && this.context.hasComponentModelWithName(child.name) && child.nodeScope !== this
         );
-        _c.forEach((child) => {
-          var consumed = child.nodeScope.sendEventFromThisScope(eventName, data, null, true);
-          if (consumed) return true;
-        });
+        for (var s = 0; s < _c.length; s++) {
+          if (_c[s].nodeScope.sendEventFromThisScope(eventName, data, null, true)) return true;
+        }
       }
     }
   }

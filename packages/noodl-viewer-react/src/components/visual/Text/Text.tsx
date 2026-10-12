@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { layerDefaults, withDefaultsClass } from '../../../default-style-layer';
 import Layout from '../../../layout';
 import PointerListeners from '../../../pointerlisteners';
 import { Noodl } from '../../../types';
@@ -89,10 +90,13 @@ export function Text(props: TextProps) {
     style.pointerEvents = 'none';
   }
 
+// P109 ISL-008 — defaults leave the inline style for the defaults sheet, so an author's class can override them.
+const defaultsClass = layerDefaults(style);
+
   return (
     <Component
       ref={noodlRootRef(props.noodlNode)}
-      className={['ndl-visual-text', props.className].join(' ')}
+      className={withDefaultsClass(['ndl-visual-text', props.className].join(' '), defaultsClass)}
       {...props.dom}
       {...PointerListeners(props)}
       style={style}

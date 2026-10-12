@@ -1,17 +1,17 @@
 {
   "_recording": {
     "what": "The editor node library (window.NodeLibraryData / NodeLibrary.instance.library) with the Kit App fixture open.",
-    "recordedAt": "2026-08-17T07:12:40.324Z",
+    "recordedAt": "2026-10-03T07:07:41.299Z",
     "project": "packages/noodl-mcp/tests/fixtures/kit-app, copied to a scratchpad directory and opened there (opening writes into a project).",
-    "how": "npm run dev:debug, LocalProjectsModel.openProjectFromFolder + loadProject + router.route({to:\"projects\"}) then route({to:\"editor\"}), then NodeLibrary.instance.library once the viewer had delivered its library.",
-    "reduction": "Kit entries (module set) are verbatim. Built-in entries are reduced to {name} \u2014 the whole payload is ~1.6MB and the only thing the editor route reads from a non-module entry is its name (see builtinTypeNamesFor). The MCP extractor reduces its own output the same way and for the same reason.",
-    "rerecordedBecause": "CN-018 / CN-003 re-record. The 2026-08-16 recording predates the __noodl_module_name fix and said module: \"Unknown Module\" for every kit node. This capture is taken from a viewer build that carries both that fix and CN-018 grouping, so module now reads the manifest name.",
+    "how": "npm run dev:debug, LocalProjectsModel.openProjectFromFolder + loadProject + router.route({to:\"projects\"}) then route({to:\"editor\"}), then NodeLibrary.instance.library once the viewer had delivered its library. Re-recorded 2026-10-03 with a throwaway profile (NOODL_USER_DATA_DIR) whose recents held only the copy, opened by its launcher card; read window.NodeLibraryData.nodetypes.",
+    "reduction": "Kit entries (module set) are verbatim. Built-in entries are reduced to {name} — the whole payload is ~1.6MB and the only thing the editor route reads from a non-module entry is its name (see builtinTypeNamesFor). The MCP extractor reduces its own output the same way and for the same reason.",
+    "rerecordedBecause": "P109 ISL-009 (2026-10-03). Every visual node — a kit node included — gained `scrollIntoView` and `scrollIntoViewAlign` (s5) and the `dataAttributes` list with its `namedports/derived` rule (s6). The MCP route carried them; this recording did not, and kitAgreement read 3 red. Previous rerecordedBecause: CN-018 / CN-003 re-record. The 2026-08-16 recording predates the __noodl_module_name fix and said module: \"Unknown Module\" for every kit node. This capture is taken from a viewer build that carries both that fix and CN-018 grouping, so module now reads the manifest name.",
     "counts": {
-      "total": 177,
+      "total": 182,
       "kit": 2,
-      "builtinsReducedToNames": 175
+      "builtinsReducedToNames": 180
     },
-    "orderingNote": "The entry ORDER differs from the 2026-08-16 recording (the kit entries now sort last rather than first), which is why the line diff is ~400 lines for a two-value change. Compared by NAME, the two recordings have an identical 177-name set and exactly two content differences: demo.kit.Badge and demo.kit.Meter went module: 'Unknown Module' -> 'Demo Kit'. Ports are byte-identical. Order is whatever the editor delivered and is not asserted on."
+    "orderingNote": "Compared by name with the 2026-08-17 recording: five built-ins added since (net.noodl.ParseXML, net.noodl.ParseFeed, Repeat, noodl.cloud.modelrequest, noodl.cloud.listusersinrole), none removed. Each kit entry gained exactly three ports (dataAttributes, scrollIntoView, scrollIntoViewAlign) and the rule in `dynamicports`; every other port differs only in `index`, which the new ports shifted. Order is whatever the editor delivered and is not asserted on."
   },
   "nodetypes": [
     {
@@ -186,6 +186,12 @@
       "name": "net.noodl.ToCSV"
     },
     {
+      "name": "net.noodl.ParseXML"
+    },
+    {
+      "name": "net.noodl.ParseFeed"
+    },
+    {
       "name": "net.noodl.Log"
     },
     {
@@ -253,6 +259,9 @@
     },
     {
       "name": "Timer"
+    },
+    {
+      "name": "Repeat"
     },
     {
       "name": "Color"
@@ -503,6 +512,25 @@
       "color": "visual",
       "docs": "A labelled badge that can show a percentage.",
       "category": "Visual",
+      "dynamicports": [
+        {
+          "name": "namedports/derived",
+          "parameter": "dataAttributes",
+          "accept": {
+            "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+            "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\"",
+            "example": "data-testid"
+          },
+          "port": {
+            "name": "{{*}}",
+            "displayName": "{{*}}",
+            "type": "string",
+            "plug": "input",
+            "group": "Data Attributes",
+            "description": "Written on this element as {{*}}"
+          }
+        }
+      ],
       "useVariants": true,
       "ports": [
         {
@@ -530,6 +558,60 @@
           "index": 100011
         },
         {
+          "name": "dataAttributes",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "plug": "input",
+          "group": "Data Attributes",
+          "displayName": "Data Attributes",
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
+        },
+        {
+          "name": "scrollIntoView",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "plug": "input",
+          "group": "Scroll Into View",
+          "displayName": "Scroll Into View",
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "plug": "input",
+          "group": "Scroll Into View",
+          "displayName": "Scroll Align",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "default": "nearest",
+          "index": 100021
+        },
+        {
           "name": "variant",
           "type": {
             "name": "string",
@@ -539,7 +621,7 @@
           "group": "General",
           "displayName": "Variant",
           "description": "Name of a saved variant of this node type to apply, replacing the styling set here",
-          "index": 2
+          "index": 5
         },
         {
           "name": "mounted",
@@ -558,7 +640,7 @@
           "group": "Content",
           "displayName": "Label",
           "default": "Badge",
-          "index": 4
+          "index": 7
         },
         {
           "name": "progress",
@@ -567,7 +649,7 @@
           "group": "Content",
           "displayName": "Progress",
           "default": 0,
-          "index": 5
+          "index": 8
         },
         {
           "name": "showProgress",
@@ -576,7 +658,7 @@
           "group": "Content",
           "displayName": "Show Progress",
           "default": true,
-          "index": 6
+          "index": 9
         },
         {
           "name": "background",
@@ -585,7 +667,7 @@
           "group": "Style",
           "displayName": "Background",
           "default": "var(--color-primary)",
-          "index": 7
+          "index": 10
         },
         {
           "name": "textColor",
@@ -594,7 +676,7 @@
           "group": "Style",
           "displayName": "Text Color",
           "default": "var(--color-on-primary)",
-          "index": 8
+          "index": 11
         },
         {
           "name": "radius",
@@ -603,7 +685,7 @@
           "group": "Style",
           "displayName": "Corner Radius",
           "default": 12,
-          "index": 9
+          "index": 12
         },
         {
           "name": "paddingX",
@@ -612,7 +694,7 @@
           "group": "Style",
           "displayName": "Padding X",
           "default": 8,
-          "index": 10
+          "index": 13
         },
         {
           "name": "fontSize",
@@ -621,7 +703,7 @@
           "group": "Style",
           "displayName": "Font Size",
           "default": 12,
-          "index": 11
+          "index": 14
         },
         {
           "name": "childIndex",
@@ -630,7 +712,7 @@
           "group": "Advanced",
           "displayName": "Child Index",
           "description": "This element's position among its parent's children, counting from 0",
-          "index": 12
+          "index": 15
         },
         {
           "name": "this",
@@ -639,7 +721,7 @@
           "group": "Advanced",
           "displayName": "This",
           "description": "A reference to this node itself, for ports that take a node rather than a value",
-          "index": 13
+          "index": 16
         },
         {
           "name": "screenPositionX",
@@ -648,7 +730,7 @@
           "group": "Bounding Box",
           "displayName": "Screen Position X",
           "description": "Distance in pixels from the left edge of the window to this element's left edge",
-          "index": 14
+          "index": 17
         },
         {
           "name": "screenPositionY",
@@ -657,7 +739,7 @@
           "group": "Bounding Box",
           "displayName": "Screen Position Y",
           "description": "Distance in pixels from the top edge of the window to this element's top edge",
-          "index": 15
+          "index": 18
         },
         {
           "name": "boundingWidth",
@@ -666,7 +748,7 @@
           "group": "Bounding Box",
           "displayName": "Width",
           "description": "Width this element actually ended up with after layout, in pixels",
-          "index": 16
+          "index": 19
         },
         {
           "name": "boundingHeight",
@@ -675,7 +757,7 @@
           "group": "Bounding Box",
           "displayName": "Height",
           "description": "Height this element actually ended up with after layout, in pixels",
-          "index": 17
+          "index": 20
         },
         {
           "name": "didMount",
@@ -684,7 +766,7 @@
           "group": "Mounted",
           "displayName": "Did Mount",
           "description": "Fires once this element has been added to the page and can be measured",
-          "index": 18
+          "index": 21
         },
         {
           "name": "willUnmount",
@@ -693,7 +775,7 @@
           "group": "Mounted",
           "displayName": "Will Unmount",
           "description": "Fires just before this element is removed from the page, while it still exists",
-          "index": 19
+          "index": 22
         },
         {
           "name": "clicked",
@@ -701,7 +783,7 @@
           "plug": "output",
           "group": "Events",
           "displayName": "Clicked",
-          "index": 20
+          "index": 23
         }
       ],
       "runtimeTypes": [
@@ -717,6 +799,25 @@
       "color": "visual",
       "docs": "A horizontal meter. Outputs the fraction it is filled to, as a percentage.",
       "category": "Visual",
+      "dynamicports": [
+        {
+          "name": "namedports/derived",
+          "parameter": "dataAttributes",
+          "accept": {
+            "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+            "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\"",
+            "example": "data-testid"
+          },
+          "port": {
+            "name": "{{*}}",
+            "displayName": "{{*}}",
+            "type": "string",
+            "plug": "input",
+            "group": "Data Attributes",
+            "description": "Written on this element as {{*}}"
+          }
+        }
+      ],
       "useVariants": true,
       "ports": [
         {
@@ -744,6 +845,60 @@
           "index": 100011
         },
         {
+          "name": "dataAttributes",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "plug": "input",
+          "group": "Data Attributes",
+          "displayName": "Data Attributes",
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
+        },
+        {
+          "name": "scrollIntoView",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "plug": "input",
+          "group": "Scroll Into View",
+          "displayName": "Scroll Into View",
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "plug": "input",
+          "group": "Scroll Into View",
+          "displayName": "Scroll Align",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "default": "nearest",
+          "index": 100021
+        },
+        {
           "name": "variant",
           "type": {
             "name": "string",
@@ -753,7 +908,7 @@
           "group": "General",
           "displayName": "Variant",
           "description": "Name of a saved variant of this node type to apply, replacing the styling set here",
-          "index": 2
+          "index": 5
         },
         {
           "name": "mounted",
@@ -772,7 +927,7 @@
           "group": "Content",
           "displayName": "Value",
           "default": 0,
-          "index": 4
+          "index": 7
         },
         {
           "name": "max",
@@ -781,7 +936,7 @@
           "group": "Content",
           "displayName": "Max",
           "default": 100,
-          "index": 5
+          "index": 8
         },
         {
           "name": "trackColor",
@@ -790,7 +945,7 @@
           "group": "Style",
           "displayName": "Track Color",
           "default": "var(--color-surface)",
-          "index": 6
+          "index": 9
         },
         {
           "name": "fillColor",
@@ -799,7 +954,7 @@
           "group": "Style",
           "displayName": "Fill Color",
           "default": "var(--color-primary)",
-          "index": 7
+          "index": 10
         },
         {
           "name": "radius",
@@ -808,7 +963,7 @@
           "group": "Style",
           "displayName": "Corner Radius",
           "default": 4,
-          "index": 8
+          "index": 11
         },
         {
           "name": "height",
@@ -817,7 +972,7 @@
           "group": "Style",
           "displayName": "Height",
           "default": 8,
-          "index": 9
+          "index": 12
         },
         {
           "name": "childIndex",
@@ -826,7 +981,7 @@
           "group": "Advanced",
           "displayName": "Child Index",
           "description": "This element's position among its parent's children, counting from 0",
-          "index": 10
+          "index": 13
         },
         {
           "name": "this",
@@ -835,7 +990,7 @@
           "group": "Advanced",
           "displayName": "This",
           "description": "A reference to this node itself, for ports that take a node rather than a value",
-          "index": 11
+          "index": 14
         },
         {
           "name": "screenPositionX",
@@ -844,7 +999,7 @@
           "group": "Bounding Box",
           "displayName": "Screen Position X",
           "description": "Distance in pixels from the left edge of the window to this element's left edge",
-          "index": 12
+          "index": 15
         },
         {
           "name": "screenPositionY",
@@ -853,7 +1008,7 @@
           "group": "Bounding Box",
           "displayName": "Screen Position Y",
           "description": "Distance in pixels from the top edge of the window to this element's top edge",
-          "index": 13
+          "index": 16
         },
         {
           "name": "boundingWidth",
@@ -862,7 +1017,7 @@
           "group": "Bounding Box",
           "displayName": "Width",
           "description": "Width this element actually ended up with after layout, in pixels",
-          "index": 14
+          "index": 17
         },
         {
           "name": "boundingHeight",
@@ -871,7 +1026,7 @@
           "group": "Bounding Box",
           "displayName": "Height",
           "description": "Height this element actually ended up with after layout, in pixels",
-          "index": 15
+          "index": 18
         },
         {
           "name": "didMount",
@@ -880,7 +1035,7 @@
           "group": "Mounted",
           "displayName": "Did Mount",
           "description": "Fires once this element has been added to the page and can be measured",
-          "index": 16
+          "index": 19
         },
         {
           "name": "willUnmount",
@@ -889,7 +1044,7 @@
           "group": "Mounted",
           "displayName": "Will Unmount",
           "description": "Fires just before this element is removed from the page, while it still exists",
-          "index": 17
+          "index": 20
         },
         {
           "name": "percent",
@@ -897,7 +1052,7 @@
           "plug": "output",
           "group": "Values",
           "displayName": "Percent",
-          "index": 18
+          "index": 21
         }
       ],
       "runtimeTypes": [
@@ -915,6 +1070,9 @@
     },
     {
       "name": "noodl.cloud.secret"
+    },
+    {
+      "name": "noodl.cloud.modelrequest"
     },
     {
       "name": "noodl.cloud.hmac"
@@ -945,6 +1103,9 @@
     },
     {
       "name": "noodl.cloud.getuserroles"
+    },
+    {
+      "name": "noodl.cloud.listusersinrole"
     },
     {
       "name": "noodl.cloud.aggregate"

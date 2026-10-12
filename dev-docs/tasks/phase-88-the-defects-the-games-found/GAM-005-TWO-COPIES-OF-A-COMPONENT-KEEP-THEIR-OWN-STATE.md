@@ -127,7 +127,14 @@ console see it. Rocket School's banner was caught from a screenshot.
 
 **Owed**
 - AC5: a browser drive, two banners built the new way beside the Variable version.
-- AC7: measure the repeater `id` note before teaching it. The P87 README `:143` note stands until then.
+- ~~AC7: measure the repeater `id` note before teaching it.~~ **Answered by P109 ISL-001, 2026-10-01** (its corpus spec
+  `packages/noodl-viewer-react/tests/corpus/isl-001-repeater-list-given-twice.test.ts`, run at HEAD `22303a534` before
+  the fix and after it): fresh id-less rows handed to a For Each twice while it is still building its first list drew
+  **10 rows for 5**; the same sequence **with ids** drew **8 for 5**. After a settle between the two lists both drew 5
+  (F50's third shape). So the row count grows with ids as well as without — the doubling is D85 (the rebuild's dropped
+  promise and live-collection loop), not the missing `id`. With ISL-001's fix both forms draw 5. **The P87 README `:143`
+  "give every row an id" sentence is not supported as a cure and should be corrected by its owner;** ids remain right for
+  identity across changes, which is F50's point, not this one.
 - Mark site-builder's two reads (P77's `sb006Components.ts`, then regenerate).
 - An MCP bundle rebuild, so the installed server carries the warning.
 - The editor's Electron `test:ci` (not run) and the full noodl-mcp suite (not run).

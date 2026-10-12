@@ -36,6 +36,10 @@
  * Usage: `node cloud-bundle.cjs <projectDir>` → JSON on stdout.
  */
 
+// 🔴 BEFORE ANYTHING ELSE: stdout is this child's ANSWER, one JSON document. Loading a project logs, so logs go to
+// stderr from here on (P78 D84; see the module).
+require('../childLogsToStderr');
+
 // 🔴 FIRST, and not decorative: `projectmodel` reaches `bugtracker.ts`, which
 // calls `filesystem.join(platform.getUserDataPath(), 'debug')` at MODULE SCOPE.
 // Without a platform installed, merely importing the model throws

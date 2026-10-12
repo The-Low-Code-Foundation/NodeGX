@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "18366e50-1953-5498-823d-9a6e248ccb26",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rendererIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stored",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rendererFn",
+      "type": "JavaScriptFunction",
+      "label": "Renderer",
+      "parameters": {
+        "functionScript": "var { wordMap } = Scripts.words;\nvar r = Inputs.stored && typeof Inputs.stored === 'object' ? Inputs.stored : {};\nvar mode = r.mode === '2d' ? '2d' : '3d';\nvar why = r.why === 'unsupported' || r.why === 'slow' || r.why === 'grown-up' ? r.why : '';\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nvar w = wordMap(Inputs.words, lang, 'Pip');\nOutputs.use3d = mode === '3d';\nOutputs.use2d = mode === '2d';\nOutputs.mode = mode;\nOutputs.why = why;\nOutputs.line = mode === '3d' ? (w[why === 'grown-up' ? 'guRend3dKept' : 'guRend3dLine'] || '') : (w[why === 'slow' ? 'guRendSlow' : why === 'unsupported' ? 'guRendNoGl' : 'guRendFlat'] || '');\n",
+        "uses": "words.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-stored",
+          "displayName": "stored",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-use3d",
+          "displayName": "use3d",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-use2d",
+          "displayName": "use2d",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mode",
+          "displayName": "mode",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-why",
+          "displayName": "why",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-line",
+          "displayName": "line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "rendererOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "line",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "use2d",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "use3d",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "why",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

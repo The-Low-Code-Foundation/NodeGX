@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1dae7757-7468-5fa3-809e-2fac61004c4f",
+  "name": "Island choose",
+  "path": "/Logic/Island choose",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The plot card: who asks, what, whether it opens, and bring the robot home. Runs on Go; answers Ran once its outputs are set."
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b7680a62-8950-5677-8235-d825b95bb053",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "landstartIn",
+      "fromProperty": "land",
+      "toId": "landstartFn",
+      "toProperty": "in-land"
+    },
+    {
+      "fromId": "landstartIn",
+      "fromProperty": "requestId",
+      "toId": "landstartFn",
+      "toProperty": "in-requestId"
+    },
+    {
+      "fromId": "landstartIn",
+      "fromProperty": "world",
+      "toId": "landstartFn",
+      "toProperty": "in-world"
+    },
+    {
+      "fromId": "landstartIn",
+      "fromProperty": "go",
+      "toId": "landstartFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "landstartFn",
+      "fromProperty": "out-world",
+      "toId": "landstartOut",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "landstartFn",
+      "fromProperty": "success",
+      "toId": "landstartOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -6,48 +6,44 @@
  * touching disk and refuse on drift (an open editor autosaving, git checkout,
  * a second agent). All writes are temp-file + atomic rename; validation
  * happens before any file is created, so a rejected write leaves no trace.
+ *
+ * P112 OWN-001 slice 2 — those rules are the format's now. The component reads
+ * and writes below delegate to `@nodegx/project-contract/format`'s
+ * `V2ProjectStore` over `diskFiles`, so a page, a script or another editor
+ * writes a project with exactly this server's rules. What this class keeps on
+ * top: the write clock (component ids, `created`/`modified`), the
+ * run-on-value-change pins for projects older than format 5, the
+ * project-level files (settings, tokens, cloud), the normalized model for the
+ * semantic validator, and the `ToolError`s the tools answer with, in this
+ * door's words (a refusal names `get_component` / `update_component`).
  */
 
-import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import type {
-  ComponentV2File,
-  ConnectionsV2File,
-  NodesV2File,
-  NormProject,
-  ProjectV2File,
-  RegistryComponentEntry,
-  RegistryV2File,
-  RoutesV2File,
-  StylesV2File
-} from '../editor-deps';
+import {
+  FormatRefusal,
+  V2ProjectStore,
+  componentRevision,
+  sameComponentContent,
+  type RegistryComponentEntry,
+  type StoredComponent
+} from '@nodegx/project-contract/format';
+import { diskFiles } from '@nodegx/project-contract/format-node';
+
+import type { ComponentV2File, NormProject, ProjectV2File, RegistryV2File, RoutesV2File, StylesV2File } from '../editor-deps';
 import { buildComponentRefs, isComponentRef, normalizeV2Component, refToPath } from '../editor-deps';
 import { ToolError } from '../errors';
 import type { ComponentFiles } from '../graph';
 import { toPathForm } from '../paths';
+import { WriteClock, type ReproducibleOutput } from './writeClock';
+import { pinAuthoredRunOnChange, projectWillBeCleanedUp, type TickedBox } from './runOnChangePins';
 
-const COMPONENT_FILES = ['component.json', 'nodes.json', 'connections.json'] as const;
-
-interface FileStat {
-  mtimeMs: number;
-  size: number;
-}
-
-interface Snapshot {
-  stats: Record<string, FileStat | null>; // abs path → stat (null = absent at read time)
-  revision: string;
-}
-
-export interface StoredComponent {
-  /** Registry key (canonical path form). */
-  key: string;
-  entry: RegistryComponentEntry;
-  legacyName: string;
-  files: ComponentFiles;
-  revision: string;
-}
+export type { StoredComponent };
+/** The format's `sameComponentContent`, the one no-change rule (P109 ISL-019). */
+export { sameComponentContent };
+/** The format's revision (cyrb53, 14 hex characters, the same in a page); the SHA-1 it replaced was this server's alone. */
+export const computeRevision = componentRevision;
 
 export interface ComponentListRow {
   path: string;
@@ -72,59 +68,49 @@ function readJson<T>(file: string): T {
   }
 }
 
-function statOrNull(file: string): FileStat | null {
-  try {
-    const s = fs.statSync(file);
-    return { mtimeMs: s.mtimeMs, size: s.size };
-  } catch {
-    return null;
-  }
-}
-
-function sameStat(a: FileStat | null, b: FileStat | null): boolean {
-  if (a === null || b === null) return a === b;
-  return a.mtimeMs === b.mtimeMs && a.size === b.size;
-}
-
 function writeJsonAtomic(file: string, data: unknown): void {
   const tmp = `${file}.tmp-${process.pid}-${Math.random().toString(36).slice(2, 8)}`;
   fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf8');
   fs.renameSync(tmp, file);
 }
 
-export function computeRevision(files: ComponentFiles): string {
-  return crypto
-    .createHash('sha1')
-    .update(JSON.stringify([files.component, files.nodes, files.connections]))
-    .digest('hex')
-    .slice(0, 12);
+/** JSON with every object's keys sorted, so two documents that differ only in key order compare equal. */
+function canonicalJson(value: unknown): string {
+  return JSON.stringify(value, (_key, v: unknown) =>
+    v && typeof v === 'object' && !Array.isArray(v)
+      ? Object.fromEntries(Object.entries(v as Record<string, unknown>).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
+      : v
+  );
 }
 
 export class ProjectStore {
   readonly projectDir: string;
-  private snapshots = new Map<string, Snapshot>();
+  /** P109 ISL-019 — the one source of time and component ids for every write below and in the tools. */
+  readonly clock: WriteClock;
+  /** The format's store, over this folder. Every component read and write goes through it. */
+  readonly format: V2ProjectStore;
 
   /**
    * ⚠️ **The two refusal messages below are mirrored in the editor**, in
    * `packages/noodl-editor/src/main/src/mcp/mcpFrontDoor.js` (MCP-001). That is what lets the
    * "Connect an AI agent" settings section withhold the copy button for exactly the projects this
    * constructor would reject, saying the same thing — rather than emitting a command that dies at
-   * spawn time. The editor cannot import this module (`@noodl/mcp` is not one of its
+   * spawn time. The editor cannot import this module (`@nodegx/mcp` is not one of its
    * dependencies), so if you change the wording here, change it there too.
    */
-  constructor(projectDir: string) {
+  constructor(projectDir: string, options: { reproducible?: ReproducibleOutput } = {}) {
     this.projectDir = path.resolve(projectDir);
+    this.clock = new WriteClock(options.reproducible);
     if (!fs.existsSync(this.projectDir) || !fs.statSync(this.projectDir).isDirectory()) {
       throw new ToolError('not-found', `Project directory does not exist: ${this.projectDir}`);
     }
-    const isV2 =
-      fs.existsSync(path.join(this.projectDir, 'components', '_registry.json')) ||
-      fs.existsSync(path.join(this.projectDir, 'nodegx.project.json'));
-    if (!isV2) {
-      const legacy = fs.existsSync(path.join(this.projectDir, 'project.json'));
+    try {
+      this.format = new V2ProjectStore(diskFiles(this.projectDir), { now: () => this.clock.now() });
+    } catch (err) {
+      if (!(err instanceof FormatRefusal)) throw err;
       throw new ToolError(
         'not-a-v2-project',
-        legacy
+        err.reason === 'legacy-project'
           ? `${this.projectDir} holds a legacy monolithic project.json. Migrate it to the v2 format ` +
             `(NodeGX editor: project settings → migrate) before using the MCP server.`
           : `${this.projectDir} is not a NodeGX v2 project (no nodegx.project.json or components/_registry.json).`
@@ -132,15 +118,77 @@ export class ProjectStore {
     }
   }
 
+  /**
+   * The format's refusal as this door's `ToolError`: the same code, the same details, and the
+   * wording this server has always used — the tool to call next is named, and a path is said
+   * relative to the project. Anything else is thrown as it came.
+   */
+  private refused(err: unknown, key?: string): never {
+    if (!(err instanceof FormatRefusal)) throw err;
+    const component = (err.details?.component as string | undefined) ?? key;
+    switch (err.reason) {
+      case 'drift':
+        throw new ToolError(
+          'conflict',
+          `${err.details?.path as string} changed on disk since this server last read it ` +
+            `(open editor? another process?). Re-read the component (get_component) and retry.`,
+          { component }
+        );
+      case 'stale-revision':
+        throw new ToolError(
+          'conflict',
+          `Revision mismatch for "${component}": expected ${err.details?.expected as string}, disk has ` +
+            `${err.details?.actual as string}. Re-read the component (get_component) and retry with the fresh revision.`,
+          err.details
+        );
+      case 'exists':
+        throw new ToolError('already-exists', `Component "${component}" already exists. Use update_component instead.`);
+      case 'missing':
+        throw new ToolError('not-found', `Component "${component}" does not exist. Use create_component instead.`);
+      case 'unregistered-files':
+        throw new ToolError(
+          'conflict',
+          `Directory ${err.details?.path as string} already holds component files but is not in the registry. Refusing to overwrite.`
+        );
+      case 'missing-registry':
+        throw new ToolError('io-error', `Missing components/_registry.json in ${this.projectDir}.`);
+      default:
+        throw new ToolError(err.code, err.message, err.details);
+    }
+  }
+
+  private viaFormat<T>(run: () => T, key?: string): T {
+    try {
+      return run();
+    } catch (err) {
+      return this.refused(err, key);
+    }
+  }
+
   // ─── Project-level files ────────────────────────────────────────────────────
 
   readProjectFile(): ProjectV2File | undefined {
-    const p = path.join(this.projectDir, 'nodegx.project.json');
-    return fs.existsSync(p) ? readJson<ProjectV2File>(p) : undefined;
+    return this.viaFormat(() => this.format.readProjectFile());
   }
 
   private get projectFilePath(): string {
     return path.join(this.projectDir, 'nodegx.project.json');
+  }
+
+  /** P109 ISL-019 — the stamp for a `created`/`modified` written now (the epoch when reproducible). */
+  now(): string {
+    return this.clock.now();
+  }
+
+  /**
+   * P109 ISL-019 "Keep the same id" — the id a component at `legacyName` has in this project, derived
+   * from the project's own `id` (its name, then its folder, when it has none) and the path. A
+   * component rebuilt or recreated in the same place keeps it.
+   */
+  componentIdFor(legacyName: string): string {
+    const project = this.readProjectFile() as (ProjectV2File & { id?: string }) | undefined;
+    const namespace = project?.id || project?.name || path.basename(this.projectDir);
+    return this.clock.componentId(namespace, legacyName);
   }
 
   /**
@@ -190,8 +238,57 @@ export class ProjectStore {
   writeProjectSettings(settings: Record<string, unknown>): string[] {
     const { project, settings: current, written } = this.projectSettingsAfterWrite(settings);
     if (written.length === 0) return [];
-    writeJsonAtomic(this.projectFilePath, { ...project, settings: current, modified: new Date().toISOString() });
+    writeJsonAtomic(this.projectFilePath, { ...project, settings: current, modified: this.now() });
     return written;
+  }
+
+  /**
+   * P109 ISL-016 — an explicit request to change the project file, which **does** overwrite: ruled
+   * 2026-10-04, "Replace, say what changed". The plan door's non-overwriting rule above stays as it
+   * is (a plan states what a *new* app needs); this is the door a caller uses when it means a value.
+   *
+   * Returns one row per field that changed, `was` → `now`. A request that changes nothing writes
+   * nothing — not even `modified` (ISL-019: a no-change write leaves the bytes alone). The caller
+   * validates; this only writes. `rootNodeId` is appended where the editor's save and `pinRootNode`
+   * put it, after the keys already there.
+   */
+  writeProjectFields(fields: {
+    name?: string;
+    settings?: Record<string, unknown>;
+    rootNodeId?: string;
+  }): Array<{ field: string; was: unknown; now: unknown }> {
+    const p = this.projectFilePath;
+    if (!fs.existsSync(p)) {
+      throw new ToolError('not-found', `Missing nodegx.project.json in ${this.projectDir}; cannot store settings.`);
+    }
+    const project = readJson<ProjectV2File & { rootNodeId?: string }>(p);
+    const changes: Array<{ field: string; was: unknown; now: unknown }> = [];
+    const next: Record<string, unknown> = { ...project };
+    if (fields.name !== undefined && fields.name !== project.name) {
+      changes.push({ field: 'name', was: project.name, now: fields.name });
+      next.name = fields.name;
+    }
+    const settings: Record<string, unknown> = { ...(project.settings ?? {}) };
+    for (const [key, value] of Object.entries(fields.settings ?? {})) {
+      if (value === undefined || canonicalJson(settings[key]) === canonicalJson(value)) continue;
+      changes.push({ field: `settings.${key}`, was: settings[key], now: value });
+      settings[key] = value;
+    }
+    if (changes.some((c) => c.field.startsWith('settings.'))) next.settings = settings;
+    if (fields.rootNodeId !== undefined && fields.rootNodeId !== project.rootNodeId) {
+      changes.push({ field: 'rootNodeId', was: project.rootNodeId, now: fields.rootNodeId });
+      next.rootNodeId = fields.rootNodeId;
+    }
+    if (changes.length === 0) return [];
+    // Every key keeps its place (key order is bytes). A NEW `rootNodeId` goes last, after
+    // `modified`, where `pinRootNode` has always put it.
+    if (project.rootNodeId === undefined && next.rootNodeId !== undefined) {
+      const { rootNodeId, ...rest } = next;
+      writeJsonAtomic(p, { ...rest, modified: this.now(), rootNodeId });
+    } else {
+      writeJsonAtomic(p, { ...next, modified: this.now() });
+    }
+    return changes;
   }
 
   /**
@@ -261,54 +358,30 @@ export class ProjectStore {
     }
     const project = readJson<ProjectV2File & { metadata?: Record<string, unknown> }>(p);
     const metadata = { ...(project.metadata ?? {}), cloudservices: { ...current, ...binding } };
-    writeJsonAtomic(p, { ...project, metadata, modified: new Date().toISOString() });
+    writeJsonAtomic(p, { ...project, metadata, modified: this.now() });
   }
 
   readRoutes(): RoutesV2File | undefined {
-    const p = path.join(this.projectDir, 'nodegx.routes.json');
-    return fs.existsSync(p) ? readJson<RoutesV2File>(p) : undefined;
+    return this.viaFormat(() => this.format.readRoutes());
   }
 
   readStyles(): StylesV2File | undefined {
-    const p = path.join(this.projectDir, 'nodegx.styles.json');
-    return fs.existsSync(p) ? readJson<StylesV2File>(p) : undefined;
+    return this.viaFormat(() => this.format.readStyles());
   }
 
   private get componentsDir(): string {
     return path.join(this.projectDir, 'components');
   }
 
-  private get registryFile(): string {
-    return path.join(this.componentsDir, '_registry.json');
-  }
-
   readRegistry(): RegistryV2File {
-    if (!fs.existsSync(this.registryFile)) {
-      throw new ToolError('io-error', `Missing components/_registry.json in ${this.projectDir}.`);
-    }
-    return readJson<RegistryV2File>(this.registryFile);
+    return this.viaFormat(() => this.format.readRegistry());
   }
 
   // ─── Resolution ─────────────────────────────────────────────────────────────
 
   /** Resolve any accepted identifier ("Pages/Home", "/Pages/Home", "/#Card") to a registry entry. */
   resolve(input: string): { key: string; entry: RegistryComponentEntry } | undefined {
-    const registry = this.readRegistry();
-    const p = toPathForm(input);
-    if (registry.components[p]) return { key: p, entry: registry.components[p] };
-    for (const [key, entry] of Object.entries(registry.components)) {
-      if (entry.path === p || key === input || entry.path === input) return { key, entry };
-    }
-    return undefined;
-  }
-
-  private mustResolve(input: string): { key: string; entry: RegistryComponentEntry } {
-    const hit = this.resolve(input);
-    if (!hit) {
-      const known = Object.keys(this.readRegistry().components).sort();
-      throw new ToolError('not-found', `No component "${input}" in this project.`, { knownComponents: known });
-    }
-    return hit;
+    return this.viaFormat(() => this.format.resolve(input));
   }
 
   componentDir(entry: RegistryComponentEntry): string {
@@ -317,58 +390,25 @@ export class ProjectStore {
 
   // ─── Reads ──────────────────────────────────────────────────────────────────
 
-  private readComponentFiles(dir: string, key: string): ComponentFiles {
-    const componentPath = path.join(dir, 'component.json');
-    const component = fs.existsSync(componentPath)
-      ? readJson<ComponentV2File>(componentPath)
-      : ({ id: key, name: key.split('/').pop() ?? key, type: 'visual' } as ComponentV2File);
-    const nodesPath = path.join(dir, 'nodes.json');
-    const nodes = fs.existsSync(nodesPath)
-      ? readJson<NodesV2File>(nodesPath)
-      : ({ componentId: component.id, nodes: [] } as NodesV2File);
-    const connectionsPath = path.join(dir, 'connections.json');
-    const connections = fs.existsSync(connectionsPath)
-      ? readJson<ConnectionsV2File>(connectionsPath)
-      : ({ componentId: component.id, connections: [] } as ConnectionsV2File);
-    return { component, nodes, connections };
-  }
-
-  private takeSnapshot(key: string, dir: string, files: ComponentFiles): string {
-    const stats: Record<string, FileStat | null> = {};
-    for (const f of COMPONENT_FILES) {
-      const abs = path.join(dir, f);
-      stats[abs] = statOrNull(abs);
-    }
-    const revision = computeRevision(files);
-    this.snapshots.set(key, { stats, revision });
-    return revision;
-  }
-
   readComponent(input: string): StoredComponent {
-    const { key, entry } = this.mustResolve(input);
-    const dir = this.componentDir(entry);
-    const files = this.readComponentFiles(dir, key);
-    const revision = this.takeSnapshot(key, dir, files);
-    return {
-      key,
-      entry,
-      legacyName: files.component.path ?? '/' + key,
-      files,
-      revision
-    };
+    return this.viaFormat(() => this.format.readComponent(input), input);
   }
 
   listComponents(): ComponentListRow[] {
     const registry = this.readRegistry();
     const rows: ComponentListRow[] = [];
     for (const [key, entry] of Object.entries(registry.components)) {
-      const dir = this.componentDir(entry);
-      const componentJson = path.join(dir, 'component.json');
+      const text = this.format.files.read(`components/${entry.path}/component.json`);
       let legacyName = '/' + key;
       let description: string | undefined;
       let type: string = entry.type;
-      if (fs.existsSync(componentJson)) {
-        const c = readJson<ComponentV2File>(componentJson);
+      if (text !== null) {
+        let c: ComponentV2File;
+        try {
+          c = JSON.parse(text) as ComponentV2File;
+        } catch (err) {
+          throw new ToolError('io-error', `Failed to read components/${entry.path}/component.json: ${(err as Error).message}`);
+        }
         if (c.path) legacyName = c.path;
         if (c.description) description = c.description;
         if (c.type) type = c.type;
@@ -376,7 +416,7 @@ export class ProjectStore {
       let nodeCount = entry.nodeCount;
       let connectionCount = entry.connectionCount;
       if (nodeCount === undefined || connectionCount === undefined) {
-        const files = this.readComponentFiles(dir, key);
+        const files = this.viaFormat(() => this.format.filesOf(key, entry), key);
         nodeCount = files.nodes.nodes.length;
         connectionCount = files.connections.connections.length;
       }
@@ -412,7 +452,7 @@ export class ProjectStore {
       if (options.replace && options.replace.key === key) {
         files = options.replace.files;
       } else {
-        files = this.readComponentFiles(this.componentDir(entry), key);
+        files = this.viaFormat(() => this.format.filesOf(key, entry), key);
       }
       const name = files.component.path ?? key;
       components.push(normalizeV2Component(name, files.nodes, files.connections));
@@ -439,7 +479,7 @@ export class ProjectStore {
     const usages: Usage[] = [];
     const registry = this.readRegistry();
     for (const [key, entry] of Object.entries(registry.components)) {
-      const files = this.readComponentFiles(this.componentDir(entry), key);
+      const files = this.viaFormat(() => this.format.filesOf(key, entry), key);
       for (const node of files.nodes.nodes) {
         if (typeof node.type === 'string' && isComponentRef(node.type) && refToPath(node.type) === targetPath) {
           usages.push({ component: key, legacyName: files.component.path ?? '/' + key, nodeId: node.id });
@@ -451,126 +491,43 @@ export class ProjectStore {
 
   // ─── Writes ─────────────────────────────────────────────────────────────────
 
-  private assertNoDrift(key: string, dir: string, ifRevision?: string): void {
-    const snapshot = this.snapshots.get(key);
-    if (snapshot) {
-      for (const [abs, oldStat] of Object.entries(snapshot.stats)) {
-        if (!sameStat(oldStat, statOrNull(abs))) {
-          throw new ToolError(
-            'conflict',
-            `${path.relative(this.projectDir, abs)} changed on disk since this server last read it ` +
-              `(open editor? another process?). Re-read the component (get_component) and retry.`,
-            { component: key }
-          );
-        }
-      }
-    }
-    if (ifRevision !== undefined) {
-      const current = computeRevision(this.readComponentFiles(dir, key));
-      if (current !== ifRevision) {
-        throw new ToolError(
-          'conflict',
-          `Revision mismatch for "${key}": expected ${ifRevision}, disk has ${current}. ` +
-            `Re-read the component (get_component) and retry with the fresh revision.`,
-          { component: key, expected: ifRevision, actual: current }
-        );
-      }
-    }
-  }
-
-  /** Write a component (create or update) and maintain the registry. Assumes validation already passed. */
+  /**
+   * Write a component (create or update) and maintain the registry. Assumes validation already passed.
+   *
+   * P109 ISL-019 — an update whose content equals what is on disk (everything but `modified` and
+   * `modifiedBy`) writes nothing, the registry included, and says so with `unchanged`. A component
+   * an agent rebuilds exactly as it was then leaves git clean, on the wall clock as well as off it.
+   *
+   * P109 ISL-018 — in a project the editor will still clean up (format < 5), say "ticked" on the
+   * run-on-value-change boxes of the nodes this write authors. That runs in the format's `prepare`
+   * hook: after the write is admitted, before the no-op check (so a rewrite of a pinned node is still
+   * a no-op), and never on a refused write.
+   */
   writeComponent(
     key: string,
     files: ComponentFiles,
     options: { expectNew?: boolean; ifRevision?: string } = {}
-  ): { revision: string; dir: string } {
-    const registry = this.readRegistry();
-    const existing = registry.components[key];
-
-    if (options.expectNew && existing) {
-      throw new ToolError('already-exists', `Component "${key}" already exists. Use update_component instead.`);
-    }
-    if (!options.expectNew && !existing) {
-      throw new ToolError('not-found', `Component "${key}" does not exist. Use create_component instead.`);
-    }
-
-    const entryPath = existing?.path ?? key;
-    const dir = path.join(this.componentsDir, entryPath);
-
-    if (existing) {
-      this.assertNoDrift(key, dir, options.ifRevision);
-    } else if (COMPONENT_FILES.some((f) => fs.existsSync(path.join(dir, f)))) {
-      throw new ToolError(
-        'conflict',
-        `Directory components/${entryPath} already holds component files but is not in the registry. Refusing to overwrite.`
-      );
-    }
-
-    fs.mkdirSync(dir, { recursive: true });
-    writeJsonAtomic(path.join(dir, 'component.json'), files.component);
-    writeJsonAtomic(path.join(dir, 'nodes.json'), files.nodes);
-    writeJsonAtomic(path.join(dir, 'connections.json'), files.connections);
-
-    // Registry maintenance.
-    const now = new Date().toISOString();
-    const entry: RegistryComponentEntry = {
-      path: entryPath,
-      type: files.component.type,
-      nodeCount: files.nodes.nodes.length,
-      connectionCount: files.connections.connections.length,
-      modified: now,
-      ...(existing?.created ? { created: existing.created } : { created: now }),
-      ...(existing?.route ? { route: existing.route } : {})
-    };
-    registry.components[key] = entry;
-    this.updateRegistry(registry, now);
-
-    const revision = this.takeSnapshot(key, dir, files);
-    return { revision, dir };
+  ): { revision: string; dir: string; unchanged?: true; ticked?: TickedBox[] } {
+    const willBeCleanedUp = projectWillBeCleanedUp(this.readProjectFile()?.version);
+    let ticked: TickedBox[] = [];
+    const written = this.viaFormat(
+      () =>
+        this.format.writeComponent(key, files, {
+          expectNew: options.expectNew,
+          ifRevision: options.ifRevision,
+          prepare: (stored) => {
+            if (willBeCleanedUp) ticked = pinAuthoredRunOnChange(key, files, stored ?? null);
+          }
+        }),
+      key
+    );
+    const entry = this.format.resolve(key)?.entry;
+    const dir = path.join(this.componentsDir, entry?.path ?? key);
+    if (written.unchanged) return { revision: written.revision, dir, unchanged: true };
+    return { revision: written.revision, dir, ...(ticked.length > 0 ? { ticked } : {}) };
   }
 
   deleteComponent(input: string): { removed: string[] } {
-    const { key, entry } = this.mustResolve(input);
-    const dir = this.componentDir(entry);
-    this.assertNoDrift(key, dir);
-
-    const removed: string[] = [];
-    for (const f of COMPONENT_FILES) {
-      const abs = path.join(dir, f);
-      if (fs.existsSync(abs)) {
-        fs.unlinkSync(abs);
-        removed.push(path.relative(this.projectDir, abs));
-      }
-    }
-    // Remove the directory only when empty — nested component directories may
-    // live beneath it (e.g. deleting "Pages" must not touch "Pages/Home").
-    try {
-      if (fs.readdirSync(dir).length === 0) fs.rmdirSync(dir);
-    } catch {
-      /* directory already gone or not empty — fine */
-    }
-
-    const registry = this.readRegistry();
-    delete registry.components[key];
-    this.updateRegistry(registry, new Date().toISOString());
-    this.snapshots.delete(key);
-    return { removed };
-  }
-
-  private updateRegistry(registry: RegistryV2File, now: string): void {
-    let totalNodes = 0;
-    let totalConnections = 0;
-    const entries = Object.values(registry.components);
-    for (const e of entries) {
-      totalNodes += e.nodeCount ?? 0;
-      totalConnections += e.connectionCount ?? 0;
-    }
-    registry.lastUpdated = now;
-    registry.stats = {
-      totalComponents: entries.length,
-      totalNodes,
-      totalConnections
-    };
-    writeJsonAtomic(this.registryFile, registry);
+    return this.viaFormat(() => this.format.deleteComponent(input), input);
   }
 }

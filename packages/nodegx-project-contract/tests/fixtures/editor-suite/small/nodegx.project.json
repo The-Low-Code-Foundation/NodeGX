@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "Editor suite small",
+  "version": "5",
+  "nodegxVersion": "1.1.0",
+  "settings": {
+    "htmlTitle": "Editor suite small"
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  }
+}

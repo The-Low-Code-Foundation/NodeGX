@@ -1,0 +1,183 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c677978d-003d-5e30-8765-65c5dbc5b6d7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pa_page",
+      "type": "Page",
+      "label": "A",
+      "parameters": {
+        "title": "Page A",
+        "urlPath": ""
+      },
+      "children": [
+        "pa_root"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pa_root",
+      "type": "Group",
+      "label": "Root",
+      "parent": "pa_page",
+      "parameters": {
+        "flexDirection": "column"
+      },
+      "children": [
+        "pa_t1",
+        "pa_t2",
+        "pa_app",
+        "pa_appplus",
+        "pa_ticks",
+        "pa_go"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pa_t1",
+      "type": "Group",
+      "label": "Tally 1",
+      "parent": "pa_root",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "dataAttributes": "data-testid",
+        "data-testid": "tally-1"
+      },
+      "children": [
+        "pa_tally1"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pa_tally1",
+      "type": "/Parts/Tally",
+      "label": "Tally",
+      "parent": "pa_t1",
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "pa_t2",
+      "type": "Group",
+      "label": "Tally 2",
+      "parent": "pa_root",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "dataAttributes": "data-testid",
+        "data-testid": "tally-2"
+      },
+      "children": [
+        "pa_tally2"
+      ],
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "pa_tally2",
+      "type": "/Parts/Tally",
+      "label": "Tally",
+      "parent": "pa_t2",
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "pa_app",
+      "type": "Text",
+      "label": "App taps",
+      "parent": "pa_root",
+      "parameters": {
+        "text": "0",
+        "dataAttributes": "data-testid",
+        "data-testid": "app-count"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "pa_appplus",
+      "type": "Button",
+      "label": "App plus",
+      "parent": "pa_root",
+      "parameters": {
+        "label": "app +",
+        "dataAttributes": "data-testid",
+        "data-testid": "app-plus"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "pa_appadd",
+      "type": "JavaScriptFunction",
+      "label": "App add",
+      "parameters": {
+        "functionScript": "Noodl.Variables.isl004Taps = (Noodl.Variables.isl004Taps || 0) + 1;"
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "pa_appvar",
+      "type": "Variable2",
+      "label": "Taps",
+      "parameters": {
+        "name": "isl004Taps"
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "pa_clock",
+      "type": "Repeat",
+      "label": "Clock",
+      "parameters": {
+        "interval": 200
+      },
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "pa_ticks",
+      "type": "Text",
+      "label": "Ticks",
+      "parent": "pa_root",
+      "parameters": {
+        "text": "0",
+        "dataAttributes": "data-testid",
+        "data-testid": "ticks"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "pa_go",
+      "type": "Button",
+      "label": "To B",
+      "parent": "pa_root",
+      "parameters": {
+        "label": "to B",
+        "dataAttributes": "data-testid",
+        "data-testid": "to-b"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "pa_nav",
+      "type": "RouterNavigate",
+      "label": "Go B",
+      "parameters": {
+        "target": "/Pages/B"
+      },
+      "x": 470,
+      "y": 1120
+    }
+  ],
+  "visualRoots": [
+    "pa_page"
+  ]
+}

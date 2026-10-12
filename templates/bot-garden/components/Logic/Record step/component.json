@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "35ffee3b-96dd-5f7d-894e-dd05189c23d0",
+  "name": "Record step",
+  "path": "/Logic/Record step",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A Teach pad press: the block appended, the robot moved by the engine. Runs on Go; answers Ran once its outputs are set."
+}

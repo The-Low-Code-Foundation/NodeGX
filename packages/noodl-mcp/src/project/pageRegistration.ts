@@ -134,7 +134,8 @@ export function registrationComponents(
  * page is staying put, or the project has no router at all. A project with no
  * router is **not** an error — single-screen apps exist, and refusing an
  * otherwise-good write over a missing router would be this phase's mistake in
- * the other direction. `checkPageShape` is where that gets said.
+ * the other direction. It is said, not refused: `unroutedPagesSummary` names the
+ * page a write left unreachable (P109-S4).
  */
 export function resolveRegistration(
   store: ProjectStore,
@@ -170,7 +171,7 @@ export function applyRegistration(store: ProjectStore, registration: PageRegistr
   if (!node) return undefined;
 
   node.parameters = { ...(node.parameters ?? {}), pages: registration.pages };
-  files.component.modified = new Date().toISOString();
+  files.component.modified = store.now();
   files.component.modifiedBy = 'noodl-mcp';
   store.writeComponent(stored.key, files);
   return registration;
@@ -258,7 +259,7 @@ export function unregisterPages(store: ProjectStore, legacyName: string): PageUn
     const written: { routes: string[]; startPage?: string } = { routes: pages?.routes ?? [] };
     if (pages?.startPage !== undefined) written.startPage = pages.startPage;
     node.parameters = { ...(node.parameters ?? {}), pages: written };
-    stored.files.component.modified = new Date().toISOString();
+    stored.files.component.modified = store.now();
     stored.files.component.modifiedBy = 'noodl-mcp';
     store.writeComponent(stored.key, stored.files);
     done.push({ router: router.component, nodeId: router.nodeId, removed: matching, startPageCleared });
@@ -291,6 +292,36 @@ export function registrationSummary(registration: PageRegistration | undefined):
       added: registration.added,
       ...(registration.startPage ? { startPage: registration.startPage } : {}),
       summary: describePageRegistration(registration, { applied: true })
+    }
+  };
+}
+
+/**
+ * P109-S4 — the pages this write left reachable from nowhere, said in the same
+ * response: a page in a project with no Router is saved, but no URL and no
+ * Navigate can ever open it. `{}` when every page has a Router to be listed in,
+ * or is itself the component the app opens on.
+ */
+export function unroutedPagesSummary(
+  store: ProjectStore,
+  pages: readonly string[]
+): Pick<PageRegistrationSummary, 'unroutedPages'> {
+  if (pages.length === 0) return {};
+  const components = registrationComponents(store);
+  if (findRoutersInComponents(components).length > 0) return {};
+  const unrouted = pages.filter((page) => !components.some((c) => c.isRoot && isSamePage(c.name, page)));
+  if (unrouted.length === 0) return {};
+  const home = components.find((c) => c.isRoot)?.name;
+  const named = unrouted.map((p) => `"${p}"`).join(', ');
+  return {
+    unroutedPages: {
+      pages: unrouted,
+      summary:
+        `${named} ${unrouted.length === 1 ? 'is a page' : 'are pages'}, but this project has no Router, so nothing can ` +
+        `open ${unrouted.length === 1 ? 'it' : 'them'}: the app shows ${home ? `"${home}"` : 'its home component'} and no URL ` +
+        `or Navigate reaches ${unrouted.length === 1 ? 'this page' : 'these pages'}. Add a Router to ` +
+        `${home ? `"${home}"` : 'the home component'} (every page written after that is listed in it for you, and ` +
+        `update_component on this page lists it now), or put this content in ${home ? `"${home}"` : 'the home component'} itself.`
     }
   };
 }

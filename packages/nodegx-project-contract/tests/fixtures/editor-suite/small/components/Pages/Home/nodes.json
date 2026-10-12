@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "comp-home",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "home-root",
+      "type": "Group",
+      "label": "Page",
+      "x": 0,
+      "y": 0,
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "paddingTop": 16
+      },
+      "children": ["home-title", "home-count"]
+    },
+    {
+      "id": "home-title",
+      "type": "Text",
+      "label": "Title",
+      "x": 0,
+      "y": 120,
+      "parent": "home-root",
+      "parameters": {
+        "text": "Hello",
+        "fontSize": 24
+      }
+    },
+    {
+      "id": "home-count",
+      "type": "Text",
+      "label": "Count",
+      "x": 0,
+      "y": 240,
+      "parent": "home-root",
+      "parameters": {
+        "text": "0"
+      }
+    }
+  ],
+  "visualRoots": ["home-root"]
+}

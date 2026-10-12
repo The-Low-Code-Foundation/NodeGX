@@ -1,0 +1,1590 @@
+[
+  {
+    "name": "Optimistic Update: Apply writes the value now and opens a transaction every view sees; Commit confirms it and writes nothing",
+    "clauses": [
+      "N"
+    ],
+    "because": "optimisticupdatenode.ts header: \"write the value the user is about to be shown ... then either confirm it (do nothing at all) or put the old value back\"; `value`: \"following writes made by anything, not only by this node\"; `previousValue`: \"What the key held immediately before the most recent Apply\"; `isPending`, `pendingCount`, `isCommitted`",
+    "world": {},
+    "nodes": {
+      "a": {
+        "type": "net.noodl.GlobalStore",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "seed": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "count",
+          "value": 1
+        }
+      },
+      "ou": {
+        "type": "net.noodl.OptimisticUpdate",
+        "params": {
+          "storeName": "app",
+          "key": "count",
+          "optimisticValue": 5,
+          "timeout": 0
+        }
+      },
+      "sub": {
+        "type": "net.noodl.GlobalStore.Subscribe",
+        "params": {
+          "storeName": "app",
+          "keys": "count"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "seed",
+        "signal": "set"
+      },
+      "settle",
+      {
+        "node": "ou",
+        "signal": "apply"
+      },
+      "settle",
+      {
+        "node": "ou",
+        "signal": "commit"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "ou",
+        "port": "isPending",
+        "value": false
+      },
+      {
+        "at": 1,
+        "subject": "ou",
+        "port": "pendingCount",
+        "value": 0
+      },
+      {
+        "at": 1,
+        "subject": "ou",
+        "port": "isCommitted",
+        "value": false
+      },
+      {
+        "at": 2,
+        "subject": "ou",
+        "port": "value",
+        "value": 1
+      },
+      {
+        "at": 3,
+        "subject": "ou",
+        "signal": "applied",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "ou",
+        "port": "value",
+        "value": 5
+      },
+      {
+        "at": 3,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "count": 5
+        }
+      },
+      {
+        "at": 3,
+        "subject": "sub",
+        "port": "value",
+        "value": 5
+      },
+      {
+        "at": 3,
+        "subject": "ou",
+        "port": "isPending",
+        "value": true
+      },
+      {
+        "at": 3,
+        "subject": "ou",
+        "port": "pendingCount",
+        "value": 1
+      },
+      {
+        "at": 3,
+        "subject": "ou",
+        "port": "previousValue",
+        "value": 1
+      },
+      {
+        "at": 4,
+        "subject": "ou",
+        "signal": "committed",
+        "count": 1
+      },
+      {
+        "at": 4,
+        "subject": "ou",
+        "port": "isCommitted",
+        "value": true
+      },
+      {
+        "at": 4,
+        "subject": "ou",
+        "port": "isPending",
+        "value": false
+      },
+      {
+        "at": 4,
+        "subject": "ou",
+        "port": "pendingCount",
+        "value": 0
+      },
+      {
+        "at": 4,
+        "subject": "a",
+        "port": "state",
+        "absent": true
+      },
+      {
+        "at": 4,
+        "subject": "sub",
+        "port": "value",
+        "absent": true
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "seed"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "count",
+        "subject": "seed"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 1,
+        "subject": "seed"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "ou"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "count",
+        "subject": "ou"
+      },
+      {
+        "t": "set",
+        "port": "optimisticValue",
+        "value": 5,
+        "subject": "ou"
+      },
+      {
+        "t": "set",
+        "port": "timeout",
+        "value": 0,
+        "subject": "ou"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "sub"
+      },
+      {
+        "t": "set",
+        "port": "keys",
+        "value": "count",
+        "subject": "sub"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {},
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "storeId",
+        "value": "--ndl--global-store--app",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "ready",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "isCommitted",
+        "value": false,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "isPending",
+        "value": false,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "isRolledBack",
+        "value": false,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "pendingCount",
+        "value": 0,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "sub"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "seed"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "count",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "seed"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 1,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "count",
+        "subject": "sub"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 1,
+        "subject": "sub"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "sub"
+      },
+      {
+        "t": "in",
+        "port": "apply",
+        "subject": "ou"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 5
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "isPending",
+        "value": true,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "pendingCount",
+        "value": 1,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "previousValue",
+        "value": 1,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "transactionId",
+        "value": "tx_0_mkorf98kq",
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 5,
+        "subject": "ou"
+      },
+      {
+        "t": "signal",
+        "port": "applied",
+        "subject": "ou"
+      },
+      {
+        "t": "outcome",
+        "port": "apply",
+        "value": "done",
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "previousValue",
+        "value": 1,
+        "subject": "sub"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 5,
+        "subject": "sub"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "sub"
+      },
+      {
+        "t": "in",
+        "port": "commit",
+        "subject": "ou"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "isCommitted",
+        "value": true,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "isPending",
+        "value": false,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "pendingCount",
+        "value": 0,
+        "subject": "ou"
+      },
+      {
+        "t": "signal",
+        "port": "committed",
+        "subject": "ou"
+      },
+      {
+        "t": "outcome",
+        "port": "commit",
+        "value": "done",
+        "subject": "ou"
+      }
+    ]
+  },
+  {
+    "name": "Rollback puts the old value back and says why; with no answer, the deadline rolls back on its own and Timed Out fires beside Rolled Back",
+    "clauses": [
+      "N"
+    ],
+    "because": "optimisticupdatenode.ts `rollback`: \"Puts the old value back, unless something else has written the key since\"; `timeout`: \"Milliseconds to wait for an answer before rolling back on its own\"; `timedOut`: \"Fires alongside Rolled Back when it was the deadline rather than the graph that ended the update\"; `error`: \"Why the last update failed or was undone; blank once an Apply succeeds\"",
+    "world": {},
+    "nodes": {
+      "a": {
+        "type": "net.noodl.GlobalStore",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "seed": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "count",
+          "value": 1
+        }
+      },
+      "ou": {
+        "type": "net.noodl.OptimisticUpdate",
+        "params": {
+          "storeName": "app",
+          "key": "count",
+          "optimisticValue": 5,
+          "timeout": 1000
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "seed",
+        "signal": "set"
+      },
+      "settle",
+      {
+        "node": "ou",
+        "signal": "apply"
+      },
+      "settle",
+      {
+        "node": "ou",
+        "signal": "rollback"
+      },
+      "settle",
+      {
+        "node": "ou",
+        "signal": "apply"
+      },
+      "settle",
+      {
+        "node": "ou",
+        "advance": 999
+      },
+      "settle",
+      {
+        "node": "ou",
+        "advance": 1
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 3,
+        "subject": "ou",
+        "port": "value",
+        "value": 5
+      },
+      {
+        "at": 4,
+        "subject": "ou",
+        "signal": "rolledBack",
+        "count": 1
+      },
+      {
+        "at": 4,
+        "subject": "ou",
+        "signal": "timedOut",
+        "count": 0
+      },
+      {
+        "at": 4,
+        "subject": "ou",
+        "port": "value",
+        "value": 1
+      },
+      {
+        "at": 4,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "count": 1
+        }
+      },
+      {
+        "at": 4,
+        "subject": "ou",
+        "port": "isRolledBack",
+        "value": true
+      },
+      {
+        "at": 4,
+        "subject": "ou",
+        "port": "error",
+        "value": "The update was rolled back"
+      },
+      {
+        "at": 5,
+        "subject": "ou",
+        "signal": "applied",
+        "count": 1
+      },
+      {
+        "at": 5,
+        "subject": "ou",
+        "port": "value",
+        "value": 5
+      },
+      {
+        "at": 5,
+        "subject": "ou",
+        "port": "error",
+        "absent": true
+      },
+      {
+        "at": 6,
+        "subject": "ou",
+        "signal": "rolledBack",
+        "count": 0
+      },
+      {
+        "at": 6,
+        "subject": "ou",
+        "port": "value",
+        "absent": true
+      },
+      {
+        "at": 7,
+        "subject": "ou",
+        "signal": "rolledBack",
+        "count": 1
+      },
+      {
+        "at": 7,
+        "subject": "ou",
+        "signal": "timedOut",
+        "count": 1
+      },
+      {
+        "at": 7,
+        "subject": "ou",
+        "port": "value",
+        "value": 1
+      },
+      {
+        "at": 7,
+        "subject": "ou",
+        "port": "error",
+        "value": "Request timed out"
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "seed"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "count",
+        "subject": "seed"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 1,
+        "subject": "seed"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "ou"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "count",
+        "subject": "ou"
+      },
+      {
+        "t": "set",
+        "port": "optimisticValue",
+        "value": 5,
+        "subject": "ou"
+      },
+      {
+        "t": "set",
+        "port": "timeout",
+        "value": 1000,
+        "subject": "ou"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {},
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "storeId",
+        "value": "--ndl--global-store--app",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "ready",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "isCommitted",
+        "value": false,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "isPending",
+        "value": false,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "isRolledBack",
+        "value": false,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "pendingCount",
+        "value": 0,
+        "subject": "ou"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "seed"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "count",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "seed"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 1,
+        "subject": "ou"
+      },
+      {
+        "t": "in",
+        "port": "apply",
+        "subject": "ou"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 5
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "isPending",
+        "value": true,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "pendingCount",
+        "value": 1,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "previousValue",
+        "value": 1,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "transactionId",
+        "value": "tx_0_mkorf98kq",
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 5,
+        "subject": "ou"
+      },
+      {
+        "t": "signal",
+        "port": "applied",
+        "subject": "ou"
+      },
+      {
+        "t": "outcome",
+        "port": "apply",
+        "value": "done",
+        "subject": "ou"
+      },
+      {
+        "t": "in",
+        "port": "rollback",
+        "subject": "ou"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "The update was rolled back",
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "isPending",
+        "value": false,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "isRolledBack",
+        "value": true,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "pendingCount",
+        "value": 0,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 1,
+        "subject": "ou"
+      },
+      {
+        "t": "signal",
+        "port": "rolledBack",
+        "subject": "ou"
+      },
+      {
+        "t": "outcome",
+        "port": "rollback",
+        "value": "done",
+        "subject": "ou"
+      },
+      {
+        "t": "in",
+        "port": "apply",
+        "subject": "ou"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 5
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "isPending",
+        "value": true,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "isRolledBack",
+        "value": false,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "pendingCount",
+        "value": 1,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "transactionId",
+        "value": "tx_0_03jmyljhj",
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 5,
+        "subject": "ou"
+      },
+      {
+        "t": "signal",
+        "port": "applied",
+        "subject": "ou"
+      },
+      {
+        "t": "outcome",
+        "port": "apply",
+        "value": "done",
+        "subject": "ou"
+      },
+      {
+        "t": "advance",
+        "ms": 999,
+        "subject": "ou"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "advance",
+        "ms": 1,
+        "subject": "ou"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "Request timed out",
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "isPending",
+        "value": false,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "isRolledBack",
+        "value": true,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "pendingCount",
+        "value": 0,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 1,
+        "subject": "ou"
+      },
+      {
+        "t": "signal",
+        "port": "rolledBack",
+        "subject": "ou"
+      },
+      {
+        "t": "signal",
+        "port": "timedOut",
+        "subject": "ou"
+      }
+    ]
+  },
+  {
+    "name": "a Rollback after a plain write to the same key leaves the newer value alone and says so; Apply with no key and Rollback with nothing open are refusals",
+    "clauses": [
+      "N"
+    ],
+    "because": "optimisticupdatenode.ts header: \"if the key no longer holds the value this update applied, the update is superseded. Its patch is closed without restoring, the newer value stands, and error says so\"; `key`: \"an Apply with no key is refused rather than dropped\"; `failure`: \"no Key, a transaction id already open, or no such update to resolve\"",
+    "world": {},
+    "nodes": {
+      "a": {
+        "type": "net.noodl.GlobalStore",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "seed": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "count",
+          "value": 1
+        }
+      },
+      "plain": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "count",
+          "value": 7
+        }
+      },
+      "ou": {
+        "type": "net.noodl.OptimisticUpdate",
+        "params": {
+          "storeName": "app",
+          "key": "count",
+          "optimisticValue": 5,
+          "timeout": 0
+        }
+      },
+      "noKey": {
+        "type": "net.noodl.OptimisticUpdate",
+        "params": {
+          "storeName": "app",
+          "timeout": 0
+        }
+      },
+      "none": {
+        "type": "net.noodl.OptimisticUpdate",
+        "params": {
+          "storeName": "app",
+          "key": "x",
+          "timeout": 0
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "seed",
+        "signal": "set"
+      },
+      "settle",
+      {
+        "node": "ou",
+        "signal": "apply"
+      },
+      "settle",
+      {
+        "node": "plain",
+        "signal": "set"
+      },
+      "settle",
+      {
+        "node": "ou",
+        "signal": "rollback"
+      },
+      "settle",
+      {
+        "node": "noKey",
+        "signal": "apply"
+      },
+      "settle",
+      {
+        "node": "none",
+        "signal": "rollback"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 3,
+        "subject": "ou",
+        "port": "value",
+        "value": 5
+      },
+      {
+        "at": 4,
+        "subject": "ou",
+        "port": "value",
+        "value": 7
+      },
+      {
+        "at": 4,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "count": 7
+        }
+      },
+      {
+        "at": 5,
+        "subject": "ou",
+        "signal": "rolledBack",
+        "count": 1
+      },
+      {
+        "at": 5,
+        "subject": "ou",
+        "port": "value",
+        "absent": true
+      },
+      {
+        "at": 5,
+        "subject": "a",
+        "port": "state",
+        "absent": true
+      },
+      {
+        "at": 5,
+        "subject": "ou",
+        "port": "error",
+        "value": "The update was rolled back. The value changed after the update was applied, so it was left as it is."
+      },
+      {
+        "at": 6,
+        "subject": "noKey",
+        "port": "error",
+        "value": "Key is required"
+      },
+      {
+        "at": 6,
+        "subject": "noKey",
+        "signal": "applied",
+        "count": 0
+      },
+      {
+        "at": 7,
+        "subject": "none",
+        "port": "error",
+        "value": "There is no open update to roll back"
+      },
+      {
+        "at": 7,
+        "subject": "none",
+        "signal": "rolledBack",
+        "count": 0
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "seed"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "count",
+        "subject": "seed"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 1,
+        "subject": "seed"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "plain"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "count",
+        "subject": "plain"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 7,
+        "subject": "plain"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "ou"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "count",
+        "subject": "ou"
+      },
+      {
+        "t": "set",
+        "port": "optimisticValue",
+        "value": 5,
+        "subject": "ou"
+      },
+      {
+        "t": "set",
+        "port": "timeout",
+        "value": 0,
+        "subject": "ou"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "noKey"
+      },
+      {
+        "t": "set",
+        "port": "timeout",
+        "value": 0,
+        "subject": "noKey"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "none"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "x",
+        "subject": "none"
+      },
+      {
+        "t": "set",
+        "port": "timeout",
+        "value": 0,
+        "subject": "none"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {},
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "storeId",
+        "value": "--ndl--global-store--app",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "ready",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "isCommitted",
+        "value": false,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "isPending",
+        "value": false,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "isRolledBack",
+        "value": false,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "pendingCount",
+        "value": 0,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "isCommitted",
+        "value": false,
+        "subject": "noKey"
+      },
+      {
+        "t": "value",
+        "port": "isPending",
+        "value": false,
+        "subject": "noKey"
+      },
+      {
+        "t": "value",
+        "port": "isRolledBack",
+        "value": false,
+        "subject": "noKey"
+      },
+      {
+        "t": "value",
+        "port": "pendingCount",
+        "value": 0,
+        "subject": "noKey"
+      },
+      {
+        "t": "value",
+        "port": "isCommitted",
+        "value": false,
+        "subject": "none"
+      },
+      {
+        "t": "value",
+        "port": "isPending",
+        "value": false,
+        "subject": "none"
+      },
+      {
+        "t": "value",
+        "port": "isRolledBack",
+        "value": false,
+        "subject": "none"
+      },
+      {
+        "t": "value",
+        "port": "pendingCount",
+        "value": 0,
+        "subject": "none"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "seed"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "count",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "seed"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 1,
+        "subject": "ou"
+      },
+      {
+        "t": "in",
+        "port": "apply",
+        "subject": "ou"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 5
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "isPending",
+        "value": true,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "pendingCount",
+        "value": 1,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "previousValue",
+        "value": 1,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "transactionId",
+        "value": "tx_0_mkorf98kq",
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 5,
+        "subject": "ou"
+      },
+      {
+        "t": "signal",
+        "port": "applied",
+        "subject": "ou"
+      },
+      {
+        "t": "outcome",
+        "port": "apply",
+        "value": "done",
+        "subject": "ou"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "plain"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 7
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "plain"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 7,
+        "subject": "ou"
+      },
+      {
+        "t": "in",
+        "port": "rollback",
+        "subject": "ou"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "The update was rolled back. The value changed after the update was applied, so it was left as it is.",
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "isPending",
+        "value": false,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "isRolledBack",
+        "value": true,
+        "subject": "ou"
+      },
+      {
+        "t": "value",
+        "port": "pendingCount",
+        "value": 0,
+        "subject": "ou"
+      },
+      {
+        "t": "signal",
+        "port": "rolledBack",
+        "subject": "ou"
+      },
+      {
+        "t": "outcome",
+        "port": "rollback",
+        "value": "unchanged",
+        "subject": "ou"
+      },
+      {
+        "t": "in",
+        "port": "apply",
+        "subject": "noKey"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "Key is required",
+        "subject": "noKey"
+      },
+      {
+        "t": "outcome",
+        "port": "apply",
+        "value": "failure",
+        "error": "optimistic-update/operation-failed",
+        "subject": "noKey"
+      },
+      {
+        "t": "in",
+        "port": "rollback",
+        "subject": "none"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "There is no open update to roll back",
+        "subject": "none"
+      },
+      {
+        "t": "outcome",
+        "port": "rollback",
+        "value": "failure",
+        "error": "optimistic-update/operation-failed",
+        "subject": "none"
+      }
+    ]
+  }
+]

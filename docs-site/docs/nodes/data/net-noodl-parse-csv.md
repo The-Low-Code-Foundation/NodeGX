@@ -29,6 +29,20 @@ A CSV arriving from anywhere at runtime: a request body, an upload, an HTTP resp
 | `hasHeader` | Boolean | `true` | When ticked the first row names the columns and Items is an array of records. Untick it and Items is an array of rows, each an array of cells |
 | `text` | String | — | The CSV text to parse. A leading byte-order mark — which is what Excel writes when it saves UTF-8 — is stripped, so the first column keeps its name |
 
+### What each input does
+
+**CSV** (`text`)
+
+- always: parsed at the end of the frame (once, however many inputs moved) — Items, Count and Changed, or Error and Failure with Items and Count untouched; nothing (undefined or null) is not parsed, a number parses as its text
+
+**Has Header** (`hasHeader`)
+
+- always: the CSV is parsed again at the end of the frame, once any has arrived — the first row names the columns and Items holds records in a fresh array, or Items holds the rows as arrays of cells
+
+**Delimiter** (`delimiter`)
+
+- always: the CSV is parsed again at the end of the frame, once any has arrived, split on this (cleared reads as a comma)
+
 ## Outputs
 
 ### Values

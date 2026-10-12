@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c_home",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "description": "A marker, the Garden and the Block List each under a Group root (D53), and a game-kit Avatar beside them so the page proves both modules loaded. Every kit port is fed by a Variable the drive sets through Noodl.Variables; the Block List's Program and Selected outputs are written back into Variables the drive reads."
+}

@@ -4,10 +4,12 @@
  * (input sourcing, output landing, run-model fit) lives in plan.ts; this module only ever
  * looks at the script text, exactly the way the runtime's own parsers do.
  *
- * The mining regexes are verbatim clones of the runtime's (javascriptnodeparser.js
- * `parseAndAddPortsFromScript`, expression.ts `parsePorts`) — the port set the runtime mints
- * is the port set this gate reasons about, so the two must not drift.
+ * A Function's ports are read with `@nodegx/project-contract/function-ports`, the reader the runtime's
+ * Function node imports (P109 ISL-006), and an Expression's with `expression-ports.ts`, a copy of
+ * the runtime's — the port set the runtime mints is the port set this gate reasons about.
  */
+
+import { functionScriptPortNames, stripScriptComments } from '@nodegx/project-contract/function-ports';
 
 import { NodeIR } from '../ir/types';
 import { EXPRESSION_MATH_ALIASES as RUNTIME_MATH_ALIASES, expressionPorts, expressionReferences } from './expression-ports';
@@ -82,29 +84,20 @@ export interface FunctionMinedPorts {
   signals: string[];
 }
 
-/** javascriptnodeparser.js `parseAndAddPortsFromScript`, as data. Signals win over values. */
+/**
+ * The Function's ports as data, from `@nodegx/project-contract/function-ports`. Signals win over values.
+ *
+ * One addition the runtime's reader does not make: `Outputs.x.send()` is a signal here. It is the documented second
+ * spelling (simplejavascript.ts attaches `.send` to every signal value), so it is seeded and cannot throw.
+ */
 export function functionMinedPortsOf(body: string): FunctionMinedPorts {
-  const collect = (patterns: RegExp[]): string[] => {
-    const names: string[] = [];
-    for (const pattern of patterns) {
-      for (const match of body.matchAll(pattern)) {
-        if (match[1] !== undefined && !names.includes(match[1])) names.push(match[1]);
-      }
-    }
-    return names;
-  };
-  const signals = collect([
-    /Outputs\.([A-Za-z0-9]+)\s*\(\s*\)/g,
-    /Outputs\s*\[\s*(?:'|")(.*)(?:'|")\s*\]\(\s*\)/g,
-    // Not in the runtime's miner, but `Outputs.x.send()` is the documented second spelling
-    // (simplejavascript.ts attaches `.send` to every signal value) — seeded so it cannot throw.
-    /Outputs\.([A-Za-z0-9_]+)\.send\s*\(/g
-  ]);
-  const outputs = collect([/Outputs\.([A-Za-z0-9_]+)/g, /Outputs\s*\[\s*\"([^\"]*)\"\s*\]/g]).filter(
-    (name) => !signals.includes(name) && name !== 'send'
-  );
-  const inputs = collect([/Inputs\.([A-Za-z0-9_]+)/g, /Inputs\s*\[\s*(?:'|")(.*)(?:'|")\s*\]/g]);
-  return { inputs, outputs, signals };
+  const names = functionScriptPortNames(body);
+  const signals = [...names.signals];
+  for (const match of stripScriptComments(body).matchAll(/Outputs\.([A-Za-z0-9_]+)\.send\s*\(/g)) {
+    if (!signals.includes(match[1])) signals.push(match[1]);
+  }
+  const outputs = names.outputs.filter((name) => !signals.includes(name) && name !== 'send');
+  return { inputs: [...names.inputs], outputs, signals };
 }
 
 /**
@@ -142,15 +135,17 @@ const EXPRESSION_PREAMBLE =
  * template literals stay, their interpolations are code). Over-deferring on a marker inside an
  * odd string is the safe direction; certifying a body that reaches the network is not.
  */
-const MARKER_GATES: ReadonlyArray<{ pattern: RegExp; reason: string }> = [
+const MARKER_GATES: ReadonlyArray<{ pattern: RegExp; reason: string; bodyOnly?: true }> = [
   {
     pattern: /\bComponent\s*[.\[]/,
-    reason: 'reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)'
+    reason: 'reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)',
+    bodyOnly: true
   },
-  { pattern: /\bScript\s*[.\[]/, reason: 'uses the Script-node DSL (Script.*) — a hand-written node, not a function' },
+  { pattern: /\bScript\s*[.\[]/, reason: 'uses the Script-node DSL (Script.*) — a hand-written node, not a function', bodyOnly: true },
   {
     pattern: /\bthis\s*[.\[]/,
-    reason: "keeps state on `this` across runs — cross-run state is EXP-003 Tier B"
+    reason: "keeps state on `this` across runs — cross-run state is EXP-003 Tier B",
+    bodyOnly: true
   },
   { pattern: /\bnew\s+Date\b|\bDate\s*[.(]/, reason: 'reads the clock (Date) — not deterministic' },
   { pattern: /\bMath\.random\b/, reason: 'draws randomness (Math.random) — not deterministic' },
@@ -158,15 +153,33 @@ const MARKER_GATES: ReadonlyArray<{ pattern: RegExp; reason: string }> = [
   { pattern: /\bsetTimeout\b|\bsetInterval\b/, reason: 'schedules timers — invocation timing is real semantics' },
   {
     pattern: /\bwindow\b|\bdocument\b|\blocalStorage\b|\bsessionStorage\b|\bnavigator\b/,
-    reason: 'touches the browser environment — not translatable in this slice'
+    reason: 'touches the browser environment — not translatable in this slice',
+    bodyOnly: true
   },
   { pattern: /\bimport\s*\(/, reason: 'loads code dynamically (import()) — not translatable in this slice' },
   {
     pattern: /\basync\b|\bawait\b|\.then\s*\(/,
     reason: 'is asynchronous — completion ordering joins the invocation tier when the trace harness exists'
   },
-  { pattern: /\barguments\b/, reason: "reads the compiled function's arguments object — a host detail this wrapper does not carry" }
+  { pattern: /\barguments\b/, reason: "reads the compiled function's arguments object — a host detail this wrapper does not carry", bodyOnly: true }
 ];
+
+/**
+ * P109 ISL-005 — the marker gates a **script file** must pass, for a Function that uses it to re-host.
+ *
+ * A file's code runs inside the Function's call, so what makes a body unfit to re-host (the clock,
+ * randomness, the network, timers, `import()`, anything asynchronous) makes a file it calls unfit
+ * too. The `bodyOnly` gates are about the body's own host and are not read here: inside a file
+ * `this` and `arguments` are ordinary JavaScript, and `Component`, `Script`, `window` and
+ * `document` are `undefined` in the runtime and in the export alike (the loader passes them so).
+ */
+export function scriptFileMarkerDefer(source: string): string | null {
+  const scanned = strippedForScan(source);
+  for (const gate of MARKER_GATES) {
+    if (!gate.bodyOnly && gate.pattern.test(scanned)) return gate.reason;
+  }
+  return null;
+}
 
 /** Comment + quoted-string stripping for the marker scan (LOGIC-TARGET's parse discipline). */
 export function strippedForScan(body: string): string {

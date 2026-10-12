@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Layout from '../../../layout';
 import Utils from '../../../nodes/controls/utils';
 import { Noodl } from '../../../types';
-import { noodlRootRef } from '../../noodl-root-ref';
+import { noodlRootRef, dataAttributeProps } from '../../noodl-root-ref';
 
 export interface SliderProps extends Noodl.ReactProps {
   _nodeId: string;
@@ -25,6 +25,12 @@ export interface SliderProps extends Noodl.ReactProps {
 
   onClick: () => void;
   updateOutputValue: (value: number) => void;
+  /** P107-C73 + D36 — where the node last put the handle: a remounted slider starts there */
+  handle: number;
+  /** counts the graph's words for the handle; the effect draws each one */
+  valueWrites: number;
+  /** the handle as the browser holds it now — the graph's word when one waits — reported without Changed (C74, D36) */
+  drawHandle: () => number;
 }
 
 function _styleTemplate(_class: string, props: SliderProps) {
@@ -83,11 +89,15 @@ function hasUnitPx(value: string) {
 }
 
 export function Slider(props: SliderProps) {
-  const [value, setValue] = useState(props.value);
+  const [value, setValue] = useState(props.handle);
 
+  // P107-C73 + D36 (P109 ISL-031): the effect draws the graph's word without announcing it, and is keyed on the node's count
+  // of words, so a Value equal to React's last render is drawn too. It used to call the slide's own report with
+  // `props.value`, so a graph Value, a clamping Min or Max, the mount and a remount (a fresh `useState(props.value)`) all
+  // fired Changed with nobody sliding.
   useEffect(() => {
-    onValueChanged(props.value);
-  }, [props.value]);
+    setValue(props.drawHandle());
+  }, [props.valueWrites]);
 
   function onValueChanged(value: number) {
     setValue(value);
@@ -170,7 +180,7 @@ export function Slider(props: SliderProps) {
   setShadow(thumbStyle, 'thumb', props);
 
   return (
-    <div ref={noodlRootRef(props.noodlNode)} style={divStyle}>
+    <div ref={noodlRootRef(props.noodlNode)} {...dataAttributeProps(props.dom)} style={divStyle}>
       <div style={trackStyle} />
       <div style={thumbStyle} />
       <input

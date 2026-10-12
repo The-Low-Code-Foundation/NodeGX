@@ -51,6 +51,9 @@ export class RouterHandler {
   navigate(name: string, args: NavigateArgs) {
     //add a 1ms timeout so other nodes have a chance to run before the page is destroyed.
     setTimeout(() => {
+      // P107-C118: a blank name is Main here too, as `registerRouter` reads it — a blank-named Navigate queued before any
+      // router was on the page waited under '' for good, and a router registering as Main never took it
+      name = name || 'Main';
       const routerNames = Object.keys(this._routers);
       if (routerNames.length === 1) {
         name = routerNames[0];
@@ -117,7 +120,9 @@ export class RouterHandler {
 
     if (routers === undefined || routers.length === 0) return [];
 
-    const matchingRouters = name === undefined ? [routers[0]] : routers.filter((r) => r.name === name);
+    // P109-S18: a blank name is Main here too, as `registerRouter` reads it and as the index names an unnamed Router
+    const wanted = name || 'Main';
+    const matchingRouters = routers.filter((r) => r.name === wanted);
 
     const pageComponents = new Set();
     matchingRouters.forEach((r) => {

@@ -14,7 +14,12 @@
 
 // Type-only import of the generated catalog shape (no runtime cost).
 import type { NodeCatalog, CatalogNode, CatalogPort, Typecast } from '../../../../../noodl-types/src/node-catalog';
+import { canConnectPortTypes } from '@nodegx/project-contract/typecasts';
+
 import type { DeclaredPortGroup, ParameterBag } from './portConditions';
+// Import-free by construction (its header says why), the way `derivedPortTargets` reaches
+// `nameListParameter`: one reader of a derived-port rule, not a second copy here.
+import { derivedPortsForNode, refusedDerivedNames } from '../models/nodelibrary/dynamicPortRules';
 
 export type { NodeCatalog, CatalogNode, CatalogPort };
 
@@ -65,8 +70,8 @@ export class CatalogIndex {
   private readonly portNamesCache = new Map<string, { input: Set<string>; output: Set<string> }>();
   /** DEF-006 — memoised {@link inputDefaults} bags, one per node type. */
   private readonly defaultsByType = new Map<string, ParameterBag>();
-  /** from-type → Set<to-type> reachable via a documented typecast. */
-  private readonly typecasts = new Map<string, Set<string>>();
+  /** The catalog's typecast rows (`@nodegx/project-contract/typecasts`' table, as the runtime published it). */
+  private readonly typecasts: readonly Typecast[];
   private readonly allTypeNames: string[];
 
   constructor(private readonly catalog: NodeCatalog) {
@@ -74,9 +79,7 @@ export class CatalogIndex {
       this.byType.set(node.typeName, node);
     }
     this.allTypeNames = catalog.nodes.map((n) => n.typeName);
-    for (const cast of catalog.typecasts ?? ([] as Typecast[])) {
-      this.typecasts.set(cast.from, new Set(cast.to));
-    }
+    this.typecasts = catalog.typecasts ?? [];
   }
 
   // ── Node types ────────────────────────────────────────────────────────────
@@ -168,6 +171,30 @@ export class CatalogIndex {
    */
   declaredPortGroups(typeName: string): DeclaredPortGroup[] | undefined {
     return this.byType.get(typeName)?.dynamicPorts?.declaredPortGroups as DeclaredPortGroup[] | undefined;
+  }
+
+  /**
+   * P109 ISL-009 — the ports a node's `namedports/derived` rules mint from its own parameters.
+   *
+   * These are enumerable, which is the whole difference from a runtime-discovered port: the rule is
+   * in the catalog and the names are in the node's parameter. So a port rule asks this before it
+   * errors, instead of the type being marked runtime-dynamic and every unknown port on all 27
+   * visual types going unchecked.
+   */
+  derivedPortNames(typeName: string, plug: Plug, parameters: ParameterBag | null | undefined): string[] {
+    const groups = this.byType.get(typeName)?.dynamicPorts?.declaredPortGroups;
+    return derivedPortsForNode(groups, parameters ?? undefined)
+      .filter((p) => !p.plug || p.plug === plug)
+      .map((p) => p.name);
+  }
+
+  /** P109 ISL-009 — the names a node lists that its type's derived-port rule refuses. */
+  refusedDerivedNames(
+    typeName: string,
+    parameters: ParameterBag | null | undefined
+  ): Array<{ parameter: string; name: string; rule: string }> {
+    const groups = this.byType.get(typeName)?.dynamicPorts?.declaredPortGroups;
+    return refusedDerivedNames(groups, parameters ?? undefined);
   }
 
   /** A short human note describing why a port could not be checked. */
@@ -316,19 +343,16 @@ export class CatalogIndex {
   }
 
   /**
-   * Can a value of `fromType` feed an input of `toType`? Conservative: unknown
-   * types, wildcards, and signal endpoints are treated as compatible so the
-   * type rule only ever fires on a *provably* incompatible, statically-typed pair.
+   * Can a value of `fromType` feed an input of `toType`? The canvas's own answer (`canConnectPortTypes`: the
+   * typecast table, and a signal output reaches only a signal input), so the Problems panel and the agent server warn
+   * on exactly the wires a person could not draw. An unknown type is not guessed at.
+   *
+   * P107 R22 (2026-10-11): until s88 this let a signal through on either end, which the canvas never did — over
+   * Richard's 201 projects 0 wires answered differently, so the two rules became one.
    */
   isTypeCompatible(fromType: string | undefined, toType: string | undefined): boolean {
     if (!fromType || !toType) return true; // unknown ⇒ don't guess
-    if (fromType === toType) return true;
-    if (fromType === '*' || toType === '*') return true;
-    // Signals interoperate broadly and the runtime coerces around them, so a
-    // signal on either side is treated as compatible (a common, legal pattern).
-    if (fromType === 'signal' || toType === 'signal') return true;
-    const reach = this.typecasts.get(fromType);
-    return !!reach && reach.has(toType);
+    return canConnectPortTypes(this.typecasts, fromType, toType);
   }
 
   // ── Suggestions (edit distance) ──────────────────────────────────────────────

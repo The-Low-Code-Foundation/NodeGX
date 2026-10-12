@@ -439,15 +439,19 @@ function applyIndexes(
   sm: IStorageSchema,
   table: string,
   indexes: StorageIndexDecl[] | undefined,
-  result: ApplyResult
+  result: ApplyResult,
+  whole: boolean
 ): void {
-  if (!indexes || indexes.length === 0) return;
+  // P109 ISL-041 (P99-HLT016-LASTINDEX): `whole` as `applyChecks` has it. A changed table whose source
+  // removed its LAST index arrives as `[]`, and returning here left that index on the target, refusing
+  // rows the source accepts, named nowhere in the result. A NEW table with none has nothing to do.
+  if (!whole && (!indexes || indexes.length === 0)) return;
   if (typeof sm.reconcileIndexes !== 'function') {
     result.skipped.push(`indexes on ${table} (this adapter cannot declare indexes)`);
     return;
   }
   try {
-    const report = sm.reconcileIndexes(table, indexes);
+    const report = sm.reconcileIndexes(table, indexes || []);
     for (const name of report.created) result.appliedIndexes.push(`${table}.${name}`);
     for (const name of report.dropped) result.droppedIndexes.push(`${table}.${name}`);
   } catch (e) {
@@ -529,7 +533,7 @@ export async function applySchema(
     // FED-002: a promoted table arrives with its constraints or the promotion
     // has moved a guarantee into a hope. The table is one statement old, so no
     // unique declaration can be refused by data here.
-    applyIndexes(sm, t.name, t.indexes, result);
+    applyIndexes(sm, t.name, t.indexes, result, false);
     applyChecks(sm, t.name, t.checks, result, false);
   }
   for (const c of diff.tables.changed) {
@@ -543,7 +547,7 @@ export async function applySchema(
     // because a new index usually names one of them. A unique index the target's
     // rows refuse is SKIPPED with the reason — never applied halfway, and never
     // by deleting rows.
-    if (c.indexChange) applyIndexes(sm, c.name, c.indexChange.to, result);
+    if (c.indexChange) applyIndexes(sm, c.name, c.indexChange.to, result, true);
     if (c.checkChange) applyChecks(sm, c.name, c.checkChange.to, result, true);
   }
 

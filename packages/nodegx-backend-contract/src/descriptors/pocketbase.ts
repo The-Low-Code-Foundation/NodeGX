@@ -211,6 +211,13 @@ export const pocketbaseDescriptor: BackendDescriptor = {
 
     ...WILDCARD_DEGRADED,
 
+    // P116 ONT-004. PocketBase's dotted-path filter is measured one hop deep
+    // (BCN-005, with the ?= cardinality trap); deeper paths not driven.
+    path: unsupported(
+      'Following several links in one request is not available on PocketBase yet. Filter one link at a time with a dotted field.',
+      "BCN-005 live: one hop works (author.city='London', tags.label?='algebra'); deeper paths not driven, no translator"
+    ),
+
     relatedTo: unsupported(
       'Filtering by "records related to this one" is not available on PocketBase yet.',
       'BCN-005.'

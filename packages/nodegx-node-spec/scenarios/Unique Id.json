@@ -1,0 +1,27 @@
+[
+  {
+    "name": "one id at creation: the first settle publishes the world's first ten draws, no pulse",
+    "because": "uniqueid.ts :22-25 initialize → Model.guid(); model.ts :297-311 ten draws; the connection-time read hands a wire the getter's value",
+    "params": {},
+    "steps": ["settle"]
+  },
+  {
+    "name": "New replaces the id with the next ten draws and reports done",
+    "because": "uniqueid.ts :34-45",
+    "params": {},
+    "steps": ["settle", { "signal": "new" }, "settle"]
+  },
+  {
+    "name": "two News in one frame: the wire carries the second id, two dones",
+    "because": "uniqueid.ts :38 flagged on every call; the frame sends the last defined value",
+    "params": {},
+    "steps": ["settle", { "signal": "new" }, { "signal": "new" }, "settle"]
+  },
+  {
+    "name": "a different seed is a different id — the draws are the world's, not the node's",
+    "because": "world.ts RANDOM — Math.random is the seeded stream",
+    "params": {},
+    "world": { "seed": 424242 },
+    "steps": ["settle", { "signal": "new" }, "settle"]
+  }
+]

@@ -11,8 +11,10 @@
 import { aclPredicateSql } from '../postgres/predicates';
 import type { EngineDatabase } from './engine';
 import { escapeTable, escapeColumn } from './QueryBuilder';
+import { assertSeriesColumns, planNumbering, seriesName, seriesProblem, SERIES_SET_SQL, SERIES_TABLE, SERIES_TABLE_DDL, type SeriesOption } from '../series';
 import {
   builtInIndexNames as sharedBuiltInIndexNames,
+  applyRequired,
   CHECK_FAILED_PREFIX,
   checkChecksAgainstColumns,
   checkName,
@@ -27,6 +29,7 @@ import {
   declaredColumn,
   declaredProperties,
   describeWhere,
+  FieldEmptyError,
   indexName as sharedIndexName,
   MigrationRefusal,
   normalizeIndexDecls,
@@ -34,6 +37,8 @@ import {
   junctionTableName,
   quoteLiteral,
   refuseColumnInUse,
+  ownedJunctions,
+  refuseTableRename,
   sameIndexSignature,
   sanitizeIdent,
   SYSTEM_COLUMNS,
@@ -124,9 +129,12 @@ interface PostgresExportOptions {
  * is below it. Only the two fields the policies are generated from are named,
  * so a change to the rest of the config cannot break the export by type alone.
  */
+/** A rule as `security.json` stores it; an object atom is P116 ONT-004's path rule, which the export refuses. */
+type RuleLike = string | object | Array<string | object>;
+
 interface SecurityRulesLike {
-  defaults: { permissions: Record<string, string | string[]>; creatorOwns?: boolean };
-  collections?: Record<string, { permissions?: Record<string, string | string[]>; creatorOwns?: boolean }>;
+  defaults: { permissions: Record<string, RuleLike>; creatorOwns?: boolean };
+  collections?: Record<string, { permissions?: Record<string, RuleLike>; creatorOwns?: boolean }>;
 }
 
 /** Options for the Supabase export. Both fields are required in practice — see `generateSupabaseSQL`. */
@@ -209,6 +217,7 @@ class SchemaManager {
    */
   createTable(schema: TableSchema): boolean {
     const tableName = schema.name;
+    assertSeriesColumns(schema.columns); // P116 ONT-015: a series that cannot be kept is refused, not stored
 
     // Check if table exists
     const exists = this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?").get(tableName);
@@ -277,6 +286,7 @@ class SchemaManager {
    * Add a column to an existing table
    */
   addColumn(tableName: string, column: SchemaColumn): void {
+    assertSeriesColumns([column]);
     const colDef = this._columnToSQL(column);
     if (!colDef) {
       // BMG-003: a Relation is a junction table, not a column. Before this it
@@ -324,6 +334,27 @@ class SchemaManager {
   }
 
   /**
+   * BMG-003 / P116-ONT-007-renamecolumn — refuse a drop or a rename while
+   * something declared reads the column (`refuseColumnInUse`). The FTS sync
+   * trigger names every indexed column (`new."col"`), so it is the honest
+   * record of the search opt-in on this engine.
+   */
+  private refuseIfRead(tableName: string, columnName: string, verb: 'drop' | 'rename'): void {
+    const fts = this.db
+      .prepare("SELECT sql FROM sqlite_master WHERE type = 'trigger' AND name = ?")
+      .get(`${tableName}_fts_ai`) as { sql?: string } | undefined;
+    const searched = fts && typeof fts.sql === 'string' && fts.sql.includes(escapeColumn(columnName)) ? [columnName] : undefined;
+    refuseColumnInUse(
+      tableName,
+      columnName,
+      this.declaredIndexes(tableName).map((i) => ({ name: this.indexName(tableName, i.fields, i.where), fields: i.fields, where: i.where })),
+      this.declaredChecks(tableName),
+      searched,
+      verb
+    );
+  }
+
+  /**
    * BMG-003 — drop a column. A Relation is a junction table, so that is what
    * goes. A declared index, check or search opt-in that reads the column is a
    * refusal (`code: 'COLUMN_IN_USE'`) naming it — SQLite's own DROP COLUMN
@@ -341,19 +372,7 @@ class SchemaManager {
     const physical = this.tableColumns(tableName).has(columnName);
     if (!declared && !physical) return false;
 
-    // The FTS sync trigger names every indexed column (`new."col"`), so it is
-    // the honest record of the search opt-in on this engine.
-    const fts = this.db
-      .prepare("SELECT sql FROM sqlite_master WHERE type = 'trigger' AND name = ?")
-      .get(`${tableName}_fts_ai`) as { sql?: string } | undefined;
-    const searched = fts && typeof fts.sql === 'string' && fts.sql.includes(escapeColumn(columnName)) ? [columnName] : undefined;
-    refuseColumnInUse(
-      tableName,
-      columnName,
-      this.declaredIndexes(tableName).map((i) => ({ name: this.indexName(tableName, i.fields, i.where), fields: i.fields })),
-      this.declaredChecks(tableName),
-      searched
-    );
+    this.refuseIfRead(tableName, columnName, 'drop');
 
     const relation = !!declared && declared.type === 'Relation';
     this.db.exec('SAVEPOINT nodegx_drop_column');
@@ -389,26 +408,287 @@ class SchemaManager {
       return false;
     }
 
+    // P116-ONT-007-junctions: its own junction tables, read before its declaration goes — never
+    // a `LIKE` over names, where `_` matches any one character and "Account" took "MyAccount"'s.
+    this.ensureSchemaTable();
+    const declared = new Map<string, string[]>();
+    for (const r of this.db.prepare('SELECT "name", "schema" FROM "_Schema"').all() as Array<{ name: string; schema: string }>) {
+      const cols = (JSON.parse(r.schema) as TableSchema).columns || [];
+      declared.set(r.name, cols.filter((c) => c.type === 'Relation').map((c) => c.name));
+    }
+    const tables = (this.db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{ name: string }>).map((t) => t.name);
+    const junctions = ownedJunctions(tableName, tables, declared);
+
     // Drop the table
     this.db.exec(`DROP TABLE IF EXISTS ${escapeTable(tableName)}`);
 
     // Remove from schema tracking
-    this.ensureSchemaTable();
     this.db.prepare('DELETE FROM "_Schema" WHERE "name" = ?').run(tableName);
 
     // Clear cache
     this._schemaCache.delete(tableName);
 
-    // Drop any junction tables for relations
-    const junctionTables = this.db
-      .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE ?")
-      .all(`_Join_%_${tableName}`) as Array<{ name: string }>;
-
-    for (const jt of junctionTables) {
-      this.db.exec(`DROP TABLE IF EXISTS ${escapeTable(jt.name)}`);
-    }
+    for (const j of junctions) this.db.exec(`DROP TABLE IF EXISTS ${escapeTable(j)}`);
 
     return true;
+  }
+
+  /**
+   * P116 ONT-007 — rename a collection, keeping its records. See
+   * `IStorageSchema.renameTable` for what is carried and what refuses it.
+   *
+   * SQLite's `ALTER TABLE … RENAME TO` keeps the rows and the indexes but not
+   * their names, so the two built-in indexes are made again under the new
+   * name. The junction tables are the ones this table's own `Relation` columns
+   * name — read from its declaration, never by a `LIKE` over table names (in
+   * which `_` matches any character). One transaction: a failure leaves the
+   * old name whole.
+   *
+   * @returns true; it throws rather than answering false.
+   */
+  renameTable(oldName: string, newName: string): boolean {
+    const isTable = (n: string): boolean =>
+      Boolean(this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?").get(n));
+    const known = isTable(oldName);
+    refuseTableRename(oldName, newName, (n) => isTable(n) || this.getTableSchema(n) !== null, {
+      indexes: known ? this.indexStatus(oldName) : [],
+      checks: known ? this.checkStatus(oldName) : [],
+      search: known && this.hasSearchIndex(oldName)
+    });
+
+    const schema = this.getTableSchema(oldName);
+    const relations = (schema?.columns || []).filter((c) => c.type === 'Relation' && c.targetClass);
+    // P116 ONT-007 s11: a link the collection has to ITSELF (a topic's parent) is renamed with it.
+    // `{ ...schema, name }` kept `targetClass: oldName` on it — a link to a collection that no longer exists.
+    const renamed = schema ? freshSchema({ ...schema, name: newName }) : null;
+    for (const c of renamed?.columns || []) if (c.targetClass === oldName) c.targetClass = newName;
+    this.ensureSchemaTable();
+    const others = (this.db.prepare('SELECT "name", "schema" FROM "_Schema"').all() as Array<{ name: string; schema: string }>)
+      .filter((r) => r.name !== oldName)
+      .map((r) => ({ name: r.name, schema: JSON.parse(r.schema) as TableSchema }))
+      .filter((r) => (r.schema.columns || []).some((c) => c.targetClass === oldName));
+
+    this.db.exec('BEGIN');
+    try {
+      this.db.exec(`ALTER TABLE ${escapeTable(oldName)} RENAME TO ${escapeTable(newName)}`);
+      for (const [from, to] of sharedBuiltInIndexNames(oldName).map((n, i) => [n, sharedBuiltInIndexNames(newName)[i]])) {
+        this.db.exec(`DROP INDEX IF EXISTS ${escapeTable(from)}`);
+        this.db.exec(`CREATE INDEX IF NOT EXISTS ${escapeTable(to)} ON ${escapeTable(newName)}("${from.endsWith('_createdAt') ? 'createdAt' : 'updatedAt'}")`);
+      }
+      for (const col of relations) {
+        const from = junctionTableName(oldName, col.name);
+        const to = junctionTableName(newName, col.name);
+        if (!isTable(from)) continue;
+        this.db.exec(`ALTER TABLE ${escapeTable(from)} RENAME TO ${escapeTable(to)}`);
+        for (const end of ['owning', 'related']) {
+          this.db.exec(`DROP INDEX IF EXISTS ${escapeTable(`idx_${from}_${end}`)}`);
+          this.db.exec(`CREATE INDEX IF NOT EXISTS ${escapeTable(`idx_${to}_${end}`)} ON ${escapeTable(to)}("${end}Id")`);
+        }
+      }
+      if (schema) {
+        this.db.prepare('DELETE FROM "_Schema" WHERE "name" = ?').run(oldName);
+        this.db
+          .prepare('INSERT OR REPLACE INTO "_Schema" ("name", "schema", "updatedAt") VALUES (?, ?, CURRENT_TIMESTAMP)')
+          .run(newName, JSON.stringify(renamed));
+      }
+      for (const o of others) {
+        for (const c of o.schema.columns || []) if (c.targetClass === oldName) c.targetClass = newName;
+        this.db
+          .prepare('UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?')
+          .run(JSON.stringify(o.schema), o.name);
+      }
+      this.db.exec('COMMIT');
+    } catch (e) {
+      this.db.exec('ROLLBACK');
+      throw e;
+    }
+
+    this._schemaCache.delete(oldName);
+    if (renamed) this._schemaCache.set(newName, renamed);
+    for (const o of others) this._schemaCache.set(o.name, freshSchema(o.schema));
+    return true;
+  }
+
+  /**
+   * P116 ONT-007 s11: say again what a collection — and any of its fields — is, in the words the
+   * person said now. The words are kept with the declaration and never interpreted; `createTable`
+   * writes them once, and this is the one thing that changes them. An empty or null text takes the
+   * words away. Throws on a collection or a field the declaration does not have.
+   */
+  describeTable(tableName: string, description: string | null, columns: Record<string, string | null> = {}): boolean {
+    const schema = this.getTableSchema(tableName);
+    if (!schema) throw new Error(`There is no collection called "${tableName}"`);
+    const fresh = freshSchema(schema);
+    const say = (target: { [key: string]: unknown }, words: string | null | undefined): void => {
+      const text = typeof words === 'string' ? words.trim() : '';
+      if (text) target.description = text;
+      else delete target.description;
+    };
+    say(fresh, description);
+    for (const [name, words] of Object.entries(columns)) {
+      const col = (fresh.columns || []).find((c) => c.name === name);
+      if (!col) throw new Error(`"${tableName}" has no field "${name}"`);
+      say(col as unknown as { [key: string]: unknown }, words);
+    }
+    this.ensureSchemaTable();
+    this.db
+      .prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`)
+      .run(JSON.stringify(fresh), tableName);
+    this._schemaCache.set(tableName, fresh);
+    return true;
+  }
+
+  /**
+   * P116 R10: what happens to a record when the one each named link points at goes — `whenTargetGoes`
+   * by field name, `null` to take it away. Only the declaration changes; the backend keeps the rule
+   * at delete time. A fresh object in the cache, as every schema edit (the memo, s11).
+   */
+  setWhenTargetGoes(tableName: string, columns: Record<string, 'goes-too' | 'stays-unlinked' | 'blocks' | null>): boolean {
+    const schema = this.getTableSchema(tableName);
+    if (!schema) throw new Error(`There is no collection called "${tableName}"`);
+    const fresh = freshSchema(schema);
+    const RULES = ['goes-too', 'stays-unlinked', 'blocks'];
+    for (const [name, rule] of Object.entries(columns)) {
+      const col = (fresh.columns || []).find((c) => c.name === name);
+      if (!col) throw new Error(`"${tableName}" has no field "${name}"`);
+      if (rule === null) {
+        delete col.whenTargetGoes;
+        continue;
+      }
+      if (!RULES.includes(rule)) throw new Error(`"${tableName}.${name}": "${String(rule)}" is not one of ${RULES.join(', ')}`);
+      if (col.type !== 'Pointer') throw new Error(`"${tableName}.${name}" is not a link to one record, so it cannot say what happens when that record goes`);
+      if (rule === 'stays-unlinked' && col.required) throw new Error(`"${tableName}.${name}" is required, so it cannot stay without one`);
+      col.whenTargetGoes = rule;
+    }
+    this.ensureSchemaTable();
+    this.db
+      .prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`)
+      .run(JSON.stringify(fresh), tableName);
+    this._schemaCache.set(tableName, fresh);
+    return true;
+  }
+
+  /**
+   * P116 ONT-015 §3.3 — a series put on (or, with `null`, taken off) fields a collection already has.
+   * Putting one numbers the records that hold no value, in the order they were made, and starts the
+   * counter above the highest number held (`planNumbering`): the declaration, the numbers and the
+   * counters in one transaction, so a failure leaves none of them. How many it numbers is the dry
+   * run's to say (the migration counts the empty ones first).
+   */
+  setSeries(tableName: string, columns: Record<string, SeriesOption | null>): boolean {
+    const schema = this.getTableSchema(tableName);
+    if (!schema) throw new Error(`There is no collection called "${tableName}"`);
+    const fresh = freshSchema(schema);
+    for (const [name, series] of Object.entries(columns)) {
+      const col = (fresh.columns || []).find((c) => c.name === name);
+      if (!col) throw new Error(`"${tableName}" has no field "${name}"`);
+      if (series === null) {
+        delete col.series;
+        continue;
+      }
+      const problem = seriesProblem(name, series, col.type);
+      if (problem) throw new Error(problem);
+      col.series = series;
+    }
+    this.db.transaction(() => {
+      this.ensureSchemaTable();
+      this.db.prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`).run(JSON.stringify(fresh), tableName);
+      for (const [name, series] of Object.entries(columns)) {
+        if (series === null) continue;
+        this.db.exec(SERIES_TABLE_DDL);
+        const counter = seriesName(tableName, name);
+        const counters = this.db.prepare(`SELECT "period", "next" FROM "${SERIES_TABLE}" WHERE "name" = ?`).all(counter) as Array<{ period: string; next: number }>;
+        const rows = this.db.prepare(`SELECT "objectId", "createdAt", ${escapeColumn(name)} AS "value" FROM ${escapeTable(tableName)}`).all() as Array<{ objectId: string; createdAt: unknown; value: unknown }>;
+        const plan = planNumbering(series, rows, counters);
+        const write = this.db.prepare(`UPDATE ${escapeTable(tableName)} SET ${escapeColumn(name)} = ? WHERE "objectId" = ?`);
+        for (const a of plan.assign) write.run(a.value, a.objectId);
+        for (const c of plan.counters) this.db.prepare(SERIES_SET_SQL).run(counter, c.period, c.next);
+      }
+    })();
+    this._schemaCache.set(tableName, fresh);
+    return true;
+  }
+
+  /**
+   * P116-ONT-007-required — make fields a collection already has required (`true`) or optional
+   * (`false`), over the records it holds. Refused with `FieldEmptyError`, before anything changes,
+   * while any record holds nothing in a field made required. SQLite cannot add or drop a NOT NULL in
+   * place (and `ADD COLUMN … NOT NULL` needs a default, so `changeColumnType`'s add-copy-drop cannot
+   * carry one), so the table is rebuilt: the same columns read from `PRAGMA table_info` with the flag
+   * changed, every row copied with its rowid (a search index's external content reads by it), and
+   * the table's own indexes and triggers (declared indexes, checks, search) re-made from their
+   * stored SQL — in one transaction, the declaration with it.
+   *
+   * @returns Whether any field's rule changed (`false` when every one was already as asked).
+   */
+  setRequired(tableName: string, columns: Record<string, boolean>): boolean {
+    const schema = this.getTableSchema(tableName);
+    if (!schema) throw new Error(`There is no collection called "${tableName}"`);
+    const fresh = freshSchema(schema);
+    const changes = applyRequired(fresh, tableName, columns);
+    if (!changes.length) return false;
+    const table = escapeTable(tableName);
+    for (const c of changes) {
+      if (!c.required) continue;
+      const empty = this.db.prepare(`SELECT COUNT(*) AS n FROM ${table} WHERE ${escapeColumn(c.name)} IS NULL`).get() as { n: number } | undefined;
+      if (empty && empty.n > 0) throw new FieldEmptyError(tableName, c.name, empty.n);
+    }
+
+    const missing = changes.find((c) => !this._columnInfo(tableName).some((i) => i.name === c.name));
+    if (missing) throw new Error(`"${tableName}" declares "${missing.name}" but its table has no such column`);
+
+    this.db.exec('BEGIN');
+    try {
+      this._rebuildNotNull(tableName, new Map(changes.map((c) => [c.name, c.required])));
+      this.ensureSchemaTable();
+      this.db.prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`).run(JSON.stringify(fresh), tableName);
+      this.db.exec('COMMIT');
+    } catch (e) {
+      this.db.exec('ROLLBACK');
+      throw e;
+    }
+    this._schemaCache.set(tableName, fresh);
+    return true;
+  }
+
+  /** `PRAGMA table_info` — the columns as the engine holds them, not as `_Schema` declares them. */
+  private _columnInfo(tableName: string): Array<{ name: string; type: string; notnull: number; dflt_value: string | null; pk: number }> {
+    return this.db.prepare(`PRAGMA table_info(${escapeTable(tableName)})`).all() as Array<{
+      name: string;
+      type: string;
+      notnull: number;
+      dflt_value: string | null;
+      pk: number;
+    }>;
+  }
+
+  /**
+   * P116-ONT-007-required — rebuild a table with some columns' NOT NULL changed (`flip`: column →
+   * whether it is NOT NULL now), everything else as the engine holds it: each column's type, primary
+   * key and DDL default from `PRAGMA table_info`, every row with its rowid (a search index's external
+   * content reads by it), and the indexes and triggers built on the table re-made from their stored
+   * SQL. Runs inside the caller's transaction; never opens one.
+   */
+  private _rebuildNotNull(tableName: string, flip: Map<string, boolean>): void {
+    const table = escapeTable(tableName);
+    const info = this._columnInfo(tableName);
+    const defs = info.map((c) => {
+      let def = `${escapeColumn(c.name)} ${c.type}`;
+      if (c.pk) def += ' PRIMARY KEY';
+      if (flip.has(c.name) ? flip.get(c.name) : c.notnull) def += ' NOT NULL';
+      if (c.dflt_value !== null) def += ` DEFAULT ${c.dflt_value}`;
+      return def;
+    });
+    const names = info.map((c) => escapeColumn(c.name)).join(', ');
+    const readers = this.db
+      .prepare("SELECT type, name, sql FROM sqlite_master WHERE tbl_name = ? AND type IN ('index', 'trigger') AND sql IS NOT NULL")
+      .all(tableName) as Array<{ type: string; name: string; sql: string }>;
+    const temp = escapeTable(`__nodegx_rebuild_${tableName}`);
+    this.db.exec(`CREATE TABLE ${temp} (${defs.join(', ')})`);
+    this.db.exec(`INSERT INTO ${temp} (rowid, ${names}) SELECT rowid, ${names} FROM ${table}`);
+    this.db.exec(`DROP TABLE ${table}`);
+    this.db.exec(`ALTER TABLE ${temp} RENAME TO ${table}`);
+    for (const r of readers) this.db.exec(r.sql);
   }
 
   /**
@@ -427,6 +707,7 @@ class SchemaManager {
     if (systemCols.includes(oldName)) {
       throw new Error('Cannot rename system columns');
     }
+    this.refuseIfRead(tableName, oldName, 'rename');
 
     try {
       this.db.exec(
@@ -534,11 +815,19 @@ class SchemaManager {
     // rebuild would emit `ADD COLUMN "x" undefined`, which is not SQL.
     if (typeof oldSql === 'string' && oldSql !== newSql) {
       // Affinity changes, so the stored values do too. Add-copy-drop-rename
-      // rather than the twelve-step table rebuild: user columns carry no
-      // constraints and no indexes (only `createdAt`/`updatedAt` are indexed,
-      // and they are system columns this method refuses), which is what makes
-      // the short form safe here and would not make it safe in general.
+      // rather than the twelve-step table rebuild. 🔴 P109 ISL-041
+      // (P99-HLT016-TYPECHANGE): a user column CAN carry an index (FED-002) or a
+      // check trigger (HLT-016), and SQLite will not DROP a column either reads,
+      // so the change failed and rolled back. They are set aside and re-created
+      // from their own stored SQL inside the same transaction — a unique index
+      // the converted values now break is refused there, and everything rolls back.
       const temp = `__nodegx_convert_${columnName}`;
+      const quoted = escapeColumn(columnName);
+      const readers = (
+        this.db
+          .prepare("SELECT type, name, sql FROM sqlite_master WHERE tbl_name = ? AND type IN ('index', 'trigger') AND sql IS NOT NULL")
+          .all(tableName) as Array<{ type: string; name: string; sql: string }>
+      ).filter((r) => r.sql.includes(quoted));
       const nonNull = this.db
         .prepare(`SELECT COUNT(*) AS n FROM ${escapeTable(tableName)} WHERE ${escapeColumn(columnName)} IS NOT NULL`)
         .get() as { n: number } | undefined;
@@ -546,6 +835,7 @@ class SchemaManager {
 
       this.db.exec('BEGIN');
       try {
+        for (const r of readers) this.db.exec(`DROP ${r.type === 'index' ? 'INDEX' : 'TRIGGER'} ${escapeColumn(r.name)}`);
         this.db.exec(`ALTER TABLE ${escapeTable(tableName)} ADD COLUMN ${escapeColumn(temp)} ${newSql}`);
         this.db.exec(
           `UPDATE ${escapeTable(tableName)} SET ${escapeColumn(temp)} = ` +
@@ -553,6 +843,11 @@ class SchemaManager {
         );
         this.db.exec(`ALTER TABLE ${escapeTable(tableName)} DROP COLUMN ${escapeColumn(columnName)}`);
         this.db.exec(`ALTER TABLE ${escapeTable(tableName)} RENAME COLUMN ${escapeColumn(temp)} TO ${escapeColumn(columnName)}`);
+        for (const r of readers) this.db.exec(r.sql);
+        // P116-S24-TYPEREQUIRED: the column added above has no NOT NULL (`ADD COLUMN … NOT NULL` needs a
+        // default), so a required field came out of a type change taking records without it while its
+        // declaration still said required. Put back the way `setRequired` puts it on.
+        if (col.required) this._rebuildNotNull(tableName, new Map([[columnName, true]]));
         this.db.exec('COMMIT');
       } catch (e) {
         this.db.exec('ROLLBACK');
@@ -824,6 +1119,17 @@ class SchemaManager {
         ? entry.permissions[op]
         : security.defaults.permissions[op];
     const atoms = raw === undefined ? [] : Array.isArray(raw) ? raw.slice() : [raw];
+    // P116 ONT-004: a rule through a path (an object atom) narrows rows by a
+    // chain across collections, which no PostgREST policy can express.
+    // Refused by name, like a role — never read as text.
+    if (atoms.some((a) => typeof a !== 'string')) {
+      throw new MigrationRefusal(
+        `"${collection}" lets callers ${op} what they reach through a path rule. A policy cannot follow a ` +
+          'path across collections, so it would either ignore the rule or deny everyone.',
+        'a path rule on a collection permission',
+        collection
+      );
+    }
     return atoms.map((a) => String(a)).sort();
   }
 

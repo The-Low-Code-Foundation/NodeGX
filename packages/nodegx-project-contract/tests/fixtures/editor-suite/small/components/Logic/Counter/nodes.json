@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "comp-counter",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "counter",
+      "type": "Counter",
+      "x": 300,
+      "y": 0,
+      "parameters": {
+        "startValue": 5
+      }
+    },
+    {
+      "id": "limit",
+      "type": "Number",
+      "x": 300,
+      "y": 160,
+      "parameters": {
+        "value": 10
+      }
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6c33cd7b-b409-5802-8f7b-0fe1b367d725",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "landkeephereIn",
+      "fromProperty": "model",
+      "toId": "landkeephereFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "landkeephereIn",
+      "fromProperty": "requestId",
+      "toId": "landkeephereFn",
+      "toProperty": "in-requestId"
+    },
+    {
+      "fromId": "landkeephereIn",
+      "fromProperty": "world",
+      "toId": "landkeephereFn",
+      "toProperty": "in-world"
+    },
+    {
+      "fromId": "landkeephereIn",
+      "fromProperty": "go",
+      "toId": "landkeephereFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "landkeephereFn",
+      "fromProperty": "out-model",
+      "toId": "landkeephereOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "landkeephereFn",
+      "fromProperty": "out-wrote",
+      "toId": "landkeephereOut",
+      "toProperty": "wrote"
+    },
+    {
+      "fromId": "landkeephereFn",
+      "fromProperty": "success",
+      "toId": "landkeephereOut",
+      "toProperty": "ran"
+    }
+  ]
+}

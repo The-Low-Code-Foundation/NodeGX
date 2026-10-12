@@ -290,8 +290,14 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // page while it runs) and `POST admin/files/move` (start it: one background
     // job, a 409 while it runs). Reviewed and left in the `admin` budget: one
     // person, one card, a poll a second while a move runs. Counted — 99 → 101.
+    // P116 ONT-007 s11 moved `admin` by 1: `POST admin/world/migrate`, a world
+    // migration (a dry run, or the backup and the steps). Reviewed in P116 s12,
+    // which found this line owed — s11 added the route and did not run this
+    // spec. Left in the `admin` budget: one person saying yes to one change, and
+    // a run that takes the backup first is not a thing a page polls. Counted —
+    // 101 → 102.
     expect(counts).toEqual({
-      admin: 101,
+      admin: 102,
       auth: 17,
       data: 19,
       files: 4,

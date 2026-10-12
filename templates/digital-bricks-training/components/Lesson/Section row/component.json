@@ -5,7 +5,7 @@
   "path": "/Lesson/Section row",
   "type": "visual",
   "created": "2026-09-19T21:09:24.188Z",
-  "modified": "2026-09-20T18:16:07.997Z",
+  "modified": "2026-09-30T15:30:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "The For Each template for a lesson's sections: one row is { id, section }, and the kit's Section node renders the section by its kind and draws the knot. Its root IS the kit node, so each row lands as a direct child of the lesson grid (the Sprint-8 fragment contract)."
+  "description": "The For Each template for a lesson's sections: one row is { id, section, conceptId, facts, copy }, and the kit's Section node renders the section by its kind and draws the knot. Its root IS the kit node, so each row lands as a direct child of the lesson grid (the Sprint-8 fragment contract). A row that carries a concept SAVES what the learner captures, through the `capture` function, and the kit shows ✓ only when that answers (TASK-L177)."
 }

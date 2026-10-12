@@ -33,6 +33,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { reducedMotionReport } from './reducedMotion';
 import { HANGAR_SHELF } from './tpl007Curriculum';
 import { HANGAR_HELPERS } from './tpl007Scripts';
+import { MOON_SPECIES, MOON_WEAR } from './tpl007Moon';
 
 const KIT_DIR = path.join(__dirname, '..', '..', '..', 'library', 'modules', 'game-kit');
 const BUILT = path.join(KIT_DIR, 'project', 'noodl_modules', 'game-kit', 'index.js');
@@ -108,9 +109,9 @@ describe('TPL-007 — game-kit, the built artefact', () => {
     expect(built.startsWith('/* game-kit')).toBe(true);
   });
 
-  it('registers exactly six nodes under the game-kit namespace', () => {
+  it('registers exactly seven nodes under the game-kit namespace (P113 REV-005 added the Alien)', () => {
     const names = [...kit.nodes, ...kit.reactNodes].map((n) => n.name).sort();
-    expect(names).toEqual(['game-kit.AnswerPad', 'game-kit.Avatar', 'game-kit.KeepStorage', 'game-kit.KeyboardMap', 'game-kit.RaceTrack', 'game-kit.Sound']);
+    expect(names).toEqual(['game-kit.Alien', 'game-kit.AnswerPad', 'game-kit.Avatar', 'game-kit.KeepStorage', 'game-kit.KeyboardMap', 'game-kit.RaceTrack', 'game-kit.Sound']);
     for (const n of [...kit.nodes, ...kit.reactNodes]) {
       expect(typeof n.docs).toBe('string');
       expect(n.docs.length).toBeGreaterThan(40);
@@ -725,6 +726,84 @@ describe('TPL-007 — game-kit, the built artefact', () => {
       expect(Object.fromEntries(Object.entries(outs).map(([k, o]) => [k, o.type]))).toEqual({ onText: "string", onMistakes: "number", onWrongKey: "string", onMistake: "signal", onSubmit: "signal", onLayout: "string", onLayoutSeen: "signal" });
       // RKT-012: the one animation is the refused key's shake, and reduced motion stills it (the red outline stays).
       expect(reducedMotionReport(logic().css)).toEqual({ animated: ["gk-pad-wrong-a", "gk-pad-wrong-b"], unstilled: [] });
+    });
+  });
+  describe('P113 REV-005 — the Alien: what the moon draws', () => {
+    const alien = () => kit.reactNodes.find((n) => n.name === 'game-kit.Alien')!;
+    const data = () => alien().alien as { speciesIds: string[]; wear: Record<string, string[]>; species: Record<string, any>; wearShapes: (slot: string, id: string, sp: unknown, ink: string, trim: string, gold: string) => unknown[]; css: string; burstRose: (a: unknown, b: unknown) => boolean };
+    const draw = (props: Record<string, unknown>) => {
+      const def = alien();
+      const defaults = Object.fromEntries(Object.entries(def.inputProps as Record<string, { default?: unknown }>).map(([k, p]) => [k, p.default]));
+      return renderToStaticMarkup(React.createElement(def.getReactComponent(), { ...defaults, ...props }));
+    };
+
+    it('six species, each a different body, every part of it edged in the Outline colour', () => {
+      expect(data().speciesIds).toEqual(['blob', 'bean', 'trio', 'squid', 'fuzz', 'star']);
+      const bodies = new Set<string>();
+      for (const sp of data().speciesIds) {
+        const html = draw({ species: sp, outlineColor: 'var(--ink-test)', color: 'var(--fill-test)' });
+        expect(html).toContain(`data-alien="${sp}"`);
+        // Every filled body part carries the outline: the outline is the contrast, whatever the Colour.
+        const filled = html.match(/<(path|ellipse|circle|polygon)[^>]*fill="var\(--fill-test\)"[^>]*>/g) ?? [];
+        expect(filled.length).toBeGreaterThan(0);
+        for (const tag of filled) expect(tag).toContain('stroke="var(--ink-test)"');
+        bodies.add((html.match(/<g class="gk-alien-breathe">[\s\S]*?<circle[^>]*fill="#ffffff"/) ?? [''])[0]);
+      }
+      expect(bodies.size).toBe(6);
+      // A species the kit does not know is a blob, not a blank.
+      expect(draw({ species: 'dragon' })).toContain('data-alien="blob"');
+    });
+
+    it('🔴 everything the moon can sell is something the kit draws, each different, on every species; an unknown id draws nothing', () => {
+      const { wear, species, wearShapes } = data();
+      expect(Object.keys(wear)).toEqual(['hat', 'eyes', 'neck']);
+      for (const [slot, ids] of Object.entries(wear)) {
+        for (const sp of Object.keys(species)) {
+          const seen = new Set<string>();
+          for (const id of ids) {
+            const shapes = wearShapes(slot, id, species[sp], 'i', 't', 'g');
+            expect({ slot, id, sp, n: shapes.length > 0 }).toEqual({ slot, id, sp, n: true });
+            seen.add(renderToStaticMarkup(React.createElement('svg', null, ...(shapes as React.ReactElement[]))));
+          }
+          expect({ slot, sp, distinct: seen.size }).toEqual({ slot, sp, distinct: ids.length });
+          expect(wearShapes(slot, 'cape', species[sp], 'i', 't', 'g')).toEqual([]);
+        }
+      }
+      // What the moon sells (tpl007Moon.ts) is exactly what the kit draws: every species, and every thing to wear in its own place.
+      expect(MOON_SPECIES.map((sp) => sp.id)).toEqual(data().speciesIds);
+      for (const item of MOON_WEAR) expect({ id: item.id, slot: item.slot, drawn: wear[item.slot].includes(item.id) }).toEqual({ id: item.id, slot: item.slot, drawn: true });
+      expect(MOON_WEAR.length).toBe(Object.values(wear).flat().length);
+      const dressed = draw({ species: 'bean', hat: 'crown', eyes: 'glasses', neck: 'scarf' });
+      expect(dressed.match(/data-wear="[a-z]+:[a-z]+"/g)).toEqual(['data-wear="neck:scarf"', 'data-wear="eyes:glasses"', 'data-wear="hat:crown"']);
+      expect(draw({ species: 'bean', hat: 'cape' })).not.toContain('data-wear');
+    });
+
+    it('Grown draws a baby, a young one and a grown-up, from the feet; anything else is grown up', () => {
+      const scale = (grown: unknown) => {
+        const html = draw({ grown });
+        return [Number((html.match(/data-grown="(\d)"/) ?? [])[1]), (html.match(/scale\(([\d.]+)\)/) ?? [])[1]];
+      };
+      expect([scale(0), scale(1), scale(2), scale(7), scale('x')]).toEqual([[0, '0.62'], [1, '0.8'], [2, '1'], [2, '1'], [2, '1']]);
+    });
+
+    it('🔴 a hop is a Happy count going UP; mounting with a count already up hops nothing, and every motion is stilled for reduced motion', () => {
+      const { burstRose, css } = data();
+      expect([burstRose(0, 1), burstRose(2, 3), burstRose(3, 3), burstRose(3, 0)]).toEqual([true, true, false, false]);
+      const mounted = draw({ happy: 5 });
+      expect(mounted).toContain('data-hops="0"');
+      expect(mounted).not.toContain('gk-alien-hop"');
+      expect(mounted).toContain('prefers-reduced-motion: reduce');
+      expect(reducedMotionReport(css)).toEqual({ animated: ['gk-alien-breathe', 'gk-alien-hop'], unstilled: [] });
+      // Sabotage arm: without its reduced-motion block, both are named.
+      expect(reducedMotionReport(css.replace(/@media \(prefers-reduced-motion: reduce\) \{[\s\S]*\}$/, '')).unstilled).toEqual(['gk-alien-breathe', 'gk-alien-hop']);
+    });
+
+    it('the picture says its name to a screen reader, and every port is documented', () => {
+      expect(draw({ name: 'Zib' })).toContain('aria-label="Zib"');
+      for (const [key, port] of Object.entries(alien().inputProps as Record<string, { description?: string; type: unknown }>)) {
+        if (port.type === 'color' && key === 'color') continue;
+        expect({ key, documented: !!port.description }).toEqual({ key, documented: true });
+      }
     });
   });
 });

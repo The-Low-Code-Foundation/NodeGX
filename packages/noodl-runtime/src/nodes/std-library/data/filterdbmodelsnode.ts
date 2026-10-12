@@ -18,6 +18,7 @@ import type {
 } from '@noodl/types';
 
 import { outcomeOutputs, reportOutcomes } from '../../../outcome';
+import { notAList } from './itemsinput';
 
 import Node = require('../../../node');
 import CollectionImport = require('../../../collection');
@@ -69,6 +70,8 @@ interface FilterDbModelsInstance extends NodeInstance {
   _internal: {
     enabled?: boolean;
     collection?: CollectionLike;
+    /** P107-C10: why the value on Items is not a list (itemsinput.ts), while it stands. */
+    notAList?: string;
     collectionName?: string;
     filteredCollection?: CollectionLike;
     filterSettings: Record<string, unknown>;
@@ -154,7 +157,9 @@ const FilterDBModelsNode: NodeDefinitionOptions = {
       if (!_this.shouldRunOnValueChange('records')) return;
 
       if (_this._internal.visualFilter === undefined) return;
-      if (_this._internal.collection === undefined) return;
+      // P107-C44 (ISL-026, ruled "Treat it as holding nothing"): null on Items holds nothing, as undefined does —
+      // `null.contains` threw inside the store's save event, onto the WRITER's Error, and later listeners missed the save
+      if (_this._internal.collection === undefined || _this._internal.collection === null) return;
       if (args.collection !== _this._internal.collectionName) return;
 
       // Note this reaches for the *global* `Model` rather than `nodeScope.modelScope`,
@@ -165,11 +170,13 @@ const FilterDBModelsNode: NodeDefinitionOptions = {
         _this.scheduleFilter();
     };
 
-    // BCN-004 step 5: bound to the legacy store here, exactly as before, and moved by
-    // `bindStoreEvents` when the `Backend` input names another one. A node watching the
-    // wrong backend's saves re-filters when nothing it holds has changed, and does not
-    // re-filter when something has.
-    this.bindStoreEvents(CloudStore.instance);
+    // BCN-004 step 5: moved by `bindStoreEvents` when the `Backend` input names another one. A node watching the
+    // wrong backend's saves re-filters when nothing it holds has changed, and does not re-filter when something has.
+    // P107-C42 (ISL-029, ruled "Follow the project's backend"): with no Backend written — the editor hides the picker
+    // when the project has one backend — the store the project's backend resolves to, as Query Records and the
+    // writers use. It was the legacy store, which no save on a `backendServices` backend reaches, so a filtered list
+    // went stale after an edit. Re-resolved at each run (`scheduleFilter`), as Query Records re-resolves at each query.
+    this.bindStoreEvents(CloudStore.forBackend(this.nodeScope.modelScope, undefined) || CloudStore.instance);
 
     this._internal.enabled = true;
     this._internal.filterSettings = {};
@@ -315,8 +322,10 @@ const FilterDBModelsNode: NodeDefinitionOptions = {
     },
     bindCollection: function (this: FilterDbModelsInstance, collection: CollectionLike | undefined) {
       this.unbindCurrentCollection();
-      this._internal.collection = collection;
-      collection && collection.on('change', this._internal.collectionChangedCallback);
+      // P107-C10: what is not a list binds nothing, and the next run says so (itemsinput.ts)
+      this._internal.notAList = notAList(collection);
+      this._internal.collection = this._internal.notAList === undefined ? collection : undefined;
+      if (this._internal.collection) this._internal.collection.on('change', this._internal.collectionChangedCallback);
     },
     /** Move the `save` subscription onto `store`, off whatever it was on. */
     bindStoreEvents: function (this: FilterDbModelsInstance, store: FilterStoreLike | undefined) {
@@ -432,10 +441,19 @@ const FilterDBModelsNode: NodeDefinitionOptions = {
       this.scheduleAfterInputsHaveUpdated(() => {
         this.collectionChangedScheduled = false;
 
+        // C42: the store this run's records live in — the Backend's, or the project's when none was written
+        this.bindStoreEvents(CloudStore.forBackend(this.nodeScope.modelScope, this._internal.backendId) || CloudStore.instance);
+
         // Drained before the run starts, so a later `Filter` owns its own batch.
         const tokens = this._internal.pendingFilterOutcomes || [];
         this._internal.pendingFilterOutcomes = [];
         const requested = tokens.length > 0;
+
+        if (this._internal.notAList !== undefined) {
+          // P107-C10: refused, every time a run is due — a press gets its Failure, a value-path run pulses it once
+          this.reportFailure('filter-records/not-a-list', this._internal.notAList, undefined, tokens);
+          return;
+        }
 
         if (!this._internal.collection) {
           // Silent unless an author asked: without this test the raise fires while the graph
@@ -455,40 +473,39 @@ const FilterDBModelsNode: NodeDefinitionOptions = {
         let filtered: ModelLike[] = [].concat(this._internal.collection.items);
 
         if (this._internal.enabled) {
-          const _filter = this._internal.visualFilter;
-          if (_filter !== undefined) {
-            let filter;
-            try {
-              filter = QueryUtils.convertVisualFilter(_filter, {
+          // P107-C43 (ISL-029, ruled "Fail with an error"): the sort sits inside the filter's failure path. Sorting rows
+          // that are not records (`a.get is not a function`) threw out of the scheduled run with the press's token
+          // already drained, so the press got no outcome at all.
+          try {
+            const _filter = this._internal.visualFilter;
+            if (_filter !== undefined) {
+              const filter = QueryUtils.convertVisualFilter(_filter, {
                 queryParameters: this._internal.filterParameters,
                 collectionName: this._internal.collectionName,
                 valuePortPrefix: 'fp-'
               });
               if (filter) filtered = filtered.filter((m) => QueryUtils.matchesQuery(m, filter));
-            } catch (e) {
-              // Array Filter's second failure, in the same position: a filter that cannot be
-              // built or applied threw out of a *scheduled callback* into `nodecontext.ts`'s
-              // blanket catch — a console line with no code and no provenance, and the rest of
-              // this node's update pass abandoned. Not gated on `requested`, because a filter
-              // that cannot be applied is wrong whenever it arrives.
-              this.reportFailure(
-                'filter-records/filter-failed',
-                'The filter could not be applied: ' + ((e as Error).message || String(e)),
-                { collectionName: this._internal.collectionName },
-                tokens
-              );
-              return;
             }
-          }
 
-          // `sort` is declared outside the `if` deliberately: the original relied on `var`
-          // hoisting to read it below the block it was assigned in (PLAT-003 NOTES §23.1).
-          const _sort = this._internal.visualSorting;
-          let sort: unknown;
-          if (_sort !== undefined && _sort.length > 0) {
-            sort = QueryUtils.convertVisualSorting(_sort);
+            const _sort = this._internal.visualSorting;
+            if (_sort !== undefined && _sort.length > 0) {
+              const sort = QueryUtils.convertVisualSorting(_sort);
+              if (sort) filtered.sort(QueryUtils.compareObjects.bind(this, sort));
+            }
+          } catch (e) {
+            // Array Filter's second failure, in the same position: a filter (or a sort) that cannot be
+            // built or applied threw out of a *scheduled callback* into `nodecontext.ts`'s
+            // blanket catch — a console line with no code and no provenance, and the rest of
+            // this node's update pass abandoned. Not gated on `requested`, because a filter
+            // that cannot be applied is wrong whenever it arrives.
+            this.reportFailure(
+              'filter-records/filter-failed',
+              'The filter could not be applied: ' + ((e as Error).message || String(e)),
+              { collectionName: this._internal.collectionName },
+              tokens
+            );
+            return;
           }
-          if (sort) filtered.sort(QueryUtils.compareObjects.bind(this, sort));
 
           const skip = this.getSkip();
           if (skip) filtered = filtered.slice(skip, filtered.length);

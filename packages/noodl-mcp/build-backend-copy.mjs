@@ -1,0 +1,50 @@
+#!/usr/bin/env node
+/**
+ * P112 OWN-015 — the backend an npm install of `@nodegx/mcp` provisions.
+ *
+ *   node build-backend-copy.mjs            bundle nodegx-backend's service into dist/backend/cli.js (npm's prepack)
+ *   node build-backend-copy.mjs --remove   delete it again (npm's postpack)
+ *
+ * `provision_backend` starts `nodegx-backend/dist/cli.js`, found beside a checkout (or inside the editor app). An npm
+ * install had none, so it refused, and an API key could only sit in an HTTP Request node in the page. The service is
+ * already ONE self-contained file by design (its build.js: "copy this file and run it"; Node built-ins and
+ * `node:sqlite` only, the optional sharp / pg-native / better-sqlite3 by guarded require), and everything it inlines
+ * is MIT. So it ships inside this package, built here with the backend's OWN esbuild config (`shared`, exported for
+ * exactly this, P109 ISL-042) to a path of this package's, never over the `dist/` a running editor or peer is using.
+ *
+ * Not a dependency on a separate npm package: no workspace is called that, so declaring one would send the
+ * monorepo's own install to the registry. A standalone package for servers is OWN-016's question.
+ */
+import { mkdirSync, rmSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import esbuild from 'esbuild';
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const OUT = path.join(HERE, 'dist', 'backend');
+const BACKEND = path.resolve(HERE, '..', 'nodegx-backend');
+
+if (process.argv.includes('--remove')) {
+  rmSync(OUT, { recursive: true, force: true });
+  process.exit(0);
+}
+
+const require = createRequire(import.meta.url);
+const { shared } = require(path.join(BACKEND, 'scripts', 'build.js'));
+const { buildAdminApp } = require(path.join(BACKEND, 'scripts', 'build-admin-app.js'));
+
+const started = Date.now();
+rmSync(OUT, { recursive: true, force: true });
+mkdirSync(OUT, { recursive: true });
+// The service bundle inlines the admin dashboard this writes (build/admin/, gitignored), as its own build does.
+await buildAdminApp();
+await esbuild.build({
+  ...shared,
+  sourcemap: false,
+  logLevel: 'warning',
+  entryPoints: [path.join(BACKEND, 'src', 'cli.ts')],
+  outfile: path.join(OUT, 'cli.js')
+});
+console.log(`build-backend-copy: dist/backend/cli.js (${((Date.now() - started) / 1000).toFixed(1)} s)`);

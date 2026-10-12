@@ -23,7 +23,7 @@ import { z } from 'zod';
 
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
-import { runRenderReport, type RenderReportPayload } from '../render';
+import { runDrivePage, runRenderReport, type RenderReportPayload } from '../render';
 import type { RenderLedger } from '../renderVerdict';
 import { guarded, type ToolResult } from './util';
 
@@ -143,7 +143,86 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
             ...screenshots.flatMap((shot) => [
               { type: 'text' as const, text: `Screenshot — ${shot.name} (${report.viewports[shot.name]?.requested.width}px wide, full page)` },
               { type: 'image' as const, data: shot.base64, mimeType: shot.mimeType }
-            ])
+            ]),
+            // P109 ISL-021 AC6 (s14) — the agent built a form, read this answer four times, then went looking
+            // for a browser to script: `drive_page` is deferred, so nothing it could see named it. This answer
+            // is where it looks after building, and response text costs no resident tokens.
+            { type: 'text' as const, text: FIRST_FRAME_NOTE }
+          ]
+        };
+      }
+    )
+  );
+
+  /**
+   * P109 ISL-021 — "One call, a step list" (ruled 2026-10-04). `render_report` sees the first frame; this
+   * presses, types, waits and reads, so an agent can prove a button does something without writing a
+   * browser script. Deferred in `explore` (0 resident tokens) and read-only on the project: it renders
+   * from disk and writes nothing but the screenshots it is asked for.
+   */
+  server.registerTool(
+    'drive_page',
+    {
+      title: 'Drive a rendered page',
+      description:
+        'Render this project from disk in a headless browser, run a list of steps on it, and report one row per ' +
+        'step — so you can prove a button, a form or a game WORKS, not just that it draws. Each call is a fresh ' +
+        'browser: nothing carries over from the last call. Steps (each an object with one verb): {tap: T}, ' +
+        '{type: "text", into?: T, replace?: true} (appends to what the field holds unless replace), {key: "Enter"}, ' +
+        '{wait_for: {text|testid|selector|url|expression}, timeout_ms?}, {read: {text: T}|{variable: name}|' +
+        '{storage: key}|{url: true}|{stub: path}|{expression}, expect?: value|{contains}} — or, as lists so far, ' +
+        '{console_errors: true}|{network_errors: true}|{other_origins: true} (expect [] = none yet), {navigate: "/route"}, ' +
+        '{viewport: "phone"|"390x844"}, {screenshot: name}, {seed_storage: {key: value}} or {seed_storage: "key", ' +
+        'edit: "js changing v"} (applied again on the next load, before the app can overwrite it), ' +
+        '{clear_storage: true}, {stub_route: "/api/x", json?, body?, status?} (answers that path itself; put it ' +
+        'first to meet a fetch made at boot), {reduced_motion: true|false}. A target T is {text: "exact label"} or {text_contains} (a field\'s ' +
+        'placeholder counts), {testid} (a data-testid set in the node\'s Data Attributes list — NOT its node id) ' +
+        'or {selector}; a bare string is exact text. A tap is a real pointer press at the element\'s centre and is ' +
+        'REFUSED when something else covers it, naming what a finger would hit. The first failing step stops the run.',
+      inputSchema: {
+        steps: z
+          .array(z.record(z.unknown()))
+          .min(1)
+          .max(60)
+          .describe('The steps, in order. Each is an object with exactly one verb key.'),
+        page: z.string().optional().describe('Start on this page (its route, e.g. "island"); default the start page.'),
+        viewport: z.string().optional().describe('"desktop" (default), "phone" or WIDTHxHEIGHT.'),
+        out_dir: z.string().optional().describe('Where screenshot steps write their PNGs.'),
+        backend_port: z.number().int().optional().describe('Proxy /__backend to a running backend on this port.')
+      }
+    },
+    guarded(
+      async (args: {
+        steps: Array<Record<string, unknown>>;
+        page?: string;
+        viewport?: string;
+        out_dir?: string;
+        backend_port?: number;
+      }): Promise<ToolResult> => {
+        const projectDir = binding.require().projectDir;
+        const result = await runDrivePage(projectDir, args.steps, {
+          page: args.page,
+          viewport: args.viewport,
+          outDir: args.out_dir === undefined ? undefined : path.resolve(args.out_dir),
+          backendPort: args.backend_port
+        });
+        const failed = result.steps.find((r) => !r.ok);
+        // The verdict before the JSON, as render_report's is: a caller must not be able to skim past it.
+        const headline =
+          result.verdict === 'passed'
+            ? `PASSED — ${result.of} of ${result.of} steps.`
+            : `FAILED at step ${failed?.n ?? result.ran} (${failed?.do ?? '?'}): ${failed?.error ?? 'stopped'}. ` +
+              `${result.ran - 1} of ${result.of} steps passed before it; the rest did not run.`;
+        const caveats = [
+          result.page.visibilityState !== 'visible' ? `the page was ${result.page.visibilityState} (timers throttle)` : '',
+          !result.page.webgl2 ? 'no WebGL2 in this browser (a 3D kit falls back to 2D here)' : '',
+          result.consoleErrors.length ? `${result.consoleErrors.length} console error(s)` : '',
+          result.networkErrors?.length ? `${result.networkErrors.length} failed request(s)` : ''
+        ].filter(Boolean);
+        return {
+          content: [
+            { type: 'text', text: headline + (caveats.length ? ` Note: ${caveats.join('; ')}.` : '') },
+            { type: 'text', text: JSON.stringify(result, null, 2) }
           ]
         };
       }
@@ -181,6 +260,12 @@ function screenshotManifest(report: RenderReportPayload, outDir: string): string
     lines.join('\n')
   );
 }
+
+/** What `render_report` cannot prove, and the tool that can — appended to every report. */
+export const FIRST_FRAME_NOTE =
+  'This report is the FIRST FRAME only: nothing was pressed, typed or waited for. To prove a button, form or game ' +
+  'WORKS (tap, type, wait, read a Variable or what was saved), call find_tools({ query: "press" }) to reveal ' +
+  'drive_page and send it a list of steps — no browser script needed.';
 
 /** The verdict as the one line a caller reads first. */
 function verdictHeadline(verdict: { done: boolean; reason: string }): string {

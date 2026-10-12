@@ -1,0 +1,81 @@
+{
+  "name": "page-shell",
+  "rule": "a 100% × 100% column with space-between: a header and a footer that hug their height (the members-area page shell, 13 placements)",
+  "nodes": [
+    {
+      "id": "pg",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        {
+          "id": "head",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "contentHeight",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "paddingTop": {
+              "value": 12,
+              "unit": "px"
+            },
+            "paddingLeft": {
+              "value": 12,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "ht",
+              "type": "Text",
+              "parameters": {
+                "text": "Header"
+              }
+            }
+          ]
+        },
+        {
+          "id": "foot",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "contentHeight",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "paddingBottom": {
+              "value": 12,
+              "unit": "px"
+            },
+            "paddingLeft": {
+              "value": 12,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "ft",
+              "type": "Text",
+              "parameters": {
+                "text": "Footer"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

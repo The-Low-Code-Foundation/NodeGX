@@ -6,6 +6,7 @@ import { platform } from '@noodl/platform';
 import { EventDispatcher } from '../../../../shared/utils/EventDispatcher';
 import View from '../../../../shared/ListenableView';
 import { PreviewTokenInjector } from '../../services/PreviewTokenInjector';
+import { notifyStyleSourcesStale, setStyleSourceProvider } from '../../utils/styleSourceBridge';
 import { VisualCanvas } from './VisualCanvas';
 import { PREVIEW_STRIP_ACTION, type StripAction } from './detachedStrip';
 import { previewRoutePath } from './previewRoutePath';
@@ -111,6 +112,18 @@ export class CanvasView extends View {
   _setupWebview(webview: Electron.WebviewTag) {
     this.webview = webview;
 
+    // P109 ISL-008 — the property panel asks this canvas which values the author's CSS decides
+    // (`styleSourceBridge.ts`). A canvas that has not loaded answers nothing, and the panel shows no note.
+    setStyleSourceProvider((path) =>
+      this.webview && this.webviewDomReady
+        ? this.webview.executeJavaScript(
+            `(typeof NoodlEditorHighlightAPI !== 'undefined' && NoodlEditorHighlightAPI.explainStyle) ? NoodlEditorHighlightAPI.explainStyle(${JSON.stringify(
+              path
+            )}) : []`
+          )
+        : Promise.resolve([])
+    );
+
     webview.preload = platform.getAppPath() + 'src/assets/webview-preload-viewer.js';
 
     webview.addEventListener('dom-ready', async () => {
@@ -164,6 +177,11 @@ export class CanvasView extends View {
       PreviewTokenInjector.instance.notifyDomReady(this.webview);
 
       this.updateViewportSize();
+
+      // P109 ISL-008 — the app reloads on every save; what the panel was told about its CSS may be wrong now. Twice,
+      // because the page draws after `dom-ready`, and a project with data may take a moment to draw what matters.
+      notifyStyleSourcesStale();
+      setTimeout(notifyStyleSourcesStale, 1500);
     });
 
     webview.addEventListener('load-commit', (event) => {
@@ -255,6 +273,7 @@ export class CanvasView extends View {
     EventDispatcher.instance.emit('viewer-navigated', route);
   }
   dispose() {
+    setStyleSourceProvider(undefined);
     if (this.webview) {
       this.tryWebviewCall(() => {
         if (this.webview.isDevToolsOpened()) {

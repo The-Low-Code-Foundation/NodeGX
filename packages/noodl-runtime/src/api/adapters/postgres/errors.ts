@@ -44,10 +44,22 @@ export function uniqueViolationColumns(detail: string | undefined): string[] | n
  * expect. Returns the same object when there is nothing to translate.
  *
  * The translated error keeps `code` (the SQLSTATE) and `cause` (the original),
- * so a reader that wants PostgreSQL's own words can still get them.
+ * so a reader that wants PostgreSQL's own words can still get them. A
+ * translated error passes through a second time untouched: it keeps `code` but
+ * not `detail`, so translating it again would say `?.?` (and lose anything a
+ * caller added to its words in between — P116-S22-SERIESMSG).
  */
 export function translatePgError(e: unknown): Error {
   if (!(e instanceof Error)) return new Error(String(e));
+  if (translated.has(e)) return e;
+  const out = translateOnce(e);
+  if (out !== e) translated.add(out);
+  return out;
+}
+
+const translated = new WeakSet<Error>();
+
+function translateOnce(e: Error): Error {
   const pe = e as PgErrorLike;
 
   if (pe.code === PG_UNIQUE_VIOLATION) {

@@ -5,6 +5,7 @@ import type { GraphModelLike, NodeVariant, RouterIndex, StateTransition } from '
 import ComponentModel = require('./componentmodel');
 import NodeModel = require('./nodemodel');
 import EventSender = require('../eventsender');
+import { ScriptFiles, type ScriptSources } from '../scriptfiles';
 
 /** A component as it appears in a project's exported JSON. */
 type ComponentExportData = Parameters<typeof ComponentModel.createFromExportData>[0];
@@ -23,6 +24,8 @@ interface GraphExportData {
   variants?: NodeVariant[];
   settings?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
+  /** ISL-005 — the project's script files, `{ 'engine/world.js': source }` (see `scriptfiles.ts`). */
+  scripts?: ScriptSources;
   components: ComponentExportData[];
   rootComponent?: string;
 }
@@ -36,6 +39,8 @@ interface GraphModel extends GraphModelLike {
   components: Record<string, ComponentModel>;
   settings: Record<string, unknown>;
   metadata: Record<string, unknown>;
+  /** ISL-005 — the project's script files, compiled on first use, one copy per app run. */
+  scriptFiles: ScriptFiles;
   /** The export's bundle index — which components each bundle holds, and its dependencies. */
   componentIndex?: Record<string, ComponentBundle>;
   routerIndex?: RouterIndex;
@@ -63,6 +68,8 @@ interface GraphModel extends GraphModelLike {
   reset(): Promise<void>;
   isEmpty(): boolean;
   setSettings(settings: Record<string, unknown>): void;
+  /** ISL-005 — replace every script file's source; emits `scriptsChanged`. */
+  setScripts(scripts: ScriptSources | undefined): void;
   setAllMetaData(metadata: Record<string, unknown>): void;
   setMetaData(key: string, data: unknown): void;
   getMetaData(key?: string): unknown;
@@ -104,6 +111,8 @@ const GraphModel = function GraphModel(this: GraphModel) {
   this.settings = {};
 
   this.metadata = {};
+
+  this.scriptFiles = new ScriptFiles();
 } as unknown as GraphModelConstructor;
 
 GraphModel.prototype = Object.create(EventSender.prototype);
@@ -173,6 +182,9 @@ GraphModel.prototype.importEditorData = async function (this: GraphModel, export
   exportData.settings && this.setSettings(exportData.settings);
 
   exportData.metadata && this.setAllMetaData(exportData.metadata);
+
+  // ISL-005. Before the components, so a Function that runs at load finds its files.
+  exportData.scripts && this.setScripts(exportData.scripts);
 
   for (const component of exportData.components) {
     await this.importComponentFromEditorData(component);
@@ -373,6 +385,11 @@ GraphModel.prototype.setSettings = function (this: GraphModel, settings) {
 
 GraphModel.prototype.getSettings = function (this: GraphModel) {
   return this.settings;
+};
+
+GraphModel.prototype.setScripts = function (this: GraphModel, scripts) {
+  this.scriptFiles.setSources(scripts);
+  this.emit('scriptsChanged', this.scriptFiles.version);
 };
 
 GraphModel.prototype.setAllMetaData = function (this: GraphModel, metadata) {

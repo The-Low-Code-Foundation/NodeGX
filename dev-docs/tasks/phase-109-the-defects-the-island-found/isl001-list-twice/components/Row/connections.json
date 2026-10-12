@@ -1,0 +1,6 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c_row",
+  "version": 1,
+  "connections": [{ "fromId": "rowIn", "fromProperty": "label", "toId": "rowText", "toProperty": "text" }]
+}

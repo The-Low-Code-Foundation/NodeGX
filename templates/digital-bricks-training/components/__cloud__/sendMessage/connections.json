@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "726623a6-638f-5ee7-b674-c9e60494d367",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req",
+      "fromProperty": "pm-anchorKind",
+      "toId": "ask",
+      "toProperty": "in-anchorKind"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-anchorId",
+      "toId": "ask",
+      "toProperty": "in-anchorId"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-body",
+      "toId": "ask",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "userId",
+      "toId": "ask",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "ask",
+      "fromProperty": "out-request",
+      "toId": "thread",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "thread",
+      "fromProperty": "turns",
+      "toId": "res",
+      "toProperty": "pm-turns"
+    },
+    {
+      "fromId": "thread",
+      "fromProperty": "reason",
+      "toId": "deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "thread",
+      "fromProperty": "failed",
+      "toId": "deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "userId",
+      "toId": "who",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "who",
+      "fromProperty": "learnerId",
+      "toId": "ask",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "who",
+      "fromProperty": "failed",
+      "toId": "deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "userId",
+      "toId": "notice",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "notice",
+      "fromProperty": "current",
+      "toId": "ask",
+      "toProperty": "in-noticeCurrent"
+    },
+    {
+      "fromId": "notice",
+      "fromProperty": "failed",
+      "toId": "deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "thread",
+      "fromProperty": "turn",
+      "toId": "mailreq",
+      "toProperty": "in-turn"
+    },
+    {
+      "fromId": "thread",
+      "fromProperty": "learnerId",
+      "toId": "mailreq",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "thread",
+      "fromProperty": "anchorKind",
+      "toId": "mailreq",
+      "toProperty": "in-anchorKind"
+    },
+    {
+      "fromId": "thread",
+      "fromProperty": "anchorId",
+      "toId": "mailreq",
+      "toProperty": "in-anchorId"
+    },
+    {
+      "fromId": "thread",
+      "fromProperty": "done",
+      "toId": "mailreq",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mailreq",
+      "fromProperty": "out-request",
+      "toId": "mail",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "mail",
+      "fromProperty": "done",
+      "toId": "res",
+      "toProperty": "send"
+    }
+  ]
+}

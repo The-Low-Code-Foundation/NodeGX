@@ -32,28 +32,32 @@ const RangeNode = {
 
     this.props.value = this.props.min;
     this._internal.outputValue = 0;
+    // P107-C73 + D36 (P109 ISL-031, both ruled "Fix it now"): the handle is the node's, not the component's. `handle` is where
+    // it was last put — by a person's slide or by the graph's word drawn — so a remounted component starts there instead of
+    // taking the author's Value back (D36, "where the person left it"). `wordPending` is a Value the graph wrote that the page
+    // has not drawn yet; `valueWrites` counts those words, so the component draws each one, the same value as the last
+    // included (C73: a Reset after a slide was dropped because it equalled the author's last Value).
+    this.props.handle = 0;
+    this.props.valueWrites = 0;
+    this._internal.wordPending = true;
 
     this.props._nodeId = this.id;
 
-    //this is used by the range to communicate with the node whenever the range changes value
-    this.props.updateOutputValue = (value: string | number) => {
-      value = typeof value === 'string' ? parseFloat(value) : value;
-
-      const valueChanged = this._internal.outputValue !== value;
-      if (valueChanged) {
-        this._internal.outputValue = value;
-        this.flagOutputDirty('value');
-        this._updateOutputValuePercent(value);
-        this.sendSignalOnOutput('onChange');
-      }
-
-      // On first mount, output the initial percentage.
-      if (!this._internal.valuePercent) {
-        this._updateOutputValuePercent(value);
-      }
+    // a person's slide: Changed fires when the value moves
+    this.props.updateOutputValue = (value: string | number) => this._reportValue(value, true);
+    // the paint: the handle drawn as the browser holds it — the graph's word when one is waiting, else where it was —
+    // against the attributes now, and reported without Changed (D36). P107-C74 (ruled "Follow the handle"): Value and Value
+    // Percent describe the handle the browser draws, clamped and rounded to the step, after a Value and after Min, Max or Step
+    // moved. Returns the value the handle shows.
+    this.props.drawHandle = () => {
+      const target = this._internal.wordPending ? this.props.value : this.props.handle;
+      this._internal.wordPending = false;
+      const value = Number(browserRangeValue(this.props, target));
+      this._reportValue(value, false);
+      return value;
     };
 
-    this.props.updateOutputValue(this.props.value); // Set the value output to an initial value
+    this._reportValue(this.props.value, false); // Set the value output to an initial value
   },
   getReactComponent() {
     return Slider;
@@ -68,7 +72,7 @@ const RangeNode = {
       displayName: 'Value',
       group: 'General',
       description:
-        'Moves the handle to this value, clamped to Min and Max; changing it from the graph does not fire Changed. An empty value leaves the handle where it is',
+        'Moves the handle to this value, clamped to Min and Max and rounded to the Step; changing it from the graph does not fire Changed. An empty value leaves the handle where it is',
       index: 100,
       set(value) {
         this._setInputValue(value);
@@ -110,7 +114,7 @@ const RangeNode = {
       default: 0,
       index: 100,
       onChange() {
-        this._setInputValue(this.props.value);
+        this._attributeChanged();
       }
     },
     max: {
@@ -121,7 +125,7 @@ const RangeNode = {
       default: 100,
       index: 100,
       onChange() {
-        this._setInputValue(this.props.value);
+        this._attributeChanged();
       }
     },
     step: {
@@ -130,7 +134,10 @@ const RangeNode = {
       group: 'General',
       description: 'Smallest amount the handle can move by, so the value lands on multiples of it',
       default: 1,
-      index: 100
+      index: 100,
+      onChange() {
+        this._attributeChanged();
+      }
     },
     width: {
       index: 11,
@@ -217,10 +224,33 @@ const RangeNode = {
     }
   },
   methods: {
+    /** Value (and Value Percent) as the handle now shows; Changed only for a person's slide (`announce`) */
+    _reportValue(value: string | number, announce: boolean) {
+      value = typeof value === 'string' ? parseFloat(value) : value;
+      this.props.handle = value;
+
+      const valueChanged = this._internal.outputValue !== value;
+      if (valueChanged) {
+        this._internal.outputValue = value;
+        this.flagOutputDirty('value');
+        announce && this.sendSignalOnOutput('onChange');
+      }
+
+      // P107-C74: recomputed at every report, so a moved Min or Max reaches it (it was recomputed only with the value)
+      this._updateOutputValuePercent(value);
+    },
+    /** Min, Max or Step written: the next paint draws the handle against them (C74) — no word for it */
+    _attributeChanged() {
+      this.props.valueWrites++;
+      this.forceUpdate();
+    },
     _updateOutputValuePercent(value: number) {
-      const min = this.props.min;
-      const max = this.props.max;
-      const valuePercent = Math.floor(((value - min) / (max - min)) * 100);
+      // P107-C75 (ruled "Percent 0, defaults for blanks"): over the attributes as the browser reads them, a blank Min or Max
+      // as 0 or 100; 0 when they are equal — the handle sits at the start (0 / 0 read NaN, and every report re-sent it). A -0
+      // (a reversed range at its start) is 0.
+      const min = rangeAttribute(this.props.min) ?? 0;
+      const max = rangeAttribute(this.props.max) ?? 100;
+      const valuePercent = max === min ? 0 : Math.floor(((value - min) / (max - min)) * 100) + 0;
       // NDA-012 (Visual), A3. This compared against `this._internal.valuePercentChanged` — a
       // field nothing ever writes, so always `undefined`, so the comparison was always true and
       // `valuePercent` was flagged dirty on *every* value change whether the percentage moved or
@@ -234,6 +264,7 @@ const RangeNode = {
       this._internal.valuePercent = valuePercent;
       valuePercentChanged && this.flagOutputDirty('valuePercent');
     },
+    /** A Value write is the graph's word for the handle whatever it equals (C73, R14 "the last word wins"); the paint draws it */
     _setInputValue(newValue) {
       // NDA-012 (Visual), G1. This was `Math.min(this.props.max, newValue || 0)`, and the two
       // things wrong with it were both invisible:
@@ -259,18 +290,55 @@ const RangeNode = {
         return;
       }
 
-      //make sure value never goes out of range
-      const value = Math.max(this.props.min, Math.min(this.props.max, asNumber));
-
-      const changed = value !== this.props.value;
-
-      if (changed) {
-        this.props.value = value;
-        this.forceUpdate();
-      }
+      // the paint clamps and steps it as the browser does (C74, `drawHandle`)
+      this.props.value = asNumber;
+      this._internal.wordPending = true;
+      this.props.valueWrites++;
+      this.forceUpdate();
     }
   }
 };
+
+/**
+ * P107-C74 / C75 — an attribute of the `<input type="range">` as the element carries it (`String(v)`; `undefined`, `null`, a
+ * boolean, a function draw none) read by HTML's rules for parsing floating-point number values, the lenient prefix parse
+ * (`"1,2"` is 1). The node reads Min, Max and Step as the browser reads what the component renders (Slider.tsx `min`, `max`,
+ * `step`), so Value describes the handle drawn.
+ */
+function rangeAttribute(v: unknown): number | undefined {
+  if (v === undefined || v === null || typeof v === 'boolean' || typeof v === 'function' || typeof v === 'symbol') return undefined;
+  const str = String(v);
+  const lead = str.length - str.trimStart().length;
+  if (/[^\t\n\f\r ]/.test(str.slice(0, lead))) return undefined;
+  const n = parseFloat(str);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+/**
+ * P107-C74 — the value an `<input type="range">` holds for `v`, as the element renders `props`: not a valid floating-point number
+ * → the middle (or Min when Max is below it); clamped to [Min, Max]; then, when Max is not below Min, rounded to the step from
+ * Min (else from the handle the element carries, else 0), a tie upwards, a rounding past Max stepped back one, below Min forward
+ * one (HTML's value sanitization and step-mismatch rules). Step only when truthy (Slider.tsx), a step that is not a positive
+ * number is 1. Returned as the text the element holds.
+ */
+function browserRangeValue(props: { min?: unknown; max?: unknown; step?: unknown; handle?: unknown }, v: unknown): string {
+  const minAttr = rangeAttribute(props.min);
+  const min = minAttr ?? 0;
+  const max = rangeAttribute(props.max) ?? 100;
+  const text = typeof v === 'number' ? (Number.isFinite(v) ? String(v) : '') : v;
+  const parsed = typeof text === 'string' && /^-?(?:\d+|\d*\.\d+)(?:[eE][-+]?\d+)?$/.test(text) ? parseFloat(text) : undefined;
+  const valid = parsed !== undefined && Number.isFinite(parsed) ? parsed : undefined;
+  const proposed = valid === undefined ? (max < min ? min : (min + max) / 2) : valid;
+  const inRange = valid === undefined ? proposed : proposed < min ? min : proposed > max ? max : proposed;
+  // a reversed range holds Min, as Chromium draws it (it raises Max to Min)
+  if (max < min) return String(min);
+  const stepAttr = props.step ? rangeAttribute(props.step) : undefined;
+  const step = stepAttr !== undefined && stepAttr > 0 ? stepAttr : 1;
+  const base = minAttr ?? rangeAttribute(props.handle) ?? 0;
+  const rounded = base + Math.round((inRange - base) / step) * step;
+  const clamped = rounded > max ? rounded - step : rounded < min ? rounded + step : rounded;
+  return String(clamped < min || clamped > max ? inRange : clamped);
+}
 
 //Add borders
 function addBorderInputs(definition, opts) {

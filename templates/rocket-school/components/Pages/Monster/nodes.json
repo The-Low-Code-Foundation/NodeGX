@@ -135,7 +135,7 @@
       "type": "/Data/Words",
       "label": "The words",
       "x": 470,
-      "y": 2200
+      "y": 2320
     },
     {
       "id": "zgT",
@@ -149,21 +149,21 @@
       "type": "/Data/Curriculum",
       "label": "The skills",
       "x": 470,
-      "y": 1360
+      "y": 1240
     },
     {
       "id": "zgWordLists",
       "type": "/Data/Word lists",
       "label": "The typing words",
       "x": 470,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "zgSave",
       "type": "/Logic/Save model",
       "label": "Remember what was learned",
       "x": 470,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "zgNoOne",
@@ -173,7 +173,7 @@
         "expression": "has === false"
       },
       "x": 470,
-      "y": 2320
+      "y": 2440
     },
     {
       "id": "zgGuard",
@@ -236,7 +236,7 @@
         "name": "monsterPlaying"
       },
       "x": 470,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "zgSetDone",
@@ -246,7 +246,7 @@
         "name": "monsterPlaying"
       },
       "x": 470,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "zgInitDone",
@@ -266,7 +266,7 @@
         "expression": "true"
       },
       "x": 470,
-      "y": 2440
+      "y": 2560
     },
     {
       "id": "zgFalse",
@@ -276,7 +276,7 @@
         "expression": "false"
       },
       "x": 470,
-      "y": 2560
+      "y": 2680
     },
     {
       "id": "zgNotPlaying",
@@ -286,21 +286,32 @@
         "expression": "!playing"
       },
       "x": 470,
-      "y": 1240
+      "y": 1360
     },
     {
       "id": "zgSounds",
       "type": "/Logic/Play sounds",
       "label": "The fanfare",
       "x": 470,
-      "y": 1960
+      "y": 2080
     },
     {
       "id": "zgTeachCards",
       "type": "/Data/Teach cards",
       "label": "The Teach cards",
       "x": 470,
-      "y": 2080
+      "y": 2200
+    },
+    {
+      "id": "zgGoLists",
+      "type": "RouterNavigate",
+      "label": "To the revision lists",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Lists"
+      },
+      "x": 470,
+      "y": 1480
     }
   ],
   "visualRoots": [

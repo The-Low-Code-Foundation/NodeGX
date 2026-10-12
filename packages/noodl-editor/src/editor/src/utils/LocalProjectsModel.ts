@@ -20,6 +20,7 @@ import { isV2FormatEnabled } from '../services/ProjectStructure/featureFlags';
 import {
   dedupeProjectRowsByDirectory,
   findDurableIdCollisions,
+  idForOpenedFolder,
   findRowByDirectory,
   type DurableIdCollision
 } from './recentProjectRows';
@@ -239,11 +240,16 @@ export class LocalProjectsModel extends Model {
   }
 
   // Create a new project dir entry
-  _addProject(project: ProjectModel) {
+  /**
+   * `opened`: the folder already existed and is being opened, so it keeps the id in its file
+   * (P112-S11-IDREPLACE, {@link idForOpenedFolder}). A project being made — from a template or a zip — always mints.
+   */
+  _addProject(project: ProjectModel, { opened = false }: { opened?: boolean } = {}) {
     if (!project._retainedProjectDirectory) return;
 
     // Push directory entry
-    const id = guid();
+    const id =
+      (opened && idForOpenedFolder(project.id, project._retainedProjectDirectory, this.projectEntries || [])) || guid();
     this.projectEntries.push({
       retainedProjectDirectory: project._retainedProjectDirectory,
       latestAccessed: Date.now(),
@@ -406,7 +412,8 @@ export class LocalProjectsModel extends Model {
       return;
     }
 
-    // Load the newly created project
+    // Load the newly created project. It was a template a moment ago: no copy before its format
+    // update (P112 R17), which `toDirectory` below then saves.
     projectFromDirectory(dirEntry, (project) => {
       if (!project) {
         console.error('Failed to create project from template');
@@ -431,7 +438,7 @@ export class LocalProjectsModel extends Model {
           fn(project);
         });
       });
-    });
+    }, { copyBeforeFormatUpdate: false });
   }
 
   /**
@@ -476,7 +483,7 @@ export class LocalProjectsModel extends Model {
           return;
         }
 
-        this._addProject(project);
+        this._addProject(project, { opened: true });
         resolve(project);
       });
     });

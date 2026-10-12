@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c677978d-003d-5e30-8765-65c5dbc5b6d7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pa_appplus",
+      "fromProperty": "onClick",
+      "toId": "pa_appadd",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pa_appvar",
+      "fromProperty": "value",
+      "toId": "pa_app",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pa_page",
+      "fromProperty": "didMount",
+      "toId": "pa_clock",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "pa_clock",
+      "fromProperty": "count",
+      "toId": "pa_ticks",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pa_go",
+      "fromProperty": "onClick",
+      "toId": "pa_nav",
+      "toProperty": "navigate"
+    }
+  ]
+}

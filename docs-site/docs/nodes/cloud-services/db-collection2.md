@@ -78,6 +78,7 @@ All *inputs* are runtime-determined (runtime-discovered + editor-adapter): the c
 - Treating `Changed Record` as the full record on a delete — delete events carry only primary keys, so it is null and only `Changed Record Id` is populated.
 - Polling with a Timer while Subscribe To Changes is available on this backend. Subscribe and re-fetch on `Changed` instead.
 - Assuming `Subscribed` distinguishes 'reconnecting' from 'never connected' — it does not. Read `Realtime Status` for that.
+- Comparing a read-back Object field with `JSON.stringify` — an Object field does not keep the order of its names (a backend on PostgreSQL gives them back with shorter names first), so two equal objects can give different text. Compare them name by name, and sort the names yourself where a page shows them in an order.
 
 ## Examples
 

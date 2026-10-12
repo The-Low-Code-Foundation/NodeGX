@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2b3b639c-e4d6-526b-8521-ae8b846a0556",
+  "name": "With ghost",
+  "path": "/Logic/With ghost",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The island’s world with the ghost of a blueprint on it, for the drawing. Runs when an input changes; Ran after each run."
+}

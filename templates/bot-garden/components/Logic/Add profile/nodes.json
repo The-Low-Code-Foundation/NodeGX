@@ -1,0 +1,212 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "018abab9-856c-5885-8469-e94eca7cb017",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "addprofileIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "color",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "eye",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "face",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "robotName",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "addprofileFn",
+      "type": "JavaScriptFunction",
+      "label": "Add profile",
+      "parameters": {
+        "functionScript": "var { MAX_PROFILES, activate, modelOf, profileOf } = Scripts.save;\nvar model = modelOf(Inputs.model);\nvar name = String(Inputs.name || '').trim().slice(0, 24);\nvar ok = false, profileId = '', error = '';\nif (!name) error = 'name';\nelse if (model.profiles.length >= MAX_PROFILES) error = 'full';\nelse {\n  var p = profileOf({ name: name, band: Inputs.band, lang: Inputs.lang, face: Inputs.face, robot: { name: Inputs.robotName, color: Inputs.color, eye: Inputs.eye, hat: 'none' } });\n  model.profiles.push(p);\n  activate(model, p.id);\n  profileId = p.id;\n  ok = true;\n}\nOutputs.model = model;\nOutputs.ok = ok;\nOutputs.error = error;\nOutputs.profileId = profileId;\nOutputs.count = model.profiles.length;\n",
+        "runOnChange-in-band": false,
+        "runOnChange-in-color": false,
+        "runOnChange-in-eye": false,
+        "runOnChange-in-face": false,
+        "runOnChange-in-lang": false,
+        "runOnChange-in-model": false,
+        "runOnChange-in-name": false,
+        "runOnChange-in-robotName": false,
+        "uses": "save.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-band",
+          "displayName": "band",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-face",
+          "displayName": "face",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robotName",
+          "displayName": "robotName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-color",
+          "displayName": "color",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-eye",
+          "displayName": "eye",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-model",
+          "displayName": "model",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "displayName": "error",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-profileId",
+          "displayName": "profileId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "addprofileOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "error",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ok",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "profileId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

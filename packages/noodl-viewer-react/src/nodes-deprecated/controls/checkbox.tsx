@@ -4,6 +4,7 @@ import guid from '../../guid';
 import Layout from '../../layout';
 import NodeSharedPortDefinitions from '../../node-shared-port-definitions';
 import { createNodeFromReactComponent, type ReactNodeDefinition, type StyleObject } from '../../react-component-node';
+import { dataAttributeProps } from '../../components/noodl-root-ref';
 import type { Noodl } from '../../types';
 import Utils from './utils';
 
@@ -73,6 +74,7 @@ function CheckBox(props: CheckBoxProps) {
   return (
     <input
       className={className}
+      {...dataAttributeProps(props.dom)}
       type="checkbox"
       {...tagProps}
       {...Utils.controlEvents(props)}
@@ -94,6 +96,7 @@ const CheckBoxNode: ReactNodeDefinition = {
   // `displayName`. The picker therefore offered two entries reading the same word, and
   // the one an author was most likely to reach for was this one.
   deprecated: true,
+  replacedBy: 'net.noodl.controls.checkbox',
   displayName: 'Checkbox',
   docs: 'https://docs.noodl.net/nodes/visual/checkbox',
   allowChildren: false,

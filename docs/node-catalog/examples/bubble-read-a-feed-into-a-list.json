@@ -26,30 +26,10 @@
           "id": "list",
           "type": "For Each",
           "label": "One row per item",
-          "parent": "root",
-          "children": ["row"]
-        },
-        {
-          "id": "row",
-          "type": "Group",
-          "label": "Row",
           "parameters": {
-            "flexDirection": "column"
+            "template": "/Post Row"
           },
-          "parent": "list",
-          "children": ["row_title", "row_date"]
-        },
-        {
-          "id": "row_title",
-          "type": "Text",
-          "label": "Title",
-          "parent": "row"
-        },
-        {
-          "id": "row_date",
-          "type": "Text",
-          "label": "Published",
-          "parent": "row"
+          "parent": "root"
         },
         {
           "id": "fetch",
@@ -125,6 +105,55 @@
           "fromProperty": "failure",
           "toId": "parse_failed_log",
           "toProperty": "log"
+        }
+      ]
+    },
+    {
+      "name": "/Post Row",
+      "nodes": [
+        {
+          "id": "row",
+          "type": "Group",
+          "label": "Row",
+          "parameters": {
+            "flexDirection": "column"
+          },
+          "children": ["row_title", "row_date"]
+        },
+        {
+          "id": "row_title",
+          "type": "Text",
+          "label": "Title",
+          "parent": "row"
+        },
+        {
+          "id": "row_date",
+          "type": "Text",
+          "label": "Published",
+          "parent": "row"
+        },
+        {
+          "id": "item",
+          "type": "Component Inputs",
+          "label": "One item's fields, by name",
+          "ports": [
+            { "name": "Title", "plug": "output", "type": "*" },
+            { "name": "Published", "plug": "output", "type": "*" }
+          ]
+        }
+      ],
+      "connections": [
+        {
+          "fromId": "item",
+          "fromProperty": "Title",
+          "toId": "row_title",
+          "toProperty": "text"
+        },
+        {
+          "fromId": "item",
+          "fromProperty": "Published",
+          "toId": "row_date",
+          "toProperty": "text"
         }
       ]
     }

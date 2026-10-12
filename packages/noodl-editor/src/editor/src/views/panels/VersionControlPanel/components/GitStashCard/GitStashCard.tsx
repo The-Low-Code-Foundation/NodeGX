@@ -66,6 +66,7 @@ export default function GitStashCard({ stash, onDeleteClick, onApplyClick }: Git
 
         <div className={css['ToggleContainer']}>
           <IconButton
+            ariaLabel={isDrawerOpen ? 'Collapse' : 'Expand'}
             icon={IconName.CaretDown}
             variant={IconButtonVariant.Transparent}
             state={isDrawerOpen ? IconButtonState.Rotated : null}

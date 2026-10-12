@@ -1,0 +1,29 @@
+<!doctype html><meta charset="utf-8"><title>pending</title>
+<!-- The smallest home-made host: Orbit's v2 files held in memory, the real app beside nothing. /app.html?interval=50 speeds the clock (a write through the store). -->
+<style>body{margin:0;background:#111} #app{width:380px;height:680px;margin:20px;border-radius:36px;overflow:hidden}</style>
+<div id="app"></div>
+<script src="/preview.js"></script>
+<script>
+(async () => {
+  try {
+    const files = NodegxPreview.memoryFiles(await (await fetch('/project/orbit.json')).json());
+    const store = new NodegxPreview.V2ProjectStore(files);
+    // ?set=node.param=value (repeatable; ?interval=n is ticker.interval=n): each a write through the store
+    const query = new URLSearchParams(location.search);
+    const sets = query.getAll('set');
+    if (query.get('interval')) sets.push('ticker.interval=' + query.get('interval'));
+    for (const s of sets) {
+      const [, node, param, raw] = s.match(/^([^.]+)\.([^=]+)=(.*)$/);
+      const c = store.readComponent('App');
+      c.files.nodes.nodes.find((n) => n.id === node).parameters[param] = isNaN(Number(raw)) ? raw : Number(raw);
+      store.writeComponent('App', c.files, { ifRevision: c.revision });
+    }
+    const preview = await NodegxPreview.mountPreview(document.getElementById('app'), { runtimeBase: '/runtime/' });
+    window.preview = preview; window.store = store; window.files = files;
+    window.batches = [];
+    preview.onTrace((b) => window.batches.push(b));
+    const s = await preview.update(files.entries());
+    document.title = s.status === 'ok' ? 'ok ' + Math.round(s.exportMs) + '/' + Math.round(s.frameMs) + ' warnings=' + JSON.stringify(s.warnings) : 'FAIL ' + JSON.stringify(s).slice(0, 500);
+  } catch (e) { document.title = 'FAIL ' + (e && e.stack || e); }
+})();
+</script>

@@ -100,6 +100,7 @@ not a kit's.
 6. **AC6** — A fixture returning `stop_reason: "refusal"` fires `Failure` with `code: "refusal"`.
 7. **AC7** — `provider: openai-compatible` fires `Failure` with `code: "not_implemented"` and the
    node's description says so.
+   **Rewritten by P109 ISL-010 (2026-10-05):** `openai-compatible` is implemented (ISL-010 rulings 1–2), so the refusal is now graded on a provider value the enum never offered (`gemini` in the spec). The implemented provider has its own specs: `nodegx-backend/tests/isl-010-local-model.test.ts` (the request, the key rule, nothing on the record) and the key rule by parsed host in `noodl-viewer-cloud/tests/fed-003-model-request.test.ts`.
 8. **AC8** — The node is absent from the browser runtime's catalogue and present in the cloud
    catalogue with `availableIn: ["cloud"]`; the MCP `get_node_type` output documents every port
    in §3.1.

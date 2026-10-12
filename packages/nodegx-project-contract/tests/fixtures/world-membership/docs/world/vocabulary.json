@@ -1,0 +1,5 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/world-v1.json#/definitions/vocabularyFile",
+  "vocabulary": "nodegx-world-kinds",
+  "version": 1
+}

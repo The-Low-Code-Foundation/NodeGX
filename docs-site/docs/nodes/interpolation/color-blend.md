@@ -27,6 +27,13 @@ Any color that should respond continuously to a value: hover highlights, scroll-
 |---|---|---|---|
 | `blendValue` | Number | `0` | Position along the colour list, where 1 is exactly Color 1 and 1.5 is halfway to Color 2; values outside the list are clamped |
 
+### What each input does
+
+**Blend Value** (`blendValue`)
+
+- Blend Value not a number: the colour last shown stays
+- otherwise Result is the colour at Blend Value, mixed between its two neighbours
+
 ## Outputs
 
 ### Values

@@ -1,5 +1,6 @@
 import { each, filter, find, isEqual, some } from 'underscore';
 
+import { cannotBeAChild, cannotHaveChildren, cannotHoldChild, rootCategoryDisagrees } from '@nodegx/project-contract/hierarchy';
 import { stripCodeHistoryMetadata } from '@noodl-models/CodeHistory/codeHistoryMetadata';
 import { ComponentModel } from '@noodl-models/componentmodel';
 import { NodeGraphModel } from '@noodl-models/nodegraphmodel/NodeGraphModel';
@@ -7,6 +8,7 @@ import { NodeGrapPort } from '@noodl-models/NodeGraphPort';
 import { replaceOrAppendPorts } from '@noodl-models/nodegraphmodel/portOverrides';
 import { NodeLibrary } from '@noodl-models/nodelibrary';
 import { BasicNodeType } from '@noodl-models/nodelibrary/BasicNodeType';
+import { derivedPortsForNode } from '@noodl-models/nodelibrary/dynamicPortRules';
 import { UnknownNodeType } from '@noodl-models/nodelibrary/UnknownNodeType';
 import { UndoActionGroup, UndoQueue } from '@noodl-models/undo-queue-model';
 import { WarningsModel } from '@noodl-models/warningsmodel';
@@ -518,6 +520,13 @@ export class NodeGraphNode extends Model {
       // Any user defined ports
       if (this.ports) ports = ports.concat(this.ports);
 
+      // P109 ISL-009 — ports the type's `namedports/derived` rules mint from this node's own
+      // parameters (a visual node's Data Attributes list). Derived here, on read, rather than
+      // pushed through `setDynamicPorts`, which replaces: Page Stack, Router and Text Input already
+      // have a writer there, and two writers erase each other.
+      const derived = derivedPortsForNode(type.dynamicports, this.parameters);
+      if (derived.length) ports = ports.concat(derived);
+
       // Dynamic instance ports on this instance. FB-026 — these *replace* a static port of the
       // same name and plug rather than appearing beside it; see `portOverrides.ts`.
       if (this.dynamicports) ports = replaceOrAppendPorts(ports, this.dynamicports);
@@ -975,8 +984,10 @@ export class NodeGraphNode extends Model {
         : undefined
     );
 
+    // Where it sits in the tree — P107 R23: the rule's one body is `@nodegx/project-contract/hierarchy`, which the
+    // agent's checker (`validation/rules/invalidHierarchy.ts`) calls too
     // Cannot be a child
-    var w = this.parent && !this.type.allowAsChild;
+    var w = this.parent && cannotBeAChild(this.type);
     WarningsModel.instance.setWarning(
       { component: this.owner.owner, node: this, key: 'node-not-child' },
       !missingType && w //don't show this warning if type is missing since it's a bit superfluous
@@ -989,13 +1000,7 @@ export class NodeGraphNode extends Model {
     );
 
     // Parent cannot have children
-    var w =
-      this.type &&
-      this.parent &&
-      this.parent.type &&
-      (!this.parent.type.allowChildrenWithCategory ||
-        !this.type.category ||
-        this.parent.type.allowChildrenWithCategory.indexOf(this.type.category) === -1);
+    var w = this.type && this.parent && this.parent.type && cannotHoldChild(this.parent.type, this.type);
 
     WarningsModel.instance.setWarning(
       { component: this.owner.owner, node: this, key: 'node-invalid-child' },
@@ -1008,7 +1013,7 @@ export class NodeGraphNode extends Model {
     );
 
     // Cannot have children
-    w = !this.type.allowChildrenWithCategory && this.children && this.children.length > 0;
+    w = cannotHaveChildren(this.type) && this.children && this.children.length > 0;
     WarningsModel.instance.setWarning(
       { component: this.owner.owner, node: this, key: 'node-no-children' },
       !missingType && w //don't show this warning if type is missing since it's a bit superfluous
@@ -1037,10 +1042,10 @@ export class NodeGraphNode extends Model {
     // Roots must have same category
     var w =
       !this.parent &&
-      this.type.allowAsChild &&
-      !!find(this.owner.roots, function (n) {
-        return n !== _this && n.type.allowAsChild && n.type.category !== _this.type.category;
-      });
+      rootCategoryDisagrees(
+        this.type,
+        this.owner.roots.filter((n) => n !== _this).map((n) => n.type)
+      );
     WarningsModel.instance.setWarning(
       { component: this.owner.owner, node: this, key: 'node-child-cat' },
       w

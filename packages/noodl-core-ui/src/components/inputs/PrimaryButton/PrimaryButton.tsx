@@ -54,6 +54,11 @@ export interface PrimaryButtonProps extends UnsafeStyleProps {
   onBlur?: FocusEventHandler<HTMLButtonElement>;
 
   testId?: string;
+  /**
+   * P109 s43 (beside P101-INS003-ICONBTN) — what a screen reader calls the button when `label` is
+   * empty and only the icon is drawn (the top bar's Deploy in a narrow window).
+   */
+  ariaLabel?: string;
 }
 
 export function PrimaryButton({
@@ -82,6 +87,7 @@ export function PrimaryButton({
   onBlur,
 
   testId,
+  ariaLabel,
 
   UNSAFE_className,
   UNSAFE_style
@@ -119,6 +125,7 @@ export function PrimaryButton({
       onBlur={onBlur}
       disabled={isDisabled}
       data-test={testId}
+      aria-label={ariaLabel}
       style={UNSAFE_style}
     >
       <span className={classNames([css['Label'], isLoading && css['is-loading']])}>

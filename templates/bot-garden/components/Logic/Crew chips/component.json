@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "bea9e54f-0c0a-5fd1-8672-26f95ad12c4b",
+  "name": "Crew chips",
+  "path": "/Logic/Crew chips",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The plot card’s crew: her robots of the kind the job needs, the ones here ringed. Runs when an input changes; Ran after each run."
+}

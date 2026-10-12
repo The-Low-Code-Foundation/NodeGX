@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "aa95b96c-e275-5548-89cb-f33071ee0d4d",
+  "name": "Tally",
+  "path": "/Parts/Tally",
+  "type": "visual",
+  "created": "2026-10-05T16:22:48.353Z",
+  "modified": "2026-10-05T16:22:48.353Z",
+  "modifiedBy": "noodl-mcp"
+}

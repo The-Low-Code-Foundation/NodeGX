@@ -18,10 +18,12 @@
 
 import type * as http from 'http';
 
-import type { IStorageFacade } from '@noodl/backend-contract';
+import { whenTargetGoesProblems, type IStorageFacade, type StorageSeries, type WhenTargetGoes } from '@noodl/backend-contract';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import type { RequestContext } from './HttpServer';
+import { assertSeriesWrite } from './series-door';
+import { seriesProblem } from '@noodl/runtime/src/api/adapters/series';
 import type { ClpOp } from '../security/model';
 import type {
   StorageCheckDecl,
@@ -31,7 +33,12 @@ import type {
   StorageSupabaseExportOptions
 } from '@noodl/backend-contract';
 import { validateAclShape } from '../security/model';
-import { isVisibleAccountColumn } from '../users/accountColumns';
+import { isVisibleAccountColumn, accountWriteRefusal } from '../users/accountColumns';
+import { bundleWiringProblems } from '../workflow/bundleWiring';
+import { declaredFunctionsIn, type FunctionDeclaration } from '../workflow/functionDeclarations';
+
+/** P109 ISL-040: SB-016's rule for functions arriving after start (`SecurityState.undeclaredOnDeploy`). */
+export type DeployGate = (arriving: FunctionDeclaration[]) => { refused: boolean; message: string } | null;
 
 /** The four columns every record carries; never a person's to drop. */
 const SYSTEM_FIELDS: readonly string[] = ['objectId', 'createdAt', 'updatedAt', 'ACL'];
@@ -54,7 +61,23 @@ function requiredNeedsDefault(e: unknown, table: string, column: StorageColumn |
   );
 }
 
+/**
+ * P116-ONT-007-required: a field made required over records that hold nothing in it — the managers'
+ * `FieldEmptyError` (SQLite's at the call, PostgreSQL's as the queue's cause) as a 409 in their words,
+ * with how many, or null for any other error.
+ */
+function fieldEmpty(e: unknown, table: string): HttpError | null {
+  const err = e as { code?: string; message?: string; field?: string; count?: number } | null;
+  if (!err || err.code !== 'FIELD_EMPTY') return null;
+  return new HttpError(409, String(err.message), undefined, { reason: 'field-empty', collection: table, field: err.field, count: err.count });
+}
+
 /** Whether a declared check reads this column (BMG-003 — the drop refusal). */
+/** P116 ONT-003 — `{ description }` when it is words, `{}` otherwise: absent on the wire, never empty. */
+function describedAs(value: unknown): { description?: string } {
+  return typeof value === 'string' && value.trim() ? { description: value.trim() } : {};
+}
+
 function checkReads(rule: StorageCheckDecl, column: string): boolean {
   if ('exactlyOne' in rule) return rule.exactlyOne.includes(column);
   if ('allOrNone' in rule) return rule.allOrNone.includes(column);
@@ -69,6 +92,8 @@ import {
   readJSONBody,
   sendJSON,
   splitCapped,
+  stillLinkedToHttp,
+  notWhileToHttp,
   uniqueViolationToHttp
 } from './http-util';
 
@@ -121,14 +146,9 @@ function forWire<T>(table: string, record: T): T {
 function assertAccountWrite(table: string, data: Record<string, unknown> | undefined | null): void {
   if (table !== '_User' || !data) return;
   for (const key of Object.keys(data)) {
-    if (!isVisibleAccountColumn(key)) {
-      throw new HttpError(
-        400,
-        key === 'password'
-          ? 'A password is not written through /api/_User — it would be stored as text. Use PUT /admin/users/:id { password }, which hashes it.'
-          : `"${key}" is the backend's own column and cannot be written.`
-      );
-    }
+    // P109 ISL-040: the admin-only flags too (`adminAccess`, `disabled`, `emailVerified`), not only `_` columns and the password.
+    const refusal = accountWriteRefusal(key, '/api/_User');
+    if (refusal) throw new HttpError(400, refusal);
   }
 }
 
@@ -156,6 +176,8 @@ export interface SchemaTable {
   indexes?: StorageIndexStatus[];
   /** HLT-016 — every declared check and whether it is enforced. Absent on an adapter too old to answer. */
   checks?: StorageCheckStatus[];
+  /** P116 ONT-003 — the collection's description, when it was created with one. */
+  description?: string;
 }
 
 /** `GET /admin/schema` and `GET /api/_schema`. */
@@ -171,21 +193,25 @@ export interface TableSchemaResponse {
   indexes?: StorageIndexStatus[];
   /** HLT-016 — see {@link SchemaTable.checks}. */
   checks?: StorageCheckStatus[];
+  /** P116 ONT-003 — see {@link SchemaTable.description}. */
+  description?: string;
 }
 
 /** `POST /admin/schema` — one of the five mutation actions. */
 export interface SchemaMutationResponse {
   success: boolean;
-  action: 'createTable' | 'addColumn' | 'renameColumn' | 'changeColumnType' | 'deleteTable' | 'setIndexes' | 'setChecks' | 'dropColumn';
+  action: 'createTable' | 'addColumn' | 'renameColumn' | 'renameTable' | 'describeTable' | 'setWhenTargetGoes' | 'setSeries' | 'setRequired' | 'changeColumnType' | 'deleteTable' | 'setIndexes' | 'setChecks' | 'dropColumn';
   table: string;
   /** Present on createTable / deleteTable: whether the DDL actually ran. */
   created?: boolean;
   deleted?: boolean;
   /** BMG-003 — dropColumn: whether the column was there to drop. */
   dropped?: boolean;
+  /** P116 ONT-007 — renameTable: the collection's name now (`table` is the name it had). */
+  renamedTo?: string;
   column?: string;
   // ── changeColumnType (AAQ-002) ────────────────────────────────────────────
-  /** Whether the column's type actually moved (false when it already matched). */
+  /** Whether the column's type actually moved (false when it already matched). setRequired: whether any field's rule did. */
   changed?: boolean;
   /** The type it had before. */
   from?: string;
@@ -228,6 +254,12 @@ export interface SchemaExportOptions {
   userIdClaim?: string;
 }
 
+
+/** P116 R10 — 400 in words for a `whenTargetGoes` the backend could never keep (`targetGoes.ts`). */
+function refuseUnkeptLinkRules(table: string, columns: StorageColumn[]): void {
+  const problems = whenTargetGoesProblems(table, columns);
+  if (problems.length) throw new HttpError(400, problems.join(' '));
+}
 export class ByobAdminRoutes {
   private readonly facade: IStorageFacade;
   private readonly executions: ExecutionHistory;
@@ -278,6 +310,7 @@ export class ByobAdminRoutes {
   async create(ctx: RequestContext): Promise<void> {
     const data = await readJSONBody(ctx.req);
     assertAccountWrite(ctx.params.table, data);
+    assertSeriesWrite(ctx.principal, this.facade.schemaManager, ctx.params.table, data);
     ctx.stampCreate(ctx.params.table, data);
     let record: Record<string, unknown>;
     try {
@@ -300,6 +333,8 @@ export class ByobAdminRoutes {
       const record = await this.facade.rawSave(ctx.params.table, ctx.params.id, data, ctx.acl('write'));
       sendJSON(ctx.res, 200, forWire(ctx.params.table, record));
     } catch (e) {
+      const settled = notWhileToHttp(e);
+      if (settled) throw settled;
       // FED-002: an edit refused by a unique index is a conflict, not a missing
       // row — the same distinction `classPut` draws.
       const message = e instanceof Error ? e.message : String(e);
@@ -329,8 +364,9 @@ export class ByobAdminRoutes {
     }
     try {
       await this.facade.rawDelete(ctx.params.table, ctx.params.id, ctx.acl('write'));
-    } catch {
-      throw new HttpError(404, 'Record not found');
+    } catch (e) {
+      // P116 R10: a link's `blocks` rule refusing is a 409 that says what links to it, not a 404.
+      throw stillLinkedToHttp(e) || notWhileToHttp(e) || new HttpError(404, 'Record not found');
     }
     sendJSON(ctx.res, 200, { deleted: true, objectId: ctx.params.id });
   }
@@ -354,6 +390,7 @@ export class ByobAdminRoutes {
             ctx.checkData(collection, clpOp);
             const data = (op.data as Record<string, unknown>) || {};
             assertAccountWrite(collection, data);
+            assertSeriesWrite(ctx.principal, this.facade.schemaManager, collection, data);
             ctx.stampCreate(collection, data);
             results.push(forWire(collection, await this.facade.rawCreate(collection, data)));
             break;
@@ -366,20 +403,23 @@ export class ByobAdminRoutes {
               collection,
               op.objectId as string,
               op.data as Record<string, unknown>,
-              ctx.acl('write')
+              ctx.acl('write', collection)
             );
             results.push({ success: true });
             break;
           case 'delete':
             ctx.checkData(collection, clpOp);
-            await this.facade.rawDelete(collection, op.objectId as string, ctx.acl('write'));
+            await this.facade.rawDelete(collection, op.objectId as string, ctx.acl('write', collection));
             results.push({ deleted: true });
             break;
           default:
             results.push({ error: `Unknown method: ${String(op.method)}` });
         }
       } catch (e) {
-        results.push({ error: e instanceof Error ? e.message : String(e) });
+        // P116 R10: a refused delete says why, in the shape the single-record door answers with.
+        // P116 ONT-012: and so does a write an `onlyWhile` rule refused.
+        const linked = stillLinkedToHttp(e) || notWhileToHttp(e);
+        results.push(linked ? { error: linked.message, ...linked.extra } : { error: e instanceof Error ? e.message : String(e) });
       }
     }
 
@@ -403,7 +443,7 @@ export class ByobAdminRoutes {
     if (!sm) throw new HttpError(500, 'Schema manager not available');
     const tables: string[] = sm.listTables();
     const accounts = withAccounts ? sm.getTableSchema('_User') : null;
-    const schemas: { name: string; columns?: unknown[]; createdAt?: string }[] = sm.exportSchemas();
+    const schemas: { name: string; columns?: unknown[]; createdAt?: string; description?: string }[] = sm.exportSchemas();
     sendJSON(res, 200, {
       tables: tables.map((name) => {
         const schema = schemas.find((s) => s.name === name);
@@ -411,6 +451,7 @@ export class ByobAdminRoutes {
           name,
           columns: schema?.columns || [],
           createdAt: schema?.createdAt || null,
+          ...describedAs(schema?.description),
           ...this.indexesOf(name),
           ...this.checksOf(name)
         };
@@ -439,6 +480,7 @@ export class ByobAdminRoutes {
     sendJSON(res, 200, {
       name: tableName,
       columns: tableName === '_User' ? columns.filter((c) => isVisibleAccountColumn(c.name)) : columns,
+      ...describedAs(schema.description),
       ...this.indexesOf(tableName),
       ...this.checksOf(tableName)
     } satisfies TableSchemaResponse);
@@ -501,9 +543,21 @@ export class ByobAdminRoutes {
         // `createTable` is create-if-absent, so the reconcile runs afterwards
         // either way: a push against a table that already exists is exactly the
         // case where a declaration has CHANGED.
+        // P116 ONT-003: a collection made from what a person said carries their sentence. It is
+        // kept with the table's declaration on both engines and never interpreted; like the rest
+        // of `createTable` it is written once — a changed description is ONT-007's migration (`describeTable`).
+        const description = describedAs(body.description).description;
+        // P116 R10: a link's "when it goes" rule that could never be kept is refused, not stored.
+        refuseUnkeptLinkRules(table, (body.columns as StorageColumn[] | undefined) || []);
+        // P116 ONT-015: so is a series that could not be handed out (no counter, a number column, …).
+        for (const c of (body.columns as StorageColumn[] | undefined) || []) {
+          const problem = seriesProblem(c.name, c.series, c.type);
+          if (problem) throw new HttpError(400, problem);
+        }
         const created = sm.createTable({
           name: table,
-          columns: (body.columns as StorageColumn[] | undefined) || []
+          columns: (body.columns as StorageColumn[] | undefined) || [],
+          ...(description ? { description } : {})
         });
         // HLT-016: `checks` rides along the same way, and is applied first: a
         // push refused by its rows is refused before any index is built.
@@ -541,6 +595,7 @@ export class ByobAdminRoutes {
         // and either refusal is the person's to act on — so it is 400 in words,
         // and the queue is awaited here so it reaches the person who added the
         // field rather than whoever writes the next record.
+        refuseUnkeptLinkRules(table, body.column ? [body.column as StorageColumn] : []);
         try {
           sm.addColumn(table, body.column as StorageColumn);
         } catch (e) {
@@ -550,9 +605,146 @@ export class ByobAdminRoutes {
         sendJSON(res, 200, { success: true, action: 'addColumn', table } satisfies SchemaMutationResponse);
         return;
       case 'renameColumn':
-        sm.renameColumn(table, body.oldName as string, body.newName as string);
+        // P116-ONT-007-renamecolumn: refused like a drop. A rename that went through left a rule or an
+        // index naming a field that is gone, still reported built, and the same declaration pushed again
+        // was refused. A world migration takes them off first and puts them back after.
+        this.refuseIfInUse(table, body.oldName as string, 'rename');
+        try {
+          sm.renameColumn(table, body.oldName as string, body.newName as string);
+        } catch (e) {
+          const err = e as { code?: string; message?: string };
+          if (err && err.code === 'COLUMN_IN_USE') throw new HttpError(409, String(err.message));
+          throw e;
+        }
         sendJSON(res, 200, { success: true, action: 'renameColumn', table } satisfies SchemaMutationResponse);
         return;
+      case 'renameTable': {
+        // P116 ONT-007: a noun the person calls something else now. Optional on the interface,
+        // like `deleteTable`. The adapter refuses while an index, a check or a search index is
+        // built under the old name (`TABLE_IN_USE`, 409) — a world migration takes them off
+        // first and puts them back after. Permission rules kept under the old name are NOT
+        // moved here: the migration's reach names them (ONT-007 §6).
+        if (typeof sm.renameTable !== 'function') {
+          throw new HttpError(501, 'This adapter cannot rename a collection.');
+        }
+        const newName = body.newName as string;
+        if (typeof newName !== 'string' || !newName) throw new HttpError(400, 'Say what the collection is called now (newName).');
+        try {
+          sm.renameTable(table, newName);
+        } catch (e) {
+          const err = e as { code?: string; message?: string };
+          if (err && err.code === 'TABLE_IN_USE') throw new HttpError(409, String(err.message));
+          throw new HttpError(400, e instanceof Error ? e.message : String(e));
+        }
+        await this.awaitSchemaQueue(ctx, table);
+        ctx.audit({ renamedTable: `${table} → ${newName}` });
+        sendJSON(res, 200, { success: true, action: 'renameTable', table, renamedTo: newName } satisfies SchemaMutationResponse);
+        return;
+      }
+      case 'describeTable': {
+        // P116 ONT-007 s11: the words on a collection (and its fields), said again — a changed answer
+        // that changes only what the store does not keep. Never interpreted; `_User` keeps the backend's.
+        if (typeof sm.describeTable !== 'function') {
+          throw new HttpError(501, 'This adapter cannot say again what a collection is.');
+        }
+        if (table.startsWith('_')) throw new HttpError(400, `"${table}" is one of the backend's own collections; its words are the backend's.`);
+        const columns = body.columns === undefined ? {} : body.columns;
+        if (!columns || typeof columns !== 'object' || Array.isArray(columns) || !Object.values(columns).every((v) => v === null || typeof v === 'string')) {
+          throw new HttpError(400, 'Say each field\'s words as { "<field>": "<words>" } (null takes them away).');
+        }
+        if (body.description !== null && typeof body.description !== 'string') throw new HttpError(400, 'Say the collection\'s words as text (description), or null to take them away.');
+        try {
+          sm.describeTable(table, body.description as string | null, columns as Record<string, string | null>);
+        } catch (e) {
+          throw new HttpError(400, e instanceof Error ? e.message : String(e));
+        }
+        await this.awaitSchemaQueue(ctx, table);
+        ctx.audit({ describedTable: table, fields: Object.keys(columns) });
+        sendJSON(res, 200, { success: true, action: 'describeTable', table } satisfies SchemaMutationResponse);
+        return;
+      }
+      case 'setWhenTargetGoes': {
+        // P116 R10: per link, what happens to a record when the one it points at goes — a changed
+        // answer. Only the declaration changes here; every delete keeps it (`AdapterFacade.rawDelete`).
+        if (typeof sm.setWhenTargetGoes !== 'function') {
+          throw new HttpError(501, 'This adapter cannot say what happens to a link when its record goes.');
+        }
+        const columns = body.columns;
+        if (!columns || typeof columns !== 'object' || Array.isArray(columns) || !Object.values(columns).every((v) => v === null || typeof v === 'string')) {
+          throw new HttpError(400, 'Say each link\'s rule as { "<field>": "goes-too" | "stays-unlinked" | "blocks" } (null takes it away).');
+        }
+        const rules = columns as Record<string, WhenTargetGoes | null>;
+        const now = sm.getTableSchema(table);
+        if (!now) throw new HttpError(404, `No such table: ${table}`);
+        refuseUnkeptLinkRules(
+          table,
+          (now.columns || []).filter((c) => rules[c.name]).map((c) => ({ ...c, whenTargetGoes: rules[c.name] as WhenTargetGoes }))
+        );
+        try {
+          sm.setWhenTargetGoes(table, rules);
+        } catch (e) {
+          throw new HttpError(400, e instanceof Error ? e.message : String(e));
+        }
+        await this.awaitSchemaQueue(ctx, table);
+        ctx.audit({ setWhenTargetGoes: table, fields: Object.keys(rules) });
+        sendJSON(res, 200, { success: true, action: 'setWhenTargetGoes', table } satisfies SchemaMutationResponse);
+        return;
+      }
+      case 'setSeries': {
+        // P116 ONT-015 §3.3: a series put on (or taken off) a field the collection has. Putting one numbers
+        // the records holding none, in the order they were made, above the highest number held — in the store,
+        // in one transaction (the counter must move with the numbers). A migration's step (ONT-007).
+        if (typeof sm.setSeries !== 'function') throw new HttpError(501, 'This adapter cannot hand out numbers.');
+        const columns = body.columns;
+        if (!columns || typeof columns !== 'object' || Array.isArray(columns) || !Object.values(columns).every((v) => v === null || (!!v && typeof v === 'object' && !Array.isArray(v)))) {
+          throw new HttpError(400, 'Say each field\'s series as { "<field>": { "format": "INV-{YYYY}-{####}", "restart"?, "gapFree"? } } (null takes it off).');
+        }
+        const now = sm.getTableSchema(table);
+        if (!now) throw new HttpError(404, `No such table: ${table}`);
+        const series = columns as Record<string, StorageSeries | null>;
+        for (const [field, option] of Object.entries(series)) {
+          const col = (now.columns || []).find((c) => c.name === field);
+          if (!col) throw new HttpError(400, `"${table}" has no field "${field}"`);
+          const problem = option === null ? null : seriesProblem(field, option, col.type);
+          if (problem) throw new HttpError(400, problem);
+        }
+        try {
+          sm.setSeries(table, series);
+        } catch (e) {
+          throw new HttpError(400, e instanceof Error ? e.message : String(e));
+        }
+        await this.awaitSchemaQueue(ctx, table);
+        ctx.audit({ setSeries: table, fields: Object.keys(series) });
+        sendJSON(res, 200, { success: true, action: 'setSeries', table } satisfies SchemaMutationResponse);
+        return;
+      }
+      case 'setRequired': {
+        // P116-ONT-007-required: fields the records already have made required (true) or optional (false) — the
+        // column's NOT NULL and the declaration together. Refused 409 in words, naming how many, while a record
+        // holds none (SQLite at the call, PostgreSQL at the queue). A world migration's step after its move.
+        if (typeof sm.setRequired !== 'function') throw new HttpError(501, 'This adapter cannot make a field required or optional.');
+        const columns = body.columns;
+        if (!columns || typeof columns !== 'object' || Array.isArray(columns) || !Object.keys(columns).length || !Object.values(columns).every((v) => typeof v === 'boolean')) {
+          throw new HttpError(400, 'Say each field as { "<field>": true } (required) or false (optional).');
+        }
+        if (!sm.getTableSchema(table)) throw new HttpError(404, `No such table: ${table}`);
+        const fields = columns as Record<string, boolean>;
+        for (const field of Object.keys(fields)) {
+          if (table === '_User' && (!isVisibleAccountColumn(field) || field === 'username' || field === 'email')) {
+            throw new HttpError(400, `"${field}" is one of the backend's own account fields.`);
+          }
+        }
+        let changed: boolean;
+        try {
+          changed = sm.setRequired(table, fields);
+        } catch (e) {
+          throw fieldEmpty(e, table) || new HttpError(400, e instanceof Error ? e.message : String(e));
+        }
+        await this.awaitSchemaQueue(ctx, table);
+        ctx.audit({ setRequired: table, fields });
+        sendJSON(res, 200, { success: true, action: 'setRequired', table, changed } satisfies SchemaMutationResponse);
+        return;
+      }
       case 'changeColumnType': {
         // AAQ-002. Optional on the interface (an older adapter predates it), so
         // its absence is a 501 rather than an `is not a function` at request time.
@@ -616,14 +808,15 @@ export class ByobAdminRoutes {
         throw new HttpError(
           400,
           `Unknown schema action: ${String(body.action)}. Expected one of createTable, addColumn, ` +
-            'renameColumn, changeColumnType, dropColumn, deleteTable, setIndexes, setChecks.'
+            'renameColumn, renameTable, describeTable, setWhenTargetGoes, setSeries, setRequired, changeColumnType, dropColumn, deleteTable, setIndexes, setChecks.'
         );
     }
   }
 
   /**
-   * BMG-003 — a column a declared index, a check or a search opt-in reads is
-   * refused for a drop or a type change, naming what reads it (AC4). The
+   * BMG-003 — a column a declared index (over it, or in its `where`), a check
+   * or a search opt-in reads is refused for a drop, a rename or a type change,
+   * naming what reads it (AC4). The
    * adapters refuse the same way; this is the sentence the page shows, and it
    * runs first so the two engines answer identically.
    *
@@ -633,7 +826,7 @@ export class ByobAdminRoutes {
     const sm = this.facade.schemaManager;
     if (!sm) return;
     const indexes = typeof sm.indexStatus === 'function' ? sm.indexStatus(table) : [];
-    const index = indexes.find((i) => i.declared !== false && (i.fields || []).includes(column));
+    const index = indexes.find((i) => i.declared !== false && ((i.fields || []).includes(column) || Object.keys(i.where || {}).includes(column)));
     if (index) {
       throw new HttpError(
         409,
@@ -668,6 +861,8 @@ export class ByobAdminRoutes {
       const message = e instanceof Error ? e.message : String(e);
       const needsDefault = column ? requiredNeedsDefault(e, table, column) : null;
       if (needsDefault) throw needsDefault;
+      const empty = fieldEmpty((e as { cause?: unknown }).cause, table);
+      if (empty) throw empty;
       if (/UNIQUE constraint failed/.test(message)) {
         ctx.audit({ indexesRefused: { table, engine: 'postgres' } });
         throw new HttpError(
@@ -843,12 +1038,26 @@ export class ByobAdminRoutes {
     sendJSON(res, 200, runner ? runner.getStatus() : { initialized: false, workflowCount: 0, functions: [] });
   }
 
-  async updateWorkflow(req: http.IncomingMessage, res: http.ServerResponse, name: string): Promise<void> {
+  /**
+   * `gate` (P109 ISL-040, P78-DBT-UNRULED): SB-016's rule for the functions this bundle declares, asked
+   * before anything loads — refused on a public bind (409), a `warning` on loopback.
+   */
+  async updateWorkflow(req: http.IncomingMessage, res: http.ServerResponse, name: string, gate?: DeployGate): Promise<void> {
     const runner = this.getRunner();
     if (!runner) throw new HttpError(503, 'Workflows not initialized');
     const body = await readJSONBody(req);
+    const verdict = gate ? gate(declaredFunctionsIn(body, name)) : null;
+    // `success: false` too: the editor's and the MCP door's deploy clients read that field, not the status.
+    if (verdict && verdict.refused) throw new HttpError(409, verdict.message, undefined, { success: false });
+    // P109 ISL-042 (P78-DBT-BUNDLEWIRES): a bundle whose wires connect nothing is refused, and a wire into a
+    // component port the component does not declare is named, before either reads as a 30-second hang.
+    const wiring = bundleWiringProblems(body);
+    if (wiring.refusals.length > 0) {
+      throw new HttpError(400, `Not deployed: ${wiring.refusals.join(' ')}`, undefined, { success: false });
+    }
     const result = await runner.loadWorkflow(name, body);
-    sendJSON(res, result.success ? 200 : 500, result);
+    const warnings = [...(verdict ? [verdict.message] : []), ...wiring.warnings];
+    sendJSON(res, result.success ? 200 : 500, warnings.length ? { ...result, warning: warnings.join('\n\n') } : result);
   }
 
   async deleteWorkflow(res: http.ServerResponse, name: string): Promise<void> {
@@ -858,11 +1067,14 @@ export class ByobAdminRoutes {
     sendJSON(res, result.success ? 200 : 500, result);
   }
 
-  async reloadWorkflows(res: http.ServerResponse): Promise<void> {
+  async reloadWorkflows(res: http.ServerResponse, gate?: () => ReturnType<DeployGate>): Promise<void> {
+    const verdict = gate ? gate() : null;
+    // `success: false` too: the editor's and the MCP door's deploy clients read that field, not the status.
+    if (verdict && verdict.refused) throw new HttpError(409, verdict.message, undefined, { success: false });
     const runner = this.getRunner();
     if (!runner) throw new HttpError(503, 'Workflows not initialized');
     const result = await runner.reloadWorkflows();
-    sendJSON(res, 200, result);
+    sendJSON(res, 200, verdict ? { ...result, warning: verdict.message } : result);
   }
 
   // ==========================================================================

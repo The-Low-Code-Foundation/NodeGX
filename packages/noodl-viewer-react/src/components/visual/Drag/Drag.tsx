@@ -8,7 +8,7 @@ export interface DragProps extends Noodl.ReactProps {
   inputPositionX: number;
   inputPositionY: number;
 
-  enabled: boolean;
+  enabled: unknown;
   scale: number;
   axis: 'x' | 'y' | 'both';
 
@@ -33,6 +33,24 @@ function setDragValues(event, props) {
   props.deltaY && props.deltaY(event.deltaY);
 }
 
+/** react-draggable's `canDragX` / `canDragY`: the axes Axis lets the element move on (any other value: neither). */
+function canDrag(axis: DragProps['axis'], on: 'x' | 'y') {
+  return axis === on || axis === 'both';
+}
+
+/**
+ * P107-C160, ruled R26 "Off means off": Enabled turns dragging off on `false`, `0`, empty and the text "false" — before, only the
+ * exact `false` did, so a wired 0 or "false" left the element draggable. Nothing yet (`undefined`, `null` from an Expression that
+ * has not answered) leaves it on, as the port's default.
+ */
+export function dragEnabled(enabled: unknown): boolean {
+  if (enabled === undefined || enabled === null) return true;
+  return !!enabled && enabled !== 'false';
+}
+
+/** P107-C101 — what a press inside a Drag operates instead of dragging. */
+const DRAG_CANCEL = 'input, textarea, select, button, a, [contenteditable]';
+
 type State = {
   x: number
   y: number
@@ -50,6 +68,16 @@ export class Drag extends React.Component<DragProps, State> {
    */
   draggableNodeRef: React.RefObject<HTMLElement>;
 
+  /** P107-C103 — the element a Drag with more than one child wraps them in, and moves. */
+  wrapperRef = React.createRef<HTMLDivElement>();
+
+  /**
+   * P107-C105 — where `componentDidMount` put the element, until that `setState` lands. A Snap Do that waited for the component
+   * runs at the child's ref, after the mount queued its position and before React commits it: read from `this.state`, it started
+   * from the constructor's 0 and the element jumped to the edge first.
+   */
+  mountedAt?: State;
+
   constructor(props: DragProps) {
     super(props);
     this.state = { x: 0, y: 0 } satisfies State;
@@ -57,6 +85,8 @@ export class Drag extends React.Component<DragProps, State> {
     const self = this;
     this.draggableNodeRef = {
       get current() {
+        // P107-C103 — with more than one child, the library moves the wrapper
+        if (self.wrapperRef.current) return self.wrapperRef.current;
         const noodlNode = self.props.noodlNode;
         const child = noodlNode && noodlNode.children && noodlNode.children[0];
         return child && child.getDOMElement ? child.getDOMElement() : null;
@@ -64,12 +94,36 @@ export class Drag extends React.Component<DragProps, State> {
     } as React.RefObject<HTMLElement>;
   }
 
+  /**
+   * P107-C102 — what a press, a move or a let go reports. react-draggable's callbacks carry the pointer's movement on both axes
+   * whatever `axis` is (it "only controls flushing to the DOM"), so on an axis Axis locks Drag X / Y said the element moved while it
+   * stayed put, and jumped back at the next press. There they report where the element is, and a Delta of 0.
+   */
+  reportDrag(data: { x: number; y: number; deltaX: number; deltaY: number }, axis: DragProps['axis']) {
+    const canX = canDrag(axis, 'x');
+    const canY = canDrag(axis, 'y');
+    setDragValues(
+      {
+        x: canX ? data.x : this.state.x,
+        y: canY ? data.y : this.state.y,
+        deltaX: canX ? data.deltaX : 0,
+        deltaY: canY ? data.deltaY : 0
+      },
+      this.props
+    );
+  }
+
+  /** Where the element is on an axis: the mount's position until it lands (P107-C105), then the state. */
+  positionOn(axis: 'x' | 'y') {
+    return this.mountedAt ? this.mountedAt[axis] : this.state[axis];
+  }
+
   snapToPosition({ timerScheduler, propCallback, duration, axis, endValue }) {
     const _this = this;
     return timerScheduler
       .createTimer({
         duration: duration === undefined ? 300 : duration,
-        startValue: this.state[axis],
+        startValue: this.positionOn(axis),
         endValue: endValue,
         ease: EaseCurves.easeOut,
         onRunning: function (t) {
@@ -117,19 +171,24 @@ export class Drag extends React.Component<DragProps, State> {
     const x = this.props.inputPositionX ? this.props.inputPositionX : 0;
     const y = this.props.inputPositionY ? this.props.inputPositionY : 0;
 
-    this.setState({ x, y });
+    this.mountedAt = { x, y };
+    this.setState({ x, y }, () => {
+      this.mountedAt = undefined;
+    });
     setDragValues({ x, y, deltaX: 0, deltaY: 0 }, this.props);
   }
 
   componentDidUpdate(prevProps: DragProps) {
     const props = this.props;
 
-    if (prevProps.inputPositionX !== props.inputPositionX) {
+    // P107-C106 — `Object.is`: a Start Drag X / Y of NaN is unchanged when it is NaN again; `!==` saw a change at every update and set
+    // state until React gave up, which blanked the page
+    if (!Object.is(prevProps.inputPositionX, props.inputPositionX)) {
       this.setState({ x: props.inputPositionX });
       props.positionX && props.positionX(props.inputPositionX);
       props.deltaX && props.deltaX(props.inputPositionX - prevProps.inputPositionX);
     }
-    if (prevProps.inputPositionY !== props.inputPositionY) {
+    if (!Object.is(prevProps.inputPositionY, props.inputPositionY)) {
       this.setState({ y: props.inputPositionY });
       props.positionY && props.positionY(props.inputPositionY);
       props.deltaY && props.deltaY(props.inputPositionY - prevProps.inputPositionY);
@@ -137,7 +196,7 @@ export class Drag extends React.Component<DragProps, State> {
   }
 
   snapToPositionX(x, duration) {
-    if (this.state.x === x) return;
+    if (this.positionOn('x') === x) return;
 
     this.snapToPositionXTimer && this.snapToPositionXTimer.stop();
     this.snapToPositionXTimer = this.snapToPosition({
@@ -150,7 +209,7 @@ export class Drag extends React.Component<DragProps, State> {
   }
 
   snapToPositionY(y, duration) {
-    if (this.state.y === y) return;
+    if (this.positionOn('y') === y) return;
 
     this.snapToPositionYTimer && this.snapToPositionYTimer.stop();
     this.snapToPositionYTimer = this.snapToPosition({
@@ -166,19 +225,59 @@ export class Drag extends React.Component<DragProps, State> {
     const props = this.props;
     const bounds = props.useParentBounds ? 'parent' : undefined;
 
-    let child;
-    if (React.Children.count(props.children) > 0) {
-      child = React.Children.toArray(props.children)[0];
-    } else {
-      return null;
-    }
+    const children = React.Children.toArray(props.children) as React.ReactElement<any>[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+    if (children.length === 0) return null;
+
+    /**
+     * P107-C104 — the Drag has no element of its own, so its CSS Class and CSS Style go on the element it moves (Richard,
+     * 2026-10-08: "Apply to what it moves"). react-draggable adds `react-draggable` to this class and its transform to this
+     * style; a child's wrapper adds both to the node's own (DEF-027 for the class; on a style property both set, the Drag's
+     * wins, as a React parent's always does). Unset, nothing is passed and the child is exactly as before.
+     */
+    const look = {
+      ...(props.className ? { className: props.className } : {}),
+      ...(props.style && Object.keys(props.style).length > 0 ? { style: props.style } : {})
+    };
+
+    /**
+     * P107-C103 — a Drag drew only its first child; the rest vanished without a word (Richard, 2026-10-08: "Draw them all").
+     * One child is moved as it always was. More are wrapped in one element the library moves, so they move together: it lays
+     * them out as a column, as a Group does by default (each child is told so), and sits where a Noodl element sits in the
+     * Drag's parent — in its flow, or at the top left of a parent that lays nothing out.
+     */
+    const moved =
+      children.length === 1 ? (
+        React.cloneElement(children[0], { parentLayout: props.parentLayout, ...look })
+      ) : (
+        <div
+          ref={this.wrapperRef}
+          className={look.className}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            flexShrink: 0,
+            ...(props.parentLayout === 'none' ? { position: 'absolute', left: 0, top: 0 } : { position: 'relative' }),
+            ...look.style
+          }}
+        >
+          {children.map((c) => React.cloneElement(c, { parentLayout: 'column' }))}
+        </div>
+      );
 
     return (
       <Draggable
         nodeRef={this.draggableNodeRef}
         axis={props.axis}
         bounds={bounds}
-        disabled={props.enabled === false}
+        disabled={!dragEnabled(props.enabled)}
+        /**
+         * P107-C101. react-draggable cancels every `touchstart` on the element it moves, and a browser
+         * that sees a cancelled `touchstart` sends no click and no focus for that touch — so on a phone
+         * nothing inside a Drag could be tapped (the Site Builder's section rows: Save, Delete, the
+         * fields). A press on something a person operates does not start a drag; the library checks
+         * `cancel` before it cancels the touch. A press on the rest still drags.
+         */
+        cancel={DRAG_CANCEL}
         /**
          * NDA-012 (Visual). `props.scale || 0` was a divide by zero waiting for an empty value.
          * `react-draggable` divides every pointer delta by `scale`, so a `0` makes each delta
@@ -190,28 +289,26 @@ export class Drag extends React.Component<DragProps, State> {
         scale={props.scale || 1}
         position={{ x: this.state.x, y: this.state.y }}
         onStart={(e, data) => {
-          setDragValues(data, props);
+          this.reportDrag(data, props.axis);
           props.onStart && props.onStart();
           this.snapToPositionXTimer && this.snapToPositionXTimer.stop();
           this.snapToPositionYTimer && this.snapToPositionYTimer.stop();
         }}
         onStop={(e, data) => {
-          if (props.axis === 'x' || props.axis === 'both') {
-            this.setState({ x: data.x });
-          }
-          if (props.axis === 'y' || props.axis === 'both') {
-            this.setState({ y: data.y });
-          }
-          props.positionX && props.positionX(data.x);
-          props.positionY && props.positionY(data.y);
+          // P107-C102 — on an axis Axis locks the element stays, and Drag X / Y say so
+          const x = canDrag(props.axis, 'x') ? data.x : this.state.x;
+          const y = canDrag(props.axis, 'y') ? data.y : this.state.y;
+          this.setState({ x, y });
+          props.positionX && props.positionX(x);
+          props.positionY && props.positionY(y);
           props.onStop && props.onStop();
         }}
         onDrag={(e, data) => {
-          setDragValues(data, props);
+          this.reportDrag(data, props.axis);
           props.onDrag && props.onDrag();
         }}
       >
-        {React.cloneElement(child, { parentLayout: props.parentLayout })}
+        {moved}
       </Draggable>
     );
   }

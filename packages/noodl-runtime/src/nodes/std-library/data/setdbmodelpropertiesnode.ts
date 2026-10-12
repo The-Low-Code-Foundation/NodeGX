@@ -179,17 +179,26 @@ const SetDbModelPropertiedNodeDefinition: DbCrudNodeModule = {
               ifMatch[name] = held as string | number | boolean | null;
             }
           }
-          // Only a guarded save can be refused for a precondition, so only it needs the values to put
-          // back. An unguarded save runs exactly the loop it always did.
-          const before: Record<string, unknown> = {};
-          for (const key in internal.inputValues) {
-            if (ifMatch) before[key] = model.get(key);
-            model.set(key, internal.inputValues[key], { resolve: true });
+          // P107-C35: rules that cannot be sent refuse the save before anything is written or sent
+          const aclRefusal = _this._aclRefusal();
+          if (aclRefusal !== undefined) {
+            _this.setError(aclRefusal, tokens);
+            return;
           }
 
-          // BCN-004 step 5: the store the `Backend` input names, not the singleton.
+          // BCN-004 step 5: the store the `Backend` input names, not the singleton. P107-C34 (ISL-029, ruled "Put the
+          // old values back"): resolved BEFORE the write, so a backend the project does not have writes nothing — it
+          // used to leave the record showing values no backend was ever sent.
           const cloudstore = _this.cloudStore(tokens);
           if (!cloudstore) return;
+
+          // C34: what the write replaces, kept for EVERY save — any failure puts it back (it was only a refused
+          // precondition), so the record shows what the backend holds.
+          const before: Record<string, unknown> = {};
+          for (const key in internal.inputValues) {
+            before[key] = model.get(key);
+            model.set(key, internal.inputValues[key], { resolve: true });
+          }
 
           cloudstore.save({
             collection: internal.collectionId,
@@ -205,9 +214,9 @@ const SetDbModelPropertiedNodeDefinition: DbCrudNodeModule = {
               reportOutcomes(_this, tokens, 'done');
             },
             error: function (err?: string, detail?: Record<string, unknown>) {
+              // Nothing was written, so the record must not keep showing what was refused (C34: whatever the reason).
+              for (const key in before) model.set(key, before[key]);
               if (detail && detail.reason === 'precondition-failed') {
-                // Nothing was written, so the record must not keep showing what was refused.
-                for (const key in before) model.set(key, before[key]);
                 _this.setError(
                   'Someone else changed this record after it was read, so this update was not applied. ' +
                     'Fetch the record again, then retry.',

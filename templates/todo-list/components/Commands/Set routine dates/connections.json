@@ -1,0 +1,121 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1f707db9-0743-5618-8334-bda4144ce7bf",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "SetroutineIn",
+      "fromProperty": "routines",
+      "toId": "SetroutineGuard",
+      "toProperty": "in-routines"
+    },
+    {
+      "fromId": "SetroutineIn",
+      "fromProperty": "routineId",
+      "toId": "SetroutineGuard",
+      "toProperty": "in-routineId"
+    },
+    {
+      "fromId": "SetroutineIn",
+      "fromProperty": "which",
+      "toId": "SetroutineGuard",
+      "toProperty": "in-which"
+    },
+    {
+      "fromId": "SetroutineIn",
+      "fromProperty": "text",
+      "toId": "SetroutineGuard",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "SetroutineIn",
+      "fromProperty": "do",
+      "toId": "SetroutineGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "SetroutineGuard",
+      "fromProperty": "out-startDate",
+      "toId": "SetroutineWrite",
+      "toProperty": "prop-startDate"
+    },
+    {
+      "fromId": "SetroutineGuard",
+      "fromProperty": "out-endDate",
+      "toId": "SetroutineWrite",
+      "toProperty": "prop-endDate"
+    },
+    {
+      "fromId": "SetroutineIn",
+      "fromProperty": "routineId",
+      "toId": "SetroutineWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "SetroutineGuard",
+      "fromProperty": "out-go",
+      "toId": "SetroutineWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "SetroutineIn",
+      "fromProperty": "routineId",
+      "toId": "SetroutineHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "SetroutineGuard",
+      "fromProperty": "out-summary",
+      "toId": "SetroutineHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "SetroutineIn",
+      "fromProperty": "which",
+      "toId": "SetroutineHistory",
+      "toProperty": "mergeKey"
+    },
+    {
+      "fromId": "SetroutineWrite",
+      "fromProperty": "done",
+      "toId": "SetroutineHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "SetroutineHistory",
+      "fromProperty": "done",
+      "toId": "SetroutineOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "SetroutineWrite",
+      "fromProperty": "failure",
+      "toId": "SetroutineProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "SetroutineGuard",
+      "fromProperty": "out-verdict",
+      "toId": "SetroutineSay",
+      "toProperty": "in-verdict"
+    },
+    {
+      "fromId": "SetroutineIn",
+      "fromProperty": "routineId",
+      "toId": "SetroutineSay",
+      "toProperty": "in-about"
+    },
+    {
+      "fromId": "SetroutineSay",
+      "fromProperty": "out-error",
+      "toId": "SetroutineOut",
+      "toProperty": "error"
+    },
+    {
+      "fromId": "SetroutineSay",
+      "fromProperty": "out-hasError",
+      "toId": "SetroutineOut",
+      "toProperty": "hasError"
+    }
+  ]
+}

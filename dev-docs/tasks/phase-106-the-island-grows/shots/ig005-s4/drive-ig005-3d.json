@@ -1,0 +1,67 @@
+{
+  "dir": "../ig005-robots-scratch/pages/deploy",
+  "mode": "3d",
+  "results": [
+    {
+      "name": "3D: a new player lands on the island",
+      "ok": true,
+      "saw": "/island"
+    },
+    {
+      "name": "3D AC4: Garden 3D draws the island with two robots named on their own plots (Pip on the tulips, Cobble on the stones)",
+      "ok": true,
+      "saw": {
+        "gl": {
+          "meshes": "226",
+          "camera": "island"
+        },
+        "names": [
+          [
+            "Pip",
+            12,
+            2
+          ],
+          [
+            "Cobble",
+            12,
+            11
+          ]
+        ]
+      }
+    },
+    {
+      "name": "3D: the stones’ Workshop draws Cobble (his name over him)",
+      "ok": true,
+      "saw": [
+        "Cobble"
+      ]
+    },
+    {
+      "name": "3D: 0 console errors",
+      "ok": true,
+      "saw": []
+    }
+  ],
+  "readings": {
+    "gl": {
+      "gl": {
+        "meshes": "226",
+        "camera": "island"
+      },
+      "names": [
+        [
+          "Pip",
+          12,
+          2
+        ],
+        [
+          "Cobble",
+          12,
+          11
+        ]
+      ]
+    }
+  },
+  "consoleErrors": [],
+  "networkErrors": []
+}

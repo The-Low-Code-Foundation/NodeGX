@@ -1674,6 +1674,28 @@ describe('SB-006: the public site, beside the panel it shares a router with', ()
     }))
   });
 
+  /**
+   * P109 ISL-018: the door says "ticked" (`runOnChange-*: true`) on every Run-driven node it writes into a project
+   * the editor will still clean up, so the real artefact now plans NO write. The known-firing signal beside the
+   * absence is the same planner over this copy, every `runOnChange-*` key stripped: the shape the door wrote before.
+   */
+  const unpinned = (): Record<string, Written> =>
+    Object.fromEntries(
+      Object.entries(written).map(([key, w]) => [
+        key,
+        {
+          ...w,
+          graph: {
+            ...w.graph,
+            nodes: w.graph.nodes.map((n) => ({
+              ...n,
+              parameters: Object.fromEntries(Object.entries(n.parameters ?? {}).filter(([k]) => !k.startsWith('runOnChange-')))
+            }))
+          }
+        }
+      ])
+    );
+
   const LINK_STATE = 'Is this the page being read';
 
   /**
@@ -1703,10 +1725,12 @@ describe('SB-006: the public site, beside the panel it shares a router with', ()
     // 🔴 THE KNOWN-FIRING SIGNAL BESIDE THE ABSENCE. "No write names the link
     // state" passes for free on a plan that writes nothing at all — and a plan
     // that writes nothing is exactly what a broken import, an empty `written` or
-    // a renamed family would produce. The migration genuinely fires on this
-    // template, in bulk, and these two numbers are what say so.
-    expect(plan.writes.length).toBeGreaterThan(0);
+    // a renamed family would produce. Since P109 ISL-018 the door pins every node
+    // it writes, so the real artefact plans nothing; the same planner over the
+    // unpinned copy fires in bulk, and that is what says the instrument works.
     expect(plan.signalDrivenNodes).toBeGreaterThan(0);
+    expect(plan.writes).toEqual([]);
+    expect(planRunOnValueChangeMigration(migrationProject(unpinned())).writes.length).toBeGreaterThan(0);
 
     // …and the link state is not among them.
     const silenced = plan.writes.filter((w) => w.component === '/Site/NavLink').map((w) => w.parameter);
@@ -1765,9 +1789,10 @@ describe('SB-006: the public site, beside the panel it shares a router with', ()
     const plan = planRunOnValueChangeMigration(migrationProject());
 
     // The known-firing signal. "No write names this node" passes for free on a
-    // plan that writes nothing at all.
-    expect(plan.writes.length).toBeGreaterThan(0);
+    // plan that writes nothing at all: the unpinned copy is where it fires (ISL-018).
     expect(plan.signalDrivenNodes).toBeGreaterThan(0);
+    expect(plan.writes).toEqual([]);
+    expect(planRunOnValueChangeMigration(migrationProject(unpinned())).writes.length).toBeGreaterThan(0);
 
     const resolve = byLabel(written['Pages/Site'], 'JavaScriptFunction', RESOLVE_SLUG);
     const silenced = plan.writes

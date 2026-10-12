@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8a3938ee-4f1b-5e87-8f50-6111fa431e18",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "skIn",
+      "fromProperty": "cardClass",
+      "toId": "skCard",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "skIn",
+      "fromProperty": "stateClass",
+      "toId": "skState",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "skIn",
+      "fromProperty": "stateText",
+      "toId": "skState",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "skIn",
+      "fromProperty": "title",
+      "toId": "skTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "skIn",
+      "fromProperty": "blockClass",
+      "toId": "skBlock",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "skIn",
+      "fromProperty": "blockWord",
+      "toId": "skBlockText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "skIn",
+      "fromProperty": "text",
+      "toId": "skText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "skIn",
+      "fromProperty": "prog",
+      "toId": "skProg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "skIn",
+      "fromProperty": "isBlooming",
+      "toId": "skIsBloom",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "skIsBloom",
+      "fromProperty": "ontrue",
+      "toId": "skGrowth",
+      "toProperty": "to-bloom"
+    },
+    {
+      "fromId": "skIsBloom",
+      "fromProperty": "onfalse",
+      "toId": "skGrowth",
+      "toProperty": "to-seed"
+    },
+    {
+      "fromId": "skGrowth",
+      "fromProperty": "weight",
+      "toId": "skTitle",
+      "toProperty": "fontWeight"
+    },
+    {
+      "fromId": "skCard",
+      "fromProperty": "onClick",
+      "toId": "skOut",
+      "toProperty": "clicked"
+    }
+  ]
+}

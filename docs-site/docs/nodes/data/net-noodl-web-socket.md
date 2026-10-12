@@ -49,6 +49,97 @@ When the client needs to send as well as receive — chat with an agent, collabo
 | `disconnect` | Signal | — | Closes the socket and cancels any pending reconnect |
 | `send` | Signal | — | Hands the current Message to the socket, or applies the When Disconnected policy |
 
+### What each input does
+
+**URL** (`url`)
+
+- no connection yet: stored as text (nothing as blank); at the end of the frame one connects to it when Auto Connect is on and it is not blank — Connection State connecting, the Status outputs sent (a URL not starting with ws:// or wss:// fails at once instead: Connection State error, Last Error, On Error); with Auto Connect off it waits for a Connect
+- the URL the connection was made with (its Protocols too): stored; nothing else, now or at the end of the frame — a closed or failed connection is not retried by setting its URL again
+- a URL other than the connection's: stored; at the end of the frame that connection is dropped silently (its socket closed, its countdown and heartbeat stopped, no On Close; a Connect still waiting, or made before then against the old URL: Unchanged), the Status outputs sent, and a fresh one (Retry Count 0, Queue Size 0, Dropped 0) connects to this URL when it is not blank and Auto Connect is on or the old one was connecting, open or reconnecting — Connection State connecting (not starting with ws:// or wss://: error, Last Error, On Error); otherwise idle
+
+**Auto Connect** (`autoConnect`)
+
+- on or off, with a connection (open, closed or failed alike): held for the next URL or Protocols change, after which the new one connects when this is on; nothing now or at the end of the frame — off closes nothing, on reopens nothing
+- on, with no connection yet: at the end of the frame one connects when the URL is not blank — Connection State connecting, the Status outputs sent (a URL not starting with ws:// or wss://: error, Last Error, On Error); a blank URL: idle until one arrives
+- off, with no connection yet: nothing — it waits for a Connect
+
+**Protocols** (`protocols`)
+
+- no connection yet: split on commas and trimmed (blank or not text: none), offered at the handshake when a connection is made — at the end of the frame when Auto Connect is on and there is a URL, else at the next Connect
+- the list the connection was made with (its URL too): stored; nothing else, now or at the end of the frame
+- a list other than the connection's: stored; at the end of the frame that connection is dropped silently (no On Close; a Connect still waiting: Unchanged), the Status outputs sent, and a fresh one offering these connects when the URL is not blank and Auto Connect is on or the old one was connecting, open or reconnecting — Connection State connecting; otherwise idle
+
+**Auto Reconnect** (`autoReconnect`)
+
+- on or off: onto the connection at once, read at its next unsolicited close — on, the drop is retried after the backoff wait (Connection State reconnecting, Last Error says when, On Close); off, it is final: a goodbye (1000 or 1001) is Connection State closed and On Close, anything else error, Last Error, On Error and On Close; a reconnect already counting down still fires either way
+
+**Reconnect Delay (ms)** (`reconnectDelay`)
+
+- always: onto the connection at once, read when the next backoff is drawn — the first retry of an outage waits this many milliseconds, each later one twice the last, capped at Max Reconnect Delay (ms); 0, below, or not a number: 1000; a wait already counting down keeps its length
+
+**Max Reconnect Delay (ms)** (`maxReconnectDelay`)
+
+- always: onto the connection at once, read when the next backoff is drawn — the ceiling on the wait in milliseconds, however many retries; 0, below, or not a number: 30000
+
+**Max Retries** (`maxRetries`)
+
+- always: onto the connection at once, read at its next unsolicited close — Retry Count (the retries so far in this outage) below it: one more; at it: gives up — Connection State error, Last Error `… gave up after n reconnect attempts`, On Error, On Close (a waiting Connect: Failure); 0, or not a number: no retry; below 0: unlimited; a close code retrying cannot help (1002, 1003, 1007 to 1010, 1015) gives up whatever this is
+
+**Backoff Jitter** (`jitter`)
+
+- on or off: onto the connection at once, read when the next backoff is drawn — on, the wait is scaled by a random draw into its second half (from half of it to all of it); off, the whole wait exactly
+
+**Heartbeat Interval (ms)** (`heartbeatInterval`)
+
+- a different interval while the socket is open: the heartbeat restarts now — a reply still awaited is forgotten, and the Heartbeat Message goes this many milliseconds from now, then every interval; 0, below, or not a number: the heartbeat stops
+- the same interval, or no open socket: read when the socket next opens — above 0, the Heartbeat Message is sent every this many milliseconds (not On Message Sent) and the Heartbeat Reply swallowed; 0, below, or not a number: no heartbeat, and a Heartbeat Reply arriving is an ordinary message
+
+**Heartbeat Message** (`heartbeatMessage`)
+
+- always: onto the connection at once (not text: blank), read at the next beat — the text sent as the heartbeat, not On Message Sent; blank: no beat is sent and no reply awaited, so no connection is declared dead
+
+**Heartbeat Reply** (`heartbeatReply`)
+
+- always: onto the connection at once (not text: blank), read at the next beat and the next message — while a heartbeat runs, a message equal to it is swallowed instead of On Message and, when a beat was awaiting it, measured as Latency (ms) (the Status outputs sent); a beat still unanswered when the next is due is a dead connection: Last Error, On Error, then handled as a 1006 close; blank: nothing is awaited
+
+**Message** (`message`)
+
+- always: held for the next Send (nothing or null fails it)
+
+**Message Type** (`messageType`)
+
+- always: onto the connection at once (nothing as Auto), read at the next send — Binary encodes text, and an object's JSON, as UTF-8 bytes; Auto and Text send them as text; a buffer or typed array goes as bytes whatever this says
+
+**When Disconnected** (`whenDisconnected`)
+
+- always: onto the connection at once (nothing as Queue), read by the next Send while the socket is not open — Queue holds it in order (Done; sent at the next open), Drop discards it and counts it in Dropped (Unchanged), Report Error counts it and fails (Last Error, On Error, Failure websocket/not-connected); messages already queued stay queued
+
+**Max Queue Size** (`maxQueueSize`)
+
+- always: onto the connection at once, read by the next Send that would queue — above 0, a queue already this long refuses it: Dropped, Last Error, On Error, Failure websocket/queue-full; 0, below, or not a number: no limit; a queue already longer than a new limit keeps what it holds
+
+**Connect** (`connect`)
+
+- a blank URL: any socket held is closed quietly and the countdown and heartbeat stopped (a Connect still waiting: Unchanged), then it fails at once — Connection State error, Last Error `URL is required to connect`, Retry Count 0, the Status outputs sent, On Error; Failure (websocket/connect-failed)
+- a URL not starting with ws:// or wss://: any socket held is closed quietly (a Connect still waiting: Unchanged), then it fails at once — Connection State error, Last Error `URL must start with ws:// or wss://`, Retry Count 0, the Status outputs sent, On Error; Failure (websocket/connect-failed)
+- a URL the browser refuses to open: any socket held is closed quietly (a Connect still waiting: Unchanged), Connection State connecting, then error at once — Last Error `Could not open WebSocket: …`, Retry Count 0, the Status outputs sent, On Error; Failure (websocket/connect-failed)
+- a URL starting with ws:// or wss:// (the connection's own: one changed this frame is taken at the frame's end, which then supersedes this): any socket held is closed quietly, the countdown and heartbeat stopped (a Connect still waiting: Unchanged), Retry Count 0, Close Code 0, Connection State connecting (Connected false), the Status outputs sent, and a socket is made with the URL trimmed and the Protocols; settled later — Done when it opens (On Open, however many retried drops lie between), Failure (websocket/connect-failed) when the connection fails or gives up, Unchanged when a later Connect, a Disconnect or a URL change supersedes it
+
+**Disconnect** (`disconnect`)
+
+- no connection was ever made: nothing is sent (a Connect still waiting: Unchanged); Unchanged
+- a socket held, or a connection connecting, open or reconnecting: the socket is closed (1000 `Client disconnect`), the countdown and heartbeat stopped, nothing more arrives — Connection State closed, Connected false, Retry Count 0, Close Code 1000, Close Reason `Client disconnect`, the Status outputs sent, On Close (a Connect still waiting: Unchanged); Done
+- a connection idle, closed or failed, holding no socket: Connection State closed, Retry Count 0, Close Code 1000, Close Reason `Client disconnect` (Last Error kept), the Status outputs sent, no On Close; Unchanged
+
+**Send** (`send`)
+
+- Message empty (nothing or null), whatever the socket is doing: Last Error `Nothing to send: the Message input is empty`, the Status outputs sent, On Error; Failure (websocket/nothing-to-send)
+- the socket not open (idle, connecting, reconnecting, closed or failed), When Disconnected Report Error: Dropped counts it, Last Error `Cannot send: the connection is not open`, the Status outputs sent, On Error; Failure (websocket/not-connected)
+- the socket not open, When Disconnected Queue, Max Queue Size above 0 and Queue Size at it: Dropped counts it, Last Error `Send queue is full`, the Status outputs sent, On Error; Failure (websocket/queue-full)
+- the socket not open, When Disconnected Drop: discarded — Dropped counts it, the Status outputs sent, no On Error; Unchanged
+- the socket not open (an idle connection is made if there is none), When Disconnected Queue, with room: held at the back of the queue — Queue Size, the Status outputs sent; sent in order when the socket next opens, On Message Sent for each then; Done
+- the socket open: handed to it now — text as itself, an object as JSON, anything else as text, a buffer or typed array as bytes, and with Message Type Binary the text as UTF-8 bytes — On Message Sent; the Status outputs stay silent; Done
+
 ## Outputs
 
 ### Values

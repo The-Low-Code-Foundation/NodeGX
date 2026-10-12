@@ -1,0 +1,256 @@
+[
+  {
+    "name": "two Array nodes naming one id hold one array: an Insert into it moves both Counts and pulses both Changed; a third node naming another id sees nothing; Items is not re-sent (mutated in place)",
+    "clauses": [
+      "S1",
+      "S2"
+    ],
+    "because": "NSP-012 §3 — Collection.get(name) is one process-wide table (collectionnode2.ts :243-262); the announcement re-sends count and firstItemId only (:80-85). AC5 with its control; AC6 from the trace",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1
+          }
+        }
+      }
+    },
+    "nodes": {
+      "a": {
+        "type": "Collection2",
+        "params": {
+          "collectionId": "cart"
+        }
+      },
+      "a2": {
+        "type": "Collection2",
+        "params": {
+          "collectionId": "cart"
+        }
+      },
+      "b": {
+        "type": "Collection2",
+        "params": {
+          "collectionId": "other"
+        }
+      },
+      "ins": {
+        "type": "CollectionInsert",
+        "params": {
+          "collectionId": "cart",
+          "modifyId": "m1"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "ins",
+        "signal": "add"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "a",
+        "port": "count",
+        "value": 0
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "count",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "a2",
+        "port": "count",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "firstItemId",
+        "value": "m1"
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "signal": "changed",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "a2",
+        "signal": "changed",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "signal": "changed",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "port": "count",
+        "absent": true
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "items",
+        "absent": true
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "collectionId",
+        "value": "cart",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "collectionId",
+        "value": "cart",
+        "subject": "a2"
+      },
+      {
+        "t": "set",
+        "port": "collectionId",
+        "value": "other",
+        "subject": "b"
+      },
+      {
+        "t": "set",
+        "port": "collectionId",
+        "value": "cart",
+        "subject": "ins"
+      },
+      {
+        "t": "set",
+        "port": "modifyId",
+        "value": "m1",
+        "subject": "ins"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 0,
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "cart",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "cart",
+          "items": []
+        },
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 0,
+        "subject": "a2"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "cart",
+        "subject": "a2"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "cart",
+          "items": []
+        },
+        "subject": "a2"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 0,
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "other",
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "other",
+          "items": []
+        },
+        "subject": "b"
+      },
+      {
+        "t": "in",
+        "port": "add",
+        "subject": "ins"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 1,
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "firstItemId",
+        "value": "m1",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 1,
+        "subject": "a2"
+      },
+      {
+        "t": "value",
+        "port": "firstItemId",
+        "value": "m1",
+        "subject": "a2"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "a2"
+      },
+      {
+        "t": "outcome",
+        "port": "add",
+        "value": "done",
+        "subject": "ins"
+      }
+    ]
+  }
+]

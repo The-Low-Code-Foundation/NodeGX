@@ -1,0 +1,149 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9916918b-6839-5366-8dcf-9be055ffe73e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "updaterobotIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "field",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "robotId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "updaterobotFn",
+      "type": "JavaScriptFunction",
+      "label": "Update robot",
+      "parameters": {
+        "functionScript": "var { FIRST_ROBOT_ID, ROBOT_NAME_MAX, modelOf, robotRow } = Scripts.save;\nvar model = modelOf(Inputs.model && typeof Inputs.model === 'object' ? Inputs.model : {});\nvar id = String(Inputs.profileId || model.island.activeId);\nvar robotId = String(Inputs.robotId || FIRST_ROBOT_ID);\nvar field = String(Inputs.field || '');\n// A card's colour and hat rows carry their card's kind before a | (a repeater row is global by id): the value is after it.\nvar v = (field === 'color' || field === 'hat') && typeof Inputs.value === 'string' ? Inputs.value.slice(Inputs.value.lastIndexOf('|') + 1) : Inputs.value;\nvar p = null, row = null, changed = false;\nfor (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === id) p = model.profiles[i];\nif (p) for (var r = 0; r < p.island.robots.length; r++) if (p.island.robots[r].id === robotId) row = p.island.robots[r];\nif (p && row) {\n  // The look being changed: r1's is the profile's; a lent robot's row starts from what the pages show for it.\n  var cur = robotRow(p, row);\n  var look = row.id === FIRST_ROBOT_ID ? p.robot : row;\n  if (row.id !== FIRST_ROBOT_ID) { row.kind = cur.kind; row.name = cur.name; row.color = cur.color; row.eye = cur.eye; row.hat = cur.hat; }\n  if (field === 'name') { var n = String(v || '').trim().slice(0, ROBOT_NAME_MAX); if (n && n !== cur.name) { look.name = n; changed = true; } }\n  else if (field === 'color') { var c = String(v || ''); if (/^#[0-9A-Fa-f]{6}$/.test(c) && c !== cur.color) { look.color = c; changed = true; } }\n  else if (field === 'eye') { var e = String(v || ''); if ((e === 'round' || e === 'happy' || e === 'wink') && e !== cur.eye) { look.eye = e; changed = true; } }\n  else if (field === 'hat') { var h = String(v || ''); if ((h === 'none' || p.hats.indexOf(h) !== -1) && h !== cur.hat) { look.hat = h; changed = true; } }\n}\nOutputs.model = model;\nOutputs.changed = changed;\nOutputs.found = !!row;\n",
+        "runOnChange-in-field": false,
+        "runOnChange-in-model": false,
+        "runOnChange-in-profileId": false,
+        "runOnChange-in-robotId": false,
+        "runOnChange-in-value": false,
+        "uses": "save.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-profileId",
+          "displayName": "profileId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robotId",
+          "displayName": "robotId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-field",
+          "displayName": "field",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-value",
+          "displayName": "value",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-model",
+          "displayName": "model",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-changed",
+          "displayName": "changed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-found",
+          "displayName": "found",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "updaterobotOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "found",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

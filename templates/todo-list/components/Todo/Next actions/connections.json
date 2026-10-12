@@ -59,18 +59,6 @@
     },
     {
       "fromId": "naEach",
-      "fromProperty": "itemOutputSignal-up",
-      "toId": "naOut",
-      "toProperty": "up"
-    },
-    {
-      "fromId": "naEach",
-      "fromProperty": "itemOutputSignal-down",
-      "toId": "naOut",
-      "toProperty": "down"
-    },
-    {
-      "fromId": "naEach",
       "fromProperty": "itemOutputSignal-rename",
       "toId": "naOut",
       "toProperty": "rename"
@@ -116,6 +104,48 @@
       "fromProperty": "itemOutput-descriptionText",
       "toId": "naOut",
       "toProperty": "descriptionText"
+    },
+    {
+      "fromId": "naRows",
+      "fromProperty": "this",
+      "toId": "naDrag",
+      "toProperty": "in-host"
+    },
+    {
+      "fromId": "naRows",
+      "fromProperty": "didMount",
+      "toId": "naMounts",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "naMounts",
+      "fromProperty": "out-mounts",
+      "toId": "naDrag",
+      "toProperty": "in-mounted"
+    },
+    {
+      "fromId": "naIn",
+      "fromProperty": "rows",
+      "toId": "naDrag",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "naDrag",
+      "fromProperty": "out-itemId",
+      "toId": "naOut",
+      "toProperty": "moveId"
+    },
+    {
+      "fromId": "naDrag",
+      "fromProperty": "out-toIndex",
+      "toId": "naOut",
+      "toProperty": "moveTo"
+    },
+    {
+      "fromId": "naDrag",
+      "fromProperty": "out-moved",
+      "toId": "naOut",
+      "toProperty": "moved"
     }
   ]
 }

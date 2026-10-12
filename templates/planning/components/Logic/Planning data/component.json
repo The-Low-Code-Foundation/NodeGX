@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "554e283c-e5ab-51b1-8683-61c6b6e3bf97",
+  "name": "Planning data",
+  "path": "/Logic/Planning data",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The twelve queries the week is drawn from: your projects, the blocks in the weeks on screen, the blocks from four weeks back, this month’s plan, your money items, the marks on them from thirteen months back, your balance readings, your settings, the latest of Planning’s history, and — when there is a todo list — your open tasks in it, their next actions, and which of them Planning sent."
+}

@@ -36,7 +36,7 @@ import * as path from 'path';
 import { errorMessage } from '../errorMessage';
 import { checkTarget } from '../write/writeExport';
 import { ALLOW_DEV_ENGINE_FLAG } from './args';
-import { describeMissingEngine, resolveEngine } from './deployEngine';
+import { describeMissingEngine, refreshEngine, resolveEngine, runtimeWarning } from './deployEngine';
 import {
   MANIFEST_NAME,
   announce,
@@ -373,6 +373,15 @@ export async function runDeploy(args: DeployArgs, io: CliIO): Promise<ExitCode> 
     io.err(describeMissingEngine(engine));
     return EXIT.harness;
   }
+  // P109-S5 — a checkout's engine older than its source is rebuilt first, so it validates against today's catalog.
+  const refreshed = refreshEngine(engine);
+  if (refreshed.failed) {
+    io.err(refreshed.failed);
+    return EXIT.harness;
+  }
+  if (refreshed.rebuilt) io.err(refreshed.rebuilt);
+  const runtimeStale = runtimeWarning(engine);
+  if (runtimeStale) io.err(runtimeStale);
 
   const projectDir = path.resolve(args.projectDir);
   const readable = readableProject(projectDir);

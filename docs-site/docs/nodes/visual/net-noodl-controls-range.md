@@ -31,6 +31,7 @@ Continuous or stepped numeric input where feel matters more than precision: volu
 | `boxSizing` | Enum (`border-box`, `content-box`) | `border-box` | Whether Width and Height include this element's padding and border, or only its content |
 | `clickBubbling` | Enum (`auto`, `always`, `never`) | `auto` | Whether a click on this control also fires Click on the nodes it sits inside. Automatic keeps it here as soon as this control's own Click is connected, so a Favourite button inside a clickable card runs Favourite and not the card; Always is the older behaviour where both run; Never keeps every click here, wired or not |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `enabled` | Boolean | `true` | Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing |
 | `marginBottom` | Number | — | Space outside the element's bottom edge, between it and its neighbours |
 | `marginLeft` | Number | — | Space outside the element's left edge, between it and its neighbours |
@@ -39,13 +40,14 @@ Continuous or stepped numeric input where feel matters more than precision: volu
 | `max` | Number | `100` | Value at the far right of the track; the current value is clamped down to it if it is above |
 | `min` | Number | `0` | Value at the far left of the track; the current value is clamped up to it if it is below |
 | `mixBlendMode` | Enum (`normal`, `multiply`, `screen`, `overlay`, `darken`, `lighten`, `color-dodge`, `color-burn`, `hard-light`, `soft-light`, `difference`, `exclusion`, `hue`, `saturation`, `color`, `luminosity`) | `normal` | How this element's colours blend with whatever is painted behind it |
-| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
+| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen) |
 | `opacity` | Number | `1` | How opaque this element is, from 0 for invisible to 1 for solid |
 | `paddingBottom` | Number | `0` | Space inside the element's bottom edge, between it and its content |
 | `paddingLeft` | Number | `0` | Space inside the element's left edge, between it and its content |
 | `paddingRight` | Number | `0` | Space inside the element's right edge, between it and its content |
 | `paddingTop` | Number | `0` | Space inside the element's top edge, between it and its content |
 | `position` | Enum (`relative`, `absolute`, `sticky`, `fixed`) | `relative` | How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `step` | Number | `1` | Smallest amount the handle can move by, so the value lands on multiples of it |
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
 | `thumbBorderBottomColor` | Color | — | Colour of the bottom edge of the handle you drag only, overriding Thumb Border Color |
@@ -114,7 +116,7 @@ Continuous or stepped numeric input where feel matters more than precision: volu
 | `transformScale` | Number | `1` | Scales the element about its transform origin; 1 leaves it unscaled |
 | `transformX` | Number | `0` | Moves the element right after layout, without moving its siblings |
 | `transformY` | Number | `0` | Moves the element down after layout, without moving its siblings |
-| `value` | Number | — | Moves the handle to this value, clamped to Min and Max; changing it from the graph does not fire Changed. An empty value leaves the handle where it is |
+| `value` | Number | — | Moves the handle to this value, clamped to Min and Max and rounded to the Step; changing it from the graph does not fire Changed. An empty value leaves the handle where it is |
 | `variant` | String | — | Name of a saved variant of this node type to apply, replacing the styling set here |
 | `visible` | Boolean | `true` | Hides the element while keeping the space it occupies in the layout |
 | `width` | Number | `100` | Overall width of the slider, which is the length of the track plus the handle |
@@ -126,6 +128,55 @@ Continuous or stepped numeric input where feel matters more than precision: volu
 |---|---|---|---|
 | `blur` | Signal | — | Takes the keyboard away from this slider, which is what fires Blurred |
 | `focus` | Signal | — | Puts the keyboard on this slider, so Enter, Space and the arrow keys go to it |
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
+
+### What each input does
+
+**Enabled** (`enabled`)
+
+- the value it already holds: nothing
+- a change: Enabled follows; disabled, the handle takes no slide and no focus
+
+**Value** (`value`)
+
+- empty: no word, and the handle stays where it is
+- not a number: no word (the runtime reports it), and the handle stays where it is
+- a number: at the next paint the handle goes there, clamped to Min and Max and rounded to the Step; Value and Value Percent follow when they move — Changed does not fire (only a person's slide fires it)
+
+**Min** (`min`)
+
+- always: at the next paint the handle is held at or above it (an empty Min is 0) and on the Step; Value and Value Percent follow when they move — never Changed
+
+**Max** (`max`)
+
+- always: at the next paint the handle is held at or below it (an empty Max is 100; below Min, the handle holds Min) and on the Step; Value and Value Percent follow when they move — never Changed
+
+**Step** (`step`)
+
+- always: at the next paint the handle is rounded to it (one that is not above 0 is 1); Value and Value Percent follow when they move — never Changed
+
+**Mounted** (`mounted`)
+
+- always: the slider is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint; put back, the handle is where it was left
+
+**Focus** (`focus`)
+
+- not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent
+- it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent
+- otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done
+
+**Blur** (`blur`)
+
+- it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes → Done; Blurred stays silent
+- it holds the keyboard: it is taken off it, and the Focused state goes false → Blurred, Done
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the slider can be seen
+
+**Visible** (`visible`)
+
+- always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it
 
 ## Outputs
 
@@ -153,9 +204,9 @@ Continuous or stepped numeric input where feel matters more than precision: volu
 | `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
 | `didMount` | Signal | — | Fires once this element has been added to the page and can be measured |
 | `done` | Signal | — | Fires when Focus put the keyboard on this slider, or Blur took it away |
-| `hoverEnd` | Signal | — | Fires when the pointer leaves this control, including when it leaves while a button is still held |
+| `hoverEnd` | Signal | — | Fires when the pointer leaves this control, including when it leaves while a button is still held, or when the control leaves the page under it |
 | `hoverStart` | Signal | — | Fires when the pointer moves onto this control |
-| `onBlur` | Signal | — | Fires when keyboard focus leaves this control, which is the usual place to validate what was entered |
+| `onBlur` | Signal | — | Fires when keyboard focus leaves this control, or the control leaves the page while holding it, which is the usual place to validate what was entered |
 | `onChange` | Signal | — | Fires when the user moves the handle; a value arriving on the Value input does not fire it |
 | `onFocus` | Signal | — | Fires the moment this control takes keyboard focus, whether from a click, a tab or a Focus action |
 | `pointerDown` | Signal | — | Fires as a mouse button or finger goes down on this control, before any click has completed |
@@ -183,6 +234,7 @@ Declares conditional/expandable port groups whose visibility depends on paramete
 | thumbBorderRightStyle = solid OR thumbBorderRightStyle = dashed OR thumbBorderRightStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `thumbBorderRightWidth`, `thumbBorderRightColor` | — |
 | thumbBorderBottomStyle = solid OR thumbBorderBottomStyle = dashed OR thumbBorderBottomStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `thumbBorderBottomWidth`, `thumbBorderBottomColor` | — |
 | thumbBoxShadowEnabled = true | `thumbBoxShadowOffsetX`, `thumbBoxShadowOffsetY`, `thumbBoxShadowInset`, `thumbBoxShadowBlurRadius`, `thumbBoxShadowSpreadRadius`, `thumbBoxShadowColor` | — |
+| — | — | — |
 
 ## Ports at runtime
 

@@ -1,0 +1,68 @@
+[
+  {
+    "name": "the headline case: (\\d+)% out of a status line — Match, Groups, First Group, Match Count 1, Found, Done",
+    "because": "pattern-extractor.ts :228-260; First Group's description",
+    "params": { "pattern": "(\\d+)%" },
+    "steps": ["settle", { "set": "text", "value": "Processing... 45% complete" }, { "signal": "extract" }, "settle"]
+  },
+  {
+    "name": "nothing until Extract: setting Text and Pattern sends nothing",
+    "because": ":73-110 — the setters only store; :112-120 Extract is the only thing that runs",
+    "params": {},
+    "steps": [{ "set": "text", "value": "abc" }, { "set": "pattern", "value": "b" }, "settle", { "signal": "extract" }, "settle"]
+  },
+  {
+    "name": "no match is a result: Not Found and Done, and every output is rewritten to empty",
+    "because": ":205-220 Not Found is not Unchanged; :235-247 every output flagged",
+    "params": { "pattern": "(\\d+)%" },
+    "steps": [{ "set": "text", "value": "45% done" }, { "signal": "extract" }, "settle", { "set": "text", "value": "NO DIGITS" }, { "signal": "extract" }, "settle"]
+  },
+  {
+    "name": "a blank pattern is refused: Failure with the sentence on Error, no Found and no Not Found",
+    "because": "stream-parsers.ts :389-403 (NDA-012); :249-257",
+    "params": {},
+    "steps": [{ "set": "text", "value": "anything" }, { "signal": "extract" }, "settle"]
+  },
+  {
+    "name": "an invalid pattern is a result carrying the engine's message; the next good one clears Error",
+    "because": "stream-parsers.ts :409-414; :239 error '' on success",
+    "params": { "text": "a[b" },
+    "steps": [{ "set": "pattern", "value": "[" }, { "signal": "extract" }, "settle", { "set": "pattern", "value": "\\[" }, { "signal": "extract" }, "settle"]
+  },
+  {
+    "name": "Extract All collects every match; Groups and Named Groups stay the FIRST match's",
+    "because": "stream-parsers.ts :418-428",
+    "params": { "pattern": "([a-z])(\\d+)", "extractAll": true },
+    "steps": [{ "set": "text", "value": "a1 b22 c333" }, { "signal": "extract" }, "settle", { "set": "extractAll", "value": false }, { "signal": "extract" }, "settle"]
+  },
+  {
+    "name": "named groups by name; an optional group that did not take part is a blank string, not a hole",
+    "because": "stream-parsers.ts :441-454",
+    "params": { "text": "-y" },
+    "steps": [{ "set": "pattern", "value": "(?<first>x)?-(?<second>y)" }, { "signal": "extract" }, "settle"]
+  },
+  {
+    "name": "a g in Flags is ignored, i and m are honoured, an unknown letter is dropped",
+    "because": "stream-parsers.ts :405-407 — filtered to imsuy",
+    "params": { "text": "tool: search\nTOOL: fetch", "pattern": "^tool: (\\w+)$" },
+    "steps": [{ "set": "flags", "value": "g" }, { "signal": "extract" }, "settle", { "set": "flags", "value": "gimq" }, { "signal": "extract" }, "settle", { "set": "extractAll", "value": true }, { "signal": "extract" }, "settle"]
+  },
+  {
+    "name": "empty text matches nothing even for a pattern that matches the empty string",
+    "because": "stream-parsers.ts :416 — the text check comes before the regex runs",
+    "params": { "pattern": "z*" },
+    "steps": [{ "set": "text", "value": "" }, { "signal": "extract" }, "settle", { "set": "text", "value": "q" }, { "signal": "extract" }, "settle"]
+  },
+  {
+    "name": "null on Text and Pattern is blank; a number is its text",
+    "because": ":74, :85 — `null`/`undefined` → '', else String(value)",
+    "params": {},
+    "steps": [{ "set": "text", "value": 2026 }, { "set": "pattern", "value": 20 }, { "signal": "extract" }, "settle", { "set": "pattern", "value": null }, { "signal": "extract" }, "settle"]
+  },
+  {
+    "name": "two Extracts in one frame are two invocations",
+    "because": ":116-119 — inline, no deferral",
+    "params": { "text": "ab", "pattern": "b" },
+    "steps": [{ "signal": "extract" }, { "signal": "extract" }, "settle"]
+  }
+]

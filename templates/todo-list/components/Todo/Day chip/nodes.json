@@ -1,0 +1,101 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "db050056-e2d0-5b8d-85e2-f8df30aed34a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "dcIn",
+      "type": "Component Inputs",
+      "label": "The day",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bg",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "color",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "border",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "dcOut",
+      "type": "Component Outputs",
+      "label": "Picked",
+      "ports": [
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "dcRoot",
+      "type": "Group",
+      "label": "Day",
+      "parameters": {
+        "flexDirection": "row",
+        "sizeMode": "contentSize"
+      },
+      "children": [
+        "dcButton"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "dcButton",
+      "type": "net.noodl.controls.button",
+      "label": "Pick this day",
+      "parent": "dcRoot",
+      "parameters": {
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderRadius": "var(--radius-full)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "label": "",
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderColor": "var(--border-control)"
+      },
+      "x": 100,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "dcRoot"
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "88ea282f-4ece-55e7-86c4-290c9bdfa934",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "islandkeepIn",
+      "fromProperty": "lang",
+      "toId": "islandkeepFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "islandkeepIn",
+      "fromProperty": "model",
+      "toId": "islandkeepFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "islandkeepIn",
+      "fromProperty": "robots",
+      "toId": "islandkeepFn",
+      "toProperty": "in-robots"
+    },
+    {
+      "fromId": "islandkeepIn",
+      "fromProperty": "state",
+      "toId": "islandkeepFn",
+      "toProperty": "in-state"
+    },
+    {
+      "fromId": "islandkeepIn",
+      "fromProperty": "words",
+      "toId": "islandkeepFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "islandkeepIn",
+      "fromProperty": "go",
+      "toId": "islandkeepFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "islandkeepFn",
+      "fromProperty": "out-due",
+      "toId": "islandkeepOut",
+      "toProperty": "due"
+    },
+    {
+      "fromId": "islandkeepFn",
+      "fromProperty": "out-has",
+      "toId": "islandkeepOut",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "islandkeepFn",
+      "fromProperty": "out-model",
+      "toId": "islandkeepOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "islandkeepFn",
+      "fromProperty": "out-paid",
+      "toId": "islandkeepOut",
+      "toProperty": "paid"
+    },
+    {
+      "fromId": "islandkeepFn",
+      "fromProperty": "out-text",
+      "toId": "islandkeepOut",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "islandkeepFn",
+      "fromProperty": "success",
+      "toId": "islandkeepOut",
+      "toProperty": "ran"
+    }
+  ]
+}

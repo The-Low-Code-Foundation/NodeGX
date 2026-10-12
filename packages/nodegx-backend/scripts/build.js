@@ -67,7 +67,13 @@ async function main() {
   });
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+// P109 ISL-042: the config is exported so a spec can bundle to a temp path and scan what would ship,
+// without writing over the dist/ a running editor or peer may be using.
+module.exports = { shared };
+
+if (require.main === module) {
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}

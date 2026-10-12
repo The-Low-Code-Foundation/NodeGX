@@ -1,0 +1,162 @@
+[
+  {
+    "name": "Is True keeps what the last test found: a wire made after Condition changed with nobody testing it is handed the tested value, as the older wire holds",
+    "clauses": [
+      "N",
+      "C11"
+    ],
+    "because": "condition.ts `result`: \"Whether the last test found Condition true\" — the claim is the sentence. connectInput reads the getter when a wire is made (C11), so a getter reading the input LIVE handed the late wire a value no test produced while the older wire held the tested one. Ruled 2026-10-05 (P107-C2, \"Keep the tested result\"): both getters report the last test's answer",
+    "nodes": {
+      "c": {
+        "type": "Condition",
+        "params": {
+          "runOnChange-condition": false,
+          "condition": true
+        }
+      },
+      "early": {
+        "type": "Inverter"
+      },
+      "late": {
+        "type": "Inverter"
+      }
+    },
+    "wires": [
+      {
+        "from": "c.result",
+        "to": "early.value"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "c",
+        "signal": "eval"
+      },
+      "settle",
+      {
+        "node": "c",
+        "set": "condition",
+        "value": false
+      },
+      "settle",
+      {
+        "wire": {
+          "from": "c.result",
+          "to": "late.value"
+        }
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "early",
+        "port": "result",
+        "value": false
+      },
+      {
+        "at": 3,
+        "subject": "c",
+        "port": "result",
+        "absent": true
+      },
+      {
+        "at": 4,
+        "subject": "late",
+        "port": "result",
+        "value": false
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "runOnChange-condition",
+        "value": false,
+        "subject": "c"
+      },
+      {
+        "t": "set",
+        "port": "condition",
+        "value": true,
+        "subject": "c"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "isfalse",
+        "value": null,
+        "subject": "c"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": null,
+        "subject": "c"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": true,
+        "subject": "early"
+      },
+      {
+        "t": "in",
+        "port": "eval",
+        "subject": "c"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "isfalse",
+        "value": false,
+        "subject": "c"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": true,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "ontrue",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "eval",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": false,
+        "subject": "early"
+      },
+      {
+        "t": "set",
+        "port": "condition",
+        "value": false,
+        "subject": "c"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": false,
+        "subject": "late"
+      }
+    ]
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "cddaeb00-128b-4ac4-90df-d884400864ca",
+  "name": "Add a learner",
+  "path": "/People/Add a learner",
+  "type": "visual",
+  "created": "2026-10-01T09:20:56.929Z",
+  "modified": "2026-10-01T09:20:56.929Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach adds a learner by address: their project's name, what they are building, and a private note only the coach sees. Calls addLearner (staff only), says what happened in a sentence, and can then email them a sign-in link. A second add with the same address changes nothing (TASK-L184)."
+}

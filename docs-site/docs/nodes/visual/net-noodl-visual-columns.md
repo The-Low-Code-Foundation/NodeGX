@@ -26,6 +26,7 @@ Card grids, dashboards, magazine-style layouts — anywhere content should reflo
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `direction` | Enum (`row`, `column`) | `row` | Whether items fill across rows or down columns |
 | `justifyContent` | Enum (`flex-start`, `flex-end`, `center`) | `flex-start` | Where the columns sit as a group when they do not fill the container |
 | `layoutString` | String | `1 2 1` | Column widths as space-separated proportions, so "1 2 1" makes the middle column twice as wide |
@@ -34,13 +35,58 @@ Card grids, dashboards, magazine-style layouts — anywhere content should reflo
 | `mediumBreakpoint` | Number | — | Container width below which Medium Layout replaces Layout String; this is the container, not the viewport |
 | `mediumLayout` | String | — | Layout String to use below Medium Below; leaving it blank makes the breakpoint inert |
 | `minWidth` | Number | `0` | Columns are dropped from the end rather than shrink below this; with Auto Fit it decides how many there are |
-| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
+| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen) |
 | `packing` | Enum (`rows`, `masonry`) | `rows` | Rows makes every item in a row as tall as the tallest; Masonry lets each column pack independently |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `sizing` | Enum (`layoutString`, `autoFit`) | `layoutString` | Layout String sets the columns explicitly; Auto Fit derives them from Min Column Width and the space available |
 | `smallBreakpoint` | Number | — | Container width below which Small Layout replaces the others; it wins over Medium Below |
 | `smallLayout` | String | — | Layout String to use below Small Below; leaving it blank makes the breakpoint inert. For more bands than these two, install the Advanced Columns prefab from the library — it drives these same inputs from a States node, so each band can set its own layout and gaps |
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
 | `variant` | String | — | Name of a saved variant of this node type to apply, replacing the styling set here |
+
+### Signals
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
+
+### What each input does
+
+**Mounted** (`mounted`)
+
+- always: the container is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the columns can be seen
+
+**Layout String** (`layoutString`)
+
+- always: the column proportions, whatever it is handed; one that cannot be read draws the children bare, in the Default band
+
+**Column Sizing** (`sizing`)
+
+- always: Layout String or Auto Fit; while Auto Fit, the band is Default
+
+**Medium Layout** (`mediumLayout`)
+
+- always: the layout below Medium Below; blank makes that breakpoint inert — the band (Breakpoint, At Medium, At Small) is picked again from it at the next render
+
+**Small Layout** (`smallLayout`)
+
+- always: the layout below Small Below; blank makes that breakpoint inert — the band (Breakpoint, At Medium, At Small) is picked again from it at the next render
+
+**Horizontal Gap** (`marginX`)
+
+- always: a size (a bare number in the unit it holds, else pixels); the container is measured again, less the gap
+
+**Medium Below** (`mediumBreakpoint`)
+
+- always: a size (a bare number in the unit it holds, else pixels); nothing, or 0, makes the Medium breakpoint inert — the band (Breakpoint, At Medium, At Small) is picked again from it at the next render
+
+**Small Below** (`smallBreakpoint`)
+
+- always: a size (a bare number in the unit it holds, else pixels); nothing, or 0, makes the Small breakpoint inert — the band (Breakpoint, At Medium, At Small) is picked again from it at the next render
 
 ## Outputs
 
@@ -65,6 +111,20 @@ Card grids, dashboards, magazine-style layouts — anywhere content should reflo
 | `onAtMedium` | Signal | — | Fires when the container narrows or widens into the Medium band, once per crossing |
 | `onAtSmall` | Signal | — | Fires when the container narrows or widens into the Small band, once per crossing |
 | `willUnmount` | Signal | — | Fires just before this element is removed from the page, while it still exists |
+
+## Dynamic ports
+
+_This node's port list changes at runtime (declared-port-groups); the tables above may be incomplete for a given instance._
+
+Declares conditional/expandable port groups whose visibility depends on parameter values (see declaredPortGroups).
+
+| Condition | Inputs shown | Outputs shown |
+|---|---|---|
+| — | — | — |
+
+## Ports at runtime
+
+Its only dynamic ports are its Data Attributes list: each data-* name listed in `dataAttributes` becomes a string input of that name, written on the element (declared-port-groups). Every other port is static.
 
 ## Patterns
 

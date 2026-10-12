@@ -44,7 +44,9 @@ const { toPgQuery } = require('../../src/api/adapters/postgres/placeholders');
 const { SEARCH_FIELDS_REQUIRED } = require('../../src/api/adapters/postgres/search');
 
 const PG_URL = process.env.NODEGX_PG_TEST_URL || 'postgres:///nodegx_brg005';
-const TABLE = 'BrgDialect';
+// P109 ISL-041 (P99-HLT016-DIALECTTEST): one table per run. A fixed name in the shared test database
+// made two runs at once (two sessions on one machine) fail each other's cases; `afterAll` drops it.
+const TABLE = `BrgDialect_${process.pid}`;
 
 let reachable = false;
 try {

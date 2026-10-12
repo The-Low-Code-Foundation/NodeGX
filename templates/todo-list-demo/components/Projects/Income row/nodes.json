@@ -1,0 +1,192 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "dbeb79da-ed6d-54cf-83e4-96466ce71649",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "irIn",
+      "type": "Component Inputs",
+      "label": "The money",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "key",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "meta",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "metaColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "irOut",
+      "type": "Component Outputs",
+      "label": "Paid",
+      "ports": [
+        {
+          "name": "paid",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "key",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "irRow",
+      "type": "Group",
+      "label": "Row",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "irText",
+        "irAmount",
+        "irPaid"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "irText",
+      "type": "Group",
+      "label": "Who and when",
+      "parent": "irRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0-5)",
+        "styleCss": "flex: 1 1 auto; min-width: 0;"
+      },
+      "children": [
+        "irLabel",
+        "irMeta"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "irLabel",
+      "type": "Text",
+      "label": "Who",
+      "parent": "irText",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "irMeta",
+      "type": "Text",
+      "label": "When",
+      "parent": "irText",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "irAmount",
+      "type": "Text",
+      "label": "How much",
+      "parent": "irRow",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize",
+        "fontVariantNumeric": "tabular-nums"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "irPaid",
+      "type": "net.noodl.controls.button",
+      "label": "Paid",
+      "parent": "irRow",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Paid"
+      },
+      "x": 100,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "irRow"
+  ]
+}

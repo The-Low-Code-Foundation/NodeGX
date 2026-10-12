@@ -1,0 +1,220 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0116bf30-2c55-4101-a80a-d54a0c579ad8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ps_row_in",
+      "type": "Component Inputs",
+      "label": "One chosen step",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "number",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canUp",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "canDown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "upLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "downLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "removeLabel",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "ps_row",
+      "type": "Group",
+      "label": "The step",
+      "x": 40,
+      "y": 240,
+      "children": [
+        "ps_row_title",
+        "ps_row_controls"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)"
+      }
+    },
+    {
+      "id": "ps_row_title",
+      "type": "Text",
+      "label": "Its place and title",
+      "x": 100,
+      "y": 320,
+      "parent": "ps_row",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "ps_row_controls",
+      "type": "Group",
+      "label": "Move it",
+      "x": 100,
+      "y": 400,
+      "parent": "ps_row",
+      "children": [
+        "ps_row_up",
+        "ps_row_down",
+        "ps_row_remove"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "ps_row_up",
+      "type": "net.noodl.controls.button",
+      "label": "Move up",
+      "x": 160,
+      "y": 480,
+      "parent": "ps_row_controls",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-sm)"
+      }
+    },
+    {
+      "id": "ps_row_down",
+      "type": "net.noodl.controls.button",
+      "label": "Move down",
+      "x": 160,
+      "y": 560,
+      "parent": "ps_row_controls",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-sm)"
+      }
+    },
+    {
+      "id": "ps_row_remove",
+      "type": "net.noodl.controls.button",
+      "label": "Remove",
+      "x": 160,
+      "y": 640,
+      "parent": "ps_row_controls",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-sm)"
+      }
+    },
+    {
+      "id": "ps_row_label",
+      "type": "JavaScriptFunction",
+      "label": "Its place, then its title",
+      "x": 600,
+      "y": 320,
+      "parameters": {
+        "functionScript": "// A path is an ORDER, so the step says its place. Numerals are fine here: this is a\n// coach arranging a list, not the learner's stepper (which has none).\nOutputs.text = String(Inputs.number || '') + '. ' + String(Inputs.title || '');\n"
+      },
+      "ports": [
+        {
+          "name": "in-number",
+          "plug": "input",
+          "type": "*",
+          "displayName": "number",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*",
+          "displayName": "title",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-text",
+          "plug": "output",
+          "type": "*",
+          "displayName": "text",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "ps_row_out",
+      "type": "Component Outputs",
+      "label": "Which control was pressed",
+      "x": 600,
+      "y": 480,
+      "ports": [
+        {
+          "name": "up",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "down",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "remove",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "ps_row"
+  ]
+}

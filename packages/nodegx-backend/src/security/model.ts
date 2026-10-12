@@ -15,6 +15,7 @@
  * @module nodegx-backend/security/model
  */
 
+import { pathProblem, type CollectionReach, type OnlyWhileMove, type OnlyWhileRule, type PathHop, type Reach, type StorageTableSchema } from '@noodl/backend-contract';
 import type { RateLimitPolicy } from '../ops/model';
 
 // ============================================================================
@@ -138,15 +139,59 @@ export type ClpOp = 'find' | 'get' | 'create' | 'update' | 'delete';
 export const CLP_OPS: ClpOp[] = ['find', 'get', 'create', 'update', 'delete'];
 
 /**
- * A single rule: 'public' | 'authenticated' | 'nobody' | 'role:<name>',
- * or an array of those (OR semantics).
+ * P116 ONT-004 — a rule through a chain: *"an account holder sees the members
+ * on their account"*. The caller may reach the rows this path reaches from
+ * their own `_User` row; nobody else is let in by it, and an anonymous caller
+ * never is. The hops are the contract's `PathHop`s (`@noodl/backend-contract`
+ * `PathFilter`), with every nested `where` in Parse-wire spelling; `maxDepth`
+ * is mandatory and at most `MAX_PATH_DEPTH`.
+ *
+ * It is an atom like `role:<name>`, so it ORs with the others: `['role:admin',
+ * { path }]` lets an admin see everything and everyone else what they reach.
+ * Allowed on `find`, `get`, `update` and `delete` — a row that is not there
+ * yet cannot be reached, so never on `create`, and never on a function, a
+ * file or signup.
+ *
+ * Enforced where the row ACL is enforced, in the SQL (`StorageAclOption.only`),
+ * so a reader that passes the caller's ACL applies the rule and a reader that
+ * cannot (live updates) refuses the subscription rather than streaming past it.
  */
-export type RuleValue = string | string[];
+export interface PathRule {
+  path: { hops: PathHop[]; maxDepth: number };
+}
+
+export type RuleAtom = string | PathRule;
+
+/**
+ * A single rule: 'public' | 'authenticated' | 'nobody' | 'role:<name>' or a
+ * {@link PathRule}, or an array of those (OR semantics).
+ */
+export type RuleValue = RuleAtom | RuleAtom[];
 
 const RULE_ATOMS = new Set(['public', 'authenticated', 'nobody']);
 
+/** True for the one object-shaped atom. */
+export function isPathRule(atom: unknown): atom is PathRule {
+  return !!atom && typeof atom === 'object' && !Array.isArray(atom) && 'path' in (atom as Record<string, unknown>);
+}
+
+/** The `$path` a {@link PathRule} compiles to for one signed-in caller. */
+export function pathRuleWhere(rule: PathRule, userId: string): Record<string, unknown> {
+  return { $path: { from: { collection: '_User', where: { objectId: userId } }, hops: rule.path.hops, maxDepth: rule.path.maxDepth } };
+}
+
 /** Validate one rule atom. Returns an error message or null. */
-function validateRuleAtom(atom: unknown): string | null {
+function validateRuleAtom(atom: unknown, paths: boolean): string | null {
+  if (isPathRule(atom)) {
+    if (!paths) return 'a path rule is allowed only on find, get, update and delete of a collection';
+    const keys = Object.keys(atom);
+    if (keys.length !== 1) return `a path rule has only "path", not ${keys.filter((k) => k !== 'path').join(', ')}`;
+    const inner = atom.path as unknown as Record<string, unknown>;
+    if (!inner || typeof inner !== 'object' || Array.isArray(inner)) return 'a path rule is { "path": { "hops": […], "maxDepth": n } }';
+    for (const k of Object.keys(inner)) if (k !== 'hops' && k !== 'maxDepth') return `a path rule has no "${k}"`;
+    const problem = pathProblem({ from: { collection: '_User' }, hops: inner.hops, maxDepth: inner.maxDepth });
+    return problem ? `path rule: ${problem}` : null;
+  }
   if (typeof atom !== 'string') return `rule must be a string, got ${typeof atom}`;
   if (RULE_ATOMS.has(atom)) return null;
   if (atom.startsWith('role:')) {
@@ -206,43 +251,387 @@ export function validateFunctionIdempotency(value: unknown): string | null {
   return null;
 }
 
-export function validateRuleValue(value: unknown): string | null {
+/**
+ * @param paths whether a {@link PathRule} atom may appear — true only for a
+ *   collection's `find`, `get`, `update` and `delete`.
+ */
+export function validateRuleValue(value: unknown, paths = false): string | null {
   if (Array.isArray(value)) {
     if (value.length === 0) return 'empty rule arrays are not allowed (use "nobody")';
     for (const atom of value) {
-      const err = validateRuleAtom(atom);
+      const err = validateRuleAtom(atom, paths);
       if (err) return err;
     }
     return null;
   }
-  return validateRuleAtom(value);
+  return validateRuleAtom(value, paths);
+}
+
+/** The atoms of a rule, whichever shape it was stored in. */
+export function ruleAtoms(rule: RuleValue): RuleAtom[] {
+  return Array.isArray(rule) ? rule : [rule];
+}
+
+/** Does one atom grant this principal outright (without narrowing)? */
+function atomGrants(atom: RuleAtom, principal: Principal): boolean {
+  if (isPathRule(atom)) return false;
+  if (atom === 'public') return true;
+  if (atom === 'nobody') return false;
+  if (atom === 'authenticated' && principal.kind === 'user') return true;
+  if (atom.startsWith('role:') && principal.kind === 'user') {
+    return principal.roles.includes(atom.slice('role:'.length));
+  }
+  return false;
 }
 
 /**
  * Does a rule grant this principal the operation? Admin/system is decided
  * before rules are consulted (bypass); API-key scope checks likewise — this
  * evaluates rules for users and anonymous callers only.
+ *
+ * A {@link PathRule} grants a signed-in caller — the rows they reach, which
+ * {@link ruleNarrowing} says and which may be none. An anonymous caller has no
+ * row to start from and is not granted.
  */
 export function ruleAllows(rule: RuleValue, principal: Principal): boolean {
-  const atoms = Array.isArray(rule) ? rule : [rule];
-  for (const atom of atoms) {
-    if (atom === 'public') return true;
-    if (atom === 'nobody') continue;
-    if (atom === 'authenticated' && principal.kind === 'user') return true;
-    if (atom.startsWith('role:') && principal.kind === 'user') {
-      if (principal.roles.includes(atom.slice('role:'.length))) return true;
-    }
+  for (const atom of ruleAtoms(rule)) {
+    if (atomGrants(atom, principal)) return true;
+    if (isPathRule(atom) && principal.kind === 'user') return true;
   }
   return false;
+}
+
+/**
+ * What a rule narrows a granted caller to, or `undefined` when an atom grants
+ * them outright. Several path atoms OR together: the rows any of them reaches.
+ */
+export function ruleNarrowing(rule: RuleValue, principal: Principal): Record<string, unknown> | undefined {
+  const atoms = ruleAtoms(rule);
+  if (atoms.some((a) => atomGrants(a, principal))) return undefined;
+  if (principal.kind !== 'user') return undefined;
+  const paths = atoms.filter(isPathRule).map((a) => pathRuleWhere(a, principal.userId));
+  if (paths.length === 0) return undefined;
+  return paths.length === 1 ? paths[0] : { $or: paths };
 }
 
 // ============================================================================
 // Security config (security.json)
 // ============================================================================
 
+/**
+ * P116 ONT-014 — a collection's `onlyWhile` as `security.json` says it. A move's `by` is a rule
+ * value; {@link onlyWhileFor} decides it for one caller (`OnlyWhileMove.admits`) before the write,
+ * as {@link checkClp} decides a permission. `delete: "never"` is *"a sealed envelope is never
+ * deleted"* said in one word.
+ */
+export interface OnlyWhileConfig {
+  update?: Omit<OnlyWhileRule, 'moves'> & { moves?: Record<string, Record<string, OnlyWhileConfigMove>> };
+  delete?: OnlyWhileRule | 'never';
+}
+
+/** P116 ONT-014 — one old value's moves, as written: `by` is who may make them. */
+export interface OnlyWhileConfigMove {
+  to: string[];
+  by?: RuleValue;
+  says?: string;
+}
+
 export interface CollectionRules {
   permissions?: Partial<Record<ClpOp, RuleValue>>;
   creatorOwns?: boolean;
+  /**
+   * P116 ONT-012 (R-b) — *"a bill changes only while it is a draft"*. A condition on the record's
+   * own values before the change, for `update` and `delete`. It ANDs with the permission (it says
+   * WHEN; `permissions` says WHO) and binds every caller the row ACL binds. The facade compiles it
+   * into the write itself (`AdapterFacade.heldWhile`), and a write it stops is a 409 in `says`.
+   */
+  onlyWhile?: OnlyWhileConfig;
+  /**
+   * P116 ONT-012 (R-a) — *"their company's representative reads my account, but not my two health
+   * details"*. Per field, who may READ it: an ordinary rule value (path atoms included), ANDed with
+   * the collection's `find`/`get`. A field nobody is granted is not on any row a caller receives,
+   * and a request that names it (where, sort, keys, distinct, aggregate, precondition, a path hop,
+   * a live filter, a search) is refused by name. See {@link fieldMask}.
+   */
+  fields?: Record<string, { read: RuleValue }>;
+}
+
+/**
+ * P116 ONT-012 — one field a caller may not read on every row: hidden everywhere, or shown only on
+ * the rows `shownWhere` reaches (the caller's path atoms, compiled from their own `_User` row).
+ */
+export interface HiddenField {
+  field: string;
+  shownWhere?: Record<string, unknown>;
+}
+
+/**
+ * P116 bug INCLUDECLP — what one collection rule (`get` or `find`) lets this caller read, for every
+ * collection the rules name and for the rest (the defaults). {@link checkClp} is the one decider,
+ * so an `include` and a `$path` answer exactly what a direct request would. System collections
+ * are not here: the facade decides those (`_User` by its name, the rest refused).
+ * `undefined` when every collection answers `'all'`, so most callers' ACL option is unchanged.
+ */
+export function collectionReach(config: SecurityConfig, principal: Principal, op: 'get' | 'find'): CollectionReach | undefined {
+  const reachOf = (decision: AccessDecision): Reach =>
+    !decision.allowed ? 'none' : decision.narrow ? { where: decision.narrow } : 'all';
+  const by: Record<string, Reach> = {};
+  for (const name of Object.keys(config.collections)) {
+    if (!isSystemCollection(name)) by[name] = reachOf(checkClp(config, principal, name, op));
+  }
+  // The defaults, asked the same way: a collection no entry names falls through to them.
+  const otherwise = reachOf(checkClp({ ...config, collections: {} }, principal, 'any', op));
+  const open = (r: Reach) => r === 'all';
+  return open(otherwise) && Object.values(by).every(open) ? undefined : { by, otherwise };
+}
+
+/**
+ * P116 ONT-012 — what this caller may not read, per collection. Empty for a caller every rule
+ * grants. Bypasses (admin, dev-open, an unbound scoped key) are decided by the caller of this,
+ * exactly as for the row ACL: `SecurityState.hiddenFor`.
+ */
+export function fieldMask(config: SecurityConfig, principal: Principal): Record<string, HiddenField[]> {
+  const subject = rulePrincipal(principal);
+  const out: Record<string, HiddenField[]> = {};
+  for (const [collection, entry] of Object.entries(config.collections)) {
+    if (!entry.fields) continue;
+    const hidden: HiddenField[] = [];
+    for (const [field, rule] of Object.entries(entry.fields)) {
+      if (ruleAtoms(rule.read).some((a) => atomGrants(a, subject))) continue;
+      const shownWhere = ruleNarrowing(rule.read, subject);
+      hidden.push(shownWhere ? { field, shownWhere } : { field });
+    }
+    if (hidden.length) out[collection] = hidden;
+  }
+  return out;
+}
+
+/** The fields no collection rule may name: the record's own bookkeeping. */
+const UNHIDEABLE_FIELDS = new Set(['objectId', 'createdAt', 'updatedAt', 'ACL']);
+
+function validateFieldRules(value: unknown): string[] {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return ['must be an object { <field>: { read } }'];
+  const errors: string[] = [];
+  const entries = Object.entries(value as Record<string, unknown>);
+  if (entries.length === 0) errors.push('is empty: name a field, or leave "fields" out');
+  for (const [field, rule] of entries) {
+    if (UNHIDEABLE_FIELDS.has(field)) {
+      errors.push(`"${field}" is the record's own bookkeeping and is read by every reader; it cannot be hidden`);
+      continue;
+    }
+    if (!rule || typeof rule !== 'object' || Array.isArray(rule)) {
+      errors.push(`${field} must be an object { read }`);
+      continue;
+    }
+    const r = rule as Record<string, unknown>;
+    for (const k of Object.keys(r)) {
+      if (k !== 'read') errors.push(`${field}: unknown key "${k}" (only "read" is ruled; who may change a field is not)`);
+    }
+    if (r.read === undefined) errors.push(`${field}.read is required`);
+    else {
+      const err = validateRuleValue(r.read, true);
+      if (err) errors.push(`${field}.read: ${err}`);
+    }
+  }
+  return errors;
+}
+
+/**
+ * Keys an `onlyWhile.where` may not use. It is a condition on the record's own values: a path or
+ * a relation is a different rule (who), and an `$or` around one would hide it from this check.
+ */
+const ONLY_WHILE_REFUSED_KEYS = new Set(['$path', '$relatedTo', '$inQuery', '$notInQuery', '$select', '$dontSelect']);
+
+function onlyWhileWhereProblem(where: unknown): string | null {
+  if (!where || typeof where !== 'object' || Array.isArray(where)) return 'where must be an object (a filter on the record\'s own fields)';
+  const keys = Object.keys(where as Record<string, unknown>);
+  if (keys.length === 0) return 'where is empty: a condition that says nothing would bind nothing';
+  const walk = (w: Record<string, unknown>): string | null => {
+    for (const [k, v] of Object.entries(w)) {
+      if (ONLY_WHILE_REFUSED_KEYS.has(k)) return `where may not use ${k}: it is a condition on the record's own values`;
+      if ((k === '$and' || k === '$or') && Array.isArray(v)) {
+        for (const sub of v) {
+          if (!sub || typeof sub !== 'object' || Array.isArray(sub)) return `${k} takes a list of filters`;
+          const p = walk(sub as Record<string, unknown>);
+          if (p) return p;
+        }
+      }
+    }
+    return null;
+  };
+  return walk(where as Record<string, unknown>);
+}
+
+/** Validate a collection's `onlyWhile`. Returns error strings, prefixed by the caller. */
+function validateOnlyWhile(value: unknown): string[] {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return ['must be an object { update?, delete? }'];
+  const errors: string[] = [];
+  const entries = Object.entries(value as Record<string, unknown>);
+  if (entries.length === 0) errors.push('is empty: name update, delete or both');
+  for (const [op, rule] of entries) {
+    if (op !== 'update' && op !== 'delete') {
+      errors.push(`"${op}": only update and delete can depend on the record's values (a record being made has none yet)`);
+      continue;
+    }
+    if (op === 'delete' && rule === 'never') continue;
+    if (!rule || typeof rule !== 'object' || Array.isArray(rule)) {
+      errors.push(op === 'delete' ? 'delete must be "never" or an object { where, says? }' : `${op} must be an object { where?, except?, says?, moves?, frozen? }`);
+      continue;
+    }
+    const r = rule as Record<string, unknown>;
+    const keys = op === 'update' ? ['where', 'except', 'says', 'moves', 'frozen'] : ['where', 'except', 'says'];
+    for (const k of Object.keys(r)) {
+      if (!keys.includes(k)) errors.push(`${op}: unknown key "${k}" (expected ${keys.join(', ')})`);
+    }
+    // ONT-014: an update may say its rule as moves or frozen fields alone; a delete's object form is a condition.
+    if (r.where !== undefined || op === 'delete' || (r.moves === undefined && r.frozen === undefined)) {
+      const wp = onlyWhileWhereProblem(r.where);
+      if (wp) errors.push(`${op}.${wp}`);
+    }
+    if (op === 'update') {
+      if (r.moves !== undefined) for (const err of validateMoves(r.moves)) errors.push(`update.moves${err}`);
+      if (r.frozen !== undefined) for (const err of validateFrozen(r.frozen, r.except)) errors.push(`update.frozen${err}`);
+    }
+    if (r.except !== undefined) {
+      if (op === 'delete') errors.push('delete.except: a delete removes every field, so nothing can be excepted');
+      else if (!Array.isArray(r.except) || r.except.length === 0 || r.except.some((f) => typeof f !== 'string' || !f)) {
+        errors.push(`${op}.except must be a non-empty list of field names`);
+      }
+    }
+    if (r.says !== undefined && (typeof r.says !== 'string' || !r.says.trim())) errors.push(`${op}.says must be a sentence`);
+  }
+  return errors;
+}
+
+/** P116 ONT-014 — `update.moves`: per field, per old value (or `"*"`), `{ to, by?, says? }`. Errors start with their path. */
+function validateMoves(value: unknown): string[] {
+  if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).length === 0) {
+    return [' must be an object naming at least one field: { "<field>": { "<old value>": { "to": [...] } } }'];
+  }
+  const errors: string[] = [];
+  for (const [field, byOld] of Object.entries(value as Record<string, unknown>)) {
+    if (UNHIDEABLE_FIELDS.has(field)) errors.push(`.${field}: the record's own bookkeeping is not a value a person moves`);
+    if (!byOld || typeof byOld !== 'object' || Array.isArray(byOld) || Object.keys(byOld).length === 0) {
+      errors.push(`.${field} must be an object naming at least one old value`);
+      continue;
+    }
+    for (const [old, move] of Object.entries(byOld as Record<string, unknown>)) {
+      const at = `.${field}.${JSON.stringify(old)}`;
+      if (!move || typeof move !== 'object' || Array.isArray(move)) {
+        errors.push(`${at} must be an object { to, by?, says? }`);
+        continue;
+      }
+      const m = move as Record<string, unknown>;
+      for (const k of Object.keys(m)) if (k !== 'to' && k !== 'by' && k !== 'says') errors.push(`${at}: unknown key "${k}" (expected to, by, says)`);
+      if (!Array.isArray(m.to) || m.to.some((v) => typeof v !== 'string')) errors.push(`${at}.to must be a list of values ([] = it never moves)`);
+      else if (m.to.includes(old)) errors.push(`${at}.to names ${JSON.stringify(old)} itself: staying is not a move, and is always allowed`);
+      if (m.by !== undefined) {
+        const err = validateRuleValue(m.by, true);
+        if (err) errors.push(`${at}.by: ${err}`);
+      }
+      if (m.says !== undefined && (typeof m.says !== 'string' || !m.says.trim())) errors.push(`${at}.says must be a sentence`);
+    }
+  }
+  return errors;
+}
+
+/** P116 ONT-014 — `update.frozen`: `{ fields: [...] | "*", unless?, says? }`. Errors start with their path. */
+function validateFrozen(value: unknown, except: unknown): string[] {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return [' must be an object { fields, unless?, says? }'];
+  const errors: string[] = [];
+  const f = value as Record<string, unknown>;
+  for (const k of Object.keys(f)) if (k !== 'fields' && k !== 'unless' && k !== 'says') errors.push(`: unknown key "${k}" (expected fields, unless, says)`);
+  if (f.fields !== '*') {
+    if (!Array.isArray(f.fields) || f.fields.length === 0 || f.fields.some((x) => typeof x !== 'string' || !x)) {
+      errors.push('.fields must be a non-empty list of field names, or "*" for the whole record');
+    } else {
+      for (const x of f.fields as string[]) if (UNHIDEABLE_FIELDS.has(x)) errors.push(`.fields: "${x}" is the record's own bookkeeping, kept by the backend`);
+      const both = Array.isArray(except) ? (f.fields as string[]).filter((x) => (except as unknown[]).includes(x)) : [];
+      if (both.length) errors.push(`.fields: ${both.map((x) => `"${x}"`).join(', ')} cannot be both frozen and excepted from the condition`);
+    }
+  }
+  if (f.unless !== undefined) {
+    const wp = onlyWhileWhereProblem(f.unless);
+    if (wp) errors.push(`.unless: ${wp.replace(/^where/, 'unless')}`);
+  }
+  if (f.says !== undefined && (typeof f.says !== 'string' || !f.says.trim())) errors.push('.says must be a sentence');
+  return errors;
+}
+
+/** What {@link onlyWhileSchemaProblems} reads of one collection: its declared columns and checks. */
+export type DeclaredTable = Pick<StorageTableSchema, 'columns' | 'checks'>;
+
+/**
+ * P116 ONT-014 AC3, the schema half — a `moves` rule read against the schema it will be kept on:
+ * only text moves (`moves.<f>.<old>.to` is a list of words, and the rule compares them as words), and
+ * where the field is a choice, every old value and every `to` is one of its values. The validator
+ * cannot say this: `security.json` is loaded before any table exists. The writes that have the
+ * schema at hand call it (the permissions PUT, the world migration with the schema its plan leaves).
+ *
+ * Only what the schema DECLARES is refused: a table made by first use records no columns, and a
+ * column can hold data while missing from `_Schema` (`LocalSQLAdapter._columnScope`), so an
+ * undeclared field or collection is not evidence of a mistake. Errors carry the validator's paths.
+ */
+export function onlyWhileSchemaProblems(
+  collections: Record<string, CollectionRules | undefined>,
+  tableOf: (collection: string) => DeclaredTable | null | undefined
+): string[] {
+  const errors: string[] = [];
+  for (const [name, entry] of Object.entries(collections)) {
+    const moves = entry?.onlyWhile?.update?.moves;
+    if (!moves || typeof moves !== 'object') continue;
+    const table = tableOf(name);
+    if (!table) continue;
+    for (const [field, byOld] of Object.entries(moves)) {
+      const at = `collections.${name}.onlyWhile: update.moves.${field}`;
+      const column = table.columns?.find((c) => c.name === field);
+      if (!column?.type) continue;
+      const choice = table.checks?.find((c): c is { field: string; oneOf: Array<string | number> } => 'oneOf' in c && c.field === field)?.oneOf;
+      if (column.type !== 'String') {
+        errors.push(`${at}: "${field}" is ${column.type === 'Number' && choice ? 'a choice of numbers' : `a ${column.type}`}; only a choice or text has values that move`);
+        continue;
+      }
+      if (!choice || !byOld || typeof byOld !== 'object') continue;
+      const named = choice.map((v) => JSON.stringify(v)).join(', ');
+      for (const [old, move] of Object.entries(byOld)) {
+        if (old !== '*' && !choice.includes(old)) errors.push(`${at}.${JSON.stringify(old)}: "${field}" is never ${JSON.stringify(old)} — its choices are ${named}`);
+        const outside = Array.isArray(move?.to) ? move.to.filter((v) => !choice.includes(v)) : [];
+        if (outside.length) {
+          errors.push(`${at}.${JSON.stringify(old)}.to names ${outside.map((v) => JSON.stringify(v)).join(', ')}, which "${field}" cannot hold — its choices are ${named}`);
+        }
+      }
+    }
+  }
+  return errors;
+}
+
+/**
+ * The `onlyWhile` a collection carries, as the facade reads it: with no principal, as written (a
+ * move's `by` dropped); with one, each move's `by` decided for that caller (`admits`), ONT-014.
+ */
+export function onlyWhileFor(
+  config: SecurityConfig,
+  collection: string,
+  principal?: Principal
+): { update?: OnlyWhileRule; delete?: OnlyWhileRule | 'never' } | undefined {
+  const ow = config.collections[collection]?.onlyWhile;
+  if (!ow?.update?.moves) return ow as { update?: OnlyWhileRule; delete?: OnlyWhileRule | 'never' } | undefined;
+  const subject = principal && rulePrincipal(principal);
+  const moves: Record<string, Record<string, OnlyWhileMove>> = {};
+  for (const [field, byOld] of Object.entries(ow.update.moves)) {
+    moves[field] = {};
+    for (const [old, { by, ...move }] of Object.entries(byOld)) {
+      moves[field][old] = by === undefined || !subject ? move : { ...move, admits: admitsFor(by, subject) };
+    }
+  }
+  return { ...ow, update: { ...ow.update, moves } };
+}
+
+/** Who a move's `by` lets through, for one caller: everyone it grants, none, or the records a path reaches. */
+function admitsFor(by: RuleValue, subject: Principal): OnlyWhileMove['admits'] {
+  if (!ruleAllows(by, subject)) return false;
+  const narrow = ruleNarrowing(by, subject);
+  return narrow ? { where: narrow } : true;
 }
 
 export interface FunctionRules {
@@ -417,7 +806,7 @@ export function validateSecurityConfig(raw: unknown): string[] {
         if (perms[op] === undefined) {
           errors.push(`defaults.permissions.${op} is required`);
         } else {
-          const err = validateRuleValue(perms[op]);
+          const err = validateRuleValue(perms[op], op !== 'create');
           if (err) errors.push(`defaults.permissions.${op}: ${err}`);
         }
       }
@@ -444,7 +833,15 @@ export function validateSecurityConfig(raw: unknown): string[] {
       }
       const e = entry as Record<string, unknown>;
       for (const key of Object.keys(e)) {
-        if (key !== 'permissions' && key !== 'creatorOwns') errors.push(`unknown key "${key}" in collections.${name}`);
+        if (key !== 'permissions' && key !== 'creatorOwns' && key !== 'onlyWhile' && key !== 'fields') {
+          errors.push(`unknown key "${key}" in collections.${name}`);
+        }
+      }
+      if (e.onlyWhile !== undefined) {
+        for (const err of validateOnlyWhile(e.onlyWhile)) errors.push(`collections.${name}.onlyWhile: ${err}`);
+      }
+      if (e.fields !== undefined) {
+        for (const err of validateFieldRules(e.fields)) errors.push(`collections.${name}.fields: ${err}`);
       }
       if (e.permissions !== undefined) {
         if (!e.permissions || typeof e.permissions !== 'object') {
@@ -454,7 +851,7 @@ export function validateSecurityConfig(raw: unknown): string[] {
             if (!CLP_OPS.includes(op as ClpOp)) {
               errors.push(`unknown operation "${op}" in collections.${name}.permissions`);
             } else {
-              const err = validateRuleValue(rule);
+              const err = validateRuleValue(rule, op !== 'create');
               if (err) errors.push(`collections.${name}.permissions.${op}: ${err}`);
             }
           }
@@ -578,6 +975,12 @@ export interface AccessDecision {
   /** The rule that decided, for check/debug surfaces. */
   rule: RuleValue;
   reason: string;
+  /**
+   * P116 ONT-004: present when the caller is let in by a {@link PathRule}
+   * alone — the `where` their rows are narrowed to. A reader that cannot apply
+   * it must refuse, never ignore it.
+   */
+  narrow?: Record<string, unknown>;
 }
 
 /** API-key scope check for data operations. */
@@ -657,7 +1060,12 @@ export function checkClp(config: SecurityConfig, principal: Principal, collectio
     // branch below untouched, which is what every key does today.
     if (principal.actsAs) {
       return ruleAllows(rule, rulePrincipal(principal))
-        ? { allowed: true, rule, reason: `API key scope covers classes ${op}, and rule ${JSON.stringify(rule)} grants it to the user "${principal.name}" acts as` }
+        ? {
+            allowed: true,
+            rule,
+            reason: `API key scope covers classes ${op}, and rule ${JSON.stringify(rule)} grants it to the user "${principal.name}" acts as`,
+            ...narrowed(rule, rulePrincipal(principal))
+          }
         : {
             allowed: false,
             rule,
@@ -667,8 +1075,14 @@ export function checkClp(config: SecurityConfig, principal: Principal, collectio
     return { allowed: true, rule, reason: `API key scope covers classes ${op}` };
   }
   return ruleAllows(rule, principal)
-    ? { allowed: true, rule, reason: `rule ${JSON.stringify(rule)} grants ${op} to ${principal.kind}` }
+    ? { allowed: true, rule, reason: `rule ${JSON.stringify(rule)} grants ${op} to ${principal.kind}`, ...narrowed(rule, principal) }
     : { allowed: false, rule, reason: `rule ${JSON.stringify(rule)} denies ${op} to ${principal.kind}` };
+}
+
+/** The `narrow` field of a decision, when the rule narrows. */
+function narrowed(rule: RuleValue, principal: Principal): { narrow?: Record<string, unknown> } {
+  const narrow = ruleNarrowing(rule, principal);
+  return narrow ? { narrow } : {};
 }
 
 // ============================================================================

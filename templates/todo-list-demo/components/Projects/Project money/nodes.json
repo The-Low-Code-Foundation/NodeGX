@@ -1,0 +1,162 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3ce25093-a075-552c-8ece-4f63c501521f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pmIn",
+      "type": "Component Inputs",
+      "label": "The item",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "itemKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "line",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "color",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "pmOut",
+      "type": "Component Outputs",
+      "label": "Change it",
+      "ports": [
+        {
+          "name": "edit",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "itemKey",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "pmRow",
+      "type": "Group",
+      "label": "The item",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "styleCss": "cursor: pointer;"
+      },
+      "children": [
+        "pmText",
+        "pmGo"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pmText",
+      "type": "Group",
+      "label": "What and how much",
+      "parent": "pmRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0-5)",
+        "styleCss": "flex: 1 1 auto; min-width: 0;"
+      },
+      "children": [
+        "pmLabel",
+        "pmLine"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pmLabel",
+      "type": "Text",
+      "label": "What it is",
+      "parent": "pmText",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pmLine",
+      "type": "Text",
+      "label": "How much and how often",
+      "parent": "pmText",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "pmGo",
+      "type": "Text",
+      "label": "What pressing it does",
+      "parent": "pmRow",
+      "parameters": {
+        "text": "Change",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "pmRow"
+  ]
+}

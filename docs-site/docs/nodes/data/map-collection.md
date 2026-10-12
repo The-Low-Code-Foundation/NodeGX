@@ -39,6 +39,20 @@ Reshaping list data between its source and the UI: computing display labels, ren
 |---|---|---|---|
 | `refresh` | Signal | — | Re-runs the mapping now, for a source array that changed without notifying |
 
+### What each input does
+
+**Items** (`items`)
+
+- always: Items and Count are re-sent as they stand, and the map runs at the frame's end (and again whenever this array reports a change)
+
+**Script** (`mapScript`)
+
+- always: compiled now, and the map runs again at the frame's end; a script that does not compile fails there, on Error and Failure
+
+**Refresh** (`refresh`)
+
+- always: the map runs at the frame's end, one run for the frame's presses; each answered Done, or Failure with no Items, Items that are not a list, or a Script that fails
+
 ## Outputs
 
 ### Values

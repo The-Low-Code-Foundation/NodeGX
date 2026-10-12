@@ -130,6 +130,90 @@
       "toProperty": "to-untick"
     },
     {
+      "fromId": "dfIn",
+      "fromProperty": "todayTaskId",
+      "toId": "dfTaskFromToday",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "dfIn",
+      "fromProperty": "todayClose",
+      "toId": "dfTaskFromToday",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "dfIn",
+      "fromProperty": "todayTaskTitle",
+      "toId": "dfSubjectFromToday",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "dfIn",
+      "fromProperty": "todayClose",
+      "toId": "dfSubjectFromToday",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "dfIn",
+      "fromProperty": "todayClose",
+      "toId": "dfMode",
+      "toProperty": "to-close"
+    },
+    {
+      "fromId": "dfIn",
+      "fromProperty": "occurrenceId",
+      "toId": "dfOccurrenceSet",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "dfIn",
+      "fromProperty": "check",
+      "toId": "dfOccurrenceSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "dfIn",
+      "fromProperty": "occurrenceTitle",
+      "toId": "dfSubjectFromOccurrence",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "dfIn",
+      "fromProperty": "check",
+      "toId": "dfSubjectFromOccurrence",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "dfIn",
+      "fromProperty": "check",
+      "toId": "dfMode",
+      "toProperty": "to-check"
+    },
+    {
+      "fromId": "dfIn",
+      "fromProperty": "detailStop",
+      "toId": "dfTaskFromDetail",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "dfIn",
+      "fromProperty": "routineTitle",
+      "toId": "dfSubjectFromRoutine",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "dfIn",
+      "fromProperty": "detailStop",
+      "toId": "dfSubjectFromRoutine",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "dfIn",
+      "fromProperty": "detailStop",
+      "toId": "dfMode",
+      "toProperty": "to-stop"
+    },
+    {
       "fromId": "dfMode",
       "fromProperty": "open",
       "toId": "dfDialog",
@@ -152,6 +236,12 @@
       "fromProperty": "ok",
       "toId": "dfDialog",
       "toProperty": "okLabel"
+    },
+    {
+      "fromId": "dfMode",
+      "fromProperty": "optional",
+      "toId": "dfDialog",
+      "toProperty": "optional"
     },
     {
       "fromId": "dfSubject",
@@ -190,6 +280,18 @@
       "toProperty": "condition"
     },
     {
+      "fromId": "dfMode",
+      "fromProperty": "at-check",
+      "toId": "dfIfCheck",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "dfMode",
+      "fromProperty": "at-stop",
+      "toId": "dfIfStop",
+      "toProperty": "condition"
+    },
+    {
       "fromId": "dfDialog",
       "fromProperty": "confirm",
       "toId": "dfIfClose",
@@ -238,6 +340,30 @@
       "toProperty": "to-none"
     },
     {
+      "fromId": "dfDialog",
+      "fromProperty": "confirm",
+      "toId": "dfIfCheck",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "dfIfCheck",
+      "fromProperty": "ontrue",
+      "toId": "dfMode",
+      "toProperty": "to-none"
+    },
+    {
+      "fromId": "dfDialog",
+      "fromProperty": "confirm",
+      "toId": "dfIfStop",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "dfIfStop",
+      "fromProperty": "ontrue",
+      "toId": "dfMode",
+      "toProperty": "to-none"
+    },
+    {
       "fromId": "dfIfClose",
       "fromProperty": "ontrue",
       "toId": "dfOut",
@@ -260,6 +386,24 @@
       "fromProperty": "ontrue",
       "toId": "dfOut",
       "toProperty": "confirmUntick"
+    },
+    {
+      "fromId": "dfIfCheck",
+      "fromProperty": "ontrue",
+      "toId": "dfOut",
+      "toProperty": "confirmCheck"
+    },
+    {
+      "fromId": "dfIfStop",
+      "fromProperty": "ontrue",
+      "toId": "dfOut",
+      "toProperty": "confirmStop"
+    },
+    {
+      "fromId": "dfOccurrence",
+      "fromProperty": "value",
+      "toId": "dfOut",
+      "toProperty": "dialogOccurrenceId"
     },
     {
       "fromId": "dfTask",

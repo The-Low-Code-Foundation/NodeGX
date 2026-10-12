@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3ce25093-a075-552c-8ece-4f63c501521f",
+  "name": "Project money",
+  "path": "/Projects/Project money",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One money item of a project: what it is, how much and how often. Pressed, the money form opens on it."
+}

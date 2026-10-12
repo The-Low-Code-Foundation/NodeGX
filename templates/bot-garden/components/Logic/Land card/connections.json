@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "275d3b34-cc7b-5551-8c47-894cbdf05a7d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "landcardIn",
+      "fromProperty": "ghost",
+      "toId": "landcardFn",
+      "toProperty": "in-ghost"
+    },
+    {
+      "fromId": "landcardIn",
+      "fromProperty": "lang",
+      "toId": "landcardFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "landcardIn",
+      "fromProperty": "model",
+      "toId": "landcardFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "landcardIn",
+      "fromProperty": "requestId",
+      "toId": "landcardFn",
+      "toProperty": "in-requestId"
+    },
+    {
+      "fromId": "landcardIn",
+      "fromProperty": "words",
+      "toId": "landcardFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "landcardFn",
+      "fromProperty": "out-cancelText",
+      "toId": "landcardOut",
+      "toProperty": "cancelText"
+    },
+    {
+      "fromId": "landcardFn",
+      "fromProperty": "out-chips",
+      "toId": "landcardOut",
+      "toProperty": "chips"
+    },
+    {
+      "fromId": "landcardFn",
+      "fromProperty": "out-chipsLabel",
+      "toId": "landcardOut",
+      "toProperty": "chipsLabel"
+    },
+    {
+      "fromId": "landcardFn",
+      "fromProperty": "out-ghostLine",
+      "toId": "landcardOut",
+      "toProperty": "ghostLine"
+    },
+    {
+      "fromId": "landcardFn",
+      "fromProperty": "out-ghostOk",
+      "toId": "landcardOut",
+      "toProperty": "ghostOk"
+    },
+    {
+      "fromId": "landcardFn",
+      "fromProperty": "out-ghostShow",
+      "toId": "landcardOut",
+      "toProperty": "ghostShow"
+    },
+    {
+      "fromId": "landcardFn",
+      "fromProperty": "out-ghostThing",
+      "toId": "landcardOut",
+      "toProperty": "ghostThing"
+    },
+    {
+      "fromId": "landcardFn",
+      "fromProperty": "out-line",
+      "toId": "landcardOut",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "landcardFn",
+      "fromProperty": "out-putText",
+      "toId": "landcardOut",
+      "toProperty": "putText"
+    },
+    {
+      "fromId": "landcardFn",
+      "fromProperty": "out-show",
+      "toId": "landcardOut",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "landcardFn",
+      "fromProperty": "out-showChips",
+      "toId": "landcardOut",
+      "toProperty": "showChips"
+    },
+    {
+      "fromId": "landcardFn",
+      "fromProperty": "out-why",
+      "toId": "landcardOut",
+      "toProperty": "why"
+    },
+    {
+      "fromId": "landcardFn",
+      "fromProperty": "success",
+      "toId": "landcardOut",
+      "toProperty": "ran"
+    }
+  ]
+}

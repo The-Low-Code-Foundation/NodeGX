@@ -1,0 +1,88 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "layout"
+      ],
+      "parameters": {
+        "title": "Home"
+      }
+    },
+    {
+      "id": "layout",
+      "type": "Group",
+      "label": "Layout",
+      "parent": "page",
+      "children": [
+        "ask",
+        "shown"
+      ]
+    },
+    {
+      "id": "ask",
+      "type": "net.noodl.controls.button",
+      "label": "Ask Olive",
+      "parent": "layout",
+      "parameters": {
+        "label": "Ask Olive"
+      }
+    },
+    {
+      "id": "shown",
+      "type": "Text",
+      "label": "What Olive said",
+      "parent": "layout",
+      "parameters": {
+        "text": "Olive has not been asked yet"
+      }
+    },
+    {
+      "id": "call",
+      "type": "CloudFunction2",
+      "label": "askOlive (sends a choice, never a prompt)",
+      "parameters": {
+        "function": "askOlive",
+        "in-thing": "the sky on a clear day"
+      }
+    },
+    {
+      "id": "say",
+      "type": "JavaScriptFunction",
+      "label": "say what came back",
+      "parameters": {
+        "runOnChange-in-answer": true,
+        "runOnChange-in-errorCode": true,
+        "functionScript": "if (Inputs.answer && Inputs.answer.word) Outputs.shown = 'Olive says: ' + Inputs.answer.word;\nelse if (Inputs.errorCode) Outputs.shown = 'Olive is asleep, so the game carries on (' + Inputs.errorCode + ')';"
+      },
+      "ports": [
+        {
+          "name": "in-answer",
+          "displayName": "answer",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-errorCode",
+          "displayName": "errorCode",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-shown",
+          "displayName": "shown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "169961a3-9ace-5661-8b19-e52a6e31e43c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "grIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "grPanel",
+      "type": "Group",
+      "label": "What Olive may do",
+      "children": [
+        "grH",
+        "gr_guR1",
+        "gr_guR2",
+        "gr_guR3",
+        "gr_guR4"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)",
+        "backgroundColor": "var(--card)",
+        "borderRadius": "var(--radius-card)",
+        "cssClassName": "bg-panel",
+        "paddingTop": "var(--space-3-5)",
+        "paddingBottom": "var(--space-3-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "grH",
+      "type": "Text",
+      "label": "What Olive is allowed to do",
+      "parent": "grPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontFamily": "Fredoka",
+        "as": "h3",
+        "fontSize": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontWeight": "600",
+        "color": "var(--ink)",
+        "lineHeight": 1.2
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "gr_guR1",
+      "type": "Text",
+      "label": "guR1",
+      "parent": "grPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-li"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "gr_guR2",
+      "type": "Text",
+      "label": "guR2",
+      "parent": "grPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-li"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "gr_guR3",
+      "type": "Text",
+      "label": "guR3",
+      "parent": "grPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-li"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "gr_guR4",
+      "type": "Text",
+      "label": "guR4",
+      "parent": "grPanel",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-li"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "grT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "grPanel"
+  ]
+}

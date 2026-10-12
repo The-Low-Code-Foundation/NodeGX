@@ -54,9 +54,12 @@ function _getPageInfo(allComponents: TSFixme) {
 export function getRouterIndex(allComponents: TSFixme) {
   //build an index with all routers and pages so the viewer know what components to load without
   //having load the entire graph at once
-  const routers = getNodesWithType('Router', allComponents).filter((router) => router.parameters.name);
+  // P109-S18: a Router left with no Name is Main, as the runtime registers it (`router-handler.ts` `name || 'Main'`)
+  // and as the Router's Name port tells a person to leave it when there is only one. Leaving it out of the index made
+  // every URL open its start page in a deployed app.
+  const routers = getNodesWithType('Router', allComponents);
 
-  const routerInfo = routers.map((router) => ({ ...router.parameters }));
+  const routerInfo = routers.map((router) => ({ ...router.parameters, name: router.parameters.name || 'Main' }));
 
   return {
     routers: routerInfo,

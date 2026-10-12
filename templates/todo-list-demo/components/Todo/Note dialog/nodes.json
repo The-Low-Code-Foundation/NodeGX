@@ -32,6 +32,11 @@
           "name": "okLabel",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "optional",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 470,
@@ -289,7 +294,7 @@
       "type": "JavaScriptFunction",
       "label": "Has something been written?",
       "parameters": {
-        "functionScript": "var t = String(Inputs.text || '').trim();\nOutputs.ok = t !== '';\nOutputs.note = t;"
+        "functionScript": "var t = String(Inputs.text || '').trim();\nOutputs.ok = t !== '' || Inputs.optional === true;\nOutputs.note = t;"
       },
       "x": 470,
       "y": 1120,
@@ -297,6 +302,13 @@
         {
           "name": "in-text",
           "displayName": "text",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-optional",
+          "displayName": "optional",
           "plug": "input",
           "type": "*",
           "group": "Inputs"

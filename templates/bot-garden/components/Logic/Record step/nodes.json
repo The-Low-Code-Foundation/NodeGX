@@ -1,0 +1,322 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "35ffee3b-96dd-5f7d-894e-dd05189c23d0",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "recordstepIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "botName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bumps",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "islander",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "op",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "program",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "record",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "selected",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "world",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "recordstepFn",
+      "type": "JavaScriptFunction",
+      "label": "Record step",
+      "parameters": {
+        "functionScript": "var { apply, clone, countBlocks, isSet, newRun, step, worldOf } = Scripts.engine;\nvar { findBlock, maxId } = Scripts.fold;\nvar OPS = { fwd: 1, left: 1, right: 1, water: 1, fill: 1, pick: 1, put: 1, say: 1, 'olive:read': 1 };\n// P108 IW-001 F7: a say key says the thank-you of whoever asked (the request's islander), as the reference programs do.\nvar SAY_OF = { mamie: 'thanksMamie', sami: 'thanksSami', biscuit: 'thanksBiscuit' };\n// Record is 'yes' / 'no' from the Workshop's mode (a string: a States node's first-state false never arrives); false works too.\nvar record = Inputs.record !== false && String(Inputs.record) !== 'no';\nvar op = String(Inputs.op || '');\nvar raw = Inputs.program, prog = [];\nif (Array.isArray(raw)) prog = JSON.parse(JSON.stringify(raw));\nelse if (typeof raw === 'string' && raw) { try { var parsed = JSON.parse(raw); if (Array.isArray(parsed)) prog = parsed; } catch (e) { prog = []; } }\nvar w = worldOf(Inputs.world);\n// P108 IW-003 (lane M): a go key (go_nearest:<kind>, go_to:<kind>) records its block with the kind, or a chip of the first\n// thing of that kind on the plot.\nvar goKey = /^(go_nearest|go_to):([a-z]+)$/.exec(op);\nvar goChip = null;\nif (goKey && goKey[1] === 'go_to') for (var gc = 0; gc < w.things.length && !goChip; gc++) if (w.things[gc] && w.things[gc].kind === goKey[2]) goChip = { kind: goKey[2], x: w.things[gc].x, y: w.things[gc].y };\nif (goChip && w.things.length) for (var gd = 0; gd < w.things.length; gd++) if (w.things[gd].kind === goChip.kind && w.things[gd].x === goChip.x && w.things[gd].y === goChip.y && isSet(w.things[gd].id)) { goChip = { id: String(w.things[gd].id), kind: goChip.kind, x: goChip.x, y: goChip.y }; break; }\nvar ok = (!!OPS[op] || (!!goKey && (goKey[1] === 'go_nearest' || !!goChip))) && w.robots.length > 0;\nvar sayKey = '', bumped = false, asking = false;\nif (ok) {\n  var id = maxId(prog) + 1;\n  var blk = { id: id, t: op };\n  if (op === 'say') blk.slots = { text: SAY_OF[String(Inputs.islander || '')] || 'thanksMamie' };\n  if (goKey) blk = goKey[1] === 'go_nearest' ? { id: id, t: 'go_nearest', slots: { kind: goKey[2] } } : { id: id, t: 'go_to', slots: { thing: goChip } };\n  var host = null, sel = Inputs.selected;\n  if (sel !== undefined && sel !== null && sel !== '') { var c = findBlock(prog, Number(sel)); if (c && Array.isArray(c.body) && c.t !== 'if') host = c.body; }\n  if (record) (host || prog).push(clone(blk));\n  var st = step(newRun([clone(blk)], w.robots[0].id, Inputs.lang), w, null);\n  // P108 IW-003 (lane M): a go key walks the whole way in one press (every tick of the block, the engine's own step and\n  // apply, as Play walks it); what it last said is the press's line (a none: sayNone:<kind>).\n  // P108 s8 (Richard: \"the robot jumps to the rock\"): every tile it steps onto is kept, in order, as the robot row's\n  // via, so the kits draw the walk a tile at a time (the world itself still changes once, as before).\n  var via = [];\n  if (goKey) {\n    var gsay = '', gn2 = 0;\n    for (;;) {\n      if (st.delta.sayKey) gsay = st.delta.none && st.delta.sayKey === 'sayNone' ? 'sayNone:' + st.delta.none.kind : st.delta.sayKey;\n      w = apply(w, st.delta);\n      if (st.delta.move && w.robots[0]) via.push([w.robots[0].x, w.robots[0].y]);\n      if (st.done || ++gn2 > 400) break;\n      st = step(st.run, w, null);\n    }\n    st = { delta: { sayKey: gsay }, waiting: false };\n  }\n  // F7: Olive's read parks on its ask, as the block does in a run: the page asks her (Request, Pending) and her answer\n  // is spoken by Pad answer. Anything else moves the world by the engine's own step.\n  if (st.waiting) { asking = true; Outputs.request = st.request; Outputs.pending = st.run; }\n  else w = apply(w, st.delta);\n  sayKey = st.delta.sayKey || '';\n  bumped = !!st.delta.bump;\n  // The walk is this press's only: any other press clears it (a kit ignores a via that does not join where it drew the robot).\n  if (w.robots[0]) { if (via.length > 1) w.robots[0].via = via; else delete w.robots[0].via; }\n}\n// F7: a say key's line over the robot (a new bubble each press); nothing to say leaves the port alone.\nif (sayKey) {\n  var WR = Array.isArray(Inputs.words) ? Inputs.words : [], lg = String(Inputs.lang) === 'fr' ? 'fr' : 'en', said = sayKey;\n  // P108 IW-003 (lane M): sayNone:<kind> is worded by kind (iw3mNone<Kind>), else the plain sayNone.\n  var lookKey = sayKey;\n  if (lookKey.indexOf('sayNone:') === 0) { var nk = 'iw3mNone' + lookKey.charAt(8).toUpperCase() + lookKey.slice(9); lookKey = 'sayNone'; for (var nq = 0; nq < WR.length; nq++) if (WR[nq] && WR[nq].key === nk) lookKey = nk; }\n  for (var q = 0; q < WR.length; q++) if (WR[q] && WR[q].key === lookKey) said = String(WR[q][lg] || WR[q].en || sayKey).split('{b}').join(String(Inputs.botName || 'Pip'));\n  Outputs.bubble = { robot: 0, text: said, style: 'plain', n: 'pad:' + id + ':' + Math.random().toString(36).slice(2, 8) };\n}\nOutputs.asking = asking;\nOutputs.program = JSON.stringify(prog);\nOutputs.world = w;\nOutputs.recorded = ok && record;\nOutputs.moved = ok;\nOutputs.sayKey = sayKey;\nOutputs.sayN = countBlocks(prog);\nOutputs.bumps = (Number(Inputs.bumps) || 0) + (bumped ? 1 : 0);\nOutputs.blocks = countBlocks(prog);\n",
+        "runOnChange-in-botName": false,
+        "runOnChange-in-bumps": false,
+        "runOnChange-in-islander": false,
+        "runOnChange-in-lang": false,
+        "runOnChange-in-op": false,
+        "runOnChange-in-program": false,
+        "runOnChange-in-record": false,
+        "runOnChange-in-selected": false,
+        "runOnChange-in-words": false,
+        "runOnChange-in-world": false,
+        "uses": "engine.js,fold.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-record",
+          "displayName": "record",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-op",
+          "displayName": "op",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-program",
+          "displayName": "program",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-world",
+          "displayName": "world",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-islander",
+          "displayName": "islander",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-selected",
+          "displayName": "selected",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-botName",
+          "displayName": "botName",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-bumps",
+          "displayName": "bumps",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-request",
+          "displayName": "request",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pending",
+          "displayName": "pending",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bubble",
+          "displayName": "bubble",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-asking",
+          "displayName": "asking",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-program",
+          "displayName": "program",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-world",
+          "displayName": "world",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-recorded",
+          "displayName": "recorded",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-moved",
+          "displayName": "moved",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sayKey",
+          "displayName": "sayKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sayN",
+          "displayName": "sayN",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bumps",
+          "displayName": "bumps",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blocks",
+          "displayName": "blocks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "recordstepOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "asking",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "blocks",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "bubble",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "bumps",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "moved",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "pending",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "program",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "recorded",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "request",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "sayKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sayN",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "world",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

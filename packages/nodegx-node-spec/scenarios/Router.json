@@ -1,0 +1,6736 @@
+[
+ {
+  "name": "placed with Pages: the start page is built at once — Current Page Home, one child, its Page Inputs handed no parameters; Did Mount",
+  "because": "the mount registers the router, which resets (router-handler.ts :69-96, router.tsx :503-640); the build lands at the frame's yield",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "placed at #/about: the URL's page, not the start page",
+  "because": "matchPageFromUrl :768-844 — the hash is the path",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/about"
+  }
+ },
+ {
+  "name": "placed at #/product/7?x: the parameter from the path, and one from the hash's own query stays in the segment",
+  "because": "_matchPathParts; the hash's '?' is not a query",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/product/7?x=1"
+  }
+ },
+ {
+  "name": "placed at ?tab=x#/product/a%2Fb: the query joins the path's parameters; an encoded slash is part of the parameter",
+  "because": "_decodePathSegment after the split; _getSearchParams",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/?tab=x#/product/a%2Fb"
+  }
+ },
+ {
+  "name": "path mode, /product/a%25b?tab=x: the path, the % decoded once",
+  "because": "navigationPathType path :735-746",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/product/a%25b?tab=x",
+   "projectSettings": {
+    "navigationPathType": "path"
+   }
+  }
+ },
+ {
+  "name": "path mode at /: the empty path matches Home ('/')",
+  "because": "'' split is [''] and '/' trims to ''",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "projectSettings": {
+    "navigationPathType": "path"
+   }
+  }
+ },
+ {
+  "name": "hash setting 'hash' reads the hash as unset does",
+  "because": "navigationPathType hash",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/about",
+   "projectSettings": {
+    "navigationPathType": "hash"
+   }
+  }
+ },
+ {
+  "name": "Url path shop, path mode at /shop/about: the prefix is part of every pattern",
+  "because": "urlPath :838-840",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "urlPath": "shop"
+  },
+  "steps": [
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/shop/about",
+   "projectSettings": {
+    "navigationPathType": "path"
+   }
+  }
+ },
+ {
+  "name": "Url path '' puts an empty part in front: '/about' no longer matches",
+  "because": "'' is not undefined (:838)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "urlPath": ""
+  },
+  "steps": [
+   "settle",
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/about"
+  }
+ },
+ {
+  "name": "Url path /shop/ trims to shop",
+  "because": "_trimUrlPart",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "urlPath": "/shop/"
+  },
+  "steps": [
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/shop/product/3"
+  }
+ },
+ {
+  "name": "Url path null is no Url path: the router shows its page and answers its Reset (row C116, fixed in P109 ISL-048)",
+  "because": "the Url path setter — null is none (row C116, fixed in P109 ISL-048)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "urlPath": null
+  },
+  "steps": [
+   "settle",
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "urlPath",
+    "value": "shop"
+   },
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "a URL with no page: the start page, with the query",
+  "because": "the fallback :515-527",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/?q=1#/nowhere"
+  }
+ },
+ {
+  "name": "no Pages: nothing shown; a Reset fails router/no-pages",
+  "because": "RT-3 :529-544",
+  "params": {
+   "name": "Main"
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "Pages with no start page and no match: a Reset fails router/no-start-page",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "About"
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/nowhere"
+  }
+ },
+ {
+  "name": "a start page the index has no page for: router/page-not-found",
+  "because": "getPageInfoForComponent :137-141",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [],
+    "startPage": "Missing"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "start page Twice (two Page nodes): built, deleted, router/component-is-not-a-page; Current Page Component goes (never sent)",
+  "because": "RT-1 :586-608",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Product"
+    ],
+    "startPage": "Twice"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "routes name pages; a start page outside them is still shown",
+  "because": "the start page is looked up in the index, not the routes",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Product"
+    ],
+    "startPage": "About"
+   }
+  },
+  "steps": [
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "routes without the URL's page: the URL is not matched, the start page shown",
+  "because": "getPagesForRouter :114-135",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "About"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/product/3"
+  }
+ },
+ {
+  "name": "a malformed query is kept as written: the router shows its start page (row C115, fixed in P109 ISL-048)",
+  "because": "_getSearchParams :749-764 — a malformed escape kept as written (row C115, fixed in P109 ISL-048)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/?q=%zz"
+  }
+ },
+ {
+  "name": "a malformed path segment is kept as written and matches nothing",
+  "because": "_decodePathSegment never throws",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/product/%zz"
+  }
+ },
+ {
+  "name": "Reset on the page it shows with the same parameters: Unchanged",
+  "because": "ERG-001 §4 :548-577",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "two Resets in one frame: one reset, both answered alike",
+  "because": "scheduleReset collects the tokens",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "reset"
+   },
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "Reset before the mount's reset lands: answered by the frame's reset",
+  "because": "the mount reset and the scheduled one",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   {
+    "signal": "reset"
+   },
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "UNNAMED: placed with no Name at #/about — the project's index names an unnamed Router Main, so the URL's page shows, and Back to #/product/3 shows Product (P109-S18)",
+  "because": "getRouterIndex names a blank Router Main; getPagesForRouter looks a blank name up as Main",
+  "params": {
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/product/3"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/about"
+  }
+ },
+ {
+  "name": "UNNAMED: placed with Name '' — the same: '' is Main on both sides",
+  "because": "'' is falsy",
+  "params": {
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "name": ""
+  },
+  "steps": [
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/about"
+  }
+ },
+ {
+  "name": "UNNAMED: placed with no Name, Name written Main — the index already names it Main, so #/about still matches",
+  "because": "the index is the saved project; the lookup is the Name now",
+  "params": {
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "Main"
+   },
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/about"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/about"
+  }
+ },
+ {
+  "name": "UNNAMED: placed with no Name, Name written Side — the index is the saved project (Main), the lookup is Side, so no URL matches and the start page shows",
+  "because": "getPagesForRouter filters the index by the Name now",
+  "params": {
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "Side"
+   },
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/about"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/about"
+  }
+ },
+ {
+  "name": "UNNAMED at #/product/7: the mount's Reset builds Product; Url path written shop and a Reset in the same frame wait behind the build and fail when it lands (the start page Twice is not a page) — Product stays on, so a second Reset fails the same way and builds nothing",
+  "because": "world.resume lands the build (Page Inputs handed) and then runs the queued Reset, which matches no page under shop and refuses the start page; the Reset after reads what the landing kept (P109 ISL-034: once an unnamed router matched its URL, only generated sequences reached this landing)",
+  "params": {
+   "pages": {
+    "routes": [
+     "Product"
+    ],
+    "startPage": "Twice"
+   }
+  },
+  "steps": [
+   {
+    "set": "urlPath",
+    "value": "shop"
+   },
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/product/7"
+  }
+ },
+ {
+  "name": "navigate Product 7: handed at the frame's end, on 1 ms later — built, Page Inputs handed {id:7}, #/product/7 pushed, Done",
+  "because": "router-handler.ts :51-67; _buildPage :957-1000",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 7
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "navigate 'a/b c': the parameter encoded into the path",
+  "because": "getRelativeURL encodeURIComponent",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": "a/b c"
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "navigate with a parameter not in the path: a query before the hash",
+  "because": "getRelativeURL :660-668; hash mode :852-858",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 7,
+      "tab": "reviews"
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "navigate Product without its id: {id} stays in the URL, and a reset reads it as the id",
+  "because": "pageParams[key] !== undefined",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "path mode navigate: a path, the query after",
+  "because": "_getCompleteUrlToPage path",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 7,
+      "tab": "x"
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "projectSettings": {
+    "navigationPathType": "path"
+   }
+  }
+ },
+ {
+  "name": "navigate with Url path shop: the prefix in the URL",
+  "because": "getRelativeURL :670-672",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "urlPath": "shop"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "navigate with Url path null: the page is built and shown, its URL pushed, Done (row C116, fixed in P109 ISL-048)",
+  "because": "_updateUrlWithTopPage",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "urlPath",
+    "value": null
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About",
+     "openInNewTab": true
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "navigate Twice: a navigate builds a component whatever its Page nodes",
+  "because": "_buildPage has no Page check",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Twice"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "navigate with no target: Failure navigate/no-target-page",
+  "because": "NDA-004 §2 :899-904",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {}
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "navigate to a component with no page: Failure navigate/page-not-found",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Missing"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "navigate in a new tab: window.open, Done; the page stays",
+  "because": "openInNewTab :908-914",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 1,
+      "q": "a b"
+     },
+     "openInNewTab": true
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "navigate in a new tab, path mode",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About",
+     "openInNewTab": true
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "projectSettings": {
+    "navigationPathType": "path"
+   }
+  }
+ },
+ {
+  "name": "navigate to the page it shows: Unchanged",
+  "because": "_navigateInCurrentWindow :942-955",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Home"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "navigate Product 7 twice: the second Unchanged; a Reset reads '7' from the URL, a change — Done, handed to the page the navigate built (row C117, fixed in P109 ISL-048); a third navigate with 7 rebuilds",
+  "because": "shallowObjectsEqual ===",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 7
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 7
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 7
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "navigate to a Router named Other while only Main is registered: the one router takes it",
+  "because": "router-handler.ts :54-57",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "router": "Other",
+     "target": "About"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "a navigate waits its 1 ms: nothing before the clock moves",
+  "because": "setTimeout(…, 1)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   "settle",
+   "settle",
+   {
+    "advance": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "two navigates in one frame: both built in turn at the same millisecond",
+  "because": "one request at a time",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 2
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "an Unchanged then a build in one frame",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Home"
+    }
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "a Failure then a build in one frame",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {}
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "a new tab then a build in one frame",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About",
+     "openInNewTab": true
+    }
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 3
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "a build then a navigate back to the same page in one frame",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Home"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "navigates a frame apart, at different times",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 4
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "a Reset and a navigate in one frame: the reset first, the navigate a millisecond later",
+  "because": "the frame's callbacks in step order",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "reset"
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "a navigate and a Reset in one frame",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "a navigate lands, then a Reset reads the URL it pushed: Unchanged",
+  "because": "the push moved the location",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": "x"
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "Back to #/product/9: popstate — a reset at the frame's end",
+  "because": "the popstate listener :143-151",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/product/9"
+   },
+   "settle",
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "Back to #/: Home again",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "after a navigate built Product 1, Back to #/product/2: the reset takes it as the page it shows with new parameters, and its Page Inputs are handed id 2 (row C117, fixed in P109 ISL-048)",
+  "because": "the same page, the parameters moved :548-577",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": "1"
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/product/2"
+   },
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/product/2"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "Back to a malformed query: the reset keeps it as written and answers (row C115, fixed in P109 ISL-048); a later Back moves on",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "traverse",
+    "value": "?q=%zz#/about"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "traverse",
+    "value": "https://app.example/#/about"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "Back to #/twice: built and refused as no page",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/twice"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/about"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "Back while unmounted: no one listens",
+  "because": "willUnmount removes the listener",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/about"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "Back twice in one frame: one reset",
+  "because": "scheduleReset",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/about"
+   },
+   {
+    "act": "traverse",
+    "value": "#/product/3"
+   },
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "Back and a Reset in one frame: one reset, the Reset answered",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/about"
+   },
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "Back, path mode",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "traverse",
+    "value": "/about"
+   },
+   "settle",
+   {
+    "act": "traverse",
+    "value": "/product/3?tab=specs"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "projectSettings": {
+    "navigationPathType": "path"
+   }
+  }
+ },
+ {
+  "name": "placed named Other: the index names it Other; a navigate still reaches it",
+  "because": "getPagesForRouter by name",
+  "params": {
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "name": "Other"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/product/2"
+  }
+ },
+ {
+  "name": "Name written Other while on the page: registered again — a reset; the index still names it as placed, so the URL matches no page",
+  "because": "_registerRouter on a Name write",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "Other"
+   },
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/about"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/product/2"
+  }
+ },
+ {
+  "name": "Name written to what it was: a reset all the same",
+  "because": "",
+  "params": {
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "name": "Main"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "Main"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "Name written twice in a frame, then Back: the second reset waits for the first's microtask",
+  "because": "ASyncQueue",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "A"
+   },
+   {
+    "set": "name",
+    "value": "B"
+   },
+   {
+    "act": "traverse",
+    "value": "#/about"
+   },
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "unmounted: a navigate queued under its name; mounted, a Main one replays, and a blank one too — a blank name is Main (row C118, fixed in P109 ISL-048)",
+  "because": "router-handler.ts navigate and registerRouter both read a blank name as Main (row C118, fixed in P109 ISL-048)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "router": "Main",
+     "target": "Product",
+     "params": {
+      "id": 2
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "unmounted with a queued Main navigate to the page the start would show: replayed, no reset",
+  "because": "hasNavigated skips the reset",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   {
+    "act": "navigate",
+    "value": {
+     "router": "Main",
+     "target": "Home"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "unmounted, a queued navigate under Other replays when the Name becomes Other",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   {
+    "act": "navigate",
+    "value": {
+     "router": "Other",
+     "target": "About"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "set": "name",
+    "value": "Other"
+   },
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "Pages written while on the page: a reset at the frame's end",
+  "because": "pages setter :199-210",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "pages",
+    "value": {
+     "routes": [
+      "Home",
+      "About"
+     ],
+     "startPage": "About"
+    }
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "Pages written while off the page: stored only",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "set": "pages",
+    "value": {
+     "routes": [
+      "About"
+     ],
+     "startPage": "About"
+    }
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "Mounted off: Will Unmount; a Reset still rebuilds (the Reset has no mount guard)",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/about"
+   },
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "Mounted off and on: registered again — a reset onto the page it shows",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "placed off the page, then on: the first reset at that frame — Children Count a frame late",
+  "because": "C114's frame",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "placed at #/product/1, Back to #/product/2: the page a reset built is handed id 2 (Done); a Reset after it Unchanged",
+  "because": "the same page, the parameters moved :548-577 — currentPageComponent is the reset's",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/product/2"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "name",
+    "value": "X"
+   },
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/product/1"
+  }
+ },
+ {
+  "name": "placed without Pages, off the page: a Reset in the frame it mounts fails, the mount's reset after it; a later Reset answered",
+  "because": "the frame's callbacks, then the paint's register",
+  "params": {
+   "name": "Main",
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "name",
+    "value": "X"
+   },
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "no Pages: a failing Reset in the frame it is unmounted; mounted again, a later Reset answered",
+  "because": "the queue frees at the yield; a later reset is not stuck behind it",
+  "params": {
+   "name": "Main"
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "reset"
+   },
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "no Pages: unmounted, then a failing Reset in the same frame; mounted again, a later Reset answered",
+  "because": "",
+  "params": {
+   "name": "Main"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "at #/product/1, Back to #/product/2 and a Reset in one frame: Done, handed id 2; a Reset after it Unchanged",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/product/2"
+   },
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/product/1"
+  }
+ },
+ {
+  "name": "at #/product/1, Back to #/product/2 and a Name write (the name it was placed with) in one frame: the Name's reset hands id 2 at once; the frame's reset Unchanged",
+  "because": "registering resets at the write",
+  "params": {
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "name": "Main"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/product/2"
+   },
+   {
+    "set": "name",
+    "value": "Main"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/product/1"
+  }
+ },
+ {
+  "name": "at #/product/1, unmounted, Back to #/product/2 (no one listens), mounted again: the mount's reset hands id 2",
+  "because": "the listener goes with the mount",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/product/2"
+   },
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/product/1"
+  }
+ },
+ {
+  "name": "off the page and on again, with a Reset in that frame: Unchanged, the mount's reset after it; a later Reset answered",
+  "because": "the frame's callbacks, then the paint",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "off the page and on again, a Reset before the Mounted write in that frame: the same",
+  "because": "",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "Pages written before the first frame: the placing's reset read the placed Pages — About lands, then the written start page Twice is refused; Current Page Component stays About on the wire",
+  "because": "the placing mounts (registering resets at once); two builds land at one yield, each output sent as flagged — undefined is never sent (C3)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "About"
+    ]
+   }
+  },
+  "steps": [
+   {
+    "set": "pages",
+    "value": {
+     "routes": [
+      "Product"
+     ],
+     "startPage": "Twice"
+    }
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/about"
+  }
+ },
+ {
+  "name": "MATRIX a Reset, no paint",
+  "because": "THE MATRIX (s51, s56)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Reset, Mounted off before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Reset, Mounted off after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "reset"
+   },
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Reset, Mounted on before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Reset, Mounted on after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "reset"
+   },
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Reset, after a Name write in the frame",
+  "because": "hops (async-queue.ts)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "X"
+   },
+   {
+    "signal": "reset"
+   },
+   {
+    "act": "traverse",
+    "value": "#/product/8"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a navigate, no paint",
+  "because": "THE MATRIX (s51, s56)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a navigate, Mounted off before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a navigate, Mounted off after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a navigate, Mounted on before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a navigate, Mounted on after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a navigate, after a Name write in the frame",
+  "because": "hops (async-queue.ts)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "X"
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About"
+    }
+   },
+   {
+    "act": "traverse",
+    "value": "#/product/8"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX an Unchanged navigate, no paint",
+  "because": "THE MATRIX (s51, s56)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Home"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX an Unchanged navigate, Mounted off before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Home"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX an Unchanged navigate, Mounted off after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Home"
+    }
+   },
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX an Unchanged navigate, Mounted on before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Home"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX an Unchanged navigate, Mounted on after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Home"
+    }
+   },
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX an Unchanged navigate, after a Name write in the frame",
+  "because": "hops (async-queue.ts)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "X"
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Home"
+    }
+   },
+   {
+    "act": "traverse",
+    "value": "#/product/8"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a refused navigate, no paint",
+  "because": "THE MATRIX (s51, s56)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {}
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a refused navigate, Mounted off before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   {
+    "act": "navigate",
+    "value": {}
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a refused navigate, Mounted off after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {}
+   },
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a refused navigate, Mounted on before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   {
+    "act": "navigate",
+    "value": {}
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a refused navigate, Mounted on after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {}
+   },
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a refused navigate, after a Name write in the frame",
+  "because": "hops (async-queue.ts)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "X"
+   },
+   {
+    "act": "navigate",
+    "value": {}
+   },
+   {
+    "act": "traverse",
+    "value": "#/product/8"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a new-tab navigate, no paint",
+  "because": "THE MATRIX (s51, s56)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About",
+     "openInNewTab": true
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a new-tab navigate, Mounted off before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About",
+     "openInNewTab": true
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a new-tab navigate, Mounted off after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About",
+     "openInNewTab": true
+    }
+   },
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a new-tab navigate, Mounted on before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About",
+     "openInNewTab": true
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a new-tab navigate, Mounted on after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About",
+     "openInNewTab": true
+    }
+   },
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a new-tab navigate, after a Name write in the frame",
+  "because": "hops (async-queue.ts)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "X"
+   },
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About",
+     "openInNewTab": true
+    }
+   },
+   {
+    "act": "traverse",
+    "value": "#/product/8"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Back, no paint",
+  "because": "THE MATRIX (s51, s56)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/about"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Back, Mounted off before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   {
+    "act": "traverse",
+    "value": "#/about"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Back, Mounted off after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/about"
+   },
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Back, Mounted on before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   {
+    "act": "traverse",
+    "value": "#/about"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Back, Mounted on after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/about"
+   },
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Back, after a Name write in the frame",
+  "because": "hops (async-queue.ts)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "X"
+   },
+   {
+    "act": "traverse",
+    "value": "#/about"
+   },
+   {
+    "act": "traverse",
+    "value": "#/product/8"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a malformed Back, no paint",
+  "because": "THE MATRIX (s51, s56)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "traverse",
+    "value": "?q=%zz#/about"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a malformed Back, Mounted off before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   {
+    "act": "traverse",
+    "value": "?q=%zz#/about"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a malformed Back, Mounted off after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "traverse",
+    "value": "?q=%zz#/about"
+   },
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a malformed Back, Mounted on before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   {
+    "act": "traverse",
+    "value": "?q=%zz#/about"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a malformed Back, Mounted on after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "traverse",
+    "value": "?q=%zz#/about"
+   },
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a malformed Back, after a Name write in the frame",
+  "because": "hops (async-queue.ts)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "X"
+   },
+   {
+    "act": "traverse",
+    "value": "?q=%zz#/about"
+   },
+   {
+    "act": "traverse",
+    "value": "#/product/8"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Name write, no paint",
+  "because": "THE MATRIX (s51, s56)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "Other"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Name write, Mounted off before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   {
+    "set": "name",
+    "value": "Other"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Name write, Mounted off after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "Other"
+   },
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Name write, Mounted on before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   {
+    "set": "name",
+    "value": "Other"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Name write, Mounted on after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "Other"
+   },
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Name write, after a Name write in the frame",
+  "because": "hops (async-queue.ts)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "X"
+   },
+   {
+    "set": "name",
+    "value": "Other"
+   },
+   {
+    "act": "traverse",
+    "value": "#/product/8"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Pages write, no paint",
+  "because": "THE MATRIX (s51, s56)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "pages",
+    "value": {
+     "routes": [
+      "Home",
+      "About"
+     ],
+     "startPage": "About"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Pages write, Mounted off before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": false
+   },
+   {
+    "set": "pages",
+    "value": {
+     "routes": [
+      "Home",
+      "About"
+     ],
+     "startPage": "About"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Pages write, Mounted off after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "pages",
+    "value": {
+     "routes": [
+      "Home",
+      "About"
+     ],
+     "startPage": "About"
+    }
+   },
+   {
+    "set": "mounted",
+    "value": false
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Pages write, Mounted on before it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mounted",
+    "value": true
+   },
+   {
+    "set": "pages",
+    "value": {
+     "routes": [
+      "Home",
+      "About"
+     ],
+     "startPage": "About"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Pages write, Mounted on after it",
+  "because": "THE MATRIX",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   },
+   "mounted": false
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "pages",
+    "value": {
+     "routes": [
+      "Home",
+      "About"
+     ],
+     "startPage": "About"
+    }
+   },
+   {
+    "set": "mounted",
+    "value": true
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "MATRIX a Pages write, after a Name write in the frame",
+  "because": "hops (async-queue.ts)",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "X"
+   },
+   {
+    "set": "pages",
+    "value": {
+     "routes": [
+      "Home",
+      "About"
+     ],
+     "startPage": "About"
+    }
+   },
+   {
+    "act": "traverse",
+    "value": "#/product/8"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Product",
+     "params": {
+      "id": 5
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "C117's twin: navigate About with ?x=1 (no Page Inputs), then a Reset reads '1' — a change, Done; a second Reset is Unchanged, and a navigate after it still runs",
+  "because": "resetAsync :571-589 (the parameters move: Done, Page Inputs handed to the page on screen, here none); a reset that changed nothing is Unchanged",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About",
+     "params": {
+      "x": 1
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Home"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ }
+]

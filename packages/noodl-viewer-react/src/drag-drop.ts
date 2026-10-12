@@ -84,20 +84,8 @@ export function setDraggable(node: DragDropNode, on: boolean): void {
   if (on) {
     draggables.add(node);
     install();
-    whenMounted(node, (el) => {
-      // Something a keyboard can reach and a screen reader can name. Only added where the author
-      // has not already decided — an element with its own tabindex keeps it.
-      const added: string[] = [];
-      if (!el.hasAttribute('tabindex')) {
-        el.setAttribute('tabindex', '0');
-        added.push('tabindex');
-      }
-      if (!el.hasAttribute('aria-roledescription')) {
-        el.setAttribute('aria-roledescription', 'draggable');
-        added.push('aria-roledescription');
-      }
-      if (added.length) addedAttributes.set(el, added);
-    });
+    const el = node.getDOMElement();
+    if (el) markDraggable(el);
   } else {
     draggables.delete(node);
     const el = node.getDOMElement();
@@ -107,6 +95,34 @@ export function setDraggable(node: DragDropNode, on: boolean): void {
       addedAttributes.delete(el);
     }
   }
+}
+
+/**
+ * P107-C77: the node has a new element — a mount, a remount, a new Tag. A Draggable one gets the
+ * attributes at once, so the keyboard can still pick it up. Called from `setDOMElement`, where
+ * every built-in node reports its element; the attributes used to go on whatever element existed
+ * when Draggable was written (or turned up within 60 frames), and a later element had none.
+ */
+export function elementChanged(node: DragDropNode, el: HTMLElement): void {
+  if (draggables.has(node)) markDraggable(el);
+}
+
+/**
+ * Something a keyboard can reach and a screen reader can name. Only added where the author has
+ * not already decided — an element with its own tabindex keeps it.
+ */
+function markDraggable(el: HTMLElement): void {
+  if (addedAttributes.has(el)) return;
+  const added: string[] = [];
+  if (!el.hasAttribute('tabindex')) {
+    el.setAttribute('tabindex', '0');
+    added.push('tabindex');
+  }
+  if (!el.hasAttribute('aria-roledescription')) {
+    el.setAttribute('aria-roledescription', 'draggable');
+    added.push('aria-roledescription');
+  }
+  if (added.length) addedAttributes.set(el, added);
 }
 
 export function setAcceptsDrops(node: DragDropNode, on: boolean): void {
@@ -127,23 +143,6 @@ export function forget(node: DragDropNode): void {
   else if (gesture && gesture.zone === node) leaveZone(gesture);
 }
 
-/**
- * Run `fn` with the node's element once it has one. A port's `set` runs before the first render,
- * when there is no element yet; a few frames is always enough for a mounted node, and a node that
- * never mounts (in a hidden branch) is simply not reachable by keyboard until it does — pointer
- * pickup does not depend on this at all.
- */
-function whenMounted(node: DragDropNode, fn: (el: HTMLElement) => void, framesLeft = 60): void {
-  if (typeof window === 'undefined') return;
-  const el = node.getDOMElement();
-  if (el) {
-    fn(el);
-    return;
-  }
-  if (framesLeft <= 0 || node._deleted) return;
-  window.requestAnimationFrame(() => whenMounted(node, fn, framesLeft - 1));
-}
-
 function liveElement(node: DragDropNode): HTMLElement | null {
   if (node._deleted) return null;
   const el = node.getDOMElement();
@@ -152,8 +151,10 @@ function liveElement(node: DragDropNode): HTMLElement | null {
 
 // ── Reading a node ──────────────────────────────────────────────────────────
 
-function kindsOf(value: string | undefined): string[] {
-  return (value || '')
+// A wire can carry anything into Accept Kind, Drag Kind and Zone Name: read each as text, as the spec does, so a number or a
+// list never throws inside a drag (P107-C84, C85).
+function kindsOf(value: unknown): string[] {
+  return String(value || '')
     .split(',')
     .map((k) => k.trim())
     .filter(Boolean);
@@ -166,7 +167,7 @@ function kindsOf(value: string | undefined): string[] {
 function accepts(zone: DragDropNode, source: DragDropNode): boolean {
   const wanted = kindsOf(zone._internal.acceptKind);
   if (wanted.length === 0) return true;
-  const kind = (source._internal.dragKind || '').trim();
+  const kind = String(source._internal.dragKind || '').trim();
   return wanted.includes(kind);
 }
 
@@ -438,6 +439,17 @@ function finish(g: Gesture, { settleGap }: { settleGap: boolean }): void {
 // ── Where the pointer is ────────────────────────────────────────────────────
 
 /**
+ * A zone the gesture's source can never be dropped into: the source node itself, or a zone inside
+ * it (P107-C78). Asked of the node as well as of the element the press started on: a remount or a
+ * new Tag replaces the element under a gesture, and the new one is not inside the old.
+ */
+function insideSource(g: Gesture, node: DragDropNode, el: Element): boolean {
+  if (node === g.source || g.sourceEl.contains(el)) return true;
+  const now = liveElement(g.source);
+  return !!now && now.contains(el);
+}
+
+/**
  * The innermost armed zone that takes this source, walking out from the element under the
  * pointer. A zone that refuses the kind is passed over, so an outer zone that takes it still can
  * (AC3's nesting rule is about the innermost TAKER). A zone inside the source is never a target:
@@ -457,7 +469,7 @@ function zoneAt(g: Gesture, x: number, y: number): { node: DragDropNode; el: HTM
   for (let el: Element | null = hit; el; el = el.parentElement) {
     const node = byElement.get(el);
     if (!node) continue;
-    if (g.sourceEl.contains(el)) continue;
+    if (insideSource(g, node, el)) continue;
     if (accepts(node, g.source)) return { node, el: el as HTMLElement };
   }
   return null;
@@ -528,13 +540,26 @@ function axisOf(el: HTMLElement): 'x' | 'y' {
  */
 function slots(g: Gesture, zoneEl: HTMLElement): HTMLElement[] {
   const out: HTMLElement[] = [];
-  for (const child of Array.from(zoneEl.children)) {
+  for (const child of Array.from(slotParent(zoneEl).children)) {
     if (!(child instanceof HTMLElement) || child === g.sourceEl) continue;
+    // A node's own drawing is no slot (P107-C91: Custom SVG's span held a Shape's Drop Index at 1)
+    if (child.hasAttribute('data-ndl-drawing')) continue;
     const style = getComputedStyle(child);
     if (style.display === 'none' || style.position === 'absolute' || style.position === 'fixed') continue;
     out.push(child);
   }
   return out;
+}
+
+/**
+ * The element a zone's cards are laid out in: the zone's own element, or the child it marks `data-ndl-slots` — a scrolling
+ * Group draws its children inside the scroller's wrapper (P107-C88, ruled "count the cards": Drop Index counted the wrapper).
+ */
+function slotParent(zoneEl: HTMLElement): HTMLElement {
+  for (const child of Array.from(zoneEl.children)) {
+    if (child instanceof HTMLElement && child.hasAttribute('data-ndl-slots')) return child;
+  }
+  return zoneEl;
 }
 
 /** A child's box as it would be without this gesture's translate. */
@@ -588,7 +613,7 @@ function setIndex(g: Gesture, index: number): void {
  * one card lower than it aimed.
  */
 function homeIndex(g: Gesture, zoneEl: HTMLElement): number {
-  if (g.sourceEl.parentElement !== zoneEl) return -1;
+  if (g.sourceEl.parentElement !== slotParent(zoneEl)) return -1;
   return slots(g, zoneEl).filter((c) => c.compareDocumentPosition(g.sourceEl) & Node.DOCUMENT_POSITION_FOLLOWING).length;
 }
 
@@ -738,7 +763,7 @@ function sourceName(el: HTMLElement): string {
 }
 
 function zoneName(zone: DragDropNode, el: HTMLElement | undefined): string {
-  const named = (zone._internal.dropZoneName || '').trim();
+  const named = String(zone._internal.dropZoneName || '').trim();
   if (named) return named;
   const label = el && el.getAttribute('aria-label');
   if (label) return label;
@@ -790,7 +815,12 @@ function onKeyDown(e: KeyboardEvent): void {
     return;
   }
 
-  const list = orderedZones(g.source);
+  // P107-C83: a zone taken off the page under the carried card (Mounted off) is left at the next key, so Drag Over goes false,
+  // Enter or Space cancels instead of dropping into a zone nobody can see, and an arrow key moves among the zones still there.
+  if (g.zone && !liveElement(g.zone)) leaveZone(g);
+
+  // the zones the card can go to — never itself (P107-C78, as `zoneAt` for the pointer)
+  const list = orderedZones(g.source).filter((z) => !insideSource(g, z.node, z.el));
   const at = list.findIndex((z) => z.node === g.zone);
   const count = (z: HTMLElement) => slots(g, z).length;
 
@@ -858,9 +888,10 @@ function keyboardLift(source: DragDropNode, el: HTMLElement): void {
   listenForGesture();
   lift(g);
 
-  // Start where it already is: the innermost zone it sits in, at its own place in that zone.
-  const list = orderedZones(source);
-  const around = list.filter((z) => z.el !== el && z.el.contains(el));
+  // Start where it already is: the innermost zone it sits in, at its own place in that zone. Never
+  // in itself (P107-C78): a Draggable that is also a zone starts in the zone around it, or the first.
+  const list = orderedZones(source).filter((z) => !insideSource(g, z.node, z.el));
+  const around = list.filter((z) => z.el.contains(el));
   const home = around.find((z) => !around.some((o) => o !== z && z.el.contains(o.el))) || list[0];
   if (home) {
     enterZone(g, home.node, home.el);

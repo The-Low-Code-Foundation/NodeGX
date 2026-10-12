@@ -21,8 +21,15 @@ import type { RuntimeDiagnostic } from './runtimeDiagnostic';
  * which titled the popout **EXPRESSION** and then reported every line of valid
  * CSS as a syntax error. An editor that misnames what it is holding and then
  * fails it is worse than one with no verdict at all.
+ *
+ * `'scriptfile'` (P109 ISL-005) is a project script file, `scripts/**.js`. It is
+ * compiled `new Function('use', 'exports', 'module', 'Noodl', 'window',
+ * 'document', …)` with the last three `undefined` (`noodl-runtime/src/scriptfiles.ts`),
+ * so it has neither the Function node's names nor the Script node's. It borrowed
+ * `'script'` at first, which linted every `use(…)` and `exports.x` as undefined
+ * and completed `define` and `Noodl`, which throw there.
  */
-export type ValidationType = 'expression' | 'function' | 'script' | 'json' | 'text' | 'css' | 'html';
+export type ValidationType = 'expression' | 'function' | 'script' | 'scriptfile' | 'json' | 'text' | 'css' | 'html';
 
 /**
  * Whose code the editor is holding (CN-019).

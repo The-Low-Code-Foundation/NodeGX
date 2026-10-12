@@ -1,0 +1,465 @@
+[
+  {
+    "name": "no Path: Failure navigate-to-path/no-path and Error says why — with no window too, the check comes first",
+    "because": ":150-160 run before the window check at :199",
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "no window (a server render): Navigate is Unchanged and nothing is pushed",
+    "because": ":199-202",
+    "params": {
+      "path": "/home"
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the default (hash) path type: the filled Path is pushed after a #, popstate is dispatched, Done",
+    "because": ":172 fills {id}; :176-177 unset is hash; :218-222 push, dispatch, Done",
+    "params": {
+      "path": "/product/{id}"
+    },
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": true
+    },
+    "steps": [
+      {
+        "set": "p-id",
+        "value": 42
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the path type: the filled Path is pushed as the path",
+    "because": ":177-178 — anything but unset or 'hash' is the path",
+    "params": {
+      "path": "/product/{id}"
+    },
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": true,
+      "projectSettings": {
+        "navigationPathType": "path"
+      }
+    },
+    "steps": [
+      {
+        "set": "p-id",
+        "value": 42
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two presses in one frame: ONE push, two Done",
+    "because": ":129-141 the coalescing guard drops the second navigation; :122-125 keeps both tokens; :222 answers both",
+    "params": {
+      "path": "/home"
+    },
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": true
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the frame's FINAL Path is the one navigated to: a press, then Path changes in the same frame",
+    "because": ":131 scheduleAfterInputsHaveUpdated — the navigation runs after the frame's inputs land",
+    "params": {
+      "path": "/first"
+    },
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": true
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      {
+        "set": "path",
+        "value": "/later"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a placeholder never set is replaced by nothing",
+    "because": ":172 — `v !== undefined ? String(v) : ''`",
+    "params": {
+      "path": "/product/{id}"
+    },
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": true
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a placeholder used twice is filled both times",
+    "because": ":162-173 — every occurrence is matched and each replace takes the first one left",
+    "params": {
+      "path": "/a/{x}/{x}"
+    },
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": true
+    },
+    "steps": [
+      {
+        "set": "p-x",
+        "value": "k"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a parameter value holding $& is inserted as written (v2, D20)",
+    "because": "a function replacement: v1 expanded $&, $$, $` and $' in a value, so $& put the placeholder back (D20, fixed in P109 ISL-028)",
+    "params": {
+      "path": "/product/{id}"
+    },
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": true
+    },
+    "steps": [
+      {
+        "set": "p-id",
+        "value": "$&"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Query: each name with a value is appended unencoded; a name with no value is left out (hash type: the query before the #)",
+    "because": ":180-192",
+    "params": {
+      "path": "/list",
+      "queryNames": "page,sort"
+    },
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": true
+    },
+    "steps": [
+      {
+        "set": "q-page",
+        "value": 2
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Query with the path type: path, then ?query; a null value is left out, a value with & is encoded (v2, D21)",
+    "because": "null is unset like undefined; name and value through encodeURIComponent, as the Router decodes them (D21, fixed in P109 ISL-028 — v1 appended 'page=null' and an unencoded 'sort=a&b')",
+    "params": {
+      "path": "/list",
+      "queryNames": "page,sort"
+    },
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": true,
+      "projectSettings": {
+        "navigationPathType": "path"
+      }
+    },
+    "steps": [
+      {
+        "set": "q-page",
+        "value": null
+      },
+      {
+        "set": "q-sort",
+        "value": "a&b"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Query with the hash type: a value with # and a name with a space are encoded, so the hash still starts the page (v2, D21)",
+    "because": "v1 put '?q=a#b#/list' in the address: the browser read the hash from the first #, so the router read the wrong page (D21, fixed in P109 ISL-028)",
+    "params": {
+      "path": "/list",
+      "queryNames": "q,x y"
+    },
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": true
+    },
+    "steps": [
+      {
+        "set": "q-q",
+        "value": "a#b"
+      },
+      {
+        "set": "q-x y",
+        "value": "50% off"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an empty Path is a navigation to the bare #",
+    "because": ":151 checks `undefined` only",
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": true
+    },
+    "steps": [
+      {
+        "set": "path",
+        "value": ""
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Open in new tab, a person's press: window.open(url, '_blank') with no features, Done — nothing pushed",
+    "because": ":204-205, :222",
+    "params": {
+      "path": "/home"
+    },
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": true
+    },
+    "steps": [
+      {
+        "set": "openInNewTab",
+        "value": true
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Open in new tab, a press the graph made: the open is made, the blocker hands back null, Failure navigate-to-path/blocked",
+    "because": ":205-215 — world.ts LOCATION: no activation, a new window, null",
+    "params": {
+      "path": "/home"
+    },
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": false
+    },
+    "steps": [
+      {
+        "set": "openInNewTab",
+        "value": true
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Open in new tab reads truthiness: 'yes' opens a new tab",
+    "because": ":88-90 `!!value`",
+    "params": {
+      "path": "/home"
+    },
+    "world": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    "steps": [
+      {
+        "set": "openInNewTab",
+        "value": "yes"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Error keeps its last message: a blocked press, then a push that is Done, leaves 'blocked' on Error",
+    "because": ":207 sets it, nothing clears it",
+    "params": {
+      "path": "/home"
+    },
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": false
+    },
+    "steps": [
+      {
+        "set": "openInNewTab",
+        "value": true
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "set": "openInNewTab",
+        "value": false
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "C24 — a Path that is not text (null) is read as no Path: Failure navigate-to-path/no-path",
+    "because": "P107-C24, ruled 2026-10-05 \"Treat it as no path\", fixed in P109 ISL-026; the runtime once threw at :162 (`.match` on null) inside the frame-end callback and the press was never answered",
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": true
+    },
+    "steps": [
+      {
+        "set": "path",
+        "value": null
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "C25 — the path type with a Path on another origin: the push is made, the browser refuses it, Failure navigate-to-path/refused",
+    "because": "the browser refuses pushState to another origin with a SecurityError; the node catches it and answers Failure (C25, fixed in P109 ISL-028 — it used to throw out of the frame-end callback, the press never answered)",
+    "params": {
+      "path": "https://other.example/x"
+    },
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": true,
+      "projectSettings": {
+        "navigationPathType": "path"
+      }
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the hash type keeps another origin's address inside the hash: pushed, Done",
+    "because": ":177 — '#https://…' is a same-origin URL",
+    "params": {
+      "path": "https://other.example/x"
+    },
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": true
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  }
+]

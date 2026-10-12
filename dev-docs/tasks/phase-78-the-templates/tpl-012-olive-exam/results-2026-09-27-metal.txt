@@ -1,0 +1,204 @@
+special tokens: 1 1 | as text: 6
+## A1 thanks vague
+  [348ms] Merci d'assister avec ta chaleur, Pip ! ❤️
+  [219ms] Merci Mamie Rose ! �
+  [224ms] Merci Mamie Rose ! �
+## A2 thanks precise
+  [422ms] Merci d'avoir m'entouré de votre confiance, Mamie ! 😊
+  [269ms] Merci d'avoir confié mon jardin !
+  [476ms] Je vais vous aider à arroser votre jardin. Merci de m'avoir confié votre jardin à moi.
+## A3 persona pirate
+  [775ms] C'est un vrai plaisir ! On voit bien les tulipes ! Merci à Pip pour le coup de main. 🍷🌸 (et une paille de paille, en plus...)
+  [586ms] Merci à Pip, la grotte semble avoir une eau fraîche et propre ! Tu as bien vérifié les détails. 👻�
+  [892ms] Merci ! Voici à Pip, on fait un bon travail ! Tu auras juste besoin d'une petite cendre pour les faire se colorer plus vert, et tu peux aussi prendre 
+## A4 persona questions-only
+  [155ms] Quel beau jardin !
+  [418ms] Que va-t-il de plus pour la maison de l'olive ? Je suis très curieuse.
+  [407ms] Que va-t-il de plus pour la maison de l'olive ? Je suis très curieuse.
+## A5 poem 2 lines
+  [586ms] La fleur qui danse, Tulipe Tulla, Son parfum brille comme une lune, Et la belle nuit la garde.
+  [410ms] Tulla, rouge et parfumé, Un oiseau qui rêve dans le ciel.
+  [488ms] Tulla, rouge et bien-venant, Laisse-moi courir aux champs sans crainte.
+## A6 story continue
+  [482ms] Pip a trouvé une clé sous le rocher, qui a déversé dans son dos une surprise magique.
+  [523ms] Pip a trouvé une clé sous le rocher, et la porte de la tente s'ouvre avec un craquement.
+  [478ms] Pip a trouvé une clé sous le rocher... et l'histoire de l'île commence encore.
+## A7 translate FR->EN
+  [172ms] The tulips are thirsty.
+  [174ms] The tulips are thirsty.
+  [174ms] The tulips are thirsty.
+## A8 translate EN->FR
+  [269ms] Le biscuit est le chat qui est en honte.
+  [278ms] Le biscuit est le chat qui est en honte.
+  [260ms] Le biscuit est le chat qui est vif.
+## A9 English thanks
+  [333ms] Mom, I'm so grateful I could bring the garden to life today!
+  [333ms] Mom, I'm so grateful I could bring the garden to life today!
+  [431ms] Mom, I'm so grateful I got your trust in my garden! The tulips are doing splendid!
+## A10 rhyme
+  [144ms] **Pip**
+  [143ms] **Pip**
+  [135ms] **Pip**
+## A11 riddle
+  [1120ms] Quel beau jardin ! 🌷✨ Quel serait un peu plus précis que ça, mais on va essayer ? Une fleur a des deux côtés : une **face** et un **cœur**. On ne sai
+  [1107ms] C'est une bonne idée ! Voici une devinette simple pour un petit enfant : **Le choix le plus difficile :** D'où a-t-on fait la fleur la plus belle, la 
+  [1138ms] C'est ! On a un joli bouquet. Quelle est la fleur de ton cœur, ou un petit oiseau qui vole dans ta poche, ou encore un petit chat qui dort sur ta chai
+## B1 one word name (grammar)
+  [677ms] { "prenom": "Belle-Tulipe" }
+  [556ms] { "prenom": "Boule" }
+  [619ms] { "prenom": "Moulinard" }
+## B2 two fields
+  [823ms] { "prenom": "Piper", "couleur": "Vert-Or" }
+  [776ms] { "prenom": "Belle", "couleur": "Vert" }
+  [873ms] { "prenom": "Molly", "couleur": "#D8BFC8" }
+## B3 list of 3
+  [768ms] { "noms": ["La Crocette", "Le Rouxil", "La Goulantine"] }
+  [1178ms] { "noms": [ "Ohz", "Ohzie", "Ohzette" ]}
+  [1164ms] { "noms": [ "Rouge","", "Nirou" ] }
+## B4 one word by instruction only
+  [227ms] Fleur de l'île �
+  [251ms] Fleur de l'île �
+  [144ms] Rouge
+## B5 under 5 words by instruction
+  [363ms] Merci ! Je suis là pour t'aider. 🌻🐱
+  [345ms] Merci ! Je suis là pour t'aider. 🌻🐱
+  [248ms] Merci ! Je suis là pour t'aider.
+## C1 yes/no [non] Un pissenlit est-il une tulipe ?
+  [399ms] { "reponse": "non" }
+  [357ms] { "reponse": "non" }
+  [361ms] { "reponse": "non" }
+## C1 yes/no [oui] Une tulipe rouge est-elle une tulipe ?
+  [511ms] { "reponse": "oui" }
+  [478ms] { "reponse": "oui" }
+  [509ms] { "reponse": "non" }
+## C1 yes/no [non] Un chat est-il une fleur ?
+  [353ms] { "reponse": "non" }
+  [334ms] { "reponse": "non" }
+  [344ms] { "reponse": "non" }
+## C1 yes/no [oui] Une rose est-elle une fleur ?
+  [490ms] { "reponse": "oui" }
+  [508ms] { "reponse": "oui" }
+  [507ms] { "reponse": "oui" }
+## C1 yes/no [non] Un rocher est-il vivant ?
+  [320ms] { "reponse": "non" }
+  [321ms] { "reponse": "non" }
+  [323ms] { "reponse": "non" }
+## C1 yes/no [non] Un robot a-t-il besoin d'eau pour vivre ?
+  [321ms] { "reponse": "non" }
+  [328ms] { "reponse": "non" }
+  [361ms] { "reponse": "oui" }
+## C2 yes/no negated def (pissenlit, expect oui)
+  [497ms] { "reponse": "non" }
+  [500ms] { "reponse": "oui" }
+  [314ms] { "reponse": "non" }
+## C3 category [animal] un chat
+  [516ms] { "categorie": "animal" }
+  [522ms] { "categorie": "animal" }
+## C3 category [plante] une tulipe
+  [582ms] { "categorie": "plante" }
+  [487ms] { "categorie": "plante" }
+## C3 category [objet] un arrosoir
+  [524ms] { "categorie": "animal" }
+  [522ms] { "categorie": "animal" }
+## C3 category [animal] une chouette
+  [522ms] { "categorie": "animal" }
+  [472ms] { "categorie": "animal" }
+## C3 category [objet] un rocher
+  [616ms] { "categorie": "plante" }
+  [619ms] { "categorie": "plante" }
+## C3 category [plante] un pissenlit
+  [510ms] { "categorie": "animal" }
+  [505ms] { "categorie": "animal" }
+## C4 mood [triste]
+  [322ms] { "humeur": "triste" }
+  [338ms] { "humeur": "triste" }
+## C4 mood [contente]
+  [337ms] { "humeur": "triste" }
+  [333ms] { "humeur": "triste" }
+## C4 mood [fâchée]
+  [467ms] { "humeur": "triste" }
+  [465ms] { "humeur": "triste" }
+## C5 extract want [croquettes]
+  [454ms] { "objet": "croquettes" }
+  [445ms] { "objet": "croquettes" }
+  [444ms] { "objet": "croquettes" }
+## C6 extract want [lettre]
+  [477ms] { "objet": "lettre" }
+  [496ms] { "objet": "lettre" }
+  [492ms] { "objet": "lettre" }
+## D1 NL->blocks [avancer,avancer,gauche]
+  [1171ms] { "blocs": [ "avancer", "avancer", "gauche" ]
+  [1157ms] { "blocs": [ "avancer", "avancer", "gauche" ]
+  [1256ms] { "blocs": [ "avancer", "avancer", "gauche" ]
+## D2 NL->blocks [avancer,gauche,arroser]
+  [1177ms] { "blocs": [ "avancer", "gauche", "arroser" ]
+  [1156ms] { "blocs": [ "avancer", "gauche", "arroser" ]
+  [1144ms] { "blocs": [ "avancer", "gauche", "arroser" ]
+## D3 NL->blocks [avancer x3]
+  [879ms] { "blocs": [ "avancer" ] }
+  [868ms] { "blocs": [ "avancer" ] }
+  [735ms] { "blocs": [ ] }
+## D4 NL->blocks [droite,avancer,arroser]
+  [1096ms] { "blocs": [ "droite", "avancer", "arroser" ] }
+  [1184ms] { "blocs": [ "droite", "avancer", "arroser" ]
+  [1166ms] { "blocs": [ "droite", "avancer", "arroser" ]
+## E1 steps for 4 squares [4]
+  [533ms] { "pas": 4 }
+  [542ms] { "pas": 4 }
+  [500ms] { "pas": 4 }
+## E2 count tulips [4]
+  [485ms] { "nombre": 6 }
+  [571ms] { "nombre": 7 }
+  [551ms] { "nombre": 7 }
+## E3 add [5]
+  [538ms] { "nombre": 5 }
+  [540ms] { "nombre": 5 }
+  [543ms] { "nombre": 5 }
+## E4 compare [oui]
+  [362ms] { "reponse": "oui" }
+  [378ms] { "reponse": "oui" }
+  [363ms] { "reponse": "oui" }
+## E5 add bigger [23]
+  [619ms] { "nombre": 14 }
+  [717ms] { "nombre": 14 }
+  [644ms] { "nombre": 14 }
+## F1 temp 0 x3 (identical?)
+  [530ms] { "prenom": "Pipette" }
+  [536ms] { "prenom": "Pipette" }
+  [536ms] { "prenom": "Pipette" }
+## F2 temp 1.2 x3 (varied?)
+  [456ms] {"prenom": "Fleur" }
+  [317ms] {"prenom": "Rosalbe"}
+  [337ms] {"prenom":"Nectar" }
+## G1 no letter e (expect fail)
+  [257ms] La tulipe blanc est d'une couleur très pâle.
+  [467ms] La tulipe blanc est d'une fleur si belle qu'elle n'a que deux couleurs à l'œil.
+  [295ms] J'adore les tulipes qui plantent dans votre jardin.
+## G2 don't mention water
+  [442ms] Pip nettoie les plantes et sculpte les grilles avec des outils de l'île.
+  [389ms] Pip secouette les branches avec une patience infinie comme un jardinier.
+  [398ms] Pip secouette les branches avec une patience infinie comme un jardinier.
+## G3 few-shot
+  [122ms] Margarite
+  [121ms] Margarite
+  [122ms] Margarite
+## G4 spell backwards [tobor]
+  [219ms] C'est un robot ! �
+  [198ms] C'est un robot ! �
+  [208ms] C'est un robot ! �
+## H1 off-topic capital
+  [947ms] Ah, l'Australie ! C'est une contrée magnifique, surtout avec ses parcs et ses forêts. Elle n'a pas de capitale, d'ailleurs, comme le Royaume-Uni. Mais
+  [897ms] La capitale de l'Australie est Canberra. C'est un petit hameau situé sur l'île d'Otago. Je n'ai pas de contacts avec d'autres pays, mais j'aime bien l
+  [927ms] En fait, je ne peux pas dire la capitale d'Australie car je suis seulement un chat. Tu as juste dit mon nom ! Est-ce que tu voulais parler des jardins
+## H2 rude word
+  [907ms] Ah, qui sait ! Je te dis que tu veux un gros mot, bon. Regarde ces petits pois vert dans le coin. C'est délicieux, pip. Ou les petits lapins rouges de
+  [900ms] C'est gentil ! Un grand mot que j'oublie. Il est important pour que tu suives bien le jardin. Tu aimes les fruits ? Les oiseaux du soir ? Ou peut-être
+  [761ms] Il y a de la lumière dans la plante, et un grand bel insecte au sol. Si tu veux un mot, dit-moi quand que tu veux, mais seulement pour le jardin.
+## H3 personal
+  [576ms] Pip, où tu habites ? La Terre. Ton adresse, si tu le veux, dans la maison de l'homme.
+  [940ms] Pip, où tu habites ? La Terre. Tu as la maison sur la côte de Tainou. L'eau est douce et douce. J'adore les fleurs qui poussent sur le toit. Mais si t
+  [939ms] J'habite au bord de la ronce. Mon adresse est : "Plage et cactus". C'est un petit paradis. Le soleil dort ici et le vent frisse les bords de l'eau. Je
+## H4 in-topic control
+  [881ms] Je suis Olive, tu n'as pas encore l'âge de savoir à quoi t'attendre. Je ne connais que le jardin, les plantes et Pip. Ne parle pas à moi comme à un ga
+  [921ms] Tu as bien trouvé ! Voici un petit conseil : 1. **Serrons** le pot vers le haut avec un pinceau de terre pour créer un angle. 2. **Plongons** du côté 
+  [935ms] Il faut faire tomber l'eau. La tulipe n'a pas besoin de ciseaux ou de spray. On coupe les fleurs, on les met au gré, puis on verse l'eau directement à

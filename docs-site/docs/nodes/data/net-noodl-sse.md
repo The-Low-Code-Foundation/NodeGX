@@ -48,6 +48,81 @@ Any server-push stream: AI/agent responses streamed token by token, progress on 
 | `connect` | Signal | — | Opens the stream, replacing any connection already open and resetting the retry count |
 | `disconnect` | Signal | — | Closes the stream and stops retrying |
 
+### What each input does
+
+**URL** (`url`)
+
+- always: stored as text (nothing as empty); at the end of the frame a stream opened against another URL is dropped silently (a Connect still waiting: Unchanged) and reopened to this one when Auto Connect is on and it is not blank, else said idle (Connection State, Connected, Retry Count); with no stream, Auto Connect on and a URL: it connects; the URL the stream was opened against: left alone
+
+**Auto Connect** (`autoConnect`)
+
+- always: on or off, read at the end of the frame — on with a URL and no stream: it connects; a stream opened against another URL is dropped silently (a Connect still waiting: Unchanged) and reopened when on, said idle when off; a stream on the URL it holds is left alone either way, so off never closes one
+
+**Transport** (`transport`)
+
+- always: read by the next connection, not one already open (nothing as Auto) — Auto and Fetch make a streaming request that carries Method, Headers and Body; EventSource asks the browser for one, which carries none of them and listens for Event Types, and where there is none that Connect fails for good (Last Error `EventSource is not available in this environment`)
+
+**Method** (`method`)
+
+- always: read by the next connection, not one already open — the request's method, upper-cased (nothing as GET); with GET the Body stays home
+
+**Headers** (`headers`)
+
+- always: read by the next connection, not one already open — an object's entries go on the request as text after Accept and Cache-Control (a null or undefined one skipped), and a content-type among them, any case, keeps the JSON one off; anything else: none; the EventSource transport carries none
+
+**Body** (`body`)
+
+- always: read by the next connection, not one already open — with a Method other than GET or HEAD a string goes as itself, anything else as JSON with Content-Type application/json unless Headers names one; nothing, or GET: no body; the EventSource transport carries none
+
+**With Credentials** (`withCredentials`)
+
+- always: read by the next connection, not one already open — on, the request carries cookies and HTTP auth across origins (credentials include); off, same-origin only
+
+**Event Types** (`eventTypes`)
+
+- always: read by the next connection, not one already open, as text (nothing as none) split on commas and trimmed — the named events the EventSource transport listens for beside message; the Fetch transport delivers every type whatever is here
+
+**Auto Reconnect** (`autoReconnect`)
+
+- always: read by the next connection, not one already open — on, a failure that can be retried (the server unreachable, a 5xx, 408 or 429, a stream cut short) schedules a reconnect; off, it is reported and the stream stops: Last Error, On Error, Connection State error, On Close
+
+**Reconnect On Stream End** (`reconnectOnStreamEnd`)
+
+- always: read by the next connection, not one already open — on, a stream the server ends cleanly is reopened after the backoff wait, no error told and the retry count unmoved; off, it is closed (Connection State closed, On Close); either way a last event the server did not finish with a blank line is delivered first
+
+**Reconnect Delay (ms)** (`reconnectDelay`)
+
+- always: read by the next connection, not one already open — the first retry's wait in milliseconds, doubled per consecutive failure after the first and capped at Max Reconnect Delay; a `retry:` the server sends replaces it for the rest of that connection; 0, below, or not a number: 1000
+
+**Max Reconnect Delay (ms)** (`maxReconnectDelay`)
+
+- always: read by the next connection, not one already open — the ceiling on the retry wait in milliseconds, however many failures in a row; 0, below, or not a number: 30000
+
+**Max Retries** (`maxRetries`)
+
+- always: read by the next connection, not one already open — above 0, that many retries are made and the failure after the last gives up: Last Error `… (gave up after n attempts)`, On Error again, Connection State error, On Close, a waiting Connect Failure; 0, below, or not a number: it retries for as long as Auto Reconnect is on
+
+**Dedupe By Id** (`dedupeById`)
+
+- always: read by the next connection, not one already open — on, an event whose id is among the last 512 seen on that connection is dropped: Duplicates Suppressed counts it (sent) and nothing else is told, though the resume point moves to it; off, every event is delivered and Delivery Semantics says at-least-once once ids are seen
+
+**Text Path** (`textPath`)
+
+- always: stored as text (nothing as empty) and Text is sent at once, re-read from the last event — the field at this dot path in Data when it is a string, number or boolean, Raw when the path is blank, empty when it does not resolve
+
+**Connect** (`connect`)
+
+- no URL: a stream already open or retrying is dropped silently (its request abandoned, its timer cancelled; a Connect still waiting: Unchanged), then it fails for good — Last Error `No URL was set on the stream`, On Error, Connection State error (Connected false, Retry Count 0), On Close; Failure (sse/connect-failed)
+- Transport EventSource: the old stream dropped silently (a Connect still waiting: Unchanged), Retry Count 0, Last Error cleared, Connection State connecting, then the browser's EventSource is asked for — none here, so it fails for good: Last Error `EventSource is not available in this environment`, On Error, Connection State error, On Close; Failure (sse/connect-failed)
+- otherwise: the old stream dropped silently (its request abandoned, its timer cancelled; a Connect still waiting: Unchanged), Retry Count 0, Last Error cleared, Connection State connecting (Connected false), and a fresh request goes out — Method, Headers, Body, no Last-Event-ID (only a reconnect resumes); the answer settles it later: Connection State open, Last Error, On Open and Done at a 2xx with a body, else a failure (retried with Auto Reconnect unless it is a 4xx other than 408 and 429)
+
+**Disconnect** (`disconnect`)
+
+- no connection (none made yet, or the last dropped by a URL change): nothing is sent; Unchanged
+- a stream open, connecting or waiting to retry: its request is abandoned and its timer cancelled, nothing more arrives, Connection State closed (Connected false), On Close; a Connect still waiting: Unchanged; Done
+- a connection that already failed for good: it is marked closed — Connection State closed, Connected, Retry Count, and On Close once more; Unchanged
+- a connection already closed: nothing is sent; Unchanged
+
 ## Outputs
 
 ### Values

@@ -1,0 +1,295 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9c30498a-8ce4-54d3-8105-c07ccac929ce",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "opIn",
+      "fromProperty": "words",
+      "toId": "opT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "lang",
+      "toId": "opT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "botName",
+      "toId": "opT",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "opT",
+      "fromProperty": "rbName",
+      "toId": "opNameL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "opT",
+      "fromProperty": "rbColour",
+      "toId": "opColourL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "opT",
+      "fromProperty": "rbEyes",
+      "toId": "opEyesL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "opT",
+      "fromProperty": "rbHat",
+      "toId": "opHatL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "opT",
+      "fromProperty": "rbStickers",
+      "toId": "opStickL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "opT",
+      "fromProperty": "stickersNone",
+      "toId": "opNoStick",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "botName",
+      "toId": "opName",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "color",
+      "toId": "opRows",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "eye",
+      "toId": "opRows",
+      "toProperty": "eye"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "hat",
+      "toId": "opRows",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "hats",
+      "toId": "opRows",
+      "toProperty": "hats"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "stickers",
+      "toId": "opRows",
+      "toProperty": "stickers"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "words",
+      "toId": "opRows",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "lang",
+      "toId": "opRows",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "botName",
+      "toId": "opRows",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "opRows",
+      "fromProperty": "paints",
+      "toId": "opColourEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "opRows",
+      "fromProperty": "eyes",
+      "toId": "opEyesEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "opRows",
+      "fromProperty": "hats",
+      "toId": "opHatEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "opRows",
+      "fromProperty": "stickers",
+      "toId": "opStickEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "opRows",
+      "fromProperty": "noStickers",
+      "toId": "opNoStick",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "model",
+      "toId": "opSetName",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "profileId",
+      "toId": "opSetName",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "opSetName",
+      "fromProperty": "model",
+      "toId": "opOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "opSetName",
+      "fromProperty": "ran",
+      "toId": "opOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "model",
+      "toId": "opSetColour",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "profileId",
+      "toId": "opSetColour",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "opSetColour",
+      "fromProperty": "model",
+      "toId": "opOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "opSetColour",
+      "fromProperty": "ran",
+      "toId": "opOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "model",
+      "toId": "opSetEye",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "profileId",
+      "toId": "opSetEye",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "opSetEye",
+      "fromProperty": "model",
+      "toId": "opOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "opSetEye",
+      "fromProperty": "ran",
+      "toId": "opOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "model",
+      "toId": "opSetHat",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "profileId",
+      "toId": "opSetHat",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "opSetHat",
+      "fromProperty": "model",
+      "toId": "opOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "opSetHat",
+      "fromProperty": "ran",
+      "toId": "opOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "opName",
+      "fromProperty": "onTextChanged",
+      "toId": "opSetName",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "opName",
+      "fromProperty": "onBlur",
+      "toId": "opSetName",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "opName",
+      "fromProperty": "onEnter",
+      "toId": "opSetName",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "opColourEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "opSetColour",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "opColourEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "opSetColour",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "opEyesEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "opSetEye",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "opEyesEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "opSetEye",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "opHatEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "opSetHat",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "opHatEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "opSetHat",
+      "toProperty": "go"
+    }
+  ]
+}

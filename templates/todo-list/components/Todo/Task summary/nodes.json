@@ -67,6 +67,26 @@
           "name": "narrow",
           "plug": "output",
           "type": "boolean"
+        },
+        {
+          "name": "projectOptions",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "projectValue",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "showProject",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hasProject",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 530,
@@ -116,10 +136,25 @@
           "name": "deadlineText",
           "plug": "input",
           "type": "string"
+        },
+        {
+          "name": "openProject",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "setProject",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "pickedProject",
+          "plug": "input",
+          "type": "string"
         }
       ],
       "x": 530,
-      "y": 400
+      "y": 760
     },
     {
       "id": "tsRoot",
@@ -138,6 +173,7 @@
         "tsBack",
         "tsTitle",
         "tsMeta",
+        "tsProject",
         "tsBar",
         "tsClosing"
       ],
@@ -215,6 +251,95 @@
       "y": 400
     },
     {
+      "id": "tsProject",
+      "type": "Group",
+      "label": "Its project",
+      "parent": "tsRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap",
+        "mounted": false
+      },
+      "children": [
+        "tsProjectLine",
+        "tsProjectPick",
+        "tsOpenProject"
+      ],
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "tsProjectLine",
+      "type": "Text",
+      "label": "Project",
+      "parent": "tsProject",
+      "parameters": {
+        "text": "Project",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "tsProjectPick",
+      "type": "net.noodl.controls.options",
+      "label": "Which project",
+      "parent": "tsProject",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "styleCss": "flex: 1 1 200px; min-width: 0; max-width: 320px;"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "tsOpenProject",
+      "type": "net.noodl.controls.button",
+      "label": "Open the project",
+      "parent": "tsProject",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-1)",
+        "paddingRight": "var(--space-1)",
+        "paddingTop": "var(--space-0-5)",
+        "paddingBottom": "var(--space-0-5)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Open the project",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
       "id": "tsBar",
       "type": "Group",
       "label": "Deadline and buttons",
@@ -237,7 +362,7 @@
         "tsButtons"
       ],
       "x": 100,
-      "y": 520
+      "y": 1000
     },
     {
       "id": "tsDeadline",
@@ -259,7 +384,7 @@
         "tsDeadlineError"
       ],
       "x": 160,
-      "y": 640
+      "y": 1120
     },
     {
       "id": "tsDeadlineLabel",
@@ -273,7 +398,7 @@
         "sizeMode": "contentSize"
       },
       "x": 220,
-      "y": 760
+      "y": 1240
     },
     {
       "id": "tsDeadlineRow",
@@ -296,7 +421,7 @@
         "tsDue"
       ],
       "x": 220,
-      "y": 880
+      "y": 1360
     },
     {
       "id": "tsDeadlineField",
@@ -311,7 +436,7 @@
         }
       },
       "x": 280,
-      "y": 1000
+      "y": 1480
     },
     {
       "id": "tsDue",
@@ -325,7 +450,7 @@
         "sizeMode": "contentSize"
       },
       "x": 280,
-      "y": 1120
+      "y": 1600
     },
     {
       "id": "tsDeadlineError",
@@ -345,7 +470,7 @@
         "mounted": false
       },
       "x": 220,
-      "y": 1240
+      "y": 1720
     },
     {
       "id": "tsButtons",
@@ -369,7 +494,7 @@
         "tsReopen"
       ],
       "x": 160,
-      "y": 1360
+      "y": 1840
     },
     {
       "id": "tsMakeNext",
@@ -394,7 +519,7 @@
         "mounted": false
       },
       "x": 220,
-      "y": 1480
+      "y": 1960
     },
     {
       "id": "tsClose",
@@ -417,7 +542,7 @@
         "mounted": false
       },
       "x": 220,
-      "y": 1600
+      "y": 2080
     },
     {
       "id": "tsReopen",
@@ -442,7 +567,7 @@
         "mounted": false
       },
       "x": 220,
-      "y": 1720
+      "y": 2200
     },
     {
       "id": "tsClosing",
@@ -468,7 +593,7 @@
         "tsClosingNote"
       ],
       "x": 100,
-      "y": 1840
+      "y": 2320
     },
     {
       "id": "tsClosingLabel",
@@ -486,7 +611,7 @@
         }
       },
       "x": 160,
-      "y": 1960
+      "y": 2440
     },
     {
       "id": "tsClosingNote",
@@ -504,7 +629,7 @@
         }
       },
       "x": 160,
-      "y": 2080
+      "y": 2560
     }
   ],
   "visualRoots": [

@@ -183,3 +183,40 @@ describe('P79 E2 — the behaviour that must not have moved', () => {
     expect((await blend(BLACK_TO_WHITE, -5)).result).toBe('#000000');
   });
 });
+
+/**
+ * P107-D8 (P109 ISL-026, ruled 2026-10-05 "Keep last colour, warn once"): a Blend Value that is not a number keeps the
+ * colour last shown and is reported once per value, on the unreadable colour's channel. It rendered `#NaNNaNNaN`.
+ */
+describe('P107-D8 — a Blend Value that is not a number', () => {
+  test('keeps the last good colour, reports a bad value once while it stands (a different one is reported anew), and blends again when a number arrives', async () => {
+    const { result, graph } = await blend(BLACK_TO_WHITE, 0.5);
+    expect(result).toBe('#7f7f7f');
+
+    const node = graph.node('blend');
+    node.setInputValue('blendValue', 'abc');
+    await graph.settle(4);
+    node.setInputValue('blendValue', 'abc ');
+    node.setInputValue('blendValue', 'abc');
+    await graph.settle(4);
+    expect(node.getOutput('result').value).toBe('#7f7f7f');
+    expect(graph.errors.filter((e) => e.code === 'color-blend/unreadable-blend-value').map((e) => e.message)).toEqual([
+      'Color Blend cannot read the Blend Value "abc" as a number, so it is keeping the colour it last showed.',
+      'Color Blend cannot read the Blend Value "abc " as a number, so it is keeping the colour it last showed.',
+      'Color Blend cannot read the Blend Value "abc" as a number, so it is keeping the colour it last showed.'
+    ]);
+
+    node.setInputValue('blendValue', 0.25);
+    await graph.settle(4);
+    expect(node.getOutput('result').value).toBe('#3f3f3f');
+  });
+
+  test('the same bad value written again is reported once', async () => {
+    const { graph } = await blend(BLACK_TO_WHITE, 0.5);
+    const node = graph.node('blend');
+    node.setInputValue('blendValue', 'abc');
+    node.setInputValue('blendValue', 'abc');
+    await graph.settle(4);
+    expect(graph.errors.filter((e) => e.code === 'color-blend/unreadable-blend-value')).toHaveLength(1);
+  });
+});

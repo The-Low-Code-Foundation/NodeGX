@@ -13,7 +13,7 @@
   "tsExclude": [
     "packages/noodl-editor/src/editor/src/views/nodegrapheditor/canvas/CanvasTheme.ts"
   ],
-  "commit": "f74b47eee",
+  "commit": "169a44ac8",
   "max": {
     "noodl-core-ui": 27,
     "noodl-editor": 25

@@ -26,12 +26,15 @@
 import { createHash } from 'crypto';
 import * as fs from 'fs';
 import * as http from 'http';
+import * as path from 'path';
 
 import type { BackendServiceOptions } from '../config';
 import type { PersistenceHandle } from '../persistence/createAdapter';
 import type { IStorageFacade } from '@noodl/backend-contract';
 import type { AclOption } from '../persistence/AdapterFacade';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
+import { scanDeployedFunctions } from '../workflow/functionDeclarations';
+import { carriesCredential } from '../security/state';
 import type { IdempotencyStore } from '../execution/IdempotencyStore';
 import { buildRunPayload } from '../workflow/runPayload';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
@@ -49,7 +52,8 @@ import {
   functionTimeoutMs,
   ruleAllows,
   rulePrincipal,
-  validateAclShape
+  validateAclShape,
+  type AccessDecision
 } from '../security/model';
 import type { TriggerSubsystem } from '../triggers/TriggerSubsystem';
 import type { WorkflowSubsystem } from '../workflow/WorkflowSubsystem';
@@ -72,6 +76,7 @@ import { AdminWorkflowRoutes } from './admin-workflows';
 import { AdminEmailRoutes } from './admin-email';
 import { AdminBackupRoutes } from './admin-backups';
 import type { PersistenceControl } from './admin-backups';
+import { AdminWorldRoutes } from './admin-world';
 import { AdminFileRoutes } from './admin-files';
 import { AdminSearchRoutes } from './admin-search';
 import { ByobAdminRoutes } from './byob-admin';
@@ -144,9 +149,17 @@ export interface RequestContext {
   body: Record<string, unknown> | null;
   principal: Principal;
   security: SecurityState;
-  /** acl option for adapter calls; undefined = bypass (dev-open / admin / scoped key). */
-  acl(access: 'read' | 'write'): AclOption | undefined;
-  /** Throw 403/119 unless `op` on `collection` is allowed (used by /api/_batch). */
+  /**
+   * acl option for adapter calls; undefined = bypass (dev-open / admin / scoped key).
+   *
+   * P116 ONT-004: carries a path rule's narrowing for `collection` — the route's
+   * own collection when none is named, so the routes that declare one need no
+   * edit; a route that checks per item (`checkData`) names the collection it is
+   * about to read or write, or the narrowing is not applied and the rule is a
+   * hole shaped exactly like the one reader that forgot.
+   */
+  acl(access: 'read' | 'write', collection?: string): AclOption | undefined;
+  /** Throw 403/119 unless `op` on `collection` is allowed (used by /api/_batch); remembers the decision's narrowing for `acl()`. */
   checkData(collection: string, op: ClpOp): void;
   /** Owner + template-ACL stamping and client-ACL validation for creates. */
   stampCreate(collection: string, data: Record<string, unknown>): void;
@@ -277,6 +290,11 @@ export interface RouteInfo {
 
 interface RouteDef extends RouteInfo {
   handler: (ctx: RequestContext) => Promise<void> | void;
+  /**
+   * P109 ISL-040 (P100-UPG001-LOCKOUT): the route takes a credential in its BODY (a password), and spends
+   * BAK-005's failure budget, so a locked-out address is held back from it as from a header credential.
+   */
+  takesCredential?: true;
 }
 
 export interface HttpServerDeps {
@@ -416,6 +434,8 @@ export class HttpServer {
   private readonly adminTriggers: AdminTriggerRoutes;
   private readonly adminWorkflows: AdminWorkflowRoutes;
   private readonly adminBackups: AdminBackupRoutes;
+  /** P116 ONT-007 — `POST /admin/world/migrate`. */
+  private readonly adminWorld: AdminWorldRoutes;
   private readonly adminSearch: AdminSearchRoutes;
   private readonly adminFiles: AdminFileRoutes;
   private readonly email: EmailRoutes;
@@ -466,6 +486,7 @@ export class HttpServer {
     this.oauth = new OAuthRoutes({
       facade: deps.facade,
       auth: deps.auth,
+      sessions: deps.security.sessions,
       emailConfig: deps.emailConfig,
       mailer: deps.mailer,
       tokens: deps.emailTokens,
@@ -483,6 +504,7 @@ export class HttpServer {
     });
     this.adminAuth = new AdminAuthRoutes({
       auth: deps.auth,
+      sessions: deps.security.sessions,
       emailConfig: deps.emailConfig,
       callbackUrl: (providerId) => this.oauth.callbackUrl(providerId),
       getLocalUrl: () => this.localUrl()
@@ -536,6 +558,7 @@ export class HttpServer {
       dataDir: deps.options.dataDir,
       persistence: deps.persistenceControl
     });
+    this.adminWorld = new AdminWorldRoutes({ facade: deps.facade, security: deps.security, backups: deps.backups });
     this.adminEmail = new AdminEmailRoutes(deps.emailConfig, deps.mailer, () => ({ magicLinkTtlMinutes: deps.auth ? deps.auth.config.magicLink.ttlMinutes : undefined }));
     this.adminSearch = new AdminSearchRoutes(deps.search, deps.facade);
     this.dashboard = deps.options.adminDashboard
@@ -627,6 +650,7 @@ export class HttpServer {
     const adminTriggers = this.adminTriggers;
     const adminWorkflows = this.adminWorkflows;
     const adminBackups = this.adminBackups;
+    const adminWorld = this.adminWorld;
     const adminFiles = this.adminFiles;
     const email = this.email;
     const adminEmail = this.adminEmail;
@@ -961,13 +985,18 @@ export class HttpServer {
         method: 'POST',
         pattern: 'admin/workflows/reload',
         access: { kind: 'admin' },
-        handler: (ctx) => byob.reloadWorkflows(ctx.res)
+        // P109 ISL-040 (P78-DBT-UNRULED): the folder's functions meet SB-016's rule, as at start.
+        handler: (ctx) =>
+          byob.reloadWorkflows(ctx.res, () =>
+            this.security.undeclaredOnDeploy(scanDeployedFunctions(path.join(this.options.dataDir, 'workflows')))
+          )
       },
       {
         method: 'PUT',
         pattern: 'admin/workflows/:name',
         access: { kind: 'admin' },
-        handler: (ctx) => byob.updateWorkflow(ctx.req, ctx.res, ctx.params.name)
+        // P109 ISL-040 (P78-DBT-UNRULED): a deploy's functions meet SB-016's rule, as at start.
+        handler: (ctx) => byob.updateWorkflow(ctx.req, ctx.res, ctx.params.name, (arriving) => this.security.undeclaredOnDeploy(arriving))
       },
       {
         method: 'DELETE',
@@ -1286,6 +1315,13 @@ export class HttpServer {
         access: { kind: 'admin' },
         handler: (ctx) => adminBackups.schemaApply(ctx)
       },
+      // P116 ONT-007: a changed world run on the records — dry run, backup, steps, rules moved.
+      {
+        method: 'POST',
+        pattern: 'admin/world/migrate',
+        access: { kind: 'admin' },
+        handler: (ctx) => adminWorld.migrate(ctx)
+      },
 
       // ---- Admin: file storage config (BAK-006) ----------------------------
       {
@@ -1436,7 +1472,7 @@ export class HttpServer {
       // sits on the auth budget (rate-limit.ts) and its failures count against
       // the same per-IP budget as a wrong token. `setup` is admin-gated: the
       // credential (or a full admin) is the proof that makes the first account.
-      { method: 'POST', pattern: '_admin/login', access: { kind: 'public' }, handler: (ctx) => dashboard.login(ctx) },
+      { method: 'POST', pattern: '_admin/login', access: { kind: 'public' }, takesCredential: true, handler: (ctx) => dashboard.login(ctx) },
       { method: 'POST', pattern: '_admin/setup', access: { kind: 'admin' }, handler: (ctx) => dashboard.setup(ctx) }
     ];
   }
@@ -1756,7 +1792,8 @@ export class HttpServer {
     // count, and the refusal is a plain 429 — it reveals nothing about which
     // credential was wrong.
     const authBucket = trace.clientIp;
-    if (this.authLimiter.isLockedOut(authBucket)) {
+    // P109 ISL-040 (P100-UPG001-LOCKOUT): only a request carrying a credential is held back.
+    if ((carriesCredential(req.headers) || route.takesCredential) && this.authLimiter.isLockedOut(authBucket)) {
       const retryAfter = this.authLimiter.retryAfterSeconds(authBucket);
       res.setHeader('Retry-After', String(retryAfter));
       throw new HttpError(429, `Too many failed credential attempts. Try again in ${retryAfter}s.`);
@@ -1933,7 +1970,10 @@ export class HttpServer {
     }
 
     // Steps 2–3: dev-open fast-path, then the route gate.
-    this.checkAccess(route.access, principal, params, body, query);
+    const gated = this.checkAccess(route.access, principal, params, body, query);
+    // P116 ONT-004: what a path rule narrows this caller to, per collection.
+    const narrowings = new Map<string, AclOption['only']>();
+    if (gated?.narrow) narrowings.set(gated.collection, { collection: gated.collection, where: gated.narrow });
 
     const ctx: RequestContext = {
       req,
@@ -1945,8 +1985,15 @@ export class HttpServer {
       body,
       principal,
       security: this.security,
-      acl: (access) => this.security.aclFor(principal, access),
-      checkData: (collection, op) => this.assertDataAccess(principal, collection, op),
+      acl: (access, collection) => {
+        const named = collection ?? gated?.collection;
+        return this.security.aclFor(principal, access, narrowings.get(named ?? ''), named);
+      },
+      checkData: (collection, op) => {
+        const decision = this.assertDataAccess(principal, collection, op);
+        if (decision?.narrow) narrowings.set(collection, { collection, where: decision.narrow });
+        else narrowings.delete(collection);
+      },
       stampCreate: (collection, data) => this.stampCreate(principal, collection, data),
       audit: (detail) => {
         // BMG-014: a handler that establishes WHO the caller is after the
@@ -1975,7 +2022,7 @@ export class HttpServer {
     params: Record<string, string>,
     body: Record<string, unknown> | null,
     query: Record<string, string> = {}
-  ): void {
+  ): { collection: string; narrow?: Record<string, unknown> } | undefined {
     if (access.kind === 'public') return;
 
     // Step 2a: the admin gate, which dev-open does NOT relax (FH-024).
@@ -2050,8 +2097,8 @@ export class HttpServer {
         const collection = params[access.collectionParam];
         const op: ClpOp =
           access.op === 'byBody' ? (body && body._method === 'GET' ? 'find' : 'create') : access.op;
-        this.assertDataAccess(principal, collection, op);
-        return;
+        const decision = this.assertDataAccess(principal, collection, op);
+        return { collection, narrow: decision?.narrow };
       }
 
       case 'data-perOp':
@@ -2162,12 +2209,13 @@ export class HttpServer {
    * own collections. That is the cost of dev-open, it is not what FH-024 closed,
    * and turning `devOpen` off is what removes it.
    */
-  private assertDataAccess(principal: Principal, collection: string, op: ClpOp): void {
-    if (this.security.devOpenActive) return;
+  private assertDataAccess(principal: Principal, collection: string, op: ClpOp): AccessDecision | undefined {
+    if (this.security.devOpenActive) return undefined;
     const decision = this.security.checkClp(principal, collection, op);
     if (!decision.allowed) {
       throw new HttpError(403, `Permission denied for this operation on "${collection}".`, 119);
     }
+    return decision;
   }
 
   /**

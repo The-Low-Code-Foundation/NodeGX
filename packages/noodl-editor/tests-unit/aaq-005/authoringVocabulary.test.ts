@@ -233,7 +233,8 @@ describe('AAQ-005 — every divergence is declared with a reason', () => {
 });
 
 describe('AAQ-005 — no phantom fields', () => {
-  const schemaPath = path.join(__dirname, '../../src/editor/src/schemas/nodes.schema.json');
+  // The schemas moved to `@nodegx/project-contract` (P112 OWN-001).
+  const schemaPath = path.join(__dirname, '../../../nodegx-project-contract/schemas/nodes.schema.json');
   const nodesSchema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
 
   it('every node field the vocabulary offers exists in nodes.schema.json', () => {

@@ -9,7 +9,7 @@ export interface PopupResult {
 }
 
 export interface NavigateToPathOptions {
-  /** Appended as a `?a=1&b=2` query string. Values are not URL-encoded. */
+  /** Appended as a `?a=1&b=2` query string, each name and value URL-encoded; a `null` or `undefined` value is left out. */
   query?: Record<string, unknown>;
 }
 
@@ -70,7 +70,9 @@ const navigation: NavigationApi = {
     const query = [];
     if (options && options.query !== undefined) {
       for (const key in options.query) {
-        query.push(key + '=' + options.query[key]);
+        // P107-D21 (ISL-028): encoded, and a null left out — the Navigate To Path node's rule, so the two agree
+        const v = options.query[key];
+        if (v !== undefined && v !== null) query.push(encodeURIComponent(key) + '=' + encodeURIComponent(String(v)));
       }
     }
 

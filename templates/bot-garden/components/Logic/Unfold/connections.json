@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "219ffd70-d1b5-534c-87bb-868b4e826f90",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "unfoldIn",
+      "fromProperty": "program",
+      "toId": "unfoldFn",
+      "toProperty": "in-program"
+    },
+    {
+      "fromId": "unfoldIn",
+      "fromProperty": "repeatId",
+      "toId": "unfoldFn",
+      "toProperty": "in-repeatId"
+    },
+    {
+      "fromId": "unfoldIn",
+      "fromProperty": "go",
+      "toId": "unfoldFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "unfoldFn",
+      "fromProperty": "out-program",
+      "toId": "unfoldOut",
+      "toProperty": "program"
+    },
+    {
+      "fromId": "unfoldFn",
+      "fromProperty": "out-unfolded",
+      "toId": "unfoldOut",
+      "toProperty": "unfolded"
+    },
+    {
+      "fromId": "unfoldFn",
+      "fromProperty": "success",
+      "toId": "unfoldOut",
+      "toProperty": "ran"
+    }
+  ]
+}

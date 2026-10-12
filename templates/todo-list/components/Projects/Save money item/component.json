@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "683245bc-9422-58b0-85ee-a08326b237d1",
+  "name": "Save money item",
+  "path": "/Projects/Save money item",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Adds a money item, or changes one (Key item:<id>): what it is, in or out, how much, how often from which day until which, whose it is, how likely, and a note. Error says what is missing."
+}

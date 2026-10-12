@@ -40,6 +40,22 @@
  *    `runcontext.ts`'s `RuntimeModelCall`.
  *  - **Nothing here logs.** Not on failure either; the messages below are built from the name and
  *    the status, which is all an operator needs and all they are owed.
+ *  - **A provider's error prose stays off the record (ISL-010).** A failed call's message on the
+ *    record carries the status and the error's type/code identifiers only. A provider's own
+ *    sentence can quote the request — a local server's "could not parse …" echoes the prompt —
+ *    so it goes on the `Error` port, where the author's graph decides what to do with it, and
+ *    nowhere else.
+ *
+ * ## The OpenAI-compatible provider (ISL-010)
+ *
+ * The shape every local model server speaks (Ollama, llama.cpp's server, LM Studio, vLLM):
+ * `POST <base>/v1/chat/completions`, a structured answer through `response_format`'s
+ * `json_schema`. The node stays general: a fixed question with slots, a word list and an output
+ * check are the GRAPH's job (ISL-010 ruling 3), because the fence is policy and policy varies by
+ * app. Its one rule of its own is the key (ruling 2): a key is optional only when Base URL is
+ * this computer, read from the parsed host — see {@link isThisComputer}. Stop reasons and usage
+ * are mapped onto the Anthropic vocabulary the ports already promise, so a graph switching
+ * provider is never rewired (FED-003 R2).
  */
 
 import type { NodeRunContext } from '@noodl/runtime/src/runcontext';
@@ -159,6 +175,136 @@ function refusalMessage(stopDetails: any): string {
   return `Model Request: the model declined this request (${category})${explanation}`;
 }
 
+/**
+ * ISL-010 ruling 2: is Base URL this computer? Read from the PARSED host, never a prefix —
+ * `http://127.0.0.1.evil.example` begins with "127.0.0.1" and is somebody else's machine. The
+ * URL parser already folds `127.1`, `0x7f.0.0.1` and `[0:0::1]` into the three spellings below.
+ *
+ * ⚠️ Not resolved through DNS, deliberately: `localhost` is reserved for loopback (RFC 6761), and
+ * all this decides is whether a MISSING key is a mistake. With no key nothing secret is sent
+ * anywhere; with a key provisioned the key is sent as it always was.
+ */
+export function isThisComputer(baseUrl: string): boolean {
+  let host: string;
+  try {
+    host = new URL(baseUrl).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  return host === '127.0.0.1' || host === '[::1]' || host === 'localhost';
+}
+
+/**
+ * Where a chat completion goes. A base already ending in `/v1` is taken as given (it is what the
+ * OpenAI SDKs and Ollama's and llama.cpp's docs print), and so is a full `/chat/completions` URL —
+ * otherwise a person pasting either would be sent to `/v1/v1/chat/completions`.
+ */
+function chatCompletionsUrl(base: string): string {
+  if (/\/chat\/completions$/.test(base)) return base;
+  if (/\/v1$/.test(base)) return `${base}/chat/completions`;
+  return `${base}/v1/chat/completions`;
+}
+
+/** A chat completion's answer. `content` is a string on every server measured; parts are joined. */
+function chatTextOf(message: any): string {
+  if (!message) return '';
+  if (typeof message.content === 'string') return message.content;
+  if (!Array.isArray(message.content)) return '';
+  return message.content
+    .filter((part: any) => part && part.type === 'text' && typeof part.text === 'string')
+    .map((part: any) => part.text)
+    .join('');
+}
+
+/**
+ * Chat usage onto {@link ModelUsage}. ⚠️ `prompt_tokens` INCLUDES cached tokens where Anthropic's
+ * `input_tokens` excludes them, so the cached part is taken out: Input Tokens means the same
+ * uncached count whichever provider answered. Nothing reports a cache write.
+ */
+function chatUsageOf(usage: any): ModelUsage {
+  const n = (v: unknown) => (typeof v === 'number' && isFinite(v) ? v : 0);
+  if (!usage) return { ...EMPTY_USAGE };
+  const cached = n(usage.prompt_tokens_details && usage.prompt_tokens_details.cached_tokens);
+  return {
+    inputTokens: Math.max(0, n(usage.prompt_tokens) - cached),
+    outputTokens: n(usage.completion_tokens),
+    cacheReadTokens: cached,
+    cacheWriteTokens: 0
+  };
+}
+
+/** `finish_reason` onto the Stop Reason the port promises (R2: a graph is never rewired). */
+const CHAT_STOP_REASONS: Record<string, string> = {
+  stop: 'end_turn',
+  length: 'max_tokens',
+  tool_calls: 'tool_use',
+  function_call: 'tool_use'
+};
+
+/** One answer, read from either API into what the ports publish. */
+interface ReadAnswer {
+  usage: ModelUsage;
+  text: string;
+  stopReason: string;
+  /** Set when the model declined: the sentence the failure carries. */
+  refusal?: string;
+}
+
+function readMessagesAnswer(payload: any): ReadAnswer {
+  return {
+    usage: usageOf(payload.usage),
+    text: textOf(payload.content),
+    stopReason: payload.stop_reason ? String(payload.stop_reason) : '',
+    refusal: payload.stop_reason === 'refusal' ? refusalMessage(payload.stop_details) : undefined
+  };
+}
+
+/**
+ * A chat completion, or `undefined` when the JSON is not one (no `choices`) — a wrong Base URL
+ * answering 200 with some other JSON must not reach the graph as an empty answer.
+ *
+ * A refusal is `message.refusal` or `finish_reason: content_filter`. ⚠️ The model's refusal
+ * WORDS are not put in the sentence: that sentence reaches the record, and the words can quote
+ * the request.
+ */
+function readChatAnswer(payload: any): ReadAnswer | undefined {
+  const choice = payload && Array.isArray(payload.choices) ? payload.choices[0] : undefined;
+  if (!choice) return undefined;
+  const finish = choice.finish_reason ? String(choice.finish_reason) : '';
+  const declined =
+    (choice.message && typeof choice.message.refusal === 'string' && choice.message.refusal.length > 0) ||
+    finish === 'content_filter';
+  return {
+    usage: chatUsageOf(payload.usage),
+    text: chatTextOf(choice.message),
+    stopReason: declined ? 'refusal' : CHAT_STOP_REASONS[finish] || finish,
+    refusal: declined
+      ? `Model Request: the model declined this request (${finish === 'content_filter' ? 'content_filter' : 'refusal'})`
+      : undefined
+  };
+}
+
+/**
+ * The parts of a provider's error body that may go on the record: its `error.type` and
+ * `error.code`, and only when each is an identifier. A free-text message never qualifies — see the
+ * module note. Ollama answers `{ "error": "<a sentence>" }`, which yields nothing, on purpose.
+ */
+function errorIdentifiers(raw: string): string[] {
+  let parsed: any;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  const err = parsed && parsed.error && typeof parsed.error === 'object' ? parsed.error : undefined;
+  if (!err) return [];
+  const words: string[] = [];
+  for (const word of [err.type, err.code]) {
+    if (typeof word === 'string' && /^[A-Za-z0-9_.:-]{1,64}$/.test(word) && words.indexOf(word) === -1) words.push(word);
+  }
+  return words;
+}
+
 export const node = {
   name: 'noodl.cloud.modelrequest',
   displayNodeName: 'Model Request',
@@ -211,14 +357,15 @@ export const node = {
         name: 'enum',
         enums: [
           { label: 'Anthropic', value: 'anthropic' },
-          { label: 'OpenAI-compatible (not yet implemented)', value: 'openai-compatible' }
+          { label: 'OpenAI-compatible', value: 'openai-compatible' }
         ]
       },
       default: DEFAULTS.provider,
       description:
-        'Which API shape the request is built in. Only Anthropic is implemented; OpenAI-compatible ' +
-        'is listed so a graph drawn today keeps its wiring when it arrives, and until then it fails ' +
-        'on Failure with Error Code not_implemented rather than pretending',
+        'Which API shape the request is built in. OpenAI-compatible is what a model running on your ' +
+        'own computer speaks (Ollama, llama.cpp\'s server, LM Studio): point Base URL at it, for ' +
+        'example http://127.0.0.1:11434, and set Model to the name that server knows the model by. ' +
+        'A key is optional only when Base URL is this computer (127.0.0.1, ::1, localhost)',
       set: function (this: any, value: string) {
         this._internal.provider = value || DEFAULTS.provider;
       }
@@ -243,7 +390,9 @@ export const node = {
       description:
         'The NAME of a secret in the project\'s functions namespace — never the key itself. It is ' +
         'read server-side at the moment of the call, exactly as the Secret node reads one, used in ' +
-        'one header and dropped. There is deliberately no port that could hold the value',
+        'one header and dropped. There is deliberately no port that could hold the value. With ' +
+        'OpenAI-compatible and a Base URL on this computer, a secret that is not provisioned means ' +
+        'no key is sent; anywhere else a missing secret fails with secret_missing',
       set: function (this: any, value: string) {
         this._internal.apiKeySecret = value;
       }
@@ -253,7 +402,9 @@ export const node = {
       displayName: 'Base URL',
       type: 'string',
       default: DEFAULTS.baseUrl,
-      description: 'Where the request goes. Change it for a proxy, a gateway, or a test double',
+      description:
+        'Where the request goes. Change it for a local model server, a proxy, a gateway, or a test ' +
+        'double. For OpenAI-compatible, a URL ending in /v1 or /chat/completions is used as given',
       set: function (this: any, value: string) {
         this._internal.baseUrl = value || DEFAULTS.baseUrl;
       }
@@ -268,7 +419,9 @@ export const node = {
         'it at a tenth of the price. Keep it the same on every call; anything that changes per call ' +
         '(a name, today\'s date) belongs in Per-Call Instructions or Input, or nothing is ever read back. ' +
         'Instructions shorter than the model\'s minimum (512 tokens on Claude Opus 5, up to 4,096 on ' +
-        'some older models) are not cached at all: the call works, and Usage shows 0 written',
+        'some older models) are not cached at all: the call works, and Usage shows 0 written. ' +
+        'OpenAI-compatible: Instructions and Per-Call Instructions are sent as one system message, ' +
+        'and any caching is the server\'s own',
       set: function (this: any, value: string) {
         this._internal.instructions = value;
       }
@@ -314,7 +467,10 @@ export const node = {
       description:
         'A JSON schema the answer must match. When set, the answer is constrained to it and arrives ' +
         'parsed on Json as well as raw on Text. Objects in the schema need additionalProperties ' +
-        'false, and the provider refuses the request outright if they do not have it',
+        'false, and the provider refuses the request outright if they do not have it. An ' +
+        'OpenAI-compatible server is sent it as response_format json_schema; a server that ignores ' +
+        'it and answers in prose fails with bad_json, and an answer that parses is not re-checked ' +
+        'against the schema here',
       set: function (this: any, value: unknown) {
         this._internal.outputSchema = value;
       }
@@ -325,6 +481,7 @@ export const node = {
       type: {
         name: 'enum',
         enums: [
+          { label: 'None (no thinking)', value: 'none' },
           { label: 'Low', value: 'low' },
           { label: 'Medium', value: 'medium' },
           { label: 'High', value: 'high' },
@@ -335,7 +492,11 @@ export const node = {
       default: DEFAULTS.effort,
       description:
         'How hard the model works before answering — the first lever to reach for on both cost and ' +
-        'quality. Low for tagging and classifying, high for anything that has to be right',
+        'quality. Low for tagging and classifying, high for anything that has to be right. ' +
+        'OpenAI-compatible: only None is sent (as reasoning_effort none), and it is the setting a ' +
+        'small thinking model on this computer needs — without it a Qwen 3 spends a short Max ' +
+        'Tokens thinking and answers nothing; the other values are not sent, because a model that ' +
+        'does not think refuses them. Anthropic: None is sent as Low, the lowest it takes',
       set: function (this: any, value: string) {
         this._internal.effort = value || DEFAULTS.effort;
       }
@@ -456,7 +617,7 @@ export const node = {
       type: 'number',
       description:
         'The HTTP status of the last attempt, or 0 when the request never reached the provider — a ' +
-        'missing secret, an unimplemented provider, a timeout',
+        'missing secret, a provider this node does not know, a timeout',
       getter: function (this: any) {
         return this._internal.status;
       }
@@ -465,7 +626,10 @@ export const node = {
       group: 'Error',
       displayName: 'Error',
       type: 'string',
-      description: 'Why there is no answer, in a sentence. Names the secret or the status, never a key',
+      description:
+        'Why there is no answer, in a sentence. Names the secret or the status, never a key. When the ' +
+        'provider answered with an error, its own words follow — here only, never on the execution ' +
+        'record, because a server\'s error can quote the request',
       getter: function (this: any) {
         return this._internal.error;
       }
@@ -483,9 +647,14 @@ export const node = {
     }
   },
   methods: {
-    /** Publish on the Error ports and settle every invocation in this batch as a failure. */
-    setError: function (this: any, message: string, code: string, tokens: any[], status?: number) {
-      this._internal.error = message;
+    /**
+     * Publish on the Error ports and settle every invocation in this batch as a failure.
+     *
+     * `portDetail` is the provider's own words, and it goes on the `Error` PORT only: the runtime
+     * error and the outcome are the execution record, and the record is counts only (ISL-010).
+     */
+    setError: function (this: any, message: string, code: string, tokens: any[], status?: number, portDetail?: string) {
+      this._internal.error = portDetail ? `${message} ${portDetail}` : message;
       this._internal.errorCode = code;
       this._internal.status = typeof status === 'number' ? status : 0;
       this.flagOutputDirty('error');
@@ -518,14 +687,14 @@ export const node = {
       const tokens = this._internal.pendingSendOutcomes || [];
       this._internal.pendingSendOutcomes = undefined;
 
-      if (this._internal.provider && this._internal.provider !== 'anthropic') {
-        // R2's whole point: the port exists so no graph is ever rewired, and it refuses loudly
-        // until it does something. Before the secret is touched — an unimplemented provider is
-        // not a reason to read a credential.
+      const provider = this._internal.provider || DEFAULTS.provider;
+      if (provider !== 'anthropic' && provider !== 'openai-compatible') {
+        // A value the enum never offered (a hand-edited project, a provider from a newer release).
+        // Refused before the secret is touched — an unknown provider is not a reason to read a
+        // credential.
         this.setError(
-          `Model Request: provider '${this._internal.provider}' is not implemented yet. Only ` +
-            'anthropic is available in this release; the port exists so a graph drawn now keeps its ' +
-            'wiring when another provider arrives.',
+          `Model Request: provider '${provider}' is not implemented. This release speaks anthropic ` +
+            'and openai-compatible.',
           CODES.notImplemented,
           tokens
         );
@@ -558,13 +727,22 @@ export const node = {
       }
 
       if (!secret || !secret.found || !secret.value) {
+        const baseUrl = String(this._internal.baseUrl || DEFAULTS.baseUrl);
+        if (provider === 'openai-compatible' && isThisComputer(baseUrl)) {
+          // ISL-010 ruling 2: a model server on this computer has no key to give.
+          this.dispatch(undefined, tokens);
+          return;
+        }
         // AC4 — names the secret, before any request is made, and never a value.
         this.setError(
           (secret && secret.error) ||
             `Model Request: no secret named '${name}' is provisioned for this backend's functions. ` +
               'Add it in the admin dashboard under Secrets, or set NODEGX_SECRET_' +
               String(name || '').toUpperCase() +
-              ' in the environment.',
+              ' in the environment.' +
+              (provider === 'openai-compatible'
+                ? ' A key is optional only when Base URL is this computer (127.0.0.1, ::1, localhost).'
+                : ''),
           CODES.secretMissing,
           tokens
         );
@@ -576,22 +754,19 @@ export const node = {
     },
     /** Build the body §3.2 describes. Split out so a spec can read it without a network. */
     buildBody: function (this: any) {
-      const messages =
-        Array.isArray(this._internal.messages) && this._internal.messages.length > 0
-          ? this._internal.messages
-          : [{ role: 'user', content: this._internal.input === undefined ? '' : String(this._internal.input) }];
-
       const body: Record<string, unknown> = {
         model: this._internal.model || DEFAULTS.model,
         max_tokens: this._internal.maxTokens || DEFAULTS.maxTokens,
-        messages
+        messages: this.conversation()
       };
       const system = this.buildSystem();
       if (system !== undefined) body.system = system;
 
       // `effort` and `format` are both inside `output_config` — taken from the API docs at build
       // time (2026-09-19), where the older top-level `output_format` is the deprecated spelling.
-      const outputConfig: Record<string, unknown> = { effort: this._internal.effort || DEFAULTS.effort };
+      // `none` is OpenAI-compatible's (ISL-010); the lowest this API takes is `low`.
+      const effort = this._internal.effort === 'none' ? 'low' : this._internal.effort || DEFAULTS.effort;
+      const outputConfig: Record<string, unknown> = { effort };
       if (this._internal.outputSchema !== undefined && this._internal.outputSchema !== null) {
         outputConfig.format = { type: 'json_schema', schema: this._internal.outputSchema };
       }
@@ -599,6 +774,41 @@ export const node = {
 
       // No `thinking` field and no `budget_tokens`, deliberately: current models think
       // adaptively by default and reject a token budget outright.
+      return body;
+    },
+    /** Messages when wired and non-empty, else Input as one user turn — the same for both APIs. */
+    conversation: function (this: any): unknown[] {
+      return Array.isArray(this._internal.messages) && this._internal.messages.length > 0
+        ? this._internal.messages
+        : [{ role: 'user', content: this._internal.input === undefined ? '' : String(this._internal.input) }];
+    },
+    /**
+     * The OpenAI-compatible body (ISL-010). `max_tokens`, not `max_completion_tokens`: it is the
+     * spelling every local server reads. Instructions travel as ONE system message — several
+     * chat templates (Qwen's among them) accept a system turn only first and only once.
+     *
+     * Effort is sent ONLY as `reasoning_effort: 'none'` (measured on Ollama 0.34.4, ISL-010 AC4):
+     * `none` turns a Qwen 3's thinking off and a non-thinking model accepts it, while `low` still
+     * spends 64 tokens thinking and `high` is a 400 ("does not support thinking") from a model that
+     * does not think — so the default `high` must never be sent.
+     */
+    buildChatBody: function (this: any) {
+      const fixed = this._internal.instructions ? String(this._internal.instructions) : '';
+      const perCall = this._internal.callInstructions ? String(this._internal.callInstructions) : '';
+      const system = [fixed, perCall].filter(Boolean).join('\n\n');
+
+      const body: Record<string, unknown> = {
+        model: this._internal.model || DEFAULTS.model,
+        max_tokens: this._internal.maxTokens || DEFAULTS.maxTokens,
+        messages: system ? [{ role: 'system', content: system }, ...this.conversation()] : this.conversation()
+      };
+      if (this._internal.effort === 'none') body.reasoning_effort = 'none';
+      if (this._internal.outputSchema !== undefined && this._internal.outputSchema !== null) {
+        body.response_format = {
+          type: 'json_schema',
+          json_schema: { name: 'answer', strict: true, schema: this._internal.outputSchema }
+        };
+      }
       return body;
     },
     /**
@@ -645,26 +855,32 @@ export const node = {
      * One call, up to {@link MAX_ATTEMPTS} attempts, settling exactly `tokens`.
      *
      * ⚠️ `key` is a parameter and never a field. It is in scope for this function and gone when
-     * it returns; nothing it touches is stored.
+     * it returns; nothing it touches is stored. `undefined` only for an OpenAI-compatible server
+     * on this computer (ISL-010 ruling 2), which is then sent no authorization header at all.
      *
      * Returns a promise that resolves (never rejects) when the call is settled, so a spec can
      * await it.
      */
-    dispatch: function (this: any, key: string, tokens: any[]) {
+    dispatch: function (this: any, key: string | undefined, tokens: any[]) {
       const started = Date.now();
       // One deadline for the whole call, retries included — a per-attempt timeout would let three
       // attempts quietly spend three times the budget the author set.
       const deadline = started + (this._internal.timeoutMs || DEFAULTS.timeoutMs);
       const base = String(this._internal.baseUrl || DEFAULTS.baseUrl).replace(/\/+$/, '');
-      const url = `${base}/v1/messages`;
-      const body = JSON.stringify(this.buildBody());
+      const chat = this._internal.provider === 'openai-compatible';
+      const url = chat ? chatCompletionsUrl(base) : `${base}/v1/messages`;
+      const body = JSON.stringify(chat ? this.buildChatBody() : this.buildBody());
+      const headers: Record<string, string> = chat
+        ? { 'content-type': 'application/json' }
+        : { 'x-api-key': key as string, 'anthropic-version': ANTHROPIC_VERSION, 'content-type': 'application/json' };
+      if (chat && key) headers.authorization = `Bearer ${key}`;
 
       let attempts = 0;
 
-      const finishFailure = (message: string, code: string, status?: number) => {
+      const finishFailure = (message: string, code: string, status?: number, portDetail?: string) => {
         this._internal.attempts = attempts;
         this.flagOutputDirty('attempts');
-        this.setError(message, code, tokens, status);
+        this.setError(message, code, tokens, status, portDetail);
       };
 
       const attempt = (): Promise<void> => {
@@ -683,11 +899,7 @@ export const node = {
 
         return fetch(url, {
           method: 'POST',
-          headers: {
-            'x-api-key': key,
-            'anthropic-version': ANTHROPIC_VERSION,
-            'content-type': 'application/json'
-          },
+          headers,
           body,
           signal: controller ? controller.signal : undefined
         })
@@ -716,12 +928,16 @@ export const node = {
               if (status < 200 || status >= 300) {
                 // 4xx is the caller's mistake and 5xx has outlived its retries; both are the same
                 // shape to a graph, and `status` plus the provider's own message is what tells
-                // them apart. The body is the provider's error JSON — not a credential.
+                // them apart. ⚠️ The message is NOT a credential but it can be the prompt: a
+                // server's error may quote the request. The record gets the status and the
+                // error's identifiers; the provider's words go on the Error port only.
                 const code = status === 429 || status >= 500 ? CODES.rateLimited : CODES.httpError;
+                const words = errorIdentifiers(raw);
                 finishFailure(
-                  `Model Request: the provider answered ${status}. ${raw.slice(0, 400)}`.trim(),
+                  `Model Request: the provider answered ${status}${words.length ? ` (${words.join(', ')})` : ''}.`,
                   code,
-                  status
+                  status,
+                  raw.slice(0, 400).trim() || undefined
                 );
                 return;
               }
@@ -738,7 +954,18 @@ export const node = {
                 return;
               }
 
-              const usage = usageOf(payload.usage);
+              const read = chat ? readChatAnswer(payload) : readMessagesAnswer(payload);
+              if (!read) {
+                finishFailure(
+                  `Model Request: the provider answered ${status} with JSON that is not a chat completion. ` +
+                    'Check Base URL.',
+                  CODES.network,
+                  status
+                );
+                return;
+              }
+
+              const usage = read.usage;
               const durationMs = Date.now() - started;
               // The cost is recorded for every answered call, including a refusal: it was paid.
               this.recordCall(usage, durationMs);
@@ -749,17 +976,17 @@ export const node = {
               this.flagOutputDirty('attempts');
               this.flagOutputDirty('status');
 
-              if (payload.stop_reason === 'refusal') {
+              if (read.refusal) {
                 // AC6. A refusal is an HTTP 200 — a graph that only checked the status would read
                 // it as an answer and hand an empty string downstream.
                 this._internal.stopReason = 'refusal';
                 this.flagOutputDirty('stopReason');
-                this.setError(refusalMessage(payload.stop_details), CODES.refusal, tokens, status);
+                this.setError(read.refusal, CODES.refusal, tokens, status);
                 return;
               }
 
-              const text = textOf(payload.content);
-              this._internal.stopReason = payload.stop_reason ? String(payload.stop_reason) : '';
+              const text = read.text;
+              this._internal.stopReason = read.stopReason;
 
               if (this._internal.outputSchema !== undefined && this._internal.outputSchema !== null) {
                 let parsed: unknown;

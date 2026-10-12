@@ -43,7 +43,16 @@ export interface SSEResponse {
 /** The security surface the hub needs — structurally satisfied by SecurityState. */
 export interface HubSecurity {
   readonly devOpenActive: boolean;
-  checkClp(principal: Principal, collection: string, op: ClpOp): { allowed: boolean; reason: string };
+  checkClp(
+    principal: Principal,
+    collection: string,
+    op: ClpOp
+  ): { allowed: boolean; reason: string; narrow?: Record<string, unknown> };
+  /**
+   * P116 ONT-012 — the details this caller may not read, per collection (`SecurityState.hiddenFor`).
+   * Optional only so a test's stand-in need not say "nothing is hidden"; the service passes the state.
+   */
+  hiddenFor?(principal: Principal): Record<string, Array<{ field: string; shownWhere?: Record<string, unknown> }>>;
 }
 
 export interface Subscription {
@@ -293,6 +302,33 @@ export class RealtimeHub {
           rejected.push({ collection, reason: decision.reason });
           continue;
         }
+        // P116 ONT-004: a path rule narrows rows through a chain the matcher
+        // cannot follow on a change frame. Refused here, by name, rather than
+        // streamed past — a subscriber must never receive what a query excludes.
+        if (decision.narrow) {
+          rejected.push({
+            collection,
+            reason: `"${collection}" lets you see rows through a path rule, and live updates cannot follow a path yet — query it instead`
+          });
+          continue;
+        }
+        // P116 ONT-012 (R-a): a detail shown on SOME rows needs the path its rule names, which a
+        // change frame cannot follow — refused like a narrowed collection. A filter that names a
+        // hidden detail is an oracle on it — refused by name, as a query is.
+        const hidden = this.security.hiddenFor?.(conn.principal)[collection] ?? [];
+        const partly = hidden.find((h) => h.shownWhere);
+        if (partly) {
+          rejected.push({
+            collection,
+            reason: `"${partly.field}" on "${collection}" is shown to you only on some records, through a path rule, and live updates cannot follow a path yet — query it instead`
+          });
+          continue;
+        }
+        const named = hidden.find((h) => filterNames(sub.filter, h.field));
+        if (named) {
+          rejected.push({ collection, reason: `"${named.field}" on "${collection}" is a detail you may not read, so a live filter may not name it` });
+          continue;
+        }
       }
       accepted.push({ collection, filter: sub.filter });
     }
@@ -322,9 +358,17 @@ export class RealtimeHub {
         // In dev-open the query routes bypass row ACLs (aclFor → undefined), so
         // realtime must bypass them too or the twin property breaks locally.
         if (!this.security.devOpenActive && !canReadRecord(conn.principal, event.record)) continue;
+        // P116 ONT-012 (R-a): the details this subscriber may not read are not in the frame. Only
+        // "hidden on every row" can reach here; "shown on some" was refused at subscribe.
+        const hidden = this.security.devOpenActive ? [] : (this.security.hiddenFor?.(conn.principal)[event.collection] ?? []);
+        let record = event.record;
+        if (hidden.length && record && typeof record === 'object') {
+          record = { ...record };
+          for (const h of hidden) delete (record as Record<string, unknown>)[h.field];
+        }
         this.enqueue(conn, {
           event: 'change',
-          data: { action: event.action, collection: event.collection, record: event.record }
+          data: { action: event.action, collection: event.collection, record }
         });
         break; // at most one delivery per connection per change
       }
@@ -371,4 +415,15 @@ export class RealtimeHub {
 /** Serialize one frame to the SSE wire, stamping a monotonic per-connection id. */
 function serializeFrame(frame: OutFrame, id: number): string {
   return `id: ${id}\nevent: ${frame.event}\ndata: ${JSON.stringify(frame.data)}\n\n`;
+}
+
+/** P116 ONT-012 — does a live filter name `field` anywhere (`$and`/`$or` included)? */
+function filterNames(filter: unknown, field: string): boolean {
+  if (!filter || typeof filter !== 'object') return false;
+  if (Array.isArray(filter)) return filter.some((f) => filterNames(f, field));
+  for (const [key, value] of Object.entries(filter as Record<string, unknown>)) {
+    if (key.split('.')[0] === field) return true;
+    if (key.startsWith('$') && filterNames(value, field)) return true;
+  }
+  return false;
 }

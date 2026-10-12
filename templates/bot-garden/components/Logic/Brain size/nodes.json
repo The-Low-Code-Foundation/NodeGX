@@ -1,0 +1,66 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3ab9f63c-dbd6-5c0b-893b-198699e9b681",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "brainsizeIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "robot",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "brainsizeFn",
+      "type": "JavaScriptFunction",
+      "label": "Brain size",
+      "parameters": {
+        "functionScript": "\nvar BRAIN_SIZE = 12;\nvar r = Inputs.robot && typeof Inputs.robot === 'object' ? Inputs.robot : null;\nOutputs.size = r && Number(r.brain) > BRAIN_SIZE ? Math.floor(Number(r.brain)) : BRAIN_SIZE;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-robot",
+          "displayName": "robot",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-size",
+          "displayName": "size",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "brainsizeOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "size",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

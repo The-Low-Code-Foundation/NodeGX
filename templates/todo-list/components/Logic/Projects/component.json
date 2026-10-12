@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "18587fe1-2251-549d-8f28-f749e873566b",
+  "name": "Projects",
+  "path": "/Logic/Projects",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The projects and the money: reads Project, MoneyItem, MoneyMark and BalanceReading, brings Planning’s moves over once (as tasks), and works out everything the Projects tab draws and the name a project task carries in the list. Refresh reads them again; Changed says tasks were written."
+}

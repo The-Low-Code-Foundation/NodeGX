@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "60268503-123c-574c-813f-0c6f89f49d7f",
+  "name": "Lesson rows",
+  "path": "/Logic/Lesson rows",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Olive’s five lessons as Skills cards, band 10–12. Runs when an input changes; Ran after each run."
+}

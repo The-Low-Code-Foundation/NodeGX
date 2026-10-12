@@ -16,12 +16,6 @@
       "toProperty": "mounted"
     },
     {
-      "fromId": "rsDefMode",
-      "fromProperty": "result",
-      "toId": "rsInitMode",
-      "toProperty": "value"
-    },
-    {
       "fromId": "rsSeeded",
       "fromProperty": "seeded",
       "toId": "rsFirst",
@@ -34,20 +28,14 @@
       "toProperty": "eval"
     },
     {
-      "fromId": "rsFirst",
-      "fromProperty": "onfalse",
-      "toId": "rsInitMode",
-      "toProperty": "do"
-    },
-    {
       "fromId": "rsDefPlayers",
       "fromProperty": "result",
       "toId": "rsInitPlayers",
       "toProperty": "value"
     },
     {
-      "fromId": "rsInitMode",
-      "fromProperty": "done",
+      "fromId": "rsFirst",
+      "fromProperty": "onfalse",
       "toId": "rsInitPlayers",
       "toProperty": "do"
     },
@@ -68,18 +56,6 @@
       "fromProperty": "done",
       "toId": "rsSeeded",
       "toProperty": "to-seeded"
-    },
-    {
-      "fromId": "rsIn",
-      "fromProperty": "mathsWord",
-      "toId": "rsModeItems",
-      "toProperty": "in-maths"
-    },
-    {
-      "fromId": "rsIn",
-      "fromProperty": "typingWord",
-      "toId": "rsModeItems",
-      "toProperty": "in-typing"
     },
     {
       "fromId": "rsIn",
@@ -154,12 +130,6 @@
       "toProperty": "startValue"
     },
     {
-      "fromId": "rsModeItems",
-      "fromProperty": "out-items",
-      "toId": "rsMode",
-      "toProperty": "items"
-    },
-    {
       "fromId": "rsPlayerItems",
       "fromProperty": "out-items",
       "toId": "rsPlayers",
@@ -170,24 +140,6 @@
       "fromProperty": "out-items",
       "toId": "rsTimed",
       "toProperty": "items"
-    },
-    {
-      "fromId": "rsModeVar",
-      "fromProperty": "value",
-      "toId": "rsMode",
-      "toProperty": "value"
-    },
-    {
-      "fromId": "rsMode",
-      "fromProperty": "value",
-      "toId": "rsSetMode",
-      "toProperty": "value"
-    },
-    {
-      "fromId": "rsMode",
-      "fromProperty": "changed",
-      "toId": "rsSetMode",
-      "toProperty": "do"
     },
     {
       "fromId": "rsPlayersVar",
@@ -238,12 +190,6 @@
       "toProperty": "mounted"
     },
     {
-      "fromId": "rsModeVar",
-      "fromProperty": "value",
-      "toId": "rsOut",
-      "toProperty": "mode"
-    },
-    {
       "fromId": "rsPlayersVar",
       "fromProperty": "value",
       "toId": "rsPlayersNum",
@@ -278,6 +224,294 @@
       "fromProperty": "onClick",
       "toId": "rsOut",
       "toProperty": "start"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "practisingWord",
+      "toId": "rsFocusLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "changeWord",
+      "toId": "rsChange",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "curriculum",
+      "toId": "rsFocus",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "sets",
+      "toId": "rsFocus",
+      "toProperty": "sets"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "level",
+      "toId": "rsFocus",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "lang",
+      "toId": "rsFocus",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "everythingWord",
+      "toId": "rsFocus",
+      "toProperty": "everythingWord"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "countWord",
+      "toId": "rsFocus",
+      "toProperty": "countWord"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "listWord",
+      "toId": "rsFocus",
+      "toProperty": "listWord"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "subject0",
+      "toId": "rsFocus",
+      "toProperty": "subject"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "skills0",
+      "toId": "rsFocus",
+      "toProperty": "skills"
+    },
+    {
+      "fromId": "rsFocus",
+      "fromProperty": "line",
+      "toId": "rsFocusLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rsFocus",
+      "fromProperty": "mode",
+      "toId": "rsOut",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "rsFocus",
+      "fromProperty": "focus",
+      "toId": "rsOut",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "rsFocus",
+      "fromProperty": "customSet",
+      "toId": "rsOut",
+      "toProperty": "customSet"
+    },
+    {
+      "fromId": "rsFocus",
+      "fromProperty": "customSetId",
+      "toId": "rsOut",
+      "toProperty": "customSetId"
+    },
+    {
+      "fromId": "rsFocus",
+      "fromProperty": "customSetBoth",
+      "toId": "rsOut",
+      "toProperty": "customSetBoth"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "app",
+      "toId": "rsSetFocus",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "profileId",
+      "toId": "rsSetFocus",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rsPicker",
+      "fromProperty": "subject",
+      "toId": "rsSetFocus",
+      "toProperty": "focusSubject"
+    },
+    {
+      "fromId": "rsPicker",
+      "fromProperty": "skills",
+      "toId": "rsSetFocus",
+      "toProperty": "focusSkills"
+    },
+    {
+      "fromId": "rsPicker",
+      "fromProperty": "save",
+      "toId": "rsSetFocus",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rsSetFocus",
+      "fromProperty": "app",
+      "toId": "rsOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "rsSetFocus",
+      "fromProperty": "done",
+      "toId": "rsOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "rsChoosing",
+      "fromProperty": "setup",
+      "toId": "rsRows",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rsChoosing",
+      "fromProperty": "picking",
+      "toId": "rsPicker",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rsChange",
+      "fromProperty": "onClick",
+      "toId": "rsPicker",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "rsChange",
+      "fromProperty": "onClick",
+      "toId": "rsChoosing",
+      "toProperty": "to-picking"
+    },
+    {
+      "fromId": "rsPicker",
+      "fromProperty": "save",
+      "toId": "rsChoosing",
+      "toProperty": "to-setup"
+    },
+    {
+      "fromId": "rsPicker",
+      "fromProperty": "cancel",
+      "toId": "rsChoosing",
+      "toProperty": "to-setup"
+    },
+    {
+      "fromId": "rsPicker",
+      "fromProperty": "editLists",
+      "toId": "rsOut",
+      "toProperty": "editLists"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "curriculum",
+      "toId": "rsPicker",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "sets",
+      "toId": "rsPicker",
+      "toProperty": "sets"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "level",
+      "toId": "rsPicker",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "lang",
+      "toId": "rsPicker",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "subject0",
+      "toId": "rsPicker",
+      "toProperty": "subject0"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "skills0",
+      "toId": "rsPicker",
+      "toProperty": "skills0"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "titleWord",
+      "toId": "rsPicker",
+      "toProperty": "titleWord"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "subjectWord",
+      "toId": "rsPicker",
+      "toProperty": "subjectWord"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "topicWord",
+      "toId": "rsPicker",
+      "toProperty": "topicWord"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "skillsHint",
+      "toId": "rsPicker",
+      "toProperty": "skillsHint"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "allWord",
+      "toId": "rsPicker",
+      "toProperty": "allWord"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "noneWord",
+      "toId": "rsPicker",
+      "toProperty": "noneWord"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "saveWord",
+      "toId": "rsPicker",
+      "toProperty": "saveWord"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "cancelWord",
+      "toId": "rsPicker",
+      "toProperty": "cancelWord"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "listsWord",
+      "toId": "rsPicker",
+      "toProperty": "listsWord"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "editListsWord",
+      "toId": "rsPicker",
+      "toProperty": "editListsWord"
+    },
+    {
+      "fromId": "rsIn",
+      "fromProperty": "noListsWord",
+      "toId": "rsPicker",
+      "toProperty": "noListsWord"
     }
   ]
 }

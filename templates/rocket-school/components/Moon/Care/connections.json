@@ -1,0 +1,331 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "dcadc9f5-898e-577f-8ba9-71a1c6121532",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mcIn",
+      "fromProperty": "mounted",
+      "toId": "mcShown",
+      "toProperty": "m"
+    },
+    {
+      "fromId": "mcShown",
+      "fromProperty": "result",
+      "toId": "mcCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "species",
+      "toId": "mcAlien",
+      "toProperty": "species"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "name",
+      "toId": "mcAlien",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "grown",
+      "toId": "mcAlien",
+      "toProperty": "grown"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "hat",
+      "toId": "mcAlien",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "eyes",
+      "toId": "mcAlien",
+      "toProperty": "eyes"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "neck",
+      "toId": "mcAlien",
+      "toProperty": "neck"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "happy",
+      "toId": "mcAlien",
+      "toProperty": "happy"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "colour",
+      "toId": "mcAlien",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "name",
+      "toId": "mcName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "line",
+      "toId": "mcLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "favLine",
+      "toId": "mcFav",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "feedWord",
+      "toId": "mcFeedLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "dressWord",
+      "toId": "mcDressLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "foods",
+      "toId": "mcFoodEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "wear",
+      "toId": "mcWearEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "said",
+      "toId": "mcSaid",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mcFeed",
+      "fromProperty": "said",
+      "toId": "mcSaid",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mcWear",
+      "fromProperty": "said",
+      "toId": "mcSaid",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mcBuy",
+      "fromProperty": "said",
+      "toId": "mcSaid",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "app",
+      "toId": "mcFeed",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "profileId",
+      "toId": "mcFeed",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "mcFoodEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "mcFeed",
+      "toProperty": "foodId"
+    },
+    {
+      "fromId": "mcFoodEach",
+      "fromProperty": "itemOutputSignal-use",
+      "toId": "mcFeed",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "app",
+      "toId": "mcWear",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "profileId",
+      "toId": "mcWear",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "mcWearEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "mcWear",
+      "toProperty": "wearId"
+    },
+    {
+      "fromId": "mcWearEach",
+      "fromProperty": "itemOutputSignal-use",
+      "toId": "mcWear",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mcWearEach",
+      "fromProperty": "itemOutputSignal-ask",
+      "toId": "mcAsk",
+      "toProperty": "to-asking"
+    },
+    {
+      "fromId": "mcAsk",
+      "fromProperty": "asking",
+      "toId": "mcOver",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mcAsk",
+      "fromProperty": "asking",
+      "toId": "mcConfirm",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "buyTitle",
+      "toId": "mcBuyTitle",
+      "toProperty": "word"
+    },
+    {
+      "fromId": "mcWearEach",
+      "fromProperty": "itemOutput-label",
+      "toId": "mcBuyTitle",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "mcBuyTitle",
+      "fromProperty": "result",
+      "toId": "mcConfirm",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "mcWearEach",
+      "fromProperty": "itemOutput-cost",
+      "toId": "mcConfirm",
+      "toProperty": "cost"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "purse",
+      "toId": "mcConfirm",
+      "toProperty": "purse"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "haveWord",
+      "toId": "mcConfirm",
+      "toProperty": "haveWord"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "costWord",
+      "toId": "mcConfirm",
+      "toProperty": "costWord"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "leftWord",
+      "toId": "mcConfirm",
+      "toProperty": "leftWord"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "yesWord",
+      "toId": "mcConfirm",
+      "toProperty": "yesWord"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "noWord",
+      "toId": "mcConfirm",
+      "toProperty": "noWord"
+    },
+    {
+      "fromId": "mcConfirm",
+      "fromProperty": "no",
+      "toId": "mcAsk",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "mcConfirm",
+      "fromProperty": "yes",
+      "toId": "mcAsk",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "app",
+      "toId": "mcBuy",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mcIn",
+      "fromProperty": "profileId",
+      "toId": "mcBuy",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "mcWearEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "mcBuy",
+      "toProperty": "wearId"
+    },
+    {
+      "fromId": "mcConfirm",
+      "fromProperty": "yes",
+      "toId": "mcBuy",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mcFeed",
+      "fromProperty": "app",
+      "toId": "mcOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mcFeed",
+      "fromProperty": "done",
+      "toId": "mcOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "mcWear",
+      "fromProperty": "app",
+      "toId": "mcOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mcWear",
+      "fromProperty": "done",
+      "toId": "mcOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "mcBuy",
+      "fromProperty": "app",
+      "toId": "mcOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mcBuy",
+      "fromProperty": "done",
+      "toId": "mcOut",
+      "toProperty": "write"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a1673283-b780-565c-8d68-893deb9edb4e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ylIn",
+      "fromProperty": "rows",
+      "toId": "ylEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ylIn",
+      "fromProperty": "rows",
+      "toId": "ylCount",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "ylCount",
+      "fromProperty": "out-empty",
+      "toId": "ylEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ylEach",
+      "fromProperty": "itemOutputSignal-open",
+      "toId": "ylOut",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "ylEach",
+      "fromProperty": "itemOutputSignal-close",
+      "toId": "ylOut",
+      "toProperty": "close"
+    },
+    {
+      "fromId": "ylEach",
+      "fromProperty": "itemOutputSignal-check",
+      "toId": "ylOut",
+      "toProperty": "check"
+    },
+    {
+      "fromId": "ylEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "ylOut",
+      "toProperty": "rowId"
+    },
+    {
+      "fromId": "ylEach",
+      "fromProperty": "itemOutput-targetId",
+      "toId": "ylOut",
+      "toProperty": "targetId"
+    },
+    {
+      "fromId": "ylEach",
+      "fromProperty": "itemOutput-title",
+      "toId": "ylOut",
+      "toProperty": "title"
+    }
+  ]
+}

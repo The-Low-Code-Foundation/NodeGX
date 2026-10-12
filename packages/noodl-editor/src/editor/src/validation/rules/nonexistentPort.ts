@@ -14,6 +14,14 @@
  *   - not found, and the node really mints ports at runtime      → skip (optional info)
  *   - not found, and every port the node can have is enumerable  → error
  *
+ * 🔴 P107 NSP-020 R19 — the middle row has a door now. Where the caller can draw a
+ * node's ports from its spec (`ValidatorOptions.drawnPorts`: the agent server does,
+ * and since R20 the editor's Problems panel — both through `../drawnPortLookup` — for
+ * the types `DRAWN_PORT_TYPES` lists), the ports drawn from its settings and the
+ * project ARE enumerable, and a port outside them is an error that names the near
+ * one. Where it cannot (no callback, or a type the spec does not draw), it is the
+ * skip it always was.
+ *
  * 🔴 GAM-019 (P78 D66) — the middle row used to read "the node has ANY dynamic
  * ports" (`isDynamicNode`), and that is how `name0 → text` on a Text Input went
  * through the door silently. 88 of the 176 shipped types carry a `dynamicPorts`
@@ -27,7 +35,9 @@
  * @module noodl-editor/validation/rules/nonexistentPort
  */
 
-import { CatalogIndex, Plug, PortKind, portKindOfTypeName } from '../CatalogIndex';
+import { tierForGroup } from '../../views/panels/propertyeditor/propertyPanelTiers';
+import { CatalogIndex, Plug, PortKind, nearest, portKindOfTypeName } from '../CatalogIndex';
+import { CLOUD_FUNCTION_TYPE, cloudFunctionCanMint } from '../derivedPortTargets';
 import { Diagnostic, DiagnosticCode } from '../diagnostics';
 import { NormConnection, NormNode, isComponentRef } from '../model';
 import { SkippedCheck, unknownTypeSkip } from '../unknownTypeSkip';
@@ -35,7 +45,7 @@ import { Rule, RuleContext } from './types';
 
 const MAX_ALTERNATIVES = 24;
 
-function availableAlternatives(catalog: CatalogIndex, type: string, plug: Plug): string[] {
+function availableAlternatives(catalog: CatalogIndex, type: string, plug: Plug, kind?: PortKind): string[] {
   // For inputs, lead with signal inputs — "how do I trigger this" is the most
   // common near-miss — then the ports that carry a value or a behaviour, then
   // the styling ports a visual state can vary, capped so the message stays readable.
@@ -44,9 +54,25 @@ function availableAlternatives(catalog: CatalogIndex, type: string, plug: Plug):
   // Input's `startValue` 88th of its 105 inputs, behind every `border*`, so the
   // refusal of D66's `text` listed 24 styling ports and never the one the author
   // meant. `suggestPort` cannot rescue it: "text" is nowhere near "startValue".
+  //
+  // P109 ISL-009 — two more rules, found when every visual node gained a `Scroll Into View`
+  // signal and its `Scroll Align`: a Text Input's `startValue` was 24th of the 24 shown, and
+  // those two ports pushed it to 26th, so the refusal of D66's `text` stopped naming it.
+  // - Shared plumbing joins the last tier: a port whose heading the property panel folds into
+  //   Advanced CSS (`CSS Class`, `Scroll Into View`, `Pointer Events`…) is never the near-miss
+  //   for what a node is about. One list decides both (`tierForGroup`), so they cannot drift.
+  // - The first two tiers follow the wire, as GAM-019's ruling has the suggestion do: a value
+  //   wire leads with the ports that take a value. A signal wire, or one of no known kind,
+  //   keeps signals first.
   const all = catalog.portNames(type, plug);
   const signals = new Set(plug === 'input' ? catalog.signalInputNames(type) : []);
-  const tier = (name: string) => (signals.has(name) ? 0 : catalog.getPort(type, plug, name)?.allowVisualStates ? 2 : 1);
+  const valuesFirst = kind === 'value';
+  const tier = (name: string) => {
+    const port = catalog.getPort(type, plug, name);
+    if (port?.allowVisualStates || (port?.group && tierForGroup(port.group) === 'advanced')) return 2;
+    if (signals.has(name)) return valuesFirst ? 1 : 0;
+    return valuesFirst ? 0 : 1;
+  };
   const ordered = [...all].sort((a, b) => tier(a) - tier(b) || (a < b ? -1 : 1));
   return ordered.slice(0, MAX_ALTERNATIVES);
 }
@@ -72,6 +98,49 @@ function otherEndKind(
     return catalog.portKind(other.type, otherPlug, port);
   }
   return portKindOfTypeName(other.instancePortTypes?.[port]);
+}
+
+/**
+ * P107 NSP-020 R19 — a wire to a port the node's spec does not draw now. The suggestion is a drawn port with the same
+ * name after its prefix first (a For Each's `addToBasket` is `itemOutputSignal-addToBasket`, a Function's `items` is
+ * `in-items`, an untyped row output's `itemOutputSignal-x` is `itemOutput-x`: too far apart for `nearest`), else the
+ * nearest drawn name; the alternatives lead with the ports drawn from
+ * the settings and the project, then the catalog's in its usual order.
+ */
+function missingDrawnPort(
+  catalog: CatalogIndex,
+  nodeById: { get(id: string): NormNode | undefined },
+  conn: NormConnection,
+  component: string,
+  node: NormNode,
+  port: string,
+  plug: Plug,
+  drawn: ReadonlySet<string>
+): Diagnostic {
+  const names = [...drawn];
+  // the name after its prefix (`itemOutputSignal-`, `prop-`, `in-`); the whole name when it has none
+  const tail = (name: string) => name.slice(name.indexOf('-') + 1).toLowerCase();
+  const suffixed = names.filter((name) => tail(name) === port.toLowerCase() || tail(name) === tail(port));
+  const suggestion = suffixed.length > 0 ? nearest(port, suffixed) ?? suffixed[0] : nearest(port, names);
+  const wireKind = otherEndKind(catalog, nodeById, conn, plug);
+  const fromProject = names.filter((name) => !catalog.hasPort(node.type, plug, name)).sort();
+  const alternatives = [...new Set([...fromProject, ...availableAlternatives(catalog, node.type, plug, wireKind).filter((name) => drawn.has(name))])].slice(0, MAX_ALTERNATIVES);
+  return {
+    code: DiagnosticCode.NonexistentPort,
+    severity: 'error',
+    message: `${node.type} has no ${plug} named "${port}" with its settings in this project.`,
+    location: {
+      component,
+      nodeId: node.id,
+      nodeType: node.type,
+      nodeLabel: node.label,
+      port,
+      plug,
+      connection: { fromId: conn.fromId, fromProperty: conn.fromProperty, toId: conn.toId, toProperty: conn.toProperty }
+    },
+    suggestion,
+    alternatives
+  };
 }
 
 export const nonexistentPort: Rule = {
@@ -122,9 +191,24 @@ export const nonexistentPort: Rule = {
 
           if (catalog.hasPort(node.type, plug, port)) continue; // (1)
           if (node.instancePorts.includes(port)) continue; // (2)
+          // (2b) P109 ISL-009 — minted by the type's derived-port rule from this node's own list.
+          if (catalog.derivedPortNames(node.type, plug, node.parameters).includes(port)) continue;
 
-          if (catalog.hasRuntimeDynamicPorts(node.type)) {
-            // (3) — runtime/adapter/numbered/component ports. Never an error.
+          // (2c) P109 ISL-042 — a Cloud Function's runtime ports are `out-*` results and `function`/`in-*` inputs, so
+          // any other name it does not list can never exist. Prefixed names go on to (3): whether the called function
+          // declares them is `derivedPortTargets`'s question, not this rule's.
+          const cloudFunctionCannotMint = node.type === CLOUD_FUNCTION_TYPE && !cloudFunctionCanMint(port, plug);
+
+          if (catalog.hasRuntimeDynamicPorts(node.type) && !cloudFunctionCannotMint) {
+            // (3a) P107 NSP-020 R19 — the ports the node's spec draws now from its settings and the project, where the
+            // caller supplies them (the agent server does): a port it does not draw is an error, as on a static node.
+            const drawn = ctx.options.drawnPorts?.(component.name, node.id, node.type);
+            if (drawn) {
+              if (drawn[plug].has(port)) continue;
+              out.push(missingDrawnPort(catalog, nodeById, conn, component.name, node, port, plug, drawn[plug]));
+              continue;
+            }
+            // (3) — runtime/adapter/numbered/component ports the caller cannot draw. Never an error.
             if (ctx.options.emitDynamicPortInfo) {
               out.push({
                 code: DiagnosticCode.DynamicPortSkipped,
@@ -147,8 +231,9 @@ export const nonexistentPort: Rule = {
           }
 
           // Fully static node — a missing port here is a real error.
-          const suggestion = catalog.suggestPort(node.type, plug, port, otherEndKind(catalog, nodeById, conn, plug));
-          const alternatives = availableAlternatives(catalog, node.type, plug);
+          const wireKind = otherEndKind(catalog, nodeById, conn, plug);
+          const suggestion = catalog.suggestPort(node.type, plug, port, wireKind);
+          const alternatives = availableAlternatives(catalog, node.type, plug, wireKind);
           out.push({
             code: DiagnosticCode.NonexistentPort,
             severity: 'error',

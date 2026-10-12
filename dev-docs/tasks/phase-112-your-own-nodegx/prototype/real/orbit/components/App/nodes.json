@@ -1,0 +1,469 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0b7e1f2a-0000-4000-8000-0000000000a1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "screen",
+      "type": "Group",
+      "label": "Screen",
+      "children": [
+        "phaseTxt",
+        "timeTxt",
+        "track",
+        "footTxt",
+        "btnRow"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "#0b1026",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "rowGap": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 36,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 36,
+          "unit": "px"
+        }
+      },
+      "x": 1650,
+      "y": -50
+    },
+    {
+      "id": "phaseTxt",
+      "type": "Text",
+      "label": "Phase label",
+      "parent": "screen",
+      "parameters": {
+        "text": "Focus",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 22,
+          "unit": "px"
+        },
+        "fontWeight": 700,
+        "letterSpacing": {
+          "value": 6,
+          "unit": "px"
+        },
+        "textTransform": "uppercase",
+        "color": "#ff5a36",
+        "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif"
+      },
+      "x": 1670,
+      "y": 32
+    },
+    {
+      "id": "timeTxt",
+      "type": "Text",
+      "label": "Time",
+      "parent": "screen",
+      "parameters": {
+        "text": "25:00",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 104,
+          "unit": "px"
+        },
+        "fontWeight": 200,
+        "color": "#eef2f6",
+        "fontVariantNumeric": "tabular-nums",
+        "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif"
+      },
+      "x": 1670,
+      "y": 134
+    },
+    {
+      "id": "track",
+      "type": "Group",
+      "label": "Track",
+      "parent": "screen",
+      "children": [
+        "bar"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 8,
+          "unit": "px"
+        },
+        "borderRadius": {
+          "value": 4,
+          "unit": "px"
+        },
+        "backgroundColor": "rgba(255,255,255,0.14)",
+        "clip": true,
+        "flexDirection": "column",
+        "alignItems": "flex-start"
+      },
+      "x": 1670,
+      "y": 216
+    },
+    {
+      "id": "bar",
+      "type": "Group",
+      "label": "Progress bar",
+      "parent": "track",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 0,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "borderRadius": {
+          "value": 4,
+          "unit": "px"
+        },
+        "backgroundColor": "#ff5a36"
+      },
+      "x": 1690,
+      "y": 278
+    },
+    {
+      "id": "footTxt",
+      "type": "Text",
+      "label": "Footer",
+      "parent": "screen",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": {
+          "value": 20,
+          "unit": "px"
+        },
+        "color": "rgba(238,242,246,0.8)",
+        "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif"
+      },
+      "x": 1670,
+      "y": 380
+    },
+    {
+      "id": "btnRow",
+      "type": "Group",
+      "label": "Buttons",
+      "parent": "screen",
+      "children": [
+        "pauseBtn",
+        "skipBtn"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "columnGap": {
+          "value": 28,
+          "unit": "px"
+        },
+        "marginTop": {
+          "value": 24,
+          "unit": "px"
+        }
+      },
+      "x": 1670,
+      "y": 462
+    },
+    {
+      "id": "pauseBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Pause button",
+      "parent": "btnRow",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 120,
+          "unit": "px"
+        },
+        "height": {
+          "value": 52,
+          "unit": "px"
+        },
+        "backgroundColor": "rgba(255,255,255,0.12)",
+        "color": "#eef2f6",
+        "fontSize": {
+          "value": 22,
+          "unit": "px"
+        },
+        "fontWeight": 600,
+        "borderRadius": {
+          "value": 12,
+          "unit": "px"
+        },
+        "borderStyle": "none",
+        "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif",
+        "label": "Pause"
+      },
+      "x": 1690,
+      "y": 524
+    },
+    {
+      "id": "skipBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Skip button",
+      "parent": "btnRow",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 120,
+          "unit": "px"
+        },
+        "height": {
+          "value": 52,
+          "unit": "px"
+        },
+        "backgroundColor": "rgba(255,255,255,0.12)",
+        "color": "#eef2f6",
+        "fontSize": {
+          "value": 22,
+          "unit": "px"
+        },
+        "fontWeight": 600,
+        "borderRadius": {
+          "value": 12,
+          "unit": "px"
+        },
+        "borderStyle": "none",
+        "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif",
+        "label": "Skip"
+      },
+      "x": 1690,
+      "y": 626
+    },
+    {
+      "id": "focusLen",
+      "type": "Number",
+      "label": "Focus length",
+      "parameters": {
+        "value": 1500
+      },
+      "x": 40,
+      "y": 318
+    },
+    {
+      "id": "breakLen",
+      "type": "Number",
+      "label": "Break length",
+      "parameters": {
+        "value": 300
+      },
+      "x": 40,
+      "y": 450
+    },
+    {
+      "id": "running",
+      "type": "Switch",
+      "label": "Running?",
+      "parameters": {
+        "onFromStart": true
+      },
+      "x": 40,
+      "y": 126
+    },
+    {
+      "id": "btnLabel",
+      "type": "Boolean To String",
+      "label": "Button label",
+      "parameters": {
+        "trueString": "Pause",
+        "falseString": "Start"
+      },
+      "x": 270,
+      "y": 238
+    },
+    {
+      "id": "ticker",
+      "type": "Repeat",
+      "label": "Every second",
+      "parameters": {
+        "interval": 1000
+      },
+      "x": 270,
+      "y": 66
+    },
+    {
+      "id": "elapsed",
+      "type": "Counter",
+      "label": "Seconds elapsed",
+      "parameters": {},
+      "x": 500,
+      "y": 192
+    },
+    {
+      "id": "phase",
+      "type": "States",
+      "label": "Focus / Break",
+      "parameters": {
+        "states": "Focus,Break",
+        "values": "length,glow",
+        "type-glow": "color",
+        "useTransitions": false,
+        "value-Focus-length": 1500,
+        "value-Break-length": 300,
+        "value-Focus-glow": "#ff5a36",
+        "value-Break-glow": "#2ee6a6"
+      },
+      "x": 270,
+      "y": 390
+    },
+    {
+      "id": "remaining",
+      "type": "Number Remapper",
+      "label": "Seconds left",
+      "parameters": {
+        "minInputValue": 0,
+        "maxInputValue": 1500,
+        "minOutputValue": 1500,
+        "maxOutputValue": 0
+      },
+      "x": 730,
+      "y": 172
+    },
+    {
+      "id": "progress",
+      "type": "Number Remapper",
+      "label": "Progress 0→1",
+      "parameters": {
+        "minInputValue": 0,
+        "maxInputValue": 1500,
+        "minOutputValue": 0,
+        "maxOutputValue": 1
+      },
+      "x": 730,
+      "y": 364
+    },
+    {
+      "id": "zero",
+      "type": "Inverter",
+      "label": "Nothing left?",
+      "parameters": {},
+      "x": 960,
+      "y": 50
+    },
+    {
+      "id": "finished",
+      "type": "Condition",
+      "label": "Phase over",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 1190,
+      "y": 40
+    },
+    {
+      "id": "rounds",
+      "type": "Counter",
+      "label": "Rounds done",
+      "parameters": {},
+      "x": 500,
+      "y": 364
+    },
+    {
+      "id": "toMs",
+      "type": "Number Remapper",
+      "label": "Seconds → ms",
+      "parameters": {
+        "minInputValue": 0,
+        "maxInputValue": 1,
+        "minOutputValue": 0,
+        "maxOutputValue": 1000,
+        "clamp": false
+      },
+      "x": 960,
+      "y": 202
+    },
+    {
+      "id": "clockface",
+      "type": "Date To String",
+      "label": "mm:ss",
+      "parameters": {
+        "formatString": "{minutes}:{seconds}",
+        "timeZone": "UTC"
+      },
+      "x": 1190,
+      "y": 212
+    },
+    {
+      "id": "sky",
+      "type": "Color Blend",
+      "label": "Sky",
+      "parameters": {
+        "color 0": "#0b1026",
+        "color 1": "#3a1c71",
+        "color 2": "#ffaf7b"
+      },
+      "x": 1190,
+      "y": 364
+    },
+    {
+      "id": "skyIdx",
+      "type": "Number Remapper",
+      "label": "Progress → sky",
+      "parameters": {
+        "minInputValue": 0,
+        "maxInputValue": 1,
+        "minOutputValue": 0,
+        "maxOutputValue": 2
+      },
+      "x": 960,
+      "y": 354
+    },
+    {
+      "id": "smooth",
+      "type": "net.noodl.animatetovalue",
+      "label": "Eased progress",
+      "parameters": {
+        "duration": 800,
+        "easingCurve": "easeOut"
+      },
+      "x": 960,
+      "y": 506
+    },
+    {
+      "id": "barPct",
+      "type": "Number Remapper",
+      "label": "Progress → %",
+      "parameters": {
+        "minInputValue": 0,
+        "maxInputValue": 1,
+        "minOutputValue": 0,
+        "maxOutputValue": 100
+      },
+      "x": 1190,
+      "y": 516
+    },
+    {
+      "id": "hud",
+      "type": "String Format",
+      "label": "Round line",
+      "parameters": {
+        "format": "Round {round} · {phase} ends in {time}"
+      },
+      "x": 1420,
+      "y": 258
+    }
+  ],
+  "visualRoots": [
+    "screen"
+  ]
+}

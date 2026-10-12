@@ -1,0 +1,70 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "layout"
+      ],
+      "parameters": {
+        "title": "Home"
+      }
+    },
+    {
+      "id": "layout",
+      "type": "Group",
+      "label": "Layout",
+      "parent": "page",
+      "children": [
+        "marker",
+        "world",
+        "bare"
+      ]
+    },
+    {
+      "id": "marker",
+      "type": "Text",
+      "label": "Marker",
+      "parent": "layout",
+      "parameters": {
+        "text": "isl011 page drew"
+      }
+    },
+    {
+      "id": "world",
+      "type": "isl011.World",
+      "label": "a grid with defaultCss display block",
+      "parent": "layout"
+    },
+    {
+      "id": "bare",
+      "type": "isl011.WorldBare",
+      "label": "the same grid, no defaultCss (control)",
+      "parent": "layout"
+    },
+    {
+      "id": "later",
+      "type": "JavaScriptFunction",
+      "label": "300 ms after load, change both nodes' opacity",
+      "parameters": {
+        "functionScript": "setTimeout(() => { Outputs.op = 0.5; window.__isl011Wrote = true; }, 300);"
+      },
+      "ports": [
+        {
+          "name": "out-op",
+          "displayName": "op",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

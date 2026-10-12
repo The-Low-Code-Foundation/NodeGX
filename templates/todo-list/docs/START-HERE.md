@@ -11,6 +11,21 @@ one list, and its order is **what you are going to do next** — which only you 
 - **Nothing is ever deleted.** You close a task by writing what happened — even
   "not needed, dropping it" — and every move, note, rename, tick and close is kept in its history.
 
+## Today, and things that repeat
+
+**Today** is the second tab. It is ordered by time, not by what you do next: overdue tasks, then
+what repeats today at its time, then tasks due today, then deadlines in the next 7 days.
+
+- **Things that repeat** are listed under Today. Add one and it opens beside the list: every day at
+  09:00 until you give it its own times. **Every day**, **Every week** or **Every month**, then as many
+  times as you like — pick Tue and Thu, type 9 and press **Add time**, and it is Tuesdays and Thursdays
+  at 09:00. A 31st in a shorter month comes up on its last day.
+- It starts on its **start date** (set things up ahead of time) and stops after its **end date**, if it
+  has one. **Stop it** ends it early and asks why.
+- **Ticking one off** logs that one occurrence — a note if you want one — and it leaves Today until it
+  is next due. One nobody ticked is shown as **Missed** in its history; it does not carry over.
+- A task ticked in Today is closed the way the list closes one: it asks what happened.
+
 ## It needs a backend
 
 Your list lives in the NodeGX backend, so every device you sign in on sees the same one. In the
@@ -22,16 +37,16 @@ security settings of its own yet, so one you have already used keeps its old rul
 
 The access rules ship as `nodegx.security.json`:
 
-- `Task`, `Action` and `Event` can be read and written by anyone signed in, and **creator owns** is on,
-  so each row is private to the person who made it.
-- `delete` is `nobody` on all three. The app has no delete button, and the backend refuses one.
+- `Task`, `Action`, `Event`, `Routine` and `RoutineCheck` can be read and written by anyone signed in, and
+  **creator owns** is on, so each row is private to the person who made it. A `RoutineCheck` is never edited.
+- `delete` is `nobody` on all of them. The app has no delete button, and the backend refuses one.
 - 🔴 **`signup` is `public`**, so that you can make your account. If you deploy this for yourself,
   create your account first and then set `signup` to `nobody`, or anyone who finds the address can
   make one (they would only ever see their own list, but it is your server).
 
 ## How it is built
 
-- **`Commands/`** — one component for each thing a person can do: Add task, Move task, Close task, Reopen task, Rename task, Set deadline, Add action, Tick action, Untick action, Move action, Rename action, Describe action, Add note.
+- **`Commands/`** — one component for each thing a person can do: Add task, Move task, Close task, Reopen task, Rename task, Set deadline, Add action, Tick action, Untick action, Move action, Rename action, Describe action, Add note, Add routine, Rename routine, Set schedule, Set routine dates, Tick routine, Stop routine.
   Each one checks its input, writes the record, then writes a line of history. Read one and you have
   read the pattern.
 - **`Logic/Write history`** is the only thing that writes to `Event`. Moving the same task several
@@ -43,10 +58,15 @@ The access rules ship as `nodegx.security.json`:
 - **Light and dark.** The page follows your system until you press the moon or sun at the top right
   (`Todo/Theme switch`). Pick the theme your system already uses and it goes back to following it.
   Both palettes are in `App`'s CSS Definition; `App` also puts your choice back when the app opens.
-- **Deadline reminders.** `Todo/Reminders switch` is a bell that shows only when the page the app is served
+- **Reminders.** `Todo/Reminders switch` is a bell that shows only when the page the app is served
   from sets `data-reminders` on the root and provides `window.todoReminders` — a service worker, a push key
-  and a server that sends at 9am on the day a task is due. This project sends nothing by itself, so without
-  that host there is no bell. The host keeps each device in `PushSubscription`.
+  and a server that sends at 9am on the day a task is due, and at the time of each thing that repeats. This
+  project sends nothing by itself, so without that host there is no bell. The host keeps each device in
+  `PushSubscription`. A reminder that links to `/?view=today` opens Today.
+- **When something repeats** is decided in one place, `SCHEDULE_FNS` in the generator's source: the Today
+  rows, a routine's history and the commands all carry it. `Logic/Today rows` and `Logic/Selected routine`
+  turn the records into what Today and the routine pane draw; a missed occurrence is worked out there,
+  never written.
 - **The deadline field** is `Todo/Date picker`, the same part as the library's Date Picker: a real date
   input with a calendar that drops down on a computer, and the device's own date picker on a phone. It
   hands `Commands/Set deadline` a `YYYY-MM-DD` day when a date is picked, typed (on Enter or leaving the
@@ -58,6 +78,8 @@ The access rules ship as `nodegx.security.json`:
 |---|---|
 | `Task` | `title`, `position` (lower = sooner), `status` (`open`/`done`), `deadline` (`YYYY-MM-DD`), `closingNote`, `closedAt` |
 | `Action` | `taskId`, `title`, `position`, `done`, `note`, `description` |
-| `Event` | `taskId`, `kind`, `summary`, `body`, `at` |
+| `Event` | `taskId` (a task's or a routine's id), `kind`, `summary`, `body`, `at` |
+| `Routine` | `title`, `cadence` (`daily`/`weekly`/`monthly`), `slots` (`08:00,20:00` · `tue@09:00,thu@09:00` · `1@09:00,last@17:00`), `startDate`, `endDate`, `status` (`active`/`stopped`), `stoppedAt`, `stopNote` |
+| `RoutineCheck` | `routineId`, `date`, `time`, `doneAt`, `note` — one per occurrence ticked off; never edited (`update` is `nobody`) |
 | `PushSubscription` | `endpoint`, `p256dh`, `auth`, `timeZone`, `enabled`, `device` — one per device with reminders on |
 

@@ -113,11 +113,12 @@ describe('NDA-004 §3: Repeater — Items Rendered', () => {
     graph.node('repeater').setInputValue('refresh', true);
     await graph.settle();
 
-    // ERG-001 §4 gave `Refresh` its own outcome. ⚠️ Note the order: `itemsRendered` lands
-    // *before* `done`, and the ERG-001 corpus row measures why — see
-    // `corpus/erg-001-repeater-outcomes.test.ts`, "Items Rendered fires before a Refresh's
-    // items exist".
-    expect(graph.signalsFor('repeater')).toEqual(['itemsRendered', 'itemsRendered', 'done', 'completed']);
+    // ERG-001 §4 gave `Refresh` its own outcome. The order: `done` as the rebuild attaches its
+    // last row, then `itemsRendered` once the queue has drained with every row on screen. It used
+    // to read `itemsRendered` FIRST, with zero rows built — the rebuild's op dropped its promise,
+    // so the queue drained under it (ERG-001's "(filed, not fixed)" row; fixed by P109 ISL-001,
+    // D85 — see `corpus/isl-001-repeater-list-given-twice.test.ts`).
+    expect(graph.signalsFor('repeater')).toEqual(['itemsRendered', 'done', 'completed', 'itemsRendered']);
   });
 
   /**

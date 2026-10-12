@@ -1,0 +1,639 @@
+{
+ "dir": "/Users/richardosborne/vscode_projects/OpenNoodl-worktrees/ig007-placement-scratch/fx/deploy",
+ "results": [
+  {
+   "name": "BOOT: the page drew, Noodl.Variables is reachable, index.html loads three.min.js before garden-3d-kit/index.js, THREE r158 is a global",
+   "ok": true,
+   "saw": {
+    "marker": true,
+    "api": true,
+    "threeAt": 8075,
+    "kitAt": 9339,
+    "modules": [
+     "Garden 3D Kit",
+     "Garden Kit"
+    ],
+    "THREE": "158"
+   }
+  },
+  {
+   "name": "SUPP: Supported came out of the port as true, the root agrees, and garden-kit’s helpers were found on the page",
+   "ok": true,
+   "saw": {
+    "supported": true,
+    "ready": 1,
+    "attrs": {
+     "class": "gd3-world",
+     "data-gd3-world": "true",
+     "data-w": "8",
+     "data-h": "6",
+     "data-camera": "island",
+     "role": "group",
+     "aria-label": "The garden",
+     "data-supported": "true",
+     "data-helpers": "sibling",
+     "data-meshes": "41",
+     "data-draw-calls": "41",
+     "data-ready": "true",
+     "data-frame-ms": "16",
+     "style": "aspect-ratio: 8 / 6; display: block;"
+    }
+   }
+  },
+  {
+   "name": "READY: Ready fired once (the Counter reads 1) and the root carries data-ready",
+   "ok": true,
+   "saw": {
+    "supported": true,
+    "ready": 1,
+    "attrs": {
+     "class": "gd3-world",
+     "data-gd3-world": "true",
+     "data-w": "8",
+     "data-h": "6",
+     "data-camera": "island",
+     "role": "group",
+     "aria-label": "The garden",
+     "data-supported": "true",
+     "data-helpers": "sibling",
+     "data-meshes": "41",
+     "data-draw-calls": "41",
+     "data-ready": "true",
+     "data-frame-ms": "16",
+     "style": "aspect-ratio: 8 / 6; display: block;"
+    }
+   }
+  },
+  {
+   "name": "PIXELS: the canvas is not one colour (≥ 200 distinct colours in its region) and the renderer made draw calls",
+   "ok": true,
+   "saw": {
+    "canvasRect": {
+     "x": 196,
+     "y": 22,
+     "w": 632,
+     "h": 472
+    },
+    "colours": 616,
+    "drawCalls": "41",
+    "meshes": "41"
+   }
+  },
+  {
+   "name": "GLIDE: a Robots write glides the robot two tiles — the name pill moved > 40 px the way the tiles run on screen, it reported gliding mid-way, and the shots differ in its region",
+   "ok": true,
+   "saw": {
+    "pillBefore": {
+     "x": 285.2109375,
+     "y": 232,
+     "w": 35.765625,
+     "h": 17
+    },
+    "pillAfter": {
+     "x": 389.1171875,
+     "y": 271.390625,
+     "w": 35.765625,
+     "h": 17
+    },
+    "mid": {
+     "x": -2.9624795017530383,
+     "y": 0.34,
+     "z": 0.5,
+     "yaw": -1.5707963267948966,
+     "gliding": true,
+     "bumping": false
+    },
+    "after": {
+     "x": -1.5,
+     "y": 0.34,
+     "z": 0.5,
+     "yaw": -1.5707963267948966,
+     "gliding": false,
+     "bumping": false
+    },
+    "region": {
+     "x": 245.2109375,
+     "y": 142,
+     "w": 219.671875,
+     "h": 169.390625
+    },
+    "diff": {
+     "differing": 5910,
+     "total": 37400,
+     "fraction": 0.15802139037433155
+    },
+    "midDiff": {
+     "differing": 5893,
+     "total": 37400,
+     "fraction": 0.1575668449197861
+    },
+    "dataX": "2",
+    "expected": {
+     "dx": 102.73887574828998,
+     "dy": 38.22483365915062
+    }
+   }
+  },
+  {
+   "name": "TURN: a d write changes the yaw by a quarter turn without moving the robot",
+   "ok": true,
+   "saw": {
+    "yaw0": -1.5707963267948966,
+    "turned": {
+     "x": -1.5,
+     "y": 0.34,
+     "z": 0.5,
+     "yaw": -3.141592653589793,
+     "gliding": false,
+     "bumping": false
+    }
+   }
+  },
+  {
+   "name": "BUMP: a risen bump count recoils the robot for a moment and it comes back to its tile",
+   "ok": true,
+   "saw": {
+    "bumping": {
+     "x": -1.5,
+     "y": 0.34,
+     "z": 0.4429714287349156,
+     "yaw": -3.141592653589793,
+     "gliding": false,
+     "bumping": true
+    },
+    "rested": {
+     "x": -1.5,
+     "y": 0.34,
+     "z": 0.5,
+     "yaw": -3.141592653589793,
+     "gliding": false,
+     "bumping": false
+    }
+   }
+  },
+  {
+   "name": "HOP: Celebrate lifts the robot off its tile and it lands again",
+   "ok": true,
+   "saw": {
+    "hopping": {
+     "x": -1.5,
+     "y": 0.5599872381196186,
+     "z": 0.5,
+     "yaw": -3.141592653589793,
+     "gliding": false,
+     "bumping": false
+    },
+    "landed": {
+     "x": -1.5,
+     "y": 0.34,
+     "z": 0.5,
+     "yaw": -3.141592653589793,
+     "gliding": false,
+     "bumping": false
+    }
+   }
+  },
+  {
+   "name": "TAP: a mouse press and release 3 px apart on tile 5,2 fires Tile Tapped once with Tile X 5, Tile Y 2 (read from the graph’s Variables)",
+   "ok": true,
+   "saw": {
+    "taps0": 0,
+    "p52": {
+     "x": 609.8594134311745,
+     "y": 265.7853735586588
+    },
+    "tap1": {
+     "taps": 1,
+     "x": 5,
+     "y": 2
+    },
+    "touch": {
+     "p14": {
+      "x": 333.52762529205665,
+      "y": 284.89576333025815
+     },
+     "tap2": {
+      "taps": 2,
+      "x": 1,
+      "y": 4
+     }
+    }
+   }
+  },
+  {
+   "name": "TAP: a touch tap on tile 1,4 (the water) fires Tile Tapped with Tile X 1, Tile Y 4",
+   "ok": true,
+   "saw": {
+    "p14": {
+     "x": 333.52762529205665,
+     "y": 284.89576333025815
+    },
+    "tap2": {
+     "taps": 2,
+     "x": 1,
+     "y": 4
+    }
+   }
+  },
+  {
+   "name": "DRAG: a 60 px drag pans the camera (the target moved) and fires no tap",
+   "ok": true,
+   "saw": {
+    "stBefore": {
+     "tx": 0,
+     "tz": 0,
+     "dist": 11.437527154622318
+    },
+    "stAfter": {
+     "tx": -1.1303461242985615,
+     "tz": -0.14550522898236515,
+     "dist": 11.437527154622318
+    },
+    "tapsAfterDrag": 2
+   }
+  },
+  {
+   "name": "WHEEL: a wheel up zooms in (the distance shrank) and stays above zero",
+   "ok": true,
+   "saw": {
+    "before": {
+     "tx": -1.1303461242985615,
+     "tz": -0.14550522898236515,
+     "dist": 11.437527154622318
+    },
+    "zoomed": {
+     "tx": -1.1303461242985615,
+     "tz": -0.14550522898236515,
+     "dist": 6.951749320113322
+    }
+   }
+  },
+  {
+   "name": "CAMERA: island frames the whole map; plot with Focus {0,2,4,3} frames closer and to the left",
+   "ok": true,
+   "saw": {
+    "islandState": {
+     "tx": 0,
+     "tz": 0,
+     "dist": 11.437527154622318
+    },
+    "plotState": {
+     "tx": -2,
+     "tz": 0.5,
+     "dist": 6.951749320113322
+    },
+    "plotColours": 499,
+    "attr": "plot"
+   }
+  },
+  {
+   "name": "BUBBLE: the bubble shows the text near the robot (≤ 160 px from its pill) and does not eat a press (elementFromPoint at its centre is the canvas)",
+   "ok": true,
+   "saw": {
+    "text": "Glug glug!",
+    "rect": {
+     "x": 381.0531311035156,
+     "y": 178.1875,
+     "w": 96.125,
+     "h": 33
+    },
+    "pill": {
+     "x": 389.1171875,
+     "y": 271.390625
+    },
+    "under": "canvas"
+   }
+  },
+  {
+   "name": "FRAME: Frame Ms came out of the port as a number > 0 (a readout, not a pass — software GL)",
+   "ok": true,
+   "saw": {
+    "frameMs": 42.3,
+    "attr": "42.3",
+    "renderer": "swiftshader (software), this Mac"
+   }
+  },
+  {
+   "name": "ISLAND: a 24×16 map with 30 things and three robots draws ≤ 500 meshes, three name pills, and is not one colour",
+   "ok": true,
+   "saw": {
+    "meshes": "188",
+    "drawCalls": "188",
+    "w": "24",
+    "h": "16",
+    "colours": 1694,
+    "pills": 3
+   }
+  },
+  {
+   "name": "VOCAB: rocks big / medium / small by left, a sign and a note (their text not on the tile), stones; the can at 2 of 3, empty at 0, none at null; the loads stone, letter, parcel",
+   "ok": true,
+   "saw": {
+    "things": [
+     "rock:big",
+     "rock:medium",
+     "rock:small",
+     "sign",
+     "postbox",
+     "stone",
+     "stone",
+     "note"
+    ],
+    "bots": [
+     {
+      "level": {
+       "share": 0.67,
+       "visible": true
+      },
+      "load": "stone"
+     },
+     {
+      "level": {
+       "share": 0,
+       "visible": false
+      },
+      "load": "letter"
+     },
+     {
+      "level": null,
+      "load": "parcel"
+     }
+    ],
+    "labels": [],
+    "meshes": 76
+   }
+  },
+  {
+   "name": "0 console errors through the whole drive",
+   "ok": true,
+   "saw": []
+  }
+ ],
+ "readings": {
+  "boot": {
+   "marker": true,
+   "api": true,
+   "threeAt": 8075,
+   "kitAt": 9339,
+   "modules": [
+    "Garden 3D Kit",
+    "Garden Kit"
+   ],
+   "THREE": "158"
+  },
+  "ready": {
+   "supported": true,
+   "ready": 1,
+   "attrs": {
+    "class": "gd3-world",
+    "data-gd3-world": "true",
+    "data-w": "8",
+    "data-h": "6",
+    "data-camera": "island",
+    "role": "group",
+    "aria-label": "The garden",
+    "data-supported": "true",
+    "data-helpers": "sibling",
+    "data-meshes": "41",
+    "data-draw-calls": "41",
+    "data-ready": "true",
+    "data-frame-ms": "16",
+    "style": "aspect-ratio: 8 / 6; display: block;"
+   }
+  },
+  "pixels": {
+   "canvasRect": {
+    "x": 196,
+    "y": 22,
+    "w": 632,
+    "h": 472
+   },
+   "colours": 616,
+   "drawCalls": "41",
+   "meshes": "41"
+  },
+  "glide": {
+   "pillBefore": {
+    "x": 285.2109375,
+    "y": 232,
+    "w": 35.765625,
+    "h": 17
+   },
+   "pillAfter": {
+    "x": 389.1171875,
+    "y": 271.390625,
+    "w": 35.765625,
+    "h": 17
+   },
+   "mid": {
+    "x": -2.9624795017530383,
+    "y": 0.34,
+    "z": 0.5,
+    "yaw": -1.5707963267948966,
+    "gliding": true,
+    "bumping": false
+   },
+   "after": {
+    "x": -1.5,
+    "y": 0.34,
+    "z": 0.5,
+    "yaw": -1.5707963267948966,
+    "gliding": false,
+    "bumping": false
+   },
+   "region": {
+    "x": 245.2109375,
+    "y": 142,
+    "w": 219.671875,
+    "h": 169.390625
+   },
+   "diff": {
+    "differing": 5910,
+    "total": 37400,
+    "fraction": 0.15802139037433155
+   },
+   "midDiff": {
+    "differing": 5893,
+    "total": 37400,
+    "fraction": 0.1575668449197861
+   },
+   "dataX": "2",
+   "expected": {
+    "dx": 102.73887574828998,
+    "dy": 38.22483365915062
+   }
+  },
+  "turn": {
+   "yaw0": -1.5707963267948966,
+   "turned": {
+    "x": -1.5,
+    "y": 0.34,
+    "z": 0.5,
+    "yaw": -3.141592653589793,
+    "gliding": false,
+    "bumping": false
+   }
+  },
+  "bump": {
+   "bumping": {
+    "x": -1.5,
+    "y": 0.34,
+    "z": 0.4429714287349156,
+    "yaw": -3.141592653589793,
+    "gliding": false,
+    "bumping": true
+   },
+   "rested": {
+    "x": -1.5,
+    "y": 0.34,
+    "z": 0.5,
+    "yaw": -3.141592653589793,
+    "gliding": false,
+    "bumping": false
+   }
+  },
+  "hop": {
+   "hopping": {
+    "x": -1.5,
+    "y": 0.5599872381196186,
+    "z": 0.5,
+    "yaw": -3.141592653589793,
+    "gliding": false,
+    "bumping": false
+   },
+   "landed": {
+    "x": -1.5,
+    "y": 0.34,
+    "z": 0.5,
+    "yaw": -3.141592653589793,
+    "gliding": false,
+    "bumping": false
+   }
+  },
+  "tap": {
+   "taps0": 0,
+   "p52": {
+    "x": 609.8594134311745,
+    "y": 265.7853735586588
+   },
+   "tap1": {
+    "taps": 1,
+    "x": 5,
+    "y": 2
+   },
+   "touch": {
+    "p14": {
+     "x": 333.52762529205665,
+     "y": 284.89576333025815
+    },
+    "tap2": {
+     "taps": 2,
+     "x": 1,
+     "y": 4
+    }
+   }
+  },
+  "drag": {
+   "stBefore": {
+    "tx": 0,
+    "tz": 0,
+    "dist": 11.437527154622318
+   },
+   "stAfter": {
+    "tx": -1.1303461242985615,
+    "tz": -0.14550522898236515,
+    "dist": 11.437527154622318
+   },
+   "tapsAfterDrag": 2
+  },
+  "wheel": {
+   "before": {
+    "tx": -1.1303461242985615,
+    "tz": -0.14550522898236515,
+    "dist": 11.437527154622318
+   },
+   "zoomed": {
+    "tx": -1.1303461242985615,
+    "tz": -0.14550522898236515,
+    "dist": 6.951749320113322
+   }
+  },
+  "camera": {
+   "islandState": {
+    "tx": 0,
+    "tz": 0,
+    "dist": 11.437527154622318
+   },
+   "plotState": {
+    "tx": -2,
+    "tz": 0.5,
+    "dist": 6.951749320113322
+   },
+   "plotColours": 499,
+   "attr": "plot"
+  },
+  "bubble": {
+   "text": "Glug glug!",
+   "rect": {
+    "x": 381.0531311035156,
+    "y": 178.1875,
+    "w": 96.125,
+    "h": 33
+   },
+   "pill": {
+    "x": 389.1171875,
+    "y": 271.390625
+   },
+   "under": "canvas"
+  },
+  "frame": {
+   "frameMs": 42.3,
+   "attr": "42.3",
+   "renderer": "swiftshader (software), this Mac"
+  },
+  "island": {
+   "meshes": "188",
+   "drawCalls": "188",
+   "w": "24",
+   "h": "16",
+   "colours": 1694,
+   "pills": 3
+  },
+  "vocab": {
+   "things": [
+    "rock:big",
+    "rock:medium",
+    "rock:small",
+    "sign",
+    "postbox",
+    "stone",
+    "stone",
+    "note"
+   ],
+   "bots": [
+    {
+     "level": {
+      "share": 0.67,
+      "visible": true
+     },
+     "load": "stone"
+    },
+    {
+     "level": {
+      "share": 0,
+      "visible": false
+     },
+     "load": "letter"
+    },
+    {
+     "level": null,
+     "load": "parcel"
+    }
+   ],
+   "labels": [],
+   "meshes": 76
+  }
+ },
+ "consoleErrors": [],
+ "networkErrors": []
+}

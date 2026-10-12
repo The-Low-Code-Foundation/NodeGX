@@ -1,0 +1,223 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e2478e40-dc18-5053-8329-460a4feb9350",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "plIn",
+      "fromProperty": "rows",
+      "toId": "plEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-toggle",
+      "toId": "plOut",
+      "toProperty": "toggle"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-save",
+      "toId": "plOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-tick",
+      "toId": "plOut",
+      "toProperty": "tick"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-sent",
+      "toId": "plOut",
+      "toProperty": "sent"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-projectId",
+      "toId": "plOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-projectName",
+      "toId": "plOut",
+      "toProperty": "projectName"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-taskId",
+      "toId": "plOut",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-mode",
+      "toId": "plOut",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-title",
+      "toId": "plOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-waitingOn",
+      "toId": "plOut",
+      "toProperty": "waitingOn"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-deadline",
+      "toId": "plOut",
+      "toProperty": "deadline"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-billKey",
+      "toId": "plOut",
+      "toProperty": "billKey"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-sendKey",
+      "toId": "plOut",
+      "toProperty": "sendKey"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-openTask",
+      "toId": "plOut",
+      "toProperty": "openTask"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-openTaskId",
+      "toId": "plOut",
+      "toProperty": "openTaskId"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-editMoney",
+      "toId": "plOut",
+      "toProperty": "editMoney"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-moneyKey",
+      "toId": "plOut",
+      "toProperty": "moneyKey"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-addMoney",
+      "toId": "plOut",
+      "toProperty": "addMoney"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-saveProject",
+      "toId": "plOut",
+      "toProperty": "saveProject"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-pName",
+      "toId": "plOut",
+      "toProperty": "pName"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-pSub",
+      "toId": "plOut",
+      "toProperty": "pSub"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-pKind",
+      "toId": "plOut",
+      "toProperty": "pKind"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-pBilling",
+      "toId": "plOut",
+      "toProperty": "pBilling"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-pTerms",
+      "toId": "plOut",
+      "toProperty": "pTerms"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-pRate",
+      "toId": "plOut",
+      "toProperty": "pRate"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-pSay",
+      "toId": "plOut",
+      "toProperty": "pSay"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-linkTask",
+      "toId": "plOut",
+      "toProperty": "linkTask"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-linkTaskId",
+      "toId": "plOut",
+      "toProperty": "linkTaskId"
+    },
+    {
+      "fromId": "plRoot",
+      "fromProperty": "this",
+      "toId": "plDrag",
+      "toProperty": "in-host"
+    },
+    {
+      "fromId": "plRoot",
+      "fromProperty": "didMount",
+      "toId": "plMounts",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "plMounts",
+      "fromProperty": "out-mounts",
+      "toId": "plDrag",
+      "toProperty": "in-mounted"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "rows",
+      "toId": "plDrag",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "plDrag",
+      "fromProperty": "out-itemId",
+      "toId": "plOut",
+      "toProperty": "moveId"
+    },
+    {
+      "fromId": "plDrag",
+      "fromProperty": "out-toIndex",
+      "toId": "plOut",
+      "toProperty": "moveTo"
+    },
+    {
+      "fromId": "plDrag",
+      "fromProperty": "out-moved",
+      "toId": "plOut",
+      "toProperty": "moved"
+    }
+  ]
+}

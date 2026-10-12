@@ -1,0 +1,66 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "layout"
+      ],
+      "parameters": {
+        "title": "Home"
+      }
+    },
+    {
+      "id": "layout",
+      "type": "Group",
+      "label": "Layout",
+      "parent": "page",
+      "children": [
+        "marker",
+        "list"
+      ]
+    },
+    {
+      "id": "marker",
+      "type": "Text",
+      "label": "Marker",
+      "parent": "layout",
+      "parameters": {
+        "text": "isl001 page drew"
+      }
+    },
+    {
+      "id": "list",
+      "type": "For Each",
+      "label": "one row per item (Create asynchronously is on for this project)",
+      "parent": "layout",
+      "parameters": {
+        "template": "/Row",
+        "templateType": "explicit"
+      }
+    },
+    {
+      "id": "rows",
+      "type": "Variable2",
+      "label": "the list",
+      "parameters": {
+        "name": "isl001Rows"
+      }
+    },
+    {
+      "id": "seed",
+      "type": "JavaScriptFunction",
+      "label": "seed list a at load, replace it with list b 0-30 ms later",
+      "parameters": {
+        "functionScript": "const COUNT = 60;\nconst make = (p) => Array.from({ length: COUNT }, (_, i) => ({ label: p + i }));\nNoodl.Variables.isl001Rows = make('a');\nconst delay = Math.floor(Math.random() * 31);\nwindow.__isl001 = { delay, count: COUNT, replaced: false };\nsetTimeout(() => {\n  Noodl.Variables.isl001Rows = make('b');\n  window.__isl001.replaced = true;\n}, delay);"
+      }
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

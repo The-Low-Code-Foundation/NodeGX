@@ -5,7 +5,7 @@
  * > gap — it converts "this backend cannot do that" into "this is broken."
  *
  * That sentence is a property of a table with 6 × 27 capability cells and
- * 6 × 31 filter cells in it, so it is checked as one — over every cell of every
+ * 6 × 32 filter cells in it, so it is checked as one — over every cell of every
  * descriptor, rather than over the handful a spec happened to name. Phase 30's
  * own lesson, applied to a different table.
  */

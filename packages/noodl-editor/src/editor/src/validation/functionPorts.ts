@@ -48,15 +48,16 @@
  * `Outputs.text`, wired `items` → `text`, `ports: []`, so the page's list has
  * never rendered under a clean report.
  *
- * ## The duplicated regexes
+ * ## The grammar
  *
- * The families below are copied from `@noodl/runtime`'s `javascriptnodeparser.js`
- * rather than imported, for the reason `CatalogIndex`'s `runOnChange-` prefix is
- * copied: this layer runs in the editor, in the MCP server and in a CLI, and must
- * not pull the runtime in. Unlike that one-string copy, these are five regexes
- * that can drift — so `tests-unit/fix-007/function-ports.test.ts` runs both
- * implementations over a corpus and fails when they disagree. Change them there
- * first.
+ * The mining regexes are `@noodl/runtime`'s `javascriptnodeparser.js` families,
+ * not imported, for the reason `CatalogIndex`'s `runOnChange-` prefix is copied:
+ * this layer runs in the editor, in the MCP server and in a CLI, and must not
+ * pull the runtime in. Since P109 ISL-006 this file holds no copy of its own. It
+ * reads them through `cloudDynamicPorts.ts`'s `scriptPortsFromSource`, the
+ * door's port derivation, so the check and the ports the door writes share one
+ * grammar. `tests-unit/fix-007/function-ports.test.ts` and `tests-unit/sb-017`
+ * run it against the real parser over a corpus and fail when they disagree.
  *
  * Note the parser does **not** strip comments before mining (the commented-out
  * `scriptWithoutComments` line in its source is the record of that decision), so
@@ -67,7 +68,8 @@
  * @module noodl-editor/validation/functionPorts
  */
 
-import type { CatalogIndex } from './CatalogIndex';
+import { scriptPortsFromSource } from '../models/nodelibrary/cloudDynamicPorts';
+import { nearest, type CatalogIndex } from './CatalogIndex';
 import { DiagnosticCode, type Diagnostic, type Severity } from './diagnostics';
 
 /** The Function node. `Javascript2` (Script) declares its ports and does not prefix them. */
@@ -179,32 +181,10 @@ export function checkScriptNodeRunnable(
 export const FUNCTION_INPUT_PREFIX = 'in-';
 export const FUNCTION_OUTPUT_PREFIX = 'out-';
 
-/** Verbatim from `javascriptnodeparser.js`'s `parseAndAddPortsFromScript`. */
-const INPUT_PATTERNS = [/Inputs\.([A-Za-z0-9_]+)/g, /Inputs\s*\[\s*(?:'|")(.*)(?:'|")\s*\]/g];
-const OUTPUT_PATTERNS = [
-  /Outputs\.([A-Za-z0-9]+)\s*\(\s*\)/g, // signal, Outputs.Done()
-  /Outputs\s*\[\s*(?:'|")(.*)(?:'|")\s*\]\(\s*\)/g,
-  /Outputs\.([A-Za-z0-9_]+)/g,
-  /Outputs\s*\[\s*"([^"]*)"\s*\]/g
-];
-
 /** The *display* names a Function script creates — unprefixed, as the panel shows them. */
 export interface MinedFunctionPorts {
   inputs: Set<string>;
   outputs: Set<string>;
-}
-
-function mineWith(script: string, patterns: readonly RegExp[]): Set<string> {
-  const found = new Set<string>();
-  for (const pattern of patterns) {
-    // Each use gets a fresh lastIndex; the module-level literals are /g.
-    pattern.lastIndex = 0;
-    for (const match of script.matchAll(pattern)) {
-      const name = match[1];
-      if (typeof name === 'string' && name.length > 0) found.add(name);
-    }
-  }
-  return found;
 }
 
 /**
@@ -214,10 +194,16 @@ function mineWith(script: string, patterns: readonly RegExp[]): Set<string> {
  * `functionScript` is absent or wrongly shaped simply produces no findings.
  */
 export function mineFunctionScriptPorts(script: unknown): MinedFunctionPorts {
-  if (typeof script !== 'string' || script.length === 0) {
-    return { inputs: new Set(), outputs: new Set() };
+  const mined: MinedFunctionPorts = { inputs: new Set(), outputs: new Set() };
+  if (typeof script !== 'string' || script.length === 0) return mined;
+  // P109 ISL-006 AC6: the grammar is `cloudDynamicPorts`' copy, not a fourth one. `Inputs["x"]` comes back
+  // with the runtime's own `plug: 'inputs'` typo, and still names an input here.
+  for (const port of scriptPortsFromSource(script)) {
+    const name = String(port.displayName ?? '');
+    if (name.length === 0) continue;
+    (port.plug === 'output' ? mined.outputs : mined.inputs).add(name);
   }
-  return { inputs: mineWith(script, INPUT_PATTERNS), outputs: mineWith(script, OUTPUT_PATTERNS) };
+  return mined;
 }
 
 /** A connection as this check reads it. */
@@ -265,10 +251,15 @@ export function checkFunctionNodePorts(
 
   const mined = new Map<string, MinedFunctionPorts>();
   const declared = new Map<string, Set<string>>();
+  const listed = new Map<string, MinedFunctionPorts>();
   const labels = new Map<string, string>();
   for (const node of nodes) {
     if (node.type !== FUNCTION_NODE_TYPE) continue;
     mined.set(node.id, mineFunctionScriptPorts(node.parameters?.['functionScript']));
+    listed.set(node.id, {
+      inputs: listedLabels(node.parameters?.['scriptInputs']),
+      outputs: listedLabels(node.parameters?.['scriptOutputs'])
+    });
     labels.set(node.id, node.label ? `"${node.label}"` : node.type);
     const own = new Set<string>();
     if (Array.isArray(node.ports)) {
@@ -292,7 +283,11 @@ export function checkFunctionNodePorts(
       const ports = mined.get(id);
       if (!ports) continue; // not a Function node in this candidate
       if (typeof port !== 'string' || port.length === 0) continue;
-      if (port.startsWith(prefix)) continue; // already the port name
+      if (port.startsWith(prefix)) {
+        const unknown = unknownPrefixedPort({ id, port, plug, prefix, wire, component, severity }, ports, listed.get(id)!, declared.get(id)!, labels.get(id)!);
+        if (unknown) diagnostics.push(unknown);
+        continue;
+      }
       if (!(plug === 'input' ? ports.inputs : ports.outputs).has(port)) continue; // not a name we can prove
       // A declared port of the node, or one the instance serialises, really is
       // connectable under this exact name — `done` beside `Outputs.done()`.
@@ -332,4 +327,93 @@ export function checkFunctionNodePorts(
   }
 
   return diagnostics;
+}
+
+/** The labels of a `scriptInputs` / `scriptOutputs` proplist (`[{ id, label }]`), as the runtime reads them. */
+function listedLabels(value: unknown): Set<string> {
+  const labels = new Set<string>();
+  if (!Array.isArray(value)) return labels;
+  for (const row of value) {
+    const label = row && typeof row === 'object' ? (row as { label?: unknown }).label : undefined;
+    if (typeof label === 'string' && label.length > 0) labels.add(label);
+  }
+  return labels;
+}
+
+/** How many names the refusal lists before it stops being readable. */
+const MAX_LISTED_PORTS = 24;
+
+/**
+ * P109 ISL-006 AC4 — a prefixed endpoint naming a port the node does not have.
+ *
+ * The node has exactly what the editor's `NodeGraphNode.getPorts` would give it: the written list, the
+ * names the code mines (comments included, as the runtime mines them), and the ports saved on the node.
+ * Anything else is painted "Target port doesn't exist" and deleted from the build, so this is never a
+ * guess. `Outputs[key]` mints nothing, which is the case the list exists for.
+ */
+function unknownPrefixedPort(
+  at: {
+    id: string;
+    port: string;
+    plug: 'input' | 'output';
+    prefix: string;
+    wire: FunctionWireLike;
+    component: string;
+    severity: Severity;
+  },
+  mined: MinedFunctionPorts,
+  listed: MinedFunctionPorts,
+  saved: Set<string>,
+  label: string
+): Diagnostic | undefined {
+  const { id, port, plug, prefix, wire, component, severity } = at;
+  const bare = port.slice(prefix.length);
+  const fromList = plug === 'input' ? listed.inputs : listed.outputs;
+  const fromCode = plug === 'input' ? mined.inputs : mined.outputs;
+  if (fromList.has(bare) || fromCode.has(bare) || saved.has(port)) return undefined;
+
+  const list = plug === 'input' ? 'scriptInputs' : 'scriptOutputs';
+  const typeParam = (plug === 'input' ? 'intype-' : 'outtype-') + bare;
+  const reference = plug === 'input' ? `Inputs.${bare}` : `Outputs.${bare}`;
+  const real = [
+    ...new Set([...fromList, ...fromCode].map((n) => prefix + n).concat([...saved].filter((n) => n.startsWith(prefix))))
+  ];
+  const has =
+    real.length === 0
+      ? `it has no ${plug} ports of that kind`
+      : `its ${plug}s are ${real
+          .slice(0, MAX_LISTED_PORTS)
+          .map((n) => `"${n}"`)
+          .join(', ')}`;
+  const closest = nearest(port, real);
+
+  return {
+    code: DiagnosticCode.UnknownFunctionPort,
+    severity,
+    message:
+      `Connection names ${plug} "${port}" on the Function node ${label}, but the node has no such port: ` +
+      `a Function's ports are the names on its list (${list}) and the ${reference.split('.')[0]}.<name> its code ` +
+      `uses, and "${bare}" is in neither — ${has}. The editor paints this wire "${
+        plug === 'input' ? 'Target' : 'Source'
+      } port doesn't exist" and leaves it out of the app it builds.`,
+    location: {
+      component,
+      nodeId: id,
+      nodeType: FUNCTION_NODE_TYPE,
+      port,
+      plug,
+      connection: {
+        fromId: wire.fromId,
+        fromProperty: wire.fromProperty,
+        toId: wire.toId,
+        toProperty: wire.toProperty
+      }
+    },
+    suggestion:
+      (closest ? `Did you mean "${closest}"? ` : '') +
+      `If the node should have "${bare}", add it to ${list} — { "id": "${bare}", "label": "${bare}" }, with its type in ` +
+      `the "${typeParam}" parameter — or use ${reference} in the script. The list is the way when the code reaches the ` +
+      `port through a variable (${plug === 'input' ? 'Inputs' : 'Outputs'}[key]) or never reads it at all.`,
+    alternatives: real.slice(0, MAX_LISTED_PORTS)
+  };
 }

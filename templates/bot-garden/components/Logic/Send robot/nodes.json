@@ -1,0 +1,249 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b5d93f4e-4d16-5469-86e1-7d86d2268bfc",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sendrobotIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "now",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "requestId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "requests",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "robotId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sendTo",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "sendrobotFn",
+      "type": "JavaScriptFunction",
+      "label": "Send robot",
+      "parameters": {
+        "functionScript": "var { crewBlocks, modelOf, plotOfRobot, robotKindOf, robotRow } = Scripts.save;\nvar { fill, langOf, wordMap } = Scripts.words;\nvar iw6oTo = String(Inputs.sendTo || '');\nInputs = { model: Inputs.model, profileId: Inputs.profileId, lang: Inputs.lang, words: Inputs.words, requests: Inputs.requests, now: Inputs.now, robotId: Inputs.robotId, requestId: iw6oTo.slice(iw6oTo.lastIndexOf('|') + 1) };\n\nvar CREW_CAN = {\"pip\":[\"fwd\",\"left\",\"right\",\"pick\",\"put\",\"go_nearest\",\"go_to\",\"repeat\",\"until\",\"if\",\"when\",\"count_inc\",\"trick\",\"do\",\"set\",\"change\",\"water\",\"fill\",\"olive:read\"],\"cobble\":[\"fwd\",\"left\",\"right\",\"pick\",\"put\",\"go_nearest\",\"go_to\",\"repeat\",\"until\",\"if\",\"when\",\"count_inc\",\"trick\",\"do\",\"set\",\"change\",\"pick\",\"put\"],\"pocket\":[\"fwd\",\"left\",\"right\",\"pick\",\"put\",\"go_nearest\",\"go_to\",\"repeat\",\"until\",\"if\",\"when\",\"count_inc\",\"trick\",\"do\",\"set\",\"change\",\"pick\",\"put\",\"say\",\"olive:say-thanks\",\"olive:read\"],\"echo\":[\"fwd\",\"left\",\"right\",\"pick\",\"put\",\"go_nearest\",\"go_to\",\"repeat\",\"until\",\"if\",\"when\",\"count_inc\",\"trick\",\"do\",\"set\",\"change\",\"water\",\"fill\",\"say\",\"olive:read\",\"olive:is-it-a\",\"olive:say-thanks\"]};\nfunction crewRowOf(p, id) { var l = p && p.island ? p.island.robots : []; for (var i = 0; i < l.length; i++) if (l[i].id === String(id)) return l[i]; return null; }\n/** A block's id as the kinds' lists name it: an ask of a rung is that rung's olive block. */\nfunction crewBlockId(b) { var t = String(b.t || ''); if (t === 'ask') { var rg = b.slots && b.slots.rung ? String(b.slots.rung) : ''; return rg ? 'olive:' + rg : 'ask'; } return t; }\n/** The program a robot runs or carries: its plot's when it is pinned, else its row's; null when it knows none. */\nfunction crewProgramOf(p, id) {\n  var at = plotOfRobot(p.island, String(id));\n  if (at) return p.island.plots[at].program;\n  var r = crewRowOf(p, id);\n  return r && Array.isArray(r.program) && r.program.length ? r.program : null;\n}\n/** A program against a robot: the first block (in reading order) its kind cannot place, else too many for its brain. */\nfunction crewCheck(program, kind, brain) {\n  var can = CREW_CAN[kind] || CREW_CAN.pip, first = '';\n  function walk(l) {\n    for (var i = 0; i < l.length && !first; i++) {\n      var b = l[i];\n      if (!b || typeof b !== 'object') continue;\n      var t = crewBlockId(b);\n      if (can.indexOf(t) === -1) { first = t; return; }\n      if (Array.isArray(b.body)) walk(b.body);\n      if (Array.isArray(b['else'])) walk(b['else']);\n    }\n  }\n  walk(Array.isArray(program) ? program : []);\n  var n = crewBlocks(program);\n  if (first) return { ok: false, error: 'block', block: first, n: n, brain: brain };\n  if (n > brain) return { ok: false, error: 'brain', block: '', n: n, brain: brain };\n  return { ok: true, error: '', block: '', n: n, brain: brain };\n}\n/** Copy the program one robot runs or carries onto another: its plot's (at work), else its row's. */\nfunction crewCopy(p, fromId, toId) {\n  var from = crewRowOf(p, fromId), to = crewRowOf(p, toId);\n  var out = { ok: false, error: '', block: '', n: 0, brain: 0, from: from ? robotRow(p, from).name : '', to: to ? robotRow(p, to).name : '' };\n  if (!from || !to) { out.error = 'robot'; return out; }\n  if (from.id === to.id) { out.error = 'same'; return out; }\n  var prog = crewProgramOf(p, from.id);\n  if (!prog || !prog.length) { out.error = 'none'; return out; }\n  var tr = robotRow(p, to), chk = crewCheck(prog, tr.kind, tr.brain);\n  out.n = chk.n; out.brain = chk.brain; out.block = chk.block;\n  if (!chk.ok) { out.error = chk.error; return out; }\n  var at = plotOfRobot(p.island, to.id);\n  if (at) p.island.plots[at].program = JSON.parse(JSON.stringify(prog));\n  else to.program = JSON.parse(JSON.stringify(prog));\n  out.ok = true;\n  return out;\n}\n/**\n * Send a robot to a plot she has won (or home, when it already works there). 'req' is the request (its needs, band);\n * 'band' hers. Returns '{ ok, error, role, block, n, brain, mate }': role 'works' | 'helps' | 'home'; error 'robot' |\n * 'plot' | 'kind' | 'locked' | 'open' (not won yet) | 'full' (two robots there) | 'teach' (no program to run) | 'block' |\n * 'brain'; mate = the robot already at work there (for 'helps').\n */\nfunction crewAssign(p, robotId, req, band, now) {\n  var out = { ok: false, error: '', role: '', block: '', n: 0, brain: 0, mate: '' };\n  var row = crewRowOf(p, robotId);\n  if (!row) { out.error = 'robot'; return out; }\n  if (!req || !req.id || req.id === 'free') { out.error = 'plot'; return out; }\n  var kind = req.needs ? String(req.needs) : 'pip';\n  if (robotKindOf(row) !== kind) { out.error = 'kind'; return out; }\n  if (Number(req.band) > (Number(band) === 1 ? 1 : 2)) { out.error = 'locked'; return out; }\n  if (p.island.done.indexOf(req.id) === -1) { out.error = 'open'; return out; }\n  var plots = p.island.plots, q = plots[req.id] || null, at = plotOfRobot(p.island, row.id);\n  var primary = q && q.robotId && Array.isArray(q.program) && q.program.length ? q.robotId : '';\n  // Tapped where it already works: home, with the program it ran (the plot keeps its win and its live job).\n  if (at === req.id || row.helps === req.id) {\n    if (at === req.id) { row.program = JSON.parse(JSON.stringify(q.program)); q.program = null; q.robotId = ''; }\n    delete row.helps;\n    out.ok = true; out.role = 'home';\n    return out;\n  }\n  var helper = !!primary;\n  var prog = null;\n  if (helper) {\n    for (var h = 0; h < p.island.robots.length; h++) if (p.island.robots[h].helps === req.id && p.island.robots[h].id !== row.id) { out.error = 'full'; return out; }\n    prog = crewProgramOf(p, row.id) || q.program;\n    out.mate = primary;\n  } else prog = (q && Array.isArray(q.program) && q.program.length ? q.program : null) || crewProgramOf(p, row.id);\n  if (!prog || !prog.length) { out.error = 'teach'; return out; }\n  var chk = crewCheck(prog, kind, robotRow(p, row).brain);\n  out.n = chk.n; out.brain = chk.brain; out.block = chk.block;\n  if (!chk.ok) { out.error = chk.error; return out; }\n  prog = JSON.parse(JSON.stringify(prog));\n  // It leaves wherever it was: a plot it worked keeps its program for the next robot (as a win elsewhere leaves it).\n  if (at) { row.program = JSON.parse(JSON.stringify(plots[at].program)); plots[at].robotId = ''; }\n  delete row.helps;\n  if (helper) { row.program = prog; row.helps = req.id; out.role = 'helps'; }\n  else {\n    var next = { program: prog, robotId: row.id, wonAt: q && q.wonAt ? q.wonAt : Number(now) > 0 ? Number(now) : Date.now() };\n    if (q && q.live) next.live = q.live;\n    plots[req.id] = next;\n    out.role = 'works';\n  }\n  out.ok = true;\n  return out;\n}\n\nvar OLIVE_WORD = {\"olive:say-thanks\":\"rungSayThanks\",\"olive:read\":\"rungRead\",\"olive:is-it-a\":\"rungIsItA\"};\n\nfunction crewBlockWord(t, w, band) {\n  if (String(t).indexOf('olive:') === 0) return w[OLIVE_WORD[t]] || String(t);\n  var k = String(t).split('_').map(function (x) { return x.charAt(0).toUpperCase() + x.slice(1); }).join('');\n  return (band === 1 && w['c' + k]) || w['b' + k] || String(t);\n}\n\nvar model = modelOf(Inputs.model && typeof Inputs.model === 'object' ? Inputs.model : {});\nvar pid = String(Inputs.profileId || model.island.activeId);\nvar lang = langOf(Inputs.lang);\nvar w = wordMap(Inputs.words, lang, 'Pip');\nvar raw = String(Inputs.robotId || ''), rid = raw.slice(raw.lastIndexOf('|') + 1), reqId = String(Inputs.requestId || '');\nvar reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];\nvar req = null, p = null;\nfor (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === reqId) req = reqs[i];\nfor (var j = 0; j < model.profiles.length; j++) if (model.profiles[j].id === pid) p = model.profiles[j];\n// P108 IW-007 (s6): on her land a tap CHOOSES the robot that learns a job there (Go and help teaches it); nothing is written.\nvar iw7tChose = reqId === \"land\" && !!p && !!crewRowOf(p, rid);\nvar res = iw7tChose ? { ok: false, error: '', role: 'chosen', block: '', n: 0, brain: 0, mate: '' } : p ? crewAssign(p, rid, req, p.band, Inputs.now) : { ok: false, error: 'robot', role: '', block: '', n: 0, brain: 0, mate: '' };\nvar me = p && crewRowOf(p, rid) ? robotRow(p, crewRowOf(p, rid)).name : '';\nvar mate = p && res.mate && crewRowOf(p, res.mate) ? robotRow(p, crewRowOf(p, res.mate)).name : '';\nvar vars = { r: me, m: mate, blk: crewBlockWord(res.block, w, p ? p.band : 2), n: res.brain, k: res.n };\nvar line = res.role === 'works' ? fill(w.iw8cSent, vars) : res.role === 'helps' ? fill(w.iw8cHelping, vars) : res.role === 'home' ? fill(w.iw8cGoneHome, vars)\n  : res.error === 'teach' ? fill(w.iw8cTeach, vars) : res.error === 'full' ? fill(w.iw8cFull, vars) : res.error === 'block' ? fill(w.iw8cNoBlockHere, vars) : res.error === 'brain' ? fill(w.iw8cNoBrainHere, vars) : res.error ? fill(w.iw8cKind, vars) : '';\nOutputs.model = model;\nOutputs.ok = res.ok;\nOutputs.error = res.error;\nOutputs.role = res.role;\nOutputs.told = { requestId: reqId, text: line, ok: res.ok, n: Date.now() };\nOutputs.chose = iw7tChose;\nOutputs.chosen = iw7tChose ? rid : '';\n\nvar iw6oPlot = req && req.copyKeys ? (w[req.copyKeys.title] || reqId) : reqId;\nvar iw6oVars = { r: me, m: mate, plot: iw6oPlot };\nif (res.role === 'works') line = fill(w.iw6oSentTo, iw6oVars);\nelse if (res.role === 'helps') line = fill(w.iw6oHelpsOn, iw6oVars);\nelse if (res.error === 'full') line = fill(w.iw6oFull, iw6oVars);\nOutputs.told = { robotId: rid, requestId: reqId, text: line, ok: res.ok, n: Date.now() };\n",
+        "runOnChange-in-lang": false,
+        "runOnChange-in-model": false,
+        "runOnChange-in-now": false,
+        "runOnChange-in-profileId": false,
+        "runOnChange-in-requestId": false,
+        "runOnChange-in-requests": false,
+        "runOnChange-in-robotId": false,
+        "runOnChange-in-sendTo": false,
+        "runOnChange-in-words": false,
+        "uses": "save.js,words.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-sendTo",
+          "displayName": "sendTo",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-model",
+          "displayName": "model",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-profileId",
+          "displayName": "profileId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-requests",
+          "displayName": "requests",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-now",
+          "displayName": "now",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robotId",
+          "displayName": "robotId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-requestId",
+          "displayName": "requestId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-model",
+          "displayName": "model",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "displayName": "error",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-role",
+          "displayName": "role",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-told",
+          "displayName": "told",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-chose",
+          "displayName": "chose",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-chosen",
+          "displayName": "chosen",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "sendrobotOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "chose",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "chosen",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "error",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ok",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "role",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "told",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

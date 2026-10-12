@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f3ea6969-476c-42ed-b8f1-8bd9f69b8116",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ps_in-2",
+      "fromProperty": "heading",
+      "toId": "ps_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ps_in-2",
+      "fromProperty": "body",
+      "toId": "ps_b",
+      "toProperty": "text"
+    }
+  ]
+}

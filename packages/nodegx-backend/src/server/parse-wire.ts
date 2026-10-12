@@ -26,7 +26,9 @@
 
 import type { IStorageFacade, StorageQueryOptions as QueryOptions } from '@noodl/backend-contract';
 import type { RequestContext } from './HttpServer';
+import { assertSeriesWrite, seriesAnswer } from './series-door';
 import { validateAclShape } from '../security/model';
+import { heldWhile, whyRefused } from '../persistence/onlyWhile';
 // The adapter stack is plain CommonJS without type declarations (see AdapterFacade).
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const QueryBuilder = require('@noodl/runtime/src/api/adapters/local-sql/QueryBuilder');
@@ -39,8 +41,11 @@ import {
   sendJSON,
   preconditionToHttp,
   splitCapped,
+  stillLinkedToHttp,
+  notWhileToHttp,
   uniqueViolationToHttp
 } from './http-util';
+import { accountWriteRefusal } from '../users/accountColumns';
 
 /**
  * FED-002 — the upsert header: `X-NodeGX-Upsert: <field>` on a create.
@@ -131,6 +136,66 @@ export function toQueryOptions(src: Record<string, unknown>): QueryOptions {
     options.count = true;
   }
   return options;
+}
+
+/** P109 ISL-040 (P78-DBT-USERCOLS): an account's admin-only columns are not written through `/classes`, by anyone. */
+function assertAccountWrite(collection: string, body: Record<string, unknown>): void {
+  if (collection !== '_User') return;
+  for (const key of Object.keys(body)) {
+    const refusal = accountWriteRefusal(key, '/classes/_User');
+    if (refusal) throw new HttpError(400, refusal);
+  }
+}
+
+/** The `__op`s `extractOps` turns into their own writes on an update. */
+const UPDATE_OPS = new Set(['Increment', 'AddRelation', 'RemoveRelation']);
+
+/**
+ * P109 ISL-039 (P100-UPG001-ADDUNIQUE): a Parse client's array and delete operators, which used to
+ * be saved as the literal object — `{"__op":"AddUnique",…}` over the array that was there.
+ *
+ * - On a CREATE there is nothing to merge with, so each is exact: `Add`/`AddUnique` are the array,
+ *   `Remove` is an empty one, `Increment` is its amount, `Delete` leaves the field out.
+ * - On an UPDATE, `Delete` clears the field (Parse's `unset`). `Add`, `AddUnique` and `Remove`
+ *   would need the stored array read and written back, which two clients can race, so they are
+ *   refused by name, with nothing written.
+ * - Any other `__op` is refused by name everywhere; the three `extractOps` knows stay with it.
+ *
+ * Mutates `body`; throws an HttpError(400) before anything is written.
+ */
+function normaliseParseOps(body: Record<string, unknown>, mode: 'create' | 'update' | 'upsert'): void {
+  for (const [key, value] of Object.entries(body)) {
+    const op = value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>).__op : undefined;
+    if (op === undefined) continue;
+    const v = value as Record<string, unknown>;
+    const objects = Array.isArray(v.objects) ? (v.objects as unknown[]) : [];
+    if (mode === 'upsert') {
+      throw new HttpError(400, `X-NodeGX-Upsert takes plain values; "${key}" is a ${String(op)} operation. Nothing was saved.`);
+    }
+    if (op === 'Delete') {
+      if (mode === 'create') delete body[key];
+      else body[key] = null;
+      continue;
+    }
+    if (mode === 'create') {
+      if (op === 'Add') body[key] = objects;
+      else if (op === 'AddUnique') body[key] = objects.filter((o, i) => objects.findIndex((p) => JSON.stringify(p) === JSON.stringify(o)) === i);
+      else if (op === 'Remove') body[key] = [];
+      else if (op === 'Increment') body[key] = Number(v.amount) || 0;
+      else if (op === 'AddRelation' || op === 'RemoveRelation') continue;
+      else throw new HttpError(400, `"${key}" holds the operation "${String(op)}", which this backend does not know. Nothing was saved.`);
+      continue;
+    }
+    if (UPDATE_OPS.has(String(op))) continue;
+    if (op === 'Add' || op === 'AddUnique' || op === 'Remove') {
+      throw new HttpError(
+        400,
+        `"${key}": ${String(op)} is not supported on an update yet — it would have to read the list and write it back, ` +
+          'which two clients can race. Send the whole list instead. Nothing was saved.'
+      );
+    }
+    throw new HttpError(400, `"${key}" holds the operation "${String(op)}", which this backend does not know. Nothing was saved.`);
+  }
 }
 
 /** True when a PUT body is an operator update (`__op` values). */
@@ -245,6 +310,8 @@ export class ParseWireRoutes {
         try {
           result = await this.facade.wireSearch(collection, { ...options, search: searchTerm });
         } catch (e) {
+          // P116 ONT-012: a search over a hidden detail is the facade's own 403; it stays one.
+          if (e instanceof HttpError) throw e;
           // "Search is not enabled for ..." (LocalSQLAdapter) is a caller
           // mistake, not a server fault — a clear 400 beats a generic 500.
           throw new HttpError(400, e instanceof Error ? e.message : String(e));
@@ -266,6 +333,9 @@ export class ParseWireRoutes {
     // is stamped, because the update half must not have a create's ACL applied
     // over the owner the row already has.
     const upsertOn = headerValue(ctx, UPSERT_HEADER);
+    assertAccountWrite(collection, body);
+    assertSeriesWrite(ctx.principal, this.facade.schemaManager, collection, body);
+    normaliseParseOps(body, upsertOn ? 'upsert' : 'create');
     if (upsertOn) {
       await this.classesUpsert(ctx, collection, body, upsertOn);
       return;
@@ -285,7 +355,8 @@ export class ParseWireRoutes {
     // own data over this — returning wire-typed fields here would leak `__type`
     // envelopes into model data un-deserialized (create responses skip
     // _deserializeJSON on the client).
-    sendJSON(ctx.res, 201, { objectId: record.objectId, createdAt: record.createdAt });
+    // P116 ONT-015: …and the number the store handed out, which the client has no other way to know.
+    sendJSON(ctx.res, 201, { objectId: record.objectId, createdAt: record.createdAt, ...seriesAnswer(this.facade.schemaManager, collection, record) });
   }
 
   /**
@@ -359,7 +430,7 @@ export class ParseWireRoutes {
       await this.upsertUpdate(ctx, collection, raced, body);
       return;
     }
-    sendJSON(ctx.res, 201, { objectId: record.objectId, createdAt: record.createdAt, upsert: 'created' });
+    sendJSON(ctx.res, 201, { objectId: record.objectId, createdAt: record.createdAt, ...seriesAnswer(this.facade.schemaManager, collection, record), upsert: 'created' });
   }
 
   /**
@@ -417,6 +488,8 @@ export class ParseWireRoutes {
     try {
       updated = await this.facade.rawSave(collection, objectId, data, ctx.acl('write'));
     } catch (e) {
+      const settled = notWhileToHttp(e);
+      if (settled) throw settled;
       const message = e instanceof Error ? e.message : String(e);
       const conflict = uniqueViolationToHttp(message, data);
       if (conflict) throw conflict;
@@ -508,6 +581,8 @@ export class ParseWireRoutes {
     if (body.ACL === undefined || body.ACL === null) delete body.ACL;
 
     const acl = ctx.acl('write');
+    assertAccountWrite(collection, body);
+    normaliseParseOps(body, 'update');
     const { increments, addRelations, removeRelations, plain } = extractOps(body);
 
     // HLT-016: parse and refuse a precondition up front, before anything is written.
@@ -530,11 +605,18 @@ export class ParseWireRoutes {
 
     // Relation-only updates never touch the row itself, so the write predicate
     // wouldn't run — assert writability explicitly before mutating junctions.
+    // P116 ONT-012: held to the record's `onlyWhile` like a save of those fields would be.
     if ((addRelations.length > 0 || removeRelations.length > 0) && acl) {
       try {
-        await this.facade.rawFetch(collection, objectId, { ...acl, access: 'write' });
-      } catch {
-        throw new HttpError(404, 'Object not found.', 101);
+        const relationFields = [...addRelations, ...removeRelations].map((r) => r.key);
+        const fields = [...Object.keys(plain), ...Object.keys(increments), ...relationFields];
+        const held = heldWhile(collection, acl, 'update', fields, plain);
+        const writeAcl = { ...acl, access: 'write' as const };
+        await this.facade
+          .rawFetch(collection, objectId, { ...held.acl!, access: 'write' })
+          .catch((e) => whyRefused((c, w, a) => this.facade.rawCount(c, w, a), e, collection, objectId, 'update', writeAcl, held));
+      } catch (e) {
+        throw notWhileToHttp(e) || new HttpError(404, 'Object not found.', 101);
       }
     }
 
@@ -547,6 +629,11 @@ export class ParseWireRoutes {
         updated = await this.facade.rawIncrement(collection, objectId, increments, acl);
       }
     } catch (e) {
+      // P116 ONT-012: a precondition naming a hidden detail is the facade's own 403; it stays one.
+      if (e instanceof HttpError) throw e;
+      // P116 ONT-012: "only while a draft" refusing is a 409 in its own words, not a 404.
+      const settled = notWhileToHttp(e);
+      if (settled) throw settled;
       // FED-002: an update refused by a unique index is a conflict, not a
       // missing row. Answering 404 here would tell a person their record had
       // vanished when what actually happened is that another one has the value.
@@ -583,8 +670,9 @@ export class ParseWireRoutes {
   async classDelete(ctx: RequestContext): Promise<void> {
     try {
       await this.facade.rawDelete(ctx.params.collection, ctx.params.id, ctx.acl('write'));
-    } catch {
-      throw new HttpError(404, 'Object not found.', 101);
+    } catch (e) {
+      // P116 R10: a link's `blocks` rule refusing is a 409 that says what links to it, not a 404.
+      throw stillLinkedToHttp(e) || notWhileToHttp(e) || new HttpError(404, 'Object not found.', 101);
     }
     sendJSON(ctx.res, 200, {});
   }

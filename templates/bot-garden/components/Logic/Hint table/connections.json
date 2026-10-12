@@ -1,0 +1,205 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "346f2d39-d56a-5246-85d0-40358b562fa7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hinttableIn",
+      "fromProperty": "botName",
+      "toId": "hinttableFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "hinttableIn",
+      "fromProperty": "hints",
+      "toId": "hinttableFn",
+      "toProperty": "in-hints"
+    },
+    {
+      "fromId": "hinttableIn",
+      "fromProperty": "lang",
+      "toId": "hinttableFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintBump",
+      "toId": "hinttableOut",
+      "toProperty": "hintBump"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintDone",
+      "toId": "hinttableOut",
+      "toProperty": "hintDone"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintDoneMany",
+      "toId": "hinttableOut",
+      "toProperty": "hintDoneMany"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintDriveReady",
+      "toId": "hinttableOut",
+      "toProperty": "hintDriveReady"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintDry",
+      "toId": "hinttableOut",
+      "toProperty": "hintDry"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintEmpty",
+      "toId": "hinttableOut",
+      "toProperty": "hintEmpty"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintFree",
+      "toId": "hinttableOut",
+      "toProperty": "hintFree"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintMissed",
+      "toId": "hinttableOut",
+      "toProperty": "hintMissed"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintNotYet",
+      "toId": "hinttableOut",
+      "toProperty": "hintNotYet"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintPattern",
+      "toId": "hinttableOut",
+      "toProperty": "hintPattern"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintPerfect",
+      "toId": "hinttableOut",
+      "toProperty": "hintPerfect"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintPredictMiss",
+      "toId": "hinttableOut",
+      "toProperty": "hintPredictMiss"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintRockGone",
+      "toId": "hinttableOut",
+      "toProperty": "hintRockGone"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintStart",
+      "toId": "hinttableOut",
+      "toProperty": "hintStart"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-hintWet",
+      "toId": "hinttableOut",
+      "toProperty": "hintWet"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-iw1Loop",
+      "toId": "hinttableOut",
+      "toProperty": "iw1Loop"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-iw3Job",
+      "toId": "hinttableOut",
+      "toProperty": "iw3Job"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-iw3NoCan",
+      "toId": "hinttableOut",
+      "toProperty": "iw3NoCan"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-iw3bTrick",
+      "toId": "hinttableOut",
+      "toProperty": "iw3bTrick"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-iw3pRead",
+      "toId": "hinttableOut",
+      "toProperty": "iw3pRead"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-lang",
+      "toId": "hinttableOut",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveResting",
+      "toId": "hinttableOut",
+      "toProperty": "oliveResting"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveResting1",
+      "toId": "hinttableOut",
+      "toProperty": "oliveResting1"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveResting2",
+      "toId": "hinttableOut",
+      "toProperty": "oliveResting2"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveResting3",
+      "toId": "hinttableOut",
+      "toProperty": "oliveResting3"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung1",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung1"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung2",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung2"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveRung3",
+      "toId": "hinttableOut",
+      "toProperty": "oliveRung3"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "out-oliveThinking",
+      "toId": "hinttableOut",
+      "toProperty": "oliveThinking"
+    },
+    {
+      "fromId": "hinttableFn",
+      "fromProperty": "success",
+      "toId": "hinttableOut",
+      "toProperty": "ran"
+    }
+  ]
+}

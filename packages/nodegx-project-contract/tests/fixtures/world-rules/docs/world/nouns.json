@@ -1,0 +1,101 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/world-v1.json#/definitions/nounsFile",
+  "nouns": [
+    {
+      "id": "invoice",
+      "name": "Invoice",
+      "sentence": "An invoice is what we send a company for what it owes.",
+      "properties": [
+        {
+          "name": "amount",
+          "kind": "number"
+        },
+        {
+          "name": "status",
+          "kind": "choice",
+          "values": [
+            "draft",
+            "issued",
+            "paid"
+          ]
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "amount",
+        "history": false,
+        "readAloud": true,
+        "looksLike": "INV-{YYYY}-{####}",
+        "maySkip": false,
+        "restarts": "each year",
+        "secret": false
+      }
+    },
+    {
+      "id": "assignment",
+      "name": "Assignment",
+      "sentence": "An assignment is a piece of work a coach gives a learner.",
+      "properties": [
+        {
+          "name": "brief",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "status",
+          "kind": "choice",
+          "values": [
+            "draft",
+            "issued",
+            "withdrawn"
+          ]
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "brief",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
+    },
+    {
+      "id": "cohort",
+      "name": "Cohort",
+      "sentence": "A cohort is a group of learners who start together.",
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
+    },
+    {
+      "id": "learner",
+      "name": "Learner",
+      "sentence": "A learner is a person on one of our courses.",
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
+    }
+  ]
+}

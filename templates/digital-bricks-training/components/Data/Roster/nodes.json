@@ -123,6 +123,23 @@
           "group": "Outputs"
         }
       ]
+    },
+    {
+      "id": "ro_in",
+      "type": "Component Inputs",
+      "label": "Ask again — after a coach adds somebody",
+      "x": -220,
+      "y": 320,
+      "ports": [
+        {
+          "name": "refresh",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "metadata": {
+        "comment": "TASK-L184: the roster asks once when it mounts (ro_ask). A coach who has just added a learner on this page asks again through this signal, so the new row appears without a reload. Still no parameter: whose people these are is the session's, never the page's."
+      }
     }
   ]
 }

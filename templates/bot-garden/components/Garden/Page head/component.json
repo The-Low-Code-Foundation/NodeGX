@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "489ec11b-263f-5630-851f-c46c60797fcd",
+  "name": "Page head",
+  "path": "/Garden/Page head",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A screen’s head (the mockup’s .head): an eyebrow, the one title, a line under it."
+}

@@ -86,6 +86,24 @@
       "fromProperty": "copy",
       "toId": "sfs_fn",
       "toProperty": "in-copy"
+    },
+    {
+      "fromId": "sfs_in",
+      "fromProperty": "conceptId",
+      "toId": "sfs_fn",
+      "toProperty": "in-conceptId"
+    },
+    {
+      "fromId": "sfs_in",
+      "fromProperty": "facts",
+      "toId": "sfs_fn",
+      "toProperty": "in-facts"
+    },
+    {
+      "fromId": "sfs_in",
+      "fromProperty": "captured",
+      "toId": "sfs_fn",
+      "toProperty": "in-captured"
     }
   ]
 }

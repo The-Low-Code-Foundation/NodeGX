@@ -158,7 +158,16 @@ export function verdictFor(report: RenderReportPayload): RenderVerdict {
     // company: nothing is broken, and the page reads as a WordPress starter.
     // Saying only the first is what every gate in the product did to all nine
     // baseline pages.
+    //
+    // 🔴 P112-S13-CLEANWARNINGS: the other warnings are the same case. A page measuring
+    // `minimum-layout-width` (it cannot lay out at phone width) came back "the render is
+    // clean" over a summary of "0 errors, 2 warnings". They still do not block; they are
+    // named, so the one sentence an agent reads does not out-claim the report.
     const codes = [...new Set(poverty.map((f) => f.code))];
+    const warned = [
+      ...new Set((report.findings ?? []).filter((f) => f.severity === 'warning' && !isPovertyFinding(f)).map((f) => f.code))
+    ];
+    const alsoWarns = warned.length ? `It also warns: ${warned.join(', ')}. ` : '';
     return {
       done: true,
       blocking,
@@ -166,8 +175,12 @@ export function verdictFor(report: RenderReportPayload): RenderVerdict {
       poverty,
       reason: poverty.length
         ? `Rendered, and nothing is broken — but it measures as a default template: ${codes.join(', ')}. ` +
+          alsoWarns +
           'Nothing here blocks; look at the screenshot before calling it finished.'
-        : 'Rendered, and the render is clean.'
+        : warned.length
+          ? `Rendered, and nothing is broken — but it warns: ${warned.join(', ')}. ` +
+            'Nothing here blocks; read the warnings before calling it finished.'
+          : 'Rendered, and the render is clean.'
     };
   }
   const parts: string[] = [];

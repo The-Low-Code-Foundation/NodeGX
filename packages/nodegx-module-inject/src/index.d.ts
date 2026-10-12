@@ -43,6 +43,11 @@ export interface ModuleManifest {
    */
   codeAsClass?: boolean;
   dependencies?: string[];
+  /**
+   * ISL-013 — the kits this one reads, by their manifest `name` or their folder. They load before this kit, whatever the
+   * folders are called, and this kit is not loaded (and says why) when one is missing. Read one through `Noodl.getModule`.
+   */
+  requires?: string[];
   runtimes?: string[];
   browser?: ModuleBrowserManifest;
   componentAnnotations?: Record<string, Record<string, unknown>>;
@@ -95,7 +100,23 @@ export interface InjectModule {
    * has on which kit failed.
    */
   name: string;
+  /** The module's folder under `noodl_modules/` (ISL-013: a `requires` entry may name a kit by it). */
+  folder?: string;
+  /** ISL-013 — the kits this one reads, by manifest name or folder; `toInjectModules` loads them first. */
+  requires?: string[];
+  /**
+   * ISL-013 ruling 2 (a) — set when a kit this one requires is missing, was refused itself, or needs this one back: the reason,
+   * as a sentence. A refused module has no `index` and no `dependencies`, so nothing loads it; `buildInjectionTags` writes a
+   * `console.error` naming it in their place.
+   */
+  refused?: string;
 }
+
+/**
+ * ISL-013 — the kits a kit `requires` first, depth first over the given order (a list where nothing declares `requires` comes
+ * back unchanged); a kit whose needed kit is missing is kept with `refused` and stripped of `index` and `dependencies`.
+ */
+export function orderByRequires<M extends { name: string; folder?: string; requires?: string[] }>(modules: M[]): M[];
 
 /**
  * One module as the cloud-function bundle carries it (CN-013 / D18).
@@ -108,6 +129,8 @@ export interface InjectModule {
 export interface CloudModuleSource {
   /** Manifest name, the handle every cloud-side diagnostic uses. */
   name: string;
+  /** ISL-013 — the kit's folder under `noodl_modules/`, which `Noodl.getModule` also answers to. */
+  folder?: string;
   /** The manifest's `runtimes`, already defaulted to `['browser']`. */
   runtimes: string[];
   /** Whether `runtimes` includes `cloud`. */
@@ -132,6 +155,12 @@ export declare const MANIFEST_SCHEMA: Record<string, unknown>;
 export declare const DEPENDENCIES_PLACEHOLDER: '<%modules_dependencies%>';
 export declare const MAIN_PLACEHOLDER: '<%modules_main%>';
 
+/**
+ * One kit folder's manifest text → its `ScannedModule` (`null` = the read failed). The scan's core, exported so a
+ * reader that is not a file system — P112 OWN-004's page, holding a project's files in memory — reads kits the
+ * same way.
+ */
+export declare function manifestEntry(dir: string, raw: string | null): ScannedModule;
 export declare function scanModuleManifests(projectDirectory: string | undefined): Promise<ScannedModule[]>;
 /**
  * `scanModuleManifests`, synchronously — a twin sharing the same core, not a

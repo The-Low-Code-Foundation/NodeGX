@@ -1,0 +1,11 @@
+{
+  "label": "Ask a Local Model",
+  "description": "Ask a model running on this computer (Ollama, llama.cpp, LM Studio) a fixed question whose blank is filled from a list, and get back one answer from a list. No key, nothing leaves the machine; a missing or slow model fires Failure and the app carries on.",
+  "type": "prefab",
+  "tags": [
+    "Cloud",
+    "AI"
+  ],
+  "version": "1.0.0",
+  "icon": "icon.png"
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2ae6febc-f841-5951-8e75-58a6b965c81e",
+  "name": "Money bar",
+  "path": "/Projects/Money bar",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One day of the money line: as tall as the balance that day, red below nothing."
+}

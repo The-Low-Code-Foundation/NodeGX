@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { layerDefaults, withDefaultsClass } from '../../../default-style-layer';
 import Layout from '../../../layout';
 import PointerListeners from '../../../pointerlisteners';
 import { sanitizeInlineSvg, stripRootSvgDimensions } from '../../../sanitize-inline-svg';
@@ -168,6 +169,18 @@ function vertexAt(size: number, angleFromTop: number, radiusScale = 1): Point {
   return { x: c + r * Math.cos(a), y: c + r * Math.sin(a) };
 }
 
+/**
+ * P107-C92 — the most corners a Polygon or Star draws. Points had no upper bound, so a wired Infinity (a divide by zero) or a count
+ * read from the wrong field built that many vertices and the tab ran out of memory. At 500 a polygon already reads as a circle.
+ */
+export const MAX_POINTS = 500;
+
+/** Points as a corner count: 3 to {@link MAX_POINTS}; a value that is not a finite number (Infinity, NaN, a word) draws the default 5. */
+export function pointCountOf(points: unknown): number {
+  const n = Math.round(Number(points ?? 5));
+  return Number.isFinite(n) ? Math.min(MAX_POINTS, Math.max(3, n)) : 5;
+}
+
 /** A regular n-gon inscribed in the box, first vertex at the top, wound clockwise. */
 function polygonPoints(size: number, sides: number): Point[] {
   const n = Math.max(3, Math.round(sides));
@@ -326,6 +339,8 @@ export class Circle extends React.Component<CircleProps> {
     if (shape === 'svg') {
       custom = (
         <span
+          // the drawing, not a child: drag-drop.ts `slots` skips it, so a card dropped on the Shape lands at 0 (P107-C91)
+          data-ndl-drawing=""
           style={{ display: 'block', width: this.props.size, height: this.props.size }}
           dangerouslySetInnerHTML={{ __html: stripRootSvgDimensions(sanitizeInlineSvg(this.props.svgSource)) }}
         />
@@ -354,7 +369,7 @@ export class Circle extends React.Component<CircleProps> {
       // does: a connection can deliver `undefined`, and a project saved before stage 2 has neither
       // parameter. 5 points is a pentagon and a five-pointed star, which is what those two words
       // draw in anybody's head.
-      const pointCount = Math.max(3, Math.round(this.props.points ?? 5));
+      const pointCount = pointCountOf(this.props.points);
       const cornerRadius = Math.max(0, this.props.cornerRadius ?? 0);
       const points = shapePoints(shape, this.props.size, pointCount);
 
@@ -390,10 +405,13 @@ export class Circle extends React.Component<CircleProps> {
 
     //the SVG element lack some properties like offsetLeft, offsetTop that the drag node depends on.
     //Let's wrap it in a div to make it work properly
+// P109 ISL-008 — defaults leave the inline style for the defaults sheet, so an author's class can override them.
+const defaultsClass = layerDefaults(style);
+
     return (
       <div
         ref={noodlRootRef(this.props.noodlNode)}
-        className={this.props.className}
+        className={withDefaultsClass(this.props.className, defaultsClass)}
         {...this.props.dom}
         {...PointerListeners(this.props)}
         style={style}

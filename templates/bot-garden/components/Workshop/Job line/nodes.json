@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7512e0c8-d933-5bf4-864f-483b6e49e7ae",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "jlIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "text",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "jlRow",
+      "type": "Group",
+      "label": "The line",
+      "children": [
+        "jlLeft",
+        "jlRight"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "flexWrap": "nowrap",
+        "columnGap": "var(--space-2-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "bg-job-row"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "jlLeft",
+      "type": "Group",
+      "label": "The label’s column",
+      "parent": "jlRow",
+      "children": [
+        "jlLabel"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 112,
+          "unit": "px"
+        },
+        "cssClassName": "bg-job-lc"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "jlLabel",
+      "type": "Text",
+      "label": "What part of the job",
+      "parent": "jlLeft",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "cssClassName": "bg-job-l"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "jlRight",
+      "type": "Group",
+      "label": "The line’s column",
+      "parent": "jlRow",
+      "children": [
+        "jlText"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "bg-grow"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "jlText",
+      "type": "Text",
+      "label": "The line",
+      "parent": "jlRight",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "cssClassName": "bg-job-t"
+      },
+      "x": 160,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "jlRow"
+  ]
+}

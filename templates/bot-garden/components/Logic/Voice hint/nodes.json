@@ -1,0 +1,78 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "11c97530-2dec-55f5-8a5d-04f8b87b9065",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "voicehintIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "sig",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "voicehintFn",
+      "type": "JavaScriptFunction",
+      "label": "Voice hint",
+      "parameters": {
+        "functionScript": "\nvar sig = typeof Inputs.sig === 'string' ? Inputs.sig : '';\nvar req = null;\nif (sig) { try { req = JSON.parse(sig); } catch (e) { req = null; } }\nif (req && typeof req === 'object' && req.rung === 'voice-hint') req.seq = sig; else req = null;\nOutputs.request = req;\nOutputs.due = !!req;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-sig",
+          "displayName": "sig",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-request",
+          "displayName": "request",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-due",
+          "displayName": "due",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "voicehintOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "due",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "request",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

@@ -27,6 +27,16 @@ import ModelImport = require('./model');
 
 const Model = ModelImport as unknown as ModelScopeLike;
 
+/**
+ * The app's arrays — `window.Noodl.Arrays.x` is `Collection.get('x')`. Required when first asked for, not at import: loading
+ * collection.ts installs the collection API on `Array.prototype`, and this module is loaded by every node (node.ts), so an
+ * import here would make that patch a side effect of loading the evaluator. Where an expression reads an array, the viewer
+ * has loaded it already (noodl-js-api.ts).
+ */
+function collections(): { get(name: string): { on(event: string, handler: () => void): void; off(event: string, handler: () => void): void } } {
+  return require('./collection');
+}
+
 // Expression system version - increment when context changes
 export const EXPRESSION_VERSION = 1;
 
@@ -140,13 +150,14 @@ export function createNoodlContext(modelScope?: ModelScopeLike) {
         }
       }
     ),
+    // P109 ISL-051 (s35): the array, as `window.Noodl.Arrays.x` is — `Collection.get`, one table for the app. This read
+    // `scope.get(prop).data`, a record's data named like the array, so `Arrays.items.length` was `undefined`.
     Arrays: new Proxy(
       {},
       {
         get(target, prop) {
           if (typeof prop === 'symbol') return undefined;
-          const arr = scope.get(prop);
-          return arr ? arr.data : undefined;
+          return collections().get(prop);
         }
       }
     ),
@@ -270,14 +281,15 @@ export function subscribeToChanges(
     }
   }
 
-  // Subscribe to array changes
+  // Subscribe to array changes. P109 ISL-051 (P107-C150): the ARRAY, which is what `Arrays.x` reads — `window.Noodl.Arrays.x` is
+  // `Collection.get('x')`, one table for the app, not the model scope's. This subscribed to `scope.get(arrId)`, a record named like
+  // the array that nothing writes, so an item added or the list replaced was never heard. Every add and remove also sends one
+  // `change` (coalesced over a batch), so `change` alone is heard once per operation. A member's own key moving is not heard.
   for (const arrId of dependencies.arrays) {
-    const arrModel = scope.get(arrId);
-    if (arrModel) {
-      const handler = () => callback();
-      arrModel.on('change', handler);
-      listeners.push(() => arrModel.off('change', handler));
-    }
+    const array = collections().get(arrId);
+    const handler = () => callback();
+    array.on('change', handler);
+    listeners.push(() => array.off('change', handler));
   }
 
   // Return unsubscribe function

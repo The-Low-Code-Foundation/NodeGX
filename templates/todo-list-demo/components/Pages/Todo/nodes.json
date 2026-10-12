@@ -65,6 +65,8 @@
         "tdDemoNotice",
         "tdHeader",
         "tdProblem",
+        "tdPrompt",
+        "tdProjectsView",
         "tdMain"
       ],
       "x": 160,
@@ -105,6 +107,43 @@
       "y": 640
     },
     {
+      "id": "tdPrompt",
+      "type": "/Projects/Next move prompt",
+      "label": "What next for the project",
+      "parent": "tdShell",
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "tdProjectsView",
+      "type": "Group",
+      "label": "Projects view",
+      "parent": "tdShell",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "mounted": false
+      },
+      "children": [
+        "tdProjectsPane"
+      ],
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "tdProjectsPane",
+      "type": "/Projects/View",
+      "label": "Projects",
+      "parent": "tdProjectsView",
+      "x": 280,
+      "y": 1000
+    },
+    {
       "id": "tdMain",
       "type": "Group",
       "label": "List and task",
@@ -126,7 +165,7 @@
         "tdRight"
       ],
       "x": 220,
-      "y": 760
+      "y": 1120
     },
     {
       "id": "tdLeft",
@@ -145,11 +184,12 @@
       },
       "children": [
         "tdListView",
+        "tdTodayView",
         "tdDoneView",
         "tdLogView"
       ],
       "x": 280,
-      "y": 880
+      "y": 1240
     },
     {
       "id": "tdListView",
@@ -166,10 +206,11 @@
         "rowGap": "var(--space-0)"
       },
       "children": [
-        "tdList"
+        "tdList",
+        "tdProjectsOn"
       ],
       "x": 340,
-      "y": 1000
+      "y": 1360
     },
     {
       "id": "tdList",
@@ -177,7 +218,69 @@
       "label": "Open tasks",
       "parent": "tdListView",
       "x": 400,
-      "y": 1120
+      "y": 1480
+    },
+    {
+      "id": "tdProjectsOn",
+      "type": "net.noodl.controls.button",
+      "label": "Projects and money",
+      "parent": "tdListView",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Also keep track of projects and money",
+        "marginTop": "var(--space-6)",
+        "mounted": false
+      },
+      "x": 400,
+      "y": 1600
+    },
+    {
+      "id": "tdTodayView",
+      "type": "Group",
+      "label": "Today view",
+      "parent": "tdLeft",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "mounted": false
+      },
+      "children": [
+        "tdToday",
+        "tdRoutines"
+      ],
+      "x": 340,
+      "y": 1720
+    },
+    {
+      "id": "tdToday",
+      "type": "/Todo/Today list",
+      "label": "Today",
+      "parent": "tdTodayView",
+      "x": 400,
+      "y": 1840
+    },
+    {
+      "id": "tdRoutines",
+      "type": "/Todo/Routine list",
+      "label": "Things that repeat",
+      "parent": "tdTodayView",
+      "x": 400,
+      "y": 1960
     },
     {
       "id": "tdDoneView",
@@ -198,7 +301,7 @@
         "tdDone"
       ],
       "x": 340,
-      "y": 1240
+      "y": 2080
     },
     {
       "id": "tdDone",
@@ -206,7 +309,7 @@
       "label": "Closed tasks",
       "parent": "tdDoneView",
       "x": 400,
-      "y": 1360
+      "y": 2200
     },
     {
       "id": "tdLogView",
@@ -227,7 +330,7 @@
         "tdLog"
       ],
       "x": 340,
-      "y": 1480
+      "y": 2320
     },
     {
       "id": "tdLog",
@@ -235,7 +338,7 @@
       "label": "Everything that happened",
       "parent": "tdLogView",
       "x": 400,
-      "y": 1600
+      "y": 2440
     },
     {
       "id": "tdRight",
@@ -263,10 +366,11 @@
       },
       "children": [
         "tdEmpty",
-        "tdDetail"
+        "tdDetail",
+        "tdRoutineDetail"
       ],
       "x": 280,
-      "y": 1720
+      "y": 2560
     },
     {
       "id": "tdEmpty",
@@ -274,7 +378,7 @@
       "label": "When nothing is selected",
       "parent": "tdRight",
       "parameters": {
-        "text": "Select a task to see its details.",
+        "text": "Select a task, or something that repeats, to see its details.",
         "fontSize": "var(--text-sm)",
         "color": "var(--muted-foreground)",
         "sizeMode": "contentHeight",
@@ -285,7 +389,7 @@
         "textAlignX": "center"
       },
       "x": 340,
-      "y": 1840
+      "y": 2680
     },
     {
       "id": "tdDetail",
@@ -308,7 +412,7 @@
         "tdHistory"
       ],
       "x": 340,
-      "y": 1960
+      "y": 2800
     },
     {
       "id": "tdSummary",
@@ -316,7 +420,7 @@
       "label": "Summary",
       "parent": "tdDetail",
       "x": 400,
-      "y": 2080
+      "y": 2920
     },
     {
       "id": "tdNext",
@@ -324,7 +428,7 @@
       "label": "Next actions",
       "parent": "tdDetail",
       "x": 400,
-      "y": 2200
+      "y": 3040
     },
     {
       "id": "tdHistory",
@@ -332,7 +436,45 @@
       "label": "History",
       "parent": "tdDetail",
       "x": 400,
-      "y": 2320
+      "y": 3160
+    },
+    {
+      "id": "tdRoutineDetail",
+      "type": "Group",
+      "label": "Thing that repeats",
+      "parent": "tdRight",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-6)",
+        "mounted": false
+      },
+      "children": [
+        "tdRoutineSummary",
+        "tdRoutineHistory"
+      ],
+      "x": 340,
+      "y": 3280
+    },
+    {
+      "id": "tdRoutineSummary",
+      "type": "/Todo/Routine summary",
+      "label": "Summary",
+      "parent": "tdRoutineDetail",
+      "x": 400,
+      "y": 3400
+    },
+    {
+      "id": "tdRoutineHistory",
+      "type": "/Todo/History",
+      "label": "Its history",
+      "parent": "tdRoutineDetail",
+      "x": 400,
+      "y": 3520
     },
     {
       "id": "tdDialog",
@@ -340,7 +482,7 @@
       "label": "What happened?",
       "parent": "tdRoot",
       "x": 160,
-      "y": 2440
+      "y": 3640
     },
     {
       "id": "tdData",
@@ -361,31 +503,71 @@
       "type": "/Logic/Selected task",
       "label": "The selected task",
       "x": 650,
-      "y": 1960
+      "y": 2920
     },
     {
       "id": "tdLogRows",
       "type": "/Logic/Log rows",
       "label": "The log lines",
       "x": 650,
-      "y": 1720
+      "y": 2680
+    },
+    {
+      "id": "tdTodayRows",
+      "type": "/Logic/Today rows",
+      "label": "Today",
+      "x": 650,
+      "y": 640
+    },
+    {
+      "id": "tdRoutine",
+      "type": "/Logic/Selected routine",
+      "label": "The selected thing that repeats",
+      "x": 650,
+      "y": 4720
+    },
+    {
+      "id": "tdClock",
+      "type": "JavaScriptFunction",
+      "label": "A minute clock, and a wake when the app comes back into view",
+      "parameters": {
+        "functionScript": "if (this.clockStarted) return;\nthis.clockStarted = true;\nfunction tick() {\n  try { Outputs.now = Date.now(); } catch (e) {}\n}\ntick();\nsetInterval(tick, 60000);\ntry {\n  document.addEventListener('visibilitychange', function () {\n    if (document.visibilityState !== 'visible') return;\n    tick();\n    try { Outputs.wake(); } catch (e) {}\n  });\n} catch (e) {}"
+      },
+      "ports": [
+        {
+          "name": "out-now",
+          "plug": "output",
+          "type": "number",
+          "displayName": "now",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-wake",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "wake",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 6880
     },
     {
       "id": "tdScreen",
       "type": "Screen Resolution",
       "label": "How wide the screen is",
       "x": 650,
-      "y": 4120
+      "y": 7000
     },
     {
       "id": "tdLayout",
       "type": "JavaScriptFunction",
       "label": "One pane or two?",
       "parameters": {
-        "functionScript": "var narrow = (Inputs.width || 1200) < 820;\nvar found = !!Inputs.found;\nOutputs.narrow = narrow;\nOutputs.showLeft = !(narrow && found);\nOutputs.showRight = !narrow || found;"
+        "functionScript": "var narrow = (Inputs.width || 1200) < 820;\nvar found = !!Inputs.found || !!Inputs.routineFound;\nOutputs.narrow = narrow;\nOutputs.found = found;\nOutputs.nothing = !found;\nOutputs.showLeft = !(narrow && found);\nOutputs.showRight = !narrow || found;"
       },
       "x": 650,
-      "y": 880,
+      "y": 1600,
       "ports": [
         {
           "name": "in-width",
@@ -402,8 +584,29 @@
           "group": "Inputs"
         },
         {
+          "name": "in-routineFound",
+          "displayName": "routineFound",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
           "name": "out-narrow",
           "displayName": "narrow",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-found",
+          "displayName": "found",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-nothing",
+          "displayName": "nothing",
           "plug": "output",
           "type": "*",
           "group": "Outputs"
@@ -429,12 +632,364 @@
       "type": "States",
       "label": "Which view",
       "parameters": {
-        "states": "list,done,log",
+        "states": "list,today,done,log,projects",
         "currentState": "list",
+        "values": "main",
+        "type-main": "boolean",
+        "value-list-main": true,
+        "value-today-main": true,
+        "value-done-main": true,
+        "value-log-main": true,
+        "value-projects-main": false,
         "useTransitions": false
       },
       "x": 650,
-      "y": 640
+      "y": 760
+    },
+    {
+      "id": "tdProjects",
+      "type": "/Logic/Projects",
+      "label": "Your projects and money, from the backend",
+      "x": 650,
+      "y": 880
+    },
+    {
+      "id": "tdOpenProject",
+      "type": "Variable2",
+      "label": "Which project is open",
+      "parameters": {
+        "name": "todoOpenProject"
+      },
+      "x": 650,
+      "y": 7120
+    },
+    {
+      "id": "tdToggleProject",
+      "type": "JavaScriptFunction",
+      "label": "Open it, or close it again",
+      "parameters": {
+        "functionScript": "var id = String(Inputs.id || '');\nOutputs.value = id !== '' && id === String(Inputs.current || '') ? '' : id;\nOutputs.go();",
+        "runOnChange-in-id": false,
+        "runOnChange-in-current": false
+      },
+      "x": 650,
+      "y": 1240,
+      "ports": [
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-current",
+          "displayName": "current",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-value",
+          "displayName": "value",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tdSetOpenProject",
+      "type": "Set Variable",
+      "label": "Open a project",
+      "parameters": {
+        "name": "todoOpenProject",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 7240
+    },
+    {
+      "id": "tdFlag",
+      "type": "Variable2",
+      "label": "Is the Projects tab on?",
+      "parameters": {
+        "name": "todoProjectsFlag"
+      },
+      "x": 650,
+      "y": 7360
+    },
+    {
+      "id": "tdFlagRead",
+      "type": "JavaScriptFunction",
+      "label": "What this device chose",
+      "parameters": {
+        "functionScript": "var v = '';\ntry { v = window.localStorage.getItem(\"todo-projects-tab\") || ''; } catch (e) {}\nOutputs.flag = v === 'on' || v === 'off' ? v : '';\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-flag",
+          "plug": "output",
+          "type": "string",
+          "displayName": "flag",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "go",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 7480
+    },
+    {
+      "id": "tdFlagLoad",
+      "type": "Set Variable",
+      "label": "Put the choice back",
+      "parameters": {
+        "name": "todoProjectsFlag",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 7600
+    },
+    {
+      "id": "tdFlagOn",
+      "type": "Set Variable",
+      "label": "Switch the tab on",
+      "parameters": {
+        "name": "todoProjectsFlag",
+        "setWith": "string",
+        "value": "on"
+      },
+      "x": 650,
+      "y": 2080
+    },
+    {
+      "id": "tdFlagOff",
+      "type": "Set Variable",
+      "label": "Hide the tab",
+      "parameters": {
+        "name": "todoProjectsFlag",
+        "setWith": "string",
+        "value": "off"
+      },
+      "x": 650,
+      "y": 1360
+    },
+    {
+      "id": "tdFlagKeep",
+      "type": "JavaScriptFunction",
+      "label": "Remember the choice on this device",
+      "parameters": {
+        "functionScript": "var v = String(Inputs.flag || '');\nif (v !== 'on' && v !== 'off') return;\ntry { window.localStorage.setItem(\"todo-projects-tab\", v); } catch (e) {}"
+      },
+      "x": 650,
+      "y": 7720,
+      "ports": [
+        {
+          "name": "in-flag",
+          "displayName": "flag",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "tdNextFor",
+      "type": "JavaScriptFunction",
+      "label": "Was it a project’s task?",
+      "parameters": {
+        "functionScript": "var id = String(Inputs.taskId || '');\nvar tasks = Inputs.tasks || [];\nvar names = Inputs.projectNames || {};\nfor (var i = 0; i < tasks.length; i++) {\n  var t = tasks[i];\n  if (!t || t.id !== id || !t.projectId || !names[t.projectId]) continue;\n  Outputs.projectId = String(t.projectId);\n  Outputs.projectName = String(names[t.projectId]);\n  Outputs.show();\n  return;\n}",
+        "runOnChange-in-taskId": false,
+        "runOnChange-in-tasks": false,
+        "runOnChange-in-projectNames": false
+      },
+      "x": 650,
+      "y": 1000,
+      "ports": [
+        {
+          "name": "in-taskId",
+          "displayName": "taskId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tasks",
+          "displayName": "tasks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectNames",
+          "displayName": "projectNames",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-show",
+          "displayName": "show",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-projectId",
+          "displayName": "projectId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-projectName",
+          "displayName": "projectName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tdPromptState",
+      "type": "States",
+      "label": "Is the next-move question showing?",
+      "parameters": {
+        "states": "hidden,shown",
+        "currentState": "hidden",
+        "useTransitions": false
+      },
+      "x": 650,
+      "y": 1120
+    },
+    {
+      "id": "tdSelectFromProject",
+      "type": "Set Variable",
+      "label": "Select a project’s task",
+      "parameters": {
+        "name": "todoSelected",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 1480
+    },
+    {
+      "id": "tdTaskProject",
+      "type": "JavaScriptFunction",
+      "label": "Which project is the selected task part of?",
+      "parameters": {
+        "functionScript": "var sel = String(Inputs.selectedId || ''), tasks = Inputs.tasks || [], names = Inputs.projectNames || {};\nvar pid = '';\nfor (var i = 0; i < tasks.length; i++) if (tasks[i] && tasks[i].id === sel && tasks[i].projectId && names[tasks[i].projectId]) pid = String(tasks[i].projectId);\nOutputs.projectId = pid;\nOutputs.projectValue = pid || 'none';\nOutputs.showProject = Inputs.showTab === true;\nOutputs.hasProject = pid !== '' && Inputs.showTab === true;"
+      },
+      "x": 650,
+      "y": 3040,
+      "ports": [
+        {
+          "name": "in-selectedId",
+          "displayName": "selectedId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tasks",
+          "displayName": "tasks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectNames",
+          "displayName": "projectNames",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-showTab",
+          "displayName": "showTab",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-projectId",
+          "displayName": "projectId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-projectValue",
+          "displayName": "projectValue",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showProject",
+          "displayName": "showProject",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasProject",
+          "displayName": "hasProject",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tdOpenFromTask",
+      "type": "Set Variable",
+      "label": "Open the task’s project",
+      "parameters": {
+        "name": "todoOpenProject",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 3160
+    },
+    {
+      "id": "tdSetTaskProject",
+      "type": "/Projects/Set task project",
+      "label": "Put the task in a project",
+      "x": 650,
+      "y": 3280
+    },
+    {
+      "id": "tdViewOpen",
+      "type": "JavaScriptFunction",
+      "label": "Did the link ask for Today?",
+      "parameters": {
+        "functionScript": "var m = /[?&]view=([^&#]*)/.exec((window.location && window.location.search) || '');\nif (m && m[1] === 'today') Outputs.today();"
+      },
+      "ports": [
+        {
+          "name": "out-today",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "today",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 160
     },
     {
       "id": "tdSelected",
@@ -444,7 +999,7 @@
         "name": "todoSelected"
       },
       "x": 650,
-      "y": 3520
+      "y": 6040
     },
     {
       "id": "tdSelectFromList",
@@ -455,7 +1010,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 1120
+      "y": 1720
     },
     {
       "id": "tdSelectFromDone",
@@ -466,7 +1021,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 1600
+      "y": 2560
     },
     {
       "id": "tdSelectFromLog",
@@ -477,7 +1032,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 1840
+      "y": 2800
     },
     {
       "id": "tdDeselect",
@@ -488,7 +1043,151 @@
         "setWith": "emptyString"
       },
       "x": 650,
-      "y": 2080
+      "y": 3400
+    },
+    {
+      "id": "tdLinkOpen",
+      "type": "JavaScriptFunction",
+      "label": "Which task did the link ask for?",
+      "parameters": {
+        "functionScript": "var id = '';\ntry {\n  id = window.sessionStorage.getItem(\"todo-open-task\") || '';\n  window.sessionStorage.removeItem(\"todo-open-task\");\n} catch (e) {}\nif (!id) {\n  var m = /[?&]task=([^&#]*)/.exec(window.location.search || '');\n  if (m) { try { id = decodeURIComponent(m[1]); } catch (e) { id = ''; } }\n}\nif (!id) return;\nOutputs.taskId = id;\nOutputs.open();"
+      },
+      "x": 650,
+      "y": 280,
+      "ports": [
+        {
+          "name": "out-open",
+          "displayName": "open",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-taskId",
+          "displayName": "taskId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tdSelectFromLink",
+      "type": "Set Variable",
+      "label": "Select from a link",
+      "parameters": {
+        "name": "todoSelected",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 7840
+    },
+    {
+      "id": "tdSelectFromToday",
+      "type": "Set Variable",
+      "label": "Select from Today",
+      "parameters": {
+        "name": "todoSelected",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 2200
+    },
+    {
+      "id": "tdSelectFromRoutines",
+      "type": "Set Variable",
+      "label": "Select a thing that repeats",
+      "parameters": {
+        "name": "todoSelected",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 2320
+    },
+    {
+      "id": "tdSelectNewRoutine",
+      "type": "Set Variable",
+      "label": "Open the one just added",
+      "parameters": {
+        "name": "todoSelected",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 7960
+    },
+    {
+      "id": "tdDays",
+      "type": "Variable2",
+      "label": "The days picked",
+      "parameters": {
+        "name": "todoSlotDays"
+      },
+      "x": 650,
+      "y": 8080
+    },
+    {
+      "id": "tdPickDay",
+      "type": "JavaScriptFunction",
+      "label": "Pick or unpick a day",
+      "parameters": {
+        "functionScript": "var key = String(Inputs.key || '');\nif (key === '') return;\nvar list = String(Inputs.days || '').split(',').filter(function (d) { return d !== ''; });\nvar at = list.indexOf(key);\nif (at >= 0) list.splice(at, 1); else list.push(key);\nOutputs.days = list.join(',');\nOutputs.go();",
+        "runOnChange-in-key": false,
+        "runOnChange-in-days": false
+      },
+      "x": 650,
+      "y": 4840,
+      "ports": [
+        {
+          "name": "in-key",
+          "displayName": "key",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-days",
+          "displayName": "days",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-days",
+          "displayName": "days",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tdSetDays",
+      "type": "Set Variable",
+      "label": "Keep the days picked",
+      "parameters": {
+        "name": "todoSlotDays",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 8200
+    },
+    {
+      "id": "tdClearDays",
+      "type": "Set Variable",
+      "label": "Forget the days picked",
+      "parameters": {
+        "name": "todoSlotDays",
+        "setWith": "emptyString"
+      },
+      "x": 650,
+      "y": 8320
     },
     {
       "id": "tdOpenAction",
@@ -498,7 +1197,7 @@
         "name": "todoOpenAction"
       },
       "x": 650,
-      "y": 4240
+      "y": 8440
     },
     {
       "id": "tdOpenDesc",
@@ -509,7 +1208,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 2560
+      "y": 3880
     },
     {
       "id": "tdCloseDesc",
@@ -520,34 +1219,24 @@
         "setWith": "emptyString"
       },
       "x": 650,
-      "y": 2680
+      "y": 4000
     },
     {
       "id": "cmdAdd",
       "type": "/Commands/Add task",
       "label": "Add",
       "x": 650,
-      "y": 1240
+      "y": 1840
     },
     {
-      "id": "cmdUp",
+      "id": "cmdDrag",
       "type": "/Commands/Move task",
-      "label": "Up",
+      "label": "Drag",
       "parameters": {
-        "direction": "up"
+        "direction": "to"
       },
       "x": 650,
-      "y": 1360
-    },
-    {
-      "id": "cmdDown",
-      "type": "/Commands/Move task",
-      "label": "Down",
-      "parameters": {
-        "direction": "down"
-      },
-      "x": 650,
-      "y": 1480
+      "y": 1960
     },
     {
       "id": "cmdTop",
@@ -557,97 +1246,192 @@
         "direction": "top"
       },
       "x": 650,
-      "y": 2200
+      "y": 3520
     },
     {
       "id": "cmdClose",
       "type": "/Commands/Close task",
       "label": "Close",
       "x": 650,
-      "y": 3640
+      "y": 6160
     },
     {
       "id": "cmdReopen",
       "type": "/Commands/Reopen task",
       "label": "Reopen",
       "x": 650,
-      "y": 3760
+      "y": 6280
     },
     {
       "id": "cmdRename",
       "type": "/Commands/Rename task",
       "label": "Rename",
       "x": 650,
-      "y": 2320
+      "y": 3640
     },
     {
       "id": "cmdDeadline",
       "type": "/Commands/Set deadline",
       "label": "Deadline",
       "x": 650,
-      "y": 2440
+      "y": 3760
     },
     {
       "id": "cmdAddAction",
       "type": "/Commands/Add action",
       "label": "AddAction",
       "x": 650,
-      "y": 2800
+      "y": 4120
     },
     {
-      "id": "cmdTick",
+      "id": "cmdTick-2",
       "type": "/Commands/Tick action",
       "label": "Tick",
       "x": 650,
-      "y": 3880
+      "y": 6400
     },
     {
       "id": "cmdUntick",
       "type": "/Commands/Untick action",
       "label": "Untick",
       "x": 650,
-      "y": 4000
+      "y": 6520
     },
     {
-      "id": "cmdActUp",
+      "id": "cmdActDrag",
       "type": "/Commands/Move action",
-      "label": "ActUp",
+      "label": "ActDrag",
       "parameters": {
-        "direction": "up"
+        "direction": "to"
       },
       "x": 650,
-      "y": 2920
-    },
-    {
-      "id": "cmdActDown",
-      "type": "/Commands/Move action",
-      "label": "ActDown",
-      "parameters": {
-        "direction": "down"
-      },
-      "x": 650,
-      "y": 3040
+      "y": 4240
     },
     {
       "id": "cmdRenameAct",
       "type": "/Commands/Rename action",
       "label": "RenameAct",
       "x": 650,
-      "y": 3160
+      "y": 4360
     },
     {
       "id": "cmdDescribe",
       "type": "/Commands/Describe action",
       "label": "Describe",
       "x": 650,
-      "y": 3280
+      "y": 4480
     },
     {
       "id": "cmdNote",
       "type": "/Commands/Add note",
       "label": "Note",
       "x": 650,
-      "y": 3400
+      "y": 4600
+    },
+    {
+      "id": "cmdAddRoutine",
+      "type": "/Commands/Add routine",
+      "label": "AddRoutine",
+      "x": 650,
+      "y": 2440
+    },
+    {
+      "id": "cmdRenameRoutine",
+      "type": "/Commands/Rename routine",
+      "label": "RenameRoutine",
+      "x": 650,
+      "y": 4960
+    },
+    {
+      "id": "cmdDaily",
+      "type": "/Commands/Set schedule",
+      "label": "Daily",
+      "parameters": {
+        "change": "daily"
+      },
+      "x": 650,
+      "y": 5080
+    },
+    {
+      "id": "cmdWeekly",
+      "type": "/Commands/Set schedule",
+      "label": "Weekly",
+      "parameters": {
+        "change": "weekly"
+      },
+      "x": 650,
+      "y": 5200
+    },
+    {
+      "id": "cmdMonthly",
+      "type": "/Commands/Set schedule",
+      "label": "Monthly",
+      "parameters": {
+        "change": "monthly"
+      },
+      "x": 650,
+      "y": 5320
+    },
+    {
+      "id": "cmdAddTime",
+      "type": "/Commands/Set schedule",
+      "label": "AddTime",
+      "parameters": {
+        "change": "add"
+      },
+      "x": 650,
+      "y": 5440
+    },
+    {
+      "id": "cmdRemoveSlot",
+      "type": "/Commands/Set schedule",
+      "label": "RemoveSlot",
+      "parameters": {
+        "change": "remove"
+      },
+      "x": 650,
+      "y": 5560
+    },
+    {
+      "id": "cmdStart",
+      "type": "/Commands/Set routine dates",
+      "label": "Start",
+      "parameters": {
+        "which": "start"
+      },
+      "x": 650,
+      "y": 5680
+    },
+    {
+      "id": "cmdEnd",
+      "type": "/Commands/Set routine dates",
+      "label": "End",
+      "parameters": {
+        "which": "end"
+      },
+      "x": 650,
+      "y": 5800
+    },
+    {
+      "id": "cmdCheck",
+      "type": "/Commands/Tick routine",
+      "label": "Check",
+      "x": 650,
+      "y": 6640
+    },
+    {
+      "id": "cmdStop",
+      "type": "/Commands/Stop routine",
+      "label": "Stop",
+      "x": 650,
+      "y": 6760
+    },
+    {
+      "id": "cmdRoutineNote",
+      "type": "/Commands/Add note",
+      "label": "RoutineNote",
+      "x": 650,
+      "y": 5920
     }
   ],
   "visualRoots": [

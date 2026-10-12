@@ -39,8 +39,9 @@
     //
     // `DOM` is a TYPE lib, not an environment: `jest.config.js` still runs these
     // specs under `testEnvironment: node` with no DOM globals. The editor's
-    // `candidate.ts` refers to the `Crypto` type, which is declared there.
-    "lib": ["ES2022", "DOM"],
+    // `candidate.ts` refers to the `Crypto` type, which is declared there. `DOM.Iterable` for node-spec's
+    // `world.ts` (`FormData.entries()`), reached through the `@nodegx/node-spec` alias below.
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "paths": {
       "@cloud-runtime": ["../noodl-viewer-cloud/src/index.ts"],
       "@cloud-runtime/*": ["../noodl-viewer-cloud/src/*"],
@@ -55,7 +56,13 @@
       // The root tsconfig already aliases this to source; repeated here because
       // a `paths` block REPLACES the inherited one rather than extending it.
       "@nodegx/export": ["../nodegx-export/src/index.ts"],
-      "@nodegx/export/*": ["../nodegx-export/src/*"]
+      "@nodegx/export/*": ["../nodegx-export/src/*"],
+
+      // The same trap, a second time (P112 OWN-013, 2026-10-12): the editor's validation and
+      // `noodl-mcp/src/specPorts.ts` import `@nodegx/node-spec`, whose `exports` point into `dist/`.
+      // CI's Typecheck went red on cline-dev with "Cannot find module '@nodegx/node-spec'"; locally a
+      // stale `dist` answered instead, missing `DRAWN_PORT_TYPES`.
+      "@nodegx/node-spec": ["../nodegx-node-spec/src/browser.ts"]
     }
   },
   "include": ["tests/**/*.ts", "src/**/*"],

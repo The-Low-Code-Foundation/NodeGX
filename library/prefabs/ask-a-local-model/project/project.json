@@ -1,0 +1,431 @@
+{
+  "name": "Ask a Local Model",
+  "settings": {},
+  "version": 4,
+  "metadata": {
+    "styles": {}
+  },
+  "variants": [],
+  "components": [
+    {
+      "name": "/#__cloud__/Local Model/Ask",
+      "id": "ask-a-local-model-ask",
+      "description": "Asks a model on this computer a fixed question with one blank, filled from a list, and returns one answer from a list — or fires Failure with an Error Code and lets the app carry on.",
+      "created": "2026-10-05T00:00:00.000Z",
+      "modifiedBy": "isl-010",
+      "graph": {
+        "roots": [
+          {
+            "id": "lmIn",
+            "type": "Component Inputs",
+            "children": [],
+            "label": "What the app gives it",
+            "x": 40,
+            "y": 40,
+            "parameters": {},
+            "dynamicports": [],
+            "ports": [
+              {
+                "name": "Do",
+                "plug": "output",
+                "type": "signal"
+              },
+              {
+                "name": "Choice",
+                "plug": "output",
+                "type": "string"
+              },
+              {
+                "name": "Choices",
+                "plug": "output",
+                "type": "array"
+              },
+              {
+                "name": "Question",
+                "plug": "output",
+                "type": "string"
+              },
+              {
+                "name": "Answers",
+                "plug": "output",
+                "type": "array"
+              },
+              {
+                "name": "Instructions",
+                "plug": "output",
+                "type": "string"
+              },
+              {
+                "name": "Base URL",
+                "plug": "output",
+                "type": "string"
+              },
+              {
+                "name": "Model",
+                "plug": "output",
+                "type": "string"
+              }
+            ]
+          },
+          {
+            "id": "lmFence",
+            "type": "JavaScriptFunction",
+            "children": [],
+            "label": "The fence: a choice from a list, a fixed question",
+            "x": 360,
+            "y": 40,
+            "parameters": {
+              "functionScript": "// The fence (TPL-012 §2.6). A small model cannot be TOLD to stay inside a fence, so this builds one:\n// the page sends a CHOICE from a list, never words of its own; the question is a fixed sentence\n// written here; and the answer can only be one of Answers (an enum schema, checked again after).\nvar choices = Array.isArray(Inputs.Choices) ? Inputs.Choices.map(String) : [];\nvar answers = Array.isArray(Inputs.Answers) ? Inputs.Answers.map(String) : [];\nvar choice = Inputs.Choice === undefined || Inputs.Choice === null ? '' : String(Inputs.Choice);\nvar question = Inputs.Question === undefined || Inputs.Question === null ? '' : String(Inputs.Question);\nif (!Inputs.Model || answers.length === 0 || question.indexOf('{choice}') === -1) {\n  Outputs.code = 'not_configured';\n  Outputs.refused();\n  return;\n}\nif (choices.indexOf(choice) === -1) {\n  Outputs.code = 'not_on_the_list';\n  Outputs.refused();\n  return;\n}\nOutputs.baseUrl = Inputs.BaseURL ? String(Inputs.BaseURL) : 'http://127.0.0.1:11434';\nOutputs.model = String(Inputs.Model);\nOutputs.prompt = question.split('{choice}').join(choice);\nOutputs.schema = {\n  type: 'object',\n  properties: { answer: { type: 'string', enum: answers } },\n  required: ['answer'],\n  additionalProperties: false\n};\nOutputs.ask();",
+              "runOnChange-in-Choice": false,
+              "runOnChange-in-Choices": false,
+              "runOnChange-in-Question": false,
+              "runOnChange-in-Answers": false,
+              "runOnChange-in-BaseURL": false,
+              "runOnChange-in-Model": false
+            },
+            "dynamicports": [],
+            "ports": [
+              {
+                "name": "in-Choice",
+                "plug": "input",
+                "type": "*",
+                "displayName": "Choice",
+                "group": "Inputs"
+              },
+              {
+                "name": "in-Choices",
+                "plug": "input",
+                "type": "*",
+                "displayName": "Choices",
+                "group": "Inputs"
+              },
+              {
+                "name": "in-Question",
+                "plug": "input",
+                "type": "*",
+                "displayName": "Question",
+                "group": "Inputs"
+              },
+              {
+                "name": "in-Answers",
+                "plug": "input",
+                "type": "*",
+                "displayName": "Answers",
+                "group": "Inputs"
+              },
+              {
+                "name": "in-BaseURL",
+                "plug": "input",
+                "type": "*",
+                "displayName": "BaseURL",
+                "group": "Inputs"
+              },
+              {
+                "name": "in-Model",
+                "plug": "input",
+                "type": "*",
+                "displayName": "Model",
+                "group": "Inputs"
+              },
+              {
+                "name": "out-prompt",
+                "plug": "output",
+                "type": "*",
+                "displayName": "prompt",
+                "group": "Outputs"
+              },
+              {
+                "name": "out-schema",
+                "plug": "output",
+                "type": "*",
+                "displayName": "schema",
+                "group": "Outputs"
+              },
+              {
+                "name": "out-baseUrl",
+                "plug": "output",
+                "type": "*",
+                "displayName": "baseUrl",
+                "group": "Outputs"
+              },
+              {
+                "name": "out-model",
+                "plug": "output",
+                "type": "*",
+                "displayName": "model",
+                "group": "Outputs"
+              },
+              {
+                "name": "out-code",
+                "plug": "output",
+                "type": "*",
+                "displayName": "code",
+                "group": "Outputs"
+              },
+              {
+                "name": "out-ask",
+                "plug": "output",
+                "type": "signal"
+              },
+              {
+                "name": "out-refused",
+                "plug": "output",
+                "type": "signal"
+              }
+            ]
+          },
+          {
+            "id": "lmModel",
+            "type": "noodl.cloud.modelrequest",
+            "children": [],
+            "label": "The model on this computer",
+            "x": 680,
+            "y": 40,
+            "dynamicports": [],
+            "ports": [],
+            "parameters": {
+              "provider": "openai-compatible",
+              "baseUrl": "http://127.0.0.1:11434",
+              "apiKeySecret": "LOCAL_MODEL_KEY",
+              "effort": "none",
+              "maxTokens": 64,
+              "timeoutMs": 20000
+            }
+          },
+          {
+            "id": "lmCheck",
+            "type": "JavaScriptFunction",
+            "children": [],
+            "label": "Only a word from Answers leaves",
+            "x": 1000,
+            "y": 40,
+            "parameters": {
+              "functionScript": "// Checked again: a server that ignores the schema can still answer with JSON naming a word that\n// is not on the list. Only a word from Answers leaves this component.\nvar answers = Array.isArray(Inputs.Answers) ? Inputs.Answers.map(String) : [];\nvar got = Inputs.json && typeof Inputs.json === 'object' ? Inputs.json.answer : undefined;\nif (typeof got !== 'string' || answers.indexOf(got) === -1) {\n  Outputs.code = 'answer_not_allowed';\n  Outputs.bad();\n  return;\n}\nOutputs.answer = got;\nOutputs.ok();",
+              "runOnChange-in-json": false,
+              "runOnChange-in-Answers": false
+            },
+            "dynamicports": [],
+            "ports": [
+              {
+                "name": "in-json",
+                "plug": "input",
+                "type": "*",
+                "displayName": "json",
+                "group": "Inputs"
+              },
+              {
+                "name": "in-Answers",
+                "plug": "input",
+                "type": "*",
+                "displayName": "Answers",
+                "group": "Inputs"
+              },
+              {
+                "name": "out-answer",
+                "plug": "output",
+                "type": "*",
+                "displayName": "answer",
+                "group": "Outputs"
+              },
+              {
+                "name": "out-code",
+                "plug": "output",
+                "type": "*",
+                "displayName": "code",
+                "group": "Outputs"
+              },
+              {
+                "name": "out-ok",
+                "plug": "output",
+                "type": "signal"
+              },
+              {
+                "name": "out-bad",
+                "plug": "output",
+                "type": "signal"
+              }
+            ]
+          },
+          {
+            "id": "lmOut",
+            "type": "Component Outputs",
+            "children": [],
+            "label": "What comes back",
+            "x": 1320,
+            "y": 40,
+            "parameters": {},
+            "dynamicports": [],
+            "ports": [
+              {
+                "name": "Answer",
+                "plug": "input",
+                "type": "string"
+              },
+              {
+                "name": "Done",
+                "plug": "input",
+                "type": "signal"
+              },
+              {
+                "name": "Failure",
+                "plug": "input",
+                "type": "signal"
+              },
+              {
+                "name": "Error Code",
+                "plug": "input",
+                "type": "string"
+              }
+            ]
+          }
+        ],
+        "connections": [
+          {
+            "fromId": "lmIn",
+            "fromProperty": "Choice",
+            "toId": "lmFence",
+            "toProperty": "in-Choice"
+          },
+          {
+            "fromId": "lmIn",
+            "fromProperty": "Choices",
+            "toId": "lmFence",
+            "toProperty": "in-Choices"
+          },
+          {
+            "fromId": "lmIn",
+            "fromProperty": "Question",
+            "toId": "lmFence",
+            "toProperty": "in-Question"
+          },
+          {
+            "fromId": "lmIn",
+            "fromProperty": "Answers",
+            "toId": "lmFence",
+            "toProperty": "in-Answers"
+          },
+          {
+            "fromId": "lmIn",
+            "fromProperty": "Answers",
+            "toId": "lmCheck",
+            "toProperty": "in-Answers"
+          },
+          {
+            "fromId": "lmIn",
+            "fromProperty": "Base URL",
+            "toId": "lmFence",
+            "toProperty": "in-BaseURL"
+          },
+          {
+            "fromId": "lmIn",
+            "fromProperty": "Model",
+            "toId": "lmFence",
+            "toProperty": "in-Model"
+          },
+          {
+            "fromId": "lmIn",
+            "fromProperty": "Instructions",
+            "toId": "lmModel",
+            "toProperty": "instructions"
+          },
+          {
+            "fromId": "lmIn",
+            "fromProperty": "Do",
+            "toId": "lmFence",
+            "toProperty": "run"
+          },
+          {
+            "fromId": "lmFence",
+            "fromProperty": "out-prompt",
+            "toId": "lmModel",
+            "toProperty": "input"
+          },
+          {
+            "fromId": "lmFence",
+            "fromProperty": "out-schema",
+            "toId": "lmModel",
+            "toProperty": "outputSchema"
+          },
+          {
+            "fromId": "lmFence",
+            "fromProperty": "out-baseUrl",
+            "toId": "lmModel",
+            "toProperty": "baseUrl"
+          },
+          {
+            "fromId": "lmFence",
+            "fromProperty": "out-model",
+            "toId": "lmModel",
+            "toProperty": "model"
+          },
+          {
+            "fromId": "lmFence",
+            "fromProperty": "out-ask",
+            "toId": "lmModel",
+            "toProperty": "send"
+          },
+          {
+            "fromId": "lmFence",
+            "fromProperty": "out-code",
+            "toId": "lmOut",
+            "toProperty": "Error Code"
+          },
+          {
+            "fromId": "lmFence",
+            "fromProperty": "out-refused",
+            "toId": "lmOut",
+            "toProperty": "Failure"
+          },
+          {
+            "fromId": "lmModel",
+            "fromProperty": "json",
+            "toId": "lmCheck",
+            "toProperty": "in-json"
+          },
+          {
+            "fromId": "lmModel",
+            "fromProperty": "done",
+            "toId": "lmCheck",
+            "toProperty": "run"
+          },
+          {
+            "fromId": "lmModel",
+            "fromProperty": "errorCode",
+            "toId": "lmOut",
+            "toProperty": "Error Code"
+          },
+          {
+            "fromId": "lmModel",
+            "fromProperty": "failure",
+            "toId": "lmOut",
+            "toProperty": "Failure"
+          },
+          {
+            "fromId": "lmCheck",
+            "fromProperty": "out-answer",
+            "toId": "lmOut",
+            "toProperty": "Answer"
+          },
+          {
+            "fromId": "lmCheck",
+            "fromProperty": "out-ok",
+            "toId": "lmOut",
+            "toProperty": "Done"
+          },
+          {
+            "fromId": "lmCheck",
+            "fromProperty": "out-code",
+            "toId": "lmOut",
+            "toProperty": "Error Code"
+          },
+          {
+            "fromId": "lmCheck",
+            "fromProperty": "out-bad",
+            "toId": "lmOut",
+            "toProperty": "Failure"
+          }
+        ]
+      }
+    }
+  ]
+}

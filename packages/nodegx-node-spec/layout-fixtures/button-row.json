@@ -1,0 +1,46 @@
+{
+  "name": "button-row",
+  "rule": "the templates' most-used shape (49 parents in 6 templates): a row, centred across, with a gap, of Buttons that hug their labels",
+  "nodes": [
+    {
+      "id": "bar",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": {
+          "value": 12,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "b1",
+          "type": "net.noodl.controls.button",
+          "parameters": {
+            "label": "Save"
+          }
+        },
+        {
+          "id": "b2",
+          "type": "net.noodl.controls.button",
+          "parameters": {
+            "label": "Cancel"
+          }
+        },
+        {
+          "id": "b3",
+          "type": "net.noodl.controls.button",
+          "parameters": {
+            "label": "A longer label"
+          }
+        }
+      ]
+    }
+  ]
+}

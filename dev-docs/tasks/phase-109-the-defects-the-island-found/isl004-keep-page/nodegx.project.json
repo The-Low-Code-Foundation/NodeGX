@@ -1,0 +1,14 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "isl004 keep page",
+  "version": "5",
+  "nodegxVersion": "1.1.0",
+  "settings": {
+    "navigationPathType": "path",
+    "bodyScroll": true
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  }
+}

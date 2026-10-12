@@ -1,5 +1,6 @@
 const ExpressionEvaluator = require('../src/expression-evaluator');
 const Model = require('../src/model');
+const Collection = require('../src/collection');
 
 describe('Expression Evaluator', () => {
   beforeEach(() => {
@@ -269,7 +270,44 @@ describe('Expression Evaluator', () => {
     });
   });
 
+  // P109 ISL-051 (P107-C150): `Arrays.x` is the array — `Collection.get('x')` — so the subscription is to the array.
+  describe('subscribeToChanges on an Array (P107-C150)', () => {
+    it('re-runs when an item is added to the array, or the list replaced, once per operation', () => {
+      const list = Collection.get('c150List');
+      list.set([Model.get('c150a')]);
+      let calls = 0;
+      const unsub = ExpressionEvaluator.subscribeToChanges({ variables: [], objects: [], arrays: ['c150List'] }, () => calls++);
+
+      list.add(Model.get('c150b'));
+      expect(calls).toBe(1);
+      list.set([Model.get('c150b')]);
+      expect(calls).toBe(2);
+
+      unsub();
+      list.add(Model.get('c150a'));
+      expect(calls).toBe(2);
+    });
+
+    it('does not re-run on a record named like the array', () => {
+      Collection.get('c150Other');
+      let calls = 0;
+      const unsub = ExpressionEvaluator.subscribeToChanges({ variables: [], objects: [], arrays: ['c150Other'] }, () => calls++);
+      Model.get('c150Other').set('x', 1);
+      unsub();
+      expect(calls).toBe(0);
+    });
+  });
+
   describe('createNoodlContext', () => {
+    // P109 ISL-051 (s35): an expression parameter reading `Arrays.x` got a record's data named like it, so `.length` was undefined
+    it('hands Arrays.x as the array, as window.Noodl.Arrays does', () => {
+      Collection.get('c150Context').set([Model.get('c150a'), Model.get('c150b')]);
+      const context = ExpressionEvaluator.createNoodlContext();
+      expect(context.Arrays.c150Context).toBe(Collection.get('c150Context'));
+      const fn = ExpressionEvaluator.compileExpression('Arrays.c150Context.size()');
+      expect(ExpressionEvaluator.evaluateExpression(fn)).toBe(2);
+    });
+
     it('creates context with Variables', () => {
       const varsModel = Model.get('--ndl--global-variables');
       varsModel.set('test', 123);

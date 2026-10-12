@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ee11fea6-a7c2-56ec-8450-94357956c896",
+  "name": "Win pay",
+  "path": "/Logic/Win pay",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The shells a win in the Workshop earns, and the plot as a done job. Runs on Go; answers Ran once its outputs are set."
+}

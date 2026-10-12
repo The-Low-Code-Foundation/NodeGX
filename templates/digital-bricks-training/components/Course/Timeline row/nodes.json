@@ -78,7 +78,8 @@
       "y": 40,
       "children": [
         "tr_heading",
-        "tr_row"
+        "tr_row",
+        "tr_thread"
       ],
       "parameters": {
         "width": {
@@ -123,20 +124,6 @@
       }
     },
     {
-      "id": "tr_log",
-      "type": "net.noodl.Log",
-      "label": "Where a question would go",
-      "x": 840,
-      "y": 360,
-      "parameters": {
-        "level": "info",
-        "message": "Ask your coach about this"
-      },
-      "metadata": {
-        "comment": "NOTHING WRITES THIS SPRINT (sprint 45 decision 6). The control emits and the graph decides where it goes — a Log until a backend exists, a Cloud Function after. Wiring it to a fake success would be worse than wiring it here."
-      }
-    },
-    {
       "id": "tr_out",
       "type": "Component Outputs",
       "label": "What the row asked for",
@@ -157,6 +144,560 @@
       "metadata": {
         "comment": "A COACH asked to see this entry in the activity log (TASK-L165). The For Each that places this row bubbles it up as itemOutputSignal-showInLog with the entry's id in itemActionItemId — the Lesson/Step chip pattern. It never fires on the learner's page, and nothing there listens for it. ALSO openLesson (TASK-L181): the learner pressed Review / Continue / Start on a lesson, or “Open the lesson this came from” on a piece of work. The same bubbling, with the entry's id in itemActionItemId; the page resolves the concept. It never fires on a coach's page."
       }
+    },
+    {
+      "id": "tr_thread",
+      "type": "Group",
+      "label": "The thread, under the row",
+      "x": 420,
+      "y": 520,
+      "parent": "tr_root",
+      "children": [
+        "tr_panel"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "mounted": false
+      },
+      "metadata": {
+        "comment": "TASK-L186. `mounted`, never `visible` (sprint 45: visibility keeps the space). Nothing under it exists until a learner presses Ask or a coach presses Reply, so forty rows carry forty closed doors and no panels."
+      }
+    },
+    {
+      "id": "tr_panel",
+      "type": "dbt-lesson.ConversationPanel",
+      "label": "The thread",
+      "x": 460,
+      "y": 680,
+      "parent": "tr_thread",
+      "parameters": {
+        "status": "loading"
+      },
+      "metadata": {
+        "comment": "A kit node that FETCHES NOTHING. The five Functions to the right decide every port it shows; it hands back Send requested + Body and Close requested."
+      }
+    },
+    {
+      "id": "tr_ask",
+      "type": "JavaScriptFunction",
+      "label": "A learner asked: open their thread about this card",
+      "x": 840,
+      "y": 360,
+      "parameters": {
+        "functionScript": "/* TASK-L186 §5. The learner pressed \"Ask your coach about this\". Open the\n   panel in its loading state and ask for the thread about THIS card. The\n   anchor is the row's own kind and id, which the kit emitted with the press. */\nOutputs.open = true;\nOutputs.status = 'loading';\nOutputs.turns = [];\nOutputs.rejected = '';\nOutputs.sending = false;\nOutputs.anchorKind = String(Inputs.anchorKind || '');\nOutputs.anchorId = String(Inputs.anchorId || '');\nOutputs.call();\n",
+        "runOnChange-in-anchorKind": false,
+        "runOnChange-in-anchorId": false
+      },
+      "ports": [
+        {
+          "name": "in-anchorKind",
+          "plug": "input",
+          "type": "*",
+          "displayName": "anchorKind",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-anchorId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "anchorId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-call",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-open",
+          "plug": "output",
+          "type": "*",
+          "displayName": "open",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-status",
+          "plug": "output",
+          "type": "*",
+          "displayName": "status",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-turns",
+          "plug": "output",
+          "type": "*",
+          "displayName": "turns",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rejected",
+          "plug": "output",
+          "type": "*",
+          "displayName": "rejected",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sending",
+          "plug": "output",
+          "type": "*",
+          "displayName": "sending",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-anchorKind",
+          "plug": "output",
+          "type": "*",
+          "displayName": "anchorKind",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-anchorId",
+          "plug": "output",
+          "type": "*",
+          "displayName": "anchorId",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "ONLY ON ITS RUN SIGNAL: every input has Run On Value Change off (NDA-017 §2; L165 found that a wired Run does not make inputs passive)."
+      }
+    },
+    {
+      "id": "tr_reply",
+      "type": "JavaScriptFunction",
+      "label": "A coach asked to reply: open that thread",
+      "x": 840,
+      "y": 560,
+      "parameters": {
+        "functionScript": "/* TASK-L186 §5. A coach pressed Reply on a message. Open the thread that\n   message belongs to. A coach never names an anchor: they answer a thread the\n   learner started (sprint 54 §2.1). */\nOutputs.open = true;\nOutputs.status = 'loading';\nOutputs.turns = [];\nOutputs.rejected = '';\nOutputs.sending = false;\nOutputs.conversationId = String(Inputs.conversationId || '');\nOutputs.call();\n",
+        "runOnChange-in-conversationId": false
+      },
+      "ports": [
+        {
+          "name": "in-conversationId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "conversationId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-call",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-open",
+          "plug": "output",
+          "type": "*",
+          "displayName": "open",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-status",
+          "plug": "output",
+          "type": "*",
+          "displayName": "status",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-turns",
+          "plug": "output",
+          "type": "*",
+          "displayName": "turns",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rejected",
+          "plug": "output",
+          "type": "*",
+          "displayName": "rejected",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sending",
+          "plug": "output",
+          "type": "*",
+          "displayName": "sending",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-conversationId",
+          "plug": "output",
+          "type": "*",
+          "displayName": "conversationId",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "ONLY ON ITS RUN SIGNAL: every input has Run On Value Change off (NDA-017 §2; L165 found that a wired Run does not make inputs passive)."
+      }
+    },
+    {
+      "id": "tr_open_l",
+      "type": "CloudFunction2",
+      "label": "openThread — theirs, about this card",
+      "x": 1100,
+      "y": 360,
+      "parameters": {
+        "function": "openThread"
+      },
+      "metadata": {
+        "comment": "components/__cloud__/openThread (TASK-L186). The learner is the session; this sends only which card."
+      }
+    },
+    {
+      "id": "tr_open_c",
+      "type": "CloudFunction2",
+      "label": "openThreadAsCoach — the thread this message is in",
+      "x": 1100,
+      "y": 560,
+      "parameters": {
+        "function": "openThreadAsCoach"
+      },
+      "metadata": {
+        "comment": "components/__cloud__/openThreadAsCoach (TASK-L186), role:staff."
+      }
+    },
+    {
+      "id": "tr_send",
+      "type": "JavaScriptFunction",
+      "label": "Send: the learner's half or the coach's",
+      "x": 840,
+      "y": 760,
+      "parameters": {
+        "functionScript": "/* TASK-L186 §5. The panel's Send. Who is reading decides which write — the\n   same `audience` the kit row already threw on if it was anything else. The\n   panel only emits a body that is non-empty and inside the limit; the server\n   refuses again rather than trusting it. */\nOutputs.sending = true;\nOutputs.rejected = '';\nOutputs.body = String(Inputs.body || '');\nif (String(Inputs.audience || '') === 'coach') Outputs.callCoach();\nelse Outputs.callLearner();\n",
+        "runOnChange-in-body": false,
+        "runOnChange-in-audience": false
+      },
+      "ports": [
+        {
+          "name": "in-body",
+          "plug": "input",
+          "type": "*",
+          "displayName": "body",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-audience",
+          "plug": "input",
+          "type": "*",
+          "displayName": "audience",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-callLearner",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-callCoach",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-sending",
+          "plug": "output",
+          "type": "*",
+          "displayName": "sending",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rejected",
+          "plug": "output",
+          "type": "*",
+          "displayName": "rejected",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-body",
+          "plug": "output",
+          "type": "*",
+          "displayName": "body",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "ONLY ON ITS RUN SIGNAL: every input has Run On Value Change off (NDA-017 §2; L165 found that a wired Run does not make inputs passive)."
+      }
+    },
+    {
+      "id": "tr_send_l",
+      "type": "CloudFunction2",
+      "label": "sendMessage — their question",
+      "x": 1100,
+      "y": 760,
+      "parameters": {
+        "function": "sendMessage"
+      },
+      "metadata": {
+        "comment": "components/__cloud__/sendMessage (TASK-L186). Refused, never trimmed, over 4,000 characters."
+      }
+    },
+    {
+      "id": "tr_send_c",
+      "type": "CloudFunction2",
+      "label": "replyAsCoach — the coach's answer",
+      "x": 1100,
+      "y": 940,
+      "parameters": {
+        "function": "replyAsCoach"
+      },
+      "metadata": {
+        "comment": "components/__cloud__/replyAsCoach (TASK-L186), role:staff."
+      }
+    },
+    {
+      "id": "tr_loaded",
+      "type": "JavaScriptFunction",
+      "label": "The thread arrived",
+      "x": 1360,
+      "y": 460,
+      "parameters": {
+        "functionScript": "/* The thread, as the server says THIS reader sees it (unread is theirs). */\nOutputs.turns = Inputs.turns || [];\nOutputs.status = 'ready';\n",
+        "runOnChange-in-turns": false
+      },
+      "ports": [
+        {
+          "name": "in-turns",
+          "plug": "input",
+          "type": "*",
+          "displayName": "turns",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-turns",
+          "plug": "output",
+          "type": "*",
+          "displayName": "turns",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-status",
+          "plug": "output",
+          "type": "*",
+          "displayName": "status",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "ONLY ON ITS RUN SIGNAL: every input has Run On Value Change off (NDA-017 §2; L165 found that a wired Run does not make inputs passive)."
+      }
+    },
+    {
+      "id": "tr_open_fail",
+      "type": "JavaScriptFunction",
+      "label": "The thread could not be opened",
+      "x": 1360,
+      "y": 620,
+      "parameters": {
+        "functionScript": "/* One plain sentence, no red (the panel's 'error' state). */\nOutputs.status = 'error';\n"
+      },
+      "ports": [
+        {
+          "name": "out-status",
+          "plug": "output",
+          "type": "*",
+          "displayName": "status",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "ONLY ON ITS RUN SIGNAL: every input has Run On Value Change off (NDA-017 §2; L165 found that a wired Run does not make inputs passive)."
+      }
+    },
+    {
+      "id": "tr_sent",
+      "type": "JavaScriptFunction",
+      "label": "Written: show it, clear the box",
+      "x": 1360,
+      "y": 800,
+      "parameters": {
+        "functionScript": "/* The write landed. The panel clears its box only when `sent` changes, so the\n   token is new every time — a second identical message must clear it too. */\nOutputs.turns = Inputs.turns || [];\nOutputs.status = 'ready';\nOutputs.sending = false;\nOutputs.rejected = '';\nOutputs.sent = String(Date.now()) + Math.random().toString(16).slice(2);\n",
+        "runOnChange-in-turns": false
+      },
+      "ports": [
+        {
+          "name": "in-turns",
+          "plug": "input",
+          "type": "*",
+          "displayName": "turns",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-turns",
+          "plug": "output",
+          "type": "*",
+          "displayName": "turns",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-status",
+          "plug": "output",
+          "type": "*",
+          "displayName": "status",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sending",
+          "plug": "output",
+          "type": "*",
+          "displayName": "sending",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rejected",
+          "plug": "output",
+          "type": "*",
+          "displayName": "rejected",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sent",
+          "plug": "output",
+          "type": "*",
+          "displayName": "sent",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "ONLY ON ITS RUN SIGNAL: every input has Run On Value Change off (NDA-017 §2; L165 found that a wired Run does not make inputs passive)."
+      }
+    },
+    {
+      "id": "tr_send_fail",
+      "type": "JavaScriptFunction",
+      "label": "Not written: say why, keep the words",
+      "x": 1360,
+      "y": 960,
+      "parameters": {
+        "functionScript": "/* The server's REASON, never its sentence (shared/Thread). The words stay in\n   the box: losing somebody's question to a refusal would be the worst answer. */\nconst why = String(Inputs.error || '');\nOutputs.sending = false;\nOutputs.rejected = why === 'too_long' ? 'too_long' : why === 'notice-not-accepted' ? 'stale' : 'error';\n",
+        "runOnChange-in-error": false
+      },
+      "ports": [
+        {
+          "name": "in-error",
+          "plug": "input",
+          "type": "*",
+          "displayName": "error",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-sending",
+          "plug": "output",
+          "type": "*",
+          "displayName": "sending",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rejected",
+          "plug": "output",
+          "type": "*",
+          "displayName": "rejected",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "ONLY ON ITS RUN SIGNAL: every input has Run On Value Change off (NDA-017 §2; L165 found that a wired Run does not make inputs passive)."
+      }
+    },
+    {
+      "id": "tr_close",
+      "type": "JavaScriptFunction",
+      "label": "Closed: the panel goes",
+      "x": 1360,
+      "y": 1120,
+      "parameters": {
+        "functionScript": "Outputs.open = false;\n"
+      },
+      "ports": [
+        {
+          "name": "out-open",
+          "plug": "output",
+          "type": "*",
+          "displayName": "open",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "ONLY ON ITS RUN SIGNAL: every input has Run On Value Change off (NDA-017 §2; L165 found that a wired Run does not make inputs passive)."
+      }
+    },
+    {
+      "id": "tr_focus_var",
+      "type": "Variable",
+      "label": "focusAnchor — set by /course from ?comment=",
+      "x": 840,
+      "y": 1300,
+      "parameters": {
+        "name": "focusAnchor"
+      }
+    },
+    {
+      "id": "tr_focus",
+      "type": "JavaScriptFunction",
+      "label": "A link pointed at THIS card: open it, and its thread",
+      "x": 1100,
+      "y": 1300,
+      "parameters": {
+        "functionScript": "/*\n * THE DEEP LINK, ON THE ROW IT NAMES (TASK-L188 §5). A reply mail links to\n * /course?comment=<entry id>; /course puts that in `focusAnchor` and every row\n * asks \"is it me?\". Only the row whose OWN id matches, on a learner's page, and\n * only for a kind a thread can be about, opens — and then it asks for the thread\n * exactly as the Ask control does. Anything else, including a hostile value,\n * matches nothing and changes nothing: it is compared, never rendered.\n */\nconst KINDS = ['lesson', 'session', 'evaluation', 'assignment', 'submission', 'message', 'signal'];\nconst focus = typeof Inputs.focus === 'string' ? Inputs.focus : '';\nconst e = Inputs.entry && typeof Inputs.entry === 'object' ? Inputs.entry : null;\nconst mine = !!(focus && e && e.id === focus && KINDS.indexOf(e.kind) !== -1 && Inputs.audience === 'learner');\nOutputs.focused = mine;\nif (mine) {\n  Outputs.anchorKind = e.kind;\n  Outputs.anchorId = e.id;\n  Outputs.go();\n}\n",
+        "runOnChange-in-focus": true,
+        "runOnChange-in-entry": true,
+        "runOnChange-in-audience": true
+      },
+      "ports": [
+        {
+          "name": "in-focus",
+          "plug": "input",
+          "type": "*",
+          "displayName": "focus",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-entry",
+          "plug": "input",
+          "type": "*",
+          "displayName": "entry",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-audience",
+          "plug": "input",
+          "type": "*",
+          "displayName": "audience",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-focused",
+          "plug": "output",
+          "type": "*",
+          "displayName": "focused",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-anchorKind",
+          "plug": "output",
+          "type": "*",
+          "displayName": "anchorKind",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-anchorId",
+          "plug": "output",
+          "type": "*",
+          "displayName": "anchorId",
+          "group": "Outputs"
+        }
+      ]
     }
   ],
   "visualRoots": [

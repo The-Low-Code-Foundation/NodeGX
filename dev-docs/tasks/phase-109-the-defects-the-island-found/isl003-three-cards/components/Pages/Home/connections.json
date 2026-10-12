@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8ee04873-4e1b-5b1a-8b30-4146ee5ee10f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "h_data1",
+      "fromProperty": "items",
+      "toId": "h_list1",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "h_data2",
+      "fromProperty": "items",
+      "toId": "h_list2",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "h_data3",
+      "fromProperty": "items",
+      "toId": "h_list3",
+      "toProperty": "items"
+    }
+  ]
+}

@@ -80,6 +80,21 @@ export function projectLevelFileFromRelativePath(relativePath: string): ProjectL
 }
 
 /**
+ * P109 ISL-005 — `scripts/engine/world.js` → `engine/world.js`; `null` for anything else (a temp
+ * file mid-write, a non-`.js` file, a dot folder).
+ */
+export function scriptPathFromRelativePath(relativePath: string): string | null {
+  if (!relativePath) return null;
+  const parts = relativePath.replace(/\\/g, '/').split('/').filter(Boolean);
+  if (parts.length < 2 || parts[0] !== V2_FILES.scriptsDir) return null;
+  const rest = parts.slice(1);
+  if (rest.some((s) => IGNORED_SEGMENTS.has(s) || s.startsWith('.'))) return null;
+  const file = rest[rest.length - 1];
+  if (!file.endsWith('.js')) return null;
+  return rest.join('/');
+}
+
+/**
  * Maps a path relative to the project directory onto the registry path of the
  * component it belongs to, or `null` if the path is not part of one.
  *

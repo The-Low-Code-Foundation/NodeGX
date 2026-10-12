@@ -27,6 +27,7 @@ import {
 } from './popoutSize';
 import { Property, PropertyProps } from './Property';
 import { createReactRoot, unmountReactRoot } from '../../../../../../shared/utils/unmountReactRoot';
+import { scriptUsesOf } from '@noodl/runtime/src/scriptfiles';
 
 /** Where the popout's remembered size lives. Unchanged, so an existing good size survives. */
 const SIZE_STORAGE_KEY = 'codeeditor_size_percentage';
@@ -223,6 +224,8 @@ export class CodeEditorType extends TypeView {
   openNode: TSFixme = null;
   /** The last ports published, so an unrelated parameter write costs nothing. */
   publishedPorts: DeclaredPorts | null = null;
+  /** P109 ISL-005 — the Uses last published beside the ports, joined; a change to it republishes too. */
+  publishedUses: string | null = null;
 
   static fromPort(args): TSFixme {
     const view = new CodeEditorType();
@@ -273,6 +276,7 @@ export class CodeEditorType extends TypeView {
       this.openNode = null;
     }
     this.publishedPorts = null;
+    this.publishedUses = null;
 
     // Unmount popout root
     if (this.popoutRoot) {
@@ -376,18 +380,23 @@ export class CodeEditorType extends TypeView {
       // hear.
       const publish = () => {
         const declared = collectDeclaredPorts(node.parameters);
+        const uses = node.typename === 'JavaScriptFunction' ? scriptUsesOf(node.parameters?.uses) : undefined;
+        const usesKey = uses ? uses.join(',') : '';
 
         // Every parameter write lands here, including this editor's own save of
         // `functionScript` on Cmd-S. Republishing that would re-lint the document
         // it just wrote, per save, for no change in the answer.
-        if (this.publishedPorts && declaredPortsEqual(this.publishedPorts, declared)) return;
+        if (this.publishedPorts && declaredPortsEqual(this.publishedPorts, declared) && this.publishedUses === usesKey) return;
         this.publishedPorts = declared;
+        this.publishedUses = usesKey;
 
         setOpenNodeContext({
           nodeId,
           typeName: node.typename,
           declaredInputs: declared.inputs,
-          declaredOutputs: declared.outputs
+          declaredOutputs: declared.outputs,
+          // P109 ISL-005 — what `Scripts.` completes to: this Function's Uses.
+          uses
         });
       };
 

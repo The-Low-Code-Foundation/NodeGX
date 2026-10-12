@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7b8e80ac-a71d-54f7-8bc7-779f56c25edf",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "runcapIn",
+      "fromProperty": "tick",
+      "toId": "runcapFn",
+      "toProperty": "in-tick"
+    },
+    {
+      "fromId": "runcapIn",
+      "fromProperty": "go",
+      "toId": "runcapFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "runcapFn",
+      "fromProperty": "out-over",
+      "toId": "runcapOut",
+      "toProperty": "over"
+    },
+    {
+      "fromId": "runcapFn",
+      "fromProperty": "success",
+      "toId": "runcapOut",
+      "toProperty": "ran"
+    }
+  ]
+}

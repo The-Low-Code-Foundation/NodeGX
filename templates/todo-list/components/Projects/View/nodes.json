@@ -1,0 +1,1058 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b4fdc018-1660-5eb4-831b-f283a33285c6",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pvIn",
+      "type": "Component Inputs",
+      "label": "What to draw",
+      "ports": [
+        {
+          "name": "balanceText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "balanceWhen",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bars",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lowText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lowColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "incomeRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasIncome",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "noProjects",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "projectPosition",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "nextPosition",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "items",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "marks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "projects",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "upRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "recRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "pastRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "projectOptions",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "payingRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasPaying",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "buildingRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasBuilding",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hobbyRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasHobby",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "quietRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasQuiet",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "projectNames",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "pvOut",
+      "type": "Component Outputs",
+      "label": "What you did",
+      "ports": [
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "toggle",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "projectId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hide",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openTask",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openTaskId",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "pvRoot",
+      "type": "Group",
+      "label": "Projects",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-6)",
+        "maxWidth": {
+          "value": 760,
+          "unit": "px"
+        }
+      },
+      "children": [
+        "pvMoney",
+        "pvProjects",
+        "pvAdd",
+        "pvHide",
+        "pvSheet"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pvMoney",
+      "type": "/Projects/Money",
+      "label": "Money",
+      "parent": "pvRoot",
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pvProjects",
+      "type": "Group",
+      "label": "The projects",
+      "parent": "pvRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "pvEmpty",
+        "pvOrderRow",
+        "pvByKind",
+        "pvUrgent"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "pvEmpty",
+      "type": "Text",
+      "label": "No projects yet",
+      "parent": "pvProjects",
+      "parameters": {
+        "text": "No projects yet. Add the first one below: who it is, and what they pay if they do.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "pvOrderRow",
+      "type": "Group",
+      "label": "How the projects are shown",
+      "parent": "pvProjects",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1)",
+        "flexWrap": "wrap",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "pvOrderLabel",
+        "pvByKindBtn",
+        "pvByUrgentBtn"
+      ],
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "pvOrderLabel",
+      "type": "Text",
+      "label": "Show",
+      "parent": "pvOrderRow",
+      "parameters": {
+        "text": "Show",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize",
+        "marginRight": "var(--space-1)"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "pvByKindBtn",
+      "type": "net.noodl.controls.button",
+      "label": "By kind",
+      "parent": "pvOrderRow",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "By kind"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "pvByUrgentBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Most urgent first",
+      "parent": "pvOrderRow",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Most urgent first"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "pvByKind",
+      "type": "Group",
+      "label": "By kind, in your own order",
+      "parent": "pvProjects",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "pvKpaying",
+        "pvKbuilding",
+        "pvKhobby",
+        "pvKquiet"
+      ],
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "pvKpaying",
+      "type": "/Projects/Kind group",
+      "label": "Paying",
+      "parent": "pvByKind",
+      "parameters": {
+        "heading": "Paying"
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "pvKbuilding",
+      "type": "/Projects/Kind group",
+      "label": "Building",
+      "parent": "pvByKind",
+      "parameters": {
+        "heading": "Building"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "pvKhobby",
+      "type": "/Projects/Kind group",
+      "label": "Hobby",
+      "parent": "pvByKind",
+      "parameters": {
+        "heading": "Hobby"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "pvKquiet",
+      "type": "/Projects/Kind group",
+      "label": "Quiet",
+      "parent": "pvByKind",
+      "parameters": {
+        "heading": "Quiet"
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "pvUrgent",
+      "type": "Group",
+      "label": "Most urgent first",
+      "parent": "pvProjects",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "mounted": false
+      },
+      "children": [
+        "pvList"
+      ],
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "pvList",
+      "type": "/Projects/Project list",
+      "label": "The projects, by whose move it is",
+      "parent": "pvUrgent",
+      "x": 220,
+      "y": 1720
+    },
+    {
+      "id": "pvAdd",
+      "type": "Group",
+      "label": "Add a project",
+      "parent": "pvRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "pvAddHeading",
+        "pvName",
+        "pvAddRow",
+        "pvOften",
+        "pvAddError"
+      ],
+      "x": 100,
+      "y": 1840
+    },
+    {
+      "id": "pvAddHeading",
+      "type": "Text",
+      "label": "Add a project",
+      "parent": "pvAdd",
+      "parameters": {
+        "text": "Add a project",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "pvName",
+      "type": "net.noodl.controls.textinput",
+      "label": "Who or what",
+      "parent": "pvAdd",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "A client, or something of your own"
+      },
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "pvAddRow",
+      "type": "Group",
+      "label": "What they pay",
+      "parent": "pvAdd",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "pvAmount",
+        "pvWhen"
+      ],
+      "x": 160,
+      "y": 2200
+    },
+    {
+      "id": "pvAmount",
+      "type": "net.noodl.controls.textinput",
+      "label": "What they pay",
+      "parent": "pvAddRow",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "What they pay (€), if they do",
+        "styleCss": "flex: 1 1 180px; min-width: 0;"
+      },
+      "x": 220,
+      "y": 2320
+    },
+    {
+      "id": "pvWhen",
+      "type": "net.noodl.controls.textinput",
+      "label": "When",
+      "parent": "pvAddRow",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "First paid on: 2026-11-01",
+        "styleCss": "flex: 1 1 180px; min-width: 0;"
+      },
+      "x": 220,
+      "y": 2440
+    },
+    {
+      "id": "pvOften",
+      "type": "Group",
+      "label": "How often",
+      "parent": "pvAdd",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "pvMonthly",
+        "pvOnce",
+        "pvAddButton"
+      ],
+      "x": 160,
+      "y": 2560
+    },
+    {
+      "id": "pvMonthly",
+      "type": "net.noodl.controls.button",
+      "label": "Every month",
+      "parent": "pvOften",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Every month"
+      },
+      "x": 220,
+      "y": 2680
+    },
+    {
+      "id": "pvOnce",
+      "type": "net.noodl.controls.button",
+      "label": "Just once",
+      "parent": "pvOften",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Just once"
+      },
+      "x": 220,
+      "y": 2800
+    },
+    {
+      "id": "pvAddButton",
+      "type": "net.noodl.controls.button",
+      "label": "Add",
+      "parent": "pvOften",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Add project",
+        "marginLeft": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 2920
+    },
+    {
+      "id": "pvAddError",
+      "type": "Text",
+      "label": "Why it was not added",
+      "parent": "pvAdd",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "lineHeight": "var(--leading-snug)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 160,
+      "y": 3040
+    },
+    {
+      "id": "pvHide",
+      "type": "net.noodl.controls.button",
+      "label": "Hide this tab",
+      "parent": "pvRoot",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Hide this tab"
+      },
+      "x": 100,
+      "y": 3160
+    },
+    {
+      "id": "pvSheet",
+      "type": "/Projects/Money sheet",
+      "label": "The money popup",
+      "parent": "pvRoot",
+      "x": 100,
+      "y": 3280
+    },
+    {
+      "id": "pvRepeat",
+      "type": "States",
+      "label": "Every month or once",
+      "parameters": {
+        "states": "monthly,once",
+        "currentState": "monthly",
+        "values": "monthlyBg,onceBg",
+        "type-monthlyBg": "color",
+        "type-onceBg": "color",
+        "value-monthly-monthlyBg": "var(--muted)",
+        "value-monthly-onceBg": "transparent",
+        "value-once-monthlyBg": "transparent",
+        "value-once-onceBg": "var(--muted)",
+        "useTransitions": false
+      },
+      "x": 470,
+      "y": 2680
+    },
+    {
+      "id": "pvSheetState",
+      "type": "States",
+      "label": "Is the money popup open?",
+      "parameters": {
+        "states": "closed,list,edit,editOnly",
+        "currentState": "closed",
+        "useTransitions": false
+      },
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "pvSheetLook",
+      "type": "JavaScriptFunction",
+      "label": "Open, and on a form?",
+      "parameters": {
+        "functionScript": "var s = String(Inputs.state || 'closed');\nOutputs.open = s !== 'closed';\nOutputs.editing = s === 'edit' || s === 'editOnly';"
+      },
+      "x": 470,
+      "y": 3280,
+      "ports": [
+        {
+          "name": "in-state",
+          "displayName": "state",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-open",
+          "displayName": "open",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-editing",
+          "displayName": "editing",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pvSheetBack",
+      "type": "JavaScriptFunction",
+      "label": "Back to the list, or closed",
+      "parameters": {
+        "functionScript": "if (String(Inputs.state || '') === 'edit') Outputs.toList(); else Outputs.toClosed();",
+        "runOnChange-in-state": false
+      },
+      "x": 470,
+      "y": 3400,
+      "ports": [
+        {
+          "name": "in-state",
+          "displayName": "state",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-toList",
+          "displayName": "toList",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-toClosed",
+          "displayName": "toClosed",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pvEditKey",
+      "type": "Variable2",
+      "label": "What the money form shows",
+      "parameters": {
+        "name": "todoMoneyEdit"
+      },
+      "x": 470,
+      "y": 3520
+    },
+    {
+      "id": "pvEditNew",
+      "type": "Set Variable",
+      "label": "A new item, from the Money card",
+      "parameters": {
+        "name": "todoMoneyEdit",
+        "setWith": "string",
+        "value": "new"
+      },
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "pvEditNewInSheet",
+      "type": "Set Variable",
+      "label": "A new item, from the popup",
+      "parameters": {
+        "name": "todoMoneyEdit",
+        "setWith": "string",
+        "value": "new"
+      },
+      "x": 470,
+      "y": 3640
+    },
+    {
+      "id": "pvEditLine",
+      "type": "Set Variable",
+      "label": "An item, from a line in the popup",
+      "parameters": {
+        "name": "todoMoneyEdit",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 3760
+    },
+    {
+      "id": "pvEditRowItem",
+      "type": "Set Variable",
+      "label": "An item, from a project",
+      "parameters": {
+        "name": "todoMoneyEdit",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "pvNewFor",
+      "type": "JavaScriptFunction",
+      "label": "A new item for this project",
+      "parameters": {
+        "functionScript": "var id = String(Inputs.projectId || '');\nif (id === '') return;\nOutputs.value = 'new:' + id;\nOutputs.go();",
+        "runOnChange-in-projectId": false
+      },
+      "x": 470,
+      "y": 1840,
+      "ports": [
+        {
+          "name": "in-projectId",
+          "displayName": "projectId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-value",
+          "displayName": "value",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pvEditRowNew",
+      "type": "Set Variable",
+      "label": "A new item, for a project",
+      "parameters": {
+        "name": "todoMoneyEdit",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 3880
+    },
+    {
+      "id": "cmdMove",
+      "type": "/Projects/Save next move",
+      "label": "Save next move",
+      "x": 470,
+      "y": 1960
+    },
+    {
+      "id": "cmdTick",
+      "type": "/Projects/Mark money",
+      "label": "Been paid",
+      "parameters": {
+        "action": "tick"
+      },
+      "x": 470,
+      "y": 2080
+    },
+    {
+      "id": "cmdSent",
+      "type": "/Projects/Mark money",
+      "label": "Sent",
+      "parameters": {
+        "action": "sent"
+      },
+      "x": 470,
+      "y": 2200
+    },
+    {
+      "id": "cmdAddProject",
+      "type": "/Projects/Add project",
+      "label": "Add project",
+      "x": 470,
+      "y": 3040
+    },
+    {
+      "id": "cmdSaveProject",
+      "type": "/Projects/Save project",
+      "label": "Save project",
+      "x": 470,
+      "y": 2320
+    },
+    {
+      "id": "pvOrder",
+      "type": "States",
+      "label": "By kind or most urgent first",
+      "parameters": {
+        "states": "kind,urgent",
+        "currentState": "kind",
+        "values": "kindBg,urgentBg",
+        "type-kindBg": "color",
+        "type-urgentBg": "color",
+        "value-kind-kindBg": "var(--muted)",
+        "value-kind-urgentBg": "transparent",
+        "value-urgent-kindBg": "transparent",
+        "value-urgent-urgentBg": "var(--muted)",
+        "useTransitions": false
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "pvOrderRead",
+      "type": "JavaScriptFunction",
+      "label": "What this device chose",
+      "parameters": {
+        "functionScript": "var v = '';\ntry { v = window.localStorage.getItem(\"todo-projects-order\") || ''; } catch (e) {}\nif (v === 'urgent') Outputs.urgent(); else Outputs.kind();"
+      },
+      "ports": [
+        {
+          "name": "out-kind",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "kind",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-urgent",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "urgent",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 4000
+    },
+    {
+      "id": "pvKeepKind",
+      "type": "JavaScriptFunction",
+      "label": "Remember By kind on this device",
+      "parameters": {
+        "functionScript": "try { window.localStorage.setItem(\"todo-projects-order\", \"kind\"); } catch (e) {}"
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "pvKeepUrgent",
+      "type": "JavaScriptFunction",
+      "label": "Remember Most urgent first on this device",
+      "parameters": {
+        "functionScript": "try { window.localStorage.setItem(\"todo-projects-order\", \"urgent\"); } catch (e) {}"
+      },
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "cmdLink",
+      "type": "/Projects/Set task project",
+      "label": "Put a task in the project",
+      "parameters": {
+        "current": "none"
+      },
+      "x": 470,
+      "y": 2440
+    }
+  ],
+  "visualRoots": [
+    "pvRoot"
+  ]
+}

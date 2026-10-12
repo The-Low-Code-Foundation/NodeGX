@@ -1,0 +1,122 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6d5d3f54-646e-5db8-873a-1b442cc06b37",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "applydeltaIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "delta",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "world",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "applydeltaFn",
+      "type": "JavaScriptFunction",
+      "label": "Apply delta",
+      "parameters": {
+        "functionScript": "var { apply, tulipsOf } = Scripts.engine;\nvar next = apply(Inputs.world, Inputs.delta);\nOutputs.world = next;\nOutputs.things = next.things;\nOutputs.robots = next.robots;\nOutputs.tulips = tulipsOf(next);\n",
+        "runOnChange-in-delta": false,
+        "runOnChange-in-world": false,
+        "uses": "engine.js"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-world",
+          "displayName": "world",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-delta",
+          "displayName": "delta",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-world",
+          "displayName": "world",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-things",
+          "displayName": "things",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-robots",
+          "displayName": "robots",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tulips",
+          "displayName": "tulips",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "applydeltaOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "robots",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "things",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "tulips",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "world",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

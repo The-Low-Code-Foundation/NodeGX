@@ -1,0 +1,269 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2b358db2-c66c-5a5b-868c-d1d75f8c05ed",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lkIn",
+      "type": "Component Inputs",
+      "label": "Which tasks",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "heading",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "options",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "lkOut",
+      "type": "Component Outputs",
+      "label": "The one picked",
+      "ports": [
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cancel",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "taskId",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "lkRoot",
+      "type": "Group",
+      "label": "Add an existing task",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--background)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "mounted": true
+      },
+      "children": [
+        "lkHead",
+        "lkPick",
+        "lkError",
+        "lkBtns"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "lkHead",
+      "type": "Text",
+      "label": "What this is",
+      "parent": "lkRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "lkPick",
+      "type": "net.noodl.controls.options",
+      "label": "Which task",
+      "parent": "lkRoot",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Pick a task",
+        "value": ""
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "lkError",
+      "type": "Text",
+      "label": "Why nothing was added",
+      "parent": "lkRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "lineHeight": "var(--leading-snug)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "lkBtns",
+      "type": "Group",
+      "label": "Add or cancel",
+      "parent": "lkRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "lkSave",
+        "lkCancel"
+      ],
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "lkSave",
+      "type": "net.noodl.controls.button",
+      "label": "Add to project",
+      "parent": "lkBtns",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Add to project"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "lkCancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "parent": "lkBtns",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Cancel"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "lkCheck",
+      "type": "JavaScriptFunction",
+      "label": "Was one picked?",
+      "parameters": {
+        "functionScript": "var id = String(Inputs.picked || '');\nOutputs.error = id === '' ? 'Pick a task first.' : '';\nOutputs.hasError = id === '';\nif (id === '') return;\nOutputs.taskId = id;\nOutputs.go();",
+        "runOnChange-in-picked": false
+      },
+      "x": 410,
+      "y": 400,
+      "ports": [
+        {
+          "name": "in-picked",
+          "displayName": "picked",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "displayName": "error",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasError",
+          "displayName": "hasError",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-taskId",
+          "displayName": "taskId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "lkRoot"
+  ]
+}

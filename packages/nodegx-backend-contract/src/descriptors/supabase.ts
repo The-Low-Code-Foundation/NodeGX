@@ -244,6 +244,13 @@ export const supabaseDescriptor: BackendDescriptor = {
       'No _nempty equivalent.'
     ),
 
+    // P116 ONT-004. PostgREST embeds with `!inner` filter across one link
+    // (BCN-005); a chain of embeds is a path on paper and has not been driven.
+    path: unsupported(
+      'Following several links in one request is not available on Supabase yet. Filter one link at a time with an embedded field.',
+      'BCN-005 live: one hop works as a dotted filter with an !inner embed; deeper paths not driven, no translator'
+    ),
+
     relatedTo: unsupported(
       'Filtering by "records related to this one" is not available on Supabase yet.',
       'BCN-005.'

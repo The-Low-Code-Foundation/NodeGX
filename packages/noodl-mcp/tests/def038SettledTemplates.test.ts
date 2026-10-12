@@ -134,31 +134,44 @@ describe('DEF-038 — every shipped template artefact is settled against NDA-017
       // the mail app) has nothing pinned and was failing this control for a
       // reason that is not about settling. Deleting an authored answer makes
       // the planner want to write just the same, which is what "live" means.
-      const copy = JSON.parse(JSON.stringify(artefact.project)) as {
-        components?: { graph?: { roots?: unknown[] } }[];
-      };
-
-      let unsettled: string | undefined;
-      const walk = (nodes: unknown[]): void => {
-        for (const raw of nodes) {
+      //
+      // 🔴 P109 s7 (P109-S6-DEF038): **a key the planner GOVERNS, not the first one in the walk.**
+      // The planner only reads a node whose control signal is wired; an answer left on a Function
+      // with nothing wired to `Run` (TPL-007's `picknextquesFn`, the DBT template's `sfs_fn`) is
+      // outside its reach, so deleting it rightly writes nothing — and this arm read that as a dead
+      // check on two committed artefacts carrying 133 and 36 live keys beside it (measured s7). So: try each answered key
+      // in walk order and pass on the first whose deletion the planner sees. A planner that stopped
+      // finding anything still reddens here — every candidate then reads 0.
+      type Raw = { components?: { name?: string; graph?: { roots?: unknown[] } }[] };
+      const answered: { component: number; path: number[]; key: string }[] = [];
+      const collect = (component: number, nodes: unknown[], at: number[]): void => {
+        nodes.forEach((raw, i) => {
           const node = raw as { parameters?: Record<string, unknown>; children?: unknown[] };
           for (const key of Object.keys(node.parameters ?? {})) {
-            if (unsettled || !key.startsWith('runOnChange-')) continue;
-            delete (node.parameters as Record<string, unknown>)[key];
-            unsettled = key;
+            if (key.startsWith('runOnChange-')) answered.push({ component, path: [...at, i], key });
           }
-          if (Array.isArray(node.children)) walk(node.children);
-        }
+          if (Array.isArray(node.children)) collect(component, node.children, [...at, i]);
+        });
       };
-      for (const component of copy.components ?? []) {
-        if (unsettled) break;
-        if (Array.isArray(component?.graph?.roots)) walk(component.graph.roots);
-      }
+      ((artefact.project as Raw).components ?? []).forEach((component, c) => {
+        if (Array.isArray(component?.graph?.roots)) collect(c, component.graph.roots, []);
+      });
 
       // Every settled artefact carries at least one answered checkbox, or there
       // was nothing to settle and the arm above proved nothing about this artefact.
+      expect(answered.length).toBeGreaterThan(0);
+
+      const unsettled = answered.find(({ component, path: at, key }) => {
+        const copy = JSON.parse(JSON.stringify(artefact.project)) as Raw;
+        let node = { children: copy.components?.[component]?.graph?.roots } as {
+          parameters?: Record<string, unknown>;
+          children?: unknown[];
+        };
+        for (const i of at) node = node.children?.[i] as typeof node;
+        delete node.parameters?.[key];
+        return planRunOnValueChangeMigration(copy as never).writes.length > 0;
+      });
       expect(unsettled).toBeDefined();
-      expect(planRunOnValueChangeMigration(copy as never).writes.length).toBeGreaterThan(0);
     }
   );
 });

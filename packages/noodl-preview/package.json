@@ -1,18 +1,31 @@
 {
-  "name": "@noodl/preview",
-  "version": "0.1.0",
+  "name": "@nodegx/preview",
+  "version": "0.2.0",
   "description": "Standalone live-preview harness: renders a NodeGX (OpenNoodl) v2 project in a browser with no editor process, and reloads it when the files on disk change.",
+  "license": "GPL-3.0-only",
+  "homepage": "https://nodegx.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/The-Low-Code-Foundation/NodeGX.git",
+    "directory": "packages/noodl-preview"
+  },
   "main": "src/index.ts",
   "bin": {
-    "noodl-preview": "./bin/noodl-preview.js"
+    "noodl-preview": "./bin/noodl-preview.js",
+    "nodegx-deploy": "./bin/nodegx-deploy.js"
   },
   "files": [
     "bin",
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "node build.mjs",
+    "prepack": "node build.mjs && node scripts/pack-runtime.mjs",
+    "postpack": "node scripts/pack-runtime.mjs --remove",
+    "in-page-check": "node scripts/in-page-check.mjs",
+    "graph-target-check": "node scripts/graph-target-check.mjs",
     "test": "jest",
     "typecheck": "tsc --noEmit"
   },
@@ -23,5 +36,8 @@
     "@types/jest": "^29.0.1",
     "jest": "^29.7.0",
     "ts-jest": "^29.4.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

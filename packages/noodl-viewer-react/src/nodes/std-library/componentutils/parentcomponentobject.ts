@@ -159,13 +159,18 @@ const ParentComponentObject: NodeDefinitionOptions = {
    *
    * Going loud is tied to the same point: before it, a miss is expected and silent; after
    * it, a miss is a genuine failure and gets raised.
+   *
+   * P107-C23: the re-walk is unconditional. It used to run only `if (!modelId)`, which fixed
+   * "found nothing" but not "found the wrong one": created before its parent's Component
+   * Object, the walk in `initialize` passes the parent and binds the GRANDPARENT's record,
+   * for good in a deployed app (the `componentStateNodesChanged` re-walk is editor-only),
+   * while Set Parent Component Object Properties writes the parent's. Same comparison as
+   * `onComponentStateNodesChanged`: rebind only when the id differs.
    */
   nodeScopeDidInitialize(this: ParentComponentObjectInstance) {
     this.context.scheduleAfterUpdate(() => {
       this._internal.resolutionIsLoud = true;
-      if (!this._internal.modelId) {
-        this.updateComponentState();
-      }
+      this.onComponentStateNodesChanged();
     });
   },
   getInspectInfo(this: ParentComponentObjectInstance): InspectInfo {

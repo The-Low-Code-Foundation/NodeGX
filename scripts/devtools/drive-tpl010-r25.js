@@ -7,8 +7,8 @@
  * dated from the visit, so every figure here is worked out from today rather than written down.
  *
  * Usage:
- *   node packages/noodl-preview/dist/nodegx-deploy.cjs templates/planner-demo <site>/templates/planner --base-url /templates/planner/ --allow-development-engine
- *   node scripts/devtools/drive-tpl010-r25.js <site> --path /templates/planner/ [--shots <dir>]
+ *   node packages/noodl-preview/dist/nodegx-deploy.cjs templates/planning-demo <site>/templates/planning --base-url /templates/planning/ --allow-development-engine
+ *   node scripts/devtools/drive-tpl010-r25.js <site> --path /templates/planning/ [--shots <dir>]
  *
  * Exits 0 when every clause passed, 1 when any did not.
  */
@@ -23,7 +23,7 @@ const flag = (name) => {
 const SHOTS = flag('--shots');
 const BASE = (flag('--path') || '/').replace(/\/?$/, '/');
 if (!DIR) {
-  console.error('usage: drive-tpl010-r25.js <site-dir|https://origin> [--path /templates/planner/] [--shots <dir>]');
+  console.error('usage: drive-tpl010-r25.js <site-dir|https://origin> [--path /templates/planning/] [--shots <dir>]');
   process.exit(2);
 }
 
@@ -225,7 +225,7 @@ withDeployedSite(LIVE ? { origin: DIR } : { dir: DIR, port: 0 }, async (page) =>
   await page.navigate(BASE);
 
   // ── Arrival: the bar has no Todo link while the address is empty (L6) ──
-  const boot = await until(text, (s) => s.includes('Planner') && s.includes('Billable'));
+  const boot = await until(text, (s) => s.includes('Planning') && s.includes('Billable'));
   check('L6 — no Todo link in the bar while Settings.todoUrl is empty', !boot.includes('Todo ↗'), boot.slice(0, 300));
   const billableBefore = await tileSay('Billable');
 
@@ -269,7 +269,7 @@ withDeployedSite(LIVE ? { origin: DIR } : { dir: DIR, port: 0 }, async (page) =>
 
   // ── R2.5-4, half of it: the ticks come back as they were saved ──
   await page.navigate(BASE);
-  await until(text, (s) => s.includes('Planner'));
+  await until(text, (s) => s.includes('Planning'));
   const reopened = await openSettings();
   check('R2.5-4 — the ticks survive a reload', (await checked('Sat')) === false && (await checked('Fri')) === true && reopened.includes('5 days a week'), reopened.slice(0, 700));
 
@@ -381,7 +381,7 @@ withDeployedSite(LIVE ? { origin: DIR } : { dir: DIR, port: 0 }, async (page) =>
   );
   await key('Escape');
   await page.navigate(BASE);
-  await until(text, (s) => s.includes('Planner'));
+  await until(text, (s) => s.includes('Planning'));
   await openSettings();
   const read = [];
   for (const [label, value] of typed) read.push([label, await valueOf(label), value]);

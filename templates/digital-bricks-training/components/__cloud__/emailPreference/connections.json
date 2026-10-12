@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5614bdf3-0ba7-58cb-b80a-388d4fc42bdb",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fn",
+      "fromProperty": "out-on",
+      "toId": "res",
+      "toProperty": "pm-on"
+    },
+    {
+      "fromId": "fn",
+      "fromProperty": "out-done",
+      "toId": "res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "fn",
+      "fromProperty": "out-failed",
+      "toId": "deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "userId",
+      "toId": "fn",
+      "toProperty": "in-userId"
+    }
+  ]
+}

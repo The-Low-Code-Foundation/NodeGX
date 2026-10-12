@@ -57,6 +57,7 @@ const OptionsNode = {
   },
   initialize: function () {
     this._itemsChanged = () => {
+      this.props.items = optionItems(this._internal.items);
       this.forceUpdate();
     };
 
@@ -105,10 +106,17 @@ const OptionsNode = {
      * `set`, and the runtime never calls a port's `set` for an unauthored default.
      */
     this.props.value = this._internal.value = DEFAULT_ITEMS[0].Value;
+    // P107-C71 (P109 ISL-031, ruled "Fix it now"): bumped by every write of the value — a pick and the Value input — so the
+    // <select> redraws the node's value even when React's last render already held that value
+    this.props.valueWrites = 0;
 
     this.props.valueChanged = (value) => {
       const changed = this._internal.value !== value;
-      this._internal.value = value;
+      // P107-D34 (P109 ISL-031, ruled "Fix it now"): a pick is the node's value on BOTH sides. It wrote `_internal.value`
+      // alone, so a remount or a new Items list re-read the author's `props.value` and announced it as a change (Changed
+      // with nobody picking, the pick taken back); C71: and a Value written back to the last render was never drawn
+      this.props.value = this._internal.value = value;
+      this.props.valueWrites++;
       if (changed) {
         this.flagOutputDirty('value');
         this.sendSignalOnOutput('onChange');
@@ -165,7 +173,7 @@ const OptionsNode = {
           if (newValue && typeof newValue.on === 'function') newValue.on('change', this._itemsChanged);
         }
 
-        this.props.items = this._internal.items;
+        this.props.items = optionItems(this._internal.items);
 
         this.forceUpdate();
       }
@@ -192,6 +200,7 @@ const OptionsNode = {
 
         const changed = value !== this._internal.value;
         this.props.value = this._internal.value = value;
+        this.props.valueWrites++;
 
         if (changed) {
           this.forceUpdate();
@@ -329,6 +338,26 @@ Utils.addFocusActions(OptionsNode, { noun: 'dropdown' });
  * read yields no options, and {@link updateValuePort} then leaves the port a plain string rather than
  * offering a list that would be missing rows.
  */
+/**
+ * P107-C70 (P109 ISL-026, ruled 2026-10-05 "Read old text, else no options"): what `Select` draws for whatever arrived on
+ * Items. Text is the old stored form and is read the way the editor reads it (`readItems`); a list keeps its identity (a
+ * live Array repaints on its own `change`) unless it holds an empty item, which is skipped, or a word, which becomes an
+ * option labelled and valued by it (R21); anything else that is not a list offers no options. A falsy Items is passed on as it was (`Select` offers none). Handed to the render as it came,
+ * a string or a record threw at `props.items.map` / `findIndex`, and a null item at `.Value` — the whole page, not one
+ * Dropdown.
+ */
+function optionItems(items: unknown): unknown {
+  if (!items) return items;
+  if (typeof items === 'string') return readItems(items);
+  if (!Array.isArray(items)) return [];
+  if (!items.some((item) => item === null || item === undefined || typeof item !== 'object')) return items;
+  // P107 R21 (2026-10-11, P107-S88-OPTIONSCAST): a word in a wired list is an option — its label and its value are the
+  // word, as typing it does; `Select` reads `Label` and `Value` off each item, so `["Small", "Large"]` drew empty options
+  return items
+    .filter((item) => item !== null && item !== undefined)
+    .map((item) => (typeof item === 'object' ? item : { Label: String(item), Value: String(item) }));
+}
+
 function readItems(stored: unknown): { Label: string; Value: string }[] {
   let source: unknown = stored;
 

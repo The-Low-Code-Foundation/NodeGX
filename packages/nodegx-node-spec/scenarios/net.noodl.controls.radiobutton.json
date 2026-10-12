@@ -1,0 +1,4670 @@
+[
+  {
+    "name": "a fresh radio button in a group never written: Did Mount, Child Index 0, This itself — Checked stays false while the group selects the button with no Value (this one has none either: selected, so Checked true)",
+    "because": "RadioButton.tsx :58 `selected === props.value` — undefined === undefined; the effect at the mount (:78-84) reports it, nobody's (radiobutton.ts :39-55)",
+    "steps": [
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "with a Value, in a group never written: not selected — Checked never sent; a click selects it: Pointer Down, Focused, Pointer Up, Checked true, Changed; a second click: the pointer events alone (a selected radio raises no change)",
+    "because": "RadioButton.tsx :187-189 → RadioButtonGroup.tsx :27-30 (a person's selection) → the re-render and the effect (:78-84) with `selectionFromUser` true",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "in no group: never selected, whatever its Value; a click is the pointer events alone (the input toggles and is put back)",
+    "because": "RadioButton.tsx :58 — `radioButtonGroup ? … : false`; :187-189 `radioButtonGroup && …` — world.ts GROUP `none`",
+    "world": {
+      "group": {
+        "none": true
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the group's Value at load names this button: Checked true in the first frame, no Changed",
+    "because": "RadioButtonGroup.tsx :21 `useState({ value: props.value, fromUser: false })`; the button's effect at the mount",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the group's Value at load is the NUMBER 1 and this button's Value the number 1: the group converts it to \"1\", so not selected — a strict compare",
+    "because": "radiobuttongroup.ts :89 converts by `toString`; RadioButton.tsx :58 `===`",
+    "params": {
+      "value": 1
+    },
+    "world": {
+      "group": {
+        "value": 1
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "selected, then a sibling picked: the click took the selection from this button — Checked false and Changed; another sibling picked: nothing on this button",
+    "because": "Richard, 2026-10-05, on D37: \"Fire from the click\" — Changed comes from a person's click on this button, or for the deselect when another button's click takes its selection; the runtime fires it from an effect whenever Checked moves while the group's last selection was a person's",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying THIS button's Value picked: both are selected — Checked true and no Changed (the person clicked the other); the other sibling picked: this one loses the selection to that click — Checked false and Changed",
+    "because": "Richard, 2026-10-05, on D37: \"Fire from the click\" — Changed comes from a person's click on this button, or for the deselect when another button's click takes its selection; the runtime fires it from an effect whenever Checked moves while the group's last selection was a person's (was row D37, fixed in P109 ISL-031)",
+    "params": {
+      "value": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the graph writes the group's Value to this button's Value: Checked true at the frame's end, no Changed; to another: Checked false, no Changed",
+    "because": "world.ts GROUP — the group renders the write at the frame's end, its effect makes the selection nobody's (RadioButtonGroup.tsx :37-39); a write the group ignores (null) does nothing",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          },
+          {
+            "at": 100,
+            "value": null
+          },
+          {
+            "at": 1000,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 100
+      },
+      "settle",
+      {
+        "advance": 1000
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "selected, a click raises the pointer events alone; then the graph writes the group's Value away (an advance) and a click in the same frame: the click's paint shows the write first, so it meets an unselected button and selects it again — Changed (Checked ends true, as it began). v1's name said this click raised the pointer events alone",
+    "because": "an act paints the page first (adapter.ts `act`): the group's write is on the page before the click",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 5,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click, then this button's Value written away in the same frame: Changed for the click, then the button shows that the group no longer names it — Checked ends false, with no second Changed; its Value written back: Checked true, no Changed",
+    "because": "Richard, 2026-10-05, on D37: \"Fire from the click\" — Changed comes from a person's click on this button, or for the deselect when another button's click takes its selection; the runtime fires it from an effect whenever Checked moves while the group's last selection was a person's (was row D37, fixed in P109 ISL-031)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "c"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "this button's Value written to the group's: selected at the next paint — Checked true, no Changed; written away: Checked false, no Changed",
+    "because": "react-component-node.ts `defineRegularInputProp` renders it at the frame's end; the selection is the group's load (nobody's)",
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off: Will Unmount, Checked keeps its value, a click finds nothing, a sibling picked still moves the selection; Mounted on: Did Mount, and the button shows the group's choice — Checked false, no Changed (nobody clicked it while it was on the page)",
+    "because": "react-component-node.ts :2302-2321; a button off the page shows the group's choice when it comes back, with no Changed (D37 named a remount's Changed a defect; the runtime is quiet here too — the pick's own frame end cleared its group's flag)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then a sibling picked: the mouse button down on the sibling takes the keyboard — Blurred — and the pick deselects this one (Changed)",
+    "because": "the browser's mousedown default: the keyboard onto the pressed control; utils.ts :157-195 onBlur",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling picked in no group: there is no sibling — nothing",
+    "because": "world.ts GROUP `none`: the button renders alone",
+    "world": {
+      "group": {
+        "none": true
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "disabled: a click takes nothing, but a sibling carrying this button's Value picked selects it too — Checked true, no Changed (a disabled radio still shows the group's selection; only a click on it fires)",
+    "because": "Richard, 2026-10-05, on D37: \"Fire from the click\" — Changed comes from a person's click on this button, or for the deselect when another button's click takes its selection; the runtime fires it from an effect whenever Checked moves while the group's last selection was a person's (was row D37, fixed in P109 ISL-031)",
+    "params": {
+      "value": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click, then a sibling pick, then a click in one frame: each moves the selection — Checked true, false, true: sent as true, Changed three times",
+    "because": "each click re-renders at once (React's event batch); the frame records the last value",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a disabled button takes no click, press, release or focus — the pointer still hovers it, and a finger reports nothing (C64)",
+    "because": "RadioButton.tsx :57 `disabled: !props.enabled`; React drops onClick / onMouseDown / onMouseUp on a disabled control; the browser does not toggle a disabled radio button; utils.ts :216-243, :260-275 (carried from the Checkbox: the same page model, utils.ts)",
+    "params": {
+      "enabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "act": "leave"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Focus action puts the keyboard on the input (Focused, Done); again: Done alone; Blur: Blurred, Done; again: Done alone",
+    "because": "utils.ts :340-364; focus-tracker.ts :57-78, :88-90; the target is the input (:402-405) (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Enabled off and a Focus in the same frame: the button is still enabled on the page, so it takes the keyboard; in the next frame a Focus is Done and takes nothing",
+    "because": "utils.ts :82-89 writes the prop; the element follows at the frame's end (react-component-node.ts :1675-1689); a disabled input is not a focusable area (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then disabled: Focused stays true — a disabled element gives the keyboard up to nobody, so a Blur is Done and nothing fires; re-enabled, Blur takes it",
+    "because": "the browser's focusing steps: a disabled control is not a focusable area, so `blur()` on it does nothing (focus-tracker.ts :88 calls `_blur` regardless and reports Done) (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Enabled follows its input as a boolean and is sent only on a change",
+    "because": "utils.ts :82-89 (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": 0
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": "no"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Scroll Into View and every look or layout input change nothing on the wire",
+    "because": "react-component-node.ts :1380-1395; the style inputs write the element's style and no output reads it (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "signal": "scrollIntoView"
+      },
+      {
+        "set": "backgroundColor",
+        "value": "#ff0000"
+      },
+      {
+        "set": "width",
+        "value": 24
+      },
+      {
+        "set": "label",
+        "value": "Go"
+      },
+      {
+        "set": "labelSpacing",
+        "value": 4
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a person acts on a painted page: Mounted written off and an act in the same frame find no element (a Focus after it is Unchanged); written on, the act meets the element (a Focus after it is Done) — every act, both ways",
+    "because": "the holder re-renders before the act is dispatched (node-spec-target.ts PERSON), as a browser paints before a person can act; each pair toggles the page (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a person acts on a painted page: Enabled written off and an act in the same frame meet a disabled element (a Focus after it takes nothing, a Blur gives nothing up); written on, an enabled one — every act, both ways",
+    "because": "the element's disabled attribute is painted with the page (Button.tsx :145 / RadioButton.tsx :57); the Focus and Blur actions meet the painted element (utils.ts :340-364) (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "placed disabled: a Focus before the first frame is Done and takes nothing — the element was drawn disabled",
+    "because": "the params are set before the first render (react-component-node.ts :1740-1743 reads what the params wrote); a disabled control is not a focusable area (carried from the Checkbox: the same page model, utils.ts)",
+    "params": {
+      "enabled": false
+    },
+    "steps": [
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a press held, then disabled and re-enabled across frames, then a click: Pressed true until the click's own release ends it",
+    "because": "utils.ts :82-89 touches only `enabled`; the press is not released by disabling; the click's mouseup releases (utils.ts :265-269) (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Mounted off and on: the leaving takes the keyboard and Focused with it — Will Unmount, Focused false and Blurred (D30); Did Mount; a Focus action puts the keyboard on the element that came back and fires Focused; a Tab away then fires Blurred",
+    "because": "P109 ISL-031 (P107-D30, ruled \"Reset and announce\"): the browser fires no blur for an element it removes, so the node resets its states as the element leaves (utils.ts `_leftPage`, called from react-component-node.ts `componentWillUnmount`)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a person acts on a painted page: Enabled and Mounted both written and an act in the same frame — off together (no element; a Focus after it Unchanged), on together (Did Mount, an enabled element) — every act, both ways",
+    "because": "the paint inside the act commits the remount and the enabled attribute at once; a Focus and a Blur after it read what was painted (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "disabled and unmounted in one frame, then enabled and remounted in one frame, then a quiet frame: Did Mount once, Enabled true, and nothing more",
+    "because": "the frame's end paints the remount and the attribute together (react-component-node.ts :1675-1689); the next frame paints nothing (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a person acts on a painted page: Enabled off with Mounted on (a disabled element arrives: Did Mount, the act takes nothing, a Focus after it Done and nothing focused), then Enabled on with Mounted off (the element leaves) — every act, both ways",
+    "because": "the paint inside the act commits a remount and the attribute at once; the crossed pairs reach the branches the matched pairs cannot (a release or press on a remounted but disabled element) (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "placed disabled, Mounted off then on with a press in the same frame: Did Mount and nothing else (a disabled element takes no press); a Focus after it Done and nothing focused; the same with a release",
+    "because": "the paint inside the act commits the remount; the element arrives disabled, so the press and the release meet nothing (React drops them; the browser dispatches none) (carried from the Checkbox: the same page model, utils.ts)",
+    "params": {
+      "enabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label turned on: the input and its keyboard stay — a press fires Pointer Down with no Focused; turned off again while focused: the same — a Tab onto it finds the keyboard there already",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
+    "steps": [
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label changed and a Tab away in the same frame: the keyboard is still on the button, so the Tab takes it — Blurred; a Blur action after it is Done alone; changed back with another Tab away: nothing to take",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "pressed and focused, then Enable Label changed and the release in the same frame: Pointer Up, and the keyboard is still there — a Blur action after it fires Blurred; a Tab onto it then fires Focused",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off then on, and a Tab onto the button in the same frame: Did Mount and Focused together; the same with Enabled off: Did Mount alone, a Focus after it Done",
+    "because": "the act paints the page first — the remount commits (didMount) and then the Tab meets the new input; a disabled one takes nothing, but it IS on the page (focus-tracker.ts :61) (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a press held across a frame, then the release and a Blur action in the same frame: Pointer Up, then Blurred — the keyboard the press gave is still there to take away",
+    "because": "utils.ts :255-269 the press and the release; :356-364 the Blur action meets the focused input (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then disabled; Enable Label changed and a release in the same frame: nothing (a disabled input takes no release) and the keyboard stays; re-enabled, a Blur action gives it up (Blurred)",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label changed and the pointer moving onto the button in the same frame: Hover Start, and the keyboard is still there — a Blur action after it fires Blurred",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then the pointer onto the button and a Blur action in the same frame: Hover Start, then Blurred — a hover alone moves no keyboard",
+    "because": "utils.ts :216-234 the hover; :356-364 the Blur action meets the focused input (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling picked while this button is not selected: nothing on this button — but the selection moved: this button's Value written to it later is selected (nobody clicked it: no Changed)",
+    "because": "RadioButtonGroup.tsx :27-30 moves the selection whoever is clicked; the frame's end makes it nobody's",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "placed off the page in a group whose Value at load names it: nothing; Mounted on: Did Mount, Checked true, no Changed",
+    "because": "the group is on the page whatever the button's Mounted says; the effect at the mount reads its selection (nobody's)",
+    "params": {
+      "mounted": false,
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked and the group's Value written back in the same frame: the button shows what the Value says — unselected, nothing on the wire; the other sibling picked: nothing (the group names it already); a click selects this one: Checked true, Changed",
+    "because": "Richard, 2026-10-05, on C76: \"Show what Value says\" — the button reads its group's Value; the runtime's group keeps a copy of the selection that a write-back in the frame of a pick leaves on the pick (RadioButtonGroup.tsx :21, :37-39 — was row C76, fixed in P109 ISL-031)",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick and the group's Value written back in one frame, then this button's Value written to the picked one: the group names the other, so nothing moves",
+    "because": "Richard, 2026-10-05, on C76: \"Show what Value says\" — the button reads its group's Value; the runtime's group keeps a copy of the selection that a write-back in the frame of a pick leaves on the pick (RadioButtonGroup.tsx :21, :37-39 — was row C76, fixed in P109 ISL-031)",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a write the group ignores (null) or already holds between two it takes: nothing moves",
+    "because": "radiobuttongroup.ts :89-95 — null is ignored, the same text is no change",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          },
+          {
+            "at": 2,
+            "value": null
+          },
+          {
+            "at": 3,
+            "value": "a"
+          },
+          {
+            "at": 4,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a write the group ignores while it holds nothing: this button (Value 'a') stays unselected — a write it takes, beside it, selects it",
+    "because": "radiobuttongroup.ts :89-90 — null is ignored; the next write is taken and rendered at the frame's end",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": null
+          },
+          {
+            "at": 2,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a write the group ignores while it holds nothing: this button (Value 'b') stays unselected — a write it takes, beside it, selects it",
+    "because": "radiobuttongroup.ts :89-90 — null is ignored; the next write is taken and rendered at the frame's end",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": null
+          },
+          {
+            "at": 2,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label changed and the pointer leaving in the same frame: Hover End, and the keyboard is still there — a Blur action after it fires Blurred",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label changed and a pick of the sibling already selected in the same frame: the mouse press on the sibling takes the keyboard — Blurred — and nothing else (a selected radio raises no change); a Blur action after it is Done alone",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, a sibling picked: Blurred, and the group takes its Value — this button's Value written to it later is selected (nobody clicked it: no Changed)",
+    "because": "the mousedown moves the keyboard; RadioButtonGroup.tsx :27-30 and radiobuttongroup.ts :20-29 move the group's Value",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, the sibling already selected picked: Blurred and nothing else — the group keeps its Value, so this button's Value written to the OTHER sibling's stays unselected",
+    "because": "a click on a selected radio raises no change; the mousedown still moves the keyboard",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "b"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a remount after a pick written back in its frame: Mounted off, this button's Value written to the picked one, Mounted on — Did Mount and nothing else: the group names the other",
+    "because": "Richard, 2026-10-05, on C76: \"Show what Value says\" — the button reads its group's Value; the runtime's group keeps a copy of the selection that a write-back in the frame of a pick leaves on the pick (RadioButtonGroup.tsx :21, :37-39 — was row C76, fixed in P109 ISL-031)",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label changed and a touch in the same frame: Pointer Down, and the keyboard is still there — a Blur action after it fires Blurred",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label changed and a lift in the same frame: Pointer Up, and the keyboard is still there — a Blur action after it fires Blurred",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Enable Label turned off, then the Focus action: the button is on the page and takes the keyboard (Focused, Done)",
+    "because": "utils.ts :340-355 — a button on the page can be asked; RadioButton.tsx :167 and :199 put the SAME root ref on the button and on the wrapper, so the wrapper's removal nulls the node's element (react-component-node.ts :1934-1945) and `_focusTarget` finds nothing — the runtime reports Unchanged with the button in plain sight (NSP-016 §7.2 was row C66, fixed in P109 ISL-031) (carried from the Checkbox: the same page model, utils.ts)",
+    "params": {
+      "useLabel": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Label that is an object with Enable Label on: the label is drawn as its text and the page keeps drawing",
+    "because": "P107-C65, ruled 2026-10-05 \"Turn them into text\", fixed in P109 ISL-026 (controls/labelText.ts); it was rendered raw (RadioButton.tsx :205-207 renders `{props.label}` as it is (the Button renders `String(props.label)`) — NSP-016 §7.2 row C65 (carried from the Checkbox: the same page model, utils.ts)) and React threw, taking the page down",
+    "params": {
+      "useLabel": true,
+      "label": {
+        "a": 1
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Margin Top wired null: the style is removed, as for undefined — nothing moves on the wire and the node keeps working",
+    "because": "P107-C62, ruled 2026-10-05 \"Remove the style\", fixed in P109 ISL-026: the `inputCss` units setter treats null as empty; it once read `.value` of null and threw (react-component-node.ts, every node with margins)",
+    "steps": [
+      "settle",
+      {
+        "set": "marginTop",
+        "value": null
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Pos X wired undefined: back to 0 — nothing moves on the wire and the node keeps working",
+    "because": "P107-C63, ruled 2026-10-05 \"Use the default\", fixed in P109 ISL-026: an empty Placement value stores nothing (position and rotation 0, origin 50%); the setters once read `.value` of it and threw (node-shared-port-definitions.ts, every node with Placement inputs)",
+    "steps": [
+      "settle",
+      {
+        "set": "transformX"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Visible off: a hidden button is under no pointer and takes no keyboard — every act raises nothing; the Focus action is Done with nothing; shown again, a click is a click",
+    "because": "node-shared-port-definitions.ts :366-375 `visibility: hidden`: the browser hit-tests past a hidden element and `focus()` refuses one (Chromium `IsFocusableStyle`)",
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ],
+    "world": {
+      "group": {}
+    },
+    "params": {
+      "value": "c"
+    }
+  },
+  {
+    "name": "Visible off in the frame of an act: the act's paint hides the button first — the act raises nothing; one that held the keyboard keeps it (no focus fixup), and a blur takes it off",
+    "because": "adapter.ts `act` paints first; jsdom has no focus fixup; `blur()` works on a hidden element",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ],
+    "world": {
+      "group": {}
+    },
+    "params": {
+      "value": "c"
+    }
+  },
+  {
+    "name": "Visible off: a hidden button cannot be clicked, but a sibling picked in its group still is — the pick is the sibling's click: this hidden button carries the same Value, so it is Checked too, with no Changed",
+    "because": "Richard, 2026-10-05, on D37: \"Fire from the click\" — Changed comes from a person's click on this button, or for the deselect when another button's click takes its selection; the runtime fires it from an effect whenever Checked moves while the group's last selection was a person's (was row D37, fixed in P109 ISL-031)",
+    "world": {
+      "group": {}
+    },
+    "params": {
+      "value": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "hidden, holding the keyboard: every pointer act meets nothing and takes nothing away — the Blur action after each finds the keyboard on the button (Blurred)",
+    "because": "the browser hit-tests past a hidden element; nothing takes the keyboard off one that has it (no focus fixup); `blur()` works on a hidden element",
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "hidden, holding the keyboard, Enable Label changed with every pointer act: the act meets nothing and the keyboard stays — the Blur action after each finds it on the button (Blurred)",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Enabled off, a pick of the sibling already selected and a Focus action in one frame: the pick's paint disables the input first, so the Focus is Done and takes nothing; Visible off the same way: Done, nothing",
+    "because": "an act paints the page first (adapter.ts `act`); a disabled or hidden input takes no keyboard (utils.ts :340-364; NSP-016 s43). s47: the pick that raises nothing kept its paint unkilled until a Focus action read it",
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a button carrying 'a' in a group on 'b': the sibling already selected ('b') picked — nothing on this button and the group keeps its Value; a click on this button then selects it: Pointer Down, Focused, Pointer Up, Checked true and Changed",
+    "because": "RadioButton.tsx :58, :187-189 — a selected radio raises no change; s47: a pick that changes nothing, handed the recorded patch of one that moves the group to 'a' (a swap keeps the page's Checked), survived until a button carrying 'a' itself read the group's Value",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "b"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off, a pick of the sibling already selected and a Focus action in one frame: the pick's paint takes the button off the page first (Will Unmount), so the Focus is Unchanged",
+    "because": "an act paints the page first (adapter.ts `act`); a Focus action on a button off the page is Unchanged (utils.ts :340-364). s47 (seed 20731): the paint of a pick that changes nothing in a Mounted-off frame survived until a Focus action read it",
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the remount-frame pick grid, a button carrying 'c': the group set to 'a' or 'b' by a pick (which takes the selection the last click gave this button: Checked false and Changed), then Mounted off with a pick in its frame (no element: a Focus after it is Unchanged) or Mounted on with a pick in its frame (Did Mount first: a Focus after it is Done), the pick of the sibling already selected or of the other; back on the page, a click selects this button — Checked true and Changed every time; a Blur action gives the keyboard up",
+    "because": "an act paints the page first (adapter.ts `act`): a pick in a frame with Mounted written puts the button on or off the page before the sibling is clicked — a Focus action after it reads which (Done or Unchanged); a click a frame later reads the group's Value (Changed or not). s47: the 10,000 at 20732 left six swaps of these picks unkilled",
+    "world": {
+      "group": {}
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "c"
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "c"
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "c"
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "c"
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "c"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "c"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "c"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "c"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the remount-frame pick grid, a button carrying 'a' or 'b' (a sibling carries it too): the same frames — a pick of the sibling carrying this button's Value selects it too, with no Changed; a pick of the other takes the selection from it (Changed while it is on the page, nothing while it is off); back on the page, a click on it fires Changed only when the group names another",
+    "because": "an act paints the page first (adapter.ts `act`): a pick in a frame with Mounted written puts the button on or off the page before the sibling is clicked — a Focus action after it reads which (Done or Unchanged); a click a frame later reads the group's Value (Changed or not). s47: the 10,000 at 20732 left six swaps of these picks unkilled; the runtime fires Changed for the same-Value sibling (was row D37, fixed in P109 ISL-031)",
+    "world": {
+      "group": {}
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "a"
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "a"
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "a"
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "a"
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "a"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "a"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "a"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "a"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "b"
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "b"
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "b"
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "b"
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "b"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "b"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "b"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "b"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused and under the pointer, then Mounted off, an act and a Focus action in one frame: the act's paint takes the element off the page, and Focused and Hover with it — Will Unmount, Blurred and Hover End (D30) — so the act finds nothing and the Focus is Unchanged; Mounted on: Did Mount; every act",
+    "because": "P109 ISL-031 (P107-D30): the act paints first (`onPainted`), and the paint that unmounts the element resets the states it held; a Focus action after it in the frame reads the page the act left. The s27 mutant run left a Text Input release on a leaving field ungraded (the frame's end does the same leave, so only a reader between the two can tell them apart)",
+    "steps": [
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the remount grid: focused, under the pointer, or both; then Mounted off, each act, and Mounted on again in one frame — the act's paint takes the element off the page first (Will Unmount, and Focused / Hover false with Blurred / Hover End for what it held) and the frame's end puts it back: Did Mount",
+    "because": "utils.ts `_leftPage` from react-component-node.ts `componentWillUnmount` (D30), then `componentDidMount`; the act paints the page before it lands, so the leaving is AT the act — with Mounted written back on later in the same frame, a paint deferred to the frame's end would find the element still there and nothing would leave (P107 s80: seed-only mutant kills on several acts) — a pick is not in the grid: a pick of the selected sibling swapped with a pick that moves the group records a group value the play already holds, so its cell grades nothing; the pick's leaving is graded by the two scenarios before this one",
+    "steps": [
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ]
+  }
+]

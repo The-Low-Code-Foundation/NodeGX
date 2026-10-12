@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1fcc2cc6-5f20-5ed6-8915-6e6bf7704884",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lookrowsIn",
+      "fromProperty": "botName",
+      "toId": "lookrowsFn",
+      "toProperty": "in-botName"
+    },
+    {
+      "fromId": "lookrowsIn",
+      "fromProperty": "color",
+      "toId": "lookrowsFn",
+      "toProperty": "in-color"
+    },
+    {
+      "fromId": "lookrowsIn",
+      "fromProperty": "eye",
+      "toId": "lookrowsFn",
+      "toProperty": "in-eye"
+    },
+    {
+      "fromId": "lookrowsIn",
+      "fromProperty": "hat",
+      "toId": "lookrowsFn",
+      "toProperty": "in-hat"
+    },
+    {
+      "fromId": "lookrowsIn",
+      "fromProperty": "hats",
+      "toId": "lookrowsFn",
+      "toProperty": "in-hats"
+    },
+    {
+      "fromId": "lookrowsIn",
+      "fromProperty": "lang",
+      "toId": "lookrowsFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "lookrowsIn",
+      "fromProperty": "stickers",
+      "toId": "lookrowsFn",
+      "toProperty": "in-stickers"
+    },
+    {
+      "fromId": "lookrowsIn",
+      "fromProperty": "words",
+      "toId": "lookrowsFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "lookrowsFn",
+      "fromProperty": "out-eyes",
+      "toId": "lookrowsOut",
+      "toProperty": "eyes"
+    },
+    {
+      "fromId": "lookrowsFn",
+      "fromProperty": "out-hasStickers",
+      "toId": "lookrowsOut",
+      "toProperty": "hasStickers"
+    },
+    {
+      "fromId": "lookrowsFn",
+      "fromProperty": "out-hats",
+      "toId": "lookrowsOut",
+      "toProperty": "hats"
+    },
+    {
+      "fromId": "lookrowsFn",
+      "fromProperty": "out-noStickers",
+      "toId": "lookrowsOut",
+      "toProperty": "noStickers"
+    },
+    {
+      "fromId": "lookrowsFn",
+      "fromProperty": "out-paints",
+      "toId": "lookrowsOut",
+      "toProperty": "paints"
+    },
+    {
+      "fromId": "lookrowsFn",
+      "fromProperty": "out-stickers",
+      "toId": "lookrowsOut",
+      "toProperty": "stickers"
+    },
+    {
+      "fromId": "lookrowsFn",
+      "fromProperty": "success",
+      "toId": "lookrowsOut",
+      "toProperty": "ran"
+    }
+  ]
+}

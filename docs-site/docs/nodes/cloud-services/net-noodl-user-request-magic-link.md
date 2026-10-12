@@ -34,6 +34,21 @@ For passwordless sign-in, and as a password-free recovery path on backends that 
 |---|---|---|---|
 | `send` | Signal | — | Asks the backend to email a one-click sign-in link to Email |
 
+### What each input does
+
+**Do** (`send`)
+
+- the first press this frame: the call goes to the backend at the frame's end, with the values held then
+- another press this frame: it joins that call, and is answered with it
+
+**Email** (`email`)
+
+- always: held as handed; read when the next request goes
+
+**Redirect** (`redirect`)
+
+- always: held as handed; read when the next request goes
+
 ## Outputs
 
 ### Signals

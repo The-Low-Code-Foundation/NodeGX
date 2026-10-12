@@ -1,0 +1,268 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "469e0463-26b7-5203-8d9b-8031dd474847",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "kgIn",
+      "type": "Component Inputs",
+      "label": "The kind",
+      "ports": [
+        {
+          "name": "heading",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "has",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "kgOut",
+      "type": "Component Outputs",
+      "label": "What a row said",
+      "ports": [
+        {
+          "name": "toggle",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "tick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "sent",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "projectId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "projectName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "taskId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "waitingOn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "deadline",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "billKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sendKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "openTask",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openTaskId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "editMoney",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "moneyKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "addMoney",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "saveProject",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "pName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pSub",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pKind",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pBilling",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pTerms",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pRate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pSay",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "linkTask",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "linkTaskId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "kgRoot",
+      "type": "Group",
+      "label": "The kind",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "mounted": false
+      },
+      "children": [
+        "kgHead",
+        "kgList"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "kgHead",
+      "type": "Group",
+      "label": "Its name",
+      "parent": "kgRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "kgName"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "kgName",
+      "type": "Text",
+      "label": "Its name",
+      "parent": "kgHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "kgList",
+      "type": "/Projects/Project list",
+      "label": "Its projects",
+      "parent": "kgRoot",
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "kgOrder",
+      "type": "/Projects/Move project",
+      "label": "Save the new order",
+      "x": 410,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "kgRoot"
+  ]
+}
