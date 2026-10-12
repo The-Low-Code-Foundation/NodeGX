@@ -152,8 +152,28 @@ per-conversation switch.
 | R3 | learner context sent to Anthropic for Claude mode | *"We anonymise any data sent to Anthropic. Names are changed, no other personal details, so we can say anything we want about them. The learner's details are stored as variables and each text that goes out gets a find and replace treatment to sanitise any texts programmatically. If the odd detail slips through, it's life. We can state so in the privacy policy."* |
 | R4 | where clips live | *"Yep same Hetzner box and I think we already had S3 storage for Digital Bricks Training, use that"* |
 | R5 | sign-in | *"six digit code yes"* |
+| R6 | the learners on training.digitalbricks.io today (s1) | *"Zero, we can delete it"*. Nothing to migrate and nobody to tell. The DBT deployment is deleted when SRK-013 puts this app on the name, not before, so the address never serves nothing. |
+| R7 | where clips live (s1, refines R4) | *"You should have one for training.digitalbricks.io you can reuse, nothing in there"*. So no second bucket: the `training-digitalbricks` bucket, under a `clips/` prefix, each clip public-read. It is not empty, though: the nightly encrypted backup writes to `dbtraining/` in it, and that stays private. The backup's 156 h prune is scoped to `dbtraining/` (`offsite-backup.sh:156`), so it never deletes a clip. |
 
 ## Slots still owed
 
 - The first real learner's own sentences, when gate 5 runs (PLAYTEST.md).
-- Richard's welcome-popup wording, in his words, before SRK-004 ships it.
+- Richard's welcome-popup wording, in his words, before SRK-004 ships it. **s1: he asked for a pitch** (*"pitch me
+  something. Run it through the 'claude content authoring' repo"*). The pitch below passed the offline checks
+  (`written`, `closer`, `contract`, `opener`, `figures`, `rollercoaster`) clean, awaiting his ruling:
+
+  > **How this app works**
+  >
+  > I show you things by recording my screen. AI cuts each recording into short messages. You get them one at a time.
+  >
+  > A mark on each message says where it came from.
+  > ✂ Made by AI from my video. · ✎ Typed by me. · ✦ Written by AI from what I told it, checked by me.
+  >
+  > Some videos have an AI voice saying my words.
+  >
+  > The box at the bottom sends me a message. I read it and reply.
+  >
+  > [ OK ]
+
+  The reply bar: placeholder **"Message Rick"**, the WhatsApp pattern; an optional line under it, *"Rick reads your
+  message and replies."* The mockup's *"Replies reach Rick the same day"* is out: it promises a time nobody confirmed.
