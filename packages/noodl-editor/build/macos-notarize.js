@@ -111,7 +111,35 @@ module.exports = async function notarizeHook(context) {
         teamId: process.env.APPLE_TEAM_ID
       };
 
-  await notarize(options);
+  try {
+    await notarize(options);
+  } catch (err) {
+    // 🔴 0.4.0's tag run (2026-10-12): on the Intel runner, Apple accepted the app ("notarization successful") and the
+    // staple that `notarize()` does last failed twice in a row — `stapler` lost its connection to Apple's ticket server
+    // (`api.apple-cloudkit.com`, NSURLErrorDomain -1005, "Error 68") through all three of its own retries, which back
+    // off 1, 2 and 4 seconds. The ticket exists by then, so only the staple is retried, over minutes rather than
+    // seconds. It still fails the build if Apple stays unreachable: an unstapled app cannot open offline on first launch.
+    if (!/Failed to staple/.test(String(err && err.message))) throw err;
+    await stapleWithPatience(appPath, err);
+  }
 
-  console.log('[notarize] Notarisation complete — ticket will be stapled by electron-builder.');
+  console.log('[notarize] Notarisation complete — ticket stapled.');
 };
+
+const STAPLE_WAITS_MS = [30000, 60000, 120000, 240000];
+
+async function stapleWithPatience(appPath, firstError) {
+  const { execFileSync } = require('child_process');
+  let lastError = firstError;
+  for (const waitMs of STAPLE_WAITS_MS) {
+    console.log(`[notarize] Staple failed (${String(lastError.message).split('\n')[0]}); retrying in ${waitMs / 1000}s...`);
+    await new Promise((resolve) => setTimeout(resolve, waitMs));
+    try {
+      execFileSync('xcrun', ['stapler', 'staple', '-v', appPath], { stdio: 'inherit' });
+      return;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError;
+}
