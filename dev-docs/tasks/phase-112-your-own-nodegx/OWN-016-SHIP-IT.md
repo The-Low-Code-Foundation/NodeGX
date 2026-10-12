@@ -85,3 +85,32 @@ person on Claude Desktop has no terminal, so a `deploy_to_folder` tool is still 
 writing anything new, read DEP-005/006 and HST-005 (step 2). The backend for the VM is the same one-file
 `cli.js` OWN-015 ships (`node cli.js serve`).
 
+
+## 7. Session 13, continued: the VM route, scripted (not yet run)
+
+**Richard, 2026-10-12:** use nexus-1 (`49.12.102.195`; SSH permitted), with the test fixture rather than a real app.
+A hostname waits for a real app (an A record, e.g. `lingo.nodegx.io` → `49.12.102.195`; `nodegx.io` has no wildcard).
+
+**Measured on the box (read-only SSH):** Node v22.23.2 (the backend needs ≥ 22.13). Caddy imports `conf.d/*.caddy`.
+3.8 GB RAM, 29 GB free. Ports 8690 (todo) and 8691 are taken, so Lingo uses **8692**. No `lingo` user or folders yet.
+`todo.digitalbricks.io` is already the shape this needs (P78's `todo-digitalbricks/provision.sh`: a static site, a
+`--no-admin` backend on loopback behind Caddy, admin routes 404). Its app has no cloud functions or secrets.
+
+**Measured locally:** deployed cloud functions are files in `<dataDir>/workflows/*.workflow.json`, so a `--no-admin`
+backend on the box can take the set the agent's local `deploy_cloud_functions` made. No admin API is needed.
+
+**Written (bash -n clean, NOT YET RUN against the box):**
+- `own-016/provision-app.sh` runs as root on the box. It is P78's script parametrized (`APP`, `PORT`, `DOMAIN`,
+  `CADDY=off`). It adds `workflows/` and an `EnvironmentFile=/etc/<app>/secrets.env` (640 root:<app>), read through the
+  backend's `NODEGX_SECRET_<NAME>` fallback, and refuses a Node below 22.13.
+- `own-016/ship-to-vm.sh` runs locally: `<project> <local-backend-dir> <user@host> <app> <port> [domain]`.
+  `nodegx-deploy` writes the site. The backend is `dist/backend/cli.js` from the `@nodegx/mcp` tarball. The functions
+  come from the local backend's `workflows/`. The secrets come from the local backend's `secrets.json` (what
+  `set_function_secret` stored) and go over ssh stdin.
+
+🔴 **The auto-mode classifier refused the run as [Production Deploy]**, despite Richard's chat permission (the
+same as 2026-10-05, ssh memory). Read-only SSH worked. It needs Richard to run `ship-to-vm.sh` himself, or a Bash
+permission rule for it. Then: health, `/functions/speak` over loopback returns RIFF, a key search under
+`/srv/<app>` and `/opt/<app>` finds 0 (with `/etc/<app>/secrets.env` as the known-firing control),
+`systemctl restart` comes back, and `is-enabled` says enabled. A real reboot of nexus-1 is Richard's call: it serves
+live sites.
