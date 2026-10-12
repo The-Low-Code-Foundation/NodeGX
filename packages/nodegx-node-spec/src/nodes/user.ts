@@ -59,12 +59,12 @@ import { backendPickerPort, recordFieldType } from './record-base';
 export const USER_FIELDS = ['nick', 'n'] as const;
 
 /**
- * NSP-020 s84 — user-ports.ts `userSchemaContext` / `userPropertyPorts` :115-150: the accounts class (`_User` on the Parse
- * wire) as the project's schema holds it, its columns in order less the ones `ignore` names and every Relation column. On the
- * Parse wire `shouldShowField` is NOT applied (:131), so a hidden column — `ACL` — is drawn.
+ * NSP-020 s84 — user-ports.ts `userSchemaContext` / `userPropertyPorts`: the accounts class (`_User` on the Parse wire) as the
+ * project's schema holds it, its columns in order less the ones `ignore` names, every Relation column and the hidden `ACL`
+ * (`shouldShowField` on every wire since P107-S84-USERACL, ruled R29: before, the Parse wire drew `prop-ACL`).
  */
 export function userFields(context: Readonly<PortContext>, ignore: readonly string[]): Array<[string, BackendField]> {
-  return Object.entries(context.schema?.classes._User?.fields ?? {}).filter(([name, decl]) => !ignore.includes(name) && decl.relation === undefined);
+  return Object.entries(context.schema?.classes._User?.fields ?? {}).filter(([name, decl]) => !ignore.includes(name) && name !== 'ACL' && decl.relation === undefined);
 }
 
 /** :32 */
@@ -220,7 +220,18 @@ export const UserNode = defineNode({
   // adapter's alone — a rejected session pulses Session Lost once; a backend that is down says nothing and keeps the person.
   // v4 (P109 ISL-030, row C47 ruled "Blank text, empty for others"): nobody signed in reads blank Id / Email / Username, `null`
   // Roles and properties — sent, so a wire lets go; v3 read `undefined`, never sent, and kept the person who left.
-  version: 4,
+  // v5 (P107 s92, P107-S84-USERACL ruled R29): no `prop-ACL` output on the Parse wire
+  version: 5,
+  changes: [
+    {
+      version: 5,
+      says: 'On the Parse wire the accounts class\'s ACL column draws no output (nor ACL Changed) port any more, as no Record node draws one: it is the account\'s access rules, not something about the person. Before, the Parse wire drew prop-ACL here (and only on the User family)',
+      row: 'P107-S84-USERACL (R29)',
+      migration: {
+        none: 'Ruled "Hide it, like the Record nodes" (R29). The reach measured on 2026-10-12 was 429 User-family nodes in 58 of Richard\'s projects and none wired to or from ACL, so no saved wire is dropped'
+      }
+    }
+  ],
   source: 'packages/noodl-runtime/src/nodes/std-library/user/user.ts; noodl-viewer-react/.../user/userservice.ts; RestAuthAdapter.ts',
   needs: ['backend', 'registry', 'clock'],
   worldPool: { backends: BACKENDS },

@@ -67,8 +67,8 @@ const TWO: PortContext['backends'] = [
 ];
 /**
  * NSP-020 s84 — the accounts class as a Parse project holds it (`systemCollections`): the columns each User node leaves out
- * (user-ports.ts's ignore lists, signup.ts :219), a date, a Relation (no node draws one), and the `ACL` (the Parse wire
- * skips `shouldShowField` for the User family, user-ports.ts :131, so it is drawn — unlike the Record family).
+ * (user-ports.ts's ignore lists, signup.ts :219), a date, a Relation (no node draws one), and the `ACL` (hidden on every wire
+ * since P107-S84-USERACL, ruled R29 — as the Record family hides it; s84 measured the Parse wire drawing it).
  */
 const USERS: PortContext = {
   schema: {

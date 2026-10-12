@@ -92,7 +92,18 @@ export const SetUserProperties = defineNode({
   type: 'net.noodl.user.SetUserProperties',
   // v2 (P109 ISL-030, row D23 ruled "Refuse with a reason"): a Username to a REST backend fails the write with the
   // world's USERNAME_UNSUPPORTED sentence, nothing written; v1's adapter dropped it, wrote the rest and said Done.
-  version: 2,
+  // v3 (P107 s92, P107-S84-USERACL ruled R29): no `prop-ACL` input on the Parse wire
+  version: 3,
+  changes: [
+    {
+      version: 3,
+      says: 'On the Parse wire the accounts class\'s ACL column draws no input port any more, as no Record node draws one: it is the account\'s access rules, not something about the person. Before, the Parse wire drew prop-ACL here (and only on the User family)',
+      row: 'P107-S84-USERACL (R29)',
+      migration: {
+        none: 'Ruled "Hide it, like the Record nodes" (R29). The reach measured on 2026-10-12 was 429 User-family nodes in 58 of Richard\'s projects and none wired to or from ACL, so no saved wire is dropped'
+      }
+    }
+  ],
   source: 'packages/noodl-runtime/src/nodes/std-library/user/setuserproperties.ts; noodl-viewer-react/.../user/userservice.ts; RestAuthAdapter.ts',
   needs: ['backend', 'registry', 'clock'],
   worldPool: { backends: BACKENDS },
