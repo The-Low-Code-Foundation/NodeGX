@@ -28,6 +28,7 @@ import { Section, SectionVariant } from '@noodl-core-ui/components/sidebar/Secti
 import { Text, TextType } from '@noodl-core-ui/components/typography/Text';
 
 import { Diagnostic, Severity, sortDiagnostics } from '../../../validation/diagnostics';
+import { diagnosticText } from './diagnosticText';
 import { ProjectValidationEvent, ProjectValidationService } from './ProjectValidationService';
 
 // ── Severity → presentation ────────────────────────────────────────────────────
@@ -61,12 +62,6 @@ function navigateTo(diagnostic: Diagnostic): void {
 }
 
 // ── Row ──────────────────────────────────────────────────────────────────────────
-
-function diagnosticText(d: Diagnostic): string {
-  let text = d.message;
-  if (d.suggestion) text += `  — did you mean “${d.suggestion}”?`;
-  return text;
-}
 
 function DiagnosticRow({ diagnostic }: { diagnostic: Diagnostic }) {
   const loc = diagnostic.location;
