@@ -56,3 +56,25 @@ Today it cannot. It builds blind, and the person is the only one who looks at th
 
 - The render harness's own measurement rules: the existing harness is reused as it is.
 - Live values over the observe protocol (`nodegx-observe`): that's a separate question.
+
+## 6. Session 13 (2026-10-12, Opus): step 1 measured
+
+**What the harness loads.** Three entry scripts (`measure-from-disk.js`, `render-from-disk.js`, `drive-steps.js`), with
+`render-report.js` and `harness-paths.js` inside them; `@nodegx/render-measure` and `@nodegx/module-inject` by static
+`require` (both private workspace packages, inlinable); `ws` by a computed `require` (harness-paths' `WS_MODULE`, so it
+can't be inlined); data files resolved by `harness-paths.js` (the viewer at `<harness>/../src/external/viewer`, the
+two catalogs and the token declarations in `<harness>/data/`); and Chrome, found by `findChrome()` in
+`render-report.js` (macOS, Linux and Windows paths, `CHROME_PATH` first). **None of the harness is in an npm tarball
+today.** `@nodegx/preview@0.1.0` ships a production *deploy* runtime (`dist/external/deploy`, 2.0 MB) and
+`nodegx-deploy.cjs`, but no *viewer* build, which is what `render-from-disk.js` loads (`/noodl.viewer.js`).
+
+**The home: `@nodegx/mcp` itself**, because it's the package that calls the harness and the one a stranger already has.
+`build-render-harness.mjs` runs at prepack and writes the packaged editor's layout one level down (`dist/render-harness/`
+plus `dist/src/external/viewer`), so `harness-paths.js` resolves it with no new rule. `render.ts` gets one more candidate.
+
+**Found on the way: P112-S13-HARNESSTOKENS (high, fixed).** The packaged editor's harness (0.3.0's `app.asar`
+included) ships `StyleTokensModel/DefaultTokens.ts`, a 12-line re-export since HLS-001, as its token source. The
+fallback's regex finds 0 declarations in it, against 193 in `nodegx-project-contract/tokens.ts`, so every packaged
+`render_report` rendered with no shipped defaults. UNI-012's gate checked that the file existed, and it did. The fix
+packages `tokens.ts` itself and the gate now compares contents. Its control arm (the old mapping) fails the new test
+alone: 1 failed, 7 passed.

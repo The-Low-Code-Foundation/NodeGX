@@ -98,10 +98,10 @@
         ]
       },
       {
-        "from": "src/editor/src/models/StyleTokensModel",
+        "from": "../nodegx-project-contract",
         "to": "render-harness/data",
         "filter": [
-          "DefaultTokens.ts"
+          "tokens.ts"
         ]
       }
     ],

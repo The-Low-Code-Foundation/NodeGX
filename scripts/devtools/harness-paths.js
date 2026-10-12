@@ -13,7 +13,7 @@
  * the 14MB viewer bundle that the editor already ships. Measured on the 0.1.7 dmg:
  * `src/external/viewer/`, `node_modules/ws` and `node_modules/@nodegx/render-measure`
  * are **already inside `app.asar`**. What is genuinely absent is the harness itself,
- * the two node catalogs and `DefaultTokens.ts`. So the packaged layout resolves the
+ * the two node catalogs and the token declarations (`tokens.ts`). So the packaged layout resolves the
  * viewer where the editor already put it, and only the absent files move.
  *
  * 🔴 **This works because the harness is spawned with `process.execPath`, which for
@@ -106,12 +106,16 @@ const ENRICHED_CATALOG_JSON = resolveHarnessPath(
  * product-wide spacing defect. It is the exact "lying harness" its own comment
  * in `render-from-disk.js` warns about, and the refactor walked straight into it.
  *
- * ⚠️ The packaged candidate is unchanged: a packaged install ships the file
- * under its old name, and `firstExisting` prefers the checkout.
+ * 🔴 **The packaged half, 2026-10-12 (P112-S13-HARNESSTOKENS).** TPL-005 left
+ * the packaged candidate on the old name, and the packaging went on copying the
+ * re-export into `data/` — so every packaged `render_report` (NodeGX 0.3.0
+ * included) rendered with 0 shipped defaults, the same lie on the other side.
+ * Both halves now name `tokens.ts`, and UNI-012's gate compares the two files'
+ * contents, not their existence.
  */
 const TOKENS_SRC = resolveHarnessPath(
   'packages/nodegx-project-contract/tokens.ts',
-  path.join(PACKAGED_DATA, 'DefaultTokens.ts')
+  path.join(PACKAGED_DATA, 'tokens.ts')
 );
 
 /**

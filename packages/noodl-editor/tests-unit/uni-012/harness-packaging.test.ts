@@ -98,6 +98,22 @@ describe('UNI-012 — what the packaging names still exists', () => {
     }
   });
 
+  it('🔴 ships the token declarations the checkout reads, not a file of the same purpose (P112-S13-HARNESSTOKENS)', () => {
+    // The "is on disk" test above passed for a mapping that copied a 12-line
+    // re-export: the file existed, and the packaged harness rendered every project with
+    // 0 shipped defaults. Existence is not the property; the content is.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const paths = require(path.join(REPO, 'scripts', 'devtools', 'harness-paths.js'));
+    const packagedName = path.basename(paths.TOKENS_SRC.candidates[1]);
+    const mapping = harnessMappings().find((m) => m.to === 'render-harness/data' && m.filter?.includes(packagedName));
+    if (!mapping) throw new Error(`no render-harness/data mapping ships ${packagedName}, the packaged token source`);
+
+    const shipped = path.resolve(REPO, 'packages', 'noodl-editor', mapping.from, packagedName);
+    expect(fs.readFileSync(shipped, 'utf8')).toBe(fs.readFileSync(paths.TOKENS_SRC.path, 'utf8'));
+    // The checkout's own source holds declarations at all (a re-export would equal itself).
+    expect(fs.readFileSync(shipped, 'utf8')).toMatch(/name:\s*'--[\w-]+',\s*value:/);
+  });
+
   it('🔴 anchors the second candidate to the harness, not to the repo', () => {
     // A resolver that only ever probes the checkout would pass every test above
     // and ship a harness that cannot find its own data.
