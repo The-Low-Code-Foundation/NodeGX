@@ -1,12 +1,13 @@
 # P107 — next session
 
-**Written 2026-10-12 (s97, Opus).** Read the [README](README.md) §2–§7, then [NSP-022 §6](NSP-022-BATCH-CLOUD-ONLY.md). §6.5 is
-the INVOCATION design and its measurements, §6.6 is what s97 built.
+**Written 2026-10-12 (s97, Opus; s98 — Model Request — was done in the same sitting, so the next session is s99).** Read the
+[README](README.md) §2–§7, then [NSP-022 §6](NSP-022-BATCH-CLOUD-ONLY.md): §6.5 the INVOCATION design and its measurements,
+§6.6 what s97 built, §6.7 Model Request (s98).
 
 **Model: Opus.**
 
 **Richard's priority (s96, still standing):** *"start focussing asap on the remaining node to spec … so the npm package stuff can
-be finished, and the backend specs."* Two nodes are left, both NSP-022's. Everything else on this board waits behind them.
+be finished, and the backend specs."* ONE node is left: Aggregate Records (NSP-022). Everything else on this board waits behind it.
 
 **s97 in one paragraph.** HOST grew THE INVOCATION. The world hands a cloud function its request (`{ headers, body }`, at a
 moment on the clock). The request stays open until a Response answers it, a refusal settles it, or `settledAt` settles it from
@@ -25,36 +26,21 @@ caught. P107-S97-USERSMEHANG fixed: a `/users/me` answer that was not JSON hung 
 | NSP-016 the visual nodes | ✅ s71; s73 SCROLLROOM | `aa8abb06f` … `fd6385beb` |
 | NSP-018 the spec speaks | ✅ s77 | s72 … s77 |
 | NSP-019 Richard reads it | ✅ s95 | s77 … s95 |
-| NSP-009 the ratchet | ✅ s64; floor.runtime **140** since s97 | `6a1ed0084`, s65, s85, s87, s96, s97 |
+| NSP-009 the ratchet | ✅ s64; floor.runtime **141** since s98 | `6a1ed0084`, s65, s85, s87, s96, s97, s98 |
 | NSP-010 a change is a version | ✅ s78 | `36e08e29e`, `64f9576d9` |
 | NSP-017 the escape hatches | 🟡 s64–s68. Left: AC1's export half (P18's) | s64 … s68 |
 | NSP-023 the spec without React | ✅ (s50) | s45 … s57 |
 | NSP-006 the stranger | ✅ rounds 1–4 (all four re-graded s97) | `649e6864d`, s70 … s84 |
 | NSP-020 ports without a viewer | 🟡 Left: Router's labels (ADAPTERLABEL); the cloud nodes' ports (below) | s79 … s87 |
 | NSP-021 the second editor | 🟡 Left in §3.2: which runtimes (NSP-022). Round trip (§3.3) = P112 OWN-006 | s87 … s93 |
-| **NSP-022 the cloud-only nodes** | 🟡 **15 of 17.** Left: Model Request, Aggregate Records | s96, s97 |
+| **NSP-022 the cloud-only nodes** | 🟡 **16 of 17** (ledger 141). Left: Aggregate Records | s96, s97, s98 |
 | R35 (the settings say when they make no sense) | ✅ Counter (s95); the other nodes owed — AFTER NSP-022 | `0d81cd398` |
 
-## What s98 does (in order)
+## What s99 does (in order)
 
-1. **Model Request** (`noodl-viewer-cloud/src/nodes/cloud/modelrequest.ts`, read in full in s97). Seams: HOST `secrets` (the
-   key, by name, synchronous) and NETWORK (`fetch`, an `AbortController` on the world's clock; s97 measured that the world's
-   `fetch` honours the signal and rejects with an `AbortError`). The deadline, the backoff (500 ms doubled) and `retry-after`
-   are all world clock (`Date.now`, `setTimeout`).
-   - **Two defects first** (measured s97, filed, both open, medium). Fix them before the spec, because the spec would otherwise
-     pin a paid triple request:
-     - P107-S97-MRNULLRETRY: an Anthropic 200 `null` throws in `readMessagesAnswer`, and the `.catch` retries it as a
-       transport fault. The request is sent 3 times, each paid, and the Error says "did not reach the provider".
-     - P107-S97-MREMPTYANSWER: an Anthropic 200 `{}` is Done with empty Text. The chat path refuses the same thing.
-     - The fix for both: a 200 that is not a Messages answer fails ONCE, with its status, never retried, mirroring
-       `readChatAnswer`. One small choice is in it: the code is `network` (as the chat path's) or `http_error`. Take the
-       chat path's (`network`); a second code for the same fault is how a graph ends up switching on two.
-   - The cost channel: `recordCall` → `runContext.recordModelCall`. The runtime target's run context has NO
-     `recordModelCall` (s97 grep), so the target observes nothing. Give the target a sink on the handle, the way Log lines are
-     kept (`h.logs`), and grade it in a dedicated test beside conformance.test.ts's "the Log line is an effect" test.
-   - Read live, at the moment of use: `timeoutMs` in the timeout sentence and `outputSchema` when the answer lands. `model`
-     and the body are read at dispatch.
-   - Several presses in a frame are one call. A press while a call is out starts its own call, concurrently: key per call.
+1. ~~Model Request~~ — **done in s98** (NSP-022 §6.7): its two defects fixed first, NETWORK rules took `times`, the spec
+   conforms (26 scenarios, 79 / 79 mutants, 13 / 13 plants), and the cost channel is kept on the runtime handle (`modelCalls`)
+   and graded in conformance.test.ts. **First in s99: re-run the runtime's whole node-spec suite** (below, "NOT re-run").
 2. **Aggregate Records** (`data/aggregatenode.js` over `CloudStore`). First measure whether it reaches the contract's adapter
    (BACKEND) or the legacy store, then decide the seam.
 3. The census (`node scripts/node-spec/census.js`), once the peer edits in `nodegx-export` (`plan.ts`,
@@ -106,7 +92,7 @@ caught. P107-S97-USERSMEHANG fixed: a `/users/me` answer that was not JSON hung 
     string body does.
   - P107-S97-USERIDBOOLEAN (low): User Id is typed boolean. Count the saved wires from it before retyping.
 
-**Open, filed this phase:** P107-S97-MRNULLRETRY, P107-S97-MREMPTYANSWER (medium, s98 step 1); P107-S97-NULLBODY,
+**Open, filed this phase:** P107-S97-NULLBODY,
 P107-S97-USERIDBOOLEAN (low); P107-S95-MINABOVEMAX (Counter fixed; the others wait behind NSP-022), P107-S94-DEVHEAP (medium),
 P107-S93-NOTANAME (low), P107-S92-VIDEOEMBEDSEED (low), P107-S89-NIGHTBOOK (medium), P107-S89-CFEXAMPLES (low),
 P107-S89-XMLEXAMPLE (low); P107-S86-STOREDWIRE (medium); P107-S85-RESTCOLTYPES (low); P107-S83-SENDFORM;
@@ -135,6 +121,12 @@ NSP-010's and NSP-017's uncommitted notes (not this phase's sessions') were left
 - `spec-ledger --check` holds at 140 (owed 2); `spec-golden --check` 123 specs fresh, version rule held (2 new goldens, none
   moved); `catalog:check` green after `catalog:generate` (the two nodes' rules); spec-disagreements up to date;
   `runtime-target.test.ts` 15 / 15; `typecheck:runtime`, `:node-spec`, `:cloud` 0.
-- **Runtime, every spec** (`npx jest -w 2 test/node-spec`): see the commit message for its reading.
+- **Runtime, every spec** (`npx jest -w 2 test/node-spec`, s97, 1,494 s): 6 red, exactly s95/s96's on this seed
+  (P107-S95-SEED20738: DbModel2, JavaScriptFunction, Router, Radio Button, Video survivors; row C96); every other spec conforms.
+  **NOT re-run after s98**: s98's changes to shared code are additive (NETWORK `times`, absent on every existing rule; the
+  target's run context gained `recordModelCall`, which only Model Request calls). Re-run it first in s99 to confirm.
+- **s98:** the 16 cloud specs CONFORM; the cost-channel tests 2 / 2 (control: `recordCall` removed → red); node-spec package
+  33 suites, 1,950 tests; stranger rounds 1–3 green after the hashes (world.ts) were rewritten; round 4 not re-run (it plays
+  no NETWORK; 36 min); noodl-viewer-cloud 266 / 266 (fed-003 grew two tests, red without the fix); typechecks 0.
 - **Not run:** `test:main`, `test:ci`, the editor's jest, the Jasmine suite, the MCP suite (no editor or MCP source changed;
   the catalog gained two nodes' rules).

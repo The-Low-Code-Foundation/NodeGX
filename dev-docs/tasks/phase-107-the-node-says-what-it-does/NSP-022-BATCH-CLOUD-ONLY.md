@@ -1,7 +1,7 @@
 # NSP-022 — Batch: the cloud-only nodes
 
 **Opened 2026-10-02 (s21), split from [NSP-014](NSP-014-BATCH-DATA-AND-CLOUD.md) as its status line said it would be.**
-**Depends on NSP-007 and NSP-014's BACKEND seam (s21).** **Status: 🟡 s96 (2026-10-12): 13 of 17 conform on the runtime's new cloud target — HMAC, JWT Sign, JWT Verify, Secret, Create / Update / Delete User, Verify Session Token, Add User To Role, Remove User From Role, Get User Roles, List Users In Role, Send Email — each on its first or second run, every mutant killed. The world grew the KEYED SIGN (DIGEST) and HOST (the backend process's services). s97: Request and Response conform (15 of 17) on HOST's new INVOCATION (§6.5–§6.6); P107-S97-USERSMEHANG fixed on the way. Left: Model Request, Aggregate Records.**
+**Depends on NSP-007 and NSP-014's BACKEND seam (s21).** **Status: 🟡 s96 (2026-10-12): 13 of 17 conform on the runtime's new cloud target — HMAC, JWT Sign, JWT Verify, Secret, Create / Update / Delete User, Verify Session Token, Add User To Role, Remove User From Role, Get User Roles, List Users In Role, Send Email — each on its first or second run, every mutant killed. The world grew the KEYED SIGN (DIGEST) and HOST (the backend process's services). s97: Request and Response conform on HOST's new INVOCATION (§6.5–§6.6); P107-S97-USERSMEHANG fixed on the way. s98: Model Request conforms (16 of 17, §6.7), its two defects fixed first. Left: Aggregate Records.**
 
 ## 1. The person sentence
 
@@ -202,3 +202,34 @@ column. Adding the cloud package to its ROOTS brings every cloud hook into the t
 
 **The rules column** shows only Request's two input rows: what it does when a request comes is a `world.invoke` handler, whose
 words nothing reads yet (NSP-018 §6 item 1).
+
+### 6.7 s98 (2026-10-12, the same sitting as s97) — Model Request
+
+**Measured first, through a probe calling the node's own `dispatch`:** an Anthropic 200 JSON `null` was sent THREE times (each
+answered and paid) and then reported "did not reach the provider" (P107-S97-MRNULLRETRY). An Anthropic 200 `{}` or `5` was
+Done with an empty Text (P107-S97-MREMPTYANSWER). **Both fixed before the spec:** `readMessagesAnswer` refuses JSON with no
+`content` list, as `readChatAnswer` refuses JSON with no `choices`. The answer fails once, `network`, with its status. Two
+fed-003 tests are red without the guard.
+
+**The world grew one thing:** NETWORK rules take `times` (as BACKEND's and HOST's do), so a script can say "503, then an
+answer". Without it, no scenario could reach a retry that succeeds.
+
+**The spec** (`model-request.ts`): HOST `secrets` (synchronous, inside the frame-end call) and NETWORK, with the clock the
+deadline's. The bodies, the answer readers and the error identifiers are the spec's own copies, byte-for-byte what the node
+sends. One deadline per call. Each attempt is aborted at it (a world timer, `abort:<request>`). The backoff and `retry-after`
+are timers (`retry:<call>`). Calls are keyed, so a press while one is out is its own call.
+
+**The cost channel** (`recordModelCall`) is not on the wire. The runtime target now keeps it on the handle (`modelCalls`, a
+lone node's run context), graded in conformance.test.ts beside the Log line. An answered call, a refusal included, hands the
+run its model, four token counts and its duration, retries included (540 ms over a 503 and a 40 ms answer). A call no
+provider answered hands it nothing. Control: `recordCall` removed → red.
+
+| node | scenarios | generated | mutants | planted in a copy of the runtime file |
+|---|---|---|---|---|
+| Model Request | 26 / 26 | 200 / 200 (first run, 0 divergences) | 79 / 79 (one equivalent write removed; one survivor — attempts never counting up on a retry — was a pool hole, closed by the retry scenarios) | 13 / 13: three attempts become two, the backoff halved, `retry-after` ignored, a 4xx retried, Anthropic sent `effort: none`, "this computer" read as a prefix, Instructions not cached, a refusal read as Done, the s98 guard removed, Max Tokens not floored, a deadline per attempt, a Status-0 failure keeping the last status (survived until a scenario put a failure after an answered call), Messages ignored when Input is set |
+
+A plant I wrote badly (`errorCode = code + ''`, a no-op) is not counted. The property it meant, provider prose never on the
+execution record (ISL-010), is not on the wire. fed-003's tests own it.
+
+Read live, and pinned: the timeout sentence reads Timeout (ms) when the call fails, so a Timeout changed mid-call says the new
+number ("did not finish inside 7ms" for a 1,000 ms call). That is the runtime's read; not filed.

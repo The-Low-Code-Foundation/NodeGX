@@ -28,7 +28,7 @@
  *           relative URL; Node's throws; the world is neither). The first script rule whose
  *           `match` fits answers it: a status with headers and a body, a network error, or
  *           never. `after` > 0 delays the answer on the clock; absent or 0 answers at once (the
- *           same settle sees it). A request no rule answers is a VIOLATION: it is answered with
+ *           same settle sees it); (NSP-022 s98) `times` — the rule answers the first `times` requests it fits, then fits none. A request no rule answers is a VIOLATION: it is answered with
  *           a network error so the play can go on, and the runner fails the run (AC5). Aborting a
  *           request (a node's `Cancel`, its own timeout) delivers `{ aborted }` at once and drops
  *           any answer still due.
@@ -1172,6 +1172,8 @@ export interface NetworkRule {
   answer: Answer;
   /** Milliseconds on the clock before the answer lands; absent or 0 lands at once. */
   after?: number;
+  /** NSP-022 s98: the rule answers the first `times` requests it fits, then fits none (a 503, then a retry the next rule answers); absent: every one. As BACKEND's and HOST's. */
+  times?: number;
 }
 
 export type Answer =
@@ -1352,6 +1354,8 @@ export class Network {
   private nextId = 1;
   private inFlight = new Map<number, InFlight>();
   private listeners: Array<(r: RequestRecord) => void> = [];
+  /** NSP-022 s98: how many requests each rule has answered (`times`). */
+  private readonly used = new Map<NetworkRule, number>();
 
   constructor(
     private readonly clock: Clock,
@@ -1376,7 +1380,8 @@ export class Network {
     const id = this.nextId++;
     const entry: InFlight = { id, deliver, done: false };
     this.inFlight.set(id, entry);
-    const rule = this.rules.find((r) => matches(r, record));
+    const rule = this.rules.find((r) => matches(r, record) && (r.times === undefined || (this.used.get(r) ?? 0) < r.times));
+    if (rule) this.used.set(rule, (this.used.get(rule) ?? 0) + 1);
     if (!rule) {
       this.violations.push(`${record.method} ${record.url}: no rule in the world's script answers it`);
       this.land(entry, { error: { name: 'TypeError', message: `the world has no answer for ${record.method} ${record.url}` } });

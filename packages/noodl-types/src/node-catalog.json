@@ -63927,7 +63927,48 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "provider": [
+          "always: read when the call is made — blank is Anthropic"
+        ],
+        "model": [
+          "always: read when the request is built — blank is the default model"
+        ],
+        "apiKeySecret": [
+          "always: the name read from the secret store when the call is made"
+        ],
+        "baseUrl": [
+          "always: read when the call is made — blank is the Anthropic API"
+        ],
+        "instructions": [
+          "always: read when the request is built"
+        ],
+        "callInstructions": [
+          "always: read when the request is built"
+        ],
+        "input": [
+          "always: read when the request is built, unless Messages holds a conversation"
+        ],
+        "messages": [
+          "always: read when the request is built — a non-empty list replaces Input"
+        ],
+        "outputSchema": [
+          "always: read when the request is built and again when its answer lands"
+        ],
+        "effort": [
+          "always: read when the request is built — blank is high"
+        ],
+        "maxTokens": [
+          "always: a positive number, floored, read when the request is built — anything else is 16000"
+        ],
+        "timeoutMs": [
+          "always: a positive number, floored, read when the call starts and in its timeout sentence — anything else is 120000"
+        ],
+        "send": [
+          "always: one call at the end of the frame however many presses — Done with the answer published, or Failure with Error, Error Code and Status, per press"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.removeuserfromrole",

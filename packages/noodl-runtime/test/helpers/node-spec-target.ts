@@ -1358,7 +1358,7 @@ export function registerViewerModules(target: RuntimeTarget, modules: ViewerNode
  * `registerNodes` list, nodes/index.ts). They are graded on {@link cloudTarget}: a `NoodlRuntime` of type `cloud`, which is what
  * the backend's function runner builds (noodl-viewer-cloud/src/index.ts) — none of the browser's session nodes, none of the viewer's.
  */
-export const CLOUD_NODES = ['cloud/hmac', 'cloud/jwtsign', 'cloud/jwtverify', 'cloud/secret', 'cloud/createuser', 'cloud/updateuser', 'cloud/deleteuser', 'cloud/verifysessiontoken', 'cloud/addusertorole', 'cloud/removeuserfromrole', 'cloud/getuserroles', 'cloud/listusersinrole', 'cloud/sendemail', 'cloud/request', 'cloud/response'] as const;
+export const CLOUD_NODES = ['cloud/hmac', 'cloud/jwtsign', 'cloud/jwtverify', 'cloud/secret', 'cloud/createuser', 'cloud/updateuser', 'cloud/deleteuser', 'cloud/verifysessiontoken', 'cloud/addusertorole', 'cloud/removeuserfromrole', 'cloud/getuserroles', 'cloud/listusersinrole', 'cloud/sendemail', 'cloud/request', 'cloud/response', 'cloud/modelrequest'] as const;
 
 /** The type names of {@link CLOUD_NODES}, read from the modules — what a suite asks to choose {@link cloudTarget} for a spec. */
 export function cloudNodeTypes(): string[] {
@@ -1388,6 +1388,11 @@ export interface RuntimeHandle extends Handle {
   readonly errors: RuntimeErrorEventLike[];
   /** Every line this node wrote through the scope's log sink, in order. Live. */
   readonly logs: LogLine[];
+  /**
+   * NSP-022 s98 — every model call this node handed the run's cost channel (runcontext.ts `recordModelCall`, Model Request's
+   * `recordCall`), in order. Live. A lone node's scope only: what CloudRunner hands a run (index.ts :219).
+   */
+  readonly modelCalls: unknown[];
 }
 
 /** What `net.noodl.Log` hands the sink (runcontext.ts `RuntimeLogEntry`), minus the node id the handle already knows. */
@@ -1957,13 +1962,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
    * global `Model`), a component owner named after the handle whose walk stops here (`getRoots`
    * and no `parentNodeScope`), and the log sink.
    */
-  const loneScope = (id: string, logs: LogLine[]) => ({
+  const loneScope = (id: string, logs: LogLine[], modelCalls: unknown[] = []) => ({
     // NSP-022 s97 — a cloud function's nodes live in the request's own model scope (index.ts :215-216 `requestScope.modelScope =
     // new Model.Scope()`), so what the function writes (the `Request` model, the caller's user record) is the play's alone
     modelScope: options.type === 'cloud' ? new Model.Scope() : undefined,
     componentOwner: { name: `node-spec/${id}`, getInstanceId: () => id, getRoots: () => [] as never[] },
     context,
-    runContext: { log: logSink(logs) }
+    runContext: { log: logSink(logs), recordModelCall: (call: unknown) => void modelCalls.push(call) }
   });
 
   /**
@@ -2023,9 +2028,10 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const ports: Readonly<PlayContext> = { ...playContextOf(portContext), wired: [...(portContext.wired ?? []), ...(wired ?? [])] };
     portContexts.set(id, ports);
     const logs: LogLine[] = [];
+    const modelCalls: unknown[] = [];
     // NSP-016 s56 — a lone Component Stack builds its pages in its own scope (`createNode`, `createPrimitiveNode`, `deleteNode`):
     // a REAL scope, as the popup root has (`scopeFor`)
-    const nodeScope = scope ?? (type === 'Page Stack' || type === 'Router' || type === 'For Each' ? scopeFor({ name: `node-spec/${id}`, getInstanceId: () => id, getRoots: () => [] as never[] }, logs) : loneScope(id, logs));
+    const nodeScope = scope ?? (type === 'Page Stack' || type === 'Router' || type === 'For Each' ? scopeFor({ name: `node-spec/${id}`, getInstanceId: () => id, getRoots: () => [] as never[] }, logs) : loneScope(id, logs, modelCalls));
     // POPUP (world.ts, NSP-015 s20) — a lone Close Popup inside the script's popups
     if (!scope && type === 'NavigationClosePopup' && world && world.popup.inside.length > 0) insidePopups(nodeScope.componentOwner as { parentNodeScope?: unknown }, world.popup.inside);
     const metadata = context.nodeRegister.getNodeMetadata(type);
@@ -2092,6 +2098,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // node's `set` keeps writing through `setInputValue`, as a parameter does.
     for (const port of wired ?? []) wireStub(node as unknown as NodeInstance, port, type);
     const h = adopt(node, id, type, metadata, params, logs, made);
+    (h as { modelCalls: unknown[] }).modelCalls = modelCalls;
     // PERSON (above, NSP-016 s37) — a node a person acts on is put on the page, its params already applied as a
     // loaded project's are before the first render; its Did Mount lands in the first settle
     // NSP-016 s52 — a placing that throws (C87: a Group's Tag of null) tears down what it made, as a dispose does: the play gets no
@@ -3153,7 +3160,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     for (const m of names) {
       proto[m] = function (this: RuntimeNode & Record<string, (...a: unknown[]) => unknown>, ...a: unknown[]) {
         if (made === undefined && this.id === id) {
-          made = { h: { id, type, node: this, metadata, errors: [], logs }, trace: [], frame: newFrame(), lastSent: {}, settles: 0, currentInput: undefined, inOutcome: 0 };
+          made = { h: { id, type, node: this, metadata, errors: [], logs, modelCalls: [] }, trace: [], frame: newFrame(), lastSent: {}, settles: 0, currentInput: undefined, inOutcome: 0 };
           states.set(id, made);
           byNodeId.set(id, made);
           intercept(made); // the node's own wrappers now — each calls this function again, which below is the original
@@ -3174,7 +3181,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   function adopt(node: RuntimeNode, id: string, type: string, metadata: NodeMetadata, params: Record<string, unknown>, logs: LogLine[], made?: State): RuntimeHandle {
     let s = made;
     if (!s) {
-      s = { h: { id, type, node, metadata, errors: [], logs }, trace: [], frame: newFrame(), lastSent: {}, settles: 0, currentInput: undefined, inOutcome: 0 };
+      s = { h: { id, type, node, metadata, errors: [], logs, modelCalls: [] }, trace: [], frame: newFrame(), lastSent: {}, settles: 0, currentInput: undefined, inOutcome: 0 };
       states.set(id, s);
       byNodeId.set(id, s);
       intercept(s);

@@ -178,6 +178,37 @@ describe('Model Request (FED-003)', () => {
     });
   });
 
+  describe('P107-S97 — a 200 that is not a Messages answer fails once, and is never retried', () => {
+    const settle = async () => {
+      for (let i = 0; i < 4; i++) await new Promise((resolve) => setImmediate(resolve));
+    };
+
+    it('JSON null: one request (it was answered, and paid), Failure network naming the status — never "did not reach the provider"', async () => {
+      const calls = stubFetch(200, null);
+      const probe = makeProbe({ input: 'go' });
+      press(probe);
+      probe.flush();
+      await settle();
+      expect(calls).toHaveLength(1);
+      expect(probe.signals).toContain('failure');
+      expect(probe.internal.errorCode).toBe('network');
+      expect(probe.internal.status).toBe(200);
+      expect(probe.internal.error).toBe('Model Request: the provider answered 200 with JSON that is not a Messages answer. Check Base URL.');
+    });
+
+    it('JSON with no content list (a wrong Base URL answering its own JSON): Failure, never Done with an empty Text', async () => {
+      const calls = stubFetch(200, { ok: true });
+      const probe = makeProbe({ input: 'go' });
+      press(probe);
+      probe.flush();
+      await settle();
+      expect(calls).toHaveLength(1);
+      expect(probe.signals).toContain('failure');
+      expect(probe.signals).not.toContain('done');
+      expect(probe.internal.errorCode).toBe('network');
+    });
+  });
+
   describe('AC3, structurally — every port, and the debug inspector', () => {
     /**
      * ⚠️ **This enumerates the node's ports from the node itself rather than listing them.**

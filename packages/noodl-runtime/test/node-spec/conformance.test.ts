@@ -17,7 +17,7 @@ import * as ts from 'typescript';
 
 import type { NodeModule } from '@noodl/types';
 
-import { Counter, EQUIVALENT_MUTANTS, specs, runConformance, formatReport, poolFor } from '../../../nodegx-node-spec/src';
+import { Counter, EQUIVALENT_MUTANTS, specs, runConformance, formatReport, poolFor, World } from '../../../nodegx-node-spec/src';
 import type { Divergence, KnownRow, Report, Withheld } from '../../../nodegx-node-spec/src';
 import { cloudNodeTypes, cloudTarget, runtimeTarget, withViewerNodes, type RuntimeTarget } from '../helpers/node-spec-target';
 
@@ -204,6 +204,49 @@ describe('NSP-011 — the Log line is an effect the target keeps beside the trac
       { level: 'info', message: 'hello', data: { a: 1 } }
     ]);
     expect(target.trace(h).filter((e) => e.t === 'outcome')).toHaveLength(2);
+  });
+});
+
+describe('NSP-022 s98 — the cost of a model call is an effect the target keeps beside the trace (checked, not ignored)', () => {
+  /** Model Request's `recordCall` (modelrequest.ts :847-859) hands the run's cost channel five numbers and a model id — never the wire. */
+  const answer = { content: [{ type: 'text', text: 'hi' }], stop_reason: 'end_turn', usage: { input_tokens: 3, output_tokens: 1, cache_read_input_tokens: 2, cache_creation_input_tokens: 5 } };
+  const play = async (network: unknown[], params: Record<string, unknown>, steps: (t: RuntimeTarget, h: ReturnType<RuntimeTarget['mount']>) => Promise<void>) => {
+    const target = batchTarget('noodl.cloud.modelrequest');
+    const restore = target.install!(new World({ host: { services: ['secrets'], answers: [{ answer: { ok: { found: true, value: 'sk' } } }] }, network: network as never }));
+    try {
+      const h = target.mount('noodl.cloud.modelrequest', params);
+      await steps(target, h);
+      const calls = [...h.modelCalls];
+      target.dispose(h);
+      return calls;
+    } finally {
+      restore();
+    }
+  };
+  test('an answered call — a refusal included, it was paid — hands the run its model, four token counts and how long it took, retries included', async () => {
+    const calls = await play([{ answer: { status: 503, body: '' }, times: 1 }, { answer: { status: 200, body: answer }, after: 40 }], { input: 'x', model: 'm1' }, async (t, h) => {
+      t.signal(h, 'send');
+      await t.settle();
+      await t.advance!(h, 540);
+      await t.settle();
+    });
+    expect(calls).toEqual([{ model: 'm1', inputTokens: 3, outputTokens: 1, cacheReadTokens: 2, cacheWriteTokens: 5, durationMs: 540 }]);
+    const refused = await play([{ answer: { status: 200, body: { content: [], stop_reason: 'refusal', usage: { input_tokens: 4 } } } }], { input: 'x' }, async (t, h) => {
+      t.signal(h, 'send');
+      await t.settle();
+    });
+    expect(refused).toEqual([{ model: 'claude-opus-5', inputTokens: 4, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0, durationMs: 0 }]);
+  });
+  test('a call no provider answered — an error status, a transport fault, an answer that is not one — hands it nothing', async () => {
+    for (const network of [[{ answer: { status: 400, body: '{}' } }], [{ answer: { status: 200, body: 'null' } }], [{ answer: { error: 'fetch failed' } }]]) {
+      const calls = await play(network, { input: 'x' }, async (t, h) => {
+        t.signal(h, 'send');
+        await t.settle();
+        await t.advance!(h, 2000);
+        await t.settle();
+      });
+      expect(calls).toEqual([]);
+    }
   });
 });
 

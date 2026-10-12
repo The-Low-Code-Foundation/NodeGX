@@ -33,6 +33,7 @@ import { Secret } from './secret';
 import { SendEmail } from './send-email';
 import { CloudRequest } from './cloud-request';
 import { CloudResponse } from './cloud-response';
+import { ModelRequest } from './model-request';
 import { CreateUser, DeleteUser, UpdateUser, VerifySessionToken } from './system-users';
 import { AddUserToRole, GetUserRoles, ListUsersInRole, RemoveUserFromRole } from './system-roles';
 import { HttpRequest } from './http';
@@ -255,7 +256,9 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [SendEmail.type]: SendEmail,
   // NSP-022 s97 — a function's first and last events (world.ts HOST, THE INVOCATION)
   [CloudRequest.type]: CloudRequest,
-  [CloudResponse.type]: CloudResponse
+  [CloudResponse.type]: CloudResponse,
+  // NSP-022 s98 — a model provider over NETWORK, its key from HOST `secrets`
+  [ModelRequest.type]: ModelRequest
 });
 
 export { EQUIVALENT_MUTANTS } from './equivalent-mutants';
