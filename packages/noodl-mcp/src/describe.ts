@@ -68,7 +68,9 @@ function isVisualType(type: string): boolean {
 
 function endpoint(node: NodeV2 | undefined, id: string, property: string): string {
   if (!node) return `${id}.${property}`;
-  const name = node.label ?? displayType(node.type) ?? node.type;
+  // An empty label is no label, as on the canvas (`NodeGraphNode.label` falls through on `!this._label`) and in the
+  // tree below: `??` kept `""` and named the endpoint " [id]" on 97 nodes in Richard's projects (P107-S90-EMPTYLABEL).
+  const name = node.label || displayType(node.type) || node.type;
   return `${name} [${id}].${property}`;
 }
 
