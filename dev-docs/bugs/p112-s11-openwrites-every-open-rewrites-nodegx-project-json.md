@@ -1,7 +1,9 @@
 ---
 id: P112-S11-OPENWRITES
 title: "Every open of a v2 project rewrites `nodegx.project.json` (a new `modified`); the first also drops `created` and stamps a hard-coded `nodegxVersion: \"1.1.0\"`"
-status: open
+status: fixed
+commit: 1ed87f2ef
+regression: packages/noodl-editor/tests-unit/own-013/openWrites.test.ts
 severity: medium
 area: editor / project-level save (`packages/noodl-editor/src/editor/src/services/ProjectStructure/index.ts` `seedProjectLevelHashes` :263 vs `saveProjectLevelFiles` :494-531; `packages/noodl-editor/src/editor/src/io/ProjectExporter.ts` `buildProjectV2File` :433-471)
 found: P112 OWN-011 s11, 2026-10-11
@@ -28,3 +30,15 @@ least). The two never agree, so the first save after any open rewrites the file 
 Not measured: what triggers the save on an open where no component changed (third open: no component file moved).
 
 Blocks OWN-011 AC2 (no change written on open beyond the three agent files).
+
+**Fixed 2026-10-12 (P112 OWN-013, `1ed87f2ef`) — the every-open rewrite.** The model's `metadata` holds three keys set
+to `undefined` (`dbCollections`, `systemCollections`, `dbVersionMajor`, read in the running dev editor), and
+`buildProjectV2File` counted them, so the save wrote `"metadata": {}` and never matched the baseline. Keys holding
+`undefined` are dropped now. **Driven:** a converted project reopened → 16 of 16 files unchanged, while a real
+metadata change in the same session was written (the control); the kit's `reading-list` project kept its
+`nodegx.project.json` byte for byte on its first open and changed nothing on its second. Unit: 3 specs, and removing
+the filter fails 2.
+
+**Not fixed here, filed as P112-S12-CREATEDLOST:** when the file *is* written for a real change, `created` is still
+dropped and `nodegxVersion` is still stamped `"1.1.0"`.
+

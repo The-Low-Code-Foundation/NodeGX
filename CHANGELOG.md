@@ -70,6 +70,8 @@ backend rule, and many fixes to how nodes behave.**
 - JSON Stream Parser no longer freezes the app on a stray `}`.
 - Signing out clears the User.
 - Editor icon buttons have names a screen reader can read.
+- When your agent renders your app to check it, the render now has the default spacing, corners and fonts. In
+  0.3.0 it had none, so the app looked broken.
 - Many smaller fixes to how nodes behave.
 
 ### Good to know
@@ -80,8 +82,8 @@ backend rule, and many fixes to how nodes behave.**
   open.
 - 0.3.0 refuses a project saved by 0.4.0 with two wrong messages. One names Noodl, and the other says `project.json`
   is missing. The person needs to update to 0.4.0.
-- Opening a project rewrites `nodegx.project.json` even when nothing changed. The first open of a page your agent
-  wrote also rewrites that page's files. In a project kept in git, opening it can leave these files changed.
+- The first time you open a page your agent wrote, NodeGX rewrites that page's files. In a project kept in git, this
+  leaves them changed.
 - Code export is still in alpha.
 - Windows installers aren't signed, so SmartScreen will warn you. Choose More info, then Run anyway.
 - If you use the MCP server with an assistant, restart the assistant's session after updating.

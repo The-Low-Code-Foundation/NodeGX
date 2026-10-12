@@ -4,7 +4,7 @@
 properly via main*). **Model:** **Opus** for the cut point, the gates and the measurements; the changelog and release
 notes go through the content-authoring skill.
 
-**Status: 🟡 — s12 (2026-10-11): G1 measured, G2 written and approved, R17 built (§6). The version is bumped on `cline-dev` (`88366e69f`, pushed). Nothing is pushed or branched for the release yet.**
+**Status: 🟡 — s12 (2026-10-11/12): G1 measured, G2 written and approved, R17 built and driven, OPENWRITES fixed (§6, §7). The version is bumped on `cline-dev` (`88366e69f`, pushed). Nothing is pushed or branched for the release yet.**
 
 ## 1. The person sentence
 
@@ -33,7 +33,7 @@ was created (`gh release view v0.4.0` → not found), tag deleted on origin and 
 | G4 | **The PR `release/0.4.0` → `main`**, six required checks green (*Typecheck, Lint, Test (editor), Test (platform-node), Build (viewer + editor bundles), Check build artefacts*). `enforce_admins`: red means stop. Read each run's duration. 0.3.0 had three red on first CI | CI | ⬜ |
 | G5 | `npm run ci:build:editor` **on the cut tree** (a worktree with its own build output). s11 ran it in the shared checkout at `88366e69f` + peers' open edits: exit 0, so the production config itself is not broken there | agent | ⬜ |
 | G6 | Editor test floor **by name**. s11's `test:ci` (HEAD `120baf39`): 3,012 specs, 2 failures — SUB-006 *nonexistent-port … lists available alternatives*, and *pending project saves … re-arms a held save* (the order-dependent one) | agent | ⬜ |
-| G7 | **Opening writes.** Richard ruled the release knowing opening still writes: P112-S11-PAGEPORTS (a Page's `dynamicports`), P112-S11-OPENWRITES (`nodegx.project.json` on every open). Fixed before the cut if cheap; otherwise named under *Good to know*. P112-S11-IDREPLACE is fixed (`f2505b83f`) and **undriven in the editor** — drive it on the cut | agent | 🟡 s12 (§6.3): R17's copy built; PAGEPORTS and OPENWRITES not fixed (named under *Good to know*); IDREPLACE and R17 undriven |
+| G7 | **Opening writes.** Richard ruled the release knowing opening still writes: P112-S11-PAGEPORTS (a Page's `dynamicports`), P112-S11-OPENWRITES (`nodegx.project.json` on every open). Fixed before the cut if cheap; otherwise named under *Good to know*. P112-S11-IDREPLACE is fixed (`f2505b83f`) and **undriven in the editor** — drive it on the cut | agent | 🟡 s12 (§6.3, §7): R17's copy built and **driven**; OPENWRITES **fixed and driven** (`1ed87f2ef`); IDREPLACE **driven**; PAGEPORTS still open (named under *Good to know*) |
 | G8 | **The upgrade 0.3.0 → 0.4.0**: install over 0.3.0 and open (a) a 0.3.0 project — the 4 → 5 migration runs once (ISL-018) and the project still works; (b) a project the npm kit made — it opens. P112-S11-REFUSALWORDS stays visible to anyone still on 0.3.0 opening a 0.4.0 project | agent + Richard | ⬜ |
 | G9 | The shelf: the tag run's *every authored library entry is installable*; if red, Publish library first | agent / CI | ⬜ |
 | G10 | Richard's drives of what 0.4.0 announces (each phase's owed driven rows — list them from the phase READMEs at the cut) | Richard | ⬜ |
@@ -96,4 +96,32 @@ each checked in the code. Richard approved it (AskUserQuestion, s12) with the co
   reach disk as `{}`. Needs the editor to confirm.
 - Not driven this session: the box sat at load 10–21 with 12.2 of 13.3 GB swap used and peers' jest running; the dev
   stack died of heap twice at that load in s11.
+
+## 7. Session 12, continued (2026-10-12, Opus) — the drive
+
+The box was quiet (load 3.6, no peer suite). One dev stack (`dev:debug`), torn down after. Every folder opened through
+the real *Open project…* button with `filesystem.openDialog` stubbed (handoff finding 38), each a copy under the
+scratchpad, graded by `shasum` of every file before and after.
+
+| arm | folder | result |
+|---|---|---|
+| 1 | `Desk A`, a copy of `Deadline Desk` (format 4) | 🔴 **two** copies, `Desk A.before-0.4` and `-1`, identical, same second. Cause: *Open project…* loads the folder twice (`openProjectFromFolder`, then `loadProject`), both before the first save. Also, `nodegx.project.json` gained `"metadata": {}` |
+| — | in the running editor | `ProjectModel.instance.metadata` = `dbCollections`, `systemCollections`, `dbVersionMajor`, all `undefined` → OPENWRITES' cause |
+| fix | `1ed87f2ef` | one copy per folder per run (`copiesMadeThisRun`); `buildProjectV2File` drops `undefined` metadata keys. Bundle checked to carry both before the next arms |
+| 2 | `Desk C`, a fresh copy of the same | ✅ **one** `.before-0.4`, equal to the original (`diff -rq`); the note names it; version 5 after; no `metadata` written. New id `4df97301-…`: `Desk A` carries the same id and is registered, so R16 mints (as designed) |
+| 3 | `Desk A` reopened (format 5) | ✅ 16 of 16 files unchanged. **Control:** `setMetaData('own013probe', 1)` in the same session → the file was written with `{"own013probe": 1}` and none of the `undefined` keys |
+| 4 | `Reading B`, the `reading-list` fixture (format 5, made by the kit) | ✅ id `95de5bf2-…` kept (**IDREPLACE driven**); no copy; `nodegx.project.json` byte for byte. Written: `components/Pages/Home/{component,nodes}.json` and `_registry.json` (PAGEPORTS, open) and `.mcp.json` (the fixture has none; the editor writes the agent's config on open by design) |
+| 5 | `Reading B` reopened | ✅ nothing changed |
+
+Unit: `tests-unit/own-013` 10/10 (`openWrites` 3: removing the filter fails 2). Editor `tsc --noEmit` exit 0. eslint:
+one error in `ProjectExporter.ts` (`PortDefinition` unused, there since `fbce66e0d`, February), none mine. Filed
+P112-S12-CREATEDLOST (low): a real save still drops `created` and stamps `nodegxVersion "1.1.0"`. The changelog's
+*Good to know* now names only PAGEPORTS.
+
+🔴 **0.3.0's `.before-0.3` copy has the same double:** `NodeGX test projects/CMG Drive Tokens.before-0.3-1` exists
+beside `.before-0.3`. The fix covers both, since they share `backupBeforeUpgrade`.
+
+**For the cut:** the OWN-014 session (P112, same day) has P112-S13-HARNESSTOKENS's fix uncommitted (the packaged
+render harness ships no default tokens). It landed as `63992760c` (peer message, checked in HEAD) and is in the
+changelog's *Fixed*.
 

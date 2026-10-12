@@ -2,8 +2,9 @@
 
 **Written 2026-10-11 at the end of session 12** (Opus 5.5). Session 12 started OWN-013, the 0.4.0 cut, by UPG-008's
 runbook. G1 (the cut point) is measured and G2 (the changelog) is written and approved. Richard ruled R17: 0.4.0
-copies a 0.3.0 project to `<project>.before-0.4` before its format moves to 5. That is built (`8f9137d8e`) and
-unit-graded but undriven. Nothing was pushed, branched or tagged. Earlier handoffs are in this file's git history.
+copies a 0.3.0 project to `<project>.before-0.4` before its format moves to 5 (`8f9137d8e`). **Continued 2026-10-12:**
+the drive in the dev editor found the copy made twice per open, and measured OPENWRITES' cause; both fixed and driven
+(`1ed87f2ef`, OWN-013 §7). IDREPLACE is driven too. Nothing was pushed, branched or tagged. Earlier handoffs are in this file's git history.
 
 ## The board (re-derived from the task files, 2026-10-11)
 
@@ -16,10 +17,10 @@ unit-graded but undriven. Nothing was pushed, branched or tagged. Earlier handof
 | OWN-010 every bug teaches the kit | 🟡 ledger + `gate <kit>` | `gate mcp`: 0 blockers, 2 known issues (FORMATSKEW, PAGEPORTS) | see its file |
 | OWN-011 one install | 🟡 published; **AC1, AC3, AC4 ✅**; **AC2 editor half ❌** (§9) | waits on OWN-013's release | **Opus** |
 | OWN-012 the screen, from the descriptions | 📋 | — | step 1 **Opus**, 2–3 **Fable** |
-| **OWN-013 the 0.4.0 cut** | 🟡 **G1 ✅ measured, G2 ✅ written, G7 🟡** (R17 built); G3–G6, G8–G10 ⬜ | R17 unit 7/7 + mutant; editor tsc 0, eslint clean | **Opus** |
+| **OWN-013 the 0.4.0 cut** | 🟡 **G1 ✅ measured, G2 ✅ written, G7 🟡** (R17, OPENWRITES, IDREPLACE ✅ driven; PAGEPORTS open); G3–G6, G8–G10 ⬜ | unit `own-013` 10/10 + two mutants; editor tsc 0; drive §7 | **Opus** |
 
-**Built but undriven: 2.** P112-S11-IDREPLACE's fix (`f2505b83f`) and R17's copy (`8f9137d8e`). The dev stack was not
-launched this session: load 10–21, swap 12.2 of 13.3 GB, peers' jest running.
+**Built but undriven: 0** for OWN-013 (all three driven 2026-10-12, OWN-013 §7). A P112 peer (OWN-014/015/016,
+R18, labelled "s13") works in this phase at the same time; it adds its own rows and merges into this file.
 
 ## Session 12 in brief
 
@@ -41,13 +42,9 @@ launched this session: load 10–21, swap 12.2 of 13.3 GB, peers' jest running.
 **First, in your first message: say which model you are running on and whether the task's Model line says Richard
 should switch** (README §0.2). Do not wait for an answer.
 
-1. **Drive, when the box allows** (check `uptime` and `vm.swapusage`; one heavy job): in the dev editor, open a COPY of
-   a real 0.3.0 project (format 4). Check `<copy>.before-0.4` exists and holds the files as they were, the note names
-   it, `nodegx.project.json` says `"5"` after the open, and a second open makes no second copy. A new project from a
-   template makes no copy. In the same launch, drive IDREPLACE (a fresh copy keeps `95de5bf2-…`) and measure
-   OPENWRITES' cause (diff the baseline and the save's `buildProjectV2File` output). Fix OPENWRITES if the cause is the
-   one suspected and the fix is small; then remove its line from the changelog's *Good to know*, on both branches.
-2. **G5 + G6 on the cut tree:** a worktree (`make-worktree.sh`; delete its links into the primary's `dist` first) at
+1. ✅ *Done 2026-10-12 (OWN-013 §7).* Not driven: a **new project from a template makes no copy** (the opt-out in
+   `newProject`); check it on the next launch.
+2. **G5 + G6 on the cut tree** (P112-S13-HARNESSTOKENS's fix landed as `63992760c` and is in the changelog's *Fixed*): a worktree (`make-worktree.sh`; delete its links into the primary's `dist` first) at
    `cline-dev`'s tip with its own build output; `npm run ci:build:editor`, then `test:ci` and read the floor by name.
 3. **Make `release/0.4.0`** (local, through a temporary index or `git merge` in the worktree): the cut + `origin/main`
    merged in, conflicts from the cut. Ask Richard before pushing it and opening the PR (G4). Six required checks.
