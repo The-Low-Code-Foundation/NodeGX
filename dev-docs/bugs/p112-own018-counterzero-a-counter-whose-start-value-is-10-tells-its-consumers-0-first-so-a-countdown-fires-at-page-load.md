@@ -6,7 +6,6 @@ severity: high
 area: runtime / Counter (`packages/noodl-runtime/src/nodes/std-library/counter.ts` `currentCount`); the general shape is `NodeScope.setNodeParameters` queueing parameters while `connectInput` seeds targets immediately
 found: P112 OWN-018 s2, 2026-10-12 (Mistral Large 4 in OpenCode, quiz run 1; tarballs packed at 5754e993e)
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-018-A-STRANGER-ON-MISTRAL.md §14
-kit: runtime
 regression: packages/noodl-runtime/test/own018-a-countdown-condition-fires-at-load.test.ts
 commit: dd7ff4756
 ---
