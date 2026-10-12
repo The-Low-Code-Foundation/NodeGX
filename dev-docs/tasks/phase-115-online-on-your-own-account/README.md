@@ -3,6 +3,9 @@
 **Scoped:** 2026-10-07, at HEAD `d8a9f0069`, from a conversation with Richard that started as the story of an
 ex-client and ended as a research question. **Status: 📋 SCOPED AND PARKED.** Richard: *"we'll come back to it after
 phase 107 and our Swift runtime experiment phase"* (P110). Nothing here is built. **Prefix: `HST`.**
+**2026-10-12: HST-005's VM route is taken forward by P112 [OWN-016](../phase-112-your-own-nodegx/OWN-016-SHIP-IT.md)**
+(P112 R18), for the npm kit: a deploy folder plus the backend on a VM the person owns. Read OWN-016 before building
+HST-005. The rest of this phase stays parked.
 Task files: [HST-000](HST-000-THE-HOURS-WRITTEN-DOWN.md) … [HST-009](HST-009-THE-WORDS.md). The board is §6.
 
 > "Now if someone had a system where it just set up the VM, got you the domain name you wanted, connected all the APIs
