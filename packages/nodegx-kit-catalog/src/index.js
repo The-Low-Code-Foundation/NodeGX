@@ -389,8 +389,8 @@ function sameRuntimeList(a, b) {
  * Map one runtime node-library entry to a catalog-shaped overlay node.
  *
  * Derivations mirror `buildCatalog` exactly where the payload allows it —
- * `isVisual` is `category === 'Visual'`, `allowAsChild`/`allowAsExportRoot`
- * follow from it, `displayName` falls back to the type name. `inNodePicker` is
+ * `isVisual` is `category === 'Visual'`, the child/parent rules are the
+ * payload's own, `displayName` falls back to the type name. `inNodePicker` is
  * true for every non-deprecated kit node because `buildCatalog`'s own rule is
  * `!deprecated && (inPickerIndex || !!module)` and `registerModule` stamps
  * `module` onto every node a module registers.
@@ -434,13 +434,16 @@ function toOverlayNode(nodeType, origin) {
   if (nodeType.searchTags !== undefined) node.searchTags = nodeType.searchTags;
   if (nodeType.module !== undefined) node.module = nodeType.module;
   if (nodeType.shortDocs !== undefined) node.shortDesc = nodeType.shortDocs;
+  // The child/parent rules are the export's own answer, copied rather than derived again (P107 s90, as the
+  // built-in catalog has done since s89): `generateNodeLibrary` already makes a Visual node a child and an export
+  // root. Until s90 this re-applied that derivation; over the kits in 203 projects (65 types) the two never
+  // differed, so the copy only ever disagreed with a hand-written payload the runtime cannot produce.
   if (nodeType.singleton) node.singleton = true;
-  if (isVisual || nodeType.allowAsChild) node.allowAsChild = true;
+  if (nodeType.allowAsChild) node.allowAsChild = true;
   if (nodeType.allowChildrenWithCategory !== undefined) {
     node.allowChildrenWithCategory = nodeType.allowChildrenWithCategory;
   }
   if (nodeType.allowAsExportRoot !== undefined) node.allowAsExportRoot = nodeType.allowAsExportRoot;
-  else if (isVisual) node.allowAsExportRoot = true;
   if (nodeType.useVariants) node.useVariants = true;
   if (nodeType.visualStates !== undefined) node.visualStates = nodeType.visualStates;
 
