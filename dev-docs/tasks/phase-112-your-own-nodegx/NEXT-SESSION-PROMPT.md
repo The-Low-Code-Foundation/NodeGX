@@ -18,6 +18,9 @@ the drive in the dev editor found the copy made twice per open, and measured OPE
 | OWN-011 one install | 🟡 published; **AC1, AC3, AC4 ✅**; **AC2 editor half ❌** (§9) | waits on OWN-013's release | **Opus** |
 | OWN-012 the screen, from the descriptions | 📋 | — | step 1 **Opus**, 2–3 **Fable** |
 | **OWN-013 the 0.4.0 cut** | 🟡 **G1 ✅ measured, G2 ✅ written, G7 🟡** (R17, OPENWRITES, IDREPLACE ✅ driven; PAGEPORTS open); G3–G6, G8–G10 ⬜ | unit `own-013` 10/10 + two mutants; editor tsc 0; drive §7 | **Opus** |
+| **OWN-014 the agent sees its app** (s13) | 🟡 **AC1 ✅ AC2 ✅** from a packed tarball; AC3 publish, AC4 (the language app) owed | `scripts/own/stranger-render.mjs` + control (registry 0.1.0 refuses) | **Opus** |
+| **OWN-015 the backend from npm** (s13) | 🟡 mechanism ✅ from a tarball: provision → `set_function_secret` → deploy → call; AC2 files+results ✅ with control; AC3 ✅ | `scripts/own/stranger-backend.mjs` (a key-checking stand-in for Google) | **Opus** |
+| **OWN-016 ship it** (s13) | 🟡 step 1 + AC1 ✅ (`nodegx-deploy` bin); the VM ⬜ | Chrome over CDP, 0 errors; broken-project control | **Opus** |
 
 **Built but undriven: 0** for OWN-013 (all three driven 2026-10-12, OWN-013 §7). A P112 peer (OWN-014/015/016,
 R18, labelled "s13") works in this phase at the same time; it adds its own rows and merges into this file.
@@ -63,6 +66,41 @@ should switch** (README §0.2). Do not wait for an answer.
   picker?* (OWN-006 §6.3); who bumps the next npm release (s10).
 
 **Not this phase's to fix, but owed:** P112-S7-TEXTDEFAULTS, P112-S8-SHAREDTARGET, P112-S9-FRESHFONT (open).
+
+## OWN-014 / 015 / 016: the npm full stack (s13, 2026-10-12, Opus)
+
+**Why:** R18. Richard wants a no-editor tutorial video (a Duolingo clone with Google text-to-speech, built from npm
+alone). The npm kit could build and preview but not see its screen, keep a key on a server, or deploy. Commits:
+`9c65f35b8` (scoping), `63992760c` (HARNESSTOKENS), `9ee402130` (OWN-014), `c82f04a5b` (OWN-015), `2016dd48d`
+(OWN-016 step 1). Each task file's last section has the measurements.
+
+**What ships at the next `@nodegx/mcp` / `@nodegx/preview` release (nothing published yet):**
+- `@nodegx/mcp`'s prepack adds `dist/render-harness/` plus a production viewer (`build-render-harness.mjs`),
+  `dist/backend/cli.js` (`build-backend-copy.mjs`) and `dist/package.json` (C68's fix, for the cloud bundler).
+- Two new tools: `set_function_secret` and `list_function_secrets`.
+- `@nodegx/preview` gains the `nodegx-deploy` bin.
+- Both refusals say "from version 0.2.0 on", so **the release is 0.2.0** or those two sentences change.
+
+**Bugs found, all filed:**
+- HARNESSTOKENS (high) ✅: the packaged harness had 0 default tokens, 0.3.0 included.
+- CLEANWARNINGS (medium) ✅: "the render is clean" over warnings.
+- CLOUDDEPLOY (high) ✅: deploy failed on every npm install and on 0.3.0's sidecar.
+- AGENTFILES (medium) ✅: a deploy published `.mcp.json` and `CLAUDE.md`.
+- Still open: SECRETPATH (low; a Secret node's error names the server path), DEPLOYBADJSON (low), WORLDTYPECAST
+  (low, P116's test).
+
+**Next, in order:**
+1. **Ask Richard for a Google Cloud TTS key** (restricted to the Text-to-Speech API). Then run OWN-015 AC1 as a
+   stranger round: `claude -p` (Sonnet, `--strict-mcp-config`) in an empty folder whose `.mcp.json` runs the packed
+   `@nodegx/mcp`, given one sentence. It must build the function, the page, and playback through a `create_node_kit`
+   node, and the app must speak in the preview. Follow the stranger-round recipe memory: `--allowedTools` doesn't
+   restrict, so record cost and turns. AC2's last third is a CDP capture of every request the page makes, searched
+   for the key.
+2. **Publish 0.2.0** of `@nodegx/mcp` and `@nodegx/preview`, ask first (R11). Pack in a worktree at the pushed commit,
+   never in the shared checkout, then re-run the three `scripts/own/stranger-*.mjs` from the registry (OWN-014 AC3,
+   OWN-015 AC4, OWN-016 AC5).
+3. **OWN-016 steps 2–4** need Richard's VM (SSH), a DNS name and his go. Read DEP-005/006 and HST-005 first. The
+   backend there is `node cli.js serve`. Also owed: a `deploy_to_folder` MCP tool for people without a terminal.
 
 ## Standing findings (still true)
 
