@@ -1,7 +1,7 @@
 # NSP-019 — Richard reads it: the inspector shows a node's rules, and *Try this node*
 
 **Opened 2026-09-29.** **Depends on NSP-018.**
-**Status: 🟡 s91 (2026-10-12): Richard drove it — "Needs changes" (R30, §5.3): the Try panel moves into a pop-out modal with a live mock of the node. AC1 and AC2 built s77, the §2 disagreements table too (§5.1). AC3 stays open until the modal is driven. The three fold/gating choices are ruled (R31). The phase's only surface a person sees.**
+**Status: 🟡 s94 (2026-10-12): the R33 modal is BUILT and driven (§5.5) — *How this node works* under the node's name, the rules and *Try it* in a pop-out. AC3 waits on Richard's drive of it. (s91: "Needs changes", R30/R31, §5.3; s93: the mockup, R33 "Build it like this", §5.4; AC1/AC2 and the disagreements table s77.)**
 
 ## 1. The person sentence
 
@@ -181,3 +181,54 @@ on the Counter, the node he tried:
 The artboard works (press the buttons on the canvas's Play). It plays a hand-written copy of the Counter's rules, not the
 interpreter: the built modal runs `tryNodeModel` as the panel does today. Not yet asked: the modal's loading state
 (§5.3's two-minute "Loading the spec…" in the dev stack).
+
+### 5.5 s94, 2026-10-12 — the modal, built as drawn (R33) and driven
+
+**Built** (commit `feat(p107/nsp-019 s94)`), all under `views/panels/propertyeditor/spec/`; the two folds (`SpecSections`,
+`NodeRulesSection`, `TryNodePanel`, `TryTimeline`) are gone:
+
+- **The entry** — `HowItWorksButton`, mounted under `NodeLabel` (`propertyeditor/index.tsx`), above the tab strip, so it shows
+  on every tab. Three arms: the catalog has `rules` → *How this node works*; the type has a spec and no words →
+  a dashed *How it works: spec in progress* (R31's second choice); anything else → nothing (AC1's absent arm). The five are a
+  committed list (`spec-in-progress.json`: And, DbCollection2, Or, PageInputs, Screen Resolution), and
+  `tests-unit/nsp-019/nodeRules.test.tsx` recomputes it from the spec registry (108 specs, 103 worded) and goes red when it moves
+  (planted control: one name dropped → red).
+- **The shell** — `HowItWorksModal`: the editor's `BaseDialog` with its backdrop (the pattern `Modal` uses). Focus moves into the
+  modal on open and its root is a `data-keyboard-scope`, so `keyboardhandler.ts` runs no canvas command behind it (Backspace or
+  Delete would otherwise delete the selected node); Escape closes; a press outside closes.
+- **Left: the rules** — `NodeRulesColumn`. `ruleParts` takes a catalog line apart without changing a word (the case; the pulses as
+  "Sends …"; the outcome as a chip — Done, Unchanged, Failure, Completed; the "stays silent" tail); a test puts every one of the
+  catalog's 400+ lines back together from its parts. The spec/runtime disagreements and their rulings sit at the foot.
+- **Right: *Try it*** — `TryIt`, `TryStage`, `TryRows`, over a new `playTry` in `tryNodeModel.ts` (the same trace as
+  `playTimeline`, read as rows, each input's value, each output's last sent value, and the ports the last row reached). The node is
+  drawn as the canvas draws it: a white card with its title, inputs left and outputs right with their dots (square for a signal),
+  a bubble per value port, a signal's bubble only while lit (*sent* / *fired*), the dark preview pill above with the first value
+  output. What a step reached lights for about a second. Controls: signal pills, − / + steppers with a typeable middle (so `"abc"`
+  can still be tried), a switch per boolean, a native `<select>` per enum; *Move time* and *Same frame* only for a spec whose
+  `needs` has `clock` (24 of 108: Delay, HTTP, the visual nodes…). *What happened* is one row per thing done (one frame's presses
+  share a row), the outcome as a chip, the newest tinted and scrolled into view; a row whose only answer is an outcome reads
+  "nothing moves". The steps start with one frame end, so row 1 says what the node does at load. After 4 s of loading, the column
+  says why it waits (§5.3's dev-server hold).
+
+**Driven** (`npm run dev:debug`, a renamed copy of nodegx-debug-demo registered with the launcher and removed afterwards; the
+source's SHA unchanged; 28 MCP server processes alive after teardown). The Counter's panel shows the button under its name
+([shot](shots/nsp-019-s94-panel-button.png)); the modal opened with the spec loaded in 1–3 s. Eight real clicks — Increase ×2,
+Reset ×2, Limits Enabled, Max Value +, Increase ×2 — wrote exactly eight rows: `Current Count → 1`, `→ 2`, Reset `→ 0` Done,
+Reset *nothing moves* Unchanged, *Limits Enabled on* and *Max Value 1* (each *nothing happens*), Increase `→ 1` Done, Increase
+*nothing moves* Unchanged; the row list sat at its bottom (`scrollTop` 165 of 165) and the dialog never scrolled. Beside the
+mockup: [built](shots/nsp-019-s94-modal-built.png) · [mockup](shots/nsp-019-s94-modal-mockup.png).
+
+**Where it differs from the mockup, on purpose:** the rules are the catalog's (Counter has four worded inputs; the mockup's hand
+copy also had Min/Max and Count Changed groups); the steppers carry the full port name (no generic way to shorten one); the
+backdrop is the editor's own (a white wash in the light theme, where the mockup drew a dark dim); the card's colours are the
+canvas card's, not the node picker's category scheme (grey for most logic nodes).
+
+**Found while driving:** the dev server ran out of heap on its second or third rebuild, twice, and took the stack with it →
+[P107-S94-DEVHEAP](../../bugs/p107-s94-devheap-the-editor-dev-server-runs-out-of-heap-on-its-second-or-third-rebuild.md).
+An earlier "7 rows for 6 presses" happened while the dialog itself was scrolling under the click (the Try column overflowed);
+after `.Modal` clipped and the column scrolled on its own, every count matched.
+
+**Not driven:** the dark theme; a spec-in-progress node in the panel (graded by react-dom/server only); a clock node's controls in
+the app (graded with Delay, type `Timer`, by react-dom/server).
+
+**Left: AC3** — Richard drives the modal and his verdict is recorded here in his words.
