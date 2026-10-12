@@ -257,6 +257,11 @@ function buildCatalog(records, extras) {
       searchTags: sanitize(metadata.searchTags),
       module: metadata.module,
       ...exportedChildRules(exported),
+      // The port whose value titles the card (P107 s90, R24), as the export carries it: the agent names a node by it.
+      usePortAsLabel: exported.usePortAsLabel,
+      portLabelTruncationMode: exported.portLabelTruncationMode,
+      // For a deprecated type, the one that replaced it (P107 s90, R25): the node's own definition says it.
+      replacedBy: exported.replacedBy,
       useVariants: metadata.useVariants || undefined,
       visualStates: sanitize(metadata.visualStates)
     });
@@ -295,6 +300,15 @@ function buildCatalog(records, extras) {
     parameterEncoding: null
   });
   nodes.sort((a, b) => (a.typeName < b.typeName ? -1 : a.typeName > b.typeName ? 1 : 0));
+
+  // R25: a successor must be a type an author can still add, or the warning that names it sends them somewhere closed.
+  const byName = new Map(nodes.map((n) => [n.typeName, n]));
+  for (const n of nodes) {
+    if (n.replacedBy === undefined) continue;
+    const next = byName.get(n.replacedBy);
+    if (!n.isDeprecated) throw new Error(`${n.typeName} names replacedBy "${n.replacedBy}" but is not deprecated`);
+    if (!next || next.isDeprecated) throw new Error(`${n.typeName} is replaced by "${n.replacedBy}", which is ${next ? 'deprecated too' : 'not a registered type'}`);
+  }
 
   return {
     catalogFormatVersion: CATALOG_FORMAT_VERSION,

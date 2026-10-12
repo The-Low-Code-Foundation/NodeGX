@@ -197,6 +197,7 @@ const DbCollectionNode: NodeDefinitionOptions = {
   usePortAsLabel: 'collectionName',
   color: 'data',
   deprecated: true, // Use Query Records
+  replacedBy: 'DbCollection2',
   initialize: function (this: DbCollectionNodeInstance) {
     const _this = this;
 

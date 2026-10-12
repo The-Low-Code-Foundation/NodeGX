@@ -550,6 +550,8 @@ export interface ReactNodeDefinition {
   category?: string;
   /** Marks the node deprecated in the runtime definition and the catalog. */
   deprecated?: boolean;
+  /** For a deprecated node: the type that replaced it (P107 R25). */
+  replacedBy?: string;
   /** Server-side-rendering compatibility (RUN-002); forwarded to the runtime definition and the catalog. */
   ssr?: NodeSSRCompat;
 
@@ -1264,6 +1266,7 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
     displayNodeName: def.displayNodeName || def.displayName,
     category: 'Visual',
     deprecated: def.deprecated,
+    replacedBy: def.replacedBy,
     ssr: def.ssr,
     allowChildren: def.allowChildren === undefined ? true : def.allowChildren, //default to true
     visualStates: def.visualStates,

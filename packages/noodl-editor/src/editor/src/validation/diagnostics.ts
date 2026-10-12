@@ -83,6 +83,11 @@ export enum DiagnosticCode {
    * visual roots of different categories. `error`, as the editor marks it (`@nodegx/project-contract/hierarchy`).
    */
   InvalidHierarchy = 'invalid-hierarchy',
+  /**
+   * P107 R25: a node of a retired type the editor no longer offers, named with the type that replaced it when its
+   * definition says (`replacedBy`). `warning`: the old node still runs.
+   */
+  DeprecatedNode = 'deprecated-node',
   TypeIncompatibleConnection = 'type-incompatible-connection',
   /**
    * NDA-017: a control signal fires without waiting for the asynchronous producer of a value

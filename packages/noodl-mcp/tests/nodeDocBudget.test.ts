@@ -128,6 +128,14 @@ describe('AWP-005 — the response budget (a ratchet: move the number, say why)'
     tokens(await callRawText(session, 'get_node_type', { type_names: types, detail }));
 
   /**
+   * 🔴 **Ratchet moved 8,350 → 8,450 by P107 R25, "Warn on any" (2026-10-12, s90).** A deprecated type's summary now
+   * says what replaced it (`replacedBy`), and the basket holds one: the retired `Text Input`, which gained
+   * `"replacedBy": "net.noodl.controls.textinput"`. Measured with this spec's harness, that one line removed and
+   * restored: **8,338 → 8,351** (+13). The headroom it hit was 12, because the basket had grown 84 since the last move,
+   * which s90 did not attribute. Headroom kept near the last move's 96: **99**.
+   *
+   * ---
+   *
    * 🔴 **Ratchet moved 8,200 → 8,350 by P109/ISL-009's second ruling, "A data-* list" (2026-10-03).**
    * Every visual node gained one input, `dataAttributes` (a stringlist of `data-*` names; each listed
    * name becomes a port of that name). A summary carries one line per port and no description, so it
@@ -148,9 +156,9 @@ describe('AWP-005 — the response budget (a ratchet: move the number, say why)'
    * 3,940 → 4,223, `textinput` 14,520 → 14,765). ⚠️ That leaves 59 tokens, and `HEAD`'s `Group`
    * had already grown 279 past P99's recorded 15,561 — not attributed here.
    */
-  it('keeps the 8-type storefront basket under 8,350 tokens at summary detail', async () => {
+  it('keeps the 8-type storefront basket under 8,450 tokens at summary detail', async () => {
     // Was 30,815 at full detail — more than all 89 tool schemas combined.
-    expect(await cost(STOREFRONT_TYPES, 'summary')).toBeLessThan(8_350);
+    expect(await cost(STOREFRONT_TYPES, 'summary')).toBeLessThan(8_450);
   });
 
   it('keeps any single summary response under 3,000 tokens', async () => {

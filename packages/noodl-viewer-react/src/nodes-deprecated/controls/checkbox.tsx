@@ -96,6 +96,7 @@ const CheckBoxNode: ReactNodeDefinition = {
   // `displayName`. The picker therefore offered two entries reading the same word, and
   // the one an author was most likely to reach for was this one.
   deprecated: true,
+  replacedBy: 'net.noodl.controls.checkbox',
   displayName: 'Checkbox',
   docs: 'https://docs.noodl.net/nodes/visual/checkbox',
   allowChildren: false,

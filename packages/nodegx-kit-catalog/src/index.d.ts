@@ -46,6 +46,8 @@ export interface ExportedNodeType {
   allowAsChild?: boolean;
   allowAsExportRoot?: unknown;
   allowChildrenWithCategory?: unknown;
+  usePortAsLabel?: string;
+  portLabelTruncationMode?: string;
   useVariants?: unknown;
   visualStates?: unknown;
   dynamicports?: unknown[];
@@ -154,6 +156,9 @@ export interface OverlayCatalogNode {
   allowAsChild?: boolean;
   allowChildrenWithCategory?: unknown;
   allowAsExportRoot?: unknown;
+  /** P107 R24: the port whose value titles the card. */
+  usePortAsLabel?: string;
+  portLabelTruncationMode?: string;
   useVariants?: boolean;
   visualStates?: unknown;
   inputs: OverlayCatalogPort[];

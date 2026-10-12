@@ -116,6 +116,7 @@ const CloudFunctionNode: NodeDefinitionOptions = {
   usePortAsLabel: 'functionName',
   docs: 'https://docs.noodl.net/nodes/data/cloud-data/cloud-function',
   deprecated: true,
+  replacedBy: 'CloudFunction2',
   initialize: function (this: CloudFunctionInstance) {
     this._internal.paramsValues = {};
     // this._internal.resultsValues = {};

@@ -59,6 +59,7 @@ const CollectionNode: NodeDefinitionOptions = {
   usePortAsLabel: 'collectionId',
   color: 'data',
   deprecated: true, // Use new array node
+  replacedBy: 'Collection2',
   initialize: function (this: CollectionNodeInstance) {
     const _this = this;
 

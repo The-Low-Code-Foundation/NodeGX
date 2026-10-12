@@ -325,6 +325,8 @@ export interface NodeTypeRow {
   isVisual: boolean;
   availableIn: string[];
   deprecated?: boolean;
+  /** P107 R25: the type that replaced a deprecated one, when its definition says. */
+  replacedBy?: string;
   /** false ⇒ superseded/specialised type hidden from the editor's picker. */
   inNodePicker?: boolean;
   /** CN-009 — `"project-kit"` on a node one of this project's kits declares; absent on a built-in. */
@@ -389,6 +391,7 @@ export function listNodeTypes(filter: ListNodeTypesFilter = {}): NodeTypeRow[] {
       availableIn: n.availableIn as unknown as string[]
     };
     if (n.isDeprecated) row.deprecated = true;
+    if (n.replacedBy) row.replacedBy = n.replacedBy;
     if (n.inNodePicker === false) row.inNodePicker = false;
     if (origin) {
       row.providedBy = origin.providedBy;
@@ -455,6 +458,8 @@ export interface NodeTypeDetail {
   category?: string;
   isVisual: boolean;
   deprecated?: boolean;
+  /** P107 R25: the type that replaced a deprecated one, when its definition says. */
+  replacedBy?: string;
   availableIn: string[];
   /** CN-009 — `"project-kit"` on a node one of this project's kits declares; absent on a built-in. */
   providedBy?: string;
@@ -610,6 +615,8 @@ export interface NodeTypeSummary {
   category?: string;
   isVisual: boolean;
   deprecated?: boolean;
+  /** P107 R25: the type that replaced a deprecated one, when its definition says. */
+  replacedBy?: string;
   /**
    * CN-009 — `"project-kit"` on a node one of this project's kits declares.
    *
@@ -801,6 +808,7 @@ export function getNodeTypeSummary(typeName: string): NodeTypeSummary | NodeType
   }
   if (full.category) s.category = full.category;
   if (full.deprecated) s.deprecated = true;
+  if (full.replacedBy) s.replacedBy = full.replacedBy;
   // CMP-006 AC3 — see `NodeTypeSummary.antiPatterns` for the traffic count that
   // moved this off `detail: "full"`. Unconditional on purpose: a rule that emits
   // them only for cheap types would reintroduce silence exactly where the
@@ -882,6 +890,7 @@ export function getNodeTypePorts(typeName: string, portNames: readonly string[])
     ...(full.summary ? { summary: full.summary } : {}),
     // CMP-009 §3 — 30 of 176 types, and `antiPatterns` covers 1 of the 30.
     ...(full.deprecated ? { deprecated: true as const } : {}),
+    ...(full.replacedBy ? { replacedBy: full.replacedBy } : {}),
     // CMP-009 §2 — the port-scoped half of the export ledger, narrowed to what
     // was asked. See `NodeTypePortsView.export`.
     ...(exportInfo ? { export: exportInfo } : {}),
@@ -1002,6 +1011,7 @@ export function getNodeTypeDetail(typeName: string): NodeTypeDetail | NodeTypeLo
     examples
   };
   if (n.isDeprecated) detail.deprecated = true;
+  if (n.replacedBy) detail.replacedBy = n.replacedBy;
   const origin = kitOrigin(n);
   if (origin) {
     detail.providedBy = origin.providedBy;

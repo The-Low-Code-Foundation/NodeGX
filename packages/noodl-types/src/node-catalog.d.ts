@@ -348,6 +348,8 @@ export interface CatalogNode {
   category?: NodeCategory;
   isVisual: boolean;
   isDeprecated: boolean;
+  /** For a deprecated type: the type that replaced it, from its definition (P107 R25). Absent when nothing did. */
+  replacedBy?: NodeTypeName;
   /** False for legacy/superseded types or ones created only through specialised flows; avoid authoring these. */
   inNodePicker: boolean;
   availableIn: RuntimeEnvironment[];
@@ -370,6 +372,10 @@ export interface CatalogNode {
   /** Set on `Component Children`: a component that holds one holds children of these categories. */
   haveComponentChildren?: string[];
   allowAsExportRoot?: boolean;
+  /** The port whose value titles an unlabelled node's card (`@nodegx/project-contract/node-title`, P107 R24). */
+  usePortAsLabel?: string;
+  /** `filename` or `length`: how that title is cut. */
+  portLabelTruncationMode?: string;
   useVariants?: boolean;
   visualStates?: Array<{ name: string; label: string }>;
   inputs: CatalogPort[];

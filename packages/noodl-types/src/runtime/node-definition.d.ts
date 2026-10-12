@@ -1237,6 +1237,8 @@ export interface NodeDefinitionOptions {
   version?: string;
   /** Hides the node from the picker while keeping existing projects working. */
   deprecated?: boolean;
+  /** For a deprecated node: the type that replaced it, which the agent's checker names (P107 R25). */
+  replacedBy?: string;
   /** Server-side-rendering compatibility. Absent means `safe`. */
   ssr?: NodeSSRCompat;
 
@@ -1387,6 +1389,7 @@ export interface NodeMetadata {
   module?: string;
   version?: string;
   deprecated?: boolean;
+  replacedBy?: string;
   /** Server-side-rendering compatibility. Absent means `safe`. */
   ssr?: NodeSSRCompat;
 

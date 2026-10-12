@@ -54,6 +54,7 @@ interface NodeExportMetadata {
   nodeDoubleClickAction?: unknown;
   module?: unknown;
   deprecated?: unknown;
+  replacedBy?: unknown;
   haveComponentPorts?: unknown;
   /**
    * P77 SBR-008 §9 — ports with this prefix on this node type are declared by the author's
@@ -93,6 +94,8 @@ interface ExportedNodeType {
   nodeDoubleClickAction?: unknown;
   module?: unknown;
   deprecated?: boolean;
+  /** For a deprecated type: the type that replaced it (P107 R25). */
+  replacedBy?: string;
   haveComponentPorts?: boolean;
   /** P77 SBR-008 §9 — see the same field on the metadata above. */
   wireDeclaredPortPrefix?: string;
@@ -366,6 +369,9 @@ function generateNodeLibrary(nodeRegister: NodeRegisterLike, options?: { runtime
     }
     if (nodeMetadata.deprecated) {
       nodeObj.deprecated = true;
+    }
+    if (typeof nodeMetadata.replacedBy === 'string') {
+      nodeObj.replacedBy = nodeMetadata.replacedBy;
     }
     if (nodeMetadata.haveComponentPorts) {
       nodeObj.haveComponentPorts = true;

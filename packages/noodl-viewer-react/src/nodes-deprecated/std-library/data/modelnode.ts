@@ -54,6 +54,7 @@ const ModelNodeDefinition: NodeDefinitionOptions = {
   usePortAsLabel: 'modelId',
   color: 'data',
   deprecated: true, // Use new model node
+  replacedBy: 'Model2',
   initialize: function (this: ModelNodeInstance) {
     const internal = this._internal;
     internal.inputValues = {};

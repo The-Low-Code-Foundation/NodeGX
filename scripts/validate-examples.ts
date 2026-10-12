@@ -240,6 +240,22 @@ function parameterValueDiagnostics(example: ExampleFile): Diagnostic[] {
 
 const { resolveModuleNodeTypes } = require('./node-catalog/moduleNodeTypes');
 
+/** Example id → the deprecated node types whose own enrichment lists it as their example (P107 R25). */
+function retiredNodesDocumentedBy(): Map<string, Set<string>> {
+  const catalog = loadDefaultCatalog();
+  const dir = path.join(__dirname, '..', 'docs', 'node-catalog', 'enrichment');
+  const out = new Map<string, Set<string>>();
+  for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.json'))) {
+    const e = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')) as { typeName?: string; examples?: string[] };
+    if (!e.typeName || !catalog.getNode(e.typeName)?.isDeprecated) continue;
+    for (const id of e.examples ?? []) {
+      if (!out.has(id)) out.set(id, new Set());
+      out.get(id)!.add(e.typeName);
+    }
+  }
+  return out;
+}
+
 /**
  * COM-003 AC3 — an example may use a node type the catalog cannot carry, IF it says which module
  * registers it and that module really does.
@@ -298,6 +314,7 @@ function main(): void {
   }
 
   const validator = new SemanticValidator();
+  const retiredSubjects = retiredNodesDocumentedBy();
   const results: unknown[] = [];
   let failed = 0;
 
@@ -328,6 +345,19 @@ function main(): void {
         report.summary.errors = kept.filter((d) => d.severity === 'error').length;
         report.summary.warnings = kept.filter((d) => d.severity === 'warning').length;
         report.summary.infos = kept.filter((d) => d.severity === 'info').length;
+      }
+    }
+
+    // P107 R25 — an example that IS a retired node's documentation (listed in that node's enrichment `examples`) keeps
+    // its subject: it is there for the projects that still have one. Any other retired node in an example is a finding.
+    const documents = retiredSubjects.get(example.id) ?? new Set<string>();
+    if (documents.size > 0) {
+      const kept = report.diagnostics.filter(
+        (d) => !(d.code === 'deprecated-node' && d.location.nodeType && documents.has(d.location.nodeType))
+      );
+      if (kept.length !== report.diagnostics.length) {
+        report.diagnostics = kept;
+        report.summary.warnings = kept.filter((d) => d.severity === 'warning').length;
       }
     }
 

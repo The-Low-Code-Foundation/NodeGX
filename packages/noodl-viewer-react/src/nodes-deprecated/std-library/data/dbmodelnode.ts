@@ -98,6 +98,7 @@ const ModelNodeDefinition: NodeDefinitionOptions = {
   usePortAsLabel: '$ndlCollectionName',
   color: 'data',
   deprecated: true, // Use record node
+  replacedBy: 'DbModel2',
   initialize: function (this: DbModelNodeInstance) {
     const internal = this._internal;
     internal.inputValues = {};

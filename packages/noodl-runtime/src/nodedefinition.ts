@@ -348,6 +348,7 @@ function defineNode(opts: NodeDefinitionOptions): NodeDefinition {
     name: opts.name,
     displayNodeName: opts.displayNodeName || opts.displayName,
     deprecated: opts.deprecated,
+    replacedBy: opts.replacedBy,
     haveComponentPorts: opts.haveComponentPorts,
     // P77 SBR-008 §9 — ports under this prefix are declared by the author's wires. Carried
     // through to the editor so it stops calling such a wire broken before the runtime has

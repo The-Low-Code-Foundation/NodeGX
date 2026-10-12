@@ -4,6 +4,8 @@
  * catalog display names instead of raw type strings where possible.
  */
 
+import { portTitle } from '@nodegx/project-contract/node-title';
+
 import { catalogIndex } from './catalog';
 import { isComponentRef, refToPath } from './editor-deps';
 import type { NodeV2 } from './editor-deps';
@@ -14,6 +16,8 @@ export interface VisualTreeNode {
   type: string;
   displayType?: string;
   label?: string;
+  /** What the node's card says when it has no label: one of its own ports (a Variable's name, a Text's text). R24. */
+  title?: string;
   /** Small selection of scalar parameters that shape what the node shows. */
   parameters?: Record<string, unknown>;
   children?: VisualTreeNode[];
@@ -33,7 +37,7 @@ export interface ComponentDescription {
   /** Visual hierarchy — the trees rooted at parentless visual nodes. */
   visualTree: VisualTreeNode[];
   /** Non-visual nodes (logic, data, events), flat. */
-  logicNodes: Array<{ id: string; type: string; displayType?: string; label?: string; parameters?: Record<string, unknown> }>;
+  logicNodes: Array<{ id: string; type: string; displayType?: string; label?: string; title?: string; parameters?: Record<string, unknown> }>;
   /** Data/signal flow in readable endpoint notation. */
   dataFlow: FlowEdge[];
   /** Other project components this component instantiates. */
@@ -61,6 +65,16 @@ function displayType(type: string): string | undefined {
   return node && node.displayName !== type ? node.displayName : undefined;
 }
 
+/**
+ * The title an unlabelled node's card takes from its own port (`usePortAsLabel`), as the editor draws it — P107 R24
+ * ("Card title + type"): the agent names the node by it, with the type beside it.
+ */
+function cardTitle(node: NodeV2): string | undefined {
+  if (node.label || isComponentRef(node.type)) return undefined;
+  const type = catalogIndex().getNode(node.type);
+  return type ? portTitle(node.parameters as Record<string, unknown> | undefined, type) : undefined;
+}
+
 function isVisualType(type: string): boolean {
   if (isComponentRef(type)) return true; // component instances mount into the tree
   return catalogIndex().getNode(type)?.isVisual ?? false;
@@ -70,7 +84,9 @@ function endpoint(node: NodeV2 | undefined, id: string, property: string): strin
   if (!node) return `${id}.${property}`;
   // An empty label is no label, as on the canvas (`NodeGraphNode.label` falls through on `!this._label`) and in the
   // tree below: `??` kept `""` and named the endpoint " [id]" on 97 nodes in Richard's projects (P107-S90-EMPTYLABEL).
-  const name = node.label || displayType(node.type) || node.type;
+  const typeName = displayType(node.type) || node.type;
+  const title = cardTitle(node);
+  const name = node.label || (title !== undefined ? `${typeName} ${JSON.stringify(title)}` : typeName);
   return `${name} [${id}].${property}`;
 }
 
@@ -83,6 +99,8 @@ export function describeComponent(key: string, files: ComponentFiles): Component
     const dt = displayType(node.type);
     if (dt) t.displayType = dt;
     if (node.label) t.label = node.label;
+    const title = cardTitle(node);
+    if (title !== undefined) t.title = title;
     const params = pickParameters(node);
     if (params) t.parameters = params;
     const children = (node.children ?? [])
@@ -111,6 +129,8 @@ export function describeComponent(key: string, files: ComponentFiles): Component
       const dt = displayType(n.type);
       if (dt) row.displayType = dt;
       if (n.label) row.label = n.label;
+      const title = cardTitle(n);
+      if (title !== undefined) row.title = title;
       const params = pickParameters(n);
       if (params) row.parameters = params;
       return row;

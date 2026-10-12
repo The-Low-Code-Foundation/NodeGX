@@ -444,6 +444,9 @@ function toOverlayNode(nodeType, origin) {
     node.allowChildrenWithCategory = nodeType.allowChildrenWithCategory;
   }
   if (nodeType.allowAsExportRoot !== undefined) node.allowAsExportRoot = nodeType.allowAsExportRoot;
+  // P107 R24 (s90): the port whose value titles the card, which the agent names a kit node by, as a built-in.
+  if (nodeType.usePortAsLabel !== undefined) node.usePortAsLabel = nodeType.usePortAsLabel;
+  if (nodeType.portLabelTruncationMode !== undefined) node.portLabelTruncationMode = nodeType.portLabelTruncationMode;
   if (nodeType.useVariants) node.useVariants = true;
   if (nodeType.visualStates !== undefined) node.visualStates = nodeType.visualStates;
 

@@ -157,6 +157,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/cloud-data/add-record-relation",
+      "usePortAsLabel": "collectionName",
       "inputs": [
         {
           "name": "idSource",
@@ -1118,6 +1119,7 @@
         "Visual"
       ],
       "allowAsExportRoot": true,
+      "replacedBy": "net.noodl.controls.button",
       "useVariants": true,
       "inputs": [
         {
@@ -2454,6 +2456,7 @@
       "docs": "https://docs.noodl.net/nodes/visual/checkbox",
       "allowAsChild": true,
       "allowAsExportRoot": true,
+      "replacedBy": "net.noodl.controls.checkbox",
       "useVariants": true,
       "inputs": [
         {
@@ -5140,6 +5143,8 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/cloud-data/cloud-function",
+      "usePortAsLabel": "functionName",
+      "replacedBy": "CloudFunction2",
       "inputs": [
         {
           "name": "call",
@@ -5258,6 +5263,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/cloud-data/cloud-function",
+      "usePortAsLabel": "function",
       "inputs": [
         {
           "name": "call",
@@ -5381,6 +5387,8 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/array",
+      "usePortAsLabel": "collectionId",
+      "replacedBy": "Collection2",
       "inputs": [
         {
           "name": "add",
@@ -5596,6 +5604,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/array/array-node",
+      "usePortAsLabel": "collectionId",
       "inputs": [
         {
           "name": "collectionId",
@@ -5822,6 +5831,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/array/clear-array",
+      "usePortAsLabel": "collectionId",
       "inputs": [
         {
           "name": "clear",
@@ -5957,6 +5967,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/array/insert-into-array",
+      "usePortAsLabel": "collectionId",
       "inputs": [
         {
           "name": "add",
@@ -6230,6 +6241,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/array/remove-from-array",
+      "usePortAsLabel": "collectionId",
       "inputs": [
         {
           "name": "collectionId",
@@ -6838,6 +6850,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/component-utilities/component-object",
+      "replacedBy": "net.noodl.ComponentObject",
       "inputs": [
         {
           "name": "fetch",
@@ -7512,6 +7525,8 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/cloud-services/collection",
+      "usePortAsLabel": "collectionName",
+      "replacedBy": "DbCollection2",
       "inputs": [],
       "outputs": [
         {
@@ -7689,6 +7704,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/cloud-data/query-records",
+      "usePortAsLabel": "collectionName",
       "inputs": [],
       "outputs": [
         {
@@ -8080,6 +8096,8 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/cloud-services/model",
+      "usePortAsLabel": "$ndlCollectionName",
+      "replacedBy": "DbModel2",
       "inputs": [
         {
           "name": "delete",
@@ -8360,6 +8378,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/cloud-data/record",
+      "usePortAsLabel": "collectionName",
       "inputs": [
         {
           "name": "fetch",
@@ -8651,6 +8670,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/cloud-data/delete-record",
+      "usePortAsLabel": "collectionName",
       "inputs": [
         {
           "name": "idSource",
@@ -9439,6 +9459,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/events/receive-event",
+      "usePortAsLabel": "channelName",
       "inputs": [
         {
           "name": "channelName",
@@ -9552,6 +9573,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/events/send-event",
+      "usePortAsLabel": "channelName",
       "inputs": [
         {
           "name": "channelName",
@@ -9757,6 +9779,7 @@
         "percent",
         "%"
       ],
+      "usePortAsLabel": "expression",
       "inputs": [
         {
           "name": "evaluateAtLoad",
@@ -18706,6 +18729,7 @@
         "Visual"
       ],
       "allowAsExportRoot": true,
+      "replacedBy": "Text",
       "useVariants": true,
       "inputs": [
         {
@@ -20626,6 +20650,8 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/object",
+      "usePortAsLabel": "modelId",
+      "replacedBy": "Model2",
       "inputs": [
         {
           "name": "clear",
@@ -20810,6 +20836,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/object/object-node",
+      "usePortAsLabel": "modelId",
       "inputs": [
         {
           "name": "fetch",
@@ -21529,6 +21556,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/cloud-data/create-new-record",
+      "usePortAsLabel": "collectionName",
       "inputs": [
         {
           "name": "accessControl",
@@ -22726,6 +22754,7 @@
       "docs": "https://docs.noodl.net/nodes/visual/options",
       "allowAsChild": true,
       "allowAsExportRoot": true,
+      "replacedBy": "net.noodl.controls.options",
       "useVariants": true,
       "inputs": [
         {
@@ -26047,6 +26076,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/component-utilities/parent-component-object",
+      "replacedBy": "net.noodl.ParentComponentObject",
       "inputs": [
         {
           "name": "fetch",
@@ -26187,6 +26217,7 @@
         "request",
         "fetch"
       ],
+      "replacedBy": "net.noodl.HTTP",
       "inputs": [
         {
           "name": "cancel",
@@ -26365,6 +26396,7 @@
       "docs": "https://docs.noodl.net/nodes/visual/radiobutton",
       "allowAsChild": true,
       "allowAsExportRoot": true,
+      "replacedBy": "net.noodl.controls.radiobutton",
       "useVariants": true,
       "inputs": [
         {
@@ -28454,6 +28486,7 @@
       "docs": "https://docs.noodl.net/nodes/visual/range",
       "allowAsChild": true,
       "allowAsExportRoot": true,
+      "replacedBy": "net.noodl.controls.range",
       "useVariants": true,
       "inputs": [
         {
@@ -29564,6 +29597,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/cloud-data/remove-record-relation",
+      "usePortAsLabel": "collectionName",
       "inputs": [
         {
           "name": "idSource",
@@ -30992,6 +31026,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/variable/set-variable",
+      "usePortAsLabel": "name",
       "inputs": [
         {
           "name": "do",
@@ -31181,6 +31216,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/cloud-data/set-record-properties",
+      "usePortAsLabel": "collectionName",
       "inputs": [
         {
           "name": "accessControl",
@@ -31547,6 +31583,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/object/set-object-properties",
+      "usePortAsLabel": "modelId",
       "inputs": [
         {
           "name": "idSource",
@@ -32560,6 +32597,8 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/string",
+      "usePortAsLabel": "value",
+      "portLabelTruncationMode": "length",
       "inputs": [
         {
           "name": "runOnChange-value",
@@ -32778,6 +32817,8 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/string-manipulation/string-format",
+      "usePortAsLabel": "format",
+      "portLabelTruncationMode": "length",
       "inputs": [
         {
           "name": "format",
@@ -33092,6 +33133,7 @@
         "socket",
         "backend"
       ],
+      "usePortAsLabel": "collectionName",
       "inputs": [
         {
           "name": "enabled",
@@ -33629,6 +33671,8 @@
       "docs": "https://docs.noodl.net/nodes/basic-elements/text",
       "allowAsChild": true,
       "allowAsExportRoot": true,
+      "usePortAsLabel": "text",
+      "portLabelTruncationMode": "length",
       "useVariants": true,
       "visualStates": [
         {
@@ -35461,6 +35505,7 @@
       "docs": "https://docs.noodl.net/nodes/visual/text-input",
       "allowAsChild": true,
       "allowAsExportRoot": true,
+      "replacedBy": "net.noodl.controls.textinput",
       "useVariants": true,
       "inputs": [
         {
@@ -37671,6 +37716,8 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/variable",
+      "usePortAsLabel": "name",
+      "replacedBy": "Variable2",
       "inputs": [
         {
           "name": "fetch",
@@ -37794,6 +37841,7 @@
         "compat": "safe"
       },
       "docs": "https://docs.noodl.net/nodes/data/variable/variable-node",
+      "usePortAsLabel": "name",
       "inputs": [
         {
           "name": "fetch",
@@ -40303,6 +40351,7 @@
         "guided",
         "tour"
       ],
+      "usePortAsLabel": "channel",
       "inputs": [
         {
           "name": "action",
@@ -40821,6 +40870,7 @@
         "remote",
         "command"
       ],
+      "usePortAsLabel": "actionType",
       "inputs": [
         {
           "name": "actionType",
@@ -42195,6 +42245,7 @@
       "ssr": {
         "compat": "safe"
       },
+      "usePortAsLabel": "storeName",
       "inputs": [
         {
           "name": "initialState",
@@ -42367,6 +42418,7 @@
       "ssr": {
         "compat": "safe"
       },
+      "usePortAsLabel": "key",
       "inputs": [
         {
           "name": "key",
@@ -42538,6 +42590,7 @@
       "ssr": {
         "compat": "safe"
       },
+      "usePortAsLabel": "keys",
       "inputs": [
         {
           "name": "keys",
@@ -43815,6 +43868,7 @@
       "ssr": {
         "compat": "safe"
       },
+      "usePortAsLabel": "key",
       "inputs": [
         {
           "name": "apply",
@@ -46293,6 +46347,7 @@
       "ssr": {
         "compat": "safe"
       },
+      "usePortAsLabel": "storeName",
       "inputs": [
         {
           "name": "clearHistory",
@@ -46551,6 +46606,7 @@
       "ssr": {
         "compat": "safe"
       },
+      "usePortAsLabel": "storeName",
       "inputs": [
         {
           "name": "jumpTo",
@@ -46779,6 +46835,7 @@
       "ssr": {
         "compat": "safe"
       },
+      "usePortAsLabel": "snapshotName",
       "inputs": [
         {
           "name": "restore",
@@ -47976,6 +48033,8 @@
         "chat",
         "live"
       ],
+      "usePortAsLabel": "url",
+      "portLabelTruncationMode": "path",
       "inputs": [
         {
           "name": "autoConnect",
@@ -48800,6 +48859,8 @@
         "Visual"
       ],
       "allowAsExportRoot": true,
+      "usePortAsLabel": "label",
+      "portLabelTruncationMode": "length",
       "useVariants": true,
       "visualStates": [
         {
@@ -51120,6 +51181,8 @@
       "docs": "https://docs.noodl.net/nodes/ui-controls/checkbox",
       "allowAsChild": true,
       "allowAsExportRoot": true,
+      "usePortAsLabel": "label",
+      "portLabelTruncationMode": "length",
       "useVariants": true,
       "visualStates": [
         {
@@ -53322,6 +53385,7 @@
       "docs": "https://docs.noodl.net/nodes/ui-controls/dropdown",
       "allowAsChild": true,
       "allowAsExportRoot": true,
+      "usePortAsLabel": "label",
       "useVariants": true,
       "visualStates": [
         {
@@ -55944,6 +56008,7 @@
       "docs": "https://docs.noodl.net/nodes/ui-controls/radio-button",
       "allowAsChild": true,
       "allowAsExportRoot": true,
+      "usePortAsLabel": "label",
       "useVariants": true,
       "visualStates": [
         {
@@ -60562,6 +60627,7 @@
       "docs": "https://docs.noodl.net/nodes/ui-controls/text-input",
       "allowAsChild": true,
       "allowAsExportRoot": true,
+      "usePortAsLabel": "label",
       "useVariants": true,
       "visualStates": [
         {
@@ -66716,6 +66782,7 @@
       ],
       "providedBy": "noodl-viewer-cloud",
       "docs": "https://docs.noodl.net/nodes/cloud-functions/cloud-data/aggregate-records",
+      "usePortAsLabel": "collectionName",
       "inputs": [
         {
           "name": "aggregates",
@@ -75473,7 +75540,7 @@
     {
       "id": "code-rest-list",
       "title": "REST node feeding a repeater",
-      "description": "The REST node wraps a request/response pair in two scripts: the request script assembles the call from the node's script-declared inputs, and the response script maps the payload onto script-declared outputs — here an `items` array. Ports come from those scripts (that is its dynamism). `fetch` on mount loads the list; `success`/`failure` sequence what follows. For a one-off GET without mapping scripts, HTTP Request is the lighter tool.",
+      "description": "The REST node is retired: the editor no longer offers it, and HTTP Request replaces it in new work. This example is here for the projects that still have one. It wraps a request/response pair in two scripts: the request script assembles the call from the node's script-declared inputs, and the response script maps the payload onto script-declared outputs — here an `items` array. Ports come from those scripts (that is its dynamism). `fetch` on mount loads the list; `success`/`failure` sequence what follows. For a one-off GET without mapping scripts, HTTP Request is the lighter tool.",
       "demonstrates": [
         "REST2"
       ],
@@ -81562,7 +81629,7 @@
             },
             {
               "id": "prompt_input",
-              "type": "Text Input",
+              "type": "net.noodl.controls.textinput",
               "label": "Prompt",
               "parent": "composer",
               "parameters": {
@@ -81571,7 +81638,7 @@
             },
             {
               "id": "send_button",
-              "type": "Button",
+              "type": "net.noodl.controls.button",
               "label": "Send",
               "parent": "composer",
               "parameters": {

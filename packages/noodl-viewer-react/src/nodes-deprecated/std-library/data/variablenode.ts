@@ -40,6 +40,7 @@ const VariableNodeDefinition: NodeDefinitionOptions = {
   usePortAsLabel: 'name',
   color: 'data',
   deprecated: true, // use newvariable instead
+  replacedBy: 'Variable2',
   initialize: function (this: VariableNodeInstance) {
     const _this = this;
     const internal = this._internal;

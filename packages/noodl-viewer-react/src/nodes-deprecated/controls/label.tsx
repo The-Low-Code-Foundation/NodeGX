@@ -46,6 +46,7 @@ const LabelNode: ReactNodeDefinition = {
   allowChildren: true,
   noodlNodeAsProp: true,
   deprecated: true,
+  replacedBy: 'Text',
   getReactComponent() {
     return Label;
   },

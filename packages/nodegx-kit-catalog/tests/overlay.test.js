@@ -120,6 +120,19 @@ describe('catalogNodesFromNodeLibrary', () => {
     expect('allowAsExportRoot' in bare[0]).toBe(false);
   });
 
+  it('carries the port a kit node titles its card from, and leaves it absent when there is none (P107 R24)', () => {
+    const { nodes } = catalogNodesFromNodeLibrary({
+      nodetypes: [
+        { name: 'k.Named', module: 'K', category: 'Data', ports: [], usePortAsLabel: 'key', portLabelTruncationMode: 'length' },
+        { name: 'k.Plain', module: 'K', category: 'Data', ports: [] }
+      ]
+    });
+    const named = nodes.find((n) => n.typeName === 'k.Named');
+    const plain = nodes.find((n) => n.typeName === 'k.Plain');
+    expect([named.usePortAsLabel, named.portLabelTruncationMode]).toEqual(['key', 'length']);
+    expect('usePortAsLabel' in plain).toBe(false);
+  });
+
   it('keeps the port metadata a check needs, not just the names', () => {
     const { nodes } = catalogNodesFromNodeLibrary(payload);
     const lane = nodes.find((n) => n.typeName === 'nodegx.cashflow.Lane');

@@ -152,6 +152,7 @@ const RangeNode: ReactNodeDefinition = {
   // `displayName`. The picker therefore offered two entries reading the same word, and
   // the one an author was most likely to reach for was this one.
   deprecated: true,
+  replacedBy: 'net.noodl.controls.range',
   docs: 'https://docs.noodl.net/nodes/visual/range',
   allowChildren: false,
   noodlNodeAsProp: true,
