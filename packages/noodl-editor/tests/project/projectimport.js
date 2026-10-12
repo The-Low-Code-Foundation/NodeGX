@@ -245,6 +245,8 @@ describe('Project import and export unit tests', function () {
   });
 
   it('can check for collissions (1)', function (done) {
+    // 🔴 `{ copyBeforeFormatUpdate: false }`: the committed fixture, opened in place, is format 4. Without it, 0.4.0's
+    // copy (P112 R17) lands beside it as `tests/testfs/import_proj1.before-0.4/` (found by test:ci, 2026-10-12).
     projectFromDirectory(Process.cwd() + '/tests/testfs/import_proj1', function (project) {
       ProjectModel.instance = project;
 
@@ -260,7 +262,7 @@ describe('Project import and export unit tests', function () {
         expect(collisions.styles.text).toEqual([]);
         done();
       });
-    });
+    }, { copyBeforeFormatUpdate: false });
   });
 
   it('can check for collissions (2)', function (done) {
@@ -280,7 +282,7 @@ describe('Project import and export unit tests', function () {
         expect(collisions.styles.text).toEqual([]);
         done();
       });
-    });
+    }, { copyBeforeFormatUpdate: false });
   });
 
   it('can import project with files', function (done) {
