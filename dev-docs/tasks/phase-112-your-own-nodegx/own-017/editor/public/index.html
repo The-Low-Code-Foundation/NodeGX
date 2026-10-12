@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>French Phrases Editor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>French Phrases — Editor</h1>
+      <p class="project-path" id="project-path">Opening project…</p>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab-btn active" data-tab="lessons">Lessons &amp; Phrases</button>
+      <button class="tab-btn" data-tab="voice">Cloud Voice</button>
+      <button class="tab-btn" data-tab="browse">Browse Components</button>
+    </nav>
+  </header>
+
+  <div id="banner" class="banner" hidden></div>
+
+  <main>
+    <section id="tab-lessons" class="tab-panel active">
+      <p class="hint">
+        Each lesson's title and its phrases (French + English). Content is shared by the Home and
+        Lesson pages, so a change here shows up on both.
+      </p>
+      <div id="lessons-root"></div>
+      <div class="actions-row">
+        <button id="add-lesson-btn" class="secondary">+ Add lesson</button>
+        <button id="save-lessons-btn" class="primary">Save lessons</button>
+      </div>
+    </section>
+
+    <section id="tab-voice" class="tab-panel">
+      <p class="hint">
+        The model and voice the server-side Speak Phrase cloud function passes to Gemini TTS. The
+        Gemini API key stays a server secret and is never shown or edited here.
+      </p>
+      <form id="voice-form" class="form-grid">
+        <label>
+          Model
+          <input list="model-suggestions" id="voice-model" name="model" required />
+          <datalist id="model-suggestions">
+            <option value="gemini-3.8-flash-tts"></option>
+          </datalist>
+        </label>
+        <label>
+          Voice
+          <input list="voice-suggestions" id="voice-name" name="voiceName" required />
+          <datalist id="voice-suggestions"></datalist>
+        </label>
+        <div class="actions-row">
+          <button type="submit" class="primary">Save voice</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="tab-browse" class="tab-panel">
+      <p class="hint">
+        Every component in the app, node by node: parameters (button colours and labels, layout,
+        script code, …) and what each node's signals are wired to (what tapping or finishing a
+        step does).
+      </p>
+      <div class="browse-layout">
+        <aside>
+          <ul id="component-list" class="component-list"></ul>
+        </aside>
+        <div id="component-detail" class="component-detail">
+          <p class="hint">Pick a component on the left.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

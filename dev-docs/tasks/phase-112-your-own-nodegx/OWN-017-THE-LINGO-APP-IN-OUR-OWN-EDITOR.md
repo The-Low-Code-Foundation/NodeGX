@@ -90,3 +90,43 @@ That's 7 components, the cloud function included, and every project/component/no
 0.1.0 kit and the files MCP 0.2.0 wrote. 🔴 The published `@nodegx/project-contract` README describes only the
 token/logic-builder/world modules. It never mentions `format`, `V2ProjectStore` or how to open a project, and it still
 says *"`private: true` for now"*. An outsider has to find the store by reading `.d.ts` files.
+
+**The stranger round** (`own-017/run.mjs`, the sentence in `own-017/sentence.txt`): `claude -p` (Sonnet) in a folder
+holding only a copy of the s15 app. No MCP, the kit from the registry, and shell limited to npm/npx/node/curl plus
+read-only tools. Attempt 1 died with the parent session after only exploring. Attempt 2 ran 113 turns in 17 min
+(Claude Code on the subscription). It built `editor/`: Express + one page with three tabs (*Lessons & Phrases*,
+*Cloud Voice*, *Browse Components*: every node's parameters as a form, its outgoing wires as a table), 1,453 lines.
+**It goes through the kit for real:** `V2ProjectStore(diskFiles(dir))` for every read and write, the editor suite's
+`applyEdit` (`set_parameter`, `rename`, `connect`, `disconnect`) for every change, `SchemaValidator` before each write,
+node-spec's ports to choose each field's control, and `DEFAULT_TOKENS` for the colour suggestions. It found all of
+this by reading `.d.ts` files (CONTRACTREADME).
+- 🔴 **It tested on the app it was told not to touch**, then said it had checked "the files matched the originals
+  byte-for-byte". Two files didn't: a wire moved to the end of `Pages/Lesson/connections.json` (its
+  disconnect/reconnect round trip), and registry timestamps. Harmless, and restored from the fixture before the drive.
+  The claim was false.
+- 🟡 **No stale-write guard:** the page gets each component's `revision` but never sends it back, so a save made after
+  someone else changed the file (an agent, the official editor) overwrites them silently. The store supports
+  `ifRevision`. Input for the brief (OWN-007): "send the revision back".
+
+**The drive** (`own-017/drive.mjs`, `editor-drive.mjs`, `f0.mjs`). Packed MCP 0.2.0 with a fresh HOME:
+`provision_backend` refused at first (the copy points at s15's backend, still alive on 8579 with s15's HOME, so the
+advice "use that backend" was right). With `force` it got its own backend on 8580, the function deployed, and Richard
+pasted the key into the copy's `.env` (R26: 53 characters, sent from the file). The packed preview runs on 59500.
+Every edit was made on the editor's own page over CDP: real presses on its tabs, rows and Save buttons, checked with
+`elementFromPoint`, and field values set the way its `input` handlers read them.
+
+| edit (AC2) | through the editor | in the running app |
+|---|---|---|
+| **The static (WAVTWICE)**: PhraseRow's *Convert PCM to WAV and play*, Script field: a WAV that starts with `RIFF` (or a `wav` MIME type) plays as it is; only raw PCM is wrapped | Browse → `Components/PhraseRow` → the node → Script → *Save node* → "Node saved." Only `/nodes/7/parameters/functionScript` changed (plus registry timestamps) | Before: a second `RIFF` inside the samples, tail RMS `… 19 8 16894 16961`. After: Gemini's own file (`fmt`, `data 57600`, `C2PA 6062` as its own chunk), tail `… 542 16 41 5 5 5`. **Richard: "static gone".** |
+| **A phrase**: *Merci / Thank you* → *Merci beaucoup / Thank you very much* | *Lessons & Phrases* → the row → *Save lessons* → "Lessons saved." | The lesson reads *Merci beaucoup / Thank you very much*; tapping it plays the new phrase (1.48 s, clean tail) |
+| **The voice**: Kore → Charon | *Cloud Voice* → *Save voice* → "Voice settings saved." | Control: saved but not deployed, still Kore (169 Hz median). After `deploy_cloud_functions` (the editor has no deploy button, so a person asks their agent): the backend's workflow file holds `voiceName: "Charon"` and no Kore. Bonjour's median pitch is 120 Hz against 169–220 Hz over three Kore clips. *Merci beaucoup* reads 182 vs 180, which this measure can't separate. **Richard, listening: "voice changed".** |
+| **A colour or a tap** (Richard's own, AC4) | He saved a change while the app was on the Greetings lesson; the file shows `borderTopStyle: "solid"` on *Group Actions* | 🔴 **The app showed "Not found"**: P112-S16-DEEPLINK (below) |
+
+**P112-S16-DEEPLINK (fixed, Richard found it):** the preview answered every address but `/` with a plain 404, so the
+live reload after each save, made while looking at a lesson, landed on "Not found". This wasn't his edit: a bare
+reload does it too. The VM's Caddy has `try_files` and lingo.nodegx.io answers 200. Fixed in the preview server,
+with a spec, a mutant and a traversal case rewritten to grade the property. Driven on the French app from the
+checkout's build (port 59502): reloading and a direct load both show the lesson.
+
+**AC3, half:** `validate_project` (packed MCP, read-only) after all edits: 0 errors, 1 warning (FRESHFONT, as
+before). Opening it in the official editor is owed.
