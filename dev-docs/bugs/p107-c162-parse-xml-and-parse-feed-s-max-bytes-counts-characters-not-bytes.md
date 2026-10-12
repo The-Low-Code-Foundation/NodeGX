@@ -2,6 +2,7 @@
 id: P107-C162
 title: Parse XML and Parse Feed — "Max Bytes" counts characters, not bytes, and its description says "larger than this"
 status: fixed
+commit: dccaa77e0
 severity: low
 area: runtime / Parse XML and Parse Feed (noodl-runtime/src/nodes/std-library/data/xml.ts `parseXML` :118; feed.ts :383 goes through the same call)
 found: P107 NSP-018 s77, 2026-10-10 — writing the two nodes' rules in words (the streams-and-parsers lane)

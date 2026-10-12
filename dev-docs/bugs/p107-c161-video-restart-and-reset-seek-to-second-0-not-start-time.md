@@ -2,6 +2,7 @@
 id: P107-C161
 title: Video — Restart and Reset seek to second 0, not Start Time: with a Start Time set, a Restart plays from before it, and the seek takes the End Time bound with it
 status: fixed
+commit: b8090d121
 severity: medium
 area: runtime / Video (noodl-viewer-react/src/components/visual/Video/Video.tsx `restart` :184-189, `reset` :197-203; the port descriptions, noodl-viewer-react/src/nodes/visual/video.ts :70 and :105)
 found: P107 NSP-018 s77, 2026-10-10 — writing the node's rules in words

@@ -2,6 +2,7 @@
 id: P107-S84-USERACL
 title: On the Parse wire the User, Set User Properties and Sign Up nodes draw a `prop-ACL` port, which the Record family hides as "access control, not data"
 status: fixed
+commit: 1c3166c57
 severity: low
 area: noodl-runtime/src/nodes/std-library/user/user-ports.ts `userPropertyPorts` (:115-150, the `!parseWire && !shouldShowField` guard :131); noodl-viewer-react/src/nodes/std-library/user/signup.ts `updatePorts` (:199-250, `_ignoreKeys` :219)
 found: P107 NSP-020 s84 (L1, the User family moved onto the port format), 2026-10-11 — oracle (a) drove the three User rows with an accounts class holding an `ACL` column
