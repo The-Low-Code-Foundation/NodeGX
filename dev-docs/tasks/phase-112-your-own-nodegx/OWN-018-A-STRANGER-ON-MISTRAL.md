@@ -4,7 +4,7 @@
 package … an internal data management system as a case study … all the data stays in Europe with an EU LLM. Do the
 same 'stranger's Claude Code' method we used for the Lingo app."*).
 **Depends on** OWN-015's 0.2.0 tarballs (packed at `9505d342d`; nothing shipped has changed since).
-**Status: 🟡 s1 done (2026-10-12). Round 3 on the fixed kit built ~90% of the intranet with 0 validation errors before its price cap (§10); reads cut 31% (§11). Next session: Richard's new brief (a landing page + Brevo sign-up) in an environment tuned for Large 4 (§12). ~$4 of the $10 credit left.**
+**Status: 🟡 s1 done (2026-10-12). Round 3 on the fixed kit built ~90% of the intranet with 0 validation errors before its price cap (§10); reads cut 31% (§11). Next session: the experiment series (§13) — a quiz game built a dozen times on OpenCode, scored by a script, with a Sonnet yardstick. ~$4 of the $10 credit left.**
 **Model:** the session that runs the rounds and reads them: Opus. The stranger: **Mistral Large 4 (`mistral-large-4`)
 in Mistral Vibe**, on purpose — the test is whether the kit is enough for an agent that isn't Claude.
 
@@ -272,4 +272,50 @@ entry. Measured, cheap experiments first (each on a small fixed task, a few cent
 
 **Budget:** ~$4 at the launch sale (ends ~2026-10-20; list prices are double). A landing page is far smaller than the
 intranet; with the cache and read fixes a round should be well under $1, so $4 covers the experiments and 2–3 rounds.
+
+## 13. The experiment series (ruled at the end of s1; supersedes §12's landing page)
+
+**Richard:** *"make Mistral build something small but complex, to make sure it can choose the right nodes for the
+job, but not something so complex it has to think of backend ids and rules … test it a dozen times with a dozen
+different configs … find the ultimate config that fits perfectly with NodeGX … then we can try a bigger project
+later."* Asked and answered: **the quiz game**; **OpenCode, plus one Claude Sonnet run of the same brief as the
+yardstick** (Vibe dropped: *"fuck Vibe and start using OpenCode"*, after the research put OpenCode first).
+
+**Why OpenCode, honestly:** source-level it passes every protocol check (re-lists tools, one turn late; error text
+verbatim; `opencode run`; `external_directory` deny; Large 4 known with effort none/high). **Unmeasured:** a real
+build; its cache rate (the one smoke: ~14% of ~129k input from cache over 6 steps, too short to judge); no spend
+cap (`--max-steps` only); MCP tool calls time out at 60 s (render can approach it); reasoning off unless a variant is
+set. The first runs measure these before anything is tuned.
+
+**The brief:** `own-018/sentence-quiz.txt` — "Capital Quiz", five fixed questions with fixed answer order, a 10 s
+countdown, right/wrong colours, score, results with a best score that survives a reload, Play again. No backend. It
+needs a list or repeater, a reusable answer component with inputs, variables, conditions, states, a timer, screen
+switching and local storage — node choice is the test.
+
+**The grader (build it first, no API spend):** a headless-Chrome script over the packed preview that plays a fixed
+pattern and reads what a person sees (`elementFromPoint`-checked taps, text by regex): Start → "Question 1 of 5" and a
+visible countdown; Lisbon (right) → green, advances; Sydney (wrong) → red + Canberra green; Ottawa (right); Q4 left to
+time out (wait 11 s) → advances; Bern (right) → "You scored 3 out of 5", "Best: 3 out of 5"; Play again → "Question 1
+of 5"; an all-wrong run → 0 and Best still 3; reload → Best 3. ~10 checks, each pass/fail. **Prove the grader on the
+Sonnet build and on mutants of it** (score not counted, timer removed, best not persisted) — a grader that passes a
+broken app grades nothing. Plus a static audit of the graph: answers drawn by a list node (not three hand-copied
+buttons per question), a reusable component with Component Inputs, the countdown from a Timer/Repeat node (not
+`setInterval` in JavaScript), persistence by a storage node; `validate_project` errors; JavaScript node count.
+
+**Per run, recorded:** grader score, audit, validation errors, real $ (repriced; OpenCode reports its own), turns,
+wall time, cache %, and a phone screenshot.
+
+**The dozen (~$0.25 a run is the target; ~$4 left, sale ends ~10-20):**
+| # | config |
+|---|---|
+| 0 | Sonnet yardstick (`claude -p`, subscription, same lab rules) — also proves the grader |
+| 1–2 | OpenCode as a person would set it up (model only) ×2 — the baseline and its noise |
+| 3 | `--variant high` (reasoning on) |
+| 4 | + Large 4's measured trips where it reads (stringlist = comma string, `sizeMode: "explicit"`, `runOnChange` on a button-fed Condition, `pm-` params, describe several tools at once) |
+| 5 | temperature 0.3 |
+| 6 | a context cap / compaction |
+| 7–8 | the best combination ×2 |
+| 9–11 | reserve: repeat what looks like a win, or a variant the numbers suggest |
+
+One factor at a time from the baseline; a "win" needs to hold on a repeat, because one run is one sample.
 

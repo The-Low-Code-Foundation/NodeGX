@@ -19,20 +19,19 @@ is the short version.
 - Money: ~$4 left of Richard's $10 Mistral credit (`MISTRAL_API_KEY` in the repo `.env`; never print it). Launch sale
   ends ~2026-10-20. Reprice from the export / journal, never trust Vibe's code-mode `cost_usd` (it ignores the cache).
 
-## Richard's ask (end of s1)
+## Richard's ask (end of s1, final)
 
-*"Set up the perfect little environment that Mistral Large 4 will love, and let it rip"* — with a new brief: *"a
-basic, very pretty modern landing page with an API sending sign up form to Brevo … basic but impressive."* The
-sentence is `sentence-landing.txt` (never says "NodeGX"; the key `BREVO_API_KEY` goes in `.env` by the person).
+**The experiment series in OWN-018 §13** (it supersedes the landing page): Mistral Large 4 builds the quiz game in
+`sentence-quiz.txt` about a dozen times on **OpenCode** (Vibe dropped), one config change at a time, scored by a script,
+with **one Claude Sonnet run of the same brief as the yardstick**. Then a bigger project later.
 
 ## Do, in order
 
-1. **Cheap measurements first (cents each, a small fixed task):** cache rate per harness (Vibe legacy 40–47% vs
-   code-mode 76–91% — find why legacy misses; uncached input was $2.46 of round 3's $3.08); `thinking` low vs high;
-   an `auto_compact_threshold`; OpenCode with `--variant high`. Pick the environment from the numbers.
-2. **Fix NOSTARTERASSETS** before a "very pretty" page (npm-made projects have no icons or imagery). Ask Richard if
-   the fix is a ruling (bundle the starter set in the MCP vs fetch from the shelf).
-3. Put Large 4's measured trips where it reads (§12 item 4), re-pack, smoke the lab (canary 0), then the landing-page
-   round. Brevo: `POST https://api.brevo.com/v3/contacts` with header `api-key`, body `{email, attributes, listIds}`;
-   grade with a key-checking local stand-in first (as s13 did for Gemini), the real key only when Richard pastes it.
-4. Every finding → `dev-docs/bugs/` (`P112-OWN018-*`); record the round beside round 3's numbers.
+1. **The grader first, no API spend:** headless Chrome over the packed preview, plays the fixed pattern in §13, ~10
+   pass/fail checks + a static audit of the graph. Prove it on the Sonnet build (`claude -p --model sonnet`, same lab:
+   empty HOME, packed create-nodegx, `--strict-mcp-config`, Richard's subscription — say "API-equivalent", never "cost")
+   and on mutants of that build.
+2. **Fix NOSTARTERASSETS** if it touches the quiz's looks (icons); ask Richard if the fix is a ruling.
+3. Re-pack at HEAD; smoke OpenCode's lab (canary 0) with `round-opencode.mjs`; then runs 1–2 (baseline ×2). Read the
+   cache % before spending more — if OpenCode caches badly, say so before the dozen.
+4. Runs 3–11 per §13's table; record each beside the others; every finding → `dev-docs/bugs/` (`P112-OWN018-*`).
