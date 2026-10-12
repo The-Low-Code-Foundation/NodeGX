@@ -111,8 +111,10 @@ describe('AWP-005 §1 — a port line carries a usable type', () => {
  * These drive the registered `get_node_type` handler over an in-memory transport
  * and measure the text it actually returns, so the figures are directly
  * comparable to phase-58's wire table (`Group` full ≈ 11,018 tokens). Measuring
- * `JSON.stringify(payload)` instead understates every one of them by about half,
- * because the wire is pretty-printed.
+ * `JSON.stringify(payload)` instead understated every one of them by about half
+ * while the wire was pretty-printed. 🔴 P112-OWN018-READWASTE (2026-10-12): the wire is
+ * compact now (indentation was 19% of what an agent read), so these figures dropped
+ * and the two ratios below moved — see each.
  */
 describe('AWP-005 — the response budget (a ratchet: move the number, say why)', () => {
   let session: TestSession;
@@ -288,7 +290,9 @@ describe('AWP-005 — the response budget (a ratchet: move the number, say why)'
   it('makes summary materially cheaper than full detail on the basket that matters', async () => {
     const summary = await cost(STOREFRONT_TYPES, 'summary');
     const full = await cost(STOREFRONT_TYPES, 'full');
-    expect(full / summary).toBeGreaterThan(3);
+    // Moved 3 → 2.5 (P112-OWN018-READWASTE): compact JSON shrank BOTH, but full nests deeper and lost more
+    // indentation, so the ratio fell to 2.77 with summary itself cheaper than before.
+    expect(full / summary).toBeGreaterThan(2.5);
   });
 
   it('still carries a usable type per port at summary detail — cheap is not the only bar', async () => {
@@ -314,7 +318,8 @@ describe('AWP-005 §2 — summary is the default, and it is worth defaulting to'
     const summary = tokens(await callRawText(session, 'get_node_type', { type_names: STOREFRONT_TYPES, detail: 'summary' }));
     const full = tokens(await callRawText(session, 'get_node_type', { type_names: STOREFRONT_TYPES, detail: 'full' }));
     expect(omitted).toBe(summary);
-    expect(omitted).toBeLessThan(full / 3);
+    // Moved full/3 → full/2.5 for the same reason as the ratio above (P112-OWN018-READWASTE).
+    expect(omitted).toBeLessThan(full / 2.5);
   });
 
   it('carries the runtime-determined ports that only prose names', async () => {

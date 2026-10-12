@@ -46,9 +46,24 @@ function distance(a: string, b: string): number {
 }
 
 /** The declared key a misspelt one most likely meant: the same letters in another case or separator, else one or two edits away. */
+/**
+ * P112-OWN018-READWASTE — words a model uses for an argument the tool spells differently, which no edit distance
+ * finds. Measured: Mistral Large 4 passed `create_project` a `description` in 2 of 2 rounds; the refusal offered
+ * nothing, so it had to re-read the argument list. Only an entry whose target the tool declares is offered.
+ */
+const ARGUMENT_SYNONYMS: Record<string, readonly string[]> = {
+  description: ['summary', 'intent', 'request'],
+  desc: ['summary', 'intent'],
+  title: ['name'],
+  folder: ['directory', 'path'],
+  dir: ['directory', 'path']
+};
+
 export function closestArgument(key: string, declared: readonly string[]): string | undefined {
   const same = declared.find((d) => fold(d) === fold(key));
   if (same) return same;
+  const synonym = (ARGUMENT_SYNONYMS[fold(key)] ?? []).find((s) => declared.includes(s));
+  if (synonym) return synonym;
   let best: string | undefined;
   let bestDistance = 3;
   for (const d of declared) {

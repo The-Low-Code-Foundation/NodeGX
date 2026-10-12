@@ -132,7 +132,7 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
             // shape reads as success is how "Rendered clean" survived over a
             // page nobody could reach.
             ...(verdict ? [{ type: 'text' as const, text: verdictHeadline(verdict) }] : []),
-            { type: 'text', text: JSON.stringify(report, null, 2) },
+            { type: 'text', text: JSON.stringify(report) },
             // FLD-011 AC1 — with `out_dir` the harness wrote files and returned no base64, so
             // `screenshots` is empty and the loop below produces nothing. The manifest replaces it,
             // because a caller told only "written to a folder" has to list a directory to find out
@@ -222,7 +222,7 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
         return {
           content: [
             { type: 'text', text: headline + (caveats.length ? ` Note: ${caveats.join('; ')}.` : '') },
-            { type: 'text', text: JSON.stringify(result, null, 2) }
+            { type: 'text', text: JSON.stringify(result) }
           ]
         };
       }

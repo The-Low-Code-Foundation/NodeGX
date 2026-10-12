@@ -158,4 +158,13 @@ describe('P112-OWN018-LISTCHANGED — call_tool reaches every tool for a client 
     expect(self.data.ok).toBe(false);
     expect(self.data.error.code).toBe('not-found');
   });
+
+  it('describes several tools in one call (P112-OWN018-READWASTE)', async () => {
+    const res = await callTool(session.client, 'create_component, get_project_info,nope', undefined, true);
+    expect(res.isError).toBe(false);
+    const names = res.data.tools.map((t: any) => t.name);
+    expect(names).toEqual(['create_component', 'get_project_info', 'nope']);
+    expect(Object.keys(res.data.tools[0].inputSchema.properties)).toEqual(expect.arrayContaining(['path', 'nodes']));
+    expect(res.data.tools[2].error).toBe('no such tool');
+  });
 });

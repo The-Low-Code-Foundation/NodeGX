@@ -29,8 +29,10 @@ export interface ToolResult {
   isError?: boolean;
 }
 
+// P112-OWN018-READWASTE — compact, not indented: two-space indentation was 19% of every character an agent read
+// (126k of 651k in OWN-018's measured sitting), re-sent on every later turn. Models read compact JSON as well.
 export function jsonResult(payload: unknown): ToolResult {
-  return { content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }] };
+  return { content: [{ type: 'text', text: JSON.stringify(payload) }] };
 }
 
 export function errorResult(error: ToolError): ToolResult {
@@ -39,7 +41,7 @@ export function errorResult(error: ToolError): ToolResult {
   };
   return {
     isError: true,
-    content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }]
+    content: [{ type: 'text', text: JSON.stringify(payload) }]
   };
 }
 

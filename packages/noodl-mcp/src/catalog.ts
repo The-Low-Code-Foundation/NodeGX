@@ -1119,17 +1119,36 @@ export interface ExampleRow {
   demonstrates: string[];
 }
 
+/**
+ * P112-OWN018-READWASTE — a query is a phrase first, then its words. Mistral Large 4 (OWN-018) searched the examples
+ * in sentences ("db change automation webhook", "navigate target path parameter record id detail"): as one substring
+ * 5 of its 6 searches found nothing and it fell back to the whole catalog (131k characters). The phrase still wins
+ * when it matches; otherwise an example is kept when it has at least half the query's words, best match first — the
+ * same widening `find_tools` got for the same reason (P109 S13-FINDTOOLSPHRASE).
+ */
+const QUERY_STOPWORDS = new Set(['the', 'and', 'for', 'with', 'from', 'into', 'that', 'this', 'one', 'how', 'use']);
+
 export function listExamples(filter: { nodeType?: string; query?: string } = {}): ExampleRow[] {
-  const q = filter.query?.toLowerCase();
-  return allExamples()
-    .filter((ex) => {
-      if (filter.nodeType && !ex.demonstrates.includes(filter.nodeType)) return false;
-      if (q) {
-        const hay = [ex.id, ex.title, ex.description ?? '', ...ex.demonstrates].join(' ').toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      return true;
-    })
+  const q = filter.query?.toLowerCase().trim();
+  const typed = allExamples().filter((ex) => !filter.nodeType || ex.demonstrates.includes(filter.nodeType));
+  const hayOf = (ex: CatalogExample) => [ex.id, ex.title, ex.description ?? '', ...ex.demonstrates].join(' ').toLowerCase();
+  let matched = typed;
+  if (q) {
+    matched = typed.filter((ex) => hayOf(ex).includes(q));
+    const words = [...new Set(q.split(/[^a-z0-9]+/).filter((w) => w.length >= 3 && !QUERY_STOPWORDS.has(w)))];
+    if (matched.length === 0 && words.length > 1) {
+      const need = Math.max(1, Math.ceil(words.length / 2));
+      matched = typed
+        .map((ex) => {
+          const hay = hayOf(ex);
+          return { ex, score: words.filter((w) => hay.includes(w)).length };
+        })
+        .filter((row) => row.score >= need)
+        .sort((a, b) => b.score - a.score)
+        .map((row) => row.ex);
+    }
+  }
+  return matched
     .map((ex) => ({
       id: ex.id,
       title: ex.title,

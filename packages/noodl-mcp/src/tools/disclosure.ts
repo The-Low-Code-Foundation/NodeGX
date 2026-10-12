@@ -527,8 +527,8 @@ export function backendRevealPayload(revealed: readonly string[]): { backendTool
  * refusal in the one shape every client passes through. `ok: false` says it plainly; the tool's own payload follows.
  */
 const CALL_TOOL_DESCRIPTION =
-  "Run any tool this server has by name, even one your tool list doesn't show (some clients never refresh it). " +
-  'describe: true returns its description and arguments instead.';
+  "Run any of this server's tools by name, even one your list never showed. describe: true returns its " +
+  'description and arguments instead; comma-separate names for several.';
 
 export function registerCallTool(server: McpServer, disclosure: ToolDisclosure): void {
   server.registerTool(
@@ -544,6 +544,23 @@ export function registerCallTool(server: McpServer, disclosure: ToolDisclosure):
     },
     async (args: { name: string; arguments?: Record<string, unknown>; describe?: boolean }, extra: unknown) => {
       try {
+        // P112-OWN018-READWASTE — round 3's Mistral spent 26 calls describing one tool at a time; several at once.
+        if (args.describe && args.name.includes(',')) {
+          const names = [...new Set(args.name.split(',').map((n) => n.trim()).filter(Boolean))];
+          const described = names.map((name) => {
+            const h = name === 'call_tool' ? undefined : disclosure.handleFor(name);
+            if (!h) return { name, error: 'no such tool' };
+            const sch = h.inputSchema ? normalizeObjectSchema(h.inputSchema) ?? h.inputSchema : undefined;
+            return {
+              name,
+              description: h.description ?? '',
+              inputSchema: sch
+                ? toJsonSchemaCompat(sch as Parameters<typeof toJsonSchemaCompat>[0], { strictUnions: true, pipeStrategy: 'input' })
+                : { type: 'object', properties: {} }
+            };
+          });
+          return jsonResult({ tools: described });
+        }
         const handle = args.name === 'call_tool' ? undefined : disclosure.handleFor(args.name);
         if (!handle) {
           throw new ToolError(

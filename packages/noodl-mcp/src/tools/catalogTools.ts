@@ -163,14 +163,22 @@ export function registerCatalogTools(server: McpServer): void {
       title: 'List graph examples',
       description:
         'Browse the library of validated example graph fragments (each proven error-free by the semantic ' +
-        'validator). Filter by `node_type` or free-text `query`. Fetch a full fragment with get_example.',
+        'validator). With no filter: ids, titles and node types. Filter by `node_type` or free-text `query` for ' +
+        'descriptions too. Fetch a full fragment with get_example.',
       inputSchema: {
         node_type: z.string().optional().describe('Only examples demonstrating this typeName'),
         query: z.string().optional().describe('Free-text filter over titles and descriptions')
       }
     },
     guarded((args: { node_type?: string; query?: string }) => {
-      const payload: ListExamplesResponse = { examples: listExamples({ nodeType: args.node_type, query: args.query }) };
+      const examples = listExamples({ nodeType: args.node_type, query: args.query });
+      // P112-OWN018-READWASTE — unfiltered, the catalog is a menu: Mistral's one unfiltered call was 131k
+      // characters, 101k of them descriptions of examples it never opened. A filter answers with descriptions,
+      // because a short list is where they help choose.
+      const filtered = Boolean(args.node_type || args.query?.trim());
+      const payload: ListExamplesResponse = {
+        examples: filtered ? examples : examples.map(({ id, title, demonstrates }) => ({ id, title, demonstrates }))
+      };
       return jsonResult(payload);
     })
   );
