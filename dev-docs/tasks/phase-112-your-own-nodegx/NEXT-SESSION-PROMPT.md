@@ -17,7 +17,7 @@ the drive in the dev editor found the copy made twice per open, and measured OPE
 | OWN-010 every bug teaches the kit | 🟡 ledger + `gate <kit>` | `gate mcp`: 0 blockers, 2 known issues (FORMATSKEW, PAGEPORTS) | see its file |
 | OWN-011 one install | 🟡 published; **AC1, AC3, AC4 ✅**; **AC2 editor half ❌** (§9) | waits on OWN-013's release | **Opus** |
 | OWN-012 the screen, from the descriptions | 📋 | — | step 1 **Opus**, 2–3 **Fable** |
-| **OWN-013 the 0.4.0 cut** | 🟡 **G1 ✅ measured, G2 ✅ written, G7 🟡** (R17, OPENWRITES, IDREPLACE ✅ driven; PAGEPORTS open); G3–G6, G8–G10 ⬜ | unit `own-013` 10/10 + two mutants; editor tsc 0; drive §7 | **Opus** |
+| **OWN-013 the 0.4.0 cut** | 🟡 **G1 G2 G3 ✅, G5 G6 ✅, G4 🟡** (the six checks fixed locally, §8; `cline-dev` pushed for CI, R20), **G7 🟡** (PAGEPORTS open); G8–G10 ⬜ | unit `own-013` 10/10 + two mutants; drive §7; cut-tree `test:ci` 3015 / 1 by name (§8) | **Opus** |
 | **OWN-014 the agent sees its app** (s13) | 🟡 **AC1 ✅ AC2 ✅** from a packed tarball; AC3 publish, AC4 (the language app) owed | `scripts/own/stranger-render.mjs` + control (registry 0.1.0 refuses) | **Opus** |
 | **OWN-015 the backend from npm** (s13) | 🟡 mechanism ✅ from a tarball: provision → `set_function_secret` → deploy → call; AC2 files+results ✅ with control; AC3 ✅ | `scripts/own/stranger-backend.mjs` (a key-checking stand-in for Google) | **Opus** |
 | **OWN-016 ship it** (s13) | 🟡 step 1 + AC1 ✅ (`nodegx-deploy` bin); the VM ⬜ | Chrome over CDP, 0 errors; broken-project control | **Opus** |
@@ -47,7 +47,10 @@ should switch** (README §0.2). Do not wait for an answer.
 
 1. ✅ *Done 2026-10-12 (OWN-013 §7).* Not driven: a **new project from a template makes no copy** (the opt-out in
    `newProject`); check it on the next launch.
-2. **G5 + G6 on the cut tree** (P112-S13-HARNESSTOKENS's fix landed as `63992760c` and is in the changelog's *Fixed*): a worktree (`make-worktree.sh`; delete its links into the primary's `dist` first) at
+2. **Read CI on the pushed `cline-dev`** (`gh run list --branch cline-dev --workflow pr.yml`; read each job's duration,
+   and `--log-failed` for a red one). If Test (editor) is red with only *re-arms a held save*, re-run the job (OWN-013
+   §8: an order-dependent spec, not chased). Then **ask Richard (R20) for `release/0.4.0` and the PR.**
+   *Done s12, kept for the record — G5 + G6 on the cut tree:* a worktree (`make-worktree.sh`; delete its links into the primary's `dist` first) at
    `cline-dev`'s tip with its own build output; `npm run ci:build:editor`, then `test:ci` and read the floor by name.
 3. **Make `release/0.4.0`** (local, through a temporary index or `git merge` in the worktree): the cut + `origin/main`
    merged in, conflicts from the cut. Ask Richard before pushing it and opening the PR (G4). Six required checks.

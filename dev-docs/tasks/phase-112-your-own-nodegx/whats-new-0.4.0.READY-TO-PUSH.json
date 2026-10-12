@@ -1,0 +1,16 @@
+{
+  "version": "https://jsonfeed.org/version/1.1",
+  "title": "NodeGX — what's new",
+  "home_page_url": "https://the-low-code-foundation.github.io/nodegx-content/",
+  "feed_url": "https://the-low-code-foundation.github.io/nodegx-content/static/whats-new/feed.json",
+  "description": "Release notes shown in the NodeGX editor. An empty items list means there is nothing to announce; the editor treats that as a normal state and opens no modal.",
+  "items": [
+    {
+      "id": "nodegx-0.4.0",
+      "url": "https://nodegx.io/changelog/#v0-4-0",
+      "title": "NodeGX 0.4.0",
+      "date_modified": "SET-TO-THE-PUBLISH-MOMENT-eg-2026-10-15T12:00:00Z",
+      "content_html": "<h2>NodeGX 0.4.0</h2><p><strong>Your project is updated to a newer format the first time you open it.</strong> NodeGX first copies the project folder to <code>&lt;project&gt;.before-0.4</code> and tells you where the copy is. Keep that copy until you're happy with the updated project. It's the only copy 0.3.0 can still open.</p><p><strong>Apps made with <code>npm create nodegx</code> open in the editor.</strong></p><p><strong>Functions can share code through script files.</strong> Scripts have their own section in the Components panel.</p><p><strong>A node's properties now end with <em>What this node does</em> and <em>Try this node</em>.</strong></p><p><a href=\"https://nodegx.io/changelog/#v0-4-0\" target=\"_blank\">Everything in 0.4.0</a></p>"
+    }
+  ]
+}

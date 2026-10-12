@@ -29,10 +29,10 @@ was created (`gh release view v0.4.0` → not found), tag deleted on origin and 
 |---|---|---|---|
 | G1 | **The cut point.** `origin/main` = `202314165` (Release 0.3.0, #47); `cline-dev` is 1,000+ commits ahead. Pick a commit, check what it carries (peers' half-done work: read each phase README's live rows), `git merge-tree --write-tree origin/main <cut>` exit 0. Branch `release/0.4.0` = the cut + the release docs commit, made through a temporary index (UPG-008 §2.1) | agent | ✅ measured s12 (§6.1); the branch is not made |
 | G2 | **CHANGELOG.md `## 0.4.0 · <date>`** — what 0.4.0 is for in one bold sentence, then New / Changed / Fixed / Good to know, plain words (the header comment). Same commit on `cline-dev` and the release branch (nodegx-web reads the primary checkout). Content-authoring skill | agent | ✅ s12 (§6.2): in CHANGELOG.md on `cline-dev`; the date is set on the tag day |
-| G3 | `GITHUB-RELEASE-0.4.0.md` (draft body) and the what's-new feed post (`whats-new-0.3.0.READY-TO-PUSH.json`'s shape) — pushed **only after Publish** (every installed editor fetches it on project open) | agent | ⬜ |
-| G4 | **The PR `release/0.4.0` → `main`**, six required checks green (*Typecheck, Lint, Test (editor), Test (platform-node), Build (viewer + editor bundles), Check build artefacts*). `enforce_admins`: red means stop. Read each run's duration. 0.3.0 had three red on first CI | CI | ⬜ |
-| G5 | `npm run ci:build:editor` **on the cut tree** (a worktree with its own build output). s11 ran it in the shared checkout at `88366e69f` + peers' open edits: exit 0, so the production config itself is not broken there | agent | ⬜ |
-| G6 | Editor test floor **by name**. s11's `test:ci` (HEAD `120baf39`): 3,012 specs, 2 failures — SUB-006 *nonexistent-port … lists available alternatives*, and *pending project saves … re-arms a held save* (the order-dependent one) | agent | ⬜ |
+| G3 | `GITHUB-RELEASE-0.4.0.md` (draft body) and the what's-new feed post (`whats-new-0.3.0.READY-TO-PUSH.json`'s shape) — pushed **only after Publish** (every installed editor fetches it on project open) | agent | ✅ drafted s12 (§8): `GITHUB-RELEASE-0.4.0.md`, `whats-new-0.4.0.READY-TO-PUSH.json` (copy checks clean) |
+| G4 | **The PR `release/0.4.0` → `main`**, six required checks green (*Typecheck, Lint, Test (editor), Test (platform-node), Build (viewer + editor bundles), Check build artefacts*). `enforce_admins`: red means stop. Read each run's duration. 0.3.0 had three red on first CI | CI | 🟡 s12 (§8): the last CI on `cline-dev` (`88366e69f`) had 3 of the 6 red; Typecheck and Test (editor) fixed locally, Lint's `type` fixed, Lint's `tsfixme` raised visibly (R19, `7efa3395d`); `cline-dev` pushed for CI (R20); release branch + PR wait for Richard |
+| G5 | `npm run ci:build:editor` **on the cut tree** (a worktree with its own build output). s11 ran it in the shared checkout at `88366e69f` + peers' open edits: exit 0, so the production config itself is not broken there | agent | ✅ CI's Build (viewer + editor bundles) green at `88366e69f` (5 min, clean runner); the release run re-checks the sidecars (§8) |
+| G6 | Editor test floor **by name**. s11's `test:ci` (HEAD `120baf39`): 3,012 specs, 2 failures — SUB-006 *nonexistent-port … lists available alternatives*, and *pending project saves … re-arms a held save* (the order-dependent one) | agent | ✅ s12 (§8): cut tree `76372696` + two spec fixes, seed 44986 → 3015 specs, **1 failure by name**: *re-arms a held save* (order-dependent, known since s43) |
 | G7 | **Opening writes.** Richard ruled the release knowing opening still writes: P112-S11-PAGEPORTS (a Page's `dynamicports`), P112-S11-OPENWRITES (`nodegx.project.json` on every open). Fixed before the cut if cheap; otherwise named under *Good to know*. P112-S11-IDREPLACE is fixed (`f2505b83f`) and **undriven in the editor** — drive it on the cut | agent | 🟡 s12 (§6.3, §7): R17's copy built and **driven**; OPENWRITES **fixed and driven** (`1ed87f2ef`); IDREPLACE **driven**; PAGEPORTS still open (named under *Good to know*) |
 | G8 | **The upgrade 0.3.0 → 0.4.0**: install over 0.3.0 and open (a) a 0.3.0 project — the 4 → 5 migration runs once (ISL-018) and the project still works; (b) a project the npm kit made — it opens. P112-S11-REFUSALWORDS stays visible to anyone still on 0.3.0 opening a 0.4.0 project | agent + Richard | ⬜ |
 | G9 | The shelf: the tag run's *every authored library entry is installable*; if red, Publish library first | agent / CI | ⬜ |
@@ -124,4 +124,41 @@ beside `.before-0.3`. The fix covers both, since they share `backupBeforeUpgrade
 **For the cut:** the OWN-014 session (P112, same day) has P112-S13-HARNESSTOKENS's fix uncommitted (the packaged
 render harness ships no default tokens). It landed as `63992760c` (peer message, checked in HEAD) and is in the
 changelog's *Fixed*.
+
+## 8. Session 12, continued — the six required checks
+
+**The last CI on `cline-dev`** (`pr.yml` runs on every push there): run `38174808907` at `88366e69f`, 2026-10-11.
+Required: Build ✅ (5 min), Check build artefacts ✅, Test (platform-node) ✅; **Typecheck ❌, Lint ❌, Test (editor)
+❌**. (Not required and red: Test (runtime, backend, viewer, mcp, preview), Library check, Docs site builds, Node
+catalog freshness, Lesson bundles.)
+
+| check | cause (from CI's log, then reproduced) | fix |
+|---|---|---|
+| Typecheck | `typecheck:backend-tests`: *Cannot find module '@nodegx/node-spec'* — its `tsconfig.tests.json` sets its own `paths` (which replace the root's), so node-spec resolved through `exports` to `dist/`, absent on CI (locally a stale `dist` answered, missing `DRAWN_PORT_TYPES`). The next step, `typecheck:mcp`, then failed on `ont002WorldTools.test.ts:253` (TS2352) | `693d4dd36`: the alias + `DOM.Iterable`; the cast through `unknown`. All 8 Typecheck steps exit 0 locally; a `--traceResolution` sweep finds no other program resolving a workspace package to `dist` |
+| Lint — `type` | +12 raw px font sizes in P109's script-file screens | `a5a584fd9`: tokens; 622 → 610 = baseline |
+| Lint — `tsfixme` | +98 in `src` (72 in node-spec's node specs), +1,371 in tests (mostly the island/garden MCP specs) | R19 (Richard, 2026-10-12): **raise it visibly, owed back down** — `7efa3395d`, measured in a clean worktree at `a6ce18c9f`: src 1260, tests 2221 |
+| Test (editor) | 1 failure: SUB-006 *lists available alternatives* (pre-GAM-019 assertion) | `76372696`: the ruled order, plus a signal-wire case |
+
+**The cut tree's own suite** (worktree `own013-cut`, run directly in `packages/noodl-editor` — never through
+`lerna exec`, which runs the primary's source): at `76372696`, seed 44986 → 3015 specs, 2 failures: *re-arms a held
+save* and a new one, *Component instances can report accepted children* — P107 R23 (`9da5979f9`, 07:58 that morning)
+moved the derivation into the contract and the order flipped (nobody reads it). The same run left
+`tests/testfs/import_proj1.before-0.4/` in the tree (R17's copy, from a spec opening the committed format-4 fixture
+in place). `b9d15e52d` fixes both; the rerun at the same seed: **3015 specs, 1 failure** (*re-arms a held save*), and
+no copy left.
+
+🔴 **The held-save spec is a coin flip on the PR.** It passed at CI's seed 28755, failed at 44986. A drain-first fix
+(the sibling spec's pattern) did NOT fix it: a "Project saved" still lands after the drain while saving is held, so
+something outside the spec's own model saves (a second module copy, or a listener). Reverted; not chased further.
+If Test (editor) is red on the PR with only this spec, re-run the job.
+
+**Two packaged-editor fixes from the OWN-014/015 session are in the cut and the changelog:** `63992760c`
+(P112-S13-HARNESSTOKENS, the render harness's tokens) and `c82f04a5b` (P112-S13-CLOUDDEPLOY, `noodl-mcp/package.json`
+in `extraResources`; `check-build-artefacts --built` fails the release build if its source is missing).
+
+**G3:** `GITHUB-RELEASE-0.4.0.md` and `whats-new-0.4.0.READY-TO-PUSH.json` in this folder, through the copy checks.
+
+Three more fixes from the OWN-014/015/016 session that the editor ships, all in the changelog's *Fixed*:
+HARNESSTOKENS `63992760c`, CLOUDDEPLOY `c82f04a5b`, AGENTFILES `2016dd48d` (a deploy no longer publishes `.mcp.json`,
+`CLAUDE.md`, `AGENTS.md`, `.claude/`).
 

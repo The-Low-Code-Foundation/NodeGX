@@ -72,6 +72,10 @@ backend rule, and many fixes to how nodes behave.**
 - Editor icon buttons have names a screen reader can read.
 - When your agent renders your app to check it, the render now has the default spacing, corners and fonts. In
   0.3.0 it had none, so the app looked broken.
+- Your agent can deploy your cloud functions from the installed app. In 0.3.0 this failed unless the project folder
+  was an npm package.
+- A deploy no longer publishes your agent's files, such as `.mcp.json` and `CLAUDE.md`. `.mcp.json` names folders on
+  your computer.
 - Many smaller fixes to how nodes behave.
 
 ### Good to know
