@@ -167,6 +167,13 @@
       "status": "fixed",
       "commit": "40c9fc310",
       "ruling": "Ruled 2026-10-08 (P107 \"Phase 107 Rulings\" page), as recommended: \"Read it as a number\". The same as Animate To Value's Delay (P107-C20). When fixed, the scenario's behaviour moves with it (a Drag spec version)."
+    },
+    {
+      "id": "P107-C160",
+      "title": "Drag — Enabled disables dragging only on exactly `false`: a wired `0` or the text \"false\" leaves the element draggable, while the description reads as \"off\"",
+      "status": "fixed",
+      "commit": "a94119947",
+      "ruling": "Ruling needed (R1): (a) coerce — Drag.tsx reads disabled={!props.enabled} (or the port gains a set that writes !!value), the spec's :506 becomes !s.shown.enabled, version up with a changes entry naming this row, and the…"
     }
   ],
   "Expression": [
@@ -194,6 +201,12 @@
       "title": "An Expression with a stray input, or whose text once read more ports, reads `Variables` / `Objects` / `Arrays` as nothing — the Noodl API is handed to the wrong parameter",
       "status": "fixed",
       "commit": "024e2ee55"
+    },
+    {
+      "id": "P107-C155",
+      "title": "The spec format cannot say \"this port is wired\", so five runtime branches on it are graded on the unwired arm only",
+      "status": "fixed",
+      "commit": "c9b8a8e0e"
     }
   ],
   "Filter Collection": [
@@ -828,6 +841,13 @@
       "status": "open"
     },
     {
+      "id": "P107-C161",
+      "title": "Video — Restart and Reset seek to second 0, not Start Time: with a Start Time set, a Restart plays from before it, and the seek takes the End Time bound with it",
+      "status": "fixed",
+      "commit": "b8090d121",
+      "ruling": "Ruling needed (R1): (a) Restart and Reset seek to Start Time when one is set (Video.tsx :187 / :200 become currentTime = startSeconds || 0, with the same fragmentSeconds clamp the spec uses at :689), which also keeps…"
+    },
+    {
       "id": "P107-C96",
       "title": "A Video showing a YouTube or Vimeo link throws when Source Object arrives — before its first draw, the throw is inside React's commit and the page goes blank",
       "status": "open"
@@ -920,6 +940,13 @@
     }
   ],
   "net.noodl.ParseXML": [
+    {
+      "id": "P107-C162",
+      "title": "Parse XML and Parse Feed — \"Max Bytes\" counts characters, not bytes, and its description says \"larger than this\"",
+      "status": "fixed",
+      "commit": "dccaa77e0",
+      "ruling": "Ruling needed (Richard): either measure bytes (new TextEncoder().encode(text).length, a cost on every parse of a large text, and the spec's cap changes with it — a version), or rename / re-describe the port (\"Max…"
+    },
     {
       "id": "P107-C18",
       "title": "Parse XML goes silent — no Result, no Failure — while Always Array holds anything but text",

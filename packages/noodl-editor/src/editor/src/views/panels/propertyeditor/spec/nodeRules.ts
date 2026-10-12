@@ -56,3 +56,40 @@ export function splitRule(line: string): { when: string; then?: string } {
   if (at < 0) return { when: line };
   return { when: line.slice(0, at), then: line.slice(at + 3) };
 }
+
+/** The outcome names `scripts/node-spec/rules.js` writes last on a rule's wire half (`OUTCOME_NAMES`). */
+const OUTCOME_WORDS = new Set(['Done', 'Unchanged', 'Failure', 'Completed']);
+
+export interface RuleParts {
+  /** The author's case, as written. */
+  when: string;
+  /** The signals the branch sends, in the order a frame settles them. */
+  pulses: string[];
+  /** The outcome the branch reports, when it reports one: drawn as a chip. */
+  outcome?: string;
+  /** "Count Changed stays silent": the signals a sibling branch sends and this one does not. */
+  silent?: string;
+}
+
+/**
+ * A rule line taken apart for the modal (R33): `<case> → <pulses…>, <Outcome>; <X> stays silent`.
+ * The words stay the spec's; only their places move — the outcome to a chip, the rest under the case.
+ */
+export function ruleParts(line: string): RuleParts {
+  const { when, then } = splitRule(line);
+  if (then === undefined) return { when, pulses: [] };
+  const at = then.indexOf('; ');
+  const wire = at < 0 ? then : then.slice(0, at);
+  const silent = at < 0 ? undefined : then.slice(at + 2);
+  const items = wire
+    .split(', ')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const last = items[items.length - 1];
+  const outcome = last !== undefined && OUTCOME_WORDS.has(last) ? items.pop() : undefined;
+  // a branch that sends nothing and reports nothing reads its silence alone ("→ Count Changed stays silent")
+  if (items.length === 1 && / stays? silent$/.test(items[0]) && silent === undefined) {
+    return { when, pulses: [], outcome, silent: items[0] };
+  }
+  return { when, pulses: items, outcome, silent };
+}

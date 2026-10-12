@@ -12,10 +12,11 @@
  * ## What the person reads is what is graded
  *
  * The timeline is the product (memory: *correct and usable were never the same criterion*), so the
- * expected value is the English, not the trace events. `TryTimeline` (hook-free) is evaluated as an
- * element tree on the same entries, and `TryNodePanel` (hooks) renders through `react-dom/server`
- * in its not-yet-loaded state — a server render runs no effects, so the dynamic `import()` is never
- * taken here; the model is graded directly above it.
+ * expected value is the English, not the trace events. R33 moved *Try* into the *How this node
+ * works* modal: `playTry` reads the same trace as rows, port values and what to light; `TryRows`
+ * and `TryStage` (hook-free) are evaluated as element trees; the modal's body (`HowItWorks`, hooks)
+ * renders through `react-dom/server` with the spec package handed in (`loaded`) — a server render
+ * runs no effects, so its own dynamic `import()` is never taken — and once without it, as a control.
  *
  * ## The disagreement table
  *
@@ -29,6 +30,7 @@ import * as path from 'path';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
+import { HowItWorks } from '../../src/editor/src/views/panels/propertyeditor/spec/HowItWorks';
 import {
   disagreementsFor,
   summariseDisagreements,
@@ -36,16 +38,20 @@ import {
 } from '../../src/editor/src/views/panels/propertyeditor/spec/specDisagreements';
 import {
   controlsFor,
+  inputsFor,
+  outputsFor,
   parseTyped,
   playTimeline,
+  playTry,
   showValue,
   specNamed,
   startParamsFor,
+  usesClock,
   type Step
 } from '../../src/editor/src/views/panels/propertyeditor/spec/tryNodeModel';
-import { TryNodePanel } from '../../src/editor/src/views/panels/propertyeditor/spec/TryNodePanel';
-import { TryTimeline } from '../../src/editor/src/views/panels/propertyeditor/spec/TryTimeline';
-import { render, text } from '../support/renderElements';
+import { TryRows } from '../../src/editor/src/views/panels/propertyeditor/spec/TryRows';
+import { TryStage } from '../../src/editor/src/views/panels/propertyeditor/spec/TryStage';
+import { byClass, render, text } from '../support/renderElements';
 
 const ROOT = path.join(__dirname, '..', '..', '..');
 const SCENARIOS = path.join(ROOT, 'nodegx-node-spec', 'scenarios', 'Counter.json');
@@ -190,30 +196,161 @@ describe('the controls and the typed values', () => {
   });
 });
 
+describe('the modal’s play (R33): rows, port values, what lights', () => {
+  test('the pilot scenario as rows: what was done, what the node answered, the outcome as its own field', () => {
+    const { params, steps } = scenarios[0];
+    const play = playTry(Counter, params, steps);
+    expect(play.error).toBeUndefined();
+    expect(play.rows.map((r) => [r.what, r.answers.join(', '), r.outcomes.map((o) => o.value).join(' ')])).toEqual([
+      ['At load', 'Start Value starts at 5, Current Count → 5, Count Changed fires', ''],
+      ['Increase Count', 'Current Count → 6, Count Changed fires', 'done'],
+      // one frame, two presses: one row, both outcomes
+      ['Increase Count · Decrease Count', 'Count Changed fires, Count Changed fires', 'done done'],
+      ['Reset To Start', 'Current Count → 5, Count Changed fires', 'done'],
+      ['Reset To Start', '', 'unchanged']
+    ]);
+  });
+
+  test('port values: the inputs as they stand, each value output as last sent', () => {
+    const play = playTry(Counter, { startValue: 2 }, [
+      'settle',
+      { signal: 'increase' },
+      'settle',
+      { set: 'limitsMax', value: 9 },
+      'settle'
+    ]);
+    expect(play.inputs).toEqual({ startValue: 2, limitsMax: 9 });
+    expect(play.outputs).toEqual({ currentCount: 3 });
+    expect(play.rows[play.rows.length - 1]).toMatchObject({ what: 'Max Value 9', quiet: true });
+  });
+
+  test('what lights: the last row’s inputs and the outputs it moved — and nothing at load', () => {
+    expect(playTry(Counter, {}, ['settle']).lit).toEqual({ inputs: [], outputs: [] });
+    const pressed = playTry(Counter, {}, ['settle', { signal: 'increase' }, 'settle']);
+    expect(pressed.lit).toEqual({ inputs: ['increase'], outputs: ['currentCount', 'countChanged'] });
+    // control: an Unchanged press lights its input and no output
+    const clamped = playTry(Counter, { limitsEnabled: true, limitsMax: 0 }, [
+      'settle',
+      { signal: 'increase' },
+      'settle'
+    ]);
+    expect(clamped.lit).toEqual({ inputs: ['increase'], outputs: [] });
+    expect(clamped.rows[1].outcomes).toEqual([{ label: 'Increase Count', value: 'unchanged', error: undefined }]);
+  });
+
+  test('a boolean reads on / off; a refused step keeps the rows before it and says why', () => {
+    const on = playTry(Counter, {}, ['settle', { set: 'limitsEnabled', value: true }, 'settle']);
+    expect(on.rows[1].what).toBe('Limits Enabled on');
+    const refused = playTry(Counter, {}, [
+      'settle',
+      { signal: 'increase' },
+      'settle',
+      { signal: 'noSuchPort' },
+      'settle'
+    ]);
+    expect(refused.error).toMatch(/no input "noSuchPort"/);
+    expect(refused.rows.map((r) => r.what)).toEqual(['At load', 'Increase Count']);
+  });
+
+  test('the card’s ports in declaration order, and the clock only for a node that needs it', () => {
+    expect(inputsFor(Counter).map((p) => [p.label, p.signal])).toEqual([
+      ['Increase Count', true],
+      ['Decrease Count', true],
+      ['Reset To Start', true],
+      ['Start Value', false],
+      ['Min Value', false],
+      ['Max Value', false],
+      ['Limits Enabled', false]
+    ]);
+    expect(outputsFor(Counter)).toEqual([
+      { port: 'currentCount', label: 'Current Count', signal: false },
+      { port: 'countChanged', label: 'Count Changed', signal: true }
+    ]);
+    expect(usesClock(Counter)).toBe(false);
+    // control: Delay (type `Timer`) waits on the clock
+    expect(usesClock(specNamed('Timer')!)).toBe(true);
+  });
+});
+
 describe('the drawing', () => {
-  test('TryTimeline draws every line in order, with a rule where a frame ends', () => {
-    const { entries } = playTimeline(Counter, scenarios[0].params, scenarios[0].steps);
-    const tree = render(<TryTimeline entries={entries} />)!;
+  test('TryRows: one row per thing done, the newest tinted, outcomes as chips', () => {
+    const { rows } = playTry(Counter, scenarios[0].params, scenarios[0].steps);
+    const tree = render(<TryRows rows={rows} />)!;
     expect(tree.type).toBe('ol');
-    const items = tree.children;
-    expect(items).toHaveLength(entries.length);
-    expect(items[1].props.className).toBe('TimelineFrame');
-    const drawn = text(tree);
-    expect(drawn.indexOf('You press Increase Count')).toBeLessThan(drawn.indexOf('Increase Count: done'));
-    expect(drawn).toContain('Reset To Start: unchanged — nothing to do');
+    expect(tree.children).toHaveLength(rows.length);
+    expect(byClass(tree, 'is-latest')).toHaveLength(1);
+    expect(tree.children[rows.length - 1].props.className).toContain('is-latest');
+    expect(byClass(tree, 'Chip-done').map((n) => n.ownText)).toEqual([
+      'Done',
+      'Increase Count: Done',
+      'Decrease Count: Done',
+      'Done'
+    ]);
+    expect(byClass(tree, 'Chip-unchanged').map((n) => n.ownText)).toEqual(['Unchanged']);
+    // an outcome with nothing sent says so in words too, not only in its chip
+    expect(text(tree.children[rows.length - 1])).toBe('5 Reset To Start nothing moves Unchanged');
   });
 
-  test('TryTimeline with nothing tried says so, and an error is drawn last', () => {
-    expect(text(render(<TryTimeline entries={[]} />)!)).toContain('Nothing tried yet');
-    const tree = render(<TryTimeline entries={[]} error="no input" />)!;
-    expect(text(tree)).toContain('The spec refused that: no input');
+  test('TryRows: a quiet frame says so; an error is drawn last', () => {
+    // a second frame with nothing done belongs to the load row; a set that moves nothing is a quiet row
+    const { rows } = playTry(Counter, {}, ['settle', { set: 'limitsMax', value: 9 }, 'settle']);
+    expect(text(render(<TryRows rows={rows} />))).toContain('Max Value 9 nothing happens');
+    expect(text(render(<TryRows rows={rows} error="no input" />))).toMatch(/The spec refused that: no input$/);
   });
 
-  test('TryNodePanel renders before the spec package has loaded, and says what it is waiting for', () => {
-    expect(renderToStaticMarkup(<TryNodePanel typeName="Counter" isActive={false} />)).toContain(
-      'Open to try the node'
+  test('TryStage: the card, a bubble per value port, a signal’s bubble only while lit, the preview pill', () => {
+    const tree = render(
+      <TryStage
+        title="Counter"
+        typeLabel="Counter"
+        inputs={[
+          { port: 'increase', label: 'Increase Count', signal: true, lit: true },
+          { port: 'reset', label: 'Reset To Start', signal: true, lit: false },
+          { port: 'startValue', label: 'Start Value', signal: false, value: '0', lit: false }
+        ]}
+        outputs={[
+          { port: 'currentCount', label: 'Current Count', signal: false, value: '1', lit: true },
+          { port: 'countChanged', label: 'Count Changed', signal: true, lit: true }
+        ]}
+        preview={{ label: 'Current Count', value: '1', lit: true }}
+      />
+    )!;
+    const bubbles = byClass(tree, 'Bubble').map((n) => n.ownText);
+    expect(bubbles).toEqual(['sent', '0', '1', 'fired']);
+    expect(byClass(tree, 'is-lit')).toHaveLength(4); // three ports and the pill
+    expect(text(byClass(tree, 'PreviewPill')[0])).toBe('Current Count 1');
+  });
+
+  test('the whole modal body, loaded, through react-dom/server: rules left, the stage, the controls, the load row', async () => {
+    const loaded = await import('../../src/editor/src/views/panels/propertyeditor/spec/tryNodeModel');
+    const html = renderToStaticMarkup(
+      <HowItWorks
+        typeName="Counter"
+        title="Counter"
+        typeLabel="Counter"
+        parameters={{ startValue: 5 }}
+        loaded={loaded}
+      />
     );
-    expect(renderToStaticMarkup(<TryNodePanel typeName="Counter" isActive />)).toContain('Loading the spec');
+    expect(html).toContain('How the Counter works');
+    expect(html).toContain('The rules');
+    expect(html).toContain('Try it');
+    for (const signal of ['Increase Count', 'Decrease Count', 'Reset To Start']) expect(html).toContain(signal);
+    expect(html).toContain('role="switch"'); // Limits Enabled
+    expect(html).toContain('Max Value down by one'); // a stepper
+    expect(html).not.toContain('Move time'); // Counter has no clock
+    expect(html).toContain('Start Value starts at 5, Current Count → 5, Count Changed fires');
+    // control: before the package has loaded, the column says it is loading and draws no controls
+    const waiting = renderToStaticMarkup(<HowItWorks typeName="Counter" title="Counter" typeLabel="Counter" />);
+    expect(waiting).toContain('Loading the node&#x27;s spec');
+    expect(waiting).not.toContain('Max Value down by one');
+  });
+
+  test('a node that uses the clock is offered Move time and Same frame', async () => {
+    const loaded = await import('../../src/editor/src/views/panels/propertyeditor/spec/tryNodeModel');
+    const html = renderToStaticMarkup(<HowItWorks typeName="Timer" title="Delay" typeLabel="Delay" loaded={loaded} />);
+    expect(html).toContain('Move time');
+    expect(html).toContain('Same frame');
   });
 });
 
@@ -233,10 +370,13 @@ describe('the disagreement rows', () => {
     expect(summariseDisagreements(rows)).toMatch(/^(once|\d+ times) \(/);
   });
 
-  test('the panel says so, with the ruling, for a type with rows', () => {
+  test('the modal says so, with the ruling, for a type with rows — and not for Counter', () => {
     const [first] = typesWithDisagreements();
-    const html = renderToStaticMarkup(<TryNodePanel typeName={first} isActive={false} />);
+    const html = renderToStaticMarkup(<HowItWorks typeName={first} title={first} typeLabel={first} />);
     expect(html).toContain('The spec and the running node disagreed');
     expect(html).toContain(disagreementsFor(first)[0].id);
+    expect(renderToStaticMarkup(<HowItWorks typeName="Counter" title="Counter" typeLabel="Counter" />)).not.toContain(
+      'disagreed'
+    );
   });
 });

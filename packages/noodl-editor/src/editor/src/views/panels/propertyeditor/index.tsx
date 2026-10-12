@@ -16,7 +16,7 @@ import { NodeComment } from './components/NodeComment';
 import { NodeLabel } from './components/NodeLabel';
 import { PortsTab } from './components/PortsTab';
 import { PropertyEditor as PropertyEditorView } from './propertyeditor';
-import { SpecSections } from './spec/SpecSections';
+import { HowItWorksButton } from './spec/HowItWorksButton';
 
 const TAB_AI_CHAT = 'AI Chat';
 const TAB_PROPERTIES = 'Properties';
@@ -204,13 +204,7 @@ function PropertyEditorTabs(props: PropertyEditorProps & { instance: PropertyEdi
       label: TAB_PROPERTIES,
       content: (
         <ScrollArea>
-          {/* NSP-019: the spec sections sit under the rows. `ScrollArea`'s container is a flex ROW,
-              so the two are stacked in a column of their own; the `Frame` keeps its place in the
-              tree (not keyed — it is what must stay put), the sections are keyed by node. */}
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <Frame instance={props.instance} isContentSize UNSAFE_style={{ flex: 1 }} />
-            {Boolean(props.model) && <SpecSections key={props.model.id} model={props.model} />}
-          </div>
+          <Frame instance={props.instance} isContentSize UNSAFE_style={{ flex: 1 }} />
         </ScrollArea>
       )
     },
@@ -270,6 +264,10 @@ function PropertyEditorTabs(props: PropertyEditorProps & { instance: PropertyEdi
       }}
     >
       {Boolean(props.model) && <NodeLabel key={props.model.id} model={props.model} showHelp={!props.hasAiAssistant} />}
+      {/* NSP-019 R33: *How this node works*, under the node's name — the modal holds the rules and
+       *Try it* (it replaced the two folds that sat under the property rows). Keyed by node, apart
+          from `NodeLabel`'s key — the two are siblings. */}
+      {Boolean(props.model) && <HowItWorksButton key={`how-it-works-${props.model.id}`} model={props.model} />}
 
       {/* Re-keyed only when `AI Chat` comes or goes: `Tabs` looks its active id up in the current
           list and throws on a miss, and `initialActiveTab` is read once.
