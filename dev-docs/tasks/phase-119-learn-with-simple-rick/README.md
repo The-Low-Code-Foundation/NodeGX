@@ -1,8 +1,9 @@
 # Phase 119 — Learn with Simple Rick
 
 **Scoped:** 2026-10-12, at HEAD `bca1363b8`, from a conversation with Richard that began as *"let's jam and brainstorm
-something new"* for his AI training and coaching offer. **Status: 🟡 OPEN — s1 (2026-10-12): SRK-000 three of six
-measured (§1a), three owed by Richard; SRK-001's backend half built and tested.** **Prefix: `SRK`.** Route: the P116 path, **npm packages only, no editor MCP**,
+something new"* for his AI training and coaching offer. **Status: 🟡 OPEN — s2 (2026-10-12): SRK-003 ✅ (the world, the schema it
+projects, the policy, the setup and studio-key tools, the privacy notice; §1b, §2); rulings R8–R14. s1: SRK-000 three of
+six measured (§1a), three owed by Richard; SRK-001's backend half built and tested.** **Prefix: `SRK`.** Route: the P116 path, **npm packages only, no editor MCP**,
 like P118. The five gates are the board, as in P118.
 
 > "eLearning + coaching concepts, but disguised as a chat platform." — Richard, 2026-10-12
@@ -55,22 +56,56 @@ seven tables, six message kinds, and a human.**
 | 5 | Web Push from `nodegx-backend` | **None.** `vapid`, `web-push` and `pushManager` have 0 hits in `nodegx-backend`, `noodl-runtime`, `noodl-viewer-react` and `templates/`. | SRK-005 owes a sender: VAPID keys in the backend's secrets and a cloud function or core route that sends. That finding feeds P110. |
 | 6 | `nodegx deploy` + manifest + service worker on an iPhone and an Android | **not measured.** It needs the phones. | **Owed by Richard**, once SRK-004 has a first build to install. |
 
-## 2. The data (about seven collections, policy in `nodegx.security.json`)
+## 1b. The world, described in s2 (2026-10-12)
 
-| collection | fields (sketch) | who reads | who writes |
+The schema is not hand-written. `templates/learn-with-simple-rick/docs/world/` (P116's three files) holds Richard's
+nouns and links, each with his sentence where he said one, and `validate_world` named the questions that kill a classic
+mistake. It named **47**. Forty were the same four link questions (several? required? when the target goes? can it
+move?) asked once per link, ten links over (bug **P119-S2-WORLDPERLINK**). Richard answered them as four plain
+questions (BRIEF.md R8–R11), and the world then asked nothing more (`enough: true`). The rest (only one learner? what
+is a row called? read aloud? free words?) were answered from his recorded words or as defaults, listed here to
+overturn: no noun is a single record; a row is called by its name, title, body, text or date; nothing is read aloud;
+every text field is free words.
+
+What the world projects to, measured: the eight nouns plus **a history for each (R11)**, 16 collections; 53 claims, 52
+kept by the store. Not kept by the store: "no conversation sits under itself", and "every change is written to its
+history" (the store keeps history rows but writes none; a function does, §2). A secret field projects to
+`read: "nobody"`, which would hide Rick's notes from Rick (bug **P119-S2-SECRETNOBODY**); the policy says `role:staff`.
+
+## 2. The data (16 collections; the policy in `nodegx.security.json`)
+
+`backend/schema.json` is `schemaPushes(projectWorld(docs/world))`, byte for byte, gated by
+`packages/nodegx-backend/tests/srk-003-policy.test.ts` (rewrite it with `SRK_SCHEMA_WRITE=1` after the world changes).
+
+| collection | fields | who reads | who writes |
 |---|---|---|---|
-| `Learner` | email, name, language, prefs (theme, font), aliases (the R3 find-and-replace table), inviteToken, package (sessions bought or monthly cadence), meetCode (§1a #4), notes (**coach-only free text**) | own row minus `notes`/`aliases` | staff; learner writes `prefs` only |
-| `Conversation` | learnerId, title, kind (lesson · session-review · follow-up), state (open · done · archived), language, dubbed, linkedFrom, summary (the refresh block), dueBefore (next session), shareable, run (reset counter) | own | staff; learner writes `run` |
-| `Message` | conversationId, run, seq, from (rick · learner), origin (cut · typed · drafted · dictated), kind (text · clip · choice · question · paste · learner), body, clip {url, start, end}, options, revealsAfter | own | staff; learner writes `from: learner` |
-| `Progress` | learnerId, conversationId, run, lastSeq, lastOpened | own | learner |
-| `CoachNote` | learnerId, conversationId?, messageId?, text, on | **staff only** | staff |
-| `Objective` | learnerId, text, setOn, doneOn | **staff only** | staff |
-| `Session` | learnerId, at, recordingDriveId, predicted, happened, comparison, reviewConversationId, reminderOn | **staff only** | staff |
-| `PushSubscription` | learnerId, endpoint, keys | own | learner |
+| `Learner` | name, email, language (en · fr), prefs, aliases (the R3 table), inviteToken, package, meetCode (§1a #4), notes, login → `_User` | Rick; the learner their own row, **never `notes` or `aliases`** (R10), not even as a filter | a function |
+| `Conversation` | title, kind (lesson · session-review · follow-up), state (open · done · archived), language, dubbed, summary, dueBefore, shareable, run, learner →, parent → (the linked "before next time", Richard's #7) | Rick; the learner their own | a function |
+| `Message` | run, seq, from (rick · learner), origin (cut · typed · drafted · dictated), kind (text · clip · choice · question · paste · learner), body, clip, options, revealsAfter, conversation → | Rick; the learner the ones in their conversations | a function |
+| `Progress` | run, lastSeq, lastOpened, conversation → | Rick; the learner their own | a function |
+| `CoachNote` | text, on, learner →, conversation →?, message →? | **Rick only** | a function |
+| `Objective` | text, setOn, doneOn, learner → | **Rick only** | a function |
+| `Session` | at, recordingDriveId, predicted, happened, comparison, reminderOn, learner →, conversation →? (the review) | **Rick only** | a function |
+| `PushSubscription` | endpoint, keys, learner → | **Rick only** | a function |
+| `<each>History` | the row →, at, who → `_User`, changed (each detail, before and after) | **Rick only** | the same function, in the same call |
 
-Rule, carried from DBT and TPL-010: **nothing is ever deleted; `delete: nobody` everywhere.** A reset is a new `run`.
-Rule, from R3: the Anthropic-bound text is built from rows and passed through `Learner.aliases` before it leaves; the
-privacy page says so in Richard's words.
+"Their own" is a path from the learner's sign-in: Learner (by `login`) → Conversation (by `learner`) → Message or
+Progress (by `conversation`). It fails closed, but live updates refuse it (bug **P119-S2-LIVEPATH**), so the thread
+refetches on open, on the "Rick replied" push and on focus. Per-row ACLs would stream live and fail open, which is why
+they were not taken.
+
+**Nobody writes a row directly, Rick included.** Every write is a cloud function that writes the row and its history row
+together (R11). A db-change trigger was the other way to write history, but its loop guard suppresses any write that
+lands while a handler runs (`src/triggers/dbchange.ts`), so a studio publishing twenty messages at once would lose
+history rows. The functions the policy names, for SRK-004 onwards to write: a learner's `sendMessage`, `setPrefs`,
+`resetConversation`, `markProgress`, `subscribePush`; Rick's `addLearner`, `updateLearner`, `publishThread`,
+`appendMessages`, `replyAsRick`, `saveCoachNote`, `saveObjective`, `saveSession`, `setConversation`. A learner's
+`sendMessage` sets `from: learner` itself, so a learner cannot post a message marked as Rick's.
+
+Nothing is ever deleted (R8): `delete: nobody` everywhere, a link never moves (`onlyWhile` frozen, from the world), and
+a reset is a new `run`. Erasure on request is Rick's, from the admin screen (R13). Sign-up is off (`signup: nobody`,
+and `emailCode.allowSignup: false`): Rick adds every learner. Rule, from R3: the Anthropic-bound text is built from rows
+and passed through `Learner.aliases` before it leaves; the privacy notice says so.
 
 ## 3. The studio (the private repo, `~/vscode_projects/learn-with-simple-rick`)
 
@@ -99,9 +134,9 @@ one).
 | task | what | depends on | state |
 |---|---|---|---|
 | SRK-000 | **Measure first:** learners on training.digitalbricks.io today; Gemini vs Groq STT on one French + one English screencast (word error on ten sentences each, on-screen text yes/no, cost); the Object Storage project and a public bucket; Drive API access to Meet Recordings from the Mac; Web Push from this backend (none today?); `nodegx deploy` + manifest + service worker on a phone | — | 🟡 #1 answered (zero, R6); #4 and #5 measured; #3 ruled (R7), probe owed; #2 and #6 owed by Richard (iPhone now, Android later) |
-| SRK-001 | **Core:** six-digit email code sign-in in `nodegx-backend`, beside magic links (R5) | 000 | 🟡 **backend ✅ s1**: `POST /auth/email-code` and `POST /auth/email-code/verify`, the session as JSON in `/oauth/exchange`'s shape, the magic link's identity (one account for a link and a code), at most 5 wrong guesses per code, newest code only, 10 tries per address per 15 min; the `emailCode` template; `tests/srk-001-email-code.test.ts` 14/14, two mutants caught. **Owed:** the client side (a node, both auth adapters, the code export), carried in SRK-005; a switch on the admin Sign-in page and in the MCP auth tool (today it is turned on by `PUT /admin/auth {emailCode:{enabled:true}}`) |
+| SRK-001 | **Core:** six-digit email code sign-in in `nodegx-backend`, beside magic links (R5) | 000 | 🟡 **backend ✅ s1**: `POST /auth/email-code` and `POST /auth/email-code/verify`, the session as JSON in `/oauth/exchange`'s shape, the magic link's identity (one account for a link and a code), at most 5 wrong guesses per code, newest code only, 10 tries per address per 15 min; the `emailCode` template; `tests/srk-001-email-code.test.ts` 14/14, two mutants caught. **The whole `nodegx-backend` suite, s2** (started by s1, finished 15:18 CEST 2026-10-12 at HEAD `9505d342d`, `-w 2`): 249 of 251 suites, 3108 tests passed; the two red are filed and neither is auth: `rel002b-fail-closed` (P116-S13-REL002B) and `ac2-page-editor-drag-drive`, whose `beforeAll` hit its 30 min limit (P116-S13-AC2STALL). **Owed:** the client side (a node, both auth adapters, the code export), carried in SRK-005; a switch on the admin Sign-in page and in the MCP auth tool (today it is turned on by `PUT /admin/auth {emailCode:{enabled:true}}`) |
 | SRK-002 | **Core:** `package-deploy.js` secret-scan false positive | 000 | ✅ s1: already fixed by P109 ISL-042 (`ac78efb4b`), confirmed on `dist/cli.js`; the hosting README is corrected |
-| SRK-003 | The schema, the policy, the staff key, the privacy page (R3 wording) | 000 | ⬜ |
+| SRK-003 | The schema, the policy, the staff key, the privacy page (R3 wording) | 000 | ✅ **s2**: `templates/learn-with-simple-rick` made by the MCP's `create_project`; `docs/world/` (8 nouns, 11 links, every question answered, R8–R11) projects 16 collections, `backend/schema.json` byte for byte; `nodegx.security.json` (§2: path reads, notes and aliases hidden per field, nothing written directly, nothing deleted, sign-up off); `tools/setup-backend.mjs` (schema, policy, staff role, Rick, sign-in by code 10 min, no sign-up, magic links off) and `tools/setup-studio-key.mjs` (`classes:read` + three functions, acting as Rick, refuses non-staff); `privacy/notice.en.json` (R3, R12–R14; offline copy checks clean; two TODO facts). `packages/nodegx-backend/tests/srk-003-policy.test.ts` **20/20**, four policy mutants each caught. **Owed:** the page that shows the notice (SRK-004); the 14 functions the policy names, each writing its history row (SRK-004 onwards) |
 | SRK-004 | Learner app: the thread held to LOOK.md 1–13, the conversations drawer, the summary block + reset with runs, the welcome popup, themes, the reply bar wording | 003 | ⬜ |
 | SRK-005 | Learner app: code sign-in, the invite link, PWA (manifest, service worker, install), push "Rick replied" (brainstorm #12) | 001, 004 | ⬜ |
 | SRK-006 | Teacher app: inbox, learner page (notes, objectives, sessions), the conversation with coach notes **unmistakably separate from the reply bar**, add learner, share link, quick replies, next-session highlight | 003, a sketch Richard says yes to | ⬜ |
@@ -109,7 +144,7 @@ one).
 | SRK-008 | Studio: ingest, preamble, code words | 000 | ⬜ |
 | SRK-009 | Studio: thread, cut, preview, publish, verify, clean; append to a conversation | 003, 008 | ⬜ |
 | SRK-010 | Studio: the dubbing switch, Richard's voice replaced, French or English (R11) | 009 | ⬜ |
-| SRK-011 | Studio: watch-drive, review in two modes, "off the record", the linked "before next time" conversation | 009 | ⬜ |
+| SRK-011 | Studio: watch-drive, review in two modes, "off the record", the linked "before next time" conversation; session clips **private**, played through a signed link a cloud function hands the learner who owns the conversation (R12; measure first that Hetzner honours a presigned GET) | 009 | ⬜ |
 | SRK-012 | Sessions: prediction vs happened + advice; objectives; the optional check-in reminder; the package count | 006 | ⬜ |
 | SRK-013 | Hosting: replace DBT on training.digitalbricks.io (learners told, data kept, backup kept), the clips bucket, Caddy, `/mcp` | 000, 002, 005 | ⬜ |
 | SRK-014 | Forward to a colleague: a blank, non-interactive copy of Rick's messages (brainstorm #10) | 004 | ⬜ |

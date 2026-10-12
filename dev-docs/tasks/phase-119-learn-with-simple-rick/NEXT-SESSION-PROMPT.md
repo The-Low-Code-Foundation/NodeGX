@@ -1,37 +1,59 @@
-# Next session — Phase 119, Learn with Simple Rick (s2)
+# Next session — Phase 119, Learn with Simple Rick (s3)
 
-Read, in this order: [README.md](README.md) (the board; §1a is what s1 measured), [BRIEF.md](BRIEF.md) (Richard's
-words, the rulings), [LOOK.md](LOOK.md) and open `look/learner-thread.html` in a browser at phone width. Then the
-studio repo's README at `~/vscode_projects/learn-with-simple-rick/README.md` and its `CODEWORDS.md`.
+Read, in this order: [README.md](README.md) (the board; §1b and §2 are what s2 built), [BRIEF.md](BRIEF.md) (Richard's
+words, rulings R1–R14), [LOOK.md](LOOK.md) and open `look/learner-thread.html` in a browser at phone width. Then the
+template itself, `templates/learn-with-simple-rick/` (its `docs/world/`, `nodegx.security.json`, `tools/`, `privacy/`).
 
-**Where s1 left it (2026-10-12):**
+**Where s2 left it (2026-10-12):**
 
-- SRK-000: Drive (#4) and Web Push (#5) are measured, see README §1a. **A Meet recording's name carries no attendee, but a
-  recurring meeting keeps its code**, so `Learner.meetCode` is the match key. There is no Web Push anywhere in the stack.
-- SRK-001: the backend half is built. `POST /auth/email-code {email}` mails a six-digit code (always 200).
-  `POST /auth/email-code/verify {email, code}` answers with the session in `/oauth/exchange`'s shape, roles included.
-  It is the magic link's identity, so a link and a code are one account. Turn it on with
-  `PUT /admin/auth {"emailCode":{"enabled":true}}`. Spec: `packages/nodegx-backend/tests/srk-001-email-code.test.ts`.
-- **Not run in s1:** the full `nodegx-backend` suite and `test:main`. Fifteen auth and email specs plus the MCP's
-  `backendTools` spec were run (all green). Run the full suite before anything else builds on SRK-001.
+- **SRK-003 is done and verified.** The template was made with the `nodegx` MCP's `create_project` (the npm route,
+  P116 path). `docs/world/` holds eight nouns and eleven links; `validate_world` asked 47 questions, Richard answered
+  them as four (R8–R11), and it now asks nothing. The projection is 16 collections (a history beside each, R11), written
+  to `backend/schema.json` byte for byte. The policy reads through paths from the learner's sign-in, hides `notes` and
+  `aliases` per field, and lets **nobody** write a row directly: every write is a cloud function that writes the row and
+  its history row together (README §2 says why a db-change trigger was not used). `tools/setup-backend.mjs` and
+  `tools/setup-studio-key.mjs` are proven against a real backend by the spec. `privacy/notice.en.json` passes the offline
+  copy checks; two facts in it are TODO lines, not shown.
+- **Readings taken, 2026-10-12, at HEAD `9505d342d` plus this session's files:**
+  `packages/nodegx-backend/tests/srk-003-policy.test.ts` 20/20, and four policy mutants (field rule dropped, messages
+  open, learner create allowed, coach notes open) each reddened the test aimed at it. `noodl-mcp`
+  `def038SettledTemplates` 32/33 (the red one is `templates/nightbook`, a peer's untracked template, red before s2's
+  change too). `npm run ontology-census:check` green after regenerating. `tsc` clean on `nodegx-backend` tests and
+  `noodl-mcp`. The full `nodegx-backend` suite (s1's owed run): 249 of 251 suites, both red ones filed and not auth
+  (README SRK-001 row). `test:main` not run: nothing in `tests-unit` reads `templates/` (checked).
+- **Two gates the new template tripped, both fixed in s2.** The ontology census wanted a verdict on the eight history
+  collections (one wildcard verdict in P116's `kinds.hand.json`, then a regenerate). DEF-038 called a template with no
+  run-on-value-change node a broken reader. It now counts family types in the raw files as a second reading, so an
+  honest zero passes and a zero beside a non-zero still fails. A mutant of that reading reddens the control.
+- **Where the handoff was wrong:** the "peer" whose full backend suite s2 waited on for 30 minutes was s1's own
+  background job, still running after `/clear`.
 
-**Richard's answers at the end of s1:** zero learners on the old app, delete it at SRK-013 (R6). Clips go in the
-`training-digitalbricks` bucket under `clips/` (R7). He tests on his iPhone now and Android later, and records the
-STT screencasts later. The welcome popup and reply bar were pitched (BRIEF.md slots) and await his ruling.
+**Next to build, in order:**
 
-**Owed by Richard:**
+1. **SRK-004, the learner's thread**, held to LOOK.md 1–13. It owes the learner's four functions first (`sendMessage`
+   sets `from: learner` itself, `markProgress`, `resetConversation`, `setPrefs`), each writing its row and its history
+   row through one shared helper. Then the Thread, Sign in and Privacy pages. The thread refetches on open, on focus
+   and on the push, because live updates refuse path rules (P119-S2-LIVEPATH). The welcome popup and the reply bar wait
+   on Richard's wording ruling: build the slots with the pitch, marked as such.
+2. **SRK-008, the studio's ingest**, in parallel (`~/vscode_projects/learn-with-simple-rick`), once Richard's two
+   screencasts exist (SRK-000 #2).
+3. Then SRK-009, SRK-005/006 as in README §4's order.
 
-1. The clips-bucket check, done by him: does a public-read object under `clips/` load without credentials, while
-   the bucket listing and `dbtraining/` stay private? Claude's attempt was refused as a production read.
-2. Two ~3 min screencasts, one English and one French, with the ten sentences he said written down.
-3. The iPhone install once SRK-004 has a build; Android later.
-4. A ruling on the welcome-popup and reply-bar pitch.
+**Owed by Richard (human decisions, not ours):**
 
-**Next to build, in order:** SRK-003 (the schema with `meetCode`, the policy, the staff key, the privacy page), then
-SRK-004 (the thread, held to LOOK.md 1–13). SRK-002 turned out to be already fixed (P109 ISL-042). The client half of SRK-001 (a sign-in-by-code node, both auth adapters, the export) is
-carried in SRK-005.
+1. A ruling on the welcome-popup and reply-bar pitch (BRIEF.md slots).
+2. The clips-bucket check (does a public-read object under `clips/` load without credentials, while the listing and
+   `dbtraining/` stay private?). R12 adds a second thing to measure there: a presigned GET on a private object.
+3. Two ~3 min screencasts, English and French, with the ten sentences written down.
+4. A sketch of the teacher side he says yes to, before SRK-006.
+5. To overturn if he wants: the world's defaults s2 set from his words (README §1b: no noun is a single record, what a
+   row is called, nothing read aloud, every text field free words).
 
-**Traps already known:** `gh` and
-`ssh` are sometimes refused by the auto-mode classifier, so test in one command and never inherit the block; `grep -rn`
-on this machine silently skips `.ts` files, so use `git grep`; the shared-checkout rules in memory (temp-index commits,
-no stash).
+**Product findings (s2):** filed `P119-S2-WORLDPERLINK` (the world asks a link question once per link, 40 of 47),
+`P119-S2-LIVEPATH` (live updates refuse a path rule, so a chat refetches), `P119-S2-SECRETNOBODY` (a secret field
+projects to `read: "nobody"`, hiding it from the coach too). DEF-038's honest-zero blind spot fixed in place (above).
+
+**Traps already known:** `gh` and `ssh` are sometimes refused by the auto-mode classifier; `grep -rn` on this machine
+silently skips `.ts` files, so use `git grep`; shared-checkout rules in memory (temp-index commits, no stash). New in
+s2: `validateSecurityConfig` refuses any unknown top-level key (no `_about` in `nodegx.security.json`); the admin
+routes answer `{ config }` for `/admin/permissions` and `/admin/auth`, and `/admin/users` searches with `?q=`.
