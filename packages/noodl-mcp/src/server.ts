@@ -251,7 +251,7 @@ export function createServer(options: ServerOptions): CreatedServer {
     registerStyleWriteTools(rec, binding);
     registerDocsWriteTools(rec, binding);
     registerScriptWriteTools(rec, binding);
-    registerBackendWriteTools(rec);
+    registerBackendWriteTools(rec, binding);
     registerWorldWriteTools(rec, binding);
     // AAQ-011/F13. Write-gated, and it is the strongest write in the server: it
     // starts a process and creates a database. Read-only callers get the

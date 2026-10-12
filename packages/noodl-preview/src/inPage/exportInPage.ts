@@ -26,7 +26,7 @@ import { HtmlProcessor } from '@noodl-utils/compilation/build/processors/html-pr
 
 import { injectIntoTemplate } from '@nodegx/module-inject';
 
-import { PREVIEW_EXPORT_OPTIONS, projectModelFromLegacy } from '../projectExport';
+import { previewExportOptions, projectModelFromLegacy } from '../projectExport';
 import { kitTags } from './kits';
 import { validateLegacyProject, type PreviewReport } from '../validate';
 
@@ -115,7 +115,7 @@ function load(files: Record<string, string>, nodeLibraryData: unknown): Loaded |
     useNodeLibrary(nodeLibraryData);
     const { project, warnings } = projectModelFromLegacy(legacy);
     // No bundles: there is no server to fetch them from, and the whole project is already here.
-    const projectData = Exporter.exportToJSON(project, { ...PREVIEW_EXPORT_OPTIONS, useBundles: false });
+    const projectData = Exporter.exportToJSON(project, { ...previewExportOptions(legacy.metadata), useBundles: false });
     if (!projectData) return { status: 'error', message: 'Export produced nothing — the root component may have been deleted.' };
     return { status: 'ok', projectData, report, warnings, project };
   } catch (err) {

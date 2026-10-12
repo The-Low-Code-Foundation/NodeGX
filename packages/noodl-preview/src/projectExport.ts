@@ -24,6 +24,30 @@ export const PREVIEW_EXPORT_OPTIONS: ExportToJSONOptions = {
   ignoreComponentFilter: (c) => !c.name.startsWith('/#__cloud__/')
 };
 
+const LOOPBACK = /^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?(\/|$)/i;
+
+/**
+ * The export options for one project: {@link PREVIEW_EXPORT_OPTIONS}, except that a backend on THIS machine is kept.
+ *
+ * P112-S14-NOBACKEND. `provision_backend` binds a project to a local backend (`http://127.0.0.1:<port>`), and on the
+ * npm path that backend is the only one the app has. Blanked, every Record, Query and Cloud Function in the preview
+ * said "This project has no backend configured" while the backend was up. A loopback endpoint can't be someone's
+ * deployed backend reached by accident, which is what the blanking is for; anything else is still blanked.
+ */
+export function previewExportOptions(metadata: Record<string, unknown> | undefined): ExportToJSONOptions {
+  const cs = metadata?.cloudservices as { instanceId?: string; endpoint?: string; appId?: string; type?: string } | undefined;
+  if (!cs || typeof cs.endpoint !== 'string' || !LOOPBACK.test(cs.endpoint)) return PREVIEW_EXPORT_OPTIONS;
+  return {
+    ...PREVIEW_EXPORT_OPTIONS,
+    environment: {
+      id: cs.instanceId,
+      appId: cs.appId ?? cs.instanceId ?? '',
+      url: cs.endpoint,
+      type: cs.type === 'external' ? 'external' : 'nodegx'
+    }
+  };
+}
+
 /**
  * Picks a root node when the project file does not name one.
  *

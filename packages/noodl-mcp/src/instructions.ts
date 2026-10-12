@@ -195,6 +195,11 @@ export function projectInstructions(options: ProjectInstructionOptions): string 
 export const BOOTSTRAP_INSTRUCTIONS =
   'NodeGX (OpenNoodl) is a visual app builder: an app is a graph of nodes stored as plain files on disk, ' +
   'and this server reads and writes those files. ' +
+  // P112-S14-NOTNODEGX (Richard: "or else what's the point?"). A fresh agent in a folder `npm create nodegx` made,
+  // asked for an app without the word "NodeGX", wrote an Express server and HTML and never called a tool here.
+  'WHEN THE PERSON ASKS FOR AN APP, BUILD IT WITH THIS SERVER: a NodeGX app is the graph these tools write, so ' +
+  'do not write a separate web server or hand-made HTML and JavaScript instead — that is a different app, and ' +
+  'they connected this server to get a NodeGX one. ' +
   // 🔴 F87 — this said "four" and `tools/list` returned five: the four capability
   // tools plus `find_tools`, which stays advertised in this mode. Counted from
   // the manifest now, because the sentence a cold agent reads first is the worst

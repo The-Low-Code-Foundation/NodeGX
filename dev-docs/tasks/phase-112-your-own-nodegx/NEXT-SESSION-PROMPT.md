@@ -18,9 +18,9 @@ the drive in the dev editor found the copy made twice per open, and measured OPE
 | OWN-011 one install | 🟡 published; **AC1, AC3, AC4 ✅**; **AC2 editor half ❌** (§9) | waits on OWN-013's release | **Opus** |
 | OWN-012 the screen, from the descriptions | 📋 | — | step 1 **Opus**, 2–3 **Fable** |
 | **OWN-013 the 0.4.0 cut** | 🟡 **G1 G2 G3 ✅, G5 G6 ✅, G4 🟡** (the six checks fixed locally, §8; `cline-dev` pushed for CI, R20), **G7 🟡** (PAGEPORTS open); G8–G10 ⬜ | unit `own-013` 10/10 + two mutants; drive §7; cut-tree `test:ci` 3015 / 1 by name (§8) | **Opus** |
-| **OWN-014 the agent sees its app** (s13) | 🟡 **AC1 ✅ AC2 ✅** from a packed tarball; AC3 publish, AC4 (the language app) owed | `scripts/own/stranger-render.mjs` + control (registry 0.1.0 refuses) | **Opus** |
-| **OWN-015 the backend from npm** (s13) | 🟡 mechanism ✅ from a tarball: provision → `set_function_secret` → deploy → call; AC2 files+results ✅ with control; AC3 ✅ | `scripts/own/stranger-backend.mjs` (a key-checking stand-in for Google) | **Opus** |
-| **OWN-016 ship it** (s13) | 🟡 step 1 + AC1 ✅ (`nodegx-deploy` bin); the VM ⬜ | Chrome over CDP, 0 errors; broken-project control | **Opus** |
+| **OWN-014 the agent sees its app** (s13–s14) | 🟡 AC1 ✅ AC2 ✅; s14: KEYCHAIN fixed (renders had hung on a macOS dialog); AC4 half (Home yes, Lesson not: route parameter); AC3 publish owed | `scripts/own/stranger-render.mjs` + control | **Opus** |
+| **OWN-015 the backend from npm** (s13–s14) | 🟡 a stranger built the language app and it SPEAKS after fixes + two repairs on a copy (§7–§8); AC2 ✅ (requests); R26/R27 built; owed CFPORTS, UNDEPLOYED, DETACHEDVISUAL, a fresh round (AC1), AC4 publish | `own-015/` (the round's scripts, as they ran) | **Opus** |
+| **OWN-016 ship it** (s13) | 🟡 AC1 ✅, live at https://lingo.nodegx.io, AC4 reboot ✅; phone check with the real app and AC5 publish owed | Chrome over CDP, 0 errors; broken-project control | **Opus** |
 
 **Built but undriven: 0** for OWN-013 (all three driven 2026-10-12, OWN-013 §7). A P112 peer (OWN-014/015/016,
 R18, labelled "s13") works in this phase at the same time; it adds its own rows and merges into this file.
@@ -93,11 +93,13 @@ without `--use-mock-keychain`), **DAYTWO** (`provision_backend` restarts the pro
 The key was in 0 of the page's requests (control 6). Richard ruled that the agent never sees the key (PERSONKEY,
 needs a ruling on the fix).
 
-**Next, in order:** (1) ask Richard for NOTNODEGX's and PERSONKEY's rulings; (2) fix CFPORTS (the checker derives a
+**Rulings came back (OWN-015 §8):** NOTNODEGX = both (done), PERSONKEY = the `.env` route (done, plus ENVSERVED:
+the preview served `.env`, fixed). The static Richard heard was the agent's double WAV header (Gemini now returns
+WAV + C2PA), not ours. **Next, in order:** (1) — ; (2) fix CFPORTS (the checker derives a
 `CloudFunction2`'s and Request/Response's ports, and the two examples get fixed), UNDEPLOYED (a `next` on cloud
 writes) and DETACHEDVISUAL; (3) a fresh round 2 that must speak with no repair, which is AC1; (4) re-pack 0.2.0 in a
 worktree and ask before publishing. KITROOTDEPLOY (GAM-014 red since P107's `9da5979f9`) is P107's.
-The scratch stack lived in this session's scratchpad (`own015-r2/`: `run.mjs`, `stack.mjs`, `drive.mjs`, `put-key.py`).
+The round's scripts are kept in `own-015/` (scratchpad paths left as they ran; see its README).
 
 ## OWN-014 / 015 / 016: the npm full stack (s13, 2026-10-12, Opus)
 

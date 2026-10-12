@@ -7,7 +7,7 @@ const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
 
-const { MCP_PACKAGE, MCP_VERSION, serverEntry, setUp } = require('../bin/create-nodegx.js');
+const { AGENT_NOTE, MCP_PACKAGE, MCP_VERSION, serverEntry, setUp } = require('../bin/create-nodegx.js');
 
 const BIN = path.join(__dirname, '..', 'bin', 'create-nodegx.js');
 const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'create-nodegx-'));
@@ -19,11 +19,11 @@ test('the pinned server is the version the checkout would publish', () => {
   assert.equal(MCP_VERSION, mcp.version);
 });
 
-test('an empty folder gets one file: the bootstrap server, pinned', () => {
+test('an empty folder gets the bootstrap server, pinned, and the two agent notes', () => {
   const dir = path.join(tmp(), 'my-apps');
   const run = spawnSync(process.execPath, [BIN, dir], { encoding: 'utf8' });
   assert.equal(run.status, 0, run.stderr);
-  assert.deepEqual(fs.readdirSync(dir), ['.mcp.json']);
+  assert.deepEqual(fs.readdirSync(dir).sort(), ['.mcp.json', 'AGENTS.md', 'CLAUDE.md']);
   const entry = read(path.join(dir, '.mcp.json')).mcpServers.nodegx;
   assert.deepEqual(entry, serverEntry());
   assert.ok(entry.args.includes(`${MCP_PACKAGE}@${MCP_VERSION}`));
@@ -31,6 +31,23 @@ test('an empty folder gets one file: the bootstrap server, pinned', () => {
   // Bootstrap mode: no project directory, so the agent's create_project makes the app (R8).
   assert.ok(!entry.args.some((a) => path.isAbsolute(a)));
   assert.match(run.stdout, /Say what you want to build/);
+  assert.match(run.stdout, /Wrote CLAUDE.md and AGENTS.md/);
+});
+
+test('P112-S14-NOTNODEGX: the agent notes say an app here is a NodeGX app, and how a key goes in', () => {
+  assert.match(AGENT_NOTE, /build it as a NodeGX app with the `nodegx`\nserver's tools/);
+  assert.match(AGENT_NOTE, /Don't\nwrite a separate web server/);
+  assert.match(AGENT_NOTE, /`set_function_secret` without a value/);
+  assert.match(AGENT_NOTE, /`\.env` file/);
+});
+
+test("a person's own CLAUDE.md or AGENTS.md is never replaced", () => {
+  const dir = tmp();
+  fs.writeFileSync(path.join(dir, 'CLAUDE.md'), 'mine\n');
+  const result = setUp(dir);
+  assert.equal(fs.readFileSync(path.join(dir, 'CLAUDE.md'), 'utf8'), 'mine\n');
+  assert.deepEqual(result.notes, ['AGENTS.md']);
+  assert.equal(fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8'), AGENT_NOTE);
 });
 
 test('Windows spawns npx through cmd /c', () => {

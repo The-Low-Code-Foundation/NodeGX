@@ -175,3 +175,12 @@ The phone check comes with the real app.
   - In headless Chrome the page renders with 0 exceptions and 0 console errors.
 - The five neighbouring sites answer 200.
 - **Owed:** the phone check comes with the real app. AC5, the publish, waits for Richard's 2FA.
+
+## 9. Session 14 (2026-10-12): the real app, at phone width, locally
+
+OWN-015 §7's stranger-built language app (repaired copy, the checkout's preview, the round's backend with the real
+key) was driven in headless Chrome at 390×844: Home → *Greetings* → tap *Bonjour* → the WAV played to the end (1.45 s
+of 1.45 s), 0 console errors, the key in 0 of the page's requests. **The phone check on the live site is still
+owed:** lingo.nodegx.io serves s13's fixture function, not this app. It's deployed there once CFPORTS, UNDEPLOYED and
+DETACHEDVISUAL are fixed and a fresh round builds it with no repair. Two s14 fixes reach this task: the preview no
+longer serves `.env` (ENVSERVED), and a copied or moved project can't redeploy its functions (MOVEDDEPLOY, open).

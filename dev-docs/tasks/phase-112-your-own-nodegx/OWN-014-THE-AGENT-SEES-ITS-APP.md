@@ -121,3 +121,17 @@ worktree at the pushed commit (OWN-011 s10: a pack in the shared checkout inline
 session's test tarballs were packed there and are tests only). The refusal says "from version 0.2.0 on", so the
 release must be 0.2.0 or the sentence changes. AC4 needs OWN-015's language app.
 
+
+## 8. Session 14 (2026-10-12, Opus): the stranger's agent never saw its app
+
+OWN-015's round 2 (a real `claude -p` from the 0.2.0 tarball, `HOME` empty) called `render_report` 4 times, and every
+call was killed at 240 s. The s13 control (`stranger-render.mjs`, a fresh project) failed the same way today.
+Measured: the harness with the real `HOME` rendered in 2 s; with the round's `HOME` it hung. A bare headless Chrome
+answered normally, and so did the harness's own server. The cause was on Richard's screen: macOS **"Keychain Not
+Found"** (Cancel / Reset To Defaults), once per Chrome. A page that uses storage makes Chrome open the login
+keychain, an empty `HOME` has none, and Chrome waits for the dialog. **P112-S14-KEYCHAIN fixed:**
+`render-report.js` passes `--use-mock-keychain`. With the fix, the same project under the same `HOME` renders in 3 s.
+AC1/AC2's s13 readings stand. The 0.2.0 tarball predates the fix and must be re-packed. **AC4 (the language app), half:**
+the fixed harness measured Home (0 errors, 3 warnings incl. one console error; the backend was down at that
+moment). It did **not** measure Lesson: its `urlPath` `lesson/{lessonId}` takes a route parameter the harness has
+no value for, and the report says so. A page per route still needs a way to name a parameter value.

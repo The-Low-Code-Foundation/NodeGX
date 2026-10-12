@@ -34,7 +34,13 @@ import { z } from 'zod';
 
 import { requireBackend } from '../backend/client';
 import { ensureProjectId } from '../backend/projectIdentity';
-import { censusBackends, listBackendConfigs, provisionBackend, stopBackend } from '../backend/provision';
+import {
+  censusBackends,
+  findReusableBackend,
+  listBackendConfigs,
+  provisionBackend,
+  stopBackend
+} from '../backend/provision';
 import { reapOrphanedBackends } from '../backend/reaper';
 import { deployProjectCloudFunctions } from '../cloud/deploy';
 import { listRuntimeRecords, ownerIsLive } from '../backend/runtimeRecord';
@@ -92,7 +98,14 @@ export function registerProvisionTools(server: McpServer, binding: ProjectBindin
       // Refuse BEFORE spawning anything: a provision that creates a process and
       // then fails to bind it has left durable machine state for nothing.
       const current = store.readCloudServices();
-      if (!args.force && current.endpoint) {
+      // P112-S14-DAYTWO: the endpoint this project points at may be its OWN backend, stopped because the server
+      // that started it stopped (every new session). That is the reuse this tool's description promises, not a
+      // repoint: the same backend id comes back on its own data. Refusing it left an npm install with no way to
+      // start the backend again short of `force`, and the next refusal sent the agent to an editor panel.
+      const ownBackend =
+        current.instanceId &&
+        findReusableBackend(listBackendConfigs(), args.name, store.readProjectFile()?.id)?.id === current.instanceId;
+      if (!args.force && current.endpoint && !ownBackend) {
         return jsonResult({
           provisioned: false,
           reason:
