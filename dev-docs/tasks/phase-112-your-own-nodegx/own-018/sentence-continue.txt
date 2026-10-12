@@ -1,0 +1,1 @@
+I've restarted the nodegx server with the studio-hub folder and --all-tools, as its messages said, so all its tools should be there now. Carry on and build the whole app as I first asked, without waiting for me to answer questions.
