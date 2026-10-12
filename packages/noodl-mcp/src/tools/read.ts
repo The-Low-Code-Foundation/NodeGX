@@ -165,8 +165,9 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
     {
       title: 'Get project info',
       description:
-        'Project metadata and orientation: name, the directory this server is bound to, settings, root ' +
-        'component, routes, global style names, component stats and whether this server allows writes. ' +
+        // P112-OWN018-LISTCHANGED — shortened (same fields) for `call_tool`'s resident slot.
+        'Project metadata: name, bound directory, settings, root component, routes, global style names, ' +
+        'component stats, and whether writes are allowed. ' +
         'On a read-write server it also returns `authoringDoctrine` — how work is expected to be ' +
         'factored into components. Cheap — call this first.',
       inputSchema: {}
@@ -263,7 +264,7 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
         'node/connection counts, and `description` — what the component is for, in the author\'s own words, for ' +
         'the components that have one (cut at ' +
         LIST_COMPONENTS_DESCRIPTION_CHARS +
-        ' characters, ending "…"; `get_component` returns it in full). Read the descriptions before rebuilding ' +
+        ' characters; get_component has it in full). Read the descriptions before rebuilding ' +
         'something the project already has. Filter with `type` or `path_prefix`.',
       inputSchema: {
         type: z.enum(['root', 'page', 'visual', 'logic', 'cloud']).optional().describe('Only components of this type'),

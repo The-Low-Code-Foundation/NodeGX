@@ -10,6 +10,7 @@
  * |---|---|
  * | `.mcp.json` | registers this project's authoring server, scoped to this folder |
  * | `CLAUDE.md` | says what the app is, and that the tools are the way in |
+ * | `AGENTS.md` | the same, for every agent that isn't Claude Code (P112-OWN018-PROJECTAGENTS) |
  *
  * ⚠️ **Neither is a substitute for the other.** A registered server with no
  * context gives a model twenty-odd tools and a project it has no vocabulary for;
@@ -37,6 +38,7 @@
 export const AGENT_CONFIG_PATHS = Object.freeze({
   mcp: '.mcp.json',
   claude: 'CLAUDE.md',
+  agents: 'AGENTS.md',
   gitignore: '.gitignore'
 });
 
@@ -155,6 +157,34 @@ export function renderMcpJson(serverName: string, registration: AgentServerRegis
  * tools are the way in, and where the prose lives.
  */
 export function renderClaudeMd(options: AgentConfigOptions): string {
+  return renderAgentNote(options, 'claude');
+}
+
+/**
+ * `AGENTS.md` — P112-OWN018-PROJECTAGENTS. Mistral Vibe, Codex, Cline and most agents that aren't Claude Code read
+ * `AGENTS.md`, not `CLAUDE.md`, and none of them reads `.mcp.json`. So it is `CLAUDE.md` with one paragraph
+ * changed: how to reach the server is the command itself, to register once, rather than a pointer at `.mcp.json`.
+ */
+export function renderAgentsMd(options: AgentConfigOptions): string {
+  return renderAgentNote(options, 'agents');
+}
+
+/**
+ * The stdio command a registration runs, as one line to paste into another agent's config.
+ *
+ * ⚠️ The project's own folder is written as `<this folder>`. AGENTS.md is committed and travels with a shared
+ * template, and the absolute path names this machine and its user — the reason `.mcp.json` is git-ignored. The
+ * folder is the one absolute argument that isn't a script (`.cjs`/`.js`) or a flag.
+ */
+function commandLine(registration: AgentServerRegistration): string {
+  const quote = (a: string) => (/[\s"']/.test(a) ? JSON.stringify(a) : a);
+  const isFolder = (a: string) => (a.startsWith('/') || /^[A-Za-z]:[\\/]/.test(a)) && !/\.c?js$/.test(a);
+  const env = Object.entries(registration.env ?? {}).map(([k, v]) => `${k}=${quote(v)} `);
+  const args = registration.args.map((a) => (isFolder(a) ? '<this folder>' : quote(a)));
+  return env.join('') + [quote(registration.command), ...args].join(' ');
+}
+
+function renderAgentNote(options: AgentConfigOptions, audience: 'claude' | 'agents'): string {
   const { projectName, serverName, summary, hasDocs, registration } = options;
 
   const lines: string[] = [`# ${projectName}`, ''];
@@ -178,7 +208,17 @@ export function renderClaudeMd(options: AgentConfigOptions): string {
     ''
   );
 
-  if (registration) {
+  if (registration && audience === 'agents') {
+    lines.push(
+      `Use the \`${serverName}\` MCP server instead. Claude Code finds it in \`.mcp.json\`; any other agent ` +
+        'needs it registered once, as a stdio server running this, with `<this folder>` the full path of this folder:',
+      '',
+      '```',
+      commandLine(registration),
+      '```',
+      ''
+    );
+  } else if (registration) {
     lines.push(
       `Use the \`${serverName}\` MCP server instead. It is registered for this folder in ` +
         '`.mcp.json`, so an agent started here is offered it and asks you to approve it once.',
@@ -277,6 +317,20 @@ export async function installAgentConfig(
   } else {
     await host.write(AGENT_CONFIG_PATHS.claude, renderClaudeMd(options));
     files.push({ path: AGENT_CONFIG_PATHS.claude, outcome: 'written' });
+
+    // ── AGENTS.md ────────────────────────────────────────────────────────────
+    // Only beside a CLAUDE.md written now: where the person already has their own CLAUDE.md, the agent notes in
+    // this folder are theirs, and a second voice beside them would contradict it.
+    if (await host.exists(AGENT_CONFIG_PATHS.agents)) {
+      files.push({
+        path: AGENT_CONFIG_PATHS.agents,
+        outcome: 'kept-existing',
+        reason: 'An AGENTS.md was already here and is the user’s to own.'
+      });
+    } else {
+      await host.write(AGENT_CONFIG_PATHS.agents, renderAgentsMd(options));
+      files.push({ path: AGENT_CONFIG_PATHS.agents, outcome: 'written' });
+    }
   }
 
   return { files, written: files.filter((f) => f.outcome === 'written').map((f) => f.path) };
@@ -323,7 +377,8 @@ export async function backfillAgentConfig(
     return {
       files: [
         { path: AGENT_CONFIG_PATHS.mcp, outcome: 'skipped', reason },
-        { path: AGENT_CONFIG_PATHS.claude, outcome: 'skipped', reason }
+        { path: AGENT_CONFIG_PATHS.claude, outcome: 'skipped', reason },
+        { path: AGENT_CONFIG_PATHS.agents, outcome: 'skipped', reason }
       ],
       written: []
     };
@@ -378,6 +433,14 @@ export async function upgradeAgentConfigForDocs(
   }
 
   const upgraded = renderClaudeMd(options);
+  // AGENTS.md follows CLAUDE.md: re-rendered only when it is byte for byte what creation wrote.
+  if (await host.exists(AGENT_CONFIG_PATHS.agents)) {
+    const agentsAsCreated = renderAgentsMd({ ...options, summary: undefined, hasDocs: false });
+    const agentsUpgraded = renderAgentsMd(options);
+    if ((await host.read(AGENT_CONFIG_PATHS.agents)) === agentsAsCreated && agentsUpgraded !== agentsAsCreated) {
+      await host.write(AGENT_CONFIG_PATHS.agents, agentsUpgraded);
+    }
+  }
   if (upgraded === current) {
     // Nothing to say that was not already said — no docs were written, and no summary captured.
     return { path, outcome: 'kept-existing', reason: 'Already up to date.' };

@@ -45,7 +45,7 @@ import { registerKitTools } from './tools/kitTools';
 import { registerProjectSettingsTools } from './tools/projectSettingsTools';
 import { registerLibraryTools } from './tools/libraryTools';
 import { registerLessonTools } from './tools/lessonTools';
-import { ToolDisclosure, recordTools, registerFindTools } from './tools/disclosure';
+import { ToolDisclosure, recordTools, registerCallTool, registerFindTools } from './tools/disclosure';
 import { refuseUnknownArguments } from './tools/unknownArguments';
 import type { ReproducibleOutput } from './project/writeClock';
 
@@ -237,6 +237,8 @@ export function createServer(options: ServerOptions): CreatedServer {
   // backend *read* tools too, so the door out of the deferred set cannot be
   // behind the write flag.
   registerFindTools(rec, disclosure);
+  // P112-OWN018-LISTCHANGED — resident in every mode: the door for a client that never re-reads the tool list.
+  registerCallTool(rec, disclosure);
   if (options.allowWrites) {
     // LAS-006 §4 — one plan registry, shared by the two write groups that both
     // have an opinion about it: the plan tools own the plans, and

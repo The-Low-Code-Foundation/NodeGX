@@ -103,13 +103,12 @@ export function registerStyleReadTools(server: McpServer, binding: ProjectBindin
         // P94 STY-002 AC6. 🔴 Says the new thing in FEWER characters than the old line, because the
         // resident surface has 5 tokens of headroom: naming Looks at the old length read 8,285 of the
         // 8,280 budget (`toolDisclosure`), and a budget is not answered by raising it.
-        'radius, borders, shadows), its Looks and the shipped Look library, and the named COMPOSITIONS — ' +
-        'ready-made parameter sets for a card, a shell, a section head, the buttons and the type ramp, each ' +
-        'naming the recipe that shows it assembled, the icon sets installed here with a copyable ' +
-        'iconIconSource value, and the bundled stock photographs. ' +
-        'Reference a token in a node ' +
-        'parameter as "var(--token-name)" (never a raw hex or px). Set detail: "prompt" for the compact ' +
-        'prompt-shaped block, or "full" (default) for the structured JSON. Built-in presets are listed too.',
+        // P112-OWN018-LISTCHANGED — shortened again, same content, for `call_tool`'s resident slot.
+        'radius, borders, shadows), its Looks and the Look library, and named COMPOSITIONS — ready-made ' +
+        'parameter sets for a card, shell, section head, buttons and type ramp, each naming its recipe — plus ' +
+        'installed icon sets (with a copyable iconIconSource value) and bundled stock photos. Use a token in a ' +
+        'node parameter as "var(--token-name)", never raw hex or px. detail: "prompt" for a compact block, ' +
+        '"full" (default) for JSON. Built-in presets are listed too.',
       inputSchema: {
         detail: z
           .enum(['full', 'prompt'])

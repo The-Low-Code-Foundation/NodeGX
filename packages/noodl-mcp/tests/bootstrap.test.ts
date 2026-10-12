@@ -255,7 +255,7 @@ describe('BST-001 — the bound surface is unchanged', () => {
     // tools on a server with no project — this mode's whole failure, in one flag.
     const session = await open({ allowWrites: true, deferTools: false });
     try {
-      expect([...(await toolNames(session.client))].sort()).toEqual([...BOOTSTRAP_TOOLS, 'find_tools'].sort());
+      expect([...(await toolNames(session.client))].sort()).toEqual([...BOOTSTRAP_TOOLS, 'find_tools', 'call_tool'].sort());
     } finally {
       await session.close();
     }

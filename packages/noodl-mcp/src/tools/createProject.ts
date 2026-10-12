@@ -588,9 +588,11 @@ export function completeBind(bind: CreateProjectBinding, projectDir: string): Bi
       'you can build in it from this same conversation, with no second registration and no restart. ' +
       // ⚠️ Named, because a client that ignores `list_changed` would otherwise
       // see a note promising tools it cannot call. Measured 2026-08-11: Claude
-      // Code re-lists 3ms after the notification.
-      'They arrive in your next tool list; if your client does not refresh on notifications/tools/' +
-      'list_changed, restart the server with the project directory as its argument. ' +
+      // Code re-lists 3ms after the notification. 🔴 P112-OWN018-LISTCHANGED
+      // (2026-10-12): Mistral Vibe never does, and a restart is no exit for an
+      // agent, so the note names the door it can use from here.
+      'They arrive in your next tool list; if your client does not refresh on notifications/tools/list_changed, ' +
+      "call them through call_tool (describe: true gives a tool's arguments). " +
       // 🔴 §3 — the briefing `initialize` already spent, and the reason this
       // field exists at all.
       'Read `guidance` below before authoring: it is what a server started with this project would have ' +
