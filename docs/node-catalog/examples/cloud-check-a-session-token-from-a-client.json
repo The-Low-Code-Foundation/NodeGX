@@ -23,11 +23,11 @@
         { "id": "fail_response", "type": "noodl.cloud.response", "label": "The lookup failed", "parameters": { "status": "failure" } }
       ],
       "connections": [
-        { "fromId": "fn_request", "fromProperty": "sessionToken", "toId": "check", "toProperty": "token" },
+        { "fromId": "fn_request", "fromProperty": "pm-sessionToken", "toId": "check", "toProperty": "token" },
         { "fromId": "fn_request", "fromProperty": "receive", "toId": "check", "toProperty": "verify" },
-        { "fromId": "check", "fromProperty": "valid", "toId": "ok_response", "toProperty": "valid" },
-        { "fromId": "check", "fromProperty": "userId", "toId": "ok_response", "toProperty": "userId" },
-        { "fromId": "check", "fromProperty": "username", "toId": "ok_response", "toProperty": "username" },
+        { "fromId": "check", "fromProperty": "valid", "toId": "ok_response", "toProperty": "pm-valid" },
+        { "fromId": "check", "fromProperty": "userId", "toId": "ok_response", "toProperty": "pm-userId" },
+        { "fromId": "check", "fromProperty": "username", "toId": "ok_response", "toProperty": "pm-username" },
         { "fromId": "check", "fromProperty": "done", "toId": "ok_response", "toProperty": "send" },
         { "fromId": "check", "fromProperty": "unchanged", "toId": "ok_response", "toProperty": "send" },
         { "fromId": "check", "fromProperty": "error", "toId": "fail_response", "toProperty": "errorMessage" },

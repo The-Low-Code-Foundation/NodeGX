@@ -57,7 +57,7 @@
         },
         {
           "fromId": "call_stats",
-          "fromProperty": "taskCount",
+          "fromProperty": "out-taskCount",
           "toId": "count_text",
           "toProperty": "text"
         }
@@ -108,7 +108,7 @@
           "fromId": "count_tasks",
           "fromProperty": "taskCount",
           "toId": "fn_response",
-          "toProperty": "taskCount"
+          "toProperty": "pm-taskCount"
         },
         {
           "fromId": "count_tasks",

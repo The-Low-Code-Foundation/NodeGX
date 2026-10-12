@@ -5344,7 +5344,7 @@
       "enrichment": {
         "typeName": "CloudFunction2",
         "summary": "Calls a cloud function component from the browser: send parameters, run the server-side graph, receive its results.",
-        "description": "Cloud Function is the browser-side caller of a cloud function — a component that lives on the cloud runtime and starts with a Request node and ends with a Response node. Pick the target in the `function` input; the node then grows one `in-<name>` input per parameter declared on the function's Request node and one `out-<name>` output per value declared on its Response nodes. Triggering `call` (Call, signal) POSTs the current `in-` values to the server, where the function's graph runs; when the Response sends a success reply the `out-` outputs update and `done` (signal) fires. On a failure reply — or any transport error — `error` (string value) is set and `failure` (signal) fires. The logged-in user's session token is sent along automatically, so the function sees the caller's identity.",
+        "description": "Cloud Function is the browser-side caller of a cloud function — a component that lives on the cloud runtime and starts with a Request node and ends with a Response node. Pick the target in the `function` input; the node then grows one `in-<name>` input per parameter declared on the function's Request node and one `out-<name>` output per value declared on its Response nodes. Wire the prefixed names (`in-text`, `out-audioUrl`): a bare `text` is never made, so nothing is sent or read. Triggering `call` (Call, signal) POSTs the current `in-` values to the server, where the function's graph runs; when the Response sends a success reply the `out-` outputs update and `done` (signal) fires. On a failure reply — or any transport error — `error` (string value) is set and `failure` (signal) fires. The logged-in user's session token is sent along automatically, so the function sees the caller's identity.",
         "whenToUse": "Use it whenever browser logic needs work done with server-side trust: secrets, security-sensitive writes, aggregations, or multi-record transactions. For plain reads of database classes prefer DbCollection2 (Query Records) directly. Do not use the deprecated v1 'Cloud Function' node in new graphs.",
         "ports": {
           "call": "Signal input; sends the request with the current `in-` parameter values after all pending input updates have been applied.",
@@ -69050,7 +69050,7 @@
       "enrichment": {
         "typeName": "noodl.cloud.request",
         "summary": "Entry point of a cloud function component: receives the call's parameters and fires Received to start the server-side flow.",
-        "description": "Request is the entry node of a cloud function — it only exists in the cloud runtime, and a component containing one becomes callable from the browser through a Cloud Function (CloudFunction2) node. Declare the function's parameters as a name list in `params`; each name becomes an output carrying the value the caller sent, and a matching `in-<name>` input appears on the browser-side caller. When a call arrives the node checks authentication (rejecting unauthenticated calls unless `allowNoAuth` is true), publishes each parameter, then fires `receive` (Received, signal) — wire that signal into your logic and end the flow at a Response node. The caller's identity, parameters and headers are also placed on a 'Request' model readable elsewhere in the function.",
+        "description": "Request is the entry node of a cloud function — it only exists in the cloud runtime, and a component containing one becomes callable from the browser through a Cloud Function (CloudFunction2) node. Declare the function's parameters as a name list in `params`; each name becomes an output named `pm-<name>` carrying the value the caller sent (wire `pm-text`, never `text`: a name without the prefix is never made), and a matching `in-<name>` input appears on the browser-side caller. When a call arrives the node checks authentication (rejecting unauthenticated calls unless `allowNoAuth` is true), publishes each parameter, then fires `receive` (Received, signal) — wire that signal into your logic and end the flow at a Response node. The caller's identity, parameters and headers are also placed on a 'Request' model readable elsewhere in the function.",
         "whenToUse": "Place exactly one at the start of every cloud function component. It is meaningless in browser components — there, use Component Inputs for inputs and CloudFunction2 to call the function.",
         "ports": {
           "receive": "Signal; fires once per incoming call, after authentication has been checked and all parameter outputs hold the call's values. Start the function's logic from here.",
@@ -69254,7 +69254,7 @@
       "enrichment": {
         "typeName": "noodl.cloud.response",
         "summary": "Exit point of a cloud function component: collects result values and sends the reply back to the caller.",
-        "description": "Response ends a cloud function — it only exists in the cloud runtime. Declare the function's result values as a name list in `params`; each name becomes an input to feed, and a matching `out-<name>` output appears on the browser-side Cloud Function (CloudFunction2) caller. Triggering `send` (Send, signal) replies to the pending call: with `status` 'success' (the default) it returns HTTP 200 with the collected result values, with `status` 'failure' it returns HTTP 400 carrying `errorMessage`, which the caller surfaces on its `error` output before firing `failure`. A function can contain several Response nodes — for example one success and one failure path — but exactly one should send per call.",
+        "description": "Response ends a cloud function — it only exists in the cloud runtime. Declare the function's result values as a name list in `params`; each name becomes an input named `pm-<name>` to feed (wire `pm-audioUrl`, never `audioUrl`: a name without the prefix is never made), and a matching `out-<name>` output appears on the browser-side Cloud Function (CloudFunction2) caller. Triggering `send` (Send, signal) replies to the pending call: with `status` 'success' (the default) it returns HTTP 200 with the collected result values, with `status` 'failure' it returns HTTP 400 carrying `errorMessage`, which the caller surfaces on its `error` output before firing `failure`. A function can contain several Response nodes — for example one success and one failure path — but exactly one should send per call.",
         "whenToUse": "End every path through a cloud function with one. Without a `send`, the caller's request never completes. In browser components use Component Outputs instead.",
         "ports": {
           "send": "Signal input; sends the reply for the current call using the current status, result values and error message. Trigger it exactly once per call.",
@@ -72982,7 +72982,7 @@
           "connections": [
             {
               "fromId": "fn_request",
-              "fromProperty": "sessionToken",
+              "fromProperty": "pm-sessionToken",
               "toId": "check",
               "toProperty": "token"
             },
@@ -72996,19 +72996,19 @@
               "fromId": "check",
               "fromProperty": "valid",
               "toId": "ok_response",
-              "toProperty": "valid"
+              "toProperty": "pm-valid"
             },
             {
               "fromId": "check",
               "fromProperty": "userId",
               "toId": "ok_response",
-              "toProperty": "userId"
+              "toProperty": "pm-userId"
             },
             {
               "fromId": "check",
               "fromProperty": "username",
               "toId": "ok_response",
-              "toProperty": "username"
+              "toProperty": "pm-username"
             },
             {
               "fromId": "check",
@@ -73127,7 +73127,7 @@
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "rawBody",
+              "fromProperty": "pm-rawBody",
               "toId": "body_signature",
               "toProperty": "value"
             },
@@ -73145,7 +73145,7 @@
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "partnerToken",
+              "fromProperty": "pm-partnerToken",
               "toId": "check_token",
               "toProperty": "token"
             },
@@ -73165,13 +73165,13 @@
               "fromId": "body_signature",
               "fromProperty": "signature",
               "toId": "ok_response",
-              "toProperty": "signature"
+              "toProperty": "pm-signature"
             },
             {
               "fromId": "check_token",
               "fromProperty": "valid",
               "toId": "ok_response",
-              "toProperty": "tokenValid"
+              "toProperty": "pm-tokenValid"
             },
             {
               "fromId": "check_token",
@@ -73428,7 +73428,7 @@
               "fromId": "purge",
               "fromProperty": "sessionsRevoked",
               "toId": "ok_response",
-              "toProperty": "sessionsRevoked"
+              "toProperty": "pm-sessionsRevoked"
             },
             {
               "fromId": "purge",
@@ -73778,13 +73778,13 @@
           "connections": [
             {
               "fromId": "fn_request",
-              "fromProperty": "email",
+              "fromProperty": "pm-email",
               "toId": "new_user",
               "toProperty": "username"
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "email",
+              "fromProperty": "pm-email",
               "toId": "new_user",
               "toProperty": "email"
             },
@@ -73802,7 +73802,7 @@
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "role",
+              "fromProperty": "pm-role",
               "toId": "grant",
               "toProperty": "role"
             },
@@ -73816,13 +73816,13 @@
               "fromId": "new_user",
               "fromProperty": "userId",
               "toId": "ok_response",
-              "toProperty": "userId"
+              "toProperty": "pm-userId"
             },
             {
               "fromId": "grant",
               "fromProperty": "roles",
               "toId": "ok_response",
-              "toProperty": "roles"
+              "toProperty": "pm-roles"
             },
             {
               "fromId": "grant",
@@ -74450,7 +74450,7 @@
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "role",
+              "fromProperty": "pm-role",
               "toId": "revoke",
               "toProperty": "role"
             },
@@ -74468,7 +74468,7 @@
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "revokedBy",
+              "fromProperty": "pm-revokedBy",
               "toId": "stamp",
               "toProperty": "revokedBy"
             },
@@ -74500,7 +74500,7 @@
               "fromId": "roles_now",
               "fromProperty": "roles",
               "toId": "ok_response",
-              "toProperty": "roles"
+              "toProperty": "pm-roles"
             },
             {
               "fromId": "roles_now",
@@ -74625,7 +74625,7 @@
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "claims",
+              "fromProperty": "pm-claims",
               "toId": "mint",
               "toProperty": "claims"
             },
@@ -74639,7 +74639,7 @@
               "fromId": "mint",
               "fromProperty": "token",
               "toId": "ok_response",
-              "toProperty": "token"
+              "toProperty": "pm-token"
             },
             {
               "fromId": "mint",
@@ -75240,13 +75240,13 @@
           "connections": [
             {
               "fromId": "fn_request",
-              "fromProperty": "page",
+              "fromProperty": "pm-page",
               "toId": "page_offset",
               "toProperty": "page"
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "role",
+              "fromProperty": "pm-role",
               "toId": "members",
               "toProperty": "role"
             },
@@ -75266,13 +75266,13 @@
               "fromId": "members",
               "fromProperty": "users",
               "toId": "ok_response",
-              "toProperty": "users"
+              "toProperty": "pm-users"
             },
             {
               "fromId": "members",
               "fromProperty": "total",
               "toId": "ok_response",
-              "toProperty": "total"
+              "toProperty": "pm-total"
             },
             {
               "fromId": "members",
@@ -81751,7 +81751,7 @@
             },
             {
               "fromId": "call_stats",
-              "fromProperty": "taskCount",
+              "fromProperty": "out-taskCount",
               "toId": "count_text",
               "toProperty": "text"
             }
@@ -81802,7 +81802,7 @@
               "fromId": "count_tasks",
               "fromProperty": "taskCount",
               "toId": "fn_response",
-              "toProperty": "taskCount"
+              "toProperty": "pm-taskCount"
             },
             {
               "fromId": "count_tasks",
@@ -81900,13 +81900,13 @@
               "fromId": "a_input",
               "fromProperty": "onTextChanged",
               "toId": "call_add",
-              "toProperty": "a"
+              "toProperty": "in-a"
             },
             {
               "fromId": "b_input",
               "fromProperty": "onTextChanged",
               "toId": "call_add",
-              "toProperty": "b"
+              "toProperty": "in-b"
             },
             {
               "fromId": "sum_btn",
@@ -81916,7 +81916,7 @@
             },
             {
               "fromId": "call_add",
-              "fromProperty": "sum",
+              "fromProperty": "out-sum",
               "toId": "sum_text",
               "toProperty": "text"
             }
@@ -81953,13 +81953,13 @@
           "connections": [
             {
               "fromId": "fn_request",
-              "fromProperty": "a",
+              "fromProperty": "pm-a",
               "toId": "fn_sum",
               "toProperty": "a"
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "b",
+              "fromProperty": "pm-b",
               "toId": "fn_sum",
               "toProperty": "b"
             },
@@ -81967,7 +81967,7 @@
               "fromId": "fn_sum",
               "fromProperty": "result",
               "toId": "fn_response",
-              "toProperty": "sum"
+              "toProperty": "pm-sum"
             },
             {
               "fromId": "fn_request",
@@ -82028,19 +82028,19 @@
           "connections": [
             {
               "fromId": "fn_request",
-              "fromProperty": "to",
+              "fromProperty": "pm-to",
               "toId": "fn_send_email",
               "toProperty": "to"
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "subject",
+              "fromProperty": "pm-subject",
               "toId": "fn_send_email",
               "toProperty": "subject"
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "message",
+              "fromProperty": "pm-message",
               "toId": "fn_send_email",
               "toProperty": "text"
             },
