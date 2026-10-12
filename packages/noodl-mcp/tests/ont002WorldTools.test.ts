@@ -250,7 +250,7 @@ describe('ONT-013 — the world tools read the fifth file, rules.json', () => {
     expect(rules.rules.find((r) => r.id === 'cohort-at-most-twenty')!.why).toMatch(/ONT-016/);
     expect(rules.rules.find((r) => r.id === 'invoice-amount-settled')!.why).toBeUndefined();
     // The read-back in the schema the tool returns: the unkept sentence under "Not kept", the kept one nowhere.
-    const schema = (again.data.report as { schema: { collections: { name: string; description: string }[] } }).schema;
+    const schema = (again.data.report as unknown as { schema: { collections: { name: string; description: string }[] } }).schema;
     expect(schema.collections.find((c) => c.name === 'Cohort')!.description).toMatch(/Not kept by the database yet: A cohort holds at most twenty learners\.$/);
     expect(schema.collections.find((c) => c.name === 'Invoice')!.description).not.toContain('amount never changes');
   });
