@@ -143,3 +143,20 @@ The script lost its executable bit because the `chmod +x` was inside a refused c
 - AC4: restart and crash recovery ✅, enabled at boot ✅. A real reboot of nexus-1 is Richard's call, because it
   serves live sites.
 - AC5: publish (the commands are with Richard).
+
+**AC4 ✅, the real reboot (Richard: "go ahead and reboot", 2026-10-12 08:44 UTC).**
+- **Before:** 29 running services were snapshotted, and each was checked for being enabled at boot. That found
+  `nexus.service` **disabled**: it had been running by hand since 2026-09-11 and would not have come back. Richard ruled
+  "Enable it, then reboot", and it was enabled. SSH is socket-activated (`ssh.socket` enabled) and PostgreSQL starts
+  through `postgresql.service`.
+- **The reboot** applied a pending kernel (6.8.0-137 → 146), and the box was back in about 20 s.
+- **After:** 28 of 29 services are running; the missing one is `polkit` (D-Bus-activated, on demand). There are 0 failed
+  units and the listening ports are the same.
+- `lingo-backend` came back on its own: health 200, and `speak` returned 94,434 bytes RIFF.
+- `nodegx.io`, `community.nodegx.io`, `todo.digitalbricks.io`, `digitalbricks.io` and `nexus.digitalbricks.io` all
+  answer 200.
+
+**Next:** Richard adds an A record `lingo.nodegx.io` → `49.12.102.195` (Namecheap, `nodegx.io` → Advanced DNS; no AAAA,
+since the zone is IPv4 only). Then re-run `ship-to-vm.sh` with `lingo.nodegx.io` as the sixth argument. That adds the
+Caddy drop-in (validated, removed again if invalid) and gets the certificate, which completes AC2's `https://` half.
+The phone check comes with the real app.
