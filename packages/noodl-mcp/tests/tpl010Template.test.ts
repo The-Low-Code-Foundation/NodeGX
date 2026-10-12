@@ -1773,7 +1773,10 @@ describe('§7 the todo list’s tasks in the week (TPL-010-L)', () => {
     });
     const today = (outputs.columns as Array<{ key: string; blocks: Array<Record<string, unknown>> }>).find((c) => c.key === dayFrom(0));
     if (!today) return; // Sunday is not one of the six columns.
-    expect(today.blocks.map((b) => b.id)).toEqual(['todo-t-late', 'todo-t-sent', 'todo-t-today', 'b1', 'b2']);
+    // A row wears its own id and carries the record's (P78-TPL010-MOVEARROW, `96059a380`). That commit landed on a
+    // Sunday, when the line above returns early, so this read the old ids until Monday (P112-S15-SUNDAYGATE).
+    expect(today.blocks.map((b) => b.blockId)).toEqual(['todo-t-late', 'todo-t-sent', 'todo-t-today', 'b1', 'b2']);
+    expect(today.blocks.map((b) => b.id)).toEqual(['day:todo-t-late', 'day:todo-t-sent', 'day:todo-t-today', 'day:b1', 'day:b2']);
     expect(today.blocks[0]).toMatchObject({ fromTodo: true, mark: 'var(--destructive)', hoursText: '0.25 h' });
     expect(String(today.blocks[0].projectName)).toMatch(/^From todo · was due /);
     expect(today.blocks[2]).toMatchObject({ fromTodo: true, projectName: 'From todo', mark: 'var(--env-admin)' });
