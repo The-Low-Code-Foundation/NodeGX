@@ -47,7 +47,7 @@ should switch** (README §0.2). Do not wait for an answer.
 
 1. ✅ *Done 2026-10-12 (OWN-013 §7).* Not driven: a **new project from a template makes no copy** (the opt-out in
    `newProject`); check it on the next launch.
-2. **Read CI on the pushed `cline-dev`** (`gh run list --branch cline-dev --workflow pr.yml`; read each job's duration,
+2. ✅ *Done s12: CI on `01aeb0868` — all six required green (OWN-013 §8 end).* Next: **ask Richard (R20) for `release/0.4.0` and the PR** if he hasn't answered. Was: **Read CI on the pushed `cline-dev`** (`gh run list --branch cline-dev --workflow pr.yml`; read each job's duration,
    and `--log-failed` for a red one). If Test (editor) is red with only *re-arms a held save*, re-run the job (OWN-013
    §8: an order-dependent spec, not chased). Then **ask Richard (R20) for `release/0.4.0` and the PR.**
    *Done s12, kept for the record — G5 + G6 on the cut tree:* a worktree (`make-worktree.sh`; delete its links into the primary's `dist` first) at
