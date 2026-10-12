@@ -1,19 +1,21 @@
 # P107 — next session
 
-**Written 2026-10-11 (s88, Opus).** Read the [README](README.md) §2–§7 (**R21 and R22 are the newest rulings**). Then
-[NSP-021 §6.2](NSP-021-THE-SECOND-EDITOR.md) (what s88 measured and built) and the census's
+**Written 2026-10-12 (s89, Opus).** Read the [README](README.md) §2–§7 (**R23 is the newest ruling**). Then
+[NSP-021 §6.3](NSP-021-THE-SECOND-EDITOR.md) (what s89 drove, measured and built) and the census's
 [§5 "the source after"](NSP-021-EDITOR-KNOWLEDGE-CENSUS.md).
 
 **Model: Opus.**
 
-**s88 in one paragraph.** The R20 drive could not run again: a peer's editor (P112 OWN-011) held port 9222. So s88 did
-NSP-021's `typecasts`, and measured first. Over 201 projects (31,026 wires typed at both ends) the agent's checker and
-the canvas differed on **0** wires. Both refused the same 34, and **30 were one defect**: since Items became an
-`optionslist` (2026-09-05), nobody could wire a list into a Dropdown's Items. That is **P107-S88-OPTIONSCAST**, filed.
-Richard ruled both questions in one go. **R21** "Allow it, and fix bare labels" and **R22** "The canvas's rule". Built:
-the table and the rule moved to **`@nodegx/project-contract/typecasts`** (the runtime imports it, so it is one table,
-not a copy; `813657773`). Then **Dropdown v8**: a word in a wired list is an option (runtime `optionItems`, spec,
-stranger round 4; `fecab7823`).
+**s89 in one paragraph.** Both owed drives ran in one editor launch on a copy of CMG Drive Looks B. **R20 ✅**: the For
+Each `addToBasket` wire is an error naming `itemOutputSignal-addToBasket`. **R21 ✅**: a real canvas drag from a Static
+Data onto a Dropdown offers Items, connects, and carries no type warning, with a signal → Items control firing beside it.
+Then `allowAsChild` was measured first. Types: 0 differences between the runtime export and the catalog. Visual roots: 0
+differences. **But the agent's checker asked none of the editor's four hierarchy errors**: 60 nodes in 208 projects
+(nightbook 52, an agent's For Each cards 6), the same 60 counted in the running editor. Richard ruled **R23 "Yes, as
+errors"**. Built: `@nodegx/project-contract/hierarchy`, which the editor's node warnings, `ComponentModel` and the
+validator's new `invalid-hierarchy` all call. The catalog now takes its child rules from the runtime export (it gained
+`haveComponentChildren`; without it the rule would have flagged 70 correct nodes). **Found on the way: R21 had never
+reached the agent server** — the enriched catalog it reads was not regenerated in s88 (P107-S89-ENRICHEDSTALE, fixed).
 
 ## Board (from the task files)
 
@@ -28,79 +30,78 @@ stranger round 4; `fecab7823`).
 | NSP-017 the escape hatches | 🟡 s64–s68. Left: AC1's export half (P18's) | s64 … s68 |
 | NSP-023 the spec without React | ✅ (s50) | s45 … s57 |
 | NSP-006 the stranger | ✅ rounds 1–4 | `649e6864d`, s70 … s84 |
-| NSP-020 ports without a viewer | 🟡 L1–L5 ✅, AC4 ✅, R19 ✅, oracle (c) ✅, R20 ✅ (s87; **its drive is owed**). Left: Router's labels (ADAPTERLABEL) | s79 … s87 |
-| **NSP-021 the second editor** | 🟡 AC1 ✅ (s87); §3.2: Navigate, Cloud Function (s87), **`typecasts` ✅ s88 (R21, R22)**. Round trip (§3.3) = P112 OWN-006 | s87, `813657773`, `fecab7823` |
+| NSP-020 ports without a viewer | 🟡 L1–L5 ✅, AC4 ✅, R19 ✅, oracle (c) ✅, R20 ✅ **and driven (s89)**. Left: Router's labels (ADAPTERLABEL) | s79 … s87 |
+| **NSP-021 the second editor** | 🟡 AC1 ✅ (s87); §3.2: Navigate, Cloud Function (s87), `typecasts` ✅ s88 (R21 driven s89), **`allowAsChild` / visual-ness ✅ s89 (R23)**. Round trip (§3.3) = P112 OWN-006 | s87, s88, s89 |
 | NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
 
-## What s89 does (in order)
+## What s90 does (in order)
 
-1. **Two drives in the running editor, one launch.** Check `lsof -nP -iTCP:9222 -sTCP:LISTEN` and the peer list
-   first, and never run a second stack. Open a COPY of `NodeGX test projects/CMG Drive Looks B` with the `run-editor`
-   skill (opening a project writes three files into it).
-   (a) **R20**: read `ProjectValidationService.instance.report`. The For Each `addToBasket` wire must be an error
-   naming `itemOutputSignal-addToBasket`.
-   (b) **R21**: on a page, drag a Static Data's `Items` onto a Dropdown. The popup must offer Items, the wire must
-   connect, and the Problems panel must show no type warning.
-   A screenshot of each is the evidence.
-2. **`allowAsChild` / visual-ness** (census §2: the catalog mirrors the rule by hand three times). Measure first, as
-   s88 did: where do the editor's answer and the agent server's answer differ, over Richard's projects? The census
-   script is in s88's scratchpad pattern: esbuild a `.ts` scan from `src` with `--alias:@nodegx/node-spec=…/src/
-   browser.ts --alias:@nodegx/project-contract=…/nodegx-project-contract` (the node-spec `dist/` is stale). Keep a
-   known-firing control beside any zero.
-3. Display name / deprecation at node level; Router (ADAPTERLABEL) only if a reason appears.
+1. **The kit overlay's copy of the child rules** (`packages/nodegx-kit-catalog/src/index.js` :392-443): the last of the
+   three hand mirrors census §2 named. Measure first, as s89 did: a kit node's `allowAsChild` / `allowChildrenWithCategory`
+   from the overlay against what the editor's node library gets for the same kit (the runtime registers kit nodes through
+   the same `defineNode`, so `generateNodeLibrary` over a register with the kit loaded is the oracle). Keep a
+   known-firing control beside any zero. If they agree, move the overlay onto `@nodegx/project-contract/hierarchy`'s
+   reading of the export (or note why a published package cannot), and only then retire it.
+2. **Display name / deprecation at node level** (census §2's next rows). Measure the editor's answer against the MCP's
+   over Richard's projects before designing anything.
+3. Router (ADAPTERLABEL) only if a reason appears.
 
-**The L1 recipe, for any spec that moves later** (s82 + s83 + s84 + s87, one step per line):
-- grep the runtime node's `registerOutputIfNeeded` callers;
-- write `wiredOutputs` from the gated names the HEAD trace mentions (s87: a script reading `golden/<type>.json`; keep
-  the file's indent and trailing newline — round-trip the HEAD text first);
-- move the spec (`onWire` on the derived output, `discoverOutput`, the send asks `world.hasOutput`);
-- diff the traces by scenario name (NOT `golden --check` alone: a moved input hash also reads "stale");
-- run the interpreter with mutants at seeds 13 and 20728, and the runtime at 200 with seed 20737;
-- for a seed-only survivor, run HEAD's spec at the same seed first, then add the hand scenario that kills it;
-- add the oracle cases and a planted break;
-- run both graph suites.
+**The census recipe (s89):** write a scratch entry that `import`s `scripts/node-catalog/dom-shim` by absolute path,
+registers the browser runtime + viewer nodes as `extractor-entry.js` does, and calls the REAL `generateNodeLibrary`;
+bundle it with `require('./scripts/node-catalog/lib/bundle').bundleEntry(entry, outDir)` (the `@noodl/runtime` alias and
+the type-stub plugin come with it) and run the bundle with node. Population: everything under `vscode_projects` (depth 3,
+OpenNoodl excluded) plus the v2 projects in `~/Library/Application Support/NodeGX/recently_opened_project.json`, by
+realpath (123 on 2026-10-12), and the committed corpus (85). Put a synthetic control project in the list.
 
-**Oracle (c) recipe (s87):** a jest test in `noodl-editor/tests-unit/nsp-020/` can run a REAL editor adapter by mocking
-`@noodl-models/projectmodel` (`getNodesWithType`, `getComponentWithName`), `@noodl-models/warningsmodel` and
-`@noodl-models/nodegraphmodel` (CloudFunctionAdapter also needs `@noodl-models/componentmodel`). Copy the node's params
-BEFORE running the adapter, because RouterNavigateAdapter writes `router` into them.
-
-**The survivor recipe (s86):** reproduce on the INTERPRETER at the deep run's own seed. Find the generated sequences
-that reach the branch with `discoverBranches(spec).spec` and its `hits`. A sequence that ENDS at the branch is the hole,
-so the killing scenario puts a READER after it.
+**Driving recipe (s89):** copy the project to the scratchpad and rename `nodegx.project.json`'s `name`; open it with
+`LocalProjectsModel.instance.openProjectFromFolder(dir)` then the fiber router's `route({ to: 'editor', project })`;
+`cdp reload` between projects. `ProjectValidationService.instance.report` is `null` until the Problems panel mounts
+(click `[aria-label="Problems"]`). A real wire drag is `node scripts/devtools/cdp.js drag "x,y" "x,y" 25` from the
+source's output dot onto the target node (screen = canvas rect + (graph + pan) × scale); the popup's rows are
+`[class*=listElementPort]`, `enabled` when offered. Afterwards remove your entries from `recently_opened_project.json`.
 
 **Human decisions:**
 - NSP-019 AC3 and its three choices; C160; C161; C162.
 - **P107-S84-USERACL**: should the User family hide `ACL` like the Record family?
 - The Frappe note in NSP-010 §4 is owed to Richard **before the first `changes` entry answers `project`**. None does yet.
+- **P107-S89-NIGHTBOOK** is the template owner's (P78): make each `/Data/*` instance a root of its page; it moves the 26
+  pinned in `tests-unit/nsp-021/hierarchy`.
 
 NSP-010's and NSP-017's uncommitted notes (not this phase's sessions') were left out again.
 
-**Open, filed this phase:** P107-S86-STOREDWIRE (medium); P107-S85-RESTCOLTYPES (low); P107-S83-SENDFORM;
-P107-S79-ADAPTERLABEL (low; s87 note: it no longer blocks oracle (c)). **Fixed s88:** P107-S88-OPTIONSCAST (R21) — its
-drive in the running editor is step 1(b). Rocket School's keyboard (`noodl-mcp/tests/tpl007Components.ts` :1729) feeds its
-Dropdown through a Function only to dodge it; back to Static Data is the template owner's call.
+**Open, filed this phase:** P107-S89-NIGHTBOOK (medium), P107-S89-CFEXAMPLES (low; `catalog:examples` red on two Cloud
+Function examples before s89), P107-S89-XMLEXAMPLE (low); P107-S86-STOREDWIRE (medium); P107-S85-RESTCOLTYPES (low);
+P107-S83-SENDFORM; P107-S79-ADAPTERLABEL (low). **Fixed s89:** P107-S89-HIERARCHY (R23), P107-S89-ENRICHEDSTALE.
 
-**P109 holds:** D38, the Page Stack, the Router, LIBRARYDOCS, CHR007SNAPSHOT; P107-S82-STATESVALUEPORT (drop
-`KNOWN_ROWS.States` and the States scenario's `row` in the same commit) and P107-S82-STATESLOADGATE (two pins in
-`nsp-020-module-table.ts`). **P112 holds:** P107-SIZE.
+**P109 holds:** D38, the Page Stack, the Router, LIBRARYDOCS, CHR007SNAPSHOT; P107-S82-STATESVALUEPORT and
+P107-S82-STATESLOADGATE. **P112 holds:** P107-SIZE.
 
-## Gates (s88, this tree)
+## Gates (s89, 2026-10-12, this tree on `8a714409f` + s89's uncommitted changes, then committed)
 
-- editor: `tests-unit/nsp-021/typecasts` 4 / 4 (planted: the old signal leniency → red); `tests/validation/catalog-index`
-  and the cast-rule suites under the editor's jest (`--testMatch '<rootDir>/tests/validation/…'`): 129 / 130, the one red
-  is `rules.test.ts` nonexistent-port "lists available alternatives" (alternatives order; that rule never reads the cast
-  rule — not s88's); `tests-unit/nsp-020/problems-panel-wire-check` green; `tsc` editor 0, `typecheck:editor-tests` 0.
-- runtime: `tsc` 0; `nda-014-outbound-string-cast` + `nodelibraryexport.port-descriptions` 15 / 15; conformance
-  `NSP_ONLY=net.noodl.controls.options NSP_SEED=20737`: v8 CONFORMS, 66 / 66 scenarios, 200 / 200 (planted: the bare-word
-  mint removed → exactly the two new scenarios red).
-- node-spec: Dropdown on the interpreter with mutants at seeds 13 and 20728 — conforms, 0 survivors, 0 unreached;
-  `spec-golden:check --type net.noodl.controls.options` 0 (no existing trace moved); stranger hashes refreshed (2 lines,
-  both s88's). Stranger round 4 (Dropdown) 66 / 66 and the hash check green.
-- viewer-react corpus `nda-012-dropdown-items` + `p82-dropdown-default-items` 18 / 18.
-- `catalog:check` 0 (the catalog moved by the one `optionslist` row); project-contract `tsc` 0.
-- MCP `nsp020WireCheck` + `nsp020DrawnPorts` + `isl042CloudFunctionPorts` + `toolDisclosure` + `def011ScriptPortsDrive`
-  32 / 32.
+- **Drives**: R20 and R21 in the running editor (screens in `shots/s89-*`); hierarchy counts in the running editor:
+  nightbook 26 + 26, phase55-s6-haiku 3 + 3, SBR-006 Admin Drive 0.
+- project-contract: `tests/hierarchy` 11 / 11; `tsc` 0 (both configs).
+- editor: `tests-unit/nsp-021` 13 / 13 (planted: Component Children's categories dropped → the control red; "cannot be a
+  child" always false → two red); `tsc` 0. `tests/validation` 89 / 90 — the one red is `rules.test.ts` nonexistent-port
+  "lists available alternatives", as s88 recorded. **Whole `tests-unit`: 557 / 565 suites, 9,199 / 9,214 tests.** The 8
+  red suites, none reading s89's files: `exp-013/exportBadge` (export ledger), `hlt-013/libraryDocs` (library prefab),
+  `vfn-011/drift-gate`, `def007-project-load-seam` and `hls003`/`hls009` scans (peers' open edits in `noodl-preview`,
+  `noodl-mcp`, `LocalProjectsModel.ts`), `chr-007/widgetDispatch` (Page Stack port snapshot), `el-009` (a kit render,
+  3 / 3 red alone). `nsp-019/tryNode` was red too: `spec-disagreements.json` stale since s88's bug — regenerated, green.
+- catalog: `catalog:check` 0, `catalog:merge:check` 0; `catalog:examples` 107 / 109 (the two Cloud Function examples,
+  red with the new rule off too).
+- MCP whole suite (before the last three fixes): 182 / 196 suites, 3,887 / 3,905 tests. Attributed by re-running the 14
+  red ones with the new rule switched off: **3 were s89's** — `kitOverlay` and `kitAgreement` (the kit fixture's `/Broken`
+  puts a Badge inside a Meter that declares `allowChildren: false`: two true placement errors, now named in both tests;
+  30 / 30) and `cmp001InterfaceDoctrine` (the new `/Post Row` moved the corpus publish rate 39 → 38; constant moved; 26 / 26).
+  `iw008Crew` passed alone (load). **10 red with the rule off too, none s89's**: `cmp004Parts` / `cmp004RoundTrip` (a shelf
+  entry's `icon.png`), `def018-def020-layout-drive`, `def038SettledTemplates` (nightbook, a peer's generator is untracked
+  in the tree), `fld013ExportReach` (export ledger), `nodeIdAllocation` (its fixture wires Text's `text` OUTPUT, which
+  Text does not have), `sbr009ThemeEditorDrive`, `tpl010Template`, `tpl011Template` (refused on a cloud component's
+  `unknown-function-port`), `writePathConformance` (an allow-list entry `component.type` no longer seen).
+  ⚠️ **`tpl011` authors nightbook through the agent's door: once its cloud error is fixed, R23 will refuse its page writes
+  until P107-S89-NIGHTBOOK is fixed** (predicted from the template's tree; not run). `typecheck:mcp`: 1 error, in P116's
+  `ont002WorldTools.test.ts` (not touched). `typecheck:editor-tests` 0.
+- **Committed:** `9da5979f9` (code), then the docs commit.
 
-**Not run:** the whole MCP suite, `test:main`, `test:ci`, the full node-spec jest suite (the whole stranger file ran past a 15-minute limit; rounds 1–3 untouched by s88), and both
-drives in the running editor.
+**Not run:** `test:main`, `test:ci`, the node-spec suite (s89 changed no spec).

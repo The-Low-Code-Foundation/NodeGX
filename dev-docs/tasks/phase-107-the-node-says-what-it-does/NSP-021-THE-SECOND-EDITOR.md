@@ -152,3 +152,61 @@ reads no clock, the runtime fails exactly the two new scenarios.
 **Left (s89 on):** the R20 drive and this one in the running editor (a Static Data's Items onto a Dropdown connects;
 s88's editor port was held by a peer again); `allowAsChild` / visual-ness (census §2: the catalog mirrors the rule by
 hand three times); display name / deprecation at node level; Router's labels only if a reason appears.
+
+### 6.3 s89 (2026-10-12, Opus) — the R20 and R21 drives, then `allowAsChild` measured, ruled (R23) and built
+
+**The drives (one editor launch, a copy of CMG Drive Looks B; the source's checksum unchanged after).**
+- **R20 ✅** — `ProjectValidationService.instance.report` (the service starts when the Problems panel mounts): the For Each
+  `addToBasket` wire is an `error`, "For Each has no output named "addToBasket" … — did you mean
+  "itemOutputSignal-addToBasket"?"; the panel shows it (`shots/s89-r20-problems-panel.png`).
+- **R21 ✅** — a real press-move-release drag from a Static Data's output onto a Dropdown on `/Pages/Home` opened the
+  connection popup; with Items picked on the source, the Dropdown's `Items` row is offered (`enabled`, not among the
+  refused), and choosing it made `s89-static.items → s89-dropdown.items`; neither the canvas (`WarningsModel`) nor the
+  Problems panel has a type warning on it (summary unchanged, 4 errors · 58 warnings). Control beside the zero: a
+  `failure` (signal) → `items` wire on the same pair fired `con-type-mismatch` and `type-incompatible-connection` +
+  `signal-into-value-port`, and was removed. `shots/s89-r21-connection-popup-offers-items.png`,
+  `shots/s89-r21-static-data-into-dropdown-items.png`. (The Dropdown was a root for the drive — inside the page lane it
+  sat under the Show Popup column — so its one other warning is "detached from the main node tree", from the set-up.)
+
+**`allowAsChild` / visual-ness, measured first.** A census bundled with the catalog's own extractor (the REAL
+`generateNodeLibrary` beside the committed catalog), over Richard's 123 projects (everything under `vscode_projects`
+plus the launcher's recent list, de-duplicated) and the 85 committed (export fixtures, templates, lessons, P109's):
+- **Types: 0 differences** between the runtime export and the catalog on category, `allowAsChild`,
+  `allowChildrenWithCategory`, `allowAsExportRoot`, `singleton` and `isVisual` for every type both carry (163; the 17
+  catalog-only ones are cloud nodes). The one gap: `Component Children`'s `haveComponentChildren`, which the export seeds
+  and the catalog's hand mirror never had.
+- **Visual roots: 0 components** where the editor's derivation and the agent's (`visualRoots.ts`) differ. One saved
+  `visualRoots` disagrees with the editor's derivation (`phase58-awp006-deepseek /Components/Hero`, the saved list lacks
+  `hero-shell-wrap`); the editor re-derives on save and the agent believes the file (AWP-001's design) — noted, not filed.
+- **The hierarchy rules: the agent asked none of them.** The editor's four (`node-not-child`, `node-invalid-child`,
+  `node-no-children`, `node-child-cat`) fire on **60 nodes** in 34,361: nightbook 52 (its eight `/Data/*` components
+  inside Groups and the Page — P107-S89-NIGHTBOOK), phase55-s6-haiku 6 (three For Each holding cards / a link column),
+  slot-desk 2 (a fixture built for it). Read in the running editor (`WarningsModel`, a second launch, copies): nightbook
+  26 + 26, haiku 3 + 3, and the control SBR-006 Admin Drive (`/Admin/Shell` holding a Group through its
+  `Component Children` slot) 0 — the census's control project fired as planted on both sides first. A rule on the catalog
+  as it was would match all 60 and add 70 wrong ones (every `Component Children` component read as holding nothing).
+
+**Ruled: R23 "Yes, as errors"** (README §7). **Built:**
+- `@nodegx/project-contract/hierarchy` — the four predicates (`cannotBeAChild`, `cannotHoldChild`, `cannotHaveChildren`,
+  `rootCategoryDisagrees`), a component instance's type (`componentHierarchyType`, `componentChildCategories`) and
+  `hierarchyFindings` over one component. The editor's `NodeGraphNode.evaluateHealth` and `ComponentModel`'s `category`
+  / `allowAsChild` / `collectAllowedChildCategories` call it (behaviour unchanged).
+- The validator's **`invalid-hierarchy`** (`rules/invalidHierarchy.ts`, error, after `detachedPageContent`): one diagnostic
+  per node (where the editor raises "not a child" and "not held" on one node, the first only), types from the catalog
+  and, for an instance, from its component's graph. Existing errors do not block an agent write (`validate.ts`
+  `newErrors`), so nightbook's 26 are reported, not blocking.
+- **The catalog's mirror is gone**: `build-catalog.js` takes `singleton`, `allowAsChild`, `allowChildrenWithCategory`,
+  `haveComponentChildren` and `allowAsExportRoot` from the export (browser, then cloud; `extractor-entry.js`). The
+  catalog moved by exactly `Component Children`'s new field; `node-catalog.d.ts` declares it. The kit overlay's own copy
+  (`nodegx-kit-catalog/src/index.js` :438-443) is the one mirror left.
+- **Found on the way: R21 had never reached the agent server** (P107-S89-ENRICHEDSTALE). The MCP validates against
+  `node-catalog-enriched.json`; s88 regenerated only `node-catalog.json`, because `catalog:merge` refuses a typecast with
+  no `castSemantics` entry. Written (`compatibility.json`, from `optionItems`), merged, and held by a test.
+- **Two published examples taught rows inside a For Each** (`bubble-read-a-feed-into-a-list`, `bubble-read-an-xml-response`):
+  each now names a template (`/Post Row` with Title / Published through Component Inputs; `/Tool Row`, unchanged —
+  its list is fed by nothing, P107-S89-XMLEXAMPLE). `catalog:examples` 107 / 109: the two left are Cloud Function
+  examples, red before s89 (measured with the rule off; P107-S89-CFEXAMPLES).
+
+**Left (s90 on):** the kit overlay's copy of the child rules; display name / deprecation at node level; Router's labels
+only if a reason appears. nightbook's fix is the template owner's (P78), and moves the pinned 26 in
+`tests-unit/nsp-021/hierarchy`.
