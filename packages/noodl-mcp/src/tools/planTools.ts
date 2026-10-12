@@ -94,6 +94,7 @@ import type { ExampleBudget } from './attachments';
 import { examplesBlock } from './attachments';
 import type { ToolDisclosure } from './disclosure';
 import { backendRevealPayload } from './disclosure';
+import { cloudDeployPayload } from './cloudDeployNote';
 import { guarded, jsonResult } from './util';
 
 // ─── LAS-006: the structured operation fields, in this client's dialect ───────
@@ -1118,6 +1119,12 @@ export function registerPlanTools(
         ...(settingsWritten.length > 0 ? { settings: settingsWritten } : {}),
         ...validationBlock(surviving, summarize(surviving)),
         ...(rendered ? { render: rendered.summary } : {}),
+        // P112-S14-UNDEPLOYED — a plan is how the stranger round wrote its function, and nothing here said deploy.
+        ...cloudDeployPayload(
+          applied.map((a) => pathToLegacyName(a.target)),
+          store,
+          disclosure
+        ),
         // 🔴 Above `note`, and `note` no longer says the work is finished. The
         // plan is applied and discarded — that is a fact about the files, and it
         // was the last thing in the response, which is how it got read as a
