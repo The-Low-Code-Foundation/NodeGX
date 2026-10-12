@@ -31,6 +31,7 @@ import { orphanedNode } from './orphanedNode';
 import { detachedPageContent } from './detachedPageContent';
 import { invalidHierarchy } from './invalidHierarchy';
 import { deprecatedNode } from './deprecatedNode';
+import { duplicateSingleton } from './duplicateSingleton';
 import { typeIncompatibleConnection } from './typeIncompatibleConnection';
 import { signalDrivenStaleInput } from './signalDrivenStaleInput';
 import { signalIntoValuePort } from './signalIntoValuePort';
@@ -69,6 +70,8 @@ export const ALL_RULES: Rule[] = [
   invalidHierarchy,
   // P107 R25 — the editor refuses to create these; the checker warns on them
   deprecatedNode,
+  // P107 R34 — a second Page (or cloud Request) in one component, as the editor marks it
+  duplicateSingleton,
   typeIncompatibleConnection,
   signalDrivenStaleInput,
   // DEF-002 §3 — beside `typeIncompatibleConnection`'s neighbours because it is
@@ -122,6 +125,7 @@ export {
   detachedPageContent,
   invalidHierarchy,
   deprecatedNode,
+  duplicateSingleton,
   typeIncompatibleConnection,
   signalDrivenStaleInput,
   signalIntoValuePort,

@@ -1,6 +1,7 @@
 import { each, filter, find, isEqual, some } from 'underscore';
 
 import { cannotBeAChild, cannotHaveChildren, cannotHoldChild, rootCategoryDisagrees } from '@nodegx/project-contract/hierarchy';
+import { extraSingletons } from '@nodegx/project-contract/singleton';
 import { stripCodeHistoryMetadata } from '@noodl-models/CodeHistory/codeHistoryMetadata';
 import { ComponentModel } from '@noodl-models/componentmodel';
 import { NodeGraphModel } from '@noodl-models/nodegraphmodel/NodeGraphModel';
@@ -1025,15 +1026,18 @@ export class NodeGraphNode extends Model {
         : undefined
     );
 
-    // Singleton
-    w = this.type.allowSingleInstanceOnly && this.owner.hasNodesWithType(this.type);
+    // Singleton — P107 R34 ("Warn on the second one, in both"): the rule's one body is
+    // `@nodegx/project-contract/singleton`, which the checker the agent shares calls too. It read
+    // `allowSingleInstanceOnly`, which no producer sends, so it never fired; and `hasNodesWithType` counts this node,
+    // so reading `singleton` there would have marked every Page.
+    w = !!this.type.singleton && this.isExtraSingleton();
     WarningsModel.instance.setWarning(
       { component: this.owner.owner, node: this, key: 'node-singleton' },
       w
         ? {
             message:
               'There can only be one instance of this type in a component. Multiple instances may lead to unexpected behavior.',
-            level: 'error',
+            level: 'warning',
             showGlobally: true
           }
         : undefined
@@ -1274,6 +1278,17 @@ export class NodeGraphNode extends Model {
         }
       });
     }
+  }
+
+  /** P107 R34 — after the first node of its singleton type in its component, in the component's tree order. */
+  isExtraSingleton(): boolean {
+    const nodes: NodeGraphNode[] = [];
+    const types = new Map<string, { singleton?: boolean }>();
+    this.owner.forEachNode((n: NodeGraphNode) => {
+      nodes.push(n);
+      types.set(n.typename, n.type);
+    });
+    return extraSingletons(nodes, (n) => n.typename, (name) => types.get(name)).includes(this);
   }
 
   updateVariantRef() {

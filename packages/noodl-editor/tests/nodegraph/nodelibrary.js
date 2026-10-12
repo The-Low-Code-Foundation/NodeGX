@@ -181,14 +181,12 @@ function createTestNodeLibrary() {
         name: 'Component Children',
         color: 'component',
         category: 'visuals',
-        allowSingleInstanceOnly: true,
         haveComponentChildren: ['visuals']
       },
       {
         name: 'Component Modifier Children',
         color: 'component',
         category: 'modifiers',
-        allowSingleInstanceOnly: true,
         haveComponentChildren: ['modifiers']
       },
       {

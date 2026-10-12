@@ -88,6 +88,11 @@ export enum DiagnosticCode {
    * definition says (`replacedBy`). `warning`: the old node still runs.
    */
   DeprecatedNode = 'deprecated-node',
+  /**
+   * P107 R34: a second node of a type a component holds only once (Page, a cloud function's Request). `warning`, on
+   * every one after the first, as the editor marks it.
+   */
+  DuplicateSingleton = 'duplicate-singleton',
   TypeIncompatibleConnection = 'type-incompatible-connection',
   /**
    * NDA-017: a control signal fires without waiting for the asynchronous producer of a value
