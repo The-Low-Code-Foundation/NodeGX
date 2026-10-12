@@ -100,7 +100,8 @@
       "from": "array",
       "to": [
         "collection",
-        "string"
+        "string",
+        "optionslist"
       ]
     }
   ],
@@ -406,6 +407,7 @@
       ],
       "displayNodeName": "REST",
       "deprecated": true,
+      "replacedBy": "net.noodl.HTTP",
       "docs": "https://docs.noodl.net/nodes/data/rest",
       "shortDocs": "https://docs.noodl.net/nodes/data/rest-short.md",
       "category": "Data",
