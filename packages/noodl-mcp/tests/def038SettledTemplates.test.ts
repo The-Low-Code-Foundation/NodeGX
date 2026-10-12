@@ -48,7 +48,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { planRunOnValueChangeMigration } from '../../noodl-editor/src/editor/src/models/ProjectPatches/runOnValueChangeMigration';
+import {
+  planRunOnValueChangeMigration,
+  RUN_ON_CHANGE_FAMILIES
+} from '../../noodl-editor/src/editor/src/models/ProjectPatches/runOnValueChangeMigration';
 
 import { readAsLegacyProject } from './templateArtefact';
 
@@ -61,7 +64,26 @@ const EMBEDDED_CONTENT = path.join(
   'packages/noodl-editor/src/editor/src/models/template/templates'
 );
 
-type Artefact = { name: string; project: { components?: unknown[] } };
+/**
+ * `familyTypesInFiles` is the presence control's second, independent reading: how many times a
+ * family's type name appears as a `"type"` in the artefact's own files, by text. P119 s2: a new
+ * template that is still the App + Home skeleton holds none of the fifteen families, the same
+ * as `hello-world` (below), and the planner's zero is then the truth, not a broken instrument.
+ * A zero from the planner beside a non-zero here is still the broken instrument, and fails.
+ */
+type Artefact = { name: string; project: { components?: unknown[] }; familyTypesInFiles: number };
+
+const FAMILY_TYPE_RE = new RegExp(`"type"\\s*:\\s*"(${Object.keys(RUN_ON_CHANGE_FAMILIES).join('|')})"`, 'g');
+const familyTypesIn = (text: string) => (text.match(FAMILY_TYPE_RE) ?? []).length;
+function jsonTextUnder(dir: string): string {
+  let out = '';
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const at = path.join(dir, entry.name);
+    if (entry.isDirectory()) out += jsonTextUnder(at);
+    else if (entry.name.endsWith('.json')) out += fs.readFileSync(at, 'utf-8');
+  }
+  return out;
+}
 
 /**
  * Find every shipped template artefact. **Derived, never listed** — see the
@@ -76,17 +98,20 @@ function shippedArtefacts(): Artefact[] {
       if (!entry.isDirectory()) continue;
       const dir = path.join(TEMPLATE_DIRECTORIES, entry.name);
       if (!fs.existsSync(path.join(dir, 'nodegx.project.json'))) continue;
-      found.push({ name: `templates/${entry.name}`, project: readAsLegacyProject(dir) as never });
+      const components = path.join(dir, 'components');
+      found.push({
+        name: `templates/${entry.name}`,
+        project: readAsLegacyProject(dir) as never,
+        familyTypesInFiles: fs.existsSync(components) ? familyTypesIn(jsonTextUnder(components)) : 0
+      });
     }
   }
 
   if (fs.existsSync(EMBEDDED_CONTENT)) {
     for (const file of fs.readdirSync(EMBEDDED_CONTENT)) {
       if (!file.endsWith('.content.json')) continue;
-      found.push({
-        name: file,
-        project: JSON.parse(fs.readFileSync(path.join(EMBEDDED_CONTENT, file), 'utf-8'))
-      });
+      const text = fs.readFileSync(path.join(EMBEDDED_CONTENT, file), 'utf-8');
+      found.push({ name: file, project: JSON.parse(text), familyTypesInFiles: familyTypesIn(text) });
     }
   }
 
@@ -104,6 +129,10 @@ describe('DEF-038 — every shipped template artefact is settled against NDA-017
     expect(artefacts.map((a) => a.name)).toEqual(
       expect.arrayContaining(['site-builder.content.json', 'templates/members-area', 'templates/landing-pages'])
     );
+    // P119 s2: the second reading is live on both shapes, so an honest zero cannot hide a regex that reads nothing.
+    for (const name of ['site-builder.content.json', 'templates/members-area', 'templates/landing-pages']) {
+      expect([name, artefacts.find((a) => a.name === name)!.familyTypesInFiles > 0]).toEqual([name, true]);
+    }
   });
 
   it.each(artefacts.map((a) => [a.name, a] as const))(
@@ -113,8 +142,10 @@ describe('DEF-038 — every shipped template artefact is settled against NDA-017
 
       // 🔴 The presence control, on the SAME reading. A zero `writes` beside a
       // zero `familyNodes` is a broken instrument, not a settled artefact —
-      // exactly how the site-builder figure would have been misread.
-      expect(plan.familyNodes).toBeGreaterThan(0);
+      // exactly how the site-builder figure would have been misread. Unless the
+      // files themselves hold no family node (P119 s2): then zero is the answer.
+      if (artefact.familyTypesInFiles === 0) expect(plan.familyNodes).toBe(0);
+      else expect(plan.familyNodes).toBeGreaterThan(0);
       expect(plan.writes).toEqual([]);
     }
   );
@@ -142,6 +173,11 @@ describe('DEF-038 — every shipped template artefact is settled against NDA-017
       // check on two committed artefacts carrying 133 and 36 live keys beside it (measured s7). So: try each answered key
       // in walk order and pass on the first whose deletion the planner sees. A planner that stopped
       // finding anything still reddens here — every candidate then reads 0.
+      // An artefact with no family node in its files has nothing to settle, so nothing to unsettle.
+      if (artefact.familyTypesInFiles === 0) {
+        expect(planRunOnValueChangeMigration(artefact.project as never).familyNodes).toBe(0);
+        return;
+      }
       type Raw = { components?: { name?: string; graph?: { roots?: unknown[] } }[] };
       const answered: { component: number; path: number[]; key: string }[] = [];
       const collect = (component: number, nodes: unknown[], at: number[]): void => {
