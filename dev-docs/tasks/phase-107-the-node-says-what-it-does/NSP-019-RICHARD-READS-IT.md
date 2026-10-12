@@ -1,7 +1,7 @@
 # NSP-019 — Richard reads it: the inspector shows a node's rules, and *Try this node*
 
 **Opened 2026-09-29.** **Depends on NSP-018.**
-**Status: 🟡 s94 (2026-10-12): the R33 modal is BUILT and driven (§5.5) — *How this node works* under the node's name, the rules and *Try it* in a pop-out. AC3 waits on Richard's drive of it. (s91: "Needs changes", R30/R31, §5.3; s93: the mockup, R33 "Build it like this", §5.4; AC1/AC2 and the disagreements table s77.)**
+**Status: 🟡 s95 (2026-10-12): Richard drove the modal (AC3, §5.6): "It's cool, but" nothing said his settings (Min 3 above Max 1) were wrong. Built the same session: diagnostics in the spec format, the runtime target and the modal; Counter v2 warns. AC3 waits on his look at that. (s94: the R33 modal built, §5.5; s93: the mockup, §5.4; s91: "Needs changes", §5.3; AC1/AC2 s77.)**
 
 ## 1. The person sentence
 
@@ -232,3 +232,46 @@ after `.Modal` clipped and the column scrolled on its own, every count matched.
 the app (graded with Delay, type `Timer`, by react-dom/server).
 
 **Left: AC3** — Richard drives the modal and his verdict is recorded here in his words.
+
+### 5.6 s95, 2026-10-12 — Richard drove the modal: "It's cool, but…" — the settings that make no sense said nothing
+
+Driven by Richard in the running dev editor (`npm run dev:debug`, a renamed copy of nodegx-debug-demo registered with the
+launcher and removed afterwards; the source's SHA `fa5f5a42…` unchanged). He opened the Counter's *How this node works*, set
+Start 2, Min 3, Max 1 with Limits Enabled off, and pressed Increase twice. **His verdict, verbatim:**
+
+> *"It's cool, but I'm fucking with it and that infamous auto checking system doesn't seem to be doing shit. I should be able
+> to see that because I've fucked the settings, there's going to be errors. The min value is higher than the start value.
+> The max value is 1. Yet I can still click Increase Count and it all works fine. This is a test of 'what's the point in
+> using this instead of just vibe coding', you said it would include automated checks and tests so there's no way to fuck it
+> up. I just managed to fuck it up first try"*
+
+Asked whether to build a separate "settings that don't make sense" check, he answered: *"No, the how it works modal should
+function using the specs, like a real node really wired up, and so if something is set wrong it'll of course be able to
+throw an error in the 'what happened' and show why the settings are FUBAR. Or do the specs not actually protect against
+stuff like that the way they were advertised to?"*
+
+**The answer, measured:** they did not. The modal was faithful: it runs the spec, and the spec copied a runtime Counter that
+said nothing. The runtime had the channel (`setDiagnostic`, DIAGNOSTICS-CONTRACT.md, whose table already says "two of this
+node's settings contradict each other → diagnostic") and the Counter never used it; the spec format could not declare one
+(Date Add's spec: "not on the wire, so not in the trace"); the conformance harness had no editor, so no diagnostic reached a
+trace. → [P107-S95-MINABOVEMAX](../../bugs/p107-s95-minabovemax-a-counter-with-min-above-max-says-nothing-anywhere.md).
+With his settings and Limits Enabled ON, both Increase and Decrease report Unchanged for good, silently.
+
+**Built (s95, `0d81cd398`):**
+- **The format:** `diagnostics` on a spec (`<node-type>/<condition>` → `{ says, message(inputs, state) }`) and a `diagnostic`
+  trace event (`key`, `message` absent when withdrawn; one per key whose sentence changed, sorted by key, closing the frame's
+  group). Schema, validator, `hasObservation`. The interpreter records them at each settle.
+- **The runner:** `TargetAdapter.diagnostics` — `true` on the interpreter and the runtime; a target without it (the export,
+  the four strangers) is graded with diagnostics left out of its reference (`withoutUnseenDiagnostics`, also in the
+  strangers' mutant check, which would otherwise have "caught" every Counter mutant for nothing).
+- **The runtime target:** a recording editor (`isRunningLocally` true, `sendWarning` / `clearWarning` / `clearWarnings`); for
+  a spec that declares `diagnostics` it records every key the node shows that is its own (not `node/…`), declared or not.
+- **Counter v2** (changes entry, migration none): `counter/min-above-max` from both limit setters, the same sentence in the
+  runtime and the spec — *"Min Value 3 is above Max Value 1. With Limits Enabled on, the count gets stuck."* An eighth hand
+  scenario plays Richard's settings and the fix.
+- **The modal:** the warning sits above the card while it holds, the card wears a danger ring, the row that raised it reads
+  the sentence chipped *Warning*, the row that cleared it *No longer: Min Value is above Max Value*, chipped *Fixed*.
+
+**Not built:** the rules column does not list a node's diagnostics (it reads the generated catalog; a regen of a shared file);
+no other node declares one yet (9 runtime call sites already raise one); the Problems panel and the agent's checker do not
+read `diagnostics` statically — the panel shows the runtime's warning only while the preview runs.

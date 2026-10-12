@@ -1,18 +1,20 @@
 # P107 — next session
 
-**Written 2026-10-12 (s94, Opus).** Read the [README](README.md) §2–§7, then [NSP-019 §5.5](NSP-019-RICHARD-READS-IT.md)
-(what s94 built and drove) — §5.3 and §5.4 are Richard's verdict and the mockup it answers.
+**Written 2026-10-12 (s95, Opus).** Read the [README](README.md) §2–§7, then [NSP-019 §5.6](NSP-019-RICHARD-READS-IT.md)
+(Richard's drive, his words, and what s95 built from it) and R35 in the README's rulings.
 
 **Model: Opus.**
 
-**s94 in one paragraph.** R33 is built: the property panel's two folds are gone and *How this node works* sits under the node's
-name (a dashed *spec in progress* for And, Or, Query Records, Page Inputs, Screen Resolution; nothing for a node with no spec).
-It opens a pop-out: the rules on the left, each case with its outcome as a chip; *Try it* on the right with the node drawn as on
-the canvas (card, port dots, value bubbles, the dark preview pill), ports that light for a second, signal pills, steppers, a
-switch per boolean, the clock only for a clock node, and *What happened* following the newest row. It runs the spec in the
-interpreter (`playTry` in `tryNodeModel.ts`). Driven in the dev editor on a copy of nodegx-debug-demo: eight presses wrote eight
-right rows. `spec-disagreements.json` was stale since s92 (C160–C162) and is regenerated. The dev server died of heap twice
-while driving: filed P107-S94-DEVHEAP.
+**s95 in one paragraph.** Richard drove the R33 modal on the Counter and set Start 2, Min 3, Max 1. Nothing anywhere said the
+settings were wrong: *"you said it would include automated checks and tests so there's no way to fuck it up. I just managed
+to fuck it up first try."* He did not want a separate checker: the modal should run the spec like a real node, and the spec
+should say what is wrong (R35). Measured: the runtime had the channel (`setDiagnostic`, DIAGNOSTICS-CONTRACT.md) and the
+Counter never used it; the spec format could not declare one; the runtime test harness had no editor. s95 built all three:
+`diagnostics` on a spec and a `diagnostic` trace event; the interpreter and the runtime target record them (the runtime
+target has a recording editor now, and records the node's own `<type>/` keys for a spec that declares any); a target
+without an editor (the export, the strangers) is graded without them. Counter v2 warns *"Min Value 3 is above Max Value 1.
+With Limits Enabled on, the count gets stuck."* The modal shows it above the card with a danger ring, as a *Warning* row,
+and *Fixed* when it clears. Also fixed: the Video page model, red since s92 (P107-S95-VIDEOPAGEMODEL).
 
 ## Board (from the task files)
 
@@ -21,7 +23,7 @@ while driving: filed P107-S94-DEVHEAP.
 | NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2's export half and the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18's) | s1 … s44 |
 | NSP-016 the visual nodes | ✅ s71; s73 SCROLLROOM | `aa8abb06f` … `fd6385beb` |
 | NSP-018 the spec speaks | ✅ s77 | s72 … s77 |
-| **NSP-019 Richard reads it** | 🟡 s77: AC1, AC2, the §2 table; s91: "Needs changes" (R30); s93: mockup, R33; **s94: the modal built and driven (§5.5)**. Left: **Richard drives it (AC3)** | s77, s91, s93, s94 |
+| **NSP-019 Richard reads it** | 🟡 s77: AC1, AC2, the §2 table; s91: "Needs changes" (R30); s93: mockup, R33; s94: the modal built (§5.5); **s95: Richard drove it (R35, §5.6) — "It's cool, but" Min 3 above Max 1 said nothing → diagnostics built**. Left: **his look at the warning (AC3)** | s77 … s95 |
 | NSP-009 the ratchet | ✅ s64; s65 `contract`; s85 `ports` (`floor.ports` **132** since s87) | `6a1ed0084`, s65, s85, s87 |
 | NSP-010 a change is a version | ✅ s78. s92: 5 more specs carry a `changes` history (10 in all) | `36e08e29e`, `64f9576d9` |
 | NSP-017 the escape hatches | 🟡 s64–s68. Left: AC1's export half (P18's) | s64 … s68 |
@@ -32,24 +34,34 @@ while driving: filed P107-S94-DEVHEAP.
 | NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
 | R26–R29 (the s91 rulings) | ✅ s92 | `a94119947`, `b8090d121`, `dccaa77e0`, `1c3166c57` |
 | R34 (singleton) | ✅ s93 | `83bb0de10` |
-| R33 (the modal) | ✅ built s94; Richard's drive owed | s94 |
+| R33 (the modal) | ✅ built s94, driven by Richard s95 | s94 |
+| R35 (the settings say when they make no sense) | ✅ built s95 for Counter; the other nodes owed | s95 |
 
-## What s95 does (in order)
+## What s96 does (in order)
 
-1. **Ask Richard to drive the modal (NSP-019 AC3)** — in plain words, with the two shots
-   ([built](shots/nsp-019-s94-modal-built.png), [mockup](shots/nsp-019-s94-modal-mockup.png)), memory
-   [[ask-richard-a-ruling-in-plain-words]]. If he asks for it running: `npm run dev:debug`, a renamed copy of
-   `NodeGX test projects/nodegx-debug-demo/project.json` registered in `~/Library/Application Support/NodeGX/recently_opened_project.json`
-   (remove it afterwards, check the source SHA), select the Counter. Record his verdict in §5.5's place in his words. Four
-   choices s94 made that the ruling did not name, to say in one line each if he raises them: full port names on the steppers;
-   the editor's white backdrop (the mockup drew a dark dim); the card in the canvas card's colours, not the picker's category
-   scheme; *Start over* at the top of *Try it* (as drawn), disabled until something was tried.
-2. **Before driving again, mind P107-S94-DEVHEAP:** batch every edit before launching; the dev server survives one rebuild and
-   died on the second or third, twice. A hot reload of the side panel unmounts the modal (reselect the node, reopen).
-3. **The agent server gets R34** when `packages/noodl-mcp` is next built. Still not built in s94: `nodegx-export` carries 23
-   files of a peer's open edits and `dist/` bundles the working tree. Build when `git status` shows none, or leave it to P112.
-4. Cheap alongside: **P107-S92-VIDEOEMBEDSEED** (low) and **P107-S93-NOTANAME** (low; owes words — the content-authoring skill,
-   memory [[copy-passes-the-content-authoring-skill]]).
+1. **Show Richard the warning (NSP-019 AC3, R35)** if s95 did not get his look at it (§5.6 says). Same recipe as s95:
+   `npm run dev:debug`, a renamed copy of `NodeGX test projects/nodegx-debug-demo/project.json` registered in
+   `~/Library/Application Support/NodeGX/recently_opened_project.json` (remove it afterwards; source SHA `fa5f5a42…`), select
+   the Counter, open *How this node works*, set Min above Max. Record his words in §5.6. Ask in plain words, memory
+   [[ask-richard-a-ruling-in-plain-words]]; try the nonsense input yourself first, memory
+   [[a-faithful-simulator-of-a-silent-node-reads-as-the-checks-failing]].
+2. **The other nodes (R35's "then go through the other nodes").** Two halves:
+   - **Declare what the runtime already says.** 9 runtime call sites raise a diagnostic and no spec declares one: Date Add
+     and Date Difference (`*/unknown-unit`), Text Input, the controls' shared helper (`controls/utils.ts` :410), For Each
+     (`ITEMS_DIAGNOSTIC`), States (`UNKNOWN_STATE_CODE`), Group, Icon (`ICON_SOURCE_DIAGNOSTIC`), layout
+     (`dimensions/wired-dimension-becomes-grow`). Declaring one switches the runtime target's recording on for that node, so
+     each is graded the moment it lands. Expect message-text and timing rows (C-numbers in the spec's §6).
+   - **Census the contradictions nobody raises.** Settings pairs that can disagree (Slider's Min/Max is the next by name;
+     ranges, lengths, a start outside its bounds). Each one found is a runtime change plus a spec version, as Counter v2.
+3. **The rules column** (`NodeRulesColumn`) does not list a node's diagnostics: it reads the generated catalog
+   (`scripts/node-spec/rules.js` → `catalog:generate` → `noodl-types/src/node-catalog.json`). Add them there (a regen of a
+   shared file: memory "REGEN can DELETE a hand edit", check `git status` first).
+4. **Static reading (not asked yet, offer it):** the Problems panel and the agent's checker could evaluate a spec's
+   `diagnostics` over a node's saved parameters without a running preview. Today the panel shows the runtime's warning only
+   while the preview runs, and the agent learns nothing before it writes. Say the cost and ask.
+5. Carried from s94: the agent server gets R34 when `packages/noodl-mcp` is next built (peer edits in `nodegx-export` and
+   `noodl-mcp/src` again in s95's `git status`); P107-S94-DEVHEAP (one launch, no edits while it runs: s95 did that and the
+   server lived); P107-S92-VIDEOEMBEDSEED and P107-S93-NOTANAME (low).
 
 **The census recipe (s89/s90/s93):** population = `os.walk` of `vscode_projects` to depth 4 for `nodegx.project.json` /
 `project.json` (paths under `OpenNoodl*` excluded, which also drops `OpenNoodl-worktrees`), the launcher's
@@ -77,9 +89,9 @@ a legacy `project.json` (exit 2). s93's client: the session scratchpad's `mcpcal
   never fired); Richard's option said "warn". The checker's `duplicate-singleton` is a warning too.
 - **The Frappe note** (R32): a named list, built when the first `changes` entry answers `project`. None does yet.
 
-**Open, filed this phase:** P107-S94-DEVHEAP (medium, new: the editor's dev server dies of heap on its 2nd–3rd rebuild), P107-S93-NOTANAME (low), P107-S92-VIDEOEMBEDSEED (low), P107-S89-NIGHTBOOK (medium),
+**Open, filed this phase:** P107-S95-MINABOVEMAX (fixed for Counter; the other nodes are step 2), P107-S94-DEVHEAP (medium, new: the editor's dev server dies of heap on its 2nd–3rd rebuild), P107-S93-NOTANAME (low), P107-S92-VIDEOEMBEDSEED (low), P107-S89-NIGHTBOOK (medium),
 P107-S89-CFEXAMPLES (low; it is why `npm run catalog:examples` exits 1 at 107 / 109), P107-S89-XMLEXAMPLE (low);
-P107-S86-STOREDWIRE (medium); P107-S85-RESTCOLTYPES (low); P107-S83-SENDFORM; P107-S79-ADAPTERLABEL (low). **Fixed s93:** P107-S93-DIDYOUMEAN, P112-S1-SINGLETON.
+P107-S86-STOREDWIRE (medium); P107-S85-RESTCOLTYPES (low); P107-S83-SENDFORM; P107-S79-ADAPTERLABEL (low). **Fixed s95:** P107-S95-VIDEOPAGEMODEL. **Fixed s93:** P107-S93-DIDYOUMEAN, P112-S1-SINGLETON.
 
 **Routed to P18 (the export):** `nodegx-export/src/emit/dragLib.ts` :69 / :356 still disables dragging only on `=== false`
 (R26). **P109 holds:** D38, the Page Stack, the Router, LIBRARYDOCS, CHR007SNAPSHOT; P107-S82-STATESVALUEPORT and
@@ -87,13 +99,29 @@ P107-S82-STATESLOADGATE. **P112 holds:** P107-SIZE.
 
 NSP-010's and NSP-017's uncommitted notes (not this phase's sessions') were left out again.
 
-## Gates (s94, 2026-10-12, on the tree of the s94 commit)
+## Gates (s95, 2026-10-12, on the tree of `0d81cd398`; day's seed 20738)
 
-- `npx jest -w 1 tests-unit/nsp-019`: **42 / 42** — `playTry` (rows, values, what lights, the Unchanged control, a refused step),
-  `ruleParts` (round-trips every catalog line), the three arms of the button, the in-progress drift gate (planted: one name
-  dropped → red), the modal body through `react-dom/server` loaded (Counter, Delay as `Timer`) and unloaded (the control).
-- `tests-unit/nsp-020` + `nsp-021` + `chr-007`: 556 / 557 — the one red is `chr-007/widgetDispatch`, P107-S77-CHR007SNAPSHOT,
-  open since s77 (Page Stack's `keepPagesWhenUnmounted`), not this work.
-- `typecheck:editor` 0, `typecheck:editor-tests` 0, `css-token-check` clean, `spec-disagreements.js --check` 0 (166 rows, 60 types).
-- **Drive:** three launches (two ended by P107-S94-DEVHEAP), each torn down with `dev:stop`; 28 MCP server processes alive after.
-- **Not run:** `test:main`, `test:ci`, the Jasmine suite, the MCP suite (no MCP source changed). Not driven: the dark theme.
+- **Runtime, Counter:** `NSP_ONLY=Counter npx jest test/node-spec/conformance.test.ts` (packages/noodl-runtime) — Counter v2
+  CONFORMS, 8 / 8 scenarios, 200 / 200 generated, 23 / 23 mutants. **Planted control:** one letter of the runtime's sentence
+  changed → red on the new scenario and on 69 of 200 sequences; restored.
+- `test/node-spec/nsp-019-diagnostics.test.ts` 4 / 4 (reads the runtime's own trace: raised at load, withdrawn on the fix,
+  equal to the interpreter's; control: agreeing settings raise nothing beside values that do arrive). `nsp-010-counter-history`,
+  `graph`, `editor-suite-graph`, `runtime-target`: 121 / 121 with them.
+- **Runtime, every spec** (`npx jest -w 2 test/node-spec`, 1,479 s): 9 failed / 625 passed before the namespace fix. 3 were
+  s95's (graph C9: the loop breaker's `runtime/cyclic-loop` recorded as the Counter's → now only the node's own `<type>/`
+  keys; green after). 6 are not: mutant survivors on today's seed in DbModel2, JavaScriptFunction, Router, Radio Button
+  (DbModel2 CONFORMS on 20737, not on 20738), Video (P107-S92-VIDEOEMBEDSEED), and known row C96 no longer firing (the same
+  with and without s95's recording editor) → **P107-S95-SEED20738**.
+- **node-spec package** (`npx jest`): every file but `stranger.test.ts` ran in the full run — 3 red, all fixed and rerun:
+  `golden` + `runner` + `counter` + `schema` + `reach` + `adapter` 104 / 104 (the version-rule tests now read
+  `Counter.version`), Video page model G1–G8 green (P107-S95-VIDEOPAGEMODEL). `stranger.test.ts` with `NSP_ONLY=Counter`:
+  13 / 13, hash gate green (`stranger-suite-hashes.json` rewritten for the six guarded files s95 changed), 23 / 23 mutants
+  caught in both rounds that hold the Counter. **The full stranger file was not run to the end** (the whole-package run
+  hit its 30-minute limit inside it); no other node declares diagnostics, so its code paths are unchanged.
+- `golden.js --check` 108 specs fresh, version rule held (Counter v1 → v2, "no golden trace moved").
+- Editor: `npx jest -w 1 tests-unit/nsp-019` 44 / 44 (the warning in rows, above the card, Fixed; control: no banner, no
+  ring). `typecheck:editor` 0, `typecheck:editor-tests` 0, `typecheck:runtime` 0, `typecheck:node-spec` 0,
+  `css-token-check` clean, `spec-disagreements.js --check` up to date (166 rows, 60 types).
+- **Drive:** Richard's (§5.6), one launch, no edits while it ran: the dev server lived; torn down with `dev:stop`; the copy
+  unregistered; source SHA unchanged. **Not driven:** the warning itself in the app (built after the drive).
+- **Not run:** `test:main`, `test:ci`, the Jasmine suite, the MCP suite (no MCP source changed).
