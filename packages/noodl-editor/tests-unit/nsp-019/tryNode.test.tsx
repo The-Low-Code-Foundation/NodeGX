@@ -321,6 +321,38 @@ describe('the drawing', () => {
     expect(text(byClass(tree, 'PreviewPill')[0])).toBe('Current Count 1');
   });
 
+  // NSP-019 s95 — Richard's drive: Start 2, Min 3, Max 1, and nothing said the settings were wrong
+  test('a warning about the settings: in the row that raised it, above the card while it holds, Fixed in the row that cleared it', () => {
+    const SAID = 'Min Value 3 is above Max Value 1. With Limits Enabled on, the count gets stuck.';
+    const raised = playTry(Counter, {}, ['settle', { set: 'limitsMin', value: 3 }, 'settle', { set: 'limitsMax', value: 1 }, 'settle']);
+    // Min 3 over the default Max 0 is already wrong; Max 1 changes the sentence
+    expect(raised.rows.map((r) => [r.what, r.problems])).toEqual([
+      ['At load', []],
+      ['Min Value 3', [{ state: 'raised', text: 'Min Value 3 is above Max Value 0. With Limits Enabled on, the count gets stuck.' }]],
+      ['Max Value 1', [{ state: 'raised', text: SAID }]]
+    ]);
+    expect(raised.problems).toEqual([SAID]);
+    // a row whose only answer is a warning is not a quiet one
+    expect(raised.rows[2].quiet).toBe(false);
+    const rowsText = text(render(<TryRows rows={raised.rows} />));
+    expect(rowsText).toContain(`Max Value 1 ${SAID} Warning`);
+    expect(byClass(render(<TryRows rows={raised.rows} />)!, 'Chip-failure').map((n) => n.ownText)).toEqual(['Warning', 'Warning']);
+
+    const fixed = playTry(Counter, {}, ['settle', { set: 'limitsMin', value: 3 }, 'settle', { set: 'limitsMax', value: 5 }, 'settle']);
+    expect(fixed.rows[2].problems).toEqual([{ state: 'fixed', text: 'Min Value is above Max Value' }]);
+    expect(fixed.problems).toEqual([]);
+    expect(text(render(<TryRows rows={fixed.rows} />))).toContain('Max Value 5 No longer: Min Value is above Max Value Fixed');
+
+    const stage = (problems?: string[]) =>
+      render(<TryStage title="Counter" typeLabel="Counter" inputs={[]} outputs={[]} problems={problems} />)!;
+    const ringed = stage([SAID]);
+    expect(byClass(ringed, 'StageProblem').map((n) => text(n))).toEqual([SAID]);
+    expect(byClass(ringed, 'has-problem')).toHaveLength(1);
+    // control: no warning, no banner and no ring
+    expect(byClass(stage([]), 'StageProblem')).toHaveLength(0);
+    expect(byClass(stage(), 'has-problem')).toHaveLength(0);
+  });
+
   test('the whole modal body, loaded, through react-dom/server: rules left, the stage, the controls, the load row', async () => {
     const loaded = await import('../../src/editor/src/views/panels/propertyeditor/spec/tryNodeModel');
     const html = renderToStaticMarkup(

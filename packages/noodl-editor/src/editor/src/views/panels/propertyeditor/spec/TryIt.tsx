@@ -246,7 +246,14 @@ export function TryIt({ typeName, title, typeLabel, parameters, loaded }: TryItP
 
   return (
     <TrySection onStartOver={startOver} canStartOver={steps.length > FIRST_FRAME.length}>
-      <TryStage title={title} typeLabel={typeLabel} inputs={stageInputs} outputs={stageOutputs} preview={preview} />
+      <TryStage
+        title={title}
+        typeLabel={typeLabel}
+        inputs={stageInputs}
+        outputs={stageOutputs}
+        preview={preview}
+        problems={play.problems}
+      />
 
       <div className={css['Controls']}>
         {controls.signals.length > 0 && (

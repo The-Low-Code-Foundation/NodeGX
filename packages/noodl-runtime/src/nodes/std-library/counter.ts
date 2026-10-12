@@ -22,6 +22,19 @@ interface CounterNodeInstance extends NodeInstance {
   };
 }
 
+/**
+ * P107 NSP-019 s95 — the Counter's one diagnostic (DIAGNOSTICS-CONTRACT.md: "two of this node's settings contradict each
+ * other"). Min above Max is a mistake whether or not Limits Enabled is on: with it on, every count stops where neither
+ * Increase nor Decrease can move it. Evaluated in both setters it reads, so the statement that raises it also clears it.
+ * The spec says the same sentence (`nodegx-node-spec/src/nodes/counter.ts`), and the conformance suite compares the two.
+ */
+const MIN_ABOVE_MAX = 'counter/min-above-max';
+
+function checkLimits(node: CounterNodeInstance): void {
+  const { limitsMin: min, limitsMax: max } = node._internal;
+  node.setDiagnostic(MIN_ABOVE_MAX, min > max ? `Min Value ${min} is above Max Value ${max}. With Limits Enabled on, the count gets stuck.` : null);
+}
+
 const CounterNode: NodeDefinitionOptions = {
   name: 'Counter',
   docs: 'https://docs.noodl.net/nodes/math/counter',
@@ -141,6 +154,7 @@ const CounterNode: NodeDefinitionOptions = {
       default: 0,
       set: function (this: CounterNodeInstance, value: unknown) {
         this._internal.limitsMin = Number(value);
+        checkLimits(this);
       }
     },
     limitsMax: {
@@ -153,6 +167,7 @@ const CounterNode: NodeDefinitionOptions = {
       default: 0,
       set: function (this: CounterNodeInstance, value: unknown) {
         this._internal.limitsMax = Number(value);
+        checkLimits(this);
       }
     },
     limitsEnabled: {

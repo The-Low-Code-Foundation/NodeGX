@@ -26,6 +26,12 @@ import {
   type Golden
 } from '../src';
 
+/**
+ * The version Counter is at today. The planted changes below are one and two above it, so a real bump of the Counter (NSP-019
+ * s95 made it v2) moves the fixture, never the rule.
+ */
+const V = Counter.version;
+
 const committed = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'golden', 'Counter.json'), 'utf8')) as Golden;
 const counter = Counter as unknown as AnyNodeSpec;
 
@@ -58,7 +64,7 @@ describe('AC1 — a changed reducer with an unchanged version fails', () => {
     ]);
     const problems = versionProblems(committed, now, spec);
     expect(problems).toHaveLength(1);
-    expect(problems[0]).toMatch(/^Counter: behaviour changed at version 1 — "the NSP-001 script/);
+    expect(problems[0]).toMatch(new RegExp(`^Counter: behaviour changed at version ${V} — "the NSP-001 script`));
   });
 
   test('the control: today\'s Counter against the same file passes', async () => {
@@ -66,34 +72,34 @@ describe('AC1 — a changed reducer with an unchanged version fails', () => {
   });
 
   test('bumped, with its entry, the same change passes', async () => {
-    const spec = preFh022({ version: 2, changes: [...(Counter.changes ?? []), entry(2)] });
+    const spec = preFh022({ version: V + 1, changes: [...(Counter.changes ?? []), entry(V + 1)] });
     expect(versionProblems(committed, await goldenOf(spec, loadScenarios('Counter')), spec)).toEqual([]);
   });
 });
 
 describe('AC2 — a bumped version without a changes entry fails', () => {
   test('with the traces moved', async () => {
-    const spec = preFh022({ version: 2 });
+    const spec = preFh022({ version: V + 1 });
     expect(versionProblems(committed, await goldenOf(spec, loadScenarios('Counter')), spec)).toEqual([
-      'Counter: version 2 has no `changes` entry — say what changed and what happens to apps built on v1'
+      `Counter: version ${V + 1} has no \`changes\` entry — say what changed and what happens to apps built on v${V}`
     ]);
   });
 
   test('with nothing moved', async () => {
-    const spec = { ...counter, version: 2 };
+    const spec = { ...counter, version: V + 1 };
     expect(versionProblems(committed, await goldenOf(spec, loadScenarios('Counter')), spec)).toHaveLength(1);
   });
 
   test('two versions at once owe two entries', async () => {
-    const spec = { ...counter, version: 3, changes: [...(Counter.changes ?? []), entry(3)] };
+    const spec = { ...counter, version: V + 2, changes: [...(Counter.changes ?? []), entry(V + 2)] };
     expect(versionProblems(committed, await goldenOf(spec, loadScenarios('Counter')), spec)).toEqual([
-      'Counter: version 2 has no `changes` entry — say what changed and what happens to apps built on v1'
+      `Counter: version ${V + 1} has no \`changes\` entry — say what changed and what happens to apps built on v${V}`
     ]);
   });
 
   test('a version that falls fails', async () => {
-    const base: Golden = { ...committed, version: 2 };
-    expect(versionProblems(base, committed, counter)).toContain('Counter: version fell from 2 to 1');
+    const base: Golden = { ...committed, version: V + 1 };
+    expect(versionProblems(base, committed, counter)).toContain(`Counter: version fell from ${V + 1} to ${V}`);
   });
 
   test('a spec new at the base owes nothing', async () => {
@@ -124,7 +130,7 @@ describe('the history\'s shape', () => {
   });
 
   test.each([
-    ['an entry above the version', [entry(2)], /above the spec's version 1/],
+    ['an entry above the version', [entry(V + 1)], new RegExp(`above the spec's version ${V}`)],
     ['two entries for one version', [entry(1), entry(1)], /rising version order/],
     ['no words', [{ ...entry(1), says: ' ' }], /`says` is empty/],
     ['two answers', [entry(1, { none: 'x', parameter: 'reset' } as never)], /exactly one of/],
@@ -141,10 +147,10 @@ describe('the history\'s shape', () => {
 
 describe('AC4 — the diff a person reads', () => {
   test('a table per scenario, value / signal / outcome columns, the moved frame marked', async () => {
-    const spec = preFh022({ version: 2, changes: [...(Counter.changes ?? []), entry(2)] });
+    const spec = preFh022({ version: V + 1, changes: [...(Counter.changes ?? []), entry(V + 1)] });
     const text = formatGoldenChange(committed, await goldenOf(spec, loadScenarios('Counter')), spec);
-    expect(text).toContain('### Counter — v1 → v2');
-    expect(text).toContain('- **v2**: planted — *migration: none* — a planted change');
+    expect(text).toContain(`### Counter — v${V} → v${V + 1}`);
+    expect(text).toContain(`- **v${V + 1}**: planted — *migration: none* — a planted change`);
     expect(text).toContain('|  | frame | stimulus | value | signal | outcome |');
     expect(text).toContain('| ● | 2 | ▶ reset |  | ~~(none)~~ → **countChanged** | ~~reset: unchanged~~ → **reset: done** |');
   });

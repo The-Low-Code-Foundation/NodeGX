@@ -122,7 +122,14 @@ export type TraceEvent =
    * a Navigate (`value`, `error` as a push's) — and `page`: the `params` it hands the Page Inputs of the page it shows (canonical at
    * the call), one per Page Inputs.
    */
-  | (Base & { t: 'answer'; op: 'push' | 'replace' | 'back' | 'returned' | 'navigate' | 'page'; value?: Outcome; error?: string; action?: unknown; results?: unknown; params?: unknown });
+  | (Base & { t: 'answer'; op: 'push' | 'replace' | 'back' | 'returned' | 'navigate' | 'page'; value?: Outcome; error?: string; action?: unknown; results?: unknown; params?: unknown })
+  /**
+   * observation (NSP-019 s95): what the node tells the EDITOR about its own settings (spec.ts `diagnostics`; the runtime's
+   * `setDiagnostic`) — `key` as the runtime keys it, `message` the sentence it now shows, absent when it was withdrawn. One per
+   * declared key whose sentence changed since the last settle, sorted by key, closing the frame's group. A target without an
+   * editor (adapter.ts `diagnostics`) is not graded on these: the runner leaves them out of its reference.
+   */
+  | (Base & { t: 'diagnostic'; key: string; message?: string });
 
 /**
  * NSP-016 s37 — the canonical form of a node's reference to ITSELF (a visual node's `This` output,

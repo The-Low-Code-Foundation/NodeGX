@@ -85,8 +85,12 @@ const media = { keeps: 'the media' } as const;
 /** video.ts `kindOf` — a Source naming a YouTube or Vimeo video draws an embed (video-embed.ts) */
 const videoKind = (source: unknown): 'video' | 'embed' =>
   typeof source === 'string' && [/youtu\.be\/[A-Za-z0-9_-]{6,}/i, /(?:youtube\.com|youtube-nocookie\.com)\/(?:watch\?(?:[^#]*&)?v=|embed\/|v\/|shorts\/)[A-Za-z0-9_-]{6,}/i, /player\.vimeo\.com\/video\/\d+/i, /vimeo\.com\/(?:channels\/[^/]+\/)?\d+/i].some((p) => p.test(source)) ? 'embed' : 'video';
-/** Video.tsx :129-201 — the component's calls meet the element: its kind, its media, whether it may play, its `src` (a reload) */
-const VIDEO_CALL = ['onPage', 'kind', 'srcAttr', 'elMuted', 'paused', 'position', 'ready', 'failed', 'pending', 'atEnd', 'activated', 'canAutoplay', 'loading', 'width', 'height'];
+/**
+ * Video.tsx :129-201 — the component's calls meet the element: its kind, its media, whether it may play, its `src` (a reload);
+ * and (v6, row C161, s92 — added here s95) Restart and Reset seek to the Start Time the component was last drawn with
+ * (`this.props.dom.startTime`), `elStart`
+ */
+const VIDEO_CALL = ['onPage', 'kind', 'srcAttr', 'elMuted', 'elStart', 'paused', 'position', 'ready', 'failed', 'pending', 'atEnd', 'activated', 'canAutoplay', 'loading', 'width', 'height'];
 const FOCUS_CALLS = {
   'on.focus': ['onPage', 'pageEnabled', 'pageVisible', 'elementFocused'],
   'on.blur': ['onPage', 'pageEnabled', 'pageVisible', 'elementFocused']
@@ -177,7 +181,10 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
       srcAttr: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? s.srcAttr : KEEP), preset: false, why: 'a `src` taken away stays as it was (HTML: removing it loads nothing), so it follows the Source only while there is one' },
       elMuted: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? !!s.muted : KEEP) },
       elAutoplay: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? !!s.autoplay : KEEP) },
-      elLoop: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? !!s.loop : KEEP) }
+      elLoop: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? !!s.loop : KEEP) },
+      // v6 (row C161, s92): the Start Time the component was drawn with, where Restart and Reset seek — drawn with the flags.
+      // s92 added it to the spec and not here, so G1 read it as classified 0 times (found s95)
+      elStart: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? s.startTime : KEEP) }
     },
     element: { elem: { changesWith: ['onPage', 'kind'] } },
     held: { focusedElem: keyboard, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },

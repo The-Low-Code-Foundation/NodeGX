@@ -31,7 +31,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import type { AnyNodeSpec, Step, TargetAdapter, TraceEvent } from '../src';
-import { compareTraces, discoverBranches, formatReport, generateSequence, interpreterAdapter, loadScenarios, mutantsOf, play, PlayError, runConformance, validateTrace, World, type WorldScript } from '../src';
+import { compareTraces, discoverBranches, formatReport, generateSequence, interpreterAdapter, loadScenarios, mutantsOf, play, PlayError, runConformance, validateTrace, withoutUnseenDiagnostics, World, type WorldScript } from '../src';
 import { specFor } from '../src/nodes';
 import { EQUIVALENT_MUTANTS } from '../src/nodes/equivalent-mutants';
 
@@ -181,6 +181,9 @@ for (const round of rounds.ROUNDS) {
         for (const item of suite) await play(probe, spec.type, item.params, item.steps, worldFor(spec, item.world));
         const mutants = mutantsOf(spec, discovered.branches);
         expect(mutants.length).toBeGreaterThan(0);
+        // NSP-019 s95 — the reference as this target can see it (runConformance does the same): a stranger's target has no
+        // editor, so a `diagnostic` event in the reference would "catch" every mutant of a node that declares one, for nothing
+        const seenBy = strangerTarget();
         const survivors: string[] = [];
         for (const m of mutants) {
           const mutant = interpreterAdapter({ resolve: () => m.spec });
@@ -188,7 +191,7 @@ for (const round of rounds.ROUNDS) {
           for (const item of suite) {
             let reference: TraceEvent[];
             try {
-              reference = await play(mutant, spec.type, item.params, item.steps, worldFor(spec, item.world));
+              reference = withoutUnseenDiagnostics(await play(mutant, spec.type, item.params, item.steps, worldFor(spec, item.world)), seenBy);
             } catch (e) {
               caught = `${item.name}: the mutant broke a spec rule (${(e as Error).message})`;
               break;

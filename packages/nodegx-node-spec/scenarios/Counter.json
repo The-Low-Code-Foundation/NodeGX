@@ -40,5 +40,11 @@
     "because": "counter.ts :124 Number(value), :167 value ? true : false",
     "params": { "startValue": "3", "limitsEnabled": "", "limitsMax": "abc" },
     "steps": ["settle", { "signal": "increase" }, "settle"]
+  },
+  {
+    "name": "Min above Max: the editor is told, the count gets stuck, and the warning goes when Max is raised",
+    "because": "counter.ts checkLimits (NSP-019 s95, Richard's drive: Start 2, Min 3, Max 1); :50-53 and :66-69 hold the count",
+    "params": { "startValue": 2, "limitsMin": 3, "limitsMax": 1, "limitsEnabled": true },
+    "steps": ["settle", { "signal": "increase" }, "settle", { "signal": "decrease" }, "settle", { "set": "limitsMax", "value": 5 }, "settle", { "signal": "increase" }, "settle"]
   }
 ]

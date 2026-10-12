@@ -244,6 +244,17 @@
           },
           "required": ["t", "op"],
           "additionalProperties": false
+        },
+        {
+          "description": "observation (NSP-019 s95): what the node tells the EDITOR about its own settings (src/spec.ts `diagnostics`; the runtime's `setDiagnostic`) — `key` `<node-type>/<condition>`, `message` the sentence it now shows, absent when withdrawn. One per declared key whose sentence changed since the last settle, sorted by key, closing the frame's group.",
+          "properties": {
+            "t": { "const": "diagnostic" },
+            "key": { "type": "string", "pattern": "^[a-z0-9-]+(/[a-z0-9-]+)+$" },
+            "message": { "type": "string", "minLength": 1 },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "key"],
+          "additionalProperties": false
         }
       ]
     }

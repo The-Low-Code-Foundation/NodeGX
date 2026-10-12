@@ -10,6 +10,9 @@ import type { TryRow } from './tryNodeModel';
  * row is last and tinted; the caller scrolls it into view (R30: "the 'what happened' list doesn't
  * focus so you have to scroll down").
  *
+ * NSP-019 s95 — a warning the node raised in that row (Richard's drive: "show why the settings are FUBAR") reads under the
+ * row's answer in the danger colour, chipped *Warning*; one it withdrew reads *Fixed*.
+ *
  * Hook-free, so the plain-Node runner evaluates it as an element tree.
  */
 export interface TryRowsProps {
@@ -38,9 +41,14 @@ export function TryRows({ rows, error }: TryRowsProps) {
             <span className={css['RowN']}>{i + 1}</span>
             <span className={css['RowWhat']}>{row.what}</span>
             <span className={classNames(css['RowDetail'], row.quiet && css['is-quiet'])}>
-              {detail || (row.kind === 'load' ? 'nothing to start with' : '')}
+              {detail || (row.kind === 'load' && row.problems.length === 0 ? 'nothing to start with' : '')}
+              {row.problems.map((p, k) => (
+                <span key={k} className={classNames(css['RowProblem'], css[`is-${p.state}`])} data-problem={p.state}>
+                  {p.state === 'raised' ? p.text : `No longer: ${p.text}`}
+                </span>
+              ))}
             </span>
-            {row.outcomes.length > 0 && (
+            {(row.outcomes.length > 0 || row.problems.length > 0) && (
               <span className={css['RowChips']}>
                 {row.outcomes.map((o, k) => (
                   <span
@@ -50,6 +58,11 @@ export function TryRows({ rows, error }: TryRowsProps) {
                   >
                     {named ? `${o.label}: ` : ''}
                     {OUTCOME_WORD[o.value]}
+                  </span>
+                ))}
+                {row.problems.map((p, k) => (
+                  <span key={`p${k}`} className={`${css['Chip']} ${css[p.state === 'raised' ? 'Chip-failure' : 'Chip-done']}`}>
+                    {p.state === 'raised' ? 'Warning' : 'Fixed'}
                   </span>
                 ))}
               </span>

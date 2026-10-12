@@ -1188,6 +1188,14 @@ export interface Change {
   migration: Migration;
 }
 
+/** NSP-019 s95 — one thing a node tells the editor about its settings (`NodeDecl.diagnostics`). */
+export interface DiagnosticDecl<S, I> {
+  /** The condition, in words, for the rules: "Min Value is above Max Value". */
+  says: string;
+  /** The sentence the editor shows while the condition holds; `null` / `undefined` / `''` when it does not. */
+  message: (inputs: Inputs<I>, state: Readonly<S>) => string | null | undefined;
+}
+
 /** NSP-018 — one shape of hand-written code a node replaces (`NodeDecl.idioms`). */
 export interface Idiom {
   /** The shape, in words: "a number in state with +1 / −1 / reset handlers". */
@@ -1225,6 +1233,14 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
   outcomes?: readonly Outcome[];
   /** What the editor's hover/inspect shows for an instance — the runtime's `getInspectInfo`. */
   inspect?: (state: Readonly<S>, world: WorldView) => string;
+  /**
+   * NSP-019 s95 — what this node tells the EDITOR about its own settings: the runtime's `setDiagnostic`
+   * (dev-docs/reference/DIAGNOSTICS-CONTRACT.md — "two of this node's settings contradict each other"), keyed as the runtime
+   * keys it, `<node-type>/<condition>`. Each is a predicate on the inputs and state: its sentence while it holds, nothing when
+   * it does not. A settle records one `diagnostic` event per key whose sentence changed (trace.ts). Never on the wire: a
+   * deployed app shows nothing, so a target without an editor (`TargetAdapter.diagnostics`) is not graded on them.
+   */
+  diagnostics?: Readonly<Record<string, DiagnosticDecl<S, I>>>;
   /**
    * NSP-017 AC3 — the person writes this node's code, so the code is the behaviour: the spec is a CONTRACT — it runs the same
    * code the same way and says what the code can see and how its results come out, graded with a fixed set of user-code fixtures
@@ -1360,6 +1376,8 @@ export interface AnyNodeSpec {
   outputs: Record<string, ErasedValueOutput | SignalOutputDecl>;
   outcomes?: readonly Outcome[];
   inspect?: (state: never, world: WorldView) => string;
+  /** NSP-019 s95 — what the node tells the editor (`NodeDecl.diagnostics`), erased. */
+  diagnostics?: Readonly<Record<string, { says: string; message: (inputs: never, state: never) => string | null | undefined }>>;
   /** NSP-017 AC3 — a contract, not a behaviour (`NodeDecl.contract`). */
   contract?: string;
   idioms?: readonly Idiom[];

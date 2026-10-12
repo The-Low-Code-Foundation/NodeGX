@@ -12,7 +12,7 @@ import { defineNode } from '../spec';
 
 export const Counter = defineNode({
   type: 'Counter',
-  version: 1,
+  version: 2,
   // NSP-010 — the history. FH-022 slice 3 came before this spec, so v1 is the behaviour after it; the before and after traces
   // are golden/changes/Counter@1.json, the before replayed on the runtime at 328a025dc^ (noodl-runtime nsp-010-counter-history)
   changes: [
@@ -23,6 +23,14 @@ export const Counter = defineNode({
       commit: '328a025dc',
       migration: {
         none: "The old pulse said the count moved when it had not, and the guard meant to stop it was dead from the day it was written. Counter has no Treat Unchanged As input to keep it (counter.ts spreads outcomeOutputs, never outcomeInputs), and the change shipped alone so one revert brings it back if a project depended on it"
+      }
+    },
+    {
+      version: 2,
+      says: 'A Min Value above Max Value now shows the editor a warning until it is fixed. Before, nothing said so, and with Limits Enabled on the count got stuck with no reason given',
+      row: 'NSP-019 s95',
+      migration: {
+        none: 'Only the editor is told. Nothing a wire carries changes, and a deployed app shows nothing'
       }
     }
   ],
@@ -38,6 +46,14 @@ export const Counter = defineNode({
   state: { count: 0, start: 0, startSeen: false },
   // :38 getInspectInfo
   inspect: (s) => 'Count: ' + s.count,
+  // `checkLimits`, from both limit setters (NSP-019 s95): Min above Max is a mistake with or without Limits Enabled — with it on,
+  // Increase stops at Max and Decrease at Min, so every count ends where neither moves it
+  diagnostics: {
+    'counter/min-above-max': {
+      says: 'Min Value is above Max Value',
+      message: (i) => (i.limitsMin > i.limitsMax ? `Min Value ${i.limitsMin} is above Max Value ${i.limitsMax}. With Limits Enabled on, the count gets stuck.` : null)
+    }
+  },
   // :194-198 outcomeOutputs({ done, unchanged }) — no failure: a counter cannot fail
   outcomes: ['done', 'unchanged'],
 

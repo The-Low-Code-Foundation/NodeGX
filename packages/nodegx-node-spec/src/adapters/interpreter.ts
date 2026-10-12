@@ -38,6 +38,7 @@ export function interpreterAdapter(options: InterpreterAdapterOptions = {}): Tar
   let current: World | undefined;
   return {
     name: 'interpreter',
+    diagnostics: true,
     mount(type, params, wired, context) {
       const spec = resolve(type);
       if (!spec) throw new Error(`interpreter: no spec for "${type}"`);

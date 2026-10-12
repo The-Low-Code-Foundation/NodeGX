@@ -191,6 +191,8 @@ export interface Instance {
    * `rederive` param (states.ts :338-358 registers a value output when `values` is written).
    */
   written: Record<string, unknown>;
+  /** NSP-019 s95: the sentence each declared diagnostic last recorded (spec.ts `diagnostics`); a key absent shows nothing. */
+  diagnosticsShown: Record<string, string>;
 }
 
 export class SpecError extends Error {
@@ -495,7 +497,8 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
     watches: new Map(),
     wired: new Set(wired),
     playContext: portContext,
-    written: { ...params }
+    written: { ...params },
+    diagnosticsShown: {}
   };
   (inst as { view: WorldView }).view = viewOf(inst);
   // P107-C155 — a wired port is one the node has (the runtime's `connectInput` throws on one it does not); checked before
@@ -1312,6 +1315,28 @@ export function settle(inst: Instance): void {
   for (const r of inst.pending.requests) inst.trace.push(r);
   for (const l of inst.pending.location) inst.trace.push(l);
   inst.pending = { signals: [], outcomes: inst.pending.outcomes.filter((o) => o.reportedAt === undefined), requests: [], location: [] };
+  recordDiagnostics(inst);
+}
+
+/**
+ * NSP-019 s95 — what the node tells the editor (spec.ts `diagnostics`), read against the frame's final inputs and state, one
+ * event per key whose sentence changed, sorted by key (trace.ts). The runtime re-evaluates in the setters of the ports a
+ * predicate reads (DIAGNOSTICS-CONTRACT.md "When to clear"), so what it shows at a frame's end is this.
+ */
+function recordDiagnostics(inst: Instance): void {
+  const declared = inst.spec.diagnostics;
+  if (!declared) return;
+  for (const key of Object.keys(declared).sort()) {
+    const message = declared[key].message(inst.inputs as never, inst.state as never) || undefined;
+    if (message === inst.diagnosticsShown[key]) continue;
+    if (message === undefined) {
+      delete inst.diagnosticsShown[key];
+      inst.trace.push({ t: 'diagnostic', key });
+    } else {
+      inst.diagnosticsShown[key] = message;
+      inst.trace.push({ t: 'diagnostic', key, message });
+    }
+  }
 }
 
 /**

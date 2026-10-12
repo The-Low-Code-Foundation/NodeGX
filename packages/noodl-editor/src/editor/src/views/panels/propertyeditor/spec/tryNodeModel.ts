@@ -296,6 +296,9 @@ export function playTimeline(spec: AnyNodeSpec, params: Record<string, unknown>,
       case 'outcome':
         answer(outcomeText(spec, e));
         break;
+      case 'diagnostic':
+        answer(e.message ? `Warning: ${e.message}` : 'the warning goes');
+        break;
       default:
         answer(otherText(e));
     }
@@ -327,6 +330,15 @@ export function usesClock(spec: AnyNodeSpec): boolean {
   return Boolean(spec.needs?.includes('clock'));
 }
 
+/**
+ * NSP-019 s95 — what the node told the editor about its settings in that row (spec.ts `diagnostics`): a warning raised, with
+ * its sentence, or one withdrawn, named by the condition it was about.
+ */
+export interface RowProblem {
+  state: 'raised' | 'fixed';
+  text: string;
+}
+
 export interface RowOutcome {
   /** The input it answers, by display name. */
   label: string;
@@ -345,6 +357,8 @@ export interface TryRow {
   /** What the node answered, one phrase each: "Current Count → 1", "Count Changed fires". */
   answers: string[];
   outcomes: RowOutcome[];
+  /** NSP-019 s95 — the warnings it raised or withdrew. */
+  problems: RowProblem[];
   /** The frame ended and nothing came out of it. */
   quiet: boolean;
 }
@@ -357,6 +371,8 @@ export interface TryPlay {
   outputs: Record<string, unknown>;
   /** The ports the LAST row reached — the ones the stage lights for a moment. */
   lit: { inputs: string[]; outputs: string[] };
+  /** NSP-019 s95 — the warnings the node shows after the last step: what the editor would ring the node for now. */
+  problems: string[];
   /** The interpreter refused a step; the rows are the steps before it. */
   error?: string;
 }
@@ -405,21 +421,22 @@ export function playTry(spec: AnyNodeSpec, params: Record<string, unknown>, step
   let litOutputs = new Set<string>();
 
   let mountSetsLeft = Object.keys(params).length;
-  const load: TryRow = { kind: 'load', what: 'At load', answers: [], outcomes: [], quiet: false };
+  const load: TryRow = { kind: 'load', what: 'At load', answers: [], outcomes: [], problems: [], quiet: false };
+  const shown: Record<string, string> = {};
   rows.push(load);
   let row: TryRow = load;
   let frameEnded = false;
   let frameQuiet = false;
 
   const closeQuiet = () => {
-    if (frameEnded && frameQuiet && row.kind === 'you' && row.answers.length === 0 && row.outcomes.length === 0) {
+    if (frameEnded && frameQuiet && row.kind === 'you' && row.answers.length === 0 && row.outcomes.length === 0 && row.problems.length === 0) {
       row.quiet = true;
     }
   };
   const stimulus = (what: string, port?: string) => {
     if (row.kind === 'load' || frameEnded) {
       closeQuiet();
-      row = { kind: 'you', what, answers: [], outcomes: [], quiet: false };
+      row = { kind: 'you', what, answers: [], outcomes: [], problems: [], quiet: false };
       rows.push(row);
       litInputs = new Set();
       litOutputs = new Set();
@@ -481,6 +498,16 @@ export function playTry(spec: AnyNodeSpec, params: Record<string, unknown>, step
         });
         answered();
         break;
+      case 'diagnostic':
+        if (e.message) {
+          shown[e.key] = e.message;
+          row.problems.push({ state: 'raised', text: e.message });
+        } else {
+          delete shown[e.key];
+          row.problems.push({ state: 'fixed', text: spec.diagnostics?.[e.key]?.says ?? e.key });
+        }
+        answered();
+        break;
       default:
         row.answers.push(otherText(e));
         answered();
@@ -494,6 +521,9 @@ export function playTry(spec: AnyNodeSpec, params: Record<string, unknown>, step
     inputs,
     outputs,
     lit: lastIsYou ? { inputs: [...litInputs], outputs: [...litOutputs] } : { inputs: [], outputs: [] },
+    problems: Object.keys(shown)
+      .sort()
+      .map((key) => shown[key]),
     error
   };
 }

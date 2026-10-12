@@ -205,8 +205,16 @@ async function playTarget(spec: AnyNodeSpec, target: TargetAdapter, params: Reco
   }
 }
 
+/**
+ * NSP-019 s95 — a target without an editor (adapter.ts `diagnostics`) cannot see what a node tells the editor, so the reference
+ * it is graded against leaves those events out. A deployed app shows none of them: that is the contract, not a gap.
+ */
+export function withoutUnseenDiagnostics(trace: TraceEvent[], target: TargetAdapter): TraceEvent[] {
+  return target.diagnostics ? trace : trace.filter((e) => e.t !== 'diagnostic');
+}
+
 async function playBoth(spec: AnyNodeSpec, target: TargetAdapter, params: Record<string, unknown>, steps: readonly Step[], reach?: Reach, script?: WorldScript, context?: Readonly<PlayContext>) {
-  const full = await playReference(spec, params, steps, script, undefined, context);
+  const full = withoutUnseenDiagnostics(await playReference(spec, params, steps, script, undefined, context), target);
   const reference = reach ? projectTrace(full, reach) : full;
   return { reference, ...(await playTarget(spec, target, params, steps, reference, script, undefined, context)) };
 }
@@ -216,7 +224,7 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
   const seed = options.seed ?? defaultSeed();
   const requested = options.sequences ?? 200;
   const reach = options.reach;
-  const project = (t: TraceEvent[]) => (reach ? projectTrace(t, reach) : t);
+  const project = (t: TraceEvent[]) => withoutUnseenDiagnostics(reach ? projectTrace(t, reach) : t, target);
   const report: Report = {
     node: spec.type,
     version: spec.version,

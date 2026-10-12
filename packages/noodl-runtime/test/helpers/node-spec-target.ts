@@ -1456,6 +1456,57 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     if (s) s.h.errors.push(event);
   });
 
+  /**
+   * NSP-019 s95 — THE EDITOR: what each node tells it about its own settings (diagnostics.ts `setDiagnostic`), by node id, then
+   * key → the sentence it shows now. The runtime's own connection reports `isRunningLocally()` false here, so `setDiagnostic`
+   * returned on its first line and every diagnostic vanished; this one is the editor a preview has. Kept apart from `State`, so
+   * a diagnostic a node raises while it is being made (before `adopt`) is not lost.
+   */
+  const diagnosticsNow = new Map<string, Map<string, string>>();
+  const diagnosticsShown = new Map<string, Record<string, string>>();
+  {
+    const editor = (context as unknown as { editorConnection: Record<string, unknown> }).editorConnection;
+    editor.isRunningLocally = () => true;
+    editor.sendWarning = (_component: string, nodeId: string, key: string, warning: { message?: unknown }) => {
+      if (!diagnosticsNow.has(nodeId)) diagnosticsNow.set(nodeId, new Map());
+      diagnosticsNow.get(nodeId)!.set(key, String(warning?.message ?? ''));
+    };
+    editor.clearWarning = (_component: string, nodeId: string, key: string) => {
+      diagnosticsNow.get(nodeId)?.delete(key);
+    };
+    editor.clearWarnings = (_component: string, nodeId: string) => {
+      diagnosticsNow.delete(nodeId);
+    };
+  }
+
+  /**
+   * NSP-019 s95 — a settle's `diagnostic` events (trace.ts): for a spec that declares `diagnostics`, every key the node shows in
+   * its OWN namespace — the `<node-type>/` prefixes its declared keys use (DIAGNOSTICS-CONTRACT.md "Keys") — declared or not, so
+   * a sentence the runtime says and the spec forgot is a divergence; one per key whose sentence changed since the last settle,
+   * sorted by key. Not the generic ones: the base class's `node/…`, and the scheduler's `runtime/cyclic-loop`, which the loop
+   * breaker puts on whichever node it stopped (graph C9, a Counter wired into itself) — the engine's, not the node's.
+   */
+  function recordDiagnostics(s: State): void {
+    const declared = specFor(s.h.type)?.diagnostics;
+    if (!declared) return;
+    const own = new Set(Object.keys(declared).map((k) => k.slice(0, k.indexOf('/') + 1)));
+    const now = diagnosticsNow.get(s.h.id) ?? new Map<string, string>();
+    const shown = diagnosticsShown.get(s.h.id) ?? {};
+    diagnosticsShown.set(s.h.id, shown);
+    const keys = [...new Set([...now.keys(), ...Object.keys(shown)])].filter((k) => own.has(k.slice(0, k.indexOf('/') + 1))).sort();
+    for (const key of keys) {
+      const message = now.get(key) || undefined;
+      if (message === shown[key]) continue;
+      if (message === undefined) {
+        delete shown[key];
+        s.trace.push({ t: 'diagnostic', key });
+      } else {
+        shown[key] = message;
+        s.trace.push({ t: 'diagnostic', key, message });
+      }
+    }
+  }
+
   const newFrame = (): Frame => ({ values: new Map(), signals: [], outcomes: [], requests: [], location: [] });
 
   /**
@@ -1655,6 +1706,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     for (const o of s.frame.outcomes) s.trace.push(o);
     for (const r of s.frame.requests) s.trace.push(r);
     for (const l of s.frame.location) s.trace.push(l);
+    recordDiagnostics(s);
     s.frame = newFrame();
     s.settles++;
   }
@@ -3190,6 +3242,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
 
   const target: RuntimeTarget = {
     name: 'runtime',
+    diagnostics: true,
     context,
     types: () => Object.keys((context.nodeRegister as unknown as { _constructors: Record<string, unknown> })._constructors),
     hasType: (type) => context.nodeRegister.hasNode(type),
