@@ -19,15 +19,17 @@ start, and Caddy answers 404 to it from outside. **Everything admin goes through
 
 ## 1. Build the backend bundle
 
-`scripts/package-deploy.js` currently **refuses every build** (measured 2026-09-30): its secret
-scan flags the backend's own error message `Expected postgres://user:password@host:5432/database`
-(phase 97) as a credential. Until that is fixed in core, ship `dist/cli.js` itself, after checking
-that the placeholder is the only connection-string-shaped text in it:
+`scripts/package-deploy.js` refused every build until 2026-10 (its secret scan read the backend's own
+`postgres://user:password@…` example as a credential). P109 ISL-042 (`ac78efb4b`) fixed that in core, and
+`tests/isl042-secretscan.test.ts` bundles the service and runs the packager's scan over it on every suite.
+Re-measured 2026-10-12 (P119 SRK-002) on the built `dist/cli.js`: the packager's own pattern (a password of
+six characters or more) finds nothing. The looser check below still finds the one placeholder, now
+`postgres://USER:PASS@`, and nothing else; anything else in that list is a real finding.
 
 ```bash
 cd packages/nodegx-backend
 python3 -c "import re;s=open('dist/cli.js').read();print(re.findall(r'[a-z+]+://[^\s:/@\"]+:[^\s@/\"]+@',s))"
-#   → ['postgres://user:password@']  and nothing else
+#   → ['postgres://USER:PASS@']  and nothing else
 ```
 
 ## 2. Build the site

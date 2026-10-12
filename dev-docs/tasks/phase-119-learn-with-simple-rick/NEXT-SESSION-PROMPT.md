@@ -26,11 +26,10 @@ studio repo's README at `~/vscode_projects/learn-with-simple-rick/README.md` and
 5. The welcome-popup wording and the reply-bar line, in his words (BRIEF.md slots).
 
 **Next to build, in order:** SRK-003 (the schema with `meetCode`, the policy, the staff key, the privacy page), then
-SRK-004 (the thread, held to LOOK.md 1–13). SRK-002 (`package-deploy.js` secret-scan false positive) is a small core
-fix that can go in any gap. The client half of SRK-001 (a sign-in-by-code node, both auth adapters, the export) is
+SRK-004 (the thread, held to LOOK.md 1–13). SRK-002 turned out to be already fixed (P109 ISL-042). The client half of SRK-001 (a sign-in-by-code node, both auth adapters, the export) is
 carried in SRK-005.
 
-**Traps already known:** `package-deploy.js` refuses every build (hosting README §1 has the workaround); `gh` and
+**Traps already known:** `gh` and
 `ssh` are sometimes refused by the auto-mode classifier, so test in one command and never inherit the block; `grep -rn`
 on this machine silently skips `.ts` files, so use `git grep`; the shared-checkout rules in memory (temp-index commits,
 no stash).
