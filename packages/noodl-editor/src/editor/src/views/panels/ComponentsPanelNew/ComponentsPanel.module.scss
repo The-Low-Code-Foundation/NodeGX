@@ -934,7 +934,7 @@
    are the three things a script row has that a component row does not. */
 .ScriptUses {
   margin-left: auto;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-variant-numeric: tabular-nums;
   color: var(--theme-color-fg-muted);
 }
