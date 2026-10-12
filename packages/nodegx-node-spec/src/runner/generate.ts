@@ -28,7 +28,7 @@ import type { Step } from '../adapter';
 import type { ActDecl, AnyNodeSpec, InputDecl } from '../spec';
 import { isSignalInput } from '../spec';
 import type { RegistryScript } from '../registry';
-import type { Answer, BackendScript, GroupScript, PickerScript, PopupScript, RouterScript, SocketScript, StackScript, ViewportScript, WorldScript } from '../world';
+import type { Answer, BackendScript, GroupScript, HostScript, PickerScript, PopupScript, RouterScript, SocketScript, StackScript, ViewportScript, WorldScript } from '../world';
 import { mulberry32, sequenceSeed, type Rng } from './random';
 import type { Reach } from './reach';
 
@@ -88,6 +88,8 @@ export const DEFAULT_WORLD_POOL = Object.freeze({
   // NSP-014 s31: a document whose file dialog nobody answers
   pickers: Object.freeze([{}] as ReadonlyArray<PickerScript>),
   sockets: Object.freeze([{}] as ReadonlyArray<SocketScript>),
+  // NSP-022 s96: a process with none of the services (a node outside a backend)
+  hosts: Object.freeze([{}] as ReadonlyArray<HostScript>),
   // NSP-016 s42: no group; one never written; one with a Value at load; one the graph writes later (twice, the second back to the first)
   groups: Object.freeze([{ none: true }, {}, { value: 'a' }, { writes: [{ at: 1, value: 'a' }, { at: 100, value: 'b' }, { at: 1000, value: 'a' }] }] as ReadonlyArray<GroupScript>)
 });
@@ -303,6 +305,11 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
   if (needs.includes('group')) {
     const group = rng.pick(pool.groups ?? DEFAULT_WORLD_POOL.groups);
     if (Object.keys(group).length > 0) world.group = group;
+  }
+  // NSP-022 s96 — HOST: one of the pool's (the default: none installed)
+  if (needs.includes('host')) {
+    const host = rng.pick(pool.hosts ?? DEFAULT_WORLD_POOL.hosts);
+    if (Object.keys(host).length > 0) world.host = host;
   }
   return { seed, params, steps, world, ...wires };
 }

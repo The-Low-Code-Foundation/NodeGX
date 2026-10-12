@@ -1,28 +1,15 @@
 {
   "$comment": "NSP-009 — the ratchet behind `npm run spec-ledger` (scripts/node-spec/spec-ledger.js). `floor`: the nodes that conform on the runtime, the nodes specced as a contract (NSP-017 AC3 — the person writes their code: counted apart, never as conforming), and the nodes that conform on the export, and (NSP-020 AC4) the picker nodes whose ports an editor draws without a viewer, held exactly as pickerCoverageFloor is — a fall fails, a rise fails until the floor is raised in the same commit. `owed`: the written reason a picker node is in the picker without a spec yet — the task that will write it. A picker node with no spec, no graph claim, no exemption (exemptions.json) and no entry here fails the PR job, named; an entry that is graded now must be removed in the same commit.",
   "floor": {
-    "runtime": 125,
+    "runtime": 138,
     "contract": 3,
     "export": 2,
     "ports": 132
   },
   "owed": {
-    "noodl.cloud.addusertorole": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",
-    "noodl.cloud.aggregate": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",
-    "noodl.cloud.createuser": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",
-    "noodl.cloud.deleteuser": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",
-    "noodl.cloud.getuserroles": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",
-    "noodl.cloud.hmac": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",
-    "noodl.cloud.jwtsign": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",
-    "noodl.cloud.jwtverify": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",
-    "noodl.cloud.listusersinrole": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",
-    "noodl.cloud.modelrequest": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",
-    "noodl.cloud.removeuserfromrole": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",
-    "noodl.cloud.request": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",
-    "noodl.cloud.response": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",
-    "noodl.cloud.secret": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",
-    "noodl.cloud.sendemail": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",
-    "noodl.cloud.updateuser": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",
-    "noodl.cloud.verifysessiontoken": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started"
+    "noodl.cloud.aggregate": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded on the runtime's cloud target (built s96, `cloudTarget`); not specced yet",
+    "noodl.cloud.modelrequest": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded on the runtime's cloud target (built s96, `cloudTarget`); not specced yet",
+    "noodl.cloud.request": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded on the runtime's cloud target (built s96, `cloudTarget`); not specced yet",
+    "noodl.cloud.response": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded on the runtime's cloud target (built s96, `cloudTarget`); not specced yet"
   }
 }

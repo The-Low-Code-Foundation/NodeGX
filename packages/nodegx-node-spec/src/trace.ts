@@ -4,7 +4,7 @@
  * Inputs and outputs in one ordered stream; `settle` marks where the target drains its frame.
  * Between two settles the events are grouped canonically: `value` events SORTED BY PORT NAME
  * (changed since the last settle only), then `signal` events in emission order, then `outcome`
- * events in the order they were REPORTED, then `request` events, (s21) `backend` events and (s34) `socket` events, one group, in the order they
+ * events in the order they were REPORTED, then `request` events, (s21) `backend` events, (s34) `socket` events and (NSP-022) `host` events, one group, in the order they
  * were issued, then
  * the LOCATION events — `open`, `history`, `dispatch`, (s18) `stack`, (s19) `route`, (s20) `popup`, (NSP-014 s31) `picker` and (NSP-016 s56) `answer`, one group — in the order they were made
  * (NSP-015).
@@ -30,7 +30,7 @@
  * Component Stack a push, a replace or a pop (world.ts STACK); s19 `route` — it handed the Routers a navigate
  * (world.ts ROUTE). NSP-014 s21 adds `backend` — it handed a backend an operation in the backend contract's words
  * (world.ts BACKEND, R9): `op`, `backend` the id it went to, `args` canonical, callbacks left out. s31 adds `picker` — it clicked a file
- * input (world.ts PICKER): `accept` and `capture`, what the element held at the click, each a string. s34 adds `socket` — it made a call on a WebSocket (world.ts SOCKET): a `connect`, a `send` or a `close`, as handed, in the request group. The world's answers are not events: they are scripted (world.ts), so what they were is
+ * input (world.ts PICKER): `accept` and `capture`, what the element held at the click, each a string. s34 adds `socket` — it made a call on a WebSocket (world.ts SOCKET): a `connect`, a `send` or a `close`, as handed, in the request group. NSP-022 s96 adds `host` — it called a service of the backend process (world.ts HOST): `service` and `request` as handed, in the request group. The world's answers are not events: they are scripted (world.ts), so what they were is
  * known from the scenario, and what the node did with them is on the wire.
  * That grouping is a rule of the FORMAT, so that a runtime which
  * pulses a signal synchronously inside a setter and delivers the value at frame end (the
@@ -114,6 +114,12 @@ export type TraceEvent =
    * `$bytes`) or a `close` (`code`, `reason`, each absent when not handed); each canonical. In the request group.
    */
   | (Base & { t: 'socket'; op: 'connect' | 'send' | 'close'; url?: unknown; protocols?: unknown; data?: unknown; code?: unknown; reason?: unknown })
+  /**
+   * observation (NSP-022 s96): the node called a service of the backend process it runs in (world.ts HOST) — `service`
+   * `secrets`, `users`, `roles` or `mail`, `request` as handed (for `secrets` the name; absent when it was `undefined`),
+   * canonical at the call. In the request group.
+   */
+  | (Base & { t: 'host'; service: 'secrets' | 'users' | 'roles' | 'mail'; request?: unknown })
   /**
    * observation (NSP-016 s56): the node answered a request another node handed it (spec.ts THE CALLERS) — a Component Stack's
    * answer to a `push`, a `replace` or a `back`: `value` done, unchanged or failure, `error` the failure's CODE (as an outcome's);

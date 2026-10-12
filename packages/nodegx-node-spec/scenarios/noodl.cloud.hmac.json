@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Do on 'hello' under 'secret': the HMAC-SHA256 hex signature lands in the same frame, done",
+    "because": "hmac.ts :86-101 schedule; :134-156 runSign and its continuation; world.ts DIGEST, the keyed sign — importKey and sign each land in the microtask after the call",
+    "params": { "value": "hello", "key": "secret" },
+    "steps": [{ "signal": "sign" }, "settle"]
+  },
+  {
+    "name": "two Dos in one frame: one signature, two dones",
+    "because": "hmac.ts :90-96 every press takes a token, only the first schedules the run; :153 every token reported",
+    "params": { "value": "hello", "key": "secret" },
+    "steps": [{ "signal": "sign" }, { "signal": "sign" }, "settle"]
+  },
+  {
+    "name": "RFC 4231 case 2 as SHA-512 base64url; SHA-384 as base64 of a UTF-8 Value; Value never set signs as ''",
+    "because": "hmac.ts :144-149; encoding.ts hmacBytes, encodeBytes",
+    "params": { "value": "what do ya want for nothing?", "key": "Jefe", "algorithm": "SHA-512", "encoding": "base64url" },
+    "steps": [{ "signal": "sign" }, "settle", { "set": "value", "value": "ünïcödé ☃" }, { "set": "algorithm", "value": "SHA-384" }, { "set": "encoding", "value": "base64" }, { "signal": "sign" }, "settle", { "set": "value", "value": "" }, { "signal": "sign" }, "settle"]
+  },
+  {
+    "name": "no Key fails every press of the frame with the node's sentence (hmac/failed), then a Key signs and clears Error",
+    "because": "hmac.ts :139-142 `!key`; :129-133 failSign — Error only; :149-153 a success clears it",
+    "params": { "value": "hello" },
+    "steps": [{ "signal": "sign" }, { "signal": "sign" }, "settle", { "set": "key", "value": "secret" }, { "signal": "sign" }, "settle"]
+  },
+  {
+    "name": "0, false and '' are no Key; an empty array is a Key whose text is empty, refused by importKey with WebCrypto's words",
+    "because": "hmac.ts :139 `!key` lets an array through; encoding.ts hmacBytes `utf8Bytes(key)` is '' — WebCrypto: Zero-length key is not supported (world.ts DIGEST)",
+    "params": { "value": "hello", "key": 0 },
+    "steps": [{ "signal": "sign" }, "settle", { "set": "key", "value": false }, { "signal": "sign" }, "settle", { "set": "key", "value": [] }, { "signal": "sign" }, "settle"]
+  },
+  {
+    "name": "an Algorithm WebCrypto has no HMAC for here fails with the reason on Error; Signature keeps the last one",
+    "because": "hmac.ts :155 the rejection lands in the catch; world.ts DIGEST refuses an unknown hash as digest does",
+    "params": { "value": "hello", "key": "secret" },
+    "steps": [{ "signal": "sign" }, "settle", { "set": "algorithm", "value": "SHA-1" }, { "signal": "sign" }, "settle"]
+  },
+  {
+    "name": "an Encoding not in the list fails after the signature was computed, with encodeBytes's message; '' on Algorithm and Encoding read as the defaults",
+    "because": "hmac.ts :149 encodeBytes throws inside the then, :155 the catch; :144-145 `||`",
+    "params": { "value": "hello", "key": "secret", "encoding": "base32" },
+    "steps": [{ "signal": "sign" }, "settle", { "set": "encoding", "value": "" }, { "set": "algorithm", "value": "" }, { "signal": "sign" }, "settle"]
+  },
+  {
+    "name": "a Value and Key set after Do in the same frame are what gets signed; 0 and false sign as ''; a non-string Key signs as its text",
+    "because": "hmac.ts :96-99 the run reads the inputs at the frame end; :147 `value || ''`; utf8Bytes converts as WebIDL does",
+    "params": {},
+    "steps": [{ "signal": "sign" }, { "set": "value", "value": "hello" }, { "set": "key", "value": "secret" }, "settle", { "set": "value", "value": 0 }, { "set": "key", "value": 5 }, { "signal": "sign" }, "settle", { "set": "value", "value": false }, { "set": "key", "value": { "a": 1 } }, { "signal": "sign" }, "settle"]
+  }
+]

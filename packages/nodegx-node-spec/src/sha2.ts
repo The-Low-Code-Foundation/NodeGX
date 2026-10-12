@@ -179,3 +179,26 @@ function sha512Core(data: Uint8Array, init: readonly number[], outBytes: number)
 
 export const sha512 = (data: Uint8Array): Uint8Array => sha512Core(data, H512, 64);
 export const sha384 = (data: Uint8Array): Uint8Array => sha512Core(data, H384, 48);
+
+/**
+ * HMAC (RFC 2104) over the three digests above, so the world's KEYED SIGN (world.ts DIGEST) is the same bytes in a page as
+ * in Node: `H((K' ^ opad) || H((K' ^ ipad) || m))`, where `K'` is the key hashed when it is longer than the digest's block
+ * (64 bytes for SHA-256, 128 for SHA-384 and SHA-512), then zero-padded to the block. tests/sha2.test.ts grades it against
+ * Node's `createHmac`.
+ */
+export function hmac(hash: (data: Uint8Array) => Uint8Array, blockSize: number, key: Uint8Array, data: Uint8Array): Uint8Array {
+  const k = new Uint8Array(blockSize);
+  k.set(key.length > blockSize ? hash(key) : key);
+  const inner = new Uint8Array(blockSize + data.length);
+  const outerPad = new Uint8Array(blockSize);
+  for (let i = 0; i < blockSize; i++) {
+    inner[i] = k[i] ^ 0x36;
+    outerPad[i] = k[i] ^ 0x5c;
+  }
+  inner.set(data, blockSize);
+  const innerHash = hash(inner);
+  const outer = new Uint8Array(blockSize + innerHash.length);
+  outer.set(outerPad);
+  outer.set(innerHash, blockSize);
+  return hash(outer);
+}

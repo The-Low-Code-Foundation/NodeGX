@@ -97,7 +97,31 @@
  *           carry. The bytes are the standard's (FIPS 180-4), so a digest is byte-for-byte the
  *           host's; an algorithm the world does not know (`SHA-1`, `MD5`, a typo) is refused with
  *           the message `digestBytes` throws, as WebCrypto refuses it with `NotSupportedError`.
- *           `importKey` / `sign` (HMAC, JWT — cloud-only nodes) stay the host's.
+ *           NSP-022 s96: the KEYED SIGN too — `importKey('raw', key, { name: 'HMAC', hash }, …)`
+ *           then `sign('HMAC', key, data)` (HMAC, JWT Sign, JWT Verify — cloud-only nodes,
+ *           crypto/encoding.ts `hmacBytes`) is the world's: each an already-resolved promise, the
+ *           bytes RFC 2104's over the same SHA-2 (`hmacBytes`); a hash the world does not know is
+ *           refused with `digestBytes`'s message, and an empty key with WebCrypto's own
+ *           (`Zero-length key is not supported`, DataError). Any other `importKey` or `sign` (an
+ *           algorithm that is not HMAC, a format that is not raw) is refused, never the host's.
+ *
+ *   HOST. (NSP-022 s96) What the backend process gives a cloud function's nodes through a process global it installs
+ *           (nodegx-backend `service.ts`), one per SERVICE: `secrets` (`_noodl_get_secret(name)` — SYNCHRONOUS, it
+ *           returns the answer), `users` (`_noodl_system_users(request)`), `roles` (`_noodl_system_roles(request)`) and
+ *           `mail` (`_noodl_send_email(request)`) — each of the last three a function whose answer the node takes with
+ *           `Promise.resolve(…)`. The world plays them as BACKEND plays a backend:
+ *             INSTALLED OR NOT — the script's `services`, the ones this process has. A service it does not list has no
+ *               global at all: the node is running outside a backend, says so and makes no call. Absent: none.
+ *             A CALL — recorded AS HANDED, a `host` trace event in the request group, in the frame it is made:
+ *               `{ service, request }`, `request` canonical (for `secrets` the name the node passed).
+ *             THE ANSWER — the first of the script's `answers` whose `match` fits (`service` equal; `request` equal for a
+ *               request that is not an object, else each key `match.request` names equal, canonically): `{ ok }` — the
+ *               call returns (secrets) or resolves with `ok`; `{ throws }` — it throws (secrets) or rejects with an Error
+ *               carrying that message; `{ never }` — it never settles (not for secrets: a synchronous call always
+ *               answers). `after` > 0 delays a resolve or reject on the clock (not for secrets); `times` as BACKEND's. A
+ *               call no rule answers is a VIOLATION: it throws or rejects with the world's sentence, so the play goes
+ *               on, and the runner fails the run. A resolve lands as a promise resolution does (a microtask after its
+ *               moment).
  *
  *   VIEWPORT. (NSP-013 s13) A play either HAS a browser viewport — the script's `viewport`,
  *           `{ width, height }` in CSS pixels — or it has NONE, which is a server render: no
@@ -542,7 +566,7 @@
  */
 
 import { HostFileCtor, type HostFile } from './host-file';
-import { sha256, sha384, sha512 } from './sha2';
+import { hmac, sha256, sha384, sha512 } from './sha2';
 
 import { canonicalise } from './canonical';
 import { Registry, type RegistryScript, type RegistryWrite } from './registry';
@@ -585,6 +609,136 @@ export interface WorldScript {
   sockets?: SocketScript;
   /** NSP-016 s42: the Radio Button Group the node sits in (GROUP above). Absent: one, never written. */
   group?: GroupScript;
+  /** NSP-022 s96: the backend process's services a cloud function's node reaches (HOST above). Absent: none installed. */
+  host?: HostScript;
+}
+
+/** HOST above: the four services a backend process installs, by the trace's name. */
+export const HOST_SERVICES = ['secrets', 'users', 'roles', 'mail'] as const;
+export type HostService = (typeof HOST_SERVICES)[number];
+
+/** HOST above: the global each service is installed as. */
+export const HOST_GLOBALS: Readonly<Record<HostService, string>> = Object.freeze({ secrets: '_noodl_get_secret', users: '_noodl_system_users', roles: '_noodl_system_roles', mail: '_noodl_send_email' });
+
+/** HOST above: which services the process has, and how they answer. */
+export interface HostScript {
+  /** The services installed. Absent: none. */
+  services?: readonly HostService[];
+  /** How they answer, first match wins. */
+  answers?: readonly HostRule[];
+}
+
+export interface HostRule {
+  match?: { service?: HostService; request?: unknown };
+  answer: HostAnswer;
+  /** Milliseconds on the clock before a resolve or reject lands (never for `secrets`); absent or 0 lands at once. */
+  after?: number;
+  /** The rule answers the first `times` calls it fits, then fits none; absent: every one. */
+  times?: number;
+}
+
+/** What a service answers (HOST above). */
+export type HostAnswer = { ok: unknown } | { throws: string } | { never: true };
+
+/** One call a node made on a service, as handed. */
+export interface HostCall {
+  service: HostService;
+  request: unknown;
+}
+
+/** What lands for a call: the value it returned or resolved with, or the message it threw or rejected with. */
+export type HostDelivery = { ok: unknown } | { threw: string };
+
+/** HOST above, as a play holds it. */
+export class WorldHost {
+  readonly services: ReadonlySet<HostService>;
+  readonly calls: HostCall[] = [];
+  readonly violations: string[] = [];
+  private readonly rules: HostRule[];
+  private readonly used = new Map<HostRule, number>();
+  private readonly listeners: Array<(c: HostCall) => void> = [];
+  constructor(private readonly clock: Clock, script: HostScript = {}) {
+    for (const sv of script.services ?? []) if (!(HOST_SERVICES as readonly string[]).includes(sv)) throw new Error(`world: ${JSON.stringify(sv)} is not a host service (HOST: ${HOST_SERVICES.join(', ')})`);
+    this.services = new Set(script.services ?? []);
+    this.rules = [...(script.answers ?? [])];
+    for (const r of this.rules) {
+      if (r.match?.service === 'secrets' && ('never' in r.answer || r.after)) throw new Error('world: a secrets lookup is synchronous — it answers at once, never `never` or `after` (HOST)');
+    }
+  }
+
+  /** Whether the process has this service (its global is installed). */
+  has(service: HostService): boolean {
+    return this.services.has(service);
+  }
+
+  /** Called with every call as it is made — how a target attributes it to the node that made it. */
+  onCall(listener: (c: HostCall) => void): void {
+    this.listeners.push(listener);
+  }
+
+  private ruleFor(call: HostCall): HostRule | undefined {
+    const fits = (r: HostRule) => {
+      const m = r.match;
+      if (!m) return true;
+      if (m.service !== undefined && m.service !== call.service) return false;
+      if (m.request === undefined) return true;
+      if (m.request === null || typeof m.request !== 'object' || call.request === null || typeof call.request !== 'object') return JSON.stringify(canonicalise(m.request)) === JSON.stringify(canonicalise(call.request));
+      const req = call.request as Record<string, unknown>;
+      return Object.entries(m.request as Record<string, unknown>).every(([k, v]) => JSON.stringify(canonicalise(v)) === JSON.stringify(canonicalise(req[k])));
+    };
+    for (const r of this.rules) {
+      if (!fits(r)) continue;
+      const n = this.used.get(r) ?? 0;
+      if (r.times !== undefined && n >= r.times) continue;
+      this.used.set(r, n + 1);
+      return r;
+    }
+    return undefined;
+  }
+
+  private record(call: HostCall): HostCall {
+    const recorded: HostCall = { service: call.service, request: call.request };
+    this.calls.push(recorded);
+    for (const l of this.listeners) l(recorded);
+    return recorded;
+  }
+
+  /** A `secrets` lookup: recorded, answered NOW (it is synchronous). */
+  lookup(name: unknown): HostDelivery {
+    const call = this.record({ service: 'secrets', request: name });
+    const rule = this.ruleFor(call);
+    if (!rule) {
+      const what = `secrets ${JSON.stringify(canonicalise(name))}`;
+      this.violations.push(`${what}: no rule in the world's script answers it`);
+      return { threw: `the world has no answer for ${what}` };
+    }
+    const a = rule.answer;
+    if ('never' in a) throw new Error('world: a secrets lookup always answers (HOST)');
+    return 'ok' in a ? { ok: a.ok } : { threw: a.throws };
+  }
+
+  /** A call on `users`, `roles` or `mail`: recorded, its rule found, the landing scheduled; `deliver` at the answer's moment. */
+  issue(call: HostCall, deliver: (d: HostDelivery) => void): void {
+    const recorded = this.record(call);
+    const rule = this.ruleFor(recorded);
+    if (!rule) {
+      const op = recorded.request && typeof recorded.request === 'object' ? (recorded.request as { op?: unknown }).op : undefined;
+      const what = `${recorded.service}${op === undefined ? '' : ' ' + String(op)}`;
+      this.violations.push(`${what}: no rule in the world's script answers it`);
+      deliver({ threw: `the world has no answer for ${what}` });
+      return;
+    }
+    const a = rule.answer;
+    if ('never' in a) return;
+    const d: HostDelivery = 'ok' in a ? { ok: a.ok } : { threw: a.throws };
+    if (rule.after !== undefined && rule.after > 0) this.clock.schedule(rule.after, () => deliver(d));
+    else deliver(d);
+  }
+}
+
+/** The `host` trace event for a call (HOST above): as handed, canonical. */
+export function hostEvent(c: HostCall): TraceEvent {
+  return { t: 'host', service: c.service, request: canonicalise(c.request) } as TraceEvent;
 }
 
 /** GROUP above: whether there is a group, its Value at load, and the graph's later writes to it. */
@@ -2561,6 +2715,8 @@ export class World {
   readonly cloudServices: Readonly<CloudServicesScript> | undefined;
   /** The WebSocket servers (SOCKET above, s34) — always: a play with no script answers no construction. */
   readonly sockets: WorldSockets;
+  /** NSP-022 s96: the backend process's services (HOST above). */
+  readonly host: WorldHost;
   /** The Radio Button Group the node sits in (GROUP above, s42) — always: a play with no script has one, never written. */
   readonly group: WorldGroup;
   /** NSP-016 s62 — the registry writes made elsewhere (REGISTRY above), in script order. */
@@ -2583,6 +2739,7 @@ export class World {
     this.picker = new WorldPicker(this.clock, script.picker);
     this.cloudServices = script.cloudServices ? { ...script.cloudServices } : undefined;
     this.sockets = new WorldSockets(this.clock, script.sockets ?? {});
+    this.host = new WorldHost(this.clock, script.host ?? {});
     this.group = new WorldGroup(script.group);
     // NSP-016 s62 — writes made elsewhere to the registry: world timers, scheduled before any node's
     this.registryWrites = (script.registry?.writes ?? []).map((w) => {
@@ -2606,7 +2763,7 @@ export class World {
 
   /** The AC5 check: every way this play touched something the script did not answer. */
   get violations(): string[] {
-    return [...this.network.violations, ...this.backend.violations, ...this.sockets.violations];
+    return [...this.network.violations, ...this.backend.violations, ...this.sockets.violations, ...this.host.violations];
   }
 }
 
@@ -2795,6 +2952,25 @@ export function digestBytes(algorithm: unknown, data: Uint8Array): Uint8Array {
   return fn(data);
 }
 
+/** The block size of each digest HMAC is built on (RFC 2104 `B`): 64 bytes for SHA-256, 128 for the 512 family. */
+const HMAC_BLOCK: Readonly<Record<string, number>> = Object.freeze({ 'SHA-256': 64, 'SHA-384': 128, 'SHA-512': 128 });
+
+/**
+ * The world's keyed sign (DIGEST above): the HMAC of `data` under `key` on the named SHA-2, computed now. An unknown name
+ * throws `digestBytes`'s message; an empty key throws WebCrypto's (`importKey` refuses it before any sign).
+ */
+export function hmacBytes(algorithm: unknown, key: Uint8Array, data: Uint8Array): Uint8Array {
+  const fn = DIGESTS[String(algorithm)];
+  if (!fn) throw new Error(`Unrecognized algorithm name: ${String(algorithm)}`);
+  if (key.length === 0) throw new Error('Zero-length key is not supported');
+  return hmac(fn, HMAC_BLOCK[String(algorithm)], key, data);
+}
+
+/** A key the world's `importKey` made: the hash it was imported for and its raw bytes. */
+class WorldHmacKey {
+  constructor(readonly hash: unknown, readonly bytes: Uint8Array) {}
+}
+
 /**
  * Installs the world into the globals for the duration of a play. Everything is restored by
  * `restore()`, whatever happened. `crypto.subtle.digest` is the world's (DIGEST above); the rest
@@ -2837,12 +3013,22 @@ export function installWorld(world: World): Installed {
   // SOCKET (s34): the world's WebSocket in every play — a host's would reach a real network; no EventSource at all
   define('WebSocket', worldWebSocket(world));
   define('EventSource', undefined);
-  const hostCrypto = g.crypto as { subtle?: Record<string, unknown> } | undefined;
-  const hostSubtle = hostCrypto?.subtle;
   const restoreZone = installTimeZone(world);
   define('crypto', {
     subtle: {
-      ...(hostSubtle ? { importKey: (hostSubtle.importKey as (...a: unknown[]) => unknown).bind(hostSubtle), sign: (hostSubtle.sign as (...a: unknown[]) => unknown).bind(hostSubtle) } : {}),
+      importKey: (format: unknown, keyData: Uint8Array, algorithm: { name?: unknown; hash?: { name?: unknown } | string } | undefined): Promise<WorldHmacKey> => {
+        if (format !== 'raw' || algorithm?.name !== 'HMAC') return Promise.reject(new Error(`world: importKey(${String(format)}, ${String(algorithm?.name)}) — the play's crypto imports only a raw HMAC key (DIGEST)`));
+        const hash = typeof algorithm.hash === 'string' ? algorithm.hash : algorithm.hash?.name;
+        if (!DIGESTS[String(hash)]) return Promise.reject(new Error(`Unrecognized algorithm name: ${String(hash)}`));
+        if (keyData.length === 0) return Promise.reject(new Error('Zero-length key is not supported'));
+        return Promise.resolve(new WorldHmacKey(hash, new Uint8Array(keyData)));
+      },
+      sign: (algorithm: unknown, key: unknown, data: Uint8Array): Promise<ArrayBuffer> => {
+        const name = typeof algorithm === 'string' ? algorithm : (algorithm as { name?: unknown } | undefined)?.name;
+        if (name !== 'HMAC' || !(key instanceof WorldHmacKey)) return Promise.reject(new Error(`world: sign(${String(name)}) — the play's crypto signs only with an HMAC key it imported (DIGEST)`));
+        const bytes = hmacBytes(key.hash, key.bytes, data);
+        return Promise.resolve(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer);
+      },
       digest: (algorithm: unknown, data: Uint8Array): Promise<ArrayBuffer> => {
         try {
           const bytes = digestBytes(algorithm, data);
@@ -2947,6 +3133,23 @@ export function installWorld(world: World): Installed {
         return new WorldFileInput(world.picker);
       }
     });
+  }
+  // HOST (NSP-022 s96): a global per service the process has — none for one it has not
+  for (const service of HOST_SERVICES) {
+    const name = HOST_GLOBALS[service];
+    if (!world.host.has(service)) {
+      define(name, undefined);
+      continue;
+    }
+    if (service === 'secrets') {
+      define(name, (secretName: unknown) => {
+        const d = world.host.lookup(secretName);
+        if ('threw' in d) throw new Error(d.threw);
+        return d.ok;
+      });
+    } else {
+      define(name, (request: unknown) => new Promise((resolve, reject) => world.host.issue({ service, request }, (d) => ('threw' in d ? reject(new Error(d.threw)) : resolve(d.ok)))));
+    }
   }
   // PROJECT: the settings a node reads through the runtime are the target's to install (the runtime target's `install`)
   Math.random = () => world.random.next();

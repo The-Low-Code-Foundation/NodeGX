@@ -98,11 +98,11 @@ import type { Step } from './adapter';
 import { canonicalise, canonicalKey } from './canonical';
 import { coerce } from './coerce';
 import { isRegistryEntry, performRegistryWrite } from './registry';
-import type { AnswerCall, AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, PlayContext, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SocketEvent, SpecBackendCall, StreamEvent, SpecRequest, SpecSocketOp, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
+import type { AnswerCall, AnyNodeSpec, BackendAnswerEvent, ChangeEvent, HostAnswerEvent, SpecHostCall, Outcome, InputDecl, PlayContext, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SocketEvent, SpecBackendCall, StreamEvent, SpecRequest, SpecSocketOp, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
 import { isSignalInput, playContextOf } from './spec';
 import { outcomePorts, playOutputs } from './ports';
 import type { TraceEvent } from './trace';
-import { backendEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PickerClick, type PickerEvent, type PopupCall, type PopupEvent, type StoreEvent, type StreamDelivery, type WorldSocket, type WorldSubscription } from './world';
+import { backendEvent, hostEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PickerClick, type PickerEvent, type PopupCall, type PopupEvent, type StoreEvent, type StreamDelivery, type WorldSocket, type WorldSubscription } from './world';
 
 /** One thing the world handed back, waiting to be delivered to the spec. */
 type Inbound =
@@ -132,6 +132,8 @@ type Inbound =
   | { kind: 'realtime'; event: RealtimeEvent }
   // s34: a WebSocket the node made fired an event (world.ts SOCKET)
   | { kind: 'socket'; event: SocketEvent }
+  // NSP-022 s96: a service of the backend process answered a call (world.ts HOST)
+  | { kind: 'host'; answer: HostAnswerEvent }
   // s34: a streamed body said something after its head (world.ts NETWORK, A STREAMED BODY)
   | { kind: 'stream'; event: StreamEvent };
 
@@ -304,6 +306,7 @@ function viewOf(inst: Instance): WorldView {
     popupAnswer: (target) => world.popup.answer(target),
     popupsInside: () => world.popup.inside,
     backendFor: (backendId) => world.backend.resolve(backendId),
+    hostHas: (service) => world.host.has(service),
     backendUser: (backend) => world.backend.userOn(backend),
     session: (backend) => world.backend.session(backend),
     userService: () => startUserService(world),
@@ -789,6 +792,7 @@ interface PatchLike {
   subscribe?: SpecBackendCall;
   subscribeFirst?: boolean;
   socket?: readonly SpecSocketOp[];
+  host?: SpecHostCall | readonly SpecHostCall[];
   answers?: readonly AnswerCall[];
   resume?: string;
 }
@@ -966,6 +970,17 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
   } else {
     backendCalls();
     realtime();
+  }
+  // HOST (world.ts, NSP-022 s96): calls on the backend process's services in the order made — each a `host` event in the request
+  // group, as handed; the answer lands in the inbox (a `secrets` lookup's inside the call)
+  for (const c of patch.host === undefined ? [] : Array.isArray(patch.host) ? (patch.host as readonly SpecHostCall[]) : [patch.host as SpecHostCall]) {
+    if (!spec.world?.host) throw new SpecError(`${spec.type}.${port}: called a host service but the spec has no world.host handler`);
+    if (typeof c.id !== 'string') throw new SpecError(`${spec.type}.${port}: a host call needs an id`);
+    if (!world.host.has(c.service)) throw new SpecError(`${spec.type}.${port}: called ${c.service}, which the process does not have — check WorldView.hostHas first`);
+    const recordFrom = world.host.calls.length;
+    if (c.service === 'secrets') inst.inbox.push({ kind: 'host', answer: { id: c.id, ...world.host.lookup(c.request) } as HostAnswerEvent });
+    else world.host.issue({ service: c.service, request: c.request }, (d) => inst.inbox.push({ kind: 'host', answer: { id: c.id, ...d } as HostAnswerEvent }));
+    for (const call of world.host.calls.slice(recordFrom)) inst.pending.requests.push(hostEvent(call));
   }
   // SOCKET (world.ts, NSP-014 s34): calls on WebSockets in the order made — each a `socket` event in the request group, as the
   // world records it; what a socket tells runs the spec's handler at its moment on the clock
@@ -1190,6 +1205,10 @@ function handleInbound(inst: Instance, item: Inbound): void {
   } else if (item.kind === 'realtime') {
     name = 'world.realtime';
     patch = asWriter(inst, () => spec.world!.realtime!(inst.state as never, inst.inputs as never, item.event, view));
+  } else if (item.kind === 'host') {
+    name = 'world.host';
+    if (!spec.world?.host) throw new SpecError(`${spec.type}: a host service answered and the spec has no world.host handler`);
+    patch = asWriter(inst, () => spec.world!.host!(inst.state as never, inst.inputs as never, item.answer, view));
   } else if (item.kind === 'socket') {
     name = 'world.socket';
     patch = asWriter(inst, () => spec.world!.socket!(inst.state as never, inst.inputs as never, item.event, view));

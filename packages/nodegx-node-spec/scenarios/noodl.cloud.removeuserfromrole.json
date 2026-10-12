@@ -1,0 +1,16 @@
+[
+  {
+    "name": "a member: one remove, Roles the rest, done; then not a member: Unchanged with Error saying which",
+    "because": "removeuserfromrole.ts doRemove; nodegx-backend roles/SystemRoles.ts :310, :329",
+    "params": { "role": "staff", "userId": "u1" },
+    "steps": [{ "signal": "remove" }, "settle", { "signal": "remove" }, "settle"],
+    "world": { "host": { "services": ["roles"], "answers": [{ "times": 1, "answer": { "ok": { "outcome": "done", "roles": ["editors"] } } }, { "answer": { "ok": { "outcome": "unchanged", "code": "role/not-member", "roles": ["editors"], "error": "The user was not in the role \"staff\"." } } }] } }
+  },
+  {
+    "name": "no Role, then no User Id, at once; outside a backend: role/no-backend",
+    "because": "removeuserfromrole.ts doRemove's checks; system-roles.ts :101-110",
+    "params": {},
+    "steps": [{ "signal": "remove" }, "settle", { "set": "role", "value": "staff" }, { "signal": "remove" }, "settle", { "set": "userId", "value": "u1" }, { "signal": "remove" }, "settle"],
+    "world": { "host": {} }
+  }
+]

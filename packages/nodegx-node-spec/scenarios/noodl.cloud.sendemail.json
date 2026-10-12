@@ -1,0 +1,57 @@
+[
+  {
+    "name": "an address inside a backend: one send with the content as it stands, done",
+    "because": "sendemail.ts :167-187 one batch, :208-246 dispatchSend — the request, the mailer's success",
+    "params": { "to": "a@example.com", "subject": "Welcome", "text": "Hello", "html": "<p>Hello</p>" },
+    "steps": [{ "signal": "send" }, "settle"],
+    "world": { "host": { "services": ["mail"], "answers": [{ "answer": { "ok": { "success": true } } }] } }
+  },
+  {
+    "name": "a Template other than None goes with the request and Variables; None sends none",
+    "because": "sendemail.ts :225-233 `template && template !== 'none'`",
+    "params": { "to": "a@example.com", "template": "passwordReset", "variables": { "link": "https://app.example/reset?t=1" } },
+    "steps": [{ "signal": "send" }, "settle", { "set": "template", "value": "none" }, { "signal": "send" }, "settle"],
+    "world": { "host": { "services": ["mail"], "answers": [{ "answer": { "ok": { "success": true } } }] } }
+  },
+  {
+    "name": "presses that agree are one send to To as it stands at the end of the frame — a To set after the presses included",
+    "because": "sendemail.ts :180-187 — the stamp is not the address a batch that agrees uses (DEF-021)",
+    "params": { "to": "a@example.com" },
+    "steps": [{ "signal": "send" }, { "signal": "send" }, { "set": "to", "value": "b@example.com" }, "settle"],
+    "world": { "host": { "services": ["mail"], "answers": [{ "answer": { "ok": { "success": true } } }] } }
+  },
+  {
+    "name": "a fan-out: one send per run of the same address, in press order, the next only after the one before is answered",
+    "because": "sendemail.ts :189-205 the runs chained; phase 78 D33",
+    "params": {},
+    "steps": [{ "set": "to", "value": "a@example.com" }, { "signal": "send" }, { "signal": "send" }, { "set": "to", "value": "b@example.com" }, { "signal": "send" }, { "set": "to", "value": "a@example.com" }, { "signal": "send" }, "settle", { "advance": 5 }, "settle", { "advance": 5 }, "settle", { "advance": 5 }, "settle"],
+    "world": { "host": { "services": ["mail"], "answers": [{ "answer": { "ok": { "success": true } }, "after": 5 }] } }
+  },
+  {
+    "name": "a fan-out whose first send is never answered never sends the rest; one with a blank address fails that run and sends the next",
+    "because": "sendemail.ts :199-205 the chain waits on each run; :209-212 a run with no address settles at once",
+    "params": {},
+    "steps": [{ "set": "to", "value": "" }, { "signal": "send" }, { "set": "to", "value": "a@example.com" }, { "signal": "send" }, { "set": "to", "value": "b@example.com" }, { "signal": "send" }, { "set": "to", "value": "a@example.com" }, { "signal": "send" }, "settle", { "advance": 100 }, "settle"],
+    "world": { "host": { "services": ["mail"], "answers": [{ "match": { "request": { "to": "b@example.com" } }, "answer": { "never": true } }, { "answer": { "ok": { "success": true } } }] } }
+  },
+  {
+    "name": "the mailer refuses with a reason, without one, gives no answer, rejects — each the run's Failure; then a success, Done",
+    "because": "sendemail.ts :236-246; :237-238 a success reports Done and never touches Error (a clear would not reach a wire anyway: node.ts :858)",
+    "params": { "to": "a@example.com" },
+    "steps": [{ "signal": "send" }, "settle", { "signal": "send" }, "settle", { "signal": "send" }, "settle", { "signal": "send" }, "settle", { "signal": "send" }, "settle"],
+    "world": { "host": { "services": ["mail"], "answers": [
+      { "times": 1, "answer": { "ok": { "success": false, "error": "SMTP 550: mailbox unavailable" } } },
+      { "times": 1, "answer": { "ok": { "success": false } } },
+      { "times": 1, "answer": { "ok": null } },
+      { "times": 1, "answer": { "throws": "connect ECONNREFUSED 127.0.0.1:587" } },
+      { "answer": { "ok": { "success": true } } }
+    ] } }
+  },
+  {
+    "name": "no address: Failure with the node's sentence, no call; outside a backend: Failure with the node's sentence",
+    "because": "sendemail.ts :209-212; :215-223 `typeof _noodl_send_email === 'undefined'`",
+    "params": {},
+    "steps": [{ "signal": "send" }, "settle", { "set": "to", "value": "a@example.com" }, { "signal": "send" }, "settle"],
+    "world": { "host": {} }
+  }
+]

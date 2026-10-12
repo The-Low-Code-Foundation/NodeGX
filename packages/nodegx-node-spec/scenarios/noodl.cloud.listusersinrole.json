@@ -1,0 +1,23 @@
+[
+  {
+    "name": "a Role: one members read with Limit and Skip as handed, Users, User Ids and Total, done",
+    "because": "listusersinrole.ts doRead; system-roles.ts :93-140",
+    "params": { "role": "staff", "limit": 1, "skip": 0 },
+    "steps": [{ "signal": "read" }, "settle"],
+    "world": { "host": { "services": ["roles"], "answers": [{ "answer": { "ok": { "outcome": "done", "users": [{ "objectId": "u1", "username": "ada" }], "userIds": ["u1"], "total": 7 } } }] } }
+  },
+  {
+    "name": "a role nobody has joined: Unchanged, the three empty; an answer with none of them reads [], [] and 0",
+    "because": "nodegx-backend roles/SystemRoles.ts :463; listusersinrole.ts `|| []`, `typeof total === 'number' ? … : 0`",
+    "params": { "role": "staff" },
+    "steps": [{ "signal": "read" }, "settle", { "signal": "read" }, "settle"],
+    "world": { "host": { "services": ["roles"], "answers": [{ "times": 1, "answer": { "ok": { "outcome": "unchanged", "users": [], "userIds": [], "total": 0 } } }, { "answer": { "ok": { "outcome": "done", "total": "7" } } }] } }
+  },
+  {
+    "name": "no Role: Failure at once; outside a backend: role/no-backend",
+    "because": "listusersinrole.ts doRead's check; system-roles.ts :101-110",
+    "params": {},
+    "steps": [{ "signal": "read" }, "settle", { "set": "role", "value": "staff" }, { "signal": "read" }, "settle"],
+    "world": { "host": {} }
+  }
+]

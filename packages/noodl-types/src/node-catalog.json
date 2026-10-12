@@ -62263,7 +62263,21 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "role": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "createRole": [
+          "always: read at the end of the frame by a Do pressed in it — only true creates a missing role"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.aggregate",
@@ -62566,6 +62580,26 @@
       "parameterEncoding": {
         "known": false,
         "reason": "The port helper needs project context this generator cannot supply headlessly — a live component, a connected node, or a backend schema."
+      },
+      "rules": {
+        "username": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "email": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "password": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "emailVerified": [
+          "always: read at the end of the frame by a Do pressed in it — only true is verified"
+        ],
+        "properties": [
+          "always: nothing while it runs; each name makes a value input"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
       }
     },
     {
@@ -62701,7 +62735,15 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.getuserroles",
@@ -62836,7 +62878,15 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.hmac",
@@ -62996,7 +63046,24 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "always: read at the end of the frame by a Do pressed in it — as its text, in UTF-8 bytes (nothing, 0 or false as the empty text)"
+        ],
+        "key": [
+          "always: read at the end of the frame by a Do pressed in it — nothing, empty, 0 or false fails that Do; otherwise its text in UTF-8 bytes, and a text that is empty fails it too"
+        ],
+        "algorithm": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as SHA-256; one the host does not know fails that Do)"
+        ],
+        "encoding": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as hex; one not in the list fails that Do)"
+        ],
+        "sign": [
+          "always: one signature at the end of the frame however many presses, of Value under Key as they stand then — Signature and a cleared Error, then Done per press; no Key, an unknown Algorithm or Encoding puts the reason on Error, Signature untouched, Failure per press"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.jwtsign",
@@ -63142,7 +63209,24 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "claims": [
+          "always: read at the end of the frame by a Do pressed in it — nothing signs no claims of its own; text is read as an object literal (not one: no claims); an array, null, a number or true/false fails that Do"
+        ],
+        "key": [
+          "always: read at the end of the frame by a Do pressed in it — nothing, empty, 0 or false fails that Do; otherwise its text in UTF-8 bytes"
+        ],
+        "algorithm": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as HS256; one not HS256/384/512 fails that Do)"
+        ],
+        "expiresIn": [
+          "always: read at the end of the frame by a Do pressed in it — as a number above 0, exp is that many whole seconds after iat; anything else, no exp"
+        ],
+        "sign": [
+          "always: one token at the end of the frame however many presses, iat the clock's second — Token and a cleared Error, then Done per press; claims that are not an object, an unknown Algorithm or no Key put the reason on Error, Token untouched, Failure per press"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.jwtverify",
@@ -63299,7 +63383,24 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "token": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "key": [
+          "always: read at the end of the frame by a Do pressed in it — nothing, empty, 0 or false refuses that Do"
+        ],
+        "algorithm": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as HS256); the token's header must name the same one"
+        ],
+        "clockTolerance": [
+          "always: read at the end of the frame by a Do pressed in it — that many seconds of leeway on nbf and exp (not a number, or below 0, none)"
+        ],
+        "verify": [
+          "always: one check at the end of the frame however many presses — verified: Valid true, Claims the payload, Error cleared, Done per press; refused: Valid false, the reason on Error, Claims untouched, Failure per press"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.listusersinrole",
@@ -63480,7 +63581,21 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "role": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "limit": [
+          "always: read at the end of the frame by a Do pressed in it, handed to the store as is"
+        ],
+        "skip": [
+          "always: read at the end of the frame by a Do pressed in it, handed to the store as is"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.modelrequest",
@@ -63958,7 +64073,18 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "role": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.request",
@@ -64453,7 +64579,15 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "name": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "fetch": [
+          "always: one read at the end of the frame however many presses — found: Value and a cleared Error, Done per press; outside a backend, not found, or a store that cannot be read: the reason on Error, Value cleared, Failure per press"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.sendemail",
@@ -64610,7 +64744,30 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "to": [
+          "always: stamped on each Do pressed after it; read at the end of the frame by a send whose presses agree"
+        ],
+        "template": [
+          "always: read when a send is made — set and not None, the message is that template"
+        ],
+        "variables": [
+          "always: read when a send is made"
+        ],
+        "subject": [
+          "always: read when a send is made"
+        ],
+        "text": [
+          "always: read when a send is made"
+        ],
+        "html": [
+          "always: read when a send is made"
+        ],
+        "send": [
+          "always: at the end of the frame, one send when the frame's presses agree on To (to To as it stands then), or one send per run of presses stamped with the same To, each after the one before is answered — Done per press, or the reason on Error and Failure per press"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.updateuser",
@@ -64753,6 +64910,17 @@
       "parameterEncoding": {
         "known": false,
         "reason": "The port helper needs project context this generator cannot supply headlessly — a live component, a connected node, or a backend schema."
+      },
+      "rules": {
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "password": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "properties": [
+          "always: nothing while it runs; each name makes a value input"
+        ]
       }
     },
     {
@@ -64911,7 +65079,15 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "token": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      }
     }
   ]
 }

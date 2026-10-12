@@ -1,7 +1,7 @@
 # NSP-022 — Batch: the cloud-only nodes
 
 **Opened 2026-10-02 (s21), split from [NSP-014](NSP-014-BATCH-DATA-AND-CLOUD.md) as its status line said it would be.**
-**Depends on NSP-007 and NSP-014's BACKEND seam (s21).** **Status: 📋 not started.**
+**Depends on NSP-007 and NSP-014's BACKEND seam (s21).** **Status: 🟡 s96 (2026-10-12): 13 of 17 conform on the runtime's new cloud target — HMAC, JWT Sign, JWT Verify, Secret, Create / Update / Delete User, Verify Session Token, Add User To Role, Remove User From Role, Get User Roles, List Users In Role, Send Email — each on its first or second run, every mutant killed. The world grew the KEYED SIGN (DIGEST) and HOST (the backend process's services). Left: Request, Response (an inbound-invocation seam), Model Request, Aggregate Records (§6.4).**
 
 ## 1. The person sentence
 
@@ -45,4 +45,83 @@ cloud target exists, these specs are refused on the browser runtime with a reaso
 
 ## 6. Built
 
-*(empty)*
+### 6.1 s96 (2026-10-12) — the cloud target, the keyed sign, HOST, 13 nodes
+
+Richard's ask for s96: *"start focussing asap on the remaining node to spec … so the npm package stuff can be finished, and the
+backend specs."* The ledger at the start: 125 of 147, 17 owed, all here.
+
+**The cloud target** (`noodl-runtime/test/helpers/node-spec-target.ts`): `CLOUD_NODES` (the cloud runtime's own node files),
+`withCloudNodes`, `cloudTarget()` = `runtimeTarget({ type: 'cloud' })` with them registered — a `NoodlRuntime` of type `cloud`,
+what the backend's function runner builds; none of the browser's session nodes, none of the viewer's. `conformance.test.ts`
+grades a spec on it when its type is one of `cloudNodeTypes()` (read from the modules). A second ADAPTER was not needed: the
+cloud nodes are node definitions on the same interpreted runtime; what differs is what the process gives them, which is the world.
+
+**The keyed sign** (world.ts DIGEST, extended): `importKey('raw', key, { name: 'HMAC', hash })` then `sign('HMAC', key, data)` are
+the world's — each an already-resolved promise, RFC 2104 over the package's own SHA-2 (`sha2.ts hmac`, graded against Node's
+`createHmac` over keys across the block boundary and RFC 4231 case 2). An unknown hash is refused with `digestBytes`'s message, an
+empty key with WebCrypto's own (`Zero-length key is not supported`). Before, they were the host's.
+
+**HOST** (world.ts, a new seam; need `host`; trace event `host` in the request group; spec effect `host`, handler `world.host`,
+view `hostHas(service)`; pool `hosts`; mutant `drop-host`): the four process globals nodegx-backend installs for a cloud function —
+`secrets` (`_noodl_get_secret`, synchronous), `users`, `roles`, `mail` (each answered through `Promise.resolve`). A service the
+script does not list has no global (the node's "outside a backend" sentence); a call is recorded as handed and answered by
+first-match rules (`ok` / `throws` / `never`, `after`, `times`); an unanswered call is a violation. The page model's pinned world
+kinds took `host` (a world answer like `backend`, never a turn of the page: no cloud node is on a page).
+
+**The nodes** (specs in `nodegx-node-spec/src/nodes/`): `hmac.ts`; `jwt.ts` (Sign and Verify, one module, the runtime's
+`crypto/jwt.ts` as the spec's own functions); `secret.ts`; `system-calls.ts` (the shared call of the user and role families —
+`system-users.ts` and `system-roles.ts` in the cloud package are the same code but for their words) with `system-users.ts`
+(Create / Update / Delete User, Verify Session Token) and `system-roles.ts` (Add / Remove User To/From Role, Get User Roles, List
+Users In Role); `send-email.ts`. Read from the code, with nodegx-backend's `SystemUsers.ts` / `SystemRoles.ts` for which operations
+can answer Unchanged (update never does; every role op can).
+
+Measured on the way (the runtime wins, R3 (a)):
+- **A string on JWT Sign's Claims is never refused:** the object port evaluates it as an object literal, `{}` when it is none
+  (node.ts `setInputValue`), so `"text"` signs an empty claim set. The first draft said it failed; the runtime corrected it.
+- **HMAC with a Key of `[]`** passes the node's `!key` and fails in `importKey`: "Zero-length key is not supported".
+- **JWT Verify's reasons include V8's words** for what throws on the way (`token.split is not a function` for a non-string Token;
+  `Cannot read properties of null (reading 'alg' / 'nbf')` for a header or payload of JSON `null`) — the runtime's `.catch` makes
+  each the Failure's reason.
+- **Send Email's fan-out** (DEF-021) is specced as built: presses that agree are one send to To as it stands at the frame end;
+  presses that disagree are one send per run of the same stamped address, each sent only after the one before is answered (so a
+  run behind an answer that never comes is never sent), each run's content read when it is sent.
+- **A Done never touches Send Email's Error** where its siblings clear it — but a cleared output never reaches a wire
+  (node.ts :858 `sendValue` returns on `undefined`; the trace's C3), so on the wire the two are the same. Not filed.
+
+### 6.2 Readings (s96, seed 20738)
+
+| node | scenarios | generated | mutants | planted in a copy of the runtime file |
+|---|---|---|---|---|
+| HMAC | 8 / 8 | 200 / 200 | 15 / 15 | Encoding default → base64 caught; Signature never flagged caught |
+| JWT Sign | 5 / 5 (2nd run: Claims coercion) | 200 / 200 | 15 / 15 | arrays accepted as Claims caught; Expires In + 1 caught |
+| JWT Verify | 7 / 7 | 200 / 200 | 15 / 15 | Clock Tolerance default 1 caught; Valid not cleared caught |
+| Secret | 6 / 6 | 200 / 200 | 18 / 18 | Name defaulted caught (by the `host` event's request); Value not cleared — invisible (C3) |
+| Create User | 5 / 5 | 200 / 200 | 37 / 37 | Email Verified as `!!` caught; Unchanged's error not published (in `system-users.ts`) caught |
+| Update User | 3 / 3 | 200 / 200 | 20 / 20 | Password left out of the request caught |
+| Delete User | 3 / 3 | 200 / 200 | 33 / 33 | `sessionsRevoked \|\| 1` caught |
+| Verify Session Token | 4 / 4 (2 survivors closed by an Unchanged that says why) | 200 / 200 | 33 / 33 | `user/no-answer` → `user/failed` caught; Username not cleared — invisible (C3) |
+| Add User To Role | 4 / 4 | 200 / 200 | 35 / 35 | Create Role If Missing as `!!` caught |
+| Remove User From Role | 2 / 2 | 200 / 200 | 34 / 34 | Roles not defaulted to `[]` (in `system-roles.ts`) caught |
+| Get User Roles | 2 / 2 | 200 / 200 | 33 / 33 | op `list` → `roles` caught |
+| List Users In Role | 3 / 3 | 200 / 200 | 35 / 35 | Total as `Number(…)` caught |
+| Send Email | 7 / 7 | 200 / 200 | 47 / 47 (one no-op write removed) | fan-out off caught; runs sent at once instead of in turn caught; Subject defaulted caught; a Done that clears Error — invisible (C3) |
+
+Plants: 16 planted, 13 caught, the 3 survivors all an output cleared to `undefined`, which the runtime never sends (node.ts :858).
+A first plant harness of mine (one `test.each` row per plant, `stopAtFirst`) reported plants as passing that a direct probe caught;
+rebuilt as one loop on the probe's shape, the reading above is that one's. The harness was not kept (scratch, `zz-`).
+
+### 6.3 Gates (s96)
+
+See the handoff (NEXT-SESSION-PROMPT.md) for the full list; the ledger: **138 of 147** (floor 138), owed 4.
+
+### 6.4 Left
+
+- **Request** and **Response** — the function's first and last events. Request is called by the backend's runner
+  (`NoodlCloudRuntime.run` → `sendRequest(req)`), resolves the caller through the UserService (AUTH), checks the request contract
+  (`requestContract.ts`), writes the `Request` model and throws for the function's error answer; Response hands the answer to
+  `_sendResponseCallback`, which tears the function down inside the call. They need an INBOUND INVOCATION seam (the world hands the
+  play a request; what the function answers, or throws, is recorded) — design it first, with both nodes in view.
+- **Model Request** (1,056 lines) — NETWORK (`fetch` to a model provider) and HOST `secrets` (the provider key): both seams exist.
+- **Aggregate Records** — `CloudStore` aggregate over BACKEND: measure first whether it reaches the contract's adapter.
+- The census (`census.json` / `CENSUS.md`) was NOT regenerated: it reads `nodegx-export`'s `plan.ts`, ledger and tests, which hold
+  a peer's uncommitted edits (97 → 99 names in `plan.ts`). Regenerate when those land.

@@ -1,0 +1,16 @@
+[
+  {
+    "name": "a User Id: one read, Roles, done; a user in no roles: Unchanged with Roles []",
+    "because": "getuserroles.ts doRead; nodegx-backend roles/SystemRoles.ts :365",
+    "params": { "userId": "u1" },
+    "steps": [{ "signal": "read" }, "settle", { "set": "userId", "value": "u2" }, { "signal": "read" }, "settle"],
+    "world": { "host": { "services": ["roles"], "answers": [{ "match": { "request": { "userId": "u1" } }, "answer": { "ok": { "outcome": "done", "roles": ["staff", "editors"] } } }, { "answer": { "ok": { "outcome": "unchanged", "roles": [] } } }] } }
+  },
+  {
+    "name": "no User Id: Failure at once; a late answer lands frames later; outside a backend: role/no-backend",
+    "because": "getuserroles.ts doRead's check; world.ts HOST `after`",
+    "params": {},
+    "steps": [{ "signal": "read" }, "settle", { "set": "userId", "value": "u1" }, { "signal": "read" }, "settle", { "advance": 5 }, "settle"],
+    "world": { "host": { "services": ["roles"], "answers": [{ "answer": { "ok": { "outcome": "done", "roles": ["staff"] } }, "after": 5 }] } }
+  }
+]

@@ -212,6 +212,8 @@ export interface WorldView {
    * `undefined` when the project has no such backend (falsy and `_active_` are the active one).
    */
   backendFor(backendId: unknown): string | undefined;
+  /** NSP-022 s96 — whether the backend process has this service's global installed (world.ts HOST); a node outside a backend has none. */
+  hostHas(service: import('./world').HostService): boolean;
   /**
    * NSP-014 s22 — the id of the user signed in, as the Record family's access rules read it (world.ts BACKEND, USER); `undefined`: nobody.
    * P109 ISL-029 (D24): asked of the RECORD's backend — `backend` is the id the call goes to — and answered from that backend's session.
@@ -297,6 +299,19 @@ export interface SpecBackendCall {
 
 /** NSP-014 s21 — a backend's answer to a `SpecBackendCall`, delivered to `WorldHandlers.backend`: what the success callback is handed, or the failure's message (`undefined`: none) and (s22) the backend's `detail` when it gave one. */
 export type BackendAnswerEvent = { id: string } & ({ ok: unknown } | { error: string | undefined; detail?: Record<string, unknown> });
+
+/**
+ * NSP-022 s96 — a call a reducer makes on a service of the backend process (world.ts HOST): `service`, and `request` as the node
+ * hands it (for `secrets` the name). `id` is the spec's own name for the call (the answer names it); it is not on the wire.
+ */
+export interface SpecHostCall {
+  id: string;
+  service: import('./world').HostService;
+  request: unknown;
+}
+
+/** NSP-022 s96 — a service's answer to a `SpecHostCall`, delivered to `WorldHandlers.host`: what it returned or resolved with, or the message it threw or rejected with. */
+export type HostAnswerEvent = { id: string } & import('./world').HostDelivery;
 
 /** NSP-014 s33 — what a subscription this node opened told it (`subscribe` effect, world.ts REALTIME), delivered to `WorldHandlers.realtime` with the subscription's `id`. */
 export type RealtimeEvent = { id: string } & import('./world').RealtimeTold;
@@ -598,6 +613,10 @@ export interface Patch<S, O> {
    *   `socket`  NSP-014 s34 — calls on WebSockets, in the order made (world.ts SOCKET): each a `socket` event in the request group,
    *             as handed. What a socket the node made tells arrives at `WorldHandlers.socket` with its `id`, each at its moment
    *             on the clock. A `connect` the world's script refuses by throwing is still recorded — read `socketAnswer` first.
+   *   `host`    NSP-022 s96 — calls on the backend process's services (world.ts HOST), in the order made: a `host` event each in the
+   *             request group, as handed, after the patch's `backend` calls. The answer arrives at `WorldHandlers.host` with the
+   *             call's `id` — a `secrets` lookup's inside the call (it is synchronous), the others' at their moment. Only to a
+   *             service `WorldView.hostHas` (a node checks before it calls, as the runtime's `typeof` does).
    */
   after?: ReadonlyArray<{ ms: unknown; tag: string }>;
   cancel?: readonly string[];
@@ -633,6 +652,7 @@ export interface Patch<S, O> {
   subscribe?: SpecBackendCall;
   subscribeFirst?: boolean;
   socket?: readonly SpecSocketOp[];
+  host?: SpecHostCall | readonly SpecHostCall[];
   /**
    * NSP-016 s56 — THE CALLERS: what the node answers the requests other nodes hand it, in the order made (an `answer` event each, in
    * the LOCATION group, after this patch's other LOCATION events): `{ op, value, error? }` for a push, replace or back (`error` the
@@ -1002,6 +1022,8 @@ export interface WorldHandlers<S, I, O> {
   popup?: (state: Readonly<S>, inputs: Inputs<I>, event: import('./world').PopupEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
   /** NSP-014 s21 — a backend answered a call this node made (`backend` effect), at the answer's moment (world.ts BACKEND). */
   backend?: (state: Readonly<S>, inputs: Inputs<I>, answer: BackendAnswerEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /** NSP-022 s96 — a service of the backend process answered a call this node made (`host` effect), at the answer's moment (world.ts HOST). */
+  host?: (state: Readonly<S>, inputs: Inputs<I>, answer: HostAnswerEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
   /**
    * NSP-014 s24 — a write made elsewhere in the app reached the store's listeners (world.ts BACKEND, `events`): called
    * at its time on the clock, AFTER the registry holds the write, with the contract's event and the backend it came
@@ -1160,6 +1182,8 @@ export interface WorldPool {
   pickers?: ReadonlyArray<import('./world').PickerScript>;
   /** NSP-014 s34: the WebSocket servers a `socket` spec's sequences play with (one is drawn per sequence; the default answers nothing — every construction a violation). */
   sockets?: ReadonlyArray<import('./world').SocketScript>;
+  /** NSP-022 s96: the backend processes a `host` spec's sequences play in (one is drawn per sequence; the default: none installed). */
+  hosts?: ReadonlyArray<import('./world').HostScript>;
   /** NSP-016 s42: the Radio Button Groups a `group` spec's sequences play in (one is drawn per sequence; the default: none, one never written, one with a Value at load, one written later). */
   groups?: ReadonlyArray<import('./world').GroupScript>;
 }
@@ -1310,8 +1334,10 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
  * NSP-016 s37 adds `person` — a person can act on the node (`NodeDecl.acts`, `PersonReducers`): a target plays it only
  * with a person face (`TargetAdapter.act`), and the node is on a page — a document — for the whole play.
  * s42 adds `group` — the node sits in a Radio Button Group, or in none (world.ts GROUP): its sequences play in a group from the pool.
+ * NSP-022 s96 adds `host` — the node calls a service of the backend process a cloud function runs in (world.ts HOST): its sequences
+ * play in a process from the pool, which may have the service or not.
  */
-export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'router' | 'popup' | 'backend' | 'picker' | 'socket' | 'person' | 'group';
+export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'router' | 'popup' | 'backend' | 'picker' | 'socket' | 'person' | 'group' | 'host';
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;
@@ -1410,6 +1436,7 @@ export interface AnyNodeSpec {
     page?: (state: never, inputs: never, params: Readonly<Record<string, unknown>>, world: WorldView) => unknown;
     popup?: (state: never, inputs: never, event: import('./world').PopupEvent, world: WorldView) => unknown;
     backend?: (state: never, inputs: never, answer: BackendAnswerEvent, world: WorldView) => unknown;
+    host?: (state: never, inputs: never, answer: HostAnswerEvent, world: WorldView) => unknown;
     store?: (state: never, inputs: never, event: import('./world').StoreEvent, world: WorldView) => unknown;
     auth?: (state: never, inputs: never, event: import('./world').AuthNotice, world: WorldView) => unknown;
     authReturn?: (state: never, inputs: never, ret: import('./world').AuthReturnState, world: WorldView) => unknown;

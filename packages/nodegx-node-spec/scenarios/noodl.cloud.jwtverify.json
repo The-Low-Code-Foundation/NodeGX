@@ -1,0 +1,44 @@
+[
+  {
+    "name": "a token signed with the Key verifies: Valid true, Claims the payload, done",
+    "because": "jwtverify.ts :148-166; jwt.ts :76-145 every check passes",
+    "params": { "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1MSIsImlhdCI6MH0.au2ZbFerRH7SpxIe2fpwCbtudXnTPJ-_EKRuDweRuEA", "key": "secret" },
+    "steps": [{ "signal": "verify" }, "settle"]
+  },
+  {
+    "name": "the wrong Key: Failure with the mismatch on Error, Valid false, Claims left as the last verified payload",
+    "because": "jwt.ts :124-126; jwtverify.ts :142-147 failVerify leaves Claims alone",
+    "params": { "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1MSIsImlhdCI6MH0.au2ZbFerRH7SpxIe2fpwCbtudXnTPJ-_EKRuDweRuEA", "key": "secret" },
+    "steps": [{ "signal": "verify" }, "settle", { "set": "key", "value": "wrong" }, { "signal": "verify" }, { "signal": "verify" }, "settle"]
+  },
+  {
+    "name": "exp 10: valid until the clock's second reaches 10, expired from then; Clock Tolerance 5 gives five more seconds",
+    "because": "jwt.ts :135-143 `now - tolerance >= exp`; jwtverify.ts :153 `Number(tolerance) || 0`",
+    "params": { "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1MSIsImlhdCI6MCwiZXhwIjoxMH0.b7yrzVolzqlCpqQhqbu_VrQOrExqvfOw_2eOe_E9esA", "key": "secret" },
+    "steps": [{ "advance": 9999 }, { "signal": "verify" }, "settle", { "advance": 1 }, { "signal": "verify" }, "settle", { "set": "clockTolerance", "value": 5 }, { "signal": "verify" }, "settle", { "advance": 5000 }, { "signal": "verify" }, "settle"]
+  },
+  {
+    "name": "nbf 20: not valid yet before the clock's second reaches 20; a negative tolerance is none",
+    "because": "jwt.ts :138-140 `now + tolerance < nbf`; :136 max(0, tolerance)",
+    "params": { "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1MSIsIm5iZiI6MjB9.a-JSR2DaqP_WCqqTbPPNuHmMGwJLl9-M_aLEaEdh4i8", "key": "secret", "clockTolerance": -10 },
+    "steps": [{ "advance": 19000 }, { "signal": "verify" }, "settle", { "advance": 1000 }, { "signal": "verify" }, "settle"]
+  },
+  {
+    "name": "the alg:none gate: a header that names another algorithm is refused before the signature is computed; HS384 verifies when expected",
+    "because": "jwt.ts :103-108 the header's alg must equal the expected one",
+    "params": { "token": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiJ1MSJ9.k8ExIOGgi5rEBooPFmq8IAVcU30oIV2b5sOeQoJrAcU", "key": "secret" },
+    "steps": [{ "signal": "verify" }, "settle", { "set": "token", "value": "eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1MSJ9.PLM-OYHXBjvWaNGxuUacGTaaRcp0cDU1uLhNmDqlqfIcIl_-iPsAtxGCvXKf6479" }, { "signal": "verify" }, "settle", { "set": "algorithm", "value": "HS384" }, { "signal": "verify" }, "settle"]
+  },
+  {
+    "name": "the refusals in the order checked: an unknown algorithm, no Key, no Token, two parts, an unreadable header, an unreadable signature",
+    "because": "jwt.ts :82-99, :118-122",
+    "params": { "token": "a.b", "key": "secret", "algorithm": "none" },
+    "steps": [{ "signal": "verify" }, "settle", { "set": "algorithm", "value": "HS256" }, { "set": "key", "value": "" }, { "signal": "verify" }, "settle", { "set": "key", "value": "secret" }, { "set": "token", "value": "" }, { "signal": "verify" }, "settle", { "signal": "verify" }, { "set": "token", "value": "a.b" }, "settle", { "set": "token", "value": "a.b.c" }, { "signal": "verify" }, "settle", { "set": "token", "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.*" }, { "signal": "verify" }, "settle"]
+  },
+  {
+    "name": "what throws on the way is the reason too: a Token that is not a string, a header of JSON null, a payload of JSON null",
+    "because": "jwt.ts :87 `token.split`, :101 `header.alg` and :135 `claims.nbf` are outside every try; jwtverify.ts :168 the catch",
+    "params": { "token": 5, "key": "secret" },
+    "steps": [{ "signal": "verify" }, "settle", { "set": "token", "value": "bnVsbA.e30.x" }, { "signal": "verify" }, "settle", { "set": "token", "value": "eyJhbGciOiJIUzI1NiJ9.bnVsbA.Hx-Q-k2OqbmJj8E3dbuK5caoD2C_bCEzOKbJANQNA9Q" }, { "signal": "verify" }, "settle"]
+  }
+]

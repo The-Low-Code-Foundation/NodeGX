@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Do signs the claims with HS256: iat is the clock's second, no exp without Expires In; Token in the same frame, done",
+    "because": "jwtsign.ts :78-94, :126-147; jwt.ts :48-67 signJwt — iat from Date.now(), the world's clock",
+    "params": { "claims": { "sub": "u1" }, "key": "secret" },
+    "steps": [{ "advance": 5400 }, { "signal": "sign" }, "settle"]
+  },
+  {
+    "name": "Expires In 60 stamps exp = iat + 60; 1.9 floors to 1; 0, -5 and '' stamp none; '30' is a number",
+    "because": "jwtsign.ts :135 `Number(expiresIn)`; jwt.ts :59-61 finite and above 0, floored",
+    "params": { "claims": { "sub": "u1" }, "key": "secret", "expiresIn": 60 },
+    "steps": [{ "advance": 2000 }, { "signal": "sign" }, "settle", { "set": "expiresIn", "value": 1.9 }, { "signal": "sign" }, "settle", { "set": "expiresIn", "value": 0 }, { "signal": "sign" }, "settle", { "set": "expiresIn", "value": -5 }, { "signal": "sign" }, "settle", { "set": "expiresIn", "value": "" }, { "signal": "sign" }, "settle", { "set": "expiresIn", "value": "30" }, { "signal": "sign" }, "settle"]
+  },
+  {
+    "name": "two Dos in one frame: one token, two dones; HS384 and HS512 sign too; a claimed iat is stamped over",
+    "because": "jwtsign.ts :82-88 a token per press, one run; jwt.ts :58 `{ ...claims, iat }`",
+    "params": { "claims": { "sub": "u1", "iat": 7 }, "key": "secret", "algorithm": "HS384" },
+    "steps": [{ "signal": "sign" }, { "signal": "sign" }, "settle", { "set": "algorithm", "value": "HS512" }, { "signal": "sign" }, "settle"]
+  },
+  {
+    "name": "Claims never set sign an empty claim set; an array, null and a number fail with the node's sentence (jwt-sign/failed), Token untouched; text is an object literal, or no claims",
+    "because": "jwtsign.ts :129-133 checked before signJwt; :137 `claims || {}`; node.ts setInputValue evaluates a string on an object port, `{}` when it throws",
+    "params": { "key": "secret" },
+    "steps": [{ "signal": "sign" }, "settle", { "set": "claims", "value": [1] }, { "signal": "sign" }, "settle", { "set": "claims", "value": null }, { "signal": "sign" }, "settle", { "set": "claims", "value": 5 }, { "signal": "sign" }, "settle", { "set": "claims", "value": "{a:1}" }, { "signal": "sign" }, "settle", { "set": "claims", "value": "text" }, { "signal": "sign" }, "settle"]
+  },
+  {
+    "name": "no Key, an algorithm not HS256/384/512 and an empty-array Key each fail with signJwt's own words; a success after clears Error",
+    "because": "jwt.ts :55-56 the two throws; encoding.ts hmacBytes refuses zero bytes of key (world.ts DIGEST); jwtsign.ts :146 the catch",
+    "params": { "claims": { "sub": "u1" } },
+    "steps": [{ "signal": "sign" }, "settle", { "set": "key", "value": "secret" }, { "set": "algorithm", "value": "RS256" }, { "signal": "sign" }, "settle", { "set": "algorithm", "value": "" }, { "set": "key", "value": [] }, { "signal": "sign" }, "settle", { "set": "key", "value": "secret" }, { "signal": "sign" }, "settle"]
+  }
+]

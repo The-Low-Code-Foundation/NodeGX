@@ -19,12 +19,15 @@ import type { NodeModule } from '@noodl/types';
 
 import { Counter, EQUIVALENT_MUTANTS, specs, runConformance, formatReport, poolFor } from '../../../nodegx-node-spec/src';
 import type { Divergence, KnownRow, Report, Withheld } from '../../../nodegx-node-spec/src';
-import { runtimeTarget, withViewerNodes, type RuntimeTarget } from '../helpers/node-spec-target';
+import { cloudNodeTypes, cloudTarget, runtimeTarget, withViewerNodes, type RuntimeTarget } from '../helpers/node-spec-target';
 
 import NodeDefinition = require('../../src/nodedefinition');
 
-/** The runtime target every spec is graded on: the runtime's own nodes plus the viewer-provided ones this phase specced. */
-const batchTarget = (): RuntimeTarget => withViewerNodes(runtimeTarget());
+/** NSP-022 — the cloud runtime's own nodes, graded where a cloud function runs them (`cloudTarget`). */
+const CLOUD_TYPES = new Set(cloudNodeTypes());
+
+/** The target a spec is graded on: a cloud-only node on the cloud runtime; every other on the runtime with the viewer-provided nodes this phase specced. */
+const batchTarget = (type: string): RuntimeTarget => (CLOUD_TYPES.has(type) ? cloudTarget() : withViewerNodes(runtimeTarget()));
 
 const COUNTER_FILE = path.join(__dirname, '..', '..', 'src', 'nodes', 'std-library', 'counter.ts');
 
@@ -148,7 +151,7 @@ describe('NSP-004 / NSP-011 — every registered spec on the runtime, 200 sequen
   const daySeed = process.env.NSP_SEED ? Number(process.env.NSP_SEED) : undefined;
   beforeAll(async () => {
     for (const spec of pilot) {
-      const report = await runConformance(spec, batchTarget(), { sequences: 200, seed: daySeed, mutants: true, known: KNOWN_ROWS[spec.type] ?? [], withheld: WITHHELD[spec.type], equivalent: EQUIVALENT_MUTANTS[spec.type] });
+      const report = await runConformance(spec, batchTarget(spec.type), { sequences: 200, seed: daySeed, mutants: true, known: KNOWN_ROWS[spec.type] ?? [], withheld: WITHHELD[spec.type], equivalent: EQUIVALENT_MUTANTS[spec.type] });
       // eslint-disable-next-line no-console
       console.log(formatReport(report));
       reports.set(spec.type, report);
@@ -190,7 +193,7 @@ describe('NSP-004 / NSP-011 — every registered spec on the runtime, 200 sequen
 
 describe('NSP-011 — the Log line is an effect the target keeps beside the trace (checked, not ignored)', () => {
   test('a Log pulse writes one line to the scope sink with the level, the message and the data; the console is not used', async () => {
-    const target = batchTarget();
+    const target = batchTarget('net.noodl.Log');
     const h = target.mount('net.noodl.Log', { message: 'hello', level: 'warn', data: { a: 1 } });
     target.signal(h, 'log');
     target.set(h, 'level', 'loud');
@@ -209,7 +212,7 @@ const deep = Number(process.env.NSP_DEEP || 0);
   const only = process.env.NSP_ONLY ? process.env.NSP_ONLY.split(',') : undefined;
   for (const spec of Object.values(specs).filter((s) => !only || only.includes(s.type))) {
     test(`${spec.type} at ${deep}`, async () => {
-      const report = await runConformance(spec, batchTarget(), {
+      const report = await runConformance(spec, batchTarget(spec.type), {
         sequences: deep,
         shrink: true,
         mutants: true,

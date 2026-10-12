@@ -27,7 +27,7 @@ const traceSchema = traceSchemaJson as Record<string, unknown>;
 /** The JSON schema, as data — for a target that wants to embed it. */
 export const TRACE_SCHEMA = traceSchema;
 
-export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request', 'open', 'history', 'dispatch', 'stack', 'route', 'popup', 'backend', 'picker', 'socket', 'act', 'answer', 'diagnostic'] as const;
+export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request', 'open', 'history', 'dispatch', 'stack', 'route', 'popup', 'backend', 'picker', 'socket', 'host', 'act', 'answer', 'diagnostic'] as const;
 export const OUTCOME_VALUES = ['done', 'unchanged', 'failure'] as const;
 
 /** Fields each kind requires and allows, beyond `t` and the always-optional `subject`. */
@@ -59,6 +59,8 @@ export const EVENT_FIELDS: Readonly<Record<(typeof EVENT_KINDS)[number], { requi
   picker: { required: ['accept', 'capture'], optional: [] },
   // NSP-014 s34 — the WebSocket servers (world.ts SOCKET): a connect carries url, protocols?; a send data; a close code?, reason? — in the request group
   socket: { required: ['op'], optional: ['url', 'protocols', 'data', 'code', 'reason'] },
+  // NSP-022 s96 — the backend process's services (world.ts HOST): which service, the request as handed — in the request group
+  host: { required: ['service'], optional: ['request'] },
   // NSP-016 s37 — the person (spec.ts THE PERSON): a stimulus — which act, and the value it carries, if any
   act: { required: ['act'], optional: ['value'] },
   // NSP-019 s95 — what the node tells the editor (spec.ts `diagnostics`): the key, and the sentence while it holds
@@ -181,6 +183,12 @@ export function validateTrace(input: unknown): Validation {
     } else if (t === 'diagnostic') {
       if (typeof e.key !== 'string' || !/^[a-z0-9-]+(\/[a-z0-9-]+)+$/.test(e.key)) return bad(`${at}.key`, 'key is <node-type>/<condition>, kebab-case');
       if ('message' in e && (typeof e.message !== 'string' || e.message.length === 0)) return bad(`${at}.message`, 'message is the sentence shown, absent when withdrawn');
+    } else if (t === 'host') {
+      if (e.service !== 'secrets' && e.service !== 'users' && e.service !== 'roles' && e.service !== 'mail') return bad(`${at}.service`, 'service is secrets, users, roles or mail');
+      if ('request' in e) {
+        const nc = findNonCanonical(e.request, `${at}.request`);
+        if (nc) return bad(nc, 'request is not in canonical form');
+      }
     } else if (t === 'socket') {
       if (e.op !== 'connect' && e.op !== 'send' && e.op !== 'close') return bad(`${at}.op`, 'op is connect, send or close');
       for (const f of ['url', 'protocols', 'data', 'code', 'reason'] as const) {

@@ -150,7 +150,7 @@ import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, R
 import type { RuntimeNode } from '../../src/internal';
 import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, PlayContext, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint, playContextOf, playOutputs, REPEATER_TEMPLATES, ROUTER_PAGES, specFor, type WorldLocation } from '../../../nodegx-node-spec/src';
-import { AUTH_OPS, backendEvent, canonicalise, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, OWN_ELEMENT, performRegistryWrite, SELF_REFERENCE, type BackendDelivery, type RegistryTables } from '../../../nodegx-node-spec/src';
+import { AUTH_OPS, backendEvent, canonicalise, hostEvent, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, OWN_ELEMENT, performRegistryWrite, SELF_REFERENCE, type BackendDelivery, type HostCall, type RegistryTables } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
 import NodeDefinition = require('../../src/nodedefinition');
@@ -1338,6 +1338,34 @@ export function registerViewerModules(target: RuntimeTarget, modules: ViewerNode
   return target;
 }
 
+/**
+ * NSP-022 s96 — the cloud runtime's own picker nodes this phase has specced, from `noodl-viewer-cloud/src/nodes/` (its
+ * `registerNodes` list, nodes/index.ts). They are graded on {@link cloudTarget}: a `NoodlRuntime` of type `cloud`, which is what
+ * the backend's function runner builds (noodl-viewer-cloud/src/index.ts) — none of the browser's session nodes, none of the viewer's.
+ */
+export const CLOUD_NODES = ['cloud/hmac', 'cloud/jwtsign', 'cloud/jwtverify', 'cloud/secret', 'cloud/createuser', 'cloud/updateuser', 'cloud/deleteuser', 'cloud/verifysessiontoken', 'cloud/addusertorole', 'cloud/removeuserfromrole', 'cloud/getuserroles', 'cloud/listusersinrole', 'cloud/sendemail'] as const;
+
+/** The type names of {@link CLOUD_NODES}, read from the modules — what a suite asks to choose {@link cloudTarget} for a spec. */
+export function cloudNodeTypes(): string[] {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return CLOUD_NODES.map((file) => (require('../../../noodl-viewer-cloud/src/nodes/' + file) as NodeModuleLike).node.name as string);
+}
+
+/** The target with the cloud runtime's own nodes registered as well, loaded through Node's `require`. */
+export function withCloudNodes(target: RuntimeTarget): RuntimeTarget {
+  for (const file of CLOUD_NODES) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mod = require('../../../noodl-viewer-cloud/src/nodes/' + file) as ViewerNodeModule;
+    target.context.nodeRegister.register(NodeDefinition.defineNode((mod.default ?? (mod as NodeModuleLike)).node));
+  }
+  return target;
+}
+
+/** NSP-022 — the runtime a cloud function runs on: type `cloud`, its own nodes registered. */
+export function cloudTarget(): RuntimeTarget {
+  return withCloudNodes(runtimeTarget({ type: 'cloud' }));
+}
+
 export interface RuntimeHandle extends Handle {
   readonly node: RuntimeNode;
   readonly metadata: NodeMetadata;
@@ -1725,6 +1753,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const s = updating.getStore() ?? (states.size === 1 ? [...states.values()][0] : undefined);
     if (!s) throw new Error(`runtime: a backend call (${call.op}) was made outside any node's update, and more than one node is mounted — it cannot be attributed`);
     s.frame.requests.push(backendEvent(call));
+  }
+
+  /** A HOST call the world saw (world.ts, NSP-022 s96), in the request group, attributed as a request is. */
+  function recordHost(call: HostCall): void {
+    const s = updating.getStore() ?? (states.size === 1 ? [...states.values()][0] : undefined);
+    if (!s) throw new Error(`runtime: a ${call.service} call was made outside any node's update, and more than one node is mounted — it cannot be attributed`);
+    s.frame.requests.push(hostEvent(call));
   }
 
   /** A LOCATION call the world saw (an open, a push, a dispatch), as the trace records it, attributed as a request is. */
@@ -3341,6 +3376,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       w.picker.onCall(recordPicker);
       // SOCKET (world.ts, NSP-014 s34) — the WebSocket itself is `installWorld`'s; each call is the node's that made the socket
       w.sockets.onCall(recordSocket);
+      // HOST (world.ts, NSP-022 s96) — the services' globals themselves are `installWorld`'s; each call is the node's that made it
+      w.host.onCall(recordHost);
       // PROJECT (world.ts, NSP-015 s17) — the settings a node reads through `NoodlRuntime.instance`:
       // the app has one runtime, so the static is this target's for the play, and its project's
       // settings are the script's (graphmodel.ts `setSettings`, what `importEditorData` calls)
