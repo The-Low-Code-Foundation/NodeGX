@@ -17,7 +17,7 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
-## 0.4.0 · 2026-10-11
+## 0.4.0 · 2026-10-12
 
 **NodeGX now opens the apps you make with `npm create nodegx`. This release also brings script files, new kinds of
 backend rule, and many fixes to how nodes behave.**
