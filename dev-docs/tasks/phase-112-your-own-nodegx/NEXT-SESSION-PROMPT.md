@@ -47,15 +47,17 @@ should switch** (README §0.2). Do not wait for an answer.
 
 1. ✅ *Done 2026-10-12 (OWN-013 §7).* Not driven: a **new project from a template makes no copy** (the opt-out in
    `newProject`); check it on the next launch.
-2. ✅ *Done s12: CI on `01aeb0868` all six green; R21 ship now; `release/0.4.0` = `0a271100e`; **PR #48** open.*
-   **Next:** read PR #48's six checks (`gh pr checks 48`; `--log-failed` on a red one). Green → set CHANGELOG's
-   `## 0.4.0 · <tag day>` on `cline-dev` and cherry-pick to the release branch (UPG-008 §4.1), then **ask Richard for
-   the merge (merge commit, not squash) and the tag** (§4 of OWN-013). Then the draft: G8 (install over 0.3.0, open a
-   0.3.0 project → one `.before-0.4`; open a kit project; check `Resources/noodl-mcp/package.json`), G9, G10, Publish. Was: **Read CI on the pushed `cline-dev`** (`gh run list --branch cline-dev --workflow pr.yml`; read each job's duration,
-   and `--log-failed` for a red one). If Test (editor) is red with only *re-arms a held save*, re-run the job (OWN-013
-   §8: an order-dependent spec, not chased). Then **ask Richard (R20) for `release/0.4.0` and the PR.**
-   *Done s12, kept for the record — G5 + G6 on the cut tree:* a worktree (`make-worktree.sh`; delete its links into the primary's `dist` first) at
-   `cline-dev`'s tip with its own build output; `npm run ci:build:editor`, then `test:ci` and read the floor by name.
+2. ✅ *Done s12: PR #48 merged (`2a258a4b5`), **`v0.4.0` tagged on `main`** (R22), Release run `38228960399` (OWN-013 §9).*
+   **Next, by RELEASE-PROCESS §4 and UPG-008 §4:** read the Release run (four legs, *merge mac update feed*, *verify
+   draft release is complete*; read durations, a draft with files is not a green run); paste
+   `GITHUB-RELEASE-0.4.0.md` into the draft body; G9 (the run's *every authored library entry is installable*; if red,
+   Publish library is Richard's); **G8 on a clean machine** — install 0.4.0 over 0.3.0, open a COPY of a 0.3.0 project
+   (one `<copy>.before-0.4`, the note names it), open the kit's `reading-list` copy (opens, nothing rewritten but
+   PAGEPORTS), check `NodeGX.app/Contents/Resources/noodl-mcp/package.json` and `render-harness/data/tokens.ts` exist;
+   G10 Richard's drives (NSP-019's two folds, script files, R17's copy). **Then Richard clicks Publish.** After
+   Publish only: the feed post (`whats-new-0.4.0.READY-TO-PUSH.json` → nodegx-content, `date_modified` = the publish
+   moment), nodegx-web deploy (`ops/deploy.sh 49.12.102.195`; check `nodegx.io/changelog/#v0-4-0`), close held issues,
+   re-drive OWN-011 AC2 on the released app. Also push `cline-dev` (it holds `fefbb8968` and this session's docs).
 3. **Make `release/0.4.0`** (local, through a temporary index or `git merge` in the worktree): the cut + `origin/main`
    merged in, conflicts from the cut. Ask Richard before pushing it and opening the PR (G4). Six required checks.
 4. **G3:** `GITHUB-RELEASE-0.4.0.md` and the what's-new post, from the changelog; pushed only after Publish.

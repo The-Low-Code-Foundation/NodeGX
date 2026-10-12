@@ -4,7 +4,7 @@
 properly via main*). **Model:** **Opus** for the cut point, the gates and the measurements; the changelog and release
 notes go through the content-authoring skill.
 
-**Status: 🟡 — s12 (2026-10-11/12): G1 measured, G2 written and approved, R17 built and driven, OPENWRITES fixed (§6, §7). The version is bumped on `cline-dev` (`88366e69f`, pushed). Nothing is pushed or branched for the release yet.**
+**Status: 🟡 — s12 (2026-10-11/12): `v0.4.0` TAGGED on `main` (`2a258a4b5`, PR #48, R22); the Release run builds the draft. Left: G8–G10, Publish (§9). Earlier: G1 measured, G2 written and approved, R17 built and driven, OPENWRITES fixed (§6, §7). The version is bumped on `cline-dev` (`88366e69f`, pushed). Nothing is pushed or branched for the release yet.**
 
 ## 1. The person sentence
 
@@ -175,4 +175,14 @@ diff vs `b7e84fa67` = 0 lines, `packages/noodl-editor/package.json` 0.4.0. Made 
 unpushed; moved back with `git branch -f`) — check the switch's exit before merging. **PR #48** opened with the merge-
 commit instruction, the checks, R17/R19/R21. Since the CI'd `01aeb0868`: `a94119947` (P107 Drag fix), `613ff7200`
 (npm 0.2.0 bump + its changelog entry, below 0.4.0's), `82221132a`/`8693f6cfd` (P112 s13), `b7e84fa67` (docs).
+
+## 9. The merge and the tag (2026-10-12, R22 "Yes, merge and tag")
+
+- PR #48's run on `0a271100e`: the six required ✅ (Test (editor) on the merge ref `6a2cce1f`: **3015 specs, 0
+  failures, seed 81716**); the five non-required red as before; GitHub *MERGEABLE / UNSTABLE*.
+- CHANGELOG dated the tag day: `## 0.4.0 · 2026-10-12` — `fefbb8968` on `cline-dev`, cherry-picked as `7162e1b83` on
+  the release branch (same blob). That push's six required ✅ (run `38228279219`).
+- **Merged** `gh pr merge 48 --merge` → `2a258a4b5` "Release 0.4.0 (#48)", second parent `7162e1b83`; tree diff main vs
+  release branch 0 lines; editor `package.json` 0.4.0.
+- **Tagged** `v0.4.0` → `2a258a4b5`, pushed (no tag existed on origin before). Release run `38228960399` (§4).
 
