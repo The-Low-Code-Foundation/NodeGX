@@ -102,7 +102,7 @@ import type { AnswerCall, AnyNodeSpec, BackendAnswerEvent, ChangeEvent, HostAnsw
 import { isSignalInput, playContextOf } from './spec';
 import { outcomePorts, playOutputs } from './ports';
 import type { TraceEvent } from './trace';
-import { backendEvent, hostEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PickerClick, type PickerEvent, type PopupCall, type PopupEvent, type StoreEvent, type StreamDelivery, type WorldSocket, type WorldSubscription } from './world';
+import { backendEvent, hostEvent, invocationEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PickerClick, type PickerEvent, type PopupCall, type PopupEvent, type StoreEvent, type StreamDelivery, type WorldSocket, type WorldSubscription, type InvocationRequest } from './world';
 
 /** One thing the world handed back, waiting to be delivered to the spec. */
 type Inbound =
@@ -134,6 +134,8 @@ type Inbound =
   | { kind: 'socket'; event: SocketEvent }
   // NSP-022 s96: a service of the backend process answered a call (world.ts HOST)
   | { kind: 'host'; answer: HostAnswerEvent }
+  // NSP-022 s97: the backend process handed the function its request (world.ts HOST, THE INVOCATION)
+  | { kind: 'invoke'; request: InvocationRequest }
   // s34: a streamed body said something after its head (world.ts NETWORK, A STREAMED BODY)
   | { kind: 'stream'; event: StreamEvent };
 
@@ -307,6 +309,8 @@ function viewOf(inst: Instance): WorldView {
     popupsInside: () => world.popup.inside,
     backendFor: (backendId) => world.backend.resolve(backendId),
     hostHas: (service) => world.host.has(service),
+    invocation: () => world.host.requestState(),
+    hostCloud: () => world.host.cloudServices,
     backendUser: (backend) => world.backend.userOn(backend),
     session: (backend) => world.backend.session(backend),
     userService: () => startUserService(world),
@@ -547,6 +551,13 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
       if (p.at > 0) world.clock.schedule(p.at, () => handleInbound(inst, item));
       else inst.inbox.push(item);
     }
+  }
+  // HOST, THE INVOCATION (world.ts, NSP-022 s97): the request handed to the function, at its time on the clock — to a spec that
+  // takes one (its `world.invoke` handler: a Request node)
+  if (spec.needs?.includes('host') && spec.world?.invoke && world.host.invocation) {
+    const { at, request } = world.host.invocation;
+    const item: Inbound = { kind: 'invoke', request: deepFreeze({ ...request, headers: { ...request.headers } }) };
+    world.clock.schedule(at, () => handleInbound(inst, item));
   }
   // GROUP (world.ts, NSP-016 s42): the graph's writes to the Value of the group the node sits in, each at its time on the clock
   if (spec.needs?.includes('group')) {
@@ -1122,7 +1133,16 @@ function stackEffects(inst: Instance, port: string, patch: PatchLike): void {
     } else if (a.op === 'push' || a.op === 'replace' || a.op === 'back' || a.op === 'navigate') {
       if (a.value === 'failure' && (typeof a.error !== 'string' || a.error.length === 0)) throw new SpecError(`${spec.type}.${port}: a failure answer carries its code`);
       inst.pending.location.push(a.value === 'failure' ? { t: 'answer', op: a.op, value: a.value, error: a.error } : { t: 'answer', op: a.op, value: a.value });
-    } else throw new SpecError(`${spec.type}.${port}: an answer's op is push, replace, back, navigate, returned or page, not ${String((a as { op?: unknown }).op)}`);
+    } else if (a.op === 'respond') {
+      // NSP-022 s97 — a Response's payload, delivered while the request is open (world.ts HOST, THE INVOCATION)
+      if (world.host.requestState() !== 'open') throw new SpecError(`${spec.type}.${port}: responded to a request that is ${world.host.requestState()} — check WorldView.invocation first`);
+      world.host.respond();
+      inst.pending.location.push(invocationEvent({ op: 'respond', status: a.status, body: a.body }));
+    } else if (a.op === 'refuse') {
+      // NSP-022 s97 — the Request's refusal, recorded when it lands, open or not; it settles the request
+      world.host.refuse();
+      inst.pending.location.push(invocationEvent(a.fields === undefined ? { op: 'refuse', reason: a.reason } : { op: 'refuse', reason: a.reason, fields: a.fields }));
+    } else throw new SpecError(`${spec.type}.${port}: an answer's op is push, replace, back, navigate, returned, page, respond or refuse, not ${String((a as { op?: unknown }).op)}`);
   }
   // PICKER (world.ts, NSP-014 s31): a click recorded as the element holds it — a `picker` event in the same group; the
   // answer fires at its moment, as a DOM event's handler runs at its dispatch (inside the `advance` that reaches it)
@@ -1209,6 +1229,9 @@ function handleInbound(inst: Instance, item: Inbound): void {
     name = 'world.host';
     if (!spec.world?.host) throw new SpecError(`${spec.type}: a host service answered and the spec has no world.host handler`);
     patch = asWriter(inst, () => spec.world!.host!(inst.state as never, inst.inputs as never, item.answer, view));
+  } else if (item.kind === 'invoke') {
+    name = 'world.invoke';
+    patch = asWriter(inst, () => spec.world!.invoke!(inst.state as never, inst.inputs as never, item.request, view));
   } else if (item.kind === 'socket') {
     name = 'world.socket';
     patch = asWriter(inst, () => spec.world!.socket!(inst.state as never, inst.inputs as never, item.event, view));

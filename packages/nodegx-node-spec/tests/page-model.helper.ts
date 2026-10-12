@@ -356,7 +356,8 @@ export const isVisual = (spec: AnyNodeSpec) => !!spec.acts || !!spec.world?.plac
 // s70 (P107) / P109 s36 — `popstate`: a `history.back()` the page made landed; a browser event, heard by the node's own listener
 // NSP-022 s96 — `host`: a service of the backend process answered (world.ts HOST); a world answer as `backend` is (a promise landing),
 // not a turn of the page — and only cloud-only nodes, which are never on a page, have it
-export const WORLD_KINDS = ['timer', 'response', 'change', 'resize', 'page', 'popup', 'backend', 'host', 'store', 'auth', 'authReturn', 'mount', 'place', 'picker', 'realtime', 'socket', 'resume', 'popstate', 'stream', 'group'] as const;
+// NSP-022 s97 — `invoke`: the backend process handed the function its request (world.ts HOST, THE INVOCATION); a world hand-off, as `host`
+export const WORLD_KINDS = ['timer', 'response', 'change', 'resize', 'page', 'popup', 'backend', 'host', 'invoke', 'store', 'auth', 'authReturn', 'mount', 'place', 'picker', 'realtime', 'socket', 'resume', 'popstate', 'stream', 'group'] as const;
 
 const LIFECYCLE = new Set(['didMount', 'willUnmount']);
 

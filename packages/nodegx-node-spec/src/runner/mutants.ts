@@ -154,6 +154,7 @@ export function reducerNames(spec: AnyNodeSpec): string[] {
   if (spec.world?.realtime) names.push('world.realtime');
   if (spec.world?.socket) names.push('world.socket');
   if (spec.world?.host) names.push('world.host');
+  if (spec.world?.invoke) names.push('world.invoke');
   if (spec.world?.stream) names.push('world.stream');
   if (spec.world?.group) names.push('world.group');
   if (spec.world?.resume) names.push('world.resume');
@@ -205,6 +206,8 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
     if (spec.world.socket) w.socket = wrap('world.socket', spec.world.socket as unknown as ErasedReducer) as unknown as typeof spec.world.socket;
     // NSP-022 s96 — a host service's answer (world.ts HOST): a copy without it never hears a secret, a user or a mail answer
     if (spec.world.host) w.host = wrap('world.host', spec.world.host as unknown as ErasedReducer) as unknown as typeof spec.world.host;
+    // NSP-022 s97 — the request handed to the function (world.ts HOST, THE INVOCATION): a copy without it never hears one
+    if (spec.world.invoke) w.invoke = wrap('world.invoke', spec.world.invoke as unknown as ErasedReducer) as unknown as typeof spec.world.invoke;
     // s34 — what a streamed body says (world.ts NETWORK): a copy without it never hears a chunk
     if (spec.world.stream) w.stream = wrap('world.stream', spec.world.stream as unknown as ErasedReducer) as unknown as typeof spec.world.stream;
     // NSP-016 s42 — the graph's writes to the group the node sits in (world.ts GROUP): a copy without it never hears one

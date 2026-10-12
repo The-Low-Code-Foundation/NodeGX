@@ -150,7 +150,7 @@ import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, R
 import type { RuntimeNode } from '../../src/internal';
 import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, PlayContext, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint, playContextOf, playOutputs, REPEATER_TEMPLATES, ROUTER_PAGES, specFor, type WorldLocation } from '../../../nodegx-node-spec/src';
-import { AUTH_OPS, backendEvent, canonicalise, hostEvent, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, OWN_ELEMENT, performRegistryWrite, SELF_REFERENCE, type BackendDelivery, type HostCall, type RegistryTables } from '../../../nodegx-node-spec/src';
+import { AUTH_OPS, backendEvent, canonicalise, hostEvent, invocationEvent, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, OWN_ELEMENT, performRegistryWrite, SELF_REFERENCE, type BackendDelivery, type HostCall, type RegistryTables } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
 import NodeDefinition = require('../../src/nodedefinition');
@@ -973,6 +973,21 @@ const UserServiceClass = ((): new () => unknown => {
   return cls;
 })();
 
+/**
+ * NSP-022 s97 — the CLOUD runtime's user service class (noodl-viewer-cloud services/userservice.js): what a cloud function's
+ * Request node looks its caller up through. Loading its module assigns `NoodlRuntime.Services.UserService` process-wide, as
+ * the cloud runner does at load (index.ts :43) — undone at once: a cloud play installs it for the play (`install`), never the
+ * browser's.
+ */
+const CloudUserServiceClass = ((): unknown => {
+  const services = (NoodlRuntime as unknown as { Services: Record<string, unknown> }).Services;
+  const before = services.UserService;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const cls = require('../../../noodl-viewer-cloud/src/services/userservice') as unknown;
+  services.UserService = before;
+  return cls;
+})();
+
 /** The REST auth adapter's halves the AUTH stand-in performs a landing through (RestAuthAdapter.ts — its store, its events). */
 interface AuthAdapterLike {
   sessionStore(handle: unknown): { write(session: Record<string, unknown>): void; clear(): void };
@@ -1343,7 +1358,7 @@ export function registerViewerModules(target: RuntimeTarget, modules: ViewerNode
  * `registerNodes` list, nodes/index.ts). They are graded on {@link cloudTarget}: a `NoodlRuntime` of type `cloud`, which is what
  * the backend's function runner builds (noodl-viewer-cloud/src/index.ts) — none of the browser's session nodes, none of the viewer's.
  */
-export const CLOUD_NODES = ['cloud/hmac', 'cloud/jwtsign', 'cloud/jwtverify', 'cloud/secret', 'cloud/createuser', 'cloud/updateuser', 'cloud/deleteuser', 'cloud/verifysessiontoken', 'cloud/addusertorole', 'cloud/removeuserfromrole', 'cloud/getuserroles', 'cloud/listusersinrole', 'cloud/sendemail'] as const;
+export const CLOUD_NODES = ['cloud/hmac', 'cloud/jwtsign', 'cloud/jwtverify', 'cloud/secret', 'cloud/createuser', 'cloud/updateuser', 'cloud/deleteuser', 'cloud/verifysessiontoken', 'cloud/addusertorole', 'cloud/removeuserfromrole', 'cloud/getuserroles', 'cloud/listusersinrole', 'cloud/sendemail', 'cloud/request', 'cloud/response'] as const;
 
 /** The type names of {@link CLOUD_NODES}, read from the modules — what a suite asks to choose {@link cloudTarget} for a spec. */
 export function cloudNodeTypes(): string[] {
@@ -1943,7 +1958,9 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
    * and no `parentNodeScope`), and the log sink.
    */
   const loneScope = (id: string, logs: LogLine[]) => ({
-    modelScope: undefined,
+    // NSP-022 s97 — a cloud function's nodes live in the request's own model scope (index.ts :215-216 `requestScope.modelScope =
+    // new Model.Scope()`), so what the function writes (the `Request` model, the caller's user record) is the play's alone
+    modelScope: options.type === 'cloud' ? new Model.Scope() : undefined,
     componentOwner: { name: `node-spec/${id}`, getInstanceId: () => id, getRoots: () => [] as never[] },
     context,
     runContext: { log: logSink(logs) }
@@ -2085,6 +2102,32 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       } catch (e) {
         target.dispose(h);
         throw e;
+      }
+    }
+    // HOST, THE INVOCATION (world.ts, NSP-022 s97) — the function a request reached, as `CloudRunner.run` drives it (index.ts
+    // :297-332): every Response holds the request's two callbacks from the component's making; the Request is handed the request at
+    // its moment (the runner's `setImmediate`, the world's timer), and what it rejects with is the function's refusal
+    if (world?.host.invocation && (type === 'noodl.cloud.response' || type === 'noodl.cloud.request')) {
+      const w = world;
+      const st = states.get(id)!;
+      if (type === 'noodl.cloud.response') {
+        const internal = (node as unknown as { _internal: Record<string, unknown> })._internal;
+        internal._requestIsOpen = () => w.host.requestState() === 'open';
+        internal._sendResponseCallback = (payload: { statusCode: number; body: string }) => {
+          if (w.host.requestState() !== 'open') return false;
+          w.host.respond();
+          st.frame.location.push(invocationEvent({ op: 'respond', status: payload.statusCode, body: payload.body }));
+          return true;
+        };
+      } else {
+        const { at, request } = w.host.invocation;
+        w.clock.schedule(at, () => {
+          const req = 'body' in request ? { headers: { ...request.headers }, body: request.body } : { headers: { ...request.headers } };
+          (node as unknown as { sendRequest(r: unknown): Promise<void> }).sendRequest(req).catch((e: { message?: unknown; fields?: unknown }) => {
+            w.host.refuse();
+            st.frame.location.push(invocationEvent(e && e.fields !== undefined ? { op: 'refuse', reason: String(e.message), fields: e.fields } : { op: 'refuse', reason: String(e && e.message) }));
+          });
+        });
       }
     }
     // ROUTE (world.ts, NSP-015 s19) — a Page Inputs in a page a Router built: the Router hands it the page's
@@ -3392,6 +3435,11 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       const restorePopups = installPopups(w);
       // BACKEND (world.ts, NSP-014 s21) — the REAL CloudStore and resolution; only the REST adapter's wire is the world's
       const restoreBackend = installBackend(w, (rt as unknown as { graphModel: { getMetaData(k: string): unknown; setMetaData(k: string, v: unknown): void } }).graphModel, recordBackend);
+      // HOST, THE INVOCATION (world.ts, NSP-022 s97) — a cloud play's user service is the CLOUD runtime's (its caller lookup is a
+      // `fetch` to `_noodl_cloudservices`, installWorld's), not the browser's AUTH stand-in
+      const services = (NoodlRuntime as unknown as { Services: Record<string, unknown> }).Services;
+      const playService = services.UserService;
+      if (options.type === 'cloud') services.UserService = CloudUserServiceClass;
       const installed = installWorld(w);
       // the three process-wide managers behind the store, history and action nodes (NSP-012 T4): one play, one of each
       globalStoreManager.reset({ clearState: true });
@@ -3426,6 +3474,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         restoreStacks();
         restoreRouters();
         restorePopups();
+        services.UserService = playService;
         restoreBackend();
         installed.restore();
         stateHistoryManager.setClock(null);

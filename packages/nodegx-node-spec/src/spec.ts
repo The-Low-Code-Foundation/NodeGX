@@ -215,6 +215,13 @@ export interface WorldView {
   /** NSP-022 s96 — whether the backend process has this service's global installed (world.ts HOST); a node outside a backend has none. */
   hostHas(service: import('./world').HostService): boolean;
   /**
+   * NSP-022 s97 — THE INVOCATION (world.ts HOST): whether a request reached the function this node is part of — `none`, or
+   * `open` until it is answered, then `settled`. What a Response asks before it answers (its two callbacks).
+   */
+  invocation(): 'none' | 'open' | 'settled';
+  /** NSP-022 s97 — the `_noodl_cloudservices` global the process installed (world.ts HOST, THE INVOCATION), or `undefined`. */
+  hostCloud(): Readonly<import('./world').HostCloudServices> | undefined;
+  /**
    * NSP-014 s22 — the id of the user signed in, as the Record family's access rules read it (world.ts BACKEND, USER); `undefined`: nobody.
    * P109 ISL-029 (D24): asked of the RECORD's backend — `backend` is the id the call goes to — and answered from that backend's session.
    */
@@ -691,7 +698,14 @@ export type AnswerCall =
   | { op: 'history'; url: unknown; how?: 'push' | 'replace' }
   /** NSP-016 s70 — `history.back()` made between two answers (world.ts LOCATION): its traversal lands at the next yield. */
   | { op: 'history'; how: 'back' }
-  | { op: 'open'; url: unknown; target?: unknown; features?: unknown };
+  | { op: 'open'; url: unknown; target?: unknown; features?: unknown }
+  /**
+   * NSP-022 s97 — a cloud function's answer to its request (world.ts HOST, THE INVOCATION): `respond`, a Response's payload
+   * (`status`, `body` the text) — made only while `WorldView.invocation()` is `open`; or `refuse`, the Request's refusal (`reason`
+   * the message, `fields` the contract's refused fields). Either settles the request.
+   */
+  | { op: 'respond'; status: number; body: string }
+  | { op: 'refuse'; reason: string; fields?: unknown };
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
   /** Required — rule 3. `deferred` hands the decision to `afterInputs` (see `ReducerOutcome`). */
@@ -1024,6 +1038,8 @@ export interface WorldHandlers<S, I, O> {
   backend?: (state: Readonly<S>, inputs: Inputs<I>, answer: BackendAnswerEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
   /** NSP-022 s96 — a service of the backend process answered a call this node made (`host` effect), at the answer's moment (world.ts HOST). */
   host?: (state: Readonly<S>, inputs: Inputs<I>, answer: HostAnswerEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /** NSP-022 s97 — the backend process handed the function this node is part of its request (world.ts HOST, THE INVOCATION), at its moment. */
+  invoke?: (state: Readonly<S>, inputs: Inputs<I>, request: import('./world').InvocationRequest, world: WorldView) => AfterInputsPatch<S, I, O>;
   /**
    * NSP-014 s24 — a write made elsewhere in the app reached the store's listeners (world.ts BACKEND, `events`): called
    * at its time on the clock, AFTER the registry holds the write, with the contract's event and the backend it came
@@ -1437,6 +1453,7 @@ export interface AnyNodeSpec {
     popup?: (state: never, inputs: never, event: import('./world').PopupEvent, world: WorldView) => unknown;
     backend?: (state: never, inputs: never, answer: BackendAnswerEvent, world: WorldView) => unknown;
     host?: (state: never, inputs: never, answer: HostAnswerEvent, world: WorldView) => unknown;
+    invoke?: (state: never, inputs: never, request: import('./world').InvocationRequest, world: WorldView) => unknown;
     store?: (state: never, inputs: never, event: import('./world').StoreEvent, world: WorldView) => unknown;
     auth?: (state: never, inputs: never, event: import('./world').AuthNotice, world: WorldView) => unknown;
     authReturn?: (state: never, inputs: never, ret: import('./world').AuthReturnState, world: WorldView) => unknown;

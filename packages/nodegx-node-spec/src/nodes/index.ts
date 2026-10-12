@@ -31,6 +31,8 @@ import { Hmac } from './hmac';
 import { JwtSign, JwtVerify } from './jwt';
 import { Secret } from './secret';
 import { SendEmail } from './send-email';
+import { CloudRequest } from './cloud-request';
+import { CloudResponse } from './cloud-response';
 import { CreateUser, DeleteUser, UpdateUser, VerifySessionToken } from './system-users';
 import { AddUserToRole, GetUserRoles, ListUsersInRole, RemoveUserFromRole } from './system-roles';
 import { HttpRequest } from './http';
@@ -250,7 +252,10 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [RemoveUserFromRole.type]: RemoveUserFromRole,
   [GetUserRoles.type]: GetUserRoles,
   [ListUsersInRole.type]: ListUsersInRole,
-  [SendEmail.type]: SendEmail
+  [SendEmail.type]: SendEmail,
+  // NSP-022 s97 — a function's first and last events (world.ts HOST, THE INVOCATION)
+  [CloudRequest.type]: CloudRequest,
+  [CloudResponse.type]: CloudResponse
 });
 
 export { EQUIVALENT_MUTANTS } from './equivalent-mutants';

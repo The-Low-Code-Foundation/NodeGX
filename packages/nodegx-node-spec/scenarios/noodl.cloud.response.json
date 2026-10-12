@@ -1,0 +1,181 @@
+[
+  {
+    "name": "no request reached the function: Send fails, the reason on Error",
+    "because": "response.ts :157-164 no callback installed",
+    "params": {
+      "params": "total"
+    },
+    "steps": [
+      {
+        "set": "pm-total",
+        "value": 1
+      },
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "host": {}
+    }
+  },
+  {
+    "name": "a request open: Send is Done, and the payload goes out — 200 with the Parameters as written, in the order first written",
+    "because": "response.ts :149, :181-183, :198 Done before :208 the delivery",
+    "params": {
+      "params": "total,ok"
+    },
+    "steps": [
+      {
+        "set": "pm-ok",
+        "value": true
+      },
+      {
+        "set": "pm-total",
+        "value": 42
+      },
+      {
+        "set": "pm-ok",
+        "value": "yes"
+      },
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "host": {
+        "invocation": {}
+      }
+    }
+  },
+  {
+    "name": "a second Send: the request is already answered — Failure, the reason on Error",
+    "because": "response.ts :172-179; index.ts :320 `_requestIsOpen`",
+    "params": {
+      "params": "total"
+    },
+    "steps": [
+      {
+        "set": "pm-total",
+        "value": 1
+      },
+      {
+        "signal": "send"
+      },
+      "settle",
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "host": {
+        "invocation": {}
+      }
+    }
+  },
+  {
+    "name": "Status Failure: 400 carrying the Error Message",
+    "because": "response.ts :149, :183",
+    "params": {
+      "status": "failure",
+      "errorMessage": "Not allowed"
+    },
+    "steps": [
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "host": {
+        "invocation": {}
+      }
+    }
+  },
+  {
+    "name": "a Status that is not exactly success (\"Success\") is a 400; no Error Message is an empty error body",
+    "because": "response.ts :149 `=== 'success'`; JSON.stringify drops undefined",
+    "params": {
+      "status": "Success"
+    },
+    "steps": [
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "host": {
+        "invocation": {}
+      }
+    }
+  },
+  {
+    "name": "a parameter input written though the list does not name it is carried too; nothing written is an empty result",
+    "because": "response.ts :212-220 any `pm-` name registers on its first write",
+    "params": {
+      "params": ""
+    },
+    "steps": [
+      {
+        "set": "pm-extra",
+        "value": [
+          1,
+          2
+        ]
+      },
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "host": {
+        "invocation": {}
+      }
+    }
+  },
+  {
+    "name": "the request settled elsewhere (another Response, the runner's timeout) before Send: already answered",
+    "because": "index.ts :261-282 settle; :320 `_requestIsOpen`",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "host": {
+        "invocation": {
+          "settledAt": 10
+        }
+      }
+    }
+  },
+  {
+    "name": "two presses in one frame: the first answers, the second is already answered",
+    "because": "response.ts :71-75 a token per press, answered at once",
+    "params": {},
+    "steps": [
+      {
+        "signal": "send"
+      },
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "host": {
+        "invocation": {}
+      }
+    }
+  }
+]

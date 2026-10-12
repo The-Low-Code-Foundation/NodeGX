@@ -122,6 +122,24 @@
  *               call no rule answers is a VIOLATION: it throws or rejects with the world's sentence, so the play goes
  *               on, and the runner fails the run. A resolve lands as a promise resolution does (a microtask after its
  *               moment).
+ *           (s97) THE INVOCATION — the process hands a cloud function a request and takes its answer (noodl-viewer-cloud
+ *           index.ts `CloudRunner.run`). Two more script fields:
+ *             `cloudServices` `{ appId, masterKey, endpoint, runId? }` — the `_noodl_cloudservices` global the process
+ *               installs (with `currentRunId()` answering `runId` when the script names one). The cloud user service reads
+ *               it to look the caller up — a plain `fetch` to `<endpoint>/users/me`, so it travels on NETWORK above and is
+ *               answered by the network's rules. Absent: not installed.
+ *             `invocation` `{ at?, headers?, body?, settledAt? }` — the node is part of a function a request reached. The
+ *               component is built before the request is handed (index.ts :284-323), so from the mount every Response node
+ *               holds the request's two callbacks: `_requestIsOpen()` and `_sendResponseCallback(payload)`. At `at` ms
+ *               on the clock (absent: 1 — a world timer, never before 1) the Request node is handed `{ headers, body }`
+ *               (`sendRequest`; `headers` absent is `{}`, `body` absent is none). The request is OPEN until it is
+ *               answered: a Response's callback while it is open delivers the payload (returns `true`) and settles it; a
+ *               refusal (`sendRequest` rejecting) settles it; `settledAt` settles it from elsewhere — another Response, or
+ *               the runner's timeout. Once settled, `_requestIsOpen()` is `false` and the callback returns `false`.
+ *               Absent: the node is in no function a request reached — no callbacks, nothing handed.
+ *           What the function answers is recorded as an `answer` event in the LOCATION group (trace.ts): op `respond` with
+ *           the payload's `statusCode` as `status` and its `body`; op `refuse` with the rejection's message as `reason`
+ *           and, for the contract's refusal, its `fields`. A refusal is recorded when it lands, open or not.
  *
  *   VIEWPORT. (NSP-013 s13) A play either HAS a browser viewport — the script's `viewport`,
  *           `{ width, height }` in CSS pixels — or it has NONE, which is a server render: no
@@ -626,6 +644,46 @@ export interface HostScript {
   services?: readonly HostService[];
   /** How they answer, first match wins. */
   answers?: readonly HostRule[];
+  /** s97 (THE INVOCATION): the `_noodl_cloudservices` global. Absent: not installed. */
+  cloudServices?: HostCloudServices;
+  /** s97 (THE INVOCATION): the request the function was handed. Absent: none. */
+  invocation?: InvocationScript;
+}
+
+/** HOST above, THE INVOCATION: what the process tells its cloud user service (`_noodl_cloudservices`). */
+export interface HostCloudServices {
+  appId: string;
+  masterKey: string;
+  endpoint: string;
+  /** What `currentRunId()` answers; absent: the global has no `currentRunId`. */
+  runId?: string;
+}
+
+/** HOST above, THE INVOCATION: the request a function is handed, when, and when it is settled from elsewhere. */
+export interface InvocationScript {
+  /** ms on the clock the request is handed at; absent: 1. */
+  at?: number;
+  /** The request's headers, as the process hands them; absent: `{}`. */
+  headers?: Record<string, unknown>;
+  /** The request's body, as the process hands it (the raw text); absent: none. */
+  body?: unknown;
+  /** ms on the clock another Response, or the runner's timeout, settles the request at; absent: never. */
+  settledAt?: number;
+}
+
+/** HOST above, THE INVOCATION: the request as handed — what `sendRequest` is called with. */
+export interface InvocationRequest {
+  headers: Record<string, unknown>;
+  body?: unknown;
+}
+
+/** HOST above, THE INVOCATION: a function's answer, as recorded (trace.ts `answer`). */
+export type InvocationAnswer = { op: 'respond'; status: number; body: string } | { op: 'refuse'; reason: string; fields?: unknown };
+
+/** The `answer` trace event for a function's answer (HOST above, THE INVOCATION). */
+export function invocationEvent(a: InvocationAnswer): TraceEvent {
+  if (a.op === 'respond') return { t: 'answer', op: 'respond', status: a.status, body: a.body };
+  return a.fields === undefined ? { t: 'answer', op: 'refuse', reason: a.reason } : { t: 'answer', op: 'refuse', reason: a.reason, fields: canonicalise(a.fields) };
 }
 
 export interface HostRule {
@@ -657,9 +715,23 @@ export class WorldHost {
   private readonly rules: HostRule[];
   private readonly used = new Map<HostRule, number>();
   private readonly listeners: Array<(c: HostCall) => void> = [];
+  /** s97 (THE INVOCATION): the `_noodl_cloudservices` global, or none. */
+  readonly cloudServices: Readonly<HostCloudServices> | undefined;
+  /** s97 (THE INVOCATION): the request handed and its moment, or none. */
+  readonly invocation: { at: number; request: InvocationRequest } | undefined;
+  private settled = false;
   constructor(private readonly clock: Clock, script: HostScript = {}) {
     for (const sv of script.services ?? []) if (!(HOST_SERVICES as readonly string[]).includes(sv)) throw new Error(`world: ${JSON.stringify(sv)} is not a host service (HOST: ${HOST_SERVICES.join(', ')})`);
     this.services = new Set(script.services ?? []);
+    this.cloudServices = script.cloudServices ? Object.freeze({ ...script.cloudServices }) : undefined;
+    const inv = script.invocation;
+    if (inv) {
+      const at = inv.at ?? 1;
+      if (!(at >= 1)) throw new Error(`world: a request is handed at ≥ 1 ms on the clock, not ${JSON.stringify(inv.at)} (HOST, THE INVOCATION)`);
+      if (inv.settledAt !== undefined && !(inv.settledAt >= 1)) throw new Error(`world: a request is settled from elsewhere at ≥ 1 ms on the clock, not ${JSON.stringify(inv.settledAt)} (HOST, THE INVOCATION)`);
+      this.invocation = { at, request: 'body' in inv ? { headers: { ...(inv.headers ?? {}) }, body: inv.body } : { headers: { ...(inv.headers ?? {}) } } };
+      if (inv.settledAt !== undefined) clock.schedule(inv.settledAt, () => void (this.settled = true));
+    } else this.invocation = undefined;
     this.rules = [...(script.answers ?? [])];
     for (const r of this.rules) {
       if (r.match?.service === 'secrets' && ('never' in r.answer || r.after)) throw new Error('world: a secrets lookup is synchronous — it answers at once, never `never` or `after` (HOST)');
@@ -669,6 +741,24 @@ export class WorldHost {
   /** Whether the process has this service (its global is installed). */
   has(service: HostService): boolean {
     return this.services.has(service);
+  }
+
+  /** s97 (THE INVOCATION): `none` — no request reached this function; `open` — one did and is unanswered; `settled` — answered. */
+  requestState(): 'none' | 'open' | 'settled' {
+    return this.invocation === undefined ? 'none' : this.settled ? 'settled' : 'open';
+  }
+
+  /** s97 (THE INVOCATION): a Response's callback — delivers and settles while the request is open (`true`), else `false`. */
+  respond(): boolean {
+    if (this.invocation === undefined) throw new Error('world: a response with no request in the play (HOST, THE INVOCATION)');
+    if (this.settled) return false;
+    this.settled = true;
+    return true;
+  }
+
+  /** s97 (THE INVOCATION): the Request's refusal landed — it settles the request (the runner's `settle`). */
+  refuse(): void {
+    this.settled = true;
   }
 
   /** Called with every call as it is made — how a target attributes it to the node that made it. */
@@ -3151,6 +3241,9 @@ export function installWorld(world: World): Installed {
       define(name, (request: unknown) => new Promise((resolve, reject) => world.host.issue({ service, request }, (d) => ('threw' in d ? reject(new Error(d.threw)) : resolve(d.ok)))));
     }
   }
+  // HOST, THE INVOCATION (s97): the `_noodl_cloudservices` global the cloud user service reads — none when the script has none
+  const cs = world.host.cloudServices;
+  define('_noodl_cloudservices', cs ? { appId: cs.appId, masterKey: cs.masterKey, endpoint: cs.endpoint, ...(cs.runId !== undefined ? { currentRunId: () => cs.runId } : {}) } : undefined);
   // PROJECT: the settings a node reads through the runtime are the target's to install (the runtime target's `install`)
   Math.random = () => world.random.next();
   Date.now = () => world.clock.now();

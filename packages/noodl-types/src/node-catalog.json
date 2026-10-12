@@ -64311,6 +64311,14 @@
             "example": "ptype-Sa1"
           }
         ]
+      },
+      "rules": {
+        "allowNoAuth": [
+          "always: read when a request comes, and again when its caller cannot be looked up"
+        ],
+        "params": [
+          "always: nothing while it runs; read when a request comes — each name a contract row and an output a wire can take"
+        ]
       }
     },
     {
@@ -64481,6 +64489,22 @@
             "valueType": "*",
             "example": "pm-Sa1"
           }
+        ]
+      },
+      "rules": {
+        "params": [
+          "always: nothing while it runs; each name makes a value input the payload carries"
+        ],
+        "errorMessage": [
+          "always: read when Send is pressed with Status Failure"
+        ],
+        "status": [
+          "always: read when Send is pressed — unset or success is a 200, anything else a 400"
+        ],
+        "send": [
+          "no request reached the function this node is part of: the reason on Error → Failure",
+          "the request was already answered — by another Response, by a refusal, or by the runner's timeout: the reason on Error → Failure",
+          "otherwise: the payload goes out just after — a 200 carrying the Parameters when Status is unset or success, else a 400 carrying the Error Message → Done"
         ]
       }
     },

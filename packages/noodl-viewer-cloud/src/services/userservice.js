@@ -49,21 +49,31 @@ class UserService {
     const runId = cs.currentRunId ? cs.currentRunId() : undefined;
     if (runId !== undefined) headers['X-NodeGX-Run'] = runId;
 
+    // P107-S97-USERSMEHANG: the body is read INSIDE the chain. `res.json()` used to be called and not returned, so an answer
+    // that was not JSON (a proxy's HTML error page, an empty 204) or was JSON `null` rejected where nothing listened: neither
+    // callback ran, the caller's promise never settled — a cloud function's Request waited for the run's timeout (a 504) — and
+    // the process got an unhandled rejection. Now that answer reaches `options.error`, as a request that never arrived does.
+    // A callback that throws is still the caller's (outside this `.then`'s rejection handler), as before.
     fetch(cs.endpoint + path, {
       method: options.method || 'GET',
       headers,
       body: JSON.stringify(options.content)
     })
-      .then((res) => {
-        if (res.ok) {
-          res.json().then((json) => options.success(json));
-        } else {
-          res.json().then((json) => options.error({ error: json.error, status: res.status }));
+      .then((res) =>
+        res.json().then((json) => {
+          if (json === null) throw new Error('The backend answered ' + path + ' with nothing.');
+          return { res, json };
+        })
+      )
+      .then(
+        ({ res, json }) => {
+          if (res.ok) options.success(json);
+          else options.error({ error: json.error, status: res.status });
+        },
+        (e) => {
+          options.error({ error: e.message });
         }
-      })
-      .catch((e) => {
-        options.error({ error: e.message });
-      });
+      );
   }
 
   setUserProperties(options) {

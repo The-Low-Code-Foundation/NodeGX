@@ -130,6 +130,13 @@ export type TraceEvent =
    */
   | (Base & { t: 'answer'; op: 'push' | 'replace' | 'back' | 'returned' | 'navigate' | 'page'; value?: Outcome; error?: string; action?: unknown; results?: unknown; params?: unknown })
   /**
+   * observation (NSP-022 s97): a cloud function's answer to the request it was handed (world.ts HOST, THE INVOCATION) — `respond`,
+   * a Response's payload (`status`, `body` the text it carries), or `refuse`, the Request's refusal (`reason` the message it rejected
+   * with; `fields` the contract's refused fields, canonical, only for its 400). In the LOCATION group, in the order made.
+   */
+  | (Base & { t: 'answer'; op: 'respond'; status: number; body: string })
+  | (Base & { t: 'answer'; op: 'refuse'; reason: string; fields?: unknown })
+  /**
    * observation (NSP-019 s95): what the node tells the EDITOR about its own settings (spec.ts `diagnostics`; the runtime's
    * `setDiagnostic`) — `key` as the runtime keys it, `message` the sentence it now shows, absent when it was withdrawn. One per
    * declared key whose sentence changed since the last settle, sorted by key, closing the frame's group. A target without an
