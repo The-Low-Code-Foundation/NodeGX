@@ -279,6 +279,23 @@ describe('🔴 M3 reaches the door — a done page cannot claim clean while meas
     expect(verdict.reason).toContain('the render is clean');
     expect(completionPayload(verdict)).not.toHaveProperty('looksLike');
   });
+
+  it('🔴 never says "clean" over a warning that is not a tell (P112-S13-CLEANWARNINGS)', () => {
+    // Measured from an npm install (OWN-014 s13): a 3000px Text on a phone page gave
+    // "0 errors, 2 warnings (minimum-layout-width, text-wider-than-its-box)" under a
+    // first line of "Rendered, and the render is clean."
+    const verdict = verdictFor({
+      findings: [
+        { code: 'minimum-layout-width', severity: 'warning', viewport: 'phone', message: 'cannot lay out below 1560px' },
+        { code: 'text-wider-than-its-box', severity: 'warning', viewport: 'phone', message: '3000px in a 390px box' }
+      ],
+      pages: []
+    });
+    expect(verdict.done).toBe(true);
+    expect(verdict.blocking).toEqual([]);
+    expect(verdict.reason).not.toContain('clean');
+    expect(verdict.reason).toContain('minimum-layout-width, text-wider-than-its-box');
+  });
 });
 
 describe('🔴 the defect AC3 found on the way — a fallback an instance supplies is not a dead fallback', () => {

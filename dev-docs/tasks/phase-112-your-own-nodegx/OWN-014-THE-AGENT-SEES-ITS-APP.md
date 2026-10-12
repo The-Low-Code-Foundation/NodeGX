@@ -4,7 +4,7 @@
 kit is ready for a tutorial video: *vibe code a Duolingo clone with Google text-to-speech, no editor*). **Model:**
 **Opus** — the shape is fixed (ship the harness the checkout already has), and a gate says when it is done.
 
-**Status: 📋 not started.**
+**Status: 🟡 s13 (2026-10-12): built and passing from a packed tarball — AC1 ✅, AC2 ✅ (§7). AC3 (publish) waits on Richard (R11); AC4 waits on OWN-015's language app.**
 
 ## 1. The person sentence
 
@@ -78,3 +78,46 @@ fallback's regex finds 0 declarations in it, against 193 in `nodegx-project-cont
 `render_report` rendered with no shipped defaults. UNI-012's gate checked that the file existed, and it did. The fix
 packages `tokens.ts` itself and the gate now compares contents. Its control arm (the old mapping) fails the new test
 alone: 1 failed, 7 passed.
+
+## 7. Session 13: built, and graded from a tarball
+
+**What changed.**
+- `packages/noodl-mcp/build-render-harness.mjs`, run at `prepack` (and `--remove` at `postpack`, as the preview's
+  `pack-runtime.mjs` does), writes `dist/render-harness/` (the three entries bundled by esbuild; the catalogs and
+  `tokens.ts` in `data/`; `ws` vendored in `node_modules/ws`, because harness-paths requires it by a computed name) and
+  `dist/src/external/viewer/`, a **production** viewer build (1.66 MB, classified by EXP-017's `viewerBuild.ts`; a
+  development build stops the pack).
+- `files` names both. `render.ts` probes `dist/render-harness/measure-from-disk.js` after the checkout and asar
+  candidates, and its refusal now names the npm case.
+- The tarball: 5.7 MB packed, 30.6 MB unpacked (the harness adds about 7.7 MB, 5.5 MB of it the two catalogs).
+- `ws` is vendored rather than declared so the shared lockfile stays untouched. npm 10.9.4 packs a nested
+  `node_modules` (measured on a scratch package first).
+
+**AC1 ✅, the stranger's view.** `node scripts/own/stranger-render.mjs <tgz>` runs in an empty folder under the OS temp
+dir, with `HOME` empty and every `NODEGX_*` override removed. It starts the server as `npm create nodegx` registers it
+(`npx -y --package <tgz> noodl-mcp --allow-writes`), over stdio:
+- 6 bootstrap tools → `create_project` "Lingo" → 24 tools, `render_report` among them.
+- `render_report` (phone, no screenshot) → *"DONE — Rendered, and the render is clean"*, `tokens: "193 shipped
+  defaults"`, 8 s.
+- The harness that ran is the package's own: `…/_npx/<hash>/node_modules/@nodegx/mcp/dist/render-harness/`. No
+  checkout candidate can resolve from the temp dir.
+- **Control arm:** the same script on the registry's `@nodegx/mcp@0.1.0` (`--expect-refusal`) refuses: *"The render
+  harness could not be located"*, with the probed paths.
+
+**AC2 ✅, it sees a defect.** `--plant` adds a 3000px-wide Text under the Home page and renders again. The report names
+it: `minimum-layout-width` (*"cannot lay out below 1560px … div.ndl-visual-text at 3000px"*) and
+`text-wider-than-its-box`. 🔴 **But the first line said "the render is clean"** over *"0 errors, 2 warnings"*. That's
+P112-S13-CLEANWARNINGS (medium, fixed): `verdictFor` kept "clean" apart from "done" only for the poverty tells. Now
+the first line reads *"Rendered, and nothing is broken — but it warns: minimum-layout-width, text-wider-than-its-box.
+Nothing here blocks; read the warnings before calling it finished."* `done` stays true (VIB-007 M1). The untouched
+page still says clean. Re-run from a re-packed tarball: both lines as described.
+
+**Gates.** `vib007PovertyFindings` 23 / 23 (one new test). `renderCli` + `vib007RenderGate` 21 / 21 (two new: the npm
+layout found, and its control without the harness refuses). The editor's `uni-012` gate is 8 / 8 (§6).
+`npm run typecheck` in `noodl-mcp` has one error, in a P116 test (P112-S13-WORLDTYPECAST, filed, not ours).
+
+**Owed.** AC3: a release of `@nodegx/mcp` with the harness, published only after asking Richard (R11) and packed in a
+worktree at the pushed commit (OWN-011 s10: a pack in the shared checkout inlines peers' uncommitted files; this
+session's test tarballs were packed there and are tests only). The refusal says "from version 0.2.0 on", so the
+release must be 0.2.0 or the sentence changes. AC4 needs OWN-015's language app.
+

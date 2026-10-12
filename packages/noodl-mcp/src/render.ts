@@ -314,7 +314,14 @@ export function resolveRenderCli(fromDir: string = __dirname): ResolvedRenderCli
      * Plain Node does not — see `harness-paths.js` for the four measurements.
      */
     path.resolve(fromDir, '..', 'app.asar', 'render-harness', 'measure-from-disk.js'),
-    path.resolve(fromDir, '..', '..', 'app.asar', 'render-harness', 'measure-from-disk.js')
+    path.resolve(fromDir, '..', '..', 'app.asar', 'render-harness', 'measure-from-disk.js'),
+    /**
+     * P112 OWN-014 — the npm install. `npm pack` bundles the harness into this package's own
+     * `dist/render-harness/` (`build-render-harness.mjs`, run by `prepack`), with a production viewer at
+     * `dist/src/external/viewer`, the packaged editor's layout one level down, so `harness-paths.js`
+     * resolves it with no new rule. Bundled, `fromDir` is `dist/`.
+     */
+    path.resolve(fromDir, 'render-harness', 'measure-from-disk.js')
   ];
   for (const candidate of candidates) {
     const found = push(candidate);
@@ -427,6 +434,8 @@ export async function runRenderReport(
           'NODEGX_RENDER_CLI to an unpacked measure-from-disk.js.'
         : 'The render harness could not be located, so the page cannot be rendered or measured. On a packaged ' +
           'install it ships inside the app and this means the installation is incomplete — reinstall NodeGX. ' +
+          'Installed from npm, it ships inside @nodegx/mcp (dist/render-harness) from version 0.2.0 on; an older ' +
+          'version has none, so run npx -y @nodegx/mcp@latest. ' +
           'From a source checkout, run this server from the checkout or set NODEGX_RENDER_CLI to ' +
           'scripts/devtools/measure-from-disk.js. If you only need the write and not the picture, ' +
           'allow_unrendered writes the bundle with the render check deliberately unanswered.',

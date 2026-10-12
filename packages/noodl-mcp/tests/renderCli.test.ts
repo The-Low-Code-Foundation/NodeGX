@@ -120,3 +120,32 @@ describe('resolveRenderCli on a packaged install, from plain Node', () => {
     expect(resolved.overrideMissing).toBe('/nowhere/measure-from-disk.js');
   });
 });
+
+describe('resolveRenderCli on an npm install (P112 OWN-014)', () => {
+  /** `<tmp>/home/.npm/_npx/<hash>/node_modules/@nodegx/mcp/dist`, the bundled server's `__dirname` under npx. */
+  function fakeNpmInstall(withHarness: boolean): string {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'own-014-'));
+    const dist = path.join(root, 'home', '.npm', '_npx', 'abc123', 'node_modules', '@nodegx', 'mcp', 'dist');
+    fs.mkdirSync(dist, { recursive: true });
+    if (withHarness) {
+      fs.mkdirSync(path.join(dist, 'render-harness'));
+      fs.writeFileSync(path.join(dist, 'render-harness', 'measure-from-disk.js'), '');
+    }
+    return dist;
+  }
+
+  it('finds the harness `prepack` bundled into the package, and runs it with plain node', () => {
+    const dist = fakeNpmInstall(true);
+    const resolved = resolveRenderCli(dist);
+    expect(resolved.entry).toBe(path.join(dist, 'render-harness', 'measure-from-disk.js'));
+    expect(resolved.exec).toBe(process.execPath);
+    expect(resolved.viaElectron).toBeUndefined();
+  });
+
+  it('🔴 the control: the same install without it (0.1.0) refuses, and says where it looked', () => {
+    const dist = fakeNpmInstall(false);
+    const resolved = resolveRenderCli(dist);
+    expect(resolved.entry).toBeNull();
+    expect(resolved.probed).toContain(path.join(dist, 'render-harness', 'measure-from-disk.js'));
+  });
+});
