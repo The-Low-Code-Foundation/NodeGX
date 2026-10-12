@@ -19,7 +19,7 @@ the drive in the dev editor found the copy made twice per open, and measured OPE
 | OWN-012 the screen, from the descriptions | 📋 | — | step 1 **Opus**, 2–3 **Fable** |
 | **OWN-013 the 0.4.0 cut** | 🟡 **G1 G2 G3 ✅, G5 G6 ✅, G4 🟡** (the six checks fixed locally, §8; `cline-dev` pushed for CI, R20), **G7 🟡** (PAGEPORTS open); G8–G10 ⬜ | unit `own-013` 10/10 + two mutants; drive §7; cut-tree `test:ci` 3015 / 1 by name (§8) | **Opus** |
 | **OWN-014 the agent sees its app** (s13–s14) | 🟡 AC1 ✅ AC2 ✅; s14: KEYCHAIN fixed (renders had hung on a macOS dialog); AC4 half (Home yes, Lesson not: route parameter); AC3 publish owed | `scripts/own/stranger-render.mjs` + control | **Opus** |
-| **OWN-015 the backend from npm** (s13–s14) | 🟡 a stranger built the language app and it SPEAKS after fixes + two repairs on a copy (§7–§8); AC2 ✅ (requests); R26/R27 built; owed CFPORTS, UNDEPLOYED, DETACHEDVISUAL, a fresh round (AC1), AC4 publish | `own-015/` (the round's scripts, as they ran) | **Opus** |
+| **OWN-015 the backend from npm** (s13–s15) | 🟡 **AC1 ✅ (s15)**: a fresh stranger round speaks with no repair (§10); AC2 ✅; CFPORTS/UNDEPLOYED/DETACHEDVISUAL fixed (§9); owed WAVTWICE (static tail), AC4 publish | `own-015/` (the round's scripts, as they ran) | **Opus** |
 | **OWN-016 ship it** (s13) | 🟡 AC1 ✅, live at https://lingo.nodegx.io, AC4 reboot ✅; phone check with the real app and AC5 publish owed | Chrome over CDP, 0 errors; broken-project control | **Opus** |
 
 **Built but undriven: 0** for OWN-013 (all three driven 2026-10-12, OWN-013 §7). A P112 peer (OWN-014/015/016,
@@ -81,6 +81,27 @@ should switch** (README §0.2). Do not wait for an answer.
   picker?* (OWN-006 §6.3); who bumps the next npm release (s10).
 
 **Not this phase's to fix, but owed:** P112-S7-TEXTDEFAULTS, P112-S8-SHAREDTARGET, P112-S9-FRESHFONT (open).
+
+## s15 (2026-10-12, Opus): the lingo app speaks with no repair (OWN-015 AC1 ✅)
+
+Read OWN-015 §9–§10 first. s14 had been left uncommitted at the `/clear`; it's committed (`908f8f478`). Fixed and
+committed: CFPORTS (`5ff71216f`: the bare-port refusal also covers an instance's own `ports` and the cloud
+Request/Response; 10 examples rewired), UNDEPLOYED (`787876713`: cloud writes say "deploy now" and reveal the tool)
+and DETACHEDVISUAL (`9505d342d`: a warning). A fresh `claude -p` round from tarballs packed at HEAD, with a sentence
+that never says NodeGX, built `french-phrases` ($3.75, 84 turns) and deployed it unprompted. Richard pasted the key
+into the project's `.env`; it **speaks** (desktop and phone, to the end, key 0 hits in 2 MB, control 4).
+
+**Next, in order:**
+1. **P112-S15-WAVTWICE** (medium): 2/2 agents double-wrap Gemini's finished WAV, so each phrase ends in static.
+   Smallest fix: a catalog example that plays a cloud function's audio as it is (wrapping only when the MIME type is
+   `audio/L16`). Grade it with a fresh round whose tail RMS stays at speech-end levels.
+2. **Re-pack 0.2.0** (mcp, preview, create-nodegx) in the `npm-020` worktree at a pushed commit. Ask before pushing
+   and before publishing (R11). Then `scripts/own/stranger-*.mjs` from the registry (OWN-014 AC3, OWN-015 AC4,
+   OWN-016 AC5).
+3. OWN-016: deploy the stranger's app to lingo.nodegx.io for the phone check (Richard's VM; ask).
+4. OWN-014 AC4's Lesson half (a route parameter). Still open from s14: MOVEDDEPLOY, KITROOTDEPLOY (P107's).
+Filed this session: P112-S15-SUNDAYGATE (fixed), P112-S15-TWOMCPREDS (two MCP specs red at HEAD, not ours).
+The round's project, home and tarballs are in s15's scratchpad (`round/`, `tgz/`); scripts in `own-015/s15/`.
 
 ## s14 (2026-10-12, Opus): the language app, built by a stranger, speaks
 

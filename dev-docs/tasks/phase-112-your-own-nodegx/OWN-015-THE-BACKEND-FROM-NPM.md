@@ -4,7 +4,7 @@
 when it leaves the monorepo, and the secret's shape across the MCP, the backend and the cloud node). **Opus** for the
 packaging, the stranger's runs and the publish.
 
-**Status: 🟡 s14 (2026-10-12): a stranger agent built the language app from one sentence (§7); it SPEAKS (real Gemini, in the preview, phone and desktop) after three product fixes (KEYCHAIN, DAYTWO, NOBACKEND), the deploy the agent skipped, and two repairs on a copy (CFPORTS, DETACHEDVISUAL); the key is in 0 of the page's requests (AC2 ✅). Owed: UNDEPLOYED, CFPORTS, DETACHEDVISUAL fixed, then a fresh round with no repair (AC1); re-pack + publish (AC4).**
+**Status: 🟡 s15 (2026-10-12): AC1 ✅. CFPORTS, UNDEPLOYED and DETACHEDVISUAL fixed (§9). A fresh stranger round from tarballs packed at HEAD built the app from a sentence without "NodeGX", deployed it unprompted, and it SPEAKS with no repair once Richard pasted the key into `.env` (§10). Owed: P112-S15-WAVTWICE (static tail, 2/2 agents; an example), then re-pack + publish (AC4).**
 
 ## 1. The person sentence
 
@@ -214,3 +214,55 @@ serves only what the deploy's own ignore rules would publish. 11-case spec, with
 
 **Owed now:** UNDEPLOYED, CFPORTS and DETACHEDVISUAL; then a fresh round 1 (no "NodeGX" in the sentence, checking
 NOTNODEGX) and round 2 with the `.env` route, which must speak with no repair (AC1); then the re-pack.
+
+## 9. Session 15 (2026-10-12, Opus): the three agent-path defects fixed
+
+s14's work was uncommitted at the `/clear`. It's committed first (`908f8f478`), after its 48 specs ran green and a
+search found the key's value in 0 of the committed paths (the control file hit).
+
+| bug | what the agent now meets | commit | spec |
+|---|---|---|---|
+| CFPORTS (+ P107-S89-CFEXAMPLES) | A bare cloud port is refused on all four ends, even when the instance declares it in its own `ports`; the refusal names `in-text` / `out-…` / `pm-…`. The examples taught the bare names on both sides: 10 of 109 (34 wires) are rewired, `catalog:examples` 109/109. Request, Response and Cloud Function descriptions say "wire `pm-text`, never `text`". | `5ff71216f` | `own015CloudPorts` (red before) |
+| UNDEPLOYED | `create_component`, `update_component` and `apply_plan` answer a cloud write with `cloudFunctionsNotDeployed.next` ("Call deploy_cloud_functions now…", or provision first), and reveal the two tools when deferred | `787876713` | `own015DeployNote` |
+| DETACHEDVISUAL | A visual node with no parent that a non-empty `visualRoots` leaves out is a `detached-visual-node` warning, with where to put it | `9505d342d` | `own015DetachedVisual` |
+
+Measured on the round's own unrepaired `bonjour`: `validate_project` reports the 4 dead cloud wires and the
+detached Video. The repaired copy reports none. Censuses: 635 cloud endpoints in templates and library, 0 bare; 820
+components, 0 detached visual nodes. Not a checker matter: the round's `speak.success` on a `JavaScriptFunction` is
+the node's real "script finished" signal (it also fires on an early return), not the script's own `out-success`.
+
+Found on the way: P112-S15-SUNDAYGATE (a planner spec skipped itself on the Sunday its subject changed; fixed) and
+P112-S15-TWOMCPREDS (two MCP specs red at HEAD, not from this work; filed).
+
+## 10. Session 15: a fresh stranger round speaks with no repair (AC1)
+
+Packed at `9505d342d` in s13's `npm-020` worktree (all six fixes found in the bundle). The packed `create-nodegx`
+ran in an empty folder with `HOME` empty and wrote `.mcp.json`, `CLAUDE.md` and `AGENTS.md`. `.mcp.json` pointed at
+the MCP tarball (0.2.0 is unpublished; the registry says 0.1.0). Then `claude -p` (Sonnet, `--strict-mcp-config`;
+`--allowedTools` pre-approves, it doesn't restrict) got **s14's round-1 sentence, which never says "NodeGX"**.
+
+- **NOTNODEGX ✅:** first calls `list_projects`, `create_project`. 84 turns, **$3.75**. Its file tools touched only
+  its own screenshot. It never opened `.env`.
+- **The agent's own path:** `provision_backend` → `set_function_secret` (no value: `.env` placeholder) → a plan → 
+  `apply_plan` → **`deploy_cloud_functions` with no prompting** (UNDEPLOYED ✅) → 3 `render_report` → `drive_page` ×5.
+  It found and fixed two bugs of its own (the function refused the browser's unauthenticated call; an upsert
+  needed a unique index), redeployed, and stopped at *"paste your Gemini API key after `GEMINI_API_KEY=`"*.
+  All its cloud ports are prefixed (`in-text`, `out-audioBase64`, `out-mimeType`; CFPORTS ✅). The player is a
+  JavaScript Function with a detached `new Audio()`, so DETACHEDVISUAL doesn't apply this time.
+- **Day two, as the person meets it:** a fresh server, `provision_backend` with the agent's backend name and **no
+  `force`** → `reused` on the same backend (DAYTWO ✅). `validate_project` 0 errors, 1 warning (FRESHFONT, known).
+- **The key, Richard's way (R26):** he pasted it into the project's `.env` and saved. `set_function_secret {name}`
+  answered `set: true, characters: 53` from the file. The packed preview answers `/.env` with 404 (ENVSERVED ✅).
+- **It speaks, unrepaired**, in the packed preview (headless Chrome, real CDP press, `elementFromPoint` checked, no
+  autoplay flag). Desktop: `playing` 2.0 s after the tap on *Bonjour*, played to the end (1.25 s of 1.25 s). Phone
+  (390×844): 3.0 s, to the end. 0 console errors. **The key is in 0 of 2.05 MB of requests and responses, and 0 in
+  the DOM; the control string is found 4 times.**
+  - The first drive read "not played": its probe listened on `document`, and a detached `Audio`'s events never get
+    there. The probe now wraps `HTMLMediaElement.prototype.play`.
+- **The static is back: P112-S15-WAVTWICE (filed).** Gemini returns a finished WAV with a C2PA chunk. This agent, like
+  s14's, wrapped it in a second header, so the tail after the speech measures RMS `5 → 15066 → 17174`. 2 of 2 agents,
+  so the kit has to show the right shape (an example first).
+
+**AC1 ✅ as written** (built from one sentence, speaks in the preview with no repair, key server-side). The video
+still needs WAVTWICE fixed. **Next:** WAVTWICE's example; re-pack; publish 0.2.0 after asking (AC4, R11); deploy this
+app to the VM for the phone check (OWN-016).
