@@ -92,6 +92,34 @@ backend rule, and many fixes to how nodes behave.**
 - Windows installers aren't signed, so SmartScreen will warn you. Choose More info, then Run anyway.
 - If you use the MCP server with an assistant, restart the assistant's session after updating.
 
+## npm packages 0.2.0 · 2026-10-12
+
+**Your agent can now look at the pages it builds. It can also keep an API key on a server and put your app in a
+folder you can host.**
+
+### New
+
+- **Your agent sees what it built.** `render_report` now works from npm. The agent renders each page and reads what it
+  measured before it says the work is done. It needs Chrome, Edge or Chromium on your machine.
+- **Your agent can start a backend.** `provision_backend` runs a NodeGX backend on your machine. Nothing else needs
+  installing.
+- **A cloud function can keep a key secret.** `set_function_secret` stores the key on the backend. A cloud function
+  reads it with a Secret node. The page never sees it.
+- **`nodegx-deploy`** writes your app to a folder you can host:
+  `npx --package @nodegx/preview nodegx-deploy <app folder> <output folder>`.
+- **`npm create nodegx`** now sets a folder up with `@nodegx/mcp` 0.2.0.
+
+### Fixed
+
+- Deploying cloud functions failed unless the agent was started inside an npm package.
+- A deploy copied `.mcp.json` and `CLAUDE.md` into the output folder. They are now left out.
+- A page with warnings was reported as clean. The report's first line now names the warnings.
+
+### Good to know
+
+- The backend needs Node 22.13 or later.
+- A folder set up with 0.1.0 keeps using 0.1.0. To move it to 0.2.0, change the version in its `.mcp.json` files.
+
 ## npm packages 0.1.0 · 2026-10-11
 
 **One command from npm now sets a folder up for your AI agent to build NodeGX apps in. The same release
