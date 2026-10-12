@@ -47,8 +47,49 @@ const AGENT_NOTE = [
   '',
   'Build in small steps: one component at a time, reading each answer before the next. A change the server refuses',
   'says exactly what to fix.',
+  '',
+  // P112 OWN-018 s2, quiz run 2: Mistral Large 4 in OpenCode ended its session after eight steps with "Let me study
+  // three examples" and no tool call — a reply without one ends the run there. Run 1 tested its quiz with
+  // `drive_page {page: "quiz"}` and never saw that pressing Start skipped question 1.
+  'Keep going until the app is built and you have tried it. Some agents end the session at the first reply that',
+  "calls no tool, so don't stop at a plan or a progress note: call the next tool.",
+  '',
+  "Try it the way a person arrives: `drive_page` from the app's start page (leave out `page`) and press through it,",
+  'not a page opened on its own.',
   ''
 ].join('\n');
+
+/**
+ * P112 OWN-018 s2 — OpenCode's settings for this folder (`opencode.json`, read from the folder it runs in): the same
+ * pinned server, and Mistral Large 4's context given as 128k. models.dev lists it at 1,048,576, so OpenCode never
+ * compacts a session; Mistral caches 70% of a prompt under ~128k tokens and 5% of one over it (quiz run 1:
+ * P112-OWN018-CACHE128K), so a long build paid full price on most of its steps. The model is left to the person;
+ * the limit only applies when they choose Large 4. Written only when absent, like the agent notes.
+ */
+const OPENCODE_CONFIG = 'opencode.json';
+
+function renderOpenCodeConfig(platform = process.platform) {
+  const entry = serverEntry(platform);
+  return (
+    JSON.stringify(
+      {
+        $schema: 'https://opencode.ai/config.json',
+        mcp: { [SERVER_NAME]: { type: 'local', command: [entry.command, ...entry.args], enabled: true } },
+        provider: { mistral: { models: { 'mistral-large-4': { limit: { context: 128000, output: 16384 } } } } }
+      },
+      null,
+      2
+    ) + '\n'
+  );
+}
+
+/** Writes `opencode.json` when absent. Returns 'written' or 'present'. */
+function writeOpenCodeConfig(dir, platform = process.platform) {
+  const file = path.join(dir, OPENCODE_CONFIG);
+  if (fs.existsSync(file)) return 'present';
+  fs.writeFileSync(file, renderOpenCodeConfig(platform));
+  return 'written';
+}
 
 /**
  * P112 OWN-018 — Mistral Vibe's settings for this folder. Vibe reads `.vibe/config.toml` from the folder it runs in
@@ -135,7 +176,7 @@ function serverEntry(platform = process.platform) {
 
 /**
  * Set `folder` up. Returns what happened, for the sentence; throws (with a sentence) when it will not write.
- * @returns {{ folder: string, file: string, outcome: 'written' | 'added' | 'present', notes: string[] }}
+ * @returns {{ folder: string, file: string, outcome: 'written' | 'added' | 'present', notes: string[], vibe: string, opencode: string }}
  */
 function setUp(folder, platform = process.platform) {
   const dir = path.resolve(folder);
@@ -146,7 +187,7 @@ function setUp(folder, platform = process.platform) {
 
   if (!fs.existsSync(file)) {
     fs.writeFileSync(file, JSON.stringify({ mcpServers: { [SERVER_NAME]: entry } }, null, 2) + '\n');
-    return { folder: dir, file, outcome: 'written', notes: writeAgentNotes(dir), vibe: writeVibeConfig(dir, platform) };
+    return { folder: dir, file, outcome: 'written', notes: writeAgentNotes(dir), vibe: writeVibeConfig(dir, platform), opencode: writeOpenCodeConfig(dir, platform) };
   }
   let config;
   try {
@@ -156,10 +197,10 @@ function setUp(folder, platform = process.platform) {
   }
   if (!config || typeof config !== 'object' || Array.isArray(config)) throw new Error(`${file} is not a JSON object; left as it is.`);
   const servers = config.mcpServers && typeof config.mcpServers === 'object' ? config.mcpServers : {};
-  if (servers[SERVER_NAME]) return { folder: dir, file, outcome: 'present', notes: writeAgentNotes(dir), vibe: writeVibeConfig(dir, platform) };
+  if (servers[SERVER_NAME]) return { folder: dir, file, outcome: 'present', notes: writeAgentNotes(dir), vibe: writeVibeConfig(dir, platform), opencode: writeOpenCodeConfig(dir, platform) };
   config.mcpServers = { ...servers, [SERVER_NAME]: entry };
   fs.writeFileSync(file, JSON.stringify(config, null, 2) + '\n');
-  return { folder: dir, file, outcome: 'added', notes: writeAgentNotes(dir), vibe: writeVibeConfig(dir, platform) };
+  return { folder: dir, file, outcome: 'added', notes: writeAgentNotes(dir), vibe: writeVibeConfig(dir, platform), opencode: writeOpenCodeConfig(dir, platform) };
 }
 
 function sentence(result) {
@@ -170,6 +211,7 @@ function sentence(result) {
       : `${result.outcome === 'written' ? 'Wrote' : 'Added the NodeGX server to'} ${result.file}.`;
   const notes = result.notes && result.notes.length ? [`Wrote ${result.notes.join(' and ')}: they tell your agent that apps here are NodeGX apps.`] : [];
   if (result.vibe === 'written') notes.push(`Wrote ${VIBE_CONFIG}: Mistral Vibe uses Mistral Large 4 and the NodeGX server here.`);
+  if (result.opencode === 'written') notes.push(`Wrote ${OPENCODE_CONFIG}: OpenCode gets the NodeGX server here.`);
   return [
     done,
     ...notes,
@@ -177,6 +219,7 @@ function sentence(result) {
     'Next:',
     `  1. Open your agent in ${here === '.' ? 'this folder' : here} (Claude Code: cd ${here} && claude) and accept the "${SERVER_NAME}" server.`,
     `     Mistral Vibe: cd ${here} && vibe --legacy-harness, and trust the folder when it asks.`,
+    `     OpenCode: cd ${here} && opencode (with Mistral: opencode -m mistral/mistral-large-4).`,
     '  2. Say what you want to build. Your agent talks it through with you, then makes the app in a folder here.',
     `  3. See it: npx ${PREVIEW_PACKAGE} <the app's folder> --open`,
     '',
@@ -202,4 +245,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { AGENT_FILES, AGENT_NOTE, MCP_PACKAGE, MCP_VERSION, SERVER_NAME, VIBE_ALLOWED_TOOLS, VIBE_CONFIG, renderVibeConfig, serverEntry, setUp };
+module.exports = { AGENT_FILES, AGENT_NOTE, MCP_PACKAGE, MCP_VERSION, OPENCODE_CONFIG, SERVER_NAME, VIBE_ALLOWED_TOOLS, VIBE_CONFIG, renderOpenCodeConfig, renderVibeConfig, serverEntry, setUp };

@@ -11,8 +11,10 @@ const {
   AGENT_NOTE,
   MCP_PACKAGE,
   MCP_VERSION,
+  OPENCODE_CONFIG,
   VIBE_ALLOWED_TOOLS,
   VIBE_CONFIG,
+  renderOpenCodeConfig,
   renderVibeConfig,
   serverEntry,
   setUp
@@ -32,7 +34,7 @@ test('an empty folder gets the bootstrap server, pinned, and the two agent notes
   const dir = path.join(tmp(), 'my-apps');
   const run = spawnSync(process.execPath, [BIN, dir], { encoding: 'utf8' });
   assert.equal(run.status, 0, run.stderr);
-  assert.deepEqual(fs.readdirSync(dir).sort(), ['.mcp.json', '.vibe', 'AGENTS.md', 'CLAUDE.md']);
+  assert.deepEqual(fs.readdirSync(dir).sort(), ['.mcp.json', '.vibe', 'AGENTS.md', 'CLAUDE.md', 'opencode.json']);
   const entry = read(path.join(dir, '.mcp.json')).mcpServers.nodegx;
   assert.deepEqual(entry, serverEntry());
   assert.ok(entry.args.includes(`${MCP_PACKAGE}@${MCP_VERSION}`));
@@ -142,3 +144,31 @@ test('P112 OWN-018: the agent notes name call_tool for an agent whose tool list 
   assert.match(AGENT_NOTE, /one component at a time/);
 });
 
+test('P112 OWN-018 s2: OpenCode gets the same pinned server, and Large 4 a 128k context so it compacts before the cache stops', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  const run = spawnSync(process.execPath, [BIN, dir], { encoding: 'utf8' });
+  assert.equal(run.status, 0, run.stderr);
+  const config = read(path.join(dir, OPENCODE_CONFIG));
+  assert.equal(fs.readFileSync(path.join(dir, OPENCODE_CONFIG), 'utf8'), renderOpenCodeConfig());
+  const entry = serverEntry();
+  assert.deepEqual(config.mcp.nodegx, { type: 'local', command: [entry.command, ...entry.args], enabled: true });
+  // Measured (P112-OWN018-CACHE128K): Mistral caches 70% of a prompt under ~128k tokens and 5% of one over it.
+  assert.deepEqual(config.provider.mistral.models['mistral-large-4'].limit, { context: 128000, output: 16384 });
+  // The model stays the person's choice: an OpenCode user on another model is not switched to Mistral.
+  assert.equal(config.model, undefined);
+  assert.match(run.stdout, /Wrote opencode\.json/);
+  assert.match(run.stdout, /OpenCode: cd .* && opencode \(with Mistral: opencode -m mistral\/mistral-large-4\)/);
+});
+
+test("P112 OWN-018 s2: a person's own opencode.json is never replaced", () => {
+  const dir = tmp();
+  fs.writeFileSync(path.join(dir, OPENCODE_CONFIG), '{"model":"mine"}\n');
+  assert.equal(setUp(dir).opencode, 'present');
+  assert.equal(fs.readFileSync(path.join(dir, OPENCODE_CONFIG), 'utf8'), '{"model":"mine"}\n');
+});
+
+test('P112 OWN-018 s2: the agent notes say keep going until the app is tried, and try it from the start page', () => {
+  assert.match(AGENT_NOTE, /Keep going until the app is built and you have tried it/);
+  assert.match(AGENT_NOTE, /calls no tool, so don't stop at a plan or a progress note: call the next tool/);
+  assert.match(AGENT_NOTE, /`drive_page` from the app's start page \(leave out `page`\)/);
+});

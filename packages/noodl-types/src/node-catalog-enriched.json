@@ -7124,7 +7124,8 @@
           "`isfalse` → a message's `visible`: show an error as a level rather than pulsing it with a signal."
         ],
         "antiPatterns": [
-          "Wiring `ontrue` (signal) to a boolean input like `visible` delivers only a momentary pulse — use `result` for anything that must stay on."
+          "Wiring `ontrue` (signal) to a boolean input like `visible` delivers only a momentary pulse — use `result` for anything that must stay on.",
+          "Leaving Run On Value Change on when `ontrue`/`onfalse` DOES something (advance a question, navigate, set a Variable, start a Timer): the gate then fires whenever its input settles, including once while the page loads, before anyone has acted. Set `runOnChange-condition: false` and wire `eval` from the signal that should ask — a Repeat's tick, a button's click, a Timer's finish."
         ],
         "relatedNodes": [
           "And",
