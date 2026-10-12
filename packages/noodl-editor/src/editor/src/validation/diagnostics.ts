@@ -78,6 +78,12 @@ export enum DiagnosticCode {
    */
   DetachedPageContent = 'detached-page-content',
   /**
+   * P112-S14-DETACHEDVISUAL: a visual node with no parent that the component's `visualRoots` does not list, so the
+   * runtime never mounts it and its inputs (`play`, `src`…) do nothing. Only files written outside the editor can hold
+   * one (the editor re-derives `visualRoots` on save). `warning`, from the agent server's precondition checks.
+   */
+  DetachedVisualNode = 'detached-visual-node',
+  /**
    * P107 R23: a node sits where the editor does not let it sit in the visual tree — a logic node (or a component with
    * no visual root) inside another node, a child its parent does not hold, children under a node that holds none, or
    * visual roots of different categories. `error`, as the editor marks it (`@nodegx/project-contract/hierarchy`).
