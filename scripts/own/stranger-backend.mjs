@@ -3,16 +3,18 @@
  * P112 OWN-015 — a cloud function that keeps the key, as a stranger's agent builds it: the MCP from a tarball (or the
  * registry), in an empty folder, `HOME` empty, spoken to over stdio.
  *
- *   node scripts/own/stranger-backend.mjs <mcp .tgz | registry spec>
+ *   node scripts/own/stranger-backend.mjs <mcp .tgz | registry spec>          Google stood in for by a local server
+ *   node scripts/own/stranger-backend.mjs <mcp .tgz | registry spec> --real   the real Gemini TTS, with the key in the
+ *                                                                              checkout's .env (GEMINI_TTS_API_KEY)
  *
  * In order, through the tools an agent has:
  *   create_project "Lingo" → provision_backend → set_function_secret GOOGLE_TTS_KEY → create_component
  *   `#__cloud__/speak` (Request → Secret → Function that calls text:synthesize → Response) → deploy_cloud_functions →
  *   POST /functions/speak {text, voice}.
  *
- * Google is stood in for by a local server that answers `text:synthesize` with audio ONLY when the right key arrives
- * in `x-goog-api-key`, so the run proves the key travelled backend → API and back without a real key. The function's
- * endpoint constant is the one thing that differs from the shipped fixture (the real URL is in FIXTURE_ENDPOINT).
+ * Without --real, Google is stood in for by a local server shaped like Gemini's `generateContent` that answers with
+ * audio ONLY when the right key arrives in `x-goog-api-key`, so the run proves the key travelled backend → API and
+ * back. With --real the function calls FIXTURE_ENDPOINT itself and the answer must be a RIFF/WAVE file.
  *
  * Then OWN-015 AC2: the key's value is searched for in every file under the project folder and in every tool result
  * the agent was shown. Zero hits is the claim. The control arm puts the same key in an HTTP Request node in a page
@@ -33,15 +35,18 @@ const mcpRequire = createRequire(path.join(here, '..', '..', 'packages', 'noodl-
 const { Client } = await import(mcpRequire.resolve('@modelcontextprotocol/sdk/client/index.js'));
 const { StdioClientTransport } = await import(mcpRequire.resolve('@modelcontextprotocol/sdk/client/stdio.js'));
 
-export const FIXTURE_ENDPOINT = 'https://texttospeech.googleapis.com/v1/text:synthesize';
+export const FIXTURE_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-tts:generateContent';
 
-const spec = process.argv[2];
+const spec = process.argv.slice(2).find((a) => !a.startsWith('--'));
+const REAL = process.argv.includes('--real');
 if (!spec) {
   console.error('usage: stranger-backend.mjs <mcp .tgz | registry spec>');
   process.exit(2);
 }
 const mcp = fs.existsSync(spec) ? path.resolve(spec) : spec;
-const KEY = 'own015-' + crypto.randomBytes(12).toString('hex');
+const KEY = REAL
+  ? fs.readFileSync(path.join(here, '..', '..', '.env'), 'utf8').match(/^GEMINI_TTS_API_KEY=(.*)$/m)[1].trim().replace(/^["']|["']$/g, '')
+  : 'own015-' + crypto.randomBytes(12).toString('hex');
 
 const say = (step, data = {}) => console.log(JSON.stringify({ step, ...data }));
 let failed = false;
@@ -66,7 +71,7 @@ const stub = http.createServer((req, res) => {
       /* answered below */
     }
     res.setHeader('content-type', 'application/json');
-    if (req.method !== 'POST' || !req.url.startsWith('/v1/text:synthesize')) {
+    if (req.method !== 'POST' || !req.url.startsWith('/v1beta/models/gemini-3.8-flash-tts:generateContent')) {
       res.statusCode = 404;
       return res.end(JSON.stringify({ error: { message: 'not found' } }));
     }
@@ -74,12 +79,13 @@ const stub = http.createServer((req, res) => {
       res.statusCode = 400;
       return res.end(JSON.stringify({ error: { message: 'API key not valid. Please pass a valid API key.' } }));
     }
-    const text = input?.input?.text ?? '';
-    res.end(JSON.stringify({ audioContent: Buffer.from(`ID3-stand-in-mp3:${text}`).toString('base64') }));
+    const text = input?.contents?.[0]?.parts?.[0]?.text ?? '';
+    const data = Buffer.from(`RIFF-stand-in-wav:${text}`).toString('base64');
+    res.end(JSON.stringify({ candidates: [{ content: { parts: [{ inlineData: { mimeType: 'audio/wav', data } }] } }] }));
   });
 });
 await new Promise((r) => stub.listen(0, '127.0.0.1', r));
-const STUB = `http://127.0.0.1:${stub.address().port}/v1/text:synthesize`;
+const STUB = `http://127.0.0.1:${stub.address().port}/v1beta/models/gemini-3.8-flash-tts:generateContent`;
 
 // --- the stranger's folder -----------------------------------------------------------------------------------------
 const work = fs.mkdtempSync(path.join(os.tmpdir(), 'stranger-backend-'));
@@ -125,7 +131,7 @@ try {
   const made = await call('create_project', {
     directory: projectDir,
     name: 'Lingo',
-    request: 'A Duolingo-style app: short lessons, each word spoken aloud by Google text-to-speech.',
+    request: 'A Duolingo-style app: short lessons, each word spoken aloud by Gemini text-to-speech.',
     pages: [{ name: 'Home', purpose: 'Pick a lesson.' }],
     backend: { kind: 'nodegx', description: 'A cloud function that turns a sentence into speech' },
     agreed: true
@@ -143,7 +149,7 @@ try {
   const backendId = prov.json?.backendId ?? prov.json?.backend?.id ?? prov.json?.id;
   const endpoint = prov.json?.endpoint ?? prov.json?.backend?.endpoint;
 
-  const created = await call('create_component', speakComponent(STUB));
+  const created = await call('create_component', speakComponent(REAL ? FIXTURE_ENDPOINT : STUB));
   if (!check('create_component', !created.isError, { head: created.text.slice(0, 300) })) throw new Error('stop');
 
   const deployed = await call('deploy_cloud_functions', { backendId });
@@ -157,11 +163,11 @@ try {
   const early = await fetch(`${base}/functions/speak`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ text: 'Bonjour', voice: 'fr-FR-Neural2-A' })
+    body: JSON.stringify({ text: 'Bonjour', voice: 'Kore' })
   });
   const earlyBody = await early.text();
   shown.push(earlyBody);
-  check('AC3 no secret yet: the error names it', early.status !== 200 && earlyBody.includes('GOOGLE_TTS_KEY') && seen.length === 0, {
+  check('AC3 no secret yet: the error names it', early.status !== 200 && earlyBody.includes('GOOGLE_TTS_KEY') && (REAL || seen.length === 0), {
     status: early.status,
     body: earlyBody.slice(0, 300),
     apiCalls: seen.length
@@ -178,7 +184,7 @@ try {
   const answer = await fetch(`${base}/functions/speak`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ text: 'Bonjour, je m’appelle Lingo.', voice: 'fr-FR-Neural2-A' })
+    body: JSON.stringify({ text: 'Bonjour, je m’appelle Lingo.', voice: 'Kore' })
   });
   const answerBody = await answer.text();
   shown.push(answerBody);
@@ -188,13 +194,18 @@ try {
   } catch {
     /* checked below */
   }
-  const decoded = audio ? Buffer.from(audio, 'base64').toString('utf8') : '';
-  check('call /functions/speak', answer.status === 200 && decoded === 'ID3-stand-in-mp3:Bonjour, je m’appelle Lingo.', {
+  const bytes = audio ? Buffer.from(audio, 'base64') : Buffer.alloc(0);
+  const heard = REAL
+    ? bytes.subarray(0, 4).toString('latin1') === 'RIFF' && bytes.subarray(8, 12).toString('latin1') === 'WAVE' && bytes.length > 20000
+    : bytes.toString('utf8') === 'RIFF-stand-in-wav:Bonjour, je m’appelle Lingo.';
+  check('call /functions/speak', answer.status === 200 && heard, {
     status: answer.status,
-    decoded: decoded.slice(0, 80),
+    bytes: bytes.length,
+    head: bytes.subarray(0, 12).toString('latin1'),
     body: audio ? undefined : answerBody.slice(0, 300),
-    apiSawKey: seen.map((s) => s.keyMatched)
+    apiSawKey: REAL ? 'real Gemini' : seen.map((s) => s.keyMatched)
   });
+  if (REAL && bytes.length) fs.writeFileSync(path.join(work, 'speak.wav'), bytes);
 
   // --- AC2: the key is nowhere the browser or the agent reaches ---------------------------------------------------
   const hits = searchTree(projectDir, KEY);
@@ -232,26 +243,26 @@ function speakComponent(endpoint) {
   const script =
     "if (!Inputs.key) return;\n" +
     `var ENDPOINT = ${JSON.stringify(endpoint)};\n` +
-    "var voice = String(Inputs.voice || 'fr-FR-Neural2-A');\n" +
+    "var voice = String(Inputs.voice || 'Kore');\n" +
     'fetch(ENDPOINT, {\n' +
     "  method: 'POST',\n" +
     "  headers: { 'content-type': 'application/json', 'x-goog-api-key': Inputs.key },\n" +
     '  body: JSON.stringify({\n' +
-    "    input: { text: String(Inputs.text || '') },\n" +
-    '    voice: { languageCode: voice.split(\'-\').slice(0, 2).join(\'-\'), name: voice },\n' +
-    "    audioConfig: { audioEncoding: 'MP3' }\n" +
+    "    contents: [{ parts: [{ text: String(Inputs.text || '') }] }],\n" +
+    "    generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } }\n" +
     '  })\n' +
     '})\n' +
     '  .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })\n' +
     '  .then(function (x) {\n' +
-    '    if (x.ok && x.j.audioContent) { Outputs.audio = x.j.audioContent; Outputs.ok(); }\n' +
-    "    else { Outputs.reason = (x.j.error && x.j.error.message) || 'Text-to-speech refused the request'; Outputs.failed(); }\n" +
+    '    var part = x.j && x.j.candidates && x.j.candidates[0] && x.j.candidates[0].content && x.j.candidates[0].content.parts[0];\n' +
+    '    if (x.ok && part && part.inlineData) { Outputs.audio = part.inlineData.data; Outputs.mime = part.inlineData.mimeType; Outputs.ok(); }\n' +
+    "    else { Outputs.reason = (x.j && x.j.error && x.j.error.message) || 'Text-to-speech refused the request'; Outputs.failed(); }\n" +
     '  })\n' +
     "  .catch(function () { Outputs.reason = 'Text-to-speech could not be reached'; Outputs.failed(); });";
   return {
     path: '#__cloud__/speak',
     type: 'cloud',
-    description: 'Turns a sentence into speech with Google text-to-speech. The key never leaves the backend.',
+    description: 'Turns a sentence into speech with Gemini text-to-speech (WAV). The key never leaves the backend.',
     nodes: [
       { id: 'spk_req', type: 'noodl.cloud.request', label: 'Say this', parameters: { params: 'text,voice', allowNoAuth: true } },
       { id: 'spk_key', type: 'noodl.cloud.secret', label: 'GOOGLE_TTS_KEY', parameters: { name: 'GOOGLE_TTS_KEY' } },
@@ -264,13 +275,14 @@ function speakComponent(endpoint) {
           { name: 'in-voice', displayName: 'voice', plug: 'input', type: '*', group: 'Inputs' },
           { name: 'in-key', displayName: 'key', plug: 'input', type: '*', group: 'Inputs' },
           { name: 'out-audio', displayName: 'audio', plug: 'output', type: '*', group: 'Outputs' },
+          { name: 'out-mime', displayName: 'mime', plug: 'output', type: '*', group: 'Outputs' },
           { name: 'out-reason', displayName: 'reason', plug: 'output', type: '*', group: 'Outputs' },
           { name: 'out-ok', displayName: 'ok', plug: 'output', type: 'signal', group: 'Outputs' },
           { name: 'out-failed', displayName: 'failed', plug: 'output', type: 'signal', group: 'Outputs' }
         ],
         parameters: { functionScript: script }
       },
-      { id: 'spk_ok', type: 'noodl.cloud.response', label: 'The audio', parameters: { params: 'audioContent' } },
+      { id: 'spk_ok', type: 'noodl.cloud.response', label: 'The audio', parameters: { params: 'audioContent,mimeType' } },
       { id: 'spk_no', type: 'noodl.cloud.response', label: 'Why not', parameters: { status: 'failure' } }
     ],
     connections: [
@@ -280,6 +292,7 @@ function speakComponent(endpoint) {
       { fromId: 'spk_key', fromProperty: 'value', toId: 'spk_tts', toProperty: 'in-key' },
       { fromId: 'spk_key', fromProperty: 'done', toId: 'spk_tts', toProperty: 'run' },
       { fromId: 'spk_tts', fromProperty: 'out-audio', toId: 'spk_ok', toProperty: 'pm-audioContent' },
+      { fromId: 'spk_tts', fromProperty: 'out-mime', toId: 'spk_ok', toProperty: 'pm-mimeType' },
       { fromId: 'spk_tts', fromProperty: 'out-ok', toId: 'spk_ok', toProperty: 'send' },
       { fromId: 'spk_tts', fromProperty: 'out-reason', toId: 'spk_no', toProperty: 'errorMessage' },
       { fromId: 'spk_tts', fromProperty: 'out-failed', toId: 'spk_no', toProperty: 'send' },
