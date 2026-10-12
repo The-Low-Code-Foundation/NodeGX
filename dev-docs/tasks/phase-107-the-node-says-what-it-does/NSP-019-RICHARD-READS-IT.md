@@ -1,7 +1,7 @@
 # NSP-019 — Richard reads it: the inspector shows a node's rules, and *Try this node*
 
 **Opened 2026-09-29.** **Depends on NSP-018.**
-**Status: 🟡 s95 (2026-10-12): Richard drove the modal (AC3, §5.6): "It's cool, but" nothing said his settings (Min 3 above Max 1) were wrong. Built the same session: diagnostics in the spec format, the runtime target and the modal; Counter v2 warns. AC3 waits on his look at that. (s94: the R33 modal built, §5.5; s93: the mockup, §5.4; s91: "Needs changes", §5.3; AC1/AC2 s77.)**
+**Status: ✅ s95 (2026-10-12): AC3 met — Richard drove the modal, found that nothing said his settings were wrong (R35, §5.6), the warning was built and he signed it off in the running editor: "Yes, that's it" (§5.7). (s94: the R33 modal built, §5.5; s93: the mockup, §5.4; s91: "Needs changes", §5.3; AC1/AC2 s77.)**
 
 ## 1. The person sentence
 
@@ -275,3 +275,22 @@ With his settings and Limits Enabled ON, both Increase and Decrease report Uncha
 **Not built:** the rules column does not list a node's diagnostics (it reads the generated catalog; a regen of a shared file);
 no other node declares one yet (9 runtime call sites already raise one); the Problems panel and the agent's checker do not
 read `diagnostics` statically — the panel shows the runtime's warning only while the preview runs.
+
+### 5.7 s95 (later the same day) — the warning, driven in the editor and signed off
+
+A second launch on a fresh renamed copy (unregistered afterwards; source SHA unchanged; 26 processes stopped). The Counter
+selected, *How this node works* opened, Start Value +2, Min Value +3, Max Value +1, Limits Enabled on, Increase pressed, each a
+real button in the visible dialog. On screen ([shot](shots/nsp-019-s95-warning.png)): the red line above the card, *"Min Value 3
+is above Max Value 1. With Limits Enabled on, the count gets stuck."*, the card's danger ring, row 7 *Max Value 1* with the
+sentence and its *Warning* chip, row 9 *Increase Count — nothing moves — Unchanged*.
+
+Asked in plain words whether this is what he meant: **"Yes, that's it."** AC3 is met.
+
+**Seen, not measured:** at the 1368 × 784 window the banner pushes the newest rows below the dialog's bottom edge (row 7 was
+the last one visible; rows 8 and 9 were in the list below it). Whether the Try column scrolls them into view on its own was
+not read. And Current Count read 1 beside Start Value 2: the Counter's real rule (only the first Start Value seeds the count;
+stepping 0 → 1 → 2 made 1 the first), said to Richard in one line.
+
+**Trap met again:** the first attempt clicked the dialog's hidden measuring copy (two `[role=dialog]` in the DOM; memory
+"`cdp click` HITS GHOST in Modal"). Pick the dialog that `elementFromPoint` lands in.
+

@@ -14,7 +14,7 @@ Counter never used it; the spec format could not declare one; the runtime test h
 target has a recording editor now, and records the node's own `<type>/` keys for a spec that declares any); a target
 without an editor (the export, the strangers) is graded without them. Counter v2 warns *"Min Value 3 is above Max Value 1.
 With Limits Enabled on, the count gets stuck."* The modal shows it above the card with a danger ring, as a *Warning* row,
-and *Fixed* when it clears. Also fixed: the Video page model, red since s92 (P107-S95-VIDEOPAGEMODEL).
+and *Fixed* when it clears. Also fixed: the Video page model, red since s92 (P107-S95-VIDEOPAGEMODEL). Driven in the editor afterwards and signed off by Richard: **"Yes, that's it"** — NSP-019 is ✅.
 
 ## Board (from the task files)
 
@@ -23,7 +23,7 @@ and *Fixed* when it clears. Also fixed: the Video page model, red since s92 (P10
 | NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2's export half and the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18's) | s1 … s44 |
 | NSP-016 the visual nodes | ✅ s71; s73 SCROLLROOM | `aa8abb06f` … `fd6385beb` |
 | NSP-018 the spec speaks | ✅ s77 | s72 … s77 |
-| **NSP-019 Richard reads it** | 🟡 s77: AC1, AC2, the §2 table; s91: "Needs changes" (R30); s93: mockup, R33; s94: the modal built (§5.5); **s95: Richard drove it (R35, §5.6) — "It's cool, but" Min 3 above Max 1 said nothing → diagnostics built**. Left: **his look at the warning (AC3)** | s77 … s95 |
+| NSP-019 Richard reads it | ✅ s95: AC3 met — Richard drove the modal, "It's cool, but" (R35, §5.6), the warning built, signed off in the editor: "Yes, that's it" (§5.7) | s77 … s95 |
 | NSP-009 the ratchet | ✅ s64; s65 `contract`; s85 `ports` (`floor.ports` **132** since s87) | `6a1ed0084`, s65, s85, s87 |
 | NSP-010 a change is a version | ✅ s78. s92: 5 more specs carry a `changes` history (10 in all) | `36e08e29e`, `64f9576d9` |
 | NSP-017 the escape hatches | 🟡 s64–s68. Left: AC1's export half (P18's) | s64 … s68 |
@@ -35,16 +35,13 @@ and *Fixed* when it clears. Also fixed: the Video page model, red since s92 (P10
 | R26–R29 (the s91 rulings) | ✅ s92 | `a94119947`, `b8090d121`, `dccaa77e0`, `1c3166c57` |
 | R34 (singleton) | ✅ s93 | `83bb0de10` |
 | R33 (the modal) | ✅ built s94, driven by Richard s95 | s94 |
-| R35 (the settings say when they make no sense) | ✅ built s95 for Counter; the other nodes owed | s95 |
+| R35 (the settings say when they make no sense) | ✅ built and signed off s95 for Counter; the other nodes owed | `0d81cd398` |
 
 ## What s96 does (in order)
 
-1. **Show Richard the warning (NSP-019 AC3, R35)** if s95 did not get his look at it (§5.6 says). Same recipe as s95:
-   `npm run dev:debug`, a renamed copy of `NodeGX test projects/nodegx-debug-demo/project.json` registered in
-   `~/Library/Application Support/NodeGX/recently_opened_project.json` (remove it afterwards; source SHA `fa5f5a42…`), select
-   the Counter, open *How this node works*, set Min above Max. Record his words in §5.6. Ask in plain words, memory
-   [[ask-richard-a-ruling-in-plain-words]]; try the nonsense input yourself first, memory
-   [[a-faithful-simulator-of-a-silent-node-reads-as-the-checks-failing]].
+1. **Done in s95:** Richard saw the warning in the editor and said "Yes, that's it" (NSP-019 §5.7). Seen there and not measured:
+   at a 1368 × 784 window the red line pushes the newest *What happened* rows below the dialog's edge — read whether the Try
+   column scrolls them into view (R30 asked for that) before anything else; if not, a small fix and a bug file.
 2. **The other nodes (R35's "then go through the other nodes").** Two halves:
    - **Declare what the runtime already says.** 9 runtime call sites raise a diagnostic and no spec declares one: Date Add
      and Date Difference (`*/unknown-unit`), Text Input, the controls' shared helper (`controls/utils.ts` :410), For Each
@@ -123,5 +120,5 @@ NSP-010's and NSP-017's uncommitted notes (not this phase's sessions') were left
   ring). `typecheck:editor` 0, `typecheck:editor-tests` 0, `typecheck:runtime` 0, `typecheck:node-spec` 0,
   `css-token-check` clean, `spec-disagreements.js --check` up to date (166 rows, 60 types).
 - **Drive:** Richard's (§5.6), one launch, no edits while it ran: the dev server lived; torn down with `dev:stop`; the copy
-  unregistered; source SHA unchanged. **Not driven:** the warning itself in the app (built after the drive).
+  unregistered; source SHA unchanged. **Then driven:** a second launch, the warning in the visible dialog (banner, ring, Warning row, Unchanged), Richard's "Yes, that's it"; torn down (26), copy unregistered, SHA `fa5f5a42` unchanged.
 - **Not run:** `test:main`, `test:ci`, the Jasmine suite, the MCP suite (no MCP source changed).
