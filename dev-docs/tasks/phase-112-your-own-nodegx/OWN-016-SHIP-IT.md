@@ -5,7 +5,7 @@ the VM route only. The rest of P115 stays parked (Richard, 2026-10-07: *"after p
 experiment phase"*). **Model:** **Opus** for step 1 and the packaging. **Fable** if step 3's server layout (static
 site, backend, TLS, restarts) turns out to have no existing design to follow.
 
-**Status: 🟡 s13 (2026-10-12): step 1 built and AC1 ✅ from a packed tarball (§6): `npx --package @nodegx/preview nodegx-deploy <project> <out>`. Steps 2–4 (the VM) need Richard: a VM with SSH, a domain, and the go-ahead.**
+**Status: 🟡 s13 (2026-10-12): AC1 ✅ (§6); the VM route ✅ on nexus-1 without a public address (§8): site, backend, function and secret shipped by `own-016/ship-to-vm.sh`, real Gemini speech on the box, key nowhere but `secrets.env`, restart and crash recovery. Owed: DNS + https with a real app, a real reboot (Richard), publish.**
 
 ## 1. The person sentence
 
@@ -114,3 +114,32 @@ permission rule for it. Then: health, `/functions/speak` over loopback returns R
 `/srv/<app>` and `/opt/<app>` finds 0 (with `/etc/<app>/secrets.env` as the known-firing control),
 `systemctl restart` comes back, and `is-enabled` says enabled. A real reboot of nexus-1 is Richard's call: it serves
 live sites.
+
+## 8. Session 13, continued: the VM route, run
+
+Richard ran `ship-to-vm.sh` himself (`bash …/ship-to-vm.sh --ssh-key … --preview <0.2.0 preview tgz> --mcp-tgz <0.2.0
+mcp tgz> <project> <local backend> root@49.12.102.195 lingo 8692`, no domain, so Caddy was untouched): "it worked".
+The script lost its executable bit because the `chmod +x` was inside a refused command, so run it as `bash …`.
+
+**Read back on the box (this session, over SSH):**
+- `lingo-backend` is active and enabled at boot, and `/health` answers 200.
+- `/etc/lingo/secrets.env` is 640 root:lingo and holds `NODEGX_SECRET_GOOGLE_TTS_KEY` only. The function
+  `Lingo-babb9778.workflow.json` is installed.
+- `POST /functions/speak` over loopback → **real Gemini audio**: `audio/wav`, 119,394 bytes, RIFF/WAVE.
+- **Restart:** `systemctl restart` → new PID, health 200, `speak` 71,394 bytes RIFF. **Crash:** `kill -9` →
+  systemd restarted it within 5 s, health 200.
+- Neighbours: `nodegx.io`, `community.nodegx.io`, `todo.digitalbricks.io` and `digitalbricks.io` all answer 200. No
+  `lingo` Caddy drop-in exists.
+- 🔴 **AC3's search found the key in the site folder**: `/srv/lingo/site/noodl_bundles/b2-…json`. It was the OWN-015
+  driver's control page, which under `--real` carried the real key (P112-S13-CONTROLKEY, fixed, not exposed: no Caddy
+  route). It was deleted on the box. **After: 0 files under `/srv`, `/opt` and `/var/lib/lingo`; 1 in
+  `secrets.env` (the known-firing control).** The search did its job.
+
+**AC status:**
+- AC1 ✅ (§6).
+- AC2: the app runs on the VM and speaks over loopback. The public `https://` address and the phone check wait for a
+  DNS record and a real app (Richard: "we don't need the real app yet").
+- AC3 ✅ on the box, as above.
+- AC4: restart and crash recovery ✅, enabled at boot ✅. A real reboot of nexus-1 is Richard's call, because it
+  serves live sites.
+- AC5: publish (the commands are with Richard).
