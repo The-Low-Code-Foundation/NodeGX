@@ -1,7 +1,7 @@
 ---
 id: P107-C162
 title: Parse XML and Parse Feed — "Max Bytes" counts characters, not bytes, and its description says "larger than this"
-status: needs-ruling
+status: scheduled
 severity: low
 area: runtime / Parse XML and Parse Feed (noodl-runtime/src/nodes/std-library/data/xml.ts `parseXML` :118; feed.ts :383 goes through the same call)
 found: P107 NSP-018 s77, 2026-10-10 — writing the two nodes' rules in words (the streams-and-parsers lane)
@@ -23,3 +23,5 @@ contradicts the port's name one line above it, like C161's "second 0" beside "th
 **Ruling needed (Richard):** either measure bytes (`new TextEncoder().encode(text).length`, a cost on every parse of a
 large text, and the spec's cap changes with it — a version), or rename / re-describe the port ("Max Length, in
 characters") and keep the check. The words stay as they are until then.
+
+**Ruled 2026-10-12 (R28, P107 s91 rulings page, asked in plain words with the reach measured that morning):** **"Rename it 'Max Characters' and keep the check"** — display name and description only, on both parsers; the port id `maxBytes` stays, so saved projects need no migration. 0 Parse XML / Parse Feed nodes in Richard's projects. Not built yet.

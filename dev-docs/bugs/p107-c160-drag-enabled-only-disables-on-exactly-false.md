@@ -1,7 +1,7 @@
 ---
 id: P107-C160
 title: Drag — Enabled disables dragging only on exactly `false`: a wired `0` or the text "false" leaves the element draggable, while the description reads as "off"
-status: needs-ruling
+status: scheduled
 severity: low
 area: runtime / Drag (noodl-viewer-react/src/components/visual/Drag/Drag.tsx :262; the node's `inputProps.enabled`, noodl-viewer-react/src/nodes/visual/drag.ts :162-168)
 found: P107 NSP-018 s77, 2026-10-10 — writing the node's rules in words
@@ -33,3 +33,5 @@ examples `0` / `'false'` now disable — the smaller change and the one the desc
 behaviour and say it: the port description (drag.ts :165 and the spec's :215) reads "…off only on exactly false; 0 or the
 text 'false' leave it on". The lane's words for s77 name the precondition until ruled. Regression when fixed (a):
 `packages/nodegx-node-spec/scenarios/Drag.json` "Enabled wired 0 or the text 'false' disables dragging like false (row C160)".
+
+**Ruled 2026-10-12 (R26, P107 s91 rulings page, asked in plain words with the reach measured that morning):** **"Off means off: 0, empty and the word "false" stop dragging too"** — option (a). The runtime and the Drag spec change together, `version` up with a `changes` entry naming this row; the regression scenario above. Nobody is hit today (5 wired Enabled ports in 258 of Richard's projects, all from a Switch). Not built yet.

@@ -1,7 +1,7 @@
 ---
 id: P107-S84-USERACL
 title: On the Parse wire the User, Set User Properties and Sign Up nodes draw a `prop-ACL` port, which the Record family hides as "access control, not data"
-status: open
+status: scheduled
 severity: low
 area: noodl-runtime/src/nodes/std-library/user/user-ports.ts `userPropertyPorts` (:115-150, the `!parseWire && !shouldShowField` guard :131); noodl-viewer-react/src/nodes/std-library/user/signup.ts `updatePorts` (:199-250, `_ignoreKeys` :219)
 found: P107 NSP-020 s84 (L1, the User family moved onto the port format), 2026-10-11 — oracle (a) drove the three User rows with an accounts class holding an `ACL` column
@@ -29,3 +29,5 @@ Properties would overwrite the account's own access rules."*
 **Not fixed here:** the ruling is whether the User family should hide it like the Record family (most likely: apply
 `shouldShowField` on every wire, and add `ACL` to Sign Up's ignore list). When it is fixed, the `USERS` cases go red on
 `prop-ACL` until `userFields` filters it too.
+
+**Ruled 2026-10-12 (R29, P107 s91 rulings page, asked in plain words with the reach measured that morning):** **"Hide it, like the Record nodes"** — `shouldShowField` on every wire (user-ports.ts :251 today), `ACL` in Sign Up's `_ignoreKeys`, `userFields` filters it in the spec. 429 User-family nodes in 58 of Richard's projects, none wired to or from ACL. Not built yet.

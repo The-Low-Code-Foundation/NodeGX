@@ -25,7 +25,7 @@ retired nodes; both are handled.
 | NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2's export half and the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18's) | s1 … s44 |
 | NSP-016 the visual nodes | ✅ s71; s73 SCROLLROOM | `aa8abb06f` … `fd6385beb` |
 | NSP-018 the spec speaks | ✅ s77 | s72 … s77 |
-| NSP-019 Richard reads it | 🟡 s77: AC1, AC2 and the §2 table built; **AC3 is Richard's drive** | s77 |
+| NSP-019 Richard reads it | 🟡 s77: AC1, AC2, the §2 table; **s91: driven by Richard — "Needs changes" (R30): a pop-out modal, §5.3** | s77, s91 |
 | NSP-009 the ratchet | ✅ s64; s65 `contract`; s85 `ports` (`floor.ports` **132** since s87) | `6a1ed0084`, s65, s85, s87 |
 | NSP-010 a change is a version | ✅ s78 | `36e08e29e`, `64f9576d9` |
 | NSP-017 the escape hatches | 🟡 s64–s68. Left: AC1's export half (P18's) | s64 … s68 |
@@ -58,14 +58,22 @@ that imports `scripts/node-catalog/dom-shim` by absolute path, registers the bro
 (357 on 2026-10-12), plus a synthetic control project. Read both formats: v2 `components/**/nodes.json`, legacy
 `project.json` graph roots. Kits: `node packages/noodl-mcp/dist/kit-extract.cjs <dir>` is the agent's real extractor.
 
-**Human decisions:**
-- NSP-019 AC3 and its three choices; C160; C161; C162.
-- **P107-S84-USERACL**: should the User family hide `ACL` like the Record family?
-- The Frappe note in NSP-010 §4 is owed to Richard **before the first `changes` entry answers `project`**. None does yet.
-- **P107-S89-NIGHTBOOK** is the template owner's (P78).
-- New, not asked: 14 deprecated types have no `replacedBy` (Animation, Field Set, Form, Globals, Gyroscope, Number
-  Blend, Script Downloader, Signal To Index, String Selector, Transition, the four user-email nodes). Their warning says
-  "no single node replaced it". Only ask Richard if a person hits one.
+**Human decisions — RULED 2026-10-12 (s91, on a rulings page; README R26–R32):**
+- C160 Drag Enabled → **off means off** (R26). C161 Video → **Restart/Reset go to Start Time** (R27). C162 parsers →
+  **rename "Max Characters", keep the check** (R28). USERACL → **hide ACL like the Records** (R29). All four bug files are
+  `scheduled`, each with its regression scenario. None is built. Each is small: runtime + spec `version` + `changes`.
+- NSP-019 AC3 → **"Needs changes"** (R30): the Try panel becomes a pop-out modal ("How this node works" button) with a
+  live mock of the node, data bubbles, inputs lighting up, a timeline that follows the latest event. R31: the folds' open
+  state and the five wordless specs fold into it ("spec in progress", never an empty Try). Brief: NSP-019 §5.3.
+  **Mockup to Richard before building** (a wireframe is not the mockup).
+- The Frappe note → **a named list, built when the first `changes` entry answers `project`** (R32). Nothing to build now.
+- Still Richard's: **P107-S89-NIGHTBOOK** is the template owner's (P78). 14 deprecated types have no `replacedBy`; ask
+  only if a person hits one.
+
+**s91 did only the rulings** (no build): the page, the measurements behind it, Richard's drive of the panel in the dev
+editor (torn down, launcher entry removed, the source's SHA unchanged). The s91 steps 1–3 below are still owed, and now
+sit beside the four R26–R29 fixes and the R30 modal. Suggested order: R26–R29 (one session, small, each with its
+scenario and mutant), then s91's steps 1–3, then the R30 mockup.
 
 NSP-010's and NSP-017's uncommitted notes (not this phase's sessions') were left out again.
 

@@ -1,7 +1,7 @@
 ---
 id: P107-C161
 title: Video — Restart and Reset seek to second 0, not Start Time: with a Start Time set, a Restart plays from before it, and the seek takes the End Time bound with it
-status: needs-ruling
+status: scheduled
 severity: medium
 area: runtime / Video (noodl-viewer-react/src/components/visual/Video/Video.tsx `restart` :184-189, `reset` :197-203; the port descriptions, noodl-viewer-react/src/nodes/visual/video.ts :70 and :105)
 found: P107 NSP-018 s77, 2026-10-10 — writing the node's rules in words
@@ -36,3 +36,5 @@ inside the fragment so End Time keeps bounding playback — the change the descr
 and say it in the two descriptions (video.ts :70, :105 and the spec's :351, :353): "Seeks to second 0 (not Start Time) and
 plays…". Regression when fixed (a): `packages/nodegx-node-spec/scenarios/Video.json` "Restart with a Start Time of 30 goes
 to Playback Position 30, not 0 (row C161)".
+
+**Ruled 2026-10-12 (R27, P107 s91 rulings page, asked in plain words with the reach measured that morning):** **"Restart and Reset go to Start Time (or 0:00 when there isn't one)"** — option (a). `Video.tsx` :187 / :200 and the spec's `restart` / `reset` ops, `version` up; the regression scenario above. 13 Video nodes in Richard's projects, none with a Start Time. Not built yet.

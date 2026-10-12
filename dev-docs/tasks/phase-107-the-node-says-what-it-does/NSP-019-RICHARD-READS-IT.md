@@ -1,7 +1,7 @@
 # NSP-019 — Richard reads it: the inspector shows a node's rules, and *Try this node*
 
 **Opened 2026-09-29.** **Depends on NSP-018.**
-**Status: 🟡 s77 (2026-10-10): AC1 and AC2 built, the §2 disagreements table too (§5.1). AC3 — Richard drives it — is open; three fold/gating choices wait on that drive. The phase's only surface a person sees.**
+**Status: 🟡 s91 (2026-10-12): Richard drove it — "Needs changes" (R30, §5.3): the Try panel moves into a pop-out modal with a live mock of the node. AC1 and AC2 built s77, the §2 disagreements table too (§5.1). AC3 stays open until the modal is driven. The three fold/gating choices are ruled (R31). The phase's only surface a person sees.**
 
 ## 1. The person sentence
 
@@ -122,3 +122,39 @@ Count — Current Count → 1, Count Changed fires, Increase Count: done", then 
 stopped with `dev:stop`, the launcher entry removed afterwards, the directory set identical to the backup. Lesson for the
 hazard list: **a bundler alias or extension order that `tsc` accepts can still fail to bundle — look at the running app's
 build log before calling a panel built** ([[a-working-wireframe-is-not-the-mockup]]).
+
+### 5.3 s91, 2026-10-12 — Richard drove it: "Needs changes" (R30, R31)
+
+Driven by Richard in the running dev editor (`npm run dev:debug`, a renamed copy of `nodegx-debug-demo` registered with
+the launcher, removed afterwards; the source's SHA unchanged). He selected the Counter, read the rules, opened *Try this
+node* and pressed its signals. Answered on the s91 rulings page. **His verdict, verbatim:**
+
+> *"The two panels are quite tight, and the 'try the node' bit is a bit basic (would be nice with a bit more styled
+> elements no??). When you click a button the 'what happened' list doesn't focus so you have to scroll down. I'm thinking
+> maybe this would be better in a pop out modal? That way you can really focus on the node and what it does. You don't
+> need to see the rest of the editor for that. Maybe a mockup version of the node with the data preview above it like on
+> the canvas? That would look cool. With the inputs lighting up and input output data bubbles changing as you play"*
+
+**On the open state (R31):** rules open, Try closed, as now — and *"If we do my modal idea, you can have the 'how this node
+works' button at the top of the panel even, like a help popup, and we don't need to worry about it and leave both open in
+the modal"*. **On the five specced nodes with no words** (And, Or, Query Records, Page Inputs, Screen Resolution):
+*"Just don't show the button, or write 'spec in progress' or something"* — never an empty Try panel.
+
+**What that asks for (the next build, a design pass first):**
+1. A **"How this node works" button** at the top of the property panel for a specced node, opening a pop-out modal. The
+   two folds leave the panel. Use the inspector's existing modal patterns (memory: a `Select` inside a `Modal` closes it;
+   the editor has two `BaseDialog`s).
+2. In the modal, both parts open: the rules, and *Try* with **a mock of the node as the canvas draws it** (its card, its
+   ports), the **data preview above it as on the canvas**, inputs that **light up** when they change, and **data bubbles**
+   on inputs and outputs that update as you play.
+3. The timeline **follows the latest event** (scrolls to it): today a press writes below the fold and nothing moves.
+4. More styled controls than the plain inputs today, from the editor's own tokens.
+5. A node with a spec whose Try cannot draw its inputs yet (or no words) shows "spec in progress", or no button at all.
+
+Memory: [[a-working-wireframe-is-not-the-mockup]] — show Richard a mockup of the modal before building it.
+
+**Seen during the drive (not his ruling):** in the dev stack, *Try this node* sat on "Loading the spec…" for about two
+minutes. The editor's webpack had begun a recompile right after launch ("App updated. Recompiling…"), and
+`webpack-dev-middleware` held the lazy chunk (`…spec_tryNodeModel_ts.bundle.js`) until it finished (99 s). The chunk then
+served 200. The panel shows no timeout or error while it waits. Dev-only (a packaged build has no dev server), but a
+spinner that never says why is worth a line in the modal's loading state.
