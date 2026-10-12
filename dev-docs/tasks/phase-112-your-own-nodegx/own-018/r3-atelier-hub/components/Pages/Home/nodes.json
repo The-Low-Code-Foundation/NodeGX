@@ -1,0 +1,178 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3aba892e-b900-5317-86cf-6df40c9401be",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "home-page",
+      "type": "Page",
+      "label": "Team feed page",
+      "children": [
+        "home-canvas"
+      ],
+      "parameters": {
+        "title": "Team feed",
+        "urlPath": "home"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "home-canvas",
+      "type": "Group",
+      "label": "Page canvas",
+      "parent": "home-page",
+      "children": [
+        "home-band"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "backgroundColor": "var(--background)",
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "home-band",
+      "type": "Group",
+      "label": "Band",
+      "parent": "home-canvas",
+      "children": [
+        "home-shell"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "flexDirection": "column",
+        "paddingBottom": "var(--space-20)",
+        "paddingTop": "var(--space-12)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "home-shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "home-band",
+      "children": [
+        "home-header",
+        "home-composer",
+        "home-list",
+        "home-empty"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "maxWidth": {
+          "unit": "px",
+          "value": 760
+        },
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "rowGap": "var(--space-8)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "home-header",
+      "type": "/Components/PageHeader",
+      "label": "Page header",
+      "parent": "home-shell",
+      "parameters": {
+        "eyebrow": "Atelier Hub",
+        "lead": "Short updates from the team. The app posts here by itself when a project is marked done.",
+        "title": "Team feed"
+      },
+      "x": 280,
+      "y": 520
+    },
+    {
+      "id": "home-composer",
+      "type": "/Components/FeedComposer",
+      "label": "Feed composer",
+      "parent": "home-shell",
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "home-list",
+      "type": "For Each",
+      "label": "Feed posts",
+      "parent": "home-shell",
+      "parameters": {
+        "template": "/Components/FeedPostCard"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "home-empty",
+      "type": "/Components/EmptyState",
+      "label": "Empty feed",
+      "parent": "home-shell",
+      "parameters": {
+        "body": "Post the first update above — or mark a project done and watch the app announce it.",
+        "title": "No updates yet"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "home-qposts",
+      "type": "DbCollection2",
+      "label": "Fetch feed posts",
+      "parameters": {
+        "collectionName": "FeedPost"
+      },
+      "x": 530,
+      "y": 880
+    },
+    {
+      "id": "home-qmembers",
+      "type": "DbCollection2",
+      "label": "Fetch team members",
+      "parameters": {
+        "collectionName": "TeamMember"
+      },
+      "x": 530,
+      "y": 1000
+    },
+    {
+      "id": "home-memberopts",
+      "type": "/Components/Record Options",
+      "label": "Author options",
+      "x": 530,
+      "y": 640
+    },
+    {
+      "id": "home-feedfilter",
+      "type": "Filter Collection",
+      "label": "Newest first",
+      "parameters": {
+        "filterSort": "createdAt",
+        "filterSort-createdAt": "descending"
+      },
+      "x": 530,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "home-page"
+  ]
+}

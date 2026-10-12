@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5608dfca-ff82-5bec-84f6-177d6e0c0f07",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ph-ci",
+      "fromProperty": "eyebrow",
+      "toId": "ph-eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ph-ci",
+      "fromProperty": "eyebrow",
+      "toId": "ph-eyebrow",
+      "toProperty": "visible"
+    },
+    {
+      "fromId": "ph-ci",
+      "fromProperty": "title",
+      "toId": "ph-title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ph-ci",
+      "fromProperty": "lead",
+      "toId": "ph-lead",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ph-ci",
+      "fromProperty": "lead",
+      "toId": "ph-lead",
+      "toProperty": "visible"
+    }
+  ]
+}

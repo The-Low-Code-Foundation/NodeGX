@@ -1,0 +1,113 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "049ae438-7a87-5635-8cbf-800db0a54117",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mb-root",
+      "type": "Group",
+      "label": "Message row",
+      "children": [
+        "mb-bubble"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mb-bubble",
+      "type": "Group",
+      "label": "Bubble",
+      "parent": "mb-root",
+      "children": [
+        "mb-content"
+      ],
+      "parameters": {
+        "borderRadius": "var(--radius-xl)",
+        "flexDirection": "column",
+        "maxWidth": {
+          "unit": "%",
+          "value": 75
+        },
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mb-content",
+      "type": "Text",
+      "label": "Message text",
+      "parent": "mb-bubble",
+      "parameters": {
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "styleCss": "white-space: pre-wrap;"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "mb-ci",
+      "type": "Component Inputs",
+      "label": "Message in",
+      "ports": [
+        {
+          "name": "role",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "content",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "mb-align",
+      "type": "Expression",
+      "label": "Row alignment",
+      "parameters": {
+        "expression": "role === 'user' ? 'flex-end' : 'flex-start'"
+      },
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "mb-bg",
+      "type": "Expression",
+      "label": "Bubble background",
+      "parameters": {
+        "expression": "role === 'user' ? 'var(--primary)' : 'var(--surface)'"
+      },
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "mb-fg",
+      "type": "Expression",
+      "label": "Text colour",
+      "parameters": {
+        "expression": "role === 'user' ? 'var(--primary-foreground)' : 'var(--foreground)'"
+      },
+      "x": 410,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "mb-root"
+  ]
+}

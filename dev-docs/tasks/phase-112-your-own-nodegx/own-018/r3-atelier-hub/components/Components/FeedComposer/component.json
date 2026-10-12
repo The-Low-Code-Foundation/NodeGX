@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d416af00-381c-5c00-8fe3-a672b7e04efe",
+  "name": "FeedComposer",
+  "path": "/Components/FeedComposer",
+  "type": "visual",
+  "created": "2026-10-12T17:52:19.330Z",
+  "modified": "2026-10-12T17:52:19.330Z",
+  "modifiedBy": "noodl-mcp"
+}

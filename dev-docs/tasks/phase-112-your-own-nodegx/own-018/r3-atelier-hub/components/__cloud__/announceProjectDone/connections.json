@@ -1,0 +1,169 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "133e40a2-9e06-54da-86b1-e64526cb9dac",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ad-req",
+      "fromProperty": "receive",
+      "toId": "ad-qprojects",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "ad-req",
+      "fromProperty": "receive",
+      "toId": "ad-qmembers",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "ad-req",
+      "fromProperty": "receive",
+      "toId": "ad-qclients",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "ad-req",
+      "fromProperty": "receive",
+      "toId": "ad-qposts",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "ad-req",
+      "fromProperty": "pm-trigger",
+      "toId": "ad-build",
+      "toProperty": "in-trigger"
+    },
+    {
+      "fromId": "ad-req",
+      "fromProperty": "pm-body",
+      "toId": "ad-build",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "ad-qprojects",
+      "fromProperty": "items",
+      "toId": "ad-build",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "ad-qmembers",
+      "fromProperty": "items",
+      "toId": "ad-build",
+      "toProperty": "in-members"
+    },
+    {
+      "fromId": "ad-qclients",
+      "fromProperty": "items",
+      "toId": "ad-build",
+      "toProperty": "in-clients"
+    },
+    {
+      "fromId": "ad-qposts",
+      "fromProperty": "items",
+      "toId": "ad-build",
+      "toProperty": "in-posts"
+    },
+    {
+      "fromId": "ad-build",
+      "fromProperty": "out-post",
+      "toId": "ad-create",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "ad-build",
+      "fromProperty": "out-content",
+      "toId": "ad-create",
+      "toProperty": "prop-content"
+    },
+    {
+      "fromId": "ad-build",
+      "fromProperty": "out-projectId",
+      "toId": "ad-create",
+      "toProperty": "prop-project"
+    },
+    {
+      "fromId": "ad-create",
+      "fromProperty": "done",
+      "toId": "ad-resok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ad-build",
+      "fromProperty": "out-skip",
+      "toId": "ad-resok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ad-build",
+      "fromProperty": "out-posted",
+      "toId": "ad-resok",
+      "toProperty": "pm-posted"
+    },
+    {
+      "fromId": "ad-build",
+      "fromProperty": "out-reason",
+      "toId": "ad-resok",
+      "toProperty": "pm-reason"
+    },
+    {
+      "fromId": "ad-create",
+      "fromProperty": "failure",
+      "toId": "ad-resfail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ad-create",
+      "fromProperty": "error",
+      "toId": "ad-resfail",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "ad-qprojects",
+      "fromProperty": "failure",
+      "toId": "ad-resfail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ad-qprojects",
+      "fromProperty": "error",
+      "toId": "ad-resfail",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "ad-qmembers",
+      "fromProperty": "failure",
+      "toId": "ad-resfail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ad-qmembers",
+      "fromProperty": "error",
+      "toId": "ad-resfail",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "ad-qclients",
+      "fromProperty": "failure",
+      "toId": "ad-resfail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ad-qclients",
+      "fromProperty": "error",
+      "toId": "ad-resfail",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "ad-qposts",
+      "fromProperty": "failure",
+      "toId": "ad-resfail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ad-qposts",
+      "fromProperty": "error",
+      "toId": "ad-resfail",
+      "toProperty": "errorMessage"
+    }
+  ]
+}

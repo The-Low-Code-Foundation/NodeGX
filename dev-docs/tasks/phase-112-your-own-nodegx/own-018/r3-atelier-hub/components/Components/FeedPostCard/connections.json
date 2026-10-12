@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e5c6a7bd-e763-57ba-88c0-df556d83013e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fc-ci",
+      "fromProperty": "author",
+      "toId": "fc-authorid",
+      "toProperty": "author"
+    },
+    {
+      "fromId": "fc-authorid",
+      "fromProperty": "result",
+      "toId": "fc-authorrec",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "fc-authorrec",
+      "fromProperty": "prop-name",
+      "toId": "fc-nameexpr",
+      "toProperty": "authorName"
+    },
+    {
+      "fromId": "fc-authorrec",
+      "fromProperty": "prop-name",
+      "toId": "fc-initialexpr",
+      "toProperty": "authorName"
+    },
+    {
+      "fromId": "fc-ci",
+      "fromProperty": "kind",
+      "toId": "fc-nameexpr",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "fc-ci",
+      "fromProperty": "kind",
+      "toId": "fc-initialexpr",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "fc-ci",
+      "fromProperty": "kind",
+      "toId": "fc-avatbgexpr",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "fc-ci",
+      "fromProperty": "kind",
+      "toId": "fc-avatfgexpr",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "fc-ci",
+      "fromProperty": "kind",
+      "toId": "fc-systagexpr",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "fc-nameexpr",
+      "fromProperty": "result",
+      "toId": "fc-name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fc-initialexpr",
+      "fromProperty": "result",
+      "toId": "fc-initials",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fc-avatbgexpr",
+      "fromProperty": "result",
+      "toId": "fc-avatar",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "fc-avatfgexpr",
+      "fromProperty": "result",
+      "toId": "fc-initials",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "fc-systagexpr",
+      "fromProperty": "asBoolean",
+      "toId": "fc-tag",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fc-ci",
+      "fromProperty": "content",
+      "toId": "fc-content",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fc-ci",
+      "fromProperty": "createdAt",
+      "toId": "fc-datefmt",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "fc-datefmt",
+      "fromProperty": "currentValue",
+      "toId": "fc-time",
+      "toProperty": "text"
+    }
+  ]
+}

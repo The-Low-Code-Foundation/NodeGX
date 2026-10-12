@@ -1,0 +1,175 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b97bd391-0b1b-5aba-8ac7-fcca165ef09f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "wfm-ci",
+      "fromProperty": "recordId",
+      "toId": "wfm-rec",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "wfm-ci",
+      "fromProperty": "recordId",
+      "toId": "wfm-update",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "wfm-ci",
+      "fromProperty": "recordId",
+      "toId": "wfm-isnew",
+      "toProperty": "recordId"
+    },
+    {
+      "fromId": "wfm-ci",
+      "fromProperty": "authorOptions",
+      "toId": "wfm-author",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "wfm-isnew",
+      "fromProperty": "asBoolean",
+      "toId": "wfm-isnewcond",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "wfm-rec",
+      "fromProperty": "prop-title",
+      "toId": "wfm-title",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "wfm-rec",
+      "fromProperty": "prop-slug",
+      "toId": "wfm-slug",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "wfm-rec",
+      "fromProperty": "prop-body",
+      "toId": "wfm-body",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "wfm-rec",
+      "fromProperty": "prop-author",
+      "toId": "wfm-authorid",
+      "toProperty": "author"
+    },
+    {
+      "fromId": "wfm-authorid",
+      "fromProperty": "result",
+      "toId": "wfm-author",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "wfm-title",
+      "fromProperty": "value",
+      "toId": "wfm-create",
+      "toProperty": "prop-title"
+    },
+    {
+      "fromId": "wfm-title",
+      "fromProperty": "value",
+      "toId": "wfm-update",
+      "toProperty": "prop-title"
+    },
+    {
+      "fromId": "wfm-title",
+      "fromProperty": "value",
+      "toId": "wfm-ok",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "wfm-slug",
+      "fromProperty": "value",
+      "toId": "wfm-create",
+      "toProperty": "prop-slug"
+    },
+    {
+      "fromId": "wfm-slug",
+      "fromProperty": "value",
+      "toId": "wfm-update",
+      "toProperty": "prop-slug"
+    },
+    {
+      "fromId": "wfm-slug",
+      "fromProperty": "value",
+      "toId": "wfm-ok",
+      "toProperty": "slug"
+    },
+    {
+      "fromId": "wfm-body",
+      "fromProperty": "value",
+      "toId": "wfm-create",
+      "toProperty": "prop-body"
+    },
+    {
+      "fromId": "wfm-body",
+      "fromProperty": "value",
+      "toId": "wfm-update",
+      "toProperty": "prop-body"
+    },
+    {
+      "fromId": "wfm-body",
+      "fromProperty": "value",
+      "toId": "wfm-ok",
+      "toProperty": "body"
+    },
+    {
+      "fromId": "wfm-author",
+      "fromProperty": "value",
+      "toId": "wfm-create",
+      "toProperty": "prop-author"
+    },
+    {
+      "fromId": "wfm-author",
+      "fromProperty": "value",
+      "toId": "wfm-update",
+      "toProperty": "prop-author"
+    },
+    {
+      "fromId": "wfm-ok",
+      "fromProperty": "asBoolean",
+      "toId": "wfm-save",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "wfm-save",
+      "fromProperty": "onClick",
+      "toId": "wfm-isnewcond",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "wfm-isnewcond",
+      "fromProperty": "ontrue",
+      "toId": "wfm-create",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "wfm-isnewcond",
+      "fromProperty": "onfalse",
+      "toId": "wfm-update",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "wfm-create",
+      "fromProperty": "done",
+      "toId": "wfm-co",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "wfm-update",
+      "fromProperty": "done",
+      "toId": "wfm-co",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "wfm-cancel",
+      "fromProperty": "onClick",
+      "toId": "wfm-co",
+      "toProperty": "cancelled"
+    }
+  ]
+}

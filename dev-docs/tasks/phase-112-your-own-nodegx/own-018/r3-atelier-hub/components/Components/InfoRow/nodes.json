@@ -1,0 +1,80 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "457e5bf5-de9c-5b84-8e1f-4d871c6b278a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ir-root",
+      "type": "Group",
+      "label": "Info row",
+      "children": [
+        "ir-label",
+        "ir-value"
+      ],
+      "parameters": {
+        "columnGap": "var(--space-4)",
+        "flexDirection": "row",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ir-label",
+      "type": "Text",
+      "label": "Label",
+      "parent": "ir-root",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "width": {
+          "unit": "px",
+          "value": 110
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ir-value",
+      "type": "Text",
+      "label": "Value",
+      "parent": "ir-root",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "styleCss": "white-space: pre-wrap;"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "ir-ci",
+      "type": "Component Inputs",
+      "label": "Row inputs",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "ir-root"
+  ]
+}

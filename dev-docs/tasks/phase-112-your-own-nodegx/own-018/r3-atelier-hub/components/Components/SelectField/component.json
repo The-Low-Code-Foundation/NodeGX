@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4519d10e-ff75-5dae-89b5-c58db12ba7d4",
+  "name": "SelectField",
+  "path": "/Components/SelectField",
+  "type": "visual",
+  "created": "2026-10-12T17:43:58.858Z",
+  "modified": "2026-10-12T17:43:58.858Z",
+  "modifiedBy": "noodl-mcp"
+}

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "89751fe8-14ee-589b-83f2-0059cb2480a5",
+  "name": "WikiPageRow",
+  "path": "/Components/WikiPageRow",
+  "type": "visual",
+  "created": "2026-10-12T17:49:18.011Z",
+  "modified": "2026-10-12T17:49:18.011Z",
+  "modifiedBy": "noodl-mcp"
+}

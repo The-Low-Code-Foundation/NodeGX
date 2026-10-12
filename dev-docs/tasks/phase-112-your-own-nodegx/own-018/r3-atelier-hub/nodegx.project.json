@@ -1,0 +1,28 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "Atelier Hub",
+  "id": "5fe9f71b-8d1c-40c6-a976-cbaed2c09267",
+  "version": "5",
+  "nodegxVersion": "0.2.0",
+  "runtimeVersion": "react19",
+  "created": "2026-10-12T17:01:19.501Z",
+  "modified": "2026-10-12T17:03:22.921Z",
+  "settings": {
+    "htmlTitle": "Atelier Hub",
+    "navigationPathType": "path",
+    "bodyScroll": true
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  },
+  "rootNodeId": "a6be29e5-f603-4986-8931-4fb9fdc399e5",
+  "metadata": {
+    "cloudservices": {
+      "instanceId": "backend_mv5i3s02bv37g",
+      "endpoint": "http://127.0.0.1:8578",
+      "appId": "backend_mv5i3s02bv37g",
+      "type": "nodegx"
+    }
+  }
+}

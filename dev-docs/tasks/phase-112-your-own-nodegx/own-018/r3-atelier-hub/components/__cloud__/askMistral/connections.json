@@ -1,0 +1,169 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c551c694-56a1-5c67-8dd8-200307a90fef",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "am-req",
+      "fromProperty": "receive",
+      "toId": "am-secret",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "am-req",
+      "fromProperty": "receive",
+      "toId": "am-qclients",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "am-req",
+      "fromProperty": "receive",
+      "toId": "am-qprojects",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "am-req",
+      "fromProperty": "receive",
+      "toId": "am-qmembers",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "am-req",
+      "fromProperty": "receive",
+      "toId": "am-qwiki",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "am-req",
+      "fromProperty": "pm-question",
+      "toId": "am-ask",
+      "toProperty": "in-question"
+    },
+    {
+      "fromId": "am-req",
+      "fromProperty": "pm-history",
+      "toId": "am-ask",
+      "toProperty": "in-history"
+    },
+    {
+      "fromId": "am-qclients",
+      "fromProperty": "items",
+      "toId": "am-ask",
+      "toProperty": "in-clients"
+    },
+    {
+      "fromId": "am-qprojects",
+      "fromProperty": "items",
+      "toId": "am-ask",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "am-qmembers",
+      "fromProperty": "items",
+      "toId": "am-ask",
+      "toProperty": "in-members"
+    },
+    {
+      "fromId": "am-qwiki",
+      "fromProperty": "items",
+      "toId": "am-ask",
+      "toProperty": "in-wiki"
+    },
+    {
+      "fromId": "am-secret",
+      "fromProperty": "value",
+      "toId": "am-ask",
+      "toProperty": "in-apiKey"
+    },
+    {
+      "fromId": "am-secret",
+      "fromProperty": "done",
+      "toId": "am-ask",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "am-ask",
+      "fromProperty": "out-finished",
+      "toId": "am-resok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "am-ask",
+      "fromProperty": "out-answer",
+      "toId": "am-resok",
+      "toProperty": "pm-answer"
+    },
+    {
+      "fromId": "am-ask",
+      "fromProperty": "out-failed",
+      "toId": "am-resfail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "am-ask",
+      "fromProperty": "out-errorText",
+      "toId": "am-resfail",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "am-secret",
+      "fromProperty": "failure",
+      "toId": "am-resfail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "am-secret",
+      "fromProperty": "error",
+      "toId": "am-resfail",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "am-qclients",
+      "fromProperty": "failure",
+      "toId": "am-resfail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "am-qclients",
+      "fromProperty": "error",
+      "toId": "am-resfail",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "am-qprojects",
+      "fromProperty": "failure",
+      "toId": "am-resfail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "am-qprojects",
+      "fromProperty": "error",
+      "toId": "am-resfail",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "am-qmembers",
+      "fromProperty": "failure",
+      "toId": "am-resfail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "am-qmembers",
+      "fromProperty": "error",
+      "toId": "am-resfail",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "am-qwiki",
+      "fromProperty": "failure",
+      "toId": "am-resfail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "am-qwiki",
+      "fromProperty": "error",
+      "toId": "am-resfail",
+      "toProperty": "errorMessage"
+    }
+  ]
+}

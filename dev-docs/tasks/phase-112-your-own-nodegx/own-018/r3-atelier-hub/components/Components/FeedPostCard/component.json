@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e5c6a7bd-e763-57ba-88c0-df556d83013e",
+  "name": "FeedPostCard",
+  "path": "/Components/FeedPostCard",
+  "type": "visual",
+  "created": "2026-10-12T17:52:19.254Z",
+  "modified": "2026-10-12T17:52:19.254Z",
+  "modifiedBy": "noodl-mcp"
+}

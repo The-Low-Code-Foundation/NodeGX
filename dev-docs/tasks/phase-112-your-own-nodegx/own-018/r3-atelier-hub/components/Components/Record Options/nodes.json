@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2eb7187e-c50c-55ba-8dfc-5de048722bc5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ro-ci",
+      "type": "Component Inputs",
+      "label": "Records in",
+      "ports": [
+        {
+          "name": "records",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ro-fn",
+      "type": "JavaScriptFunction",
+      "label": "Build dropdown options",
+      "parameters": {
+        "functionScript": "const records = Array.isArray(Inputs.records) ? Inputs.records : [];\nOutputs.options = records.map(function (r) { return { Label: r.name, Value: r.id }; });\nOutputs.ids = records.map(function (r) { return r.id; });"
+      },
+      "ports": [
+        {
+          "name": "in-records",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-options",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-ids",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ro-co",
+      "type": "Component Outputs",
+      "label": "Options out",
+      "ports": [
+        {
+          "name": "options",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "ids",
+          "plug": "input",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

@@ -1,0 +1,229 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "19d14604-9efe-5ab5-8e30-c1628f31ca0d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cl-view",
+      "fromProperty": "at-list",
+      "toId": "cl-listpanel",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cl-view",
+      "fromProperty": "at-detail",
+      "toId": "cl-detailpanel",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cl-view",
+      "fromProperty": "at-editor",
+      "toId": "cl-editorpanel",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cl-qclients",
+      "fromProperty": "items",
+      "toId": "cl-list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cl-qclients",
+      "fromProperty": "isEmpty",
+      "toId": "cl-empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cl-list",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "cl-setselected",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cl-list",
+      "fromProperty": "itemActionItemId",
+      "toId": "cl-setselected",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cl-list",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "cl-view",
+      "toProperty": "to-detail"
+    },
+    {
+      "fromId": "cl-list",
+      "fromProperty": "itemOutputSignal-edit",
+      "toId": "cl-setediting",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cl-list",
+      "fromProperty": "itemActionItemId",
+      "toId": "cl-setediting",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cl-list",
+      "fromProperty": "itemOutputSignal-edit",
+      "toId": "cl-view",
+      "toProperty": "to-editor"
+    },
+    {
+      "fromId": "cl-selected",
+      "fromProperty": "value",
+      "toId": "cl-rec",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "cl-selected",
+      "fromProperty": "value",
+      "toId": "cl-cprojects",
+      "toProperty": "filterFilterValue-client"
+    },
+    {
+      "fromId": "cl-qprojects",
+      "fromProperty": "items",
+      "toId": "cl-cprojects",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cl-cprojects",
+      "fromProperty": "items",
+      "toId": "cl-projects",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cl-cprojects",
+      "fromProperty": "count",
+      "toId": "cl-noprojects",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "cl-noprojects",
+      "fromProperty": "asBoolean",
+      "toId": "cl-projectsempty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cl-rec",
+      "fromProperty": "prop-name",
+      "toId": "cl-name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cl-rec",
+      "fromProperty": "prop-sector",
+      "toId": "cl-sector",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cl-rec",
+      "fromProperty": "prop-contactName",
+      "toId": "cl-contactrow",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cl-rec",
+      "fromProperty": "prop-email",
+      "toId": "cl-emailrow",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cl-rec",
+      "fromProperty": "prop-phone",
+      "toId": "cl-phonerow",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cl-rec",
+      "fromProperty": "prop-address",
+      "toId": "cl-addressrow",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cl-rec",
+      "fromProperty": "prop-notes",
+      "toId": "cl-notesrow",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cl-back",
+      "fromProperty": "onClick",
+      "toId": "cl-view",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "cl-editbtn",
+      "fromProperty": "onClick",
+      "toId": "cl-seteditingdetail",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cl-rec",
+      "fromProperty": "id",
+      "toId": "cl-seteditingdetail",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cl-editbtn",
+      "fromProperty": "onClick",
+      "toId": "cl-view",
+      "toProperty": "to-editor"
+    },
+    {
+      "fromId": "cl-editing",
+      "fromProperty": "value",
+      "toId": "cl-form",
+      "toProperty": "recordId"
+    },
+    {
+      "fromId": "cl-editing",
+      "fromProperty": "value",
+      "toId": "cl-editortitleexpr",
+      "toProperty": "recordId"
+    },
+    {
+      "fromId": "cl-editortitleexpr",
+      "fromProperty": "result",
+      "toId": "cl-editortitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cl-form",
+      "fromProperty": "saved",
+      "toId": "cl-view",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "cl-form",
+      "fromProperty": "cancelled",
+      "toId": "cl-view",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "cl-newbtn",
+      "fromProperty": "onClick",
+      "toId": "cl-seteditingempty",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cl-newbtn",
+      "fromProperty": "onClick",
+      "toId": "cl-view",
+      "toProperty": "to-editor"
+    },
+    {
+      "fromId": "cl-empty",
+      "fromProperty": "clicked",
+      "toId": "cl-seteditingempty",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cl-empty",
+      "fromProperty": "clicked",
+      "toId": "cl-view",
+      "toProperty": "to-editor"
+    }
+  ]
+}

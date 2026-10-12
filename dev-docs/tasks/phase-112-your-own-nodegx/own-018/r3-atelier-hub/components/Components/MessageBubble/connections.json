@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "049ae438-7a87-5635-8cbf-800db0a54117",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mb-ci",
+      "fromProperty": "role",
+      "toId": "mb-align",
+      "toProperty": "role"
+    },
+    {
+      "fromId": "mb-align",
+      "fromProperty": "result",
+      "toId": "mb-root",
+      "toProperty": "alignItems"
+    },
+    {
+      "fromId": "mb-ci",
+      "fromProperty": "role",
+      "toId": "mb-bg",
+      "toProperty": "role"
+    },
+    {
+      "fromId": "mb-bg",
+      "fromProperty": "result",
+      "toId": "mb-bubble",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "mb-ci",
+      "fromProperty": "role",
+      "toId": "mb-fg",
+      "toProperty": "role"
+    },
+    {
+      "fromId": "mb-fg",
+      "fromProperty": "result",
+      "toId": "mb-content",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "mb-ci",
+      "fromProperty": "content",
+      "toId": "mb-content",
+      "toProperty": "text"
+    }
+  ]
+}

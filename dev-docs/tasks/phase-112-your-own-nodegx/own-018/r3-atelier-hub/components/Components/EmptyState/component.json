@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ce0a7f8c-7604-57b4-8f4e-7431a70a28a2",
+  "name": "EmptyState",
+  "path": "/Components/EmptyState",
+  "type": "visual",
+  "created": "2026-10-12T17:43:58.811Z",
+  "modified": "2026-10-12T18:24:10.920Z",
+  "modifiedBy": "noodl-mcp"
+}

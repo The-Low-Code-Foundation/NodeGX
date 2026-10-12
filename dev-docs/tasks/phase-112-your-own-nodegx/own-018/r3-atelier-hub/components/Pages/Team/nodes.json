@@ -1,0 +1,293 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "50949c18-44f8-5f45-87d4-29588a9ba10c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tm-page",
+      "type": "Page",
+      "label": "Team page",
+      "children": [
+        "tm-canvas"
+      ],
+      "parameters": {
+        "title": "Team",
+        "urlPath": "team"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "tm-canvas",
+      "type": "Group",
+      "label": "Page canvas",
+      "parent": "tm-page",
+      "children": [
+        "tm-band"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "backgroundColor": "var(--background)",
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "tm-band",
+      "type": "Group",
+      "label": "Band",
+      "parent": "tm-canvas",
+      "children": [
+        "tm-shell"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "flexDirection": "column",
+        "paddingBottom": "var(--space-20)",
+        "paddingTop": "var(--space-12)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "tm-shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "tm-band",
+      "children": [
+        "tm-listpanel",
+        "tm-editorpanel"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "maxWidth": {
+          "unit": "px",
+          "value": 1200
+        },
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "rowGap": "var(--space-8)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "tm-listpanel",
+      "type": "Group",
+      "label": "List panel",
+      "parent": "tm-shell",
+      "children": [
+        "tm-header",
+        "tm-list",
+        "tm-empty"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 280,
+      "y": 520
+    },
+    {
+      "id": "tm-header",
+      "type": "/Components/PageHeader",
+      "label": "Page header",
+      "parent": "tm-listpanel",
+      "children": [
+        "tm-newbtn"
+      ],
+      "parameters": {
+        "eyebrow": "People",
+        "lead": "The people of the studio — project owners, wiki authors, feed posters.",
+        "title": "Team"
+      },
+      "x": 340,
+      "y": 640
+    },
+    {
+      "id": "tm-newbtn",
+      "type": "net.noodl.controls.button",
+      "label": "New member",
+      "parent": "tm-header",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "color": "var(--primary-foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "New member",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentSize"
+      },
+      "x": 400,
+      "y": 760
+    },
+    {
+      "id": "tm-list",
+      "type": "For Each",
+      "label": "Member rows",
+      "parent": "tm-listpanel",
+      "parameters": {
+        "template": "/Components/TeamMemberRow"
+      },
+      "x": 340,
+      "y": 880
+    },
+    {
+      "id": "tm-empty",
+      "type": "/Components/EmptyState",
+      "label": "Empty team",
+      "parent": "tm-listpanel",
+      "parameters": {
+        "actionLabel": "New member",
+        "body": "Add the team so projects have owners and posts have authors.",
+        "title": "No team members yet"
+      },
+      "x": 340,
+      "y": 1000
+    },
+    {
+      "id": "tm-editorpanel",
+      "type": "Group",
+      "label": "Editor panel",
+      "parent": "tm-shell",
+      "children": [
+        "tm-editortitle",
+        "tm-form"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "tm-editortitle",
+      "type": "Text",
+      "label": "Editor title",
+      "parent": "tm-editorpanel",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "tm-form",
+      "type": "/Components/TeamMemberForm",
+      "label": "Member form",
+      "parent": "tm-editorpanel",
+      "x": 340,
+      "y": 1360
+    },
+    {
+      "id": "tm-view",
+      "type": "States",
+      "label": "List or editor",
+      "parameters": {
+        "states": "list,editor"
+      },
+      "x": 650,
+      "y": 520
+    },
+    {
+      "id": "tm-qmembers",
+      "type": "DbCollection2",
+      "label": "Fetch team members",
+      "parameters": {
+        "collectionName": "TeamMember"
+      },
+      "x": 650,
+      "y": 1120
+    },
+    {
+      "id": "tm-membersort",
+      "type": "Filter Collection",
+      "label": "Sort by name",
+      "parameters": {
+        "filterSort": "name",
+        "filterSort-name": "ascending"
+      },
+      "x": 650,
+      "y": 880
+    },
+    {
+      "id": "tm-editing",
+      "type": "Variable2",
+      "label": "Editing member id",
+      "parameters": {
+        "name": "editingMemberId"
+      },
+      "x": 650,
+      "y": 1360
+    },
+    {
+      "id": "tm-setediting",
+      "type": "Set Variable",
+      "label": "Write editingMemberId",
+      "parameters": {
+        "name": "editingMemberId",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 1000
+    },
+    {
+      "id": "tm-seteditingempty",
+      "type": "Set Variable",
+      "label": "Clear editingMemberId",
+      "parameters": {
+        "name": "editingMemberId",
+        "setWith": "emptyString"
+      },
+      "x": 650,
+      "y": 760
+    },
+    {
+      "id": "tm-editortitleexpr",
+      "type": "Expression",
+      "label": "Editor title text",
+      "parameters": {
+        "expression": "recordId ? 'Edit member' : 'New member'"
+      },
+      "x": 650,
+      "y": 1240
+    }
+  ],
+  "visualRoots": [
+    "tm-page"
+  ]
+}

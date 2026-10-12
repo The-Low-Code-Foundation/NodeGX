@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "fbc5d553-fd25-521f-8636-d74864b4eddd",
+  "name": "ClientRow",
+  "path": "/Components/ClientRow",
+  "type": "visual",
+  "created": "2026-10-12T17:49:17.989Z",
+  "modified": "2026-10-12T17:49:17.989Z",
+  "modifiedBy": "noodl-mcp"
+}

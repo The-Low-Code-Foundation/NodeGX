@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "89751fe8-14ee-589b-83f2-0059cb2480a5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "wr-ci",
+      "fromProperty": "title",
+      "toId": "wr-title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wr-ci",
+      "fromProperty": "slug",
+      "toId": "wr-slug",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wr-ci",
+      "fromProperty": "author",
+      "toId": "wr-authorid",
+      "toProperty": "author"
+    },
+    {
+      "fromId": "wr-authorid",
+      "fromProperty": "result",
+      "toId": "wr-authorrec",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "wr-authorrec",
+      "fromProperty": "prop-name",
+      "toId": "wr-author",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wr-ci",
+      "fromProperty": "updatedAt",
+      "toId": "wr-datefmt",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "wr-datefmt",
+      "fromProperty": "currentValue",
+      "toId": "wr-updated",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wr-row",
+      "fromProperty": "onClick",
+      "toId": "wr-co",
+      "toProperty": "click"
+    }
+  ]
+}

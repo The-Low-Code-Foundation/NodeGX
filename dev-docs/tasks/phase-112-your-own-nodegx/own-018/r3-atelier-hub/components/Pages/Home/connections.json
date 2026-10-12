@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3aba892e-b900-5317-86cf-6df40c9401be",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "home-qposts",
+      "fromProperty": "items",
+      "toId": "home-feedfilter",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "home-feedfilter",
+      "fromProperty": "items",
+      "toId": "home-list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "home-qposts",
+      "fromProperty": "isEmpty",
+      "toId": "home-empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "home-qmembers",
+      "fromProperty": "items",
+      "toId": "home-memberopts",
+      "toProperty": "records"
+    },
+    {
+      "fromId": "home-memberopts",
+      "fromProperty": "options",
+      "toId": "home-composer",
+      "toProperty": "options"
+    }
+  ]
+}

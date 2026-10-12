@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ce0a7f8c-7604-57b4-8f4e-7431a70a28a2",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "es-ci",
+      "fromProperty": "title",
+      "toId": "es-title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "es-ci",
+      "fromProperty": "body",
+      "toId": "es-body",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "es-ci",
+      "fromProperty": "actionLabel",
+      "toId": "es-action",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "es-ci",
+      "fromProperty": "actionLabel",
+      "toId": "es-action",
+      "toProperty": "visible"
+    },
+    {
+      "fromId": "es-action",
+      "fromProperty": "onClick",
+      "toId": "es-co",
+      "toProperty": "clicked"
+    },
+    {
+      "fromId": "es-ci",
+      "fromProperty": "mounted",
+      "toId": "es-root",
+      "toProperty": "mounted"
+    }
+  ]
+}

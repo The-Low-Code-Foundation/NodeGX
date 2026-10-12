@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2eb7187e-c50c-55ba-8dfc-5de048722bc5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ro-ci",
+      "fromProperty": "records",
+      "toId": "ro-fn",
+      "toProperty": "in-records"
+    },
+    {
+      "fromId": "ro-fn",
+      "fromProperty": "out-options",
+      "toId": "ro-co",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "ro-fn",
+      "fromProperty": "out-ids",
+      "toId": "ro-co",
+      "toProperty": "ids"
+    }
+  ]
+}

@@ -1,0 +1,287 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a8c719c9-017b-5c3f-828f-8a7f33aaf626",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cfm-card",
+      "type": "Group",
+      "label": "Client form card",
+      "children": [
+        "cfm-name",
+        "cfm-sector",
+        "cfm-contact",
+        "cfm-email",
+        "cfm-phone",
+        "cfm-address",
+        "cfm-notes",
+        "cfm-actions"
+      ],
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "flexDirection": "column",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "paddingTop": "var(--space-5)",
+        "rowGap": "var(--space-4)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cfm-name",
+      "type": "/Components/TextField",
+      "label": "Name field",
+      "parent": "cfm-card",
+      "parameters": {
+        "label": "Name",
+        "placeholder": "Client name"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "cfm-sector",
+      "type": "/Components/TextField",
+      "label": "Sector field",
+      "parent": "cfm-card",
+      "parameters": {
+        "label": "Sector",
+        "placeholder": "Hospitality, culture, food…"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "cfm-contact",
+      "type": "/Components/TextField",
+      "label": "Contact field",
+      "parent": "cfm-card",
+      "parameters": {
+        "label": "Contact person",
+        "placeholder": "Who we talk to"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "cfm-email",
+      "type": "/Components/TextField",
+      "label": "Email field",
+      "parent": "cfm-card",
+      "parameters": {
+        "label": "Email",
+        "placeholder": "contact@client.fr"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "cfm-phone",
+      "type": "/Components/TextField",
+      "label": "Phone field",
+      "parent": "cfm-card",
+      "parameters": {
+        "label": "Phone",
+        "placeholder": "+33 …"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "cfm-address",
+      "type": "/Components/TextField",
+      "label": "Address field",
+      "parent": "cfm-card",
+      "parameters": {
+        "label": "Address",
+        "placeholder": "Street, Lyon"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "cfm-notes",
+      "type": "/Components/TextField",
+      "label": "Notes field",
+      "parent": "cfm-card",
+      "parameters": {
+        "label": "Notes",
+        "multiline": true,
+        "placeholder": "Anything the team should know"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "cfm-actions",
+      "type": "Group",
+      "label": "Actions",
+      "parent": "cfm-card",
+      "children": [
+        "cfm-cancel",
+        "cfm-save"
+      ],
+      "parameters": {
+        "columnGap": "var(--space-3)",
+        "flexDirection": "row",
+        "justifyContent": "flex-end"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "cfm-cancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "parent": "cfm-actions",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "Cancel",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "cfm-save",
+      "type": "net.noodl.controls.button",
+      "label": "Save client",
+      "parent": "cfm-actions",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "color": "var(--primary-foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "Save client",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "cfm-ci",
+      "type": "Component Inputs",
+      "label": "Form inputs",
+      "ports": [
+        {
+          "name": "recordId",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 1480
+    },
+    {
+      "id": "cfm-co",
+      "type": "Component Outputs",
+      "label": "Form outputs",
+      "ports": [
+        {
+          "name": "saved",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cancelled",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "cfm-rec",
+      "type": "DbModel2",
+      "label": "Client record",
+      "parameters": {
+        "collectionName": "Client"
+      },
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "cfm-isnew",
+      "type": "Expression",
+      "label": "Is new client",
+      "parameters": {
+        "expression": "!recordId"
+      },
+      "x": 410,
+      "y": 1600
+    },
+    {
+      "id": "cfm-isnewcond",
+      "type": "Condition",
+      "label": "Create or update",
+      "x": 410,
+      "y": 1240,
+      "parameters": {
+        "runOnChange-condition": false
+      }
+    },
+    {
+      "id": "cfm-create",
+      "type": "NewDbModelProperties",
+      "label": "Create client",
+      "parameters": {
+        "collectionName": "Client"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "cfm-update",
+      "type": "SetDbModelProperties",
+      "label": "Update client",
+      "parameters": {
+        "collectionName": "Client",
+        "idSource": "explicit"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "cfm-nameok",
+      "type": "Expression",
+      "label": "Name present",
+      "parameters": {
+        "expression": "!!name"
+      },
+      "x": 410,
+      "y": 1360
+    }
+  ],
+  "visualRoots": [
+    "cfm-card"
+  ]
+}

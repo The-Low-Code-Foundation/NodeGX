@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "457e5bf5-de9c-5b84-8e1f-4d871c6b278a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ir-ci",
+      "fromProperty": "label",
+      "toId": "ir-label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ir-ci",
+      "fromProperty": "value",
+      "toId": "ir-value",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ir-ci",
+      "fromProperty": "value",
+      "toId": "ir-value",
+      "toProperty": "visible"
+    }
+  ]
+}

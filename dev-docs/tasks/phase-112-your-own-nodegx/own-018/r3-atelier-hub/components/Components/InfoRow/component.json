@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "457e5bf5-de9c-5b84-8e1f-4d871c6b278a",
+  "name": "InfoRow",
+  "path": "/Components/InfoRow",
+  "type": "visual",
+  "created": "2026-10-12T18:06:33.918Z",
+  "modified": "2026-10-12T18:06:33.918Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One label/value row for detail cards: a muted label in a fixed column and the value beside it. The value hides its own row content when empty."
+}

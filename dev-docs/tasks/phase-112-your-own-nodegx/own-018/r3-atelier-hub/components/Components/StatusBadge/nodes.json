@@ -1,0 +1,77 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2614e598-8e5a-5e5c-8d0b-e32eb500336c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sb-pill",
+      "type": "Group",
+      "label": "Status pill",
+      "children": [
+        "sb-label"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "borderRadius": "var(--radius-full)",
+        "flexDirection": "row",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "sizeMode": "contentSize"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "sb-label",
+      "type": "Text",
+      "label": "Status text",
+      "parent": "sb-pill",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "sb-states",
+      "type": "States",
+      "label": "Status colours",
+      "parameters": {
+        "states": "Backlog,In progress,In review,Done",
+        "type-backgroundColor": "color",
+        "type-color": "color",
+        "value-Backlog-backgroundColor": "var(--muted)",
+        "value-Backlog-color": "var(--muted-foreground)",
+        "value-Done-backgroundColor": "var(--primary)",
+        "value-Done-color": "var(--primary-foreground)",
+        "value-In progress-backgroundColor": "var(--accent)",
+        "value-In progress-color": "var(--accent-foreground)",
+        "value-In review-backgroundColor": "var(--secondary)",
+        "value-In review-color": "var(--secondary-foreground)",
+        "values": "backgroundColor,color"
+      },
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "sb-ci",
+      "type": "Component Inputs",
+      "label": "Status in",
+      "ports": [
+        {
+          "name": "status",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "sb-pill"
+  ]
+}

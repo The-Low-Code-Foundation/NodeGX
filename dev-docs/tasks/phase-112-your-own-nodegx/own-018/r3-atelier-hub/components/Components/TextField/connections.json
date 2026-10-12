@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "58a4fdaa-ae80-5e79-80fa-cbd38443446d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tf-ci",
+      "fromProperty": "label",
+      "toId": "tf-label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tf-ci",
+      "fromProperty": "label",
+      "toId": "tf-label",
+      "toProperty": "visible"
+    },
+    {
+      "fromId": "tf-ci",
+      "fromProperty": "value",
+      "toId": "tf-input",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "tf-ci",
+      "fromProperty": "placeholder",
+      "toId": "tf-input",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "tf-ci",
+      "fromProperty": "multiline",
+      "toId": "tf-type",
+      "toProperty": "multiline"
+    },
+    {
+      "fromId": "tf-type",
+      "fromProperty": "result",
+      "toId": "tf-input",
+      "toProperty": "type"
+    },
+    {
+      "fromId": "tf-ci",
+      "fromProperty": "clear",
+      "toId": "tf-input",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "tf-input",
+      "fromProperty": "onTextChanged",
+      "toId": "tf-co",
+      "toProperty": "value"
+    }
+  ]
+}

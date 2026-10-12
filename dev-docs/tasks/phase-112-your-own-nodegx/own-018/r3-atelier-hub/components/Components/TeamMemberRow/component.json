@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0894b2e4-bcf3-5407-8dcf-38f67052ba21",
+  "name": "TeamMemberRow",
+  "path": "/Components/TeamMemberRow",
+  "type": "visual",
+  "created": "2026-10-12T17:52:19.287Z",
+  "modified": "2026-10-12T17:52:19.287Z",
+  "modifiedBy": "noodl-mcp"
+}

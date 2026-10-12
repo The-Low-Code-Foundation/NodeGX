@@ -1,0 +1,612 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "19d14604-9efe-5ab5-8e30-c1628f31ca0d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cl-page",
+      "type": "Page",
+      "label": "Clients page",
+      "children": [
+        "cl-canvas"
+      ],
+      "parameters": {
+        "title": "Clients",
+        "urlPath": "clients"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cl-canvas",
+      "type": "Group",
+      "label": "Page canvas",
+      "parent": "cl-page",
+      "children": [
+        "cl-band"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "backgroundColor": "var(--background)",
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "cl-band",
+      "type": "Group",
+      "label": "Band",
+      "parent": "cl-canvas",
+      "children": [
+        "cl-shell"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "flexDirection": "column",
+        "paddingBottom": "var(--space-20)",
+        "paddingTop": "var(--space-12)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "cl-shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "cl-band",
+      "children": [
+        "cl-listpanel",
+        "cl-detailpanel",
+        "cl-editorpanel"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "maxWidth": {
+          "unit": "px",
+          "value": 1200
+        },
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "rowGap": "var(--space-8)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "cl-listpanel",
+      "type": "Group",
+      "label": "List panel",
+      "parent": "cl-shell",
+      "children": [
+        "cl-header",
+        "cl-list",
+        "cl-empty"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 280,
+      "y": 520
+    },
+    {
+      "id": "cl-header",
+      "type": "/Components/PageHeader",
+      "label": "Page header",
+      "parent": "cl-listpanel",
+      "children": [
+        "cl-newbtn"
+      ],
+      "parameters": {
+        "eyebrow": "Clients",
+        "lead": "Our clients, their contacts and their projects.",
+        "title": "Clients"
+      },
+      "x": 340,
+      "y": 640
+    },
+    {
+      "id": "cl-newbtn",
+      "type": "net.noodl.controls.button",
+      "label": "New client",
+      "parent": "cl-header",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "color": "var(--primary-foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "New client",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentSize"
+      },
+      "x": 400,
+      "y": 760
+    },
+    {
+      "id": "cl-list",
+      "type": "For Each",
+      "label": "Client rows",
+      "parent": "cl-listpanel",
+      "parameters": {
+        "template": "/Components/ClientRow"
+      },
+      "x": 340,
+      "y": 880
+    },
+    {
+      "id": "cl-empty",
+      "type": "/Components/EmptyState",
+      "label": "Empty clients",
+      "parent": "cl-listpanel",
+      "parameters": {
+        "actionLabel": "New client",
+        "body": "Add your first client to start tracking their projects.",
+        "title": "No clients yet"
+      },
+      "x": 340,
+      "y": 1000
+    },
+    {
+      "id": "cl-detailpanel",
+      "type": "Group",
+      "label": "Detail panel",
+      "parent": "cl-shell",
+      "children": [
+        "cl-backrow",
+        "cl-detailhead",
+        "cl-infocard",
+        "cl-projectshead",
+        "cl-projects",
+        "cl-projectsempty"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "cl-backrow",
+      "type": "Group",
+      "label": "Back row",
+      "parent": "cl-detailpanel",
+      "children": [
+        "cl-back",
+        "cl-editbtn"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between"
+      },
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "cl-back",
+      "type": "net.noodl.controls.button",
+      "label": "Back to list",
+      "parent": "cl-backrow",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "label": "← All clients",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-2)",
+        "sizeMode": "contentSize"
+      },
+      "x": 400,
+      "y": 1360
+    },
+    {
+      "id": "cl-editbtn",
+      "type": "net.noodl.controls.button",
+      "label": "Edit client",
+      "parent": "cl-backrow",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "Edit client",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "sizeMode": "contentSize"
+      },
+      "x": 400,
+      "y": 1480
+    },
+    {
+      "id": "cl-detailhead",
+      "type": "Group",
+      "label": "Client name and sector",
+      "parent": "cl-detailpanel",
+      "children": [
+        "cl-name",
+        "cl-sector"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      },
+      "x": 340,
+      "y": 1600
+    },
+    {
+      "id": "cl-name",
+      "type": "Text",
+      "label": "Client name",
+      "parent": "cl-detailhead",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 400,
+      "y": 1720
+    },
+    {
+      "id": "cl-sector",
+      "type": "Text",
+      "label": "Sector",
+      "parent": "cl-detailhead",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-sm)"
+      },
+      "x": 400,
+      "y": 1840
+    },
+    {
+      "id": "cl-infocard",
+      "type": "Group",
+      "label": "Contact card",
+      "parent": "cl-detailpanel",
+      "children": [
+        "cl-contactrow",
+        "cl-emailrow",
+        "cl-phonerow",
+        "cl-addressrow",
+        "cl-notesrow"
+      ],
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "flexDirection": "column",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "paddingTop": "var(--space-5)",
+        "rowGap": "var(--space-3)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 340,
+      "y": 1960
+    },
+    {
+      "id": "cl-contactrow",
+      "type": "/Components/InfoRow",
+      "label": "Contact row",
+      "parent": "cl-infocard",
+      "parameters": {
+        "label": "Contact"
+      },
+      "x": 400,
+      "y": 2080
+    },
+    {
+      "id": "cl-emailrow",
+      "type": "/Components/InfoRow",
+      "label": "Email row",
+      "parent": "cl-infocard",
+      "parameters": {
+        "label": "Email"
+      },
+      "x": 400,
+      "y": 2200
+    },
+    {
+      "id": "cl-phonerow",
+      "type": "/Components/InfoRow",
+      "label": "Phone row",
+      "parent": "cl-infocard",
+      "parameters": {
+        "label": "Phone"
+      },
+      "x": 400,
+      "y": 2320
+    },
+    {
+      "id": "cl-addressrow",
+      "type": "/Components/InfoRow",
+      "label": "Address row",
+      "parent": "cl-infocard",
+      "parameters": {
+        "label": "Address"
+      },
+      "x": 400,
+      "y": 2440
+    },
+    {
+      "id": "cl-notesrow",
+      "type": "/Components/InfoRow",
+      "label": "Notes row",
+      "parent": "cl-infocard",
+      "parameters": {
+        "label": "Notes"
+      },
+      "x": 400,
+      "y": 2560
+    },
+    {
+      "id": "cl-projectshead",
+      "type": "Text",
+      "label": "Projects heading",
+      "parent": "cl-detailpanel",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "text": "Projects"
+      },
+      "x": 340,
+      "y": 2680
+    },
+    {
+      "id": "cl-projects",
+      "type": "For Each",
+      "label": "Client projects",
+      "parent": "cl-detailpanel",
+      "parameters": {
+        "template": "/Components/ProjectRow"
+      },
+      "x": 340,
+      "y": 2800
+    },
+    {
+      "id": "cl-projectsempty",
+      "type": "Text",
+      "label": "No projects",
+      "parent": "cl-detailpanel",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-sm)",
+        "text": "No projects for this client yet."
+      },
+      "x": 340,
+      "y": 2920
+    },
+    {
+      "id": "cl-editorpanel",
+      "type": "Group",
+      "label": "Editor panel",
+      "parent": "cl-shell",
+      "children": [
+        "cl-editortitle",
+        "cl-form"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 280,
+      "y": 3040
+    },
+    {
+      "id": "cl-editortitle",
+      "type": "Text",
+      "label": "Editor title",
+      "parent": "cl-editorpanel",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 340,
+      "y": 3160
+    },
+    {
+      "id": "cl-form",
+      "type": "/Components/ClientForm",
+      "label": "Client form",
+      "parent": "cl-editorpanel",
+      "x": 340,
+      "y": 3280
+    },
+    {
+      "id": "cl-view",
+      "type": "States",
+      "label": "List, detail or editor",
+      "parameters": {
+        "states": "list,detail,editor"
+      },
+      "x": 650,
+      "y": 520
+    },
+    {
+      "id": "cl-qclients",
+      "type": "DbCollection2",
+      "label": "Fetch clients",
+      "parameters": {
+        "collectionName": "Client"
+      },
+      "x": 650,
+      "y": 880
+    },
+    {
+      "id": "cl-qprojects",
+      "type": "DbCollection2",
+      "label": "Fetch projects",
+      "parameters": {
+        "collectionName": "Project"
+      },
+      "x": 650,
+      "y": 3400
+    },
+    {
+      "id": "cl-rec",
+      "type": "DbModel2",
+      "label": "Selected client record",
+      "parameters": {
+        "collectionName": "Client"
+      },
+      "x": 650,
+      "y": 1720
+    },
+    {
+      "id": "cl-cprojects",
+      "type": "Filter Collection",
+      "label": "Projects of selected client",
+      "parameters": {
+        "filterFilter": "client",
+        "filterFilterOp-client": "eq",
+        "filterFilterType-client": "string"
+      },
+      "x": 650,
+      "y": 2800
+    },
+    {
+      "id": "cl-selected",
+      "type": "Variable2",
+      "label": "Selected client id",
+      "parameters": {
+        "name": "selectedClientId"
+      },
+      "x": 650,
+      "y": 3520
+    },
+    {
+      "id": "cl-editing",
+      "type": "Variable2",
+      "label": "Editing client id",
+      "parameters": {
+        "name": "editingClientId"
+      },
+      "x": 650,
+      "y": 3280
+    },
+    {
+      "id": "cl-setselected",
+      "type": "Set Variable",
+      "label": "Write selectedClientId",
+      "parameters": {
+        "name": "selectedClientId",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 1000
+    },
+    {
+      "id": "cl-setediting",
+      "type": "Set Variable",
+      "label": "Write editingClientId from list",
+      "parameters": {
+        "name": "editingClientId",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 1120
+    },
+    {
+      "id": "cl-seteditingdetail",
+      "type": "Set Variable",
+      "label": "Write editingClientId from detail",
+      "parameters": {
+        "name": "editingClientId",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 1480
+    },
+    {
+      "id": "cl-seteditingempty",
+      "type": "Set Variable",
+      "label": "Clear editingClientId",
+      "parameters": {
+        "name": "editingClientId",
+        "setWith": "emptyString"
+      },
+      "x": 650,
+      "y": 760
+    },
+    {
+      "id": "cl-editortitleexpr",
+      "type": "Expression",
+      "label": "Editor title text",
+      "parameters": {
+        "expression": "recordId ? 'Edit client' : 'New client'"
+      },
+      "x": 650,
+      "y": 3160
+    },
+    {
+      "id": "cl-noprojects",
+      "type": "Expression",
+      "label": "Client has no projects",
+      "parameters": {
+        "expression": "count === 0"
+      },
+      "x": 650,
+      "y": 2920
+    }
+  ],
+  "visualRoots": [
+    "cl-page"
+  ]
+}

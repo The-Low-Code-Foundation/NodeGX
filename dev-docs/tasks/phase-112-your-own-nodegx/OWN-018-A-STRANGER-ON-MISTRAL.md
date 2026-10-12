@@ -4,7 +4,7 @@
 package … an internal data management system as a case study … all the data stays in Europe with an EU LLM. Do the
 same 'stranger's Claude Code' method we used for the Lingo app."*).
 **Depends on** OWN-015's 0.2.0 tarballs (packed at `9505d342d`; nothing shipped has changed since).
-**Status: 🟡 s1 (2026-10-12): rounds 1–2 couldn't build (§7); rulings asked and answered (§9); the fixes built, committed (`4a18723fe`) and re-packed; round 3 on the fixed kit (§10).**
+**Status: 🟡 s1 done (2026-10-12). Round 3 on the fixed kit built ~90% of the intranet with 0 validation errors before its price cap (§10); reads cut 31% (§11). Next session: Richard's new brief (a landing page + Brevo sign-up) in an environment tuned for Large 4 (§12). ~$4 of the $10 credit left.**
 **Model:** the session that runs the rounds and reads them: Opus. The stranger: **Mistral Large 4 (`mistral-large-4`)
 in Mistral Vibe**, on purpose — the test is whether the kit is enough for an agent that isn't Claude.
 
@@ -216,4 +216,60 @@ of them, best first); `call_tool` describes comma-separated names in one call; R
 ports `pm-<parameter>` (the reason for Mistral's invented `p-clientId`: the notes said the ports exist, never their
 names). Resident surface unchanged at 8,279. **Not changed, needs a Claude control first:** `get_project_info`'s
 doctrines and `get_node_type`'s prose (each line exists because a measured model failed without it).
+
+## 10. Round 3: the fixed kit, sealed lab, legacy harness (s1)
+
+`own-018/round-kit.mjs` with the tarballs packed at `4a18723fe` (`scratchpad/own018/tgz2/`), `own-018/sentence.txt`
+(round 1's paragraph). 85 minutes, stopped by its `--max-price 6` (Vibe list prices; **$3.08 real** at the launch
+sale): 6.80M input tokens, **only 3.18M cached (47%)**, 189k output. Uncached input was $2.46 of the $3.08.
+
+**What it did, unrepaired:** `list_projects` → `create_project` "Atelier Hub" (scoped itself as asked) → from then on
+every post-bind tool through `call_tool` (*"the newly revealed tools aren't in my static tool list, so from here on
+I'll call everything through `nodegx_call_tool` (as the AGENTS.md anticipates)"*) → provision_backend, schema fixed
+from the server's warning (createdAt/updatedAt clash), the `.env` placeholder for MISTRAL_API_KEY → 53 `call_tool`
+reads (26 of them one-tool `describe`s) and 13 examples **before its first component** (~45 min) → both cloud
+functions (`askMistral`: Secret → Mistral API; `announceProjectDone`) **0 errors first time**, deployed → collection
+permissions, 5 collections seeded (it fixed two rejected date rows itself), the db-change trigger → a plan of 17 shared
+components staged in batches of ~4–6: 2 refused, both fixed from the diagnostics (*"The validator is precise"*), **17/17
+staged, 0 errors, applied, clean render** → 6 pages staged and applied, registered in the router → `render_report`
+found three real bugs of its own and it was fixing them when the cap hit: EmptyState's button shows its fallback
+"Add", Ask's error/thinking flash at load, and **a form's Condition fires on load and would create empty records**
+(fix it named: `runOnChange-condition: false`).
+
+**Not done:** the App shell (nav bar + routes wiring the pages) and those three fixes. `validate_project` on a copy:
+**0 errors, 2 warnings, 381 nodes**. The Home page (Team feed) at phone width: `own-018/r3-home-phone.png`. The project
+is kept as `own-018/r3-atelier-hub/` (no `.env`, no `.mcp.json`); the resumable Vibe session is in this session's
+scratchpad `own018/r3/home/.vibe` (may be gone).
+
+**Large 4, as measured:** follows AGENTS.md to the letter; scopes sensibly; reasons about the app, not the format
+(String ids vs pointers, double-posting from button + trigger); self-corrects in one turn when it can read a refusal;
+**reads everything before writing** (most of the time and money); single steps of 3–16 minutes; writes lists as JSON
+arrays (STRINGLISTARRAY); adds a `description` argument; probed backend port 8581 once while its backend was on 8578
+(said by the agent, not measured — check before filing).
+
+## 12. Next session: an environment Large 4 likes, then the new brief
+
+**Richard (end of s1):** *"stop and check … are we really configuring our efforts specifically for Mistral Large 4?
+Then we'll start a new session, set up the perfect little environment that Mistral Large 4 will love, and let it
+rip"* — and the brief changes: *"a basic, very pretty modern landing page with an API sending sign up form to Brevo …
+basic but impressive"*. The sentence: `own-018/sentence-landing.txt` (Brevo is EU too; key `BREVO_API_KEY` via `.env`).
+
+**Honest answer to "specifically for Large 4?": not yet.** s1 fixed what Large 4 *exposed* in the kit and in Vibe; the
+model settings are copied defaults, untested: `temperature = 1.0` and `thinking = "high"` come from Vibe's Medium 3.5
+entry. Measured, cheap experiments first (each on a small fixed task, a few cents):
+1. **Cache rate by harness** — the biggest cost lever. Legacy: 47% (round 3), 40% (lc smoke). Default (code-mode):
+   76–91%. At 90% round 3 would have cost ~$1.29; with §11's cuts ~$1.06. Find why legacy misses (prefix changing per
+   turn?) or use code-mode now that `call_tool` answers refusals as `{ok:false}` (direct bootstrap tools' errors are
+   still opaque there). Also measure OpenCode's (runner ready: `round-opencode.mjs`, `--variant high` for parity).
+2. **`thinking` low vs high** (Vibe `low` = `reasoning_effort: "none"`): time to first component, turns, delivered?
+3. **Context cap:** `auto_compact_threshold` so a turn doesn't re-send 150k+ tokens.
+4. **What Large 4 trips on, said where it reads:** stringlists are comma strings; fixed sizes need `sizeMode:
+   "explicit"`; a Condition fed only by a button wants `runOnChange-condition: false`; route params are `pm-<param>`;
+   describe several tools in one `call_tool`. Candidate homes: the folder AGENTS.md (create-nodegx) or a Vibe skill
+   (`.vibe/skills/<name>/SKILL.md`; check it loads under `--legacy-harness`).
+5. **Kit before a pretty page:** fix NOSTARTERASSETS (a landing page needs icons and imagery; npm-made projects have
+   none); use the READWASTE tarballs (`scratchpad/own018/tgz3/`, packed at `5754e993e`, or re-pack at HEAD).
+
+**Budget:** ~$4 at the launch sale (ends ~2026-10-20; list prices are double). A landing page is far smaller than the
+intranet; with the cache and read fixes a round should be well under $1, so $4 covers the experiments and 2–3 rounds.
 

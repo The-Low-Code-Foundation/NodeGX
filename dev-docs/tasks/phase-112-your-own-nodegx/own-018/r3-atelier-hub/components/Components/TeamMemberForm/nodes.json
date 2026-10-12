@@ -1,0 +1,234 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8981f534-8ce9-5326-82ac-e7e745f99d65",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mfm-card",
+      "type": "Group",
+      "label": "Member form card",
+      "children": [
+        "mfm-name",
+        "mfm-role",
+        "mfm-email",
+        "mfm-actions"
+      ],
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "flexDirection": "column",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "paddingTop": "var(--space-5)",
+        "rowGap": "var(--space-4)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mfm-name",
+      "type": "/Components/TextField",
+      "label": "Name field",
+      "parent": "mfm-card",
+      "parameters": {
+        "label": "Name",
+        "placeholder": "Camille Bernard"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mfm-role",
+      "type": "/Components/TextField",
+      "label": "Role field",
+      "parent": "mfm-card",
+      "parameters": {
+        "label": "Role",
+        "placeholder": "Design Lead"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "mfm-email",
+      "type": "/Components/TextField",
+      "label": "Email field",
+      "parent": "mfm-card",
+      "parameters": {
+        "label": "Email",
+        "placeholder": "camille@studiomarceau.fr"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "mfm-actions",
+      "type": "Group",
+      "label": "Actions",
+      "parent": "mfm-card",
+      "children": [
+        "mfm-cancel",
+        "mfm-save"
+      ],
+      "parameters": {
+        "columnGap": "var(--space-3)",
+        "flexDirection": "row",
+        "justifyContent": "flex-end"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "mfm-cancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "parent": "mfm-actions",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "Cancel",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "mfm-save",
+      "type": "net.noodl.controls.button",
+      "label": "Save member",
+      "parent": "mfm-actions",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "color": "var(--primary-foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "Save member",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "mfm-ci",
+      "type": "Component Inputs",
+      "label": "Form inputs",
+      "ports": [
+        {
+          "name": "recordId",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "mfm-co",
+      "type": "Component Outputs",
+      "label": "Form outputs",
+      "ports": [
+        {
+          "name": "saved",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cancelled",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "mfm-rec",
+      "type": "DbModel2",
+      "label": "Member record",
+      "parameters": {
+        "collectionName": "TeamMember"
+      },
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "mfm-isnew",
+      "type": "Expression",
+      "label": "Is new member",
+      "parameters": {
+        "expression": "!recordId"
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "mfm-isnewcond",
+      "type": "Condition",
+      "label": "Create or update",
+      "x": 410,
+      "y": 760,
+      "parameters": {
+        "runOnChange-condition": false
+      }
+    },
+    {
+      "id": "mfm-create",
+      "type": "NewDbModelProperties",
+      "label": "Create member",
+      "parameters": {
+        "collectionName": "TeamMember"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "mfm-update",
+      "type": "SetDbModelProperties",
+      "label": "Update member",
+      "parameters": {
+        "collectionName": "TeamMember",
+        "idSource": "explicit"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "mfm-ok",
+      "type": "Expression",
+      "label": "Required fields present",
+      "parameters": {
+        "expression": "!!(name && role)"
+      },
+      "x": 410,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "mfm-card"
+  ]
+}

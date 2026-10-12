@@ -1,0 +1,278 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b97bd391-0b1b-5aba-8ac7-fcca165ef09f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "wfm-card",
+      "type": "Group",
+      "label": "Wiki form card",
+      "children": [
+        "wfm-title",
+        "wfm-slug",
+        "wfm-slughint",
+        "wfm-body",
+        "wfm-author",
+        "wfm-actions"
+      ],
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "flexDirection": "column",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "paddingTop": "var(--space-5)",
+        "rowGap": "var(--space-4)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "wfm-title",
+      "type": "/Components/TextField",
+      "label": "Title field",
+      "parent": "wfm-card",
+      "parameters": {
+        "label": "Title",
+        "placeholder": "Onboarding a new client"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "wfm-slug",
+      "type": "/Components/TextField",
+      "label": "Slug field",
+      "parent": "wfm-card",
+      "parameters": {
+        "label": "Slug",
+        "placeholder": "onboarding"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "wfm-slughint",
+      "type": "Text",
+      "label": "Slug hint",
+      "parent": "wfm-card",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "text": "Used in the page address — lowercase, dashes, no spaces."
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "wfm-body",
+      "type": "/Components/TextField",
+      "label": "Body field",
+      "parent": "wfm-card",
+      "parameters": {
+        "label": "Body",
+        "multiline": true,
+        "placeholder": "Write the page…"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "wfm-author",
+      "type": "/Components/SelectField",
+      "label": "Author picker",
+      "parent": "wfm-card",
+      "parameters": {
+        "label": "Author",
+        "placeholder": "Who is writing this"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "wfm-actions",
+      "type": "Group",
+      "label": "Actions",
+      "parent": "wfm-card",
+      "children": [
+        "wfm-cancel",
+        "wfm-save"
+      ],
+      "parameters": {
+        "columnGap": "var(--space-3)",
+        "flexDirection": "row",
+        "justifyContent": "flex-end"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "wfm-cancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "parent": "wfm-actions",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "Cancel",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "wfm-save",
+      "type": "net.noodl.controls.button",
+      "label": "Save page",
+      "parent": "wfm-actions",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "color": "var(--primary-foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "Save page",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "wfm-ci",
+      "type": "Component Inputs",
+      "label": "Form inputs",
+      "ports": [
+        {
+          "name": "recordId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "authorOptions",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "wfm-co",
+      "type": "Component Outputs",
+      "label": "Form outputs",
+      "ports": [
+        {
+          "name": "saved",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cancelled",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "wfm-rec",
+      "type": "DbModel2",
+      "label": "Wiki page record",
+      "parameters": {
+        "collectionName": "WikiPage"
+      },
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "wfm-authorid",
+      "type": "Expression",
+      "label": "Author id",
+      "parameters": {
+        "expression": "typeof author === 'string' ? author : ((author && (author.id || author.objectId)) || '')"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "wfm-isnew",
+      "type": "Expression",
+      "label": "Is new page",
+      "parameters": {
+        "expression": "!recordId"
+      },
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "wfm-isnewcond",
+      "type": "Condition",
+      "label": "Create or update",
+      "x": 410,
+      "y": 1000,
+      "parameters": {
+        "runOnChange-condition": false
+      }
+    },
+    {
+      "id": "wfm-create",
+      "type": "NewDbModelProperties",
+      "label": "Create page",
+      "parameters": {
+        "collectionName": "WikiPage"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "wfm-update",
+      "type": "SetDbModelProperties",
+      "label": "Update page",
+      "parameters": {
+        "collectionName": "WikiPage",
+        "idSource": "explicit"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "wfm-ok",
+      "type": "Expression",
+      "label": "Required fields present",
+      "parameters": {
+        "expression": "!!(title && slug && body)"
+      },
+      "x": 410,
+      "y": 1120
+    }
+  ],
+  "visualRoots": [
+    "wfm-card"
+  ]
+}
