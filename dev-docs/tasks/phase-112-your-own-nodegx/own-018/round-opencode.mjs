@@ -35,7 +35,7 @@
 // the refreshed list (25 nodegx tools) arrives a step later (mock), so a direct get_project_info right away is
 // "unavailable tool" — AGENTS.md's call_tool line is what carries that step.
 //
-//   node round-opencode.mjs <root> <tgz-dir> <prompt-file> [--max-steps N] [--variant none|high] [--max-usd X] [--context N]
+//   node round-opencode.mjs <root> <tgz-dir> <prompt-file> [--max-steps N] [--variant none|high] [--max-usd X] [--context N] [--proxy PORT]
 // --context (s2): the person's opencode.json tells OpenCode Large 4's context is N tokens (models.dev says 1,048,576, so
 // OpenCode never compacts). Measured in run 1: Mistral cached 70% of a prompt under 128k tokens and 5% over it.
 // --max-usd (s2): OpenCode has no spend cap. Every 15 s the runner reprices the round from OpenCode's own database (every
@@ -87,7 +87,9 @@ const seal = {
   // inside the lab's empty HOME, so allowing it reaches nothing of the real user's.
   permission: { external_directory: { '*': 'deny', [path.join(HOME, 'tmp', 'opencode', '*')]: 'allow' }, bash: 'deny', webfetch: 'deny', websearch: 'deny' },
   experimental: { continue_loop_on_deny: true },
-  ...(opt('--max-steps', null) ? { agent: { build: { steps: Number(opt('--max-steps')) } } } : {})
+  ...(opt('--max-steps', null) ? { agent: { build: { steps: Number(opt('--max-steps')) } } } : {}),
+  // --proxy (s2): Mistral through record-proxy.mjs on that port, to read what each request changes (harness config).
+  ...(opt('--proxy', null) ? { provider: { mistral: { options: { baseURL: `http://127.0.0.1:${opt('--proxy')}/v1` } } } } : {})
 };
 const sealFile = path.join(XDG.XDG_CONFIG_HOME, 'opencode', 'opencode.json');
 fs.writeFileSync(sealFile, JSON.stringify(seal, null, 2) + '\n');
