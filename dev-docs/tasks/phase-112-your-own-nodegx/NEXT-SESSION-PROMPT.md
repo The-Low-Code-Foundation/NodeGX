@@ -47,7 +47,11 @@ should switch** (README §0.2). Do not wait for an answer.
 
 1. ✅ *Done 2026-10-12 (OWN-013 §7).* Not driven: a **new project from a template makes no copy** (the opt-out in
    `newProject`); check it on the next launch.
-2. ✅ *Done s12: CI on `01aeb0868` — all six required green (OWN-013 §8 end).* Next: **ask Richard (R20) for `release/0.4.0` and the PR** if he hasn't answered. Was: **Read CI on the pushed `cline-dev`** (`gh run list --branch cline-dev --workflow pr.yml`; read each job's duration,
+2. ✅ *Done s12: CI on `01aeb0868` all six green; R21 ship now; `release/0.4.0` = `0a271100e`; **PR #48** open.*
+   **Next:** read PR #48's six checks (`gh pr checks 48`; `--log-failed` on a red one). Green → set CHANGELOG's
+   `## 0.4.0 · <tag day>` on `cline-dev` and cherry-pick to the release branch (UPG-008 §4.1), then **ask Richard for
+   the merge (merge commit, not squash) and the tag** (§4 of OWN-013). Then the draft: G8 (install over 0.3.0, open a
+   0.3.0 project → one `.before-0.4`; open a kit project; check `Resources/noodl-mcp/package.json`), G9, G10, Publish. Was: **Read CI on the pushed `cline-dev`** (`gh run list --branch cline-dev --workflow pr.yml`; read each job's duration,
    and `--log-failed` for a red one). If Test (editor) is red with only *re-arms a held save*, re-run the job (OWN-013
    §8: an order-dependent spec, not chased). Then **ask Richard (R20) for `release/0.4.0` and the PR.**
    *Done s12, kept for the record — G5 + G6 on the cut tree:* a worktree (`make-worktree.sh`; delete its links into the primary's `dist` first) at
