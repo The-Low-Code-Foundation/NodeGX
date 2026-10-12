@@ -1,7 +1,7 @@
 ---
 id: P107-C161
 title: Video — Restart and Reset seek to second 0, not Start Time: with a Start Time set, a Restart plays from before it, and the seek takes the End Time bound with it
-status: scheduled
+status: fixed
 severity: medium
 area: runtime / Video (noodl-viewer-react/src/components/visual/Video/Video.tsx `restart` :184-189, `reset` :197-203; the port descriptions, noodl-viewer-react/src/nodes/visual/video.ts :70 and :105)
 found: P107 NSP-018 s77, 2026-10-10 — writing the node's rules in words
@@ -37,4 +37,17 @@ and say it in the two descriptions (video.ts :70, :105 and the spec's :351, :353
 plays…". Regression when fixed (a): `packages/nodegx-node-spec/scenarios/Video.json` "Restart with a Start Time of 30 goes
 to Playback Position 30, not 0 (row C161)".
 
-**Ruled 2026-10-12 (R27, P107 s91 rulings page, asked in plain words with the reach measured that morning):** **"Restart and Reset go to Start Time (or 0:00 when there isn't one)"** — option (a). `Video.tsx` :187 / :200 and the spec's `restart` / `reset` ops, `version` up; the regression scenario above. 13 Video nodes in Richard's projects, none with a Start Time. Not built yet.
+**Ruled 2026-10-12 (R27, P107 s91 rulings page, asked in plain words with the reach measured that morning):** **"Restart and Reset go to Start Time (or 0:00 when there isn't one)"** — option (a). `Video.tsx` :187 / :200 and the spec's `restart` / `reset` ops, `version` up; the regression scenario above. 13 Video nodes in Richard's projects, none with a Start Time. Built s92 (below).
+
+**Fixed 2026-10-12 (P107 s92):** `media-fragment.ts` `startSeconds` (Start Time as the fragment reads it, second 0 when
+there is none); Video.tsx `restart` / `reset` seek there, from `this.props.dom.startTime` — the Start Time the component was last
+drawn with. The spec (v6, with its `changes` entry) holds that as `elStart`, written with the other drawn flags on every paint, so
+a Restart in the frame Start Time changes seeks to the one drawn, and the frame's end then loads the new address. Port
+descriptions in both: "Seeks to Start Time (the beginning when there is none)". Regression scenarios in `scenarios/Video.json`:
+"Restart with a Start Time of 30 goes to Playback Position 30, not 0 (row C161)" and its twin with Start Time as the text
+"12", then 20, then a negative and a cleared one. Runtime at seed 20738: every scenario passes, 0 mutant survivors (the six
+declared equivalents now name `elStart` in the paint's keys); control (Video.tsx's `currentTime = 0` put back) red on exactly
+the two. A first twin graded nothing (its Restart in the frame Start Time changed is overwritten by that frame's reload before
+the settle reads Playback Position) and was rewritten. The run is still red on this seed for P107-S92-VIDEOEMBEDSEED, identically
+at HEAD's v5. **The export (P18):** not checked. The End Time half (the browser drops the fragment after a seek outside it) is browser behaviour no target plays; the seek
+now stays inside the fragment, which is what keeps it.

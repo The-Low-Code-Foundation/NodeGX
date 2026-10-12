@@ -36588,7 +36588,7 @@
             "allowConnectionsOnly": true
           },
           "isSignal": true,
-          "description": "Stops playback and seeks to the beginning"
+          "description": "Stops playback and seeks to Start Time (the beginning when there is none)"
         },
         {
           "name": "restart",
@@ -36600,7 +36600,7 @@
             "allowConnectionsOnly": true
           },
           "isSignal": true,
-          "description": "Seeks to the beginning and plays, then fires Done"
+          "description": "Seeks to Start Time (the beginning when there is none) and plays, then fires Done"
         },
         {
           "name": "scrollIntoView",
@@ -37594,7 +37594,7 @@
           "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and plays at the paint that puts the video there — Done then"
         ],
         "restart": [
-          "on the page: wants the video playing and, once it has loaded, goes back to second 0 (Playback Position 0 — not Start Time) and starts it as Play does; before the load, only the wanting; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
+          "on the page: wants the video playing and, once it has loaded, goes back to Start Time as last drawn (Playback Position; second 0 when there is none) and starts it as Play does; before the load, only the wanting; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
           "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and restarts at the paint that puts the video there — Done then"
         ],
         "pause": [
@@ -37602,7 +37602,7 @@
           "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and pauses at the paint that puts the video there — Done then"
         ],
         "reset": [
-          "on the page: stops wanting the video playing, goes back to second 0 (Playback Position 0 once loaded — not Start Time) and pauses it — On Pause if it was playing; Autoplay no longer starts it on this load; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
+          "on the page: stops wanting the video playing, goes back to Start Time as last drawn (Playback Position, once loaded; second 0 when there is none) and pauses it — On Pause if it was playing; Autoplay no longer starts it on this load; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
           "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and resets at the paint that puts the video there — Done then"
         ]
       }

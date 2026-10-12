@@ -164,8 +164,8 @@ function onVideo(row: EquivalentMutant): EquivalentMutant[] {
   return [{ ...c, branch: shape(c.branch), ...(c.swappedWith !== undefined ? { swappedWith: shape(c.swappedWith) } : {}) }];
 }
 
-/** What every paint of the Video writes (video.ts `painted`): the `<video>`'s three flags, and the element and its media as they stand. */
-const VIDEO_PAINT = ['atEnd', 'canAutoplay', 'domElement', 'elAutoplay', 'elLoop', 'elMuted', 'failed', 'height', 'kind', 'loading', 'paused', 'pending', 'position', 'ready', 'srcAttr', 'width'];
+/** What every paint of the Video writes (video.ts `painted`): the `<video>`'s three flags and the Start Time it was drawn with (`elStart`, v6), and the element and its media as they stand. */
+const VIDEO_PAINT = ['atEnd', 'canAutoplay', 'domElement', 'elAutoplay', 'elLoop', 'elMuted', 'elStart', 'failed', 'height', 'kind', 'loading', 'paused', 'pending', 'position', 'ready', 'srcAttr', 'width'];
 
 // P109 ISL-031 (P107-D30) — the paint that takes a control's element off the page resets Focused, Hover and Pressed. A leave
 // that was not pressed, handed its twin's example that was: the twin fires the same pulses (Blurred with Focused, Hover End with
