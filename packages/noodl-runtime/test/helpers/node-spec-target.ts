@@ -861,6 +861,7 @@ const { RestDataAdapter } = require('../../src/api/backends/RestDataAdapter') as
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const CloudStore = require('../../src/api/cloudstore') as {
   invalidateBackends(scope?: unknown): void;
+  invalidateCollections(): void;
   instance: { _handle(): { publicToken?: string } };
   forBackend(modelScope: unknown, backendId: string): { _adapter: { emitAdapterEvent(e: Record<string, unknown>): void } } | undefined;
   _fromJSON(item: Record<string, unknown>, collectionName: string, modelScope?: unknown): unknown;
@@ -1358,7 +1359,7 @@ export function registerViewerModules(target: RuntimeTarget, modules: ViewerNode
  * `registerNodes` list, nodes/index.ts). They are graded on {@link cloudTarget}: a `NoodlRuntime` of type `cloud`, which is what
  * the backend's function runner builds (noodl-viewer-cloud/src/index.ts) — none of the browser's session nodes, none of the viewer's.
  */
-export const CLOUD_NODES = ['cloud/hmac', 'cloud/jwtsign', 'cloud/jwtverify', 'cloud/secret', 'cloud/createuser', 'cloud/updateuser', 'cloud/deleteuser', 'cloud/verifysessiontoken', 'cloud/addusertorole', 'cloud/removeuserfromrole', 'cloud/getuserroles', 'cloud/listusersinrole', 'cloud/sendemail', 'cloud/request', 'cloud/response', 'cloud/modelrequest'] as const;
+export const CLOUD_NODES = ['cloud/hmac', 'cloud/jwtsign', 'cloud/jwtverify', 'cloud/secret', 'cloud/createuser', 'cloud/updateuser', 'cloud/deleteuser', 'cloud/verifysessiontoken', 'cloud/addusertorole', 'cloud/removeuserfromrole', 'cloud/getuserroles', 'cloud/listusersinrole', 'cloud/sendemail', 'cloud/request', 'cloud/response', 'cloud/modelrequest', 'data/aggregatenode'] as const;
 
 /** The type names of {@link CLOUD_NODES}, read from the modules — what a suite asks to choose {@link cloudTarget} for a spec. */
 export function cloudNodeTypes(): string[] {
@@ -3433,6 +3434,20 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       // settings are the script's (graphmodel.ts `setSettings`, what `importEditorData` calls)
       (NoodlRuntime as unknown as { instance: unknown }).instance = rt;
       (rt as unknown as { graphModel: { setSettings(s: Record<string, unknown>): void } }).graphModel.setSettings({ ...w.projectSettings });
+      // NSP-022 s99 — and its classes and `dbVersionMajor`, the metadata the legacy store reads (cloudstore.js :120-126, :569-586),
+      // its class cache dropped so this play's are what it reads (and dropped again at the undo)
+      const projectMeta = (rt as unknown as { graphModel: { getMetaData(k: string): unknown; setMetaData(k: string, v: unknown): void } }).graphModel;
+      const savedProjectMeta = { dbCollections: projectMeta.getMetaData('dbCollections'), dbVersionMajor: projectMeta.getMetaData('dbVersionMajor') };
+      projectMeta.setMetaData('dbCollections', w.collections.length > 0 ? w.collections.map((c) => JSON.parse(JSON.stringify(c))) : undefined);
+      projectMeta.setMetaData('dbVersionMajor', w.dbVersionMajor);
+      CloudStore.invalidateCollections();
+      // NSP-022 s99 — the cloud bundle's build constant (noodl-viewer-cloud webpack.isolate.*.js: `const _noodl_cloud_runtime_version`),
+      // which every "am I in a cloud function" branch reads (the Parse wire's `fetch` face, ParseWireAdapter.ts :233, :241, :303). The
+      // cloud target never declared it: no node graded on it before Aggregate Records reached the Parse wire. A global for a cloud play only.
+      const g = globalThis as Record<string, unknown>;
+      const hadRuntimeVersion = Object.prototype.hasOwnProperty.call(g, '_noodl_cloud_runtime_version');
+      const savedRuntimeVersion = g._noodl_cloud_runtime_version;
+      if (options.type === 'cloud') g._noodl_cloud_runtime_version = 'node-spec';
       // STACK (world.ts, NSP-015 s18) — the REAL handler, fresh for the play (it is a process-wide static and
       // queues what no stack took), the node's call recorded as handed, and a stand-in stack per scripted name
       const restoreStacks = installStacks(w, recordStack);
@@ -3484,6 +3499,11 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         services.UserService = playService;
         restoreBackend();
         installed.restore();
+        if (hadRuntimeVersion) g._noodl_cloud_runtime_version = savedRuntimeVersion;
+        else delete g._noodl_cloud_runtime_version;
+        projectMeta.setMetaData('dbCollections', savedProjectMeta.dbCollections);
+        projectMeta.setMetaData('dbVersionMajor', savedProjectMeta.dbVersionMajor);
+        CloudStore.invalidateCollections();
         stateHistoryManager.setClock(null);
         world = undefined;
       };

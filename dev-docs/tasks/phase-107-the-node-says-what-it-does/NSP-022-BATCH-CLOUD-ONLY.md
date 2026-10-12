@@ -1,7 +1,7 @@
 # NSP-022 — Batch: the cloud-only nodes
 
 **Opened 2026-10-02 (s21), split from [NSP-014](NSP-014-BATCH-DATA-AND-CLOUD.md) as its status line said it would be.**
-**Depends on NSP-007 and NSP-014's BACKEND seam (s21).** **Status: 🟡 s96 (2026-10-12): 13 of 17 conform on the runtime's new cloud target — HMAC, JWT Sign, JWT Verify, Secret, Create / Update / Delete User, Verify Session Token, Add User To Role, Remove User From Role, Get User Roles, List Users In Role, Send Email — each on its first or second run, every mutant killed. The world grew the KEYED SIGN (DIGEST) and HOST (the backend process's services). s97: Request and Response conform on HOST's new INVOCATION (§6.5–§6.6); P107-S97-USERSMEHANG fixed on the way. s98: Model Request conforms (16 of 17, §6.7), its two defects fixed first. Left: Aggregate Records.**
+**Depends on NSP-007 and NSP-014's BACKEND seam (s21).** **Status: ✅ s99 (2026-10-12): 17 of 17 — Aggregate Records conforms (§6.8). s96: 13 of 17 conform on the runtime's new cloud target — HMAC, JWT Sign, JWT Verify, Secret, Create / Update / Delete User, Verify Session Token, Add User To Role, Remove User From Role, Get User Roles, List Users In Role, Send Email — each on its first or second run, every mutant killed. The world grew the KEYED SIGN (DIGEST) and HOST (the backend process's services). s97: Request and Response conform on HOST's new INVOCATION (§6.5–§6.6); P107-S97-USERSMEHANG fixed on the way. s98: Model Request conforms (16 of 17, §6.7), its two defects fixed first.**
 
 ## 1. The person sentence
 
@@ -233,3 +233,52 @@ execution record (ISL-010), is not on the wire. fed-003's tests own it.
 
 Read live, and pinned: the timeout sentence reads Timeout (ms) when the call fails, so a Timeout changed mid-call says the new
 number ("did not finish inside 7ms" for a 1,000 ms call). That is the runtime's read; not filed.
+
+### 6.8 s99 (2026-10-12) — Aggregate Records, the seventeenth
+
+**Measured first, through probes on the cloud target** (scratch `zz-` tests, not kept):
+
+| question | what the runtime does |
+|---|---|
+| which store | `CloudStore.forScope(modelScope)` (aggregatenode.js :156) — the LEGACY store. No backend is resolved, so the adapter is always `ParseWireAdapter`; BACKEND (R9's seam) is the contract-resolved stores and never sees the call (world.ts says so: "the project with none is the legacy store, not a world this seam plays") |
+| what goes out, in a cloud function | the Parse wire's `fetch` face (ParseWireAdapter.ts :302-339) to `_noodl_cloudservices.endpoint` — HOST's `cloudServices` (s97) — with the master key, and `X-NodeGX-Run` when the run has an id: `GET <endpoint>/aggregate/<Class>?group={…,"objectId":null}`, or `$group` / `_id` when `dbVersionMajor > 4` |
+| what it reads at run time | the class's columns, from the project's `dbCollections` metadata (`CloudStore._collections`, :290-292). The first node in the phase that reads the schema at PLAY |
+| the cloud build's constant | the Parse wire takes its `fetch` face only when `_noodl_cloud_runtime_version` is defined (the cloud bundle's webpack prefix). The cloud target never declared it — no graded node had reached the Parse wire. Without it every aggregation fails (the XHR face, no address) |
+
+**The seam: NETWORK + HOST, not BACKEND**, as Request's caller lookup (s97) — the call is a plain `fetch` to the process's loopback,
+and what the Parse adapter does with each answer (its spelling, its row rule, its one failure sentence) is graded, not copied into a
+stand-in. R9 ("the request, not the wire") was ruled for the contract-resolved record stores; this node never reaches one. A choice
+this session made, not a ruling.
+
+**The world grew** (world.ts PROJECT): `collections` (the project's classes, as the editor caches them in `dbCollections`) and
+`dbVersionMajor`; `WorldView.collections()` / `dbVersionMajor()`; the pool's `projectData` (drawn only when a pool names it — every
+earlier `project` spec draws what it drew). **The runtime target**: installs the two as metadata for a play (the legacy store's class
+cache dropped before and after), and declares `_noodl_cloud_runtime_version` for a CLOUD play only.
+
+**The spec** (`aggregate-records.ts`, v1): the frame-end aggregation, the filter lowered as `convertVisualFilter` does (no value-port
+prefix), `getAggregates` over the world's classes (the throw where a named aggregate has no Property: nothing at all), the request in
+the Parse wire's spelling, and each answer through the adapter's callbacks. Not specced, named in its header: the Javascript filter
+(NSP-017's escape hatch, as Query Records), a `relatedTo` whose class the record store supplies, the editor's warnings, the error bus,
+the outputs' drawn types.
+
+| node | scenarios | generated | mutants | planted in a copy |
+|---|---|---|---|---|
+| Aggregate Records | 35 / 35 | 200 / 200 on seeds 20738, 20739, 20740; 10,000 / 10,000 (99 s) | 99 / 99 (first run 101 / 108: two survivors were a field nothing read, removed; two were one branch written twice, collapsed; three closed by scenarios) | 15 / 15 — node: a setting asking with Do wired, `sum` as the number default, a non-column Property kept, the failure sentence's full stop, a filter failure's own words replaced, two requests a frame, `qp-` kept whole, Success never sent, a nameless aggregate skipped instead of thrown on, Error cleared by a Success; wire: the new spelling from version 6, `$sum` misspelt, two rows read as the first, `match=` not encoded, the server's words passed on (the AGGWORDS fix — so that fix will move a scenario) |
+
+**Five defects, measured, filed, none fixed** (the spec pins today's runtime, R3):
+
+- **P107-S99-AGGFILTERPREFIX (high)** — the filter builder saves a wired value as `qp-min`; the node looks it up without the prefix its
+  siblings pass, drops the condition, and aggregates the WHOLE class, saying Success. Control: the same condition with a static value
+  filters; the retired shape filters. Issue #14's wrong number on the visual path.
+- **P107-S99-AGGCOLUMNS (high)** — the built-in backend's `dbCollections` carries `columns`, not `schema.properties`; the node reads only
+  the second, so on our own backend it asks for no aggregate (and its editor draws no Property ports). Control pair: the two shapes,
+  same params.
+- **P107-S99-AGGNOPROP (medium)** — an aggregate named with no Property throws inside the swallowed frame-end callback: no request, no
+  Success, no Failure, ever.
+- **P107-S99-AGGSTALE (medium, needs a ruling)** — an aggregation matching no record is a Success that leaves the previous totals on
+  every output.
+- **P107-S99-AGGWORDS (medium)** — every failure is `Failed to aggregate.`; HLT-023 fixed this for `query` and missed `aggregate`,
+  `count`, `distinct`.
+
+Not filed: Error is never cleared by a Success (the family's shape — HTTP Request says so in its description).
+

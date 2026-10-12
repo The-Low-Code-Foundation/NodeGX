@@ -62376,6 +62376,11 @@
             "example": "storageFilterType"
           }
         ]
+      },
+      "rules": {
+        "aggregates": [
+          "always: kept, and read when the next aggregation goes; asks for none itself"
+        ]
       }
     },
     {

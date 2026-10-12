@@ -302,6 +302,8 @@ function viewOf(inst: Instance): WorldView {
     href: () => world.location?.href,
     projectSettings: () => world.projectSettings,
     cloudServices: () => world.cloudServices,
+    collections: () => world.collections,
+    dbVersionMajor: () => world.dbVersionMajor,
     stackAnswer: (op, stack, target) => world.stack.answer(op, stack, target),
     backAnswer: (ahead) => world.stack.backAnswer(ahead ?? 0),
     routeAnswer: (router, target, openInNewTab) => world.router.answer(router, target, openInNewTab),

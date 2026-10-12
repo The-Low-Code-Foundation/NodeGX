@@ -34,6 +34,7 @@ import { SendEmail } from './send-email';
 import { CloudRequest } from './cloud-request';
 import { CloudResponse } from './cloud-response';
 import { ModelRequest } from './model-request';
+import { AggregateRecords } from './aggregate-records';
 import { CreateUser, DeleteUser, UpdateUser, VerifySessionToken } from './system-users';
 import { AddUserToRole, GetUserRoles, ListUsersInRole, RemoveUserFromRole } from './system-roles';
 import { HttpRequest } from './http';
@@ -258,7 +259,9 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [CloudRequest.type]: CloudRequest,
   [CloudResponse.type]: CloudResponse,
   // NSP-022 s98 — a model provider over NETWORK, its key from HOST `secrets`
-  [ModelRequest.type]: ModelRequest
+  [ModelRequest.type]: ModelRequest,
+  // NSP-022 s99 — the legacy store's Parse wire, a `fetch` to HOST's loopback over NETWORK; the project's classes (PROJECT)
+  [AggregateRecords.type]: AggregateRecords
 });
 
 export { EQUIVALENT_MUTANTS } from './equivalent-mutants';

@@ -279,6 +279,12 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
       const cloud = rng.pick(pool.cloudServices);
       if (cloud) world.cloudServices = { ...cloud };
     }
+    // NSP-022 s99 — its classes and `dbVersionMajor`, likewise drawn only when the pool names them
+    if (pool.projectData) {
+      const data = rng.pick(pool.projectData);
+      if (data.collections) world.collections = data.collections;
+      if (data.dbVersionMajor !== undefined) world.dbVersionMajor = data.dbVersionMajor;
+    }
   }
   // NSP-015 s18 — STACK: one of the pool's (the default pool registers none)
   if (needs.includes('stack')) {

@@ -217,6 +217,11 @@
  *           `parseSessionStore(appId).read()`): its token; absent, nobody is signed in there. A fact of
  *           the play's storage, not of the metadata — the target writes it where the store reads it and
  *           never hands it to the metadata. Fixed for the play.
+ *           (NSP-022 s99) And its CLASSES — the project's `dbCollections` metadata, as the legacy store reads it
+ *           (`CloudStore._collections`, cloudstore.js :569-586; Aggregate Records reads a class's columns there at
+ *           RUN time, aggregatenode.js :286-310): the script's `collections`, each `{ name, schema: { properties } }`
+ *           as the editor stores it; absent, none. Beside it `dbVersionMajor`, the metadata the Parse wire reads to
+ *           pick its aggregate spelling (ParseWireAdapter.ts :431-445); absent, unset. Fixed for the play.
  *   STACK.  (NSP-015 s18) The Component Stacks a play's navigation nodes hand their requests to —
  *           played by the world as the network plays a server: what a stack DOES with a request
  *           (which page, how deep, the transition) is the Component Stack's own behaviour (a visual
@@ -623,6 +628,10 @@ export interface WorldScript {
   picker?: PickerScript;
   /** NSP-014 s32: the project's cloud services and the browser's session for them (PROJECT above). Absent: none. */
   cloudServices?: CloudServicesScript;
+  /** NSP-022 s99: the project's classes, its `dbCollections` metadata (PROJECT above). Absent: none. */
+  collections?: readonly CollectionScript[];
+  /** NSP-022 s99: the project's `dbVersionMajor` metadata (PROJECT above). Absent: unset. */
+  dbVersionMajor?: number;
   /** NSP-014 s34: the WebSocket servers (SOCKET above). Absent: none answers — every construction is a violation. */
   sockets?: SocketScript;
   /** NSP-016 s42: the Radio Button Group the node sits in (GROUP above). Absent: one, never written. */
@@ -911,6 +920,13 @@ export interface CloudServicesScript {
   deployVersion?: string;
   /** The token of the session stored under `Parse/<appId>/currentUser`; absent, nobody is signed in there. Never in the metadata. */
   sessionToken?: string;
+}
+
+/** PROJECT above (s99): one class of the project's `dbCollections` metadata, as the editor stores it. */
+export interface CollectionScript {
+  name: string;
+  /** Its columns by name, each with its `type` (`Number`, `String`, …); absent, a class whose columns the project never cached. */
+  schema?: { properties?: Readonly<Record<string, Readonly<{ type?: string } & Record<string, unknown>>>> };
 }
 
 /** PICKER above: how the person answers each click on a file input, the n-th click by the n-th entry (the last repeating). Absent or empty: never. */
@@ -2808,6 +2824,10 @@ export class World {
   readonly picker: WorldPicker;
   /** The project's cloud services (PROJECT above, s32), or none. */
   readonly cloudServices: Readonly<CloudServicesScript> | undefined;
+  /** The project's classes (PROJECT above, s99): the script's, or none. */
+  readonly collections: readonly CollectionScript[];
+  /** The project's `dbVersionMajor` (PROJECT above, s99), or unset. */
+  readonly dbVersionMajor: number | undefined;
   /** The WebSocket servers (SOCKET above, s34) — always: a play with no script answers no construction. */
   readonly sockets: WorldSockets;
   /** NSP-022 s96: the backend process's services (HOST above). */
@@ -2833,6 +2853,8 @@ export class World {
     this.backend = new WorldBackend(this.clock, script.backend ?? {});
     this.picker = new WorldPicker(this.clock, script.picker);
     this.cloudServices = script.cloudServices ? { ...script.cloudServices } : undefined;
+    this.collections = script.collections ?? [];
+    this.dbVersionMajor = script.dbVersionMajor;
     this.sockets = new WorldSockets(this.clock, script.sockets ?? {});
     this.host = new WorldHost(this.clock, script.host ?? {});
     this.group = new WorldGroup(script.group);

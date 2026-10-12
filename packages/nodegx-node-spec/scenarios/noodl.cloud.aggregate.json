@@ -1,0 +1,2342 @@
+[
+  {
+    "name": "a Class and three aggregates: one request at the frame's end; each wired output, then Success",
+    "because": "aggregatenode.js :74-78 the Class asks; :286-310 the group (avgPts with no Operation is avg, names is distinct); ParseWireAdapter.ts :405-449 the old spelling; :160-167",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total",
+      "agg-avgPts",
+      "agg-names"
+    ],
+    "steps": [
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "nothing wired out of it: Success alone",
+    "because": ":163-164 an output is flagged only when a wire made it",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "dbVersionMajor 5: $match / $group, and _id in place of objectId",
+    "because": "ParseWireAdapter.ts :431-438",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "points",
+            "operator": "greaterThan",
+            "valueSource": "static",
+            "value": 3
+          }
+        ]
+      }
+    },
+    "wiredOutputs": [
+      "agg-total"
+    ],
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "dbVersionMajor": 5
+    }
+  },
+  {
+    "name": "dbVersionMajor as the editor stores it, the text '5': the same spelling ('5' > 4)",
+    "because": "schemahandler.ts :225-228 stores the major version as text; ParseWireAdapter.ts :431",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total"
+    ],
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "dbVersionMajor": "5"
+    }
+  },
+  {
+    "name": "a filter in the builder's saved shape with a static value: the request carries match=",
+    "because": ":178-186; queryutils.ts :295-306",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "points",
+            "operator": "greaterThan",
+            "valueSource": "static",
+            "value": 3
+          }
+        ]
+      }
+    },
+    "wiredOutputs": [
+      "agg-total"
+    ],
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "the retired visual shape and its parameter: the filter reads the parameter by its bare name",
+    "because": ":357-360 qp-min is kept as min; saved.ts :271 a visual rule's input",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name",
+      "visualFilter": {
+        "combinator": "and",
+        "rules": [
+          {
+            "property": "points",
+            "operator": "greater than",
+            "input": "min"
+          }
+        ]
+      },
+      "qp-min": 3
+    },
+    "wiredOutputs": [
+      "agg-total"
+    ],
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "the builder's saved shape with a CONNECTED value: the condition is dropped and the whole class is aggregated (P107-S99-AGGFILTERPREFIX)",
+    "because": ":180-183 passes no value-port prefix, so qp-min is looked up as qp-min among parameters kept as min; queryutils.ts :286 dropUnresolvedConnected",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "points",
+            "operator": "greaterThan",
+            "valueSource": "connected",
+            "valuePortName": "qp-min"
+          }
+        ]
+      },
+      "qp-min": 3
+    },
+    "wiredOutputs": [
+      "agg-total"
+    ],
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a filter parameter changes: the aggregation runs again",
+    "because": ":329-333",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name",
+      "visualFilter": {
+        "combinator": "and",
+        "rules": [
+          {
+            "property": "points",
+            "operator": "greater than",
+            "input": "min"
+          }
+        ]
+      },
+      "qp-min": 3
+    },
+    "wiredOutputs": [
+      "agg-total"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "qp-min",
+        "value": 9
+      },
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a filter that cannot be translated: Failure with the filter's own words, and no request",
+    "because": ":145-152 setError(f.failed); :184-186",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "owner",
+            "operator": "pointsTo",
+            "valueSource": "static",
+            "value": "u1"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "Do wired: a write asks for nothing; only Do does, once per frame however many presses",
+    "because": ":77, :327, :332, :394 isInputConnected('storageFetch'); :362-371; :107-108; :394 a setting kept by name asks only when Do is not wired",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wired": [
+      "storageFetch"
+    ],
+    "wiredOutputs": [
+      "agg-total"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Score"
+      },
+      {
+        "set": "limit",
+        "value": 5
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      {
+        "signal": "storageFetch"
+      },
+      {
+        "signal": "storageFetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "Do unwired, pressed in a frame a write already asked in: still one request",
+    "because": ":107 fetchScheduled",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "steps": [
+      {
+        "signal": "storageFetch"
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "an aggregate named with no Property written: nothing at all — no request, no Success, no Failure — and writing its Property later asks for nothing either (P107-S99-AGGNOPROP)",
+    "because": ":297 defs[a].prop on undefined throws inside the frame-end callback, which swallows it; :334-346 a Property asks for nothing; then a Class write asks and the aggregation runs",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,extra",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total",
+      "agg-extra"
+    ],
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "set": "aggprop-extra",
+        "value": "points"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Score"
+      },
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a Property that is not a column of the class: that aggregate is left out of the request",
+    "because": ":298-299",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "nope",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total",
+      "agg-avgPts"
+    ],
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "an Operation the wire does not spell: that aggregate asks for {}",
+    "because": "ParseWireAdapter.ts :421-428 only avg, sum, max, min, distinct",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "count",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total"
+    ],
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "the built-in backend's cached columns: no aggregate is asked for, and the one row is a Success that sends nothing (P107-S99-AGGCOLUMNS)",
+    "because": ":290-292 reads schema.properties only; nodegx-backend byob-admin.ts getSchema caches columns",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total",
+      "agg-avgPts",
+      "agg-names"
+    ],
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "columns": [
+            {
+              "name": "points",
+              "type": "Number"
+            },
+            {
+              "name": "name",
+              "type": "String"
+            }
+          ]
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a Class the project does not have: no aggregate is asked for",
+    "because": ":291-292",
+    "params": {
+      "collectionName": "Nope",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total"
+    ],
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a second Success with a new total: the output moves",
+    "because": ":161 aggregateValues replaced",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total",
+      "agg-avgPts",
+      "agg-names"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Score"
+      },
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          },
+          "times": 1
+        },
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 7,
+                  "avgPts": 1,
+                  "names": [
+                    "c"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "an answer with no row after one with values: Success, and the outputs keep the last aggregation's values (P107-S99-AGGSTALE)",
+    "because": "ParseWireAdapter.ts :454-457 no row hands {}; :162-165 flags only the names the answer carried",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total",
+      "agg-avgPts",
+      "agg-names"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Score"
+      },
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          },
+          "times": 1
+        },
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": []
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "an answer with two rows: Success, nothing sent",
+    "because": "ParseWireAdapter.ts :454-457",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total",
+      "agg-avgPts",
+      "agg-names"
+    ],
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 1
+                },
+                {
+                  "total": 2
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a 201 with one row: the same as a 200",
+    "because": "ParseWireAdapter.ts :341",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total"
+    ],
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 201,
+            "body": {
+              "results": [
+                {
+                  "total": 3
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a 400 that names its cause: Failure, and the server's words are lost (P107-S99-AGGWORDS)",
+    "because": "ParseWireAdapter.ts :467-470 error() with nothing; :169",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 400,
+            "body": {
+              "code": 141,
+              "error": "Unknown aggregate operator"
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a 500 with an HTML body: Failure",
+    "because": "ParseWireAdapter.ts :350-354",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 500,
+            "body": "<html>bad gateway</html>"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a 200 whose body is not JSON: Failure",
+    "because": "ParseWireAdapter.ts :343-346",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": "not json"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a 200 whose body is JSON null: Failure",
+    "because": "ParseWireAdapter.ts :454 null.results throws in the chain; :345 its catch",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": "null"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a [null] row with aggregates asked: Failure",
+    "because": "ParseWireAdapter.ts :459-461 reads the row once per aggregate",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                null
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a [null] row with none asked: Success",
+    "because": "ParseWireAdapter.ts :459-461 an empty group never reads the row",
+    "params": {
+      "collectionName": "Nope",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                null
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "the request never reaches the server: Failure",
+    "because": "ParseWireAdapter.ts :356-358",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "error": "fetch failed"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a Failure, then a Success: Error keeps the failure's sentence",
+    "because": ":97-103 only setError writes Error",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Score"
+      },
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 500,
+            "body": {
+              "error": "x"
+            }
+          },
+          "times": 1
+        },
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 1
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "no loopback and no project endpoint: Failure inside the frame, no request",
+    "because": "ParseWireAdapter.ts :228-238 (P107-C33's refusal) → aggregate's error()",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {},
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "no loopback: the project's own endpoint and app id, and no master key",
+    "because": "ParseWireAdapter.ts :302-306; cloudstore.js :120-126",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total"
+    ],
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {},
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "cloudServices": {
+        "appId": "app2",
+        "endpoint": "https://proj.example"
+      }
+    }
+  },
+  {
+    "name": "the run's id on the loopback: X-NodeGX-Run",
+    "because": "ParseWireAdapter.ts :324-331 (P99 HLT-023)",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total"
+    ],
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577",
+          "runId": "run-1"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "a slow answer and a second aggregation before it lands: each answer is told in turn",
+    "because": "each request is its own fetch chain",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total"
+    ],
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      {
+        "set": "collectionName",
+        "value": "Score"
+      },
+      "settle",
+      {
+        "advance": 50
+      },
+      "settle",
+      {
+        "advance": 50
+      },
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          },
+          "times": 1,
+          "after": 50
+        },
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 7
+                }
+              ]
+            }
+          },
+          "after": 50
+        }
+      ]
+    }
+  },
+  {
+    "name": "no Class: nothing asks for an aggregation until a Class is written",
+    "because": ":45-47, :334-346 ask for nothing; only :74-78, :324-333, :390-395 ask",
+    "params": {
+      "aggregates": "total",
+      "aggprop-total": "points"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 100
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Score"
+      },
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "wiredOutputs": [
+      "agg-total"
+    ]
+  },
+  {
+    "name": "a setting kept by name: an aggregation",
+    "because": ":383-395 userInputSetter",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "total,avgPts,names",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "limit",
+        "value": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "an empty Aggregates list: no aggregate asked",
+    "because": ":287 !aggregatesList",
+    "params": {
+      "collectionName": "Score",
+      "aggregates": "",
+      "aggprop-total": "points",
+      "aggop-total": "sum",
+      "aggprop-avgPts": "points",
+      "aggprop-names": "name"
+    },
+    "wiredOutputs": [
+      "agg-total"
+    ],
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "collections": [
+        {
+          "name": "Score",
+          "schema": {
+            "properties": {
+              "points": {
+                "type": "Number"
+              },
+              "name": {
+                "type": "String"
+              },
+              "done": {
+                "type": "Boolean"
+              }
+            }
+          }
+        }
+      ],
+      "host": {
+        "cloudServices": {
+          "appId": "app1",
+          "masterKey": "mk",
+          "endpoint": "http://127.0.0.1:8577"
+        }
+      },
+      "network": [
+        {
+          "answer": {
+            "status": 200,
+            "body": {
+              "results": [
+                {
+                  "total": 12,
+                  "avgPts": 4,
+                  "names": [
+                    "a",
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+]
