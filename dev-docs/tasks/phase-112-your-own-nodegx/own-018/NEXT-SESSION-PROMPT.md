@@ -21,7 +21,8 @@ table is at its end); this is the short version.
 - **Tarballs:** re-pack at HEAD with `scripts/devtools/make-worktree.sh` (then replace the worktree's linked
   `packages/noodl-mcp/dist/*` and `packages/noodl-preview/dist` with real empty folders before `npm pack` — they point
   at the primary checkout's build output, and packing writes through them).
-- **Money:** Richard topped up €10 in s2; about $0.60 of credit was left after run 10 (check the Mistral console) (check the Mistral console).
+- **Money:** Richard topped up €10 in s2. s2 spent ~$13.8 on Mistral (ten runs ~$12.9, cache probes ~$0.9); by that
+  count about $2 of credit is left — check the Mistral console, which is the real figure.
   Launch sale ends ~2026-10-20.
 
 ## What s2 found (all filed; see `node scripts/bugs.js --all | grep OWN018`)
