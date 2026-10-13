@@ -346,3 +346,16 @@ post-tool, post-agent) — and the kit uses none of them yet.
   once, two failed fixes, a long think; a good NEXT.md with "where things are"), **`nodegx-when-stuck`** (read what
   you measured, ask the notes, try it small, look at the moment between, two tries then hand over). AGENTS.md names
   the three and carries the sizing rule and the cut signals. q5 measures it beside q4 (tgz24, no skills); q2 stopped.
+- **s3, q5 (tgz25, the teaching kit): the teaching took; the headless pull didn't let go.** Its first moves: load all
+  three skills, read `.vibe/hooks.toml` — then the plan sitting split the quiz into **six parts of ≤4 lines** (start;
+  quiz display; countdown; answer taps; results; prove with the brief's own 3-of-5 game) — the split q2 did not make.
+  Then: "I need to understand the folder's one-step-per-sitting hook, since it may refuse tools once a NEXT.md exists
+  — and I've been asked to finish the whole build in one pass"; it read the hook's source, wrote REQUEST, CHECKLIST
+  and PLAN, **held NEXT.md back**, and began reading examples and `describe`s to build. Stopped by me in sitting 1.
+  Vibe adds the "single pass" line only in headless `-p` (`system_prompt.py:430`): a person's interactive session
+  (AC6) never sees it, so the lab is harsher than real use here.
+- **s3, the rails (`3263a643e`, tgz26):** the hook also closes the building tools (component writes, plans,
+  render_report, drive_page) while no app has a NEXT.md (sitting 1; reading and the notes stay open), and at **60 tool
+  calls** in a sitting leaves only the notes open, asking it to write where it got to (the skill teaches ~30; q2 and
+  q4 built part 1 in 47–51). AGENTS.md names the rails up front, "the way a team's tooling does — not a judgement on
+  you … plan for the rails rather than around them." q6 measures it; q4 (tgz24) runs on.
