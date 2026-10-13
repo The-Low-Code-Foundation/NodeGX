@@ -4,7 +4,7 @@
 package … an internal data management system as a case study … all the data stays in Europe with an EU LLM. Do the
 same 'stranger's Claude Code' method we used for the Lingo app."*).
 **Depends on** OWN-015's 0.2.0 tarballs (packed at `9505d342d`; nothing shipped has changed since).
-**Status: 🟡 s1 done (2026-10-12). Round 3 on the fixed kit built ~90% of the intranet with 0 validation errors before its price cap (§10); reads cut 31% (§11). Next session: the experiment series (§13) — a quiz game built a dozen times on OpenCode, scored by a script, with a Sonnet yardstick. ~$4 of the $10 credit left.**
+**Status: 🟡 s2 done (2026-10-13). Mistral Large 4 on OpenCode builds the quiz 12/12 from one paragraph, finishing by itself, for $1.41 at 81% cached (run 9; Sonnet's yardstick 12/12 at $6.30 API-equivalent). Two runtime defects, five kit lessons and three config facts on the way (§14). FANOUT needs a ruling. Next: repeat run 10's verdict, then the same series in Mistral Vibe on a subscription.**
 **Model:** the session that runs the rounds and reads them: Opus. The stranger: **Mistral Large 4 (`mistral-large-4`)
 in Mistral Vibe**, on purpose — the test is whether the kit is enough for an agent that isn't Claude.
 
@@ -478,3 +478,47 @@ It graded 10/12, and both failures taught something:
 
 **Regraded with the scrolling grader:** Sonnet run 0 **12/12** (unchanged), Mistral run 6 **12/12**, run 7 **11/12**
 (order, now fixed in the kit). Mutant proof unaffected (its targets are on screen).
+
+### Run 8 — the full kit at a04271143 (tgz9)
+
+**Finished by itself in 24 min, $1.35; graded 9/12.** Order now held (no summary rewrote it). Its failures are one
+wire: the reveal Timer's `done` → "next question". On an action node `done` fires as soon as the Restart is handled,
+so each question advanced ~300 ms after a tap and no colour was ever on screen (green, red, advance fail together).
+Mistral also spent steps on a wrong theory — that a second Evaluate with an unchanged `true` stays silent (measured in
+the runtime harness: three evals, three On True). Its cache was healthy until it opened a drive_page screenshot with
+`read` to debug (drive_page's answer did not say what that costs; render_report's manifest did).
+
+**Kit, from run 8:** drive_page's headline now says screenshots are files, what opening one costs, and that a read step
+usually answers instead (a633d239a, verified end to end with the packed server); Timer's notes say `done`/`completed`
+are not "the time is up" (`timerFinished` is), Condition's that every Evaluate fires again (015370ec5).
+
+### Run 9 — the full kit at 015370ec5 (tgz11): 12/12
+
+**12/12, finished by itself in 43 min, $1.41, 81% of input cached** (4.29M of 5.28M tokens). Its closing words: *"Done
+— Capital Quiz is verified … Full phone drive passed 25/25"*. It debugged with drive_page read steps (variables,
+text), not screenshots. An AnswerOption component placed per answer (no list node this time), 79 nodes, 18 Functions,
+0 validation errors. Run 10 repeats it (one run is one sample).
+
+### Where s2 leaves it
+
+| run | kit | grade | $ (real) | ended | what it taught |
+|---|---|---|---|---|---|
+| 0 Sonnet | tgz3 | 12/12 | 6.30 API-eq. | itself | the yardstick; run-on-change ×3 |
+| 1 | tgz3 | 2/12 → **12/12** on the fixed runtime | 2.26 | cap | COUNTERZERO ×2 (runtime) |
+| 2, 3 | tgz3/5 | — | 0.21, 0.18 | `length` | my 16k output cap |
+| 4 | tgz6 | 7/12 | 1.59 | cap | FANOUT (needs ruling); think-runaway after compaction |
+| 5 | tgz6, reasoning off | 2/12 | 1.51 | cap | reasoning stays on |
+| 6 | tgz7 | **12/12** | 2.06 | cap | IMAGECACHE (any image kills Mistral's cache) |
+| 7 | tgz8 | 11/12 | 1.09 | itself | SUMMARYLOSS (summary dropped the answers) |
+| 8 | tgz9 | 9/12 | 1.35 | itself | Timer `done` ≠ time is up; drive_page image note |
+| 9 | tgz11 | **12/12** | 1.41 | itself | — |
+
+**Kit changes s2, all for every agent:** Counter and Variable getters answer from the model before queued parameters
+land (dd7ff4756, be46f18bc); Condition notes (run-on-change; chain two gates; every Evaluate fires) and Timer notes
+(`done` vs `timerFinished`); project notes point at the verbatim request; create-nodegx writes `opencode.json`
+(150k/32k) and puts `--screenshots-to-files` on the Mistral-facing servers; the folder notes say to test from the
+start page.
+
+**The Mistral config that works (OpenCode 1.19.0):** `opencode -m mistral/mistral-large-4`, default reasoning (no
+variant), the kit's `opencode.json` as written (`limit {context 150000, output 32000}`, server with
+`--screenshots-to-files`). Not yet tried: temperature (two degenerate tool calls in runs 6–7), and Vibe.

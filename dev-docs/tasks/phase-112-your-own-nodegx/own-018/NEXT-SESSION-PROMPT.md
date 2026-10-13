@@ -1,37 +1,51 @@
-# OWN-018 — next session: an environment Mistral Large 4 likes, then a landing page
+# OWN-018 — next session: confirm the OpenCode result, then Mistral Vibe on a subscription
 
-**Written 2026-10-12, end of OWN-018 s1 (Opus 5.5).** Read `../OWN-018-A-STRANGER-ON-MISTRAL.md` §10–§12 first; this
-is the short version.
+**Written 2026-10-13, end of OWN-018 s2 (Opus 5.5).** Read `../OWN-018-A-STRANGER-ON-MISTRAL.md` §14 first (the run
+table is at its end); this is the short version.
 
-**Model:** Opus for the session. The stranger is Mistral Large 4 (`mistral-large-4`, never `-latest`).
+**Model:** Opus for the session. The stranger: Mistral Large 4 (`mistral-large-4`, never `-latest`).
 
 ## Where things are
 
-- Kit fixes committed and packed: `call_tool` (LISTCHANGED), WIREDTARGET, PROJECTAGENTS, `create-nodegx` writes
-  `.vibe/config.toml` (`4a18723fe`); READWASTE: compact JSON, example menu + word search, multi-describe, `pm-` notes,
-  `description → summary` (`8a28e7860`). Tarballs at `5754e993e` in the s1 scratchpad `own018/tgz3/` (re-pack at HEAD
-  in the `npm-020` worktree if they're gone: `npm pack --pack-destination` in create-nodegx, noodl-mcp, noodl-preview).
-- Round 3 (old tarballs) built ~90% of the intranet with 0 validation errors before its price cap. Fixture:
-  `r3-atelier-hub/`. Open: STRINGLISTARRAY, NOSTARTERASSETS (both filed).
-- Runners: `round-kit.mjs` (Vibe, the person's path from create-nodegx, sealed lab), `round-opencode.mjs`, readers
-  `peek.mjs` / `peek-opencode.mjs`. **Never `--auto-approve` a Vibe round** (it reads anything on disk); the kit
-  runner seals with a derived denylist + `--disabled-tools` because an "ask" ENDS a `vibe -p` run.
-- Money: ~$4 left of Richard's $10 Mistral credit (`MISTRAL_API_KEY` in the repo `.env`; never print it). Launch sale
-  ends ~2026-10-20. Reprice from the export / journal, never trust Vibe's code-mode `cost_usd` (it ignores the cache).
+- **Mistral Large 4 on OpenCode 1.19.0 builds the quiz 12/12** from `sentence-quiz.txt`, finishing by itself: run 9,
+  43 min, $1.41 real, 81% cached (Sonnet's yardstick: 12/12, $6.30 API-equivalent). Run 6 also reached 12/12 (capped).
+  **Run 10 is a straight repeat of run 9** — read its result first (scratchpad of s2, `q/r10-oc-kit11`; grade it with
+  `grade-quiz.mjs <root> --tgz <tgz11>` if s2 ended before it did).
+- **The working config**, all written by the kit: `npm create nodegx`, `cd apps && opencode -m mistral/mistral-large-4`
+  (default reasoning, no `--variant`), the generated `opencode.json` (`limit {context 150000, output 32000}`, server
+  with `--screenshots-to-files`). Reasoning off (run 5) was worse.
+- **Tools (own-018/):** `round-opencode.mjs` (sealed lab, `--max-usd`, `--proxy`, `--context`, `--variant`),
+  `round-opencode-resume.mjs` ("keep going" sittings), `round-claude.mjs` (the Sonnet yardstick), `grade-quiz.mjs`
+  (12 checks + audit, proven on mutants via `mutate-quiz.mjs`; scrolls like a person), `peek-opencode.mjs`,
+  `peek-claude.mjs`, `record-proxy.mjs` (+ `--compare`: where consecutive requests diverge).
+- **Tarballs:** re-pack at HEAD with `scripts/devtools/make-worktree.sh` (then replace the worktree's linked
+  `packages/noodl-mcp/dist/*` and `packages/noodl-preview/dist` with real empty folders before `npm pack` — they point
+  at the primary checkout's build output, and packing writes through them).
+- **Money:** Richard topped up €10 in s2; about $2 of credit was left after run 10 started (check the Mistral console).
+  Launch sale ends ~2026-10-20.
 
-## Richard's ask (end of s1, final)
+## What s2 found (all filed; see `node scripts/bugs.js --all | grep OWN018`)
 
-**The experiment series in OWN-018 §13** (it supersedes the landing page): Mistral Large 4 builds the quiz game in
-`sentence-quiz.txt` about a dozen times on **OpenCode** (Vibe dropped), one config change at a time, scored by a script,
-with **one Claude Sonnet run of the same brief as the yardstick**. Then a bigger project later.
+Fixed: **COUNTERZERO** (Counter and Variable getters before queued parameters land — the runtime), **IMAGECACHE** (any
+image part turns Mistral's prompt cache off; screenshots to files for Mistral-facing servers), **SUMMARYLOSS** (the
+project notes point at the verbatim request after a summary). Superseded: CACHE128K (a misreading). Open:
+**NOLIBRARY**, **NOSTARTERASSETS**, **FANOUT — needs Richard's ruling** (one signal evaluating two gates: should the
+second see what the first changed?).
+
+## Richard's direction (s2)
+
+*"keep perfecting the Mistral interface and config to make it run like a dream with the nodegx MCP, as well as Claude
+Code"*; and Mistral offers Claude-style subscriptions usable with **Vibe** — *"if after you master Mistral Large 4 in
+OpenCode you can have the same if not better results in Vibe, that would be a huge win"*.
 
 ## Do, in order
 
-1. **The grader first, no API spend:** headless Chrome over the packed preview, plays the fixed pattern in §13, ~10
-   pass/fail checks + a static audit of the graph. Prove it on the Sonnet build (`claude -p --model sonnet`, same lab:
-   empty HOME, packed create-nodegx, `--strict-mcp-config`, Richard's subscription — say "API-equivalent", never "cost")
-   and on mutants of that build.
-2. **Fix NOSTARTERASSETS** if it touches the quiz's looks (icons); ask Richard if the fix is a ruling.
-3. Re-pack at HEAD; smoke OpenCode's lab (canary 0) with `round-opencode.mjs`; then runs 1–2 (baseline ×2). Read the
-   cache % before spending more — if OpenCode caches badly, say so before the dozen.
-4. Runs 3–11 per §13's table; record each beside the others; every finding → `dev-docs/bugs/` (`P112-OWN018-*`).
+1. Read run 10's grade. If it is not 12/12, find why (finish reasons first: `length` is a cap, not the model).
+2. **Claude check:** one Sonnet run on the current kit (`round-claude.mjs`) — the kit changed under it (notes,
+   runtime); confirm it still grades 12/12 and costs no more.
+3. **Vibe:** ask Richard to set up the Mistral subscription for Vibe; the kit already writes `.vibe/config.toml` (Large 4,
+   the server with `--screenshots-to-files`, `--legacy-harness` advice). Port the series: `round-kit.mjs` is the Vibe
+   runner from s1 (update it to the s2 lab rules: the kit's config, the tgz). Measure Vibe's cache with images gone, and
+   whether it compacts.
+4. Open levers, one at a time: temperature (two degenerate tool calls, runs 6–7); FANOUT once ruled; NOLIBRARY /
+   NOSTARTERASSETS for a prettier app; `list_node_types` unfiltered returned 100 KB to Mistral in run 7.
