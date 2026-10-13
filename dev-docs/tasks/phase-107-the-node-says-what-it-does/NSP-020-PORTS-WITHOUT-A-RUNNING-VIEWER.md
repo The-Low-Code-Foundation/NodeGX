@@ -777,3 +777,24 @@ So a parity row for a cloud module would grade a function no person's editor cal
 every port of every node from the spec alone, without a viewer running") has its one real customer here. The ruling the bug
 asks for decides what AC4's cloud rows grade: the spec drawing the editor's cloud ports, or the modules' hooks run against a fake
 connection, or `cloudDynamicPorts.ts` extended type by type.
+
+**R37 (s100): "From the node specs."** Measured for the build, not built:
+
+| what | count |
+|---|---|
+| types in `cloud-node-library.json` | 88 |
+| … with a spec | 81 (no spec: Component Inputs / Outputs, RunTasks, REST2, Component Object, Set Component Object Properties, On App Error) |
+| … whose spec draws derived inputs (`derived.inputs`) | 29: Expression, JavaScriptFunction, Logic Builder, DbCollection2, DbModel2, Set / Delete / New DbModelProperties, Add / Remove DbModelRelation, FilterDBModels, Model2, SetModelProperties, NewModel, Filter Collection, Set Variable, Sign File URL, And, Or, String Mapper, String Format, Set User Properties, User, cloud Request, Response, Create User, Update User, Aggregate Records, HTTP |
+| … of those 81, in `DRAWN_PORT_TYPES` (draw graded against the runtime's hooks) | 23 |
+
+**The gap the build has to close first: a `DrawnPort` carries less than a panel draws.** It has name, plug, type, displayName,
+group, description, default and enum VALUES. The runtime hooks of those types announce, by a static count over their modules:
+enum `label`s 97, `allowEditOnly` 49 (the spec's decl has `editOnly`, which `drawn()` drops), `allowConnectionsOnly` 15,
+`codeeditor` 8, the filter builder's `schema` 6 / `backend` 2 / `valuePortPrefix` 4, `index` 5. So the build is, in order:
+(1) carry the presentation fields on `DrawnPort` (edit-only, connections-only, enum labels, the code editor, order) from the
+decls, and the filter / sort builder's schema from the `PortContext` the spec already reads; (2) one editor adapter that, for a
+node in a cloud component whose type has a spec, sets its dynamic ports to the derived drawn ports in the editor's port shape.
+It needs one writer per type: `setDynamicPorts` replaces, SB-017's lesson. JavaScriptFunction, the Record family and Query
+Records already have a writer in `CloudDynamicPortsAdapter`, so merge into it, never beside it. (3) Drive it: a new Aggregate
+and a new Query Records in a cloud function show Class, Filter and Property, beside the front-end control; then the Jasmine /
+`test:ci` gate.
