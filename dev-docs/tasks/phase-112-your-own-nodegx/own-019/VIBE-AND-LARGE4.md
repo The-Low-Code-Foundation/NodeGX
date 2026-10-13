@@ -40,6 +40,16 @@ a new measurement goes in the section it belongs to, with its round.
 
 ## s3's new measurements (2026-10-13 evening)
 
+- **The evening cache, settled — Mistral's side, not the requests** (q6 sitting 4, recorded, 23:5x–00:0x CEST): every
+  chat request was a pure extension of the one before (identical prefix, the new turn appended), yet 7 of 22 calls
+  got 0–11% cached (#17 11%, #40 5%, #47 0%, #60 0%, #63 0%, #79 0%, #85 2%), most of them 0.1 s after the previous
+  call — so not a timeout either. The others got 87–99%. A miss costs time too: first byte 6–12 s against 1–2 s on a
+  hit (prefill of ~50–110k tokens). The likeliest reading: under evening load, calls land on servers that don't hold
+  the prefix. Nothing the kit writes changes it; running in the daytime does (s2's 60–76%).
+- **Per-call shape of a build sitting** (same recording): 22 calls; most answers are small (60–950 output tokens), but
+  a handful carry the session's thinking — 6.5k, 6.7k, 6.8k, **15.9k** (449 s), 7.3k, 5.5k output tokens, ~97%
+  reasoning. Time-to-first-byte 0.6–2 s on a cache hit.
+
 - **One session vs sittings, think size** (same brief, same evening): o1 (one session, taught) designed the whole app
   in one 171 KB / 30 min think before writing a component (stopped by the watchdog; not a loop, 1.0% repetition);
   q6 (one part per sitting) never thought past 69 KB. With the whole plan in front of it, Large 4 designs everything

@@ -394,3 +394,7 @@ post-tool, post-agent) — and the kit uses none of them yet.
   s2 rounds that passed; at evening speed the lab's watchdog (minutes of silence) cuts a productive think off — a
   silence watchdog is speed-dependent. The recorder (attached from session 2) never saw a call: the round stopped
   on the stall.
+- **s3, the evening cache settled (q6 sitting 4, recorded):** every chat request extended the one before, yet 7 of 22
+  calls were 0–11% cached, mostly 0.1 s after the previous call, with first byte 6–12 s (hits: 87–99%, 1–2 s) — Mistral's
+  cache missing identical prefixes under evening load, not the requests and not a timeout. q6 sitting 3 (part 2,
+  answering): 49 min, $2.71 list, 5 drives passed, NEXT → part 3 (countdown).
