@@ -9,8 +9,8 @@ table is at its end); this is the short version.
 
 - **Mistral Large 4 on OpenCode 1.19.0 builds the quiz 12/12** from `sentence-quiz.txt`, finishing by itself: run 9,
   43 min, $1.41 real, 81% cached (Sonnet's yardstick: 12/12, $6.30 API-equivalent). Run 6 also reached 12/12 (capped).
-  **Run 10 is a straight repeat of run 9** — read its result first (scratchpad of s2, `q/r10-oc-kit11`; grade it with
-  `grade-quiz.mjs <root> --tgz <tgz11>` if s2 ended before it did).
+  **Run 10 repeated it: 12/12** ($1.20), after one "keep going" — its first sitting thought 129k characters into the
+  32k ceiling (`length`), which ends a headless run but only pauses a person at OpenCode's prompt.
 - **The working config**, all written by the kit: `npm create nodegx`, `cd apps && opencode -m mistral/mistral-large-4`
   (default reasoning, no `--variant`), the generated `opencode.json` (`limit {context 150000, output 32000}`, server
   with `--screenshots-to-files`). Reasoning off (run 5) was worse.
@@ -21,7 +21,7 @@ table is at its end); this is the short version.
 - **Tarballs:** re-pack at HEAD with `scripts/devtools/make-worktree.sh` (then replace the worktree's linked
   `packages/noodl-mcp/dist/*` and `packages/noodl-preview/dist` with real empty folders before `npm pack` — they point
   at the primary checkout's build output, and packing writes through them).
-- **Money:** Richard topped up €10 in s2; about $2 of credit was left after run 10 started (check the Mistral console).
+- **Money:** Richard topped up €10 in s2; about $0.60 of credit was left after run 10 (check the Mistral console) (check the Mistral console).
   Launch sale ends ~2026-10-20.
 
 ## What s2 found (all filed; see `node scripts/bugs.js --all | grep OWN018`)
@@ -40,7 +40,10 @@ OpenCode you can have the same if not better results in Vibe, that would be a hu
 
 ## Do, in order
 
-1. Read run 10's grade. If it is not 12/12, find why (finish reasons first: `length` is a cap, not the model).
+1. **Runaway thinking** (runs 4, 10: one step thinks into the 32k ceiling). Options, one at a time: the runner
+   auto-resumes once on `length` with "keep going" (what a person does — record it); `OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX`
+   above 32000; `--variant high` (an explicit effort) vs the default; the Function example that calls `Outputs.done()`
+   (the subject of run 10's 129k-character deliberation). Read finish reasons first: `length` is a cap, not the model.
 2. **Claude check:** one Sonnet run on the current kit (`round-claude.mjs`) — the kit changed under it (notes,
    runtime); confirm it still grades 12/12 and costs no more.
 3. **Vibe:** ask Richard to set up the Mistral subscription for Vibe; the kit already writes `.vibe/config.toml` (Large 4,

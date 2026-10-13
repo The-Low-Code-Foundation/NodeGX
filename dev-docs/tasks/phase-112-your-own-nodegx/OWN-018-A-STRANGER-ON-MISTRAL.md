@@ -497,7 +497,21 @@ are not "the time is up" (`timerFinished` is), Condition's that every Evaluate f
 **12/12, finished by itself in 43 min, $1.41, 81% of input cached** (4.29M of 5.28M tokens). Its closing words: *"Done
 — Capital Quiz is verified … Full phone drive passed 25/25"*. It debugged with drive_page read steps (variables,
 text), not screenshots. An AnswerOption component placed per answer (no list node this time), 79 nodes, 18 Functions,
-0 validation errors. Run 10 repeats it (one run is one sample).
+0 validation errors.
+
+### Run 10 — the repeat: 12/12 after one "keep going"
+
+Its first sitting ended at 13 min on `length`: one step thought for 129,000 characters (whether a Function's built-in
+`done` fires on its own — the notes say it does; an example's `Outputs.done()` muddies it) and hit the 32k ceiling
+without a tool call — run 4's runaway, this time while planning. In OpenCode's interactive mode a cut-off answer does
+not end the session; a person types "keep going". Resumed that way, it built, verified (its own drives), polished
+(the preset's gradient ground, a blank-score fix on a direct /results load), decided against icons it could not get
+(NOSTARTERASSETS: *"installing a module just for two glyphs would be gold-plating"*) and finished by itself.
+**12/12, $1.20 for the round**, 51% cached (it read its screenshots at the end). Looks: a card on the playful preset;
+the "CQ" badge and the score's big digit sit left of centre in their circles.
+
+**So: on the full kit, runs 9 and 10 both grade 12/12.** The remaining unreliability is runaway thinking into the
+32k ceiling (runs 4 and 10), harmless to a person at the interactive prompt, fatal to a headless run.
 
 ### Where s2 leaves it
 
@@ -512,6 +526,7 @@ text), not screenshots. An AnswerOption component placed per answer (no list nod
 | 7 | tgz8 | 11/12 | 1.09 | itself | SUMMARYLOSS (summary dropped the answers) |
 | 8 | tgz9 | 9/12 | 1.35 | itself | Timer `done` ≠ time is up; drive_page image note |
 | 9 | tgz11 | **12/12** | 1.41 | itself | — |
+| 10 | tgz11 (repeat) | **12/12** | 1.20 (2 sittings) | itself, after one "keep going" | runaway thinking into the 32k ceiling |
 
 **Kit changes s2, all for every agent:** Counter and Variable getters answer from the model before queued parameters
 land (dd7ff4756, be46f18bc); Condition notes (run-on-change; chain two gates; every Evaluate fires) and Timer notes
