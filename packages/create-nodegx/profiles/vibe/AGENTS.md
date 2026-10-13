@@ -13,7 +13,9 @@ separate web server or hand-written HTML and JavaScript instead: that would be a
    devices share data. Then read `call_tool({ name: "get_project_info" })`: its traps are mistakes other builders
    made here.
 3. Write the checklist before building: one line for each thing I could see or do — what is on screen, what a tap
-   does, what it looks like (a colour), when it happens (a time), what is still there after a reload.
+   does, what it looks like (a colour), when it happens (a time), what is still there after a reload — and what the
+   next screen looks like the moment it appears: nothing left over from the one before (a colour, a selection) on the
+   new words. Reset that state before the words change, not after.
 4. Build one component at a time and read every answer. A refused change says exactly what to fix. Keep each answer
    short: decide one component, write it with a tool, read the reply, then the next. Don't work out the whole app in
    one answer before writing anything — a staged operation can be replaced later, and an answer with no tool call in
