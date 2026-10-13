@@ -22,3 +22,11 @@ that throws while drawing loses itself, not the page"). The row's own rule: clos
 reading whether the Video now loses itself instead (a different defect, still a person's blank video).
 
 **Not done:** either half. Neither touches what s95 built.
+
+**s100 (2026-10-13, seed 20739), the full `npx jest -w 2 test/node-spec` in noodl-runtime, run before any s100 edit:** 9 failed /
+644 passed / 125 skipped. 118 specs CONFORM; every red is a mutant that survives on this seed, plus C96 (still not firing).
+The survivors moved with the seed: String (`afterInputs` drop-set), Dropdown (`person.blur` swap-branch), Range (`person.click`
+swap-branch ×2), Video, Drag (`snapToPositionY.value` swap-branch), Delete Record Properties (`afterInputs` drop-set and
+swap-branch), WebSocket (`connect` swap-branch), JavaScriptFunction (`afterInputs` drop-set — the one survivor on both days).
+DbModel2, Router and Radio Button, red on 20738, killed every mutant on 20739. So the full run is red on most days for a reason
+no session caused, and that red hides a real one; the bug's fix (a hand scenario per survivor) is now nine scenarios, not four.

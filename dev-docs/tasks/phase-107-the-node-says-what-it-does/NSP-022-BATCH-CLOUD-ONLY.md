@@ -282,3 +282,34 @@ the outputs' drawn types.
 
 Not filed: Error is never cleared by a Success (the family's shape — HTTP Request says so in its description).
 
+
+### 6.9 s100 (2026-10-13, Opus) — Aggregate Records v2: R36's rulings built
+
+**Reach, measured before the question:** one project on this machine holds the node (lepetitpicnic_local_backend's test
+project, three nodes, a Parse-shaped cache, static or retired-shape filters). The control fired: 725 cloud Request nodes in 86
+places from the same scan. None of the five defects reaches those three nodes except a refusal, which now explains itself.
+
+**R36 (README §7):** "Fix all three" (AGGFILTERPREFIX, AGGCOLUMNS, AGGWORDS); "Empty, like our backend" (AGGSTALE: our backend
+answers one row of nulls for no match, `LocalSQLAdapter.aggregate` / `buildAggregate`); "Fail, naming it" (AGGNOPROP), which was
+not the recommendation (skip + editor warning).
+
+**Built (`9f3e69c9e`):** the node (`qp-` prefix, `classProperties` over either cached shape, `null` for every aggregate the
+answer did not carry, `missingProperty`), the Parse wire (`aggregate`, `count`, `distinct` pass `res && res.error` on), the spec
+v2 with its `changes` entry, six scenarios renamed to what v2 does, two added (an empty name; a list that is not text, the
+second because moving AGGNOPROP left the `throws` branch unreachable and its drop-set mutant alive).
+
+**Gates:** 37 / 37 scenarios, 200 / 200, 99 / 99 mutants on seeds 20739, 20740 and 20741; 10,000 / 10,000 (89 s). The moved
+scenarios' runtime traces printed and read before the pass was trusted (the wired 3 reaches `match={"points":{"$gt":3}}`; the
+`columns` cache asks for all three; the no-row answer sends `null` ×3; the missing Property fails as
+`The aggregate "extra" has no Property chosen.`). After the wire change: the other 16 cloud specs, Query Records and Counter
+CONFORM; JavaScriptFunction's one survivor is the seed's (P107-S95-SEED20738, same branch before the change).
+noodl-viewer-cloud 266 / 266; parse-wire-adapter + record-backend-routing 19 / 19; node-spec package 1,954 / 1,954; runtime
+port tests 354 / 354; golden fresh, version rule held; ledger 142; catalog up to date; typecheck runtime / node-spec / cloud 0.
+
+**🔴 What the editor drive found (P107-S100-CLOUDSETUPPORTS, high, needs a ruling).** The editor halves of AGGCOLUMNS and
+AGGFILTERPREFIX live in `updatePorts`, which runs from the module's `setup()`. Driven on a copy of the lepetitpicnic project: a
+NEW Aggregate Records in a cloud function has four ports (`aggregates` and the three outputs). The panel shows the Aggregates list
+and nothing else: no Class, Property, Filter or Do. A new Query Records there gets only SB-017's wire families (`qp-min`, Do),
+with no Class or Filter. The same Query Records in a front-end component gets all of them (the control). The three saved
+Aggregate nodes keep the ports they SAVED, and a new total on one draws nothing. Since WF-007 no cloud node's `setup()` runs in
+the editor. So the editor halves above are correct code that runs nowhere until that is ruled.

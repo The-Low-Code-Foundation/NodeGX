@@ -764,3 +764,16 @@ gone the L1 way (`onWire`, `discoverOutput`, `hasOutput`; 19 / 19 traces byte-id
 the types oracle (c) grades; both are in `DRAWN_PORT_TYPES` (41). **Oracle (c) did not wait on P107-S79-ADAPTERLABEL:**
 the adapters it needed were read directly. The label (Router, Query Records, Filter Records) stays open; Router is the
 one type still "no view" because of it.
+
+### 6.12 s100 (2026-10-13, Opus) — the cloud nodes' ports: the editor runs no cloud setup() at all
+
+The s99 handoff's step for AC4 was to add `noodl-viewer-cloud/src/nodes` to `nsp-020-ports-parity`'s ROOTS and grade each cloud
+module's `updatePorts` against its spec. **Measured first, in the dev editor (NSP-022 §6.9): that code runs nowhere in the
+editor.** A cloud function has no runtime client since WF-007. Its library is `cloud-node-library.json` (declared ports only),
+and `cloudDynamicPorts.ts` derives only the wire families (SB-017). A new Aggregate Records there has no Class, Property, Filter
+or Do; a new Query Records has no Class or Filter. The front-end control has both. Filed as P107-S100-CLOUDSETUPPORTS.
+
+So a parity row for a cloud module would grade a function no person's editor calls. This task's sentence ("an editor can draw
+every port of every node from the spec alone, without a viewer running") has its one real customer here. The ruling the bug
+asks for decides what AC4's cloud rows grade: the spec drawing the editor's cloud ports, or the modules' hooks run against a fake
+connection, or `cloudDynamicPorts.ts` extended type by type.

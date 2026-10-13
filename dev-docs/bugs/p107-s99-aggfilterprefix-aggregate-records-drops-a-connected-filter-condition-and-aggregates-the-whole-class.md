@@ -1,13 +1,14 @@
 ---
 id: P107-S99-AGGFILTERPREFIX
 title: Aggregate Records drops a filter condition whose value is wired, and aggregates the whole class, saying Success
-status: open
+status: fixed
 severity: high
 area: cloud runtime / Aggregate Records (`packages/noodl-viewer-cloud/src/nodes/data/aggregatenode.js` :180-183 `convertVisualFilter` with no `valuePortPrefix`; :357-360 parameters kept by bare name; editor ports :558-577 read only the retired shape)
 found: P107 s99 (NSP-022), 2026-10-12 — measured on the real node through the runtime's cloud target before writing Aggregate Records' spec (NSP-022 §6.8)
 evidence: control pair, same params and `qp-min` = 3: the builder's saved shape with a STATIC value 3 → `match={"points":{"$gt":3}}` in the request; the same condition with a CONNECTED value (`valuePortName: 'qp-min'`) → no `match=` at all, the whole class aggregated, Success; the retired visual shape (`input: 'min'`) → `match=` present
 regression: packages/nodegx-node-spec/scenarios/noodl.cloud.aggregate.json
 kit: node-spec
+commit: 9f3e69c9e
 ---
 
 The editor edits every `query-filter` port with the filter builder (`ByobFilterType.ts`), which saves a connected value as
@@ -21,3 +22,5 @@ Two halves: the run-time lookup (pass `valuePortPrefix: 'qp-'`, as the siblings 
 The scenario pins today's behaviour and moves when this is fixed (a spec version bump, NSP-010).
 
 The scenario "the builder's saved shape with a CONNECTED value: the condition is dropped and the whole class is aggregated (P107-S99-AGGFILTERPREFIX)" pins today's behaviour; it moves when this is fixed.
+
+**Fixed s100 (`9f3e69c9e`, R36 "Fix all three"):** `getStorageFilter` passes `valuePortPrefix: 'qp-'`; `updatePorts` draws `qp-` ports from both shapes (`collectFilterParameters`). The scenario now carries the wired value in `match=` on the runtime. ⚠️ The editor half runs nowhere in the editor today (no cloud node's `setup()` runs since WF-007) — P107-S100-CLOUDSETUPPORTS carries it.

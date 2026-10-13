@@ -1224,27 +1224,32 @@
     {
       "id": "P107-S99-AGGCOLUMNS",
       "title": "Aggregate Records asks for no aggregate on a project bound to the built-in backend: its class schema is cached as `columns`, which the node does not read",
-      "status": "open"
+      "status": "fixed",
+      "commit": "9f3e69c9e"
     },
     {
       "id": "P107-S99-AGGFILTERPREFIX",
       "title": "Aggregate Records drops a filter condition whose value is wired, and aggregates the whole class, saying Success",
-      "status": "open"
+      "status": "fixed",
+      "commit": "9f3e69c9e"
     },
     {
       "id": "P107-S99-AGGNOPROP",
       "title": "An aggregate named in Aggregate Records' list whose Property was never chosen makes the node do nothing at all — no request, no Success, no Failure",
-      "status": "open"
+      "status": "fixed",
+      "commit": "9f3e69c9e"
     },
     {
       "id": "P107-S99-AGGSTALE",
       "title": "An aggregation that matches no record says Success and leaves the previous aggregation's totals on every output",
-      "status": "needs-ruling"
+      "status": "fixed",
+      "commit": "9f3e69c9e"
     },
     {
       "id": "P107-S99-AGGWORDS",
       "title": "Aggregate Records reports every backend failure as \"Failed to aggregate.\" — the server's own words (a 400 naming its cause, a refusal) never reach Error",
-      "status": "open"
+      "status": "fixed",
+      "commit": "9f3e69c9e"
     }
   ],
   "noodl.cloud.request": [
