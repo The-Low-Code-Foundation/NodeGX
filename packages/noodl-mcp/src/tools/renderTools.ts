@@ -187,8 +187,10 @@ export function registerRenderTools(
         'step — so you can prove a button, a form or a game WORKS, not just that it draws. Each call is a fresh ' +
         'browser: nothing carries over from the last call. Steps (each an object with one verb): {tap: T}, ' +
         '{type: "text", into?: T, replace?: true} (appends to what the field holds unless replace), {key: "Enter"}, ' +
-        '{wait_for: {text|testid|selector|url|expression}, timeout_ms?}, {read: {text: T}|{variable: name}|' +
-        '{storage: key}|{url: true}|{stub: path}|{expression}, expect?: value|{contains}} — or, as lists so far, ' +
+        '{wait_for: {text|testid|selector|url|expression}, timeout_ms?}, {read: {text: T}|{look: T}|{variable: name}|' +
+        '{storage: key}|{url: true}|{stub: path}|{expression}, expect?: value|{contains}} — {look: T} is what a person ' +
+        'sees once it settles: {visible, backgroundName: "green", colorName, …}, and its expect names only what ' +
+        'matters ({backgroundName: "green"}) — or, as lists so far, ' +
         '{console_errors: true}|{network_errors: true}|{other_origins: true} (expect [] = none yet), {navigate: "/route"}, ' +
         '{viewport: "phone"|"390x844"}, {screenshot: name}, {seed_storage: {key: value}} or {seed_storage: "key", ' +
         'edit: "js changing v"} (applied again on the next load, before the app can overwrite it), ' +
