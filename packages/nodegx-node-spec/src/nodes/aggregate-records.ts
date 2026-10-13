@@ -17,34 +17,38 @@
  * :77/:327/:332/:394). `Aggregates` and each aggregate's Property and Operation are read then and ask for nothing (:45-47,
  * :334-346). At the frame's end (:104-114) the filter is lowered first: a visual filter that cannot be translated fails the
  * node at once (:145-152). Then the aggregates are read off the project's classes (`CloudStore._collections`, the
- * `dbCollections` metadata — world.ts PROJECT `collections`, :286-310): an aggregate is asked for only when its Property is a
- * column of the class's `schema.properties`, with its Operation, or — none chosen — `distinct` for a String column and `avg`
- * for anything else. ⚠️ An aggregate the list names whose Property was never written THROWS there (`defs[a].prop` on
- * `undefined`, :297); the frame-end callback swallows it (nodecontext.ts) and the node does nothing at all — no request, no
- * Success, no Failure (P107-S99-AGGNOPROP). Then ONE request: `GET <endpoint>/aggregate/<Class>?…` with the Parse wire's
+ * `dbCollections` metadata — world.ts PROJECT `collections`): an aggregate the list names with no Property chosen FAILS the
+ * node, naming it, and nothing is asked (`missingProperty`, R36 "Fail, naming it"; before v2 the lookup threw inside the
+ * frame-end callback and the node did nothing at all, P107-S99-AGGNOPROP). Otherwise an aggregate is asked for only when its
+ * Property is a column of the class — either cached shape, `schema.properties` or the built-in backend's `columns`
+ * (`classProperties`, P107-S99-AGGCOLUMNS) — with its Operation, or, none chosen, `distinct` for a String column and `avg` for
+ * anything else (`getAggregates`). Then ONE request: `GET <endpoint>/aggregate/<Class>?…` with the Parse wire's
  * spelling (ParseWireAdapter.ts :405-473): `match=`/`group=` and `objectId: null`, or — `dbVersionMajor` above 4 —
  * `$match=`/`$group=` and `_id: null`; the master key and the run's id when the process gave them. A 200 or 201 whose JSON has
  * exactly one result row hands the node that row's value for every aggregate asked; any other row count hands it nothing — and
- * the node calls both a Success (:160-167). Every failure — no address, a status that is not 200/201, a body that is not JSON,
- * a `null` body, a request that never reached a server — is the same sentence, `Failed to aggregate.` (the adapter calls
- * `error()` with nothing, ParseWireAdapter.ts :467-470; :168-170), on Error, then Failure (:97-103).
+ * the node calls both a Success. A failure carries the server's words on (`res && res.error`, P107-S99-AGGWORDS, as `query`
+ * does since HLT-023), else `Failed to aggregate.`: a status that is not 200/201 says its JSON's `error`, or `Failed to fetch.`
+ * when the body is not JSON; a 200 that is not JSON, JSON `null`, or a `null` row read says `CloudStore: Failed to get json
+ * result.`; a request that never reached a server says the fault's message; no address says the C33 sentence. On Error, then
+ * Failure (`setError`).
  *
- * WHAT A SUCCESS SENDS (:160-167): each aggregate's output, `agg-<name>`, only when it exists — a wire made it
- * (`registerOutputIfNeeded`, :315-323) — and only for the names the answer carried. ⚠️ An answer with no row carries no names:
- * the outputs keep the PREVIOUS aggregation's values on their wires while Success fires (P107-S99-AGGSTALE). Error is never
+ * WHAT A SUCCESS SENDS: every aggregate asked gets a value — what the answer carried, or `null` when it carried none — and
+ * each one's output, `agg-<name>`, is sent when it exists — a wire made it (`registerOutputIfNeeded`). So an answer with no
+ * row (a Parse server, nothing matched) empties the outputs rather than leaving the previous aggregation's totals on them
+ * (P107-S99-AGGSTALE, R36 "Empty, like our backend": `LocalSQLAdapter.aggregate` answers one row of nulls). Error is never
  * cleared by a Success.
  *
- * THE FILTER (:173-191): the saved filter is lowered as `queryutils.convertVisualFilter` does, but WITHOUT a value-port prefix
- * (:180-183 passes none; Query Records passes `qp-`). The parameters are kept by their bare name (`qp-min` → `min`, :357-360),
- * so a condition in the builder's saved shape, whose connected value is named `qp-…`, never finds its value: the condition is
- * dropped as unresolved and the node aggregates the WHOLE class (P107-S99-AGGFILTERPREFIX). The retired visual shape (`rules`,
- * `input`) resolves. With the class in the project's metadata the lowering has its schema (`schemaFor`, queryutils.ts
- * :106-138, either cached shape).
+ * THE FILTER (`getStorageFilter`): the saved filter is lowered as `queryutils.convertVisualFilter` does, with Query Records'
+ * value-port prefix `qp-` (P107-S99-AGGFILTERPREFIX: before v2 none was passed, so a condition in the builder's saved shape
+ * whose value is wired never found it, was dropped as unresolved, and the WHOLE class was aggregated). The parameters are kept
+ * by their bare name (`qp-min` → `min`, `registerInputIfNeeded`). The retired visual shape (`rules`, `input`) resolves either
+ * way. With the class in the project's metadata the lowering has its schema (`schemaFor`, queryutils.ts, either cached shape).
  *
- * THE BUILT-IN BACKEND (P107-S99-AGGCOLUMNS): our own backend's `dbCollections` carries `columns`, not `schema.properties`
- * (nodegx-backend byob-admin.ts `getSchema`). `getAggregates` reads only `schema.properties` (:290-292), so on a project bound to
- * it every aggregate is dropped: the request asks for none, and the answer's row count decides Success. (In the editor the same
- * check draws no Property / Operation ports and no outputs, :455.)
+ * THE EDITOR (`updatePorts`) reads the class the same two ways, so on our own backend the Property, Operation and output ports
+ * and the Filter are drawn; and it draws a `qp-` port for every wired value in either filter shape
+ * (`QueryUtils.collectFilterParameters`, as Query Records does).
+ *
+ * Line citations below are to v1's reading (2026-10-12) unless named; v2's code sits beside each under the names above.
  *
  * NOT SPECCED, named:
  *   - THE JAVASCRIPT FILTER (`Filter` = Javascript, :192-284) — the author's script; NSP-017's escape hatch, as in Query Records.
@@ -56,8 +60,8 @@
  *   - the browser's XHR face of the Parse wire: this node runs only in a cloud function.
  */
 
-import type { Filter } from '../../../nodegx-backend-contract/src/translators';
-import { toParseWhere } from '../../../nodegx-backend-contract/src/translators';
+import type { Filter, SavedFilterItem, VisualQueryNode } from '../../../nodegx-backend-contract/src/translators';
+import { isSavedGroup, isVisualQueryFormat, toParseWhere } from '../../../nodegx-backend-contract/src/translators';
 import type { InputDecl, OutputDecl, ValueInputDecl, WorldView } from '../spec';
 import { defineNode } from '../spec';
 import type { CollectionScript, HostScript } from '../world';
@@ -127,14 +131,14 @@ function schemaFor(w: WorldView, name: unknown): { collection: string; propertie
 }
 
 /**
- * :173-191 `getStorageFilter` (the visual branch), through queryutils.ts :295-306 `convertVisualFilter` — no value-port prefix
- * (P107-S99-AGGFILTERPREFIX), the legacy store's backend type (`nodegx`, :157-167), the class's schema. A document with no key is
+ * :173-191 `getStorageFilter` (the visual branch), through queryutils.ts :295-306 `convertVisualFilter` — the `qp-` value-port
+ * prefix (v2, P107-S99-AGGFILTERPREFIX), the legacy store's backend type (`nodegx`, :157-167), the class's schema. A document with no key is
  * no filter. A throw is the failure, with its message.
  */
 function filterOf(s: State, w: WorldView): { where?: Readonly<Record<string, unknown>> } | { failed: string } {
   if (s.visualFilter === undefined) return {};
   try {
-    const neutral: Filter | undefined = toNeutral(s.visualFilter, s.qp, '');
+    const neutral: Filter | undefined = toNeutral(s.visualFilter, s.qp, 'qp-');
     if (neutral === undefined) return {};
     const where = toParseWhere(neutral, { backend: 'nodegx', schema: schemaFor(w, s.name) as never }) as Record<string, unknown>;
     return Object.keys(where).length === 0 ? {} : { where };
@@ -144,20 +148,31 @@ function filterOf(s: State, w: WorldView): { where?: Readonly<Record<string, unk
 }
 
 /**
- * :286-310 `getAggregates` — the group the request asks for, by aggregate name; `'throws'` where the runtime throws (a list that
- * is not text, :296; a name with no Property or Operation ever written, :297).
+ * `missingProperty` (v2, R36 "Fail, naming it") — the first aggregate the list names with no Property chosen, as the sentence
+ * the node fails with; undefined when each has one (or the list is not text, which `getAggregates` throws on, below).
+ */
+function missingOf(s: State): string | undefined {
+  if (typeof s.list !== 'string' || s.list === '') return undefined;
+  for (const a of s.list.split(',')) {
+    if (s.defs[a] !== undefined && s.defs[a].prop !== undefined) continue;
+    return a === '' ? 'Aggregates lists an empty name.' : 'The aggregate "' + a + '" has no Property chosen.';
+  }
+  return undefined;
+}
+
+/**
+ * `getAggregates` — the group the request asks for, by aggregate name, over the class's columns in either cached shape
+ * (`classProperties`, v2); `'throws'` where the runtime throws (a list that is not text, `split` on it).
  */
 function groupOf(s: State, w: WorldView): Record<string, Record<string, unknown>> | 'throws' {
   if (!s.list) return {};
-  const klass = classOf(w, s.name);
-  const properties = klass?.schema?.properties;
-  if (!klass || !klass.schema || !properties) return {};
+  const properties = schemaFor(w, s.name)?.properties as Record<string, { type?: unknown }> | undefined;
+  if (!properties) return {};
   if (typeof s.list !== 'string') return 'throws';
   const group: Record<string, Record<string, unknown>> = {};
   for (const a of s.list.split(',')) {
     const def = s.defs[a];
-    if (def === undefined) return 'throws';
-    if (def.prop === undefined) continue;
+    if (def === undefined || def.prop === undefined) continue;
     const column = properties[def.prop as string];
     if (column === undefined) continue;
     const fallback = column.type === 'String' ? 'distinct' : 'avg';
@@ -166,8 +181,13 @@ function groupOf(s: State, w: WorldView): Record<string, Record<string, unknown>
   return group;
 }
 
-/** :97-103 `setError` — Error, then Failure. */
-const failure = (set: Partial<State> = {}, message: string = AGGREGATE_FAILED) => ({ set: { ...set, error: message }, send: ['error'] as const, emit: ['failure'] as const });
+/** :97-103 `setError` — Error, then Failure; the adapter's words, or the node's own sentence when it gave none (:168-170). */
+const failure = (set: Partial<State> = {}, message: unknown = AGGREGATE_FAILED) => ({ set: { ...set, error: message || AGGREGATE_FAILED }, send: ['error'] as const, emit: ['failure'] as const });
+
+/** ParseWireAdapter.ts `_makeRequest`'s fetch face — the words each failure hands `error(res)`, read as `res && res.error`. */
+const NO_BACKEND_CONFIGURED = 'This project has no backend configured. Add one in the Backend panel.';
+const NOT_JSON = 'CloudStore: Failed to get json result.';
+const NOT_FETCHED = 'Failed to fetch.';
 
 /** :104-114 — a write that asks for an aggregation, unless `Do` is wired */
 const asks = (s: State, w: WorldView): Partial<State> => (!w.wired('storageFetch') && !s.scheduled ? { scheduled: true } : {});
@@ -199,15 +219,30 @@ function discover(port: string): InputDecl | undefined {
   return { type: '*', coerce: 'none', displayName: port, group: 'General', description: 'Kept by name; a write runs the aggregation again unless Do is wired', examples: [1, 'x'] };
 }
 
-/** :561-565 `_collectInputs` — the `qp-` ports the editor draws: the retired visual shape's `input`s only (a saved-shape filter draws none). */
+/**
+ * queryutils.ts `collectFilterParameters(query, 'qp-')` (v2) — the `qp-` ports the editor draws: the retired visual shape's
+ * `input`s, and the saved shape's connected values by name, the prefix stripped.
+ */
 function drawnParameters(query: unknown): string[] {
   const names: string[] = [];
-  const walk = (q: { rules?: unknown[]; input?: unknown } | undefined): void => {
-    if (q === undefined || q === null) return;
-    if (q.rules !== undefined) (q.rules as Array<typeof q>).forEach(walk);
-    else if (q.input !== undefined && !names.includes(q.input as string)) names.push(q.input as string);
+  const walkVisual = (node: VisualQueryNode | undefined): void => {
+    if (node === undefined) return;
+    if (node.rules !== undefined) node.rules.forEach(walkVisual);
+    else if (node.input !== undefined && !names.includes(node.input)) names.push(node.input);
   };
-  walk(query as never);
+  const walkSaved = (item: SavedFilterItem | undefined): void => {
+    if (!item) return;
+    if (isSavedGroup(item)) {
+      (item.conditions ?? []).forEach(walkSaved);
+      return;
+    }
+    if (item.valueSource !== 'connected' || !item.valuePortName) return;
+    const name = item.valuePortName.startsWith('qp-') ? item.valuePortName.slice('qp-'.length) : item.valuePortName;
+    if (!names.includes(name)) names.push(name);
+  };
+  if (query === undefined) return names;
+  if (isVisualQueryFormat(query)) walkVisual(query);
+  else walkSaved(query as SavedFilterItem);
   return names;
 }
 
@@ -221,7 +256,19 @@ const HOSTS: readonly HostScript[] = [{ cloudServices: CLOUD }, { cloudServices:
 
 export const AggregateRecords = defineNode({
   type: 'noodl.cloud.aggregate',
-  version: 1,
+  version: 2,
+  // NSP-010 — R36 (s100) ruled the five defects s99 measured; four of them move behaviour, in one version
+  changes: [
+    {
+      version: 2,
+      says:
+        'A filter value that is wired in now filters (before, the condition was dropped and the whole class was totalled). On our own backend the totals are asked for (before, none were, because its columns went unread). A refusal says the server\'s reason (before, always "Failed to aggregate."). An aggregation that matches nothing empties the outputs (before, they kept the previous totals). An aggregate with no Property chosen fails, naming it (before, the node did nothing at all)',
+      row: 'P107-S99-AGGFILTERPREFIX, -AGGCOLUMNS, -AGGWORDS, -AGGSTALE, -AGGNOPROP (R36)',
+      migration: {
+        none: 'Each before was a wrong answer or no answer, and the one project on this machine that holds the node (three, Parse-cached, static or retired-shape filters) plays the same: none of its nodes reaches a changed branch except a refusal, which now says why'
+      }
+    }
+  ],
   source:
     'packages/noodl-viewer-cloud/src/nodes/data/aggregatenode.js; packages/noodl-runtime/src/api/cloudstore.js; packages/noodl-runtime/src/api/queryutils.ts; packages/noodl-runtime/src/api/backends/ParseWireAdapter.ts',
   needs: ['project', 'host', 'network'],
@@ -275,10 +322,9 @@ export const AggregateRecords = defineNode({
   },
   {
     derived: {
-      // :400-624 `updatePorts` — what the editor draws, in its order: Class, Filter type, Do; per aggregate its Property and, once
-      // that is a number or text column, its Operation; the visual filter and its parameters. ⚠️ The runtime draws the
-      // aggregates' ports only off a class cached in the Parse shape (`schema.properties`, :455) — none on the built-in backend
-      // (P107-S99-AGGCOLUMNS); `context.schema` here is the editor's schema whatever its cache's shape.
+      // `updatePorts` — what the editor draws, in its order: Class, Filter type, Do; per aggregate its Property and, once that is
+      // a number or text column, its Operation; the visual filter and its parameters. Since v2 the runtime reads the class in
+      // either cached shape (`classProperties`), as `context.schema` here does.
       inputs: (params, context) => {
         const out: Record<string, InputDecl> = {
           collectionName: classPicker(discover('collectionName') as ValueInputDecl, context),
@@ -338,14 +384,16 @@ export const AggregateRecords = defineNode({
       const drained = { scheduled: false };
       const f = filterOf(s, w);
       if ('failed' in f) return failure(drained, f.failed); // :145-152 — the filter's own words
+      const missing = missingOf(s);
+      if (missing !== undefined) return { says: 'an aggregate named with no Property chosen: Failure, naming it, and nothing asked', ...failure(drained, missing) };
       const group = groupOf(s, w);
-      // :297 — the throw is swallowed by the frame-end callback (nodecontext.ts): nothing is asked, nothing is told
-      if (group === 'throws') return { says: 'an aggregate named with no Property written: nothing at all (P107-S99-AGGNOPROP)', set: drained, send: [] };
+      // a list that is not text: `split` throws, swallowed by the frame-end callback (nodecontext.ts) — nothing is asked or told
+      if (group === 'throws') return { set: drained, send: [] };
       // ParseWireAdapter.ts :228-238 — the loopback's address in a cloud function; else the project's endpoint
       const cloud = w.hostCloud();
       const project = w.cloudServices();
       const address = cloud ? cloud.endpoint : project?.endpoint;
-      if (!address) return failure(drained); // P107-C33's refusal, reported as the one sentence
+      if (!address) return failure(drained, NO_BACKEND_CONFIGURED); // P107-C33's refusal, its words on since v2
       // ParseWireAdapter.ts :405-449 — the grouping, then the version's spelling
       const grouping: Record<string, unknown> = {};
       for (const k of Object.keys(group)) {
@@ -386,28 +434,39 @@ export const AggregateRecords = defineNode({
         if (!keys) return { send: [] };
         const { [res.id]: _done, ...rest } = s.inFlight;
         const set = { inFlight: rest };
-        if ('error' in res || 'aborted' in res) return failure(set); // :356-358
-        if (res.status !== 200 && res.status !== 201) return failure(set); // :348-355
+        // :356-358 — `.catch((e) => options.error({ error: e.message }))`: the fault's own message
+        if ('error' in res) return failure(set, typeof res.error === 'object' && res.error !== null ? (res.error as { message?: unknown }).message : res.error);
+        if ('aborted' in res) return failure(set, 'This operation was aborted');
+        if (res.status !== 200 && res.status !== 201) {
+          // :348-355 — the refusal's JSON hands its `error`; a body that is not JSON, the wire's own sentence
+          let refusal: unknown;
+          try {
+            refusal = JSON.parse(res.body ?? '');
+          } catch {
+            return failure(set, NOT_FETCHED);
+          }
+          return failure(set, (refusal as { error?: unknown } | null)?.error);
+        }
         let body: unknown;
         try {
           body = JSON.parse(res.body ?? '');
         } catch {
-          return failure(set); // :343-346
+          return failure(set, NOT_JSON); // :343-346
         }
-        // :455-466 — a throw here (a `null` body, a `null` row) lands in the chain's `.catch`: a failure
-        if (body === null || body === undefined) return failure(set);
+        // :455-466 — a throw here (a `null` body, a `null` row) lands in the chain's `.catch`: the not-JSON sentence
+        if (body === null || body === undefined) return failure(set, NOT_JSON);
         const results = (body as { results?: unknown }).results as ArrayLike<unknown> | undefined;
-        let values: Record<string, unknown> = {};
+        const carried: Record<string, unknown> = {};
         if (results && results.length === 1) {
           const row = results[0];
           // the row is read once per aggregate asked: a `null` row throws only when something was asked
-          if ((row === null || row === undefined) && keys.length > 0) return failure(set);
-          for (const k of keys) values[k] = (row as Record<string, unknown>)[k];
-        } else values = {};
-        // :160-167 — each aggregate the answer carried, when a wire made its output; then Success
-        const sendDerived = Object.keys(values)
-          .map((k) => 'agg-' + k)
-          .filter((port) => w.hasOutput(port));
+          if ((row === null || row === undefined) && keys.length > 0) return failure(set, NOT_JSON);
+          for (const k of keys) carried[k] = (row as Record<string, unknown>)[k];
+        }
+        // v2 (R36) — every aggregate asked: what the answer carried, else null; each sent when a wire made its output; then Success
+        const values: Record<string, unknown> = {};
+        for (const k of keys) values[k] = carried[k] !== undefined ? carried[k] : null;
+        const sendDerived = keys.map((k) => 'agg-' + k).filter((port) => w.hasOutput(port));
         return { set: { ...set, values }, send: [], sendDerived, emit: ['fetched'] };
       }
     }
