@@ -8,6 +8,7 @@ found: P107 NSP-020 s85 (L5, `portContextFor` graded on saved projects), 2026-10
 evidence: packages/noodl-runtime/test/node-spec/nsp-020-port-context.test.ts (`twoBackends`, `DRIVE_PINS`); packages/nodegx-project-contract/port-context.ts `enhancedType`
 regression: packages/noodl-runtime/test/node-spec/nsp-020-port-context.test.ts
 kit: node-spec
+commit: f04d95592
 phase: P107 (NSP-020)
 ---
 

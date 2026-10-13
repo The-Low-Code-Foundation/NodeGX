@@ -8,6 +8,7 @@ found: P107 s101, 2026-10-13 — while building R37 (the editor draws a cloud no
 evidence: of 113 spec-drawn cloud nodes in that project, one wired port is not drawn by its spec — `/#__cloud__/Records and Objects/Relations` Query Records `efe0ef88`, `storageFilterValue-ParentRecordId`, wired. Kept by `cloudSpecPorts.ts keepWiredSavedPorts` (a saved port a wire uses survives the redraw), so that project is unharmed; a NEW node with a Javascript filter gets no variable ports to wire
 regression: packages/noodl-runtime/test/node-spec/nsp-020-module-table.ts ("the Javascript filter draws a port per variable", DbCollection2 and noodl.cloud.aggregate)
 kit: node-spec
+commit: f04d95592
 phase: P107 (NSP-020, R37)
 ---
 
