@@ -132,6 +132,8 @@ post-tool, post-agent) — and the kit uses none of them yet.
 | v4 | Vibe kit, tgz16 | — | **stalled** (one think, 12+ min, 175 KB) | 23 | 0.35 | 37% | 0 | LONGTHINK; the series breaks |
 | v5 | tgz16, `thinking low` | — | itself, before authoring | 1.5 | 0.28 | 86% | 0 | low is worse: 36 malformed probes, a stray write ended `-p` |
 | v6 | tgz16, temperature 0.2 | — | a refused read ended `-p`, before authoring | 23 | 0.82 | 47% | 0 | inconclusive; the lab's root was unsealed |
+| v7 | tgz17, temperature 0.2, sealed lab | 12/12, **carryover** | itself | 41 | 2.97 | 64% | ~3 | 0.2: no stall, fewer drives, the last question's colours flash on the next |
+| v8 | tgz17, kit defaults, sealed lab | — | **stalled** (one think, 145 KB) | 18 | 0.34 | 45% | 0 | LONGTHINK again at the defaults: designing the whole app in one answer |
 
 - **s2 (2026-10-13, Opus):** kit tgz14 reused for v3 (create-nodegx and MCP byte-identical in source to HEAD at the
   time; the runtime had moved only in Aggregate Records, which the quiz never touches). **v3: 12/12, carryover clean,
@@ -185,3 +187,20 @@ post-tool, post-agent) — and the kit uses none of them yet.
   an ask ends a `-p` run where a person declines and goes on (v5's stray write too). `round-kit.mjs` now denies
   `<root>/[!w]*` and `<root>/work/[!a]*` (fnmatch, existing or not); Vibe checks its scratchpad first, so that stays
   writable. **v7 (0.2) and v8 (kit defaults, 1.0)** run side by side on the sealed lab, kit tgz17 (`21a3d0b98`).
+- **s2, v7 (temperature 0.2, sealed lab): 12/12, carryover NOT clean** — for a moment each new question shows the
+  last one's colours (Q2–Q4: Sydney green, Toronto red, Rabat red…). Finished by itself in 41 min, no stall, but
+  only ~3 drives where v3 ran 110 steps; its checklist never looked at the moment a question appears. Not an AC4
+  pass. **v8 (kit defaults, same lab, side by side): stalled** — 6 min in, one 145 KB answer designing every
+  component and their cross-wiring before staging anything (v4's shape). At the kit's settings the quiz series is
+  v2 ✓ v3 ✓ v4 ✗ v8 ✗. **Lever 3, the words (`f94777cde`):** the Vibe AGENTS.md step 4 keeps each answer to one
+  component and one tool call, and says why. v9 (kit tgz18, defaults) measures it.
+- **s2, Pack It pk2 (tgz17, kit defaults): 12/12**, finished by itself in 59 min, $4.34 by Vibe's list count (~$2.17
+  cached, 72% cached), 66 tool calls. The first AC5 pass (pk1's SAMEVALUE miss is in the notes now).
+- **s2, R30 (Richard):** Vibe on the subscription as far as it goes, or no Mistral. Reporting Vibe's harness defects to
+  Mistral (as issues — the repo takes no code) is an option for the final evaluation.
+
+| Pack It | kit | grade | ended | min | $ (Vibe list) | cached | what it taught |
+|---|---|---|---|---|---|---|---|
+| p0 Sonnet | core, tgz14 (Claude Code) | 0/12 as served; 12/12 healed | itself | 20 | 3.85 API-eq. | 97% | DUPCHILD; the grader proven |
+| pk1 | Vibe kit, tgz16 | 11/12 | itself | 63 | 3.95 | 82% | SAMEVALUE |
+| pk2 | Vibe kit, tgz17 | **12/12** | itself | 59 | 4.34 | 72% | AC5: 1 of 3 |
