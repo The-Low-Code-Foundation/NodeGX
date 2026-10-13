@@ -100,3 +100,11 @@ post-tool, post-agent) — and the kit uses none of them yet.
   app), so v1 drew on API credit, not the plan. Lab: `round-kit.mjs --stall-min` (default 12) now stops a round
   whose journal stops growing. **Lever added:** the long-think cap on the legacy harness (Vibe's `max_output_tokens`
   only reaches the unified harness).
+- **s1, the key, settled:** `MISTRAL_VIBE_API_KEY` in the repo `.env` must be the key from Richard's **Vibe Code**
+  app (the subscription, €255/month allowance), not an Organization API key. With it, Vibe rounds draw on the Vibe
+  Code allowance — Richard watched it rise in the console during v1b (2026-10-13). Never use that key outside Vibe
+  (the s1 speed probe sent three raw API calls with the wrong key; nothing since).
+- **s1, the Vibe kit's agent:** Vibe 2.26.1 sends an agent profile's `instructions` on its unified harness only; on the
+  legacy harness (the kit's) the build steps never reached the model (smoke 4). They live in the Vibe kit's
+  AGENTS.md now (`8f47ba49e`); smoke 6 recited all six. The agent file keeps its tool settings (`task` off). Kit tgz13
+  (`v/tgz13`): create-nodegx at `8f47ba49e`, MCP at `d8572ccdb`, preview = tgz12.
