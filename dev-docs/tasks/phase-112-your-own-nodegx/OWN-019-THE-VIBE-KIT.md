@@ -282,3 +282,14 @@ post-tool, post-agent) — and the kit uses none of them yet.
   `post_agent` hook in `.vibe/hooks.toml` that answers `{"decision":"deny","reason":…}` sends the agent back to work
   on the legacy loop (`_loop.py:2214`). Others to weigh: legacy is a "temporary escape hatch"; #1242 (no temperature
   0 on Large 4 without `top_p`); exit codes 3/4; Large 4 reportedly serves 524k, not 1M.
+- **s3, q1 (tgz20, the first process round): sitting 1 wrote no plan.** It found its step by itself ("This is sitting
+  1 — plan"), created the project, then read for 18 min (8 examples, 24 node types) and thought for 21 min in one
+  answer — port-level wiring ("Variable2 runOnChange-variable default true?") — until Mistral's stream ended with no
+  finish reason (Vibe exit 2, `infrastructure_failure`, `incomplete_stream`). 60 min, $0.89 list (~$0.45 cached), 11
+  calls, ~54k input per call, longest finished think 84 KB. Its todo list planned the whole build in that sitting.
+  Stopped in sitting 2 (no NEXT.md: it would have replayed sitting 1). **Read:** "PLAN.md: components, values,
+  timings, decisions" read to Large 4 as "design every wire first" — LONGTHINK's shape (v4, v8, v11) invited by the
+  kit's own words. **Lever (`6970c8f5c`, kit tgz21):** the plan sitting writes notes in plain words, a file per
+  answer, in order (REQUEST, CHECKLIST from the words alone, PLAN a page at most, NEXT), and reads no node types —
+  each build sitting reads its own part's; plus "the task of a sitting is its step" against Vibe's headless
+  "complete the entire task in a single pass". q2 measures it.
