@@ -9,13 +9,16 @@ import { summariseDisagreements, type DisagreementRow } from './specDisagreement
  * outcome it reports as a chip (Done, Unchanged, Failure) and the signals it sends beneath it.
  *
  * The words are NSP-018's, from the catalog (`rulesFor`); `ruleParts` only moves them — the
- * outcome to the chip, the rest under the case. Where the spec and the running node ever
+ * outcome to the chip, the rest under the case. What the node can warn the editor about follows the
+ * ports, in the spec's words too (`warningsFor`, R35). Where the spec and the running node ever
  * disagreed (the bug ledger's rows, `specDisagreements`), the column says so last, with each ruling.
  *
  * Hook-free, so the plain-Node runner evaluates it as an element tree (`tests-unit/support/renderElements`).
  */
 export interface NodeRulesColumnProps {
   groups: readonly RuleGroup[];
+  /** NSP-019 (R35) — what the node can warn the editor about (`warningsFor`), drawn after the ports when there are any. */
+  warnings?: readonly string[];
   disagreements?: readonly DisagreementRow[];
 }
 
@@ -30,7 +33,7 @@ function capitalise(text: string): string {
   return text.length > 0 ? text[0].toUpperCase() + text.slice(1) : text;
 }
 
-export function NodeRulesColumn({ groups, disagreements = [] }: NodeRulesColumnProps) {
+export function NodeRulesColumn({ groups, warnings = [], disagreements = [] }: NodeRulesColumnProps) {
   return (
     <section className={css['Rules']} aria-label="The rules">
       <h2 className={css['SectionTitle']}>The rules</h2>
@@ -54,6 +57,18 @@ export function NodeRulesColumn({ groups, disagreements = [] }: NodeRulesColumnP
           })}
         </div>
       ))}
+      {warnings.length > 0 && (
+        <div className={css['RuleGroup']}>
+          <h3 className={css['RulePort']}>It warns you when</h3>
+          {warnings.map((says, i) => (
+            <div key={i} className={css['Rule']}>
+              <span className={css['RuleText']}>
+                <span className={css['RuleWhen']}>{capitalise(says)}</span>
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
       {disagreements.length > 0 && (
         <div className={css['Disagreed']} role="note">
           <span className={css['Label']}>

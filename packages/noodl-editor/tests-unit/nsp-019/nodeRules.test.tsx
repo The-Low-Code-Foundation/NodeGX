@@ -25,7 +25,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { HowItWorksButton } from '../../src/editor/src/views/panels/propertyeditor/spec/HowItWorksButton';
-import { ruleParts, rulesFor, splitRule } from '../../src/editor/src/views/panels/propertyeditor/spec/nodeRules';
+import { ruleParts, rulesFor, splitRule, warningsFor } from '../../src/editor/src/views/panels/propertyeditor/spec/nodeRules';
 import { NodeRulesColumn } from '../../src/editor/src/views/panels/propertyeditor/spec/NodeRulesColumn';
 import {
   isSpecInProgress,
@@ -138,6 +138,37 @@ describe('NodeRulesColumn — the drawing, as an element tree', () => {
     expect(byClass(tree, 'Chip-done')).toHaveLength(3);
     expect(byClass(tree, 'Chip-unchanged')).toHaveLength(3);
     expect(byClass(tree, 'Rule')).toHaveLength(8);
+  });
+});
+
+describe('warningsFor — what a node can warn the editor about (R35), over the real catalog', () => {
+  test("every spec that declares diagnostics: the catalog carries each one's words, in the spec's order", () => {
+    const declaring = Object.values(specs).filter((spec) => spec.diagnostics && Object.keys(spec.diagnostics).length > 0);
+    // 🔴 the population: Counter (s95) and the R35 sites since — if this falls, a regen dropped the field
+    expect(declaring.length).toBeGreaterThanOrEqual(10);
+    for (const spec of declaring) expect(warningsFor(spec.type)).toEqual(Object.values(spec.diagnostics!).map((d) => d.says));
+  });
+
+  test("Counter's one warning; absent, not empty, for a worded type that declares none and for an unknown type", () => {
+    expect(warningsFor('Counter')).toEqual(['Min Value is above Max Value']);
+    const quiet = worded.find((typeName) => !specs[typeName as keyof typeof specs]?.diagnostics);
+    expect(quiet).toBeDefined();
+    expect(warningsFor(quiet as string)).toBeUndefined();
+    expect(warningsFor('net.noodl.NoSuchNode')).toBeUndefined();
+  });
+
+  test('NodeRulesColumn draws them after the ports, one line each, capitalised — and draws no group without them', () => {
+    const tree = render(<NodeRulesColumn groups={rulesFor('For Each')!} warnings={warningsFor('For Each')} />)!;
+    const all = text(tree);
+    expect(all).toContain('It warns you when');
+    expect(all).toContain('Items is not a list');
+    expect(all).toContain('An item has no component to build its row from');
+    expect(all.indexOf('It warns you when')).toBeGreaterThan(all.indexOf('Items'));
+    const ports = rulesFor('For Each')!.reduce((n, g) => n + g.lines.length, 0);
+    expect(byClass(tree, 'Rule')).toHaveLength(ports + warningsFor('For Each')!.length);
+    const without = render(<NodeRulesColumn groups={rulesFor('For Each')!} />)!;
+    expect(text(without)).not.toContain('It warns you when');
+    expect(byClass(without, 'Rule')).toHaveLength(ports);
   });
 });
 

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import css from './HowItWorks.module.scss';
-import { rulesFor } from './nodeRules';
+import { rulesFor, warningsFor } from './nodeRules';
 import { NodeRulesColumn } from './NodeRulesColumn';
 import { disagreementsFor } from './specDisagreements';
 import { TryIt, type TryItProps } from './TryIt';
@@ -77,7 +77,7 @@ export function HowItWorks({ typeName, title, typeLabel, parameters, colors, onC
         )}
       </header>
       <div className={css['Body']}>
-        <NodeRulesColumn groups={groups} disagreements={disagreementsFor(typeName)} />
+        <NodeRulesColumn groups={groups} warnings={warningsFor(typeName)} disagreements={disagreementsFor(typeName)} />
         <TryIt typeName={typeName} title={title} typeLabel={typeLabel} parameters={parameters} loaded={loaded} />
       </div>
     </div>

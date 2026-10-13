@@ -538,16 +538,16 @@ export const Repeater = defineNode({
   ],
   // THE EDITOR (above): each key shows the last sentence raised under it
   diagnostics: {
-    [ITEMS_CODE]: { says: 'Items holds a value that is not a list (nothing, null and an array are lists here; so is a registry array)', message: (_i: unknown, s: State) => s.warnings[ITEMS_CODE] },
-    [EMPTY_ENTRY_CODE]: { says: 'Items held an empty entry (null or undefined) when it was copied', message: (_i: unknown, s: State) => s.warnings[EMPTY_ENTRY_CODE] },
-    [SCRIPT_SYNTAX_CODE]: { says: 'the Script does not compile, and no Script that compiles has been written since', message: (_i: unknown, s: State) => s.warnings[SCRIPT_SYNTAX_CODE] },
-    [SCRIPT_THREW_CODE]: { says: 'the Script threw for an item, or set its component to something that is not text', message: (_i: unknown, s: State) => s.warnings[SCRIPT_THREW_CODE] },
-    [NO_TEMPLATE_FOR_ITEM_CODE]: { says: 'an item was to get a row and there was no component to build it from', message: (_i: unknown, s: State) => s.warnings[NO_TEMPLATE_FOR_ITEM_CODE] },
-    [NOT_FOUND_CODE]: { says: 'an item was to get a row from a component the project does not have', message: (_i: unknown, s: State) => s.warnings[NOT_FOUND_CODE] },
-    [MAPPING_SYNTAX_CODE]: { says: 'the input mapping does not compile, and no other mapping has been written since', message: (_i: unknown, s: State) => s.warnings[MAPPING_SYNTAX_CODE] },
+    [ITEMS_CODE]: { says: 'Items is not a list', message: (_i: unknown, s: State) => s.warnings[ITEMS_CODE] },
+    [EMPTY_ENTRY_CODE]: { says: 'Items has an empty entry', message: (_i: unknown, s: State) => s.warnings[EMPTY_ENTRY_CODE] },
+    [SCRIPT_SYNTAX_CODE]: { says: 'Script does not compile', message: (_i: unknown, s: State) => s.warnings[SCRIPT_SYNTAX_CODE] },
+    [SCRIPT_THREW_CODE]: { says: 'Script threw for an item, or set its component to something other than a name', message: (_i: unknown, s: State) => s.warnings[SCRIPT_THREW_CODE] },
+    [NO_TEMPLATE_FOR_ITEM_CODE]: { says: 'an item has no component to build its row from', message: (_i: unknown, s: State) => s.warnings[NO_TEMPLATE_FOR_ITEM_CODE] },
+    [NOT_FOUND_CODE]: { says: "an item's component is not in the project", message: (_i: unknown, s: State) => s.warnings[NOT_FOUND_CODE] },
+    [MAPPING_SYNTAX_CODE]: { says: 'the input mapping does not compile', message: (_i: unknown, s: State) => s.warnings[MAPPING_SYNTAX_CODE] },
     [MAPPING_THREW_CODE]: { says: 'the input mapping threw for an item', message: (_i: unknown, s: State) => s.warnings[MAPPING_THREW_CODE] },
-    [NO_TEMPLATE_CODE]: { says: 'a Refresh was answered Failure: Template Type had nothing to build from', message: (_i: unknown, s: State) => s.warnings[NO_TEMPLATE_CODE] },
-    [NO_ITEMS_CODE]: { says: 'a Refresh was answered Failure: there were no Items', message: (_i: unknown, s: State) => s.warnings[NO_ITEMS_CODE] }
+    [NO_TEMPLATE_CODE]: { says: 'a Refresh found nothing to build the rows from', message: (_i: unknown, s: State) => s.warnings[NO_TEMPLATE_CODE] },
+    [NO_ITEMS_CODE]: { says: 'a Refresh found no Items', message: (_i: unknown, s: State) => s.warnings[NO_ITEMS_CODE] }
   },
 
   state: {

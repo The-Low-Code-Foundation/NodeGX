@@ -6732,6 +6732,9 @@
           "after the first: only where Reset returns to → Count Changed stays silent",
           "the first one: the count starts there too → Count Changed"
         ]
+      },
+      "warnings": {
+        "counter/min-above-max": "Min Value is above Max Value"
       }
     },
     {
@@ -10782,6 +10785,18 @@
         "refresh": [
           "always: a rebuild at the end of the frame, one however many Refreshes arrived — every row goes and one is built per item, then Done for each Refresh; Failure for each when Template Type has nothing to build from, or there are no Items"
         ]
+      },
+      "warnings": {
+        "repeater/items-not-a-collection": "Items is not a list",
+        "repeater/items-empty-entry": "Items has an empty entry",
+        "repeater/template-script-syntax-error": "Script does not compile",
+        "repeater/template-script-threw": "Script threw for an item, or set its component to something other than a name",
+        "repeater/no-template-for-item": "an item has no component to build its row from",
+        "repeater/template-component-not-found": "an item's component is not in the project",
+        "repeater/input-mapping-syntax-error": "the input mapping does not compile",
+        "repeater/input-mapping-threw": "the input mapping threw for an item",
+        "repeater/no-template": "a Refresh found nothing to build the rows from",
+        "repeater/no-items": "a Refresh found no Items"
       }
     },
     {
@@ -14765,6 +14780,9 @@
         "scrollToElement.do": [
           "always: runs at the end of the frame, waiting as Scroll To Index does — Done when Element is empty (nothing to scroll to), Failure for a value that is not an element"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page"
       }
     },
     {
@@ -30162,6 +30180,12 @@
           "already in, or already heading to, the next state → Unchanged",
           "otherwise it moves to the next state, wrapping round after the last, at the end of the frame — State Changed, then Done"
         ]
+      },
+      "warnings": {
+        "states/unknown-state": "a state was asked for that is not in the list, and no state in the list has been asked for since",
+        "states/no-states": "a Toggle or a To arrived with no States list",
+        "states/unreadable-transition": "a move would have animated along a transition that is not a curve",
+        "states/reserved-port-name": "a value is named as one of the node's own outputs"
       }
     },
     {
@@ -38679,6 +38703,9 @@
           "the Date cannot be read as a date: Result goes empty → Invalid Date; Changed stays silent",
           "otherwise Result is the Date moved by Amount (0 when not a number) in Unit (days when not one of the eight); in months and years Amount counts whole steps only, and the day stops at the month's last → Changed; Invalid Date stays silent"
         ]
+      },
+      "warnings": {
+        "date-add/unknown-unit": "Unit is not one of the eight"
       }
     },
     {
@@ -39024,6 +39051,9 @@
           "either cannot be read as a date: Difference goes empty → Invalid Date; Changed stays silent",
           "otherwise Difference is To minus From in Unit (days when not one of the eight), negative when To is earlier unless Absolute is on → Changed; Invalid Date stays silent"
         ]
+      },
+      "warnings": {
+        "date-difference/unknown-unit": "Unit is not one of the eight"
       }
     },
     {
@@ -47123,6 +47153,10 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       }
     },
     {
@@ -49303,6 +49337,10 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       }
     },
     {
@@ -51904,6 +51942,10 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       }
     },
     {
@@ -54081,6 +54123,10 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, it takes no click and a Focus does not reach it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       }
     },
     {
@@ -56479,6 +56525,9 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page"
       }
     },
     {
@@ -59328,6 +59377,10 @@
         "opacity": [
           "always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       }
     },
     {
@@ -62094,6 +62147,9 @@
         "scrollIntoView": [
           "always: the page, or the scrolling Group holding it, scrolls until the icon can be seen"
         ]
+      },
+      "warnings": {
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       }
     },
     {

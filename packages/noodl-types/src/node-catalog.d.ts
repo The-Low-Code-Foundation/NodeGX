@@ -393,6 +393,11 @@ export interface CatalogNode {
    * have been given their words.
    */
   rules?: Record<string, string[]>;
+  /**
+   * NSP-019 (phase 107, R35) — for a node with an executable spec, what it can warn the editor about: each warning's key
+   * (the one the editor shows it under) and, in words, when it holds. Generated from the spec's `diagnostics`.
+   */
+  warnings?: Record<string, string>;
 }
 
 export interface Typecast {
