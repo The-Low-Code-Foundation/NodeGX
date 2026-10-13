@@ -315,3 +315,15 @@ post-tool, post-agent) — and the kit uses none of them yet.
   v12's timeout gate (AFTERTIMEOUT). Scripts and data: s3 scratchpad `mine/`.
 - **s3, kit tgz23:** create-nodegx as tgz22; **MCP re-packed at `f419f035c`** in `own018-s3-pack` (carries the
   Condition and For Each notes; also whatever else landed in its dependencies since tgz19); preview = tgz12's. q3.
+- **s3, q2 sitting 3 (part 1): 17.5 min, $1.47 list (~$0.74 cached), 29 calls, ~55k input per call**, stopped by
+  itself; the four start-screen lines marked with what it measured ("at 390×844 the Start button measures 342×53
+  px"); NEXT → part 2. Small contexts as R31 wanted (s2's one-session rounds sent up to ~9M input).
+- **s3, q3 (tgz23, the "just build it" line): sitting 1 wrote the four notes — and went on.** Past its NEXT.md it
+  began asking `describe` for create/update_component, drive_page, render_report: building part 1 in the plan
+  sitting. Words got the step finished, not the sitting stopped. Stopped by the lab (me) in sitting 1.
+- **s3, the hook (`0b60c2cb0`, kit tgz24):** `.vibe/hooks.toml` + `.vibe/hooks/one-step.mjs`, a `pre_tool` hook:
+  once this session has written an app's `docs/NEXT.md` (mtime after the session's `meta.json` start, else its
+  folder's UTC name), every tool but `read_file`, `grep`, and `write_file`/`edit` on `docs/*.md` is refused with
+  "This sitting's step is done … tell me in two lines … and stop." Fails open on anything unexpected. Test with a
+  control (a NEXT.md from an earlier sitting closes nothing). AGENTS.md says NEXT.md is written last and why the tools
+  close. q4 measures it; q2 (tgz21, no hook) runs on as the other arm.
