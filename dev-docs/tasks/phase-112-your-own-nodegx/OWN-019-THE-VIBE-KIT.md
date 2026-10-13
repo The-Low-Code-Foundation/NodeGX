@@ -293,3 +293,25 @@ post-tool, post-agent) — and the kit uses none of them yet.
   answer, in order (REQUEST, CHECKLIST from the words alone, PLAN a page at most, NEXT), and reads no node types —
   each build sitting reads its own part's; plus "the task of a sitting is its step" against Vibe's headless
   "complete the entire task in a single pass". q2 measures it.
+- **s3, q2 (tgz21): the process works from sitting 2.** Sitting 1 (4.5 min, $0.06): "Since you asked me to build it
+  all without waiting, I'll run the whole process in this pass" — the brief's own "Please just build it without
+  waiting" plus Vibe's "single pass" beat AGENTS.md — then Mistral's stream dropped again (exit 2,
+  `incomplete_stream`, twice in two rounds this evening; never in s2). **Sitting 2 ("Continue." only, 8.4 min,
+  $0.33):** "the project exists … the sitting-1 docs were never written … this is sitting 1 — plan"; wrote REQUEST,
+  CHECKLIST, PLAN, NEXT in order and stopped by itself. **The checklist is what s2's rounds lacked:** "You scored 3
+  out of 5" as a whole game "mixing right answers, wrong taps and questions left to time out"; best 4 then a 3;
+  reload then a 0; "no green or red from the previous question remains on the new answers". PLAN.md: a page in plain
+  words, four parts (start + routing; quiz screen, 11 lines; results; prove). NEXT.md names what to read, the node
+  types for the part, the lines to drive, the next NEXT, and "Stop there."
+- **s3, lever (`589f8e089`, tgz22):** "just build it / don't wait for me" means don't ask, not skip the sittings; a
+  project with no NEXT.md is a cut-off sitting 1.
+- **s3, mining the thinks (step 5):** 15 journals, ~3,000 question sentences clustered (regex counts, noisy). Most
+  doubts the notes already answer (when a Function runs, Condition on change vs eval, Expression re-evaluation,
+  Variable force-change, States, Repeat/Timer). **Answered nowhere:** whether a row's values have arrived when its
+  signal fires (8 rounds), a row index (11), whether a signal carries a value (12), how rows are matched (11). Ground
+  truth read in the runtime (`foreach.tsx` fills `itemOutput-*` before `itemOutputSignal-*`; `node.ts` takes values
+  before signals; rows get only `id` + mapped fields; `collection.ts` matches plain items by `id` or identity).
+  **For Each's notes now say all four (`f419f035c`, test `own019ForEachRows`).** Wrong conclusions built on: only
+  v12's timeout gate (AFTERTIMEOUT). Scripts and data: s3 scratchpad `mine/`.
+- **s3, kit tgz23:** create-nodegx as tgz22; **MCP re-packed at `f419f035c`** in `own018-s3-pack` (carries the
+  Condition and For Each notes; also whatever else landed in its dependencies since tgz19); preview = tgz12's. q3.
