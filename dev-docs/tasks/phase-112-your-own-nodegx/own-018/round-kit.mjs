@@ -23,7 +23,10 @@
 // max_context_length 1,000,000 puts compaction near the full window, and the legacy harness sends no max_tokens — so
 // unlike OpenCode, a long think is not cut at 32k.
 //
-//   node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price 4] [--max-turns 250] [--thinking high|low] [--key vibe|api]
+// OWN-019: `--kit vibe` sets the folder up with the Vibe kit (`create-nodegx --vibe`, what `npm create nodegx-vibe` runs):
+// its AGENTS.md, `.vibe/agents/nodegx.toml` as the default agent, and the server started with `--profile vibe`.
+//
+//   node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price 4] [--max-turns 250] [--thinking high|low] [--key vibe|api] [--kit vibe]
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
@@ -86,7 +89,8 @@ fs.writeFileSync(
 );
 
 // 1. npm create nodegx apps, from the packed tarball.
-const created = spawnSync('npx', ['-y', `--package=${tgz('create-nodegx-0.2.0.tgz')}`, 'create-nodegx', APPS], { cwd: path.dirname(APPS), env, encoding: 'utf8' });
+const kit = opt('--kit', 'core');
+const created = spawnSync('npx', ['-y', `--package=${tgz('create-nodegx-0.2.0.tgz')}`, 'create-nodegx', APPS, ...(kit === 'vibe' ? ['--vibe'] : [])], { cwd: path.dirname(APPS), env, encoding: 'utf8' });
 fs.writeFileSync(path.join(root, 'create.log'), created.stdout + created.stderr);
 if (created.status !== 0) throw new Error(`create-nodegx exited ${created.status}; see create.log`);
 
@@ -115,7 +119,7 @@ const args = [
   '--max-turns', opt('--max-turns', '250'),
   '--workdir', APPS
 ];
-fs.writeFileSync(path.join(root, 'command.txt'), ['uvx', ...args].join(' ') + `\n# key: ${keyName}${thinking ? `; thinking = ${thinking}` : ''}\n`);
+fs.writeFileSync(path.join(root, 'command.txt'), ['uvx', ...args].join(' ') + `\n# key: ${keyName}; kit: ${kit}${thinking ? `; thinking = ${thinking}` : ''}\n`);
 const log = fs.createWriteStream(path.join(root, 'agent.jsonl'));
 const err = fs.createWriteStream(path.join(root, 'agent.stderr'));
 const child = spawn('uvx', args, { cwd: APPS, env, stdio: ['ignore', 'pipe', 'pipe'] });

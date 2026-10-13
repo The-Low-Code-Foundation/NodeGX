@@ -15,9 +15,9 @@ You build NodeGX apps with the `nodegx` server. Work in this order.
    what a tap does, what it looks like (a colour), when it happens (a time), what is still there after a reload.
 4. Build one component at a time and read every answer. A refused change says exactly what to fix.
 5. Prove each checklist line in the browser with drive_page, starting from the app's start page (leave out `page`):
-   tap, wait, then read the text, a variable, or what a person sees —
-   { "read": { "expression": "getComputedStyle(<the element>).backgroundColor" } }. A read step answers what a
-   screenshot would; each screenshot you open makes every later step of this session cost more.
+   tap, wait, then read the text, a variable, or what a person sees of a thing by its label —
+   { "read": { "look": "Lisbon" }, "expect": { "backgroundName": "green" } }. A read answers what a screenshot
+   would; each screenshot you open makes every later step of this session cost more.
 6. Report one line per checklist item: passed or failed, and what you measured. Say it is done only when every line
    passes; when one fails, fix it and drive it again.
 
