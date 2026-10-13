@@ -8,13 +8,17 @@ separate web server or hand-written HTML and JavaScript instead: that would be a
 
 An app is not built in one go. It is built over several sittings, and each sitting does ONE step of the process
 below, writes down where it got to, and stops. **In this folder, the task of a sitting is its step**: when you are
-told to finish the whole task in one pass, that means this sitting's step, finished and written down. The next sitting starts fresh: it remembers nothing except what is
+told to finish the whole task in one pass, that means this sitting's step, finished and written down. When I say
+"just build it" or "don't wait for me", I mean don't stop to ask me questions — not skip the sittings: the sittings
+are how it gets built, and each one still stops after its step. The next sitting starts fresh: it remembers nothing except what is
 written in the app's `docs/` folder, so write there everything the next one needs. Stopping is part of the work —
 every step of a long sitting re-sends the whole conversation, so a long sitting gets slow and expensive, and what
 you worked out only in your head is lost when it ends.
 
 **Every sitting starts by finding where it is.** `grep` this folder (path `.`) for `^# Next sitting`.
-- No match: this is **sitting 1 — plan**. (A `docs/NEXT.md` that starts `# Done` means that app is finished.)
+- No match: this is **sitting 1 — plan**. If the app's project is already here, an earlier sitting 1 was cut off:
+  `open_project` it and write the notes it is missing. (A `docs/NEXT.md` that starts `# Done` means that app is
+  finished.)
 - A match: read that `docs/NEXT.md` first. It says which step you are on and what to read. Do that step, nothing more.
 
 When I say "continue" (or nothing new), do the next step. When I ask for a change, add its lines to the checklist and
