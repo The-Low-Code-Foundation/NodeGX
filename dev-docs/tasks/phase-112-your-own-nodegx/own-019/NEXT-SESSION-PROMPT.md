@@ -21,7 +21,7 @@ end (AC8) is a separate **Fable 5.1** session.
 - **AC5 met:** Pack It (`own-019/sentence-pack.txt`, grader `own-019/grade-pack.mjs`) pk2, pk3, pk4 — 12/12, each
   finished by itself, ~€2–2.80 real each.
 - **AC4 open (the quiz):** v2, v3 12/12 (tgz14); v10 12/12 with carryover clean but stopped by the lab's old $6 cap;
-  v12 8/12 (**AFTERTIMEOUT**, open); **v11 stalled in a real loop** (282 KB, 30 min) debugging the same seam — a For Each's item-output values when rows are re-created. Two apps, one seam: likely the runtime.
+  v12 8/12 (**AFTERTIMEOUT**, open); **v11 stalled in a real loop** (282 KB, 30 min, 100% repeated) debugging its own graph (unreduced). AFTERTIMEOUT itself is the app's graph, not the runtime — fixed in s3 (`74c19d5ab`).
 - **Kit tgz19** (create-nodegx at `f9c22c74b`; MCP + preview as tgz17, `21a3d0b98`): in s2's scratchpad
   `…/d34c68d9-…/scratchpad/v/tgz19` — may be gone. Re-pack in the worktree `own018-s3-pack` (s1's scratchpad; if gone,
   `scripts/devtools/make-worktree.sh`, then real empty `packages/noodl-mcp/dist/*` and `packages/noodl-preview/dist`
@@ -52,7 +52,7 @@ end (AC8) is a separate **Fable 5.1** session.
    grade, finished-by-itself, minutes, real €, input tokens per call, longest think.
 3. **Rounds, one lever at a time, against s2's single-session rounds:** the quiz and Pack It on the process kit.
    Then AC4 (three quiz rounds clean in a row) and AC5 again on it.
-4. **AFTERTIMEOUT (do this early — it caused v11's loop and v12's miss):** reduce v12's miss to the smallest graph (a For Each row signal + an unchanged item value into a
+4. **AFTERTIMEOUT:** done in s3 (`74c19d5ab`: the app's graph; the Condition's notes). Was: reduce v12's miss to the smallest graph (a For Each row signal + an unchanged item value into a
    component, an Expression on it, a Condition on the signal). If the runtime drops it, it is a NodeGX defect —
    fix it under the bug's own file.
 5. **Mine the thinks** (s2's journals, `type: "reasoning"`) for questions the notes didn't answer (v6 went to read

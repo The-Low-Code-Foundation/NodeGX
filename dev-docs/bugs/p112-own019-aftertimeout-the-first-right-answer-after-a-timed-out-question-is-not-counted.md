@@ -2,6 +2,7 @@
 id: P112-OWN019-AFTERTIMEOUT
 title: "In Mistral's quiz v12, the first right answer after a question timed out is not counted (score 2 where a person earned 3) — five right answers score 5/5, so it is the sequence; the agent's checks tried timing out and scoring apart, never together"
 status: fixed
+commit: 74c19d5ab
 phase: P112
 task: OWN-019
 severity: medium
@@ -9,6 +10,7 @@ area: the app's graph (v12, `Components/QuizEngine`) — not the runtime; the ki
 found: P112 OWN-019 s2, 2026-10-13 (Vibe kit round v12, Mistral Large 4, kit tgz19)
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-019-THE-VIBE-KIT.md §7 (s2); round v12 in the s2 scratchpad
 kit: core
+regression: packages/noodl-mcp/tests/own019AfterTimeout.test.ts
 ---
 
 The grader's play (the brief's own example): Lisbon right, Sydney wrong, Ottawa right, question 4 left to time out,
@@ -41,12 +43,3 @@ advance-index` **12/12** ("You scored 3", carryover clean). No runtime change.
 its condition is true even for one step mid-chain; reset the value that makes it true before the one that holds it
 off. Test `packages/noodl-mcp/tests/own019AfterTimeout.test.ts` reads it through `get_node_type` (control: fails on
 HEAD's catalog). The kit side is R31's process: the Vibe kit's CHECKLIST.md plays every worked example whole.
-
-
-**s2, a second round on the same seam — v11.** Its last think (282 KB, 29.6 min, stopped by the 30-minute watchdog)
-was Large 4 debugging its own drive: *"the `tappedIndex` variable read **0**, expected 2 … the repeater re-renders rows
-→ the new rows' creation delivers itemOutput-index values (0, 1, 2) → phantom runs"*. A real loop, unlike every
-productive think measured: the last two thirds are 100% repeated 8-word phrases (productive thinks ~1%), 74 doubt
-words per 10 KB (productive 22–30). Two rounds, two apps, the same seam — a For Each's `itemOutput-*` values when rows
-are re-created — so the runtime is the first suspect, and the notes say nothing a builder could use. Reduce it first
-(NEXT-SESSION-PROMPT step 4).
