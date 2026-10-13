@@ -156,6 +156,8 @@ interface JavascriptInstance extends NodeInstance {
     destroyFunction?: UserFunction;
     setupFunction?: UserFunction;
     definedObject?: Record<string, unknown>;
+    /** The ports the code declares, by plug — what the model holds only inside the editor (P112-OWN018-SCRIPTPORTS). */
+    codePorts: { input: Record<string, PortTypeSpec>; output: Record<string, PortTypeSpec> };
     hasParsedCode: boolean;
     changedInputs: Record<string, boolean>;
     signalScheduled: Record<string, boolean>;
@@ -205,6 +207,7 @@ const Javascript: NodeDefinitionOptions = {
     internal.destroyFunction = undefined;
     internal.setupFunction = undefined;
     internal.hasParsedCode = false;
+    internal.codePorts = { input: {}, output: {} };
     internal.changedInputs = {};
     internal.signalScheduled = {};
     internal.killed = false;
@@ -430,7 +433,18 @@ const Javascript: NodeDefinitionOptions = {
         }
       });
 
-      Object.keys(this.model.outputPorts).forEach((name) => {
+      // P112-OWN018-SCRIPTPORTS. Inside the editor the model carries the code's ports (setup announces them and the
+      // editor sends them back); the preview and a deployed app have no such round trip, so the code's own ports are
+      // the ones read there. A wired output is registered by its wire; an unwired SIGNAL output is registered here, so
+      // it is still a function on `outputs` (registering a value output would publish it, which the editor never did).
+      const codePorts: JavascriptInstance['_internal']['codePorts'] = { input: {}, output: {} };
+      for (const p of parser.getPorts()) {
+        if ((p.plug === 'input' || p.plug === 'output') && p.type !== undefined) codePorts[p.plug][p.name] = p.type;
+      }
+      this._internal.codePorts = codePorts;
+
+      const codeSignals = Object.keys(codePorts.output).filter((name) => _typename(codePorts.output[name]) === 'signal');
+      new Set([...Object.keys(this.model.outputPorts), ...codeSignals]).forEach((name) => {
         this.registerOutputIfNeeded(name);
       });
 
@@ -482,17 +496,19 @@ const Javascript: NodeDefinitionOptions = {
 
       const self = this;
 
-      const isSignal = _typename(this.model.outputPorts[name].type) === 'signal';
+      // Decided at each use, not here: a wire registers its output before the code is parsed, and outside the editor
+      // only the parsed code says which outputs are signals (P112-OWN018-SCRIPTPORTS).
+      const isSignal = () => _isSignalPort(self, 'output', name);
 
       Object.defineProperty(this._internal.outputProperties, name, {
         set: function (value) {
-          if (isSignal) return; // Cannot set signal functions
+          if (isSignal()) return; // Cannot set signal functions
 
           self._internal.outputValues[name] = value;
           self.flagOutputDirty(name);
         },
         get: function () {
-          if (isSignal)
+          if (isSignal())
             return () => {
               if (self.hasOutput(name)) self.sendSignalOnOutput(name);
             };
@@ -653,11 +669,18 @@ function _typename(type: PortTypeSpec) {
   else return type.name;
 }
 
+/** Whether a port is a signal: the model's port where it has one (the editor's), else the code's own declaration. */
+function _isSignalPort(node: JavascriptInstance, plug: 'input' | 'output', name: string) {
+  const modelPort = (plug === 'input' ? node.model.inputPorts : node.model.outputPorts)[name];
+  const type = modelPort !== undefined ? modelPort.type : node._internal.codePorts[plug][name];
+  return type !== undefined && _typename(type) === 'signal';
+}
+
 function userInputSetter(this: JavascriptInstance, name: string, value: unknown) {
   /* jshint validthis:true */
 
   if (this._internal.hasParsedCode === true) {
-    if (this.model.inputPorts[name] !== undefined && _typename(this.model.inputPorts[name].type) === 'signal') {
+    if (_isSignalPort(this, 'input', name)) {
       // If this is a signal, call the signal function
       if (this._internal.definedObject && typeof this._internal.definedObject[name] === 'function') {
         // This is a signal input, schedule a call to the signal function

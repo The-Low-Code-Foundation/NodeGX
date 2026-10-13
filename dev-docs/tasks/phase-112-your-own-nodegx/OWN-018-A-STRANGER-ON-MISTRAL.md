@@ -565,3 +565,14 @@ flags kept (`--screenshots-to-files`), the key `MISTRAL_VIBE_API_KEY` from the r
 `MISTRAL_API_KEY`; `--key vibe|api`), its name in command.txt. Smoke (`v/smoke1`, pay-as-you-go, ~$0.04): the kit's
 config and the packed server loaded, `/etc/hosts` refused by the seal and the run went on, finished by itself,
 41% cached.
+
+**The Sonnet check on the current kit (tgz11), `v/s0-sonnet`: 12/12, carryover clean, $5.07 API-equivalent** (run 0
+was $6.30), 22 min, 95 turns, 98% cached, nothing read outside the folder. A smaller build than before: one page,
+53 nodes, a `States` node for the three screens, one Function over named Variables, a `Repeat` heartbeat.
+It first built its engine as one Script (`Javascript2`) node; it validated clean and drove nothing, and Sonnet
+concluded the Script's ports "silently don't propagate in this runtime". **They didn't — P112-OWN018-SCRIPTPORTS,
+fixed:** outside the editor a Script's code-declared ports never reach its model (only the editor sends them back),
+so every wire from a Script output threw at page load and was never made, and a signal input never called its
+function. Reproduced in the packed preview (five forms on one page, all dead, one `reading 'type'` per Script); the
+fix reads the code's own ports where the model has none. Regression red on the unfixed file, Script spec green.
+Not yet seen in a browser: the preview's page runtime is the viewer's deploy bundle, rebuilt at the next pack.
