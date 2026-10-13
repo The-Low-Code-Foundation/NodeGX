@@ -2,6 +2,7 @@
 id: P112-OWN019-LOCALKEEP
 title: "Nothing in the kit names how to keep a value on this device across a reload — the Variable notes point at 'the cloud database or browser storage nodes' (there is no browser storage node), and create_project's `backend` field has no rule for 'none' — so Mistral built a backend for a single-phone best score"
 status: fixed
+commit: a8511d032
 severity: medium
 area: kit / node notes (`docs/node-catalog/enrichment/variable2.json` antiPatterns) and create_project's `backend` field (`packages/noodl-mcp/src/tools/createProject.ts`); the Vibe kit's AGENTS.md
 found: P112 OWN-019 s1, 2026-10-13 (the Vibe baseline v1b, Mistral Large 4 in Vibe 2.26.1, plain kit tgz12)

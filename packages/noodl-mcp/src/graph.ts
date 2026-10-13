@@ -70,6 +70,13 @@ export function reconcileHierarchy(inputNodes: NodeV2[]): { nodes: NodeV2[]; err
   }
   if (errors.length > 0) return { nodes, errors };
 
+  // P112-OWN019-DUPCHILD: a child listed twice is one node drawn twice — every reader that walks `children`
+  // (the preview, the editor, the export) builds it once per entry, and the preview then refuses the page as
+  // "duplicate node id". The first entry keeps its place: that is the order the author wrote.
+  for (const n of nodes) {
+    if (n.children && new Set(n.children).size !== n.children.length) n.children = [...new Set(n.children)];
+  }
+
   // children[] → parent
   for (const n of nodes) {
     if (!n.children) continue;
@@ -197,8 +204,12 @@ export function applyOperations(
           if (node.parent !== undefined) {
             const parent = byId().get(node.parent)!;
             if (!parent.children) parent.children = [];
-            const idx = op.index !== undefined ? Math.max(0, Math.min(op.index, parent.children.length)) : parent.children.length;
-            parent.children.splice(idx, 0, node.id);
+            // P112-OWN019-DUPCHILD: a parent added earlier in the batch with `children` naming this node already
+            // has it, in the author's order — appending it again listed it twice.
+            if (!parent.children.includes(node.id)) {
+              const idx = op.index !== undefined ? Math.max(0, Math.min(op.index, parent.children.length)) : parent.children.length;
+              parent.children.splice(idx, 0, node.id);
+            }
           }
           applied.push(`add_node ${node.id} (${node.type})`);
         }
