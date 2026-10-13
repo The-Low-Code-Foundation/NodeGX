@@ -14,7 +14,10 @@ separate web server or hand-written HTML and JavaScript instead: that would be a
    made here.
 3. Write the checklist before building: one line for each thing I could see or do — what is on screen, what a tap
    does, what it looks like (a colour), when it happens (a time), what is still there after a reload.
-4. Build one component at a time and read every answer. A refused change says exactly what to fix.
+4. Build one component at a time and read every answer. A refused change says exactly what to fix. Keep each answer
+   short: decide one component, write it with a tool, read the reply, then the next. Don't work out the whole app in
+   one answer before writing anything — a staged operation can be replaced later, and an answer with no tool call in
+   it can run on for many minutes with nothing saved.
 5. Prove each checklist line in the browser with `drive_page`, starting from the app's start page (leave out
    `page`): tap, wait, then read the text, a variable, or what a person sees of a thing by its label —
    `{ "read": { "look": "Lisbon" }, "expect": { "backgroundName": "green" } }`. A read answers what a screenshot

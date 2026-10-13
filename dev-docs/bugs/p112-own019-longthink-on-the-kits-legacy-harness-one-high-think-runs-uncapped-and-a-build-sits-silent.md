@@ -22,4 +22,10 @@ messages) the model call's `max_tokens` is the agent loop's, which only the app-
 `max_output_tokens` reaches the unified harness only; `--max-tokens` is a session total checked between turns. So no
 setting the kit can write cuts one think off. A person in `vibe` sees a spinner and nothing else.
 
-Levers, one per round: `thinking = "low"` (an allowed level for the kit's model entry) — v5; then temperature.
+Levers, one per round. `thinking = "low"` (v5): worse — malformed tool calls, no authoring. Temperature 0.2 (v6):
+inconclusive (ended by the lab, fixed). A cap on the unified harness would not rescue it either: an answer cut at the
+cap is appended as it is, and an answer with no tool call ends a `-p` turn. **v8 (kit defaults) stalled the same way**
+— 145 KB designing the whole app (components, instance cross-wiring) in one answer before staging anything; v4's was
+the same shape. So the lever is what the model is told: the Vibe kit's AGENTS.md step 4 now says to keep each answer
+to one decision and one tool call, and why (a staged operation can be replaced; an answer with no tool call runs on
+with nothing saved). Measured from v9.
