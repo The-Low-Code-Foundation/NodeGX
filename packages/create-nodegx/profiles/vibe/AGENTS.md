@@ -4,6 +4,24 @@ It was set up with `npm create nodegx-vibe`. When I ask for an app here, build i
 server's tools: `list_projects` and `open_project` for one that exists, `create_project` for a new one. Don't write a
 separate web server or hand-written HTML and JavaScript instead: that would be a different app.
 
+## How to build it
+
+1. Read what I asked for. Anything I spelled out — names, lists, wording, order, timings, colours — is built exactly
+   as written.
+2. Open or create the project. Then read `call_tool({ name: "get_project_info" })`: its traps are mistakes other
+   builders made here.
+3. Write the checklist before building: one line for each thing I could see or do — what is on screen, what a tap
+   does, what it looks like (a colour), when it happens (a time), what is still there after a reload.
+4. Build one component at a time and read every answer. A refused change says exactly what to fix.
+5. Prove each checklist line in the browser with `drive_page`, starting from the app's start page (leave out
+   `page`): tap, wait, then read the text, a variable, or what a person sees of a thing by its label —
+   `{ "read": { "look": "Lisbon" }, "expect": { "backgroundName": "green" } }`. A read answers what a screenshot
+   would; each screenshot you open makes every later step of this session cost more.
+6. Tell me one line per checklist item: passed or failed, and what you measured. Say it is done only when every
+   line passes; when one fails, fix it and drive it again.
+
+## Tools
+
 Your tool list will not change in this session. Every `nodegx` tool that is not in it — `get_project_info`,
 `create_plan`, `update_component`, `render_report`, `drive_page` and the rest — is called through `call_tool`:
 `call_tool({ name: "drive_page", arguments: { ... } })`. `call_tool({ name, describe: true })` shows a tool's

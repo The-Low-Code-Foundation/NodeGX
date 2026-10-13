@@ -196,11 +196,15 @@ test('P112 OWN-019: the Vibe kit writes only Vibe files — its AGENTS.md, the N
   const toml = fs.readFileSync(path.join(dir, VIBE_CONFIG), 'utf8');
   assert.equal(toml, renderVibeConfig(process.platform, { profile: 'vibe' }));
   assert.match(toml, new RegExp(`^default_agent = "${VIBE_AGENT}"$`, 'm'));
+  // The agent carries tool settings only: Vibe 2.26.1 sends an agent's `instructions` on its unified harness alone,
+  // and the kit runs the legacy one — so how to build lives in AGENTS.md, which reaches the model on both (s1 smoke).
   const agent = fs.readFileSync(path.join(dir, '.vibe', 'agents', `${VIBE_AGENT}.toml`), 'utf8');
-  assert.match(agent, /^instructions = """/m);
-  assert.match(agent, /drive_page/);
+  assert.match(agent, /^disabled_tools = \["task"\]$/m);
+  assert.doesNotMatch(agent, /^instructions =/m);
   const notes = fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8');
   assert.match(notes, /Your tool list will not change/);
+  assert.match(notes, /Write the checklist before building/);
+  assert.match(notes, /"look": "Lisbon"/);
   assert.match(run.stdout, /vibe --legacy-harness/);
 });
 
