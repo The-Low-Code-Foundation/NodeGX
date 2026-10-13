@@ -89,7 +89,7 @@ import { defineNode } from '../spec';
 import type { RecordRef } from '../registry';
 import type { BackendScript, RealtimeScriptEvent } from '../world';
 import { valueDidChange } from './condition';
-import { backendPickerPort, classPicker, NO_BACKEND_MESSAGE, selectedClass } from './record-base';
+import { backendPickerPort, classPicker, filterValuePorts, NO_BACKEND_MESSAGE, selectedClass } from './record-base';
 import { compareObjects, filterParameterNames, lowerToParse, matchesQuery, toNeutral } from './record-match';
 import { sameList } from '../world';
 
@@ -500,9 +500,12 @@ export const QueryRecords = defineNode({
         for (const [governed, label] of [['collectionName', 'Class'], ['search', 'Search'], ['records', 'Record changes'], ['querySettings', 'Query settings']]) out['runOnChange-' + governed] = { ...(checkbox(label) as ValueInputDecl), editOnly: true };
         out.realtime = discover('realtime')!;
         out.storageEnableCount = setting('storageEnableCount', 'boolean', 'Fetch total count', 'Total Count');
-        // :1452-1458 — the Javascript filter's script, drawn and never driven; its `storageFilterValue-` ports (:1460-1486, read
-        // from the script's `$name`s and `Inputs.name`s) are not drawn here: the Javascript filter is not in this spec (header)
-        if (params.storageFilterType === 'json') out.storageJSONFilter = { type: 'string', coerce: 'none', editOnly: true, codeEditor: 'javascript', displayName: 'Filter', group: 'Filter', drawnDefault: DEFAULT_JSON_QUERY, undriven: 'the Javascript filter is not in this spec (header)' };
+        // :1452-1458 — the Javascript filter's script, drawn and never driven; then its variables' ports (:1459-1487), drawn so a
+        // wire can reach them (P107-S101-JSFILTERVALUES): the Javascript filter is not in this spec (header)
+        if (params.storageFilterType === 'json') {
+          out.storageJSONFilter = { type: 'string', coerce: 'none', editOnly: true, codeEditor: 'javascript', displayName: 'Filter', group: 'Filter', drawnDefault: DEFAULT_JSON_QUERY, undriven: 'the Javascript filter is not in this spec (header)' };
+          Object.assign(out, filterValuePorts(params.storageJSONFilter));
+        }
         if ((params.storageFilterType === undefined || params.storageFilterType === 'simple') && params.collectionName !== undefined) {
           if (selectedClass(params, context)) {
             out.visualFilter = { ...(discover('visualFilter') as ValueInputDecl), type: 'query-filter', valuePortPrefix: 'qp-', filterBackend: true };

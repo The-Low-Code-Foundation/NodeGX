@@ -28,7 +28,7 @@
  */
 
 import type { InputDecl, PortContext, ValueInputDecl } from '../spec';
-import { recordFieldType, recordWiredFieldNames, selectedClass, shownFields } from './record-base';
+import { recordFieldPort, recordWiredFieldNames, selectedClass, shownFields } from './record-base';
 
 /** What the two writes hold of their property ports and their access rules. */
 export type RecordWriteState = {
@@ -107,7 +107,7 @@ export function aclInputs(params: Readonly<Record<string, unknown>>): Record<str
  */
 export function recordFieldInputs(params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>): Record<string, ValueInputDecl> {
   const out: Record<string, ValueInputDecl> = {};
-  for (const [field, decl] of shownFields(selectedClass(params, context), false)) out['prop-' + field] = { ...propertyPort(field), type: recordFieldType(decl) };
+  for (const [field, decl] of shownFields(selectedClass(params, context), false)) out['prop-' + field] = { ...propertyPort(field), ...recordFieldPort(decl) };
   for (const field of recordWiredFieldNames(params, context)) if (!('prop-' + field in out)) out['prop-' + field] = propertyPort(field);
   return out;
 }

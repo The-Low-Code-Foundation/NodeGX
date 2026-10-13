@@ -13,13 +13,13 @@
  * on arrival (:65) and a non-finite amount adds 0 (:130); a `Unit` that is empty or not one of the
  * eight counts as days (datemath.ts `unitOrDays`). The calendar is the world's zone (world.ts TIME ZONE).
  *
- * An unknown `Unit` also shows the editor a warning until it is fixed (`setDiagnostic`, not on the
- * wire, so not in the trace). v1 graded it as the runtime then did it: the setter THREW and the node
+ * An unknown `Unit` also shows the editor a warning until it is fixed (`setDiagnostic` :79, declared in
+ * `diagnostics` since v3: never on the wire, recorded by a target with an editor). v1 graded it as the runtime then did it: the setter THREW and the node
  * was dead from then on — NSP-013 §6 row C16, fixed in P109 ISL-026.
  */
 
 import { defineNode } from '../spec';
-import { addToDate, DATE_EXAMPLES, isDateUnit, supplied, toDate, UNIT_VALUES } from './date-math';
+import { addToDate, DATE_EXAMPLES, isDateUnit, supplied, toDate, UNIT_VALUES, unknownUnitMessage } from './date-math';
 
 type State = {
   input: Date | undefined;
@@ -43,7 +43,19 @@ export const DateAdd = defineNode({
   type: 'net.noodl.DateAdd',
   // v2 (P109 ISL-026, P107-C16 ruled "Use days and warn once"): a Unit that is not one of the eight counts as
   // days. In v1 such a Unit left Result as it was and fired nothing (the runtime threw there, for good).
-  version: 2,
+  version: 3,
+  changes: [
+    {
+      version: 3,
+      says: 'A Unit that is not one of the eight now shows as the node\'s warning in this spec, as the runtime has shown it since v2. Before, the spec left it out',
+      row: 'NSP-019 R35 (P107 s102)',
+      migration: { none: 'Only the editor is told, and the runtime already told it. Nothing a wire carries changes' }
+    }
+  ],
+  // the Unit setter (:79, `setDiagnostic('date-add/unknown-unit', unknownUnitMessage(value))`): the last Unit that arrived, as it arrived
+  diagnostics: {
+    'date-add/unknown-unit': { says: 'Unit is not one of the eight', message: (_i, s) => unknownUnitMessage(s.unit) }
+  },
   source: 'packages/noodl-runtime/src/nodes/std-library/date/dateadd.ts; packages/noodl-runtime/src/nodes/std-library/date/datemath.ts',
   needs: ['timezone'],
 

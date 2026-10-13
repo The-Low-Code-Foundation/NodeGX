@@ -32,8 +32,8 @@
 import type { ValueInputDecl } from '../spec';
 import { defineNode } from '../spec';
 import type { BackendScript } from '../world';
-import { backendPickerPort, recordFieldType } from './record-base';
-import { USER_FIELDS, USER_NO_BACKEND_MESSAGE, userFields } from './user';
+import { backendPickerPort, onParseWire, recordFieldPort } from './record-base';
+import { REST_USER_READONLY_FIELDS, USER_FIELDS, USER_NO_BACKEND_MESSAGE, userFields } from './user';
 
 /** :41 */
 export const SET_USER_PROPERTIES_ERROR_CODE = 'user/set-properties-failed';
@@ -56,6 +56,11 @@ type SetUserState = {
   calls: Readonly<Record<string, number>>;
   nextCall: number;
 };
+
+/** user-ports.ts :187-195 `USER_INPUT_IGNORE_PARSE_BROWSER` — the accounts columns a browser cannot write on the Parse wire. */
+const USER_INPUT_IGNORE_PARSE_BROWSER = ['authData', 'createdAt', 'updatedAt', 'email', 'username', 'emailVerified', 'password'];
+/** user-ports.ts :213-215 `USER_INPUT_IGNORE_REST` — the columns a REST backend owns, then the two with their own ports. */
+const USER_INPUT_IGNORE_REST = [...REST_USER_READONLY_FIELDS, 'username', 'email', 'tfa_secret'];
 
 const failures = (n: number) => Array.from({ length: n }, () => ({ port: 'store' as const, outcome: 'failure' as const, error: SET_USER_PROPERTIES_ERROR_CODE }));
 const dones = (n: number) => Array.from({ length: n }, () => ({ port: 'store' as const, outcome: 'done' as const }));
@@ -175,10 +180,12 @@ export const SetUserProperties = defineNode({
     derived: {
       // NSP-020 s84 — what the editor draws (`updatePorts` :241-264): the Backend picker with two or more backends, then one
       // `prop-` per column of the accounts class less the ones a browser cannot write (user-ports.ts
-      // `USER_INPUT_IGNORE_PARSE_BROWSER`) and every Relation. At play there is no schema: a write registers each (:207-226)
+      // `USER_INPUT_IGNORE_PARSE_BROWSER`; off the Parse wire `USER_INPUT_IGNORE_REST` :213-215) and every Relation. At play
+      // there is no schema: a write registers each (:207-226)
       inputs: (_params, context) => {
         const out: Record<string, ValueInputDecl> = { ...backendPickerPort(context) };
-        for (const [p, decl] of userFields(context, ['authData', 'createdAt', 'updatedAt', 'email', 'username', 'emailVerified', 'password'])) out['prop-' + p] = { ...propertyInput(p), type: recordFieldType(decl) };
+        const ignore = onParseWire(context) ? USER_INPUT_IGNORE_PARSE_BROWSER : USER_INPUT_IGNORE_REST;
+        for (const [p, decl] of userFields(context, ignore)) out['prop-' + p] = { ...propertyInput(p), ...recordFieldPort(decl) };
         return out;
       },
       needs: ['schema', 'backends'],

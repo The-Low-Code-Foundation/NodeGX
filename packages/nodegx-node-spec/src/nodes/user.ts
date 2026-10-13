@@ -53,19 +53,37 @@ import type { BackendField, ChangeEvent, OutputDecl, PortContext, SignalOutputDe
 import { defineNode } from '../spec';
 import { sameList, userRecordEvent, type BackendScript } from '../world';
 import { runOnChange } from './data-base';
-import { backendPickerPort, recordFieldType } from './record-base';
+import { backendPickerPort, onParseWire, recordFieldPort } from './record-base';
 
 /** The fields a play's graph wires from a User (THE PROPERTY OUTPUTS above) — the accounts table's, in a project. */
 export const USER_FIELDS = ['nick', 'n'] as const;
 
 /**
- * NSP-020 s84 — user-ports.ts `userSchemaContext` / `userPropertyPorts`: the accounts class (`_User` on the Parse wire) as the
- * project's schema holds it, its columns in order less the ones `ignore` names, every Relation column and the hidden `ACL`
- * (`shouldShowField` on every wire since P107-S84-USERACL, ruled R29: before, the Parse wire drew `prop-ACL`).
+ * user-ports.ts :83-102 `USER_COLLECTION_BY_BACKEND_TYPE` / `userCollectionName` — where each backend keeps its accounts
+ * (P107-S85-RESTCOLTYPES, s102): `_User` on the Parse wire, `directus_users`, PocketBase's `users`; none on Supabase or a
+ * type the table has never heard of ("no property ports").
  */
-export function userFields(context: Readonly<PortContext>, ignore: readonly string[]): Array<[string, BackendField]> {
-  return Object.entries(context.schema?.classes._User?.fields ?? {}).filter(([name, decl]) => !ignore.includes(name) && name !== 'ACL' && decl.relation === undefined);
+const USER_CLASS_BY_BACKEND_TYPE: Readonly<Record<string, string>> = { parse: '_User', nodegx: '_User', directus: 'directus_users', pocketbase: 'users' };
+
+export function userClassName(context: Readonly<PortContext>): string | undefined {
+  const type = context.schema?.backendType;
+  if (type === undefined) return '_User';
+  return Object.prototype.hasOwnProperty.call(USER_CLASS_BY_BACKEND_TYPE, type) ? USER_CLASS_BY_BACKEND_TYPE[type] : undefined;
 }
+
+/**
+ * NSP-020 s84 — user-ports.ts `userSchemaContext` / `userPropertyPorts`: the accounts class (`userClassName`; Sign Up names
+ * `_User`, which it reads whatever the backend) as the project's schema holds it, its columns in order less the ones `ignore`
+ * names, every Relation column and the hidden `ACL` (`shouldShowField` on every wire since P107-S84-USERACL, ruled R29: before,
+ * the Parse wire drew `prop-ACL`).
+ */
+export function userFields(context: Readonly<PortContext>, ignore: readonly string[], className: string | undefined = userClassName(context)): Array<[string, BackendField]> {
+  const klass = className === undefined ? undefined : context.schema?.classes[className];
+  return Object.entries(klass?.fields ?? {}).filter(([name, decl]) => !ignore.includes(name) && name !== 'ACL' && decl.relation === undefined);
+}
+
+/** RestAuthAdapter.ts :243-261 `REST_USER_READONLY_FIELDS` — the columns a REST backend owns, which no node writes. */
+export const REST_USER_READONLY_FIELDS = ['objectId', 'id', 'emailVerified', 'verified', 'createdAt', 'updatedAt', 'created', 'updated', 'collectionId', 'collectionName', 'expand', 'password', 'passwordConfirm', 'tokenKey', 'sessionToken', 'refreshToken', 'expiresAt'] as const;
 
 /** :32 */
 export const USER_FETCH_ERROR_CODE = 'user/fetch-failed';
@@ -181,8 +199,9 @@ const SESSION_SIGNALS: Readonly<Record<'loggedIn' | 'loggedOut' | 'sessionLost',
   sessionLost: { type: 'signal', displayName: 'Session Lost', group: 'Events', description: 'Fires when a session ends without the user asking, on any backend' }
 };
 
-/** user-ports.ts `USER_OUTPUT_IGNORE_PARSE` — the accounts columns the User node draws no port for on the Parse wire. */
+/** user-ports.ts :163-178 `USER_OUTPUT_IGNORE_PARSE` / `_REST` — the accounts columns the User node draws no port for, by wire (user.ts :505). */
 const USER_OUTPUT_IGNORE = ['authData', 'password', 'username', 'email'];
+const USER_OUTPUT_IGNORE_REST = ['password', 'tokenKey', 'tfa_secret', 'username', 'email', 'id', 'objectId'];
 
 const SESSION = { objectId: 'u1', email: 'ann@example.com', username: 'ann', nick: 'Ann', n: 1 };
 
@@ -338,8 +357,8 @@ export const UserNode = defineNode({
       inputs: (_params, context) => backendPickerPort(context),
       outputs: (_params, context) => {
         const out: Record<string, OutputDecl<UserState>> = {};
-        for (const [p, decl] of userFields(context, USER_OUTPUT_IGNORE)) {
-          out['prop-' + p] = { ...propertyOutput(p, recordFieldType(decl)), onWire: true } as OutputDecl<UserState>;
+        for (const [p, decl] of userFields(context, onParseWire(context) ? USER_OUTPUT_IGNORE : USER_OUTPUT_IGNORE_REST)) {
+          out['prop-' + p] = { ...propertyOutput(p), ...recordFieldPort(decl), onWire: true } as OutputDecl<UserState>;
           out['changed-' + p] = { ...changedOutput(p), onWire: true };
         }
         for (const [name, decl] of Object.entries(SESSION_SIGNALS)) out[name] = { ...decl, onWire: true };

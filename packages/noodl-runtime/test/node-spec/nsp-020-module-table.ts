@@ -132,6 +132,14 @@ const CRUD_CASES: Case[] = [
 const filterOn = (prefix: string) => ({ type: 'and', conditions: [{ field: 'n', operator: 'greaterThan', valueSource: 'connected', valuePortName: prefix + 'min' }, { field: 'title', operator: 'equalTo', valueSource: 'static', value: 'a' }] });
 const LEGACY_FILTER = { combinator: 'and', rules: [{ property: 'title', operator: 'equal to', input: 'word' }, { combinator: 'or', rules: [{ property: 'n', operator: 'equal to', input: 'word' }] }] };
 /** The cases the three query nodes share: the pickers, the builders with a schema, the parameters a filter names. */
+/**
+ * P107-S101-JSFILTERVALUES — a Javascript filter naming its variables both ways: `$min` twice, `$min2` (not `$min`'s
+ * prefix), `Inputs.max`, `Inputs.min` (already drawn from `$min`), and three names inside comments that draw nothing. The
+ * `Inputs["x"]` form is left out: the parser announces it on plug `inputs` (javascriptnodeparser.js :341-346).
+ */
+const FILTER_SCRIPT =
+  'where({ n: { greaterThan: $min, lessThan: Inputs.max }, title: { equalTo: Inputs.min } }) // $old, Inputs.gone\n/* $block */ and($min2, $min)';
+
 const QUERY_CASES = (prefix: string): Case[] => [
   { name: 'a Class the schema has: the builders', params: { collectionName: 'Lesson' }, context: LESSONS },
   { name: 'a Class the schema does not have: no builders', params: { collectionName: 'Nope' }, context: LESSONS },
@@ -472,9 +480,10 @@ export const TABLE: TableRow[] = [
     cases: [
       ...QUERY_CASES('qp-'),
       { name: 'Use limit and Fetch total count ticked', params: { storageEnableLimit: true, storageEnableCount: true } },
-      { name: 'the Javascript filter draws no visual builder', params: { collectionName: 'Lesson', storageFilterType: 'json' }, context: LESSONS }
+      { name: 'the Javascript filter draws no visual builder', params: { collectionName: 'Lesson', storageFilterType: 'json' }, context: LESSONS },
+      { name: 'the Javascript filter draws a port per variable', params: { collectionName: 'Lesson', storageFilterType: 'json', storageJSONFilter: FILTER_SCRIPT }, context: LESSONS }
     ],
-    reads: 'schema (the Class picker; the class for the Filter and Sort builders), backends (the picker); the Javascript filter (`storageFilterValue-*`) is not in the spec'
+    reads: 'schema (the Class picker; the class for the Filter and Sort builders), backends (the picker); the Javascript filter\'s script (its `storageFilterValue-*` ports, drawn and never driven)'
   },
   {
     type: 'AddDbModelRelation',
@@ -740,7 +749,8 @@ export const TABLE: TableRow[] = [
       { name: 'a saved filter with a connected parameter', params: { collectionName: 'Lesson', visualFilter: filterOn('qp-') }, context: LESSONS, meta: LESSON_COLUMNS },
       { name: 'the legacy filter shape, one parameter named twice', params: { collectionName: 'Lesson', visualFilter: LEGACY_FILTER }, context: LESSONS, meta: LESSON_COLUMNS },
       { name: 'a filter but no Class: no parameters', params: { visualFilter: filterOn('qp-') } },
-      { name: 'the Javascript filter', params: { collectionName: 'Lesson', storageFilterType: 'json' }, context: LESSONS, meta: LESSON_COLUMNS }
+      { name: 'the Javascript filter', params: { collectionName: 'Lesson', storageFilterType: 'json' }, context: LESSONS, meta: LESSON_COLUMNS },
+      { name: 'the Javascript filter draws a port per variable', params: { collectionName: 'Lesson', storageFilterType: 'json', storageJSONFilter: FILTER_SCRIPT }, context: LESSONS, meta: LESSON_COLUMNS }
     ],
     reads: 'schema (the Class picker; the class for the Property pickers and the Filter builder)'
   }

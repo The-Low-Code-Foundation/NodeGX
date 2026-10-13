@@ -183,6 +183,7 @@ function drawn(name: string, plug: 'input' | 'output', decl: InputDecl | OutputD
   if (decl.group !== undefined) port.group = decl.group;
   if (decl.description !== undefined) port.description = decl.description;
   if (plug === 'input' && decl.type === 'signal' && (decl as SignalInputDecl).connectionsOnly) port.connectionsOnly = true;
+  if (plug === 'output' && decl.type !== 'signal' && (decl as ValueOutputDecl<unknown>).enums !== undefined) port.enums = (decl as ValueOutputDecl<unknown>).enums;
   if (plug === 'input' && decl.type !== 'signal') {
     const v = decl as ValueInputDecl;
     // s82 (§6.4 gap 4): the default the editor's announcement shows, when it is not the value at mount

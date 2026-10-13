@@ -36,6 +36,16 @@ const FIXED_MS: Partial<Record<DateUnit, number>> = {
 /** :39-48 — the enum's values, in the order the four nodes offer them. */
 export const UNIT_VALUES = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'] as const;
 
+/**
+ * datemath.ts :61-65 `unknownUnitMessage` — the warning both date nodes show the editor for a Unit that is not one of the eight
+ * (`date-add/unknown-unit`, `date-difference/unknown-unit`, NSP-019 R35): nothing for an empty one, the value quoted and cut at 40 characters.
+ */
+export function unknownUnitMessage(unit: unknown): string | null {
+  if (unit === undefined || unit === null || unit === '' || (UNIT_VALUES as readonly unknown[]).includes(unit)) return null;
+  const shown = typeof unit === 'string' ? `"${unit.length > 40 ? unit.slice(0, 40) + '…' : unit}"` : String(unit);
+  return `Unit ${shown} is not one of ${UNIT_VALUES.join(', ')}, so it is counted as days.`;
+}
+
 /** Whether `addToDate` accepts the unit (anything else throws at :88). */
 export function isDateUnit(unit: unknown): unit is DateUnit {
   return (UNIT_VALUES as readonly unknown[]).includes(unit);

@@ -863,3 +863,44 @@ imported `resolveBackend.ts`, whose lazy `require('../../../noodl-runtime')` web
 compile pulled the whole runtime in (223 TS1202/TS1203 errors on its CommonJS files) and the second ran out of heap. The
 editor's own `tsc --noEmit` passed — its settings are not webpack's. `record-ports.ts` now imports the pure half
 (`resolveBackend.pure.ts`, which `resolveBackend.ts` re-exports): same functions, and the editor compiles clean (0 errors).
+
+### 6.14 s102 (2026-10-13, Opus) — the format names the backend's type; a Javascript filter draws its variables
+
+**Reach first.** 721 project files on Richard's machine (control: 166 have `cloudservices`). 4 have a REST backend, 1 of them
+has Record-family nodes (VerifyFix4, 2), and none binds a cloud function to one. P107-S85-RESTCOLTYPES stays low. It is
+still a gap in the format the backend specs are written in.
+
+**The format change is a copy of two runtime tests.**
+- `BackendSchema.backendType` is the selected backend's type, as `schema-ports.ts` :496 reads it. Absent means the Parse
+  wire (`isParseWireContext`, record-ports.ts :147-149).
+- `BackendField.enhanced` is set when a column has no Parse native type; `recordPortType` :211-221 then types it by
+  `getEnhancedFieldType`. `BackendField.enums` holds a select column's choices.
+- `ValueOutputDecl.enums` draws an enum output's values.
+
+The readers:
+- `classPicker` offers `_User` / `_Role` only on the Parse wire.
+- `recordFieldType` keeps an enhanced column's type, and `recordFieldPort` carries the choices.
+- The User family reads the accounts table by type (`userClassName`: `_User`, `directus_users`, `users`, none on
+  Supabase; user-ports.ts :83-102) and the REST ignore lists (:163-215, RestAuthAdapter.ts :243-261).
+
+The one builder (`port-context.ts` `schemaFor`) hands over the type, marks and fills the columns, and hands over a REST
+schema even when it has no classes, because then the picker is empty. The editor's cloud draw, the MCP server and the wire
+check all read that builder; none changed.
+
+**The drive measured more than the bug said.** The synthetic Directus backend got a `directus_users` table and the User
+family's two write nodes. Before the fix, the User node on it drew none of its 8 property ports and Set User Properties
+none of its 4. After: the 8 RESTCOLTYPES pins came out and (A) is clean on all 12 + 12 + 20 User-family nodes. 8 planted
+mutants (the picker, `enhanced`, `enums`, the accounts table, both REST ignore lists, the builder's type and its flag) each
+turn the drive red.
+
+Sign Up is the exception, and it is the runtime's. Its hook reads `systemCollections._User` whatever the backend
+(signup.ts :199-250), so on Directus it offers the built-in's columns. Pinned (two lines) and filed as
+P107-S102-SIGNUPBACKEND.
+
+**P107-S101-JSFILTERVALUES.** `filterValuePorts(script)` copies the hooks' rule for Query Records (:1459-1487) and Aggregate
+(:635-662): from the saved script with comments removed, a `storageFilterValue-<name>` per `$name`, then per `Inputs.name`
+not already drawn. Each is `*`, connections only, Filter Values, undriven. The parser's `Inputs["x"]` form goes to plug
+`inputs` and is not drawn. Graded by a new oracle (a) case on each row: `$min` twice, `$min2`, `Inputs.max`, `Inputs.min`,
+and three names in comments. 5 mutants are red, and a sixth ("draws nothing") was first rejected because it did not compile
+(`Tests: 0`) and was then replanted. Filter Records has no Javascript-filter ports (0 references in its module), so nothing
+is owed there.

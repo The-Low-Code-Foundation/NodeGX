@@ -61,5 +61,11 @@
     "because": "v2 — datemath.ts `unitOrDays` (P107-C16, ruled 2026-10-05 \"Use days and warn once\"); v1's runtime threw in the setter and stayed dead",
     "params": {},
     "steps": [{ "set": "input", "value": "2024-01-01T00:00:00.000Z" }, { "set": "amount", "value": 2 }, "settle", { "set": "unit", "value": "fortnights" }, "settle", { "set": "amount", "value": 3 }, "settle"]
+  },
+  {
+    "name": "R35: an unknown Unit warns the editor, and a Unit of the eight clears the warning",
+    "because": "dateadd.ts :79 `setDiagnostic('date-add/unknown-unit', unknownUnitMessage(value))` — every Unit that arrives replaces the sentence; one of the eight, or an empty one, clears it (v3)",
+    "params": {},
+    "steps": [{ "set": "input", "value": "2024-01-01T00:00:00.000Z" }, { "set": "unit", "value": "fortnights" }, "settle", { "set": "unit", "value": "an extremely long unit name that goes past forty characters" }, "settle", { "set": "unit", "value": "weeks" }, "settle"]
   }
 ]

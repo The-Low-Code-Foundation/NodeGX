@@ -31,3 +31,11 @@ it clears.
 and no census has looked for other contradictions (the Slider's Min/Max is the next by name). The editor's Problems panel
 and the agent's checker do not read a spec's `diagnostics` statically yet; the Problems panel shows the runtime's warning
 only while the preview runs.
+
+**s102 — the first two of the nine.** Date Add and Date Difference v3 declare `date-add/unknown-unit` /
+`date-difference/unknown-unit`. The sentence is datemath.ts :61-65 `unknownUnitMessage`, copied into the spec's
+`date-math.ts`, and it is evaluated on the last Unit that arrived. Each node got one scenario where an unknown Unit warns and
+a Unit of the eight clears the warning. Their goldens gained only the `diagnostic` event. Both conform at seeds 20739 and
+20740 (33 / 33 and 44 / 44 mutants). Control: one letter changed in the spec's sentence gives 17 divergences on Date Add.
+Left: Text Input, the controls' helper, For Each, States, Group, Icon, layout, and the census of contradictions nobody
+raises.

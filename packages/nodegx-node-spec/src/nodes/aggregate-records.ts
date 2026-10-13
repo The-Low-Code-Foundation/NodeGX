@@ -66,7 +66,7 @@ import { isSavedGroup, isVisualQueryFormat, toParseWhere } from '../../../nodegx
 import type { InputDecl, OutputDecl, ValueInputDecl, ValueOutputDecl, WorldView } from '../spec';
 import { defineNode } from '../spec';
 import type { CollectionScript, HostScript } from '../world';
-import { classPicker, selectedClass } from './record-base';
+import { classPicker, filterValuePorts, selectedClass } from './record-base';
 import { toNeutral } from './record-match';
 
 type Def = { prop?: unknown; op?: unknown };
@@ -352,6 +352,8 @@ export const AggregateRecords = defineNode({
           }
         } else if (params.storageFilterType === 'json') {
           out.storageJSONFilter = { type: 'string', coerce: 'none', editOnly: true, codeEditor: 'javascript', drawnDefault: DEFAULT_JSON_QUERY, displayName: 'Filter', group: 'Filter', undriven: 'the Javascript filter is not in this spec (header)' };
+          // :635-662 — the script's variables, drawn so a wire can reach them (P107-S101-JSFILTERVALUES)
+          Object.assign(out, filterValuePorts(params.storageJSONFilter));
         }
         return out;
       },

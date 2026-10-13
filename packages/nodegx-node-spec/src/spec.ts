@@ -489,6 +489,11 @@ export interface ValueOutputDecl<S> extends PortMeta {
    */
   narrow?: (params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>) => Partial<Pick<ValueOutputDecl<S>, 'type'>>;
   /**
+   * P107-S85-RESTCOLTYPES (s102) — an `enum` output's values, as the editor draws them: a Record's `prop-<column>` for a
+   * select column announces its choices (record-ports.ts :187). Presentation only — nothing reads it at play.
+   */
+  enums?: readonly string[];
+  /**
    * NSP-020 (s82) — on a DERIVED output: at play the output exists only when a wire leaves from it — the runtime registers
    * it in `nodescope.ts addConnection` (:150, `registerOutputIfNeeded(sourcePort)`) and nowhere else, and gates every
    * send on `hasOutput`. States' `at-<state>` / `reached-<state>` (states.ts :290, :918, :936); a Function's signal
@@ -884,16 +889,31 @@ export interface NamedPages {
 
 export interface BackendSchema {
   classes: Readonly<Record<string, { fields: Readonly<Record<string, BackendField>> }>>;
+  /**
+   * P107-S85-RESTCOLTYPES (s102) — the selected backend's type as the project records it (`parse`, `nodegx`, `directus`,
+   * `supabase`, `pocketbase`, `custom`). Absent is the Parse wire, as the runtime reads it (record-ports.ts
+   * `isParseWireContext` :147-149: no type, `parse` or `nodegx`). Off the Parse wire the Class picker offers no `_User` /
+   * `_Role` (:126-131) and the User family reads its accounts from the type's own table (user-ports.ts :83-102). A schema
+   * with no classes is still handed over off the Parse wire, because then the picker is empty rather than the two system classes.
+   */
+  backendType?: string;
 }
 
 /**
  * One column of a class. NSP-020 s84 — `relation` names the class a Parse `Relation` column points at: the Add / Remove
  * Record Relation picker offers exactly those columns (record-ports.ts `recordRelationPorts` :350-366), the Record node
  * draws no port for one (`skipRelationColumns`, dbmodelnode2.ts :562-564), and the writes draw it untyped.
+ *
+ * P107-S85-RESTCOLTYPES (s102) — `enhanced`: the column has no Parse native type, so the runtime types it by
+ * schema-ports.ts :119-195 `getEnhancedFieldType` (record-ports.ts `recordPortType` :211-221) and its port keeps `type` as
+ * given: an `object` (a `json` column) is an object port, where a Parse `Object` column is `*`. `enums`: a select column's
+ * choices, the values of its `enum` port.
  */
 export interface BackendField {
   type: ValueType;
   relation?: string;
+  enhanced?: true;
+  enums?: readonly string[];
 }
 
 export const PORT_CONTEXT_FIELDS = ['wired', 'wiredOutputs', 'backends', 'instancePorts', 'components', 'routers', 'stacks', 'schema', 'siblings'] as const satisfies readonly (keyof PortContext)[];

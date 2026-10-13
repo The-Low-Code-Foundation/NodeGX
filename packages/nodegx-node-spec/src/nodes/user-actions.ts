@@ -189,7 +189,7 @@ export const SignUp = defineNode({
       // Parse table. No Backend picker. At play there is no schema: a write registers each (:185-195)
       inputs: (_params, context) => {
         const out: Record<string, ValueInputDecl> = {};
-        for (const [p, decl] of userFields(context, ['authData', 'password', 'username', 'createdAt', 'updatedAt', 'emailVerified', 'email'])) out['prop-' + p] = { ...signUpProperty(p), type: recordFieldType(decl) };
+        for (const [p, decl] of userFields(context, ['authData', 'password', 'username', 'createdAt', 'updatedAt', 'emailVerified', 'email'], '_User')) out['prop-' + p] = { ...signUpProperty(p), type: recordFieldType(decl) };
         return out;
       },
       needs: ['schema'],
