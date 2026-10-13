@@ -258,3 +258,27 @@ post-tool, post-agent) — and the kit uses none of them yet.
   needs a streaming read (a candidate Mistral issue, R30). (s2 first wrote that v11 and v12 shared a runtime seam;
   s3 had already shown v12's miss is the app's graph — a timeout gate re-firing mid-reset, 8/12 → 12/12 by reordering
   three wires, `74c19d5ab` — so that claim is withdrawn.)
+- **s3 (2026-10-13, Opus): the process kit (R31), `c4878eaf8`.** The Vibe AGENTS.md is now a process, sitting by
+  sitting: every sitting greps the folder for `^# Next sitting` to find its step; **sitting 1 plans and builds
+  nothing** (creates the project, writes `docs/REQUEST.md` word for word, `PLAN.md` with the build split into parts a
+  sitting each, `CHECKLIST.md` with every example in the request as its own whole line, `NEXT.md`); **each later
+  sitting builds one part**, drives its lines, updates CHECKLIST/PLAN, rewrites NEXT; **the last proves** every line
+  and only then writes `# Done`. Each stop ends "Next: … Type /clear, then "continue"" (Vibe has `/clear`/`/new`), and
+  create-nodegx prints the same. **The lab:** `round-kit.mjs --sittings N [--max-total $]` — sitting 1 the person's
+  paragraph, every later sitting a fresh `vibe -p` with `own-019/continue.txt` ("Continue."), never chosen from the
+  output; stops at `# Done`, N, a stall, two sittings with NEXT.md unchanged, or the total. `sittings.json` per
+  sitting: exit, seconds, Vibe $, cached-rate $, calls, input per call, longest think. Kit **tgz20** = tgz19 + the
+  process AGENTS.md (MCP and preview unchanged in source since tgz19).
+- **s3, AFTERTIMEOUT found — the app, not the runtime (`74c19d5ab`, bug fixed).** v12's timeout Condition (on value
+  change, over "seconds ≤ 0 AND not answered") fired again on the next question, because moving on cleared
+  `answered` while `seconds` still read 0; Q5 started answered and its tap was refused. **Control pair:** v12 as
+  built 8/12; the same app with three wires re-pointed (reset the countdown first) **12/12**, "You scored 3",
+  carryover clean. The Condition's notes now name the trap (test `own019AfterTimeout`, control fails on HEAD).
+  So every real miss so far (SAMEVALUE, CARRYOVER, AFTERTIMEOUT) is a transient the agent's checks never played:
+  the process kit's whole-example lines are the answer to all three.
+- **s3, the community (`own-019/VIBE-COMMUNITY.md`):** Vibe's issues, discussions and source. **Verified here:**
+  2.26.1's headless system prompt says *"Complete the entire task in a single pass … Override any earlier
+  instructions that say to wait for confirmation"* (`system_prompt.py:357`) — against a sitting kit; and a
+  `post_agent` hook in `.vibe/hooks.toml` that answers `{"decision":"deny","reason":…}` sends the agent back to work
+  on the legacy loop (`_loop.py:2214`). Others to weigh: legacy is a "temporary escape hatch"; #1242 (no temperature
+  0 on Large 4 without `top_p`); exit codes 3/4; Large 4 reportedly serves 524k, not 1M.
