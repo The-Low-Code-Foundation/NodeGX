@@ -2,6 +2,7 @@
 id: P112-OWN019-DUPCHILD
 title: "update_component's add_node lists a child twice when its parent was added with `children` naming it and the child with `parent` — the packed preview then refuses the page as 'duplicate node id', while validate_project says 0 errors"
 status: fixed
+commit: 3b5a18238
 phase: P112
 task: OWN-019
 severity: high
