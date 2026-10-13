@@ -9,7 +9,7 @@ package that only work well with Claude and Claude Code, we need to be able to o
 vibe version."*
 **Depends on** OWN-018 (the lab: `round-kit.mjs`, `grade-quiz.mjs`, kit tgz12, everything Mistral taught the kit) and
 Richard's Vibe subscription key (`MISTRAL_VIBE_API_KEY` in the repo `.env`, made under Code › Vibe CLI).
-**Status: 📋 opened s3 (2026-10-13). Next: AC1, the census.**
+**Status: 🟡 s1 done (2026-10-13). The Vibe kit grades 12/12 in Vibe (v2) where the plain kit graded 0/12 (v1b) — same model, harness and settings. AC1 (census) met. Next: AC4, two more v2 rounds; then a second brief. Handoff: `own-019/NEXT-SESSION-PROMPT.md`.**
 **Model:** Opus for the sessions that build and read the rounds. The agent under test: **Mistral Large 4
 (`mistral-large-4`, never `-latest`) in Mistral Vibe**, pinned to a version per round (2.26.1 at opening).
 
