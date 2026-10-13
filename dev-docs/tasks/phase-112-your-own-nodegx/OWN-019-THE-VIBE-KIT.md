@@ -86,3 +86,17 @@ post-tool, post-agent) — and the kit uses none of them yet.
   compacts on the kit's config and sends no `max_tokens` on the legacy harness; Large 4 drove its own app 28× (run 9)
   and 7× (run 10), rendered twice; its checks never read colour or timing; Vibe has project skills, agent profiles
   with `instructions`, and pre-/post-tool and post-agent hooks.
+- **s1, built:** the server's Vibe profile (`--profile vibe`, `21f46ca3e`: the census's 29 Vibe-variant sentences
+  answered — `call_tool` named in both briefings, reveal hints as `call_tool` calls, screenshot pushes turned into
+  `drive_page` proof; a test with a control arm); `create-nodegx --vibe` (profiles/vibe: AGENTS.md, the `nodegx`
+  agent as `default_agent`, the server with the profile; no Claude files) — `npm create nodegx-vibe` itself is made
+  at publish (a new workspace now would put the shared lockfile out of step); `drive_page`'s `{ read: { look: T } }`
+  (`1f8098049`: the settled colour as a word; run 8's apps fail it, runs 9/10 pass — the grader's verdicts).
+- **s1, the baseline (v1, the plain kit on tgz12, Vibe 2.26.1, `thinking high`, temperature 1.0): stopped at 67 min.**
+  34 min of sound work (everything through `call_tool`, plan → apply → render → drive), then ONE step sat 32 min
+  with no output on two open connections — the legacy harness sends no `max_tokens`, so nothing cuts a long think
+  off (runs 4 and 10 in OpenCode hit the 32k ceiling instead). $1.78 by Vibe's list-price count. **Key mix-up:**
+  the key in `MISTRAL_VIBE_API_KEY` was not the Vibe Code one (Richard replacing it with the key from the Vibe Code
+  app), so v1 drew on API credit, not the plan. Lab: `round-kit.mjs --stall-min` (default 12) now stops a round
+  whose journal stops growing. **Lever added:** the long-think cap on the legacy harness (Vibe's `max_output_tokens`
+  only reaches the unified harness).

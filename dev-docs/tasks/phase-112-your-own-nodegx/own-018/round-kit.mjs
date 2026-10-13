@@ -26,7 +26,11 @@
 // OWN-019: `--kit vibe` sets the folder up with the Vibe kit (`create-nodegx --vibe`, what `npm create nodegx-vibe` runs):
 // its AGENTS.md, `.vibe/agents/nodegx.toml` as the default agent, and the server started with `--profile vibe`.
 //
-//   node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price 4] [--max-turns 250] [--thinking high|low] [--key vibe|api] [--kit vibe]
+// OWN-019 s1: `--stall-min N` (default 12) stops a round whose session journal has not grown for N minutes — the
+// baseline sat 32 min in one answer (the legacy harness sends no max_tokens, so nothing cuts a long think off) while
+// the key spent. agent.exit then says "stalled". The tree is found by parent pid, never by name.
+//
+//   node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price 4] [--max-turns 250] [--thinking high|low] [--key vibe|api] [--kit vibe] [--stall-min 12]
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
@@ -126,4 +130,36 @@ const child = spawn('uvx', args, { cwd: APPS, env, stdio: ['ignore', 'pipe', 'pi
 child.stdout.pipe(log);
 child.stderr.pipe(err);
 const t0 = Date.now();
-child.on('close', (code) => { fs.writeFileSync(path.join(root, 'agent.exit'), `${code} ${Math.round((Date.now() - t0) / 1000)}s`); console.log('exit', code); });
+const stallMs = Number(opt('--stall-min', 12)) * 60000;
+let stalled = null;
+const journalSize = () => {
+  const dir = path.join(HOME, '.vibe', 'logs', 'session');
+  let size = 0;
+  try {
+    for (const s of fs.readdirSync(dir)) {
+      const f = path.join(dir, s, 'messages.jsonl');
+      if (fs.existsSync(f)) size += fs.statSync(f).size;
+    }
+  } catch {}
+  return size;
+};
+let lastSize = 0;
+let lastGrowth = Date.now();
+const watchdog = setInterval(() => {
+  const size = journalSize();
+  if (size !== lastSize) {
+    lastSize = size;
+    lastGrowth = Date.now();
+    return;
+  }
+  if (Date.now() - lastGrowth < stallMs || stalled) return;
+  stalled = Math.round((Date.now() - lastGrowth) / 60000);
+  const tree = (pid) => [pid, ...(spawnSync('pgrep', ['-P', String(pid)], { encoding: 'utf8' }).stdout || '').split('\n').filter(Boolean).flatMap((c) => tree(Number(c)))];
+  for (const pid of tree(child.pid).reverse()) try { process.kill(pid, 'SIGTERM'); } catch {}
+}, 30000);
+child.on('close', (code) => {
+  clearInterval(watchdog);
+  const how = stalled ? `stalled (no journal growth for ${stalled} min)` : String(code);
+  fs.writeFileSync(path.join(root, 'agent.exit'), `${how} ${Math.round((Date.now() - t0) / 1000)}s`);
+  console.log('exit', how);
+});
