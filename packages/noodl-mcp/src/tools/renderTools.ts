@@ -236,9 +236,18 @@ export function registerRenderTools(
           result.consoleErrors.length ? `${result.consoleErrors.length} console error(s)` : '',
           result.networkErrors?.length ? `${result.networkErrors.length} failed request(s)` : ''
         ].filter(Boolean);
+        // P112-OWN018-IMAGECACHE (s2, run 8): the agent opened a drive_page screenshot to debug, and every request after
+        // it went uncached. Said only where the server was started for such a model, and only when a step wrote one.
+        const wroteScreenshot = args.steps.some((step) => step && typeof step === 'object' && 'screenshot' in step);
+        const imageNote =
+          options.screenshotsToFiles && wroteScreenshot
+            ? ' Screenshots are files, not in this answer. Each image you open stays in your conversation and, with ' +
+              'some models, leaves every later request uncached until the session is compacted — a read step (the ' +
+              'text, a computed style) answers most questions without one.'
+            : '';
         return {
           content: [
-            { type: 'text', text: headline + (caveats.length ? ` Note: ${caveats.join('; ')}.` : '') },
+            { type: 'text', text: headline + (caveats.length ? ` Note: ${caveats.join('; ')}.` : '') + imageNote },
             { type: 'text', text: JSON.stringify(result) }
           ]
         };
