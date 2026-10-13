@@ -340,9 +340,10 @@ try {
   observed.refuselater = { count: await counted(), ok: (await counted()) === '0 of 4' };
   await type('');
 
-  // tick Sunscreen
-  const sBefore = rows.Sunscreen;
-  if (!sBefore.box) throw new Error('no checkbox found in the Sunscreen row');
+  // tick Sunscreen. Every press reads its row again first: a person taps where the box IS — pk1's "Type an item
+  // first" line mounts and unmounts above the list, and a press at the coordinates read before it missed the box.
+  const sBefore = await parts('Sunscreen');
+  if (!sBefore?.box) throw new Error('no checkbox found in the Sunscreen row');
   await press(sBefore.box);
   await sleep(500);
   const sAfter = await parts('Sunscreen');
@@ -351,15 +352,15 @@ try {
   check('tick', sBefore.box.lands && !sBefore.crossed && sAfter?.crossed && inkMoved(sBefore.ink, sAfter.ink),
     { how: sBefore.box.how, lands: sBefore.box.lands, crossed: [sBefore.crossed, sAfter?.crossed], ink: [sBefore.ink, sAfter?.ink] });
   // tick Hat
-  const hBefore = rows.Hat;
-  if (!hBefore.box) throw new Error('no checkbox found in the Hat row');
+  const hBefore = await parts('Hat');
+  if (!hBefore?.box) throw new Error('no checkbox found in the Hat row');
   await press(hBefore.box);
   await sleep(500);
   const hTicked = await parts('Hat');
   const c2 = await counted();
   check('count', c1 === '1 of 4' && c2 === '2 of 4', { afterSunscreen: c1, afterHat: c2 });
   // untick Hat
-  await press(hTicked.box || hBefore.box);
+  await press((await parts('Hat'))?.box || hTicked.box);
   await sleep(500);
   const hAfter = await parts('Hat');
   const c3 = await counted();

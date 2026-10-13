@@ -2,6 +2,7 @@
 id: P112-OWN019-SAMEVALUE
 title: "The Function's notes never say an output set to the value it already holds sends nothing — Mistral's Pack It set the same error text on every empty Add, a Set Variable cleared it on typing, and the second refusal showed no message"
 status: fixed
+commit: 21a3d0b98
 phase: P112
 task: OWN-019
 severity: medium

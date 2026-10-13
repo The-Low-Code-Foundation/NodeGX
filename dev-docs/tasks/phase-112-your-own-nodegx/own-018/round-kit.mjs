@@ -30,7 +30,7 @@
 // baseline sat 32 min in one answer (the legacy harness sends no max_tokens, so nothing cuts a long think off) while
 // the key spent. agent.exit then says "stalled". The tree is found by parent pid, never by name.
 //
-//   node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price 4] [--max-turns 250] [--thinking high|low] [--key vibe|api] [--kit vibe] [--stall-min 12]
+//   node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price 4] [--max-turns 250] [--thinking high|low] [--temperature T] [--key vibe|api] [--kit vibe] [--stall-min 12]
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
@@ -106,6 +106,8 @@ if (!cfg.includes(pinned)) throw new Error('create-nodegx wrote no @nodegx/mcp@0
 let next = cfg.replace(pinned, `"--package=${tgz('nodegx-mcp-0.2.0.tgz')}", "noodl-mcp"`);
 const thinking = opt('--thinking', null);
 if (thinking) next = next.replace(/^thinking = "[a-z]+"$/m, `thinking = "${thinking}"`); // a control arm, recorded in command.txt
+const temperature = opt('--temperature', null); // OWN-019 s2: a control arm, as --thinking
+if (temperature) next = next.replace(/^temperature = [\d.]+$/m, `temperature = ${temperature}`);
 fs.writeFileSync(cfgFile, next);
 fs.writeFileSync(path.join(root, 'vibe-config.toml'), next);
 
@@ -123,7 +125,7 @@ const args = [
   '--max-turns', opt('--max-turns', '250'),
   '--workdir', APPS
 ];
-fs.writeFileSync(path.join(root, 'command.txt'), ['uvx', ...args].join(' ') + `\n# key: ${keyName}; kit: ${kit}${thinking ? `; thinking = ${thinking}` : ''}\n`);
+fs.writeFileSync(path.join(root, 'command.txt'), ['uvx', ...args].join(' ') + `\n# key: ${keyName}; kit: ${kit}${thinking ? `; thinking = ${thinking}` : ''}${temperature ? `; temperature = ${temperature}` : ''}\n`);
 const log = fs.createWriteStream(path.join(root, 'agent.jsonl'));
 const err = fs.createWriteStream(path.join(root, 'agent.stderr'));
 const child = spawn('uvx', args, { cwd: APPS, env, stdio: ['ignore', 'pipe', 'pipe'] });
