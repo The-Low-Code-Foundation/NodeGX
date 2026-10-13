@@ -79,6 +79,11 @@ post-tool, post-agent) — and the kit uses none of them yet.
 - **AC6 — Richard's own.** Richard runs `npm create nodegx-vibe`, opens Vibe himself and builds something of his
   choosing with only what the kit printed; the task closes on his words.
 - **AC7 — shipped.** Published to npm with the core (publishing is Richard's step, R11).
+- **AC8 — the audit (Richard, 2026-10-13, s2).** When the experimenting is finished, a **Fable 5.1** session audits the
+  whole record — every round's journal, grade and cost, the kit's levers and what each measured, the bugs, the lab's
+  own faults (s2 found two: the unsealed root and the 12-minute watchdog) — and answers one question: *can Vibe +
+  Large 4 on the Vibe Code subscription (R30) be made to work, or not?* Its options include the Mistral issues R30
+  keeps (no PRs: the repo takes no code). Richard rules on its answer.
 
 ## 7. Sessions
 
