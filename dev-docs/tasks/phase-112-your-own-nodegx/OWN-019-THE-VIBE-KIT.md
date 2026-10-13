@@ -134,6 +134,7 @@ post-tool, post-agent) — and the kit uses none of them yet.
 | v6 | tgz16, temperature 0.2 | — | a refused read ended `-p`, before authoring | 23 | 0.82 | 47% | 0 | inconclusive; the lab's root was unsealed |
 | v7 | tgz17, temperature 0.2, sealed lab | 12/12, **carryover** | itself | 41 | 2.97 | 64% | ~3 | 0.2: no stall, fewer drives, the last question's colours flash on the next |
 | v8 | tgz17, kit defaults, sealed lab | — | **stalled** (one think, 145 KB) | 18 | 0.34 | 45% | 0 | LONGTHINK again at the defaults: designing the whole app in one answer |
+| v9 | tgz18 (one answer, one tool call) | 12/12, **carryover** | itself | 45 | 2.68 | 76% | — | no stall (longest think 98 KB vs 142–172 KB stalled); CARRYOVER |
 
 - **s2 (2026-10-13, Opus):** kit tgz14 reused for v3 (create-nodegx and MCP byte-identical in source to HEAD at the
   time; the runtime had moved only in Aggregate Records, which the quiz never touches). **v3: 12/12, carryover clean,
@@ -204,3 +205,10 @@ post-tool, post-agent) — and the kit uses none of them yet.
 | p0 Sonnet | core, tgz14 (Claude Code) | 0/12 as served; 12/12 healed | itself | 20 | 3.85 API-eq. | 97% | DUPCHILD; the grader proven |
 | pk1 | Vibe kit, tgz16 | 11/12 | itself | 63 | 3.95 | 82% | SAMEVALUE |
 | pk2 | Vibe kit, tgz17 | **12/12** | itself | 59 | 4.34 | 72% | AC5: 1 of 3 |
+- **s2, v9 (tgz18, lever 3 — the answer-size line in AGENTS.md): 12/12, no stall**, finished by itself in 45 min,
+  $2.68 by Vibe's list count (~$1.34 cached, 76%). Its longest think was 98 KB (the stalled rounds' 142–172 KB).
+  **Carryover again** (Q2 Sydney green, Q3 Toronto red, Q4 Rabat red) — as v7, so not the temperature. v9's graph:
+  one Function colours the buttons from `answered`, `tapped` and the question's `correct`; when the pause ends the
+  index (new words, new `correct`) changes while `answered` is still true, and is cleared after. v2/v3 cleared first.
+  No checklist line ever looked at the moment a question appears. **P112-OWN019-CARRYOVER** (open): the Vibe
+  AGENTS.md checklist step now asks for it, and to reset before the words change (`f9c22c74b`, kit tgz19) — v10.
