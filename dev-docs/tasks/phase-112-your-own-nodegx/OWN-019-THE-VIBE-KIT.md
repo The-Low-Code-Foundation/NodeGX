@@ -398,3 +398,12 @@ post-tool, post-agent) — and the kit uses none of them yet.
   calls were 0–11% cached, mostly 0.1 s after the previous call, with first byte 6–12 s (hits: 87–99%, 1–2 s) — Mistral's
   cache missing identical prefixes under evening load, not the requests and not a timeout. q6 sitting 3 (part 2,
   answering): 49 min, $2.71 list, 5 drives passed, NEXT → part 3 (countdown).
+- **s3, q6 (tgz26, per-part sittings, 22:53 → 01:10 CEST): 12/12, carryover clean, finished by itself** — the first
+  process-kit app. 7 sittings (plan; parts 1–5; prove), 197 min, **$9.65 list (~$4.82 at the sale)**, 276 tool calls,
+  38 drives, 11.7M input over all sittings, longest think 131 KB (part 2, 25 min at evening speed). Its own proof
+  ("all seventeen checklist lines were driven fresh") agrees with the grader line for line — the brief's whole
+  3-of-5 game included (v12's miss). Per sitting: 16 / 37 / 49 / 38 / 10 / 19 / 27 min; $0.26 / 1.34 / 2.71 / 2.13 /
+  0.91 / 0.82 / 1.48. **Mistral recovered after midnight:** sittings 6–7 thought at 217–222 chars/s and cached 75–81%
+  (sittings 1–3: 48–94 chars/s, 26–54%). For the comparison: s2's one-shot quiz passes cost $2.44–4.90 list in 41–64
+  min at afternoon speed; q6 cost about 2–4× that, mostly in the evening's slow window — the daytime pair (o2 vs q7)
+  decides it.

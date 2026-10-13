@@ -40,6 +40,10 @@ a new measurement goes in the section it belongs to, with its round.
 
 ## s3's new measurements (2026-10-13 evening)
 
+- **The first process-kit app passed** (q6, per-part sittings): 12/12, carryover clean, finished by itself, its own
+  17-line proof matching the grader; 7 sittings, 197 min, $9.65 list (~$4.82 at the sale). Think speed recovered
+  after midnight (217–222 chars/s, 75–81% cached in sittings 6–7), confirming the evening slowdown was load.
+
 - **The evening cache, settled — Mistral's side, not the requests** (q6 sitting 4, recorded, 23:5x–00:0x CEST): every
   chat request was a pure extension of the one before (identical prefix, the new turn appended), yet 7 of 22 calls
   got 0–11% cached (#17 11%, #40 5%, #47 0%, #60 0%, #63 0%, #79 0%, #85 2%), most of them 0.1 s after the previous

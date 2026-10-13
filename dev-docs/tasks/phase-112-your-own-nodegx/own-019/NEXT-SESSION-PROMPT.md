@@ -25,7 +25,7 @@ comparable with afternoon ones.
   `npm pack ./packages/create-nodegx` (relative path!); the MCP from the worktree `own018-s3-pack` at HEAD; preview =
   tgz12's): **tgz27** = R32 one-session kit (`23f96461e`); **tgz26** = per-part sittings kit with rails (`3263a643e`);
   both with MCP at `f419f035c` (Condition + For Each notes).
-- **q6** (tgz26, sittings) was left running overnight to `# Done`, recorded from sitting 4 (`q6/calls/`, proxy on port
+- **q6** (tgz26, sittings) ran overnight to `# Done` and graded **12/12** (read in s3), recorded from sitting 4 (`q6/calls/`, proxy on port
   8795 started with nohup — kill it when q6 ends: `lsof -ti tcp:8795 -sTCP:LISTEN`). **First: read q6** — `q6.log`,
   `sittings.json`, `anatomy.mjs q6`, `q6/calls/calls.jsonl` (per call: cached tokens, first byte, output — the
   evening-cache question is already settled from sitting 4: Mistral's side, field guide), and **grade it** if it reached `# Done`
@@ -34,7 +34,7 @@ comparable with afternoon ones.
 
 ## Do, in order
 
-1. **Read q6** (above) and record it in §7 and the field guide.
+1. ~~Read q6~~ — **done in s3: 12/12, carryover clean, finished by itself; 7 sittings, 197 min, $9.65 list** (§7).
 2. **The same-window comparison**, daytime, both `--record`, side by side: **o2** = tgz27 (`--sittings 4
    --max-price 10 --stall-min 45`) and **q7** = tgz26 (`--sittings 14 --max-price 6`). Measure per round: grade
    (grade-quiz), finished by itself, wall time, Vibe $, cached %, longest think, hook firings. `anatomy.mjs` on both.
