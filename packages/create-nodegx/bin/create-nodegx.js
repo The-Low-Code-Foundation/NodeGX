@@ -77,9 +77,16 @@ const OPENCODE_CONFIG = 'opencode.json';
  */
 const MISTRAL_SERVER_FLAGS = ['--screenshots-to-files'];
 
-function mistralServerEntry(platform = process.platform) {
+/**
+ * P112 OWN-019 — Vibe's server is started with `--profile vibe`: it words what it tells the agent for a client whose
+ * tool list never changes after start (everything past the bootstrap seven through `call_tool`) and whose model pays
+ * for every image it opens. The profile implies `--screenshots-to-files`.
+ */
+const VIBE_SERVER_FLAGS = ['--profile', 'vibe'];
+
+function mistralServerEntry(platform = process.platform, flags = MISTRAL_SERVER_FLAGS) {
   const entry = serverEntry(platform);
-  return { ...entry, args: [...entry.args, ...MISTRAL_SERVER_FLAGS] };
+  return { ...entry, args: [...entry.args, ...flags] };
 }
 
 function renderOpenCodeConfig(platform = process.platform) {
@@ -121,8 +128,12 @@ function writeOpenCodeConfig(dir, platform = process.platform) {
 const VIBE_CONFIG = path.join('.vibe', 'config.toml');
 const VIBE_ALLOWED_TOOLS = ['list_projects', 'open_project', 'create_project', 'list_examples', 'get_example', 'find_tools', 'call_tool'];
 
-function renderVibeConfig(platform = process.platform) {
-  const entry = mistralServerEntry(platform);
+/**
+ * @param {{ profile?: 'vibe' }} [options] — the Vibe kit (`npm create nodegx-vibe`, OWN-019) adds `default_agent`, so
+ * `vibe` in the folder starts the NodeGX agent profile written beside it.
+ */
+function renderVibeConfig(platform = process.platform, options = {}) {
+  const entry = mistralServerEntry(platform, VIBE_SERVER_FLAGS);
   const toml = (v) => JSON.stringify(v);
   return [
     '# Mistral Vibe settings for this folder, written by `npm create nodegx`. Start Vibe here with:',
@@ -133,6 +144,7 @@ function renderVibeConfig(platform = process.platform) {
     '# with what to fix, so the legacy harness builds better apps. Edit anything below; it is never overwritten.',
     '',
     'active_model = "mistral-large-4"',
+    ...(options.profile === 'vibe' ? [`default_agent = "${VIBE_AGENT}"`] : []),
     '',
     '[[models]]',
     'name = "mistral-large-4"',
@@ -160,12 +172,47 @@ function renderVibeConfig(platform = process.platform) {
 }
 
 /** Writes `.vibe/config.toml` when absent. Returns 'written' or 'present'. */
-function writeVibeConfig(dir, platform = process.platform) {
+function writeVibeConfig(dir, platform = process.platform, options = {}) {
   const file = path.join(dir, VIBE_CONFIG);
   if (fs.existsSync(file)) return 'present';
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, renderVibeConfig(platform));
+  fs.writeFileSync(file, renderVibeConfig(platform, options));
   return 'written';
+}
+
+/**
+ * P112 OWN-019 (R29) — the Vibe kit's own files, kept as plain files under `profiles/vibe/` so they can be changed
+ * between measured rounds without touching this code. Each is written only when absent, like everything here. The
+ * Vibe kit writes these INSTEAD of the core's Claude-facing files (`.mcp.json`, `CLAUDE.md`, `opencode.json`): R29 lets
+ * the profile override anything that only suits Claude.
+ */
+const VIBE_AGENT = 'nodegx';
+const VIBE_PROFILE_DIR = path.join(__dirname, '..', 'profiles', 'vibe');
+
+function vibeProfileFiles() {
+  const out = [];
+  const walk = (rel) => {
+    for (const entry of fs.readdirSync(path.join(VIBE_PROFILE_DIR, rel), { withFileTypes: true })) {
+      const next = path.join(rel, entry.name);
+      if (entry.isDirectory()) walk(next);
+      else out.push(next);
+    }
+  };
+  walk('');
+  // `agents/…` and `skills/…` belong under `.vibe/`; AGENTS.md sits in the folder itself.
+  return out.sort().map((rel) => ({ from: path.join(VIBE_PROFILE_DIR, rel), to: rel === 'AGENTS.md' ? rel : path.join('.vibe', rel) }));
+}
+
+function writeVibeProfile(dir) {
+  const written = [];
+  for (const { from, to } of vibeProfileFiles()) {
+    const file = path.join(dir, to);
+    if (fs.existsSync(file)) continue;
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.copyFileSync(from, file);
+    written.push(to);
+  }
+  return written;
 }
 
 /** Writes each agent file that is absent. Returns the names written. */
@@ -192,10 +239,14 @@ function serverEntry(platform = process.platform) {
  * Set `folder` up. Returns what happened, for the sentence; throws (with a sentence) when it will not write.
  * @returns {{ folder: string, file: string, outcome: 'written' | 'added' | 'present', notes: string[], vibe: string, opencode: string }}
  */
-function setUp(folder, platform = process.platform) {
+function setUp(folder, platform = process.platform, options = {}) {
   const dir = path.resolve(folder);
   if (fs.existsSync(dir) && !fs.statSync(dir).isDirectory()) throw new Error(`${dir} is a file, not a folder.`);
   fs.mkdirSync(dir, { recursive: true });
+  if (options.profile === 'vibe') {
+    const profile = writeVibeProfile(dir);
+    return { folder: dir, profile: 'vibe', vibe: writeVibeConfig(dir, platform, options), written: profile };
+  }
   const file = path.join(dir, '.mcp.json');
   const entry = serverEntry(platform);
 
@@ -217,7 +268,24 @@ function setUp(folder, platform = process.platform) {
   return { folder: dir, file, outcome: 'added', notes: writeAgentNotes(dir), vibe: writeVibeConfig(dir, platform), opencode: writeOpenCodeConfig(dir, platform) };
 }
 
+function vibeSentence(result) {
+  const here = path.relative(process.cwd(), result.folder) || '.';
+  const wrote = [...(result.vibe === 'written' ? [VIBE_CONFIG] : []), ...result.written];
+  return [
+    wrote.length ? `Wrote ${wrote.join(', ')}.` : 'Everything was already there; nothing was replaced.',
+    '',
+    'Next:',
+    `  1. cd ${here} && vibe --legacy-harness, and trust the folder when it asks.`,
+    '  2. Say what you want to build. Mistral Large 4 builds it as a NodeGX app, checks each thing you asked for in a',
+    '     browser, and tells you what passed.',
+    `  3. See it: npx ${PREVIEW_PACKAGE} <the app's folder> --open`,
+    '',
+    'Any time you want the visual editor, open the same folder in NodeGX — nothing needs converting.'
+  ].join('\n');
+}
+
 function sentence(result) {
+  if (result.profile === 'vibe') return vibeSentence(result);
   const here = path.relative(process.cwd(), result.folder) || '.';
   const done =
     result.outcome === 'present'
@@ -251,7 +319,9 @@ if (require.main === module) {
     process.exitCode = 2;
   } else {
     try {
-      process.stdout.write(sentence(setUp(args.find((a) => !a.startsWith('-')) || '.')) + '\n');
+      // `--vibe` is the Vibe kit (`npm create nodegx-vibe` passes it, OWN-019).
+      const options = args.includes('--vibe') ? { profile: 'vibe' } : {};
+      process.stdout.write(sentence(setUp(args.find((a) => !a.startsWith('-')) || '.', process.platform, options)) + '\n');
     } catch (err) {
       process.stderr.write(`create-nodegx: ${err.message}\n`);
       process.exitCode = 1;
@@ -259,4 +329,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { AGENT_FILES, AGENT_NOTE, MCP_PACKAGE, MCP_VERSION, MISTRAL_SERVER_FLAGS, OPENCODE_CONFIG, SERVER_NAME, VIBE_ALLOWED_TOOLS, VIBE_CONFIG, renderOpenCodeConfig, renderVibeConfig, serverEntry, setUp };
+module.exports = { AGENT_FILES, AGENT_NOTE, MCP_PACKAGE, MCP_VERSION, MISTRAL_SERVER_FLAGS, OPENCODE_CONFIG, SERVER_NAME, VIBE_AGENT, VIBE_ALLOWED_TOOLS, VIBE_CONFIG, VIBE_SERVER_FLAGS, renderOpenCodeConfig, renderVibeConfig, serverEntry, setUp, vibeProfileFiles };

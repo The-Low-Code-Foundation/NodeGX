@@ -13,6 +13,7 @@
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
 import { reapOrphanedBackends } from './backend/reaper';
+import { CLIENT_PROFILES, isClientProfileName } from './clientProfile';
 import { ToolError } from './errors';
 import { parseReproducibleFlag, type ReproducibleOutput } from './project/writeClock';
 import { createServer } from './server';
@@ -50,6 +51,12 @@ Options:
                    project's .previews/ and return their paths, unless asked for
                    another folder. For a model whose prompt cache stops at the
                    first image in a conversation (Mistral).
+  --profile <client>
+                   Word what this server tells the agent for that client:
+                   "vibe" (Mistral Vibe) — its tool list never changes after
+                   start, so every other tool is named as a call_tool call,
+                   and images cost its prompt cache, so screenshots go to files
+                   (implies --screenshots-to-files). Default: "default".
   --version        Print version and exit.
   --help           Show this help.
 
@@ -74,7 +81,17 @@ async function main(): Promise<void> {
 
   const allowWrites = argv.includes('--allow-writes');
   const deferTools = !argv.includes('--all-tools');
-  const screenshotsToFiles = argv.includes('--screenshots-to-files');
+  // P112 OWN-019 — `--profile <client>` or `--profile=<client>` (`clientProfile.ts`).
+  const profileAt = argv.findIndex((a) => a === '--profile' || a.startsWith('--profile='));
+  const profileValueAt = profileAt >= 0 && argv[profileAt] === '--profile' ? profileAt + 1 : -1;
+  const profileName =
+    profileAt < 0 ? 'default' : argv[profileAt] === '--profile' ? argv[profileValueAt] ?? '' : argv[profileAt].slice('--profile='.length);
+  if (!isClientProfileName(profileName)) {
+    process.stderr.write(`noodl-mcp: --profile takes one of ${CLIENT_PROFILES.join(', ')}; got "${profileName}"\n`);
+    process.exitCode = 2;
+    return;
+  }
+  const screenshotsToFiles = argv.includes('--screenshots-to-files') || profileName === 'vibe';
   // P109 ISL-019 — `--reproducible <namespace>@<epoch>` or `--reproducible=<namespace>@<epoch>`.
   let reproducible: ReproducibleOutput | undefined;
   const reproducibleAt = argv.findIndex((a) => a === '--reproducible' || a.startsWith('--reproducible='));
@@ -91,7 +108,7 @@ async function main(): Promise<void> {
       return;
     }
   }
-  const positional = argv.filter((a, i) => !a.startsWith('--') && i !== reproducibleValueAt);
+  const positional = argv.filter((a, i) => !a.startsWith('--') && i !== reproducibleValueAt && i !== profileValueAt);
   // BST-001 — zero is bootstrap mode, one is a served project, two is still a
   // mistake. `createServer` refuses zero-without---allow-writes with a message
   // naming the flag, rather than this branch printing the whole usage at
@@ -130,6 +147,7 @@ async function main(): Promise<void> {
       allowWrites,
       deferTools,
       screenshotsToFiles,
+      profile: profileName,
       ...(reproducible ? { reproducible } : {})
     });
     // AWP-006 — the surface is now a decision, so it is stated at startup rather

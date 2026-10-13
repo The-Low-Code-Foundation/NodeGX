@@ -15,7 +15,8 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
-import { BOOTSTRAP_INSTRUCTIONS, projectInstructions } from './instructions';
+import { setClientProfile, type ClientProfileName } from './clientProfile';
+import { bootstrapInstructions, projectInstructions } from './instructions';
 import { ToolError } from './errors';
 import { installProjectOverlay } from './kitOverlay';
 import { ProjectBinding } from './project/ProjectBinding';
@@ -103,6 +104,11 @@ export interface ServerOptions {
    * of a session full price until a compaction dropped it. Claude caches across images, so `.mcp.json` leaves it off.
    */
   screenshotsToFiles?: boolean;
+  /**
+   * P112 OWN-019 — which client the agent-facing text is worded for (`clientProfile.ts`). Set by whoever starts the
+   * server (`--profile vibe` from the Vibe kit), never by the model; `undefined` is the default (Claude Code's).
+   */
+  profile?: ClientProfileName;
 }
 
 export interface CreatedServer {
@@ -118,6 +124,7 @@ export interface CreatedServer {
 }
 
 export function createServer(options: ServerOptions): CreatedServer {
+  setClientProfile(options.profile);
   // ⚠️ BST-001 §4 — `create_project` is registered inside the write gate below,
   // so an unbound read-only server has nothing in it at all: it would start,
   // appear connected in the client's MCP panel, advertise three listing tools
@@ -159,7 +166,7 @@ export function createServer(options: ServerOptions): CreatedServer {
       // MCP has no "instructions changed" notification. See that module.
       instructions:
         store === null
-          ? BOOTSTRAP_INSTRUCTIONS
+          ? bootstrapInstructions()
           : projectInstructions({ projectDir: store.projectDir, allowWrites: options.allowWrites, deferTools })
     }
   );

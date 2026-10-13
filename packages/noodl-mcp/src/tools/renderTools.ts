@@ -21,6 +21,8 @@ import * as path from 'path';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+
+import { clientProfile } from '../clientProfile';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
 import { runDrivePage, runRenderReport, type RenderReportPayload } from '../render';
@@ -65,8 +67,12 @@ export function registerRenderTools(
         // had to be paid for — the resident surface had **7 tokens of headroom** at HEAD against
         // toolDisclosure's 8280 budget, and a new parameter costs more than that. See the register.
         'evidence. Measures layout, text, images and empty boxes per viewport; ~2s a page. ' +
-        'LOOK AT THE SCREENSHOTS: a picture that loads is not a picture of the right thing, and no number can ' +
-        'tell you it is the wrong one.',
+        // OWN-019 census #19 — the same warning, with the evidence a Mistral model can afford.
+        (clientProfile().imagesCostly
+          ? 'PROVE WHAT IT SHOWS: a picture that loads is not the right picture — drive_page read steps (text, a ' +
+            'computed style) check it without an image; open a screenshot file once, at the end.'
+          : 'LOOK AT THE SCREENSHOTS: a picture that loads is not a picture of the right thing, and no number can ' +
+            'tell you it is the wrong one.'),
       inputSchema: {
         viewports: z
           .string()
@@ -159,7 +165,7 @@ export function registerRenderTools(
             // P109 ISL-021 AC6 (s14) — the agent built a form, read this answer four times, then went looking
             // for a browser to script: `drive_page` is deferred, so nothing it could see named it. This answer
             // is where it looks after building, and response text costs no resident tokens.
-            { type: 'text' as const, text: FIRST_FRAME_NOTE }
+            { type: 'text' as const, text: firstFrameNote() }
           ]
         };
       }
@@ -281,10 +287,15 @@ function screenshotManifest(report: RenderReportPayload, outDir: string, filesBy
   if (!lines.length) return `No screenshots were written to ${outDir} — this run photographed nothing.`;
   return (
     `${written} screenshot${written === 1 ? '' : 's'} written to ${outDir}, one per measured page per viewport. ` +
-    'They are NOT in this response — READ the ones you need. A path you never open is not a picture you ' +
-    'looked at, and no number in the report above can tell you the page shows the wrong thing.' +
+    // OWN-019 census #39 — on the Vibe profile the advice leads with what to do instead of opening images.
+    (clientProfile().imagesCostly
+      ? 'They are NOT in this response. ' + 'Each image you open makes every later request of this session full ' +
+        'price, so check what a person sees with drive_page read steps (the text, a computed style) and open ' +
+        'one image only at the end, on the page still in doubt.'
+      : 'They are NOT in this response — READ the ones you need. A path you never open is not a picture you ' +
+        'looked at, and no number in the report above can tell you the page shows the wrong thing.') +
     // P112-OWN018-IMAGECACHE: said only where the server was started for such a model.
-    (filesByDefault
+    (filesByDefault && !clientProfile().imagesCostly
       ? ' Each image you open stays in your conversation, and with some models every later request then goes ' +
         'uncached until the session is compacted, so open the ones you need, not all of them.'
       : '') +
@@ -294,10 +305,17 @@ function screenshotManifest(report: RenderReportPayload, outDir: string, filesBy
 }
 
 /** What `render_report` cannot prove, and the tool that can — appended to every report. */
-export const FIRST_FRAME_NOTE =
-  'This report is the FIRST FRAME only: nothing was pressed, typed or waited for. To prove a button, form or game ' +
-  'WORKS (tap, type, wait, read a Variable or what was saved), call find_tools({ query: "press" }) to reveal ' +
-  'drive_page and send it a list of steps — no browser script needed.';
+export function firstFrameNote(): string {
+  // OWN-019 census #38 — the note that leads an agent from the first frame to behaviour testing; on a client whose
+  // list never changes, revealing does nothing it can see, so it names the call.
+  const door = clientProfile().staticToolList
+    ? 'call call_tool({ name: "drive_page", arguments: { steps: [...] } }) — describe: true shows the steps it takes'
+    : 'call find_tools({ query: "press" }) to reveal drive_page and send it a list of steps';
+  return (
+    'This report is the FIRST FRAME only: nothing was pressed, typed or waited for. To prove a button, form or ' +
+    'game WORKS (tap, type, wait, read a Variable or what was saved), ' + door + ' — no browser script needed.'
+  );
+}
 
 /** The verdict as the one line a caller reads first. */
 function verdictHeadline(verdict: { done: boolean; reason: string }): string {

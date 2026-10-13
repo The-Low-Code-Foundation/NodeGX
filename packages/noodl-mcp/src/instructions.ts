@@ -33,7 +33,11 @@
  * @module noodl-mcp/instructions
  */
 
-import { BOOTSTRAP_ADVERTISED, spellCount } from './toolGroups';
+import { clientProfile, staticToolListRule } from './clientProfile';
+import { BOOTSTRAP_ADVERTISED, spellCount, TOOL_GROUPS } from './toolGroups';
+
+/** OWN-019 census #14: this said 60 while `find_tools` counted 65 — counted from the group now. */
+const BACKEND_TOOL_COUNT = TOOL_GROUPS.find((g) => g.id === 'backend')?.tools.length ?? 0;
 
 export interface ProjectInstructionOptions {
   /** Absolute path of the served project. Interpolated into the first clause. */
@@ -55,7 +59,9 @@ export interface ProjectInstructionOptions {
  */
 export function projectInstructions(options: ProjectInstructionOptions): string {
   const { projectDir, allowWrites, deferTools } = options;
+  const { staticToolList, imagesCostly } = clientProfile();
   return (
+    staticToolListRule() +
     `NodeGX (OpenNoodl) project server for ${projectDir} — mode: ` +
     (allowWrites ? 'read-write' : 'read-only (writes require restarting with --allow-writes)') +
     // TVW-009 §2.5 — 🔴 the identifier clause that stood here was the SAME FACT this
@@ -145,10 +151,13 @@ export function projectInstructions(options: ProjectInstructionOptions): string 
     // back by default. This sentence is where an agent building a data app
     // learns that, and it is stated before provision_backend is named so the
     // instruction never points at a tool the reader cannot currently see.
-    (deferTools
-      ? 'Its 60 tools are not advertised yet — call find_tools({group:"backend"}) and they arrive in your ' +
-        'next tool list (authoring a Record node reveals them too). Then provision_backend FIRST '
-      : 'Call provision_backend FIRST ') +
+    (staticToolList
+      ? `Its ${BACKEND_TOOL_COUNT} tools are called through call_tool like the rest (find_tools({group:"backend"}) ` +
+        'lists them). Call provision_backend FIRST '
+      : deferTools
+        ? `Its ${BACKEND_TOOL_COUNT} tools are not advertised yet — call find_tools({group:"backend"}) and they ` +
+          'arrive in your next tool list (authoring a Record node reveals them too). Then provision_backend FIRST '
+        : 'Call provision_backend FIRST ') +
     '(it creates, starts and binds a local backend and pre-seeds the collections you name — declare their ' +
     'columns, or the Record nodes get no prop-* ports), then plan the components against it. It is ' +
     'deliberately not a plan operation: it starts a process and creates a database, which a plan cannot ' +
@@ -158,9 +167,19 @@ export function projectInstructions(options: ProjectInstructionOptions): string 
     // that improvised a verification loop through Bash and still shipped the
     // wrong photograph. Retrieval advice does nothing; naming the tool here,
     // where every session reads it, is the only thing that has worked.
-    'VERIFY BY LOOKING: when you have written anything visual, call render_report. It renders the project ' +
-    'headless (~8s) and returns the numbers AND screenshots — a graph is a claim, a render is evidence, ' +
-    'and an image URL that returns 200 can still be a picture of the wrong thing.'
+    (imagesCostly
+      ? // OWN-019 census #15. Each image a Mistral model opens turns its prompt cache off for the rest of the
+        // session (P112-OWN018-IMAGECACHE): the same evidence, asked for without the picture.
+        'VERIFY: when you have written anything visual, call render_report (headless, ~2s a page) and read its ' +
+        'verdict and numbers; then prove what the person asked for with drive_page — tap, wait, and read the ' +
+        'text, a variable, or an element\'s computed style. Screenshots are files: open one only at the end, on ' +
+        'the one page still in doubt, because every image you open makes each later request of this session ' +
+        'full price.'
+      : // OWN-019 census #15: "(~8s)" disagreed with render_report's own "~2s a page"; the timing is the tool's to
+        // state, so the briefing drops it (and stays inside AWP-006's budget).
+        'VERIFY BY LOOKING: when you have written anything visual, call render_report. It renders the project ' +
+        'headless and returns the numbers AND screenshots — a graph is a claim, a render is evidence, and an ' +
+        'image URL that returns 200 can still be a picture of the wrong thing.')
   );
 }
 
@@ -192,7 +211,7 @@ export function projectInstructions(options: ProjectInstructionOptions): string 
  * perform, because an agent told to expect tools that never arrive stops and
  * waits rather than falling back.
  */
-export const BOOTSTRAP_INSTRUCTIONS =
+export const BOOTSTRAP_INSTRUCTIONS: string =
   'NodeGX (OpenNoodl) is a visual app builder: an app is a graph of nodes stored as plain files on disk, ' +
   'and this server reads and writes those files. ' +
   // P112-S14-NOTNODEGX (Richard: "or else what's the point?"). A fresh agent in a folder `npm create nodegx` made,
@@ -234,3 +253,45 @@ export const BOOTSTRAP_INSTRUCTIONS =
   'session, and this one could not send it because there was no project to describe. A server binds ONCE: ' +
   'opening or creating a second project later does NOT repoint this server; it stays bound to the first, ' +
   'and says so.';
+
+/**
+ * P112 OWN-019 — the unbound briefing for the client this server was started for. The default is
+ * {@link BOOTSTRAP_INSTRUCTIONS} byte for byte; a static-list client (Mistral Vibe) gets the three sentences that
+ * promise tools "arriving" said the way they reach it: through `call_tool` (census #11–13). Each swap names the
+ * sentence it replaces and throws if it is gone, so an edit above cannot silently stop the variant applying.
+ */
+export function bootstrapInstructions(): string {
+  if (!clientProfile().staticToolList) return BOOTSTRAP_INSTRUCTIONS;
+  return swapAll(BOOTSTRAP_INSTRUCTIONS, [
+    [
+      'arrives once there is a project to point it at. ',
+      'is reached through call_tool once there is a project to point it at — your tool list will not change in ' +
+        'this session. '
+    ],
+    [
+      "this server binds to it and the reading and authoring tools arrive in this same conversation.",
+      'this server binds to it, and its reading and authoring tools are then called through call_tool({ name, ' +
+        'arguments }).'
+    ],
+    [
+      'this server binds itself to the project and the authoring tools arrive in the same conversation — no ' +
+        'second registration, no restart.',
+      'this server binds itself to the project — no second registration, no restart — and every tool you were ' +
+        'not shown at the start is called through call_tool({ name, arguments }); call_tool({ name, describe: ' +
+        'true }) shows its arguments first.'
+    ]
+  ]);
+}
+
+/** Replace each `[from, to]` exactly once; a `from` that is missing or repeated is a bug in the caller. */
+export function swapAll(text: string, swaps: ReadonlyArray<readonly [string, string]>): string {
+  let out = text;
+  for (const [from, to] of swaps) {
+    const at = out.indexOf(from);
+    if (at < 0 || out.indexOf(from, at + 1) >= 0) {
+      throw new Error(`clientProfile swap: ${JSON.stringify(from.slice(0, 60))} must occur exactly once`);
+    }
+    out = out.slice(0, at) + to + out.slice(at + from.length);
+  }
+  return out;
+}

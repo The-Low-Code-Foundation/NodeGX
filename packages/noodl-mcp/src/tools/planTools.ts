@@ -30,6 +30,7 @@ import * as crypto from 'crypto';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+import { clientProfile } from '../clientProfile';
 import type {
   AuthoringPlan,
   PlanOperation,
@@ -425,7 +426,10 @@ async function renderSummaryFor(
           }
         ])
       ),
-      note: 'Numbers only. Call render_report for the screenshots — a picture that loads is not a picture of the right thing.'
+      // OWN-019 census #43.
+      note: clientProfile().imagesCostly
+        ? 'Numbers only. Prove what it shows with drive_page read steps — a picture that loads is not the right picture.'
+        : 'Numbers only. Call render_report for the screenshots — a picture that loads is not a picture of the right thing.'
     };
     return { summary, verdict };
   } catch (err) {
@@ -950,7 +954,11 @@ export function registerPlanTools(
           .optional()
           .describe(
             'summary (forced when the plan wrote anything visual — you may not skip looking) renders and ' +
-              'returns the numbers plus a done/not-done verdict. Call render_report for the screenshots.'
+              'returns the numbers plus a done/not-done verdict. ' +
+              // OWN-019 census #25.
+              (clientProfile().imagesCostly
+                ? 'Prove what it shows with drive_page.'
+                : 'Call render_report for the screenshots.')
           )
       }
     },

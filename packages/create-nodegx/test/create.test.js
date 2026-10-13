@@ -11,10 +11,11 @@ const {
   AGENT_NOTE,
   MCP_PACKAGE,
   MCP_VERSION,
-  MISTRAL_SERVER_FLAGS,
   OPENCODE_CONFIG,
+  VIBE_AGENT,
   VIBE_ALLOWED_TOOLS,
   VIBE_CONFIG,
+  VIBE_SERVER_FLAGS,
   renderOpenCodeConfig,
   renderVibeConfig,
   serverEntry,
@@ -107,11 +108,11 @@ test('P112 OWN-018: Mistral Vibe gets Large 4, the same pinned server, and permi
   // (a non-Mistral model) never applies.
   assert.match(toml, /^active_model = "mistral-large-4"$/m);
   assert.match(toml, /^name = "mistral-large-4"$/m);
-  // The same registration .mcp.json gets, plus screenshots to files (P112-OWN018-IMAGECACHE: an image in the
-  // conversation turns Mistral's prompt cache off).
+  // The same registration .mcp.json gets, plus the Vibe profile (OWN-019: worded for a tool list that never changes,
+  // and screenshots to files — P112-OWN018-IMAGECACHE: an image in the conversation turns Mistral's cache off).
   const entry = serverEntry();
   assert.ok(toml.includes(`command = ${JSON.stringify(entry.command)}`));
-  assert.ok(toml.includes(`args = [${[...entry.args, ...MISTRAL_SERVER_FLAGS].map((a) => JSON.stringify(a)).join(', ')}]`));
+  assert.ok(toml.includes(`args = [${[...entry.args, ...VIBE_SERVER_FLAGS].map((a) => JSON.stringify(a)).join(', ')}]`));
   for (const tool of VIBE_ALLOWED_TOOLS) assert.match(toml, new RegExp(`^\\[tools\\.nodegx_${tool}\\]\\npermission = "always"$`, 'm'));
   // The person is told how to start it, and why the harness matters.
   assert.match(toml, /vibe --legacy-harness/);
@@ -182,5 +183,40 @@ test('P112 OWN-018 s2: only the Mistral-facing configs send screenshots to files
   setUp(dir);
   assert.ok(!read(path.join(dir, '.mcp.json')).mcpServers.nodegx.args.includes('--screenshots-to-files'));
   assert.ok(read(path.join(dir, OPENCODE_CONFIG)).mcp.nodegx.command.includes('--screenshots-to-files'));
-  assert.match(fs.readFileSync(path.join(dir, VIBE_CONFIG), 'utf8'), /"--screenshots-to-files"\]/);
+  // Vibe's server takes the profile, which implies screenshots to files (noodl-mcp cli.ts).
+  assert.match(fs.readFileSync(path.join(dir, VIBE_CONFIG), 'utf8'), /"--profile", "vibe"\]/);
+});
+
+test('P112 OWN-019: the Vibe kit writes only Vibe files — its AGENTS.md, the NodeGX agent, and a config that starts it', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  const run = spawnSync(process.execPath, [BIN, dir, '--vibe'], { encoding: 'utf8' });
+  assert.equal(run.status, 0, run.stderr);
+  // R29: the profile overrides what only suits Claude — no .mcp.json, CLAUDE.md or opencode.json.
+  for (const absent of ['.mcp.json', 'CLAUDE.md', OPENCODE_CONFIG]) assert.ok(!fs.existsSync(path.join(dir, absent)), absent);
+  const toml = fs.readFileSync(path.join(dir, VIBE_CONFIG), 'utf8');
+  assert.equal(toml, renderVibeConfig(process.platform, { profile: 'vibe' }));
+  assert.match(toml, new RegExp(`^default_agent = "${VIBE_AGENT}"$`, 'm'));
+  const agent = fs.readFileSync(path.join(dir, '.vibe', 'agents', `${VIBE_AGENT}.toml`), 'utf8');
+  assert.match(agent, /^instructions = """/m);
+  assert.match(agent, /drive_page/);
+  const notes = fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8');
+  assert.match(notes, /Your tool list will not change/);
+  assert.match(run.stdout, /vibe --legacy-harness/);
+});
+
+test("P112 OWN-019: the Vibe kit never replaces a person's own files", () => {
+  const dir = tmp();
+  fs.mkdirSync(path.join(dir, '.vibe', 'agents'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'AGENTS.md'), 'mine\n');
+  fs.writeFileSync(path.join(dir, '.vibe', 'agents', `${VIBE_AGENT}.toml`), 'mine = true\n');
+  const result = setUp(dir, process.platform, { profile: 'vibe' });
+  assert.equal(fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8'), 'mine\n');
+  assert.equal(fs.readFileSync(path.join(dir, '.vibe', 'agents', `${VIBE_AGENT}.toml`), 'utf8'), 'mine = true\n');
+  assert.deepEqual(result.written, []);
+});
+
+test('P112 OWN-019: the plain kit does not set a default agent (there is no agent file beside it)', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  setUp(dir);
+  assert.doesNotMatch(fs.readFileSync(path.join(dir, VIBE_CONFIG), 'utf8'), /default_agent/);
 });

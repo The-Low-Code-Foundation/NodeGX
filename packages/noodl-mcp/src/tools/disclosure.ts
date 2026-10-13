@@ -40,6 +40,7 @@ import { getParseErrorMessage, normalizeObjectSchema, safeParseAsync } from '@mo
 import { toJsonSchemaCompat } from '@modelcontextprotocol/sdk/server/zod-json-schema-compat.js';
 import { z } from 'zod';
 
+import { callHint, clientProfile } from '../clientProfile';
 import { ToolError } from '../errors';
 
 import { backendRequirementFor } from '../editor-deps';
@@ -311,9 +312,17 @@ export function recordTools(server: McpServer, disclosure: ToolDisclosure): McpS
  * and it is the sentence that saves a session: a model whose client did not
  * refresh will otherwise conclude the tool does not exist.
  */
-const REFRESH_NOTE =
-  'Revealed tools are advertised from your next tool list. If your client does not refresh tool lists on ' +
-  'notifications/tools/list_changed, call them through call_tool (or restart the server with --all-tools).';
+function refreshNote(): string {
+  // OWN-019 census #34: on a client whose list never changes (Vibe) "your next tool list" never comes, and the
+  // restart exit was measured to change nothing (6 → 6) — so it says the one way that works.
+  if (clientProfile().staticToolList) {
+    return 'Your tool list will not change: call them through call_tool({ name, arguments }) (describe: true shows a tool\'s arguments).';
+  }
+  return (
+    'Revealed tools are advertised from your next tool list. If your client does not refresh tool lists on ' +
+    'notifications/tools/list_changed, call them through call_tool (or restart the server with --all-tools).'
+  );
+}
 
 /**
  * BST-001 — what `find_tools` says on a server with no project.
@@ -326,12 +335,27 @@ const REFRESH_NOTE =
  * has, and the reason it stays advertised at all rather than answering "unknown
  * tool".
  */
-const BOOTSTRAP_FIND_TOOLS_DESCRIPTION =
-  'This server has no project bound, so it advertises everything it currently has: ' +
-  BOOTSTRAP_TOOLS.join(', ') +
-  '. The rest of the server — reading and authoring components, validation, rendering, the backend — needs a ' +
-  'project, and arrives when a server is started with a project directory. This tool cannot reveal them here. ' +
-  'Call list_projects to find a project that already exists, or create_project to make one.';
+function bootstrapFindToolsDescription(): string {
+  const surface =
+    'This server has no project bound, so it advertises everything it currently has: ' +
+    BOOTSTRAP_TOOLS.join(', ') +
+    '. The rest of the server — reading and authoring components, validation, rendering, the backend — needs a ' +
+    'project';
+  const exits = 'Call list_projects to find a project that already exists, or create_project to make one.';
+  // OWN-019 census #16. A client that lists tools once (Vibe) keeps THIS description all session — the bound one
+  // swapped in at bind is never re-read — so it must stay true after the bind and name the door that works.
+  if (clientProfile().staticToolList) {
+    return (
+      surface +
+      '. ' +
+      exits +
+      ' Once one is open, call any of its tools through call_tool({ name, arguments }) — your tool list will not ' +
+      'change — and find_tools({ query }) names them.'
+    );
+  }
+  // "arrives when a server is started with a project directory" predates open_project (BST-002); census #16.
+  return surface + ', and arrives once one is open. This tool cannot reveal them here. ' + exits;
+}
 
 /**
  * The bound-mode description.
@@ -372,7 +396,7 @@ export function registerFindTools(server: McpServer, disclosure: ToolDisclosure)
     'find_tools',
     {
       title: 'Find tools',
-      description: bootstrap ? BOOTSTRAP_FIND_TOOLS_DESCRIPTION : boundFindToolsDescription(),
+      description: bootstrap ? bootstrapFindToolsDescription() : boundFindToolsDescription(),
       inputSchema: {
         // 🔴 Derived from the manifest, not written out. Hand-listed, this enum
         // is a second statement of which groups exist — and it was already one
@@ -395,7 +419,7 @@ export function registerFindTools(server: McpServer, disclosure: ToolDisclosure)
       // false` — that shape reads as "ask again for one of these", which is the
       // turn this whole mode exists to save.
       if (disclosure.isBootstrap) {
-        const payload: FindToolsResponse = { revealed: [], groups: [], note: BOOTSTRAP_FIND_TOOLS_DESCRIPTION };
+        const payload: FindToolsResponse = { revealed: [], groups: [], note: bootstrapFindToolsDescription() };
         return jsonResult(payload);
       }
       const revealed: string[] = [];
@@ -453,7 +477,7 @@ export function registerFindTools(server: McpServer, disclosure: ToolDisclosure)
       const payload: FindToolsResponse = {
         revealed,
         groups: disclosure.groupStates(),
-        ...(revealed.length > 0 ? { note: REFRESH_NOTE } : {})
+        ...(revealed.length > 0 ? { note: refreshNote() } : {})
       };
       return jsonResult(payload);
     })
@@ -501,9 +525,11 @@ export function backendRevealPayload(revealed: readonly string[]): { backendTool
   if (revealed.length === 0) return {};
   return {
     backendToolsRevealed:
-      `This graph has nodes that need a backend, so the ${revealed.length} backend tools are now advertised — ` +
-      'call provision_backend before expecting those nodes to do anything at run time. ' +
-      REFRESH_NOTE
+      (clientProfile().staticToolList
+        ? `This graph has nodes that need a backend — call ${callHint('provision_backend')} before expecting ` +
+          `those nodes to do anything at run time (the ${revealed.length} backend tools are all called that way). `
+        : `This graph has nodes that need a backend, so the ${revealed.length} backend tools are now advertised — ` +
+          'call provision_backend before expecting those nodes to do anything at run time. ') + refreshNote()
   };
 }
 

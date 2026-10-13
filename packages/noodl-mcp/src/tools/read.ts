@@ -6,6 +6,9 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+
+import { callHint, clientProfile } from '../clientProfile';
+import { swapAll } from '../instructions';
 import { describeComponent } from '../describe';
 import {
   AUTHORING_TRAPS,
@@ -139,7 +142,44 @@ export function kitsReport(): ProjectKitsReport | undefined {
  * `rootNodeId` (answered "App" for a project the editor opens with "No HOME component selected"). The
  * row is only an ordering hint for the search.
  */
-const SET_HOME = 'find_tools "home" reveals set_project_settings; call it with { home: "App" } (the component holding the Router).';
+/**
+ * OWN-019 census #45–47 — the doctrine is the editor's (its own agent reads the same bytes), so a client profile
+ * rewords it here, at the MCP edge. Each swap throws if its sentence is gone (`swapAll`), so an edit to the doctrine
+ * fails a test instead of silently dropping the variant.
+ */
+function forClient(text: string, which: 'traps' | 'design'): string {
+  const { staticToolList, imagesCostly } = clientProfile();
+  const swaps: Array<readonly [string, string]> = [];
+  if (which === 'traps' && imagesCostly) {
+    swaps.push([
+      'Verify by looking. Call `render_report` when you have written anything visual: it renders the\n' +
+        '   project headless and returns the numbers and the screenshots.',
+      'Verify, then prove. Call `render_report` when you have written anything visual and read its\n' +
+        '   verdict and numbers; then prove what was asked with `drive_page` read steps (the text, a variable,\n' +
+        '   a computed style). Open a screenshot file only at the end: each one costs every later request.'
+    ]);
+  }
+  if (which === 'design' && staticToolList) {
+    swaps.push([
+      'Both sit in the deferred\n   `theme` group: call `find_tools({group:"theme"})` and they arrive in your next tool list.',
+      'Call both\n   through `call_tool({ name, arguments })`, like every tool not in your list.'
+    ]);
+  }
+  if (which === 'design' && imagesCostly) {
+    swaps.push([
+      'Render the project, screenshot it, and measure the DOM\nbefore saying it is done.',
+      'Render the project, then measure the DOM with\n`drive_page` read steps (`{ read: { expression } }`) before saying it is done — no screenshot needed.'
+    ]);
+  }
+  return swaps.length ? swapAll(text, swaps) : text;
+}
+
+function setHome(): string {
+  // OWN-019 census #37.
+  return clientProfile().staticToolList
+    ? `call ${callHint('set_project_settings', '{ home: "App" }')} (the component holding the Router).`
+    : 'find_tools "home" reveals set_project_settings; call it with { home: "App" } (the component holding the Router).';
+}
 
 function homeOf(
   store: ProjectStore,
@@ -154,9 +194,9 @@ function homeOf(
       const nodes = store.readComponent(key).files.nodes.nodes ?? [];
       if (nodes.some((n) => n.id === rootNodeId)) return { path: key, nodeId: rootNodeId };
     }
-    return { nodeId: rootNodeId, missing: true, fix: SET_HOME };
+    return { nodeId: rootNodeId, missing: true, fix: setHome() };
   }
-  return { missing: true, fix: SET_HOME };
+  return { missing: true, fix: setHome() };
 }
 
 export function registerReadTools(server: McpServer, binding: ProjectBinding, options: { allowWrites: boolean }): void {
@@ -214,7 +254,7 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
               // audit measured that what arrives here gets read while what has
               // to be fetched does not. Seven lines, every one a silent failure
               // this project has measured.
-              authoringTraps: AUTHORING_TRAPS,
+              authoringTraps: forClient(AUTHORING_TRAPS, 'traps'),
               authoringDoctrine: DECOMPOSITION_DOCTRINE_MD,
               // CMP-001 AC2 — the other half of the sentence above. The
               // decomposition doctrine says what becomes a component; this says
@@ -224,7 +264,7 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
               // sits directly after `authoringDoctrine` on purpose: the two are
               // one decision, and the second half is the one that gets skipped.
               interfaceDoctrine: INTERFACE_DOCTRINE_MD,
-              designDoctrine: DESIGN_DOCTRINE_MD,
+              designDoctrine: forClient(DESIGN_DOCTRINE_MD, 'design'),
               // SB-002 — the backend idiom, in the same channel and for the
               // same measured reason. The instructions cannot carry it (surface
               // budget) and it corrects a claim the two doctrines above make

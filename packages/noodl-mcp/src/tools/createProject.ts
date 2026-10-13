@@ -38,10 +38,12 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 
+
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { RUN_ON_VALUE_CHANGE_FORMAT_VERSION } from '@nodegx/project-contract/run-on-value-change-migration';
 import { z } from 'zod';
 
+import { callHint, clientProfile } from '../clientProfile';
 import type { AuthoringPlan } from '../../../noodl-editor/src/editor/src/models/AiAssistant/authoring/plan';
 import { validatePlan } from '../../../noodl-editor/src/editor/src/models/AiAssistant/authoring/plan';
 import type {
@@ -603,8 +605,12 @@ export function completeBind(bind: CreateProjectBinding, projectDir: string): Bi
       // launcher entry rather than as a missing door. Said here, in a per-call payload, because
       // the resident surface has seven tokens of headroom (C65) and this sentence is only useful
       // in the one turn where a project has just been bound.
-      'When the user should see it, call open_in_editor with this directory — find_tools({query:' +
-      ' "editor"}) reveals it — and the running editor will open it and list it under Recent projects.',
+      // OWN-019 census #27.
+      (clientProfile().staticToolList
+        ? `When the user should see it, call ${callHint('open_in_editor', '{ directory }')} and the running ` +
+          'editor will open it and list it under Recent projects.'
+        : 'When the user should see it, call open_in_editor with this directory — find_tools({query:' +
+          ' "editor"}) reveals it — and the running editor will open it and list it under Recent projects.'),
     guidance: bindGuidance(projectDir, bind.deferTools)
   };
 }
