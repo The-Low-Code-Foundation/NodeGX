@@ -243,6 +243,14 @@ function renderAgentNote(options: AgentConfigOptions, audience: 'claude' | 'agen
       '- `docs/ARCHITECTURE.md` — how it is put together',
       '- `docs/CONVENTIONS.md` — rules this project agreed to follow, and worth checking work against',
       '- `docs/decisions/` — what was considered and deliberately not done, with reasons',
+      '',
+      // P112 OWN-018 s2 — Mistral Large 4's quiz (run 7): OpenCode summarised the conversation, the summary kept
+      // "Portugal → Lisbon, three answers in exact order" and dropped the answers, and the agent rebuilt them from
+      // memory (Porto / Lisbon / Madrid). The person's words were in 000-initial-scope.md the whole time. This file
+      // is in the system prompt, which a summary never rewrites.
+      'What the person asked for is quoted word for word in `docs/decisions/000-initial-scope.md` ("What was asked',
+      'for"). Build anything they spelled out (names, lists, wording, order) from that quote, and read it again after',
+      'your conversation has been summarised: a summary keeps the gist and drops the exact words.',
       ''
     );
   }
