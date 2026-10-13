@@ -19,6 +19,11 @@
 // A press is a real CDP mouse press at the element's centre. Colours are read from a screenshot of the answer's box,
 // not from CSS: a share of green / red pixels against the same box before the press.
 //
+// Observed (reported beside the score, not in it, so the series stays comparable):
+//   carryover  the moment questions 2–4 appear (polled every 25 ms), any of their answers still green or red — the
+//              last question's colours painted on the new answers (s3: run 10 showed Toronto red, Vancouver green for
+//              ~250 ms; the 12 checks never looked)
+//
 // The audit (reported, not scored): node-type census, list nodes, custom components and their Component Inputs,
 // Timer/Repeat nodes, JavaScript nodes and what their code calls (setInterval, setTimeout, localStorage), how the
 // answers reach the screen (where "Coimbra" is written), storage nodes, and validate_project through the packed MCP.
@@ -111,9 +116,9 @@ const ev = async (expression) => {
   return r.result?.result?.value;
 };
 const bodyText = () => ev('document.body.innerText');
-const waitText = async (re, ms) => {
+const waitText = async (re, ms, poll = 100) => {
   const t0 = Date.now();
-  while (Date.now() - t0 < ms) { if (re.test(await bodyText())) return Date.now() - t0; await sleep(100); }
+  while (Date.now() - t0 < ms) { if (re.test(await bodyText())) return Date.now() - t0; await sleep(poll); }
   return null;
 };
 const shot = async (name) => fs.writeFileSync(path.join(OUT, `${name}.png`), Buffer.from((await send('Page.captureScreenshot', { format: 'png' })).result.data, 'base64'));
@@ -171,6 +176,7 @@ const NUMBERS_AGAIN = `window.__nums.map((o) => ({ was: o.t, now: o.e.isConnecte
 const num = (t) => { const m = String(t ?? '').match(/(\d+(?:\.\d+)?)/); return m ? Number(m[1]) : null; };
 
 // Answer one question by pressing `answer`; returns timings and colours. Waits for the next screen.
+const carried = [];
 const answerQuestion = async (index, answer, { sample = [] } = {}) => {
   const b = await box(exact(answer));
   if (!b) return { pressed: false, why: `no "${answer}" on screen; it reads: ${(await bodyText()).replace(/\s+/g, ' ').slice(0, 160)}`, before: {}, after: {}, advancedMs: null };
@@ -182,7 +188,13 @@ const answerQuestion = async (index, answer, { sample = [] } = {}) => {
   const after = {};
   for (const s of sample) after[s] = await colours(await box(exact(s)));
   const nextRe = index < 4 ? new RegExp(`Question\\s*${index + 2}\\s*(of|/)\\s*5`, 'i') : /scored\s*\d+\s*(out of|\/)\s*5/i;
-  const waited = await waitText(nextRe, 6000);
+  const waited = await waitText(nextRe, 6000, 25);
+  if (waited !== null && index < 3) {
+    for (const a of QUESTIONS[index + 1].answers) {
+      const c = await colours(await box(exact(a)));
+      if (c && (c.green >= 0.08 || c.red >= 0.08)) carried.push({ question: index + 2, answer: a, ...c });
+    }
+  }
   return { pressed: true, lands: b.lands, before, after, advancedMs: waited === null ? null : Date.now() - t0 };
 };
 
@@ -377,9 +389,11 @@ if (!argv.includes('--no-audit')) {
 }
 
 const passed = CHECK_NAMES.filter((n) => checks[n].ok).length;
-const result = { app: APP, at: new Date().toISOString(), score: `${passed}/${CHECK_NAMES.length}`, passed, stopped: fatal, checks, pageErrors: errors.slice(0, 10), audit };
+const observed = { carryover: { clean: carried.length === 0, seen: carried } };
+const result = { app: APP, at: new Date().toISOString(), score: `${passed}/${CHECK_NAMES.length}`, passed, stopped: fatal, checks, observed, pageErrors: errors.slice(0, 10), audit };
 fs.writeFileSync(path.join(OUT, 'grade.json'), JSON.stringify(result, null, 2) + '\n');
 for (const d of [profile, LABHOME]) try { fs.rmSync(d, { recursive: true, force: true, maxRetries: 3 }); } catch {}
 console.log(`\nSCORE ${result.score}  ${CHECK_NAMES.map((n) => `${checks[n].ok ? '✓' : '✗'}${n}`).join(' ')}${fatal ? `  (stopped: ${fatal})` : ''}`);
+console.log(`OBSERVED carryover: ${carried.length ? carried.map((c) => `Q${c.question} ${c.answer} ${c.red >= 0.08 ? 'red' : 'green'}`).join(', ') : 'clean'}`);
 if (audit) console.log('AUDIT', JSON.stringify({ components: audit.components, nodes: audit.nodes, list: audit.list, custom: audit.customComponentsPlaced, inputs: audit.componentsWithInputs, timer: audit.timer, js: audit.javascript.count, jsCalls: audit.javascript.nodes.flatMap((n) => n.calls), answersWritten: audit.answersWritten.map((a) => `${a.type}.${a.param}${a.literal ? ' (literal)' : ''}`), storage: audit.storage.map((s) => s.type), validate: audit.validate }));
 process.exit(passed === CHECK_NAMES.length ? 0 : 1);

@@ -537,3 +537,31 @@ start page.
 **The Mistral config that works (OpenCode 1.19.0):** `opencode -m mistral/mistral-large-4`, default reasoning (no
 variant), the kit's `opencode.json` as written (`limit {context 150000, output 32000}`, server with
 `--screenshots-to-files`). Not yet tried: temperature (two degenerate tool calls in runs 6–7), and Vibe.
+
+## 15. Session 3 (2026-10-13): Vibe on a subscription
+
+**Run 10 looked at, not just graded.** The grader's third screenshot shows *question 3* with Toronto red and Vancouver
+green: question 2's colours on the new answers. A probe read the buttons' colour as question 3 appeared: full red and
+green at +0 ms, fading out by +300 ms (a CSS transition on a reset that lands with the new text). A person sees a
+quarter-second flash on every advance. The 12 checks never looked at the next question's answers.
+**Grader (`grade-quiz.mjs`), an observation beside the score, not in it** (so the 12/12 series stays comparable):
+`carryover` — the moment questions 2–4 appear (polled every 25 ms), any answer already green or red. Proven both ways:
+run 10 shows it on every advance (Q2 Sydney green, Q3 Toronto red + Vancouver green, Q4 Marrakesh green, …); Sonnet
+run 0, Mistral runs 6 and 9 are clean.
+
+**Vibe 2.26.1, read from its source, against the kit's `.vibe/config.toml`:**
+- compaction: `max_context_length = 1000000` with no `auto_compact_threshold` → Vibe compacts at a ratio of the window,
+  i.e. effectively never (OpenCode's pre-17b992839 state);
+- the legacy harness (the kit's advice) sends no `max_tokens` (`max_output_tokens` is read by the unified harness
+  only), so a runaway think is not cut at 32k — it runs to Mistral's own limit;
+- `thinking = "high"` sends `reasoning_effort: "high"`; the OpenCode runs that graded 12/12 sent none.
+These are the levers after the baseline run, which uses the config exactly as the kit writes it.
+
+**Subscription access (Mistral docs):** Vibe is included in Le Chat Pro and Team; a plan user makes a key under
+Code › Vibe CLI (pay-as-you-go: Organization › API keys). An exported `MISTRAL_API_KEY` wins over `~/.vibe/.env`.
+
+**Runner (`round-kit.mjs`) to the s2 lab rules:** real-path root, TMPDIR inside the empty HOME, the kit's server
+flags kept (`--screenshots-to-files`), the key `MISTRAL_VIBE_API_KEY` from the repo `.env` when present (else
+`MISTRAL_API_KEY`; `--key vibe|api`), its name in command.txt. Smoke (`v/smoke1`, pay-as-you-go, ~$0.04): the kit's
+config and the packed server loaded, `/etc/hosts` refused by the seal and the run went on, finished by itself,
+41% cached.

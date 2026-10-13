@@ -15,15 +15,25 @@
 // holds — and the shells and the web are "never". Vibe checks a denylist before the workspace boundary and answers it
 // with a skip ("permanently disabled"), which the run survives. A clean machine has none of this repo's files on it.
 //
-//   node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price 4] [--max-turns 250] [--thinking high|low]
+// s3 (2026-10-13), the s2 lab rules: the root is a real path (/tmp is a symlink on macOS), TMPDIR is inside the empty
+// HOME, every flag the kit writes after the server's name is kept (--screenshots-to-files), and the key is the Vibe
+// subscription's (MISTRAL_VIBE_API_KEY, made under Code › Vibe CLI) when the repo .env has one, else the pay-as-you-go
+// MISTRAL_API_KEY; an exported MISTRAL_API_KEY wins over ~/.vibe/.env (Vibe's docs), so the empty HOME stays empty.
+// command.txt records which key was used, never its value. Measured from Vibe 2.26.1's source: the kit's
+// max_context_length 1,000,000 puts compaction near the full window, and the legacy harness sends no max_tokens — so
+// unlike OpenCode, a long think is not cut at 32k.
+//
+//   node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price 4] [--max-turns 250] [--thinking high|low] [--key vibe|api]
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 
-const [root, tgzDir, promptFile, ...rest] = process.argv.slice(2);
-if (!root || !tgzDir || !promptFile) throw new Error('usage: node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price N] [--max-turns N] [--thinking high|low]');
-if (fs.existsSync(root)) throw new Error(`${root} exists; a round starts from an empty folder`);
+const [rootArg, tgzDir, promptFile, ...rest] = process.argv.slice(2);
+if (!rootArg || !tgzDir || !promptFile) throw new Error('usage: node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price N] [--max-turns N] [--thinking high|low]');
+if (fs.existsSync(rootArg)) throw new Error(`${rootArg} exists; a round starts from an empty folder`);
 const opt = (name, dflt) => { const i = rest.indexOf(name); return i >= 0 ? rest[i + 1] : dflt; };
+fs.mkdirSync(rootArg, { recursive: true });
+const root = fs.realpathSync(rootArg);
 
 const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../../..');
 const VIBE = 'mistral-vibe==2.26.1';
@@ -32,18 +42,22 @@ const APPS = path.join(root, 'work', 'apps');
 const OUT = path.join(root, 'out');
 const tgz = (name) => path.resolve(tgzDir, name);
 fs.mkdirSync(path.join(HOME, '.vibe'), { recursive: true });
+fs.mkdirSync(path.join(HOME, 'tmp'), { recursive: true });
 fs.mkdirSync(path.dirname(APPS), { recursive: true });
 
-const envLine = fs.readFileSync(path.join(REPO, '.env'), 'utf8').split('\n').find((l) => l.startsWith('MISTRAL_API_KEY='));
-if (!envLine) throw new Error('MISTRAL_API_KEY is not in the repo .env');
+const dotenv = fs.readFileSync(path.join(REPO, '.env'), 'utf8').split('\n');
+const keyFrom = (name) => dotenv.find((l) => l.startsWith(`${name}=`))?.slice(name.length + 1).trim().replace(/^["']|["']$/g, '') || null;
+const keyName = { vibe: 'MISTRAL_VIBE_API_KEY', api: 'MISTRAL_API_KEY' }[opt('--key', keyFrom('MISTRAL_VIBE_API_KEY') ? 'vibe' : 'api')];
+if (!keyName || !keyFrom(keyName)) throw new Error(`${keyName || opt('--key')} is not in the repo .env`);
 const env = { ...process.env };
 for (const k of Object.keys(env)) if (k.startsWith('NODEGX_') || k.startsWith('NOODL_') || k.startsWith('VIBE_') || /KEY|TOKEN|SECRET/.test(k)) delete env[k];
 Object.assign(env, {
   HOME,
   VIBE_HOME: path.join(HOME, '.vibe'),
+  TMPDIR: path.join(HOME, 'tmp'),
   npm_config_cache: path.join(HOME, '.npm'),
   UV_CACHE_DIR: spawnSync('uv', ['cache', 'dir'], { encoding: 'utf8' }).stdout.trim(),
-  MISTRAL_API_KEY: envLine.slice('MISTRAL_API_KEY='.length).trim().replace(/^["']|["']$/g, '')
+  MISTRAL_API_KEY: keyFrom(keyName)
 });
 
 // 0. The lab's seal (see the header). fnmatch has no negation, so it is built from the ancestors of the lab.
@@ -101,10 +115,11 @@ const args = [
   '--max-turns', opt('--max-turns', '250'),
   '--workdir', APPS
 ];
-fs.writeFileSync(path.join(root, 'command.txt'), ['uvx', ...args].join(' ') + (thinking ? `\n# thinking = ${thinking}\n` : '\n'));
+fs.writeFileSync(path.join(root, 'command.txt'), ['uvx', ...args].join(' ') + `\n# key: ${keyName}${thinking ? `; thinking = ${thinking}` : ''}\n`);
 const log = fs.createWriteStream(path.join(root, 'agent.jsonl'));
 const err = fs.createWriteStream(path.join(root, 'agent.stderr'));
 const child = spawn('uvx', args, { cwd: APPS, env, stdio: ['ignore', 'pipe', 'pipe'] });
 child.stdout.pipe(log);
 child.stderr.pipe(err);
-child.on('close', (code) => { fs.writeFileSync(path.join(root, 'agent.exit'), String(code)); console.log('exit', code); });
+const t0 = Date.now();
+child.on('close', (code) => { fs.writeFileSync(path.join(root, 'agent.exit'), `${code} ${Math.round((Date.now() - t0) / 1000)}s`); console.log('exit', code); });
