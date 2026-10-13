@@ -18,7 +18,8 @@
   ],
   "antiPatterns": [
     "Using Script for a simple transform that reruns on input change — the Function node does that with less ceremony.",
-    "Assigning outputs without the declared `outputs` entry: undeclared names never become ports."
+    "Assigning outputs without the declared `outputs` entry: undeclared names never become ports.",
+    "Setting an output at the top level of the code (`Script.Outputs.x = 'start'` outside any function): that line runs while the code is read and overwrites the declaration, so nothing is sent. Set a starting value in `setup`."
   ],
   "relatedNodes": ["JavaScriptFunction", "Expression", "Logic Builder"]
 }
