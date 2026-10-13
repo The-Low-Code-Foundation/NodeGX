@@ -372,3 +372,14 @@ post-tool, post-agent) — and the kit uses none of them yet.
   sitting's requests through `own-018/record-proxy.mjs` (`--compare`: does each request extend the one before?)** —
   it decides between "Mistral's cache tonight" and "something in the sitting's prompts". At 20% a start page costs
   what a whole s2 round did; it matters for R30.
+- **s3, q6 part 1 (tgz26, the guides): 37 min, 32 tool calls, $1.34 list (34% cached)** — half q4's part 1 ($3.20, 73
+  calls, no guides); both start-screen lines passed with what it measured; stopped by itself under the 60-call rail.
+- **s3, R32 (Richard): one session, taught** (README R32). Per-part sittings held the process but cost 4–6 h a quiz and
+  fought Vibe's single pass; the one-shot rounds were already near a YouTuber's "an hour, €30" for three.js games.
+  **The kit, rebuilt (`23f96461e`, tgz27):** AGENTS.md — one session by a written process: notes first (REQUEST,
+  CHECKLIST with whole examples, PLAN with parts ≤4 lines), then each part built and its lines driven before the next,
+  then prove and `# Done`; hand over through `docs/NEXT.md` ("# Next session: …", where things are, what to try) only
+  at ~100 tool calls or two failed fixes. The hook (`hooks/hand-over.mjs`): asks for the hand-over at 100 tool calls,
+  and closes all but the notes once a session has written NEXT.md; the plan-sitting lock is gone. Skills:
+  `nodegx-first-day`, **`nodegx-sizing-the-work`** (was `-a-sitting`: part size, the signs, the hand-over, a good
+  NEXT.md), `nodegx-when-stuck`. o1 measures it (`--sittings 4`, `--max-price 10` per session); q6 runs on to `# Done`.
