@@ -23,12 +23,15 @@
   ],
   "patterns": [
     "Query Records `items` → Repeater `items`: the canonical data-driven list.",
-    "Item component declares Component Inputs matching record property names — no explicit per-field wiring at the list level."
+    "Item component declares Component Inputs matching record property names — no explicit per-field wiring at the list level.",
+    "A row tells the list what it needs with a signal and values side by side: when a row sends a Component Outputs signal, For Each first fills every `itemOutput-<name>` (and `itemActionItemId`) with that row's values, then sends `itemOutputSignal-<name>` — and a node takes its waiting values before its waiting signals — so a node wired to both reads the tapped row's values when the signal arrives. A signal itself carries no value: send the value on its own Component Output beside it.",
+    "There is no row-index port: when a row needs its position (which answer was tapped), put it on each item (`{ \"id\": \"a0\", \"label\": \"Lisbon\", \"index\": 0 }`) and read it in the row through Component Inputs."
   ],
   "antiPatterns": [
     "Triggering `refresh` whenever data changes: the repeater already diffs `items`; refresh forces a full rebuild and loses instance state.",
     "Binding huge unpaged query results into a repeater; page or limit the query instead.",
-    "Two lists numbering rows alike (`l0, l1…`) each keep their own, but a lookup by id (an Object node given the row's `Id`, a write to `itemActionItemId`) finds the first list's row. In a row, use From repeater; give rows edited by id unique ids."
+    "Two lists numbering rows alike (`l0, l1…`) each keep their own, but a lookup by id (an Object node given the row's `Id`, a write to `itemActionItemId`) finds the first list's row. In a row, use From repeater; give rows edited by id unique ids.",
+    "Feeding `items` from a Function or Expression that builds a fresh array of objects with no `id` each time it runs: a row is matched to its item by `id` (or, without one, by being the very same object), so every run draws every row again and the rows lose their state. Give each item a stable `id`."
   ],
   "relatedNodes": [
     "DbCollection2",
