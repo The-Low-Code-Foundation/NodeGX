@@ -210,6 +210,7 @@ post-tool, post-agent) — and the kit uses none of them yet.
 | p0 Sonnet | core, tgz14 (Claude Code) | 0/12 as served; 12/12 healed | itself | 20 | 3.85 API-eq. | 97% | DUPCHILD; the grader proven |
 | pk1 | Vibe kit, tgz16 | 11/12 | itself | 63 | 3.95 | 82% | SAMEVALUE |
 | pk2 | Vibe kit, tgz17 | **12/12** | itself | 59 | 4.34 | 72% | AC5: 1 of 3 |
+| pk3 | Vibe kit, tgz18 | **12/12** | itself | 83 | 5.59 | 64% | AC5: 2 in a row |
 - **s2, v9 (tgz18, lever 3 — the answer-size line in AGENTS.md): 12/12, no stall**, finished by itself in 45 min,
   $2.68 by Vibe's list count (~$1.34 cached, 76%). Its longest think was 98 KB (the stalled rounds' 142–172 KB).
   **Carryover again** (Q2 Sydney green, Q3 Toronto red, Q4 Rabat red) — as v7, so not the temperature. v9's graph:
@@ -217,3 +218,11 @@ post-tool, post-agent) — and the kit uses none of them yet.
   index (new words, new `correct`) changes while `answered` is still true, and is cleared after. v2/v3 cleared first.
   No checklist line ever looked at the moment a question appears. **P112-OWN019-CARRYOVER** (open): the Vibe
   AGENTS.md checklist step now asks for it, and to reset before the words change (`f9c22c74b`, kit tgz19) — v10.
+- **s2, pk3 (tgz18): 12/12**, finished by itself in 83 min, $5.59 by Vibe's list count (~$2.80 cached, 64%). Pack
+  It: pk2 ✓ pk3 ✓. pk4 on tgz19 (`--max-price 8`: pk3 came within $0.41 of the old $6 stop).
+- **s2, the "stalls" re-measured — the lab, not the model** (P112-OWN019-LONGTHINK → low, `bdf57f43a`): Vibe writes a
+  think to the journal only when it ends; the rounds that finished thought for up to 10.1 min at a time (9–17 KB/min),
+  and v4/v8 were stopped by `--stall-min 12` at 11.8/12.4 min still writing at full speed, no more repetitive than
+  thinks that finished (~1% repeated 8-word phrases; the same density of "wait/hmm"). Default now 30. So v4 and v8
+  are not model failures — they are unfinished rounds. Lesson for the lab: a watchdog on silence must be longer than
+  the longest productive silence measured, and that has to be measured first.
