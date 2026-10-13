@@ -9,7 +9,7 @@ package that only work well with Claude and Claude Code, we need to be able to o
 vibe version."*
 **Depends on** OWN-018 (the lab: `round-kit.mjs`, `grade-quiz.mjs`, kit tgz12, everything Mistral taught the kit) and
 Richard's Vibe subscription key (`MISTRAL_VIBE_API_KEY` in the repo `.env`, made under Code › Vibe CLI).
-**Status: 🟡 s2 done (2026-10-13). AC5 met (Pack It pk2–pk4, 12/12 ×3, each finished by itself). AC4 open: quiz v10 12/12 clean but stopped by the lab's price cap; v12 8/12 (AFTERTIMEOUT). R30 (the Vibe subscription or no Mistral), R31 (a process, session by session, run by the agent itself), AC8 (a Fable 5.1 audit at the end). Next: the process kit (R31). Handoff: `own-019/NEXT-SESSION-PROMPT.md`.**
+**Status: 🟡 s3 done (2026-10-13). AC5 met (s2). AFTERTIMEOUT found and fixed (the app's graph; Condition note). R31 built as a process kit (sittings + hook + three teaching skills), then R32 (one session, taught); o1 showed one session re-creates the whole-app design think (171 KB) that sittings kept small; Mistral ran at half speed after 20:00. The field guide `own-019/VIBE-AND-LARGE4.md`; the lab records (`anatomy.mjs`, `--record`). Next: the same-window daytime comparison (o2 vs q7), then AC4. Handoff: `own-019/NEXT-SESSION-PROMPT.md`.**
 **Model:** Opus for the sessions that build and read the rounds. The agent under test: **Mistral Large 4
 (`mistral-large-4`, never `-latest`) in Mistral Vibe**, pinned to a version per round (2.26.1 at opening).
 

@@ -1,60 +1,47 @@
-# OWN-019 — next session (s3): the process kit (R31), then the series on it
+# OWN-019 — next session (s4): the same-window comparison, then the series
 
-**Written 2026-10-13, end of OWN-019 s2 (Opus 5.5).** Read `../OWN-019-THE-VIBE-KIT.md` §7 from "s2" on (both series
-tables are there), then the P112 README's R30 and R31.
+**Written 2026-10-13 ~23:40, end of OWN-019 s3 (Opus 5.5).** Read, in order: `VIBE-AND-LARGE4.md` (the field guide —
+its optimisation summary first), `../OWN-019-THE-VIBE-KIT.md` §7 from "s3" on, the P112 README's R30–R32.
 
-**Model:** Opus for this session. The agent under test: Mistral Large 4 (`mistral-large-4`) in Mistral Vibe 2.26.1,
-on the Vibe Code subscription key (`MISTRAL_VIBE_API_KEY` in the repo `.env`; never outside Vibe). The audit at the
-end (AC8) is a separate **Fable 5.1** session.
+**Model:** Opus. Agent under test: Mistral Large 4 in Vibe 2.26.1 on the Vibe Code subscription key. **Run rounds in the
+daytime (before ~18:00 CEST) and record the hour:** on 2026-10-13 Large 4 thought at 130–260 chars/s until 18:30 and
+~50 after 20:00, with the cache at 9–41% (afternoon 60–76%) and two dropped streams — evening rounds are not
+comparable with afternoon ones.
 
-## The two rulings that decide this session
+## The rulings that decide this session
 
-- **R30:** the Vibe subscription is the only Mistral deal that counts (€20/month → €255 of usage). If it can't be made
-  to work, no Mistral. Reporting Vibe's harness defects to Mistral is an end-of-evaluation option, as **issues** (the
-  repo takes no code contributions).
-- **R31:** the agent runs a **written process, session by session, by itself**, the way we work in this repo (the
-  castle-game lesson: one-shotting doesn't work). A non-technical person can't judge its notes, so nobody checks them
-  for it. **The lab steers by nothing but a fixed "continue"** — never read the agent's output to choose a prompt.
+- **R30:** Vibe on the subscription, or no Mistral. Vibe's `cost_usd` is the real cost at list prices (verified s3);
+  the "≈half" is the launch sale, ending ~2026-10-20.
+- **R31:** a written process the agent runs by itself; the lab says only "Continue.".
+- **R32 (s3):** one session, taught — notes, parts ≤4 lines proven as it goes, prove, hand over only at ~100 tool calls
+  or two failed fixes. **But o1 measured its cost:** with the whole plan in front of it, Large 4 designed the whole app
+  in one 171 KB / 30-min think (not a loop) and the watchdog stopped it; the per-part sittings (q6) never thought past
+  69 KB. R32 stands until the same-window comparison below says otherwise — then put the numbers to Richard.
+- **Teaching (s3, Richard):** kit text for Large 4 is a gentle senior colleague's voice, with the why and the stories.
 
 ## Where things are
 
-- **AC5 met:** Pack It (`own-019/sentence-pack.txt`, grader `own-019/grade-pack.mjs`) pk2, pk3, pk4 — 12/12, each
-  finished by itself, ~€2–2.80 real each.
-- **AC4 open (the quiz):** v2, v3 12/12 (tgz14); v10 12/12 with carryover clean but stopped by the lab's old $6 cap;
-  v12 8/12 (**AFTERTIMEOUT**, open); **v11 stalled in a real loop** (282 KB, 30 min, 100% repeated) debugging its own graph (unreduced). AFTERTIMEOUT itself is the app's graph, not the runtime — fixed in s3 (`74c19d5ab`).
-- **Kit tgz19** (create-nodegx at `f9c22c74b`; MCP + preview as tgz17, `21a3d0b98`): in s2's scratchpad
-  `…/d34c68d9-…/scratchpad/v/tgz19` — may be gone. Re-pack in the worktree `own018-s3-pack` (s1's scratchpad; if gone,
-  `scripts/devtools/make-worktree.sh`, then real empty `packages/noodl-mcp/dist/*` and `packages/noodl-preview/dist`
-  before `npm pack`). The preview is tgz12's (runtime unchanged for both briefs except Aggregate Records); re-pack it
-  only if the runtime changes (its pack runs webpack).
-- **The lab now:** `round-kit.mjs --kit vibe` with `--stall-min` 30 (default) and `--max-price 10` (Vibe's list count;
-  real ≈ half). Three lab faults found and fixed in s2 — the unsealed root, the 12-minute watchdog (Large 4's
-  productive thinks run up to 10 min), the price cap on a list count. **Before believing a red, probe it** (s2's
-  probes: re-read before press, settle after typing, slow taps, all-right run): three graders' first reads were the
-  grader. After any grader change, re-prove it: `mutate-pack.mjs` + the s2 `run-mutants.sh` pattern (control 12/12,
-  11/11 exact).
+- **Kits** (s3 scratchpad `…/f0f280e3-…/scratchpad/v/`, may be gone — re-pack from HEAD: create-nodegx is a plain
+  `npm pack ./packages/create-nodegx` (relative path!); the MCP from the worktree `own018-s3-pack` at HEAD; preview =
+  tgz12's): **tgz27** = R32 one-session kit (`23f96461e`); **tgz26** = per-part sittings kit with rails (`3263a643e`);
+  both with MCP at `f419f035c` (Condition + For Each notes).
+- **q6** (tgz26, sittings) was left running overnight to `# Done`, recorded from sitting 4 (`q6/calls/`, proxy on port
+  8795 started with nohup — kill it when q6 ends: `lsof -ti tcp:8795 -sTCP:LISTEN`). **First: read q6** — `q6.log`,
+  `sittings.json`, `anatomy.mjs q6`, `record-proxy.mjs --compare q6/calls` (does each request extend the one before?
+  `calls.jsonl` cached_tokens per call answers the evening-cache question), and **grade it** if it reached `# Done`
+  (`own-018/grade-quiz.mjs <q6> --tgz <tgz26>`). Also kill the o1 proxy (port 8796) if still up.
+- **AFTERTIMEOUT:** fixed (the app's graph; Condition note). **For Each notes:** the four mined questions answered.
 
 ## Do, in order
 
-1. **Build the process kit (R31)** in `packages/create-nodegx/profiles/vibe/` (and what the server needs, behind
-   `--profile vibe`, if anything). The agent, by itself:
-   - **sitting 1 — plan:** reads the request; writes `docs/PLAN.md` (screens, components, the decisions and why — the
-     thinking that today lives only in 10-minute thinks) and `docs/CHECKLIST.md` (one line per thing a person sees or
-     does, **the request's own worked examples as whole lines** — "You scored 3 out of 5" is right, wrong, right,
-     timed out, right — each with the drive that proves it and a status); ends by writing `docs/NEXT.md`.
-   - **sittings 2…n — build:** start from `docs/NEXT.md`; build the next part; drive its lines; update CHECKLIST and
-     NEXT; stop.
-   - **last sitting — prove:** drive every line; report pass/fail per line; write "done" in NEXT only when all pass.
-   Keep it short and in AGENTS.md's voice; the steps must say *it is a process* and *where it is in it*.
-2. **The lab for sittings:** `round-kit.mjs --sittings N` — sitting 1 is the person's paragraph; every later sitting
-   is a fresh `vibe -p` in the same folder with the **same fixed words** ("Continue."), until `docs/NEXT.md` says done
-   or N sittings. Fresh sessions, not `--continue` (small contexts are the point). Measure per sitting and in total:
-   grade, finished-by-itself, minutes, real €, input tokens per call, longest think.
-3. **Rounds, one lever at a time, against s2's single-session rounds:** the quiz and Pack It on the process kit.
-   Then AC4 (three quiz rounds clean in a row) and AC5 again on it.
-4. **AFTERTIMEOUT:** done in s3 (`74c19d5ab`: the app's graph; the Condition's notes). Was: reduce v12's miss to the smallest graph (a For Each row signal + an unchanged item value into a
-   component, an Expression on it, a Condition on the signal). If the runtime drops it, it is a NodeGX defect —
-   fix it under the bug's own file.
-5. **Mine the thinks** (s2's journals, `type: "reasoning"`) for questions the notes didn't answer (v6 went to read
-   the runtime's source to learn a signal's meaning) → kit notes.
-6. Then **AC6** (Richard's own run) and **AC8** (the Fable 5.1 audit; prepare its reading list in the task file).
+1. **Read q6** (above) and record it in §7 and the field guide.
+2. **The same-window comparison**, daytime, both `--record`, side by side: **o2** = tgz27 (`--sittings 4
+   --max-price 10 --stall-min 45`) and **q7** = tgz26 (`--sittings 14 --max-price 6`). Measure per round: grade
+   (grade-quiz), finished by itself, wall time, Vibe $, cached %, longest think, hook firings. `anatomy.mjs` on both.
+3. **Put the result to Richard in plain words** (one session vs sittings: time, cost, grade) and let him rule.
+4. **Then AC4/AC5 on the chosen shape** (three quiz rounds clean in a row; Pack It again).
+5. **Untried levers, one per round** (field guide summary §7): `auto_compact_threshold` ~118k; a `post_agent`
+   "no `# Done` with a line unproven" hook; `system_prompt_id` (could drop Vibe's headless "single pass" line); a
+   repetition-aware stall guard via the recorder (a loop repeats its 8-word phrases ~100%; a productive think ~1%).
+6. AC6 (Richard's own run, interactive — no headless "single pass" line there) and AC8 (Fable 5.1 audit; the field
+   guide is its first read).
