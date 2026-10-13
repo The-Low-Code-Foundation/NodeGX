@@ -140,6 +140,7 @@ post-tool, post-agent) — and the kit uses none of them yet.
 | v7 | tgz17, temperature 0.2, sealed lab | 12/12, **carryover** | itself | 41 | 2.97 | 64% | ~3 | 0.2: no stall, fewer drives, the last question's colours flash on the next |
 | v8 | tgz17, kit defaults, sealed lab | — | **stalled** (one think, 145 KB) | 18 | 0.34 | 45% | 0 | LONGTHINK again at the defaults: designing the whole app in one answer |
 | v9 | tgz18 (one answer, one tool call) | 12/12, **carryover** | itself | 45 | 2.68 | 76% | — | no stall (longest think 98 KB vs 142–172 KB stalled); CARRYOVER |
+| v10 | tgz19 (+ the next-screen checklist line) | **12/12, clean** | the lab's $6 stop, at its last step | 75 | 6.30 | 61% | 50 | the carry-over line works; the price stop was the lab's |
 
 - **s2 (2026-10-13, Opus):** kit tgz14 reused for v3 (create-nodegx and MCP byte-identical in source to HEAD at the
   time; the runtime had moved only in Aggregate Records, which the quiz never touches). **v3: 12/12, carryover clean,
@@ -226,3 +227,9 @@ post-tool, post-agent) — and the kit uses none of them yet.
   thinks that finished (~1% repeated 8-word phrases; the same density of "wait/hmm"). Default now 30. So v4 and v8
   are not model failures — they are unfinished rounds. Lesson for the lab: a watchdog on silence must be longer than
   the longest productive silence measured, and that has to be measured first.
+- **s2, v10 (tgz19 — the checklist asks what the next screen looks like the moment it appears): 12/12, carryover
+  clean.** Its checks covered it ("Play again restarting cleanly at question 1 … no leftover colours", a 29-step drive
+  among ~50). But the round was stopped by the lab's `--max-price 6` at its very last step (final render, validate,
+  docs) — $6.30 by Vibe's list count, ~$3.15 at the cached rate. The third lab-made stop of the day (the unsealed
+  root, the 12-minute watchdog, now the price cap on a list count that ignores the cache). Not an AC4 pass as written
+  ("finished by itself"). Quiz rounds now run with `--max-price 10`. v11 and v12 side by side, tgz19.
