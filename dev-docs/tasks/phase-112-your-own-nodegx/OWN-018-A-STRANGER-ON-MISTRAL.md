@@ -576,3 +576,11 @@ so every wire from a Script output threw at page load and was never made, and a 
 function. Reproduced in the packed preview (five forms on one page, all dead, one `reading 'type'` per Script); the
 fix reads the code's own ports where the model has none. Regression red on the unfixed file, Script spec green.
 Not yet seen in a browser: the preview's page runtime is the viewer's deploy bundle, rebuilt at the next pack.
+
+**Kit tgz12** (`v/tgz12/`; worktree `own018-s3-pack` from `make-worktree.sh`, its `noodl-mcp/dist` and
+`noodl-preview/dist` links replaced by empty folders): preview at `a5abefe4d` (SCRIPTPORTS; its production
+`noodl.deploy.js` carries the fix), MCP at `a0a449659` (Script's notes: an output set at the top level of the code
+is never sent — Sonnet's engine did that), create-nodegx unchanged. **Seen in a browser on tgz12:** the repro page's
+legacy, bare and Sonnet-shaped Scripts deliver on the press with no errors (0 of 5 did, 5 errors, on tgz11); the
+top-level set still sends nothing (as in the editor; now in the notes). Regraded on tgz12: Sonnet s3 and Mistral
+run 9 still 12/12, carryover clean. **The Vibe series uses tgz12.**
