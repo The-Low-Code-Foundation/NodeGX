@@ -20,7 +20,7 @@
   ],
   "antiPatterns": [
     "Expecting each Variable2 instance to hold its own value — the name is the identity, all instances with one name share one value. For private per-node state use Boolean/Number/String/Color.",
-    "Using variables as persistent storage — the store is in-memory and resets on page reload; persist important data in the cloud database or browser storage nodes."
+    "Using variables as persistent storage — the store is in-memory and resets on page reload. A value one person keeps on their own device (a best score, a setting) needs no backend: a Function saves it with `localStorage.setItem` and reads it back at load. A backend is for data shared between people or devices."
   ],
   "relatedNodes": ["Set Variable", "Model2", "Boolean", "Number", "String", "Color"]
 }

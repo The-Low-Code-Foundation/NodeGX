@@ -8,8 +8,10 @@ separate web server or hand-written HTML and JavaScript instead: that would be a
 
 1. Read what I asked for. Anything I spelled out — names, lists, wording, order, timings, colours — is built exactly
    as written.
-2. Open or create the project. Then read `call_tool({ name: "get_project_info" })`: its traps are mistakes other
-   builders made here.
+2. Open or create the project. A value only this device needs to keep (a best score, a setting) is not a backend:
+   a Function saves it with `localStorage` — create the project with `backend: { kind: "none" }` unless people or
+   devices share data. Then read `call_tool({ name: "get_project_info" })`: its traps are mistakes other builders
+   made here.
 3. Write the checklist before building: one line for each thing I could see or do — what is on screen, what a tap
    does, what it looks like (a colour), when it happens (a time), what is still there after a reload.
 4. Build one component at a time and read every answer. A refused change says exactly what to fix.

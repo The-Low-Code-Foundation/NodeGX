@@ -108,3 +108,9 @@ post-tool, post-agent) — and the kit uses none of them yet.
   legacy harness (the kit's) the build steps never reached the model (smoke 4). They live in the Vibe kit's
   AGENTS.md now (`8f47ba49e`); smoke 6 recited all six. The agent file keeps its tool settings (`task` off). Kit tgz13
   (`v/tgz13`): create-nodegx at `8f47ba49e`, MCP at `d8572ccdb`, preview = tgz12.
+- **s1, v1b — the baseline on the Vibe Code key: 0/12**, finished itself in 23 min, $1.25 (Vibe's list count), 77%
+  cached. It scoped the quiz with a backend (`kind: "nodegx"`, a `Score` collection) and spent its first third
+  provisioning it (P112-OWN019-LOCALKEEP, filed + notes fixed), then built through plans, **never called drive_page**,
+  and ended on a sentence of intent ("I need to find where that port comes from") — in `vibe -p` a reply with no tool
+  call ends the run (a person would type "keep going"). The app: question 1 draws; the timer never moves and a tap
+  does nothing. So the plain kit in Vibe, as a person gets it today, is far from OpenCode's 12/12.
