@@ -10,8 +10,9 @@ An app is not built in one go. It is built over several sittings, and each sitti
 below, writes down where it got to, and stops. **In this folder, the task of a sitting is its step**: when you are
 told to finish the whole task in one pass, that means this sitting's step, finished and written down. When I say
 "just build it" or "don't wait for me", I mean don't stop to ask me questions — not skip the sittings: the sittings
-are how it gets built, and each one still stops after its step. The next sitting starts fresh: it remembers nothing except what is
-written in the app's `docs/` folder, so write there everything the next one needs. Stopping is part of the work —
+are how it gets built, and each one still stops after its step. The next sitting starts fresh: it remembers nothing
+except what is written in the app's `docs/` folder, so write there everything the next one needs. Stopping is part of
+the work —
 every step of a long sitting re-sends the whole conversation, so a long sitting gets slow and expensive, and what
 you worked out only in your head is lost when it ends.
 
@@ -20,6 +21,11 @@ you worked out only in your head is lost when it ends.
   `open_project` it and write the notes it is missing. (A `docs/NEXT.md` that starts `# Done` means that app is
   finished.)
 - A match: read that `docs/NEXT.md` first. It says which step you are on and what to read. Do that step, nothing more.
+
+You're new to NodeGX, and this folder comes with three short guides from the builders before you — load them with
+the `skill` tool (or read `.vibe/skills/<name>/SKILL.md`): **`nodegx-first-day`** (where everything is, how we work,
+their mistakes — at the start of sitting 1), **`nodegx-sizing-a-sitting`** (how big a part is, when to cut — in
+sitting 1 and every build sitting), **`nodegx-when-stuck`** (when a line fails or a node surprises you).
 
 When I say "continue" (or nothing new), do the next step. When I ask for a change, add its lines to the checklist and
 go on through the process. Every sitting that stops ends with the line: *Next: <the step>. Type /clear, then
@@ -44,7 +50,8 @@ soon as you have it — one file per answer — in this order:
    reads that sentence. Each line: `- [ ] what a person sees — how to drive it`.
 4. `docs/PLAN.md` — a page at most: the screens; the components on each and what each shows and does; where every
    value lives (a Variable, a component input, `localStorage`); and the build split into **parts**, in order, each
-   small enough for one sitting (one or two components and the checklist lines they make possible).
+   small enough for one sitting: **at most four checklist lines and one or two components** each. Split by what a
+   person sees change, not by screen — a screen with a timer, taps and a score is three parts.
 5. `docs/NEXT.md` — first line `# Next sitting: build part 1 — <its name>`, then what to read first.
 6. Stop: tell me in two lines what you planned and what the next sitting does.
 
@@ -53,7 +60,10 @@ soon as you have it — one file per answer — in this order:
 1. Read `NEXT.md`, `PLAN.md` and `CHECKLIST.md` (and `REQUEST.md` when a word matters), then
    `call_tool({ name: "get_project_info" })`: its traps are mistakes other builders made here. Read the node types
    this part uses.
-2. Build that part, one component at a time, and read every answer. Reset state before the words change, not after. A refused change says exactly what to fix. Keep
+2. Build that part, one component at a time, and read every answer. Reset state before the words change, not after.
+   **Cut the sitting short** — finish what you're on, write it down, rewrite `NEXT.md` — after about 30 tool calls,
+   after ten reads in a row with nothing written (the part is too big: build half, leave half), or when a fix has
+   failed twice. Cutting early is part of the process, never a failure. A refused change says exactly what to fix. Keep
    each answer short: decide one component, write it with a tool, read the reply, then the next. An answer with no
    tool call in it can run on for many minutes with nothing saved.
 3. Drive every checklist line this part makes possible (below). Mark it `- [x] … — passed: <what you measured>` or

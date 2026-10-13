@@ -19,7 +19,8 @@ const {
   renderOpenCodeConfig,
   renderVibeConfig,
   serverEntry,
-  setUp
+  setUp,
+  vibeProfileFiles
 } = require('../bin/create-nodegx.js');
 
 const BIN = path.join(__dirname, '..', 'bin', 'create-nodegx.js');
@@ -210,6 +211,12 @@ test('P112 OWN-019: the Vibe kit writes only Vibe files — its AGENTS.md, the N
   assert.match(notes, /`\^# Next sitting`/);
   assert.match(notes, /`NEXT\.md` becomes `# Done`/);
   assert.match(notes, /REQUEST\.md` — what I asked for, \*\*word for word\*\*/);
+  assert.match(notes, /at most four checklist lines and one or two components/);
+  for (const skill of ['nodegx-first-day', 'nodegx-sizing-a-sitting', 'nodegx-when-stuck']) {
+    assert.match(notes, new RegExp(`\\*\\*\`${skill}\`\\*\\*`));
+    // Vibe 2.26.1 lists a skill only when its frontmatter name matches its folder (SkillMetadata: lowercase, hyphens).
+    assert.match(fs.readFileSync(path.join(dir, '.vibe', 'skills', skill, 'SKILL.md'), 'utf8'), new RegExp(`^---\\nname: ${skill}\\n`));
+  }
   assert.match(run.stdout, /vibe --legacy-harness/);
   assert.match(run.stdout, /type \/clear, then "continue"/);
 });
@@ -222,8 +229,10 @@ test("P112 OWN-019: the Vibe kit never replaces a person's own files", () => {
   const result = setUp(dir, process.platform, { profile: 'vibe' });
   assert.equal(fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8'), 'mine\n');
   assert.equal(fs.readFileSync(path.join(dir, '.vibe', 'agents', `${VIBE_AGENT}.toml`), 'utf8'), 'mine = true\n');
-  // Only what was missing is added (s3: the one-step-per-sitting hook).
-  assert.deepEqual(result.written, [path.join('.vibe', 'hooks.toml'), path.join('.vibe', 'hooks', 'one-step.mjs')]);
+  // Only what was missing is added (s3: the hook and the skills), never the two files that were there.
+  const mine = ['AGENTS.md', path.join('.vibe', 'agents', `${VIBE_AGENT}.toml`)];
+  assert.deepEqual(result.written, vibeProfileFiles().map((f) => f.to).filter((to) => !mine.includes(to)));
+  assert.ok(result.written.includes(path.join('.vibe', 'skills', 'nodegx-sizing-a-sitting', 'SKILL.md')));
 });
 
 test('P112 OWN-019: the plain kit does not set a default agent (there is no agent file beside it)', () => {
