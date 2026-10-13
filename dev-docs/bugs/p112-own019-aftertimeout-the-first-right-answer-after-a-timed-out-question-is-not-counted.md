@@ -42,3 +42,11 @@ its condition is true even for one step mid-chain; reset the value that makes it
 off. Test `packages/noodl-mcp/tests/own019AfterTimeout.test.ts` reads it through `get_node_type` (control: fails on
 HEAD's catalog). The kit side is R31's process: the Vibe kit's CHECKLIST.md plays every worked example whole.
 
+
+**s2, a second round on the same seam — v11.** Its last think (282 KB, 29.6 min, stopped by the 30-minute watchdog)
+was Large 4 debugging its own drive: *"the `tappedIndex` variable read **0**, expected 2 … the repeater re-renders rows
+→ the new rows' creation delivers itemOutput-index values (0, 1, 2) → phantom runs"*. A real loop, unlike every
+productive think measured: the last two thirds are 100% repeated 8-word phrases (productive thinks ~1%), 74 doubt
+words per 10 KB (productive 22–30). Two rounds, two apps, the same seam — a For Each's `itemOutput-*` values when rows
+are re-created — so the runtime is the first suspect, and the notes say nothing a builder could use. Reduce it first
+(NEXT-SESSION-PROMPT step 4).

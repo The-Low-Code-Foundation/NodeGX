@@ -141,6 +141,7 @@ post-tool, post-agent) — and the kit uses none of them yet.
 | v8 | tgz17, kit defaults, sealed lab | — | **stalled** (one think, 145 KB) | 18 | 0.34 | 45% | 0 | LONGTHINK again at the defaults: designing the whole app in one answer |
 | v9 | tgz18 (one answer, one tool call) | 12/12, **carryover** | itself | 45 | 2.68 | 76% | — | no stall (longest think 98 KB vs 142–172 KB stalled); CARRYOVER |
 | v10 | tgz19 (+ the next-screen checklist line) | **12/12, clean** | the lab's $6 stop, at its last step | 75 | 6.30 | 61% | 50 | the carry-over line works; the price stop was the lab's |
+| v11 | tgz19 | 5/12 (unfinished) | **stalled** — a real loop, 282 KB in 29.6 min | 91 | 4.59 | 69% | — | the For Each item-index seam again; a loop is measurable |
 | v12 | tgz19 | 8/12, clean | itself | 45 | 2.44 | 76% | — | AFTERTIMEOUT: the right answer after a timeout is not counted |
 
 - **s2 (2026-10-13, Opus):** kit tgz14 reused for v3 (create-nodegx and MCP byte-identical in source to HEAD at the
@@ -249,3 +250,10 @@ post-tool, post-agent) — and the kit uses none of them yet.
 - **s2, R31 (Richard):** the kit's agent works the way this repo does — a written process, session by session, by
   itself; the lab adds nothing but a fixed "continue". Every real miss today (SAMEVALUE, CARRYOVER, AFTERTIMEOUT) was
   checklist coverage; the long designs lived only in thinks; one round sent ~9M input tokens through one session.
+- **s2, v11 (tgz19): stalled — the first real loop.** One think of 282 KB over 29.6 min (the watchdog's 30): Large 4
+  debugging why its `tappedIndex` read 0 after tapping index 2 — "the repeater re-renders rows → the new rows'
+  creation delivers itemOutput-index values (0, 1, 2) → phantom runs" — v12's AFTERTIMEOUT seam, in a second app.
+  **A loop is measurable:** its last two thirds are 100% repeated 8-word phrases and 74 doubt words per 10 KB, where
+  every productive think measured is ~1% and 22–30. A guard that watches a think's repetition (not its length or
+  silence) would tell them apart — Vibe writes a think only when it ends, so that guard needs a streaming read (a
+  candidate Mistral issue, R30). The seam itself is the likelier cause to fix first (AFTERTIMEOUT, open).
