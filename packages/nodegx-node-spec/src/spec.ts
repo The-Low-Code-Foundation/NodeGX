@@ -442,13 +442,33 @@ export interface ValueInputDecl extends PortMeta {
    * s82 (§6.4 gap 3): reads the params RAW, as the runtime's hooks read `node.parameters` — a Value SET to the default is
    * not an unset one; a narrow that wants the declared default under an unset name says so itself.
    */
-  narrow?: (params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>) => Partial<Pick<ValueInputDecl, 'type' | 'enums' | 'default'>>;
+  narrow?: (params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>) => Partial<Pick<ValueInputDecl, 'type' | 'enums' | 'default' | 'labels'>>;
+  /**
+   * P107 s101 (R37: "the editor draws a cloud node's settings from its spec") — what the property panel draws beyond the
+   * port, from the runtime hook's announcement, so an editor with no runtime client draws the same panel. Presentation
+   * only: no reducer, generator or target reads them, and `drawnPorts` carries them. Graded against the hooks by oracle (a).
+   *
+   *   labels           — an `enum`'s words, by value (`{ value, label }` in an announcement); a value with none shows itself
+   *   connectionsOnly  — the port takes a wire and has no panel field (`allowConnectionsOnly`)
+   *   codeEditor       — the panel edits it in a code editor of this language (`codeeditor`)
+   *   valuePortPrefix  — a `query-filter`: the prefix of the ports its connected values are drawn as (`qp-`, `fp-`); the
+   *                      builder's schema and backend are the editor's, read from the project as the runtime reads them
+   *   filterBackend    — a `query-filter` that greys out what the node's backend cannot express (`backend` on the port);
+   *                      absent, the builder gates nothing (ByobFilterType.ts)
+   */
+  labels?: Readonly<Record<string, string>>;
+  connectionsOnly?: boolean;
+  codeEditor?: string;
+  valuePortPrefix?: string;
+  filterBackend?: boolean;
 }
 
 export interface SignalInputDecl extends PortMeta {
   type: 'signal';
   /** The input reports an outcome (ERG-001) — its reducer must return one on every path. */
   outcome?: boolean;
+  /** P107 s101 (R37) — the panel draws no trigger for it, only its wire (`allowConnectionsOnly`; States' `to-<state>`). */
+  connectionsOnly?: boolean;
 }
 
 export type InputDecl = ValueInputDecl | SignalInputDecl;
@@ -858,6 +878,8 @@ export interface NamedPages {
   pages: readonly string[];
   /** NSP-020 s84 — the component each page shows, by page id (a Component Stack's `pageComp-<id>`, navigate.ts :358-360). */
   components?: Readonly<Record<string, string>>;
+  /** P107 s101 — each page's name as the stack lists it, by page id (a Component Stack's `pages[].label`): what a picker shows. */
+  labels?: Readonly<Record<string, string>>;
 }
 
 export interface BackendSchema {

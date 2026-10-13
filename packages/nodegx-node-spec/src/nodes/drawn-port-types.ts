@@ -59,5 +59,9 @@ export const DRAWN_PORT_TYPES: readonly string[] = Object.freeze([
   'net.noodl.controls.textinput',
   'net.noodl.user.SetUserProperties',
   'net.noodl.user.SignUp',
-  'net.noodl.user.User'
+  'net.noodl.user.User',
+  // P107 s101 (R37) — the cloud-only modules with a hook, graded since oracle (a) reads `noodl-viewer-cloud`
+  'noodl.cloud.aggregate',
+  'noodl.cloud.request',
+  'noodl.cloud.response'
 ]);

@@ -798,3 +798,68 @@ It needs one writer per type: `setDynamicPorts` replaces, SB-017's lesson. JavaS
 Records already have a writer in `CloudDynamicPortsAdapter`, so merge into it, never beside it. (3) Drive it: a new Aggregate
 and a new Query Records in a cloud function show Class, Filter and Property, beside the front-end control; then the Jasmine /
 `test:ci` gate.
+
+### 6.13 s101 (2026-10-13, Opus) — R37 built: the editor draws a cloud node's settings from its spec
+
+**Grade first, then draw.** Oracle (a)'s census now reads `noodl-viewer-cloud/src/nodes`: 17 cloud modules have a hook, 14
+are empty (EXCLUDED, a line each), and Request, Response and Aggregate Records are graded rows. Aggregate's cases hand the hook
+the class list in the editor's own shape (`{ name, columns }`, `meta`); the oracle's `context.schema` fixture is the raw Parse
+list, which `aggregatenode.js` does not read, so the first `visualFilter` disagreement was the fixture's, not the node's.
+
+**The oracle grades what a panel draws.** Two widenings, each with a planted mutant:
+
+- a DERIVED port's enums (before, declared ports only). One finding: Filter Collection's Op offers the operators of the filter's
+  Type (string 5, boolean 2, number 8, `filtercollectionnode.ts` :661-683); the spec offered all nine. Fixed (draw only).
+- the panel's fields, `panelDiffs`: edit-only, connections-only, the code editor, an enum's labels, a filter builder's value-port
+  prefix and whether it is told its backend. Measured on all 43 rows: 125 of 347 cases disagreed, from ~15 sources. All fixed
+  at the source but one pin (For Each's Script: the spec's `editOnly` steers the generator; the runtime leaves it wireable — a
+  GAP, For Each never sits in a cloud function).
+
+The format grew for it (`spec.ts` `ValueInputDecl`: `labels`, `connectionsOnly`, `codeEditor`, `valuePortPrefix`,
+`filterBackend`; `SignalInputDecl.connectionsOnly`; `narrow` may return `labels`), and `DrawnPort` carries them. Presentation
+only: no reducer, generator or target reads them. Plus Aggregate's `derived.outputs` (`agg-<name>`, number or string by its
+column, `onWire` so play is unchanged) and its Javascript filter's default script — the hook announced both, the spec drew
+neither. `DRAWN_PORT_TYPES` + Aggregate, Request, Response; the ledger's ports floor 132 → 133.
+
+**The editor.** `models/nodelibrary/cloudSpecPorts.ts`: `CLOUD_SPEC_PORT_TYPES` — 24 of the 26 cloud-library types that are graded
+and draw derived ports, less Request and Response (a `namedports/list` rule draws theirs). `specPortsForNode` runs `drawnPorts`
+over a one-node `PortProject` (the node, its component's wires, the project metadata — the only `derived.needs` those 24 have:
+schema, backends, wired, wiredOutputs), keeps the derived ports, adds each wired name the spec `discover`s (the runtime registers
+it on the wire), and converts to the editor's port shape. A filter builder's `schema` / `backend` come from the runtime's own
+`recordSchemaContext` + `recordFilterSchema` (no copy), the backend's fallback `nodegx` as `QueryUtils.backendType()` answers with
+no store. Merged into `CloudDynamicPortsAdapter` (one writer per node): the spec's ports first, then any SB-017 family port of a
+name the spec did not draw, then `keepWiredSavedPorts` — a SAVED port a wire uses survives the redraw. A fourth subclass,
+`CloudSpecPortsAdapter`, takes the 20 types no family owns; a `metadataChanged` hook (`registeradapters.ts`, forwarding
+`ProjectModel.metadataChanged`) re-sweeps when the backends or classes change, as the hooks redraw on
+`metadataChanged.dbCollections`.
+
+**Measured on an old project (AC §5, "must agree with the cached list").** lepetitpicnic_local_backend's 113 spec-drawn cloud
+nodes, saved by the old cloud runtime, against today's draw: 50 identical; 63 GAIN settings today's hooks announce and the old
+lists predate (Function and Query Records' Run On Value Change boxes, Search, Realtime); one Set User Properties loses two
+unwired ports today's hook leaves out too (`prop-password`, `prop-emailVerified`). ONE wired port would have been lost — a Query
+Records' Javascript-filter value, `storageFilterValue-ParentRecordId` (the spec leaves the Javascript filter out) — and a deploy
+drops a wire to a missing port. Hence `keepWiredSavedPorts`; with it, 0 wired ports lost. Filed P107-S101-JSFILTERVALUES (low:
+a NEW node's Javascript-filter variables are not drawn; they were not before R37 either).
+
+**Graded in the editor** (`tests-unit/nsp-020/cloud-spec-ports.test.ts`, 17): for Aggregate (6 cases) and Query Records (3) and
+Update Record (1), `specPortsForNode` equals the type's own hook fired against a fake connected editor over the same metadata,
+port by port in the editor's shape (name, plug, type with enum labels, edit-only, connections-only, code editor, prefix, backend,
+the builder's columns; display name, group, default). `index` / `editorName` are not compared (named). Plus: the cloud list is
+the graded types both ways; the rule-drawn two have their rule; the four adapters' type lists are disjoint and cover the list;
+a wired name survives a missing class; a saved wired port survives a redraw.
+
+**Driven** (dev editor, a copy of lepetitpicnic_local_backend's test project, s100's recipe: `LocalProjectsModel` + the fiber
+router; nodes by `NodeGraphNode.fromJSON` + `addRoot`; read with `getPorts()`). The three SAVED Aggregate nodes draw their
+settings after the load sweep (Class, Filter, Do, each aggregate's Property and Operation, the Filter builder or the Javascript
+filter, the `agg-` outputs), and `aggregates: 'AvgAge,Names,Extra'` on one draws `aggprop-Extra` at once (s100: nothing). A NEW
+Aggregate in `/#__cloud__/Records and Objects/Aggregate` draws Class, Filter, Do; with `TestQuery`, `Total`, `Age` it draws
+Property, Operation (`{min Min, max Max, sum Sum, avg Avg}`, edit-only), the Filter builder and `agg-Total`. A NEW Query Records
+there draws the same 13 inputs as the same node in the front-end component `/Tests - Records` (the control: the viewer's hook),
+name for name. The property panel, screenshot: GENERAL Class TestQuery, Filter "Visual"; AGGREGATES Total; FILTER the builder
+("No filter"); TOTAL Property Age, Operation Avg — the panel the bug said was missing.
+
+**Found on the way: an editor import can bring the runtime with it.** `cloudSpecPorts.ts` imports `record-ports.ts`, which
+imported `resolveBackend.ts`, whose lazy `require('../../../noodl-runtime')` webpack follows statically: the editor's first
+compile pulled the whole runtime in (223 TS1202/TS1203 errors on its CommonJS files) and the second ran out of heap. The
+editor's own `tsc --noEmit` passed — its settings are not webpack's. `record-ports.ts` now imports the pure half
+(`resolveBackend.pure.ts`, which `resolveBackend.ts` re-exports): same functions, and the editor compiles clean (0 errors).

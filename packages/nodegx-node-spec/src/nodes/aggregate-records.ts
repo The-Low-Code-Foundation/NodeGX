@@ -55,14 +55,15 @@
  *     `storageFilterType`, `storageJSONFilter` and `storageFilterValue-…` are not driven.
  *   - a `relatedTo` condition whose class the record store must supply (`resolveRelatedClasses`, queryutils.ts :177-200).
  *   - the editor's warnings (:116-143, no editor in a play); `raiseRuntimeError` on the error bus (not a port).
- *   - the outputs' types as the editor draws them (`agg-<name>` number or string by the column, :490-516): at play an output
- *     exists only when wired, typed by nothing.
+ *   - the outputs' types at play: an `agg-<name>` output exists only when wired, typed by nothing. The editor draws it, number
+ *     or string by its column, once the column is chosen (:536-563) — `derived.outputs`, `onWire` (P107 s101, R37: the editor
+ *     draws a cloud node from its spec).
  *   - the browser's XHR face of the Parse wire: this node runs only in a cloud function.
  */
 
 import type { Filter, SavedFilterItem, VisualQueryNode } from '../../../nodegx-backend-contract/src/translators';
 import { isSavedGroup, isVisualQueryFormat, toParseWhere } from '../../../nodegx-backend-contract/src/translators';
-import type { InputDecl, OutputDecl, ValueInputDecl, WorldView } from '../spec';
+import type { InputDecl, OutputDecl, ValueInputDecl, ValueOutputDecl, WorldView } from '../spec';
 import { defineNode } from '../spec';
 import type { CollectionScript, HostScript } from '../world';
 import { classPicker, selectedClass } from './record-base';
@@ -192,8 +193,11 @@ const NOT_FETCHED = 'Failed to fetch.';
 /** :104-114 — a write that asks for an aggregation, unless `Do` is wired */
 const asks = (s: State, w: WorldView): Partial<State> => (!w.wired('storageFetch') && !s.scheduled ? { scheduled: true } : {});
 
+/** :445-446 `_defaultJSONQuery` — the script the editor shows in a new Javascript filter */
+const DEFAULT_JSON_QUERY = '// Write your query script here, check out the reference documentation for examples\nwhere({ })\n';
+
 /** `agg-<name>` — read off the last Success (:311-314) */
-const aggOutput = (name: string): OutputDecl<State> => ({ type: '*', displayName: name, group: 'Aggregates', description: 'The value of the ' + name + ' aggregate from the last aggregation', from: (s) => s.values?.[name] });
+const aggOutput = (name: string): ValueOutputDecl<State> => ({ type: '*', displayName: name, group: 'Aggregates', description: 'The value of the ' + name + ' aggregate from the last aggregation', from: (s) => s.values?.[name] });
 
 /** The visual filters a panel holds: the builder's saved shape (connected, static, empty), the retired visual shape, a refused `pointsTo`, an operator the lowering does not know. */
 const FILTERS: readonly unknown[] = [
@@ -328,7 +332,7 @@ export const AggregateRecords = defineNode({
       inputs: (params, context) => {
         const out: Record<string, InputDecl> = {
           collectionName: classPicker(discover('collectionName') as ValueInputDecl, context),
-          storageFilterType: { type: 'enum', enums: ['simple', 'json'], drawnDefault: 'simple', coerce: 'none', editOnly: true, displayName: 'Filter', group: 'General', undriven: 'the Javascript filter is not in this spec (header)' },
+          storageFilterType: { type: 'enum', enums: ['simple', 'json'], labels: { simple: 'Visual', json: 'Javascript' }, drawnDefault: 'simple', coerce: 'none', editOnly: true, displayName: 'Filter', group: 'General', undriven: 'the Javascript filter is not in this spec (header)' },
           storageFetch: discover('storageFetch')!
         };
         const klass = selectedClass(params, context);
@@ -337,17 +341,29 @@ export const AggregateRecords = defineNode({
           for (const a of params.aggregates.split(',')) {
             out['aggprop-' + a] = { ...(discover('aggprop-' + a) as ValueInputDecl), type: 'enum', enums: columns };
             const field = klass.fields[params['aggprop-' + a] as string];
-            if (field?.type === 'number') out['aggop-' + a] = { ...(discover('aggop-' + a) as ValueInputDecl), type: 'enum', enums: ['min', 'max', 'sum', 'avg'], drawnDefault: 'avg' };
-            else if (field?.type === 'string') out['aggop-' + a] = { ...(discover('aggop-' + a) as ValueInputDecl), type: 'enum', enums: ['distinct'], drawnDefault: 'distinct' };
+            if (field?.type === 'number') out['aggop-' + a] = { ...(discover('aggop-' + a) as ValueInputDecl), type: 'enum', enums: ['min', 'max', 'sum', 'avg'], labels: { min: 'Min', max: 'Max', sum: 'Sum', avg: 'Avg' }, drawnDefault: 'avg' };
+            else if (field?.type === 'string') out['aggop-' + a] = { ...(discover('aggop-' + a) as ValueInputDecl), type: 'enum', enums: ['distinct'], labels: { distinct: 'Distinct' }, drawnDefault: 'distinct' };
           }
         }
         if (params.storageFilterType === undefined || params.storageFilterType === 'simple') {
           if (params.collectionName !== undefined) {
-            if (klass) out.visualFilter = { ...(discover('visualFilter') as ValueInputDecl), type: 'query-filter' };
+            if (klass) out.visualFilter = { ...(discover('visualFilter') as ValueInputDecl), type: 'query-filter', valuePortPrefix: 'qp-' };
             if (params.visualFilter !== undefined) for (const name of drawnParameters(params.visualFilter)) out['qp-' + name] = discover('qp-' + name)!;
           }
         } else if (params.storageFilterType === 'json') {
-          out.storageJSONFilter = { type: 'string', coerce: 'none', editOnly: true, displayName: 'Filter', group: 'Filter', undriven: 'the Javascript filter is not in this spec (header)' };
+          out.storageJSONFilter = { type: 'string', coerce: 'none', editOnly: true, codeEditor: 'javascript', drawnDefault: DEFAULT_JSON_QUERY, displayName: 'Filter', group: 'Filter', undriven: 'the Javascript filter is not in this spec (header)' };
+        }
+        return out;
+      },
+      // :536-563 — an aggregate whose Property is a number or text column draws its output, typed by the column; at play it
+      // exists only when a wire leaves it (`discoverOutput`), so `onWire`
+      outputs: (params, context) => {
+        const out: Record<string, OutputDecl<State>> = {};
+        const klass = selectedClass(params, context);
+        if (typeof params.aggregates !== 'string' || params.collectionName === undefined || !klass) return out;
+        for (const a of params.aggregates.split(',')) {
+          const type = klass.fields[params['aggprop-' + a] as string]?.type;
+          if (type === 'number' || type === 'string') out['agg-' + a] = { ...aggOutput(a), type, onWire: true };
         }
         return out;
       },

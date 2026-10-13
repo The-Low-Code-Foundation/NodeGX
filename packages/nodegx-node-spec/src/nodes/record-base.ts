@@ -149,9 +149,15 @@ export function classPickerPort(context: Readonly<PortContext>): ValueInputDecl 
 /** The same dropdown over a node's own `collectionName` decl (its words and its examples — what a sequence draws from). */
 export function classPicker(base: ValueInputDecl, context: Readonly<PortContext>): ValueInputDecl {
   const classes = Object.keys(context.schema?.classes ?? {});
-  const enums = [...PARSE_SYSTEM_CLASSES.filter((c) => !classes.includes(c)), ...classes];
-  return { ...base, type: 'enum', enums, editOnly: true };
+  const added = PARSE_SYSTEM_CLASSES.filter((c) => !classes.includes(c));
+  const enums = [...added, ...classes];
+  // the words are the added system classes' only: a class the schema lists shows its name, `_User` included
+  const labels = Object.fromEntries(added.map((c) => [c, SYSTEM_CLASS_LABELS[c]]));
+  return { ...base, type: 'enum', enums, editOnly: true, labels };
 }
+
+/** record-ports.ts :78-81 — the words the Class dropdown shows for the system classes; a schema class shows its name. */
+const SYSTEM_CLASS_LABELS: Readonly<Record<string, string>> = { _User: 'User', _Role: 'Role' };
 
 /**
  * schema-ports.ts :546-571 `backendPickerPorts` through record-ports.ts :119-121 (`hideWhenSingleBackend`, group General): the
@@ -161,7 +167,8 @@ export function classPicker(base: ValueInputDecl, context: Readonly<PortContext>
 export function backendPickerPort(context: Readonly<PortContext>): Record<string, ValueInputDecl> {
   const backends = context.backends ?? [];
   if (backends.length <= 1) return {};
-  return { backendId: { ...backendPort(), type: 'enum', enums: ['_active_', ...backends.map((b) => b.id)], default: '_active_' } };
+  const labels = Object.fromEntries([['_active_', 'Active Backend'], ...backends.map((b) => [b.id, b.name])]);
+  return { backendId: { ...backendPort(), type: 'enum', enums: ['_active_', ...backends.map((b) => b.id)], default: '_active_', labels } };
 }
 
 /** The class the node's Class names, when the schema has it — record-ports.ts `recordSchemaContext` :84-99 `selectedCollection`. */

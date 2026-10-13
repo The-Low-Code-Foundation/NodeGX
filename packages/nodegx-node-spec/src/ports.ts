@@ -30,6 +30,7 @@ import type {
   OutputDecl,
   PlayContext,
   PortContext,
+  SignalInputDecl,
   ValueInputDecl,
   ValueOutputDecl,
   ValueType
@@ -55,6 +56,13 @@ export interface DrawnPort {
   enums?: readonly string[];
   /** Where the port came from — a declared port, or one `derived.inputs/outputs` drew for these params. */
   source: 'declared' | 'derived';
+  /** P107 s101 (R37) — the panel's fields for a value input, from its decl (spec.ts `ValueInputDecl`, "what the property panel draws"). */
+  editOnly?: boolean;
+  connectionsOnly?: boolean;
+  labels?: Readonly<Record<string, string>>;
+  codeEditor?: string;
+  valuePortPrefix?: string;
+  filterBackend?: boolean;
 }
 
 const EMPTY: Readonly<PortContext> = Object.freeze({});
@@ -161,17 +169,32 @@ export function drawnPorts(spec: AnyNodeSpec, params: Readonly<Record<string, un
   return out;
 }
 
+/**
+ * P107 s101 (R37) — one port the runtime registers on a WIRE (`derived.discover` / `discoverOutput`, nodescope.ts :149-150) as
+ * plain data: what an editor draws for a wired name the params do not draw, so the wire keeps its port.
+ */
+export function drawnWiredPort(name: string, plug: 'input' | 'output', decl: InputDecl | OutputDecl<unknown>): DrawnPort {
+  return drawn(name, plug, decl, false);
+}
+
 function drawn(name: string, plug: 'input' | 'output', decl: InputDecl | OutputDecl<unknown>, declared: boolean): DrawnPort {
   const port: DrawnPort = { name, plug, type: decl.type, source: declared ? 'declared' : 'derived' };
   if (decl.displayName !== undefined) port.displayName = decl.displayName;
   if (decl.group !== undefined) port.group = decl.group;
   if (decl.description !== undefined) port.description = decl.description;
+  if (plug === 'input' && decl.type === 'signal' && (decl as SignalInputDecl).connectionsOnly) port.connectionsOnly = true;
   if (plug === 'input' && decl.type !== 'signal') {
     const v = decl as ValueInputDecl;
     // s82 (§6.4 gap 4): the default the editor's announcement shows, when it is not the value at mount
     const d = v.drawnDefault !== undefined ? v.drawnDefault : v.default;
     if (d !== undefined) port.default = d;
     if (v.enums !== undefined) port.enums = v.enums;
+    if (v.editOnly) port.editOnly = true;
+    if (v.connectionsOnly) port.connectionsOnly = true;
+    if (v.labels !== undefined) port.labels = v.labels;
+    if (v.codeEditor !== undefined) port.codeEditor = v.codeEditor;
+    if (v.valuePortPrefix !== undefined) port.valuePortPrefix = v.valuePortPrefix;
+    if (v.filterBackend) port.filterBackend = true;
   }
   return port;
 }

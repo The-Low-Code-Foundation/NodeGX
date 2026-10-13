@@ -63,11 +63,11 @@ function propertyPort(field: string): ValueInputDecl {
 function aclPort(field: string): ValueInputDecl | undefined {
   switch (field) {
     case 'target':
-      return { type: 'enum', enums: ['user', 'everyone', 'role'], default: 'user', coerce: 'none', editOnly: true, displayName: 'Target', group: 'Access Rule' };
+      return { type: 'enum', enums: ['user', 'everyone', 'role'], labels: { user: 'User', everyone: 'Everyone', role: 'Role' }, default: 'user', coerce: 'none', editOnly: true, displayName: 'Target', group: 'Access Rule' };
     case 'role':
       return { type: 'string', coerce: 'none', displayName: 'Role', group: 'Access Rule', examples: ['admin', 'editor'] };
     case 'userid':
-      return { type: 'string', coerce: 'none', displayName: 'User Id', group: 'Access Rule', examples: ['u2', 'u9', ''] };
+      return { type: 'string', coerce: 'none', connectionsOnly: true, displayName: 'User Id', group: 'Access Rule', examples: ['u2', 'u9', ''] };
     case 'read':
     case 'write':
       return { type: 'boolean', default: true, coerce: 'none', displayName: field === 'read' ? 'Read' : 'Write', group: 'Access Rule', examples: [false, true] };

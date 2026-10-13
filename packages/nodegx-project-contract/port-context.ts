@@ -39,6 +39,7 @@ export interface PortContextPages {
   name: string;
   pages: string[];
   components?: Record<string, string>;
+  labels?: Record<string, string>;
 }
 
 export interface ProjectPortContext {
@@ -311,6 +312,13 @@ function stackPages(params: Record<string, unknown>): PortContextPages {
   for (const id of pages) if (typeof params['pageComp-' + id] === 'string') components[id] = params['pageComp-' + id] as string;
   const out: PortContextPages = { name: (params.name as string) || 'Main', pages };
   if (Object.keys(components).length) out.components = components;
+  // P107 s101 — each page's name, what the Target picker shows (navigate.ts :1389-1392 reads `pages[].label`)
+  const labels: Record<string, string> = {};
+  for (const p of Array.isArray(params.pages) ? params.pages : []) {
+    const { id, label } = (p ?? {}) as { id?: unknown; label?: unknown };
+    if (typeof id === 'string' && typeof label === 'string') labels[id] = label;
+  }
+  if (Object.keys(labels).length) out.labels = labels;
   return out;
 }
 

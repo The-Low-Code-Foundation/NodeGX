@@ -328,6 +328,7 @@ const MAPPINGS: readonly unknown[] = [
 const MAPPING_PORT = {
   type: 'string',
   editOnly: true,
+  codeEditor: 'javascript',
   coerce: 'none',
   displayName: 'Script',
   group: 'Input Mapping',

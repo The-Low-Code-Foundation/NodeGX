@@ -291,8 +291,9 @@ function json(body: string | null): { ok: true; value: unknown } | { ok: false }
 
 /** :28-35 PARAM_TYPE_ENUM — `Any` first */
 const PARAM_TYPES_ENUM = [...REQUEST_PARAM_TYPES];
+const PARAM_TYPE_LABELS: Readonly<Record<string, string>> = { '*': 'Any', string: 'String', number: 'Number', boolean: 'Boolean', object: 'Object', array: 'Array', date: 'Date' };
 
-const typeInput = (name: string): ValueInputDecl => ({ type: 'enum', enums: PARAM_TYPES_ENUM, coerce: 'none', editOnly: true, displayName: `${name} — Type`, group: 'Parameter Types', description: `What ${name} must be. Any accepts whatever arrives; another type is checked and converted where the conversion is lossless, and a request carrying something else is refused with a 400 naming the field`, examples: ['number', 'string', 'boolean', 'object', 'array', 'date', '*', 'quaternion'] });
+const typeInput = (name: string): ValueInputDecl => ({ type: 'enum', enums: PARAM_TYPES_ENUM, labels: PARAM_TYPE_LABELS, coerce: 'none', editOnly: true, displayName: `${name} — Type`, group: 'Parameter Types', description: `What ${name} must be. Any accepts whatever arrives; another type is checked and converted where the conversion is lossless, and a request carrying something else is refused with a 400 naming the field`, examples: ['number', 'string', 'boolean', 'object', 'array', 'date', '*', 'quaternion'] });
 const requiredInput = (name: string): ValueInputDecl => ({ type: 'boolean', coerce: 'none', editOnly: true, displayName: `${name} — Required`, group: 'Parameter Types', description: `Whether a request without ${name} is refused with a 400. A Default wins over Required`, examples: [true, false, 'true'] });
 const defaultInput = (name: string): ValueInputDecl => ({ type: 'string', coerce: 'none', editOnly: true, displayName: `${name} — Default`, group: 'Parameter Types', description: `The value ${name} takes when the request leaves it out or sends null, converted to its Type`, examples: ['0', '7', 'abc', '', '{"a":1}', '2026-01-01'] });
 

@@ -289,13 +289,15 @@ function portsOf(params: Readonly<Record<string, unknown>>, code: unknown, into:
  * `parseAndAddPortsFromScript` :294-388), first come first kept, as `portsOf` keeps the kinds. Only the drawing: the play reads
  * the kinds (`Ports`), and every value port is uncoerced however it is typed.
  */
-type Drawn = { type?: ValueType | 'signal'; enums?: readonly string[]; drawnDefault?: unknown; displayName?: string; group?: string; editOnly?: true };
+type Drawn = { type?: ValueType | 'signal'; enums?: readonly string[]; drawnDefault?: unknown; displayName?: string; group?: string; editOnly?: true; labels?: Readonly<Record<string, string>> };
 /** :742-763 and :765-790 — the two pickers' choices */
 const INPUT_TYPES = ['string', 'boolean', 'number', 'object', 'array'] as const;
 // P109-S20-LISTDEFAULTTYPE: an output's picker starts on Any (`*`), what its port is until a type is picked
 const OUTPUT_TYPES = ['*', 'string', 'boolean', 'number', 'object', 'array', 'signal'] as const;
 // the default is the announcement's (`drawnDefault`): nothing reads a picker at run time, and a declared default is never set (:446-456)
-const pickerOf = (enums: readonly string[], drawnDefault = 'string'): Drawn => ({ type: 'enum', enums, drawnDefault, displayName: 'Type', editOnly: true });
+/** javascriptnodeparser.js — the words the Type dropdowns show */
+const TYPE_LABELS: Readonly<Record<string, string>> = { '*': 'Any', string: 'String', boolean: 'Boolean', number: 'Number', object: 'Object', date: 'Date', array: 'Array', color: 'Color', signal: 'Signal' };
+const pickerOf = (enums: readonly string[], drawnDefault = 'string'): Drawn => ({ type: 'enum', enums, labels: TYPE_LABELS, drawnDefault, displayName: 'Type', editOnly: true });
 
 /** javascriptnodeparser.js :402-411 — a declared input: a type name, or an object whose fields are the port's */
 function declaredInput(t: unknown): Drawn {

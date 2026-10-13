@@ -4,7 +4,8 @@ import { CloudFunctionAdapter } from '@noodl-models/NodeTypeAdapters/CloudFuncti
 import {
   CloudQueryPortsAdapter,
   CloudRecordPortsAdapter,
-  CloudScriptPortsAdapter
+  CloudScriptPortsAdapter,
+  CloudSpecPortsAdapter
 } from '@noodl-models/NodeTypeAdapters/CloudDynamicPortsAdapter';
 import { FilterRecordsAdapter } from '@noodl-models/NodeTypeAdapters/FilterRecordsAdapter';
 import { NamedPortsAdapter } from '@noodl-models/NodeTypeAdapters/NamedPortsAdapter';
@@ -37,7 +38,9 @@ const _adapters = {
   // They act only inside cloud components — see the adapter's docblock.
   CloudScriptPorts: () => CloudScriptPortsAdapter,
   CloudRecordPorts: () => CloudRecordPortsAdapter,
-  CloudQueryPorts: () => CloudQueryPortsAdapter
+  CloudQueryPorts: () => CloudQueryPortsAdapter,
+  // P107 R37 — the other cloud types whose settings are drawn from their spec (the docblock there)
+  CloudSpecPorts: () => CloudSpecPortsAdapter
 };
 
 const _listeners = {
@@ -50,7 +53,8 @@ const _listeners = {
   parametersChanged: [],
   connectionAdded: [],
   connectionRemoved: [],
-  projectLoaded: []
+  projectLoaded: [],
+  metadataChanged: []
 };
 
 EventDispatcher.instance.on(
@@ -176,6 +180,15 @@ EventDispatcher.instance.on(
 NodeLibrary.instance.on('libraryUpdated', () => {
   onProjectAndNodeLibraryLoaded();
 });
+
+// P107 R37 — a project metadata key changed (`ProjectModel.setMetaData`): the cloud nodes' settings read the backends and classes
+EventDispatcher.instance.on(
+  'ProjectModel.metadataChanged',
+  (e) => {
+    _listeners.metadataChanged.forEach((l) => l(e));
+  },
+  null
+);
 
 //Trigger the "projectLoaded" event when a project is loaded AND the node library is ready
 //keep track of when the event has fired so it doesn't get triggered multiple times

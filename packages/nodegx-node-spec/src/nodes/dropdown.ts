@@ -192,9 +192,13 @@ export const Dropdown = defineNode({
         const items = editorItems(p.items === undefined ? DEFAULT_ITEMS : p.items);
         if (items.length === 0) return {};
         const enums = items.map((item) => item.Value);
+        const labels: Record<string, string> = Object.fromEntries(items.map((item) => [item.Value, item.Label]));
         const value = p.value;
-        if (typeof value === 'string' && value !== '' && !enums.includes(value)) enums.push(value);
-        return { type: 'enum', enums, default: items[0].Value };
+        if (typeof value === 'string' && value !== '' && !enums.includes(value)) {
+          enums.push(value);
+          labels[value] = `${value} (not in Items)`; // :436
+        }
+        return { type: 'enum', enums, default: items[0].Value, labels };
       }
     },
     // options.ts :225-230 — drawn in the span while nothing is selected (Select.tsx :181-183); nothing on the wire

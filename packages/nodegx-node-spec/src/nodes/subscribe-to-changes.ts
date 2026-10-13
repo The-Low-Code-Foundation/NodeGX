@@ -223,7 +223,7 @@ export const SubscribeToChanges = defineNode({
       inputs: (params, context) => {
         const out: Record<string, InputDecl> = { ...backendPickerPort(context), collectionName: classPicker(discover('collectionName') as ValueInputDecl, context) };
         if (params.collectionName === undefined) return out;
-        if (selectedClass(params, context)) out.visualFilter = { ...(discover('visualFilter') as ValueInputDecl), type: 'query-filter' }; // :613-634
+        if (selectedClass(params, context)) out.visualFilter = { ...(discover('visualFilter') as ValueInputDecl), type: 'query-filter', valuePortPrefix: 'qp-', filterBackend: true }; // :613-634
         if (params.visualFilter !== undefined) for (const name of filterParameterNames(params.visualFilter, 'qp-')) out['qp-' + name] = discover('qp-' + name)!; // :637-647
         return out;
       },

@@ -23,7 +23,7 @@
   "src/nodes/counter.ts": "3e5a2c1ae8764b28de431c17b66fa90935acba388f63c087e92f4d362e866550",
   "src/nodes/data-attributes.ts": "8fedddb1d1cb7abd5355adfaf13d5a37412fb55c725dae12a9e0440fc8ba9273",
   "src/nodes/delay.ts": "3d308e743644dfd6f0dbb2ef853ab5e79415dfc9d43ef17230eacdcaad33f6b1",
-  "src/nodes/dropdown.ts": "67ce35f0fed14740d0378dbd8ddd0003a7824ed4b45cbabc594bef7753d27741",
+  "src/nodes/dropdown.ts": "8c8fb92af6d5696d8eb3e3a28d13099bb892e9767afee705ec1f7f6ead2f0d6e",
   "src/nodes/ease-curves.ts": "0d706fafdec909b56bc8ea89237010494d674005f2e9c14b09081304c004a601",
   "src/nodes/inverter.ts": "421c0e48980fedb8ef96788341dc177886c768c060535bcc139d5b485d190848",
   "src/nodes/repeat.ts": "90d90a0d26bf20c73afa748e7eb2ec5e93f3a63bb54914b1dbf5c2e2e86cf6af",
@@ -31,7 +31,7 @@
   "src/nodes/string-format.ts": "e770452839df57a5a19e6ffe95ebdbd77bd471afa358e18a7cee18cb49cd2b14",
   "src/nodes/switch.ts": "713a1b0480b414de81b5b0af3238a556af82bd95f8512913dbc3f3efe579cb80",
   "src/nodes/uuid.ts": "5a78e42210aec89438bcafb568c4d54864d2b882b319a7447238b7ba0d2e9e49",
-  "src/spec.ts": "5b046d568ea494ea522b4dac2e027219168137c955abf3543c73204689c7323b",
+  "src/spec.ts": "8291ae8b25b070b8ddb903d1186e19d5e8f97847e89db9cdda7ddfcfe7dbe27b",
   "src/trace.ts": "82cef28199dba845ffe5a182f6ed618043938dbad5bb06471a1580ca247a3f9a",
   "src/world.ts": "8ce854b6a39758786518bc0247a7a32c0f90dd1ff464aec2920ecbe8f5df63c1",
   "tests/stranger-page.js": "b81ec9de4633acd8b3960e15fe9b461e64ca23bb520fafd6e38d2dcb25a15e35"

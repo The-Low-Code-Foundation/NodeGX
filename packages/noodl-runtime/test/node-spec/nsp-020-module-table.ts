@@ -44,10 +44,13 @@ export interface TableRow {
 const R = 'noodl-runtime/src/nodes/std-library/';
 const V = 'noodl-viewer-react/src/nodes/';
 const D = 'noodl-viewer-react/src/nodes-deprecated/';
+const C = 'noodl-viewer-cloud/src/nodes/';
 
 const STATES_LOAD_GATE = 'P107-S82-STATESLOADGATE';
 /** NSP-020 s82 — a schema with one class of two columns, as the Record family's proof case reads it. */
 const LESSONS: PortContext = { schema: { classes: { Lesson: { fields: { title: { type: 'string' }, n: { type: 'number' } } } } } };
+/** P107 s101 — LESSONS as the editor stores it from our backend (`schemahandler.ts` → `dbCollections`: `{ name, columns }`). */
+const LESSON_COLUMNS = { dbCollections: [{ name: 'Lesson', columns: [{ name: 'title', type: 'String' }, { name: 'n', type: 'Number' }] }] };
 /**
  * NSP-020 s84 — a class with every kind of column the Record family types differently: a string, an object (untyped:
  * record-ports.ts `PARSE_PORT_TYPES` has no Object), a Relation (the relation picker's; the Record node draws none, the
@@ -106,7 +109,7 @@ const BACK = { PageStackNavigateBack: [{ backActions: 'Save,Cancel', results: 'n
 const CLOSE = { NavigationClosePopup: [{ closeActions: 'Save,Cancel', results: 'name,ok' }, { closeActions: 'Save', results: 'ok' }] };
 export const PROJECT: PortContext = {
   stacks: [
-    { name: 'Main', pages: ['home', 'detail'], components: { home: 'Home', detail: 'Detail' } },
+    { name: 'Main', pages: ['home', 'detail'], components: { home: 'Home', detail: 'Detail' }, labels: { home: 'Home page', detail: 'Detail page' } },
     { name: 'Other', pages: ['solo'], components: { solo: 'Missing' } }
   ],
   components: {
@@ -594,6 +597,11 @@ export const TABLE: TableRow[] = [
       { name: 'a Template with value and signal outputs: Script with its default mapping, item outputs and item signals', params: { template: 'Row' }, context: PROJECT },
       { name: 'a Template the project does not have: nothing announced', params: { template: 'Nope' }, context: PROJECT }
     ],
+    known: {
+      // P107 s101 — the panel fields graded since R37
+      'input inputMappingScript: editOnly runtime unset, spec true':
+        'GAP: the spec marks the Script edit-only so the generator never wires noise into it (spec.ts `editOnly`); the runtime leaves it wireable. One field serves both; For Each is never drawn from its spec in a cloud function'
+    },
     reads: 'components (the Template outputs → `itemOutput-*`/`itemOutputSignal-*`, its value inputs → the default Script)'
   },
 
@@ -690,6 +698,51 @@ export const TABLE: TableRow[] = [
       { name: 'names the node owns are never a block\'s port', params: { workspace: "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_define_input\",\"fields\":{\"NAME\":\"run\"}},{\"type\":\"noodl_define_output\",\"fields\":{\"NAME\":\"done\"}},{\"type\":\"noodl_send_signal\",\"fields\":{\"NAME\":\"failure\"}},{\"type\":\"noodl_define_input\",\"fields\":{\"NAME\":\"ok\",\"TYPE\":\"string\"}}]}}" } }
     ],
     reads: 'params only (the blocks, logic-builder-io.ts)'
+  },
+  // ---- P107 s101 (R37) — the cloud-only modules (`noodl-viewer-cloud/src/nodes`). The editor runs none of these hooks
+  // (no cloud runtime client since WF-007); it draws a cloud node from its spec, so the hook is the reference that draw is
+  // graded against. Fourteen hooks are empty (EXCLUDED, below).
+  {
+    type: 'noodl.cloud.request',
+    module: C + 'cloud/request',
+    hook: 'setup',
+    cases: [
+      { name: 'two parameters, one typed', params: { params: 'id,name', 'ptype-id': 'number' } },
+      { name: 'an emptied list, a repeat', params: { params: 'a,,a' } }
+    ],
+    reads: 'params only'
+  },
+  {
+    type: 'noodl.cloud.response',
+    module: C + 'cloud/response',
+    hook: 'setup',
+    cases: [
+      { name: 'two parameters', params: { params: 'id,name' } },
+      { name: 'an error response draws no parameters', params: { params: 'id', status: 'failure' } }
+    ],
+    reads: 'params only'
+  },
+  {
+    type: 'noodl.cloud.aggregate',
+    module: C + 'data/aggregatenode',
+    hook: 'setup',
+    // `meta` carries the class list in the editor's own shape (`{ name, columns }`, what `schemahandler.ts` stores from our
+    // backend); this module reads that shape and `{ name, schema }`, never the raw Parse list `context.schema` is turned into
+    cases: [
+      { name: 'a Class the schema has: the builders', params: { collectionName: 'Lesson' }, context: LESSONS, meta: LESSON_COLUMNS },
+      { name: 'a Class the schema does not have: no builders', params: { collectionName: 'Nope' }, context: LESSONS, meta: LESSON_COLUMNS },
+      {
+        name: 'two aggregates, a number and a text column chosen, one not yet',
+        params: { collectionName: 'Lesson', aggregates: 'total,names,later', 'aggprop-total': 'n', 'aggprop-names': 'title' },
+        context: LESSONS,
+        meta: LESSON_COLUMNS
+      },
+      { name: 'a saved filter with a connected parameter', params: { collectionName: 'Lesson', visualFilter: filterOn('qp-') }, context: LESSONS, meta: LESSON_COLUMNS },
+      { name: 'the legacy filter shape, one parameter named twice', params: { collectionName: 'Lesson', visualFilter: LEGACY_FILTER }, context: LESSONS, meta: LESSON_COLUMNS },
+      { name: 'a filter but no Class: no parameters', params: { visualFilter: filterOn('qp-') } },
+      { name: 'the Javascript filter', params: { collectionName: 'Lesson', storageFilterType: 'json' }, context: LESSONS, meta: LESSON_COLUMNS }
+    ],
+    reads: 'schema (the Class picker; the class for the Property pickers and the Filter builder)'
   }
 ];
 
@@ -736,7 +789,22 @@ export const EXCLUDED: Record<string, string> = {
   [D + 'std-library/scriptdownloader#Script Downloader']:
     'deprecated, no spec; its setup announces nothing (scriptdownloader.ts :179-184)',
   [V + 'std-library/data/foreachactions#For Each Actions']:
-    'setup is empty — "Handled in editor adapter" (foreachactions.ts :158-160; DEBT-006 removed the ports it once published)'
+    'setup is empty — "Handled in editor adapter" (foreachactions.ts :158-160; DEBT-006 removed the ports it once published)',
+  // P107 s101 — the cloud-only modules whose setup is empty: every port is declared (WFA-009 moved the rest to `dynamicports`)
+  [C + 'cloud/addusertorole#noodl.cloud.addusertorole']: 'setup is empty (addusertorole.ts :178)',
+  [C + 'cloud/createuser#noodl.cloud.createuser']: 'setup is empty (createuser.ts :197) — its ports are a `dynamicports` declaration',
+  [C + 'cloud/deleteuser#noodl.cloud.deleteuser']: 'setup is empty (deleteuser.ts :122)',
+  [C + 'cloud/getuserroles#noodl.cloud.getuserroles']: 'setup is empty (getuserroles.ts :101)',
+  [C + 'cloud/hmac#noodl.cloud.hmac']: 'setup is empty (hmac.ts :160)',
+  [C + 'cloud/jwtsign#noodl.cloud.jwtsign']: 'setup is empty (jwtsign.ts :151)',
+  [C + 'cloud/jwtverify#noodl.cloud.jwtverify']: 'setup is empty (jwtverify.ts :173)',
+  [C + 'cloud/listusersinrole#noodl.cloud.listusersinrole']: 'setup is empty (listusersinrole.ts :199)',
+  [C + 'cloud/modelrequest#noodl.cloud.modelrequest']: 'setup is empty (modelrequest.ts :1060)',
+  [C + 'cloud/removeuserfromrole#noodl.cloud.removeuserfromrole']: 'setup is empty (removeuserfromrole.ts :119)',
+  [C + 'cloud/secret#noodl.cloud.secret']: 'setup is empty (secret.ts :183)',
+  [C + 'cloud/sendemail#noodl.cloud.sendemail']: 'setup is empty (sendemail.ts :250)',
+  [C + 'cloud/updateuser#noodl.cloud.updateuser']: 'setup is empty (updateuser.ts :159) — its ports are a `dynamicports` declaration',
+  [C + 'cloud/verifysessiontoken#noodl.cloud.verifysessiontoken']: 'setup is empty (verifysessiontoken.ts :171)'
 };
 
 /** Files the census's text match finds that register no node with a hook — they build ports for the modules above. */

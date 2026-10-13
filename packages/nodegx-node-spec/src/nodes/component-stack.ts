@@ -400,13 +400,15 @@ export const ComponentStack = defineNode({
         const pages = params.pages;
         if (Array.isArray(pages) && pages.length > 0) {
           const ids: string[] = [];
+          const labels: Record<string, string> = {};
           for (const p of pages) {
             const id = String((p as { id?: unknown } | null)?.id);
             ids.push(id);
+            labels[id] = String((p as { label?: unknown } | null)?.label);
             out[`pageComp-${id}`] = pageCompPort();
             if (params.useRoutes === true) out[`pagePath-${id}`] = pagePathPort();
           }
-          out.startPage = startPagePort(ids);
+          out.startPage = { ...startPagePort(ids), labels }; // navigation-stack.tsx :1389-1392 — each page by its label
         }
         return out;
       },

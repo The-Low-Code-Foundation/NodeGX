@@ -206,7 +206,13 @@ const DRIVE_PINS: Record<string, string> = {
   'input prop-extra: type runtime "object", spec "*"': 'P107-S85-RESTCOLTYPES',
   'output prop-extra: type runtime "object", spec "*"': 'P107-S85-RESTCOLTYPES',
   'input prop-status: type runtime "enum", spec "*"': 'P107-S85-RESTCOLTYPES',
-  'output prop-status: type runtime "enum", spec "*"': 'P107-S85-RESTCOLTYPES'
+  'output prop-status: type runtime "enum", spec "*"': 'P107-S85-RESTCOLTYPES',
+  // P107 s101 — graded since oracle (a) compares a derived port's enums and labels: the same root, the format names no backend
+  // kind — a REST backend's Class picker has no Parse system classes, and a select column's choices are its enum
+  'input prop-status: enums runtime ["draft","live"], spec unset': 'P107-S85-RESTCOLTYPES',
+  'output prop-status: enums runtime ["draft","live"], spec unset': 'P107-S85-RESTCOLTYPES',
+  'input collectionName: enums runtime ["posts"], spec ["_User","_Role","posts"]': 'P107-S85-RESTCOLTYPES',
+  'input collectionName: labels runtime unset, spec {"_User":"User","_Role":"Role"}': 'P107-S85-RESTCOLTYPES'
 };
 const pinsSeen = new Set<string>();
 
@@ -469,7 +475,7 @@ describe('NSP-020 L5 — portContextFor graded on saved projects', () => {
     expect(face('/Pages/Detail')).toEqual({ ...want.Detail, nodes: want.Detail.nodes });
     expect(face('/Popups/Dialog')).toEqual({ ...want.Dialog, nodes: want.Dialog.nodes });
     expect(face('/Rows/Row')).toEqual({ ...want.Row, nodes: {} });
-    expect(ctx.stacks).toEqual([{ name: 'Main', pages: ['home', 'detail'], components: { home: '/Pages/Home', detail: '/Pages/Detail' } }]);
+    expect(ctx.stacks).toEqual([{ name: 'Main', pages: ['home', 'detail'], components: { home: '/Pages/Home', detail: '/Pages/Detail' }, labels: { home: 'Home', detail: 'Detail' } }]);
   });
 
   it('REACH — every field the builder fills is graded on some node (dropping it turns that node red)', () => {

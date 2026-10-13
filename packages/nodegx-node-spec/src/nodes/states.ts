@@ -138,6 +138,8 @@ const NO_STATES_MESSAGE = 'This States node has no states defined, so there is n
 const STATE_LISTS = ['A,B', 'A,B,C', 'B,A', 'A', ''];
 const VALUE_LISTS = ['x', 'x,y', 'y,label,on'];
 const VALUE_TYPES = ['number', 'string', 'boolean', 'color', 'textStyle'];
+/** states.ts — the words the Types dropdowns show */
+const VALUE_TYPE_LABELS: Readonly<Record<string, string>> = { number: 'Number', string: 'String', boolean: 'Boolean', color: 'Color', textStyle: 'Text Style' };
 
 /** The editor's split of a list parameter (:908, :944) — a non-string reads as none. */
 function listOf(value: unknown): string[] {
@@ -502,7 +504,7 @@ function discoverOutput(port: string): OutputDecl<State> | undefined {
   return undefined;
 }
 
-const toState = (s: string) => ({ type: 'signal' as const, outcome: true, displayName: 'To ' + s, group: 'Go to state', description: 'Moves the node to the ' + s + ' state' });
+const toState = (s: string) => ({ type: 'signal' as const, outcome: true, connectionsOnly: true, displayName: 'To ' + s, group: 'Go to state', description: 'Moves the node to the ' + s + ' state' });
 const curvePort = (displayName: string, group: string, dflt: unknown = DEFAULT_CURVE) => ({
   type: 'curve' as const,
   coerce: 'none' as const,
@@ -521,7 +523,7 @@ function discover(port: string) {
   if (port.indexOf('to-') === 0) return toState(port.substring(3));
   if (port === 'startState') return { type: '*' as const, coerce: 'none' as const, displayName: 'Start State' };
   if (port === 'currentState') return { type: '*' as const, coerce: 'none' as const, displayName: 'State', group: 'States' };
-  if (port.indexOf('type-') === 0) return { type: 'enum' as const, enums: VALUE_TYPES, default: 'number', coerce: 'none' as const, editOnly: true, displayName: port.substring(5), group: 'Types' };
+  if (port.indexOf('type-') === 0) return { type: 'enum' as const, enums: VALUE_TYPES, labels: VALUE_TYPE_LABELS, default: 'number', coerce: 'none' as const, editOnly: true, displayName: port.substring(5), group: 'Types' };
   if (port.indexOf('value-') === 0) return { type: '*' as const, coerce: 'none' as const, displayName: port.split('-')[2] };
   if (port.search(/duration-/g) === 0) return { type: 'number' as const, coerce: 'none' as const, displayName: 'Duration' };
   if (port.search(/transition/g) === 0) return curvePort('Transition', 'Transitions');

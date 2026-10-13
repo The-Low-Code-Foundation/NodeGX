@@ -27,3 +27,10 @@ editor that draws from the spec, where the app's own editor shows an object port
 column must stay `*`, as the runtime keeps it), and `BackendField` has nowhere to put the choices. The fix is a format
 addition — a `native` flag (or the backend type) on `BackendField`, and `enums` — then `recordFieldType` follows
 `recordPortType`'s two branches. Not a ruling; a format task for a later NSP-020 session.
+
+**s101 — the same root, two more lines.** Since oracle (a) grades a derived port's enums and labels (R37: the editor draws a
+cloud node's settings from the spec), the drive's REST collection shows the rest of it: the runtime's Class picker on that
+backend offers its own classes only (`["posts"]`, record-ports.ts :78-81 — "`_User` on a Directus backend would be a class that
+does not exist"), where the spec prepends `_User` and `_Role`; and the select column's port carries its choices as enums
+(`["draft","live"]`), where the spec has none. Pinned beside the four above. One fix serves all: the format says which kind
+of backend a class lives on (and a column's choices), and `classPicker` / `recordFieldType` read it.
