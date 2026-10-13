@@ -260,10 +260,25 @@ test('P112 OWN-019 s3: one step per sitting — once a sitting writes docs/NEXT.
     assert.equal(run.status, 0, run.stderr);
     return run.stdout ? JSON.parse(run.stdout).decision : 'allow';
   };
+  // Sitting 1 (no NEXT.md anywhere yet): the tools that build are refused, reading and the notes are open (q5 held
+  // NEXT.md back and began building).
+  assert.equal(ask('nodegx_call_tool', { name: 'update_component' }), 'deny');
+  assert.equal(ask('nodegx_call_tool', { name: 'drive_page' }), 'deny');
+  assert.equal(ask('nodegx_call_tool', { name: 'get_node_type' }), 'allow');
+  assert.equal(ask('nodegx_create_project', {}), 'allow');
+  assert.equal(ask('write_file', { file_path: path.join(dir, 'capital-quiz', 'docs', 'PLAN.md') }), 'allow');
   // Control: NEXT.md from an earlier sitting (written before this session started) closes nothing.
   fs.writeFileSync(next, '# Next sitting: build part 1\n');
   fs.utimesSync(next, new Date(started - 3600000), new Date(started - 3600000));
   assert.equal(ask('nodegx_call_tool', { name: 'update_component' }), 'allow');
+  // Past a sitting's size (60 tool calls in this session's transcript), only the notes stay open.
+  const turn = (n) => JSON.stringify({ role: 'assistant', content: '', tool_calls: Array.from({ length: n }, (_, i) => ({ id: `t${i}` })) }) + '\n';
+  fs.writeFileSync(transcript, turn(30) + turn(29));
+  assert.equal(ask('nodegx_call_tool', { name: 'update_component' }), 'allow');
+  fs.appendFileSync(transcript, turn(1));
+  assert.equal(ask('nodegx_call_tool', { name: 'update_component' }), 'deny');
+  assert.equal(ask('edit', { file_path: next }), 'allow');
+  fs.writeFileSync(transcript, '');
   // This sitting rewrites it: the step is done.
   fs.writeFileSync(next, '# Next sitting: build part 2\n');
   assert.equal(ask('nodegx_call_tool', { name: 'update_component' }), 'deny');

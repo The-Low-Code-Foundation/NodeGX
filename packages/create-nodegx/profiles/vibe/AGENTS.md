@@ -29,8 +29,10 @@ sitting 1 and every build sitting), **`nodegx-when-stuck`** (when a line fails o
 
 When I say "continue" (or nothing new), do the next step. When I ask for a change, add its lines to the checklist and
 go on through the process. Every sitting that stops ends with the line: *Next: <the step>. Type /clear, then
-"continue".* `NEXT.md` is the last thing a sitting writes: once it is written, this folder's hook
-(`.vibe/hooks.toml`) refuses every tool but reading and touching up the notes, and the sitting ends.
+"continue".* This folder's hook (`.vibe/hooks.toml`) keeps the process on its rails, the way a team's
+tooling does — it isn't a judgement on you: in sitting 1 the tools that build are closed (reading and the notes stay
+open); `NEXT.md` is the last thing a sitting writes, and once it is written only the notes stay open; and a sitting
+that reaches 60 tool calls is told to write where it got to and stop. Plan for the rails rather than around them.
 
 ### Sitting 1 — plan (build nothing yet)
 
