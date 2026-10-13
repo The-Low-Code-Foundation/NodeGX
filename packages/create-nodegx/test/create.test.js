@@ -203,9 +203,15 @@ test('P112 OWN-019: the Vibe kit writes only Vibe files — its AGENTS.md, the N
   assert.doesNotMatch(agent, /^instructions =/m);
   const notes = fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8');
   assert.match(notes, /Your tool list will not change/);
-  assert.match(notes, /Write the checklist before building/);
   assert.match(notes, /"look": "Lisbon"/);
+  // R31 (OWN-019 s3): a process, sitting by sitting — each finds its step from the app's docs/NEXT.md, and the lab and a
+  // person both drive it with nothing but "continue". The lab reads these two first lines to know when to stop.
+  assert.match(notes, /this is a process/);
+  assert.match(notes, /`\^# Next sitting`/);
+  assert.match(notes, /`NEXT\.md` becomes `# Done`/);
+  assert.match(notes, /REQUEST\.md` — what I asked for, \*\*word for word\*\*/);
   assert.match(run.stdout, /vibe --legacy-harness/);
+  assert.match(run.stdout, /type \/clear, then "continue"/);
 });
 
 test("P112 OWN-019: the Vibe kit never replaces a person's own files", () => {

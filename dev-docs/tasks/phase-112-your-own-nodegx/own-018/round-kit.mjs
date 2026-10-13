@@ -30,7 +30,7 @@
 // baseline sat 32 min in one answer (the legacy harness sends no max_tokens, so nothing cuts a long think off) while
 // the key spent. agent.exit then says "stalled". The tree is found by parent pid, never by name.
 //
-//   node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price 4] [--max-turns 250] [--thinking high|low] [--temperature T] [--key vibe|api] [--kit vibe] [--stall-min 30]
+//   node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price 4] [--max-turns 250] [--thinking high|low] [--temperature T] [--key vibe|api] [--kit vibe] [--stall-min 30] [--sittings N --max-total 20]
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
@@ -117,32 +117,35 @@ fs.writeFileSync(cfgFile, next);
 fs.writeFileSync(path.join(root, 'vibe-config.toml'), next);
 
 // 3. vibe --legacy-harness in the folder, trusted for this run, as the closing words say.
-const args = [
+// OWN-019 s3 (R31): `--sittings N` runs the build as the Vibe kit's process — sitting 1 is the person's paragraph, every
+// later sitting a FRESH `vibe -p` in the same folder with the same fixed words (own-019/continue.txt, "Continue."),
+// never chosen from the agent's output. It stops when the app's docs/NEXT.md starts `# Done`, at N sittings, when a
+// sitting stalls, when two sittings in a row leave NEXT.md unchanged, or at `--max-total` dollars (Vibe's list count,
+// summed). Sitting k writes agent<k>.jsonl, out<k>/ and agent<k>.exit (sitting 1 untagged, as peek.mjs --tag reads);
+// sittings.json holds each one's measures. Without --sittings a round is one session, as before.
+const CONTINUE = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../own-019/continue.txt');
+const sittings = Number(opt('--sittings', 1));
+const maxTotal = Number(opt('--max-total', 20));
+const argsFor = (prompt, out) => [
   '--from', VIBE, 'vibe',
-  '--prompt-file', path.resolve(promptFile),
+  '--prompt-file', prompt,
   '--legacy-harness', '--trust',
   // `bash` resolves its own permission per command and ignores a configured "never" (kit smoke 2: it asked, and the
   // ask ended the run), so the shells are not offered at all — as s15's Claude stranger had no shell approved.
   ...['bash', 'git_bash', 'experimental_bash', 'windows_shell', 'web_fetch', 'web_search'].flatMap((t) => ['--disabled-tools', t]),
   '--output', 'streaming',
-  '--output-dir', OUT,
+  '--output-dir', out,
   '--max-price', opt('--max-price', '4'),
   '--max-turns', opt('--max-turns', '250'),
   '--workdir', APPS
 ];
-fs.writeFileSync(path.join(root, 'command.txt'), ['uvx', ...args].join(' ') + `\n# key: ${keyName}; kit: ${kit}${thinking ? `; thinking = ${thinking}` : ''}${temperature ? `; temperature = ${temperature}` : ''}\n`);
-const log = fs.createWriteStream(path.join(root, 'agent.jsonl'));
-const err = fs.createWriteStream(path.join(root, 'agent.stderr'));
-const child = spawn('uvx', args, { cwd: APPS, env, stdio: ['ignore', 'pipe', 'pipe'] });
-child.stdout.pipe(log);
-child.stderr.pipe(err);
-const t0 = Date.now();
+fs.writeFileSync(path.join(root, 'command.txt'), ['uvx', ...argsFor(path.resolve(promptFile), OUT)].join(' ') + `\n# key: ${keyName}; kit: ${kit}${thinking ? `; thinking = ${thinking}` : ''}${temperature ? `; temperature = ${temperature}` : ''}${sittings > 1 ? `; sittings ≤ ${sittings}, later prompts ${CONTINUE}, max-total $${maxTotal}` : ''}\n`);
+
 // OWN-019 s2: 12 was shorter than Large 4's own productive thinks. Vibe writes a think to the journal only when it
 // ends; the long design thinks of rounds that finished took up to 10.1 min (9–17 KB/min), and v4/v8 were stopped at
 // 11.8/12.4 min still writing at that speed, no more repetitive than the ones that finished. 30 is three times the
 // longest productive think measured.
 const stallMs = Number(opt('--stall-min', 30)) * 60000;
-let stalled = null;
 const journalSize = () => {
   const dir = path.join(HOME, '.vibe', 'logs', 'session');
   let size = 0;
@@ -154,23 +157,93 @@ const journalSize = () => {
   } catch {}
   return size;
 };
-let lastSize = 0;
-let lastGrowth = Date.now();
-const watchdog = setInterval(() => {
-  const size = journalSize();
-  if (size !== lastSize) {
-    lastSize = size;
-    lastGrowth = Date.now();
-    return;
-  }
-  if (Date.now() - lastGrowth < stallMs || stalled) return;
-  stalled = Math.round((Date.now() - lastGrowth) / 60000);
-  const tree = (pid) => [pid, ...(spawnSync('pgrep', ['-P', String(pid)], { encoding: 'utf8' }).stdout || '').split('\n').filter(Boolean).flatMap((c) => tree(Number(c)))];
-  for (const pid of tree(child.pid).reverse()) try { process.kill(pid, 'SIGTERM'); } catch {}
-}, 30000);
-child.on('close', (code) => {
-  clearInterval(watchdog);
-  const how = stalled ? `stalled (no journal growth for ${stalled} min)` : String(code);
-  fs.writeFileSync(path.join(root, 'agent.exit'), `${how} ${Math.round((Date.now() - t0) / 1000)}s`);
-  console.log('exit', how);
-});
+
+function runSitting(prompt, tag) {
+  const out = path.join(root, `out${tag}`);
+  const log = fs.createWriteStream(path.join(root, `agent${tag}.jsonl`));
+  const err = fs.createWriteStream(path.join(root, `agent${tag}.stderr`));
+  const child = spawn('uvx', argsFor(prompt, out), { cwd: APPS, env, stdio: ['ignore', 'pipe', 'pipe'] });
+  child.stdout.pipe(log);
+  child.stderr.pipe(err);
+  const t0 = Date.now();
+  let stalled = null;
+  let lastSize = journalSize();
+  let lastGrowth = Date.now();
+  const watchdog = setInterval(() => {
+    const size = journalSize();
+    if (size !== lastSize) {
+      lastSize = size;
+      lastGrowth = Date.now();
+      return;
+    }
+    if (Date.now() - lastGrowth < stallMs || stalled) return;
+    stalled = Math.round((Date.now() - lastGrowth) / 60000);
+    const tree = (pid) => [pid, ...(spawnSync('pgrep', ['-P', String(pid)], { encoding: 'utf8' }).stdout || '').split('\n').filter(Boolean).flatMap((c) => tree(Number(c)))];
+    for (const pid of tree(child.pid).reverse()) try { process.kill(pid, 'SIGTERM'); } catch {}
+  }, 30000);
+  return new Promise((resolve) => child.on('close', (code) => {
+    clearInterval(watchdog);
+    const how = stalled ? `stalled (no journal growth for ${stalled} min)` : String(code);
+    const seconds = Math.round((Date.now() - t0) / 1000);
+    fs.writeFileSync(path.join(root, `agent${tag}.exit`), `${how} ${seconds}s`);
+    resolve({ how, stalled: Boolean(stalled), seconds, ...measure(out) });
+  }));
+}
+
+/** One sitting's measures from Vibe's own export and journal: list $, tokens, calls, input per call, longest think. */
+function measure(out) {
+  const m = {};
+  try {
+    const d = JSON.parse(fs.readFileSync(path.join(out, 'export.json'), 'utf8'));
+    const u = d.usage;
+    Object.assign(m, { outcome: d.outcome, stop: d.stop_reason, vibeUsd: d.cost_usd, usage: u,
+      estimatedUsd: Number((((u.input_tokens - (u.cached_input_tokens || 0)) * 0.68 + (u.cached_input_tokens || 0) * 0.07 + u.output_tokens * 2.09) / 1e6).toFixed(3)) });
+  } catch {}
+  try {
+    const msgs = fs.readFileSync(path.join(out, 'session', 'messages.jsonl'), 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
+    const calls = msgs.filter((x) => x.role === 'assistant');
+    m.calls = calls.length;
+    m.toolCalls = calls.reduce((n, x) => n + (x.tool_calls?.length || 0), 0);
+    m.longestThinkChars = Math.max(0, ...calls.map((x) => (x.reasoning_content || '').length));
+    if (m.usage && calls.length) m.inputPerCall = Math.round(m.usage.input_tokens / calls.length);
+  } catch {}
+  return m;
+}
+
+/** The first line of the app's docs/NEXT.md (the Vibe kit's process note), or null before sitting 1 writes it. */
+function nextLine() {
+  const find = (dir, depth) => {
+    if (depth < 0) return null;
+    let entries = [];
+    try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return null; }
+    const here = path.join(dir, 'docs', 'NEXT.md');
+    if (fs.existsSync(here)) return here;
+    for (const e of entries) if (e.isDirectory() && e.name !== 'node_modules' && !e.name.startsWith('.')) {
+      const f = find(path.join(dir, e.name), depth - 1);
+      if (f) return f;
+    }
+    return null;
+  };
+  const f = find(APPS, 2);
+  return f ? { file: path.relative(APPS, f), text: fs.readFileSync(f, 'utf8'), first: fs.readFileSync(f, 'utf8').split('\n')[0].trim() } : null;
+}
+
+const record = [];
+let unchanged = 0;
+for (let k = 1; k <= sittings; k++) {
+  const before = nextLine();
+  const r = await runSitting(k === 1 ? path.resolve(promptFile) : CONTINUE, k === 1 ? '' : String(k));
+  const after = nextLine();
+  record.push({ sitting: k, ...r, next: after?.first ?? null, nextFile: after?.file ?? null });
+  fs.writeFileSync(path.join(root, 'sittings.json'), JSON.stringify(record, null, 2));
+  console.log(`sitting ${k}: exit ${r.how} ${r.seconds}s $${r.vibeUsd ?? '?'} — ${after?.first ?? '(no NEXT.md)'}`);
+  if (sittings === 1) break;
+  if (r.stalled) { console.log('stop: stalled'); break; }
+  if (after && /^#\s*Done\b/i.test(after.first)) { console.log('stop: done'); break; }
+  unchanged = before && after && before.text === after.text ? unchanged + 1 : 0;
+  if (unchanged >= 2) { console.log('stop: NEXT.md unchanged for two sittings'); break; }
+  const total = record.reduce((n, x) => n + (x.vibeUsd || 0), 0);
+  if (total >= maxTotal) { console.log(`stop: $${total.toFixed(2)} ≥ --max-total ${maxTotal}`); break; }
+}
+const sum = (f) => record.reduce((n, x) => n + (f(x) || 0), 0);
+console.log('exit', record.at(-1).how, `| ${record.length} sitting(s), ${Math.round(sum((x) => x.seconds) / 60)} min, $${sum((x) => x.vibeUsd).toFixed(2)} list, ~$${sum((x) => x.estimatedUsd).toFixed(2)} cached`);

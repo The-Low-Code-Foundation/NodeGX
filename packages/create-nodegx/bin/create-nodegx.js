@@ -276,8 +276,9 @@ function vibeSentence(result) {
     '',
     'Next:',
     `  1. cd ${here} && vibe --legacy-harness, and trust the folder when it asks.`,
-    '  2. Say what you want to build. Mistral Large 4 builds it as a NodeGX app, checks each thing you asked for in a',
-    '     browser, and tells you what passed.',
+    '  2. Say what you want to build. Mistral Large 4 builds it as a NodeGX app over several sittings — a plan, then',
+    '     a part at a time, then a check in a browser of each thing you asked for. Each sitting ends by saying what is',
+    '     next: type /clear, then "continue", until it tells you what passed and that it is done.',
     `  3. See it: npx ${PREVIEW_PACKAGE} <the app's folder> --open`,
     '',
     'Any time you want the visual editor, open the same folder in NodeGX — nothing needs converting.'

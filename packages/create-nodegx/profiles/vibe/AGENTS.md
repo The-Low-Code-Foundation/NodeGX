@@ -4,35 +4,75 @@ It was set up with `npm create nodegx-vibe`. When I ask for an app here, build i
 server's tools: `list_projects` and `open_project` for one that exists, `create_project` for a new one. Don't write a
 separate web server or hand-written HTML and JavaScript instead: that would be a different app.
 
-## How to build it
+## You build it in sittings — this is a process
+
+An app is not built in one go. It is built over several sittings, and each sitting does ONE step of the process
+below, writes down where it got to, and stops. The next sitting starts fresh: it remembers nothing except what is
+written in the app's `docs/` folder, so write there everything the next one needs. Stopping is part of the work —
+every step of a long sitting re-sends the whole conversation, so a long sitting gets slow and expensive, and what
+you worked out only in your head is lost when it ends.
+
+**Every sitting starts by finding where it is.** `grep` this folder (path `.`) for `^# Next sitting`.
+- No match: this is **sitting 1 — plan**. (A `docs/NEXT.md` that starts `# Done` means that app is finished.)
+- A match: read that `docs/NEXT.md` first. It says which step you are on and what to read. Do that step, nothing more.
+
+When I say "continue" (or nothing new), do the next step. When I ask for a change, add its lines to the checklist and
+go on through the process. Every sitting that stops ends with the line: *Next: <the step>. Type /clear, then
+"continue".*
+
+### Sitting 1 — plan (build nothing yet)
 
 1. Read what I asked for. Anything I spelled out — names, lists, wording, order, timings, colours — is built exactly
    as written.
-2. Open or create the project. A value only this device needs to keep (a best score, a setting) is not a backend:
-   a Function saves it with `localStorage` — create the project with `backend: { kind: "none" }` unless people or
-   devices share data. Then read `call_tool({ name: "get_project_info" })`: its traps are mistakes other builders
-   made here.
-3. Write the checklist before building: one line for each thing I could see or do — what is on screen, what a tap
-   does, what it looks like (a colour), when it happens (a time), what is still there after a reload — and what the
-   next screen looks like the moment it appears: nothing left over from the one before (a colour, a selection) on the
-   new words. Reset that state before the words change, not after.
-4. Build one component at a time and read every answer. A refused change says exactly what to fix. Keep each answer
-   short: decide one component, write it with a tool, read the reply, then the next. Don't work out the whole app in
-   one answer before writing anything — a staged operation can be replaced later, and an answer with no tool call in
-   it can run on for many minutes with nothing saved.
-5. Prove each checklist line in the browser with `drive_page`, starting from the app's start page (leave out
-   `page`): tap, wait, then read the text, a variable, or what a person sees of a thing by its label —
-   `{ "read": { "look": "Lisbon" }, "expect": { "backgroundName": "green" } }`. A read answers what a screenshot
-   would; each screenshot you open makes every later step of this session cost more.
-6. Tell me one line per checklist item: passed or failed, and what you measured. Say it is done only when every
-   line passes; when one fails, fix it and drive it again.
+2. Create the project. A value only this device needs to keep (a best score, a setting) is not a backend: a Function
+   saves it with `localStorage` — `backend: { kind: "none" }` unless people or devices share data. Read
+   `call_tool({ name: "get_project_info" })`: its traps are mistakes other builders made here.
+3. In the project's `docs/` folder write, with `write_file`:
+   - `REQUEST.md` — what I asked for, **word for word**.
+   - `PLAN.md` — the screens; the components on each and their inputs; where every value lives (a Variable, a
+     component input, `localStorage`); how each timing works; the decisions and why. Then the build split into
+     **parts**, in order, each small enough for one sitting (one or two components and the checklist lines they make
+     possible).
+   - `CHECKLIST.md` — one line for each thing I could see or do: what is on screen, what a tap does, what it looks like
+     (a colour), when it happens (a time), what is still there after a reload, and what the next screen looks like the
+     moment it appears (nothing left over from the one before — a colour, a selection — on the new words; reset that
+     state before the words change, not after). **Every example I gave is its own whole line, played exactly**: if I
+     wrote "You scored 3 out of 5", one line plays a game that gets exactly 3 — mixing right answers, wrong ones and
+     ones left to time out — and reads that sentence. Each line: `- [ ] what a person sees — how to drive it`.
+   - `NEXT.md` — first line `# Next sitting: build part 1 — <its name>`, then what to read first.
+4. Stop: tell me in two lines what you planned and what the next sitting does.
+
+### Sittings 2 … n — build one part
+
+1. Read `NEXT.md`, `PLAN.md` and `CHECKLIST.md` (and `REQUEST.md` when a word matters).
+2. Build that part, one component at a time, and read every answer. A refused change says exactly what to fix. Keep
+   each answer short: decide one component, write it with a tool, read the reply, then the next. An answer with no
+   tool call in it can run on for many minutes with nothing saved.
+3. Drive every checklist line this part makes possible (below). Mark it `- [x] … — passed: <what you measured>` or
+   `- [ ] … — FAILED: <what you saw>`, and fix a failure in this part before you stop.
+4. Anything you decided or learned that `PLAN.md` doesn't say, add to it.
+5. Rewrite `NEXT.md`: `# Next sitting: build part <n> — <its name>`, or `# Next sitting: prove` when every part is
+   built. Then stop: two lines, what is built and what is next.
+
+### The last sitting — prove
+
+Start the app fresh and drive **every** line of the checklist again, the whole examples as I wrote them. Update each
+line. If all pass, `NEXT.md` becomes `# Done` followed by the checklist, and you tell me one line per item: passed or
+failed, and what you measured. If any fail, `NEXT.md` becomes `# Next sitting: fix — <the lines>`; that sitting fixes
+them and ends with `# Next sitting: prove` again. Never write `# Done` with a line unproven.
+
+## Driving a line
+
+`drive_page` starts from the app's start page (leave out `page`): tap, wait, then read the text, a variable, or what a
+person sees of a thing by its label — `{ "read": { "look": "Lisbon" }, "expect": { "backgroundName": "green" } }`. A
+read answers what a screenshot would; each screenshot you open makes every later step of the sitting cost more.
 
 ## Tools
 
-Your tool list will not change in this session. Every `nodegx` tool that is not in it — `get_project_info`,
+Your tool list will not change in a sitting. Every `nodegx` tool that is not in it — `get_project_info`,
 `create_plan`, `update_component`, `render_report`, `drive_page` and the rest — is called through `call_tool`:
 `call_tool({ name: "drive_page", arguments: { ... } })`. `call_tool({ name, describe: true })` shows a tool's
-arguments first.
+arguments first. A new sitting is not bound to the project: `open_project` it first.
 
 When the app needs an API key, don't ask me to paste it into the chat. Call `set_function_secret` without a value and
 tell me where to paste it in the project's `.env` file.
