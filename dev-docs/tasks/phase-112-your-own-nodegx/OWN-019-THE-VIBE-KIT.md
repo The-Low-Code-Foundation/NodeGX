@@ -212,6 +212,7 @@ post-tool, post-agent) — and the kit uses none of them yet.
 | pk1 | Vibe kit, tgz16 | 11/12 | itself | 63 | 3.95 | 82% | SAMEVALUE |
 | pk2 | Vibe kit, tgz17 | **12/12** | itself | 59 | 4.34 | 72% | AC5: 1 of 3 |
 | pk3 | Vibe kit, tgz18 | **12/12** | itself | 83 | 5.59 | 64% | AC5: 2 in a row |
+| pk4 | Vibe kit, tgz19 | **12/12** | itself | 55 | 4.49 | 72% | **AC5: three in a row** (pk2–pk4) |
 - **s2, v9 (tgz18, lever 3 — the answer-size line in AGENTS.md): 12/12, no stall**, finished by itself in 45 min,
   $2.68 by Vibe's list count (~$1.34 cached, 76%). Its longest think was 98 KB (the stalled rounds' 142–172 KB).
   **Carryover again** (Q2 Sydney green, Q3 Toronto red, Q4 Rabat red) — as v7, so not the temperature. v9's graph:
@@ -233,3 +234,10 @@ post-tool, post-agent) — and the kit uses none of them yet.
   docs) — $6.30 by Vibe's list count, ~$3.15 at the cached rate. The third lab-made stop of the day (the unsealed
   root, the 12-minute watchdog, now the price cap on a list count that ignores the cache). Not an AC4 pass as written
   ("finished by itself"). Quiz rounds now run with `--max-price 10`. v11 and v12 side by side, tgz19.
+- **s2, pk4 (tgz19): 12/12**, finished by itself in 55 min, $4.49 by Vibe's list count (~$2.24 cached, 72%).
+  **AC5 met: pk2, pk3, pk4 — three Pack It rounds in a row, 12/12, each finished by itself** (kits tgz17–19, which
+  differ only in two AGENTS.md lines). First read 2/12: the grader typed "Passport" and aimed at Add in the same
+  instant; typing clears pk4's "Type an item first" line, which unmounts and moves Add up. A probe without the refusal
+  presses graded 12/12 with the same `<select>` presses, ruling the select out. The grader now lets the screen
+  settle 350 ms after typing and refuses to press an Add its press would miss (a person taps where the button is).
+  Re-proven on the control and the 11 mutants after the change.

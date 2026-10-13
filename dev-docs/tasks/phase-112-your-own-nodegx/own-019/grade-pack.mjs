@@ -207,6 +207,9 @@ const type = async (text) => {
   await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Backspace', code: 'Backspace', windowsVirtualKeyCode: 8 });
   await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Backspace', code: 'Backspace', windowsVirtualKeyCode: 8 });
   if (text) await send('Input.insertText', { text });
+  // Let the screen settle before the next press is aimed: typing can clear a message line above the button (pk4's
+  // "Type an item first" unmounts on the first keystroke and Add moves up), and a person taps Add where it then is.
+  await sleep(350);
   return { ok: (await page(`field().value`)) === text, value: await page(`field().value`) };
 };
 const fieldValue = () => page(`(field() || {}).value ?? null`);
@@ -256,6 +259,7 @@ const addItem = async (name, bag) => {
   const typed = await type(name);
   const add = await box(ADD);
   if (!add) return { ok: false, why: 'no Add button', chose, typed };
+  if (!add.lands) return { ok: false, why: 'a press at the centre of Add lands on something else', chose, typed };
   await press(add);
   const appeared = await waitFor(() => present(name), 4000);
   await sleep(200);
