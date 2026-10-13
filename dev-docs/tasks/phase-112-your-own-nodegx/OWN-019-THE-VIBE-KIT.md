@@ -114,3 +114,17 @@ post-tool, post-agent) — and the kit uses none of them yet.
   and ended on a sentence of intent ("I need to find where that port comes from") — in `vibe -p` a reply with no tool
   call ends the run (a person would type "keep going"). The app: question 1 draws; the timer never moves and a tap
   does nothing. So the plain kit in Vibe, as a person gets it today, is far from OpenCode's 12/12.
+- **s1, v2 — the Vibe kit (tgz14, same model settings as v1b): 12/12, carryover clean**, finished by itself in 46 min,
+  $3.20 by Vibe's list count (~half real), 83% cached, from the Vibe Code allowance. `backend: none` and the best
+  score in `localStorage` (LOCALKEEP's line read and used); For Each over an AnswerButton component; 78 nodes, 0
+  validation errors. **It checked itself as the kit says:** a 14-line checklist, 15 drives (49/49 and 17/17 full
+  runs), every line reported with what it measured, no screenshot opened. Its first drive showed taps doing nothing;
+  it found its own wiring fault (the answer gate on `ontrue` instead of `onfalse`), fixed it and drove again.
+  It read colours with its own `getComputedStyle` expressions (13) more than the `look` read (≤2).
+  **v1b → v2: 0/12 → 12/12, the same model, harness and settings; only the kit changed.**
+
+| round | kit | grade | ended | min | $ (Vibe list) | cached | drives | what it taught |
+|---|---|---|---|---|---|---|---|---|
+| v1 | plain, tgz12, wrong key | — | stalled (one 32-min step) | 67 | 1.78 | — | 1 | no max_tokens on the legacy harness; the key |
+| v1b | plain, tgz12 | 0/12 | itself, mid-work | 23 | 1.25 | 77% | 0 | LOCALKEEP; a text reply ends `vibe -p` |
+| v2 | Vibe kit, tgz14 | **12/12** | itself, all lines passed | 46 | 3.20 | 83% | 15 | the kit works |
