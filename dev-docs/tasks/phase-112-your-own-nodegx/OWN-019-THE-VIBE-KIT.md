@@ -327,3 +327,22 @@ post-tool, post-agent) — and the kit uses none of them yet.
   "This sitting's step is done … tell me in two lines … and stop." Fails open on anything unexpected. Test with a
   control (a NEXT.md from an earlier sitting closes nothing). AGENTS.md says NEXT.md is written last and why the tools
   close. q4 measures it; q2 (tgz21, no hook) runs on as the other arm.
+- **s3, q2 sitting 4 (part 2, the whole quiz screen, 11 lines): 40 min, 20 answers, 58 tool calls, 1 write, an
+  88 KB think** — reading theme tokens, examples and `describe`s, designing the screen in its head. Stopped by me.
+  The plan step got chunked; the build step didn't get chunked small enough: the model picks the part size, and a
+  screen with a timer, taps and a score is too much for one sitting.
+- **s3, Richard (on chunking and teaching):** *"We need to teach it to chunk up tasks to stay well within its limits
+  … we're on maybe nearly 100 sessions just for [P107] … If Mistral doesn't [know how to scope a session], we need to
+  teach it … You need to be like the senior dev showing the junior dev around the office … Be gentle and a good
+  teacher please."* (P107 is at s103.)
+- **s3, the teaching kit (`98178a030`, tgz25):** three Vibe skills (`.vibe/skills/…/SKILL.md`; Vibe 2.26.1 lists
+  them in the legacy system prompt and loads them with the `skill` tool), in a senior colleague's voice:
+  **`nodegx-first-day`** (where everything is — the server as manual: traps, node notes, examples, style, render,
+  drive; how we work — small steps written down, a graph is a claim and a drive is evidence, measure before you
+  believe, the notes are the manual, stuck is normal and spinning is not; the s1–s3 defects as stories: LOCALKEEP,
+  SAMEVALUE, CARRYOVER, AFTERTIMEOUT, the For Each rows, screenshots), **`nodegx-sizing-a-sitting`** (a part is at
+  most four checklist lines and one or two components, split by what a person sees change; a worked split for a
+  different app; the signs to cut — ~30 tool calls, ten reads with nothing written, designing two components at
+  once, two failed fixes, a long think; a good NEXT.md with "where things are"), **`nodegx-when-stuck`** (read what
+  you measured, ask the notes, try it small, look at the moment between, two tries then hand over). AGENTS.md names
+  the three and carries the sizing rule and the cut signals. q5 measures it beside q4 (tgz24, no skills); q2 stopped.
