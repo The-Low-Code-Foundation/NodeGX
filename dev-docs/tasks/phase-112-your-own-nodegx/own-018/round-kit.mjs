@@ -79,6 +79,11 @@ for (let dir = path.resolve(root); ; dir = path.dirname(dir)) {
   }
 }
 const denylist = deny.filter((d) => d && d !== path.resolve(root));
+// OWN-019 s2: the round's OWN root was not sealed — v6 grepped the server's package in home/.npm and v5 wrote to a
+// path it invented at the root; each was an "ask", answered no, and the `-p` run ended where a person would have
+// declined and gone on. fnmatch has [!…]: everything at the root but work/, everything in work/ but apps/, existing
+// or not. Vibe checks its own scratchpad (home/tmp/vibe-scratchpad-…) before the denylist, so that stays writable.
+denylist.push(`${root}/[!w]*`, `${root}/work/[!a]*`);
 const toml = (v) => JSON.stringify(v);
 fs.writeFileSync(
   path.join(HOME, '.vibe', 'config.toml'),

@@ -131,6 +131,7 @@ post-tool, post-agent) — and the kit uses none of them yet.
 | v3 | Vibe kit, tgz14 | **12/12** | itself, all lines passed | 64 | 4.90 | 64% | 110 steps | AC4: 2 in a row |
 | v4 | Vibe kit, tgz16 | — | **stalled** (one think, 12+ min, 175 KB) | 23 | 0.35 | 37% | 0 | LONGTHINK; the series breaks |
 | v5 | tgz16, `thinking low` | — | itself, before authoring | 1.5 | 0.28 | 86% | 0 | low is worse: 36 malformed probes, a stray write ended `-p` |
+| v6 | tgz16, temperature 0.2 | — | a refused read ended `-p`, before authoring | 23 | 0.82 | 47% | 0 | inconclusive; the lab's root was unsealed |
 
 - **s2 (2026-10-13, Opus):** kit tgz14 reused for v3 (create-nodegx and MCP byte-identical in source to HEAD at the
   time; the runtime had moved only in Aggregate Records, which the quiz never touches). **v3: 12/12, carryover clean,
@@ -177,3 +178,10 @@ post-tool, post-agent) — and the kit uses none of them yet.
   now say it; `21a3d0b98`). A real miss a person sees; its own drives pressed Add empty once. (First read 5/12: the
   grader pressed a checkbox at coordinates read before pk1's message line mounted and shifted the list — fixed in
   the grader, every press re-reads its row; a probe pressing boxes in another order showed every press landing.)
+- **s2, v6 (lever 2, temperature 0.2): inconclusive.** No stall in 23 min, and no authoring either: before planning
+  it went to read the runtime's source in the npx cache (`home/.npm`, "to verify `isTrueEv` and how For Each
+  republishes item signals"); the read was an "ask", `-p` answered no, the run ended. **The lab, fixed:** the seal
+  covered the ancestors' siblings, not the round's own root — `home/`, `out/` and anything new there were "ask", and
+  an ask ends a `-p` run where a person declines and goes on (v5's stray write too). `round-kit.mjs` now denies
+  `<root>/[!w]*` and `<root>/work/[!a]*` (fnmatch, existing or not); Vibe checks its scratchpad first, so that stays
+  writable. **v7 (0.2) and v8 (kit defaults, 1.0)** run side by side on the sealed lab, kit tgz17 (`21a3d0b98`).
