@@ -1,0 +1,88 @@
+# OWN-019 — The Vibe kit
+
+**Opened 2026-10-13** (OWN-018 s3). Richard: *"Can we not make a special npm kit for people who want to use Vibe and
+preload all of the cool things you talked about that we could add? Make a really custom version that we perfect here
+over as many sessions as it takes, that makes it purr like a kitten when run in Vibe with Large 4?"*
+**Ruled (R29):** its own name over a shared core — *"as long as we can have the right amount of freedom to really
+make the necessary changes to perfect Mistral Large 4 and Vibe usage. So if there are some parts of the core npm
+package that only work well with Claude and Claude Code, we need to be able to override them when installing the
+vibe version."*
+**Depends on** OWN-018 (the lab: `round-kit.mjs`, `grade-quiz.mjs`, kit tgz12, everything Mistral taught the kit) and
+Richard's Vibe subscription key (`MISTRAL_VIBE_API_KEY` in the repo `.env`, made under Code › Vibe CLI).
+**Status: 📋 opened s3 (2026-10-13). Next: AC1, the census.**
+**Model:** Opus for the sessions that build and read the rounds. The agent under test: **Mistral Large 4
+(`mistral-large-4`, never `-latest`) in Mistral Vibe**, pinned to a version per round (2.26.1 at opening).
+
+## 1. The person sentence
+
+> **Someone who codes with Mistral Vibe runs `npm create nodegx-vibe apps`, starts `vibe` in that folder and says
+> what they want in a paragraph. Large 4 builds a NodeGX app, checks it in a browser against their own words, and
+> reports line by line what works — with nobody else in the loop.**
+
+## 2. Why
+
+OWN-018 got Large 4 to 12/12 on the quiz in OpenCode (runs 9, 10) on a kit written for Claude, and showed where it
+still needs a hand: its own checks read what is *written* on screen, not what it *looks like* or *when* (run 8: its
+drives passed, the grader 9/12, no colour ever shown; run 10: drives passed, a quarter-second flash of the last
+question's colours); nothing turns the request into a checklist; a think can run away (runs 4, 10); the kit's Vibe
+config never compacts and asks for `reasoning_effort: high`. Vibe has the hooks to fix that from the folder — project
+`AGENTS.md`, project skills (`SKILL.md`), agent profiles with their own `instructions`, and hooks (pre-tool,
+post-tool, post-agent) — and the kit uses none of them yet.
+
+## 3. The shape (R29)
+
+- **`create-nodegx-vibe`** is a thin package: it runs `create-nodegx` with a **Vibe profile**. Every fix to the core
+  reaches it; nothing is copied.
+- **The profile may override anything the core writes or says**: each file `create-nodegx` writes (`AGENTS.md`, the
+  Vibe config, the app's own notes), and the agent-facing text the nodegx server sends (its instructions, tool
+  descriptions, guidance, refusals) — through a server profile (`--profile vibe` in the config the kit writes), not a
+  fork. Where a sentence only suits Claude, the Vibe profile replaces it; where it suits both, it stays shared.
+- **What helps every agent goes in the core**, Vibe first: the checklist and the look step (§4) belong to Claude too.
+
+## 4. What the kit preloads (candidates; each kept only if it measures better, §5)
+
+- **`.vibe/config.toml`, tuned:** Large 4; compaction that fires (an `auto_compact_threshold` near OpenCode's 118k,
+  not the 1M window); thinking level and temperature measured (kit today: `high`, 1.0; Vibe's default 0.2; OpenCode's
+  12/12 runs sent no effort); the legacy harness; every nodegx tool approved; `--screenshots-to-files` on the server.
+- **A nodegx build skill** (`.vibe/skills/…/SKILL.md`), written for Large 4: scope → plan → one component at a time →
+  **the checklist** → drive each line → report pass/fail per line before "done".
+- **A nodegx agent profile** as the folder's default agent, carrying those instructions.
+- **A finish hook** (post-agent), if Vibe's hook can send the agent back: no "done" until the checklist has been
+  driven. Measured from Vibe's source before it is relied on.
+- **Core, for every agent:** a checklist step — the request turned into lines, each with the `drive_page` steps that
+  prove it; a `drive_page` step that reads **what a person sees** (an element's colour, whether it is visible, when it
+  changed) without a screenshot (screenshots turn Mistral's cache off, P112-OWN018-IMAGECACHE); starter fonts, icons
+  and imagery (P112-OWN018-NOSTARTERASSETS), so apps stop measuring as "a default template".
+
+## 5. The method
+
+- Headless Vibe rounds in OWN-018's sealed lab (`own-018/round-kit.mjs`, on the subscription key), the kit from
+  tarballs packed at HEAD, graded by a script the agent never sees.
+- **Two briefs at least**: the quiz (`own-018/sentence-quiz.txt`, `grade-quiz.mjs`) and a second, different app with
+  its own grader proven on mutants — so the kit is not tuned to one app.
+- One change per round, kept only if it measures better (grade, the agent's own report against the grader, cost,
+  cache, time, interventions). Finish reasons read first (`length` is a cap, not the model).
+- Every defect into `dev-docs/bugs/` as found; every kit lesson for every agent unless it only suits one.
+
+## 6. Acceptance
+
+- **AC1 — the census.** Every sentence the kit and the server send an agent, labelled *shared*, *Claude-only* or
+  *needs a Vibe variant*, with the evidence for each label.
+- **AC2 — the profile.** `npm create nodegx-vibe` (from a tarball) writes the Vibe files; any core file and any
+  agent-facing server text can be overridden by the profile; a test proves an override lands and a non-overridden
+  sentence stays shared.
+- **AC3 — it checks itself.** On the quiz, Large 4's own end-of-run report flags what the grader flags: proven by
+  rounds whose apps the grader fails (or planted mutants), where its checklist goes red on the same lines.
+- **AC4 — the quiz, three in a row.** Three fresh headless Vibe rounds grade 12/12, `carryover` clean, finished by
+  itself, no intervention.
+- **AC5 — a second brief, three in a row**, on its own grader.
+- **AC6 — Richard's own.** Richard runs `npm create nodegx-vibe`, opens Vibe himself and builds something of his
+  choosing with only what the kit printed; the task closes on his words.
+- **AC7 — shipped.** Published to npm with the core (publishing is Richard's step, R11).
+
+## 7. Sessions
+
+- **s1 (2026-10-13, opened in OWN-018 s3):** R29 ruled. Inputs measured this session (OWN-018 §15): Vibe 2.26.1 never
+  compacts on the kit's config and sends no `max_tokens` on the legacy harness; Large 4 drove its own app 28× (run 9)
+  and 7× (run 10), rendered twice; its checks never read colour or timing; Vibe has project skills, agent profiles
+  with `instructions`, and pre-/post-tool and post-agent hooks.
