@@ -8,6 +8,7 @@ found: P107 s100, 2026-10-13 — driven in the dev editor while fixing P107-S99-
 evidence: on a copy of lepetitpicnic_local_backend's test project (`s100-aggdrive`), in `/#__cloud__/Records and Objects/Aggregate`, nodes made with `NodeGraphNode.fromJSON` + `addRoot`, read with `getPorts()` and the property panel (screenshots in the s100 scratchpad). A new Aggregate Records (`collectionName: TestQuery`, `aggregates: Total`): ports `fetched, failure, error, aggregates` only; the panel shows the Aggregates list and nothing else. A new Query Records in the same cloud function: outputs, `storageFetch`, `qp-min` (SB-017's derivation fires) — no `collectionName`, no `visualFilter`. CONTROL: the same new Query Records in the front-end component `/Tests - Records`: `collectionName, storageFilterType, search, storageEnableLimit, storageFetch, runOnChange-*, realtime, storageEnableCount, visualFilter, visualSort`. And the project's three saved Aggregate nodes keep their 10 / 7 / 10 SAVED dynamic ports, but writing `aggregates: 'AvgAge,Names,Extra'` on one drew no `aggprop-Extra` (4 s): nothing recomputes them
 regression: packages/noodl-editor/tests-unit/nsp-020/cloud-spec-ports.test.ts
 kit: node-spec
+commit: b9d251edc
 phase: P107 (NSP-020, R37)
 ---
 
