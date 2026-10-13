@@ -94,6 +94,15 @@ export interface ServerOptions {
    * parameter: the model does not choose it.
    */
   reproducible?: ReproducibleOutput;
+  /**
+   * P112 OWN-018 s2 — screenshots go to files unless the caller asks otherwise: `render_report` with no `out_dir`
+   * writes into `<project>/.previews/render` and returns the manifest instead of inline images, and `drive_page`
+   * screenshot steps default to `<project>/.previews/drive`. Chosen by whoever starts the server (create-nodegx sets
+   * it for OpenCode and Mistral Vibe), never by the model. Measured on Mistral Large 4 (P112-OWN018-IMAGECACHE):
+   * one image part anywhere in a request turns its prompt cache off, so an inline screenshot made every later step
+   * of a session full price until a compaction dropped it. Claude caches across images, so `.mcp.json` leaves it off.
+   */
+  screenshotsToFiles?: boolean;
 }
 
 export interface CreatedServer {
@@ -198,7 +207,7 @@ export function createServer(options: ServerOptions): CreatedServer {
   // LAS-005 — read-only and unconditional, the same posture as the rest of the
   // read surface: rendering a project changes nothing about it, and a read-only
   // server is exactly where "is this page actually right?" gets asked.
-  registerRenderTools(rec, binding, renderLedger);
+  registerRenderTools(rec, binding, renderLedger, { screenshotsToFiles: options.screenshotsToFiles === true });
   // BST-006. Takes no store, like `create_project`: it reads the launcher's own
   // recent-projects file, which is machine state rather than project state. That
   // is what makes it answerable on a server with nothing bound — and it is the

@@ -45,6 +45,11 @@ Options:
                    created/modified stamp set to <epoch> (a full ISO-8601 UTC
                    time). For template generators and CI; a person's session
                    keeps the wall clock.
+  --screenshots-to-files
+                   render_report and drive_page write screenshots under the
+                   project's .previews/ and return their paths, unless asked for
+                   another folder. For a model whose prompt cache stops at the
+                   first image in a conversation (Mistral).
   --version        Print version and exit.
   --help           Show this help.
 
@@ -69,6 +74,7 @@ async function main(): Promise<void> {
 
   const allowWrites = argv.includes('--allow-writes');
   const deferTools = !argv.includes('--all-tools');
+  const screenshotsToFiles = argv.includes('--screenshots-to-files');
   // P109 ISL-019 — `--reproducible <namespace>@<epoch>` or `--reproducible=<namespace>@<epoch>`.
   let reproducible: ReproducibleOutput | undefined;
   const reproducibleAt = argv.findIndex((a) => a === '--reproducible' || a.startsWith('--reproducible='));
@@ -123,6 +129,7 @@ async function main(): Promise<void> {
       projectDir: positional[0],
       allowWrites,
       deferTools,
+      screenshotsToFiles,
       ...(reproducible ? { reproducible } : {})
     });
     // AWP-006 — the surface is now a decision, so it is stated at startup rather

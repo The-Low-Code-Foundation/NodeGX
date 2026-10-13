@@ -35,7 +35,12 @@ import { guarded, type ToolResult } from './util';
 const MAX_SCALE = 1;
 const MIN_SCALE = 0.1;
 
-export function registerRenderTools(server: McpServer, binding: ProjectBinding, ledger: RenderLedger): void {
+export function registerRenderTools(
+  server: McpServer,
+  binding: ProjectBinding,
+  ledger: RenderLedger,
+  options: { screenshotsToFiles?: boolean } = {}
+): void {
   server.registerTool(
     'render_report',
     {
@@ -107,7 +112,14 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
         // Resolved here, once, against this server's cwd — and the SAME resolved string is both
         // what the CLI is handed and what the caller is told, so the path in the response is the
         // path on disk rather than a relative fragment the caller would have to guess the base of.
-        const outDir = args.out_dir === undefined ? undefined : path.resolve(args.out_dir);
+        // P112 OWN-018 s2 — with the server's --screenshots-to-files, no `out_dir` means the project's own
+        // .previews/render rather than images in the response (see ServerOptions.screenshotsToFiles).
+        const outDir =
+          args.out_dir !== undefined
+            ? path.resolve(args.out_dir)
+            : options.screenshotsToFiles && args.screenshot !== 'none'
+              ? path.join(projectDir, '.previews', 'render')
+              : undefined;
         const { report, screenshots } = await runRenderReport(projectDir, {
           viewports: args.viewports,
           screenshot: args.screenshot,
@@ -137,7 +149,7 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
             // `screenshots` is empty and the loop below produces nothing. The manifest replaces it,
             // because a caller told only "written to a folder" has to list a directory to find out
             // which file is which page, and the report's own rows already know.
-            ...(outDir ? [{ type: 'text' as const, text: screenshotManifest(report, outDir) }] : []),
+            ...(outDir ? [{ type: 'text' as const, text: screenshotManifest(report, outDir, options.screenshotsToFiles === true) }] : []),
             // Each image is announced before it arrives, because an agent
             // reading a bare image has no way to know which viewport it is.
             ...screenshots.flatMap((shot) => [
@@ -203,7 +215,12 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
         const result = await runDrivePage(projectDir, args.steps, {
           page: args.page,
           viewport: args.viewport,
-          outDir: args.out_dir === undefined ? undefined : path.resolve(args.out_dir),
+          outDir:
+            args.out_dir !== undefined
+              ? path.resolve(args.out_dir)
+              : options.screenshotsToFiles
+                ? path.join(projectDir, '.previews', 'drive')
+                : undefined,
           backendPort: args.backend_port
         });
         const failed = result.steps.find((r) => !r.ok);
@@ -239,7 +256,7 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
  * four is worse than no manifest. A page whose row carries no path is listed as such, because a
  * missing image and an image nobody mentioned look identical to a caller counting pictures.
  */
-function screenshotManifest(report: RenderReportPayload, outDir: string): string {
+function screenshotManifest(report: RenderReportPayload, outDir: string, filesByDefault = false): string {
   const lines: string[] = [];
   let written = 0;
   for (const page of report.pages ?? []) {
@@ -256,7 +273,13 @@ function screenshotManifest(report: RenderReportPayload, outDir: string): string
   return (
     `${written} screenshot${written === 1 ? '' : 's'} written to ${outDir}, one per measured page per viewport. ` +
     'They are NOT in this response — READ the ones you need. A path you never open is not a picture you ' +
-    'looked at, and no number in the report above can tell you the page shows the wrong thing.\n' +
+    'looked at, and no number in the report above can tell you the page shows the wrong thing.' +
+    // P112-OWN018-IMAGECACHE: said only where the server was started for such a model.
+    (filesByDefault
+      ? ' Each image you open stays in your conversation, and with some models every later request then goes ' +
+        'uncached until the session is compacted, so open the ones you need, not all of them.'
+      : '') +
+    '\n' +
     lines.join('\n')
   );
 }

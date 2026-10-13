@@ -110,8 +110,10 @@ const project = kitWrote
   ? JSON.parse(fs.readFileSync(configFile, 'utf8'))
   : { $schema: 'https://opencode.ai/config.json', mcp: { nodegx: { type: 'local', command: ['npx', '-y', '@nodegx/mcp@0.2.0', '--allow-writes'], enabled: true } } };
 const asWritten = JSON.stringify(project.mcp.nodegx.command);
-if (asWritten !== JSON.stringify(['npx', '-y', '@nodegx/mcp@0.2.0', '--allow-writes'])) throw new Error(`opencode.json names the server as ${asWritten}`);
-project.mcp.nodegx.command = ['npx', '-y', `--package=${tgz('nodegx-mcp-0.2.0.tgz')}`, 'noodl-mcp', '--allow-writes'];
+const written = project.mcp.nodegx.command;
+if (JSON.stringify(written.slice(0, 4)) !== JSON.stringify(['npx', '-y', '@nodegx/mcp@0.2.0', '--allow-writes'])) throw new Error(`opencode.json names the server as ${asWritten}`);
+// The registry name → the tarball; every flag the kit wrote after it (s2: --screenshots-to-files) is kept.
+project.mcp.nodegx.command = ['npx', '-y', `--package=${tgz('nodegx-mcp-0.2.0.tgz')}`, 'noodl-mcp', ...written.slice(3)];
 if (opt('--context', null) !== null) {
   if (Number(opt('--context')) === 0) delete project.provider;
   else project.provider = { mistral: { models: { 'mistral-large-4': { limit: { context: Number(opt('--context')), output: 32000 } } } } };

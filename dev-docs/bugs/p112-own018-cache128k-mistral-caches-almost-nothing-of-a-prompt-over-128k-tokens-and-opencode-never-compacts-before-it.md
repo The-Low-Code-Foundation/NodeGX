@@ -1,12 +1,19 @@
 ---
 id: P112-OWN018-CACHE128K
 title: "Mistral Large 4 caches 70% of a prompt under ~128k tokens and 5% of one over it; OpenCode takes Large 4's context as 1,048,576 (models.dev) and never compacts, so most of a build's steps are paid at the uncached price"
-status: open
+status: duplicate
+of: P112-OWN018-IMAGECACHE
 severity: medium
 area: harness / OpenCode + Mistral (not ours); kit mitigation candidate in create-nodegx (an opencode.json carrying the limit, as it carries .vibe/config.toml)
 found: P112 OWN-018 s2, 2026-10-12 (quiz run 1, OpenCode 1.19.0, mistral-large-4; recording proxy record-proxy.mjs)
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-018-A-STRANGER-ON-MISTRAL.md §14
 ---
+
+> **Wrong diagnosis, superseded (s2, 2026-10-13).** The cache did not stop at 128k tokens: it stopped at the first
+> image in the conversation, which in run 1 happened to arrive at the step whose prompt passed 128k. Replays against
+> the API settled it — see P112-OWN018-IMAGECACHE. What stays true below: OpenCode's limits (`max_tokens =
+> min(limit.output, 32000)`, compaction at `context − that`) and the kit's `{context: 150000, output: 32000}`, which
+> keeps compactions coming (they are what clears an image) without cutting answers off.
 
 Run 1 cost $2.26 for 28 billed steps. Split by prompt size (input + cache read, OpenCode's database):
 

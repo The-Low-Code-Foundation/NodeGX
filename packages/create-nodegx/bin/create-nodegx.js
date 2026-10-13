@@ -69,8 +69,21 @@ const AGENT_NOTE = [
  */
 const OPENCODE_CONFIG = 'opencode.json';
 
-function renderOpenCodeConfig(platform = process.platform) {
+/**
+ * P112 OWN-018 s2 (P112-OWN018-IMAGECACHE) — the server for a Mistral-facing harness writes screenshots to files.
+ * Measured on Mistral Large 4: any image part in a request turns its prompt cache off, and an inline screenshot stays
+ * in the conversation, so one render made every later step full price until a compaction. Claude caches across
+ * images, so `.mcp.json` keeps the inline default.
+ */
+const MISTRAL_SERVER_FLAGS = ['--screenshots-to-files'];
+
+function mistralServerEntry(platform = process.platform) {
   const entry = serverEntry(platform);
+  return { ...entry, args: [...entry.args, ...MISTRAL_SERVER_FLAGS] };
+}
+
+function renderOpenCodeConfig(platform = process.platform) {
+  const entry = mistralServerEntry(platform);
   return (
     JSON.stringify(
       {
@@ -109,7 +122,7 @@ const VIBE_CONFIG = path.join('.vibe', 'config.toml');
 const VIBE_ALLOWED_TOOLS = ['list_projects', 'open_project', 'create_project', 'list_examples', 'get_example', 'find_tools', 'call_tool'];
 
 function renderVibeConfig(platform = process.platform) {
-  const entry = serverEntry(platform);
+  const entry = mistralServerEntry(platform);
   const toml = (v) => JSON.stringify(v);
   return [
     '# Mistral Vibe settings for this folder, written by `npm create nodegx`. Start Vibe here with:',
@@ -246,4 +259,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { AGENT_FILES, AGENT_NOTE, MCP_PACKAGE, MCP_VERSION, OPENCODE_CONFIG, SERVER_NAME, VIBE_ALLOWED_TOOLS, VIBE_CONFIG, renderOpenCodeConfig, renderVibeConfig, serverEntry, setUp };
+module.exports = { AGENT_FILES, AGENT_NOTE, MCP_PACKAGE, MCP_VERSION, MISTRAL_SERVER_FLAGS, OPENCODE_CONFIG, SERVER_NAME, VIBE_ALLOWED_TOOLS, VIBE_CONFIG, renderOpenCodeConfig, renderVibeConfig, serverEntry, setUp };

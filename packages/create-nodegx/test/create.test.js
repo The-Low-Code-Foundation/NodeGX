@@ -11,6 +11,7 @@ const {
   AGENT_NOTE,
   MCP_PACKAGE,
   MCP_VERSION,
+  MISTRAL_SERVER_FLAGS,
   OPENCODE_CONFIG,
   VIBE_ALLOWED_TOOLS,
   VIBE_CONFIG,
@@ -106,10 +107,11 @@ test('P112 OWN-018: Mistral Vibe gets Large 4, the same pinned server, and permi
   // (a non-Mistral model) never applies.
   assert.match(toml, /^active_model = "mistral-large-4"$/m);
   assert.match(toml, /^name = "mistral-large-4"$/m);
-  // The same registration .mcp.json gets.
+  // The same registration .mcp.json gets, plus screenshots to files (P112-OWN018-IMAGECACHE: an image in the
+  // conversation turns Mistral's prompt cache off).
   const entry = serverEntry();
   assert.ok(toml.includes(`command = ${JSON.stringify(entry.command)}`));
-  assert.ok(toml.includes(`args = [${entry.args.map((a) => JSON.stringify(a)).join(', ')}]`));
+  assert.ok(toml.includes(`args = [${[...entry.args, ...MISTRAL_SERVER_FLAGS].map((a) => JSON.stringify(a)).join(', ')}]`));
   for (const tool of VIBE_ALLOWED_TOOLS) assert.match(toml, new RegExp(`^\\[tools\\.nodegx_${tool}\\]\\npermission = "always"$`, 'm'));
   // The person is told how to start it, and why the harness matters.
   assert.match(toml, /vibe --legacy-harness/);
@@ -151,7 +153,7 @@ test('P112 OWN-018 s2: OpenCode gets the same pinned server, and Large 4 limits 
   const config = read(path.join(dir, OPENCODE_CONFIG));
   assert.equal(fs.readFileSync(path.join(dir, OPENCODE_CONFIG), 'utf8'), renderOpenCodeConfig());
   const entry = serverEntry();
-  assert.deepEqual(config.mcp.nodegx, { type: 'local', command: [entry.command, ...entry.args], enabled: true });
+  assert.deepEqual(config.mcp.nodegx, { type: 'local', command: [entry.command, ...entry.args, '--screenshots-to-files'], enabled: true });
   // Measured (P112-OWN018-CACHE128K): Mistral caches 70% of a prompt under ~128k tokens and 5% of one over it, so
   // OpenCode should compact first (at context − output ≈ 118k); and output at OpenCode's own ceiling, 32000: at 16384
   // two runs ended on an answer cut off mid-step (finish `length`).
@@ -173,4 +175,12 @@ test("P112 OWN-018 s2: a person's own opencode.json is never replaced", () => {
 
 test('P112 OWN-018 s2: the agent notes say try the app from its start page', () => {
   assert.match(AGENT_NOTE, /`drive_page` from the app's start page \(leave out `page`\)/);
+});
+
+test('P112 OWN-018 s2: only the Mistral-facing configs send screenshots to files; .mcp.json (Claude) keeps them inline', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  setUp(dir);
+  assert.ok(!read(path.join(dir, '.mcp.json')).mcpServers.nodegx.args.includes('--screenshots-to-files'));
+  assert.ok(read(path.join(dir, OPENCODE_CONFIG)).mcp.nodegx.command.includes('--screenshots-to-files'));
+  assert.match(fs.readFileSync(path.join(dir, VIBE_CONFIG), 'utf8'), /"--screenshots-to-files"\]/);
 });
