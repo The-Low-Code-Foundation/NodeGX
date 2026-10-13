@@ -7,7 +7,8 @@ separate web server or hand-written HTML and JavaScript instead: that would be a
 ## You build it in sittings — this is a process
 
 An app is not built in one go. It is built over several sittings, and each sitting does ONE step of the process
-below, writes down where it got to, and stops. The next sitting starts fresh: it remembers nothing except what is
+below, writes down where it got to, and stops. **In this folder, the task of a sitting is its step**: when you are
+told to finish the whole task in one pass, that means this sitting's step, finished and written down. The next sitting starts fresh: it remembers nothing except what is
 written in the app's `docs/` folder, so write there everything the next one needs. Stopping is part of the work —
 every step of a long sitting re-sends the whole conversation, so a long sitting gets slow and expensive, and what
 you worked out only in your head is lost when it ends.
@@ -22,30 +23,32 @@ go on through the process. Every sitting that stops ends with the line: *Next: <
 
 ### Sitting 1 — plan (build nothing yet)
 
-1. Read what I asked for. Anything I spelled out — names, lists, wording, order, timings, colours — is built exactly
-   as written.
-2. Create the project. A value only this device needs to keep (a best score, a setting) is not a backend: a Function
-   saves it with `localStorage` — `backend: { kind: "none" }` unless people or devices share data. Read
-   `call_tool({ name: "get_project_info" })`: its traps are mistakes other builders made here.
-3. In the project's `docs/` folder write, with `write_file`:
-   - `REQUEST.md` — what I asked for, **word for word**.
-   - `PLAN.md` — the screens; the components on each and their inputs; where every value lives (a Variable, a
-     component input, `localStorage`); how each timing works; the decisions and why. Then the build split into
-     **parts**, in order, each small enough for one sitting (one or two components and the checklist lines they make
-     possible).
-   - `CHECKLIST.md` — one line for each thing I could see or do: what is on screen, what a tap does, what it looks like
-     (a colour), when it happens (a time), what is still there after a reload, and what the next screen looks like the
-     moment it appears (nothing left over from the one before — a colour, a selection — on the new words; reset that
-     state before the words change, not after). **Every example I gave is its own whole line, played exactly**: if I
-     wrote "You scored 3 out of 5", one line plays a game that gets exactly 3 — mixing right answers, wrong ones and
-     ones left to time out — and reads that sentence. Each line: `- [ ] what a person sees — how to drive it`.
-   - `NEXT.md` — first line `# Next sitting: build part 1 — <its name>`, then what to read first.
-4. Stop: tell me in two lines what you planned and what the next sitting does.
+This sitting writes notes in plain words, not wiring. Don't read node types or examples here: each build sitting
+reads what its own part needs and works out the wiring then, with the node types in front of it. Write each file as
+soon as you have it — one file per answer — in this order:
+
+1. Create the project from what I asked for. Anything I spelled out — names, lists, wording, order, timings, colours —
+   is built exactly as written. A value only this device needs to keep (a best score, a setting) is not a backend: a
+   Function saves it with `localStorage` — `backend: { kind: "none" }` unless people or devices share data.
+2. `docs/REQUEST.md` — what I asked for, **word for word**.
+3. `docs/CHECKLIST.md` — from my words alone, one line for each thing I could see or do: what is on screen, what a
+   tap does, what it looks like (a colour), when it happens (a time), what is still there after a reload, and what the
+   next screen looks like the moment it appears (nothing left over from the one before — a colour, a selection — on
+   the new words). **Every example I gave is its own whole line, played exactly**: if I wrote "You scored 3 out of
+   5", one line plays a game that gets exactly 3 — mixing right answers, wrong ones and ones left to time out — and
+   reads that sentence. Each line: `- [ ] what a person sees — how to drive it`.
+4. `docs/PLAN.md` — a page at most: the screens; the components on each and what each shows and does; where every
+   value lives (a Variable, a component input, `localStorage`); and the build split into **parts**, in order, each
+   small enough for one sitting (one or two components and the checklist lines they make possible).
+5. `docs/NEXT.md` — first line `# Next sitting: build part 1 — <its name>`, then what to read first.
+6. Stop: tell me in two lines what you planned and what the next sitting does.
 
 ### Sittings 2 … n — build one part
 
-1. Read `NEXT.md`, `PLAN.md` and `CHECKLIST.md` (and `REQUEST.md` when a word matters).
-2. Build that part, one component at a time, and read every answer. A refused change says exactly what to fix. Keep
+1. Read `NEXT.md`, `PLAN.md` and `CHECKLIST.md` (and `REQUEST.md` when a word matters), then
+   `call_tool({ name: "get_project_info" })`: its traps are mistakes other builders made here. Read the node types
+   this part uses.
+2. Build that part, one component at a time, and read every answer. Reset state before the words change, not after. A refused change says exactly what to fix. Keep
    each answer short: decide one component, write it with a tool, read the reply, then the next. An answer with no
    tool call in it can run on for many minutes with nothing saved.
 3. Drive every checklist line this part makes possible (below). Mark it `- [x] … — passed: <what you measured>` or
