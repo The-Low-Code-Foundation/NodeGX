@@ -27,8 +27,8 @@ comparable with afternoon ones.
   both with MCP at `f419f035c` (Condition + For Each notes).
 - **q6** (tgz26, sittings) was left running overnight to `# Done`, recorded from sitting 4 (`q6/calls/`, proxy on port
   8795 started with nohup — kill it when q6 ends: `lsof -ti tcp:8795 -sTCP:LISTEN`). **First: read q6** — `q6.log`,
-  `sittings.json`, `anatomy.mjs q6`, `record-proxy.mjs --compare q6/calls` (does each request extend the one before?
-  `calls.jsonl` cached_tokens per call answers the evening-cache question), and **grade it** if it reached `# Done`
+  `sittings.json`, `anatomy.mjs q6`, `q6/calls/calls.jsonl` (per call: cached tokens, first byte, output — the
+  evening-cache question is already settled from sitting 4: Mistral's side, field guide), and **grade it** if it reached `# Done`
   (`own-018/grade-quiz.mjs <q6> --tgz <tgz26>`). Also kill the o1 proxy (port 8796) if still up.
 - **AFTERTIMEOUT:** fixed (the app's graph; Condition note). **For Each notes:** the four mined questions answered.
 
