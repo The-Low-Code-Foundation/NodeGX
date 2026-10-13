@@ -57,10 +57,20 @@
  * bezier library refuses (not four finite numbers, or an x outside [0, 1] — any value a wire can
  * carry into a curve port: an object without `curve`, text, `true`) reads as the state's Default
  * transition — or, when the Default is the one refused or is unreadable too, the built-in ease-out
- * over 300 ms — and the node reports it once (`states/unreadable-transition`, not in the trace).
+ * over 300 ms — and the node reports it once (`states/unreadable-transition`, in the trace since v5).
  * A transition that sets its value at once (0 ms and no delay, Use Transitions off, a state only
  * passed through) never reads its curve, so it is never refused. In v1 the runtime threw there:
  * the state did not move and no outcome was reported.
+ *
+ * THE EDITOR (v5, NSP-019 R35). What the node tells the editor is declared in `diagnostics`. Its reports reach the editor
+ * through the error bus (`raiseRuntimeError` → runtimeerror.ts :177-186 `createEditorWarningSubscriber` → `sendWarning`,
+ * keyed by the code), where the editor shows them as it shows a `setDiagnostic` sentence. A later raise of the same code
+ * replaces the sentence. Only one is ever withdrawn: `states/unknown-state` is cleared when a request names a state in the
+ * list (`scheduleGoToState` :722-724, before the already-heading-there check). The others stay until the node is deleted:
+ * `states/no-states` (a Toggle or a To with no States list, `_failNoStates` :691-696 through the outcome's raise),
+ * `states/unreadable-transition` (once per port and curve, :616-635), `states/reserved-port-name` (a value named as one of
+ * the node's outputs, :349-355). `states/unreadable-color` (:597-614) asks the browser's `CSS.supports`, which a play does
+ * not have, so this spec does not raise it; a target with a page that raises it diverges, which is the right reading.
  */
 
 import { defineNode, type OutputDecl, type WorldView } from '../spec';
@@ -116,6 +126,10 @@ type State = {
   tTargetValues: Rec;
   tValueTypes: Rec;
   tUnreadable: Rec;
+  /** v5 — what the editor shows now, by key (THE EDITOR above); replaced, never edited in place. */
+  warnings: Record<string, string>;
+  /** :619-623 `warnedUnreadableTransitions` — the port + curve pairs already reported */
+  warnedTransitions: Record<string, true>;
 };
 
 /** :91 */
@@ -128,6 +142,8 @@ const RESERVED_OUTPUTS = ['failure', 'stateChanged', 'done', 'unchanged', 'compl
 const UNKNOWN_STATE_CODE = 'states/unknown-state';
 const NO_STATES_CODE = 'states/no-states';
 const NO_STATES_MESSAGE = 'This States node has no states defined, so there is nowhere to go';
+const RESERVED_NAME_CODE = 'states/reserved-port-name';
+const UNREADABLE_TRANSITION_CODE = 'states/unreadable-transition';
 
 /**
  * The lists the generator draws for `States` and `Values` (both panel-only; `examples`). NSP-020 s82: they pad nothing
@@ -236,10 +252,41 @@ function updateAtStatePorts(w: State, out: Out): void {
   }
 }
 
-/** :634-639 */
+/** `raiseRuntimeError` reaching the editor (THE EDITOR above): the key's sentence, replacing any before it. */
+function warn(w: State, key: string, message: string): void {
+  w.warnings = { ...w.warnings, [key]: message };
+}
+
+/** :616-635 `warnUnreadableTransition` — once per port and curve as written */
+function warnUnreadableTransition(w: State, port: string, transition: Curve): void {
+  let shown: string;
+  try {
+    shown = JSON.stringify(transition);
+  } catch (e) {
+    shown = String(transition);
+  }
+  const key = port + ':' + shown;
+  if (w.warnedTransitions[key]) return;
+  w.warnedTransitions = { ...w.warnedTransitions, [key]: true };
+  warn(
+    w,
+    UNREADABLE_TRANSITION_CODE,
+    `The transition "${port}" is set to ${shown}, which is not a curve, so moves into that state use ` +
+      `the state's Default transition instead. Set it in the curve editor, or as { curve: [x1, y1, x2, y2], dur, delay } ` +
+      `with both x between 0 and 1.`
+  );
+}
+
+/** `set` for a reducer that may have moved the editor's sentences: the key only when it did (a drop-set mutant must mean something). */
+function editorSet(s: Readonly<State>, w: State): Partial<State> {
+  return w.warnings !== s.warnings ? { warnings: w.warnings } : {};
+}
+
+/** :691-696 */
 function failNoStates(w: State, port: string, out: Out): void {
   w.error = NO_STATES_MESSAGE;
   flag(w, 'error', out);
+  warn(w, NO_STATES_CODE, NO_STATES_MESSAGE); // the outcome's raise (node.ts :1102-1113)
   out.outcomes.push({ port, outcome: 'failure', error: NO_STATES_CODE });
 }
 
@@ -255,6 +302,7 @@ function failUnknownState(w: State, state: unknown, port: string | undefined, ou
     '.' +
     (suggestion ? ' Did you mean "' + suggestion + '"?' : '');
   flag(w, 'error', out);
+  warn(w, UNKNOWN_STATE_CODE, w.error); // :786
   if (port) out.outcomes.push({ port, outcome: 'failure', error: UNKNOWN_STATE_CODE });
   else out.pulses.push('failure');
 }
@@ -265,6 +313,12 @@ function failUnknownState(w: State, state: unknown, port: string | undefined, ou
  * was queued (its outcome is the frame end's), nothing for a setter's.
  */
 function schedule(w: State, state: unknown, port?: string): 'unchanged' | 'deferred' | undefined {
+  // :722-724 — a request naming a state in the list withdraws the editor's unknown-state sentence, whatever happens next
+  if (state && w.states && w.states.indexOf(state as string) !== -1 && w.warnings[UNKNOWN_STATE_CODE] !== undefined) {
+    const rest = { ...w.warnings };
+    delete rest[UNKNOWN_STATE_CODE];
+    w.warnings = rest;
+  }
   const pendingTarget = w.queue.length > 0 ? w.queue[w.queue.length - 1].state : w.state;
   if (state && pendingTarget === state) return port ? 'unchanged' : undefined;
   w.queue.push(port ? { state, port } : { state });
@@ -342,6 +396,7 @@ function goToState(w: State, state: unknown, settleImmediately: boolean, port: s
       const setsAtOnce = (k: Curve) => (k.dur === 0 && k.delay === 0) || !w.useTransitions || settleImmediately;
       // v2 (C21): a refused curve reads as the state's Default, else the built-in one
       if (!setsAtOnce(c) && !bezierAccepts(c.curve)) {
+        warnUnreadableTransition(w, fromPort, c); // :873
         const stateDefault: Curve = w.params[defaultPort];
         c = fromPort === ownPort && stateDefault && (setsAtOnce(stateDefault) || bezierAccepts(stateDefault.curve)) ? stateDefault : DEFAULT_CURVE;
       }
@@ -539,7 +594,23 @@ export const States = defineNode({
   // a move that sets every value at once lands where it says and Has Reached fires once; v2 let the old run land its target.
   // v4 (P109 ISL-032, row D19 ruled "Send empty text"): a text a state leaves empty is sent as empty text on every move into
   // it, the first entry too; v3 left it unset, so the wire kept the previous state's text.
-  version: 4,
+  // v5 (NSP-019 R35): what the node tells the editor is declared (`diagnostics`); nothing on a wire moves.
+  version: 5,
+  changes: [
+    {
+      version: 5,
+      says: 'What the node tells the editor is now in this spec: an unknown state (until a known one is asked for), no States list, an unreadable transition and a value named as one of the node\'s outputs. The runtime has always told it',
+      row: 'NSP-019 R35 (P107 s103)',
+      migration: { none: 'Only the editor is told, and the runtime already told it. Nothing a wire carries changes' }
+    }
+  ],
+  // THE EDITOR (above): each key shows the last sentence raised under it
+  diagnostics: {
+    'states/unknown-state': { says: 'a state was asked for that is not in the list, and no state in the list has been asked for since', message: (_i, s) => s.warnings[UNKNOWN_STATE_CODE] },
+    'states/no-states': { says: 'a Toggle or a To arrived with no States list', message: (_i, s) => s.warnings[NO_STATES_CODE] },
+    'states/unreadable-transition': { says: 'a move would have animated along a transition that is not a curve', message: (_i, s) => s.warnings[UNREADABLE_TRANSITION_CODE] },
+    'states/reserved-port-name': { says: 'a value is named as one of the node\'s own outputs', message: (_i, s) => s.warnings[RESERVED_NAME_CODE] }
+  },
   source: 'packages/noodl-viewer-react/src/nodes/std-library/states.ts; packages/noodl-runtime/src/timerscheduler.ts; node_modules/bezier-easing (1.1.1); packages/noodl-viewer-react/src/color-reader.ts',
   needs: ['clock'],
   worldPool: { advances: [0, 1, 16, 50, 100, 150, 299, 300, 301, 1000] },
@@ -572,7 +643,9 @@ export const States = defineNode({
     tStartValues: {},
     tTargetValues: {},
     tValueTypes: {},
-    tUnreadable: {}
+    tUnreadable: {},
+    warnings: {},
+    warnedTransitions: {}
   } as State,
   // :268-270
   inspect: (s) => `Current state: ${s.state}`,
@@ -628,26 +701,34 @@ export const States = defineNode({
       if (w.states.length > 0 && !w.state) schedule(w, w.startState || w.states[0]);
       return {
         says: 'always: the list of states; while none is current, the first (or Start State) is entered at the end of the frame',
-        set: { states: w.states, queue: w.queue, scheduled: w.scheduled }
+        set: { states: w.states, queue: w.queue, scheduled: w.scheduled, ...editorSet(s, w) }
       };
     },
     // :296-327 — a reserved name is refused on the error channel and gets no output; every other name's output exists already
-    values: (_s, v) => ({ says: 'always: the values that differ between states, each an output', set: { values: v ? (v as unknown as string).split(',') : [] } }),
+    values: (s, v) => {
+      const w = draft(s);
+      w.values = v ? (v as unknown as string).split(',') : [];
+      for (const name of w.values) {
+        if (RESERVED_OUTPUTS.indexOf(name) !== -1) warn(w, RESERVED_NAME_CODE, `"${name}" is one of the node's own output ports and cannot also be a value — rename the value`); // :349-355
+      }
+      return { says: 'always: the values that differ between states, each an output; a value named as one of the node\'s outputs is refused and the editor is told', set: { values: w.values, ...editorSet(s, w) } };
+    },
     // :365-368
     useTransitions: (_s, v) => ({ says: 'always: whether the next move animates its values or jumps', set: { useTransitions: v } }),
     // :333-357
     toggle: (s) => {
       const w = draft(s);
       if (!w.states || w.states.length === 0) {
-        w.error = NO_STATES_MESSAGE; // :339-345 → :634-639
-        return { says: 'no States: refused, and Error says so', set: { error: w.error }, outcome: 'failure', error: NO_STATES_CODE };
+        w.error = NO_STATES_MESSAGE; // :372-378 → :691-696
+        warn(w, NO_STATES_CODE, NO_STATES_MESSAGE);
+        return { says: 'no States: refused, and Error says so', set: { error: w.error, ...editorSet(s, w) }, outcome: 'failure', error: NO_STATES_CODE };
       }
       const idx = w.states.indexOf(w.state as string);
       const nextIdx = (idx + 1) % w.states.length;
-      if (schedule(w, w.states[nextIdx], 'toggle') === 'unchanged') return { says: 'already in, or already heading to, the next state', outcome: 'unchanged' }; // :678 — nothing queued
+      if (schedule(w, w.states[nextIdx], 'toggle') === 'unchanged') return { says: 'already in, or already heading to, the next state', set: editorSet(s, w), outcome: 'unchanged' }; // :678 — nothing queued
       return {
         says: 'otherwise it moves to the next state, wrapping round after the last, at the end of the frame — State Changed, then Done',
-        set: { queue: w.queue, scheduled: w.scheduled },
+        set: { queue: w.queue, scheduled: w.scheduled, ...editorSet(s, w) },
         outcome: 'deferred'
       };
     }
@@ -687,11 +768,11 @@ export const States = defineNode({
         if (port === 'startState') {
           w.startState = value; // :480-481
           schedule(w, value);
-          return { set: { startState: w.startState, queue: w.queue, scheduled: w.scheduled } };
+          return { set: { startState: w.startState, queue: w.queue, scheduled: w.scheduled, ...editorSet(s, w) } };
         }
         if (port === 'currentState') {
           schedule(w, value); // :487
-          return { set: { queue: w.queue, scheduled: w.scheduled } };
+          return { set: { queue: w.queue, scheduled: w.scheduled, ...editorSet(s, w) } };
         }
         if (port.indexOf('type-') === 0) return { set: { types: { ...s.types, [port]: value } } }; // :492
         if (port.indexOf('value-') === 0) {
@@ -705,8 +786,8 @@ export const States = defineNode({
       // :462-473 — `to-<state>`
       signal: (s, port) => {
         const w = draft(s);
-        if (schedule(w, port.substring(3), port) === 'unchanged') return { outcome: 'unchanged' }; // :678 — nothing queued
-        return { set: { queue: w.queue, scheduled: w.scheduled }, outcome: 'deferred' };
+        if (schedule(w, port.substring(3), port) === 'unchanged') return { set: editorSet(s, w), outcome: 'unchanged' }; // :678 — nothing queued
+        return { set: { queue: w.queue, scheduled: w.scheduled, ...editorSet(s, w) }, outcome: 'deferred' };
       },
       discover,
       candidates: ['currentState', 'startState', 'to-A', 'to-B', 'to-Z', 'value-A-x', 'value-B-x', 'transitiondef-B', 'transition-B-x', 'type-x'],

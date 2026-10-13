@@ -39,3 +39,16 @@ a Unit of the eight clears the warning. Their goldens gained only the `diagnosti
 20740 (33 / 33 and 44 / 44 mutants). Control: one letter changed in the spec's sentence gives 17 divergences on Date Add.
 Left: Text Input, the controls' helper, For Each, States, Group, Icon, layout, and the census of contradictions nobody
 raises.
+
+**s103 — States (v5).** States had no `setDiagnostic` sentence of its own to declare. Its :723 call only *withdraws*
+`states/unknown-state`. The sentences come from the error bus: `raiseRuntimeError` reaches the editor through
+`createEditorWarningSubscriber` (runtimeerror.ts :177-186), keyed by the code, and the runtime target records any key in the
+node's namespace once the spec declares one. So declaring one key meant declaring all four a play can raise:
+`unknown-state` (withdrawn when a request names a state in the list, even one the node is already in), `no-states`,
+`unreadable-transition` (once per port and curve) and `reserved-port-name`. The other three are never withdrawn.
+`unreadable-color` needs the browser's `CSS.supports`, which a play does not have. The spec keeps the sentences in state
+(`warnings`). Four scenarios were added. Two of them kill mutants that seeds 20739 and 20740 left alive, and one shows the
+frame end's declared equivalent mutant on every seed. Before v5, seed 13's survivors there were all frame ends that raised a
+failure, and the warnings now kill those at once. States v5 conforms at 20739, 20740 and 20741 with 0 divergences. Controls:
+one letter changed in the transition sentence gives 4 scenarios and 5 sequences red, and dropping the clear gives 6 and 17.
+Left: Text Input, the controls' helper, For Each, Group, Icon, layout, and the census.

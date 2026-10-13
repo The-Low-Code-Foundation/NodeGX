@@ -30152,7 +30152,7 @@
           "always: the list of states; while none is current, the first (or Start State) is entered at the end of the frame"
         ],
         "values": [
-          "always: the values that differ between states, each an output"
+          "always: the values that differ between states, each an output; a value named as one of the node's outputs is refused and the editor is told"
         ],
         "useTransitions": [
           "always: whether the next move animates its values or jumps"
