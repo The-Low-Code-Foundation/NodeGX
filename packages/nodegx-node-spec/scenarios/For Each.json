@@ -21466,5 +21466,328 @@
    },
    "settle"
   ]
+ },
+ {
+  "name": "R35: a Script that does not compile warns the editor, and a Script that compiles withdraws the sentence",
+  "because": "foreach.tsx :361-380 raise `repeater/template-script-syntax-error` on the error bus, which the editor shows under that key (runtimeerror.ts `createEditorWarningSubscriber`); :371-373 withdraw it when the Script compiles (v11)",
+  "params": {
+   "templateType": "dynamic",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    }
+   ]
+  },
+  "wiredOutputs": [
+   "itemOutput-Label",
+   "itemOutputSignal-Tapped"
+  ],
+  "steps": [
+   "settle",
+   {
+    "set": "templateScript",
+    "value": "component = ("
+   },
+   "settle",
+   {
+    "set": "templateScript",
+    "value": "component = 'Row'"
+   },
+   "settle",
+   {
+    "set": "templateScript",
+    "value": "component = ("
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "R35: an input mapping that does not compile warns the editor; one that compiles withdraws it, and so does an empty one",
+  "because": "foreach.tsx :1102-1104 withdraw `repeater/input-mapping-syntax-error` at every write of a mapping, and :1117-1123 raise it again when the text does not compile (v11)",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A",
+     "title": "T"
+    }
+   ]
+  },
+  "wiredOutputs": [
+   "itemOutput-Label",
+   "itemOutputSignal-Tapped"
+  ],
+  "steps": [
+   "settle",
+   {
+    "set": "inputMappingScript",
+    "value": "map("
+   },
+   "settle",
+   {
+    "set": "inputMappingScript",
+    "value": "map({ label: 'title' })"
+   },
+   "settle",
+   {
+    "set": "inputMappingScript",
+    "value": "map("
+   },
+   "settle",
+   {
+    "set": "inputMappingScript",
+    "value": ""
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "R35: Items that is not a list warns the editor, each sentence naming what arrived; a list withdraws it, and so does null",
+  "because": "foreach.tsx :320 `setDiagnostic(repeater/items-not-a-collection, itemsProblem(value))` runs before the same-value check; null and an array are lists here by design (:39-45) (v11)",
+  "params": {
+   "template": "Row"
+  },
+  "wiredOutputs": [
+   "itemOutput-Label",
+   "itemOutputSignal-Tapped"
+  ],
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": {
+     "id": "z",
+     "label": "Z"
+    }
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "label": "A"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": 5
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": null
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "R35: an empty entry in Items is told once per Items value, with the count of that copy; the sentence stays after a list with none",
+  "because": "foreach.tsx :1031-1039 raise `repeater/items-empty-entry` when the copied Items holds null or undefined, once per Items value; nothing withdraws it (v11)",
+  "params": {
+   "template": "Row"
+  },
+  "wiredOutputs": [
+   "itemOutput-Label",
+   "itemOutputSignal-Tapped"
+  ],
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "label": "A"
+     },
+     null
+    ]
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     null,
+     {
+      "id": "b",
+      "label": "B"
+     },
+     null
+    ]
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "R35: a Refresh with no Template, then one with no Items, each tells the editor its Failure; a rebuild nobody asked for tells nothing",
+  "because": "foreach.tsx :783-794 — `settle('failure', code, message)` reports per Refresh answered, and the outcome's raise reaches the editor under the code; a rebuild a setter asked for answers no Refresh (v11)",
+  "params": {
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    }
+   ]
+  },
+  "wiredOutputs": [
+   "itemOutput-Label",
+   "itemOutputSignal-Tapped"
+  ],
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "set": "templateType",
+    "value": "explicit"
+   },
+   {
+    "set": "template",
+    "value": "Row"
+   },
+   {
+    "set": "items",
+    "value": null
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "R35: a component the project does not have is told once per rebuild; a Script that throws, then one that names a number, replace each other's sentence",
+  "because": "foreach.tsx :626-629 `reportTemplateProblem` (once per sentence per rebuild, :491-505); :518-524 and :532-536 raise `repeater/template-script-threw` every time (v11)",
+  "params": {
+   "template": "Missing",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "wiredOutputs": [
+   "itemOutput-Label",
+   "itemOutputSignal-Tapped"
+  ],
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "label": "A"
+     },
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "if (item.getId() === 'b') throw new Error('no b'); component = 'Row'"
+   },
+   "settle",
+   {
+    "set": "templateScript",
+    "value": "component = 7"
+   },
+   "settle",
+   {
+    "set": "templateScript",
+    "value": "if (item.getId() === 'a') component = 'Row'"
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "R35: an input mapping that throws for one record tells the editor which, and the row keeps what it set",
+  "because": "foreach.tsx :576-582 raise `repeater/input-mapping-threw` naming the record's id, at a row's landing (row C140) and at a record's change (row C141) (v11)",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ],
+   "inputMappingScript": "map({ id: function (o) { return o.getId() }, label: function (o) { if (o.label === 'B' || o.label === 'A2') throw new Error('no'); return o.label } })"
+  },
+  "wiredOutputs": [
+   "itemOutput-Label",
+   "itemOutputSignal-Tapped"
+  ],
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "label": "A2"
+     },
+     {
+      "id": "b",
+      "label": "B3"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
  }
 ]

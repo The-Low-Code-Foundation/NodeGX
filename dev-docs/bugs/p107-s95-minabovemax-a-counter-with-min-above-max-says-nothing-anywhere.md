@@ -66,3 +66,16 @@ flag that is never set.
 Left: For Each (its own `repeater/` namespace carries about 15 error-bus codes, and each one a play reaches must be modelled),
 layout (`dimensions/wired-dimension-becomes-grow` depends on the parent's direction, a wired width or height, and the
 rendered `flexGrow`: graph and render facts that a single-node play does not hold), and the census.
+
+**s104 — For Each (v11).** A probe came first. The spec declared only `repeater/items-not-a-collection`, with a message that
+was always empty, and ran at seed 20739. The runtime's sentences then show up as divergences. A play reached 9 `repeater/`
+keys in the first difference of each play. Reading foreach.tsx found two more that a play can reach behind an earlier
+difference: `template-script-threw` (a Script that throws, or a component that is not text) and `template-component-not-found`
+with a Template that is not text (`{}`, `-1`). Ten keys are declared. Four of the 15 cannot happen in a play:
+`row-build-failed`, `items-copy-threw`, `no-target` and `operation-threw`. Items is a `setDiagnostic` on every write. Two
+sentences are withdrawn: the Script's, when a Script compiles, and the mapping's, at every mapping write. A row's problem is
+raised once per sentence per rebuild, and the set a rebuild starts is kept after it. An empty entry is told once per Items
+value. A Refresh's Failure tells the editor only when a Refresh was pulsed. Seven R35 scenarios. For Each v11 conformed on
+its first run at seeds 20739 and 20740: 305 / 305 scenarios, 200 / 200 sequences, 0 divergences, 321 / 321 mutants.
+Controls: one letter in the empty-entry sentence plus a dropped mapping withdrawal give 14 scenarios and 6 sequences red.
+Left: layout, and the census.
