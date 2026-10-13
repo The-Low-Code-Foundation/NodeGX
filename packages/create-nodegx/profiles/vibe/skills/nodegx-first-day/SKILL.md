@@ -1,6 +1,6 @@
 ---
 name: nodegx-first-day
-description: "Your first day building NodeGX apps here — where everything is, how this team works, and the mistakes other builders made so you don't have to. LOAD at the start of a plan sitting (sitting 1), and any time you are unsure where to look for how something in NodeGX works."
+description: "Your first day building NodeGX apps here — where everything is, how this team works, and the mistakes other builders made so you don't have to. LOAD at the start of building an app, and any time you are unsure where to look for how something in NodeGX works."
 user-invocable: false
 ---
 
@@ -27,16 +27,16 @@ manual in one:
 | whether it *works* the way a person would use it | `call_tool({ name: "drive_page", ... })` — tap, wait, read |
 
 Your own notes live in the app's `docs/` folder: `REQUEST.md` (what the person asked, word for word),
-`CHECKLIST.md`, `PLAN.md`, `NEXT.md`. Those four files are your memory between sittings — you won't remember this
-conversation tomorrow, but you will read them.
+`CHECKLIST.md`, `PLAN.md`, and `NEXT.md` when a session hands over. They keep your place in a long session, and
+they're your memory between sessions — you won't remember this conversation tomorrow, but you will read them.
 
 ## How we work here
 
 These habits came from many projects, most of them learned the hard way:
 
-- **Small steps, written down.** We don't build a whole app in one go — not you, not the most capable model on the
-  team. One part per sitting, then a note for whoever picks it up next. (The skill `nodegx-sizing-a-sitting` says
-  how big a part is.)
+- **Small steps, written down.** We don't build a whole app in one leap — not you, not the most capable model on the
+  team. A small part at a time, each proven before the next, with notes as we go. (The skill
+  `nodegx-sizing-the-work` says how big a part is, and when a session should hand over.)
 - **A graph is a claim; a drive is evidence.** "I wired it" isn't "it works". Every checklist line is proven by
   `drive_page` doing what a person would do — and reading what a person would see.
 - **Measure before you believe.** When something looks wrong, drive it and read the actual value before you decide
@@ -44,8 +44,8 @@ These habits came from many projects, most of them learned the hard way:
 - **The notes are the manual.** When you wonder how a node behaves, read its notes (`get_node_type`), then try it
   on a tiny page with `drive_page`. Don't go looking for the runtime's source, and don't try to work it out in your
   head for long — a two-node experiment answers in a minute what a long think can't.
-- **Stuck is normal; spinning is not.** When a fix fails twice, stop, write down what you saw, and leave it for a
-  fresh sitting. (The skill `nodegx-when-stuck` walks you through it.)
+- **Stuck is normal; spinning is not.** When a fix fails twice, stop, write down what you saw, and hand it over to a
+  fresh session. (The skill `nodegx-when-stuck` walks you through it.)
 
 ## Stories other builders left behind
 
@@ -68,7 +68,7 @@ checks didn't look at.
   whole.
 - **The rows that kept rebuilding.** A list fed by a fresh array of objects with no `id` redrew every row each time.
   Give every item a stable `id`. And there's no row-index port: if a row needs its position, put it on the item.
-- **The screenshots that made everything slow.** Each screenshot you open makes every later step of the sitting cost
+- **The screenshots that made everything slow.** Each screenshot you open makes every later step of the session cost
   more. `drive_page` can read a colour, a size, whether something is visible — use that; open a picture only when a
   read can't answer.
 

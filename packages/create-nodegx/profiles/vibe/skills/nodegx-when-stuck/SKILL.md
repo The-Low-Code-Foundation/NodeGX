@@ -47,5 +47,6 @@ In `NEXT.md` write:
 - what you tried, and what each try changed;
 - what you suspect, marked as a guess.
 
-Then mark the line `FAILED` in the checklist and stop the sitting. A fresh sitting reading that note starts with
-everything you learned and none of the tiredness — it very often sees it at once.
+Start that note with `# Next session: fix — <the line>`, mark the line `FAILED` in the checklist, and stop. A fresh
+session reading that note starts with everything you learned and none of the tiredness — it very often sees it at
+once.

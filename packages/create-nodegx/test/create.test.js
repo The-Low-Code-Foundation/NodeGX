@@ -205,14 +205,16 @@ test('P112 OWN-019: the Vibe kit writes only Vibe files — its AGENTS.md, the N
   const notes = fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8');
   assert.match(notes, /Your tool list will not change/);
   assert.match(notes, /"look": "Lisbon"/);
-  // R31 (OWN-019 s3): a process, sitting by sitting — each finds its step from the app's docs/NEXT.md, and the lab and a
-  // person both drive it with nothing but "continue". The lab reads these two first lines to know when to stop.
-  assert.match(notes, /this is a process/);
-  assert.match(notes, /`\^# Next sitting`/);
-  assert.match(notes, /`NEXT\.md` becomes `# Done`/);
+  // R31 as ruled in s3 (one session, taught): a written process in one session, handing over through the app's
+  // docs/NEXT.md only when it must; the lab and a person carry on with nothing but "continue". The lab reads NEXT.md's
+  // first line to know when to stop.
+  assert.match(notes, /You build the whole app in this session, by a process/);
+  assert.match(notes, /`\^# Next session`/);
+  assert.match(notes, /write `docs\/NEXT\.md` as `# Done`/);
+  assert.match(notes, /about 100 tool calls/);
   assert.match(notes, /REQUEST\.md` — what I asked for, \*\*word for word\*\*/);
   assert.match(notes, /at most four checklist lines and one or two components/);
-  for (const skill of ['nodegx-first-day', 'nodegx-sizing-a-sitting', 'nodegx-when-stuck']) {
+  for (const skill of ['nodegx-first-day', 'nodegx-sizing-the-work', 'nodegx-when-stuck']) {
     assert.match(notes, new RegExp(`\\*\\*\`${skill}\`\\*\\*`));
     // Vibe 2.26.1 lists a skill only when its frontmatter name matches its folder (SkillMetadata: lowercase, hyphens).
     assert.match(fs.readFileSync(path.join(dir, '.vibe', 'skills', skill, 'SKILL.md'), 'utf8'), new RegExp(`^---\\nname: ${skill}\\n`));
@@ -232,7 +234,7 @@ test("P112 OWN-019: the Vibe kit never replaces a person's own files", () => {
   // Only what was missing is added (s3: the hook and the skills), never the two files that were there.
   const mine = ['AGENTS.md', path.join('.vibe', 'agents', `${VIBE_AGENT}.toml`)];
   assert.deepEqual(result.written, vibeProfileFiles().map((f) => f.to).filter((to) => !mine.includes(to)));
-  assert.ok(result.written.includes(path.join('.vibe', 'skills', 'nodegx-sizing-a-sitting', 'SKILL.md')));
+  assert.ok(result.written.includes(path.join('.vibe', 'skills', 'nodegx-sizing-the-work', 'SKILL.md')));
 });
 
 test('P112 OWN-019: the plain kit does not set a default agent (there is no agent file beside it)', () => {
@@ -241,11 +243,11 @@ test('P112 OWN-019: the plain kit does not set a default agent (there is no agen
   assert.doesNotMatch(fs.readFileSync(path.join(dir, VIBE_CONFIG), 'utf8'), /default_agent/);
 });
 
-test('P112 OWN-019 s3: one step per sitting — once a sitting writes docs/NEXT.md, its hook refuses every tool but the notes', () => {
+test('P112 OWN-019 s3: the hand-over — at 100 tool calls, or once a session writes docs/NEXT.md, only the notes stay open', () => {
   const dir = path.join(tmp(), 'my-apps');
   assert.equal(spawnSync(process.execPath, [BIN, dir, '--vibe'], { encoding: 'utf8' }).status, 0);
-  assert.match(fs.readFileSync(path.join(dir, '.vibe', 'hooks.toml'), 'utf8'), /^type = "pre_tool"\ncommand = "node \.vibe\/hooks\/one-step\.mjs"$/m);
-  const hook = path.join(dir, '.vibe', 'hooks', 'one-step.mjs');
+  assert.match(fs.readFileSync(path.join(dir, '.vibe', 'hooks.toml'), 'utf8'), /^type = "pre_tool"\ncommand = "node \.vibe\/hooks\/hand-over\.mjs"$/m);
+  const hook = path.join(dir, '.vibe', 'hooks', 'hand-over.mjs');
   // A Vibe session folder as 2.26.1 writes it: messages.jsonl beside meta.json, the folder named for its UTC start.
   const session = path.join(tmp(), 'session_20261013_183638_96a2df7d');
   fs.mkdirSync(session);
@@ -260,27 +262,24 @@ test('P112 OWN-019 s3: one step per sitting — once a sitting writes docs/NEXT.
     assert.equal(run.status, 0, run.stderr);
     return run.stdout ? JSON.parse(run.stdout).decision : 'allow';
   };
-  // Sitting 1 (no NEXT.md anywhere yet): the tools that build are refused, reading and the notes are open (q5 held
-  // NEXT.md back and began building).
-  assert.equal(ask('nodegx_call_tool', { name: 'update_component' }), 'deny');
-  assert.equal(ask('nodegx_call_tool', { name: 'drive_page' }), 'deny');
-  assert.equal(ask('nodegx_call_tool', { name: 'get_node_type' }), 'allow');
+  // A new app (no NEXT.md yet): one session plans and builds — nothing is closed.
   assert.equal(ask('nodegx_create_project', {}), 'allow');
-  assert.equal(ask('write_file', { file_path: path.join(dir, 'capital-quiz', 'docs', 'PLAN.md') }), 'allow');
-  // Control: NEXT.md from an earlier sitting (written before this session started) closes nothing.
-  fs.writeFileSync(next, '# Next sitting: build part 1\n');
-  fs.utimesSync(next, new Date(started - 3600000), new Date(started - 3600000));
   assert.equal(ask('nodegx_call_tool', { name: 'update_component' }), 'allow');
-  // Past a sitting's size (60 tool calls in this session's transcript), only the notes stay open.
+  assert.equal(ask('nodegx_call_tool', { name: 'drive_page' }), 'allow');
   const turn = (n) => JSON.stringify({ role: 'assistant', content: '', tool_calls: Array.from({ length: n }, (_, i) => ({ id: `t${i}` })) }) + '\n';
-  fs.writeFileSync(transcript, turn(30) + turn(29));
+  // At 100 tool calls the session is asked to hand over, even before any NEXT.md exists; the notes stay open.
+  fs.writeFileSync(transcript, turn(50) + turn(49));
   assert.equal(ask('nodegx_call_tool', { name: 'update_component' }), 'allow');
   fs.appendFileSync(transcript, turn(1));
   assert.equal(ask('nodegx_call_tool', { name: 'update_component' }), 'deny');
-  assert.equal(ask('edit', { file_path: next }), 'allow');
+  assert.equal(ask('write_file', { file_path: path.join(dir, 'capital-quiz', 'docs', 'PLAN.md') }), 'allow');
   fs.writeFileSync(transcript, '');
-  // This sitting rewrites it: the step is done.
-  fs.writeFileSync(next, '# Next sitting: build part 2\n');
+  // Control: NEXT.md from an earlier session (written before this one started) closes nothing.
+  fs.writeFileSync(next, '# Next session: build part 3\n');
+  fs.utimesSync(next, new Date(started - 3600000), new Date(started - 3600000));
+  assert.equal(ask('nodegx_call_tool', { name: 'update_component' }), 'allow');
+  // This session writes it (a hand-over, or "# Done"): its work is written down, only the notes stay open.
+  fs.writeFileSync(next, '# Next session: build part 4\n');
   assert.equal(ask('nodegx_call_tool', { name: 'update_component' }), 'deny');
   assert.equal(ask('todo'), 'deny');
   assert.equal(ask('write_file', { file_path: path.join(dir, 'capital-quiz', 'components', 'x.json') }), 'deny');
