@@ -33,6 +33,8 @@
 
 import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
+import { controlFocusNotMounted, focusDiagnostics, focusMissed } from './focus-not-mounted';
+import { focusAndIconSourceChange, iconSourceDiagnostics } from './icon-source';
 
 type State = {
   /** utils.ts :75-89 `_internal.enabled` */
@@ -61,6 +63,8 @@ type State = {
   elementFocused: boolean;
   /** the element is on the page (button.ts `painted`) */
   onPage: boolean;
+  /** v5 — the last Focus found the node off the page: the editor is told (focus-not-mounted.ts) */
+  focusMissed: boolean;
 }
 
 type O = typeof Checkbox extends { outputs: infer X } ? X : never;
@@ -77,13 +81,16 @@ export const Checkbox = defineNode({
   // Text Input's C80 for all three controls); v1 rebuilt the box when the label changed, as the runtime did — row C80, fixed in P109 ISL-031.
   // v3 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
   // v4 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
-  version: 4,
+  // v5 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it, and an Icon Source that is not an icon shows as one until an icon or nothing arrives (`diagnostics`)
+  version: 5,
+  changes: [focusAndIconSourceChange(5)],
+  diagnostics: { ...focusDiagnostics(controlFocusNotMounted('checkbox')), ...iconSourceDiagnostics() },
   source: 'packages/noodl-viewer-react/src/nodes/controls/checkbox.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches
   synced: ['pageEnabled', 'pageVisible'],
 
-  state: { enabled: true, checked: false, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false } as State,
+  state: { enabled: true, checked: false, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false, focusMissed: false } as State,
   // checkbox.ts :132-137 `outcomeOutputs({ done, unchanged })`
   outcomes: ['done', 'unchanged'],
 
@@ -256,9 +263,9 @@ export const Checkbox = defineNode({
     useLabel: () => ({ says: 'always: a label is drawn beside the box, or not; the box and its keyboard stay', send: [] }),
     // utils.ts :340-364 — on the element, as the Button's
     focus: (s) => {
-      if (!s.onPage) return { says: 'not on the page: nothing to focus, and the Focus is not kept', send: [], outcome: 'unchanged' };
-      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { says: 'it holds the keyboard already, or is disabled or hidden: nothing changes', send: [], outcome: 'done' };
-      return { says: 'otherwise the keyboard is put on it, and the Focused state goes true', set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
+      if (!s.onPage) return { says: 'not on the page: nothing to focus, the Focus is not kept, and the editor is told', set: focusMissed(s, true), send: [], outcome: 'unchanged' };
+      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { says: 'it holds the keyboard already, or is disabled or hidden: nothing changes', set: focusMissed(s, false), send: [], outcome: 'done' };
+      return { says: 'otherwise the keyboard is put on it, and the Focused state goes true', set: { focused: true, elementFocused: true, ...focusMissed(s, false) }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     // a disabled element gives the keyboard up to nobody: `blur()` on one does nothing (the focusing steps), Done regardless
     blur: (s) => {

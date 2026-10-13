@@ -52,6 +52,8 @@
 
 import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
+import { controlFocusNotMounted, focusDiagnostics, focusMissed } from './focus-not-mounted';
+import { focusAndIconSourceChange, iconSourceDiagnostics } from './icon-source';
 
 type State = {
   /** utils.ts :75-89 `_internal.enabled` (true at :377) */
@@ -81,6 +83,8 @@ type State = {
   elementFocused: boolean;
   /** the element is on the page — what the node HAS. Follows `mounted` at each paint (the frame's end, or the page a person acts on). */
   onPage: boolean;
+  /** v4 — the last Focus found the node off the page: the editor is told (focus-not-mounted.ts) */
+  focusMissed: boolean;
 }
 
 type O = typeof Button extends { outputs: infer X } ? X : never;
@@ -94,13 +98,16 @@ export const Button = defineNode({
   type: 'net.noodl.controls.button',
   // v2 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
   // v3 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
-  version: 3,
+  // v4 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it, and an Icon Source that is not an icon shows as one until an icon or nothing arrives (`diagnostics`)
+  version: 4,
+  changes: [focusAndIconSourceChange(4)],
+  diagnostics: { ...focusDiagnostics(controlFocusNotMounted('button')), ...iconSourceDiagnostics() },
   source: 'packages/noodl-viewer-react/src/nodes/controls/button.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches
   synced: ['pageEnabled', 'pageVisible'],
 
-  state: { enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false } as State,
+  state: { enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false, focusMissed: false } as State,
   // utils.ts :366-376 `outcomeOutputs({ done, unchanged })`
   outcomes: ['done', 'unchanged'],
 
@@ -266,9 +273,9 @@ export const Button = defineNode({
     // utils.ts :340-355 → focus-tracker.ts :57-78: an element on the page is asked (a disabled one takes nothing, silently); none, Unchanged.
     // The ELEMENT, not the want: a Mounted written off in the same frame has not left the page yet (:1675-1689, the frame's end)
     focus: (s) => {
-      if (!s.onPage) return { says: 'not on the page: nothing to focus, and the Focus is not kept', send: [], outcome: 'unchanged' };
-      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { says: 'it holds the keyboard already, or is disabled or hidden: nothing changes', send: [], outcome: 'done' };
-      return { says: 'otherwise the keyboard is put on it, and the Focused state goes true', set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
+      if (!s.onPage) return { says: 'not on the page: nothing to focus, the Focus is not kept, and the editor is told', set: focusMissed(s, true), send: [], outcome: 'unchanged' };
+      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { says: 'it holds the keyboard already, or is disabled or hidden: nothing changes', set: focusMissed(s, false), send: [], outcome: 'done' };
+      return { says: 'otherwise the keyboard is put on it, and the Focused state goes true', set: { focused: true, elementFocused: true, ...focusMissed(s, false) }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     // utils.ts :356-364 → focus-tracker.ts :88-90: the keyboard is taken off it; Done either way
     // a disabled element gives the keyboard up to nobody: `blur()` on one does nothing (the focusing steps), Done regardless

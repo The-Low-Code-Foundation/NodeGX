@@ -184183,5 +184183,32 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "R35: a Focus while the group is off the page warns the editor, a second one says nothing new, and a Focus once it is on the page withdraws the warning",
+    "because": "group.ts :191-198 `setDiagnostic('focus/not-mounted', took ? null : …)`: every Focus replaces the sentence by whether the focus tracker took it (focus-not-mounted.ts)",
+    "params": {
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
   }
 ]

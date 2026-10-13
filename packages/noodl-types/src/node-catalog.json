@@ -14746,8 +14746,8 @@
           "always: read at a drop — which files count as accepted"
         ],
         "focus": [
-          "off the page: nothing is listed → Unchanged; Focused stays silent",
-          "off the page, after outcomes this frame resolved and has not reported: nothing is listed, and Unchanged comes after them → Focused stays silent",
+          "off the page: nothing is listed, and the editor is told → Unchanged; Focused stays silent",
+          "off the page, after outcomes this frame resolved and has not reported: nothing is listed, the editor is told, and Unchanged comes after them → Focused stays silent",
           "already listed as focused → Done; Focused stays silent",
           "already listed, after outcomes this frame has not reported: Done comes after them → Focused stays silent",
           "on the page: listed as focused → Focused, Done",
@@ -47109,7 +47109,7 @@
           "always: the element is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -49289,7 +49289,7 @@
           "always: a label is drawn beside the box, or not; the box and its keyboard stay"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -51890,7 +51890,7 @@
           "always: a label is drawn beside the list, or not; the list, its keyboard and its pick stay"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -54067,7 +54067,7 @@
           "always: a label is drawn beside the button, or not; the button and its keyboard stay"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -56465,7 +56465,7 @@
           "always: the slider is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint; put back, the handle is where it was left"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -59308,7 +59308,7 @@
           "always: a label is drawn above the field, or not; the field and its keyboard stay"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],

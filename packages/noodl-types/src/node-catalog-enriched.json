@@ -15821,8 +15821,8 @@
           "always: read at a drop — which files count as accepted"
         ],
         "focus": [
-          "off the page: nothing is listed → Unchanged; Focused stays silent",
-          "off the page, after outcomes this frame resolved and has not reported: nothing is listed, and Unchanged comes after them → Focused stays silent",
+          "off the page: nothing is listed, and the editor is told → Unchanged; Focused stays silent",
+          "off the page, after outcomes this frame resolved and has not reported: nothing is listed, the editor is told, and Unchanged comes after them → Focused stays silent",
           "already listed as focused → Done; Focused stays silent",
           "already listed, after outcomes this frame has not reported: Done comes after them → Focused stays silent",
           "on the page: listed as focused → Focused, Done",
@@ -32355,7 +32355,7 @@
           "always: the list of states; while none is current, the first (or Start State) is entered at the end of the frame"
         ],
         "values": [
-          "always: the values that differ between states, each an output"
+          "always: the values that differ between states, each an output; a value named as one of the node's outputs is refused and the editor is told"
         ],
         "useTransitions": [
           "always: whether the next move animates its values or jumps"
@@ -51126,7 +51126,7 @@
           "always: the element is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -53338,7 +53338,7 @@
           "always: a label is drawn beside the box, or not; the box and its keyboard stay"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -55963,7 +55963,7 @@
           "always: a label is drawn beside the list, or not; the list, its keyboard and its pick stay"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -58162,7 +58162,7 @@
           "always: a label is drawn beside the button, or not; the button and its keyboard stay"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -60581,7 +60581,7 @@
           "always: the slider is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint; put back, the handle is where it was left"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -63447,7 +63447,7 @@
           "always: a label is drawn above the field, or not; the field and its keyboard stay"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -66744,6 +66744,20 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "role": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "createRole": [
+          "always: read at the end of the frame by a Do pressed in it — only true creates a missing role"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.addusertorole",
         "summary": "Adds a user to a named permission role from inside a cloud function, as the system. Cloud-only — the only way an account gains privilege.",
@@ -66876,6 +66890,11 @@
             "valueType": "enum",
             "example": "storageFilterType"
           }
+        ]
+      },
+      "rules": {
+        "aggregates": [
+          "always: kept, and read when the next aggregation goes; asks for none itself"
         ]
       },
       "enrichment": {
@@ -67109,6 +67128,26 @@
         "known": false,
         "reason": "The port helper needs project context this generator cannot supply headlessly — a live component, a connected node, or a backend schema."
       },
+      "rules": {
+        "username": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "email": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "password": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "emailVerified": [
+          "always: read at the end of the frame by a Do pressed in it — only true is verified"
+        ],
+        "properties": [
+          "always: nothing while it runs; each name makes a value input"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.createuser",
         "summary": "Creates a user account from inside a cloud function, as the system. Cloud-only — it does not exist in the browser.",
@@ -67287,6 +67326,14 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.deleteuser",
         "summary": "Deletes a named user account and every session it holds, from inside a cloud function, as the system. Cloud-only.",
@@ -67455,6 +67502,14 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.getuserroles",
         "summary": "Reads every permission role a user is currently in, from inside a cloud function. Cloud-only and read-only — nothing is written.",
@@ -67645,6 +67700,23 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "always: read at the end of the frame by a Do pressed in it — as its text, in UTF-8 bytes (nothing, 0 or false as the empty text)"
+        ],
+        "key": [
+          "always: read at the end of the frame by a Do pressed in it — nothing, empty, 0 or false fails that Do; otherwise its text in UTF-8 bytes, and a text that is empty fails it too"
+        ],
+        "algorithm": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as SHA-256; one the host does not know fails that Do)"
+        ],
+        "encoding": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as hex; one not in the list fails that Do)"
+        ],
+        "sign": [
+          "always: one signature at the end of the frame however many presses, of Value under Key as they stand then — Signature and a cleared Error, then Done per press; no Key, an unknown Algorithm or Encoding puts the reason on Error, Signature untouched, Failure per press"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.hmac",
         "summary": "Keyed SHA-2 signature of a string. Cloud-only, because it takes a shared secret.",
@@ -67823,6 +67895,23 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "claims": [
+          "always: read at the end of the frame by a Do pressed in it — nothing signs no claims of its own; text is read as an object literal (not one: no claims); an array, null, a number or true/false fails that Do"
+        ],
+        "key": [
+          "always: read at the end of the frame by a Do pressed in it — nothing, empty, 0 or false fails that Do; otherwise its text in UTF-8 bytes"
+        ],
+        "algorithm": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as HS256; one not HS256/384/512 fails that Do)"
+        ],
+        "expiresIn": [
+          "always: read at the end of the frame by a Do pressed in it — as a number above 0, exp is that many whole seconds after iat; anything else, no exp"
+        ],
+        "sign": [
+          "always: one token at the end of the frame however many presses, iat the clock's second — Token and a cleared Error, then Done per press; claims that are not an object, an unknown Algorithm or no Key put the reason on Error, Token untouched, Failure per press"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.jwtsign",
         "summary": "Mint a signed JSON Web Token (HS256/384/512). Cloud-only — signing in a browser means the key is in the browser.",
@@ -68012,6 +68101,23 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "token": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "key": [
+          "always: read at the end of the frame by a Do pressed in it — nothing, empty, 0 or false refuses that Do"
+        ],
+        "algorithm": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as HS256); the token's header must name the same one"
+        ],
+        "clockTolerance": [
+          "always: read at the end of the frame by a Do pressed in it — that many seconds of leeway on nbf and exp (not a number, or below 0, none)"
+        ],
+        "verify": [
+          "always: one check at the end of the frame however many presses — verified: Valid true, Claims the payload, Error cleared, Done per press; refused: Valid false, the reason on Error, Claims untouched, Failure per press"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.jwtverify",
         "summary": "Check a JWT somebody else issued: signature, algorithm, exp and nbf. Not how you authenticate your own users.",
@@ -68227,6 +68333,20 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "role": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "limit": [
+          "always: read at the end of the frame by a Do pressed in it, handed to the store as is"
+        ],
+        "skip": [
+          "always: read at the end of the frame by a Do pressed in it, handed to the store as is"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.listusersinrole",
         "summary": "Lists the accounts in a permission role, from inside a cloud function. Cloud-only and read-only — the inverse of Get User Roles.",
@@ -68596,6 +68716,47 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "provider": [
+          "always: read when the call is made — blank is Anthropic"
+        ],
+        "model": [
+          "always: read when the request is built — blank is the default model"
+        ],
+        "apiKeySecret": [
+          "always: the name read from the secret store when the call is made"
+        ],
+        "baseUrl": [
+          "always: read when the call is made — blank is the Anthropic API"
+        ],
+        "instructions": [
+          "always: read when the request is built"
+        ],
+        "callInstructions": [
+          "always: read when the request is built"
+        ],
+        "input": [
+          "always: read when the request is built, unless Messages holds a conversation"
+        ],
+        "messages": [
+          "always: read when the request is built — a non-empty list replaces Input"
+        ],
+        "outputSchema": [
+          "always: read when the request is built and again when its answer lands"
+        ],
+        "effort": [
+          "always: read when the request is built — blank is high"
+        ],
+        "maxTokens": [
+          "always: a positive number, floored, read when the request is built — anything else is 16000"
+        ],
+        "timeoutMs": [
+          "always: a positive number, floored, read when the call starts and in its timeout sentence — anything else is 120000"
+        ],
+        "send": [
+          "always: one call at the end of the frame however many presses — Done with the answer published, or Failure with Error, Error Code and Status, per press"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.modelrequest",
         "summary": "Calls a language model from a cloud function — Anthropic, or an OpenAI-compatible server such as a model on this computer.",
@@ -68798,6 +68959,17 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "role": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.removeuserfromrole",
         "summary": "Takes a user out of a named permission role from inside a cloud function, as the system. Cloud-only — the other half of Add User To Role.",
@@ -69057,6 +69229,14 @@
           }
         ]
       },
+      "rules": {
+        "allowNoAuth": [
+          "always: read when a request comes, and again when its caller cannot be looked up"
+        ],
+        "params": [
+          "always: nothing while it runs; read when a request comes — each name a contract row and an output a wire can take"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.request",
         "summary": "Entry point of a cloud function component: receives the call's parameters and fires Received to start the server-side flow.",
@@ -69261,6 +69441,22 @@
           }
         ]
       },
+      "rules": {
+        "params": [
+          "always: nothing while it runs; each name makes a value input the payload carries"
+        ],
+        "errorMessage": [
+          "always: read when Send is pressed with Status Failure"
+        ],
+        "status": [
+          "always: read when Send is pressed — unset or success is a 200, anything else a 400"
+        ],
+        "send": [
+          "no request reached the function this node is part of: the reason on Error → Failure",
+          "the request was already answered — by another Response, by a refusal, or by the runner's timeout: the reason on Error → Failure",
+          "otherwise: the payload goes out just after — a 200 carrying the Parameters when Status is unset or success, else a 400 carrying the Error Message → Done"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.response",
         "summary": "Exit point of a cloud function component: collects result values and sends the reply back to the caller.",
@@ -69387,6 +69583,14 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "name": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "fetch": [
+          "always: one read at the end of the frame however many presses — found: Value and a cleared Error, Done per press; outside a backend, not found, or a store that cannot be read: the reason on Error, Value cleared, Failure per press"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.secret",
         "summary": "Reads one of the project's stored credentials by name, inside a cloud function. Cloud-only — it does not exist in the browser.",
@@ -69576,6 +69780,29 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "to": [
+          "always: stamped on each Do pressed after it; read at the end of the frame by a send whose presses agree"
+        ],
+        "template": [
+          "always: read when a send is made — set and not None, the message is that template"
+        ],
+        "variables": [
+          "always: read when a send is made"
+        ],
+        "subject": [
+          "always: read when a send is made"
+        ],
+        "text": [
+          "always: read when a send is made"
+        ],
+        "html": [
+          "always: read when a send is made"
+        ],
+        "send": [
+          "always: at the end of the frame, one send when the frame's presses agree on To (to To as it stands then), or one send per run of presses stamped with the same To, each after the one before is answered — Done per press, or the reason on Error and Failure per press"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.sendemail",
         "summary": "Sends an email through the backend's configured SMTP server from inside a cloud function or workflow.",
@@ -69745,6 +69972,17 @@
       "parameterEncoding": {
         "known": false,
         "reason": "The port helper needs project context this generator cannot supply headlessly — a live component, a connected node, or a backend schema."
+      },
+      "rules": {
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "password": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "properties": [
+          "always: nothing while it runs; each name makes a value input"
+        ]
       },
       "enrichment": {
         "typeName": "noodl.cloud.updateuser",
@@ -69940,6 +70178,14 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "token": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.verifysessiontoken",
         "summary": "Asks this backend whether a session token is one of its own live sessions, and whose. Cloud-only.",

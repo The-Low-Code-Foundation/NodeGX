@@ -1,7 +1,8 @@
 # P107 — next session
 
-**Written 2026-10-13 (s102, Opus).** Read the [README](README.md) §2–§7, then
-[NSP-020 §6.14](NSP-020-PORTS-WITHOUT-A-RUNNING-VIEWER.md) (what s102 built and measured).
+**Written 2026-10-13 (s103, Opus).** Read the [README](README.md) §2–§7, then
+[P107-S95-MINABOVEMAX](../../bugs/p107-s95-minabovemax-a-counter-with-min-above-max-says-nothing-anywhere.md). Its s102 and
+s103 paragraphs are the record of R35's first half.
 
 **Model: Opus.**
 
@@ -9,14 +10,16 @@
 the backend specs."* Every picker node is graded (ledger 142 of 147, 3 contracts, 2 exempt, 0 owed). What is left is ports,
 words and the fixes the specs found.
 
-**s102 in one paragraph.** The census was regenerated from HEAD and committed. The peer pile in `nodegx-export` has been
-untouched since 2026-10-05 and is still uncommitted, so the census was not built from the working tree. RESTCOLTYPES is
-fixed. The format now names the backend's type (`BackendSchema.backendType`) and marks a column the runtime types by the
-enhanced mapping (`BackendField.enhanced`, `enums`, plus `ValueOutputDecl.enums`). The Class picker, the Record family and
-the User family follow the runtime on a REST backend. The User family was the same bug, found by adding `directus_users`
-to the drive: 8 + 4 ports the spec did not draw. JSFILTERVALUES is fixed: Query Records and Aggregate draw a Javascript
-filter's variables. R35's first slice is done: Date Add and Date Difference v3 declare their `*/unknown-unit` warning. One
-new row: P107-S102-SIGNUPBACKEND, the runtime's. Sign Up reads the Parse `_User` columns whatever the backend.
+**s103 in one paragraph.** R35's runtime sentences are declared for every site except two. States v5 declares four keys.
+The handoff called States "the easiest" site, but its `:723` call only *withdraws* a warning. The sentences come from the
+error bus, which reaches the editor keyed by the code. Declaring one key makes the runtime target record the whole namespace,
+so all four raises a play can reach had to be modelled. The Focus warning (`focus/not-mounted`) was the three sites "Group",
+"Text Input" and "the controls' helper". They are one sentence on seven specs: Group, Text Input, Button, Checkbox, Dropdown,
+Radio Button and Slider. Icon's `visual/icon-source-not-an-icon/iconIconSource` is declared on the six nodes that have an
+Icon Source. `visual/` belongs to the base visual class, so the runtime target now grades only the keys a spec names in
+`visual/` and `dimensions/`. The runner gained `editorOnly`: a mutant that changes only what the editor is told is not a
+survivor on a target that has no editor. The enriched catalog had been stale since s101 (17 cloud nodes), and s103's first
+commit made States stale too. Both are fixed by `catalog:merge`.
 
 ## Board (from the task files)
 
@@ -26,106 +29,105 @@ new row: P107-S102-SIGNUPBACKEND, the runtime's. Sign Up reads the Parse `_User`
 | NSP-000 the census | ✅ regenerated s102 from HEAD (test counts only) | `7d9a55dcd` |
 | NSP-016 the visual nodes | ✅ s71; s73 SCROLLROOM | `aa8abb06f` … `fd6385beb` |
 | NSP-018 the spec speaks | ✅ s77 | s72 … s77 |
-| NSP-019 Richard reads it | ✅ s95 | s77 … s95 |
+| NSP-019 Richard reads it | ✅ s95; R35's sentences s102–s103 | s77 … s103 |
 | NSP-009 the ratchet | ✅ s64; floor.runtime **142**, floor.ports **133**, `owed` empty | `6a1ed0084` … s101 |
-| NSP-010 a change is a version | ✅ s78 (13 histories now: Date Add v3, Date Difference v3) | `36e08e29e`, `64f9576d9` |
+| NSP-010 a change is a version | ✅ s78 (21 histories now) | `36e08e29e`, `64f9576d9` |
 | NSP-017 the escape hatches | 🟡 Left: AC1's export half (P18's) | s64 … s68 |
 | NSP-023 the spec without React | ✅ (s50) | s45 … s57 |
-| NSP-006 the stranger | ✅ rounds 1–4 (re-graded s102, `spec.ts` hash refreshed) | `649e6864d`, s70 … s102 |
-| **NSP-020 ports without a viewer** | 🟡 **RESTCOLTYPES ✅, JSFILTERVALUES ✅ (s102)**; left: Router's labels (ADAPTERLABEL) | s79 … s102 |
+| NSP-006 the stranger | ✅ rounds 1–4; round 4 re-graded s103 (Dropdown), its guarded files now include the three warning modules | `649e6864d`, s70 … s103 |
+| NSP-020 ports without a viewer | 🟡 left: Router's labels (ADAPTERLABEL) | s79 … s102 |
 | NSP-021 the second editor | 🟡 Left in §3.2: which runtimes. Round trip (§3.3) = P112 OWN-006 | s87 … s93 |
 | NSP-022 the cloud-only nodes | ✅ 17 of 17; Aggregate v2 (R36) | s96 … s100 |
-| R35 (the settings say when they make no sense) | 🟡 Counter (s95), Date Add + Date Difference (s102); 7 call sites owed | `0d81cd398`, s102 |
+| **R35 (the settings say when they make no sense)** | 🟡 **half 1: 7 of 9 sites** — Counter (s95), Date Add + Date Difference (s102), States, Focus ×7, Icon Source ×6 (s103). Left: For Each, layout. Half 2 not started | `0d81cd398`, s102, `e9e322a90`, s103 |
 
-## What s103 does (in order)
+## What s104 does (in order)
 
-1. **R35's other seven call sites** (half 1 of s95's step 2). Each runtime already calls `setDiagnostic`, and no spec declares
-   it yet. Declaring one turns on the runtime target's recording for that node, so it is graded as soon as it lands.
-   s102's recipe for the date nodes:
-   - Copy the sentence function into the spec, with its `:line` citation.
-   - Write `diagnostics: { key: { says, message: (i, s) => … } }`.
-   - Bump the version, with a `changes` entry whose migration is `none`.
-   - Add one scenario that warns and then clears.
-   - Run `golden.js --type`, then conformance at 2 seeds.
-   - Plant a one-letter mutant in the sentence: it must give divergences.
-
-   The sites, easiest first (sizes not measured yet; read each one first):
-   - States: `UNKNOWN_STATE_CODE`, states.ts :723.
-   - Group: group.ts :191.
-   - Text Input: text-input.ts :300.
-   - The controls' helper: controls/utils.ts :410. It serves several controls; count them first.
-   - For Each: `repeater/items-not-a-collection`, foreach.tsx :53-71. Its sentence depends on `Model.instanceOf` and
-     `describeValue`, so read how the world represents a record first.
-   - Icon: `ICON_SOURCE_DIAGNOSTIC`, react-component-node.ts :693.
-   - Layout: `dimensions/wired-dimension-becomes-grow`, layout.ts :335. It is shared by every visual node, so it may be a
-     format question rather than a per-node one.
-2. **R35 half 2: census the contradictions nobody raises.** Slider's Min / Max is the next by name. Each one found is a
-   runtime change plus a spec version, as Counter v2 was.
-3. **The rules column** (s95's step 3) does not list a node's diagnostics. It reads the generated catalog (`rules.js` →
-   `catalog:generate`). That is a regen of a shared file, so check `git status` first.
-4. **The static reading** (s95's step 4, not asked yet; offer it). The Problems panel and the agent's checker could evaluate
+1. **For Each** (`repeater/items-not-a-collection`, foreach.tsx :320). This is a namespace job, not a single sentence. Declaring
+   the key makes the runtime target record every `repeater/` key, and foreach.tsx raises about 15 more on the error bus:
+   template-script-syntax-error :361, template-script-threw :521/:534, input-mapping-threw :577, no-template-for-item :598,
+   row-build-failed :620, template-component-not-found :627, no-template :785, no-items :793, items-copy-threw :821,
+   no-target :836, operation-threw :926, items-empty-entry :1034, input-mapping-syntax-error :1099. Start with a probe: declare
+   only the key and run `NSP_ONLY="For Each"` at one seed. The divergences list the raises a play actually reaches, and
+   those are the ones to model. A play is not likely to reach all of them. `itemsProblem` needs `Model.instanceOf` and
+   `Collection.instanceOf`, so read how the registry (`registry.ts`) represents a record and a collection before copying it.
+   `describeValue` is already in `src/nodes/describe-value.ts`.
+2. **Layout** (`dimensions/wired-dimension-becomes-grow`, layout.ts :314-336). Measured in s103, not built. The sentence needs
+   the parent's direction (`parentLayout`), whether `width` / `height` is **wired** (`isInputConnected`), and the rendered
+   `flexGrow`. Those are graph and render facts, and a single-node play holds none of them. `dimensions/` is already a shared
+   namespace in the target, so declaring the key on one node does not pull in the others. This is a format question
+   (`PlayContext.wiredInputs`? a layout parent in the context?). Write the options down, and take it to Richard or to Fable
+   rather than building it.
+3. **R35 half 2: census the contradictions nobody raises.** Slider's Min / Max is the next by name. Each one found is a
+   runtime change plus a spec version, as Counter v2 was. Ask before changing runtime behaviour (R3 (a)).
+4. **The rules column** (s95's step 3) still does not list a node's diagnostics (`rules.js` → `catalog:generate`). After the
+   regen, run `catalog:merge` as well. s103 learned that `catalog:generate` does not refresh the enriched catalog.
+5. **The static reading** (s95's step 4, not asked yet; offer it). The Problems panel and the agent's checker could evaluate
    a spec's `diagnostics` over saved params with no preview running. Say what it costs and ask.
-5. **P107-S95-SEED20738.** s102 saw the same survivors again: Delete Record `afterInputs` ×2 on both seeds, DbModel2
-   `modelId` on 20740, Dropdown `person.blur` (stranger round 4). A hand scenario per survivor ends it.
-6. **The census:** regenerate it from HEAD, as s102 did (recipe below), or from the working tree once the peer's
-   `nodegx-export` pile lands.
+6. **P107-S95-SEED20738.** s103 measured more of the same survivors against HEAD's specs, so they predate it: Slider
+   `person.click` ×2 (20739), Text Input frame-end drop-set (20740), Dropdown `person.blur` (20739, and stranger round 4 at
+   today's seed). Delete Record and DbModel2 are as s102 left them. A hand scenario per survivor ends it.
+
+**The recipe for a diagnostic** (s102 + s103):
+- Read the runtime's call, then **grep the node's namespace** (`'<ns>/`) for `raiseRuntimeError` and `reportOutcome(…{ code })`.
+  Every raise there reaches the editor under its code, and the target records the whole namespace once one key is declared.
+  `visual/` and `dimensions/` are the exceptions: only the named keys are recorded there (`SHARED_DIAGNOSTIC_NAMESPACES`).
+- Copy the sentence with its `:line` citation. Keep editor-only state in its own field and **set it on every press**. A
+  "set only when it moves" split leaves swap-branch pairs that no play can tell apart.
+- Bump the version, with a `changes` entry whose migration is `none`, and add a scenario that warns and then clears.
+- Run `golden.js --type`, conformance at 2 seeds, and plant a one-letter mutant in the sentence: it must give divergences.
+- A new state key must go into `tests/page-model.helper.ts` (G1). Add it **before** the State type's last field, because
+  `page-model-plants.test.ts` anchors on the last field of Slider, Dropdown and Radio Button.
+- A spec in a stranger round (Dropdown, Counter, …) owes that round a re-grade (`NSP_ONLY=<type> npx jest
+  tests/stranger.test.ts`, 35 min for round 4). Any module the spec newly imports joins the round's guarded files. Then run
+  `node -e "require('./tests/stranger-suite-hashes.helper.js').write()"`.
+- Run `catalog:generate`, then `catalog:merge`, then `catalog:check` and `node scripts/node-catalog/merge.js --check`.
 
 **Census from HEAD (s102):** `git archive HEAD packages scripts/node-spec dev-docs/tasks/phase-107-the-node-says-what-it-does |
-tar -x -C <scratch>/headtree`, run `node <scratch>/headtree/scripts/node-spec/census.js` (it reads only `fs`, relative to its
-own folder), copy `census.json` and `CENSUS.md` back, and commit only those two. `census.js --check` on the working tree then
-reads STALE, because of the peer's pile. That is expected and is not a red.
+tar -x -C <scratch>/headtree`, run `node <scratch>/headtree/scripts/node-spec/census.js`, copy `census.json` and `CENSUS.md`
+back, and commit only those two. Not regenerated in s103: no test counts changed that it reads.
 
-**The recipe for a spec change** (unchanged): measure through a probe first; `:line` citations; `NSP_ONLY=<type> npx jest
-test/node-spec/conformance.test.ts` in noodl-runtime with two `NSP_SEED`s; print the runtime's traces; `golden.js --type`,
-`--check`, `--diff`; `spec-ledger:check`; `catalog:check`; `spec-disagreements.js --check`. A change to a spec's drawn ports
-runs `nsp-020-ports-parity.test.ts` AND `nsp-020-port-context.test.ts`. A change to `spec.ts` re-grades the stranger
-rounds (44 min in s102) and then refreshes `stranger-suite-hashes.json`.
+## Traps s103 hit
 
-## Traps s102 hit
-
-- **`xargs` splits on spaces in a path.** The first reach count read 0 for `cloudservices` across 589 projects because
-  "Noodl projects" and "NodeGX test projects" were split. The control (`cloudservices` must be > 0) caught it. Use
-  `-print0` / `xargs -0`, or a node script.
-- **A `*/` inside a `/** */` docblock closes it.** Writing `*/unknown-unit` in prose broke `date-math.ts` for about 30 s,
-  while the stranger suite was running. Write the full keys instead.
-- **`json.dumps(indent=2)` reflows a whole scenario file.** Append the new scenario as text to the HEAD version instead
-  (+6 lines, not +434).
-- **A mutant that does not compile reads `Tests: 0 total`, exit 1.** That is not a kill. Replant it in a form that compiles
-  (`|| Math.random() < 2`).
-- **noodl-mcp runs on jest, not vitest.** `npx vitest run` reports "beforeEach is not defined" and grades nothing.
+- **The handoff's "easiest first" was wrong for States.** Its diagnostic call only withdraws. The raises are on the error bus.
+  Read the namespace, not the call.
+- **A declared equivalent can go to 0 at the package's fixed seed** when a new diagnostic kills the survivors it covered
+  (`batch-time.test.ts` reads ×0 as dead). Do not drop the declaration if it still fires on other seeds. Pin one with a hand
+  scenario that only that branch reaches (States' To Last / To First).
+- **`docs:nodes:check` reads 37 stale pages**, including other workstreams' (today's P112 Condition note, Drag, Video,
+  Timer). They are build artefacts (`docs-site:build` regenerates them). s103 did not regenerate them.
+- **A peer committed catalog files mid-session** (`74c19d5ab`, P112). Diff a regenerated catalog against HEAD before staging
+  it. s103's diff held only its own sentences.
 
 ## Human decisions
 
-- None open from s102. Still Richard's from before: P107-S89-NIGHTBOOK (P78's); 14 deprecated types have no `replacedBy`.
-  P107-S102-SIGNUPBACKEND has one product question inside it: should Sign Up get a Backend picker? The port fix itself
-  needs no ruling.
+- None opened by s103. Still Richard's from before: P107-S89-NIGHTBOOK (P78's); 14 deprecated types have no `replacedBy`.
+  P107-S102-SIGNUPBACKEND has one product question inside it: should Sign Up get a Backend picker? Layout's diagnostic (step 2)
+  will need a format decision.
 
 **Open, filed this phase:** P107-S102-SIGNUPBACKEND (low, the runtime's), P107-S101-VERBSPECCED (low, P116's table),
-P107-S97-NULLBODY, P107-S97-USERIDBOOLEAN (low); P107-S95-MINABOVEMAX (Counter, Date Add and Date Difference done; 7 owed),
-P107-S95-SEED20738, P107-S94-DEVHEAP (medium), P107-S93-NOTANAME (low), P107-S92-VIDEOEMBEDSEED (low), P107-S89-NIGHTBOOK
-(medium), P107-S89-CFEXAMPLES (low), P107-S89-XMLEXAMPLE (low); P107-S86-STOREDWIRE (medium); P107-S83-SENDFORM;
-P107-S79-ADAPTERLABEL (low). **Fixed s102:** P107-S85-RESTCOLTYPES, P107-S101-JSFILTERVALUES.
+P107-S97-NULLBODY, P107-S97-USERIDBOOLEAN (low); P107-S95-MINABOVEMAX (7 of 9 sites done; For Each and layout left, then
+half 2), P107-S95-SEED20738, P107-S94-DEVHEAP (medium), P107-S93-NOTANAME (low), P107-S92-VIDEOEMBEDSEED (low),
+P107-S89-NIGHTBOOK (medium), P107-S89-CFEXAMPLES (low), P107-S89-XMLEXAMPLE (low); P107-S86-STOREDWIRE (medium);
+P107-S83-SENDFORM; P107-S79-ADAPTERLABEL (low).
 
 **Routed to P18 (the export):** `nodegx-export/src/emit/dragLib.ts` :69 / :356 (R26). **P109 holds:** D38, the Page Stack, the
 Router, LIBRARYDOCS, CHR007SNAPSHOT; P107-S82-STATESVALUEPORT and P107-S82-STATESLOADGATE. **P112 holds:** P107-SIZE.
 
 NSP-010's and NSP-017's uncommitted notes (not this phase's sessions') were left out again.
 
-## Gates (s102, 2026-10-13)
+## Gates (s103, 2026-10-13)
 
-- **Oracle (a) + the saved-project drive** (`nsp-020-ports-parity` + `nsp-020-port-context`): **359 / 359** (2 new cases, the
-  Javascript filter). The drive now has `directus_users` and the User family's write nodes; 2 pins (SIGNUPBACKEND).
-  Planted mutants: 8 red for RESTCOLTYPES, 5 red for JSFILTERVALUES.
-- **Conformance**, seeds 20739 and 20740: all 13 RESTCOLTYPES types, plus Date Add, Date Difference, DbCollection2 and
-  Aggregate, ran 200 / 200 with 0 divergences. Reds are only the SEED20738 survivors (Delete Record ×2, DbModel2 `modelId`
-  on 20740). Date Add / Date Difference v3: 33 / 33 and 44 / 44 mutants. Control: one letter in the date sentence gives 17
-  divergences.
-- **Stranger rounds 1–4** (44 min): every node conforms except Dropdown's seed survivor (`person.blur`); hash gate red on
-  `spec.ts` only, refreshed, re-run green.
-- node-spec package (no stranger) **1,954 / 1,954**; `golden --check` 125 fresh, version rule held, 13 histories;
-  `spec-ledger --check` 142 / 133; `catalog:check` up to date; `spec-disagreements --check` up to date.
-- Typecheck node-spec / runtime / mcp / project-contract / editor: 0 errors.
-- **Editor** `tests-unit/nsp-019` + `nsp-020` + `sb-017`: **548 / 548**. **MCP** nsp020 drawn-ports + wire check: 9 / 9.
-- **project-contract** 352 / 353: the 1 is P107-S101-VERBSPECCED (pre-existing).
-- **`test:ci`: Jasmine 3,015 specs, 0 failures**, seed 49826, fresh `test-results.json` (finished 15:28:18Z), HEAD `9babd0f0` +
-  the working tree (peers' open edits included). Run alone, `.webpack-cache` cleared. The floor of 8 did not appear.
+- **Runtime conformance**, seeds 20739 and 20740 (States also 20741): States v5, Group v8, Button v4, Checkbox v5, Dropdown v9,
+  Radio Button v5, Slider v6, Text Input v7 and Icon v2 all ran 200 / 200 with **0 divergences**, and every hand scenario
+  passed (except States' known row STATESVALUEPORT). The reds are the SEED20738 survivors only, measured against HEAD's specs.
+  Icon 105 / 105 mutants.
+- **Controls:** States, one letter → 4 scenarios + 5 sequences red, the clear dropped → 6 + 17. Focus module, one letter →
+  Button 8 + 13; the flag never set → 8 + 13. Icon, one letter → 1 + 90.
+- **Stranger round 4** (Dropdown, 36 min): AC2 1104 / 1106 caught plus 2 editor-only; AC1 red only on `person.blur`
+  (SEED20738); hash gate refreshed (39 files) and green.
+- node-spec package (no stranger) **1,954 / 1,954**; `golden --check` 125 specs fresh, version rule held, 21 histories;
+  `spec-ledger --check` 142 / 133; `catalog:check` and `merge.js --check` up to date; `spec-disagreements --check` up to date.
+- Runtime: typecheck 0 errors; graph + nsp-019-diagnostics + nsp-020 port-context + ports-parity **459 / 459**.
+- **Editor** `tests-unit/nsp-019` + `nsp-020` + `sb-017`: **548 / 548**. **MCP** nsp020: **9 / 9**.
+- **`test:ci`: Jasmine 3,015 specs, 0 failures**, seed 20715, fresh `test-results.json` (finished 19:27:27Z), HEAD `6f1d8b9e` +
+  the working tree (peers' open edits included). Run alone, `.webpack-cache` cleared.

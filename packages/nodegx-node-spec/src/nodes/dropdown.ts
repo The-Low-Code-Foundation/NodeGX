@@ -55,6 +55,8 @@
 
 import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
+import { controlFocusNotMounted, focusDiagnostics, focusMissed } from './focus-not-mounted';
+import { focusAndIconSourceChange, iconSourceDiagnostics } from './icon-source';
 import { dataAttributeInput, dataAttributeNames } from './data-attributes';
 
 type State = {
@@ -75,6 +77,8 @@ type State = {
   elementFocused: boolean;
   /** the component is on the page: mounted and painted */
   onPage: boolean;
+  /** v9 — the last Focus found the node off the page: the editor is told (focus-not-mounted.ts) */
+  focusMissed: boolean;
   /** options.ts :107 `_internal.value` — the Value output, and what the `<select>` is told to select; `undefined` after a Value input of undefined (never sent, C3) */
   value: string | undefined;
   /** options.ts :164-168 `_internal.items` — the list as handed */
@@ -112,7 +116,8 @@ export const Dropdown = defineNode({
   // v6 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
   // v7 (P109 ISL-045, P109-S21-DROPDOWNEMPTYRESET): the spec correcting itself — after Items offered no options the element selects nothing, and the next option to arrive is selected as it arrives
   // v8 (P107 R21, P107-S88-OPTIONSCAST): a word in a list on Items is an option, labelled and valued by the word — v7 drew an option with no text and the value ''
-  version: 8,
+  // v9 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it, and an Icon Source that is not an icon shows as one until an icon or nothing arrives (`diagnostics`)
+  version: 9,
   // NSP-010 — v7 is the spec correcting itself, not the runtime changing
   changes: [
     {
@@ -132,15 +137,17 @@ export const Dropdown = defineNode({
       migration: {
         none: 'Nothing an app relied on: a word in a wired list drew an option a person could not read, all with the same empty value. No stored project changes — typed Items were already read this way'
       }
-    }
+    },
+    focusAndIconSourceChange(9)
   ],
+  diagnostics: { ...focusDiagnostics(controlFocusNotMounted('dropdown')), ...iconSourceDiagnostics() },
   source: 'packages/noodl-viewer-react/src/nodes/controls/options.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the browser's selection with them
   synced: ['pageEnabled', 'pageVisible', 'domSelected'],
 
   state: {
-    enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false,
+    enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false, focusMissed: false,
     value: 'Option 1', items: DEFAULT_ITEMS, domSelected: ''
   } as State,
   // utils.ts :402-411 `outcomeOutputs({ done, unchanged })` (addFocusActions)
@@ -376,9 +383,9 @@ export const Dropdown = defineNode({
     useLabel: () => ({ says: 'always: a label is drawn beside the list, or not; the list, its keyboard and its pick stay', send: [] }),
     // utils.ts :370-384 — on the `<select>` (utils.ts :419-423 `_focusTarget`), as the Checkbox's
     focus: (s) => {
-      if (!s.onPage) return { says: 'not on the page: nothing to focus, and the Focus is not kept', send: [], outcome: 'unchanged' };
-      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { says: 'it holds the keyboard already, or is disabled or hidden: nothing changes', send: [], outcome: 'done' };
-      return { says: 'otherwise the keyboard is put on it, and the Focused state goes true', set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
+      if (!s.onPage) return { says: 'not on the page: nothing to focus, the Focus is not kept, and the editor is told', set: focusMissed(s, true), send: [], outcome: 'unchanged' };
+      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { says: 'it holds the keyboard already, or is disabled or hidden: nothing changes', set: focusMissed(s, false), send: [], outcome: 'done' };
+      return { says: 'otherwise the keyboard is put on it, and the Focused state goes true', set: { focused: true, elementFocused: true, ...focusMissed(s, false) }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     // utils.ts :385-395 — a disabled element gives the keyboard up to nobody: `blur()` on one does nothing (the focusing steps), Done regardless
     blur: (s) => {

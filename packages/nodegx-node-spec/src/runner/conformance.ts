@@ -145,6 +145,8 @@ export interface MutantResult {
   swappedWith?: string;
   killed: boolean;
   killedBy?: string;
+  /** NSP-019 R35 (s103) — a mutant this editor-less target cannot tell apart that an editor would: the first play where it would */
+  seenByEditor?: string;
 }
 
 export interface Report {
@@ -154,7 +156,20 @@ export interface Report {
   refused?: string;
   scenarios: ScenarioResult[];
   generated: { seed: number; requested: number; ran: number; divergences: Divergence[]; known: KnownCount[]; withheld?: Readonly<Record<string, Withheld>> };
-  mutants?: { total: number; killed: number; survivors: MutantResult[]; unreached: Branch[]; results: MutantResult[]; equivalent: Array<{ why: string; count: number }> };
+  mutants?: {
+    total: number;
+    killed: number;
+    survivors: MutantResult[];
+    unreached: Branch[];
+    results: MutantResult[];
+    equivalent: Array<{ why: string; count: number }>;
+    /**
+     * NSP-019 R35 (s103) — for a target with no editor (adapter.ts `diagnostics`): mutants that change only what the node tells the
+     * editor, so no play this target can see tells them apart. Counted, never survivors: they are graded where there is an editor
+     * (the runtime target), as a reach's unseen mutants are graded where the reach is wider.
+     */
+    editorOnly?: MutantResult[];
+  };
   /** The reach this run was graded inside (NSP-005); absent for a full-surface target. */
   reach?: Reach;
   /** Reducers the reach never calls (their port is outside it) — not `unreached`, not graded here. */
@@ -322,7 +337,14 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
     const discovered = discoverBranches(spec);
     const probe = interpreterAdapter({ resolve: () => discovered.spec });
     const referenceTraces: TraceEvent[][] = [];
-    for (const s of suite) referenceTraces.push(project(await play(probe, spec.type, s.params, s.steps, worldFor(spec, s.world), s.wired, playContextOfScenario(s))));
+    // NSP-019 R35 (s103): what an editor would see, kept only where this target has none — to tell an editor-only mutant from a survivor
+    const editorTraces: TraceEvent[][] = [];
+    const projectForEditor = (t: TraceEvent[]) => (reach ? projectTrace(t, reach) : t);
+    for (const s of suite) {
+      const t = await play(probe, spec.type, s.params, s.steps, worldFor(spec, s.world), s.wired, playContextOfScenario(s));
+      referenceTraces.push(project(t));
+      if (!target.diagnostics) editorTraces.push(projectForEditor(t));
+    }
 
     const results: MutantResult[] = [];
     // NSP-016 s52 — the order the suite is tried in, per mutant: first the plays that killed this reducer's mutants most recently,
@@ -366,6 +388,7 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
           killer = i;
           break;
         }
+        if (!target.diagnostics && !result.seenByEditor && compareTraces(editorTraces[i], projectForEditor(actual)).index >= 0) result.seenByEditor = suite[i].name;
       }
       if (killer >= 0) {
         if (!recentByReducer.has(m.reducer)) recentByReducer.set(m.reducer, []);
@@ -383,10 +406,12 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
         (e) => e.reducer === r.reducer && (e.kind === undefined || e.kind === r.kind) && (e.branch === undefined || r.branch.includes(e.branch)) && (e.swappedWith === undefined || (r.swappedWith ?? '').includes(e.swappedWith))
       );
     const survivors: MutantResult[] = [];
+    const editorOnly: MutantResult[] = [];
     for (const r of results) {
       if (r.killed) continue;
       const e = isEquivalent(r);
       if (e >= 0) equivalent[e].count++;
+      else if (r.seenByEditor !== undefined) editorOnly.push(r);
       else survivors.push(r);
     }
     report.mutants = {
@@ -395,7 +420,8 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
       survivors,
       unreached: [], // filled below from the reducers the suite never called
       results,
-      equivalent
+      equivalent,
+      ...(editorOnly.length > 0 ? { editorOnly } : {})
     };
     for (const name of Object.keys(spec.on)) {
       if (typeof spec.on[name] === 'function' && !declared.has(name)) {
@@ -462,6 +488,7 @@ export function formatReport(report: Report): string {
     for (const s of report.mutants.survivors) lines.push(`    SURVIVED${report.reach ? ' (not graded by this reach)' : ''} ${s.reducer} ${s.kind} on branch ${s.branch}${s.swappedWith ? ' ↔ ' + s.swappedWith : ''}`);
     for (const u of report.mutants.unreached) lines.push(`    UNREACHED ${u.reducer}: ${u.shape}`);
     for (const e of report.mutants.equivalent) if (e.count > 0) lines.push(`    equivalent ×${e.count}: ${e.why}`);
+    if (report.mutants.editorOnly) lines.push(`    editor only ×${report.mutants.editorOnly.length}: change only what the node tells the editor, which this target has none of`);
   }
   return lines.join('\n');
 }

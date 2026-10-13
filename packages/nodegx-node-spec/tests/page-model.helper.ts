@@ -96,7 +96,8 @@ const FOCUS_CALLS = {
   'on.blur': ['onPage', 'pageEnabled', 'pageVisible', 'elementFocused']
 };
 const FIELD_CALL = ['onPage', 'elementFocused', 'field', 'pageType', 'caret', 'hadCaret'];
-const CONTROL_NODE = ['enabled', 'hover', 'pressed', 'focused', 'mounted', 'visible'];
+/** `focusMissed` (s103, R35): the Focus action's own record of whether the element it asked for was there (focus-not-mounted.ts) */
+const CONTROL_NODE = ['enabled', 'hover', 'pressed', 'focused', 'mounted', 'visible', 'focusMissed'];
 /**
  * P109 ISL-031 (P107-D30, ruled "Reset and announce") — a control's element leaving the page takes its states with it: the paint
  * that unmounts it writes Focused, Hover and Pressed false and fires Blurred and Hover End for the ones that were on. That is the
@@ -210,7 +211,7 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
   // s52 — the Text's model with the Group's additions: the focus tracker's list (the viewer's, moved by Focus and by clicks), the
   // element the component mounted with (the tracker finds the node on it, C86), the gesture's index, Block Pointer Events, the scrolls
   Group: {
-    node: ['mounted', 'tag', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'blocks', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'index', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile', 'scrollIndex', 'scrollElement', 'scheduled', 'waiting', 'ran'],
+    node: ['mounted', 'tag', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'blocks', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'index', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile', 'scrollIndex', 'scrollElement', 'scheduled', 'waiting', 'ran', 'focusMissed'],
     attr: {
       onPage,
       shownTag: { follows: (s) => (s.onPage ? s.tag : KEEP), preset: false }

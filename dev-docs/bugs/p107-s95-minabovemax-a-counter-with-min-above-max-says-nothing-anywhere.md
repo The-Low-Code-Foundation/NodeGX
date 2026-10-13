@@ -51,4 +51,18 @@ node's namespace once the spec declares one. So declaring one key meant declarin
 frame end's declared equivalent mutant on every seed. Before v5, seed 13's survivors there were all frame ends that raised a
 failure, and the warnings now kill those at once. States v5 conforms at 20739, 20740 and 20741 with 0 divergences. Controls:
 one letter changed in the transition sentence gives 4 scenarios and 5 sequences red, and dropping the clear gives 6 and 17.
-Left: Text Input, the controls' helper, For Each, Group, Icon, layout, and the census.
+Left after States: Text Input, the controls' helper, For Each, Group, Icon, layout, and the census.
+
+**s103 — the Focus warning and Icon Source (seven specs).** Group, Text Input and the controls' helper are one sentence,
+`focus/not-mounted`, raised by every Focus on whether the focus tracker took it. Seven specs declare it: Group, Text Input,
+Button, Checkbox, Dropdown, Radio Button and Slider (`focus-not-mounted.ts`, a `focusMissed` flag the Focus action writes
+on every press). Icon's `visual/icon-source-not-an-icon/iconIconSource` is declared by the six nodes with an Icon Source:
+Icon, Button, Checkbox, Dropdown, Radio Button and Text Input (`icon-source.ts`, `describe-value.ts`). Its namespace,
+`visual/`, belongs to the base visual class, as `node/` belongs to the base node. So the runtime target now records only the
+keys a spec names in `visual/` and `dimensions/`, and does not grade the whole namespace. The runner counts a mutant that
+changes only what the editor is told as `editorOnly` on a target with no editor (stranger round 4, Dropdown), not as a
+survivor. Controls: one letter in the shared Focus sentence turns Button red on 8 scenarios and 13 sequences, and so does a
+flag that is never set.
+Left: For Each (its own `repeater/` namespace carries about 15 error-bus codes, and each one a play reaches must be modelled),
+layout (`dimensions/wired-dimension-becomes-grow` depends on the parent's direction, a wired width or height, and the
+rendered `flexGrow`: graph and render facts that a single-node play does not hold), and the census.

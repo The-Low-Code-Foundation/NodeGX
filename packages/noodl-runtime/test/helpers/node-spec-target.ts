@@ -687,6 +687,12 @@ interface Layout {
 }
 
 /** NSP-016 s60 — the width a Columns page is laid out at before any `resize` (THE LAYOUT above): a desktop window. */
+/**
+ * NSP-019 R35 (s103) — diagnostic namespaces the BASE classes share across node types (`recordDiagnostics`): a spec is graded only on
+ * the keys it names in these, never on the whole namespace.
+ */
+const SHARED_DIAGNOSTIC_NAMESPACES: ReadonlySet<string> = new Set(['visual/', 'dimensions/']);
+
 const START_WIDTH = 1024;
 
 /** NSP-016 s56 — the components a Component Stack can build in a play (navigation-stack.ts THE PAGES), each holding one Pop Component Stack. */
@@ -1534,15 +1540,20 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
    * a sentence the runtime says and the spec forgot is a divergence; one per key whose sentence changed since the last settle,
    * sorted by key. Not the generic ones: the base class's `node/…`, and the scheduler's `runtime/cyclic-loop`, which the loop
    * breaker puts on whichever node it stopped (graph C9, a Counter wired into itself) — the engine's, not the node's.
+   * NSP-019 R35 (s103): the base visual class's namespaces are shared the same way — `visual/` (react-component-node.ts: an icon
+   * port's sentence, and Scroll Into View and an action's failures on every visual node) and `dimensions/` (layout.ts and the
+   * size ports) — so a spec that names a key there is graded on THAT key, not on everything the base class says.
    */
   function recordDiagnostics(s: State): void {
     const declared = specFor(s.h.type)?.diagnostics;
     if (!declared) return;
-    const own = new Set(Object.keys(declared).map((k) => k.slice(0, k.indexOf('/') + 1)));
+    const prefixOf = (k: string) => k.slice(0, k.indexOf('/') + 1);
+    const own = new Set(Object.keys(declared).map(prefixOf).filter((p) => !SHARED_DIAGNOSTIC_NAMESPACES.has(p)));
+    const named = new Set(Object.keys(declared).filter((k) => SHARED_DIAGNOSTIC_NAMESPACES.has(prefixOf(k))));
     const now = diagnosticsNow.get(s.h.id) ?? new Map<string, string>();
     const shown = diagnosticsShown.get(s.h.id) ?? {};
     diagnosticsShown.set(s.h.id, shown);
-    const keys = [...new Set([...now.keys(), ...Object.keys(shown)])].filter((k) => own.has(k.slice(0, k.indexOf('/') + 1))).sort();
+    const keys = [...new Set([...now.keys(), ...Object.keys(shown)])].filter((k) => own.has(prefixOf(k)) || named.has(k)).sort();
     for (const key of keys) {
       const message = now.get(key) || undefined;
       if (message === shown[key]) continue;
