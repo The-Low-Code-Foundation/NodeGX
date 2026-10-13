@@ -7,6 +7,7 @@ area: kit / the project's agent notes (`noodl-editor/src/editor/src/models/templ
 found: P112 OWN-018 s2, 2026-10-13 (Mistral Large 4 in OpenCode, quiz run 7; tarballs tgz8 at e11082e5e)
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-018-A-STRANGER-ON-MISTRAL.md §14
 regression: packages/noodl-mcp/tests/own018VerbatimRequest.test.ts
+commit: a04271143
 ---
 
 Run 7 graded 10/12 and failed `order`: question 1 read Porto / Lisbon / **Madrid** (the brief: Lisbon / Porto / Coimbra),

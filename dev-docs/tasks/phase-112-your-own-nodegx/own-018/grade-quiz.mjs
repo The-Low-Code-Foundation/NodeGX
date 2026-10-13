@@ -126,6 +126,10 @@ const BOX = `(re) => {
   if (!leaf) return null;
   let box = leaf;
   while (box.parentElement && box.parentElement !== document.body && box.parentElement.textContent.trim() === leaf.textContent.trim()) box = box.parentElement;
+  // A person scrolls to what is below the fold, if the page scrolls (s2: run 7's Play again sat at y=963 on an 844px
+  // screen). A page that cannot scroll leaves it where it is, and the press below still has to land.
+  const pre = box.getBoundingClientRect();
+  if (pre.top < 0 || pre.bottom > innerHeight) box.scrollIntoView({ block: 'center', behavior: 'instant' });
   const r = box.getBoundingClientRect();
   const x = r.left + r.width / 2, y = r.top + r.height / 2;
   const hit = document.elementFromPoint(x, y);
@@ -272,6 +276,7 @@ try {
   // Play again → all wrong
   const again = await box(`/^(play again|restart|try again)$/i`);
   if (!again) throw new Error('no Play again button');
+  if (!again.lands) say('note', { why: 'Play again: a press at its centre lands on something else (covered, or below a fold the page cannot scroll)' });
   await press(again);
   const q1b = await waitText(/Question\s*1\s*(of|\/)\s*5/i, 5000);
   const run2 = q1b === null ? { ok: false, why: 'no Question 1 after Play again' } : await playRun(WRONG);

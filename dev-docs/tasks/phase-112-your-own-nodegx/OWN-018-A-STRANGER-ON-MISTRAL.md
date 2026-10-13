@@ -458,3 +458,23 @@ replayed against the API (`max_tokens: 1`, a fresh nonce so nothing was cached b
   and a manifest; drive_page → `.previews/drive`; the manifest says what opening an image costs), set by
   create-nodegx in `opencode.json` and `.vibe/config.toml` only (Claude caches across images; `.mcp.json` unchanged).
   It also ends the lab handicap of runs 1, 4 and 6: screenshots land inside the project, where the agent may read.
+
+### Run 7 — screenshots to files; and a summary that lost the brief
+
+Run 7 (tgz8: `--screenshots-to-files`) **finished by itself** — the first Mistral run to end on "Capital Quiz is built
+and verified" rather than a cap — in 39 min for **$1.09**; with no image in its history its cache held (80k → 36k,
+92k → 80k, 96k → 91k cached), until it chose to `read` its screenshots at the very end. One step was a degenerate tool
+call (malformed JSON, tabs repeating until 32k; run 6 had the same glitch) — temperature is the next config lever.
+
+It graded 10/12, and both failures taught something:
+- **order** — its data read Porto / Lisbon / **Madrid**, Canada and Morocco reordered. OpenCode's compaction summary
+  kept "three answers in exact order" and dropped the list; the agent rebuilt it from memory. The person's words were
+  in `docs/decisions/000-initial-scope.md` all along. **P112-OWN018-SUMMARYLOSS, fixed (a04271143):** the project's
+  AGENTS.md / CLAUDE.md (in the system prompt, which no summary rewrites) point at the verbatim quote and say to build
+  spelled-out content from it and re-read it after a summary.
+- **again** — the grader's, not the app's: Play again sat at y=963 on an 844 px screen (its hidden screens use
+  `visible`, which keeps their space). A person scrolls; the grader did not. **Grader fixed:** a target below the fold
+  is scrolled into view first (the press must still land, so an unscrollable page still fails).
+
+**Regraded with the scrolling grader:** Sonnet run 0 **12/12** (unchanged), Mistral run 6 **12/12**, run 7 **11/12**
+(order, now fixed in the kit). Mutant proof unaffected (its targets are on screen).
