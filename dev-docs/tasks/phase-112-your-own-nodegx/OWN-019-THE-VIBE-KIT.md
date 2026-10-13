@@ -9,7 +9,7 @@ package that only work well with Claude and Claude Code, we need to be able to o
 vibe version."*
 **Depends on** OWN-018 (the lab: `round-kit.mjs`, `grade-quiz.mjs`, kit tgz12, everything Mistral taught the kit) and
 Richard's Vibe subscription key (`MISTRAL_VIBE_API_KEY` in the repo `.env`, made under Code › Vibe CLI).
-**Status: 🟡 s1 done (2026-10-13). The Vibe kit grades 12/12 in Vibe (v2) where the plain kit graded 0/12 (v1b) — same model, harness and settings. AC1 (census) met. Next: AC4, two more v2 rounds; then a second brief. Handoff: `own-019/NEXT-SESSION-PROMPT.md`.**
+**Status: 🟡 s2 done (2026-10-13). AC5 met (Pack It pk2–pk4, 12/12 ×3, each finished by itself). AC4 open: quiz v10 12/12 clean but stopped by the lab's price cap; v12 8/12 (AFTERTIMEOUT). R30 (the Vibe subscription or no Mistral), R31 (a process, session by session, run by the agent itself), AC8 (a Fable 5.1 audit at the end). Next: the process kit (R31). Handoff: `own-019/NEXT-SESSION-PROMPT.md`.**
 **Model:** Opus for the sessions that build and read the rounds. The agent under test: **Mistral Large 4
 (`mistral-large-4`, never `-latest`) in Mistral Vibe**, pinned to a version per round (2.26.1 at opening).
 
@@ -141,6 +141,7 @@ post-tool, post-agent) — and the kit uses none of them yet.
 | v8 | tgz17, kit defaults, sealed lab | — | **stalled** (one think, 145 KB) | 18 | 0.34 | 45% | 0 | LONGTHINK again at the defaults: designing the whole app in one answer |
 | v9 | tgz18 (one answer, one tool call) | 12/12, **carryover** | itself | 45 | 2.68 | 76% | — | no stall (longest think 98 KB vs 142–172 KB stalled); CARRYOVER |
 | v10 | tgz19 (+ the next-screen checklist line) | **12/12, clean** | the lab's $6 stop, at its last step | 75 | 6.30 | 61% | 50 | the carry-over line works; the price stop was the lab's |
+| v12 | tgz19 | 8/12, clean | itself | 45 | 2.44 | 76% | — | AFTERTIMEOUT: the right answer after a timeout is not counted |
 
 - **s2 (2026-10-13, Opus):** kit tgz14 reused for v3 (create-nodegx and MCP byte-identical in source to HEAD at the
   time; the runtime had moved only in Aggregate Records, which the quiz never touches). **v3: 12/12, carryover clean,
@@ -241,3 +242,10 @@ post-tool, post-agent) — and the kit uses none of them yet.
   presses graded 12/12 with the same `<select>` presses, ruling the select out. The grader now lets the screen
   settle 350 ms after typing and refuses to press an Add its press would miss (a person taps where the button is).
   Re-proven on the control and the 11 mutants after the change.
+- **s2, v12 (tgz19): 8/12, carryover clean**, finished by itself in 45 min (~$1.22 cached). The right answer after a
+  timed-out question is not counted (P112-OWN019-AFTERTIMEOUT, open): probed three ways — the score after every tap
+  (Bern after Q4's timeout: 2→2), a 1.2 s pause before every tap (still 2: not the grader), five right answers with
+  no timeout (5/5). Its checks drove timing-out and scoring apart, never the brief's own example whole.
+- **s2, R31 (Richard):** the kit's agent works the way this repo does — a written process, session by session, by
+  itself; the lab adds nothing but a fixed "continue". Every real miss today (SAMEVALUE, CARRYOVER, AFTERTIMEOUT) was
+  checklist coverage; the long designs lived only in thinks; one round sent ~9M input tokens through one session.
