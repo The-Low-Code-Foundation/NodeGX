@@ -30,7 +30,7 @@
 // baseline sat 32 min in one answer (the legacy harness sends no max_tokens, so nothing cuts a long think off) while
 // the key spent. agent.exit then says "stalled". The tree is found by parent pid, never by name.
 //
-//   node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price 4] [--max-turns 250] [--thinking high|low] [--temperature T] [--key vibe|api] [--kit vibe] [--stall-min 30] [--sittings N --max-total 20]
+//   node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price 4] [--max-turns 250] [--thinking high|low] [--temperature T] [--key vibe|api] [--kit vibe] [--stall-min 30] [--sittings N --max-total 20] [--record]
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
@@ -85,6 +85,17 @@ const denylist = deny.filter((d) => d && d !== path.resolve(root));
 // or not. Vibe checks its own scratchpad (home/tmp/vibe-scratchpad-…) before the denylist, so that stays writable.
 denylist.push(`${root}/[!w]*`, `${root}/work/[!a]*`);
 const toml = (v) => JSON.stringify(v);
+// OWN-019 s3: `--record` puts own-018/record-proxy.mjs between Vibe and api.mistral.ai for the whole round: every
+// request body (req-<n>.json) and every call's timings, usage (cached tokens) and finish reason (calls.jsonl) land in
+// <root>/calls/. The lab's user config replaces Vibe's built-in "mistral" provider (merged by name, the higher layer
+// wins whole) with the same entry pointed at the proxy. Never a header is written (the key travels in one).
+const record = rest.includes('--record');
+const RECORD_PORT = 8800 + Math.floor(Math.random() * 900);
+let proxy = null;
+if (record) {
+  proxy = spawn(process.execPath, [path.join(path.dirname(new URL(import.meta.url).pathname), 'record-proxy.mjs'), path.join(root, 'calls'), '--port', String(RECORD_PORT)], { stdio: ['ignore', 'pipe', 'pipe'] });
+  await new Promise((resolve) => proxy.stdout.once('data', resolve));
+}
 fs.writeFileSync(
   path.join(HOME, '.vibe', 'config.toml'),
   [
@@ -92,6 +103,9 @@ fs.writeFileSync(
     'enable_update_checks = false',
     'enable_auto_update = false',
     '',
+    ...(record
+      ? ['# OWN-019 s3 --record: the built-in mistral provider, pointed at the recording proxy.', '[[providers]]', 'name = "mistral"', `api_base = "http://127.0.0.1:${RECORD_PORT}/v1"`, 'api_key_env_var = "MISTRAL_API_KEY"', 'backend = "mistral"', '']
+      : []),
     ...['read_file', 'grep', 'edit', 'write_file'].flatMap((t) => [`[tools.${t}]`, 'permission = "always"', `denylist = [${denylist.map(toml).join(', ')}]`, '']),
     ...['bash', 'git_bash', 'experimental_bash', 'windows_shell', 'web_fetch', 'web_search'].flatMap((t) => [`[tools.${t}]`, 'permission = "never"', ''])
   ].join('\n')
@@ -228,22 +242,23 @@ function nextLine() {
   return f ? { file: path.relative(APPS, f), text: fs.readFileSync(f, 'utf8'), first: fs.readFileSync(f, 'utf8').split('\n')[0].trim() } : null;
 }
 
-const record = [];
+const sittingsDone = [];
 let unchanged = 0;
 for (let k = 1; k <= sittings; k++) {
   const before = nextLine();
   const r = await runSitting(k === 1 ? path.resolve(promptFile) : CONTINUE, k === 1 ? '' : String(k));
   const after = nextLine();
-  record.push({ sitting: k, ...r, next: after?.first ?? null, nextFile: after?.file ?? null });
-  fs.writeFileSync(path.join(root, 'sittings.json'), JSON.stringify(record, null, 2));
+  sittingsDone.push({ sitting: k, ...r, next: after?.first ?? null, nextFile: after?.file ?? null });
+  fs.writeFileSync(path.join(root, 'sittings.json'), JSON.stringify(sittingsDone, null, 2));
   console.log(`sitting ${k}: exit ${r.how} ${r.seconds}s $${r.vibeUsd ?? '?'} — ${after?.first ?? '(no NEXT.md)'}`);
   if (sittings === 1) break;
   if (r.stalled) { console.log('stop: stalled'); break; }
   if (after && /^#\s*Done\b/i.test(after.first)) { console.log('stop: done'); break; }
   unchanged = before && after && before.text === after.text ? unchanged + 1 : 0;
   if (unchanged >= 2) { console.log('stop: NEXT.md unchanged for two sittings'); break; }
-  const total = record.reduce((n, x) => n + (x.vibeUsd || 0), 0);
+  const total = sittingsDone.reduce((n, x) => n + (x.vibeUsd || 0), 0);
   if (total >= maxTotal) { console.log(`stop: $${total.toFixed(2)} ≥ --max-total ${maxTotal}`); break; }
 }
-const sum = (f) => record.reduce((n, x) => n + (f(x) || 0), 0);
-console.log('exit', record.at(-1).how, `| ${record.length} sitting(s), ${Math.round(sum((x) => x.seconds) / 60)} min, $${sum((x) => x.vibeUsd).toFixed(2)} list, ~$${sum((x) => x.estimatedUsd).toFixed(2)} cached`);
+if (proxy) proxy.kill();
+const sum = (f) => sittingsDone.reduce((n, x) => n + (f(x) || 0), 0);
+console.log('exit', sittingsDone.at(-1).how, `| ${sittingsDone.length} sitting(s), ${Math.round(sum((x) => x.seconds) / 60)} min, $${sum((x) => x.vibeUsd).toFixed(2)} list, ~$${sum((x) => x.estimatedUsd).toFixed(2)} cached`);

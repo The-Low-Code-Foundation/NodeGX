@@ -5,6 +5,10 @@
 //   node record-proxy.mjs <out-dir> [--port 8799]          the harness's config: provider.mistral.options.baseURL =
 //                                                           http://127.0.0.1:8799/v1
 //   node record-proxy.mjs --compare <out-dir>
+//
+// OWN-019 s3: every call is also logged to calls.jsonl — when it was sent, when the headers came back, when the first
+// chunk and the last arrived, the status, Mistral's own `usage` from the stream's last chunk (prompt, cached and
+// completion tokens), the finish reason, and the x-ratelimit-* headers. Never a request header (the key is one).
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
@@ -48,13 +52,48 @@ http.createServer(async (req, res) => {
   const headers = { ...req.headers };
   delete headers.host;
   delete headers['content-length'];
+  const sent = Date.now();
   try {
     const upstream = await fetch(`https://api.mistral.ai${req.url.replace(/^\/v1/, '/v1')}`, { method: req.method, headers, body: body.length ? body : undefined, duplex: 'half' });
+    const headersAt = Date.now();
     const out = {};
-    upstream.headers.forEach((v, k) => { if (!['content-encoding', 'content-length', 'transfer-encoding'].includes(k)) out[k] = v; });
+    const limits = {};
+    upstream.headers.forEach((v, k) => {
+      if (!['content-encoding', 'content-length', 'transfer-encoding'].includes(k)) out[k] = v;
+      if (k.startsWith('x-ratelimit') || k === 'retry-after') limits[k] = v;
+    });
     res.writeHead(upstream.status, out);
-    if (upstream.body) for await (const c of upstream.body) res.write(c);
+    let firstAt = null;
+    let bytes = 0;
+    let tail = '';
+    if (upstream.body) {
+      for await (const c of upstream.body) {
+        if (firstAt === null) firstAt = Date.now();
+        bytes += c.length;
+        tail = (tail + Buffer.from(c).toString('utf8')).slice(-8192);
+        res.write(c);
+      }
+    }
     res.end();
+    const endAt = Date.now();
+    // The stream's last data lines carry `usage` and the finish reason.
+    let usage = null;
+    let finish = null;
+    for (const line of tail.split('\n')) {
+      const m = /^data: (\{.*\})\s*$/.exec(line);
+      if (!m) continue;
+      try {
+        const d = JSON.parse(m[1]);
+        if (d.usage) usage = d.usage;
+        const f = d.choices?.[0]?.finish_reason;
+        if (f) finish = f;
+      } catch {}
+    }
+    let msgs = null;
+    try {
+      msgs = JSON.parse(body.toString('utf8')).messages?.length ?? null;
+    } catch {}
+    fs.appendFileSync(path.join(OUT, 'calls.jsonl'), JSON.stringify({ n: i, url: req.url, status: upstream.status, reqBytes: body.length, messages: msgs, sent, headersMs: headersAt - sent, firstChunkMs: firstAt === null ? null : firstAt - sent, totalMs: endAt - sent, resBytes: bytes, finish, usage, limits }) + '\n');
     fs.appendFileSync(path.join(OUT, 'log.txt'), `${i} ${req.method} ${req.url} → ${upstream.status} ${body.length}B\n`);
   } catch (e) {
     res.writeHead(502);
