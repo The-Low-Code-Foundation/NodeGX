@@ -26,11 +26,11 @@
 // OWN-019: `--kit vibe` sets the folder up with the Vibe kit (`create-nodegx --vibe`, what `npm create nodegx-vibe` runs):
 // its AGENTS.md, `.vibe/agents/nodegx.toml` as the default agent, and the server started with `--profile vibe`.
 //
-// OWN-019 s1: `--stall-min N` (default 12) stops a round whose session journal has not grown for N minutes — the
+// OWN-019 s1: `--stall-min N` (default 30 since s2; 12 in s1) stops a round whose session journal has not grown for N minutes — the
 // baseline sat 32 min in one answer (the legacy harness sends no max_tokens, so nothing cuts a long think off) while
 // the key spent. agent.exit then says "stalled". The tree is found by parent pid, never by name.
 //
-//   node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price 4] [--max-turns 250] [--thinking high|low] [--temperature T] [--key vibe|api] [--kit vibe] [--stall-min 12]
+//   node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price 4] [--max-turns 250] [--thinking high|low] [--temperature T] [--key vibe|api] [--kit vibe] [--stall-min 30]
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
@@ -137,7 +137,11 @@ const child = spawn('uvx', args, { cwd: APPS, env, stdio: ['ignore', 'pipe', 'pi
 child.stdout.pipe(log);
 child.stderr.pipe(err);
 const t0 = Date.now();
-const stallMs = Number(opt('--stall-min', 12)) * 60000;
+// OWN-019 s2: 12 was shorter than Large 4's own productive thinks. Vibe writes a think to the journal only when it
+// ends; the long design thinks of rounds that finished took up to 10.1 min (9–17 KB/min), and v4/v8 were stopped at
+// 11.8/12.4 min still writing at that speed, no more repetitive than the ones that finished. 30 is three times the
+// longest productive think measured.
+const stallMs = Number(opt('--stall-min', 30)) * 60000;
 let stalled = null;
 const journalSize = () => {
   const dir = path.join(HOME, '.vibe', 'logs', 'session');
