@@ -359,3 +359,16 @@ post-tool, post-agent) — and the kit uses none of them yet.
   calls** in a sitting leaves only the notes open, asking it to write where it got to (the skill teaches ~30; q2 and
   q4 built part 1 in 47–51). AGENTS.md names the rails up front, "the way a team's tooling does — not a judgement on
   you … plan for the rails rather than around them." q6 measures it; q4 (tgz24) runs on.
+- **s3, the hook's first firings (q4 part 1, q6 plan):** each sitting wrote NEXT.md, then reached for one more call (a
+  `todo` update); the hook answered "this sitting's step is done", and Large 4 summarised and stopped — no argument, no
+  workaround. q6's plan sitting (tgz26) loaded the three skills, read no examples, tried no building tool, and wrote
+  PLAN.md as a table: six parts, each naming its ≤4 checklist lines and the components it touches. 16 min, $0.26.
+- **s3, q4 part 1 (tgz24, no skills): 53 min, 34 answers, 73 tool calls, $3.20 list, longest think 61 KB** — for a
+  start page. Proven (12 drive steps) and handed over cleanly, but big for its size.
+- **s3, open — the cache this evening.** Every sitting tonight cached 9–41% of input (q4 part 1: 20%, 530k of
+  2.65M); s2's single-session rounds this afternoon cached 60–76% (v12 76%, pk4 72%). Not images (none sent —
+  IMAGECACHE), not `todo` (Vibe doesn't inject it into the prompt; v12 used it at 76%). The same evening had two
+  `incomplete_stream` drops, which points at Mistral's side, but the request shape isn't ruled out. **Next: record a
+  sitting's requests through `own-018/record-proxy.mjs` (`--compare`: does each request extend the one before?)** —
+  it decides between "Mistral's cache tonight" and "something in the sitting's prompts". At 20% a start page costs
+  what a whole s2 round did; it matters for R30.
