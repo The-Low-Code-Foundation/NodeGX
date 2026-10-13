@@ -222,11 +222,49 @@ test("P112 OWN-019: the Vibe kit never replaces a person's own files", () => {
   const result = setUp(dir, process.platform, { profile: 'vibe' });
   assert.equal(fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8'), 'mine\n');
   assert.equal(fs.readFileSync(path.join(dir, '.vibe', 'agents', `${VIBE_AGENT}.toml`), 'utf8'), 'mine = true\n');
-  assert.deepEqual(result.written, []);
+  // Only what was missing is added (s3: the one-step-per-sitting hook).
+  assert.deepEqual(result.written, [path.join('.vibe', 'hooks.toml'), path.join('.vibe', 'hooks', 'one-step.mjs')]);
 });
 
 test('P112 OWN-019: the plain kit does not set a default agent (there is no agent file beside it)', () => {
   const dir = path.join(tmp(), 'my-apps');
   setUp(dir);
   assert.doesNotMatch(fs.readFileSync(path.join(dir, VIBE_CONFIG), 'utf8'), /default_agent/);
+});
+
+test('P112 OWN-019 s3: one step per sitting — once a sitting writes docs/NEXT.md, its hook refuses every tool but the notes', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  assert.equal(spawnSync(process.execPath, [BIN, dir, '--vibe'], { encoding: 'utf8' }).status, 0);
+  assert.match(fs.readFileSync(path.join(dir, '.vibe', 'hooks.toml'), 'utf8'), /^type = "pre_tool"\ncommand = "node \.vibe\/hooks\/one-step\.mjs"$/m);
+  const hook = path.join(dir, '.vibe', 'hooks', 'one-step.mjs');
+  // A Vibe session folder as 2.26.1 writes it: messages.jsonl beside meta.json, the folder named for its UTC start.
+  const session = path.join(tmp(), 'session_20261013_183638_96a2df7d');
+  fs.mkdirSync(session);
+  const transcript = path.join(session, 'messages.jsonl');
+  fs.writeFileSync(transcript, '');
+  const started = Date.now() - 60000;
+  fs.writeFileSync(path.join(session, 'meta.json'), JSON.stringify({ start_time: new Date(started).toISOString() }));
+  const next = path.join(dir, 'capital-quiz', 'docs', 'NEXT.md');
+  fs.mkdirSync(path.dirname(next), { recursive: true });
+  const ask = (tool_name, tool_input = {}) => {
+    const run = spawnSync(process.execPath, [hook], { cwd: dir, input: JSON.stringify({ session_id: 's', transcript_path: transcript, cwd: dir, tool_name, tool_call_id: 'c', tool_input }), encoding: 'utf8' });
+    assert.equal(run.status, 0, run.stderr);
+    return run.stdout ? JSON.parse(run.stdout).decision : 'allow';
+  };
+  // Control: NEXT.md from an earlier sitting (written before this session started) closes nothing.
+  fs.writeFileSync(next, '# Next sitting: build part 1\n');
+  fs.utimesSync(next, new Date(started - 3600000), new Date(started - 3600000));
+  assert.equal(ask('nodegx_call_tool', { name: 'update_component' }), 'allow');
+  // This sitting rewrites it: the step is done.
+  fs.writeFileSync(next, '# Next sitting: build part 2\n');
+  assert.equal(ask('nodegx_call_tool', { name: 'update_component' }), 'deny');
+  assert.equal(ask('todo'), 'deny');
+  assert.equal(ask('write_file', { file_path: path.join(dir, 'capital-quiz', 'components', 'x.json') }), 'deny');
+  assert.equal(ask('read_file', { file_path: next }), 'allow');
+  assert.equal(ask('edit', { file_path: path.join(dir, 'capital-quiz', 'docs', 'CHECKLIST.md') }), 'allow');
+  // No meta.json yet: the session folder's own name dates it (UTC), here long before NEXT.md was written.
+  fs.rmSync(path.join(session, 'meta.json'));
+  assert.equal(ask('nodegx_call_tool', { name: 'drive_page' }), 'deny');
+  // A broken call never blocks a person's work.
+  assert.equal(spawnSync(process.execPath, [hook], { cwd: dir, input: 'not json', encoding: 'utf8' }).status, 0);
 });

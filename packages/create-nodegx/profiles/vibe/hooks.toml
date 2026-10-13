@@ -1,0 +1,10 @@
+# Vibe hooks for this folder, written by `npm create nodegx-vibe`. Edit anything; it is never overwritten.
+#
+# One step per sitting: once a sitting has written an app's docs/NEXT.md, every tool but reading and touching up the
+# notes is refused, so the next step starts in a fresh sitting (see AGENTS.md). Delete this entry to turn it off.
+[[hooks]]
+name = "one-step-per-sitting"
+type = "pre_tool"
+command = "node .vibe/hooks/one-step.mjs"
+timeout = 10
+description = "Ends a sitting once its docs/NEXT.md is written"

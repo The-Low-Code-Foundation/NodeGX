@@ -23,7 +23,8 @@ you worked out only in your head is lost when it ends.
 
 When I say "continue" (or nothing new), do the next step. When I ask for a change, add its lines to the checklist and
 go on through the process. Every sitting that stops ends with the line: *Next: <the step>. Type /clear, then
-"continue".*
+"continue".* `NEXT.md` is the last thing a sitting writes: once it is written, this folder's hook
+(`.vibe/hooks.toml`) refuses every tool but reading and touching up the notes, and the sitting ends.
 
 ### Sitting 1 — plan (build nothing yet)
 
