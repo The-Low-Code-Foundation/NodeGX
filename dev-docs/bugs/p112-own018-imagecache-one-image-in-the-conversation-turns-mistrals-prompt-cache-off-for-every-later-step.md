@@ -7,6 +7,7 @@ area: mcp / render_report + drive_page screenshot delivery (`packages/noodl-mcp/
 found: P112 OWN-018 s2, 2026-10-13 (Mistral Large 4 in OpenCode, quiz runs 1, 4, 6; requests recorded by own-018/record-proxy.mjs)
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-018-A-STRANGER-ON-MISTRAL.md §14
 regression: packages/noodl-mcp/tests/own018ScreenshotsToFiles.test.ts
+commit: e11082e5e
 ---
 
 **Measured against api.mistral.ai** with run 6's recorded requests replayed (`max_tokens: 1`, a fresh nonce at the

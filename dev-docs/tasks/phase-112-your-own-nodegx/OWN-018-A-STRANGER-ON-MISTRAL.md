@@ -413,3 +413,48 @@ its job in both (every step under 128k; run 3 75% cached).
   database; `round-opencode-resume.mjs` for a "keep going" sitting; the runner now uses the kit's `opencode.json`.
 
 **Money:** run 1 $2.26 (both sittings), run 2 $0.21. Richard added €10 mid-session.
+
+### Runs 4 and 5 — the corrected limits, then reasoning off
+
+| run | kit | reasoning | spend | steps / time | grade | what limited it |
+|---|---|---|---|---|---|---|
+| 1 | tgz3 (s1) | default | $2.26 (2 sittings) | 35 + 4 min | 2/12 → **12/12 on the fixed runtime, app unchanged** | COUNTERZERO ×2 (ours) |
+| 2 | tgz3 + 128k/16k | default | $0.21 | 8 / 11 min | nothing built | my 16,384 output cap (`length`) |
+| 3 | tgz5 | default | $0.18 | 13 / 8 min | nothing built | the same cap |
+| 4 | tgz6 (150k/32k) | default | $1.59 (2 sittings) | 55 min + 9 | **7/12** | FANOUT (its scoring), then a 32k-token think after compaction (`length`) |
+| 5 | tgz6 | `--variant none` | $1.51 | 11 min | 2/12 | per-row values never reached its list items ("[object Object]", "Answer") |
+
+- **Run 4** read the new Condition note and applied it (*"Condition needs `runOnChange-condition:false` for
+  event-driven eval (confirmed by its antiPattern)"*); built a For Each over an Answer Button component, four
+  components with inputs, 0 validation errors; tested from the start page; then found its own scoring bug by four
+  controlled drives and stated the rule exactly — the point for question n was decided against question n+1's
+  correct answer, except the last. Root cause in its graph: one signal evaluates "right?" and "not the last?", and
+  the second's advance changes what the first compares. **P112-OWN018-FANOUT, needs a ruling** (should a signal's
+  fan-out see its siblings' effects?). Whichever way it goes, Condition's notes now say to chain them (1007f7f99).
+  Resumed with "keep going", it then thought for 117,000 characters (the whole 32k) re-deriving its state after a
+  compaction, without calling a tool, and the run ended on `length`.
+- **Run 5** (reasoning off): fast and cheap per step (85% cached before compaction), but sloppier; it spent its
+  budget searching for how a Repeater hands each row its values.
+- **Reasoning stays on.** OpenCode with no variant sends no `reasoning_effort`, so Mistral reasons at its default.
+
+### Run 6 — the chained-gates note, recorded through the proxy; and what really stops Mistral's cache
+
+Run 6 (tgz7: the Condition note on chaining two gates off one signal; default reasoning; $2 cap) **graded 11/12** —
+the best fresh Mistral build so far: score, best, keep and reload all pass. Its one failure is its own restart logic:
+Play again shows question 1 for ~90 ms and jumps to question 2 (time left 0 and `answered` true from the last game race
+the resets — the same load-order family, in its wiring). 87 nodes, For Each over an AnswerButton component, a
+QuizEngine component, 0 validation errors. Capped at $2.06, most of it uncached.
+
+**The cache, settled (P112-OWN018-IMAGECACHE; CACHE128K was a misreading).** Every request of run 6 recorded, then
+replayed against the API (`max_tokens: 1`, a fresh nonce so nothing was cached before):
+- the tool list never reorders (fingerprinted every request: 15 → 33 → 52 tools, identical between changes) and every
+  request extends the one before by character, compaction included; a tool reveal costs one miss;
+- a pair with **no image** in the history: the second cached 26,092 of 43,320; with **two screenshots**: 0 of
+  96,465; the same with the 19 revealed tools removed: 0; with the images replaced by text: **93,676 of 96,100**;
+  with a **1×1 PNG**: 0. **Any image part turns Mistral's prompt cache off for that request**, and an inline
+  screenshot stays in the conversation until a compaction. Run 1's "over 128k" misses began at the step after its
+  full-screenshot render; run 6 recovered after a compaction dropped its images and lost it at the next screenshot.
+- **Built (e11082e5e):** `noodl-mcp --screenshots-to-files` (render_report with no `out_dir` → `<project>/.previews/render`
+  and a manifest; drive_page → `.previews/drive`; the manifest says what opening an image costs), set by
+  create-nodegx in `opencode.json` and `.vibe/config.toml` only (Claude caches across images; `.mcp.json` unchanged).
+  It also ends the lab handicap of runs 1, 4 and 6: screenshots land inside the project, where the agent may read.
