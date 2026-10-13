@@ -126,6 +126,16 @@ describe('BST-001 — the unbound surface', () => {
     }
   });
 
+  it('🔴 P112-OWN019-LOCALKEEP — create_project says when a backend is NOT the answer', async () => {
+    // Mistral scoped a one-phone best score as `backend: { kind: "nodegx" }` and spent a third of its run
+    // provisioning it (OWN-019 v1b, 0/12); the same model chose "none" in OpenCode. The field said what "nodegx"
+    // does and never when to pick "none". Read as the agent receives it, on the surface it is listed on.
+    const tool = (await session.client.listTools()).tools.find((t) => t.name === 'create_project');
+    const backend = JSON.stringify((tool?.inputSchema as { properties?: Record<string, unknown> })?.properties?.backend);
+    expect(backend).toContain('shared between people or devices');
+    expect(backend).toContain('kind \\"none\\", saved by a Function with localStorage');
+  });
+
   it('find_tools reveals nothing and says what would bring the rest', async () => {
     const res = await callJson<FindToolsResponse>(session.client, 'find_tools', { group: 'backend' });
     expect(res.isError).toBe(false);

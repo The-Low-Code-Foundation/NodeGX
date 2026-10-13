@@ -381,7 +381,9 @@ const scopeSchema = {
     .optional()
     .describe(
       'What it stores data in. Either prose, or {kind, description, collections, needsAuth} — "nodegx" means ' +
-        'the returned plan will include an operation offering to create a built-in backend.'
+        'the returned plan will include an operation offering to create a built-in backend. A backend is for data ' +
+        'shared between people or devices; what one person keeps on their own device (a best score, a list, ' +
+        'settings) is kind "none", saved by a Function with localStorage.'
     ),
   conventions: z
     .array(z.string())

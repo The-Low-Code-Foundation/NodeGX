@@ -23,5 +23,9 @@ says what "nodegx" does, not when to choose "none".
 **Fixed (notes):** the Variable anti-pattern now says a value one person keeps on their own device needs no backend —
 a Function saves it with `localStorage.setItem` and reads it at load — and that a backend is for data shared between
 people or devices. The Vibe kit's AGENTS.md says the same at the create step, with `backend: { kind: "none" }`.
-**Not done:** the same rule in `create_project`'s field description — it is on the resident surface (AWP-006's budget,
-~4 tokens of headroom), so it needs a trade there first.
+**Fixed (field), OWN-019 s2 (2026-10-13):** `create_project`'s `backend` description now says a backend is for data
+shared between people or devices, and what one person keeps on their own device is kind "none", saved by a Function
+with localStorage (`tests/bootstrap.test.ts`, read off the unbound surface's `tools/list`). s1's reason for leaving it
+was wrong: measured, `create_project` is NOT on the resident surface AWP-006 budgets — it is deferred once a project is
+bound (21 resident tools, none of them create_project) and listed only on the unbound six-tool surface, which has no
+token gate. The resident count is 8,277/8,280 before and after.
