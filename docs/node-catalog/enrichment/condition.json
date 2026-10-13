@@ -19,7 +19,8 @@
   "antiPatterns": [
     "Wiring `ontrue` (signal) to a boolean input like `visible` delivers only a momentary pulse — use `result` for anything that must stay on.",
     "Leaving Run On Value Change on when `ontrue`/`onfalse` DOES something (advance a question, navigate, set a Variable, start a Timer): the gate then fires whenever its input settles, including once while the page loads, before anyone has acted. Set `runOnChange-condition: false` and wire `eval` from the signal that should ask — a Repeat's tick, a button's click, a Timer's finish.",
-    "Two gates evaluated by one signal, where one gate's On True changes what the other one reads (advancing a question index that the other's 'is the answer right?' compares against): the second can read the changed value. Chain them instead — the reader's `done` → the writer's `eval` — so the reader decides first."
+    "Two gates evaluated by one signal, where one gate's On True changes what the other one reads (advancing a question index that the other's 'is the answer right?' compares against): the second can read the changed value. Chain them instead — the reader's `done` → the writer's `eval` — so the reader decides first.",
+    "Expecting a second Evaluate with an unchanged condition to stay silent: every Evaluate fires On True or On False again, whether or not the value changed."
   ],
   "relatedNodes": ["And", "Or", "Inverter", "Switch", "Expression", "States"]
 }
