@@ -40,6 +40,12 @@ a new measurement goes in the section it belongs to, with its round.
 
 ## s3's new measurements (2026-10-13 evening)
 
+- **One session vs sittings, think size** (same brief, same evening): o1 (one session, taught) designed the whole app
+  in one 171 KB / 30 min think before writing a component (stopped by the watchdog; not a loop, 1.0% repetition);
+  q6 (one part per sitting) never thought past 69 KB. With the whole plan in front of it, Large 4 designs everything
+  first; a fresh sitting with one part in front of it doesn't. A silence watchdog in minutes is speed-dependent: at
+  50–90 chars/s a productive 150 KB think needs 30 min.
+
 - **Where the time goes** (`anatomy.mjs`, 24 sessions): thinking 82–95% of wall; tools 0.1–2 min per session; the
   model's silence after a tool result (prefill + queue) median 2–9 s per call.
 - **Think speed by hour (CEST), median chars/s over thinks >20 s:** 13:00 259 · 13:30 206 · 14:00 170 · 14:30 204 ·

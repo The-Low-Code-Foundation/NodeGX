@@ -383,3 +383,14 @@ post-tool, post-agent) — and the kit uses none of them yet.
   and closes all but the notes once a session has written NEXT.md; the plan-sitting lock is gone. Skills:
   `nodegx-first-day`, **`nodegx-sizing-the-work`** (was `-a-sitting`: part size, the signs, the hand-over, a good
   NEXT.md), `nodegx-when-stuck`. o1 measures it (`--sittings 4`, `--max-price 10` per session); q6 runs on to `# Done`.
+- **s3, o1 (tgz27, one session taught, 22:52–23:31 CEST): stopped by the lab's 30-min watchdog in one think.** It
+  loaded the three skills, wrote REQUEST, CHECKLIST and PLAN, read three examples and its node types, then: "Let me
+  now design the graph carefully before writing. ## Design ### App component…" — one think of **171 KB over 30.3 min**
+  (at the evening's ~90 chars/s), still weighing an answer button's five inputs when stopped. **Not a loop:** 1.0% of
+  its 8-word phrases repeat in the last two thirds (v11's loop: 100%; productive thinks ~1%), 44 doubt words / 10 KB.
+  39 min, 34 tool calls, 0 components written, $0.57 list (42% cached). **Read:** the per-part sittings were what
+  kept thinks small (q6 longest 69 KB) — with the whole plan in one session Large 4 designs the whole app up front
+  (s2's one-shots: 92–147 KB, ~10 min at afternoon speed). At afternoon speed this think was ~10 min, the price of the
+  s2 rounds that passed; at evening speed the lab's watchdog (minutes of silence) cuts a productive think off — a
+  silence watchdog is speed-dependent. The recorder (attached from session 2) never saw a call: the round stopped
+  on the stall.
