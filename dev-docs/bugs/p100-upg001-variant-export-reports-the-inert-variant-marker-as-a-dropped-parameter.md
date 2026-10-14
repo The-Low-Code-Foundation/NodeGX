@@ -1,7 +1,8 @@
 ---
 id: P100-UPG001-VARIANT
 title: The export report says the inert `_variant` / `_size` marker was dropped
-status: scheduled
+status: fixed
+regression: packages/nodegx-export/tests/p100-upg001-variant.test.ts (the marker row red on HEAD's loop; the dropped-parameter control and the drift row green on both)
 phase: P109
 task: ISL-043
 severity: low
@@ -21,3 +22,10 @@ left out.
 
 **Proposed:** skip the two markers in that loop, ideally from one shared constant the editor and the exporter
 both import. One line plus a spec. Small.
+
+**Re-measured and fixed 2026-10-14 (P18 session 104, ISL-043 AC1).** It still fired at HEAD: a heading carrying
+`_variant` / `_size` was reported as "parameter _variant … dropped". The loop now skips `PRESET_MARKERS`. On the
+proposal's "one shared constant": the export may not import the editor (HLS-001 AC2), and `@noodl/types` holds no such
+list. So `component.ts` exports its own copy and the spec reads the editor's `looks.ts` as text, failing the day the
+two lists differ. The control is a parameter nothing maps, still reported on the same node in the same run. No corpus
+project carries a marker, so the golden did not move. The spec reads 3/3, and `export-report` plus the golden 34/34.

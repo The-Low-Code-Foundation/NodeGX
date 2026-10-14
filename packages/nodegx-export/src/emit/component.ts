@@ -142,6 +142,14 @@ const VOID_ELEMENTS: ReadonlySet<string> = new Set([
 ]);
 
 /**
+ * The old Look-preset markers (P100-UPG001-VARIANT). No runtime, viewer or exporter reads them (UPG-001 §3.4), so a
+ * node that still carries one has lost nothing, and the report must not say it was dropped. The editor's own list is
+ * `PRESET_MARKERS` in `noodl-editor/…/models/Looks/looks.ts`. This package may not import the editor (HLS-001 AC2),
+ * so `tests/p100-upg001-variant.test.ts` holds the two copies equal.
+ */
+export const PRESET_MARKERS = ['_variant', '_size'] as const;
+
+/**
  * EXP-015. The element an author asked a node to render as, validated, with the sentence to report
  * when the answer is "not that one".
  *
@@ -169,6 +177,7 @@ const VOID_ELEMENTS: ReadonlySet<string> = new Set([
  * 3. **The value is outside the port's enum.** The editor cannot produce one; a hand-authored
  *    project or a future catalog change can.
  */
+
 export function authoredTag(
   node: NodeIR,
   fallback: string,
@@ -379,6 +388,7 @@ export function emitComponent(
     for (const name of style.unhandled) {
       if (name === 'visible' || name === 'mounted') continue; // §4b: handled by the render wrap / class toggle
       if (name === 'cssClassName' && authoredClassName(node) !== undefined) continue; // §48: folded into className
+      if ((PRESET_MARKERS as readonly string[]).includes(name)) continue; // P100-UPG001-VARIANT: inert, nothing to drop
       notes.push(`${plan.path}: parameter ${name} on ${id} has no style/content mapping — dropped, reported`);
       unmappedParams.push({ id, name });
     }
