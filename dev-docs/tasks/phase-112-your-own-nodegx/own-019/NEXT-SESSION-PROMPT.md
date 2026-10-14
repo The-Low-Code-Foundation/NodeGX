@@ -1,152 +1,137 @@
-# OWN-019 — the s4 sprint: the series that decides the claim
+# OWN-019 — s5: the levers into tgz30, then the Large 4 series on it
 
-**Written 2026-10-14 07:50 CEST by Fable 5.1, from Richard's rulings that morning (R33–R35 below).** Read, in order:
-this file; `VIBE-AND-LARGE4.md` (the field guide — its optimisation summary first); `../OWN-019-THE-VIBE-KIT.md` §6–§7
-from "s3" on; the P112 README's R30–R35. Say "Opus" in your first message (the task's Model line).
+**Written 2026-10-14 ~14:05 CEST by Opus (s4), from Richard's rulings at ~13:50 (R36, R37 below).** Read, in order:
+this file; the task file `../OWN-019-THE-VIBE-KIT.md` §7 "s4" entries; `VIBE-AND-LARGE4.md` § "s4's new measurements";
+the P112 README's R33–R37. Say "Opus" in your first message.
 
-**Model:** Opus. Agent under test: Mistral Large 4 (`mistral-large-4`, pinned) in Vibe 2.26.1 (the latest release,
-checked 2026-10-14 against PyPI), on the Vibe Code subscription key (`MISTRAL_VIBE_API_KEY` in the repo `.env`), on
-the legacy harness (the unified one hides the server's error text — upstream #1227, open).
+**Model:** Opus. Agent under test: **Mistral Large 4 only** (`mistral-large-4`, pinned) in Vibe 2.26.1 on the legacy
+harness, the Vibe Code subscription key (`MISTRAL_VIBE_API_KEY`, repo `.env`). **No GLM, no Sonnet rounds (R36).**
 
-**Run rounds in the daytime (before ~18:00 CEST) and write the hour on every result.** On 2026-10-13 Large 4 thought at
-130–260 chars/s until 18:30 and ~50 after 20:00, with the cache at 9–41% (afternoon 60–76%) and two dropped streams.
-Richard reads the evening slowness as launch traffic ("an 'at the moment' issue") and can live with cache misses; the
-sprint records them and does not try to fix them.
+## What s4 settled (2026-10-14, 09:10–14:00 CEST)
 
-## The sprint's aim, in one sentence
+- **Daytime works.** Large 4 thought at 306–406 chars/s (s3's afternoon 130–260, evening ~50); cache 85–91% per round
+  (s3 evening 9–41%). o1's 30-min stall was the evening, not R32: o2 (same tgz27) designed the app in one 103 KB think
+  in 5.6 min and finished by itself. **R32 (one session, taught) holds.**
+- **Every miss was the agent's TOOLS, not its checklist.** o2 (tgz27) 11/12, carryover not clean: its checklist had the
+  right lines; `read: { look }` waits to settle (missed a 55 ms flash) and there was no reload (it navigated to
+  `/start`). Fixed: `drive_page` `watch` + `reload` (WATCHMOMENT, RELOADHERE, `5f8dee6d7`). **Q1 on tgz29: 12/12,
+  carryover clean, by itself; it used watch ×3 and reload ×3 and built a reset-first component.**
+- **Launch is a pass and a look Richard liked.** L1 (tgz28) **17/17** by itself, 90 min, $5.12 list — Fraunces + DM
+  Sans painted, its own palette and drawn product vignettes. Richard: *"Fuck it actually looks good, blow me over
+  with a feather."* (look verdict, R35's style challenge.)
+- **The editor bonus works — with an intervention.** Richard's ask: a second session on a finished quiz adds an
+  editor kept "for everyone on this computer". E1 (Large 4, seeded with q6): chose the local backend, proved the
+  record contract on a scratch page first, app **13/13** (`grade-editor.mjs`) — then **67 min failing to edit its own
+  NEXT.md** (NOTELOOP; 18 of 23 `edit`s refused) until the lab stopped it at 13:36.
+- **Comparisons, then dropped (R36):** GLM-5.3 quiz 12/12 (47 min), Launch **12/17** (error line shown before any
+  press, `ada@nowhere` accepted and saved, no chosen font); Sonnet quiz 12/12 (15 min), editor 13/13 (27 min). Richard:
+  *"GLM performed woefully. Sonnet isn't much better. Focus on Large 4 for now and get that right."*
+- **Kit defects found and fixed (all pushed to origin by 13:58):** NODETYPEWORDS, NESTEDCALLTOOL, PRESETFONTS
+  (`cda7ea056`), WATCHMOMENT, RELOADHERE (`5f8dee6d7`). **Open:** NOTELOOP, BACKENDSESSION (high), TAPHOLD,
+  CARRYOVER (needs 3 clean rounds on a `watch` kit — Q1 is 1).
+- **Where the plan of record was wrong, and what was done instead:**
+  - "Grader red = the app's fault" was wrong FOUR times today — each read before believed, each the grader's: a `\S`
+    escape in a template (hero), a palette rule counting the template's own slate/blue, an instant press + the
+    grader's own `scrollTop` gliding under a page's `scroll-behavior: smooth` (L1 scroll), and the editor grader
+    saving its edit INTO the round's backend (a regrade then found no Portugal), reloading the editor screen, and
+    racing question 2's buttons. All fixed and committed; Launch grader re-proven (control 17/17, 12/12 mutants).
+  - **The series did not run on one kit.** The fixes landed mid-morning: o2 tgz27, L1 tgz28, Q1/E1 tgz29. Richard
+    then ruled levers first (R37) — so **nothing yet counts toward "three in a row on one kit"**; tgz30 starts it.
+  - The comparison lane's notifications only fire when the whole lane ends: rounds ran 2 h unwatched and E1 looped
+    67 min. **Check running rounds yourself** (peek + journal age) at least every ~20 min.
 
-Finish our own rounds and experiments so that Richard can say — or not — **"Yes, Mistral Large 4 in Vibe is a great
-way to build NodeGX apps, for €20 a month"** — and then, only after we are done, Richard opens Vibe himself and
-builds one of the test apps in his own words (R35), and we compare.
+## Readings taken (with date and commit)
 
-## The rulings of 2026-10-14 (Richard, with Fable)
+| Round | Kit | Started | Grade | Ended | Min | $ list | Cached | Tools | Longest think |
+|---|---|---|---|---|---|---|---|---|---|
+| o2 quiz | tgz27 | 09:10 | 11/12, carryover ✗ | itself (hand-over at 100 calls) | 52 | 3.64 | 86% | 136 | 103 KB |
+| L1 launch | tgz28 | 09:50 | **17/17** | itself | 90 | 5.12 | 89% | 202 | 94 KB |
+| Q1 quiz | tgz29 | 10:14 | **12/12**, carryover ✓ | itself (3 sittings; #2 did nothing in 42 s) | 56 | 3.49 | 91% | 152 | 117 KB |
+| E1 editor | tgz29 | 11:10 | **13/13** | **lab stop** 13:36 (NOTELOOP) | 146 | 5.77+ | 88% | 112+ | 161 KB |
+| G1 quiz (GLM) | tgz29 | 11:47 | 12/12 | itself | 47 | 5.01* | 97% | 262 | 133 KB |
+| GL1 launch (GLM) | tgz29 | 12:52 | 12/17 | itself | 49 | 6.73* | 98% | 367 | 125 KB |
+| S1 / SE1 (Sonnet) | tgz29 | 12:36 / 11:20 | 12/12 / 13/13 | itself | 15 / 27 | API-eq 6.54 (SE1) | 98% | — | — |
 
-- **R33 — no fork.** Vibe is Apache-2.0 and both harnesses are public (the Rust core under `harness/core`), so a fork
-  is possible; it is not worth it now: it would win little on cost (the model's thinking is the cost; editing history
-  breaks Mistral's prefix cache), a little on reliability (3 of ~24 rounds: two dropped streams, one loop), and
-  compatibility only once legacy is gone. The trigger that reopens it: **Mistral removes the legacy harness before
-  fixing #1227 (error text) and #1240 (tools/list_changed)** — then stock Vibe can no longer run the kit. Until then:
-  everything short of a fork is allowed — *"carte blanche on doing anything short of forking Vibe, and I'm happy to
-  keep pushing a Mistral specific integration with our MCP."*
-- **R34 — no Fable audit (AC8 as written is dropped).** *"I'm not sure we need a Fable review, this one is already
-  pretty good."* The field guide is the audit; it keeps growing. AC8 is now the claim write-up (below).
-- **R35 — the series, then Richard's own run, last.** Three or more briefs, each run three times, on one kit, while the
-  integration keeps being tuned; and *"the final final test will be me opening Vibe and trying to build one of our
-  test apps in my own words and I'll let you compare, but only after you've finished your own rounds and
-  experiments."*
+\* GLM's Vibe $ uses third-party list prices ($1.40/$4.40, unverified). Q2 and SL1 were started and **stopped by
+R37** (not results). Grades: `own-018/grade-quiz.mjs`, `own-019/grade-launch.mjs`, `own-019/grade-editor.mjs` at
+`42bab1d60`. **Console allowance (Richard):** 09:12 €30.90 · 10:14 €32.74 · 10:47 €34.49 — €3.59 over o2 + part of
+L1/Q1 ≈ the recorder's $7.10 list ÷ 2: **the console € tracks Vibe's list $ halved (the launch sale) number for
+number.** A quiz ≈ €1.8 of allowance → ~140/month in the sale, ~70 after (~2026-10-20). The recorder read L1 at $2.29
+where Vibe said $2.70 for its sitting 1 — unexplained (lever 5).
 
-## What "yes, €20 a month" has to mean — four proofs
-
-1. **It passes repeatedly:** three in a row on every brief, 12/12 or the brief's full count, `carryover` clean,
-   finished by itself, no intervention. Pack It has it (pk2–pk4, s2). The quiz does not yet (AC4).
-2. **On more than two kinds of app:** quiz = timing and logic; Pack It = data and storage; **Launch** (new, below) =
-   look, forms, a faked network call, logic, storage. A fourth brief with more moving parts only if the third passes.
-3. **The money is measured, not inferred.** Vibe's `cost_usd` is the real cost at list prices (verified s3; the launch
-   sale halves it until ~2026-10-20). Nobody has yet read the subscription's own allowance before and after a round
-   (no API for it, #1161) — **that reading is Richard's, in the Mistral console**. Ask him at round boundaries: one
-   number before, one after; the round table gets an "allowance Δ" column. From that: apps per month.
-4. **A person gets it, not the lab:** R35's run. Interactive Vibe never adds the headless "single pass" line
-   (`system_prompt.py`, `-p` only), so the lab is harsher than real use on process-following.
-
-## Where things are
-
-- **The kit: tgz27** = R32's one-session taught kit (`23f96461e`; MCP at `f419f035c`; preview = tgz12's). A copy
-  survives at `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/f0f280e3-b7ca-4f0d-986d-628ba0d5ccab/scratchpad/v/tgz27/`
-  (checked 2026-10-14 07:40: the three tarballs are there; no commit has touched `packages/create-nodegx` or
-  `packages/noodl-mcp/src` since). **Copy it into your own scratchpad first** — that folder belongs to a finished
-  session and can vanish. If it is gone: create-nodegx is a plain `npm pack ./packages/create-nodegx` (relative path);
-  the MCP from the `own018-s3-pack` worktree (still listed by `git worktree list`, at `f419f035c`) — replace its
-  linked `packages/noodl-mcp/dist/*` with a real empty folder before `npm pack` (it points at the primary's build
-  output and packing writes through it); preview from any earlier tgz folder. A new kit after a lever = tgz28, 29 …
-- **The lab (`own-018/`):** `round-kit.mjs <root> <tgz-dir> <prompt-file> --kit vibe [--max-price N] [--stall-min N]
-  [--sittings N --max-total $] [--record] [--temperature T] [--thinking high|low]`; `record-proxy.mjs --compare`;
-  `peek.mjs`; `round-claude.mjs` (the Sonnet yardstick, API-equivalent cost, not money). `own-019/anatomy.mjs
-  <root>…` (where time and tokens went; `--timeline`).
-- **Graders:** `own-018/grade-quiz.mjs` (+ `mutate-quiz.mjs`), `own-019/grade-pack.mjs` (+ `mutate-pack.mjs`); both
-  `<round-root> --tgz <tgz-dir>`, headless Chrome over the PACKED preview at phone size, reading only what a person sees.
-- **Briefs:** `own-018/sentence-quiz.txt`, `own-019/sentence-pack.txt`, **`own-019/sentence-launch.txt` (new, Fable,
-  2026-10-14 — read it before writing its grader; the agent never sees our files, so the brief's wording is the
-  contract).**
-- **Nothing running** at 07:31: no proxies on 8795/8796, no Vibe processes. q6 and o1 are read and recorded (s3).
-- The field guide's "untried levers" (§7 of its summary) and E (open questions) are the lever list.
-
-## The series — the rules that make nine rounds comparable
-
-- **One kit for the whole series.** The claim is made on one kit version. Lever rounds run **between** series, never
-  inside one; a lever adopted means a new tgz, and every brief that has not yet passed ×3 **on that tgz** runs again.
-  (AC5 stands from s2 on tgz17–19; on the final kit Pack It gets one regression round, not three, unless it fails.)
-- **Daytime, hour recorded, `--record` on every round** (the recorder is cheap and settles cache questions).
-  `--max-price 10 --stall-min 45` for one-session rounds (v10 was stopped at $6 by the lab at its last step; o1 by a
-  30-min watchdog mid-think at evening speed — both lab faults, not model failures).
-- **Side by side at most two rounds** (ONE HEAVY JOB; the model side is Mistral's, but renders and drives are local).
-- **Per round, in the table:** brief, kit, grade, how it ended (itself / lab / stall), minutes, hour started, Vibe $,
-  cached %, tool calls, drives, longest think (KB, min), hook firings, **allowance Δ** when Richard read it, what it
-  taught. `anatomy.mjs` on every round.
-- **Every real miss → `dev-docs/bugs/` as found** (`node scripts/bugs.js`), kit lesson or runtime defect; every kit
-  lesson for every agent unless it only suits one (the core first, the Vibe profile where Claude's words don't fit).
-- **A grader's red is read before it is believed** — s2's first reads were 5/12 and 2/12 for grader faults
-  (coordinates read before a line mounted; typing that moves a button). The brief's screens go in front of Richard
-  (look verdicts are his): `render_report` or the grader's screenshots, phone and laptop, per round.
+**npm:** the 0.2.0 changelog (`54a0ce946`, a peer, 13:47) lists watch/reload, preset fonts, call_tool and
+BACKENDSESSION; **the registry still served 0.1.0 at 13:58** (`npm view @nodegx/mcp version`). Publishing is Richard's.
 
 ## Do, in order
 
-1. **o2 — the quiz on tgz27 (one session, taught), daytime, `--record`, `--max-price 10 --stall-min 45`.** The first
-   quiz-series round and the daytime answer to the s3 question (o1 designed the whole app in a 171 KB / 30-min think
-   at evening speed and the watchdog cut it). Grade (`grade-quiz.mjs`), `anatomy.mjs`, hour, allowance Δ. If it
-   passes: R32 holds, the series goes on. If it stalls in a whole-app think again at daytime speed: that is R32's
-   cost measured — put the numbers (one session vs q6's sittings: time, $, grade) to Richard in plain words and let
-   him rule before round 2.
-2. **Brief 3 "Launch" — the grader before any round.** `own-019/grade-launch.mjs` from the brief's words, same lab
-   rules as `grade-pack.mjs` (CDP presses at the element's centre, text read off SHOWN leaves, every press re-reads
-   its target, settle after typing). Checks, one per sentence in the brief: `hero` (name, headline, pitch, the Join
-   button); `scroll` (pressing it brings the form into the viewport); `features` (the three titles, each with two
-   sentences); `pricing` (Monthly "€6 a month"; Yearly "€60 a year" and "Two months free"; toggling back); `faq`
-   (tap Q2 opens it; tap Q3 opens it and closes Q2); `refuse` (empty name, then "ada@nowhere": "Please check your
-   name and email", nothing sent); `sending` ("Sending…" shown within the second — a timed read, as CARRYOVER's);
-   `joined` ("You're in, Ada — we'll write to ada@example.com"); `fail` ("bob@fail.test": "Something went wrong —
-   please try again", and the fields still hold Bob / bob@fail.test); `reload` ("You're on the list, Ada" where the
-   form was); `notyou` (the link brings the empty form back); and the **look** checks, measured not judged: `font`
-   (body font-family is not the browser default / the preview's fallback), `palette` (≥3 distinct non-grey colours in
-   use on backgrounds or text), `scale` (≥3 distinct font sizes), `contrast` (body text ≥ 4.5:1 on its background),
-   `phone` (no horizontal overflow at 390 wide), `laptop` (the layout differs at 1280 — e.g. the features are not one
-   column). **Prove it on a yardstick** (Sonnet via `round-claude.mjs`, core kit) and on mutants
-   (`mutate-launch.mjs`, ≥10: nofont, nopalette, noscroll, notoggle, nofaq-close, novalidate, nosending, nofail,
-   nokeep, nopersist, nonotyou) — each mutant fails exactly its declared checks, the control none. Only then L1.
-3. **The series:** quiz ×3 (o2 counts if it passed), Launch ×3, Pack It ×1 on the final kit. Two side by side at most.
-   After each Launch round: its phone and laptop screenshots to Richard — *"I'd like to see it have a style challenge
-   and see what different creations it comes up with."* Three different looks is part of the result.
-4. **Levers, one per round, between series** (each kept only if it measures better on grade, own-report vs grader,
-   $, cache, time, interventions): `system_prompt_id` (a `.vibe/prompts/<name>.md` replaces Vibe's base prompt —
-   drops the headless "single pass" line; measure what else it drops); `auto_compact_threshold` ≈118k (the kit
-   declares a 1M window, so a long session never compacts; Large 4 may really serve 524k); a `post_agent` deny hook
-   ("no `# Done` while a checklist line is unproven" — mechanism verified at `_loop.py:2214`, 3 retries per turn);
-   the recorder retrying a dropped stream (`incomplete_stream` ended q1 and q2) and flagging a looping think (a loop
-   repeats its 8-word phrases ~100%, a productive think ~1%) — both in the proxy, nothing in Vibe; temperature 0.2
-   over more than one round (v7 was 12/12 with carryover and ~3 drives — inconclusive).
-5. **The Mistral-specific integration, as the rounds show it:** after each round, mine the thinks for questions the
-   notes don't answer (s3's `mine/` method: cluster the question sentences, read the ground truth in the runtime,
-   answer in the node's notes — For Each got four that way); anything Large 4 reaches for and doesn't find
-   (`describe` probes, invented names, reads of the runtime's source) is a candidate line in the MCP's Vibe profile
-   or the kit's guides. Carte blanche here (R33).
-6. **A fourth brief** only if Launch passes ×3: more moving parts — a multi-step flow whose state must survive going
-   back, or a list with sorting, filtering and computed totals over Static Data.
-7. **The claim write-up (AC8, reworded):** the round table, the four proofs with their numbers, the three Launch looks
-   side by side, the open defects, the levers kept and dropped, the fork trigger — in plain words, for Richard to
-   rule *yes* or *no*. Then **R35:** Richard runs `npm create nodegx-vibe` (from the final tgz), opens Vibe
-   interactively, picks one of the three briefs and asks for it **in his own words**; we grade his app with that
-   brief's grader, read his session with `anatomy.mjs`, and compare with the lab's rounds (his wording vs the brief,
-   his interventions, time, $). AC6 closes on his words.
+1. **The levers → kit tgz30** (one commit each, test with a control that fails on HEAD, bug row updated):
+   1. **NOTELOOP** (`dev-docs/bugs/p112-own019-noteloop-…`): Vibe AGENTS.md — NEXT.md is written whole with
+      `write_file`, never patched; the hand-over hook (`profiles/vibe/hooks/hand-over.mjs`) counts doc edits after
+      this session wrote NEXT.md and past ~3 answers "the notes are done — stop". Test both (a 4th edit refused; the
+      first three pass; an earlier session's NEXT.md closes nothing).
+   2. **TAPHOLD** (open): `drive_page`'s tap leaves L1's smooth scroll at 2–201 px where a held CDP press or a touch
+      tap reaches 3788 (measured on `…/v/L1/work/apps/driftwood`). Holding 100 ms inside drive-steps did NOT fix it —
+      try the pre-press locate/stability loop and focus emulation first. Fix only what you can reproduce.
+   3. **BACKENDSESSION** (open, high): `noodl-preview` starts the project's own local backend when its endpoint is
+      loopback and the backend exists under `~/.noodl/backends` — the gallery's `keep` command
+      (`own-019/gallery.mjs`) is a working reference (packed MCP + `provision_backend` by name reuses the data). Ask
+      Richard before changing what `npx noodl-preview` does if it is more than starting what the project already
+      names. Without it, the editor brief's "start it again tomorrow" is false for a person.
+   4. **Q1's empty sitting:** sitting 2 ran 42 s and left NEXT.md unchanged (`…/v/Q1/agent2.jsonl`) — read why.
+   5. **Recorder vs Vibe $:** L1 $2.29 (recorder) vs $2.70 (Vibe, sitting 1). Does the proxy miss calls (streams
+      without usage)? Proof 3 needs the per-round money right.
+   6. **The editor grader's mutants** (it has a control — the seed fails `editbutton` — but no mutants): ≥4 on SE1's
+      or E1's app (browser-only storage → `shared`/`restart`; colours ignored; seconds ignored; marker ignored).
+   Then pack **tgz30** in `/Users/richardosborne/vscode_projects/OpenNoodl-worktrees/own019-s4-pack` (`git -C …
+   checkout --detach <commit>`; delete any symlinks in `packages/noodl-mcp/dist` first; `npm pack` mcp and
+   create-nodegx; preview = tgz29's). Diff its file list against tgz29's and prove each fix from the tarball
+   (`own-019/mcp-call.mjs`), as s4 did.
+2. **The series on tgz30, Large 4 only, daytime (before ~18:00), two at a time:** quiz ×3, Launch ×3, the editor
+   brief ×1–3 (the fourth kind of app — proof 2), Pack It ×1 regression. `round-kit.mjs … --kit vibe --record
+   --max-price 10 --stall-min 45 --sittings 4 --max-total 20` (editor: `--seed <q6 copy>`; s4's is
+   `…/scratchpad/v/seed-q6/capital-quiz`, or copy the gallery's `q6/capital-quiz`). Grade every round, read every
+   red before believing it, add it to the gallery, peek every ~20 min (journal age + last calls) — a loop with tool
+   calls never trips the stall watchdog. Ask Richard for a console reading at a quiet boundary.
+3. **After each Launch round:** its phone/laptop screens to Richard (the gallery's shots, or `drive-steps.js …
+   --viewport 390x2600 --out-dir … [{screenshot}]`) — three different looks is part of the result.
+4. **The claim write-up (AC8)** when the series is in: round table, the four proofs with numbers (per-app € from the
+   console), the looks side by side, open defects (BACKENDSESSION first), levers kept/dropped, the fork trigger.
+   Then **R35: Richard's own run, last.**
 
-## The lab's own traps (every one has already cost a round)
+## Needs Richard (not an agent's call)
 
-A price cap on Vibe's count stops a passing round at its last step (v10) · a silence watchdog shorter than a productive
-think cuts it off, and the right length depends on Mistral's speed that hour (v4, v8, o1) · an unsealed root turns a
-stray read or write into an "ask" that ends `-p` (v5, v6) · a reply with no tool call ends `-p` (v1b) · any image in a
-request turns Mistral's cache off (IMAGECACHE; the server runs `--screenshots-to-files`) · the wrong key draws on API
-credit, not the plan (v1) · an evening round is not comparable with an afternoon one.
+- **npm publish of 0.2.0** — the packages on origin carry s4's fixes; the registry has 0.1.0.
+- **BACKENDSESSION's shape** if the fix changes what `noodl-preview` does beyond starting the project's own backend.
+- **Console readings** at round boundaries (proof 3).
+- The look verdicts on each Launch round.
+
+## Where things are
+
+- **Kits:** `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/70374c3f-d9d2-431a-b6da-907fd33896c9/scratchpad/v/tgz27, tgz28, tgz29`
+  (tgz29 = `5f8dee6d7`: s4's five fixes; tgz28 = `cda7ea056`). **Copy what you need into your own scratchpad first**;
+  the gallery also keeps every kit it served under `…/OWN-019 Mistral apps/tgz/`.
+- **The gallery (Richard's ask: "a locally running version of every app … summarised at the end"):**
+  `~/vscode_projects/NodeGX test projects/OWN-019 Mistral apps/`, index **http://localhost:4800**, apps 4801–4809
+  (q6, o2, Q1, L1, SE1, G1, S1, E1, GL1); E1/SE1 have their backends kept alive. `node own-019/gallery.mjs
+  add <round> <root> --tgz <dir> --brief <name> [--model …] [--note …]`, `serve` (restarts all, detached — still
+  running from s4), `stop`, `list`. Add every s5 round; the summary at the end is owed.
+- **The lab:** `own-018/round-kit.mjs` (now `--model`, `--seed`), `own-018/round-claude.mjs` (`--seed`),
+  `own-018/grade-quiz.mjs`, `own-019/grade-launch.mjs` (+ `mutate-launch.mjs`, control = l0's look replayed through
+  tgz28: `…/scratchpad/v/lctl/driftwood`), `own-019/grade-editor.mjs` (grades a copy; restarts the backend under the
+  round's HOME), `own-019/mcp-call.mjs` (call the packed server's tools on an app), `own-019/anatomy.mjs`,
+  `own-018/peek.mjs`. Briefs: `own-018/sentence-quiz.txt`, `own-019/sentence-pack.txt`, `sentence-launch.txt`,
+  **`sentence-editor.txt`** (new).
+- **Nothing running** at 14:00 except the gallery (previews + 2 backend keepers; `node own-019/gallery.mjs stop`).
+
+## The lab's own traps (s4 added four)
+
+A grade that SAVES (the editor) mutates the round unless it works on a copy · a page's `scroll-behavior: smooth` turns
+a grader's `scrollTop = y` into a glide (use `scrollTo({ behavior: 'instant' })`) · an instant CDP press can cancel a
+smooth scroll its click starts (hold ~100 ms) · a lane script notifies only when the whole lane ends — check rounds
+yourself. Older: a price cap stops a passing round at its last step · a silence watchdog cuts a productive think ·
+an unsealed root ends `-p` · images turn Mistral's cache off · the wrong key draws API credit · evening ≠ afternoon.
 
 ## End of session
 
-The handoff (this file, rewritten), the task file's §7 and tables, the README row, the field guide's new measurements
-in their sections, memory (`phase-112-your-own-nodegx.md` + any new trap as its own file with a MEMORY.md pointer),
-commit by pathspec.
+This file rewritten for s6; the task file's §7; the README row; the field guide's measurements; memory
+(`phase-112-your-own-nodegx.md`); commit by pathspec.

@@ -81,6 +81,32 @@ a new measurement goes in the section it belongs to, with its round.
 - **Skills:** listed in the legacy system prompt, loaded with the `skill` tool; Large 4 loaded all three first thing
   in q5 and q6, unprompted beyond AGENTS.md naming them.
 
+## s4's new measurements (2026-10-14, daytime 09:10–14:00 CEST)
+
+- **Daytime speed and cache:** thinks at 306–406 chars/s (o2 09:14–09:24) — faster than s3's afternoon (130–260);
+  every round cached 85–91% of input (s3 evening 9–41%). A whole-app design think: 103 KB in 5.6 min (o1's 171 KB took
+  30 min at evening speed). The evening was load, not the kit.
+- **One taught session finishes by itself** (R32 holds): o2 52 min / 2 sittings (hand-over at 100 calls), Q1 56 min /
+  3, L1 90 min / 2 — all `# Done` without the lab. Per round $3.49–5.12 list.
+- **The money, read in the console:** €30.90 (09:12) → €34.49 (10:47) over $7.10 list counted by the recorder — **the
+  allowance falls by Vibe's list $ halved** (the launch sale), number for number. A quiz ≈ €1.8; a landing page ≈ €2.6.
+  The recorder and Vibe disagree on L1 ($2.29 vs $2.70 for its first sitting) — unexplained.
+- **Large 4 reaches for a tool with the wrong shape, and routes around it:** a synonym list as one query
+  (NODETYPEWORDS: 15 category calls); `call_tool` called through `call_tool` to describe a tool (NESTEDCALLTOOL: ~10
+  refusals, then it found the bare form itself). Both now forgiven server-side.
+- **Its checklists are right; its proofs read what the tool lets them.** o2's lines named the flash and the reload; the
+  settled `look` and a navigate-instead-of-reload passed them. With `watch` and `reload` (tgz29) Q1 used both 3× and
+  came back clean. Teach the tool, not the line.
+- **It plans storage like a senior dev:** E1 proved the backend's record contract on a scratch page (create, read back,
+  update, delete, export the collection) before building the editor on it.
+- **A loop on its own notes:** E1's second session spent 67 min (18 of 23 `edit`s refused, probe files to calibrate
+  the tool) patching NEXT.md after the app was done — no rail covers notes (NOTELOOP).
+- **Its looks are its own:** L1 chose Fraunces + DM Sans (a Google Fonts `@import` in a CSS Definition), a warm paper
+  palette, drawn product vignettes instead of photos — Richard: *"blow me over with a feather."*
+- **Against other models, same kit and lab (then dropped, R36):** GLM-5.3 (`zai-glm-5-3`, Vibe's routed default)
+  quiz 12/12 in 47 min, Launch 12/17 (its form broken, no font chosen), cached 97–98%; Sonnet in Claude Code quiz
+  12/12 in 15 min, editor 13/13 in 27 min.
+
 ---
 
 ## A. Vibe the harness

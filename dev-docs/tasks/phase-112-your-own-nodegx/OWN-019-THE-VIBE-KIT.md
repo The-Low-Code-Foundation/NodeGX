@@ -9,7 +9,7 @@ package that only work well with Claude and Claude Code, we need to be able to o
 vibe version."*
 **Depends on** OWN-018 (the lab: `round-kit.mjs`, `grade-quiz.mjs`, kit tgz12, everything Mistral taught the kit) and
 Richard's Vibe subscription key (`MISTRAL_VIBE_API_KEY` in the repo `.env`, made under Code › Vibe CLI).
-**Status: 🟡 s4 scoped (2026-10-14, Fable, with Richard): R33 no fork, R34 no Fable audit, R35 the series then Richard's own run last. AC5 met (s2); AC4 open; a third brief "Launch" (`own-019/sentence-launch.txt`: look, forms, a faked call, logic, storage) written, its grader owed. The sprint guide is `own-019/NEXT-SESSION-PROMPT.md` (Opus runs it). Earlier: s3 built the process kit (R31) then R32 (one session, taught, tgz27); q6 was the first process-kit 12/12; the field guide `own-019/VIBE-AND-LARGE4.md`.**
+**Status: 🟡 s4 ran (2026-10-14, Opus): daytime works (306–406 chars/s, 85–91% cached), R32 holds; Q1 12/12 carryover clean and L1 (Launch) 17/17 by themselves, the editor bonus 13/13 with one lab stop (NOTELOOP); five kit defects fixed (tgz29), four open; GLM-5.3 and Sonnet compared then dropped (R36); levers first, the series on tgz30 (R37). Sprint guide for s5: `own-019/NEXT-SESSION-PROMPT.md`. Earlier: s4 scoped (R33 no fork, R34 no Fable audit, R35 the series then Richard's own run); s3 the process kit then R32 (one session, taught, tgz27).**
 **Model:** Opus for the sessions that build and read the rounds. The agent under test: **Mistral Large 4
 (`mistral-large-4`, never `-latest`) in Mistral Vibe**, pinned to a version per round (2.26.1 at opening).
 
@@ -432,3 +432,43 @@ post-tool, post-agent) — and the kit uses none of them yet.
   (`own-019/NEXT-SESSION-PROMPT.md`: the four proofs, the series rules, the round columns including the console's
   allowance Δ that Richard reads, the Launch grader's checks and mutants, the lever list). The kit stays tgz27 (a copy
   survives in the s3 scratchpad; matches HEAD). Opus runs the sprint.
+- **s4 (2026-10-14, Opus, 09:10–14:00 CEST): the first daytime day.** Console €30.90 → €34.49 by 10:47.
+  - **o2 (tgz27, quiz, 09:10): 11/12, carryover not clean, finished by itself** in 52 min, $3.64 list, 86% cached;
+    one 103 KB design think in 5.6 min (o1's 171 KB took 30 min at evening speed) — R32 holds by day. Both misses had
+    the right checklist line; the tool could not play it: `read: { look }` settles (a 55 ms flash of the last
+    question's green read idle) and there was no reload (it navigated to `/start`; reloading its results page shows
+    "You scored  out of 5"). **WATCHMOMENT + RELOADHERE fixed (`5f8dee6d7`): `drive_page` `watch` (every state a
+    target shows during a change, `expect: { never }`) and `reload`**, taught in the Vibe AGENTS.md.
+  - **o2's first minutes found three more:** NODETYPEWORDS (a multi-word `list_node_types` query matched nothing;
+    15 calls walking categories), NESTEDCALLTOOL (`call_tool` called through `call_tool`, refused ~10×, so no tool
+    schemas), and the Launch yardstick PRESETFONTS (npm shipped no preset typefaces). Fixed `cda7ea056` (tgz28).
+  - **The Launch grader** (`own-019/grade-launch.mjs`, 17 checks incl. measured look: painted font via
+    `CSS.getPlatformFontsForNode`, chosen palette vs the template's own tokens, scale, contrast from pixels, phone,
+    laptop): Sonnet's l0 16/17 (font = PRESETFONTS, real); its control (look replayed through tgz28) 17/17; 12
+    mutants exact. Four grader faults read before believed and fixed (a `\S` in a template; default slate/blue
+    counted as chosen; an instant press; the grader's own scrolls gliding under `scroll-behavior: smooth`).
+  - **Q1 (tgz29, quiz, 10:14): 12/12, carryover clean, by itself** — 56 min, $3.49, 91% cached; `watch` ×3,
+    `reload` ×3, a reset-first component. Its proof and the grader agree.
+  - **L1 (tgz28, Launch, 09:50): 17/17, by itself** — 90 min, $5.12; Fraunces + DM Sans painted, its own palette and
+    drawn product vignettes. Richard: *"Fuck it actually looks good, blow me over with a feather."*
+  - **Richard's bonus — "your own editor" (`own-019/sentence-editor.txt`, `grade-editor.mjs`, 13 checks: edit in
+    browser A, a fresh browser plays it, everything restarted, a third plays it):** a second session on q6 (`--seed`).
+    **E1 (Large 4): 13/13** — chose the local backend, proved the record contract on a scratch page and exported the
+    collection before building; then **NOTELOOP: 67 min failing to edit its own NEXT.md** (18 of 23 edits refused,
+    probe files to calibrate the tool) — **lab stop**. SE1 (Sonnet) 13/13. Found: **BACKENDSESSION** (high) — a local
+    backend lives only while the agent's MCP session does; the grader and the gallery restart it, a person can't.
+    The editor grader first saved its edit into the rounds' own backends (a regrade found no Portugal): now grades a
+    copy; the rounds' data restored from SQLite.
+  - **Comparisons (Richard: "a GLM 5.3 round … and Sonnet using Claude Code"):** `round-kit --model zai-glm-5-3`.
+    GLM quiz 12/12 (47 min); GLM Launch **12/17** (the error line before any press; `ada@nowhere` saved; no font);
+    Sonnet quiz 12/12 (15 min). **R36: dropped — Large 4 only.**
+  - **Money (proof 3, first reading):** €3.59 of allowance over $7.10 list (recorder) — the console tracks Vibe's list
+    $ halved (the sale). A quiz ≈ €1.8 → ~140/month in the sale, ~70 after.
+  - **The gallery (Richard's ask):** every app copied out of the scratchpad and served from its own packed preview,
+    `own-019/gallery.mjs`, http://localhost:4800 (9 apps; backends kept alive for E1/SE1).
+  - **TAPHOLD (open):** `drive_page`'s tap stops L1's smooth scroll 2–201 px down where a person's tap reaches the
+    form; holding the press inside drive-steps didn't fix it.
+  - **R37: the levers first** (NOTELOOP, TAPHOLD, BACKENDSESSION, Q1's empty sitting, recorder-vs-Vibe $, the editor
+    grader's mutants) **into tgz30, then the series on it** — nothing so far counts as "three in a row on one kit"
+    (o2 tgz27, L1 tgz28, Q1/E1 tgz29). Q2 and SL1 started and stopped by that ruling.
+
