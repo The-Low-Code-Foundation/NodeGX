@@ -1,5 +1,7 @@
 # Phase 81 — The Look Is The Product
 
+**2026-10-14 — CLOSED by the [board](../../BOARD.md) §5.** Open V-rows below are read as ledger rows: whoever picks one files it in `dev-docs/bugs/` first.
+
 **Opened 2026-08-31, by Richard's ruling after driving the members' area template (TPL-001).**
 
 ## The ruling, verbatim

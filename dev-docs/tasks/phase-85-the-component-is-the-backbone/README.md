@@ -1,5 +1,7 @@
 # Phase 85 — The component is the backbone
 
+**2026-10-14 — CLOSED by the [board](../../BOARD.md) §5.** The component story is carried by P107's specs and P112's editor suite.
+
 **Scoped:** 2026-09-09, from Richard's field test of the landing-page template.
 **Status: OPEN.** **Prefix: `CMP`.**
 

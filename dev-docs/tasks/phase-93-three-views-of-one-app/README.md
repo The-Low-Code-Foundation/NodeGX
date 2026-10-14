@@ -1,5 +1,7 @@
 # Phase 93 — Three views of one app
 
+**2026-10-14 — FOLDED INTO P111 SEE-007 (the entrance moves) by the [board](../../BOARD.md) §5.**
+
 **Scoped:** 2026-09-17, from the proposal
 [`future-projects/THREE-VIEWS-OF-ONE-APP.md`](../../future-projects/THREE-VIEWS-OF-ONE-APP.md) and
 its mock [`future-projects/mocks/three-views-mock.html`](../../future-projects/mocks/three-views-mock.html)
