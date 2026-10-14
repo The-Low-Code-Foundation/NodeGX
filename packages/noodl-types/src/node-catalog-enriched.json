@@ -5355,14 +5355,16 @@
         "runtimeBehavior": "Ports are mirrored from the targeted cloud function component by the editor's CloudFunctionAdapter. The `function` input (edit-only) lists every component that contains a `noodl.cloud.request` node — cloud function components live under the `/#__cloud__/` sheet, and the parameter stores the component name without that prefix. Each name in the Request node's `params` list becomes an `in-<name>` input; each name in the Response nodes' `params` lists becomes an `out-<name>` output. All are type '*'; an authoring tool must read the target component's Request/Response `params` to know which ports exist.",
         "examples": [
           "fn-cloud-function-roundtrip",
-          "fn-aggregate-stats-function"
+          "fn-aggregate-stats-function",
+          "fn-play-audio-a-cloud-function-returns"
         ],
         "patterns": [
           "Button `onClick` → `call`, `out-<name>` → visual inputs: the request/response cycle for an action the client must not perform itself.",
           "`done` → a Query Records fetch action: refresh client data after a server-side write."
         ],
         "antiPatterns": [
-          "Wiring `out-` outputs somewhere without also handling `failure` leaves errors invisible — surface `error` in the UI or react to `failure`."
+          "Wiring `out-` outputs somewhere without also handling `failure` leaves errors invisible — surface `error` in the UI or react to `failure`.",
+          "Putting a new WAV header around audio a function returns, or re-encoding it: an API's audio is almost always a finished file (audio/wav, audio/mpeg), and wrapping it again plays its header as a click and anything after the samples as loud static. Return the base64 and its MIME type, and play it as it came; only audio/L16 or audio/pcm is raw samples (example fn-play-audio-a-cloud-function-returns)."
         ],
         "relatedNodes": [
           "noodl.cloud.request",
@@ -69597,7 +69599,8 @@
         "runtimeBehavior": "Each name in the `params` stringlist becomes a runtime-registered input (stored as `pm-<name>`, type '*') collected into the success reply. Declared port groups make the ports conditional on `status`: `params` (and its `pm-` inputs) exist while status is 'success' or unset, `errorMessage` exists while status is 'failure'. CloudFunctionAdapter mirrors the union of all Response nodes' `params` onto the browser-side caller as `out-<name>` outputs.",
         "examples": [
           "fn-cloud-function-roundtrip",
-          "fn-aggregate-stats-function"
+          "fn-aggregate-stats-function",
+          "fn-play-audio-a-cloud-function-returns"
         ],
         "patterns": [
           "Two Response nodes — one with status 'success', one with status 'failure' and an `errorMessage` — triggered from the two branches of a Condition: explicit success/failure replies.",
@@ -82355,6 +82358,236 @@
               "fromId": "fn_request",
               "fromProperty": "receive",
               "toId": "fn_response",
+              "toProperty": "send"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fn-play-audio-a-cloud-function-returns",
+      "title": "Speak a phrase: text-to-speech in a cloud function, played in the page as it came",
+      "description": "A text-to-speech (TTS) API is called from a cloud function, so its key stays on the server, and the page plays what comes back. Three decisions matter. First, the key is a NAME: Secret reads GEMINI_API_KEY from the backend's secrets, the Function sends it in the x-goog-api-key header (never in the URL, which ends up in logs), and the key is never a port value the page can see. Second, and the one that is easy to get wrong: the audio an API returns today is almost always a FINISHED FILE (WAV, MP3 or OGG, with its own header, and sometimes extra chunks after the samples), so the cloud function passes the base64 and its MIME type through untouched and the page plays it as it is. Only a MIME type that says raw samples (audio/L16 or audio/pcm, which older Gemini text-to-speech returned) needs a WAV header put around it. Wrapping a finished file in a second header plays its first header as a click and anything after the samples as half a second of loud static. Gemini's current text-to-speech model returns audio/wav, so the wrap branch does not run for it. Third, failures stay readable: a script that threw answers through a failure Response with its own message, and a missing secret answers with a fixed sentence, because the Secret's own error names a server path the page should not show. Playback is a Function calling `new Audio(...)`, run from the call's Done; the call starts from a press, so the browser allows sound. In this function the value inputs have Run On Value Change unticked, because a signal runs each Function.",
+      "demonstrates": [
+        "CloudFunction2",
+        "noodl.cloud.request",
+        "noodl.cloud.secret",
+        "noodl.cloud.response",
+        "JavaScriptFunction"
+      ],
+      "components": [
+        {
+          "name": "/Phrase Screen",
+          "nodes": [
+            {
+              "id": "root",
+              "type": "Group",
+              "label": "Screen",
+              "parameters": {
+                "flexDirection": "column"
+              },
+              "children": [
+                "phrase_input",
+                "say_btn",
+                "status_text"
+              ]
+            },
+            {
+              "id": "phrase_input",
+              "type": "net.noodl.controls.textinput",
+              "label": "Phrase",
+              "parent": "root",
+              "parameters": {
+                "placeholder": "Bonjour"
+              }
+            },
+            {
+              "id": "say_btn",
+              "type": "net.noodl.controls.button",
+              "label": "Say it",
+              "parent": "root",
+              "parameters": {
+                "label": "Say it"
+              }
+            },
+            {
+              "id": "status_text",
+              "type": "Text",
+              "label": "What went wrong",
+              "parent": "root"
+            },
+            {
+              "id": "call_speak",
+              "type": "CloudFunction2",
+              "label": "Call Speak",
+              "parameters": {
+                "function": "Speak"
+              }
+            },
+            {
+              "id": "play",
+              "type": "JavaScriptFunction",
+              "label": "Play it as it came",
+              "parameters": {
+                "functionScript": "const audio = Inputs.audio;\nconst mimeType = String(Inputs.mimeType || 'audio/mpeg');\nif (!audio) return;\n\n// A finished file (audio/wav, audio/mpeg, audio/ogg ...) plays exactly as it came.\nlet url = 'data:' + mimeType + ';base64,' + audio;\n\n// Only raw 16-bit samples need a WAV header around them.\nif (/^audio\\/(l16|pcm)/i.test(mimeType)) {\n  const rate = Number((/rate=(\\d+)/i.exec(mimeType) || [])[1]) || 24000;\n  const samples = Uint8Array.from(atob(audio), (c) => c.charCodeAt(0));\n  const wav = new DataView(new ArrayBuffer(44 + samples.length));\n  const text = (at, s) => [...s].forEach((ch, i) => wav.setUint8(at + i, ch.charCodeAt(0)));\n  text(0, 'RIFF'); wav.setUint32(4, 36 + samples.length, true); text(8, 'WAVE');\n  text(12, 'fmt '); wav.setUint32(16, 16, true); wav.setUint16(20, 1, true); wav.setUint16(22, 1, true);\n  wav.setUint32(24, rate, true); wav.setUint32(28, rate * 2, true); wav.setUint16(32, 2, true); wav.setUint16(34, 16, true);\n  text(36, 'data'); wav.setUint32(40, samples.length, true);\n  new Uint8Array(wav.buffer, 44).set(samples);\n  let bytes = '';\n  new Uint8Array(wav.buffer).forEach((b) => (bytes += String.fromCharCode(b)));\n  url = 'data:audio/wav;base64,' + btoa(bytes);\n}\n\nawait new Audio(url).play();",
+                "runOnChange-in-audio": false,
+                "runOnChange-in-mimeType": false
+              }
+            }
+          ],
+          "connections": [
+            {
+              "fromId": "phrase_input",
+              "fromProperty": "onTextChanged",
+              "toId": "call_speak",
+              "toProperty": "in-text"
+            },
+            {
+              "fromId": "say_btn",
+              "fromProperty": "onClick",
+              "toId": "call_speak",
+              "toProperty": "call"
+            },
+            {
+              "fromId": "call_speak",
+              "fromProperty": "out-audio",
+              "toId": "play",
+              "toProperty": "in-audio"
+            },
+            {
+              "fromId": "call_speak",
+              "fromProperty": "out-mimeType",
+              "toId": "play",
+              "toProperty": "in-mimeType"
+            },
+            {
+              "fromId": "call_speak",
+              "fromProperty": "done",
+              "toId": "play",
+              "toProperty": "run"
+            },
+            {
+              "fromId": "call_speak",
+              "fromProperty": "error",
+              "toId": "status_text",
+              "toProperty": "text"
+            }
+          ]
+        },
+        {
+          "name": "/#__cloud__/Speak",
+          "nodes": [
+            {
+              "id": "speak_request",
+              "type": "noodl.cloud.request",
+              "label": "Say this",
+              "parameters": {
+                "params": "text"
+              }
+            },
+            {
+              "id": "speak_key",
+              "type": "noodl.cloud.secret",
+              "label": "GEMINI_API_KEY",
+              "parameters": {
+                "name": "GEMINI_API_KEY"
+              }
+            },
+            {
+              "id": "speak_tts",
+              "type": "JavaScriptFunction",
+              "label": "Ask for the audio, pass it through",
+              "parameters": {
+                "functionScript": "const key = Inputs.key;\nconst text = String(Inputs.text || '');\nif (!key || !text) return;\n\nconst model = 'gemini-3.8-flash-tts';\nconst response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent', {\n  method: 'POST',\n  headers: { 'content-type': 'application/json', 'x-goog-api-key': key },\n  body: JSON.stringify({\n    contents: [{ parts: [{ text }] }],\n    generationConfig: {\n      responseModalities: ['AUDIO'],\n      speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }\n    }\n  })\n});\nconst body = await response.json();\nif (!response.ok) throw new Error((body.error && body.error.message) || 'Text-to-speech refused the request');\n\nconst part = body.candidates && body.candidates[0] && body.candidates[0].content && body.candidates[0].content.parts[0];\nconst audio = part && part.inlineData;\nif (!audio || !audio.data) throw new Error('Text-to-speech sent no audio');\n\n// Pass the audio through exactly as it came: do not decode it, re-encode it or add a header here.\nOutputs.audio = audio.data;\nOutputs.mimeType = audio.mimeType;",
+                "runOnChange-in-key": false,
+                "runOnChange-in-text": false
+              }
+            },
+            {
+              "id": "speak_ok",
+              "type": "noodl.cloud.response",
+              "label": "The audio, and what kind it is",
+              "parameters": {
+                "params": "audio,mimeType"
+              }
+            },
+            {
+              "id": "speak_failed",
+              "type": "noodl.cloud.response",
+              "label": "Why not",
+              "parameters": {
+                "status": "failure"
+              }
+            },
+            {
+              "id": "speak_not_set_up",
+              "type": "noodl.cloud.response",
+              "label": "Not set up yet",
+              "parameters": {
+                "status": "failure",
+                "errorMessage": "Speech is not set up yet: add GEMINI_API_KEY to the backend's secrets."
+              }
+            }
+          ],
+          "connections": [
+            {
+              "fromId": "speak_request",
+              "fromProperty": "receive",
+              "toId": "speak_key",
+              "toProperty": "fetch"
+            },
+            {
+              "fromId": "speak_request",
+              "fromProperty": "pm-text",
+              "toId": "speak_tts",
+              "toProperty": "in-text"
+            },
+            {
+              "fromId": "speak_key",
+              "fromProperty": "value",
+              "toId": "speak_tts",
+              "toProperty": "in-key"
+            },
+            {
+              "fromId": "speak_key",
+              "fromProperty": "done",
+              "toId": "speak_tts",
+              "toProperty": "run"
+            },
+            {
+              "fromId": "speak_key",
+              "fromProperty": "failure",
+              "toId": "speak_not_set_up",
+              "toProperty": "send"
+            },
+            {
+              "fromId": "speak_tts",
+              "fromProperty": "out-audio",
+              "toId": "speak_ok",
+              "toProperty": "pm-audio"
+            },
+            {
+              "fromId": "speak_tts",
+              "fromProperty": "out-mimeType",
+              "toId": "speak_ok",
+              "toProperty": "pm-mimeType"
+            },
+            {
+              "fromId": "speak_tts",
+              "fromProperty": "success",
+              "toId": "speak_ok",
+              "toProperty": "send"
+            },
+            {
+              "fromId": "speak_tts",
+              "fromProperty": "error",
+              "toId": "speak_failed",
+              "toProperty": "errorMessage"
+            },
+            {
+              "fromId": "speak_tts",
+              "fromProperty": "failure",
+              "toId": "speak_failed",
               "toProperty": "send"
             }
           ]

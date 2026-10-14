@@ -10,13 +10,23 @@
     "error": "String value with the last error message (the Response node's Error Message on a failure reply)."
   },
   "runtimeBehavior": "Ports are mirrored from the targeted cloud function component by the editor's CloudFunctionAdapter. The `function` input (edit-only) lists every component that contains a `noodl.cloud.request` node — cloud function components live under the `/#__cloud__/` sheet, and the parameter stores the component name without that prefix. Each name in the Request node's `params` list becomes an `in-<name>` input; each name in the Response nodes' `params` lists becomes an `out-<name>` output. All are type '*'; an authoring tool must read the target component's Request/Response `params` to know which ports exist.",
-  "examples": ["fn-cloud-function-roundtrip", "fn-aggregate-stats-function"],
+  "examples": [
+    "fn-cloud-function-roundtrip",
+    "fn-aggregate-stats-function",
+    "fn-play-audio-a-cloud-function-returns"
+  ],
   "patterns": [
     "Button `onClick` → `call`, `out-<name>` → visual inputs: the request/response cycle for an action the client must not perform itself.",
     "`done` → a Query Records fetch action: refresh client data after a server-side write."
   ],
   "antiPatterns": [
-    "Wiring `out-` outputs somewhere without also handling `failure` leaves errors invisible — surface `error` in the UI or react to `failure`."
+    "Wiring `out-` outputs somewhere without also handling `failure` leaves errors invisible — surface `error` in the UI or react to `failure`.",
+    "Putting a new WAV header around audio a function returns, or re-encoding it: an API's audio is almost always a finished file (audio/wav, audio/mpeg), and wrapping it again plays its header as a click and anything after the samples as loud static. Return the base64 and its MIME type, and play it as it came; only audio/L16 or audio/pcm is raw samples (example fn-play-audio-a-cloud-function-returns)."
   ],
-  "relatedNodes": ["noodl.cloud.request", "noodl.cloud.response", "noodl.cloud.aggregate", "DbCollection2"]
+  "relatedNodes": [
+    "noodl.cloud.request",
+    "noodl.cloud.response",
+    "noodl.cloud.aggregate",
+    "DbCollection2"
+  ]
 }
