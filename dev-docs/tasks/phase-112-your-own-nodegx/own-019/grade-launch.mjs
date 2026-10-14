@@ -25,7 +25,8 @@
 //   The look, measured not judged (Richard judges the screenshots):
 //   font      the font Chrome actually PAINTS body text in (CSS.getPlatformFontsForNode) is not a browser/system
 //             default and not Inter (the template's own font token)
-//   palette   ≥3 distinct non-grey colours (chroma ≥ 30, ≥ 48 apart) in shown text, backgrounds or gradients
+//   palette   ≥3 distinct chosen colours (≥ 32 apart) in shown text, backgrounds or gradients: not a pure grey and
+//             not one of the template's own colour tokens (nodegx-project-contract/tokens.ts, read at grade time)
 //   scale     ≥3 distinct font sizes in shown text
 //   contrast  every feature sentence ≥ 4.5:1 against the background painted behind it (read from a screenshot)
 //   phone     no sideways scroll and no shown text past the right edge at 390 wide
@@ -69,6 +70,9 @@ for (const k of Object.keys(env)) if (k.startsWith('NODEGX_') || k.startsWith('N
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const say = (step, data = {}) => console.log(JSON.stringify({ step, ...data }));
 
+// The template's own colour tokens: a page wearing only these never chose a look.
+const DEFAULT_COLOURS = [...fs.readFileSync(path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../../../packages/nodegx-project-contract/tokens.ts'), 'utf8').matchAll(/#([0-9a-f]{6})\b/gi)]
+  .map((m) => [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16)));
 const FEATURES = ['Plan the week in one sitting', "See what's left at a glance", 'Quiet by default'];
 const checks = {};
 const CHECK_NAMES = ['hero', 'scroll', 'features', 'pricing', 'faq', 'refuse', 'sending', 'joined', 'fail', 'reload', 'notyou', 'font', 'palette', 'scale', 'contrast', 'phone', 'laptop'];
@@ -343,7 +347,7 @@ try {
     if (!b) return { button: null };
     const bt = b.getBoundingClientRect().top + scroller().scrollTop;
     const name = leaves(${reSrc(RE.name)})[0];
-    const above = leaves(/\S/).filter((l) => l.getBoundingClientRect().top + scroller().scrollTop < bt && own(l).split(' ').length >= 3 && !${reSrc(RE.name)}.test(own(l))).map((l) => own(l).slice(0, 80));
+    const above = leaves(/\\S/).filter((l) => l.getBoundingClientRect().top + scroller().scrollTop < bt && own(l).split(' ').length >= 3 && !${reSrc(RE.name)}.test(own(l))).map((l) => own(l).slice(0, 80));
     return { button: { text: norm(b.textContent), ...at(b, false) }, nameShown: !!name, nameTop: name ? name.getBoundingClientRect().top : null, above };
   })()`);
   check('hero', loaded !== null && hero.button && hero.nameShown && hero.above?.length >= 2, { name: hero.nameShown, lines: hero.above, button: hero.button?.text ?? null });
@@ -360,14 +364,21 @@ try {
       if (own(e)) { cols.push(...parse(s.color)); sizes.add(Math.round(parseFloat(s.fontSize))); }
       if (r.width * r.height >= 100) { cols.push(...parse(s.backgroundColor)); if (s.backgroundImage !== 'none') cols.push(...parse(s.backgroundImage)); }
     }
-    const chroma = (c) => Math.max(...c) - Math.min(...c);
-    const hues = [];
-    for (const c of cols.filter((c) => chroma(c) >= 30)) if (!hues.some((h) => Math.hypot(h[0] - c[0], h[1] - c[1], h[2] - c[2]) < 48)) hues.push(c);
+    const seenCols = [];
+    for (const c of cols) if (!seenCols.some((h) => h.join() === c.join())) seenCols.push(c);
     const se = document.scrollingElement;
     const past = leaves(/\\S/).filter((l) => l.getBoundingClientRect().right > innerWidth + 2).map((l) => own(l).slice(0, 40));
-    return { hues, sizes: [...sizes].sort((a, b) => a - b), overflow: { scrollWidth: se.scrollWidth, innerWidth, past } };
+    return { cols: seenCols, sizes: [...sizes].sort((a, b) => a - b), overflow: { scrollWidth: se.scrollWidth, innerWidth, past } };
   })()`);
-  check('palette', look.hues.length >= 3, { colours: look.hues });
+  // Chosen = not the template's own colour tokens (q6's quiz showed exactly two colours, #64748b and #2563eb, both
+  // defaults) and not a pure grey; tinted neutrals (a cream, a warm near-black) are a choice and count.
+  const near = (a, b, d) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]) < d;
+  const chosen = [];
+  for (const c of look.cols) {
+    if (Math.max(...c) - Math.min(...c) < 6 || DEFAULT_COLOURS.some((d) => near(c, d, 12))) continue;
+    if (!chosen.some((h) => near(h, c, 32))) chosen.push(c);
+  }
+  check('palette', chosen.length >= 3, { chosen, defaultsSeen: look.cols.filter((c) => DEFAULT_COLOURS.some((d) => near(c, d, 12))) });
   check('scale', look.sizes.length >= 3, { sizes: look.sizes });
   check('phone', look.overflow.scrollWidth <= look.overflow.innerWidth + 1 && look.overflow.past.length === 0, look.overflow);
 
@@ -507,7 +518,9 @@ try {
   // fail: Bob at fail.test, before anyone has joined
   const ffill = await fill('Bob', 'bob@fail.test');
   const jf = await pressJoin();
-  const wf = await watch(4000, [RE.sending, RE.failed, RE.anyJoined]);
+  // Bob joining, not any "You're in": a mutant that wrongly let "ada@nowhere" in leaves its line on screen until the
+  // press replaces it, and the first poll (≈2 ms) reads it.
+  const wf = await watch(4000, [RE.sending, RE.failed, new RegExp(`you${AP}re in, bob`, 'i')]);
   const kept = await fieldInfo();
   await shot('7-failed');
   observed.failSending = wf[0];
