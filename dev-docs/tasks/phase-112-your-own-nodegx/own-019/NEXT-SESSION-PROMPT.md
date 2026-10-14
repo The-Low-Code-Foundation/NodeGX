@@ -83,7 +83,9 @@ has R1–R3 (4810, 4811, 4813), RL1 (4812), RL2b (4814), RL3 (4815).
    names free in the gallery) and a copy of tgz33, both in
    `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/447c4862-bd83-453b-9eae-ded58fea38d1/scratchpad`.
    `--dry` creates of all four briefs on it exit 0, each on `nodegx-mcp-0.2.1.tgz` (`dry/`); no kit commit since
-   `c52e01e4f`. Start: `zsh s7lane.sh A` and `zsh s7lane.sh B`, each backgrounded, morning.
+   `c52e01e4f`. **On a timer (Richard, 22:57):** `s7start.sh` (nohup, pid in `s7start.pid`) waits until 2026-10-15
+   09:00, then runs both lanes under `caffeinate -i`; everything logs to `v/lane.log`. First check: is it there and did
+   lanes A and B start? If the pid is gone before 09:00, start `zsh s7lane.sh A` and `B` by hand.
 4. **After each Launch round:** its phone / 768 / laptop shots to Richard for the look verdict (`open -a Preview`, never
    a link). s6 opened RL1, RL2b, RL3 at all three sizes (rendered on tgz32, `proof/shots/`) — **ask for his verdict if
    it is not recorded in the task file yet.** ✅ Recorded for RL1, RL2b, RL3 (s6, 20:05): all three "a nice looking
