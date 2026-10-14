@@ -93,4 +93,5 @@ arguments first. A new session is not bound to the project: `open_project` it fi
 When the app needs an API key, don't ask me to paste it into the chat. Call `set_function_secret` without a value and
 tell me where to paste it in the project's `.env` file.
 
-To see an app: `npx @nodegx/preview <the app's folder> --open`
+To see an app: `npx @nodegx/preview <the app's folder> --open` — it starts the app's own backend too, when it has
+one on this computer, so it is also how the app opens again another day. Tell me that line when you finish.

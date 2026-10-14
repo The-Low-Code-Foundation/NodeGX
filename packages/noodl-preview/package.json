@@ -22,8 +22,8 @@
   ],
   "scripts": {
     "build": "node build.mjs",
-    "prepack": "node build.mjs && node scripts/pack-runtime.mjs",
-    "postpack": "node scripts/pack-runtime.mjs --remove",
+    "prepack": "node build.mjs && node scripts/pack-runtime.mjs && node ../noodl-mcp/build-backend-copy.mjs --out dist/backend",
+    "postpack": "node scripts/pack-runtime.mjs --remove && node ../noodl-mcp/build-backend-copy.mjs --remove --out dist/backend",
     "in-page-check": "node scripts/in-page-check.mjs",
     "graph-target-check": "node scripts/graph-target-check.mjs",
     "test": "jest",

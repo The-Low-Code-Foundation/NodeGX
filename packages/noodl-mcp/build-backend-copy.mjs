@@ -4,6 +4,7 @@
  *
  *   node build-backend-copy.mjs            bundle nodegx-backend's service into dist/backend/cli.js (npm's prepack)
  *   node build-backend-copy.mjs --remove   delete it again (npm's postpack)
+ *   … --out <dir>                          build into (or remove) <dir> instead — @nodegx/preview's prepack
  *
  * `provision_backend` starts `nodegx-backend/dist/cli.js`, found beside a checkout (or inside the editor app). An npm
  * install had none, so it refused, and an API key could only sit in an HTTP Request node in the page. The service is
@@ -23,7 +24,10 @@ import { fileURLToPath } from 'node:url';
 import esbuild from 'esbuild';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const OUT = path.join(HERE, 'dist', 'backend');
+// `--out <dir>`: P112-OWN019-BACKENDSESSION — @nodegx/preview ships the same service (its prepack builds it here into
+// its own dist/backend), so a person's preview can start the app's own backend.
+const outAt = process.argv.indexOf('--out');
+const OUT = outAt > 0 ? path.resolve(process.argv[outAt + 1]) : path.join(HERE, 'dist', 'backend');
 const BACKEND = path.resolve(HERE, '..', 'nodegx-backend');
 
 if (process.argv.includes('--remove')) {
@@ -47,4 +51,4 @@ await esbuild.build({
   entryPoints: [path.join(BACKEND, 'src', 'cli.ts')],
   outfile: path.join(OUT, 'cli.js')
 });
-console.log(`build-backend-copy: dist/backend/cli.js (${((Date.now() - started) / 1000).toFixed(1)} s)`);
+console.log(`build-backend-copy: ${path.relative(process.cwd(), path.join(OUT, 'cli.js'))} (${((Date.now() - started) / 1000).toFixed(1)} s)`);

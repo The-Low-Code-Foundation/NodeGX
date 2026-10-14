@@ -38,7 +38,8 @@ const AGENT_NOTE = [
   "When the app needs an API key, don't ask me to paste it into the chat. Call `set_function_secret` without a value",
   "and tell me where to paste it in the project's `.env` file.",
   '',
-  `To see an app: \`npx ${PREVIEW_PACKAGE} <the app's folder> --open\``,
+  `To see an app: \`npx ${PREVIEW_PACKAGE} <the app's folder> --open\` — it starts the app's own backend too, when it`,
+  'has one on this computer, so it is also how the app opens again another day.',
   '',
   // P112-OWN018-LISTCHANGED / OWN-018 round 1: Mistral Large 4 (in Mistral Vibe) created the app, then could not see
   // the tools that build it, and wrote one 17-component batch whose every refusal it then had to untangle at once.
@@ -317,7 +318,7 @@ function vibeSentence(result) {
     '  2. Say what you want to build. Mistral Large 4 builds it as a NodeGX app — notes first, then a part at a time,',
     '     checking each thing you asked for in a browser — and tells you what passed. If a build runs long it hands',
     '     over and says what is next: type /clear, then "continue".',
-    `  3. See it: npx ${PREVIEW_PACKAGE} <the app's folder> --open`,
+    `  3. See it: npx ${PREVIEW_PACKAGE} <the app's folder> --open  (any day — it starts the app's backend too)`,
     '',
     'Any time you want the visual editor, open the same folder in NodeGX — nothing needs converting.'
   ].join('\n');
@@ -343,7 +344,7 @@ function sentence(result) {
     `     Mistral Vibe: cd ${here} && vibe --legacy-harness, and trust the folder when it asks.`,
     `     OpenCode: cd ${here} && opencode (with Mistral: opencode -m mistral/mistral-large-4).`,
     '  2. Say what you want to build. Your agent talks it through with you, then makes the app in a folder here.',
-    `  3. See it: npx ${PREVIEW_PACKAGE} <the app's folder> --open`,
+    `  3. See it: npx ${PREVIEW_PACKAGE} <the app's folder> --open  (any day — it starts the app's backend too)`,
     '',
     'Any time you want the visual editor, open the same folder in NodeGX — nothing needs converting.',
     `Another AI coder: give it the server "npx -y ${MCP_PACKAGE}@${MCP_VERSION} --allow-writes" (stdio).`

@@ -47,9 +47,10 @@ export interface RunningPreview {
 }
 
 /** Boots the CLI on an ephemeral port and resolves once it reports the URL. */
-export function startPreview(projectDir: string, extraArgs: string[] = []): Promise<RunningPreview> {
+export function startPreview(projectDir: string, extraArgs: string[] = [], env?: NodeJS.ProcessEnv): Promise<RunningPreview> {
   const child: ChildProcess = spawn(process.execPath, [DIST, projectDir, '--port', '0', ...extraArgs], {
-    stdio: ['ignore', 'pipe', 'pipe']
+    stdio: ['ignore', 'pipe', 'pipe'],
+    env: env ?? process.env
   });
 
   let stdout = '';
