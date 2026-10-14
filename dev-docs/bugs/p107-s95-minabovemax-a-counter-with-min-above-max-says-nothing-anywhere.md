@@ -79,3 +79,12 @@ value. A Refresh's Failure tells the editor only when a Refresh was pulsed. Seve
 its first run at seeds 20739 and 20740: 305 / 305 scenarios, 200 / 200 sequences, 0 divergences, 321 / 321 mutants.
 Controls: one letter in the empty-entry sentence plus a dropped mapping withdrawal give 14 scenarios and 6 sequences red.
 Left: layout, and the census.
+
+**s104 — the Slider (half 2, R39 "Yes, warn").** The Slider has the same shape as the Counter. A Max below Min holds the
+handle at Min, a person's slide takes nothing, and nothing said why. slider.ts `_attributeChanged` now sets
+`slider/max-below-min` on every Min, Max or Step write, reading the attributes as the browser does: *"Max 40 is below Min 60,
+so the handle stays at Min and cannot be moved."* Slider v7 declares that key. It also declares `slider/value-not-a-number`,
+which the runtime has always raised on the error bus and the editor records once any `slider/` key is declared. Two R39
+scenarios were added. Slider v7 conforms at 20739 and 20740. Control: one letter in the spec's sentence gives 2 scenarios and
+30 sequences red.
+Left: layout (R38: a scenario names the parent's direction), and the census of other contradictions (not asked for).

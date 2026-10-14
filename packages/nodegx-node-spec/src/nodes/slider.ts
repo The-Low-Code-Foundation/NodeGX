@@ -77,6 +77,8 @@ type State = {
   onPage: boolean;
   /** v6 — the last Focus found the node off the page: the editor is told (focus-not-mounted.ts) */
   focusMissed: boolean;
+  /** v7 — the sentence the last Value that was not a number raised (slider.ts `_setInputValue`); none raised yet: undefined */
+  valueWarning: string | undefined;
   /** `props.min` / `props.max` / `props.step` as written (react-component-node.ts :729-740: `undefined` deletes the prop) */
   min: unknown;
   max: unknown;
@@ -93,6 +95,17 @@ type State = {
   pending: boolean;
 };
 
+/** v7 — the editor's keys this node says under (slider.ts) */
+const MAX_BELOW_MIN = 'slider/max-below-min';
+const VALUE_NOT_A_NUMBER = 'slider/value-not-a-number';
+
+/** v7 — slider.ts `_attributeChanged`: a Max below Min over the attributes as the browser reads them (a blank Min 0, Max 100) */
+function maxBelowMin(s: State): string | null {
+  const min = attrNumber(s.min) ?? 0;
+  const max = attrNumber(s.max) ?? 100;
+  return max < min ? `Max ${max} is below Min ${min}, so the handle stays at Min and cannot be moved.` : null;
+}
+
 type O = typeof Slider extends { outputs: infer X } ? X : never;
 type Send = Patch<State, O> & { says: string }; // NSP-018 s77: every input patch says its case
 type Pulse = 'didMount' | 'willUnmount' | 'pointerDown' | 'pointerUp' | 'onFocus' | 'onBlur' | 'hoverStart' | 'hoverEnd' | 'onChange';
@@ -106,9 +119,25 @@ export const Slider = defineNode({
   // v4 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
   // v5 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
   // v6 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it (`diagnostics`)
-  version: 6,
-  changes: [focusChange(6)],
-  diagnostics: focusDiagnostics(controlFocusNotMounted('slider')),
+  // v7 (NSP-019 R39, ruled "Yes, warn"): a Max below Min warns, as the Counter's Min above Max does; and a Value that is not a
+  // number, which the runtime always reported on the error bus, is declared with it (the editor records the `slider/` keys)
+  version: 7,
+  changes: [
+    focusChange(6),
+    {
+      version: 7,
+      says: 'The editor is told when Max is below Min: the handle stays at Min and cannot be moved. And what the runtime has always told it about a Value that is not a number is now in this spec',
+      row: 'NSP-019 R39 (P107 s104)',
+      migration: { none: 'Only the editor is told. Nothing a wire carries changes, and nothing a person does moves differently' }
+    }
+  ],
+  diagnostics: {
+    ...focusDiagnostics(controlFocusNotMounted('slider')),
+    // v7 — slider.ts `_attributeChanged`: every Min, Max or Step write, over the attributes as the browser reads them
+    [MAX_BELOW_MIN]: { says: 'Max is below Min', message: (_i: unknown, s: State) => maxBelowMin(s) },
+    // v7 — slider.ts `_setInputValue` (`raiseRuntimeError`): the last one raised; nothing withdraws it
+    [VALUE_NOT_A_NUMBER]: { says: 'a Value arrived that is not a number', message: (_i: unknown, s: State) => s.valueWarning }
+  },
   source: 'packages/noodl-viewer-react/src/nodes/controls/slider.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the handle with them
@@ -117,7 +146,7 @@ export const Slider = defineNode({
   // react-component-node.ts :1274-1301 the defaults into props, then slider.ts `initialize`: the author's Value is Min (0),
   // `_reportValue(0)` finds the node's 0 unchanged and Value Percent 0; the making's Value is a word for the first paint (`pending`)
   state: {
-    enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false, focusMissed: false,
+    enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false, focusMissed: false, valueWarning: undefined,
     min: 0, max: 100, step: 1, authorValue: 0, out: 0, percent: 0, shown: 0, pending: true
   } as State,
   // utils.ts :402-411 `outcomeOutputs({ done, unchanged })` (addFocusActions)
@@ -364,7 +393,10 @@ export const Slider = defineNode({
 function word(v: unknown): Send {
   if (v === undefined || v === null || v === '') return { says: 'empty: no word, and the handle stays where it is', send: [] };
   const n = Number(v);
-  if (!Number.isFinite(n)) return { says: 'not a number: no word (the runtime reports it), and the handle stays where it is', send: [] };
+  if (!Number.isFinite(n)) {
+    // v7 — the runtime's sentence (`raiseRuntimeError`), which the editor shows under its code
+    return { says: 'not a number: no word, the editor is told, and the handle stays where it is', set: { valueWarning: `Value cannot be read as a number (got ${JSON.stringify(v)}), so the handle has not moved.` }, send: [] };
+  }
   return { says: 'a number: at the next paint the handle goes there, clamped to Min and Max and rounded to the Step; Value and Value Percent follow when they move — Changed does not fire (only a person\'s slide fires it)', set: { authorValue: n, pending: true }, send: [] };
 }
 

@@ -56495,7 +56495,7 @@
         ],
         "value": [
           "empty: no word, and the handle stays where it is",
-          "not a number: no word (the runtime reports it), and the handle stays where it is",
+          "not a number: no word, the editor is told, and the handle stays where it is",
           "a number: at the next paint the handle goes there, clamped to Min and Max and rounded to the Step; Value and Value Percent follow when they move — Changed does not fire (only a person's slide fires it)"
         ],
         "min": [
@@ -56527,7 +56527,9 @@
         ]
       },
       "warnings": {
-        "focus/not-mounted": "the last Focus arrived while it was not on the page"
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "slider/max-below-min": "Max is below Min",
+        "slider/value-not-a-number": "a Value arrived that is not a number"
       }
     },
     {

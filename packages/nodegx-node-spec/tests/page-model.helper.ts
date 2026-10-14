@@ -248,7 +248,8 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     elementCalls: { ...FOCUS_CALLS, 'on.clear': FIELD_CALL, 'on.backspace': FIELD_CALL, 'on.startValue': FIELD_CALL }
   },
   'net.noodl.controls.range': {
-    node: [...CONTROL_NODE, 'min', 'max', 'step', 'authorValue', 'out', 'percent', 'pending'],
+    // v7 (R39) — `valueWarning`: the sentence a Value that is not a number raised, the node's
+    node: [...CONTROL_NODE, 'min', 'max', 'step', 'authorValue', 'out', 'percent', 'valueWarning', 'pending'],
     attr: { onPage, pageEnabled, pageVisible },
     // the handle shows the Value (R14: the last word, a person's or the graph's)
     held: { elementFocused: keyboard, shown: { shows: (s) => (s.onPage ? s.out : KEEP) } },
