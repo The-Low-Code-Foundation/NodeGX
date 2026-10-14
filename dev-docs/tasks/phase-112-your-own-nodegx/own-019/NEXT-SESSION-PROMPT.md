@@ -79,6 +79,11 @@ has R1–R3 (4810, 4811, 4813), RL1 (4812), RL2b (4814), RL3 (4815).
    BACKENDSESSION brief — "start it again tomorrow" is now true; grade it AND restart the preview once by hand to see
    the backend come back), Pack It ×1. `s5lane.sh` in the s5 scratchpad is the template (cutoffs 17:00 / 16:30).
    Peek every ~20 min; read every red before believing it (s5: 3 of 4 Launch reds were the grader's).
+   ✅ **Staged (s7 prep, 2026-10-14 ~20:40, evening — no rounds):** `s7lane.sh` (A = T1–T3 + TE1, B = TL1–TL3 + TP1;
+   names free in the gallery) and a copy of tgz33, both in
+   `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/447c4862-bd83-453b-9eae-ded58fea38d1/scratchpad`.
+   `--dry` creates of all four briefs on it exit 0, each on `nodegx-mcp-0.2.1.tgz` (`dry/`); no kit commit since
+   `c52e01e4f`. Start: `zsh s7lane.sh A` and `zsh s7lane.sh B`, each backgrounded, morning.
 4. **After each Launch round:** its phone / 768 / laptop shots to Richard for the look verdict (`open -a Preview`, never
    a link). s6 opened RL1, RL2b, RL3 at all three sizes (rendered on tgz32, `proof/shots/`) — **ask for his verdict if
    it is not recorded in the task file yet.** ✅ Recorded for RL1, RL2b, RL3 (s6, 20:05): all three "a nice looking
@@ -86,6 +91,9 @@ has R1–R3 (4810, 4811, 4813), RL1 (4812), RL2b (4814), RL3 (4815).
    reports). He did not raise the eyebrow drift (`align` ✗ on all three) — ask him whether it matters before
    treating `align` as a look failure in the claim.
 5. **Console readings** at quiet boundaries (ask in plain text; s5's ≈ €0.42/list $ needs a second clean window).
+   **Window 2, from the recorder (s7 prep):** after the 16:06 reading (€57.16) s5 spent **$20.57 list** — R3 4.17
+   (0.22 of its 4.39 was before 16:06), RL2 0.03, RL2b 6.82, RL3 9.55 (per-call `sent` × the kit's list prices; every
+   round total matches the table to the cent). No Mistral round since. At €0.42/$ the console would read ≈ €65.8.
 6. **The claim write-up (AC8)** once tgz33's series is in, then **R35: Richard's own run, last.**
 
 ## Needs Richard
