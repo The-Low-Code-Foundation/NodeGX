@@ -1,7 +1,8 @@
 ---
 id: P109-S25-EXPORTSTATESRUN
 title: An exported States move that sets every value at once leaves the previous move's animation running, which lands the old state's value
-status: scheduled
+status: fixed
+regression: packages/nodegx-export/tests/animation-pair.test.ts "A5 a move that sets every value at once stops the run still going, in both worlds" and "A5 a text a state leaves unset reads as the empty text…" (both frame by frame against the runtime's states.ts; both red on HEAD's lib)
 phase: P109
 task: ISL-043
 severity: low
@@ -23,3 +24,16 @@ animation finish at the old state's value."*
 
 The same commit's other row, P107-D19 (a text a state leaves empty), probably does not reach the export: the emitted
 value is React state, and an `undefined` text draws as nothing. Not measured.
+
+**Re-measured and fixed 2026-10-14 (P18 session 104, ISL-043 AC1).** It still fired at HEAD, and it was graded by the
+frame-by-frame differential against the runtime's own `states.ts`. To bright animates for 600 ms; at 300 ms To dim,
+whose transition is zero, sets every value at once. The emitted `goToState` now calls `stopRun(m.run)` on every move
+after the first, as its `jumpToState` does. The runtime's trace confirms the consequence: dim's values hold to the
+end, and Has Reached bright never fires.
+
+**D19 does reach the export,** against this file's "probably does not". The emitted `typedStateValue` returned the
+state's value as it was, so a text the state leaves unset read `undefined` after a move into it, where the runtime
+sends `''`. It is transcribed, with its own typed frame-by-frame row.
+
+Readings: `animation-pair` 69/69, with exactly the two new rows red on HEAD's lib. HLS-001 golden: 1 line predicted
+and 1 counted (`glow-desk/src/lib/states.ts`).

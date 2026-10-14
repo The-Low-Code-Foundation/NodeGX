@@ -229,6 +229,10 @@
  * ✅ **Regenerated for P109-S25-EXPORTFEEDZONE (session 104, 2026-10-14), predicted and counted.** The emitted parse
  * lib reads feed dates by D16's rule and sends Feed Updated as `''` (D17). One corpus project emits `src/lib/parse.ts`:
  * `sheet-desk`, **1 moved, 0 added, 0 removed**.
+ *
+ * ✅ **Regenerated for P109-S25-EXPORTSTATESRUN (session 104, 2026-10-14), predicted and counted.** The emitted states
+ * lib stops a running animation on every move (P107-C22) and sends an unset text as `''` (D19). One corpus project
+ * emits `src/lib/states.ts`: `glow-desk`, **1 moved, 0 added, 0 removed**.
  */
 import * as fs from 'fs';
 import * as path from 'path';
