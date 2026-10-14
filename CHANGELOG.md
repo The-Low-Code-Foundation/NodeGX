@@ -17,6 +17,24 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## 0.4.1 · 2026-10-14
+
+**A small release that fixes three things in 0.4.0: opening a project no longer changes its files, the update window
+shows when a project is open, and the What's new window is readable.**
+
+### Fixed
+
+- **Opening a project no longer changes its files.** In 0.4.0, a page could be saved again a second after the project
+  opened, although nobody had changed anything. In Git it showed up as changed files.
+- **The update window shows when a project is open.** In 0.4.0 it opened behind the editor, so *New version
+  available* seemed to do nothing. From the projects list it always worked.
+- **The What's new window is readable.** Its bold sentences and its links were white on white.
+
+### Good to know
+
+- **To update from 0.4.0, go back to your projects first.** 0.4.0 still has the hidden update window, so it shows the
+  update to 0.4.1 on the projects list, not inside a project.
+
 ## 0.4.0 · 2026-10-14
 
 **NodeGX now opens the apps you make with `npm create nodegx`. This release also brings script files, a window that

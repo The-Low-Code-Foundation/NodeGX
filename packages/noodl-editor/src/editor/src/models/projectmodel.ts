@@ -1435,6 +1435,18 @@ export class ProjectModel extends Model {
   setMetaData(key: string, data) {
     if (!this.metadata) this.metadata = {};
 
+    // P112-S11-PAGEPORTS: a write of the value already there is not an edit.
+    // `SchemaHandler._store` writes `dbCollections`, `systemCollections` and
+    // `dbVersionMajor` on project open and on every window focus, `undefined`
+    // over `undefined` when there is no backend. Each one armed a full save, and
+    // that save, a second later, wrote whatever had changed in memory meanwhile
+    // — on open, the dynamic ports the viewer had just announced for a Page, so
+    // opening a project rewrote its pages. The same object handed back is still
+    // a save: a caller may have mutated it in place and cannot be told apart.
+    const previous = this.metadata[key];
+    const unchanged =
+      previous === data ? data === null || typeof data !== 'object' : _.isEqual(previous, data);
+
     this.metadata[key] = data;
 
     EventDispatcher.instance.notifyListeners('ProjectModel.metadataChanged', {
@@ -1447,7 +1459,7 @@ export class ProjectModel extends Model {
     // autosave listener. Arm the save here rather than renaming the event —
     // `Model.metadataChanged` is already taken by `ComponentModel.setMetaData`
     // and forwarded to the viewer, and this is a *project* change.
-    scheduleProjectSave();
+    if (!unchanged) scheduleProjectSave();
   }
 
   getMetaData(key: string) {

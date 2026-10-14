@@ -15,6 +15,15 @@ $_content-padding: 24px;
     color: var(--theme-color-on-secondary);
   }
 
+  // HtmlRenderer paints strong, em and a in --theme-color-fg-highlight (white in the dark theme) at the same
+  // specificity as `.Root strong`; on this panel's bright background a post's bold lead sentences and its link
+  // vanished (P112-OWN011-NEWSWHITE). `.Inner` lifts these above HtmlRenderer whatever order the sheets load in.
+  .Inner strong,
+  .Inner em,
+  .Inner a {
+    color: var(--theme-color-on-secondary);
+  }
+
   h2,
   h3,
   p,
