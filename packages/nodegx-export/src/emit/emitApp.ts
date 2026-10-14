@@ -839,9 +839,10 @@ function httpModule(project: ProjectPlan): [string, string] | null {
     GENERATED_MODULE_TS +
       '//\n// Requests the graph makes to addresses outside this app. Each function is one\n' +
       "// HTTP Request node's configuration, with the values it was wired for as parameters.\n" +
-      '//\n// Where nothing came back at all — no URL, a timeout, a network error — the function throws an\n' +
-      "// HttpError whose `code` is the node's own (http/no-url, http/timeout, http/network-error), for the\n" +
-      '// failure arm to report on the error channel; a non-2xx answer is `ok: false`, reported there as\n' +
+      '//\n// Where nothing usable came back — no URL, a timeout, a network error, or an answer whose JSON\n' +
+      "// could not be read — the function throws an HttpError whose `code` is the node's own (http/no-url,\n" +
+      '// http/timeout, http/network-error, http/bad-body), for the failure arm to report on the error\n' +
+      '// channel; a non-2xx answer is `ok: false`, reported there as\n' +
       '// http/error-status.\n\n' +
       'export class HttpError extends Error {\n' +
       '  constructor(\n' +
@@ -1199,7 +1200,19 @@ function httpFunction(componentPath: string, call: HttpCallPlan): string {
     '    clearTimeout(timer);',
     '  }',
     "  const contentType = response.headers.get('content-type') ?? '';",
-    "  const parsed: unknown = contentType.includes('application/json') ? await response.json() : await response.text();",
+    '  // P107-D11 (P109-S24-EXPORTBADBODY): the server answered and its JSON could not be read. That is',
+    "  // http/bad-body, the runtime's own code, not the network error a request that never arrived gets. Only",
+    '  // the JSON read is marked, as `httpnode.ts` marks only that one; a text read that fails stays a network error.',
+    '  let parsed: unknown;',
+    "  if (contentType.includes('application/json')) {",
+    '    try {',
+    '      parsed = await response.json();',
+    '    } catch (error) {',
+    "      throw new HttpError(error instanceof Error && error.message ? error.message : 'Network error', 'http/bad-body');",
+    '    }',
+    '  } else {',
+    '    parsed = await response.text();',
+    '  }',
     '  const responseHeaders: Record<string, string> = {};',
     '  response.headers.forEach((value, key) => {',
     '    responseHeaders[key] = value;',

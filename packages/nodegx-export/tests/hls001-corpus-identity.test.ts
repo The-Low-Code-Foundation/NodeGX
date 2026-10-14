@@ -216,6 +216,10 @@
  * corpus projects with a Date To String move one entry each, `deadline-desk/src/lib/date.ts` and
  * `due-desk/src/lib/date.ts`: **2 lines moved, 0 added, 0 removed**, diffed key by key against the
  * pre-regenerate golden.
+ *
+ * ✅ **Regenerated for P109-S24-EXPORTBADBODY (session 104, 2026-10-14), predicted and counted.** The emitted request
+ * marks a JSON body it cannot read as `http/bad-body`. One corpus project emits `src/api/http.ts`, and it is the one line
+ * that moved: `quote-desk/src/api/http.ts`, **1 moved, 0 added, 0 removed**.
  */
 import * as fs from 'fs';
 import * as path from 'path';

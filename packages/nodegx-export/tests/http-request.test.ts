@@ -454,3 +454,66 @@ describe('EXP-011 Tier 1.2 — HTTP Request', () => {
     });
   });
 });
+
+/**
+ * P109-S24-EXPORTBADBODY — the server answered, and its JSON could not be read (P107-D11, ruled "Give it its own code").
+ *
+ * 🔴 **Run, not read.** The emitted `src/api/http.ts` is transpiled and `fetchQuote` is called against a stubbed
+ * `fetch`, so the code graded is the code that reaches the failure arm. Before the fix the parse failure escaped
+ * as a bare `SyntaxError` with no `code`, and the arm's `?? 'http/network-error'` named it a request that never
+ * arrived.
+ */
+describe('P109-S24-EXPORTBADBODY — a body that is not JSON fails under http/bad-body', () => {
+  type FakeAnswer = { contentType: string; json?: () => Promise<unknown>; text?: () => Promise<string> };
+  const run = async (answer: FakeAnswer): Promise<{ code?: string; message?: string } | unknown> => {
+    const { app } = withRequest();
+    const js = ts.transpileModule(httpFile(app), {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 }
+    }).outputText;
+    const exported: Record<string, unknown> = {};
+    const fetchStub = async () => ({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      headers: {
+        get: (name: string) => (name.toLowerCase() === 'content-type' ? answer.contentType : null),
+        forEach: (fn: (value: string, key: string) => void) => fn(answer.contentType, 'content-type')
+      },
+      json: answer.json ?? (async () => ({})),
+      text: answer.text ?? (async () => '')
+    });
+    // eslint-disable-next-line no-new-func
+    new Function('exports', 'fetch', js)(exported, fetchStub);
+    try {
+      return await (exported.fetchQuote as () => Promise<unknown>)();
+    } catch (error) {
+      return { code: (error as { code?: string }).code, message: (error as Error).message };
+    }
+  };
+
+  it('an application/json answer whose body does not parse throws http/bad-body, with the parser message', async () => {
+    const result = await run({
+      contentType: 'application/json',
+      json: () => Promise.reject(new SyntaxError('Unexpected token < in JSON at position 0'))
+    });
+    expect(result).toEqual({ code: 'http/bad-body', message: 'Unexpected token < in JSON at position 0' });
+  });
+
+  /** The control: the same answer with a body that parses is a success, so the row above is about the parse. */
+  it('the same answer with a body that parses succeeds', async () => {
+    const result = (await run({ contentType: 'application/json', json: async () => ({ quote: 'hi' }) })) as {
+      ok: boolean;
+      response: unknown;
+    };
+    expect(result.ok).toBe(true);
+    expect(result.response).toEqual({ quote: 'hi' });
+  });
+
+  /** As the runtime marks only the JSON read: a text read that fails is not a bad body. */
+  it('a text answer whose read fails is not reported as a bad body', async () => {
+    const result = (await run({ contentType: 'text/plain', text: () => Promise.reject(new TypeError('terminated')) })) as {
+      code?: string;
+    };
+    expect(result.code).not.toBe('http/bad-body');
+  });
+});
