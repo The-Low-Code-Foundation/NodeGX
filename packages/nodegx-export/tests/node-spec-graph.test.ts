@@ -55,10 +55,14 @@ describe('NSP-008 on the export', () => {
     expect(r.actual?.some((e) => e.t === 'value' && e.subject === 'c' && e.port === 'currentCount' && e.value === 3)).toBe(true);
   });
 
-  test('G1 — the And diamond: the export computes x && !x atomically and bears C6\'s sentence out where the runtime does not (known row)', () => {
+  // was a `known` row (the export bore C6's old sentence out); ISL-033 corrected the sentence to what the runtime does
+  // (8a177580d), so the export's atomic And is a declared DIFFERENCE now — this row lagged it (P18-S102-GRAPHNOSPEC)
+  test('G1 — the And diamond is a DIFFERENCE on the export: And computed atomically sends no passing true, the Counter stays at 1', () => {
     const r = result('the same diamond into a per-write node');
-    expect(r.status).toBe('known');
+    expect(r.status).toBe('diverged');
     expect(r.reason).toMatch(/G1/);
+    // the runtime's Value Changed fires twice in the flip's frame and its Counter reads 3; the export's never moves
+    expect(r.actual?.some((e) => e.t === 'value' && e.subject === 'c' && e.port === 'currentCount' && e.value === 3)).toBe(false);
   });
 
   test('the rest are outside, each in the exporter\'s own words', () => {

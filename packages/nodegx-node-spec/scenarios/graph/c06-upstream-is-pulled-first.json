@@ -291,6 +291,9 @@
       "C7"
     ],
     "because": "C6's sentence, as corrected for P107 G1 (ruled 2026-10-05, P109 ISL-033): the nodes feeding a node update first, but a node that recomputes in its SETTER (And, and.ts :33-49) rather than at frame end takes its inputs one at a time. Both of And's ports are pending in one pass (the pull holds), C7's lockstep applies one entry per port in turn, and the setter publishes after each: x AND NOT x carries true and then false inside one pass, so the Value Changed behind it fires twice and the Counter reads 3. Was row G1, whose claims were the old sentence (the wire never carries true, the Counter never moves).",
+    "divergence": {
+      "export": "CONTRACT.md C6, P107 G1: the export computes And from all of its inputs at once and sends no passing result — x AND NOT x never carries true, the Value Changed behind it never fires, and the Counter stays at 1 where the runtime reads 3"
+    },
     "nodes": {
       "s": {
         "type": "Switch"

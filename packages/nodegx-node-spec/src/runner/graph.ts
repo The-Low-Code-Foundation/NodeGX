@@ -185,9 +185,13 @@ export async function runGraphScenarios<H extends Handle>(target: GraphTarget<H>
   const results: GraphScenarioResult[] = [];
   for (const sc of scenarios) {
     const started = Date.now();
+    // canPlay first, graphReach only for a scenario it admits: a target's reach may need the graph built (the export
+    // emits it), and a scenario canPlay put outside is one it cannot build. Asking both eagerly threw on the export
+    // from 74a73de91 on, and the throw ended the whole run (P18-S102-GRAPHNOSPEC)
+    const outside = sc.expect && target.canPlay ? target.canPlay(sc) : undefined;
     const graded = await gradeGraphScenario(sc, target.name, () => playGraphForGrading(target, sc), {
-      outside: sc.expect && target.canPlay ? target.canPlay(sc) : undefined,
-      reach: target.graphReach ? target.graphReach(sc) : undefined
+      outside,
+      reach: sc.expect && outside === undefined && target.graphReach ? target.graphReach(sc) : undefined
     });
     results.push({ ...graded, timeMs: Date.now() - started });
   }

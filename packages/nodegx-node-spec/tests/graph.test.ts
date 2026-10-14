@@ -142,8 +142,10 @@ describe('every recorded trace is well-formed and bears its claims out', () => {
 
 describe('AC3 — the intentional divergence is asserted as a difference', () => {
   const declared = scenarios.filter((s) => s.divergence && 'export' in s.divergence);
-  test('the scenarios that name the export under divergence are the clauses Part 2 marks as not implemented: C7 (the one worth arguing about) and C8', () => {
-    expect(declared.map((s) => s.clauses[0]).sort()).toEqual(['C7', 'C8']);
+  // C6 joined 2026-10-14: ISL-033 (8a177580d) corrected C6 to the runtime's passing result, which the export does not
+  // send — Part 2's C6 row says partial since, and c06's per-write scenario declares it (P18-S102-GRAPHNOSPEC)
+  test('the scenarios that name the export under divergence are the clauses Part 2 marks as not implemented: C6 (the passing result), C7 (the one worth arguing about) and C8', () => {
+    expect(declared.map((s) => s.clauses[0]).sort()).toEqual(['C6', 'C7', 'C8']);
   });
 });
 
@@ -245,7 +247,8 @@ describe('the graph runner', () => {
   });
 
   test('a target that reproduces the recorded traces passes; the C7 scenario passes only as a DIFFERENCE on the export', async () => {
-    const c7 = scenarios.find((s) => s.divergence && 'export' in s.divergence)!;
+    // by clause, not first-declared: c06 declares an export divergence too since 2026-10-14 and loads first
+    const c7 = scenarios.find((s) => s.divergence && 'export' in s.divergence && s.clauses[0] === 'C7')!;
     const faithful = replayTarget('faithful', perNode(c7));
     const asExport = replayTarget('export', perNode(c7));
     const r1 = await runGraphScenarios(faithful, [c7]);
@@ -270,6 +273,23 @@ describe('the graph runner', () => {
     const r = await runGraphScenarios(replayTarget('x', {}), [{ ...c2, expect: undefined }]);
     expect(r.results[0].status).toBe('refused');
     expect(r.conforms).toBe(false);
+  });
+
+  test('a scenario canPlay puts outside is never asked its reach — a reach may need the graph built (P18-S102-GRAPHNOSPEC)', async () => {
+    const asked: string[] = [];
+    const target: GraphTarget = {
+      ...replayTarget('picky', perNode(c2)),
+      canPlay: (sc) => (sc.name === c2.name ? undefined : 'cannot build this one'),
+      graphReach: (sc) => {
+        asked.push(sc.name);
+        if (sc.name !== c2.name) throw new Error(`no spec for ${sc.name}`);
+        return { signals: true, outcomes: true, output: () => true };
+      }
+    };
+    const other = scenarios.find((s) => s.name !== c2.name && s.expect)!;
+    const r = await runGraphScenarios(target, [other, c2]);
+    expect(r.results.map((x) => x.status)).toEqual(['outside', 'passed']);
+    expect(asked).toEqual([c2.name]);
   });
 
   test('the interpreter is not a graph target', () => {
