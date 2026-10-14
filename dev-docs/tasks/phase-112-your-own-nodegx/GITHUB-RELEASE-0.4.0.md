@@ -1,6 +1,6 @@
 ## NodeGX 0.4.0 — alpha
 
-**NodeGX now opens the apps you make with `npm create nodegx`. This release also brings script files, new kinds of backend rule, and many fixes to how nodes behave.**
+**NodeGX now opens the apps you make with `npm create nodegx`. This release also brings script files, a window that explains each node, new kinds of backend rule and many fixes to how nodes behave.**
 
 ### Your existing project
 
@@ -13,7 +13,9 @@
 
 - **Apps made with `npm create nodegx` open in the editor**, and keep their project id.
 - **Functions can share code through script files**, with a Scripts section in the Components panel and a Uses list on each Function.
-- **A node's properties now end with *What this node does* and *Try this node*.**
+- **A node can explain itself.** *How this node works*, under the node's name in the properties panel, opens a window where you read what the node does and try it.
+- **Nodes in a cloud function show their settings**, and a Counter or Slider whose minimum is above its maximum says so.
+- **Agents other than Claude Code can build with NodeGX.** A new project gets an `AGENTS.md` beside its `CLAUDE.md`.
 - **The backend can keep more kinds of rule.** A field can be readable by some people only. A record can be locked once it stops being a draft. Your agent writes these rules from what you tell it. The changelog lists the rest.
 - Keep When Leaving on Page, Data Attributes and Scroll Into View on every visual node, *Is one of* in Array Filter, Model Request with a model on your own computer, and Parse CSV, To CSV, Parse XML and Parse Feed in code export.
 
@@ -23,6 +25,7 @@ The full list: **[nodegx.io/changelog](https://nodegx.io/changelog/#v0-4-0)**.
 
 - **A cloud function could make someone the backend's admin.** It can't now. Update if your backend runs cloud functions.
 - Restoring a backup brings back every setting.
+- A Counter with a Start Value no longer sends 0 first, and a Variable read when a page mounts already holds its value.
 - Many smaller fixes to how nodes behave are listed in the changelog.
 
 ### Before you file a bug
