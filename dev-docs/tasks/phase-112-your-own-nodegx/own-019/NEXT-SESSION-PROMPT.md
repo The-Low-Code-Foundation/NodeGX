@@ -1,7 +1,8 @@
-# OWN-019 — s6: the series on tgz31, by day (CARRYOVER's three, the Launch looks, the editor, Pack It)
+# OWN-019 — s7: the series on tgz32, by day (CARRYOVER's three, the Launch looks, the editor, Pack It)
 
-**Written 2026-10-14 ~18:05 CEST by Opus (s5).** Read, in order: this file; the task file `../OWN-019-THE-VIBE-KIT.md`
-§7 "s5"; `VIBE-AND-LARGE4.md` § "s5's new measurements"; the P112 README's R36–R39. Say "Opus" in your first message.
+**Written 2026-10-14 ~18:05 CEST by Opus (s5); s6 (19:42–20:00, evening — no rounds) did steps 1–2 and updated this
+file.** Read, in order: this file; the task file `../OWN-019-THE-VIBE-KIT.md` §7 "s5" and "s6"; `VIBE-AND-LARGE4.md`
+§ "s5's new measurements"; the P112 README's R36–R39. Say "Opus" in your first message.
 
 **Model:** Opus. Agent under test: **Mistral Large 4 only** (`mistral-large-4`, pinned) in Vibe 2.26.1, legacy harness,
 the Vibe Code key (`MISTRAL_VIBE_API_KEY`, repo `.env`). Daytime only (before ~18:00).
@@ -48,26 +49,34 @@ has R1–R3 (4810, 4811, 4813), RL1 (4812), RL2b (4814), RL3 (4815).
 
 ## Do, in order
 
-1. **Make the lab version-agnostic (first — tgz31 can't run without it).** The packages are now **0.2.1** (a peer's
-   `c2eab03bf`, 17:46: "npm 0.2.1"); 25 references in 10 lab scripts hardcode `…-0.2.0.tgz`, and round-kit rewrites
-   the literal `"@nodegx/mcp@0.2.0"` pin (create-nodegx 0.2.1 pins `@nodegx/mcp@0.2.1`). Find the tarball by package
-   name (`nodegx-mcp-*.tgz`) and the pin by regex. Prove on tgz30 (0.2.0) AND tgz31 (0.2.1) with a dry create.
-2. **tgz31 is packed but one fix behind — repack as tgz32 at s5's last commit** (the `row-gap` rule that ignores a
-   drawing landed after it, from RL3). tgz31: `…/5d7e516e-…/scratchpad/tgz31` = `09ae8b14c` (preview packed fresh — it now ships
-   `dist/backend/cli.js`; the worktree's `noodl-preview/dist` symlink into the primary was removed first). File lists
-   vs tgz29: preview +backend/cli.js; mcp +62 starter-asset files (a peer's: Inter, Lucide, starter imagery); nothing
-   removed. 🔴 tgz31 is more than s5's levers — it carries peers' TWOLOADERS (`9e40fc5ab`), CLOUDCALLNAME and the
-   starter assets. Copy it into your own scratchpad. Prove each s5 fix from the tarballs (`own-019/mcp-call.mjs`), as
-   s5 did for tgz30: the three sizes and `row-gap` on RL1's app; a list `watch`; a preview that starts a backend.
-3. **The series on tgz31, Large 4, by day, two at a time:** quiz ×3 (**CARRYOVER needs 3 clean in a row on one kit**),
+1. ✅ **s6: the lab is version-agnostic (`ac3effdd5`).** `own-018/kit-tarball.mjs` finds `<pkg>-<version>.tgz` by
+   package name (none or two = refusal); 30 sites in 10 scripts use it; the three round scripts require create-nodegx's
+   pin to equal the packed server's version (a mixed 0.2.1-create + 0.2.0-mcp kit is refused, measured). round-kit
+   `--dry` = create + rewrite + command.txt, no Vibe. Dry creates pass on tgz30 (0.2.0) and tgz31 (0.2.1).
+2. ✅ **s6: tgz32 packed at `ac3effdd5`** — `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/af093de6-cf64-4c6a-ae7c-061079ac7fcc/scratchpad/tgz32`
+   (copy it into your own scratchpad). = tgz31 + the one `row-gap` line: same file lists for all three packages; the
+   only content diff is that line, bundled three times in mcp (`noodl-mcp.cjs`, `render-harness/drive-steps.js`,
+   `measure-from-disk.js`). Proven from the tarballs (copies in s6's `proof/`):
+   - **three sizes:** render_report renders desktop | 768x1024 | phone with no `viewports` argument.
+   - **row-gap:** RL1 fires on its three feature rows ("01" … 217 px, 18% of the 1176 px row) on tgz31 AND tgz32;
+     RL3's hero drawing (`"" and ""`, 473 px, 62%) fires on tgz31 and is silent on tgz32.
+   - **list watch:** R1 (Lisbon → Q2, watch Sydney/Canberra/Melbourne) one row per target, all white, PASSED; the
+     known-firing control o2 FAILED at the watch — Lisbon's green on **Sydney** 955–1013 ms (R3's miss, by position).
+   - **preview starts the backend:** SE1 copy (own backends dir via `NODEGX_BACKENDS_DIR`, port moved 8578 → 8681
+     because the gallery's keeper holds 8578, its stale `runtime.json` removed) → "✓ started the app's backend" and
+     GET 200; SIGINT the preview → the backend pid gone, 8681 closed; started again → back, 200; `--no-backend`
+     control → 000.
+3. **The series on tgz32, Large 4, by day, two at a time:** quiz ×3 (**CARRYOVER needs 3 clean in a row on one kit**),
    Launch ×3 (do they still drift/gap now that render_report says so?), the editor brief ×1 (`--seed` q6, the
    BACKENDSESSION brief — "start it again tomorrow" is now true; grade it AND restart the preview once by hand to see
    the backend come back), Pack It ×1. `s5lane.sh` in the s5 scratchpad is the template (cutoffs 17:00 / 16:30).
    Peek every ~20 min; read every red before believing it (s5: 3 of 4 Launch reds were the grader's).
-4. **After each Launch round:** its phone / 768 / laptop shots to Richard for the look verdict (still owed for RL1,
-   RL2b, RL3 — he has seen RL1's feature rows and asked for LAPTOPGAPS).
+4. **After each Launch round:** its phone / 768 / laptop shots to Richard for the look verdict (`open -a Preview`, never
+   a link). s6 opened RL1, RL2b, RL3 at all three sizes (rendered on tgz32, `proof/shots/`) — **ask for his verdict if
+   it is not recorded in the task file yet.** What s6 saw on desktop: all three centre a heading under a left-set
+   eyebrow (PRICING; RL3 FAQ too); RL1's feature numbers sit 217 px from their text.
 5. **Console readings** at quiet boundaries (ask in plain text; s5's ≈ €0.42/list $ needs a second clean window).
-6. **The claim write-up (AC8)** once tgz31's series is in, then **R35: Richard's own run, last.**
+6. **The claim write-up (AC8)** once tgz32's series is in, then **R35: Richard's own run, last.**
 
 ## Needs Richard
 
@@ -79,6 +88,10 @@ has R1–R3 (4810, 4811, 4813), RL1 (4812), RL2b (4814), RL3 (4815).
 
 ## Where things are
 
+- **s6 scratchpad:** `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/af093de6-cf64-4c6a-ae7c-061079ac7fcc/scratchpad`
+  — `tgz32` (+ a copy of `tgz31`), `dry/` (the two dry creates), `proof/` (the app copies, render/watch answers,
+  `run-preview.sh`, `se1home/`, `shots/RL1|RL2b|RL3`). The pack worktree `OpenNoodl-worktrees/own019-s4-pack` is at
+  `ac3effdd5`.
 - **s5 scratchpad:** `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/5d7e516e-4c12-4421-9a2c-2e6af7d4ecdc/scratchpad`
   — `tgz30`, `tgz31`, `v/` (every round, `lane.log`, `allowance.txt`), `s5lane.sh`, `s5rl2b.sh`, `lchk/` (the Launch
   control `lctl`, the 12 mutants `lmut`, copies of RL1/RL2b/GL1), `emut/` (the editor mutants), `layout-corpus.js`

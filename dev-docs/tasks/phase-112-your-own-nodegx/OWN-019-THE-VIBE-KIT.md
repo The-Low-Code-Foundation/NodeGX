@@ -511,4 +511,13 @@ post-tool, post-agent) — and the kit uses none of them yet.
   - **Money:** €51.54 → €57.16 over ≈ $13.5 list ⇒ ≈ €0.42 per list $ (s4's "÷ 2" was against the recorder's low sum).
   - **tgz31 packed (`09ae8b14c`, 0.2.1 — a peer's version bump):** s5's fixes plus peers' starter assets, TWOLOADERS,
     CLOUDCALLNAME. The lab hardcodes 0.2.0 tarball names — s6's first job.
+- **s6 (2026-10-14, 19:42–20:00, Opus — evening, so no rounds):**
+  - **The lab is version-agnostic (`ac3effdd5`):** `own-018/kit-tarball.mjs` finds a kit's tarballs by package name;
+    the round scripts require create-nodegx's pin to equal the packed server's version (a mixed kit is refused,
+    measured); round-kit `--dry`. Dry creates on tgz30 (0.2.0) and tgz31 (0.2.1).
+  - **tgz32 = `ac3effdd5`** = tgz31 + the drawing-blind `row-gap` (the only content diff). Proven from the tarballs:
+    three sizes by default; RL1's feature rows fire on both kits, RL3's hero drawing fires on tgz31 only; a list
+    `watch` is clean on R1 and catches o2's 58 ms green on Sydney (the known-firing control); the preview starts SE1's
+    backend (a copy on its own port), stops it on SIGINT, starts it again, and `--no-backend` leaves it off.
+  - RL1, RL2b and RL3 shots at three sizes (tgz32) opened for Richard's look verdict.
 
