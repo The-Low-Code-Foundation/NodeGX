@@ -4,7 +4,7 @@
 properly via main*). **Model:** **Opus** for the cut point, the gates and the measurements; the changelog and release
 notes go through the content-authoring skill.
 
-**Status: 🟡 — s12 (2026-10-11/12): `v0.4.0` TAGGED on `main` (`2a258a4b5`, PR #48, R22); the Release run builds the draft. Left: G8–G10, Publish (§9). Earlier: G1 measured, G2 written and approved, R17 built and driven, OPENWRITES fixed (§6, §7). The version is bumped on `cline-dev` (`88366e69f`, pushed). Nothing is pushed or branched for the release yet.**
+**Status: 🟡 — s13 (2026-10-14): the first draft was BROKEN (blank window, no `fast-xml-parser`), never published. RE-CUT (R26, R27, §11): fix `0728e42f4`, everything on `cline-dev` folded in, PR #49 `release/0.4.0` → `main`. Next: #49's six required checks → merge → delete the draft + `v0.4.0` tag → re-tag → Release run → G8–G10 on the new DMG → Publish. Before s13: s12 (2026-10-11/12): `v0.4.0` TAGGED on `main` (`2a258a4b5`, PR #48, R22); the Release run builds the draft. Left: G8–G10, Publish (§9). Earlier: G1 measured, G2 written and approved, R17 built and driven, OPENWRITES fixed (§6, §7). The version is bumped on `cline-dev` (`88366e69f`, pushed). Nothing is pushed or branched for the release yet.**
 
 ## 1. The person sentence
 
@@ -215,3 +215,32 @@ Mac on 0.3.0 would be offered them. **R25 (Richard): re-run later today, no code
 ~14:20 CEST (`gh run rerun 38228960399 --failed`). `e471cb8e6` on `cline-dev` retries the staple over 30–240 s for
 the next release (a re-run of this tag's run does not use it).
 
+## 11. Session 13 (2026-10-14, Opus) — the draft would not start; the re-cut
+
+- **Richard downloaded the draft's Apple Silicon DMG: a blank launcher,** devtools `Cannot find module
+  'fast-xml-parser'` from `src/editor/index.bundle.js`. Cause: the production webpack leaves every root
+  `node_modules` package external (`get-externals-modules.js`), and electron-builder packs only what `noodl-editor`
+  declares. Parse XML / Parse Feed (`fcf68a1c7`, `75fd8ef10`) brought it in through `noodl-runtime` and
+  `nodegx-node-spec`. **Measured on the mounted DMG's `app.asar`:** of every bare `require` in the three bundles,
+  `fast-xml-parser` is the only package missing. Linux and Windows build from the same package list (inferred, not
+  opened). A dependency walk is not the honest list: it called `deprecation` missing, but the asar holds it (the
+  editor's nested `@octokit/request-error`).
+- **Fix `0728e42f4`:** `fast-xml-parser ^4.5.7` in `noodl-editor` dependencies (+ its lock line), and
+  `build/check-packaged-modules.js` as the `afterPack` hook. It reads the packed asar and throws before signing if a
+  bundle requires a package the asar lacks. **Control pair on the real artefacts:** the 0.4.0 draft's asar → exit 1
+  naming `fast-xml-parser` only; 0.3.0's → exit 0. Not yet run inside electron-builder: the Release run is its
+  first firing (a wrong asar path would fail loud, not silent).
+- **R26 (Richard): fold in everything** on `cline-dev` since the tag (154 commits, ~45 touching the app).
+  **R27: re-tag `v0.4.0`** (the draft was never published) rather than 0.4.1.
+- **G1 again:** `git merge-tree --write-tree origin/main 0728e42f4` exit 0, the merged tree equals HEAD's (0 diff
+  lines). `release/0.4.0` fast-forwarded to `ecd5045c8` (HEAD + `main`), then `e1d99d3fd` (the changelog commit,
+  same tree as `cline-dev` `8763a64c6`). PR #49. The survey (subagent, spot-checked: `6253b4c54`, `a5abefe4d`,
+  `dd7ff4756`, `be46f18bc`, `agentConfig.ts`): no feature flag, nothing marked *do not ship*; the node version bumps
+  are spec versions with `migration: none`, so none rewrites a project on open.
+- **G2 again (`8763a64c6`):** the *two folded sections* bullet was wrong since `6253b4c54` (the *How this node works*
+  window replaced them) — rewritten. Added the fold-in's features and fixes; dated 2026-10-14 (re-date if the tag
+  lands later). Held back: the six-digit email code (`b5fba6137`, off, no switch in the app, P119 owes the client),
+  the rules column's *It warns you when* (`99625cc67`, never driven in the editor), the npm-only Vibe profile.
+  GITHUB-RELEASE-0.4.0.md and the what's-new post updated to match.
+- **G10 for Richard on the new DMG, added by the fold-in:** the *How this node works* window (signed off in dev,
+  not in a packaged build), a Counter with Min above Max, a new Aggregate Records in a cloud function.
