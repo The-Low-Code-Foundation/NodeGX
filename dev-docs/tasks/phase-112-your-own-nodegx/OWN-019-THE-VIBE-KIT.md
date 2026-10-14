@@ -471,4 +471,28 @@ post-tool, post-agent) — and the kit uses none of them yet.
   - **R37: the levers first** (NOTELOOP, TAPHOLD, BACKENDSESSION, Q1's empty sitting, recorder-vs-Vibe $, the editor
     grader's mutants) **into tgz30, then the series on it** — nothing so far counts as "three in a row on one kit"
     (o2 tgz27, L1 tgz28, Q1/E1 tgz29). Q2 and SL1 started and stopped by that ruling.
+- **s5 (2026-10-14, Opus, from 14:00 CEST): the levers into tgz30, then the Large 4 series on it.**
+  - **NOTELOOP fixed (`3153bb4fc`):** the Vibe AGENTS.md says write NEXT.md whole with `write_file`; the hand-over hook
+    refuses a fourth note write after this session's NEXT.md (replayed on E1: stopped at call 92, ~1 h earlier).
+  - **TAPHOLD was misread, then fixed (`d256c1ab1`):** the tap never stopped the glide — any wait reads 3788 / 3352 /
+    3020; s4's 101 px was a read taken straight after the tap. Worse, found re-measuring: the runner's own
+    `scrollIntoView` glided under `scroll-behavior: smooth`, so **every target off screen was refused**. Now a tap
+    answers once scrolling stops (≤2 s) and locate centres instantly.
+  - **Q1's empty sitting = DESCRIBEINSIDE (`620e6723e`):** `describe: true` sent inside `arguments` (as the first-frame
+    note read) was stripped, a dummy drive ran, the agent grepped outside its folder and headless Vibe's "Allow grep?"
+    ended the sitting, recorded "finished". call_tool honours it now; round-kit records outcome `approval`.
+  - **Recorder vs Vibe $ = RECORDERTAIL (`bd149ba2c`):** the proxy searched only the last 8 KB of each stream; a final
+    line carrying a big tool call plus `usage` is longer, so L1 sitting 1 lost 8 of 43 calls' usage. 🔴 **s4's "console
+    € = list $ ÷ 2, number for number" compared the console with the recorder's low sum — unproven; re-measure from
+    Vibe's own export (`vibeUsd`).**
+  - **The editor grader proven (`b090c30ec`):** 4 mutants of SE1 (seconds, colours, marker, browser-only), each failing
+    exactly its checks; control 13/13. 🔴 Its first control graded the WRONG backend: the copy kept the round's port,
+    the gallery held it, provision failed, the grade went on and saved "Europe Quiz" into the gallery's SE1. Now the
+    copy gets its own port and a backend that doesn't start stops the grade; the gallery row restored (Richard's OK).
+  - **BACKENDSESSION fixed to R38 (`c04c1cc63`):** the preview starts the app's own backend (parent-pid, a `preview`
+    runtime record an agent adopts — same pid and port, measured — a look every 10 s); not in tgz30.
+  - **tgz30 = `b090c30ec`** (mcp + create-nodegx packed in the s4 pack worktree; preview = tgz29's). File list as tgz29
+    (+ the core-only OWN-007 skill, absent from a Vibe kit). Proven from the tarballs: the read straight after the
+    tap 99 (tgz29) → 3788 (tgz30); an off-screen "Yearly" pressed; describe-inside returns the schema; a kit made by
+    tgz30 refuses the 4th note write.
 
