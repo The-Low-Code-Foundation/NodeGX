@@ -322,3 +322,50 @@ test('P112 OWN-019 s3: the hand-over — at 100 tool calls, or once a session wr
   // A broken call never blocks a person's work.
   assert.equal(spawnSync(process.execPath, [hook], { cwd: dir, input: 'not json', encoding: 'utf8' }).status, 0);
 });
+
+test('P112-OWN019-NOTELOOP: after this session writes NEXT.md, three more writes to the notes pass and the fourth is refused', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  assert.equal(spawnSync(process.execPath, [BIN, dir, '--vibe'], { encoding: 'utf8' }).status, 0);
+  assert.match(fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8'), /Write `NEXT\.md` whole, in one `write_file` — never patch it/);
+  const hook = path.join(dir, '.vibe', 'hooks', 'hand-over.mjs');
+  const session = path.join(tmp(), 'session_20261014_101451_5b6889f3');
+  fs.mkdirSync(session);
+  const transcript = path.join(session, 'messages.jsonl');
+  fs.writeFileSync(transcript, '');
+  const started = Date.now() - 60000;
+  fs.writeFileSync(path.join(session, 'meta.json'), JSON.stringify({ start_time: new Date(started).toISOString() }));
+  const docs = path.join(dir, 'editor', 'docs');
+  fs.mkdirSync(docs, { recursive: true });
+  const next = path.join(docs, 'NEXT.md');
+  const ask = (tool_name, tool_input) => {
+    const run = spawnSync(process.execPath, [hook], { cwd: dir, input: JSON.stringify({ session_id: 's', transcript_path: transcript, cwd: dir, tool_name, tool_call_id: 'c', tool_input }), encoding: 'utf8' });
+    assert.equal(run.status, 0, run.stderr);
+    return run.stdout ? JSON.parse(run.stdout).decision : 'allow';
+  };
+  // Vibe 2.26.1's transcript: the asked-about call is recorded after the hook answers.
+  const did = (name, file_path) =>
+    fs.appendFileSync(transcript, JSON.stringify({ role: 'assistant', content: '', tool_calls: [{ id: 'x', type: 'function', function: { name, arguments: JSON.stringify({ file_path }) } }] }) + '\n');
+  // Control: an earlier session's NEXT.md closes nothing — the notes are open however often they are written.
+  fs.writeFileSync(next, '# Next session: prove it\n');
+  fs.utimesSync(next, new Date(started - 3600000), new Date(started - 3600000));
+  for (let i = 0; i < 6; i++) {
+    assert.equal(ask('edit', { file_path: path.join(docs, 'CHECKLIST.md') }), 'allow');
+    did('edit', path.join(docs, 'CHECKLIST.md'));
+  }
+  fs.writeFileSync(transcript, '');
+  // This session writes NEXT.md whole; then three more writes to the notes (mark a line, fix a word) pass.
+  assert.equal(ask('write_file', { file_path: next }), 'allow');
+  did('write_file', next);
+  fs.writeFileSync(next, '# Done\n');
+  for (const f of ['CHECKLIST.md', 'NEXT.md', 'PLAN.md']) {
+    assert.equal(ask('edit', { file_path: path.join(docs, f) }), 'allow');
+    did('edit', path.join(docs, f));
+  }
+  // The fourth is refused, NEXT.md included, and the refusal says why and what to do.
+  assert.equal(ask('edit', { file_path: next }), 'deny');
+  assert.equal(ask('write_file', { file_path: path.join(docs, 'PLAN.md') }), 'deny');
+  const run = spawnSync(process.execPath, [hook], { cwd: dir, input: JSON.stringify({ transcript_path: transcript, cwd: dir, tool_name: 'edit', tool_input: { file_path: next } }), encoding: 'utf8' });
+  assert.match(JSON.parse(run.stdout).reason, /^The notes are done: editor\/docs\/NEXT\.md is written/);
+  // Reading stays open.
+  assert.equal(ask('read_file', { file_path: next }), 'allow');
+});

@@ -64,9 +64,10 @@ A session has a size. When it reaches about 100 tool calls, or a fix has failed 
 on: finish what you're on, mark the checklist, and write `docs/NEXT.md` — first line `# Next session: <the step>`,
 then where things are (what is built, what passes, what is left), what you learned, and what to try. Then stop, ending
 with: *Next: <the step>. Type /clear, then "continue".* A new session picks it up from that note with a clear head.
-Handing over is part of the process, never a failure. This folder's hook (`.vibe/hooks.toml`) holds the line the way
-a team's tooling does: at 100 tool calls it asks for the hand-over, and once `NEXT.md` is written only the notes stay
-open.
+Handing over is part of the process, never a failure. Write `NEXT.md` whole, in one `write_file` — never patch it
+with `edit`; to change it, write it whole again. This folder's hook (`.vibe/hooks.toml`) holds the line the way a
+team's tooling does: at 100 tool calls it asks for the hand-over; once `NEXT.md` is written only the notes stay open,
+and after three more writes to them those close too.
 
 When I say "continue" (or nothing new), carry on from `NEXT.md`. When I say "just build it" or "don't wait for me",
 build it without stopping to ask me questions — the process is how you build it. When I ask for a change, add its
