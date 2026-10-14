@@ -24604,5 +24604,50 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "an Insert Text with nothing to insert, then a Set, in one frame on a field that holds the keyboard: both Unchanged at the frame's end, which still writes the Value it waited for as the start value — a remount shows it",
+    "because": "P107-S95-SEED20738: the frame-end branch that answers an Insert and a Set both Unchanged (text-input.ts `setText` :522 writes the start value on every path; `edit` :351 inserts nothing) was reached only by a seed's luck, and its drop-set mutant survived on 20740. With Run On Value Change off the Value waits for Set, so only that write puts it in the start value, and the next mount starts from it",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "runOnChange-startValue",
+        "value": false
+      },
+      {
+        "set": "startValue",
+        "value": "abc"
+      },
+      "settle",
+      {
+        "signal": "insert"
+      },
+      {
+        "signal": "set"
+      },
+      "settle",
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "insert"
+      },
+      "settle"
+    ]
   }
 ]

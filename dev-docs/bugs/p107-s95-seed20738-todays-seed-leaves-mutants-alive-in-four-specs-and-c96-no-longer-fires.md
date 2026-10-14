@@ -30,3 +30,13 @@ swap-branch ×2), Video, Drag (`snapToPositionY.value` swap-branch), Delete Reco
 swap-branch), WebSocket (`connect` swap-branch), JavaScriptFunction (`afterInputs` drop-set — the one survivor on both days).
 DbModel2, Router and Radio Button, red on 20738, killed every mutant on 20739. So the full run is red on most days for a reason
 no session caused, and that red hides a real one; the bug's fix (a hand scenario per survivor) is now nine scenarios, not four.
+
+**s104 (2026-10-14): two of s103's three pinned by hand scenarios.** The Slider's two `person.click` swap-branch survivors
+(20739) are the click whose paint takes a pressed, focused slider off the page. A click that took nothing off the page leaves
+that to the next paint, which says the same in the same settle. So the scenario follows the click with a Focus, which reads
+the page without painting: Unchanged when the slider is off it, Done when it is still on it. The Text Input's frame-end
+drop-set (20740) is an Insert with nothing to insert and a Set in one frame, both Unchanged. That frame end still writes the
+waiting Value into the start value, and a remount shows it once Run On Value Change is off. Both specs now conform at 20739
+and 20740. **Left:** Dropdown `person.blur` (20739, and stranger round 4). Its scenario file is in round 4's guarded set, so
+adding one costs the 36-minute re-grade. It goes with R38's format change, which re-grades every round anyway. Delete Record
+and DbModel2 have not been re-measured since s102.
