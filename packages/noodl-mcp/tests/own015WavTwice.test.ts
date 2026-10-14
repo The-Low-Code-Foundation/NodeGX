@@ -7,7 +7,7 @@
  * (today's `gemini-3.8-flash-tts`, `audio/wav`) must play byte for byte as it came, and raw samples (`audio/L16`,
  * older Gemini) must get exactly one 44-byte header.
  */
-import { getExample, listExamples } from '../src/catalog';
+import { allExamples, getExample, listExamples } from '../src/catalog';
 
 const ID = 'fn-play-audio-a-cloud-function-returns';
 
@@ -96,5 +96,31 @@ describe('P112-S15-WAVTWICE — the example that plays a cloud function’s audi
     const script = String(nodesOf(cloud).find((n) => n.id === 'speak_tts')!.parameters!.functionScript);
     expect(script).toContain("'x-goog-api-key': key");
     expect(script).not.toMatch(/\?key=/);
+  });
+});
+
+/**
+ * The function a caller names is the cloud component's path after `/#__cloud__/` (noodl-viewer-cloud, the call's
+ * `function` parameter). Two examples called `AddNumbers` / `TaskStats` while their components were
+ * `/Cloud Functions/Add Numbers` / `/Cloud Functions/Task Stats`, outside the cloud sheet: an agent copying them is
+ * told by create_component to put the function under `#__cloud__/`, and then the call names nothing. Control: the
+ * check finds the calls it checks (there are some).
+ */
+describe('every example call names a cloud function the same example ships', () => {
+  const calls = allExamples().flatMap((example) => {
+    const cloud = new Set(
+      example.components.filter((c) => c.name.startsWith('/#__cloud__/')).map((c) => c.name.slice('/#__cloud__/'.length))
+    );
+    return example.components.flatMap((c) =>
+      nodesOf(c)
+        .filter((n) => n.type === 'CloudFunction2')
+        .map((n) => ({ example: example.id, fn: String(n.parameters?.function ?? ''), cloud }))
+    );
+  });
+
+  it('has calls to check', () => expect(calls.length).toBeGreaterThanOrEqual(3));
+
+  it.each(calls.map((c) => [c.example, c.fn, c.cloud] as const))('%s calls "%s", which it ships', (_id, fn, cloud) => {
+    expect([...cloud]).toContain(fn);
   });
 });
