@@ -48,12 +48,19 @@ const findApp = (dir, depth = 0) => {
   }
   return null;
 };
-const APP = findApp(target);
-if (!APP) throw new Error(`no nodegx.project.json under ${target}`);
-const ROUNDHOME = path.resolve(opt('--home', path.join(target, 'home')));
-const OUT = path.resolve(opt('--out', path.join(fs.existsSync(path.join(target, 'work')) ? target : APP, 'grade')));
+const ROUND_APP = findApp(target);
+if (!ROUND_APP) throw new Error(`no nodegx.project.json under ${target}`);
+const ROUND_HOME = path.resolve(opt('--home', path.join(target, 'home')));
+const OUT = path.resolve(opt('--out', path.join(fs.existsSync(path.join(target, 'work')) ? target : ROUND_APP, 'grade')));
 fs.mkdirSync(OUT, { recursive: true });
 const LABHOME = fs.mkdtempSync(path.join(OUT, 'home-'));
+// 🔴 The grade SAVES an edit — into the app's backend, on disk. Graded in place, the round's own data became the
+// grader's ("Europe Quiz"), and a second grade found no Portugal to edit (E1/SE1, s4). So every grade works on a COPY
+// of the app and of the backends under the round's HOME (their config holds no absolute path), made fresh each time.
+const APP = path.join(LABHOME, 'app', path.basename(ROUND_APP));
+fs.cpSync(ROUND_APP, APP, { recursive: true, filter: (s) => !/[\\/](\.previews|grade|node_modules[\\/]\.cache)([\\/]|$)/.test(s) });
+const ROUNDHOME = path.join(LABHOME, 'roundhome');
+if (fs.existsSync(path.join(ROUND_HOME, '.noodl', 'backends'))) fs.cpSync(path.join(ROUND_HOME, '.noodl', 'backends'), path.join(ROUNDHOME, '.noodl', 'backends'), { recursive: true });
 const cleanEnv = (home) => {
   const env = { ...process.env, HOME: home, npm_config_cache: path.join(LABHOME, '.npm'), TMPDIR: LABHOME };
   for (const k of Object.keys(env)) if (k.startsWith('NODEGX_') || k.startsWith('NOODL_') || /KEY|TOKEN|SECRET/.test(k)) delete env[k];
@@ -289,7 +296,9 @@ try {
   await A.shot('4-saved');
   check('saved', !!sv && savedMs !== null, { pressed: !!sv, lands: sv?.lands ?? null, ms: savedMs });
   await sleep(1000);
-  await A.send('Page.reload', { ignoreCache: true });
+  // Back to the quiz's own start screen in the same browser — not a reload of the editor, where the new title sits in a
+  // field and is never text on the page (SE1's first grade read that as "not played").
+  await A.send('Page.navigate', { url });
   await sleep(2500);
   const plays = await A.seen('/europe quiz/i');
   check('plays', plays, { titleAfterReload: plays });
@@ -314,6 +323,10 @@ try {
   await B.shot('7-madrid');
   check('rightanswer', madrid.ok && !near(madrid.rgb, WRONG), madrid);
   const q2 = await B.waitFor(() => B.seen('/what is the capital of australia\\?/i'), 5000);
+  // The question's words can land a moment before its answer buttons (E1, SE1: text shown, no Sydney yet) — wait for
+  // the answers too, then tap.
+  await B.waitFor(() => B.page(`['Sydney', 'Canberra', 'Melbourne'].every((n) => leaves(exact(n)).length > 0)`), 3000);
+  await sleep(200);
   const q2answers = await B.page(`['Sydney', 'Canberra', 'Melbourne'].map((n) => leaves(exact(n)).length > 0)`);
   check('unchanged', q2 !== null && q2answers.every(Boolean), { q2: q2 !== null, answers: q2answers });
   await pressText(B, `/^sydney$/i`);
@@ -346,7 +359,7 @@ for (const n of CHECK_NAMES) if (!checks[n]) checks[n] = { ok: false, notReached
 await stopPreview();
 await stopBackend();
 const passed = CHECK_NAMES.filter((n) => checks[n].ok).length;
-const result = { app: APP, at: new Date().toISOString(), score: `${passed}/${CHECK_NAMES.length}`, passed, stopped: fatal, checks, observed };
+const result = { app: ROUND_APP, gradedCopy: true, at: new Date().toISOString(), score: `${passed}/${CHECK_NAMES.length}`, passed, stopped: fatal, checks, observed };
 fs.writeFileSync(path.join(OUT, 'grade.json'), JSON.stringify(result, null, 2) + '\n');
 try { fs.rmSync(LABHOME, { recursive: true, force: true }); } catch {}
 console.log(`\nSCORE ${result.score}  ${CHECK_NAMES.map((n) => `${checks[n].ok ? '✓' : '✗'}${n}`).join(' ')}${fatal ? `  (stopped: ${fatal})` : ''}`);
