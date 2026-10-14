@@ -3,7 +3,7 @@
 // vanish) into one gallery folder, served by the round's own PACKED preview on a fixed port, and listed on an index
 // page with its brief, kit, hour, grade, cost and the grader's screenshots.
 //
-//   node gallery.mjs add <round> <round-root|app-dir> --tgz <tgz-dir> --brief <name> [--grade <grade.json>] [--note "…"]
+//   node gallery.mjs add <round> <round-root|app-dir> --tgz <tgz-dir> --brief <name> [--model "GLM-5.3 · Vibe"] [--grade <grade.json>] [--note "…"]
 //   node gallery.mjs serve      start (or restart) every app's preview and the index, detached; prints the URLs
 //   node gallery.mjs stop       stop them (by the pids this script recorded, never by name)
 //   node gallery.mjs list
@@ -61,6 +61,7 @@ if (cmd === 'add') {
   const entry = {
     round,
     brief: opt('--brief', '?'),
+    model: opt('--model', 'Mistral Large 4 · Vibe'),
     kit,
     app: path.relative(GALLERY, dest),
     port: prev >= 0 ? apps[prev].port : INDEX_PORT + 1 + apps.length,
@@ -108,14 +109,14 @@ if (cmd === 'add') {
     }
     const rows = list.map((a) => {
       const shots = fs.existsSync(path.join(GALLERY, 'shots', a.round)) ? ['phone.png', 'laptop.png', '1-top.png'].filter((f) => fs.existsSync(path.join(GALLERY, 'shots', a.round, f))) : [];
-      return `<tr><td><b>${esc(a.round)}</b></td><td>${esc(a.brief)}</td><td>${esc(a.kit)}</td><td>${esc(a.score ?? '—')}${a.failed?.length ? `<br><small>✗ ${esc(a.failed.join(', '))}</small>` : ''}</td>
+      return `<tr><td><b>${esc(a.round)}</b></td><td>${esc(a.model ?? 'Mistral Large 4 · Vibe')}</td><td>${esc(a.brief)}</td><td>${esc(a.kit)}</td><td>${esc(a.score ?? '—')}${a.failed?.length ? `<br><small>✗ ${esc(a.failed.join(', '))}</small>` : ''}</td>
         <td><a href="http://localhost:${a.port}" target="_blank">open :${a.port}</a></td><td>${shots.map((f) => `<a href="/shots/${a.round}/${f}" target="_blank">${f.replace('.png', '')}</a>`).join(' · ')}</td><td>${esc(a.note)}</td></tr>`;
     }).join('\n');
     res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-    res.end(`<!doctype html><meta charset="utf-8"><title>OWN-019 Mistral apps</title>
+    res.end(`<!doctype html><meta charset="utf-8"><title>OWN-019 agent apps</title>
 <style>body{font:15px/1.5 -apple-system,system-ui,sans-serif;margin:32px;color:#1d1d1f;background:#fafafa}table{border-collapse:collapse;width:100%;background:#fff}td,th{padding:10px 12px;border-bottom:1px solid #e5e5e5;text-align:left;vertical-align:top}th{font-size:13px;color:#666}small{color:#b3261e}</style>
-<h1>Apps Mistral Large 4 built (OWN-019 s4)</h1><p>Each runs from the round's own packed preview. Graded by the brief's grader; the look is yours to judge.</p>
-<table><tr><th>Round</th><th>Brief</th><th>Kit</th><th>Grade</th><th>App</th><th>Screens</th><th>Note</th></tr>${rows}</table>`);
+<h1>Apps the agents built (OWN-019 s4)</h1><p>Each runs from the round's own packed preview. Graded by the brief's grader; the look is yours to judge.</p>
+<table><tr><th>Round</th><th>Agent</th><th>Brief</th><th>Kit</th><th>Grade</th><th>App</th><th>Screens</th><th>Note</th></tr>${rows}</table>`);
   }).listen(INDEX_PORT, '127.0.0.1');
 } else if (cmd === 'list') {
   for (const a of apps) console.log(`${a.round.padEnd(6)} :${a.port}  ${a.brief.padEnd(8)} ${a.kit}  ${a.score ?? '—'}  ${a.failed?.join(',') ?? ''}  ${a.note}`);

@@ -127,6 +127,20 @@ const thinking = opt('--thinking', null);
 if (thinking) next = next.replace(/^thinking = "[a-z]+"$/m, `thinking = "${thinking}"`); // a control arm, recorded in command.txt
 const temperature = opt('--temperature', null); // OWN-019 s2: a control arm, as --thinking
 if (temperature) next = next.replace(/^temperature = [\d.]+$/m, `temperature = ${temperature}`);
+// OWN-019 s4 (Richard): `--model zai-glm-5-3` — the same kit, lab and key with another model Mistral serves, for
+// comparison. GLM-5.3 is Vibe's own routed default (Z.ai's model, hosted by Mistral; `GET /v1/models` lists
+// `zai-glm-5-3`). Its entry sets no `thinking`: Vibe's backend notes the zai-glm family rejects an explicit
+// reasoning value, so the server's default applies. Prices are Z.ai's list ($1.40 in / $4.40 out, from a third-party
+// listing, unverified; cached assumed 10% as Large 4's) — its Vibe $ is approximate; the console reading is the money.
+const MODELS = {
+  'zai-glm-5-3': ['name = "zai-glm-5-3"', 'provider = "mistral"', 'alias = "zai-glm-5-3"', 'display_name = "GLM-5.3"', 'max_context_length = 1000000', 'input_price = 1.40', 'output_price = 4.40', 'cached_input_price = 0.14']
+};
+const model = opt('--model', null);
+if (model) {
+  if (!MODELS[model]) throw new Error(`--model ${model}: the lab knows ${Object.keys(MODELS).join(', ')}`);
+  next = next.replace(/^active_model = "[^"]+"$/m, `active_model = "${model}"`).replace(/\n\[\[mcp_servers\]\]/, `\n[[models]]\n${MODELS[model].join('\n')}\n\n[[mcp_servers]]`);
+  if (!next.includes(`active_model = "${model}"`)) throw new Error('the kit config has no active_model line to switch');
+}
 fs.writeFileSync(cfgFile, next);
 fs.writeFileSync(path.join(root, 'vibe-config.toml'), next);
 
@@ -153,7 +167,7 @@ const argsFor = (prompt, out) => [
   '--max-turns', opt('--max-turns', '250'),
   '--workdir', APPS
 ];
-fs.writeFileSync(path.join(root, 'command.txt'), ['uvx', ...argsFor(path.resolve(promptFile), OUT)].join(' ') + `\n# key: ${keyName}; kit: ${kit}${thinking ? `; thinking = ${thinking}` : ''}${temperature ? `; temperature = ${temperature}` : ''}${sittings > 1 ? `; sittings ≤ ${sittings}, later prompts ${CONTINUE}, max-total $${maxTotal}` : ''}\n`);
+fs.writeFileSync(path.join(root, 'command.txt'), ['uvx', ...argsFor(path.resolve(promptFile), OUT)].join(' ') + `\n# key: ${keyName}; kit: ${kit}${model ? `; model = ${model}` : ''}${thinking ? `; thinking = ${thinking}` : ''}${temperature ? `; temperature = ${temperature}` : ''}${sittings > 1 ? `; sittings ≤ ${sittings}, later prompts ${CONTINUE}, max-total $${maxTotal}` : ''}\n`);
 
 // OWN-019 s2: 12 was shorter than Large 4's own productive thinks. Vibe writes a think to the journal only when it
 // ends; the long design thinks of rounds that finished took up to 10.1 min (9–17 KB/min), and v4/v8 were stopped at
