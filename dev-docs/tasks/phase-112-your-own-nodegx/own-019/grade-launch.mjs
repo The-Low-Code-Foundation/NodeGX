@@ -30,6 +30,8 @@
 //   scale     ≥3 distinct font sizes in shown text
 //   contrast  every feature sentence ≥ 4.5:1 against the background painted behind it (read from a screenshot)
 //   phone     no sideways scroll and no shown text past the right edge at 390 wide
+//   gaps      at 1280: no row with a hole between its parts' ink (render-measure's row-gap; s5 LAPTOPGAPS, R39)
+//   align     at 1280: no section centred by its heading with a part off that centre (alignment-drift)
 //   laptop    at 1280×800 the layout differs: two feature titles side by side, or ≥2 pairs of long text lines side by
 //             side (phone has none)
 // A press is a real CDP mouse press at the element's centre, its target re-read just before; typing is CDP insertText
@@ -43,6 +45,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
+// s5 LAPTOPGAPS (R39): the render measure itself, so this grader and render_report read a laptop page the same way.
+const rm = createRequire(import.meta.url)('../../../../packages/nodegx-render-measure/src/index.js');
 
 const argv = process.argv.slice(2);
 const opt = (name, dflt) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : dflt; };
@@ -75,7 +79,7 @@ const DEFAULT_COLOURS = [...fs.readFileSync(path.resolve(path.dirname(new URL(im
   .map((m) => [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16)));
 const FEATURES = ['Plan the week in one sitting', "See what's left at a glance", 'Quiet by default'];
 const checks = {};
-const CHECK_NAMES = ['hero', 'scroll', 'features', 'pricing', 'faq', 'refuse', 'sending', 'joined', 'fail', 'reload', 'notyou', 'font', 'palette', 'scale', 'contrast', 'phone', 'laptop'];
+const CHECK_NAMES = ['hero', 'scroll', 'features', 'pricing', 'faq', 'refuse', 'sending', 'joined', 'fail', 'reload', 'notyou', 'font', 'palette', 'scale', 'contrast', 'phone', 'laptop', 'gaps', 'align'];
 const check = (name, ok, data = {}) => { checks[name] = { ok: !!ok, ...data }; say(`check ${name}`, checks[name]); return ok; };
 const observed = {};
 const found = {};
@@ -590,6 +594,12 @@ try {
     return { pairs: n, features: ft, featsRow };
   })()`;
   const lap = await page(sideBySide);
+  // s5 LAPTOPGAPS (R39, Richard on RL1's rows): render-measure's own measure at 1280, judged by its own summarise.
+  //   gaps   no `row-gap` — two parts of one row with a hole between their ink (RL1's number given a fifth of the page)
+  //   align  no `alignment-drift` — a section centred by its heading with a part off that centre (L1's price)
+  const lay = rm.summarise({ desktop: { ...(await ev(rm.measureExpression([], []))), requested: { width: 1280, height: 800 }, consoleErrors: [] } }).findings;
+  const rowGaps = lay.filter((f) => f.code === rm.RenderFinding.RowGap).map((f) => f.evidence);
+  const drifts = lay.filter((f) => f.code === rm.RenderFinding.AlignmentDrift).map((f) => f.evidence);
   await fullShot('laptop');
   await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   await send('Page.reload', { ignoreCache: true });
@@ -600,6 +610,8 @@ try {
   // s5: +1, not +2 — RL1's laptop page is two-column (hero beside its card, a number column beside each feature) and
   // read 1 pair to the phone's 0; +2 failed a layout that plainly adapts.
   check('laptop', lap.featsRow || lap.pairs >= ph.pairs + 1, { laptop: lap, phone: ph });
+  check('gaps', rowGaps.length === 0, { rowGaps: rowGaps.map((g) => `${g.left} | ${g.gap}px of ${g.rowWidth} | ${g.right}`) });
+  check('align', drifts.length === 0, { drifts: drifts.map((d) => `"${d.text}" ${d.offBy}px off "${d.centredText}"`) });
 } catch (e) {
   fatal = String(e.message || e);
   say('stopped', { why: fatal });
