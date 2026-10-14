@@ -2,6 +2,7 @@
 id: P112-OWN019-WATCHONE
 title: "drive_page's `watch` reads one target, and nothing says which — R3 proved \"nothing is left over\" by watching Canberra (answer 2) after tapping Lisbon (answer 1), while the last question's green lands by position on Sydney (answer 1): its proof passed, the grader saw the flash on every question"
 status: fixed
+commit: 7f6bee6d9
 phase: P112
 task: OWN-019
 severity: medium
