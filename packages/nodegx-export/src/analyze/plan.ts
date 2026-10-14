@@ -1015,16 +1015,16 @@ const NOW_OUTPUTS: Record<string, 'date' | 'timestamp' | 'iso'> = {
 /**
  * One argument of an emitted date helper, in the helper's own parameter order.
  *
- * `enum: true` marks a port the editor constrains to a fixed set. A wire on one of those defers
- * the node — not out of caution, but because the interpreter **throws** on a unit it does not
- * know (`addToDate`'s final `else`) rather than answering, and an export whose failure mode is a
- * crash in someone's page is worse than one that says it did not translate the node.
+ * There used to be an `enum: true` here, and a wire on such a port deferred the node, because the
+ * interpreter threw on a Unit it did not know. P109 ISL-026 (P107-C16 / D15) made the setter count
+ * an unknown or empty Unit as days (`datemath.ts` `unitOrDays`), and Date Compare's Granularity
+ * never threw (an unknown one truncates nothing). So the emitted helpers take both as values,
+ * coerced as the setters coerce them, and a wired one translates (P109-S21-EXPORTDATEUNITWIRED).
  */
 interface DateArgSpec {
   port: string;
   /** What `initialize` writes — the real default. A declared `default` never runs its setter. */
   fallback?: string | number | boolean;
-  enum?: true;
 }
 
 /**
@@ -1044,7 +1044,7 @@ interface DateArgSpec {
 const DATE_NODES: Record<string, { fn: DateHelper; args: DateArgSpec[]; outputs: Record<string, string | null> }> = {
   'net.noodl.DateAdd': {
     fn: 'dateAdd',
-    args: [{ port: 'input' }, { port: 'amount', fallback: 0 }, { port: 'unit', fallback: 'days', enum: true }],
+    args: [{ port: 'input' }, { port: 'amount', fallback: 0 }, { port: 'unit', fallback: 'days' }],
     outputs: { result: null }
   },
   'net.noodl.DateDifference': {
@@ -1052,14 +1052,14 @@ const DATE_NODES: Record<string, { fn: DateHelper; args: DateArgSpec[]; outputs:
     args: [
       { port: 'from' },
       { port: 'to' },
-      { port: 'unit', fallback: 'days', enum: true },
+      { port: 'unit', fallback: 'days' },
       { port: 'absolute', fallback: false }
     ],
     outputs: { difference: null }
   },
   'net.noodl.DateCompare': {
     fn: 'dateCompare',
-    args: [{ port: 'a' }, { port: 'b' }, { port: 'granularity', fallback: 'millisecond', enum: true }],
+    args: [{ port: 'a' }, { port: 'b' }, { port: 'granularity', fallback: 'millisecond' }],
     outputs: { before: 'before', after: 'after', same: 'same' }
   },
   'net.noodl.DateParts': {
@@ -1111,9 +1111,9 @@ const DATE_NODES: Record<string, { fn: DateHelper; args: DateArgSpec[]; outputs:
  * because it was always read from `initialize`.
  *
  * ⚠️ `clamp` and `inputValue` are the editor-constrained pair on `Number Remapper`
- * (`allowEditOnly` and `allowConnectionOnly`), and neither constraint earns a deferral the way
- * the date family's enums do: that gate exists because `addToDate` **throws** on a unit it does
- * not know. Nothing here throws — `clamp`'s setter is `value ? true : false` and the arithmetic
+ * (`allowEditOnly` and `allowConnectionOnly`), and neither constraint earns a deferral. (The date
+ * family's enums once did, because `addToDate` threw on a unit it did not know; that gate went with
+ * P109-S21-EXPORTDATEUNITWIRED.) Nothing here throws — `clamp`'s setter is `value ? true : false` and the arithmetic
  * coerces — so a wire on either is translated rather than refused.
  */
 const UTIL_NODES: Record<
@@ -1825,10 +1825,9 @@ export type ValueExpr =
    * a literal. They compose, which is the whole point: `Now → Date Add → Date To String` is one
    * nested expression and needs no per-consumer field to carry it.
    *
-   * ⚠️ **The configuration arguments are literals by gate, not by luck.** A wired `Unit` or
-   * `Granularity` defers: the enum is a value the editor constrains, a wire can deliver any
-   * string, and the interpreter *throws* on one it does not know rather than answering. Every
-   * other input may be wired, because none of them has a throwing branch.
+   * Every input may be wired, `Unit` and `Granularity` included since P109-S21-EXPORTDATEUNITWIRED:
+   * the emitted helpers coerce both as the setters do (`unitOrDays`; an unknown Granularity
+   * truncates nothing), and none of them has a throwing branch.
    */
   | {
       kind: 'date-call';
@@ -7949,18 +7948,6 @@ function planComponent(
         return null;
       }
       if (wires.length === 1) {
-        /**
-         * 🔴 A wired enum defers, and the reason is a throw rather than a doubt. `unit` and
-         * `granularity` are `allowEditOnly` in the editor, so the port set the runtime publishes
-         * admits a wire the panel would never draw — and `addToDate`'s final `else` throws on a
-         * unit it does not recognise. An export that reproduced that would put an uncaught
-         * exception in somebody's page; one that reproduced it *loosely* would answer a different
-         * date. Neither is worth the case.
-         */
-        if (arg.enum === true) {
-          ctx.defer = `its ${arg.port} is wired — that input is an editor-constrained list, and the interpreter throws on a value outside it rather than answering`;
-          return null;
-        }
         const expr = resolveExpr(nodeById.get(wires[0].fromId), wires[0].fromProperty, ctx);
         if (expr === null) {
           if (ctx.defer === undefined) ctx.defer = `its ${arg.port} input has no statically known source`;
@@ -7979,7 +7966,12 @@ function planComponent(
          * that actually matters. `now-out` never reaches here at all, being the one read in this
          * family that cannot be undefined.
          */
-        if (maybeUndefinedExpr(expr) && expr.kind !== 'date-call') {
+        /**
+         * Not for `unit` / `granularity` (P109-S21-EXPORTDATEUNITWIRED): their setters turn an empty value into
+         * the default and recompute, and the emitted helpers do the same (`unitOrDays`; an empty Granularity
+         * truncates nothing), so there is no divergence to report.
+         */
+        if (maybeUndefinedExpr(expr) && expr.kind !== 'date-call' && arg.port !== 'unit' && arg.port !== 'granularity') {
           notes.push(
             `node ${node.id} (${node.type}) reads ${arg.port} from a source that can be empty — the interpreter keeps its previous answer when that input goes away, and the exported call answers nothing instead`
           );

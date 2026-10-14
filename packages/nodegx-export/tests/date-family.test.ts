@@ -6,6 +6,7 @@ import { Catalog, loadCatalog } from '../src/catalog';
 import { emitApp } from '../src/emit/emitApp';
 import { parseProject } from '../src/parse/parseProject';
 import { dateLibSource } from '../src/emit/dateLib';
+import { typecheckEmittedApp } from './helpers/typecheckApp';
 import { ExportIR, ComponentIR, ConnectionIR, NodeIR, ParamValue } from '../src/ir/types';
 
 import * as runtimeDatemath from '../../noodl-runtime/src/nodes/std-library/date/datemath';
@@ -51,12 +52,13 @@ const baseIr = parseProject(FIXTURE, catalog);
 interface DateLib {
   toDate(value: unknown): Date | undefined;
   addToDate(date: Date, amount: number, unit: DateUnit): Date | undefined;
+  unitOrDays(unit: unknown): DateUnit;
   differenceBetween(from: Date, to: Date, unit: DateUnit): number;
   truncateTo(date: Date, granularity: CompareGranularity): number;
   isoWeek(date: Date): number;
-  dateAdd(value: unknown, amount: unknown, unit: DateUnit): Date | undefined;
-  dateDifference(from: unknown, to: unknown, unit: DateUnit, absolute: unknown): number | undefined;
-  dateCompare(a: unknown, b: unknown, g: CompareGranularity, answer: string): boolean | undefined;
+  dateAdd(value: unknown, amount: unknown, unit: unknown): Date | undefined;
+  dateDifference(from: unknown, to: unknown, unit: unknown, absolute: unknown): number | undefined;
+  dateCompare(a: unknown, b: unknown, g: unknown, answer: string): boolean | undefined;
   datePart(value: unknown, part: string): number | string | undefined;
   dateToString(value: unknown, format: unknown, timeZone: unknown, locale?: unknown): string | undefined;
 }
@@ -209,6 +211,44 @@ describe('EXP-011 Tier 1.3 §A — the emitted module against the interpreter', 
       const d = new Date(2024, 0, 1 + day);
       expect(lib.isoWeek(d)).toBe(runtimeIsoWeek(d));
     }
+  });
+
+  /**
+   * P109-S21-EXPORTDATEUNITWIRED. A Unit can be wired, so it can be anything; the setters coerce it with
+   * `unitOrDays` (P107-C16 / D15: empty and unknown count as days), and an unknown Granularity truncates
+   * nothing. Graded against the runtime's own `unitOrDays` and `truncateTo`, never a copy of the rule.
+   */
+  const ODD_UNITS: unknown[] = ['fortnights', '', undefined, null, 'Days', 3, {}, 'months', 'years', 'weeks'];
+  it('unitOrDays agrees with the interpreter for every odd unit a wire can deliver', () => {
+    for (const unit of ODD_UNITS) expect([unit, lib.unitOrDays(unit)]).toEqual([unit, runtimeDatemath.unitOrDays(unit)]);
+  });
+
+  it('dateAdd and dateDifference count an unknown or empty Unit as the node does, as days', () => {
+    const later = new Date(2024, 2, 31, 12, 0, 0, 0);
+    for (const date of DATES) {
+      for (const unit of ODD_UNITS) {
+        const counted = runtimeDatemath.unitOrDays(unit);
+        expect([unit, lib.dateAdd(date, 1, unit)?.getTime()]).toEqual([unit, addToDate(date, 1, counted).getTime()]);
+        expect([unit, lib.dateDifference(date, later, unit, false)]).toEqual([unit, differenceBetween(date, later, counted)]);
+      }
+    }
+  });
+
+  it('dateCompare at an unknown or empty Granularity is the exact comparison, as the node reads it', () => {
+    const a = new Date(2024, 1, 29, 9, 5, 3, 1);
+    const b = new Date(2024, 1, 29, 9, 5, 3, 2);
+    for (const g of ['fortnight', '', undefined, null, 'DAY']) {
+      // The node: `granularity || 'millisecond'`, then truncateTo, whose switch has no default.
+      const node = (answer: string) => {
+        const l = truncateTo(a, ((g as string) || 'millisecond') as CompareGranularity);
+        const r = truncateTo(b, ((g as string) || 'millisecond') as CompareGranularity);
+        return answer === 'before' ? l < r : answer === 'after' ? l > r : l === r;
+      };
+      for (const answer of ['before', 'after', 'same']) expect([g, answer, lib.dateCompare(a, b, g, answer)]).toEqual([g, answer, node(answer)]);
+    }
+    // The control: a known granularity does truncate, so the rows above are not all one answer.
+    expect(lib.dateCompare(a, b, 'second', 'same')).toBe(true);
+    expect(lib.dateCompare(a, b, 'fortnight', 'same')).toBe(false);
   });
 
   it('toDate agrees with the interpreter, including the shapes a JSON round trip produces', () => {
@@ -693,7 +733,12 @@ describe('EXP-011 Tier 1.3 §B — the translation', () => {
   });
 
   describe('what defers, and the reason it gives', () => {
-    it('a wired Unit defers, because the interpreter throws on a unit it does not know', () => {
+    /**
+     * 🔴 **This row used to assert the refusal** ("the interpreter throws on a value outside it"). P109 ISL-026
+     * made the setter count an unknown Unit as days, so the reason went, and the row asserts the translation
+     * now (P109-S21-EXPORTDATEUNITWIRED). The helper's own coercion is graded by the differential in §A.
+     */
+    it('a wired Unit translates, and the old throw reason is gone', () => {
       const { app } = withDates((_ir, notes) => {
         addNode(notes, {
           id: 'shift',
@@ -701,11 +746,37 @@ describe('EXP-011 Tier 1.3 §B — the translation', () => {
           parameters: [{ name: 'input', value: literal('2024-01-01') }]
         });
         connect(notes, 'noteDraftVar', 'value', 'shift', 'unit', 'value');
-        connect(notes, 'shift', 'result', 'notesHeading', 'text', 'value');
+        // Through Date To String, as a page shows a date: a raw Date in a <p> is not a ReactNode, for any Unit.
+        addNode(notes, { id: 'fmt', type: 'Date To String', parameters: [] });
+        connect(notes, 'shift', 'result', 'fmt', 'input', 'value');
+        connect(notes, 'fmt', 'currentValue', 'notesHeading', 'text', 'value');
       });
-      expect(reportOf(app)).toContain(
-        'its unit is wired — that input is an editor-constrained list, and the interpreter throws on a value outside it rather than answering'
-      );
+      expectParses(app);
+      expect(reportOf(app)).not.toContain('its unit is wired');
+      expect(reportOf(app)).not.toContain('throws on a value outside it');
+      expect(notesFile(app)).toContain("dateAdd('2024-01-01', 0, draft)");
+      // An empty Unit counts as days on both sides, so there is no "keeps its previous answer" divergence to report.
+      expect(reportOf(app)).not.toContain('reads unit from a source that can be empty');
+      expect(typecheckEmittedApp(app)).toEqual([]);
+    });
+
+    it('a wired Granularity translates too', () => {
+      const { app } = withDates((_ir, notes) => {
+        addNode(notes, {
+          id: 'cmp',
+          type: 'net.noodl.DateCompare',
+          parameters: [
+            { name: 'a', value: literal('2024-01-01') },
+            { name: 'b', value: literal('2024-01-02') }
+          ]
+        });
+        connect(notes, 'noteDraftVar', 'value', 'cmp', 'granularity', 'value');
+        connect(notes, 'cmp', 'before', 'notesHeading', 'visible', 'value');
+      });
+      expectParses(app);
+      // The known-firing signal beside the absence: the call is printed, with the wired value as its granularity.
+      expect(notesFile(app)).toContain("dateCompare('2024-01-01', '2024-01-02', draft, 'before')");
+      expect(reportOf(app)).not.toContain('its granularity is wired');
     });
 
     it('a wired Amount does NOT defer — it has no throwing branch', () => {

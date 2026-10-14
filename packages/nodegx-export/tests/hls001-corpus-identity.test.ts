@@ -220,6 +220,11 @@
  * ✅ **Regenerated for P109-S24-EXPORTBADBODY (session 104, 2026-10-14), predicted and counted.** The emitted request
  * marks a JSON body it cannot read as `http/bad-body`. One corpus project emits `src/api/http.ts`, and it is the one line
  * that moved: `quote-desk/src/api/http.ts`, **1 moved, 0 added, 0 removed**.
+ *
+ * ✅ **Regenerated for P109-S21-EXPORTDATEUNITWIRED (session 104, 2026-10-14), predicted and counted.** The emitted date
+ * lib gains `unitOrDays`, and Date Add / Date Difference apply it. No corpus project wires a Unit or a Granularity
+ * (searched first), so the only lines to move were the lib's: `deadline-desk` and `due-desk` `src/lib/date.ts`,
+ * **2 moved, 0 added, 0 removed**.
  */
 import * as fs from 'fs';
 import * as path from 'path';
