@@ -23,8 +23,9 @@
 //   reload    after a reload: "You're on the list, Ada", a "Not you?" link, and no name/email field shown
 //   notyou    "Not you?" → both fields shown and empty, "You're on the list" gone
 //   The look, measured not judged (Richard judges the screenshots):
-//   font      the font Chrome actually PAINTS body text in (CSS.getPlatformFontsForNode) is not a browser/system
-//             default and not Inter (the template's own font token)
+//   font      the font Chrome actually PAINTS the body text OR the headline in (CSS.getPlatformFontsForNode) is not a
+//             browser/system default and not Inter (the template's own font token) — s5: a display face over an Inter
+//             body is a choice
 //   palette   ≥3 distinct chosen colours (≥ 32 apart) in shown text, backgrounds or gradients: not a pure grey and
 //             not one of the template's own colour tokens (nodegx-project-contract/tokens.ts, read at grade time)
 //   scale     ≥3 distinct font sizes in shown text
@@ -423,7 +424,21 @@ try {
   // Inter is the project template's own --font-family token (POL-006, nodegx-project-contract/tokens.ts): painted in
   // Inter means the look was never chosen, whether or not Inter is installed on this Mac.
   const DEFAULT_FACES = /^(inter|times|times new roman|helvetica|helvetica neue|arial|\.?sf ns.*|system font|\.applesystemuifont|sf pro.*|-apple-system|lucida grande|verdana|tahoma|courier|courier new|dejavu.*|liberation.*|roboto|noto sans|segoe ui)$/i;
-  check('font', !!top && !DEFAULT_FACES.test(top.replace(/ \(web\)$/, '')), { painted, declared });
+  // s5: the headline counts too. RL2b paired a chosen serif display face (its headings) with an Inter body — a type
+  // choice the brief asks for ("choose … type … yourself"); the body-only reading failed it. A page that chose
+  // nothing (GL1, s4; the nofont mutant) paints a default face in both.
+  await page(`(() => { const ls = leaves(/\\S/); let best = null, size = 0; for (const l of ls) { const fs = parseFloat(getComputedStyle(l).fontSize); if (fs > size) { size = fs; best = l; } } if (best) best.setAttribute('data-grade-head', '1'); return size; })()`);
+  const headPainted = {};
+  const hq = await send('DOM.querySelectorAll', { nodeId: (await send('DOM.getDocument', { depth: -1 })).result.root.nodeId, selector: '[data-grade-head]' });
+  for (const nodeId of hq.result?.nodeIds || []) {
+    const f = await send('CSS.getPlatformFontsForNode', { nodeId });
+    for (const pf of f.result?.fonts || []) { const k = `${pf.familyName}${pf.isCustomFont ? ' (web)' : ''}`; headPainted[k] = (headPainted[k] || 0) + pf.glyphCount; }
+  }
+  const head = Object.entries(headPainted).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+  const chosenFace = (face) => !!face && !DEFAULT_FACES.test(face.replace(/ \(web\)$/, ''));
+  // The headline counts only as a SHIPPED face (a web font): the control's, the nofont mutant's and GL1's headlines
+  // paint Georgia / Iowan Old Style — system serifs a `serif` stack falls to, not a choice (measured s5).
+  check('font', chosenFace(top) || (!!head && / \(web\)$/.test(head) && chosenFace(head)), { painted, headline: headPainted, declared });
 
   // contrast of every feature sentence against what is painted behind it
   const cons = [];
