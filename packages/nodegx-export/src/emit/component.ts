@@ -2671,13 +2671,13 @@ export function emitComponent(
        * `Navigate To Path` (EXP-011 §15) — `navigate-to-path.ts`'s own url builder, line for
        * line, and **not** the `navigate` case below with different inputs.
        *
-       * 🔴 **No `encodeURIComponent`, and that is the faithful answer rather than a missing
-       * one.** The Router encodes both halves (`router.tsx:620, 630`) and this node encodes
-       * neither — `formattedPath.replace('{id}', String(v))` and `q + '=' + v`. Encoding here
-       * would make the exported app disagree with the app it came from on every value carrying
-       * a url-special character, in the direction §11.3 calls being *better* than the app: the
-       * export would route where the interpreter does not. `tests/navigate-to-path.test.ts`
-       * pins the runtime file's side of this so the two cannot drift apart silently.
+       * 🔴 **The query half is encoded and the path half is not, which is the runtime's own split.**
+       * P107-D21 (`9404f00c4`) made the node encode each query name and value
+       * (`encodeURIComponent(q) + '=' + encodeURIComponent(String(v))`) and leave a null out; P107-D20
+       * inserts a path value as written. Until P18-S102-NAVENCODE this case still transcribed the
+       * pre-D21 node, so a value with `&` or `#` split into two parameters here and arrived whole
+       * there. `tests/navigate-to-path.test.ts` §15.6 pins the runtime file's side of both halves so
+       * the two cannot drift apart silently — which is how this one was caught.
        *
        * `?? ''` on a maybe-undefined path value is likewise the runtime's own
        * `v !== undefined ? String(v) : ''`, not this exporter's invention.
@@ -2717,7 +2717,8 @@ export function emitComponent(
         if (omittable.length === 0) {
           /**
            * With every value present the query is a static suffix, exactly as the runtime's
-           * `query.length >= 1 ? '?' + query.join('&') : ''` resolves for it.
+           * `query.length >= 1 ? '?' + query.join('&') : ''` resolves for it. A literal is encoded
+           * here, once, by the runtime's own call; an expression is encoded where it is read.
            */
           const suffix =
             action.query.length === 0
@@ -2726,17 +2727,26 @@ export function emitComponent(
                 action.query
                   .map(
                     (q) =>
-                      `${lit(q.name)}=${q.expr.kind === 'literal' ? lit(q.expr.value) : `\${${exprCode(q.expr, 'handler')}}`}`
+                      `${lit(encodeURIComponent(q.name))}=${
+                        q.expr.kind === 'literal'
+                          ? lit(encodeURIComponent(String(q.expr.value)))
+                          : `\${encodeURIComponent(String(${exprCode(q.expr, 'handler')}))}`
+                      }`
                   )
                   .join('&');
           const url = `${filled}${suffix}`;
           urlCode = isTemplate ? `\`${url}\`` : `'${url}'`;
         } else {
           /**
-           * ⚠️ **An unset query parameter is omitted from the url, never sent as `name=`** — the
-           * runtime's `if (internal.query[q] !== undefined)`. A `URLSearchParams` here would send
-           * the key with an empty value *and* percent-encode to a different table, so it would be
-           * wrong twice.
+           * ⚠️ **An unset or null query parameter is omitted from the url, never sent as `name=`
+           * or `name=null`** — the runtime's `if (v !== undefined && v !== null)` (P107-D21). A
+           * `URLSearchParams` here would send the key with an empty value *and* percent-encode to a
+           * different table (a space becomes `+`), so it would be wrong twice. The key is a literal,
+           * so it is encoded here, at emit time; the value is encoded where it is read.
+           *
+           * ⚠️ Only the `omittable` values can be undefined, and so only they get the null test in
+           * a form that reads it: the never-undefined kinds are seeded rows and typed answers.
+           * A literal `null` cannot be authored on a query port.
            *
            * 🔴 **The pairs go through one `for` rather than one `if` each, so every expression is
            * read exactly once.** Two reads of `formatShout({ name })` — the guard and the push —
@@ -2748,12 +2758,15 @@ export function emitComponent(
           // The key sits in expression position, never inside the url string, so it is quoted
           // independently of `isTemplate`.
           const pairs = action.query
-            .map((q) => `['${String(q.name).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', ${exprCode(q.expr, 'handler')}]`)
+            .map(
+              (q) =>
+                `['${encodeURIComponent(q.name).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', ${exprCode(q.expr, 'handler')}]`
+            )
             .join(', ');
           pre.push(
             `const ${local}: string[] = [];`,
             `for (const [key, value] of [${pairs}] as Array<[string, unknown]>) {`,
-            `  if (value !== undefined) ${local}.push(\`\${key}=\${value}\`);`,
+            `  if (value !== undefined && value !== null) ${local}.push(\`\${key}=\${encodeURIComponent(String(value))}\`);`,
             '}'
           );
           urlCode = `\`${filled}\${${local}.length > 0 ? \`?\${${local}.join('&')}\` : ''}\``;

@@ -246,8 +246,8 @@ describe('§15.2 the query — authored, not left over, and omitted when unset',
   });
 
   /**
-   * The omittable form — the runtime's `if (internal.query[q] !== undefined)`, which a static
-   * suffix cannot express.
+   * The omittable form — the runtime's `if (v !== undefined && v !== null)` (P107-D21), which a
+   * static suffix cannot express.
    */
   test('a query fed by a Variable prints the runtime own omission loop', () => {
     const { file, app } = withNav({ path: 'mood', queryNames: 'tone,sort', 'q-sort': 'new' }, (_ir, notes) => {
@@ -256,7 +256,9 @@ describe('§15.2 the query — authored, not left over, and omitted when unset',
     });
     expect(file).toContain('const goQuery: string[] = [];');
     expect(file).toContain("for (const [key, value] of [['tone', tone.get()], ['sort', 'new']] as Array<[string, unknown]>) {");
-    expect(file).toContain('if (value !== undefined) goQuery.push(`${key}=${value}`);');
+    expect(file).toContain(
+      'if (value !== undefined && value !== null) goQuery.push(`${key}=${encodeURIComponent(String(value))}`);'
+    );
     expect(file).toContain("navigate(`/mood${goQuery.length > 0 ? `?${goQuery.join('&')}` : ''}`);");
     expectParses(app);
   });
@@ -287,11 +289,12 @@ describe('§15.2 the query — authored, not left over, and omitted when unset',
   /**
    * ⚠️ The runtime splits `queryNames` on `,` with **no trimming**, and the editor mints
    * `'q-' + q` from the same split — so `"tone, sort"` really does draw a port named `q- sort`.
-   * Trimming here would look for a port the editor never drew.
+   * Trimming here would look for a port the editor never drew. Since P107-D21 the untrimmed name
+   * is encoded on both sides, so its space reaches the address bar as `%20`.
    */
   test('query names are not trimmed, because neither side trims them', () => {
     const { file } = withNav({ path: 'mood', queryNames: 'tone, sort', 'q- sort': 'new' });
-    expect(file).toContain('? sort=new');
+    expect(file).toContain("navigate('/mood?%20sort=new')");
     expect(file).not.toContain('?sort=new');
   });
 });
@@ -807,8 +810,17 @@ describe('§15.6 the transcription is tested against the thing it transcribes', 
   const routerSource = fs.readFileSync(RUNTIME_ROUTER, 'utf8');
   const externalLinkSource = fs.readFileSync(RUNTIME_EXTERNAL_LINK, 'utf8');
 
-  test('this node still encodes neither half of the url', () => {
-    expect(nodeSource).not.toContain('encodeURIComponent');
+  /**
+   * 🔴 **P18-S102-NAVENCODE: this pin fired as designed.** Until P107-D21 (`9404f00c4`) it read
+   * "this node still encodes neither half of the url", and the export transcribed exactly that.
+   * D21 made the runtime encode the query half; D20 left the path half as written. The pin now
+   * names the split, and §15.7 grades the export against it.
+   */
+  test('this node encodes the query half, name and value, and not the path half', () => {
+    expect(nodeSource).toContain("query.push(encodeURIComponent(q) + '=' + encodeURIComponent(String(v)));");
+    // Exactly one call site for each half of the pair, and none on the path side.
+    expect(nodeSource.split('encodeURIComponent(')).toHaveLength(3);
+    expect(nodeSource).toContain("formattedPath = formattedPath.replace('{' + name + '}', () => text);");
     // The control: the Router, which this node is not, still does encode.
     expect(routerSource).toContain('encodeURIComponent');
   });
@@ -817,8 +829,9 @@ describe('§15.6 the transcription is tested against the thing it transcribes', 
     expect(nodeSource).toContain("v !== undefined ? String(v) : ''");
   });
 
-  test('an unset query parameter is still omitted rather than sent empty', () => {
-    expect(nodeSource).toContain('if (internal.query[q] !== undefined)');
+  /** P107-D21 again: a null arrived as the text `null`, and is now left out beside undefined. */
+  test('an unset or null query parameter is omitted rather than sent empty', () => {
+    expect(nodeSource).toContain('if (v !== undefined && v !== null) {');
   });
 
   /**
@@ -1356,5 +1369,99 @@ describe('§24 — Error read from the node own chains', () => {
     });
     expect(line).toContain('neither of the node');
     expect(line).toContain('string nothing ever writes');
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+/**
+ * P18-S102-NAVENCODE — the query is encoded as the running app encodes it (P107-D21).
+ *
+ * 🔴 **The failure this block is built against is a url that reads right and arrives split.**
+ * `?tone=a&b` looks like one value in the source and is two parameters in the address bar, so the
+ * rows below do not stop at the printed text: each reads the emitted url back with
+ * `URLSearchParams`, which is what the exported page's `useSearchParams()` reads it with, and
+ * compares it with the runtime's own line from §15.6.
+ */
+describe('§15.7 the query half is encoded, and a null is left out', () => {
+  /** The runtime's line, `navigate-to-path.ts` D21, pinned verbatim in §15.6. */
+  const runtimePair = (q: string, v: unknown) => encodeURIComponent(q) + '=' + encodeURIComponent(String(v));
+  const VALUES = ['a&b', 'x#y', 'a b', '50%', 'k=v', '1+1', 'é', "it's", 'plain'];
+
+  /** The url of the one `navigate('…')` literal on the page. */
+  const literalUrl = (file: string): string => {
+    const match = /navigate\('((?:[^'\\]|\\.)*)'\)/.exec(file);
+    expect(match).not.toBeNull();
+    return match![1].replace(/\\'/g, "'").replace(/\\\\/g, '\\');
+  };
+
+  test.each(VALUES)('a literal %j is printed as the runtime builds it and reads back as written', (value) => {
+    const { file } = withNav({ path: 'mood', queryNames: 'tone,sort', 'q-tone': value, 'q-sort': 'new' });
+    const url = literalUrl(file);
+    expect(url).toBe(`/mood?${runtimePair('tone', value)}&${runtimePair('sort', 'new')}`);
+    const read = new URLSearchParams(url.slice(url.indexOf('?') + 1));
+    expect([...read.keys()]).toEqual(['tone', 'sort']);
+    expect(read.get('tone')).toBe(value);
+  });
+
+  /** The control: before the fix this printed the bare value, and `a&b` read back as two keys. */
+  test('an ampersand in a value is never printed bare', () => {
+    const { file } = withNav({ path: 'mood', queryNames: 'tone', 'q-tone': 'a&b' });
+    expect(file).toContain("navigate('/mood?tone=a%26b')");
+    expect(file).not.toContain('tone=a&b');
+  });
+
+  /**
+   * The omittable form, run: the emitted statements are transpiled and executed with the
+   * Variable's read stubbed, so undefined, null and an `&` are each graded by what reaches
+   * `navigate`, not by the text that would do it.
+   */
+  test.each([
+    [undefined, '/mood?sort=new'],
+    [null, '/mood?sort=new'],
+    ['a&b', '/mood?tone=a%26b&sort=new'],
+    [0, '/mood?tone=0&sort=new'],
+    ['', '/mood?tone=&sort=new']
+  ])('a wired value %j reaches the address bar as %j', (value, expected) => {
+    const { file, app } = withNav({ path: 'mood', queryNames: 'tone,sort', 'q-sort': 'new' }, (_ir, notes) => {
+      addVariable(notes, 'toneVar', 'tone');
+      connect(notes, 'toneVar', 'value', 'go', 'q-tone', 'value');
+    });
+    const start = file.indexOf('const goQuery: string[] = [];');
+    const end = file.indexOf(';', file.indexOf('navigate(`/mood', start)) + 1;
+    expect(start).toBeGreaterThan(-1);
+    const js = ts.transpile(file.slice(start, end), { target: ts.ScriptTarget.ES2020 });
+    let reached: string | undefined;
+    new Function('tone', 'navigate', js)({ get: () => value }, (u: string) => (reached = u));
+    expect(reached).toBe(expected);
+    expectParses(app);
+  });
+
+  /** An unset value never sent as `name=`, a null never as `name=null` — and both sides agree. */
+  test('a null on a query port is never sent as the text null', () => {
+    const { file } = withNav({ path: 'mood', queryNames: 'tone' }, (_ir, notes) => {
+      addVariable(notes, 'toneVar', 'tone');
+      connect(notes, 'toneVar', 'value', 'go', 'q-tone', 'value');
+    });
+    expect(file).toContain('value !== undefined && value !== null');
+  });
+
+  /** The new-tab arm builds the same url: one builder, two calls. */
+  test('the new-tab arm opens the encoded url', () => {
+    const { file } = withNav({ path: 'mood', queryNames: 'tone', 'q-tone': 'a&b', openInNewTab: true });
+    expect(file).toContain("window.open('/mood?tone=a%26b', '_blank')");
+  });
+
+  /** The path half is D20's: inserted as written, and still unencoded beside an encoded query. */
+  test('a path value is still inserted as written beside an encoded query', () => {
+    const { file } = withNav({ path: 'note/{id}', 'p-id': 'a&b', queryNames: 'tone', 'q-tone': 'a&b' });
+    expect(file).toContain("navigate('/note/a&b?tone=a%26b')");
+  });
+
+  test('the emitted app with an encoded query typechecks', () => {
+    const { app } = withNav({ path: 'mood', queryNames: 'tone,sort', 'q-sort': "it's & more" }, (_ir, notes) => {
+      addVariable(notes, 'toneVar', 'tone');
+      connect(notes, 'toneVar', 'value', 'go', 'q-tone', 'value');
+    });
+    expect(typecheckEmittedApp(app)).toEqual([]);
   });
 });

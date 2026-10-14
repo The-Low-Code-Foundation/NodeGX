@@ -1982,7 +1982,7 @@ export type HandlerAction =
       nodeId: string;
       to: string;
       pathParams: Array<{ name: string; expr: ValueExpr }>;
-      /** `omittable` values print inside the `if` the runtime's `!== undefined` test describes. */
+      /** `omittable` values print inside the `if` the runtime's `v !== undefined && v !== null` test describes (P107-D21). */
       query: Array<{ name: string; expr: ValueExpr; omittable: boolean }>;
       /** The `const` the omittable form collects into; unused when every value is present. */
       queryLocal: string;
