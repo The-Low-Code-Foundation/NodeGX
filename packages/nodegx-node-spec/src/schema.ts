@@ -27,7 +27,7 @@ const traceSchema = traceSchemaJson as Record<string, unknown>;
 /** The JSON schema, as data — for a target that wants to embed it. */
 export const TRACE_SCHEMA = traceSchema;
 
-export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request', 'open', 'history', 'dispatch', 'stack', 'route', 'popup', 'backend', 'picker', 'socket', 'act', 'answer'] as const;
+export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request', 'open', 'history', 'dispatch', 'stack', 'route', 'popup', 'backend', 'picker', 'socket', 'host', 'act', 'answer', 'diagnostic'] as const;
 export const OUTCOME_VALUES = ['done', 'unchanged', 'failure'] as const;
 
 /** Fields each kind requires and allows, beyond `t` and the always-optional `subject`. */
@@ -59,12 +59,16 @@ export const EVENT_FIELDS: Readonly<Record<(typeof EVENT_KINDS)[number], { requi
   picker: { required: ['accept', 'capture'], optional: [] },
   // NSP-014 s34 — the WebSocket servers (world.ts SOCKET): a connect carries url, protocols?; a send data; a close code?, reason? — in the request group
   socket: { required: ['op'], optional: ['url', 'protocols', 'data', 'code', 'reason'] },
+  // NSP-022 s96 — the backend process's services (world.ts HOST): which service, the request as handed — in the request group
+  host: { required: ['service'], optional: ['request'] },
   // NSP-016 s37 — the person (spec.ts THE PERSON): a stimulus — which act, and the value it carries, if any
   act: { required: ['act'], optional: ['value'] },
+  // NSP-019 s95 — what the node tells the editor (spec.ts `diagnostics`): the key, and the sentence while it holds
+  diagnostic: { required: ['key'], optional: ['message'] },
   // NSP-016 s56 — the callers (spec.ts THE CALLERS): a Component Stack's answer to a push / replace / back (value, error?), or the
   // back's action? and results handed to the node that pushed the page it popped (`returned`) — in the LOCATION group; s57 a Page
   // Router's answer to a Navigate (`navigate`: value, error?) and the params it hands its page's Page Inputs (`page`: params)
-  answer: { required: ['op'], optional: ['value', 'error', 'action', 'results', 'params'] }
+  answer: { required: ['op'], optional: ['value', 'error', 'action', 'results', 'params', 'status', 'body', 'reason', 'fields'] }
 });
 
 export type Validation = { ok: true; events: TraceEvent[] } | { ok: false; path: string; message: string };
@@ -156,7 +160,24 @@ export function validateTrace(input: unknown): Validation {
       if (typeof e.accept !== 'string') return bad(`${at}.accept`, 'accept is what the element held at the click, a string');
       if (typeof e.capture !== 'string') return bad(`${at}.capture`, 'capture is what the element held at the click, a string');
     } else if (t === 'answer') {
-      if (e.op === 'page') {
+      if (e.op === 'respond' || e.op === 'refuse') {
+        // NSP-022 s97 — a cloud function's answer (world.ts HOST, THE INVOCATION): a Response's payload, or the Request's refusal
+        for (const f of ['value', 'error', 'action', 'results', 'params'] as const) if (f in e) return bad(`${at}.${f}`, `a ${e.op} carries ${e.op === 'respond' ? 'status and body' : 'reason and fields'}, nothing else`);
+        if (e.op === 'respond') {
+          if ('reason' in e || 'fields' in e) return bad(`${at}.reason`, 'a respond carries status and body, nothing else');
+          if (typeof e.status !== 'number' || !Number.isInteger(e.status)) return bad(`${at}.status`, 'status is the HTTP status the payload names');
+          if (typeof e.body !== 'string') return bad(`${at}.body`, 'body is the text the payload carries');
+        } else {
+          if ('status' in e || 'body' in e) return bad(`${at}.status`, 'a refuse carries reason and fields, nothing else');
+          if (typeof e.reason !== 'string') return bad(`${at}.reason`, 'reason is the message the request was refused with');
+          if ('fields' in e) {
+            const nc = findNonCanonical(e.fields, `${at}.fields`);
+            if (nc) return bad(nc, 'fields is not in canonical form');
+          }
+        }
+      } else if ('status' in e || 'body' in e || 'reason' in e || 'fields' in e) {
+        return bad(`${at}.op`, 'status, body, reason and fields are a cloud function\'s answer (respond, refuse)');
+      } else if (e.op === 'page') {
         // NSP-016 s57 — what a Page Router hands its page's Page Inputs
         if ('value' in e || 'error' in e || 'action' in e || 'results' in e) return bad(`${at}.value`, 'a page carries the params handed, nothing else');
         if (!('params' in e)) return bad(`${at}.params`, 'a page carries the params handed');
@@ -171,10 +192,19 @@ export function validateTrace(input: unknown): Validation {
           if (nc) return bad(nc, `${f} is not in canonical form`);
         }
       } else {
-        if (e.op !== 'push' && e.op !== 'replace' && e.op !== 'back' && e.op !== 'navigate') return bad(`${at}.op`, 'op is push, replace, back, navigate, returned or page');
+        if (e.op !== 'push' && e.op !== 'replace' && e.op !== 'back' && e.op !== 'navigate') return bad(`${at}.op`, 'op is push, replace, back, navigate, returned, page, respond or refuse');
         if (!(OUTCOME_VALUES as readonly unknown[]).includes(e.value)) return bad(`${at}.value`, 'value is done, unchanged or failure');
         if (e.value === 'failure' ? typeof e.error !== 'string' || e.error.length === 0 : 'error' in e) return bad(`${at}.error`, 'error is the failure\'s code, and only with a failure');
         if ('action' in e || 'results' in e || 'params' in e) return bad(`${at}.action`, 'only a returned carries action and results, only a page params');
+      }
+    } else if (t === 'diagnostic') {
+      if (typeof e.key !== 'string' || !/^[a-z0-9-]+(\/[a-z0-9-]+)+$/.test(e.key)) return bad(`${at}.key`, 'key is <node-type>/<condition>, kebab-case');
+      if ('message' in e && (typeof e.message !== 'string' || e.message.length === 0)) return bad(`${at}.message`, 'message is the sentence shown, absent when withdrawn');
+    } else if (t === 'host') {
+      if (e.service !== 'secrets' && e.service !== 'users' && e.service !== 'roles' && e.service !== 'mail') return bad(`${at}.service`, 'service is secrets, users, roles or mail');
+      if ('request' in e) {
+        const nc = findNonCanonical(e.request, `${at}.request`);
+        if (nc) return bad(nc, 'request is not in canonical form');
       }
     } else if (t === 'socket') {
       if (e.op !== 'connect' && e.op !== 'send' && e.op !== 'close') return bad(`${at}.op`, 'op is connect, send or close');

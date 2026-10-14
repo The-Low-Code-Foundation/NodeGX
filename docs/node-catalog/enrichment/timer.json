@@ -19,7 +19,8 @@
   "antiPatterns": [
     "Using `start` for debouncing — while running it ignores triggers, so the action fires on the first quiet gap after the *first* event, not the last. Use `restart`.",
     "Treating `duration` as seconds — it is milliseconds.",
-    "`timerFinished` looped into its own `restart` for a repeating tick — use Repeat, which does not drift and stops when its page is left."
+    "`timerFinished` looped into its own `restart` for a repeating tick — use Repeat, which does not drift and stops when its page is left.",
+    "Acting on `done` or `completed` to mean the time is up: they fire as soon as a Start or Restart has been handled, before any time passes. The time running out is `timerFinished` (Finished)."
   ],
   "relatedNodes": ["Value Changed", "Animation", "States", "Switch", "Repeat"]
 }

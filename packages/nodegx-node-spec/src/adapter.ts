@@ -112,6 +112,10 @@
  *                        says so. A target with one keeps the node ON A PAGE for the whole play (mounted in a
  *                        document at `mount`, taken off it at `dispose`): a node's Did Mount lands in the first
  *                        settle, and its Mounted input is honoured by whatever holds it.
+ *   diagnostics          OPTIONAL, NSP-019 s95 — `true` when the target has an editor to tell: it records what a node tells the
+ *                        editor about its settings (the runtime's `setDiagnostic`) as `diagnostic` events at each settle — per key
+ *                        whose sentence changed since the last settle, sorted by key, after the rest of the group (trace.ts). A
+ *                        target without it (the export, a stranger's) is graded with those events left out of the reference.
  *
  * Why values sort by port NAME and not by the spec's declaration order (which NSP-001 §5 first
  * wrote): a stranger's target (NSP-006) must produce a comparable trace from the spec and the
@@ -152,6 +156,8 @@ export interface TargetAdapter<H extends Handle = Handle> {
   cloudFile?(desc: CloudFileDesc): unknown;
   /** NSP-016 s37 — see the contract above. */
   act?(h: H, act: string, value?: unknown): void | Promise<void>;
+  /** NSP-019 s95 — see the contract above. */
+  readonly diagnostics?: boolean;
 }
 
 /** NSP-014 s30 — what `{ "$file": … }` describes: a file the browser hands. */

@@ -62,6 +62,13 @@ export interface CheckNavigationOptions {
    * would report the app's own working links as broken.
    */
   urlPaths?: readonly string[];
+  /**
+   * P112-OWN018-WIREDTARGET — the candidate's wired input ports, as `` `${nodeId}::${port}` `` (see
+   * `connectedInputs` in authoredCandidate.ts). A `target` or `path` that arrives on a wire is set at runtime —
+   * a reusable nav item whose page comes from its Component Inputs is the common case — so, like a `{placeholder}`
+   * path, no static list can say whether it resolves. Omitted means "no connection information".
+   */
+  connectedInputs?: ReadonlySet<string>;
   /** Severity for these findings. Defaults to `warning` — see {@link DiagnosticCode.UnresolvedNavigation}. */
   severity?: Severity;
 }
@@ -193,13 +200,14 @@ export function checkPageShape(
  *
  * A path carrying a `{placeholder}` segment is never reported: its real value
  * arrives on an input port at runtime, so no static list can say whether it
- * resolves.
+ * resolves. Nor is a `target` or `path` fed by a wire, for the same reason
+ * ({@link CheckNavigationOptions.connectedInputs}).
  */
 export function checkNavigation(
   nodes: readonly NavigatingNode[],
   options: CheckNavigationOptions
 ): Diagnostic[] {
-  const { component, components, urlPaths, severity = 'warning' } = options;
+  const { component, components, urlPaths, connectedInputs, severity = 'warning' } = options;
   const known = new Set(components.map(normalizeComponent));
   // The caller assembles this list from three sources that overlap — the
   // project's components, the candidate's own name, and the plan's other
@@ -216,6 +224,7 @@ export function checkNavigation(
     const where = node.label ? `"${node.label}"` : node.type;
 
     if (COMPONENT_TARGET_TYPES.has(node.type)) {
+      if (connectedInputs?.has(`${node.id}::target`)) continue;
       const target = str(parameters['target']);
       if (!target) {
         // A Navigate with no target is the dead-button case the runtime itself
@@ -248,6 +257,7 @@ export function checkNavigation(
     }
 
     if (PATH_TARGET_TYPES.has(node.type)) {
+      if (connectedInputs?.has(`${node.id}::path`)) continue;
       const path = str(parameters['path']);
       if (!path) {
         diagnostics.push({

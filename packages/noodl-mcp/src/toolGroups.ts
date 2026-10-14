@@ -163,7 +163,9 @@ const CORE_TOOLS = [
   'list_project_docs',
   'get_project_doc',
   // Disclosure itself — always advertised, or none of the rest is reachable.
-  'find_tools'
+  'find_tools',
+  // P112-OWN018-LISTCHANGED — the same door for a client that never re-reads the list.
+  'call_tool'
 ] as const;
 
 const CORE_WRITE_TOOLS = [
@@ -704,7 +706,7 @@ export const BOOTSTRAP_TOOLS: readonly string[] = Object.freeze([
  * a count that does not match `tools/list` is the server being wrong about
  * itself in the one place nothing else can correct.
  */
-export const BOOTSTRAP_ADVERTISED: readonly string[] = Object.freeze([...BOOTSTRAP_TOOLS, 'find_tools']);
+export const BOOTSTRAP_ADVERTISED: readonly string[] = Object.freeze([...BOOTSTRAP_TOOLS, 'find_tools', 'call_tool']);
 
 /** English for a small count, so a briefing reads like prose rather than a log line. */
 export function spellCount(n: number): string {

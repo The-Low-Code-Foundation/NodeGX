@@ -1,0 +1,128 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "58a4fdaa-ae80-5e79-80fa-cbd38443446d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tf-root",
+      "type": "Group",
+      "label": "Field",
+      "children": [
+        "tf-label",
+        "tf-input"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "tf-label",
+      "type": "Text",
+      "label": "Label",
+      "parent": "tf-root",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "tf-input",
+      "type": "net.noodl.controls.textinput",
+      "label": "Input",
+      "parent": "tf-root",
+      "parameters": {
+        "backgroundColor": "var(--background)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentHeight",
+        "type": "text",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "tf-type",
+      "type": "Expression",
+      "label": "Input type",
+      "parameters": {
+        "expression": "multiline ? 'textArea' : 'text'"
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "tf-ci",
+      "type": "Component Inputs",
+      "label": "Field inputs",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "placeholder",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "multiline",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "clear",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "tf-co",
+      "type": "Component Outputs",
+      "label": "Field outputs",
+      "ports": [
+        {
+          "name": "value",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "tf-root"
+  ]
+}

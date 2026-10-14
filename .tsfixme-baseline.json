@@ -6,18 +6,18 @@
   "exclude": [
     "packages/noodl-runtime/dist-types"
   ],
-  "commit": "a6ce18c9f",
+  "commit": "8763a64c6",
   "max": {
     "src": {
-      "TSFixme": 582,
-      "any": 591,
+      "TSFixme": 583,
+      "any": 603,
       "@ts-ignore": 17,
       "@ts-nocheck": 3,
       "@ts-expect-error": 67
     },
     "tests": {
-      "TSFixme": 305,
-      "any": 1905,
+      "TSFixme": 307,
+      "any": 1913,
       "@ts-ignore": 1,
       "@ts-nocheck": 2,
       "@ts-expect-error": 8
@@ -54,7 +54,7 @@
     },
     "nodegx-node-spec": {
       "TSFixme": 0,
-      "any": 72,
+      "any": 84,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
       "@ts-expect-error": 8
@@ -67,7 +67,7 @@
       "@ts-expect-error": 13
     },
     "noodl-editor": {
-      "TSFixme": 814,
+      "TSFixme": 815,
       "any": 184,
       "@ts-ignore": 7,
       "@ts-nocheck": 0,
@@ -82,7 +82,7 @@
     },
     "noodl-mcp": {
       "TSFixme": 0,
-      "any": 1359,
+      "any": 1366,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
       "@ts-expect-error": 0
@@ -102,7 +102,7 @@
       "@ts-expect-error": 0
     },
     "noodl-preview": {
-      "TSFixme": 14,
+      "TSFixme": 16,
       "any": 2,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
@@ -131,7 +131,7 @@
     },
     "noodl-viewer-react": {
       "TSFixme": 44,
-      "any": 213,
+      "any": 214,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
       "@ts-expect-error": 4
@@ -677,6 +677,13 @@
       "@ts-nocheck": 0,
       "@ts-expect-error": 0
     },
+    "packages/nodegx-node-spec/src/nodes/model-request.ts": {
+      "TSFixme": 0,
+      "any": 11,
+      "@ts-ignore": 0,
+      "@ts-nocheck": 0,
+      "@ts-expect-error": 0
+    },
     "packages/nodegx-node-spec/src/nodes/page-router.ts": {
       "TSFixme": 0,
       "any": 6,
@@ -694,6 +701,13 @@
     "packages/nodegx-node-spec/src/nodes/states.ts": {
       "TSFixme": 0,
       "any": 9,
+      "@ts-ignore": 0,
+      "@ts-nocheck": 0,
+      "@ts-expect-error": 0
+    },
+    "packages/nodegx-node-spec/src/nodes/system-calls.ts": {
+      "TSFixme": 0,
+      "any": 1,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
       "@ts-expect-error": 0
@@ -986,7 +1000,7 @@
       "@ts-expect-error": 0
     },
     "packages/noodl-editor/src/editor/src/models/NodeTypeAdapters/CloudDynamicPortsAdapter.ts": {
-      "TSFixme": 7,
+      "TSFixme": 8,
       "any": 0,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
@@ -3106,6 +3120,20 @@
       "@ts-nocheck": 0,
       "@ts-expect-error": 0
     },
+    "packages/noodl-mcp/tests/own018CallTool.test.ts": {
+      "TSFixme": 0,
+      "any": 3,
+      "@ts-ignore": 0,
+      "@ts-nocheck": 0,
+      "@ts-expect-error": 0
+    },
+    "packages/noodl-mcp/tests/own018WiredTarget.test.ts": {
+      "TSFixme": 0,
+      "any": 4,
+      "@ts-ignore": 0,
+      "@ts-nocheck": 0,
+      "@ts-expect-error": 0
+    },
     "packages/noodl-mcp/tests/p108s2Join.test.ts": {
       "TSFixme": 0,
       "any": 10,
@@ -3277,6 +3305,13 @@
     "packages/noodl-preview/tests/gam-023-a-deploy-publishes-every-wire-and-names-the-broken-ones.test.ts": {
       "TSFixme": 0,
       "any": 2,
+      "@ts-ignore": 0,
+      "@ts-nocheck": 0,
+      "@ts-expect-error": 0
+    },
+    "packages/noodl-preview/tests/own015-local-backend.test.ts": {
+      "TSFixme": 2,
+      "any": 0,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
       "@ts-expect-error": 0
@@ -3998,6 +4033,13 @@
     "packages/noodl-viewer-react/tests/nda-016-layout-sizemode.test.ts": {
       "TSFixme": 0,
       "any": 12,
+      "@ts-ignore": 0,
+      "@ts-nocheck": 0,
+      "@ts-expect-error": 0
+    },
+    "packages/noodl-viewer-react/tests/own018-script-outputs-outside-the-editor.test.ts": {
+      "TSFixme": 0,
+      "any": 1,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
       "@ts-expect-error": 0

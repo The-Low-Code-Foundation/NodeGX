@@ -20,15 +20,15 @@
  * the builder — offering a dropdown would offer a wrong answer. See
  * {@link userCollectionName}.
  *
- * **2. A Parse-wire backend's ports do not change — including the ones a tidier
- * rule would drop.** `shouldShowField` hides a field marked `hidden`, and
- * `parseFieldToSchemaField` marks `ACL` hidden. Applying it uniformly would
- * silently remove the `prop-ACL` output that the `User` node has always emitted,
- * and a removed output port drops whatever was wired to it. So the filter runs
- * for REST backends, where `hidden` means a Directus interface a builder
- * deliberately hid, and not for the Parse wire, where it would be a behaviour
- * change dressed as consistency. Same asymmetry, same reasoning, as
- * `record-ports.ts`' rule 1.
+ * **2. A hidden field gets no port, on every wire.** `shouldShowField` hides a
+ * field marked `hidden`: on REST a Directus interface a builder deliberately hid,
+ * and on the Parse wire the `ACL` column (`parseFieldToSchemaField` marks it —
+ * it is the account's access rules, not something about the person). Until
+ * P107-S84-USERACL (ruled R29, "Hide it, like the Record nodes", 2026-10-12) the
+ * filter skipped the Parse wire, so `User`, `Set User Properties` and `Sign Up`
+ * drew a `prop-ACL` port no Record node draws; wiring a value into it on Set User
+ * Properties would overwrite the account's own access rules. The reach measured
+ * then: 429 User-family nodes in 58 projects, none wired to or from ACL.
  *
  * **3. A port is never offered for a field the write path then throws away.**
  * {@link RestAuthAdapter.setUserProperties} strips seventeen server-owned fields
@@ -51,7 +51,7 @@ import {
   type CloudServicesMetaData
 } from '../../../api/backends/resolveBackend';
 
-import { isParseWireContext, metaDataSources, recordPortType } from '../data/record-ports';
+import { metaDataSources, recordPortType } from '../data/record-ports';
 import {
   backendPickerPorts,
   resolveSchemaPortContext,
@@ -241,14 +241,12 @@ export function userPropertyPorts(
   const ports: RuntimeDiscoveredPort[] = [];
   if (!ctx.selectedCollection) return ports;
 
-  const parseWire = isParseWireContext(ctx);
-
   for (const field of ctx.selectedCollection.fields || []) {
     if (!field || !field.name) continue;
     if (options.ignore.indexOf(field.name) !== -1) continue;
     if (isRelationField(field)) continue;
-    // Rule 2: the hidden-field filter runs for REST backends only.
-    if (!parseWire && !shouldShowField(field)) continue;
+    // Rule 2 (P107-S84-USERACL, R29): the hidden-field filter runs on every wire, as the Record family's does.
+    if (!shouldShowField(field)) continue;
 
     ports.push({
       name: 'prop-' + field.name,

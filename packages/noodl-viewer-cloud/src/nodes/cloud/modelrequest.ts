@@ -250,7 +250,15 @@ interface ReadAnswer {
   refusal?: string;
 }
 
-function readMessagesAnswer(payload: any): ReadAnswer {
+/**
+ * A Messages answer, or `undefined` when the JSON is not one (no `content` list) — the same guard {@link readChatAnswer} has.
+ *
+ * P107-S97-MREMPTYANSWER / MRNULLRETRY: before this, `{}` (or `5`) reached the graph as Done with an empty Text, and `null`
+ * threw on `payload.usage` inside the response's `.then`, where the chain's `.catch` took it for a transport fault — three
+ * requests, each answered and paid, then "did not reach the provider".
+ */
+function readMessagesAnswer(payload: any): ReadAnswer | undefined {
+  if (!payload || !Array.isArray(payload.content)) return undefined;
   return {
     usage: usageOf(payload.usage),
     text: textOf(payload.content),
@@ -957,7 +965,7 @@ export const node = {
               const read = chat ? readChatAnswer(payload) : readMessagesAnswer(payload);
               if (!read) {
                 finishFailure(
-                  `Model Request: the provider answered ${status} with JSON that is not a chat completion. ` +
+                  `Model Request: the provider answered ${status} with JSON that is not ${chat ? 'a chat completion' : 'a Messages answer'}. ` +
                     'Check Base URL.',
                   CODES.network,
                   status

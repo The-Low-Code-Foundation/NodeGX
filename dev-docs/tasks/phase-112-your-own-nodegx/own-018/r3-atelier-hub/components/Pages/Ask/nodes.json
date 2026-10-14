@@ -1,0 +1,465 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "69eaedf6-7b4a-5222-890a-de10dbf5ed1e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ask-page",
+      "type": "Page",
+      "label": "Ask page",
+      "children": [
+        "ask-canvas"
+      ],
+      "parameters": {
+        "title": "Ask",
+        "urlPath": "ask"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ask-canvas",
+      "type": "Group",
+      "label": "Page canvas",
+      "parent": "ask-page",
+      "children": [
+        "ask-band"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "backgroundColor": "var(--background)",
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ask-band",
+      "type": "Group",
+      "label": "Band",
+      "parent": "ask-canvas",
+      "children": [
+        "ask-shell"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "flexDirection": "column",
+        "paddingBottom": "var(--space-20)",
+        "paddingTop": "var(--space-12)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "ask-shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "ask-band",
+      "children": [
+        "ask-header",
+        "ask-list",
+        "ask-thinking",
+        "ask-error",
+        "ask-empty",
+        "ask-inputrow"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "maxWidth": {
+          "unit": "px",
+          "value": 760
+        },
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "rowGap": "var(--space-8)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "ask-header",
+      "type": "/Components/PageHeader",
+      "label": "Page header",
+      "parent": "ask-shell",
+      "parameters": {
+        "eyebrow": "Mistral",
+        "lead": "Ask about our clients, projects and wiki in plain language. Answers come from Mistral's mistral-large-4, called from our own server — your question never leaves Europe.",
+        "title": "Ask Atelier Hub"
+      },
+      "x": 280,
+      "y": 520
+    },
+    {
+      "id": "ask-list",
+      "type": "For Each",
+      "label": "Conversation",
+      "parent": "ask-shell",
+      "parameters": {
+        "template": "/Components/MessageBubble"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "ask-thinking",
+      "type": "Group",
+      "label": "Thinking indicator",
+      "parent": "ask-shell",
+      "children": [
+        "ask-thinkingbubble"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        },
+        "mounted": false
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "ask-thinkingbubble",
+      "type": "Group",
+      "label": "Thinking bubble",
+      "parent": "ask-thinking",
+      "children": [
+        "ask-thinkingtext"
+      ],
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "sizeMode": "contentSize"
+      },
+      "x": 340,
+      "y": 880
+    },
+    {
+      "id": "ask-thinkingtext",
+      "type": "Text",
+      "label": "Thinking text",
+      "parent": "ask-thinkingbubble",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontStyle": "italic",
+        "text": "Thinking…"
+      },
+      "x": 400,
+      "y": 1000
+    },
+    {
+      "id": "ask-error",
+      "type": "Text",
+      "label": "Error message",
+      "parent": "ask-shell",
+      "parameters": {
+        "color": "var(--red-700)",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-snug)",
+        "mounted": false,
+        "text": ""
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "ask-empty",
+      "type": "/Components/EmptyState",
+      "label": "Empty ask",
+      "parent": "ask-shell",
+      "parameters": {
+        "body": "Try: \"Which projects are due this month?\" or \"Who owns the Café Volta packaging?\"",
+        "title": "Ask anything"
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "ask-inputrow",
+      "type": "Group",
+      "label": "Input row",
+      "parent": "ask-shell",
+      "children": [
+        "ask-input",
+        "ask-send"
+      ],
+      "parameters": {
+        "alignItems": "flex-end",
+        "columnGap": "var(--space-3)",
+        "flexDirection": "row",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "ask-input",
+      "type": "/Components/TextField",
+      "label": "Question field",
+      "parent": "ask-inputrow",
+      "parameters": {
+        "multiline": true,
+        "placeholder": "Ask about a client, a project, a wiki page…"
+      },
+      "x": 340,
+      "y": 1480
+    },
+    {
+      "id": "ask-send",
+      "type": "net.noodl.controls.button",
+      "label": "Send",
+      "parent": "ask-inputrow",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "color": "var(--primary-foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "Send",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentSize"
+      },
+      "x": 340,
+      "y": 1600
+    },
+    {
+      "id": "ask-varmessages",
+      "type": "Variable2",
+      "label": "Messages variable",
+      "parameters": {
+        "name": "askMessages"
+      },
+      "x": 650,
+      "y": 640
+    },
+    {
+      "id": "ask-varloading",
+      "type": "Variable2",
+      "label": "Loading variable",
+      "parameters": {
+        "name": "askLoading"
+      },
+      "x": 650,
+      "y": 760
+    },
+    {
+      "id": "ask-varerror",
+      "type": "Variable2",
+      "label": "Error variable",
+      "parameters": {
+        "name": "askError"
+      },
+      "x": 650,
+      "y": 1120
+    },
+    {
+      "id": "ask-appenduser",
+      "type": "JavaScriptFunction",
+      "label": "Append the question",
+      "parameters": {
+        "functionScript": "const list = Array.isArray(Inputs.messages) ? Inputs.messages : [];\nconst question = Inputs.question || '';\nOutputs.history = list;\nOutputs.newMessages = list.concat([{ role: 'user', content: question }]);\nif (question.trim()) Outputs.send();"
+      },
+      "ports": [
+        {
+          "name": "in-messages",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-question",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-history",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-newMessages",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-send",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 650,
+      "y": 1480
+    },
+    {
+      "id": "ask-appendanswer",
+      "type": "JavaScriptFunction",
+      "label": "Append the answer",
+      "parameters": {
+        "functionScript": "const list = Array.isArray(Inputs.messages) ? Inputs.messages : [];\nconst answer = Inputs.answer || '';\nOutputs.newMessages = list.concat([{ role: 'assistant', content: answer }]);\nif (answer.trim()) Outputs.send();"
+      },
+      "ports": [
+        {
+          "name": "in-messages",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-answer",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-newMessages",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-send",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 650,
+      "y": 1840
+    },
+    {
+      "id": "ask-setmessages",
+      "type": "Set Variable",
+      "label": "Store the question message",
+      "parameters": {
+        "name": "askMessages",
+        "setWith": "array"
+      },
+      "x": 650,
+      "y": 1960
+    },
+    {
+      "id": "ask-setmessages2",
+      "type": "Set Variable",
+      "label": "Store the answer message",
+      "parameters": {
+        "name": "askMessages",
+        "setWith": "array"
+      },
+      "x": 650,
+      "y": 2080
+    },
+    {
+      "id": "ask-setloadingtrue",
+      "type": "Set Variable",
+      "label": "Loading on",
+      "parameters": {
+        "name": "askLoading",
+        "setWith": "boolean",
+        "value": true
+      },
+      "x": 650,
+      "y": 2200
+    },
+    {
+      "id": "ask-setloadingfalse",
+      "type": "Set Variable",
+      "label": "Loading off",
+      "parameters": {
+        "name": "askLoading",
+        "setWith": "boolean",
+        "value": false
+      },
+      "x": 650,
+      "y": 2320
+    },
+    {
+      "id": "ask-seterrorempty",
+      "type": "Set Variable",
+      "label": "Clear the error",
+      "parameters": {
+        "name": "askError",
+        "setWith": "emptyString"
+      },
+      "x": 650,
+      "y": 2440
+    },
+    {
+      "id": "ask-seterror",
+      "type": "Set Variable",
+      "label": "Store the error",
+      "parameters": {
+        "name": "askError",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 2560
+    },
+    {
+      "id": "ask-call",
+      "type": "CloudFunction2",
+      "label": "Call askMistral",
+      "parameters": {
+        "function": "askMistral"
+      },
+      "x": 650,
+      "y": 1600
+    },
+    {
+      "id": "ask-cansend",
+      "type": "Expression",
+      "label": "Can send",
+      "parameters": {
+        "expression": "!!question && !asking"
+      },
+      "x": 650,
+      "y": 1720
+    },
+    {
+      "id": "ask-haserror",
+      "type": "Expression",
+      "label": "Has error",
+      "parameters": {
+        "expression": "!!errorText"
+      },
+      "x": 650,
+      "y": 1240
+    },
+    {
+      "id": "ask-nomessages",
+      "type": "Expression",
+      "label": "No messages yet",
+      "parameters": {
+        "expression": "!messages || messages.length === 0"
+      },
+      "x": 650,
+      "y": 1360
+    }
+  ],
+  "visualRoots": [
+    "ask-page"
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c551c694-56a1-5c67-8dd8-200307a90fef",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "am-req",
+      "type": "noodl.cloud.request",
+      "label": "Ask request",
+      "parameters": {
+        "allowNoAuth": true,
+        "params": "question,history"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "am-qclients",
+      "type": "DbCollection2",
+      "label": "Fetch clients",
+      "parameters": {
+        "collectionName": "Client"
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "am-qprojects",
+      "type": "DbCollection2",
+      "label": "Fetch projects",
+      "parameters": {
+        "collectionName": "Project"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "am-qmembers",
+      "type": "DbCollection2",
+      "label": "Fetch team members",
+      "parameters": {
+        "collectionName": "TeamMember"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "am-qwiki",
+      "type": "DbCollection2",
+      "label": "Fetch wiki pages",
+      "parameters": {
+        "collectionName": "WikiPage"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "am-secret",
+      "type": "noodl.cloud.secret",
+      "label": "Read MISTRAL_API_KEY",
+      "parameters": {
+        "name": "MISTRAL_API_KEY"
+      },
+      "x": 40,
+      "y": 640
+    },
+    {
+      "id": "am-ask",
+      "type": "JavaScriptFunction",
+      "label": "Call Mistral",
+      "parameters": {
+        "functionScript": "if (Inputs.question === undefined || Inputs.apiKey === undefined || Inputs.clients === undefined || Inputs.projects === undefined || Inputs.members === undefined || Inputs.wiki === undefined) return;\n\nconst clients = Inputs.clients || [];\nconst projects = Inputs.projects || [];\nconst members = Inputs.members || [];\nconst pages = Inputs.wiki || [];\nconst history = Array.isArray(Inputs.history) ? Inputs.history : [];\n\nconst ptrId = function (value) {\n  if (typeof value === 'string') return value;\n  if (value && value.id) return value.id;\n  if (value && value.objectId) return value.objectId;\n  return '';\n};\n\nconst findById = function (list, id) {\n  return list.find(function (item) { return item.id === id; });\n};\n\nconst clientLines = clients.map(function (c) {\n  return '- ' + c.name + ' (sector: ' + (c.sector || 'unknown') + ', contact: ' + (c.contactName || 'none') + ', email: ' + (c.email || 'none') + ')';\n}).join('\\n');\n\nconst projectLines = projects.map(function (p) {\n  const client = findById(clients, ptrId(p.client));\n  const owner = findById(members, ptrId(p.owner));\n  return '- ' + p.name + ' — client: ' + (client ? client.name : 'none') + ', status: ' + (p.status || 'none') + ', owner: ' + (owner ? owner.name : 'nobody') + (p.dueDate ? ', due: ' + p.dueDate : '');\n}).join('\\n');\n\nconst wikiLines = pages.map(function (w) {\n  return '## ' + w.title + '\\n' + (w.body || '').slice(0, 1200);\n}).join('\\n\\n');\n\nconst systemPrompt = 'You are the assistant of Atelier Hub, the internal app of a design agency in Lyon. Answer the team\\'s questions about clients, projects and wiki pages using ONLY the data below. Be concise, factual and friendly. If the data does not contain the answer, say so plainly.\\n\\nCLIENTS:\\n' + (clientLines || '(none)') + '\\n\\nPROJECTS:\\n' + (projectLines || '(none)') + '\\n\\nWIKI PAGES:\\n' + (wikiLines || '(none)');\n\nconst messages = [{ role: 'system', content: systemPrompt }];\nhistory.forEach(function (m) {\n  if (m && m.role && m.content) messages.push({ role: m.role, content: String(m.content).slice(0, 4000) });\n});\nmessages.push({ role: 'user', content: Inputs.question });\n\nif (!Inputs.apiKey) {\n  Outputs.errorText = 'The MISTRAL_API_KEY secret is not set on the server yet.';\n  Outputs.failed();\n  return;\n}\n\nconst response = await fetch('https://api.mistral.ai/v1/chat/completions', {\n  method: 'POST',\n  headers: {\n    'Authorization': 'Bearer ' + Inputs.apiKey,\n    'Content-Type': 'application/json'\n  },\n  body: JSON.stringify({\n    model: 'mistral-large-4',\n    messages: messages,\n    temperature: 0.2\n  })\n});\n\nif (!response.ok) {\n  const detail = await response.text();\n  Outputs.errorText = 'Mistral API error ' + response.status + ': ' + detail.slice(0, 300);\n  Outputs.failed();\n  return;\n}\n\nconst data = await response.json();\nconst answer = data && data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : '';\nif (!answer) {\n  Outputs.errorText = 'Mistral returned an empty answer.';\n  Outputs.failed();\n  return;\n}\nOutputs.answer = answer;\nOutputs.finished();"
+      },
+      "ports": [
+        {
+          "name": "in-question",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-history",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-clients",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-projects",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-members",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-wiki",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-apiKey",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-answer",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-errorText",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-finished",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 760
+    },
+    {
+      "id": "am-resok",
+      "type": "noodl.cloud.response",
+      "label": "Answer",
+      "parameters": {
+        "params": "answer"
+      },
+      "x": 40,
+      "y": 880
+    },
+    {
+      "id": "am-resfail",
+      "type": "noodl.cloud.response",
+      "label": "Failure answer",
+      "parameters": {
+        "status": "failure"
+      },
+      "x": 40,
+      "y": 1000
+    }
+  ]
+}

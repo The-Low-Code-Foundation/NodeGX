@@ -136,7 +136,7 @@ function drive(row: TableRow, spec: AnyNodeSpec = specs[row.type]): Outcome {
 // ------------------------------------------------------------------------------------------------------------------
 // The census: every module on disk with a hook is in the table, excluded with a reason, or a library.
 
-const ROOTS = ['noodl-runtime/src/nodes', 'noodl-viewer-react/src/nodes', 'noodl-viewer-react/src/nodes-deprecated'];
+const ROOTS = ['noodl-runtime/src/nodes', 'noodl-viewer-react/src/nodes', 'noodl-viewer-react/src/nodes-deprecated', 'noodl-viewer-cloud/src/nodes'];
 /** A module-level hook in any of the shapes the two packages write one, a mixin that installs one, a numbered registration, or an announcement. */
 const CANDIDATE =
   /(\bsetup\s*\(\s*context|\bsetup\s*:\s*(function|setup\b|def\.setup)|\.setup\s*=\s*function|function setup\s*\(|numberedInputs|sendDynamicPorts|modelcrudbase|dbmodelcrudbase|componentutils\/base|from '\.\/base')/;
@@ -418,6 +418,45 @@ describe('NSP-020 oracle (a): planted mutants are red', () => {
     expect(Object.keys(row.known).filter((pin) => !seen.some((d) => matchesPin(pin, d)))).toEqual([
       'input nothing: announced; the spec does not draw it'
     ]);
+  });
+
+  // P107 s101 (R37) — what the editor now draws a cloud node's panel from: a derived port's enums, its panel fields, a derived
+  // output. The class as the editor stores it (`{ name, columns }`), which the Aggregate hook reads.
+  const LESSON = { schema: { classes: { Lesson: { fields: { title: { type: 'string' }, n: { type: 'number' } } } } } } as PortContext;
+  const COLUMNS = { dbCollections: [{ name: 'Lesson', columns: [{ name: 'title', type: 'String' }, { name: 'n', type: 'Number' }] }] };
+  const AGG = { collectionName: 'Lesson', aggregates: 'total', 'aggprop-total': 'n' };
+  const aggDiffs = (spec: AnyNodeSpec) =>
+    compareWithSpec(spec, announcedPorts(hookOf(rowOf('noodl.cloud.aggregate')), 'noodl.cloud.aggregate', AGG, LESSON, COLUMNS), AGG, LESSON);
+
+  test('PLANTED (panel): an Aggregate spec whose Operation has no labels is red', () => {
+    const agg = specs['noodl.cloud.aggregate'];
+    const bare = withDerivedInputs(agg, (params, context) => {
+      const ports = { ...agg.derived!.inputs(params, context) };
+      ports['aggop-total'] = { ...(ports['aggop-total'] as ValueInputDecl), labels: undefined };
+      return ports;
+    });
+    expect(aggDiffs(agg)).toEqual([]);
+    expect(aggDiffs(bare)).toEqual(['input aggop-total: labels runtime {"min":"Min","max":"Max","sum":"Sum","avg":"Avg"}, spec unset']);
+  });
+
+  test('PLANTED (panel): an Aggregate spec that draws no output for a chosen aggregate is red', () => {
+    const agg = specs['noodl.cloud.aggregate'];
+    const noOutputs: AnyNodeSpec = { ...agg, derived: { ...agg.derived!, outputs: undefined } };
+    expect(aggDiffs(noOutputs)).toEqual(['output agg-total: announced; the spec does not draw it']);
+  });
+
+  test('PLANTED (derived enums): a Filter Collection Op that offers every operator whatever the Type is red', () => {
+    const fc = specs['Filter Collection'];
+    const all = withDerivedInputs(fc, (params, context) => {
+      const ports = { ...fc.derived!.inputs(params, context) };
+      ports['filterFilterOp-a'] = { ...(ports['filterFilterOp-a'] as ValueInputDecl), enums: ['eq', 'neq', 'regex', 'lt', 'gt', 'gte', 'lte', 'in', 'nin'] };
+      return ports;
+    });
+    const params = { filterFilter: 'a', 'filterFilterType-a': 'boolean' };
+    expect(diffsFor('Filter Collection', fc, params)).toEqual([]);
+    expect(diffsFor('Filter Collection', all, params)).toContain(
+      'input filterFilterOp-a: enums runtime ["eq","neq"], spec ["eq","neq","regex","lt","gt","gte","lte","in","nin"]'
+    );
   });
 });
 

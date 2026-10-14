@@ -165,5 +165,35 @@
     "row": "P107-S82-STATESVALUEPORT",
     "params": { "states": "A,B" },
     "steps": ["settle", { "set": "value-A-x", "value": 5 }, "settle", { "signal": "toggle" }, "settle"]
+  },
+  {
+    "name": "R35: an unknown state warns the editor, a second one replaces the sentence, and asking for the state the node is already in clears it — the commonest correction",
+    "because": "states.ts :786 raises `states/unknown-state` on the error bus, which the editor shows under that key (runtimeerror.ts :177-186); :722-724 withdraw it when a request names a state in the list, before the already-there check, so a request that moves nothing still clears it (v5)",
+    "params": { "states": "clicked,idle" },
+    "steps": ["settle", { "set": "currentState", "value": "Clicked" }, "settle", { "set": "currentState", "value": "nowhere" }, "settle", { "set": "currentState", "value": "clicked" }, "settle"]
+  },
+  {
+    "name": "R35: a value named as one of the node's own outputs is refused and the editor is told; the sentence stays after the name is changed",
+    "because": "states.ts :349-355 raise `states/reserved-port-name` for each reserved name in the Values list, the last one's sentence showing; nothing withdraws it (v5)",
+    "params": { "states": "A,B" },
+    "steps": [{ "set": "values", "value": "x,done,failure" }, "settle", { "set": "values", "value": "x" }, "settle"]
+  },
+  {
+    "name": "R35: Toggle and To on a one-state node are Unchanged; one that names the state clears an unknown-state sentence, and one with nothing to clear leaves every other sentence standing",
+    "because": "states.ts :722-724 clear before the :733-736 already-there return, so an Unchanged request withdraws the unknown-state sentence; the reserved-name one (:349-355) is never withdrawn (v5). Kills the two swap-branch mutants seed 20739 left (an Unchanged that clears vs one that does not)",
+    "params": { "states": "A", "values": "x" },
+    "steps": ["settle", { "set": "currentState", "value": "Z" }, "settle", { "signal": "toggle" }, "settle", { "set": "currentState", "value": "Z" }, "settle", { "signal": "to-A" }, "settle", { "set": "values", "value": "x,done" }, "settle", { "signal": "toggle" }, "settle", { "signal": "to-A" }, "settle"]
+  },
+  {
+    "name": "R35: a Toggle that moves clears an unknown-state sentence as it is asked, not when the move lands",
+    "because": "states.ts :722-724 run in `scheduleGoToState`, before the request is queued (v5). Fixes the example the runner swaps into an Unchanged Toggle, so that mutant is killed on every seed (20740 found it by luck of the generated sequences)",
+    "params": { "states": "A,B" },
+    "steps": ["settle", { "set": "currentState", "value": "Z" }, "settle", { "signal": "toggle" }, "settle"]
+  },
+  {
+    "name": "To Last then To First in one frame, ending at its frame end: the node passes through Last and comes back, so State ends where it began and only State Changed ×2 and the two Dones are seen",
+    "because": "Shows the declared equivalent for States' frame end (equivalent-mutants.ts: a dropped frame-end `set` shows only at the NEXT settle) on every seed. No generated sequence can draw `to-First` / `to-Last`, no other scenario asks for them, and this play ends at that frame end. Until v5, seed 13 showed it only on frame ends that raised a failure; v5's warnings made those visible at once, and the package test reads a declaration that fires 0 times as dead",
+    "params": { "states": "First,Last" },
+    "steps": ["settle", { "signal": "to-Last" }, { "signal": "to-First" }, "settle"]
   }
 ]

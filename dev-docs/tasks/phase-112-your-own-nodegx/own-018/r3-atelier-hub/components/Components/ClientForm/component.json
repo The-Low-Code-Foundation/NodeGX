@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a8c719c9-017b-5c3f-828f-8a7f33aaf626",
+  "name": "ClientForm",
+  "path": "/Components/ClientForm",
+  "type": "visual",
+  "created": "2026-10-12T17:55:41.277Z",
+  "modified": "2026-10-12T18:24:11.148Z",
+  "modifiedBy": "noodl-mcp"
+}

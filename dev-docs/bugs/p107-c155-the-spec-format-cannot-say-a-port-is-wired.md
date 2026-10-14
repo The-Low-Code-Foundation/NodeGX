@@ -8,6 +8,8 @@ found: P107 NSP-018 s73, 2026-10-09 — writing Function's rules in words
 kit: node-spec
 evidence: the runtime branches on `isInputConnected` at simplejavascript.ts :386, :408, :414 (Function), expression.ts :611 (Expression), runtasks.ts :417 (Run Tasks), page.ts :65 (Page), layout.ts :262 (flex-grow from a wired size); P109 ISL-033 (8f31517cc) measured the wired arm on the runtime — "with Run unwired the script runs at load and on an input; wired, it still runs on the input but not at load"
 fixed: 2026-10-10 — the format says it (`wired`, NSP-002 §6); the Function's :386 and the Expression's :611 are graded on both arms; :408/:414 (Uses, undriven in a lone node), :417 (the Run Tasks node forcing a TASK node's Start to read wired — a graph rule, no spec), :65 (Page, no spec; an SSR event nobody on the wire sees) and layout.ts :262 (the layout model) are out of a lone spec's reach and say so
+commit: c9b8a8e0e
+regression: packages/nodegx-node-spec/scenarios/Expression.json "with Run wired, a new text is not evaluated at load: Result stays null until Run (P107-C155)" (and two more named C155; JavaScriptFunction.json likewise)
 ---
 
 The spec format cannot say "this port is wired", so five runtime branches on it are graded on the unwired arm only.

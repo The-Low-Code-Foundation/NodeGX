@@ -21,6 +21,8 @@ import * as path from 'path';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+
+import { clientProfile } from '../clientProfile';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
 import { runDrivePage, runRenderReport, type RenderReportPayload } from '../render';
@@ -35,7 +37,12 @@ import { guarded, type ToolResult } from './util';
 const MAX_SCALE = 1;
 const MIN_SCALE = 0.1;
 
-export function registerRenderTools(server: McpServer, binding: ProjectBinding, ledger: RenderLedger): void {
+export function registerRenderTools(
+  server: McpServer,
+  binding: ProjectBinding,
+  ledger: RenderLedger,
+  options: { screenshotsToFiles?: boolean } = {}
+): void {
   server.registerTool(
     'render_report',
     {
@@ -60,8 +67,12 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
         // had to be paid for — the resident surface had **7 tokens of headroom** at HEAD against
         // toolDisclosure's 8280 budget, and a new parameter costs more than that. See the register.
         'evidence. Measures layout, text, images and empty boxes per viewport; ~2s a page. ' +
-        'LOOK AT THE SCREENSHOTS: a picture that loads is not a picture of the right thing, and no number can ' +
-        'tell you it is the wrong one.',
+        // OWN-019 census #19 — the same warning, with the evidence a Mistral model can afford.
+        (clientProfile().imagesCostly
+          ? 'PROVE WHAT IT SHOWS: a picture that loads is not the right picture — drive_page read steps (text, a ' +
+            'computed style) check it without an image; open a screenshot file once, at the end.'
+          : 'LOOK AT THE SCREENSHOTS: a picture that loads is not a picture of the right thing, and no number can ' +
+            'tell you it is the wrong one.'),
       inputSchema: {
         viewports: z
           .string()
@@ -107,7 +118,14 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
         // Resolved here, once, against this server's cwd — and the SAME resolved string is both
         // what the CLI is handed and what the caller is told, so the path in the response is the
         // path on disk rather than a relative fragment the caller would have to guess the base of.
-        const outDir = args.out_dir === undefined ? undefined : path.resolve(args.out_dir);
+        // P112 OWN-018 s2 — with the server's --screenshots-to-files, no `out_dir` means the project's own
+        // .previews/render rather than images in the response (see ServerOptions.screenshotsToFiles).
+        const outDir =
+          args.out_dir !== undefined
+            ? path.resolve(args.out_dir)
+            : options.screenshotsToFiles && args.screenshot !== 'none'
+              ? path.join(projectDir, '.previews', 'render')
+              : undefined;
         const { report, screenshots } = await runRenderReport(projectDir, {
           viewports: args.viewports,
           screenshot: args.screenshot,
@@ -132,12 +150,12 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
             // shape reads as success is how "Rendered clean" survived over a
             // page nobody could reach.
             ...(verdict ? [{ type: 'text' as const, text: verdictHeadline(verdict) }] : []),
-            { type: 'text', text: JSON.stringify(report, null, 2) },
+            { type: 'text', text: JSON.stringify(report) },
             // FLD-011 AC1 — with `out_dir` the harness wrote files and returned no base64, so
             // `screenshots` is empty and the loop below produces nothing. The manifest replaces it,
             // because a caller told only "written to a folder" has to list a directory to find out
             // which file is which page, and the report's own rows already know.
-            ...(outDir ? [{ type: 'text' as const, text: screenshotManifest(report, outDir) }] : []),
+            ...(outDir ? [{ type: 'text' as const, text: screenshotManifest(report, outDir, options.screenshotsToFiles === true) }] : []),
             // Each image is announced before it arrives, because an agent
             // reading a bare image has no way to know which viewport it is.
             ...screenshots.flatMap((shot) => [
@@ -147,7 +165,7 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
             // P109 ISL-021 AC6 (s14) — the agent built a form, read this answer four times, then went looking
             // for a browser to script: `drive_page` is deferred, so nothing it could see named it. This answer
             // is where it looks after building, and response text costs no resident tokens.
-            { type: 'text' as const, text: FIRST_FRAME_NOTE }
+            { type: 'text' as const, text: firstFrameNote() }
           ]
         };
       }
@@ -169,13 +187,17 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
         'step — so you can prove a button, a form or a game WORKS, not just that it draws. Each call is a fresh ' +
         'browser: nothing carries over from the last call. Steps (each an object with one verb): {tap: T}, ' +
         '{type: "text", into?: T, replace?: true} (appends to what the field holds unless replace), {key: "Enter"}, ' +
-        '{wait_for: {text|testid|selector|url|expression}, timeout_ms?}, {read: {text: T}|{variable: name}|' +
-        '{storage: key}|{url: true}|{stub: path}|{expression}, expect?: value|{contains}} — or, as lists so far, ' +
+        '{wait_for: {text|testid|selector|url|expression}, timeout_ms?}, {read: {text: T}|{look: T}|{variable: name}|' +
+        '{storage: key}|{url: true}|{stub: path}|{expression}, expect?: value|{contains}} — {look: T} is what a person ' +
+        'sees once it settles: {visible, backgroundName: "green", colorName, …}, and its expect names only what ' +
+        'matters ({backgroundName: "green"}) — or, as lists so far, ' +
         '{console_errors: true}|{network_errors: true}|{other_origins: true} (expect [] = none yet), {navigate: "/route"}, ' +
         '{viewport: "phone"|"390x844"}, {screenshot: name}, {seed_storage: {key: value}} or {seed_storage: "key", ' +
         'edit: "js changing v"} (applied again on the next load, before the app can overwrite it), ' +
         '{clear_storage: true}, {stub_route: "/api/x", json?, body?, status?} (answers that path itself; put it ' +
-        'first to meet a fetch made at boot), {reduced_motion: true|false}. A target T is {text: "exact label"} or {text_contains} (a field\'s ' +
+        'first to meet a fetch made at boot), {reduced_motion: true|false}, {reload: true} (reload THIS page, as a person ' +
+        'does), {watch: {look: T}, for_ms?, expect?: {never: {backgroundName: "green"}}} (every state T showed DURING ' +
+        'a change — a look waits for it to settle and misses a moment\'s flash). A target T is {text: "exact label"} or {text_contains} (a field\'s ' +
         'placeholder counts), {testid} (a data-testid set in the node\'s Data Attributes list — NOT its node id) ' +
         'or {selector}; a bare string is exact text. A tap is a real pointer press at the element\'s centre and is ' +
         'REFUSED when something else covers it, naming what a finger would hit. The first failing step stops the run.',
@@ -203,7 +225,12 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
         const result = await runDrivePage(projectDir, args.steps, {
           page: args.page,
           viewport: args.viewport,
-          outDir: args.out_dir === undefined ? undefined : path.resolve(args.out_dir),
+          outDir:
+            args.out_dir !== undefined
+              ? path.resolve(args.out_dir)
+              : options.screenshotsToFiles
+                ? path.join(projectDir, '.previews', 'drive')
+                : undefined,
           backendPort: args.backend_port
         });
         const failed = result.steps.find((r) => !r.ok);
@@ -219,10 +246,19 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
           result.consoleErrors.length ? `${result.consoleErrors.length} console error(s)` : '',
           result.networkErrors?.length ? `${result.networkErrors.length} failed request(s)` : ''
         ].filter(Boolean);
+        // P112-OWN018-IMAGECACHE (s2, run 8): the agent opened a drive_page screenshot to debug, and every request after
+        // it went uncached. Said only where the server was started for such a model, and only when a step wrote one.
+        const wroteScreenshot = args.steps.some((step) => step && typeof step === 'object' && 'screenshot' in step);
+        const imageNote =
+          options.screenshotsToFiles && wroteScreenshot
+            ? ' Screenshots are files, not in this answer. Each image you open stays in your conversation and, with ' +
+              'some models, leaves every later request uncached until the session is compacted — a read step (the ' +
+              'text, a computed style) answers most questions without one.'
+            : '';
         return {
           content: [
-            { type: 'text', text: headline + (caveats.length ? ` Note: ${caveats.join('; ')}.` : '') },
-            { type: 'text', text: JSON.stringify(result, null, 2) }
+            { type: 'text', text: headline + (caveats.length ? ` Note: ${caveats.join('; ')}.` : '') + imageNote },
+            { type: 'text', text: JSON.stringify(result) }
           ]
         };
       }
@@ -239,7 +275,7 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
  * four is worse than no manifest. A page whose row carries no path is listed as such, because a
  * missing image and an image nobody mentioned look identical to a caller counting pictures.
  */
-function screenshotManifest(report: RenderReportPayload, outDir: string): string {
+function screenshotManifest(report: RenderReportPayload, outDir: string, filesByDefault = false): string {
   const lines: string[] = [];
   let written = 0;
   for (const page of report.pages ?? []) {
@@ -255,17 +291,35 @@ function screenshotManifest(report: RenderReportPayload, outDir: string): string
   if (!lines.length) return `No screenshots were written to ${outDir} — this run photographed nothing.`;
   return (
     `${written} screenshot${written === 1 ? '' : 's'} written to ${outDir}, one per measured page per viewport. ` +
-    'They are NOT in this response — READ the ones you need. A path you never open is not a picture you ' +
-    'looked at, and no number in the report above can tell you the page shows the wrong thing.\n' +
+    // OWN-019 census #39 — on the Vibe profile the advice leads with what to do instead of opening images.
+    (clientProfile().imagesCostly
+      ? 'They are NOT in this response. ' + 'Each image you open makes every later request of this session full ' +
+        'price, so check what a person sees with drive_page read steps (the text, a computed style) and open ' +
+        'one image only at the end, on the page still in doubt.'
+      : 'They are NOT in this response — READ the ones you need. A path you never open is not a picture you ' +
+        'looked at, and no number in the report above can tell you the page shows the wrong thing.') +
+    // P112-OWN018-IMAGECACHE: said only where the server was started for such a model.
+    (filesByDefault && !clientProfile().imagesCostly
+      ? ' Each image you open stays in your conversation, and with some models every later request then goes ' +
+        'uncached until the session is compacted, so open the ones you need, not all of them.'
+      : '') +
+    '\n' +
     lines.join('\n')
   );
 }
 
 /** What `render_report` cannot prove, and the tool that can — appended to every report. */
-export const FIRST_FRAME_NOTE =
-  'This report is the FIRST FRAME only: nothing was pressed, typed or waited for. To prove a button, form or game ' +
-  'WORKS (tap, type, wait, read a Variable or what was saved), call find_tools({ query: "press" }) to reveal ' +
-  'drive_page and send it a list of steps — no browser script needed.';
+export function firstFrameNote(): string {
+  // OWN-019 census #38 — the note that leads an agent from the first frame to behaviour testing; on a client whose
+  // list never changes, revealing does nothing it can see, so it names the call.
+  const door = clientProfile().staticToolList
+    ? 'call call_tool({ name: "drive_page", arguments: { steps: [...] } }) — describe: true shows the steps it takes'
+    : 'call find_tools({ query: "press" }) to reveal drive_page and send it a list of steps';
+  return (
+    'This report is the FIRST FRAME only: nothing was pressed, typed or waited for. To prove a button, form or ' +
+    'game WORKS (tap, type, wait, read a Variable or what was saved), ' + door + ' — no browser script needed.'
+  );
+}
 
 /** The verdict as the one line a caller reads first. */
 function verdictHeadline(verdict: { done: boolean; reason: string }): string {

@@ -1,0 +1,16 @@
+{
+  "name": "french-phrases-editor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A local tables-and-forms editor for the French Phrases NodeGX app.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@nodegx/node-spec": "^0.1.0",
+    "@nodegx/project-contract": "^0.1.0",
+    "express": "^5.3.0"
+  }
+}

@@ -1,0 +1,247 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "72a99978-8b1a-5c58-8283-9aa3abbb4460",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pfm-ci",
+      "fromProperty": "recordId",
+      "toId": "pfm-rec",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "pfm-ci",
+      "fromProperty": "recordId",
+      "toId": "pfm-update",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "pfm-ci",
+      "fromProperty": "recordId",
+      "toId": "pfm-isnew",
+      "toProperty": "recordId"
+    },
+    {
+      "fromId": "pfm-ci",
+      "fromProperty": "clientOptions",
+      "toId": "pfm-client",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "pfm-ci",
+      "fromProperty": "ownerOptions",
+      "toId": "pfm-owner",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "pfm-isnew",
+      "fromProperty": "asBoolean",
+      "toId": "pfm-isnewcond",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "pfm-rec",
+      "fromProperty": "prop-name",
+      "toId": "pfm-name",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pfm-rec",
+      "fromProperty": "prop-description",
+      "toId": "pfm-desc",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pfm-rec",
+      "fromProperty": "prop-client",
+      "toId": "pfm-clientid",
+      "toProperty": "client"
+    },
+    {
+      "fromId": "pfm-clientid",
+      "fromProperty": "result",
+      "toId": "pfm-client",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pfm-rec",
+      "fromProperty": "prop-owner",
+      "toId": "pfm-ownerid",
+      "toProperty": "owner"
+    },
+    {
+      "fromId": "pfm-ownerid",
+      "fromProperty": "result",
+      "toId": "pfm-owner",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pfm-rec",
+      "fromProperty": "prop-status",
+      "toId": "pfm-status",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pfm-rec",
+      "fromProperty": "prop-startDate",
+      "toId": "pfm-start",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pfm-rec",
+      "fromProperty": "prop-dueDate",
+      "toId": "pfm-due",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pfm-name",
+      "fromProperty": "value",
+      "toId": "pfm-create",
+      "toProperty": "prop-name"
+    },
+    {
+      "fromId": "pfm-name",
+      "fromProperty": "value",
+      "toId": "pfm-update",
+      "toProperty": "prop-name"
+    },
+    {
+      "fromId": "pfm-name",
+      "fromProperty": "value",
+      "toId": "pfm-ok",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pfm-desc",
+      "fromProperty": "value",
+      "toId": "pfm-create",
+      "toProperty": "prop-description"
+    },
+    {
+      "fromId": "pfm-desc",
+      "fromProperty": "value",
+      "toId": "pfm-update",
+      "toProperty": "prop-description"
+    },
+    {
+      "fromId": "pfm-client",
+      "fromProperty": "value",
+      "toId": "pfm-create",
+      "toProperty": "prop-client"
+    },
+    {
+      "fromId": "pfm-client",
+      "fromProperty": "value",
+      "toId": "pfm-update",
+      "toProperty": "prop-client"
+    },
+    {
+      "fromId": "pfm-client",
+      "fromProperty": "value",
+      "toId": "pfm-ok",
+      "toProperty": "client"
+    },
+    {
+      "fromId": "pfm-owner",
+      "fromProperty": "value",
+      "toId": "pfm-create",
+      "toProperty": "prop-owner"
+    },
+    {
+      "fromId": "pfm-owner",
+      "fromProperty": "value",
+      "toId": "pfm-update",
+      "toProperty": "prop-owner"
+    },
+    {
+      "fromId": "pfm-owner",
+      "fromProperty": "value",
+      "toId": "pfm-ok",
+      "toProperty": "owner"
+    },
+    {
+      "fromId": "pfm-status",
+      "fromProperty": "value",
+      "toId": "pfm-create",
+      "toProperty": "prop-status"
+    },
+    {
+      "fromId": "pfm-status",
+      "fromProperty": "value",
+      "toId": "pfm-update",
+      "toProperty": "prop-status"
+    },
+    {
+      "fromId": "pfm-status",
+      "fromProperty": "value",
+      "toId": "pfm-ok",
+      "toProperty": "status"
+    },
+    {
+      "fromId": "pfm-start",
+      "fromProperty": "value",
+      "toId": "pfm-create",
+      "toProperty": "prop-startDate"
+    },
+    {
+      "fromId": "pfm-start",
+      "fromProperty": "value",
+      "toId": "pfm-update",
+      "toProperty": "prop-startDate"
+    },
+    {
+      "fromId": "pfm-due",
+      "fromProperty": "value",
+      "toId": "pfm-create",
+      "toProperty": "prop-dueDate"
+    },
+    {
+      "fromId": "pfm-due",
+      "fromProperty": "value",
+      "toId": "pfm-update",
+      "toProperty": "prop-dueDate"
+    },
+    {
+      "fromId": "pfm-ok",
+      "fromProperty": "asBoolean",
+      "toId": "pfm-save",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "pfm-save",
+      "fromProperty": "onClick",
+      "toId": "pfm-isnewcond",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "pfm-isnewcond",
+      "fromProperty": "ontrue",
+      "toId": "pfm-create",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "pfm-isnewcond",
+      "fromProperty": "onfalse",
+      "toId": "pfm-update",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "pfm-create",
+      "fromProperty": "done",
+      "toId": "pfm-co",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "pfm-update",
+      "fromProperty": "done",
+      "toId": "pfm-co",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "pfm-cancel",
+      "fromProperty": "onClick",
+      "toId": "pfm-co",
+      "toProperty": "cancelled"
+    }
+  ]
+}

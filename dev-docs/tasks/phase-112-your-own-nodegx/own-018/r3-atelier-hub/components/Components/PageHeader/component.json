@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5608dfca-ff82-5bec-84f6-177d6e0c0f07",
+  "name": "PageHeader",
+  "path": "/Components/PageHeader",
+  "type": "visual",
+  "created": "2026-10-12T17:46:35.982Z",
+  "modified": "2026-10-12T17:46:35.982Z",
+  "modifiedBy": "noodl-mcp"
+}

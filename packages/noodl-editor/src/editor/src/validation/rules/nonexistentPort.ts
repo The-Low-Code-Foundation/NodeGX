@@ -37,7 +37,7 @@
 
 import { tierForGroup } from '../../views/panels/propertyeditor/propertyPanelTiers';
 import { CatalogIndex, Plug, PortKind, nearest, portKindOfTypeName } from '../CatalogIndex';
-import { CLOUD_FUNCTION_TYPE, cloudFunctionCanMint } from '../derivedPortTargets';
+import { cloudPortMeaning, cloudPortMissingPrefix } from '../derivedPortTargets';
 import { Diagnostic, DiagnosticCode } from '../diagnostics';
 import { NormConnection, NormNode, isComponentRef } from '../model';
 import { SkippedCheck, unknownTypeSkip } from '../unknownTypeSkip';
@@ -190,16 +190,21 @@ export const nonexistentPort: Rule = {
           ctx.counters.endpointsChecked++;
 
           if (catalog.hasPort(node.type, plug, port)) continue; // (1)
-          if (node.instancePorts.includes(port)) continue; // (2)
-          // (2b) P109 ISL-009 — minted by the type's derived-port rule from this node's own list.
-          if (catalog.derivedPortNames(node.type, plug, node.parameters).includes(port)) continue;
 
-          // (2c) P109 ISL-042 — a Cloud Function's runtime ports are `out-*` results and `function`/`in-*` inputs, so
-          // any other name it does not list can never exist. Prefixed names go on to (3): whether the called function
-          // declares them is `derivedPortTargets`'s question, not this rule's.
-          const cloudFunctionCannotMint = node.type === CLOUD_FUNCTION_TYPE && !cloudFunctionCanMint(port, plug);
+          // (1b) P109 ISL-042 — a Cloud Function's runtime ports are `out-*` results and `function`/`in-*` inputs, so
+          // any other name it does not list can never exist. P112-S14-CFPORTS: the same holds for the Request's `pm-*`
+          // outputs and the Response's `pm-*` inputs, and it is asked BEFORE (2): an agent refused for `text` declared
+          // it in the instance's own `ports`, and that declaration passed a wire the runtime never makes. Prefixed
+          // names go on: whether the called function declares them is `derivedPortTargets`'s question.
+          const missingPrefix = cloudPortMissingPrefix(node.type, port, plug);
 
-          if (catalog.hasRuntimeDynamicPorts(node.type) && !cloudFunctionCannotMint) {
+          if (!missingPrefix) {
+            if (node.instancePorts.includes(port)) continue; // (2)
+            // (2b) P109 ISL-009 — minted by the type's derived-port rule from this node's own list.
+            if (catalog.derivedPortNames(node.type, plug, node.parameters).includes(port)) continue;
+          }
+
+          if (catalog.hasRuntimeDynamicPorts(node.type) && !missingPrefix) {
             // (3a) P107 NSP-020 R19 — the ports the node's spec draws now from its settings and the project, where the
             // caller supplies them (the agent server does): a port it does not draw is an error, as on a static node.
             const drawn = ctx.options.drawnPorts?.(component.name, node.id, node.type);
@@ -232,12 +237,19 @@ export const nonexistentPort: Rule = {
 
           // Fully static node — a missing port here is a real error.
           const wireKind = otherEndKind(catalog, nodeById, conn, plug);
-          const suggestion = catalog.suggestPort(node.type, plug, port, wireKind);
+          const prefixed = missingPrefix ? missingPrefix + port : undefined;
+          const suggestion = catalog.suggestPort(node.type, plug, port, wireKind) ?? prefixed;
           const alternatives = availableAlternatives(catalog, node.type, plug, wireKind);
           out.push({
             code: DiagnosticCode.NonexistentPort,
             severity: 'error',
-            message: `${node.type} has no ${plug} named "${port}".`,
+            message:
+              `${node.type} has no ${plug} named "${port}".` +
+              (prefixed
+                ? ` Its other ${plug}s exist only as "${missingPrefix}<name>", so a name without the prefix is never ` +
+                  `made and nothing goes through this wire. If "${port}" is ${cloudPortMeaning(node.type, plug)}, ` +
+                  `wire "${prefixed}".`
+                : ''),
             location: {
               component: component.name,
               nodeId: node.id,

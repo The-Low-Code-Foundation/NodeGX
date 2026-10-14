@@ -53,6 +53,8 @@
 
 import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
+import { controlFocusNotMounted, focusDiagnostics, focusMissed } from './focus-not-mounted';
+import { focusAndIconSourceChange, iconSourceDiagnostics } from './icon-source';
 import { asGroupValue } from './radiobuttongroup';
 
 /** The Values of the Radio Buttons beside this one in its group, in order (THE FIRST VISUAL INSIDE A PARENT, above). */
@@ -82,6 +84,8 @@ type State = {
   elementFocused: boolean;
   /** the element is on the page */
   onPage: boolean;
+  /** v5 — the last Focus found the node off the page: the editor is told (focus-not-mounted.ts) */
+  focusMissed: boolean;
   /** `props.value` as written (the Value input) — what `selected` compares and a click hands the group */
   value: unknown;
   /** world.ts GROUP — the button sits in a Radio Button Group */
@@ -105,14 +109,17 @@ export const RadioButton = defineNode({
   // the input where it is — v1 copied the group's selection, its "a person made it" flag and the label rebuild (rows C76, D37, C80)
   // v3 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
   // v4 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
-  version: 4,
+  // v5 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it, and an Icon Source that is not an icon shows as one until an icon or nothing arrives (`diagnostics`)
+  version: 5,
+  changes: [focusAndIconSourceChange(5)],
+  diagnostics: { ...focusDiagnostics(controlFocusNotMounted('radio button')), ...iconSourceDiagnostics() },
   source: 'packages/noodl-viewer-react/src/nodes/controls/radiobutton.ts',
   needs: ['person', 'group'],
   // the page's syncs (spec.ts `synced`): not branches
   synced: ['pageEnabled', 'pageVisible', 'checked'],
 
   state: {
-    enabled: true, checked: false, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false,
+    enabled: true, checked: false, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false, focusMissed: false,
     value: undefined, inGroup: false, gValue: undefined
   } as State,
   // utils.ts `addFocusActions` — Focus / Blur report Done / Unchanged
@@ -279,9 +286,9 @@ export const RadioButton = defineNode({
     useLabel: () => ({ says: 'always: a label is drawn beside the button, or not; the button and its keyboard stay', send: [] }),
     // utils.ts :340-364 — on the element, as the Checkbox's
     focus: (s) => {
-      if (!s.onPage) return { says: 'not on the page: nothing to focus, and the Focus is not kept', send: [], outcome: 'unchanged' };
-      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { says: 'it holds the keyboard already, or is disabled or hidden: nothing changes', send: [], outcome: 'done' };
-      return { says: 'otherwise the keyboard is put on it, and the Focused state goes true', set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
+      if (!s.onPage) return { says: 'not on the page: nothing to focus, the Focus is not kept, and the editor is told', set: focusMissed(s, true), send: [], outcome: 'unchanged' };
+      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { says: 'it holds the keyboard already, or is disabled or hidden: nothing changes', set: focusMissed(s, false), send: [], outcome: 'done' };
+      return { says: 'otherwise the keyboard is put on it, and the Focused state goes true', set: { focused: true, elementFocused: true, ...focusMissed(s, false) }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     blur: (s) => {
       if (!s.onPage || !s.elementFocused || !s.pageEnabled) return { says: 'it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes', send: [], outcome: 'done' };

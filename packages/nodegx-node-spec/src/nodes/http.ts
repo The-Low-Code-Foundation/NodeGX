@@ -92,6 +92,7 @@ const str = (displayName: string, group: string, description: string): ValueInpu
 /** The configuration ports, registered on first write (:439-450) and drawn by `updatePorts`. */
 const CONFIG: Readonly<Record<string, ValueInputDecl>> = Object.freeze({
   method: port({
+    editOnly: true,
     type: 'enum',
     enums: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
     default: 'GET',
@@ -108,6 +109,7 @@ const CONFIG: Readonly<Record<string, ValueInputDecl>> = Object.freeze({
     description: 'Time before the request is abandoned, in milliseconds; abandoning it fires Failure, not Canceled, and 0 or blank means 30000'
   }),
   headers: port({
+    editOnly: true,
     type: 'stringlist',
     examples: ['X-Test', 'Accept, X-Test', ''],
     displayName: 'Headers',
@@ -115,6 +117,7 @@ const CONFIG: Readonly<Record<string, ValueInputDecl>> = Object.freeze({
     description: 'Names the request headers to send; each name listed here gets its own value input'
   }),
   queryParams: port({
+    editOnly: true,
     type: 'stringlist',
     examples: ['q', 'q, page', ''],
     displayName: 'Query Parameters',
@@ -122,14 +125,17 @@ const CONFIG: Readonly<Record<string, ValueInputDecl>> = Object.freeze({
     description: 'Names the query-string parameters to append to the URL; each name listed here gets its own value input'
   }),
   bodyType: port({
+    editOnly: true,
     type: 'enum',
     enums: ['json', 'form', 'urlencoded', 'raw'],
+    labels: { json: 'JSON', form: 'Form Data', urlencoded: 'URL Encoded', raw: 'Raw' },
     default: 'json',
     displayName: 'Body Type',
     group: 'Body',
     description: 'How the body is encoded, which decides both the Content-Type sent and whether a null field value is kept or omitted'
   }),
   bodyFields: port({
+    editOnly: true,
     type: 'stringlist',
     examples: ['name', 'name, age', ''],
     displayName: 'Body Fields',
@@ -137,8 +143,10 @@ const CONFIG: Readonly<Record<string, ValueInputDecl>> = Object.freeze({
     description: 'Names the fields to put in the request body; each name listed here gets its own value and type input'
   }),
   authType: port({
+    editOnly: true,
     type: 'enum',
     enums: ['none', 'bearer', 'basic', 'apiKey'],
+    labels: { none: 'None', bearer: 'Bearer Token', basic: 'Basic Auth', apiKey: 'API Key' },
     default: 'none',
     displayName: 'Authentication',
     group: 'Authentication',
@@ -147,8 +155,10 @@ const CONFIG: Readonly<Record<string, ValueInputDecl>> = Object.freeze({
       'Authorization header, so leave Authorization out of Headers'
   }),
   responseType: port({
+    editOnly: true,
     type: 'enum',
     enums: ['auto', 'json', 'text'],
+    labels: { auto: 'Auto', json: 'JSON', text: 'Text' },
     default: 'auto',
     displayName: 'Response Type',
     group: 'Response',
@@ -405,7 +415,7 @@ export const HttpRequest = defineNode({
             ports.bodyFields = CONFIG.bodyFields;
             if (typeof params.bodyFields === 'string') {
               for (const f of list(params.bodyFields)) {
-                ports['body-type-' + f] = port({ type: 'enum', enums: ['string', 'number', 'boolean', 'array', 'object', '*'], default: 'string', displayName: f + ' Type', group: 'Body', description: 'Type the matching value input accepts and is sent as' });
+                ports['body-type-' + f] = port({ type: 'enum', enums: ['string', 'number', 'boolean', 'array', 'object', '*'], labels: { string: 'String', number: 'Number', boolean: 'Boolean', array: 'Array', object: 'Object', '*': 'Any' }, editOnly: true, default: 'string', displayName: f + ' Type', group: 'Body', description: 'Type the matching value input accepts and is sent as' });
                 ports['body-' + f] = port({
                   type: ((params['body-type-' + f] as ValueInputDecl['type']) || 'string') as ValueInputDecl['type'],
                   displayName: f,
@@ -415,7 +425,7 @@ export const HttpRequest = defineNode({
               }
             }
           } else if (bodyType === 'raw') {
-            ports['body-raw'] = str('Body', 'Body', 'Body sent verbatim, with no encoding applied and no Content-Type added for you');
+            ports['body-raw'] = { ...str('Body', 'Body', 'Body sent verbatim, with no encoding applied and no Content-Type added for you'), editOnly: true, codeEditor: 'json' };
           }
         }
         ports.authType = CONFIG.authType;
@@ -427,7 +437,7 @@ export const HttpRequest = defineNode({
         } else if (authType === 'apiKey') {
           ports['auth-authApiKeyName'] = str('Key Name', 'Authentication', 'Header or query-parameter name the key is sent under; nothing is sent unless Key Value is set too');
           ports['auth-authApiKeyValue'] = str('Key Value', 'Authentication', 'The key itself; nothing is sent unless Key Name is set too');
-          ports['auth-authApiKeyLocation'] = port({ type: 'enum', enums: ['header', 'query'], default: 'header', displayName: 'Add To', group: 'Authentication', description: 'Whether the API key travels as a request header or as a query-string parameter' });
+          ports['auth-authApiKeyLocation'] = port({ type: 'enum', enums: ['header', 'query'], labels: { header: 'Header', query: 'Query Parameter' }, default: 'header', displayName: 'Add To', group: 'Authentication', description: 'Whether the API key travels as a request header or as a query-string parameter' });
         }
         ports.timeout = CONFIG.timeout;
         ports.responseType = CONFIG.responseType;

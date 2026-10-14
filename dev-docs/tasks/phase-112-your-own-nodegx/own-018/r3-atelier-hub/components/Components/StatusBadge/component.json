@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2614e598-8e5a-5e5c-8d0b-e32eb500336c",
+  "name": "StatusBadge",
+  "path": "/Components/StatusBadge",
+  "type": "visual",
+  "created": "2026-10-12T17:46:36.019Z",
+  "modified": "2026-10-12T17:46:36.019Z",
+  "modifiedBy": "noodl-mcp"
+}

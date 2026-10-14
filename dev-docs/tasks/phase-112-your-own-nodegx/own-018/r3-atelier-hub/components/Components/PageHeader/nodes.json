@@ -1,0 +1,132 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5608dfca-ff82-5bec-84f6-177d6e0c0f07",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ph-root",
+      "type": "Group",
+      "label": "Header row",
+      "children": [
+        "ph-head",
+        "ph-slot"
+      ],
+      "parameters": {
+        "alignItems": "flex-end",
+        "columnGap": "var(--space-4)",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ph-head",
+      "type": "Group",
+      "label": "Head column",
+      "parent": "ph-root",
+      "children": [
+        "ph-eyebrow",
+        "ph-title",
+        "ph-lead"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "minWidth": {
+          "unit": "px",
+          "value": 0
+        },
+        "rowGap": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ph-eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "parent": "ph-head",
+      "parameters": {
+        "color": "var(--primary)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "ph-title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "ph-head",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-semibold)",
+        "letterSpacing": "var(--tracking-tight)",
+        "lineHeight": "var(--leading-tight)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "ph-lead",
+      "type": "Text",
+      "label": "Lead",
+      "parent": "ph-head",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "maxWidth": {
+          "unit": "px",
+          "value": 560
+        }
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "ph-slot",
+      "type": "Component Children",
+      "label": "Actions slot",
+      "parent": "ph-root",
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "ph-ci",
+      "type": "Component Inputs",
+      "label": "Header inputs",
+      "ports": [
+        {
+          "name": "eyebrow",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lead",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "ph-root"
+  ]
+}

@@ -20,7 +20,7 @@
  */
 
 import { defineNode } from '../spec';
-import { DATE_EXAMPLES, differenceBetween, isDateUnit, supplied, toDate, UNIT_VALUES } from './date-math';
+import { DATE_EXAMPLES, differenceBetween, isDateUnit, supplied, toDate, UNIT_VALUES, unknownUnitMessage } from './date-math';
 
 type State = {
   from: Date | undefined;
@@ -45,7 +45,19 @@ export const DateDifference = defineNode({
   type: 'net.noodl.DateDifference',
   // v2 (P109 ISL-026, P107-D15 ruled "Use days and warn once", with Date Add's C16): a Unit that is not one of
   // the eight counts as days. In v1 it counted as YEARS.
-  version: 2,
+  version: 3,
+  changes: [
+    {
+      version: 3,
+      says: 'A Unit that is not one of the eight now shows as the node\'s warning in this spec, as the runtime has shown it since v2. Before, the spec left it out',
+      row: 'NSP-019 R35 (P107 s102)',
+      migration: { none: 'Only the editor is told, and the runtime already told it. Nothing a wire carries changes' }
+    }
+  ],
+  // the Unit setter (:75, `setDiagnostic('date-difference/unknown-unit', unknownUnitMessage(value))`): the last Unit that arrived, as it arrived
+  diagnostics: {
+    'date-difference/unknown-unit': { says: 'Unit is not one of the eight', message: (_i, s) => unknownUnitMessage(s.unit) }
+  },
   source: 'packages/noodl-runtime/src/nodes/std-library/date/datedifference.ts; packages/noodl-runtime/src/nodes/std-library/date/datemath.ts',
   needs: ['timezone'],
 

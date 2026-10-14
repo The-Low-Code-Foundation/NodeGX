@@ -1728,6 +1728,11 @@ async function withRenderedPage(options, fn) {
       '--no-default-browser-check',
       '--hide-scrollbars',
       '--disable-gpu',
+      // P112-S14-KEYCHAIN: on macOS a page that touches storage makes Chrome open the login keychain. With no
+      // keychain where `HOME` points (an empty HOME, a CI user) the OS shows "Keychain Not Found" on the person's
+      // screen and Chrome waits for the answer, so the render hangs until its 240 s kill. A throwaway profile
+      // needs no real keychain.
+      '--use-mock-keychain',
       // Caller-supplied flags, for drives that need a capability this browser
       // does not have by default — a synthetic microphone and camera
       // (`--use-fake-device-for-media-stream`) being the case that added this.
@@ -1897,6 +1902,7 @@ async function withRenderedPage(options, fn) {
       evaluate: main.evaluate,
       goto: main.goto,
       navigate: main.navigate,
+      settle: main.settle,
       setViewport: main.setViewport,
       onEvent: main.onEvent,
       openTab,

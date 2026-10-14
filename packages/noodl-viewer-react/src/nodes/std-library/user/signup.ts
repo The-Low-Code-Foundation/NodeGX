@@ -215,8 +215,9 @@ function updatePorts(
     const c = systemCollections.find((c) => c.name === '_User');
     if (c && c.schema && c.schema.properties) {
       const props = c.schema.properties;
-      // The columns the node already has dedicated inputs for, plus the ones Parse owns.
-      const _ignoreKeys = ['authData', 'password', 'username', 'createdAt', 'updatedAt', 'emailVerified', 'email'];
+      // The columns the node already has dedicated inputs for, plus the ones Parse owns. ACL is the account's access rules, hidden
+      // as every Record node hides it (P107-S84-USERACL, R29).
+      const _ignoreKeys = ['authData', 'password', 'username', 'createdAt', 'updatedAt', 'emailVerified', 'email', 'ACL'];
       for (const key in props) {
         if (_ignoreKeys.indexOf(key) !== -1) continue;
 

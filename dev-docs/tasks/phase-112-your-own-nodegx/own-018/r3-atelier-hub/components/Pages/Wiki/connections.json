@@ -1,0 +1,205 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6105ff25-a0f2-531a-86f5-6f3081a41f63",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "wk-view",
+      "fromProperty": "at-list",
+      "toId": "wk-listpanel",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wk-view",
+      "fromProperty": "at-view",
+      "toId": "wk-viewpanel",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wk-view",
+      "fromProperty": "at-editor",
+      "toId": "wk-editorpanel",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wk-qwiki",
+      "fromProperty": "items",
+      "toId": "wk-wikifilter",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "wk-wikifilter",
+      "fromProperty": "items",
+      "toId": "wk-list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "wk-qwiki",
+      "fromProperty": "isEmpty",
+      "toId": "wk-empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wk-list",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "wk-setselected",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "wk-list",
+      "fromProperty": "itemActionItemId",
+      "toId": "wk-setselected",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "wk-list",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "wk-view",
+      "toProperty": "to-view"
+    },
+    {
+      "fromId": "wk-selected",
+      "fromProperty": "value",
+      "toId": "wk-rec",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "wk-rec",
+      "fromProperty": "prop-title",
+      "toId": "wk-title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wk-rec",
+      "fromProperty": "prop-body",
+      "toId": "wk-body",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wk-rec",
+      "fromProperty": "prop-updatedAt",
+      "toId": "wk-datefmt",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "wk-datefmt",
+      "fromProperty": "currentValue",
+      "toId": "wk-metafmt",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "wk-rec",
+      "fromProperty": "prop-author",
+      "toId": "wk-authorid",
+      "toProperty": "author"
+    },
+    {
+      "fromId": "wk-authorid",
+      "fromProperty": "result",
+      "toId": "wk-authorrec",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "wk-authorrec",
+      "fromProperty": "prop-name",
+      "toId": "wk-metafmt",
+      "toProperty": "author"
+    },
+    {
+      "fromId": "wk-metafmt",
+      "fromProperty": "formatted",
+      "toId": "wk-meta",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wk-back",
+      "fromProperty": "onClick",
+      "toId": "wk-view",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "wk-editbtn",
+      "fromProperty": "onClick",
+      "toId": "wk-setediting",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "wk-rec",
+      "fromProperty": "id",
+      "toId": "wk-setediting",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "wk-editbtn",
+      "fromProperty": "onClick",
+      "toId": "wk-view",
+      "toProperty": "to-editor"
+    },
+    {
+      "fromId": "wk-editing",
+      "fromProperty": "value",
+      "toId": "wk-form",
+      "toProperty": "recordId"
+    },
+    {
+      "fromId": "wk-editing",
+      "fromProperty": "value",
+      "toId": "wk-editortitleexpr",
+      "toProperty": "recordId"
+    },
+    {
+      "fromId": "wk-editortitleexpr",
+      "fromProperty": "result",
+      "toId": "wk-editortitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wk-qmembers",
+      "fromProperty": "items",
+      "toId": "wk-memberopts",
+      "toProperty": "records"
+    },
+    {
+      "fromId": "wk-memberopts",
+      "fromProperty": "options",
+      "toId": "wk-form",
+      "toProperty": "authorOptions"
+    },
+    {
+      "fromId": "wk-form",
+      "fromProperty": "saved",
+      "toId": "wk-view",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "wk-form",
+      "fromProperty": "cancelled",
+      "toId": "wk-view",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "wk-newbtn",
+      "fromProperty": "onClick",
+      "toId": "wk-seteditingempty",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "wk-newbtn",
+      "fromProperty": "onClick",
+      "toId": "wk-view",
+      "toProperty": "to-editor"
+    },
+    {
+      "fromId": "wk-empty",
+      "fromProperty": "clicked",
+      "toId": "wk-seteditingempty",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "wk-empty",
+      "fromProperty": "clicked",
+      "toId": "wk-view",
+      "toProperty": "to-editor"
+    }
+  ]
+}

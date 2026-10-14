@@ -1,0 +1,13 @@
+# The NodeGX builder: the agent Vibe starts with in this folder (`default_agent` in .vibe/config.toml).
+# Written by `npm create nodegx-vibe`. Edit anything; it is never overwritten.
+#
+# How to build is in AGENTS.md, not in `instructions` here: Vibe 2.26.1 sends an agent's `instructions` only on its
+# unified harness, and this folder runs the legacy one (`vibe --legacy-harness`, which shows the model the server's
+# error messages). AGENTS.md reaches the model on both.
+
+display_name = "NodeGX"
+description = "Builds NodeGX apps with the nodegx server, and proves each thing you asked for in a browser before saying it is done"
+
+# Vibe's own sub-agents only read and search files; a NodeGX build has nothing for them to explore, and one spent
+# 265 s listing a folder in a smoke round (OWN-019 s1).
+disabled_tools = ["task"]

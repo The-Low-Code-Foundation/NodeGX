@@ -1,5 +1,7 @@
 # Phase 92 — Dreamweaver called
 
+**2026-10-14 — CLOSED one task short by the [board](../../BOARD.md) §5.** It reopens only if Richard asks for that task.
+
 **Scoped:** 2026-09-15, from a measured audit of the installed **0.2.4** and `cline-dev` HEAD `e740727f8`.
 **Status: 🟡 one task from closing.** Re-derived from the task files on 2026-09-18 (s34), not from a
 handoff ([[write-the-next-session-prompt-every-session]]). The per-session narrative this line used to

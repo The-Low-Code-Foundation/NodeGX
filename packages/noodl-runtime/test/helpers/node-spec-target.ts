@@ -150,7 +150,7 @@ import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, R
 import type { RuntimeNode } from '../../src/internal';
 import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, PlayContext, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint, playContextOf, playOutputs, REPEATER_TEMPLATES, ROUTER_PAGES, specFor, type WorldLocation } from '../../../nodegx-node-spec/src';
-import { AUTH_OPS, backendEvent, canonicalise, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, OWN_ELEMENT, performRegistryWrite, SELF_REFERENCE, type BackendDelivery, type RegistryTables } from '../../../nodegx-node-spec/src';
+import { AUTH_OPS, backendEvent, canonicalise, hostEvent, invocationEvent, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, OWN_ELEMENT, performRegistryWrite, SELF_REFERENCE, type BackendDelivery, type HostCall, type RegistryTables } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
 import NodeDefinition = require('../../src/nodedefinition');
@@ -687,6 +687,12 @@ interface Layout {
 }
 
 /** NSP-016 s60 — the width a Columns page is laid out at before any `resize` (THE LAYOUT above): a desktop window. */
+/**
+ * NSP-019 R35 (s103) — diagnostic namespaces the BASE classes share across node types (`recordDiagnostics`): a spec is graded only on
+ * the keys it names in these, never on the whole namespace.
+ */
+const SHARED_DIAGNOSTIC_NAMESPACES: ReadonlySet<string> = new Set(['visual/', 'dimensions/']);
+
 const START_WIDTH = 1024;
 
 /** NSP-016 s56 — the components a Component Stack can build in a play (navigation-stack.ts THE PAGES), each holding one Pop Component Stack. */
@@ -861,6 +867,7 @@ const { RestDataAdapter } = require('../../src/api/backends/RestDataAdapter') as
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const CloudStore = require('../../src/api/cloudstore') as {
   invalidateBackends(scope?: unknown): void;
+  invalidateCollections(): void;
   instance: { _handle(): { publicToken?: string } };
   forBackend(modelScope: unknown, backendId: string): { _adapter: { emitAdapterEvent(e: Record<string, unknown>): void } } | undefined;
   _fromJSON(item: Record<string, unknown>, collectionName: string, modelScope?: unknown): unknown;
@@ -969,6 +976,21 @@ const UserServiceClass = ((): new () => unknown => {
   const before = services.UserService;
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const cls = require('../../../noodl-viewer-react/src/nodes/std-library/user/userservice').default as new () => unknown;
+  services.UserService = before;
+  return cls;
+})();
+
+/**
+ * NSP-022 s97 — the CLOUD runtime's user service class (noodl-viewer-cloud services/userservice.js): what a cloud function's
+ * Request node looks its caller up through. Loading its module assigns `NoodlRuntime.Services.UserService` process-wide, as
+ * the cloud runner does at load (index.ts :43) — undone at once: a cloud play installs it for the play (`install`), never the
+ * browser's.
+ */
+const CloudUserServiceClass = ((): unknown => {
+  const services = (NoodlRuntime as unknown as { Services: Record<string, unknown> }).Services;
+  const before = services.UserService;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const cls = require('../../../noodl-viewer-cloud/src/services/userservice') as unknown;
   services.UserService = before;
   return cls;
 })();
@@ -1338,6 +1360,34 @@ export function registerViewerModules(target: RuntimeTarget, modules: ViewerNode
   return target;
 }
 
+/**
+ * NSP-022 s96 — the cloud runtime's own picker nodes this phase has specced, from `noodl-viewer-cloud/src/nodes/` (its
+ * `registerNodes` list, nodes/index.ts). They are graded on {@link cloudTarget}: a `NoodlRuntime` of type `cloud`, which is what
+ * the backend's function runner builds (noodl-viewer-cloud/src/index.ts) — none of the browser's session nodes, none of the viewer's.
+ */
+export const CLOUD_NODES = ['cloud/hmac', 'cloud/jwtsign', 'cloud/jwtverify', 'cloud/secret', 'cloud/createuser', 'cloud/updateuser', 'cloud/deleteuser', 'cloud/verifysessiontoken', 'cloud/addusertorole', 'cloud/removeuserfromrole', 'cloud/getuserroles', 'cloud/listusersinrole', 'cloud/sendemail', 'cloud/request', 'cloud/response', 'cloud/modelrequest', 'data/aggregatenode'] as const;
+
+/** The type names of {@link CLOUD_NODES}, read from the modules — what a suite asks to choose {@link cloudTarget} for a spec. */
+export function cloudNodeTypes(): string[] {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return CLOUD_NODES.map((file) => (require('../../../noodl-viewer-cloud/src/nodes/' + file) as NodeModuleLike).node.name as string);
+}
+
+/** The target with the cloud runtime's own nodes registered as well, loaded through Node's `require`. */
+export function withCloudNodes(target: RuntimeTarget): RuntimeTarget {
+  for (const file of CLOUD_NODES) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mod = require('../../../noodl-viewer-cloud/src/nodes/' + file) as ViewerNodeModule;
+    target.context.nodeRegister.register(NodeDefinition.defineNode((mod.default ?? (mod as NodeModuleLike)).node));
+  }
+  return target;
+}
+
+/** NSP-022 — the runtime a cloud function runs on: type `cloud`, its own nodes registered. */
+export function cloudTarget(): RuntimeTarget {
+  return withCloudNodes(runtimeTarget({ type: 'cloud' }));
+}
+
 export interface RuntimeHandle extends Handle {
   readonly node: RuntimeNode;
   readonly metadata: NodeMetadata;
@@ -1345,6 +1395,11 @@ export interface RuntimeHandle extends Handle {
   readonly errors: RuntimeErrorEventLike[];
   /** Every line this node wrote through the scope's log sink, in order. Live. */
   readonly logs: LogLine[];
+  /**
+   * NSP-022 s98 — every model call this node handed the run's cost channel (runcontext.ts `recordModelCall`, Model Request's
+   * `recordCall`), in order. Live. A lone node's scope only: what CloudRunner hands a run (index.ts :219).
+   */
+  readonly modelCalls: unknown[];
 }
 
 /** What `net.noodl.Log` hands the sink (runcontext.ts `RuntimeLogEntry`), minus the node id the handle already knows. */
@@ -1455,6 +1510,62 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const s = byNodeId.get(event.nodeId);
     if (s) s.h.errors.push(event);
   });
+
+  /**
+   * NSP-019 s95 — THE EDITOR: what each node tells it about its own settings (diagnostics.ts `setDiagnostic`), by node id, then
+   * key → the sentence it shows now. The runtime's own connection reports `isRunningLocally()` false here, so `setDiagnostic`
+   * returned on its first line and every diagnostic vanished; this one is the editor a preview has. Kept apart from `State`, so
+   * a diagnostic a node raises while it is being made (before `adopt`) is not lost.
+   */
+  const diagnosticsNow = new Map<string, Map<string, string>>();
+  const diagnosticsShown = new Map<string, Record<string, string>>();
+  {
+    const editor = (context as unknown as { editorConnection: Record<string, unknown> }).editorConnection;
+    editor.isRunningLocally = () => true;
+    editor.sendWarning = (_component: string, nodeId: string, key: string, warning: { message?: unknown }) => {
+      if (!diagnosticsNow.has(nodeId)) diagnosticsNow.set(nodeId, new Map());
+      diagnosticsNow.get(nodeId)!.set(key, String(warning?.message ?? ''));
+    };
+    editor.clearWarning = (_component: string, nodeId: string, key: string) => {
+      diagnosticsNow.get(nodeId)?.delete(key);
+    };
+    editor.clearWarnings = (_component: string, nodeId: string) => {
+      diagnosticsNow.delete(nodeId);
+    };
+  }
+
+  /**
+   * NSP-019 s95 — a settle's `diagnostic` events (trace.ts): for a spec that declares `diagnostics`, every key the node shows in
+   * its OWN namespace — the `<node-type>/` prefixes its declared keys use (DIAGNOSTICS-CONTRACT.md "Keys") — declared or not, so
+   * a sentence the runtime says and the spec forgot is a divergence; one per key whose sentence changed since the last settle,
+   * sorted by key. Not the generic ones: the base class's `node/…`, and the scheduler's `runtime/cyclic-loop`, which the loop
+   * breaker puts on whichever node it stopped (graph C9, a Counter wired into itself) — the engine's, not the node's.
+   * NSP-019 R35 (s103): the base visual class's namespaces are shared the same way — `visual/` (react-component-node.ts: an icon
+   * port's sentence, and Scroll Into View and an action's failures on every visual node) and `dimensions/` (layout.ts and the
+   * size ports) — so a spec that names a key there is graded on THAT key, not on everything the base class says.
+   */
+  function recordDiagnostics(s: State): void {
+    const declared = specFor(s.h.type)?.diagnostics;
+    if (!declared) return;
+    const prefixOf = (k: string) => k.slice(0, k.indexOf('/') + 1);
+    const own = new Set(Object.keys(declared).map(prefixOf).filter((p) => !SHARED_DIAGNOSTIC_NAMESPACES.has(p)));
+    const named = new Set(Object.keys(declared).filter((k) => SHARED_DIAGNOSTIC_NAMESPACES.has(prefixOf(k))));
+    const now = diagnosticsNow.get(s.h.id) ?? new Map<string, string>();
+    const shown = diagnosticsShown.get(s.h.id) ?? {};
+    diagnosticsShown.set(s.h.id, shown);
+    const keys = [...new Set([...now.keys(), ...Object.keys(shown)])].filter((k) => own.has(prefixOf(k)) || named.has(k)).sort();
+    for (const key of keys) {
+      const message = now.get(key) || undefined;
+      if (message === shown[key]) continue;
+      if (message === undefined) {
+        delete shown[key];
+        s.trace.push({ t: 'diagnostic', key });
+      } else {
+        shown[key] = message;
+        s.trace.push({ t: 'diagnostic', key, message });
+      }
+    }
+  }
 
   const newFrame = (): Frame => ({ values: new Map(), signals: [], outcomes: [], requests: [], location: [] });
 
@@ -1655,6 +1766,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     for (const o of s.frame.outcomes) s.trace.push(o);
     for (const r of s.frame.requests) s.trace.push(r);
     for (const l of s.frame.location) s.trace.push(l);
+    recordDiagnostics(s);
     s.frame = newFrame();
     s.settles++;
   }
@@ -1673,6 +1785,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const s = updating.getStore() ?? (states.size === 1 ? [...states.values()][0] : undefined);
     if (!s) throw new Error(`runtime: a backend call (${call.op}) was made outside any node's update, and more than one node is mounted — it cannot be attributed`);
     s.frame.requests.push(backendEvent(call));
+  }
+
+  /** A HOST call the world saw (world.ts, NSP-022 s96), in the request group, attributed as a request is. */
+  function recordHost(call: HostCall): void {
+    const s = updating.getStore() ?? (states.size === 1 ? [...states.values()][0] : undefined);
+    if (!s) throw new Error(`runtime: a ${call.service} call was made outside any node's update, and more than one node is mounted — it cannot be attributed`);
+    s.frame.requests.push(hostEvent(call));
   }
 
   /** A LOCATION call the world saw (an open, a push, a dispatch), as the trace records it, attributed as a request is. */
@@ -1855,11 +1974,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
    * global `Model`), a component owner named after the handle whose walk stops here (`getRoots`
    * and no `parentNodeScope`), and the log sink.
    */
-  const loneScope = (id: string, logs: LogLine[]) => ({
-    modelScope: undefined,
+  const loneScope = (id: string, logs: LogLine[], modelCalls: unknown[] = []) => ({
+    // NSP-022 s97 — a cloud function's nodes live in the request's own model scope (index.ts :215-216 `requestScope.modelScope =
+    // new Model.Scope()`), so what the function writes (the `Request` model, the caller's user record) is the play's alone
+    modelScope: options.type === 'cloud' ? new Model.Scope() : undefined,
     componentOwner: { name: `node-spec/${id}`, getInstanceId: () => id, getRoots: () => [] as never[] },
     context,
-    runContext: { log: logSink(logs) }
+    runContext: { log: logSink(logs), recordModelCall: (call: unknown) => void modelCalls.push(call) }
   });
 
   /**
@@ -1919,9 +2040,10 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const ports: Readonly<PlayContext> = { ...playContextOf(portContext), wired: [...(portContext.wired ?? []), ...(wired ?? [])] };
     portContexts.set(id, ports);
     const logs: LogLine[] = [];
+    const modelCalls: unknown[] = [];
     // NSP-016 s56 — a lone Component Stack builds its pages in its own scope (`createNode`, `createPrimitiveNode`, `deleteNode`):
     // a REAL scope, as the popup root has (`scopeFor`)
-    const nodeScope = scope ?? (type === 'Page Stack' || type === 'Router' || type === 'For Each' ? scopeFor({ name: `node-spec/${id}`, getInstanceId: () => id, getRoots: () => [] as never[] }, logs) : loneScope(id, logs));
+    const nodeScope = scope ?? (type === 'Page Stack' || type === 'Router' || type === 'For Each' ? scopeFor({ name: `node-spec/${id}`, getInstanceId: () => id, getRoots: () => [] as never[] }, logs) : loneScope(id, logs, modelCalls));
     // POPUP (world.ts, NSP-015 s20) — a lone Close Popup inside the script's popups
     if (!scope && type === 'NavigationClosePopup' && world && world.popup.inside.length > 0) insidePopups(nodeScope.componentOwner as { parentNodeScope?: unknown }, world.popup.inside);
     const metadata = context.nodeRegister.getNodeMetadata(type);
@@ -1988,6 +2110,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // node's `set` keeps writing through `setInputValue`, as a parameter does.
     for (const port of wired ?? []) wireStub(node as unknown as NodeInstance, port, type);
     const h = adopt(node, id, type, metadata, params, logs, made);
+    (h as { modelCalls: unknown[] }).modelCalls = modelCalls;
     // PERSON (above, NSP-016 s37) — a node a person acts on is put on the page, its params already applied as a
     // loaded project's are before the first render; its Did Mount lands in the first settle
     // NSP-016 s52 — a placing that throws (C87: a Group's Tag of null) tears down what it made, as a dispose does: the play gets no
@@ -1998,6 +2121,32 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       } catch (e) {
         target.dispose(h);
         throw e;
+      }
+    }
+    // HOST, THE INVOCATION (world.ts, NSP-022 s97) — the function a request reached, as `CloudRunner.run` drives it (index.ts
+    // :297-332): every Response holds the request's two callbacks from the component's making; the Request is handed the request at
+    // its moment (the runner's `setImmediate`, the world's timer), and what it rejects with is the function's refusal
+    if (world?.host.invocation && (type === 'noodl.cloud.response' || type === 'noodl.cloud.request')) {
+      const w = world;
+      const st = states.get(id)!;
+      if (type === 'noodl.cloud.response') {
+        const internal = (node as unknown as { _internal: Record<string, unknown> })._internal;
+        internal._requestIsOpen = () => w.host.requestState() === 'open';
+        internal._sendResponseCallback = (payload: { statusCode: number; body: string }) => {
+          if (w.host.requestState() !== 'open') return false;
+          w.host.respond();
+          st.frame.location.push(invocationEvent({ op: 'respond', status: payload.statusCode, body: payload.body }));
+          return true;
+        };
+      } else {
+        const { at, request } = w.host.invocation;
+        w.clock.schedule(at, () => {
+          const req = 'body' in request ? { headers: { ...request.headers }, body: request.body } : { headers: { ...request.headers } };
+          (node as unknown as { sendRequest(r: unknown): Promise<void> }).sendRequest(req).catch((e: { message?: unknown; fields?: unknown }) => {
+            w.host.refuse();
+            st.frame.location.push(invocationEvent(e && e.fields !== undefined ? { op: 'refuse', reason: String(e.message), fields: e.fields } : { op: 'refuse', reason: String(e && e.message) }));
+          });
+        });
       }
     }
     // ROUTE (world.ts, NSP-015 s19) — a Page Inputs in a page a Router built: the Router hands it the page's
@@ -3023,7 +3172,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     for (const m of names) {
       proto[m] = function (this: RuntimeNode & Record<string, (...a: unknown[]) => unknown>, ...a: unknown[]) {
         if (made === undefined && this.id === id) {
-          made = { h: { id, type, node: this, metadata, errors: [], logs }, trace: [], frame: newFrame(), lastSent: {}, settles: 0, currentInput: undefined, inOutcome: 0 };
+          made = { h: { id, type, node: this, metadata, errors: [], logs, modelCalls: [] }, trace: [], frame: newFrame(), lastSent: {}, settles: 0, currentInput: undefined, inOutcome: 0 };
           states.set(id, made);
           byNodeId.set(id, made);
           intercept(made); // the node's own wrappers now — each calls this function again, which below is the original
@@ -3044,7 +3193,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   function adopt(node: RuntimeNode, id: string, type: string, metadata: NodeMetadata, params: Record<string, unknown>, logs: LogLine[], made?: State): RuntimeHandle {
     let s = made;
     if (!s) {
-      s = { h: { id, type, node, metadata, errors: [], logs }, trace: [], frame: newFrame(), lastSent: {}, settles: 0, currentInput: undefined, inOutcome: 0 };
+      s = { h: { id, type, node, metadata, errors: [], logs, modelCalls: [] }, trace: [], frame: newFrame(), lastSent: {}, settles: 0, currentInput: undefined, inOutcome: 0 };
       states.set(id, s);
       byNodeId.set(id, s);
       intercept(s);
@@ -3190,6 +3339,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
 
   const target: RuntimeTarget = {
     name: 'runtime',
+    diagnostics: true,
     context,
     types: () => Object.keys((context.nodeRegister as unknown as { _constructors: Record<string, unknown> })._constructors),
     hasType: (type) => context.nodeRegister.hasNode(type),
@@ -3288,11 +3438,27 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       w.picker.onCall(recordPicker);
       // SOCKET (world.ts, NSP-014 s34) — the WebSocket itself is `installWorld`'s; each call is the node's that made the socket
       w.sockets.onCall(recordSocket);
+      // HOST (world.ts, NSP-022 s96) — the services' globals themselves are `installWorld`'s; each call is the node's that made it
+      w.host.onCall(recordHost);
       // PROJECT (world.ts, NSP-015 s17) — the settings a node reads through `NoodlRuntime.instance`:
       // the app has one runtime, so the static is this target's for the play, and its project's
       // settings are the script's (graphmodel.ts `setSettings`, what `importEditorData` calls)
       (NoodlRuntime as unknown as { instance: unknown }).instance = rt;
       (rt as unknown as { graphModel: { setSettings(s: Record<string, unknown>): void } }).graphModel.setSettings({ ...w.projectSettings });
+      // NSP-022 s99 — and its classes and `dbVersionMajor`, the metadata the legacy store reads (cloudstore.js :120-126, :569-586),
+      // its class cache dropped so this play's are what it reads (and dropped again at the undo)
+      const projectMeta = (rt as unknown as { graphModel: { getMetaData(k: string): unknown; setMetaData(k: string, v: unknown): void } }).graphModel;
+      const savedProjectMeta = { dbCollections: projectMeta.getMetaData('dbCollections'), dbVersionMajor: projectMeta.getMetaData('dbVersionMajor') };
+      projectMeta.setMetaData('dbCollections', w.collections.length > 0 ? w.collections.map((c) => JSON.parse(JSON.stringify(c))) : undefined);
+      projectMeta.setMetaData('dbVersionMajor', w.dbVersionMajor);
+      CloudStore.invalidateCollections();
+      // NSP-022 s99 — the cloud bundle's build constant (noodl-viewer-cloud webpack.isolate.*.js: `const _noodl_cloud_runtime_version`),
+      // which every "am I in a cloud function" branch reads (the Parse wire's `fetch` face, ParseWireAdapter.ts :233, :241, :303). The
+      // cloud target never declared it: no node graded on it before Aggregate Records reached the Parse wire. A global for a cloud play only.
+      const g = globalThis as Record<string, unknown>;
+      const hadRuntimeVersion = Object.prototype.hasOwnProperty.call(g, '_noodl_cloud_runtime_version');
+      const savedRuntimeVersion = g._noodl_cloud_runtime_version;
+      if (options.type === 'cloud') g._noodl_cloud_runtime_version = 'node-spec';
       // STACK (world.ts, NSP-015 s18) — the REAL handler, fresh for the play (it is a process-wide static and
       // queues what no stack took), the node's call recorded as handed, and a stand-in stack per scripted name
       const restoreStacks = installStacks(w, recordStack);
@@ -3302,6 +3468,11 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       const restorePopups = installPopups(w);
       // BACKEND (world.ts, NSP-014 s21) — the REAL CloudStore and resolution; only the REST adapter's wire is the world's
       const restoreBackend = installBackend(w, (rt as unknown as { graphModel: { getMetaData(k: string): unknown; setMetaData(k: string, v: unknown): void } }).graphModel, recordBackend);
+      // HOST, THE INVOCATION (world.ts, NSP-022 s97) — a cloud play's user service is the CLOUD runtime's (its caller lookup is a
+      // `fetch` to `_noodl_cloudservices`, installWorld's), not the browser's AUTH stand-in
+      const services = (NoodlRuntime as unknown as { Services: Record<string, unknown> }).Services;
+      const playService = services.UserService;
+      if (options.type === 'cloud') services.UserService = CloudUserServiceClass;
       const installed = installWorld(w);
       // the three process-wide managers behind the store, history and action nodes (NSP-012 T4): one play, one of each
       globalStoreManager.reset({ clearState: true });
@@ -3336,8 +3507,14 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         restoreStacks();
         restoreRouters();
         restorePopups();
+        services.UserService = playService;
         restoreBackend();
         installed.restore();
+        if (hadRuntimeVersion) g._noodl_cloud_runtime_version = savedRuntimeVersion;
+        else delete g._noodl_cloud_runtime_version;
+        projectMeta.setMetaData('dbCollections', savedProjectMeta.dbCollections);
+        projectMeta.setMetaData('dbVersionMajor', savedProjectMeta.dbVersionMajor);
+        CloudStore.invalidateCollections();
         stateHistoryManager.setClock(null);
         world = undefined;
       };

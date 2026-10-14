@@ -30,6 +30,7 @@ import * as crypto from 'crypto';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+import { clientProfile } from '../clientProfile';
 import type {
   AuthoringPlan,
   PlanOperation,
@@ -94,6 +95,7 @@ import type { ExampleBudget } from './attachments';
 import { examplesBlock } from './attachments';
 import type { ToolDisclosure } from './disclosure';
 import { backendRevealPayload } from './disclosure';
+import { cloudDeployPayload } from './cloudDeployNote';
 import { guarded, jsonResult } from './util';
 
 // ─── LAS-006: the structured operation fields, in this client's dialect ───────
@@ -424,7 +426,10 @@ async function renderSummaryFor(
           }
         ])
       ),
-      note: 'Numbers only. Call render_report for the screenshots — a picture that loads is not a picture of the right thing.'
+      // OWN-019 census #43.
+      note: clientProfile().imagesCostly
+        ? 'Numbers only. Prove what it shows with drive_page read steps — a picture that loads is not the right picture.'
+        : 'Numbers only. Call render_report for the screenshots — a picture that loads is not a picture of the right thing.'
     };
     return { summary, verdict };
   } catch (err) {
@@ -949,7 +954,11 @@ export function registerPlanTools(
           .optional()
           .describe(
             'summary (forced when the plan wrote anything visual — you may not skip looking) renders and ' +
-              'returns the numbers plus a done/not-done verdict. Call render_report for the screenshots.'
+              'returns the numbers plus a done/not-done verdict. ' +
+              // OWN-019 census #25.
+              (clientProfile().imagesCostly
+                ? 'Prove what it shows with drive_page.'
+                : 'Call render_report for the screenshots.')
           )
       }
     },
@@ -1118,6 +1127,12 @@ export function registerPlanTools(
         ...(settingsWritten.length > 0 ? { settings: settingsWritten } : {}),
         ...validationBlock(surviving, summarize(surviving)),
         ...(rendered ? { render: rendered.summary } : {}),
+        // P112-S14-UNDEPLOYED — a plan is how the stranger round wrote its function, and nothing here said deploy.
+        ...cloudDeployPayload(
+          applied.map((a) => pathToLegacyName(a.target)),
+          store,
+          disclosure
+        ),
         // 🔴 Above `note`, and `note` no longer says the work is finished. The
         // plan is applied and discarded — that is a fact about the files, and it
         // was the last thing in the response, which is how it got read as a

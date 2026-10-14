@@ -18,9 +18,9 @@ the drive in the dev editor found the copy made twice per open, and measured OPE
 | OWN-011 one install | 🟡 published; **AC1, AC3, AC4 ✅**; **AC2 editor half ❌** (§9) | waits on OWN-013's release | **Opus** |
 | OWN-012 the screen, from the descriptions | 📋 | — | step 1 **Opus**, 2–3 **Fable** |
 | **OWN-013 the 0.4.0 cut** | 🟡 **G1 G2 G3 ✅, G5 G6 ✅, G4 🟡** (the six checks fixed locally, §8; `cline-dev` pushed for CI, R20), **G7 🟡** (PAGEPORTS open); G8–G10 ⬜ | unit `own-013` 10/10 + two mutants; drive §7; cut-tree `test:ci` 3015 / 1 by name (§8) | **Opus** |
-| **OWN-014 the agent sees its app** (s13) | 🟡 **AC1 ✅ AC2 ✅** from a packed tarball; AC3 publish, AC4 (the language app) owed | `scripts/own/stranger-render.mjs` + control (registry 0.1.0 refuses) | **Opus** |
-| **OWN-015 the backend from npm** (s13) | 🟡 mechanism ✅ from a tarball: provision → `set_function_secret` → deploy → call; AC2 files+results ✅ with control; AC3 ✅ | `scripts/own/stranger-backend.mjs` (a key-checking stand-in for Google) | **Opus** |
-| **OWN-016 ship it** (s13) | 🟡 step 1 + AC1 ✅ (`nodegx-deploy` bin); the VM ⬜ | Chrome over CDP, 0 errors; broken-project control | **Opus** |
+| **OWN-014 the agent sees its app** (s13–s14) | 🟡 AC1 ✅ AC2 ✅; s14: KEYCHAIN fixed (renders had hung on a macOS dialog); AC4 half (Home yes, Lesson not: route parameter); AC3 publish owed | `scripts/own/stranger-render.mjs` + control | **Opus** |
+| **OWN-015 the backend from npm** (s13–s15) | 🟡 **AC1 ✅ (s15)**: a fresh stranger round speaks with no repair (§10); AC2 ✅; CFPORTS/UNDEPLOYED/DETACHEDVISUAL fixed (§9); owed WAVTWICE (static tail), AC4 publish | `own-015/` (the round's scripts, as they ran) | **Opus** |
+| **OWN-016 ship it** (s13) | 🟡 AC1 ✅, live at https://lingo.nodegx.io, AC4 reboot ✅; phone check with the real app and AC5 publish owed | Chrome over CDP, 0 errors; broken-project control | **Opus** |
 
 **Built but undriven: 0** for OWN-013 (all three driven 2026-10-12, OWN-013 §7). A P112 peer (OWN-014/015/016,
 R18, labelled "s13") works in this phase at the same time; it adds its own rows and merges into this file.
@@ -47,11 +47,23 @@ should switch** (README §0.2). Do not wait for an answer.
 
 1. ✅ *Done 2026-10-12 (OWN-013 §7).* Not driven: a **new project from a template makes no copy** (the opt-out in
    `newProject`); check it on the next launch.
-2. ✅ *Done s12: CI on `01aeb0868` — all six required green (OWN-013 §8 end).* Next: **ask Richard (R20) for `release/0.4.0` and the PR** if he hasn't answered. Was: **Read CI on the pushed `cline-dev`** (`gh run list --branch cline-dev --workflow pr.yml`; read each job's duration,
-   and `--log-failed` for a red one). If Test (editor) is red with only *re-arms a held save*, re-run the job (OWN-013
-   §8: an order-dependent spec, not chased). Then **ask Richard (R20) for `release/0.4.0` and the PR.**
-   *Done s12, kept for the record — G5 + G6 on the cut tree:* a worktree (`make-worktree.sh`; delete its links into the primary's `dist` first) at
-   `cline-dev`'s tip with its own build output; `npm run ci:build:editor`, then `test:ci` and read the floor by name.
+2. ✅ *Done s12: PR #48 merged (`2a258a4b5`), **`v0.4.0` tagged on `main`** (R22), Release run `38228960399` (OWN-013 §9).*
+   🔴 **The draft lacks the Intel Mac build (OWN-013 §10).** Agreement accepted (R23); Apple Silicon ✅; Intel fails
+   at the staple (Apple's ticket server unreachable from the Intel runner, 3 runs running). R25: re-run later — s12
+   scheduled one for ~14:20 CEST 2026-10-12. Check `gh run view 38228960399 --json attempt,jobs`; if Intel is still
+   red, `gh run rerun 38228960399 --failed` again; if it stays red for a day, ask Richard about re-tagging with
+   `e471cb8e6` (the patient staple). **Never publish without Intel** (the Mac feed would list only Apple Silicon).
+   G9 is done (R24).
+   **Next, by RELEASE-PROCESS §4 and UPG-008 §4:** read the Release run (four legs, *merge mac update feed*, *verify
+   draft release is complete*; read durations, a draft with files is not a green run); paste
+   `GITHUB-RELEASE-0.4.0.md` into the draft body; G9 (the run's *every authored library entry is installable*; if red,
+   Publish library is Richard's); **G8 on a clean machine** — install 0.4.0 over 0.3.0, open a COPY of a 0.3.0 project
+   (one `<copy>.before-0.4`, the note names it), open the kit's `reading-list` copy (opens, nothing rewritten but
+   PAGEPORTS), check `NodeGX.app/Contents/Resources/noodl-mcp/package.json` and `render-harness/data/tokens.ts` exist;
+   G10 Richard's drives (NSP-019's two folds, script files, R17's copy). **Then Richard clicks Publish.** After
+   Publish only: the feed post (`whats-new-0.4.0.READY-TO-PUSH.json` → nodegx-content, `date_modified` = the publish
+   moment), nodegx-web deploy (`ops/deploy.sh 49.12.102.195`; check `nodegx.io/changelog/#v0-4-0`), close held issues,
+   re-drive OWN-011 AC2 on the released app. Also push `cline-dev` (it holds `fefbb8968` and this session's docs).
 3. **Make `release/0.4.0`** (local, through a temporary index or `git merge` in the worktree): the cut + `origin/main`
    merged in, conflicts from the cut. Ask Richard before pushing it and opening the PR (G4). Six required checks.
 4. **G3:** `GITHUB-RELEASE-0.4.0.md` and the what's-new post, from the changelog; pushed only after Publish.
@@ -69,6 +81,53 @@ should switch** (README §0.2). Do not wait for an answer.
   picker?* (OWN-006 §6.3); who bumps the next npm release (s10).
 
 **Not this phase's to fix, but owed:** P112-S7-TEXTDEFAULTS, P112-S8-SHAREDTARGET, P112-S9-FRESHFONT (open).
+
+## s15 (2026-10-12, Opus): the lingo app speaks with no repair (OWN-015 AC1 ✅)
+
+Read OWN-015 §9–§10 first. s14 had been left uncommitted at the `/clear`; it's committed (`908f8f478`). Fixed and
+committed: CFPORTS (`5ff71216f`: the bare-port refusal also covers an instance's own `ports` and the cloud
+Request/Response; 10 examples rewired), UNDEPLOYED (`787876713`: cloud writes say "deploy now" and reveal the tool)
+and DETACHEDVISUAL (`9505d342d`: a warning). A fresh `claude -p` round from tarballs packed at HEAD, with a sentence
+that never says NodeGX, built `french-phrases` (84 turns; `claude -p` is Claude Code on Richard's subscription, never the API; its "$3.75" is an API-price equivalent) and deployed it unprompted. Richard pasted the key
+into the project's `.env`; it **speaks** (desktop and phone, to the end, key 0 hits in 2 MB, control 4).
+
+**Next, in order:**
+0. **Richard's ask (s15), first: [OWN-017](OWN-017-THE-LINGO-APP-IN-OUR-OWN-EDITOR.md), the proof it's a NodeGX
+   app.** Build our own small editor from the npm kit and use it to tweak real parts of the stranger's app
+   (`own-015/s15/french-phrases/`, work on a copy). Open with one AskUserQuestion: which edits (recommend fixing
+   WAVTWICE there, which proves it and removes the static), the editor's shape, and who builds it. Items 1–2 below
+   fold into it if WAVTWICE is fixed through the editor.
+   Context Richard confirmed: the lingo app is the proof of concept for the full-stack, no-editor npm path (R18),
+   not a product.
+1. **P112-S15-WAVTWICE** (medium): 2/2 agents double-wrap Gemini's finished WAV, so each phrase ends in static.
+   Smallest fix: a catalog example that plays a cloud function's audio as it is (wrapping only when the MIME type is
+   `audio/L16`). Grade it with a fresh round whose tail RMS stays at speech-end levels.
+2. **Re-pack 0.2.0** (mcp, preview, create-nodegx) in the `npm-020` worktree at a pushed commit. Ask before pushing
+   and before publishing (R11). Then `scripts/own/stranger-*.mjs` from the registry (OWN-014 AC3, OWN-015 AC4,
+   OWN-016 AC5).
+3. OWN-016: deploy the stranger's app to lingo.nodegx.io for the phone check (Richard's VM; ask).
+4. OWN-014 AC4's Lesson half (a route parameter). Still open from s14: MOVEDDEPLOY, KITROOTDEPLOY (P107's).
+Filed this session: P112-S15-SUNDAYGATE (fixed), P112-S15-TWOMCPREDS (two MCP specs red at HEAD, not ours).
+The round's project, home and tarballs are in s15's scratchpad (`round/`, `tgz/`); scripts in `own-015/s15/`.
+
+## s14 (2026-10-12, Opus): the language app, built by a stranger, speaks
+
+Read OWN-015 §7 first. **Not committed at write time.** Two `claude -p` rounds from the 0.2.0 tarballs. Round 1
+never used NodeGX (NOTNODEGX). Round 2 built the app ($4.29). It speaks (real Gemini, phone and desktop) only after:
+fixes **KEYCHAIN** (render hung on a macOS dialog **on Richard's screen**; never start Chrome under a fake `HOME`
+without `--use-mock-keychain`), **DAYTWO** (`provision_backend` restarts the project's own backend) and **NOBACKEND**
+(the preview keeps a loopback backend); a deploy the agent skipped (UNDEPLOYED); and two repairs on a copy
+(**CFPORTS**: every cloud port needs its `in-`/`out-`/`pm-` prefix and the checker doesn't say so; **DETACHEDVISUAL**).
+The key was in 0 of the page's requests (control 6). Richard ruled that the agent never sees the key (PERSONKEY,
+needs a ruling on the fix).
+
+**Rulings came back (OWN-015 §8):** NOTNODEGX = both (done), PERSONKEY = the `.env` route (done, plus ENVSERVED:
+the preview served `.env`, fixed). The static Richard heard was the agent's double WAV header (Gemini now returns
+WAV + C2PA), not ours. **Next, in order:** (1) — ; (2) fix CFPORTS (the checker derives a
+`CloudFunction2`'s and Request/Response's ports, and the two examples get fixed), UNDEPLOYED (a `next` on cloud
+writes) and DETACHEDVISUAL; (3) a fresh round 2 that must speak with no repair, which is AC1; (4) re-pack 0.2.0 in a
+worktree and ask before publishing. KITROOTDEPLOY (GAM-014 red since P107's `9da5979f9`) is P107's.
+The round's scripts are kept in `own-015/` (scratchpad paths left as they ran; see its README).
 
 ## OWN-014 / 015 / 016: the npm full stack (s13, 2026-10-12, Opus)
 

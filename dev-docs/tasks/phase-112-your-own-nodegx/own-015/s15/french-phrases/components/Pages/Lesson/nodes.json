@@ -1,0 +1,301 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "bf727ba8-df9b-5547-853b-d7bd91bbd3ee",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lesson_page",
+      "type": "Page",
+      "label": "Lesson",
+      "children": [
+        "band"
+      ],
+      "parameters": {
+        "title": "Lesson",
+        "urlPath": "lesson/{lessonId}"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "band",
+      "type": "Group",
+      "label": "Band",
+      "parent": "lesson_page",
+      "children": [
+        "shell"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "paddingTop": "var(--space-20)",
+        "paddingBottom": "var(--space-20)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "band",
+      "children": [
+        "back_button",
+        "lesson_title",
+        "phrases_list",
+        "actions_row",
+        "completed_banner"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 720,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "back_button",
+      "type": "net.noodl.controls.button",
+      "label": "Back link",
+      "parent": "shell",
+      "parameters": {
+        "label": "← All lessons",
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "sizeMode": "contentSize",
+        "marginBottom": "var(--space-6)"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "lesson_title",
+      "type": "Text",
+      "label": "Lesson title",
+      "parent": "shell",
+      "parameters": {
+        "text": "Lesson",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)",
+        "marginBottom": "var(--space-6)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "phrases_list",
+      "type": "Group",
+      "label": "Phrases",
+      "parent": "shell",
+      "children": [
+        "repeater"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "repeater",
+      "type": "For Each",
+      "label": "One row per phrase",
+      "parent": "phrases_list",
+      "parameters": {
+        "template": "/Components/PhraseRow"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "actions_row",
+      "type": "Group",
+      "label": "Actions",
+      "parent": "shell",
+      "children": [
+        "mark_button"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "marginTop": "var(--space-8)"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "mark_button",
+      "type": "net.noodl.controls.button",
+      "label": "Mark complete",
+      "parent": "actions_row",
+      "parameters": {
+        "label": "Mark lesson complete",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "completed_banner",
+      "type": "Group",
+      "label": "Completed banner",
+      "parent": "shell",
+      "children": [
+        "completed_banner_text"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "backgroundColor": "var(--accent)",
+        "borderRadius": "var(--radius-md)",
+        "marginTop": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "completed_banner_text",
+      "type": "Text",
+      "label": "Completed message",
+      "parent": "completed_banner",
+      "parameters": {
+        "text": "✓ Lesson marked as complete",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--accent-foreground)"
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "page_inputs",
+      "type": "PageInputs",
+      "label": "Read lessonId from URL",
+      "parameters": {
+        "pathParams": "lessonId"
+      },
+      "x": 530,
+      "y": 1240
+    },
+    {
+      "id": "lessons_src",
+      "type": "/Components/Data/Lessons",
+      "label": "All lessons",
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "find_lesson",
+      "type": "JavaScriptFunction",
+      "label": "Find this lesson by id",
+      "parameters": {
+        "functionScript": "const lessons = Inputs.lessons;\nconst lessonId = Inputs.lessonId;\nif (lessons === undefined || lessonId === undefined) return;\n\nconst lesson = lessons.find((l) => l.id === lessonId);\nOutputs.title = lesson ? lesson.title : \"Lesson not found\";\nOutputs.phrases = lesson ? lesson.phrases : [];\n"
+      },
+      "x": 530,
+      "y": 520,
+      "ports": [
+        {
+          "name": "in-lessons",
+          "displayName": "lessons",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lessonId",
+          "displayName": "lessonId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-phrases",
+          "displayName": "phrases",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "create_progress",
+      "type": "NewDbModelProperties",
+      "label": "Save progress",
+      "parameters": {
+        "collectionName": "Progress",
+        "upsertOn": "lessonId",
+        "prop-completed": true
+      },
+      "x": 530,
+      "y": 1000
+    },
+    {
+      "id": "completed_switch",
+      "type": "Switch",
+      "label": "Just marked complete",
+      "x": 530,
+      "y": 1120
+    },
+    {
+      "id": "go_home",
+      "type": "RouterNavigate",
+      "label": "Back to Home",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Home"
+      },
+      "x": 530,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "lesson_page"
+  ]
+}

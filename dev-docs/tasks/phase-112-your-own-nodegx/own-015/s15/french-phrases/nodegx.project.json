@@ -1,0 +1,28 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "French Phrases",
+  "id": "0867fa07-8c7c-436a-9afa-43ff05ecb29e",
+  "version": "5",
+  "nodegxVersion": "0.2.0",
+  "runtimeVersion": "react19",
+  "created": "2026-10-12T12:51:21.715Z",
+  "modified": "2026-10-12T13:03:48.208Z",
+  "settings": {
+    "htmlTitle": "French Phrases",
+    "navigationPathType": "path",
+    "bodyScroll": true
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  },
+  "rootNodeId": "5c381906-a40f-4007-9712-89acab779663",
+  "metadata": {
+    "cloudservices": {
+      "instanceId": "backend_mv598jwqprpro",
+      "endpoint": "http://127.0.0.1:8579",
+      "appId": "backend_mv598jwqprpro",
+      "type": "nodegx"
+    }
+  }
+}

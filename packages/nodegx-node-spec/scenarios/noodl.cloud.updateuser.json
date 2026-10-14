@@ -1,0 +1,23 @@
+[
+  {
+    "name": "a User Id inside a backend: one update with the password and the listed properties, Sessions Revoked from the answer, done",
+    "because": "updateuser.ts doStore; system-users.ts :131-176",
+    "params": { "userId": "u1", "password": "hunter2", "properties": "plan", "prop-plan": "pro" },
+    "steps": [{ "signal": "store" }, { "signal": "store" }, "settle"],
+    "world": { "host": { "services": ["users"], "answers": [{ "answer": { "ok": { "outcome": "done", "sessionsRevoked": 2 } } }] } }
+  },
+  {
+    "name": "no User Id fails at once — never the caller; a Done with no count is 0; a store's refusal keeps the count",
+    "because": "updateuser.ts doStore's check; `result.sessionsRevoked || 0`; setError touches only Error",
+    "params": {},
+    "steps": [{ "signal": "store" }, "settle", { "set": "userId", "value": "u1" }, { "signal": "store" }, "settle", { "signal": "store" }, "settle"],
+    "world": { "host": { "services": ["users"], "answers": [{ "times": 1, "answer": { "ok": { "outcome": "done" } } }, { "answer": { "ok": { "outcome": "failure", "code": "user/username-taken", "error": "That username is taken." } } }] } }
+  },
+  {
+    "name": "outside a backend: Failure (user/no-backend) with the node's label",
+    "because": "system-users.ts :138-147",
+    "params": { "userId": "u1" },
+    "steps": [{ "signal": "store" }, "settle"],
+    "world": { "host": {} }
+  }
+]

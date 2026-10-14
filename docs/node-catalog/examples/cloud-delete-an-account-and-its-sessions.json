@@ -23,7 +23,7 @@
         { "fromId": "fn_request", "fromProperty": "receive", "toId": "purge", "toProperty": "remove" },
         { "fromId": "purge", "fromProperty": "sessionsRevoked", "toId": "audit_log", "toProperty": "value" },
         { "fromId": "purge", "fromProperty": "done", "toId": "audit_log", "toProperty": "log" },
-        { "fromId": "purge", "fromProperty": "sessionsRevoked", "toId": "ok_response", "toProperty": "sessionsRevoked" },
+        { "fromId": "purge", "fromProperty": "sessionsRevoked", "toId": "ok_response", "toProperty": "pm-sessionsRevoked" },
         { "fromId": "purge", "fromProperty": "done", "toId": "ok_response", "toProperty": "send" },
         { "fromId": "purge", "fromProperty": "unchanged", "toId": "ok_response", "toProperty": "send" },
         { "fromId": "purge", "fromProperty": "error", "toId": "fail_response", "toProperty": "errorMessage" },

@@ -94,6 +94,39 @@ export function cloudFunctionCanMint(port: string, plug: 'input' | 'output'): bo
   return plug === 'output' ? port.startsWith(CLOUD_OUTPUT_PREFIX) : port === 'function' || port.startsWith(CLOUD_INPUT_PREFIX);
 }
 
+/** The prefix the Request and Response put on a declared parameter (`request.ts` / `response.ts`). */
+export const CLOUD_PARAM_PREFIX = 'pm-';
+
+/**
+ * P112-S14-CFPORTS — the prefix a cloud port lacks, when the runtime can never mint it; `undefined` when it can, or
+ * when the type and plug are not one of the four cloud ends.
+ *
+ * The four ends of a cloud call, each minting only prefixed names: the caller's `in-`/`out-` ({@link
+ * cloudFunctionCanMint}), the Request's `pm-` outputs and the Response's `pm-` inputs. A stranger's agent wired all
+ * four bare (`text`, `audioDataUrl`), as the published example did, and nothing was sent. A name the catalog lists is
+ * the caller's to have checked first; this answers only for a name it does not.
+ */
+export function cloudPortMissingPrefix(type: string, port: string, plug: 'input' | 'output'): string | undefined {
+  if (type === CLOUD_FUNCTION_TYPE) {
+    if (cloudFunctionCanMint(port, plug)) return undefined;
+    return plug === 'output' ? CLOUD_OUTPUT_PREFIX : CLOUD_INPUT_PREFIX;
+  }
+  if (type === CLOUD_REQUEST_TYPE && plug === 'output') return port.startsWith(CLOUD_PARAM_PREFIX) ? undefined : CLOUD_PARAM_PREFIX;
+  if (type === CLOUD_REQUEST_TYPE && plug === 'input') return undefined; // contract rows (CWF-014) are parameters
+  if (type === CLOUD_RESPONSE_TYPE && plug === 'input') return port.startsWith(CLOUD_PARAM_PREFIX) ? undefined : CLOUD_PARAM_PREFIX;
+  return undefined;
+}
+
+/** What a bare name on a cloud end would have been, for the refusal's sentence. */
+export function cloudPortMeaning(type: string, plug: 'input' | 'output'): string {
+  if (type === CLOUD_FUNCTION_TYPE) {
+    return plug === 'input'
+      ? `a parameter of the function (its ${CLOUD_REQUEST_TYPE} "params")`
+      : `a value the function sends back (its ${CLOUD_RESPONSE_TYPE} "params")`;
+  }
+  return 'a name in this node\'s "params"';
+}
+
 /**
  * The cloud-function namespace a `CloudFunction2.function` parameter is relative
  * to. `CloudFunctionAdapter` looks up `'/#__cloud__/' + parameters.function`, and

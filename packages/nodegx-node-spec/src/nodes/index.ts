@@ -27,6 +27,16 @@ import { DateParts } from './date-parts';
 import { DateToString } from './date-to-string';
 import { Delay } from './delay';
 import { Hash } from './hash';
+import { Hmac } from './hmac';
+import { JwtSign, JwtVerify } from './jwt';
+import { Secret } from './secret';
+import { SendEmail } from './send-email';
+import { CloudRequest } from './cloud-request';
+import { CloudResponse } from './cloud-response';
+import { ModelRequest } from './model-request';
+import { AggregateRecords } from './aggregate-records';
+import { CreateUser, DeleteUser, UpdateUser, VerifySessionToken } from './system-users';
+import { AddUserToRole, GetUserRoles, ListUsersInRole, RemoveUserFromRole } from './system-roles';
 import { HttpRequest } from './http';
 import { Inverter } from './inverter';
 import { Log } from './log';
@@ -229,7 +239,29 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   // NSP-017 s66 — the Script: a contract, its three ways of writing it, graded with one fixture per rule
   [Script.type]: Script,
   // NSP-017 s67 — the Visual Function: a contract — the blocks give the ports, the code they are written out as is the behaviour
-  [LogicBuilder.type]: LogicBuilder
+  [LogicBuilder.type]: LogicBuilder,
+  // NSP-022 s96 — the cloud-only nodes, graded on the runtime's cloud target: the keyed crypto (world.ts DIGEST, the keyed sign)
+  [Hmac.type]: Hmac,
+  [JwtSign.type]: JwtSign,
+  [JwtVerify.type]: JwtVerify,
+  // NSP-022 s96 — the backend process's services (world.ts HOST)
+  [Secret.type]: Secret,
+  [CreateUser.type]: CreateUser,
+  [UpdateUser.type]: UpdateUser,
+  [DeleteUser.type]: DeleteUser,
+  [VerifySessionToken.type]: VerifySessionToken,
+  [AddUserToRole.type]: AddUserToRole,
+  [RemoveUserFromRole.type]: RemoveUserFromRole,
+  [GetUserRoles.type]: GetUserRoles,
+  [ListUsersInRole.type]: ListUsersInRole,
+  [SendEmail.type]: SendEmail,
+  // NSP-022 s97 — a function's first and last events (world.ts HOST, THE INVOCATION)
+  [CloudRequest.type]: CloudRequest,
+  [CloudResponse.type]: CloudResponse,
+  // NSP-022 s98 — a model provider over NETWORK, its key from HOST `secrets`
+  [ModelRequest.type]: ModelRequest,
+  // NSP-022 s99 — the legacy store's Parse wire, a `fetch` to HOST's loopback over NETWORK; the project's classes (PROJECT)
+  [AggregateRecords.type]: AggregateRecords
 });
 
 export { EQUIVALENT_MUTANTS } from './equivalent-mutants';
@@ -252,6 +284,14 @@ export function specFor(typeName: string): AnyNodeSpec | undefined {
 }
 
 export {
+  Hmac,
+  Secret,
+  CreateUser,
+  UpdateUser,
+  DeleteUser,
+  VerifySessionToken,
+  JwtSign,
+  JwtVerify,
   And,
   Expression,
   JavaScriptFunction,

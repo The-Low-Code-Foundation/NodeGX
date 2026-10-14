@@ -21,6 +21,8 @@ import * as path from 'path';
 
 import { type Access, authoriseRequest, resolveAccess } from '../../nodegx-export/src/serve/access';
 
+import { buildIgnoreMatcher } from '@noodl-utils/compilation/build/ignore';
+
 import { bootstrapPage, injectClient } from './client';
 import { DEPLOY_ASSETS, deployAssetPath, type PreviewBuild } from './loader';
 import type { PreviewReport } from './validate';
@@ -240,11 +242,38 @@ export class PreviewServer {
     // Everything else: a project asset (images, fonts, module files).
     const target = path.resolve(this.projectDir, `.${pathname}`);
     if (!target.startsWith(this.projectDir + path.sep)) return this.notFound(res);
+    if (!this.isPublishable(target)) return this.notFound(res);
     if (fs.existsSync(target) && fs.statSync(target).isFile()) {
       return this.sendFile(req, res, target);
     }
 
+    // P112-S16-DEEPLINK: an app routed by path ("/lesson/greetings") is one page; any address that names no file is
+    // the app, as the deploy's server answers it (Caddy `try_files {path} /index.html`). Without this every reload off
+    // "/" — and the live reload after each edit is one — showed "Not found". A missing asset (it has an extension) and
+    // a file the deploy would not publish (it exists, refused above) stay 404.
+    const base = path.basename(pathname);
+    if (!fs.existsSync(target) && path.extname(base) === '' && !base.startsWith('.')) {
+      const html = this.build ? injectClient(this.build.html) : bootstrapPage(path.basename(this.projectDir));
+      return this.sendDynamic(res, html, 'text/html; charset=utf-8');
+    }
+
     return this.notFound(res);
+  }
+
+  /**
+   * P112-S14-ENVSERVED: the preview serves a project file only if a deploy would publish it — the deploy's own rules
+   * (`ignore.ts` defaults + the project's `.noodlignore`). Before, every file in the folder was served, `.env`
+   * included: the key OWN-015 asks the person to paste there was one request away, and with `--host` on the LAN.
+   * Built per request so an edited `.noodlignore` applies at once; static asset requests are few.
+   */
+  private isPublishable(target: string): boolean {
+    const ignoreFile = path.join(this.projectDir, '.noodlignore');
+    const matcher = buildIgnoreMatcher({
+      isV2Project: fs.existsSync(path.join(this.projectDir, 'nodegx.project.json')),
+      ignoreFileContent: fs.existsSync(ignoreFile) ? fs.readFileSync(ignoreFile, 'utf8') : null
+    });
+    const relative = path.relative(this.projectDir, target).split(path.sep).join('/');
+    return !matcher.match(relative, false).ignored;
   }
 
   private serveEvents(req: http.IncomingMessage, res: http.ServerResponse): void {

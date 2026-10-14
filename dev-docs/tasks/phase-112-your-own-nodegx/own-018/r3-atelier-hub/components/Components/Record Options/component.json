@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2eb7187e-c50c-55ba-8dfc-5de048722bc5",
+  "name": "Record Options",
+  "path": "/Components/Record Options",
+  "type": "visual",
+  "created": "2026-10-12T17:43:58.880Z",
+  "modified": "2026-10-12T17:43:58.880Z",
+  "modifiedBy": "noodl-mcp"
+}

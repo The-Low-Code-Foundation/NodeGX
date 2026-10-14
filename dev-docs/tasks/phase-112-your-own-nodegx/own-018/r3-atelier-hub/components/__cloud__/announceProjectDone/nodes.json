@@ -1,0 +1,161 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "133e40a2-9e06-54da-86b1-e64526cb9dac",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ad-req",
+      "type": "noodl.cloud.request",
+      "label": "Project update event",
+      "parameters": {
+        "allowNoAuth": true,
+        "params": "trigger,body"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ad-qprojects",
+      "type": "DbCollection2",
+      "label": "Fetch projects",
+      "parameters": {
+        "collectionName": "Project"
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ad-qmembers",
+      "type": "DbCollection2",
+      "label": "Fetch team members",
+      "parameters": {
+        "collectionName": "TeamMember"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "ad-qclients",
+      "type": "DbCollection2",
+      "label": "Fetch clients",
+      "parameters": {
+        "collectionName": "Client"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "ad-qposts",
+      "type": "DbCollection2",
+      "label": "Fetch feed posts",
+      "parameters": {
+        "collectionName": "FeedPost"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "ad-build",
+      "type": "JavaScriptFunction",
+      "label": "Decide and build the announcement",
+      "parameters": {
+        "functionScript": "if (Inputs.trigger === undefined || Inputs.body === undefined || Inputs.projects === undefined || Inputs.members === undefined || Inputs.clients === undefined || Inputs.posts === undefined) return;\n\nconst trig = Inputs.trigger || {};\nconst body = Inputs.body || {};\nconst recordId = trig.recordId || body.recordId || body.id || (body.record && body.record.id) || '';\n\nconst ptrId = function (value) {\n  if (typeof value === 'string') return value;\n  if (value && value.id) return value.id;\n  if (value && value.objectId) return value.objectId;\n  return '';\n};\n\nconst project = (Inputs.projects || []).find(function (p) { return p.id === recordId; });\n\nif (!project) {\n  Outputs.posted = false;\n  Outputs.reason = 'project not found';\n  Outputs.skip();\n  return;\n}\n\nif (project.status !== 'Done') {\n  Outputs.posted = false;\n  Outputs.reason = 'status is not Done';\n  Outputs.skip();\n  return;\n}\n\nconst oldStatus = body.previousStatus || (body.previousRecord && body.previousRecord.status) || (body.before && body.before.status) || null;\nif (oldStatus === 'Done') {\n  Outputs.posted = false;\n  Outputs.reason = 'was already Done';\n  Outputs.skip();\n  return;\n}\n\nif (oldStatus === null) {\n  const already = (Inputs.posts || []).some(function (post) {\n    return post.kind === 'system' && ptrId(post.project) === recordId;\n  });\n  if (already) {\n    Outputs.posted = false;\n    Outputs.reason = 'already announced';\n    Outputs.skip();\n    return;\n  }\n}\n\nconst owner = (Inputs.members || []).find(function (m) { return m.id === ptrId(project.owner); });\nconst client = (Inputs.clients || []).find(function (c) { return c.id === ptrId(project.client); });\n\nlet content = 'Project \"' + project.name + '\"';\nif (client) content += ' for ' + client.name;\ncontent += ' is done';\nif (owner) content += ' — nice work, ' + owner.name + '!';\n\nOutputs.posted = true;\nOutputs.reason = 'posted';\nOutputs.content = content;\nOutputs.projectId = recordId;\nOutputs.post();"
+      },
+      "ports": [
+        {
+          "name": "in-trigger",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-body",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-projects",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-members",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-clients",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-posts",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-posted",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-reason",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-content",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-projectId",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-post",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-skip",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 640
+    },
+    {
+      "id": "ad-create",
+      "type": "NewDbModelProperties",
+      "label": "Post the announcement",
+      "parameters": {
+        "collectionName": "FeedPost",
+        "prop-kind": "system"
+      },
+      "x": 40,
+      "y": 760
+    },
+    {
+      "id": "ad-resok",
+      "type": "noodl.cloud.response",
+      "label": "Report outcome",
+      "parameters": {
+        "params": "posted,reason"
+      },
+      "x": 40,
+      "y": 880
+    },
+    {
+      "id": "ad-resfail",
+      "type": "noodl.cloud.response",
+      "label": "Failure report",
+      "parameters": {
+        "status": "failure"
+      },
+      "x": 40,
+      "y": 1000
+    }
+  ]
+}

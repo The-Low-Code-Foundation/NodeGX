@@ -142,6 +142,26 @@ const getLimit = (settings: Readonly<Record<string, unknown>>): unknown => (!set
 /** :407-412 */
 const getSkip = (settings: Readonly<Record<string, unknown>>): unknown => (!settings['filterEnableLimit'] ? undefined : settings['filterSkip'] || 0);
 
+/** :661-683 `filterOps` — the operators the Op dropdown offers for each filter Type. A play accepts all nine, whatever the Type. */
+const FILTER_OPS: Readonly<Record<string, readonly string[]>> = {
+  string: ['eq', 'neq', 'regex', 'in', 'nin'],
+  boolean: ['eq', 'neq'],
+  number: ['eq', 'neq', 'lt', 'gt', 'gte', 'lte', 'in', 'nin']
+};
+
+/** :661-683 — the words the Op dropdown shows. */
+const FILTER_OP_LABELS: Readonly<Record<string, string>> = {
+  eq: 'Equals',
+  neq: 'Not Equals',
+  regex: 'Matches RegEx',
+  lt: 'Less than',
+  gt: 'Greater than',
+  gte: 'Greater than or equal',
+  lte: 'Less than or equal',
+  in: 'Is one of',
+  nin: 'Is not one of'
+};
+
 /** :582-739 updatePorts — the port a settings name is drawn as. */
 function settingPort(name: string): ValueInputDecl {
   const group = (f: string) => f + ' filter';
@@ -151,11 +171,11 @@ function settingPort(name: string): ValueInputDecl {
   if (name === 'filterFilter') return { type: 'stringlist', coerce: 'none', editOnly: true, displayName: 'Filter', group: 'Filter', examples: ['a', 'a,b', 'name', 'owner', 'a,name'] };
   if (name === 'filterSort') return { type: 'stringlist', coerce: 'none', editOnly: true, displayName: 'Sort', group: 'Sort', examples: ['a', 'b,a', 'name'] };
   let m: RegExpMatchArray | null;
-  if ((m = /^filterFilterType-(.*)$/.exec(name))) return { type: 'enum', enums: ['string', 'number', 'boolean'], default: 'string', coerce: 'none', displayName: 'Type', group: group(m[1]) };
-  if ((m = /^filterFilterOp-(.*)$/.exec(name))) return { type: 'enum', enums: ['eq', 'neq', 'regex', 'lt', 'gt', 'gte', 'lte', 'in', 'nin'], default: 'eq', coerce: 'none', displayName: 'Op', group: group(m[1]), examples: ['in', 'nin', 'in', 'nin', 'eq', 'regex'] };
+  if ((m = /^filterFilterType-(.*)$/.exec(name))) return { type: 'enum', enums: ['string', 'number', 'boolean'], labels: { string: 'String', number: 'Number', boolean: 'Boolean' }, default: 'string', coerce: 'none', displayName: 'Type', group: group(m[1]) };
+  if ((m = /^filterFilterOp-(.*)$/.exec(name))) return { type: 'enum', enums: ['eq', 'neq', 'regex', 'lt', 'gt', 'gte', 'lte', 'in', 'nin'], labels: FILTER_OP_LABELS, default: 'eq', coerce: 'none', displayName: 'Op', group: group(m[1]), examples: ['in', 'nin', 'in', 'nin', 'eq', 'regex'] };
   if ((m = /^filterFilterOption-case-(.*)$/.exec(name))) return { type: 'boolean', default: false, coerce: 'none', displayName: 'Case sensitive', group: group(m[1]) };
   if ((m = /^filterFilterValue-(.*)$/.exec(name))) return { type: '*', coerce: 'none', displayName: 'Value', group: group(m[1]), examples: [1, 'x', '2', 'a.*', '[', true, 'Ada', ...LISTS, ...LISTS, ...LISTS] };
-  if ((m = /^filterSort-(.*)$/.exec(name))) return { type: 'enum', enums: ['ascending', 'descending'], default: 'ascending', coerce: 'none', displayName: 'Sort', group: m[1] + ' sort' };
+  if ((m = /^filterSort-(.*)$/.exec(name))) return { type: 'enum', enums: ['ascending', 'descending'], labels: { ascending: 'Ascending', descending: 'Descending' }, default: 'ascending', coerce: 'none', displayName: 'Sort', group: m[1] + ' sort' };
   return { type: '*', coerce: 'none' };
 }
 
@@ -334,6 +354,11 @@ export const FilterCollection = defineNode({
         for (const n of names) out[n] = settingPort(n);
         // :704-713 — `Is one of` / `Is not one of` take a list, so the value port is `Values`, typed `*`; any other Op's value port
         // is typed by the filter's Type, `string` when unset (NSP-020 s80, oracle (a): it was `*` for every Op)
+        // :661-683, :708-717 — the Op dropdown offers the operators of the filter's Type, `string` when unset (P107 s101: oracle (a)
+        // grades a derived port's enums since R37 drew cloud nodes from their specs; it offered all nine for every Type)
+        if (params.filterFilter)
+          for (const f of String(params.filterFilter).split(','))
+            out['filterFilterOp-' + f] = { ...out['filterFilterOp-' + f], enums: FILTER_OPS[(params['filterFilterType-' + f] as string) || 'string'] ?? FILTER_OPS.string };
         if (params.filterFilter)
           for (const f of String(params.filterFilter).split(','))
             if (params['filterFilterOp-' + f] === 'in' || params['filterFilterOp-' + f] === 'nin') out['filterFilterValue-' + f] = { ...out['filterFilterValue-' + f], displayName: 'Values' };

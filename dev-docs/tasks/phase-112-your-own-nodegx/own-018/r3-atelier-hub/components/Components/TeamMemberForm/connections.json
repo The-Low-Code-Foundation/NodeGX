@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8981f534-8ce9-5326-82ac-e7e745f99d65",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mfm-ci",
+      "fromProperty": "recordId",
+      "toId": "mfm-rec",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "mfm-ci",
+      "fromProperty": "recordId",
+      "toId": "mfm-update",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "mfm-ci",
+      "fromProperty": "recordId",
+      "toId": "mfm-isnew",
+      "toProperty": "recordId"
+    },
+    {
+      "fromId": "mfm-isnew",
+      "fromProperty": "asBoolean",
+      "toId": "mfm-isnewcond",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "mfm-rec",
+      "fromProperty": "prop-name",
+      "toId": "mfm-name",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "mfm-rec",
+      "fromProperty": "prop-role",
+      "toId": "mfm-role",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "mfm-rec",
+      "fromProperty": "prop-email",
+      "toId": "mfm-email",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "mfm-name",
+      "fromProperty": "value",
+      "toId": "mfm-create",
+      "toProperty": "prop-name"
+    },
+    {
+      "fromId": "mfm-name",
+      "fromProperty": "value",
+      "toId": "mfm-update",
+      "toProperty": "prop-name"
+    },
+    {
+      "fromId": "mfm-name",
+      "fromProperty": "value",
+      "toId": "mfm-ok",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "mfm-role",
+      "fromProperty": "value",
+      "toId": "mfm-create",
+      "toProperty": "prop-role"
+    },
+    {
+      "fromId": "mfm-role",
+      "fromProperty": "value",
+      "toId": "mfm-update",
+      "toProperty": "prop-role"
+    },
+    {
+      "fromId": "mfm-role",
+      "fromProperty": "value",
+      "toId": "mfm-ok",
+      "toProperty": "role"
+    },
+    {
+      "fromId": "mfm-email",
+      "fromProperty": "value",
+      "toId": "mfm-create",
+      "toProperty": "prop-email"
+    },
+    {
+      "fromId": "mfm-email",
+      "fromProperty": "value",
+      "toId": "mfm-update",
+      "toProperty": "prop-email"
+    },
+    {
+      "fromId": "mfm-ok",
+      "fromProperty": "asBoolean",
+      "toId": "mfm-save",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "mfm-save",
+      "fromProperty": "onClick",
+      "toId": "mfm-isnewcond",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "mfm-isnewcond",
+      "fromProperty": "ontrue",
+      "toId": "mfm-create",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "mfm-isnewcond",
+      "fromProperty": "onfalse",
+      "toId": "mfm-update",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "mfm-create",
+      "fromProperty": "done",
+      "toId": "mfm-co",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "mfm-update",
+      "fromProperty": "done",
+      "toId": "mfm-co",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "mfm-cancel",
+      "fromProperty": "onClick",
+      "toId": "mfm-co",
+      "toProperty": "cancelled"
+    }
+  ]
+}

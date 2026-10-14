@@ -1,0 +1,23 @@
+[
+  {
+    "name": "a User Id inside a backend: one delete, Sessions Revoked the count, done",
+    "because": "deleteuser.ts doDelete; system-users.ts :131-176",
+    "params": { "userId": "u1" },
+    "steps": [{ "signal": "remove" }, "settle"],
+    "world": { "host": { "services": ["users"], "answers": [{ "answer": { "ok": { "outcome": "done", "sessionsRevoked": 3 } } }] } }
+  },
+  {
+    "name": "no such user: Unchanged with the reason on Error and 0 sessions; as Failure when Treat Unchanged as says so",
+    "because": "nodegx-backend users/SystemUsers.ts :405-416 not-found is Unchanged; node.ts :1049-1067",
+    "params": { "userId": "u9" },
+    "steps": [{ "signal": "remove" }, "settle", { "set": "treatUnchangedAs", "value": "failure" }, { "signal": "remove" }, "settle"],
+    "world": { "host": { "services": ["users"], "answers": [{ "answer": { "ok": { "outcome": "unchanged", "code": "user/not-found", "error": "There is no user with the id \"u9\".", "userId": "u9" } } }] } }
+  },
+  {
+    "name": "no User Id: Failure at once, never the caller; a late answer lands frames later",
+    "because": "deleteuser.ts doDelete's check; world.ts HOST `after`",
+    "params": {},
+    "steps": [{ "signal": "remove" }, "settle", { "set": "userId", "value": "u1" }, { "signal": "remove" }, "settle", { "advance": 5 }, "settle"],
+    "world": { "host": { "services": ["users"], "answers": [{ "answer": { "ok": { "outcome": "done", "sessionsRevoked": 1 } }, "after": 5 }] } }
+  }
+]

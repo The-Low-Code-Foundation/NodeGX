@@ -115,6 +115,8 @@ type State = {
   elMuted: boolean;
   elAutoplay: boolean;
   elLoop: boolean;
+  /** the Start Time the component was last drawn with (Video.tsx `this.props.dom.startTime`): where Restart and Reset seek (v6, row C161) */
+  elStart: unknown;
   /** THE MEDIA ELEMENT — the `<video>` on the page */
   paused: boolean;
   position: number;
@@ -213,7 +215,18 @@ export const Video = defineNode({
   // v3 (P109 ISL-038, s29): a file drop zone tracks itself — an enter on a new element starts the count again, and Accept File Drops off or leaving the page turns Is Dragging Over off (row C81)
   // v4 (P109 ISL-031, s30): a drag never takes its own node as its zone — a keyboard lift does not start in itself, Enter or Space then cancels, and a pointer drag over a new element of its own finds no zone (row C78)
   // v5 (P109 ISL-031, s30–31): every element of a Draggable node takes the keyboard — a remount, a new Tag or a mount however late gets the attributes (row C77); which element is on the page is the paint's sync (`synced`), and the keyboard is held by an element (`focusedElem`), so a paint writes nothing about it
-  version: 5,
+  // v6 (P107 s92, row C161 — R27): Restart and Reset seek to Start Time, not second 0
+  version: 6,
+  changes: [
+    {
+      version: 6,
+      says: 'Restart and Reset go back to Start Time, as the component was last drawn with it, or to second 0 when there is none. Before, both went to second 0 even with a Start Time set: a Restart played the seconds Start Time was there to skip, and the seek left the #t= fragment, so End Time stopped bounding playback',
+      row: 'P107-C161 (R27)',
+      migration: {
+        none: 'Ruled "Restart and Reset go to Start Time" (R27): the two port descriptions already promised "the beginning". A Video with no Start Time seeks to second 0 as before, and the reach measured on 2026-10-12 was 13 Video nodes in 8 of Richard\'s projects, none with a Start Time'
+      }
+    }
+  ],
   source: 'packages/noodl-viewer-react/src/nodes/visual/video.ts',
   needs: ['person', 'clock'],
   // the page's syncs (spec.ts `synced`): which element is on the page, written only by a paint. Not branches (row C77, P109 s31):
@@ -268,6 +281,7 @@ export const Video = defineNode({
     elMuted: false,
     elAutoplay: false,
     elLoop: false,
+    elStart: undefined,
     paused: true,
     position: 0,
     ready: false,
@@ -348,9 +362,9 @@ export const Video = defineNode({
     srcObject: { type: 'mediastream', default: null, coerce: 'none', displayName: 'Source Object', group: 'Video', description: 'A live MediaStream to play, from a camera or screen capture, instead of a URL', portability: 'logic' },
     // video.ts :48-117 — on the component, or waiting for it (`outcomeOnInnerComponent`)
     play: { type: 'signal', outcome: true, displayName: 'Play', group: 'Video Actions', description: 'Starts or resumes playback; fired before the element exists, it is held until the element exists rather than dropped', portability: 'logic' },
-    restart: { type: 'signal', outcome: true, displayName: 'Restart', group: 'Video Actions', description: 'Seeks to the beginning and plays, then fires Done', portability: 'logic' },
+    restart: { type: 'signal', outcome: true, displayName: 'Restart', group: 'Video Actions', description: 'Seeks to Start Time (the beginning when there is none) and plays, then fires Done', portability: 'logic' },
     pause: { type: 'signal', outcome: true, displayName: 'Pause', group: 'Video Actions', description: 'Pauses playback', portability: 'logic' },
-    reset: { type: 'signal', outcome: true, displayName: 'Reset', group: 'Video Actions', description: 'Stops playback and seeks to the beginning', portability: 'logic' },
+    reset: { type: 'signal', outcome: true, displayName: 'Reset', group: 'Video Actions', description: 'Stops playback and seeks to Start Time (the beginning when there is none)', portability: 'logic' },
     poster: { type: 'image', coerce: 'none', displayName: 'Poster', group: 'Video', description: 'Still image shown until the video has enough data to play; leave blank to show nothing', portability: 'logic' },
     // video.ts :158-231 — on the element (`propPath: 'dom'`), drawn at the frame's end
     autoplay: { type: 'boolean', coerce: 'none', displayName: 'Autoplay', group: 'Video', description: 'Starts playing as soon as the video can; most browsers only allow this while Muted is on. On a YouTube or Vimeo link it is muted automatically for that reason, because an embedded player cannot report that the browser refused', portability: 'logic' },
@@ -530,7 +544,7 @@ export const Video = defineNode({
         : said('off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and plays at the paint that puts the video there — Done then', waits(s, 'play')),
     restart: (s) =>
       s.onPage
-        ? said('on the page: wants the video playing and, once it has loaded, goes back to second 0 (Playback Position 0 — not Start Time) and starts it as Play does; before the load, only the wanting; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved', acted(s, 'restart'))
+        ? said('on the page: wants the video playing and, once it has loaded, goes back to Start Time as last drawn (Playback Position; second 0 when there is none) and starts it as Play does; before the load, only the wanting; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved', acted(s, 'restart'))
         : said('off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and restarts at the paint that puts the video there — Done then', waits(s, 'restart')),
     pause: (s) =>
       s.onPage
@@ -538,7 +552,7 @@ export const Video = defineNode({
         : said('off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and pauses at the paint that puts the video there — Done then', waits(s, 'pause')),
     reset: (s) =>
       s.onPage
-        ? said('on the page: stops wanting the video playing, goes back to second 0 (Playback Position 0 once loaded — not Start Time) and pauses it — On Pause if it was playing; Autoplay no longer starts it on this load; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved', acted(s, 'reset'))
+        ? said('on the page: stops wanting the video playing, goes back to Start Time as last drawn (Playback Position, once loaded; second 0 when there is none) and pauses it — On Pause if it was playing; Autoplay no longer starts it on this load; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved', acted(s, 'reset'))
         : said('off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and resets at the paint that puts the video there — Done then', waits(s, 'reset'))
   },
   {
@@ -698,7 +712,7 @@ function srcAttrOf(s: Readonly<State>): string | undefined {
 
 /** The `<video>`'s flags as drawn (React's `muted`, and `autoplay` / `loop`, Video.tsx :69-77): what each input says, as a truth. */
 function drawnFlags(s: Readonly<State>): Partial<State> {
-  return { elMuted: !!s.muted, elAutoplay: !!s.autoplay, elLoop: !!s.loop };
+  return { elMuted: !!s.muted, elAutoplay: !!s.autoplay, elLoop: !!s.loop, elStart: s.startTime };
 }
 
 /** A new `<video>`: nothing played, at 0, loading its `src` when it has one. */
@@ -953,10 +967,14 @@ function mediaPause(s: Readonly<State>): Act {
   return timeUpdate({ ...NONE, set: { canAutoplay: false, paused: true, pending: 0 }, emit: ['onPause'] }, s.position);
 }
 
-/** `currentTime = 0`: a seek on an element that has loaded (Playback Position 0); on one that has not, nothing to see. */
+/**
+ * `currentTime = startSeconds(startTime)` (v6, row C161 — R27): a seek on an element that has loaded, to the Start Time it was drawn with
+ * (media-fragment.ts `startSeconds`: as the fragment reads it, or second 0 when there is none); on one that has not, nothing to see.
+ */
 function seekToStart(s: Readonly<State>): Act {
   if (!s.ready) return NONE;
-  return timeUpdate({ ...NONE, set: { position: 0, atEnd: false } }, 0);
+  const to = fragmentSeconds(s.elStart) ?? 0;
+  return timeUpdate({ ...NONE, set: { position: to, atEnd: false } }, to);
 }
 
 /**

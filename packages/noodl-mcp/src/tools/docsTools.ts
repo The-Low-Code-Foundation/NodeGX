@@ -103,13 +103,13 @@ export function registerDocsReadTools(server: McpServer, binding: ProjectBinding
     'list_project_docs',
     {
       title: 'List project docs',
+      // P112-OWN018-LISTCHANGED — shortened (same files, same rules) to make room for `call_tool` on the
+      // resident surface; the budget in `toolDisclosure.test.ts` is answered by cutting, never by raising it.
       description:
-        "The project's own written context, under docs/. Three files ship as templates: CONVENTIONS.md " +
-        '(the rules an assistant must follow here — read it before authoring anything), BRIEF.md (what the app ' +
-        'is for) and ARCHITECTURE.md (page map, data model, backend contracts, and the reasons behind them). ' +
-        'Any other markdown under docs/ is listed too, and is a first-class document: each row carries the ' +
-        "`injection` its own front matter declared — `always` (in every authoring turn's prompt) or `pull` " +
-        '(fetched when relevant). Missing template files are reported as missing.',
+        "The project's written context in docs/: CONVENTIONS.md (rules to follow here — read it before " +
+        'authoring), BRIEF.md (what the app is for), ARCHITECTURE.md (page map, data model, backend contracts ' +
+        "and why), and any other markdown there, each row with its front matter's `injection`: `always` (in " +
+        'every authoring prompt) or `pull` (fetched when relevant). Missing templates are reported.',
       inputSchema: {}
     },
     guarded(() => {

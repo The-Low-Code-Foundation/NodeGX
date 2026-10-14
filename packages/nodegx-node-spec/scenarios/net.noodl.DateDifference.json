@@ -61,5 +61,11 @@
     "params": { "unit": "hours" },
     "world": { "timeZone": "America/New_York" },
     "steps": [{ "set": "from", "value": "2026-11-01T04:30:00.000Z" }, { "set": "to", "value": "2026-11-01T06:30:00.000Z" }, "settle", { "set": "unit", "value": "" }, "settle"]
+  },
+  {
+    "name": "R35: an unknown Unit warns the editor, and a Unit of the eight clears the warning",
+    "because": "datedifference.ts :75 `setDiagnostic('date-difference/unknown-unit', unknownUnitMessage(value))` — a saved Unit warns at mount; a Unit of the eight clears it (v3)",
+    "params": { "unit": "fortnights" },
+    "steps": [{ "set": "from", "value": "2020-01-01T00:00:00.000Z" }, { "set": "to", "value": "2020-01-15T00:00:00.000Z" }, "settle", { "set": "unit", "value": 7 }, "settle", { "set": "unit", "value": "weeks" }, "settle"]
   }
 ]

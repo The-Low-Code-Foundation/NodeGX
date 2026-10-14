@@ -3,7 +3,7 @@ import React from 'react';
 import { layerDefaults, withDefaultsClass } from '../../../default-style-layer';
 import Layout from '../../../layout';
 import PointerListeners from '../../../pointerlisteners';
-import { withMediaFragment } from '../../../media-fragment';
+import { startSeconds, withMediaFragment } from '../../../media-fragment';
 import { resolveVideoEmbed } from '../../../video-embed';
 import { Noodl } from '../../../types';
 
@@ -184,7 +184,8 @@ export class Video extends React.Component<VideoProps> {
   restart() {
     this.wantToPlay = true;
     if (this.canPlay) {
-      this.video.currentTime = 0;
+      // P107-C161 (R27): back to Start Time, not second 0 — inside the `#t=` fragment, so End Time still bounds it
+      this.video.currentTime = startSeconds(this.props.dom?.startTime);
       this.startPlayback();
     }
   }
@@ -197,7 +198,8 @@ export class Video extends React.Component<VideoProps> {
   reset() {
     this.wantToPlay = false;
     if (this.video) {
-      this.video.currentTime = 0;
+      // P107-C161 (R27): back to Start Time, not second 0
+      this.video.currentTime = startSeconds(this.props.dom?.startTime);
       this.video.pause();
     }
   }

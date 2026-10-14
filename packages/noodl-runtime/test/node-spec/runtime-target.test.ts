@@ -16,7 +16,7 @@ import * as path from 'path';
 
 import { interpreterAdapter, play, validateTrace, specs } from '../../../nodegx-node-spec/src';
 import type { Step, TraceEvent } from '../../../nodegx-node-spec/src';
-import { runtimeTarget, withViewerNodes } from '../helpers/node-spec-target';
+import { cloudNodeTypes, cloudTarget, runtimeTarget, withViewerNodes } from '../helpers/node-spec-target';
 
 const runtime = runtimeTarget();
 const interpreter = interpreterAdapter();
@@ -111,7 +111,10 @@ describe('AC1 — mount by type name from the catalog, not a hand list', () => {
 
   test('every registered spec names a type the runtime can mount — with the viewer-provided nodes registered (NSP-011)', () => {
     const withViewer = withViewerNodes(runtimeTarget());
-    for (const type of Object.keys(specs)) expect(withViewer.hasType(type)).toBe(true);
+    // NSP-022 — a cloud-only node is mounted by the cloud target (a cloud function's runtime), and never by the browser's
+    const cloud = cloudTarget();
+    for (const type of Object.keys(specs)) expect({ type, mounts: withViewer.hasType(type) || cloud.hasType(type) }).toEqual({ type, mounts: true });
+    expect(cloudNodeTypes().filter((t) => withViewer.hasType(t))).toEqual([]);
     // the three the viewer provides are not in the runtime's own list
     expect(['Color', 'Value Changed', 'Color Blend'].map((t) => runtime.hasType(t))).toEqual([false, false, false]);
   });

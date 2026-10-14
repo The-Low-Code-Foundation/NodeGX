@@ -180,6 +180,10 @@ export interface WorldView {
    * reads, with the token of the session the browser holds for its app id beside it; `undefined`: the project has none.
    */
   cloudServices(): Readonly<import('./world').CloudServicesScript> | undefined;
+  /** NSP-022 s99 — the project's classes (world.ts PROJECT): what the legacy store's `CloudStore._collections` holds, from `dbCollections`. */
+  collections(): readonly import('./world').CollectionScript[];
+  /** NSP-022 s99 — the project's `dbVersionMajor` metadata (world.ts PROJECT): what the Parse wire reads to spell an aggregate. */
+  dbVersionMajor(): number | undefined;
   /**
    * NSP-015 s18 — what the Component Stacks tell a push or a replace handed under `stack` for
    * `target` (world.ts STACK): `done`, `unchanged` or a `failure`; `undefined` when no stack is
@@ -212,6 +216,15 @@ export interface WorldView {
    * `undefined` when the project has no such backend (falsy and `_active_` are the active one).
    */
   backendFor(backendId: unknown): string | undefined;
+  /** NSP-022 s96 — whether the backend process has this service's global installed (world.ts HOST); a node outside a backend has none. */
+  hostHas(service: import('./world').HostService): boolean;
+  /**
+   * NSP-022 s97 — THE INVOCATION (world.ts HOST): whether a request reached the function this node is part of — `none`, or
+   * `open` until it is answered, then `settled`. What a Response asks before it answers (its two callbacks).
+   */
+  invocation(): 'none' | 'open' | 'settled';
+  /** NSP-022 s97 — the `_noodl_cloudservices` global the process installed (world.ts HOST, THE INVOCATION), or `undefined`. */
+  hostCloud(): Readonly<import('./world').HostCloudServices> | undefined;
   /**
    * NSP-014 s22 — the id of the user signed in, as the Record family's access rules read it (world.ts BACKEND, USER); `undefined`: nobody.
    * P109 ISL-029 (D24): asked of the RECORD's backend — `backend` is the id the call goes to — and answered from that backend's session.
@@ -297,6 +310,19 @@ export interface SpecBackendCall {
 
 /** NSP-014 s21 — a backend's answer to a `SpecBackendCall`, delivered to `WorldHandlers.backend`: what the success callback is handed, or the failure's message (`undefined`: none) and (s22) the backend's `detail` when it gave one. */
 export type BackendAnswerEvent = { id: string } & ({ ok: unknown } | { error: string | undefined; detail?: Record<string, unknown> });
+
+/**
+ * NSP-022 s96 — a call a reducer makes on a service of the backend process (world.ts HOST): `service`, and `request` as the node
+ * hands it (for `secrets` the name). `id` is the spec's own name for the call (the answer names it); it is not on the wire.
+ */
+export interface SpecHostCall {
+  id: string;
+  service: import('./world').HostService;
+  request: unknown;
+}
+
+/** NSP-022 s96 — a service's answer to a `SpecHostCall`, delivered to `WorldHandlers.host`: what it returned or resolved with, or the message it threw or rejected with. */
+export type HostAnswerEvent = { id: string } & import('./world').HostDelivery;
 
 /** NSP-014 s33 — what a subscription this node opened told it (`subscribe` effect, world.ts REALTIME), delivered to `WorldHandlers.realtime` with the subscription's `id`. */
 export type RealtimeEvent = { id: string } & import('./world').RealtimeTold;
@@ -416,13 +442,33 @@ export interface ValueInputDecl extends PortMeta {
    * s82 (§6.4 gap 3): reads the params RAW, as the runtime's hooks read `node.parameters` — a Value SET to the default is
    * not an unset one; a narrow that wants the declared default under an unset name says so itself.
    */
-  narrow?: (params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>) => Partial<Pick<ValueInputDecl, 'type' | 'enums' | 'default'>>;
+  narrow?: (params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>) => Partial<Pick<ValueInputDecl, 'type' | 'enums' | 'default' | 'labels'>>;
+  /**
+   * P107 s101 (R37: "the editor draws a cloud node's settings from its spec") — what the property panel draws beyond the
+   * port, from the runtime hook's announcement, so an editor with no runtime client draws the same panel. Presentation
+   * only: no reducer, generator or target reads them, and `drawnPorts` carries them. Graded against the hooks by oracle (a).
+   *
+   *   labels           — an `enum`'s words, by value (`{ value, label }` in an announcement); a value with none shows itself
+   *   connectionsOnly  — the port takes a wire and has no panel field (`allowConnectionsOnly`)
+   *   codeEditor       — the panel edits it in a code editor of this language (`codeeditor`)
+   *   valuePortPrefix  — a `query-filter`: the prefix of the ports its connected values are drawn as (`qp-`, `fp-`); the
+   *                      builder's schema and backend are the editor's, read from the project as the runtime reads them
+   *   filterBackend    — a `query-filter` that greys out what the node's backend cannot express (`backend` on the port);
+   *                      absent, the builder gates nothing (ByobFilterType.ts)
+   */
+  labels?: Readonly<Record<string, string>>;
+  connectionsOnly?: boolean;
+  codeEditor?: string;
+  valuePortPrefix?: string;
+  filterBackend?: boolean;
 }
 
 export interface SignalInputDecl extends PortMeta {
   type: 'signal';
   /** The input reports an outcome (ERG-001) — its reducer must return one on every path. */
   outcome?: boolean;
+  /** P107 s101 (R37) — the panel draws no trigger for it, only its wire (`allowConnectionsOnly`; States' `to-<state>`). */
+  connectionsOnly?: boolean;
 }
 
 export type InputDecl = ValueInputDecl | SignalInputDecl;
@@ -442,6 +488,11 @@ export interface ValueOutputDecl<S> extends PortMeta {
    * type its `type` names, text-input.ts :616-637): the output's `type` for these params. Raw params, as the input one.
    */
   narrow?: (params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>) => Partial<Pick<ValueOutputDecl<S>, 'type'>>;
+  /**
+   * P107-S85-RESTCOLTYPES (s102) — an `enum` output's values, as the editor draws them: a Record's `prop-<column>` for a
+   * select column announces its choices (record-ports.ts :187). Presentation only — nothing reads it at play.
+   */
+  enums?: readonly string[];
   /**
    * NSP-020 (s82) — on a DERIVED output: at play the output exists only when a wire leaves from it — the runtime registers
    * it in `nodescope.ts addConnection` (:150, `registerOutputIfNeeded(sourcePort)`) and nowhere else, and gates every
@@ -598,6 +649,10 @@ export interface Patch<S, O> {
    *   `socket`  NSP-014 s34 — calls on WebSockets, in the order made (world.ts SOCKET): each a `socket` event in the request group,
    *             as handed. What a socket the node made tells arrives at `WorldHandlers.socket` with its `id`, each at its moment
    *             on the clock. A `connect` the world's script refuses by throwing is still recorded — read `socketAnswer` first.
+   *   `host`    NSP-022 s96 — calls on the backend process's services (world.ts HOST), in the order made: a `host` event each in the
+   *             request group, as handed, after the patch's `backend` calls. The answer arrives at `WorldHandlers.host` with the
+   *             call's `id` — a `secrets` lookup's inside the call (it is synchronous), the others' at their moment. Only to a
+   *             service `WorldView.hostHas` (a node checks before it calls, as the runtime's `typeof` does).
    */
   after?: ReadonlyArray<{ ms: unknown; tag: string }>;
   cancel?: readonly string[];
@@ -633,6 +688,7 @@ export interface Patch<S, O> {
   subscribe?: SpecBackendCall;
   subscribeFirst?: boolean;
   socket?: readonly SpecSocketOp[];
+  host?: SpecHostCall | readonly SpecHostCall[];
   /**
    * NSP-016 s56 — THE CALLERS: what the node answers the requests other nodes hand it, in the order made (an `answer` event each, in
    * the LOCATION group, after this patch's other LOCATION events): `{ op, value, error? }` for a push, replace or back (`error` the
@@ -671,7 +727,14 @@ export type AnswerCall =
   | { op: 'history'; url: unknown; how?: 'push' | 'replace' }
   /** NSP-016 s70 — `history.back()` made between two answers (world.ts LOCATION): its traversal lands at the next yield. */
   | { op: 'history'; how: 'back' }
-  | { op: 'open'; url: unknown; target?: unknown; features?: unknown };
+  | { op: 'open'; url: unknown; target?: unknown; features?: unknown }
+  /**
+   * NSP-022 s97 — a cloud function's answer to its request (world.ts HOST, THE INVOCATION): `respond`, a Response's payload
+   * (`status`, `body` the text) — made only while `WorldView.invocation()` is `open`; or `refuse`, the Request's refusal (`reason`
+   * the message, `fields` the contract's refused fields). Either settles the request.
+   */
+  | { op: 'respond'; status: number; body: string }
+  | { op: 'refuse'; reason: string; fields?: unknown };
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
   /** Required — rule 3. `deferred` hands the decision to `afterInputs` (see `ReducerOutcome`). */
@@ -820,20 +883,37 @@ export interface NamedPages {
   pages: readonly string[];
   /** NSP-020 s84 — the component each page shows, by page id (a Component Stack's `pageComp-<id>`, navigate.ts :358-360). */
   components?: Readonly<Record<string, string>>;
+  /** P107 s101 — each page's name as the stack lists it, by page id (a Component Stack's `pages[].label`): what a picker shows. */
+  labels?: Readonly<Record<string, string>>;
 }
 
 export interface BackendSchema {
   classes: Readonly<Record<string, { fields: Readonly<Record<string, BackendField>> }>>;
+  /**
+   * P107-S85-RESTCOLTYPES (s102) — the selected backend's type as the project records it (`parse`, `nodegx`, `directus`,
+   * `supabase`, `pocketbase`, `custom`). Absent is the Parse wire, as the runtime reads it (record-ports.ts
+   * `isParseWireContext` :147-149: no type, `parse` or `nodegx`). Off the Parse wire the Class picker offers no `_User` /
+   * `_Role` (:126-131) and the User family reads its accounts from the type's own table (user-ports.ts :83-102). A schema
+   * with no classes is still handed over off the Parse wire, because then the picker is empty rather than the two system classes.
+   */
+  backendType?: string;
 }
 
 /**
  * One column of a class. NSP-020 s84 — `relation` names the class a Parse `Relation` column points at: the Add / Remove
  * Record Relation picker offers exactly those columns (record-ports.ts `recordRelationPorts` :350-366), the Record node
  * draws no port for one (`skipRelationColumns`, dbmodelnode2.ts :562-564), and the writes draw it untyped.
+ *
+ * P107-S85-RESTCOLTYPES (s102) — `enhanced`: the column has no Parse native type, so the runtime types it by
+ * schema-ports.ts :119-195 `getEnhancedFieldType` (record-ports.ts `recordPortType` :211-221) and its port keeps `type` as
+ * given: an `object` (a `json` column) is an object port, where a Parse `Object` column is `*`. `enums`: a select column's
+ * choices, the values of its `enum` port.
  */
 export interface BackendField {
   type: ValueType;
   relation?: string;
+  enhanced?: true;
+  enums?: readonly string[];
 }
 
 export const PORT_CONTEXT_FIELDS = ['wired', 'wiredOutputs', 'backends', 'instancePorts', 'components', 'routers', 'stacks', 'schema', 'siblings'] as const satisfies readonly (keyof PortContext)[];
@@ -1002,6 +1082,10 @@ export interface WorldHandlers<S, I, O> {
   popup?: (state: Readonly<S>, inputs: Inputs<I>, event: import('./world').PopupEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
   /** NSP-014 s21 — a backend answered a call this node made (`backend` effect), at the answer's moment (world.ts BACKEND). */
   backend?: (state: Readonly<S>, inputs: Inputs<I>, answer: BackendAnswerEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /** NSP-022 s96 — a service of the backend process answered a call this node made (`host` effect), at the answer's moment (world.ts HOST). */
+  host?: (state: Readonly<S>, inputs: Inputs<I>, answer: HostAnswerEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /** NSP-022 s97 — the backend process handed the function this node is part of its request (world.ts HOST, THE INVOCATION), at its moment. */
+  invoke?: (state: Readonly<S>, inputs: Inputs<I>, request: import('./world').InvocationRequest, world: WorldView) => AfterInputsPatch<S, I, O>;
   /**
    * NSP-014 s24 — a write made elsewhere in the app reached the store's listeners (world.ts BACKEND, `events`): called
    * at its time on the clock, AFTER the registry holds the write, with the contract's event and the backend it came
@@ -1148,6 +1232,8 @@ export interface WorldPool {
   projectSettings?: ReadonlyArray<Record<string, unknown>>;
   /** NSP-014 s32: the cloud services a `project` spec's sequences play with (one is drawn per sequence, only when the pool names them; `null` is none). */
   cloudServices?: ReadonlyArray<import('./world').CloudServicesScript | null>;
+  /** NSP-022 s99: the classes and `dbVersionMajor` a `project` spec's sequences play with (one is drawn per sequence, only when the pool names them; `{}` is none and unset). */
+  projectData?: ReadonlyArray<{ collections?: readonly import('./world').CollectionScript[]; dbVersionMajor?: number }>;
   /** NSP-015 s18: the Component Stacks a `stack` spec's sequences play with (one is drawn per sequence; the default is none registered alone). */
   stacks?: ReadonlyArray<import('./world').StackScript>;
   /** NSP-015 s19: the Routers a `router` spec's sequences play with (one is drawn per sequence; the default is none registered alone). */
@@ -1160,6 +1246,8 @@ export interface WorldPool {
   pickers?: ReadonlyArray<import('./world').PickerScript>;
   /** NSP-014 s34: the WebSocket servers a `socket` spec's sequences play with (one is drawn per sequence; the default answers nothing — every construction a violation). */
   sockets?: ReadonlyArray<import('./world').SocketScript>;
+  /** NSP-022 s96: the backend processes a `host` spec's sequences play in (one is drawn per sequence; the default: none installed). */
+  hosts?: ReadonlyArray<import('./world').HostScript>;
   /** NSP-016 s42: the Radio Button Groups a `group` spec's sequences play in (one is drawn per sequence; the default: none, one never written, one with a Value at load, one written later). */
   groups?: ReadonlyArray<import('./world').GroupScript>;
 }
@@ -1186,6 +1274,14 @@ export interface Change {
   /** The commit that changed the RUNTIME, when the change was made there (the before-traces are its parent's). */
   commit?: string;
   migration: Migration;
+}
+
+/** NSP-019 s95 — one thing a node tells the editor about its settings (`NodeDecl.diagnostics`). */
+export interface DiagnosticDecl<S, I> {
+  /** The condition, in words, for the rules: "Min Value is above Max Value". */
+  says: string;
+  /** The sentence the editor shows while the condition holds; `null` / `undefined` / `''` when it does not. */
+  message: (inputs: Inputs<I>, state: Readonly<S>) => string | null | undefined;
 }
 
 /** NSP-018 — one shape of hand-written code a node replaces (`NodeDecl.idioms`). */
@@ -1225,6 +1321,14 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
   outcomes?: readonly Outcome[];
   /** What the editor's hover/inspect shows for an instance — the runtime's `getInspectInfo`. */
   inspect?: (state: Readonly<S>, world: WorldView) => string;
+  /**
+   * NSP-019 s95 — what this node tells the EDITOR about its own settings: the runtime's `setDiagnostic`
+   * (dev-docs/reference/DIAGNOSTICS-CONTRACT.md — "two of this node's settings contradict each other"), keyed as the runtime
+   * keys it, `<node-type>/<condition>`. Each is a predicate on the inputs and state: its sentence while it holds, nothing when
+   * it does not. A settle records one `diagnostic` event per key whose sentence changed (trace.ts). Never on the wire: a
+   * deployed app shows nothing, so a target without an editor (`TargetAdapter.diagnostics`) is not graded on them.
+   */
+  diagnostics?: Readonly<Record<string, DiagnosticDecl<S, I>>>;
   /**
    * NSP-017 AC3 — the person writes this node's code, so the code is the behaviour: the spec is a CONTRACT — it runs the same
    * code the same way and says what the code can see and how its results come out, graded with a fixed set of user-code fixtures
@@ -1294,8 +1398,10 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
  * NSP-016 s37 adds `person` — a person can act on the node (`NodeDecl.acts`, `PersonReducers`): a target plays it only
  * with a person face (`TargetAdapter.act`), and the node is on a page — a document — for the whole play.
  * s42 adds `group` — the node sits in a Radio Button Group, or in none (world.ts GROUP): its sequences play in a group from the pool.
+ * NSP-022 s96 adds `host` — the node calls a service of the backend process a cloud function runs in (world.ts HOST): its sequences
+ * play in a process from the pool, which may have the service or not.
  */
-export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'router' | 'popup' | 'backend' | 'picker' | 'socket' | 'person' | 'group';
+export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'router' | 'popup' | 'backend' | 'picker' | 'socket' | 'person' | 'group' | 'host';
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;
@@ -1360,6 +1466,8 @@ export interface AnyNodeSpec {
   outputs: Record<string, ErasedValueOutput | SignalOutputDecl>;
   outcomes?: readonly Outcome[];
   inspect?: (state: never, world: WorldView) => string;
+  /** NSP-019 s95 — what the node tells the editor (`NodeDecl.diagnostics`), erased. */
+  diagnostics?: Readonly<Record<string, { says: string; message: (inputs: never, state: never) => string | null | undefined }>>;
   /** NSP-017 AC3 — a contract, not a behaviour (`NodeDecl.contract`). */
   contract?: string;
   idioms?: readonly Idiom[];
@@ -1392,6 +1500,8 @@ export interface AnyNodeSpec {
     page?: (state: never, inputs: never, params: Readonly<Record<string, unknown>>, world: WorldView) => unknown;
     popup?: (state: never, inputs: never, event: import('./world').PopupEvent, world: WorldView) => unknown;
     backend?: (state: never, inputs: never, answer: BackendAnswerEvent, world: WorldView) => unknown;
+    host?: (state: never, inputs: never, answer: HostAnswerEvent, world: WorldView) => unknown;
+    invoke?: (state: never, inputs: never, request: import('./world').InvocationRequest, world: WorldView) => unknown;
     store?: (state: never, inputs: never, event: import('./world').StoreEvent, world: WorldView) => unknown;
     auth?: (state: never, inputs: never, event: import('./world').AuthNotice, world: WorldView) => unknown;
     authReturn?: (state: never, inputs: never, ret: import('./world').AuthReturnState, world: WorldView) => unknown;

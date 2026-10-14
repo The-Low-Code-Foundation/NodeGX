@@ -1,0 +1,239 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "66499bab-5cc5-5c23-8891-8862440bc1d5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "home_page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "band-2"
+      ],
+      "parameters": {
+        "title": "Home",
+        "urlPath": "home"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "band-2",
+      "type": "Group",
+      "label": "Band",
+      "parent": "home_page",
+      "children": [
+        "shell-2"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "paddingTop": "var(--space-20)",
+        "paddingBottom": "var(--space-20)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "shell-2",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "band-2",
+      "children": [
+        "section_head",
+        "grid"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 1000,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "section_head",
+      "type": "Group",
+      "label": "Section head",
+      "parent": "shell-2",
+      "children": [
+        "eyebrow",
+        "heading",
+        "lead"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "paddingBottom": "var(--space-10)"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "parent": "section_head",
+      "parameters": {
+        "text": "LEARN FRENCH",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--primary)"
+      },
+      "x": 280,
+      "y": 520
+    },
+    {
+      "id": "heading",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "section_head",
+      "parameters": {
+        "text": "French Phrases",
+        "fontSize": "var(--display-sm)",
+        "fontWeight": "var(--font-bold)",
+        "lineHeight": "var(--leading-none)",
+        "letterSpacing": "var(--tracking-tighter)",
+        "color": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "lead",
+      "type": "Text",
+      "label": "Lead",
+      "parent": "section_head",
+      "parameters": {
+        "text": "Tap a lesson to start. Tap any phrase inside it to hear it read aloud.",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        }
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "grid",
+      "type": "net.noodl.visual.columns",
+      "label": "Lesson grid",
+      "parent": "shell-2",
+      "children": [
+        "repeater-2"
+      ],
+      "parameters": {
+        "sizing": "autoFit",
+        "minWidth": {
+          "value": 280,
+          "unit": "px"
+        },
+        "marginX": {
+          "value": 12,
+          "unit": "px"
+        }
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "repeater-2",
+      "type": "For Each",
+      "label": "One card per lesson",
+      "parent": "grid",
+      "parameters": {
+        "template": "/Components/LessonCard"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "lessons_src-2",
+      "type": "/Components/Data/Lessons",
+      "label": "All lessons",
+      "x": 530,
+      "y": 1240
+    },
+    {
+      "id": "progress_query",
+      "type": "DbCollection2",
+      "label": "Fetch progress",
+      "parameters": {
+        "collectionName": "Progress"
+      },
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "merge_fn",
+      "type": "JavaScriptFunction",
+      "label": "Merge lessons with saved progress",
+      "parameters": {
+        "functionScript": "const lessons = Inputs.lessons;\nconst progress = Inputs.progress;\nif (lessons === undefined || progress === undefined) return;\n\nOutputs.items = lessons.map((lesson) => ({\n  id: lesson.id,\n  title: lesson.title,\n  phraseCount: lesson.phrases.length,\n  completed: progress.some((p) => p.lessonId === lesson.id && p.completed),\n}));\n"
+      },
+      "x": 530,
+      "y": 1000,
+      "ports": [
+        {
+          "name": "in-lessons",
+          "displayName": "lessons",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-progress",
+          "displayName": "progress",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "go_lesson",
+      "type": "RouterNavigate",
+      "label": "Open lesson",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Lesson"
+      },
+      "x": 530,
+      "y": 1120
+    }
+  ],
+  "visualRoots": [
+    "home_page"
+  ]
+}

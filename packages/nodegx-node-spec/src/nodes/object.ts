@@ -63,6 +63,7 @@ function propertyInput(p: string): ValueInputDecl {
   return {
     type: '*',
     coerce: 'none',
+    connectionsOnly: true, // modelnode2.ts :509 — the panel draws no field for a property, only its wire
     displayName: p,
     group: 'Properties',
     description: 'Reads and writes the ' + p + ' property of the bound object; a value arriving before an object is bound is held and written once one is',

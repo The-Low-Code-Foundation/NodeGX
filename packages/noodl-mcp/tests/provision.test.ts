@@ -24,7 +24,7 @@ import {
   stopOwnedBackends
 } from '../src/backend/provision';
 import { listRuntimeRecords, readRuntimeRecord } from '../src/backend/runtimeRecord';
-import { call, connect, copyFixture, reveal, TestSession } from './helpers';
+import { call, callRawText, connect, copyFixture, reveal, TestSession } from './helpers';
 
 const BACKEND_CLI = path.join(__dirname, '..', '..', 'nodegx-backend', 'dist', 'cli.js');
 const haveBundle = fs.existsSync(BACKEND_CLI);
@@ -197,6 +197,51 @@ describeOrSkip('AAQ-011/F13 provisioning — a real backend, end to end', () => 
     // The refusal happens BEFORE the spawn: a provision that creates a process
     // and then fails to bind it has left durable machine state for nothing.
     expect(listRuntimeRecords(root)).toHaveLength(before);
+  });
+
+  it("day two: restarts the project's own stopped backend without force (P112-S14-DAYTWO)", async () => {
+    // Every new session is this: the server that started the backend stopped, so the backend stopped with it,
+    // and the project still points at it. The "Another backend" refusal above is this test's control.
+    const first = await call<ProvisionResponse>(session, 'provision_backend', { name: 'App backend' });
+    await call(session, 'stop_backend', { backendId: first.data.backendId });
+    await expect(fetch(`${first.data.endpoint}/health`)).rejects.toBeDefined();
+
+    const again = await call<ProvisionResponse>(session, 'provision_backend', { name: 'App backend' });
+    expect(again.data.provisioned).toBe(true);
+    expect(again.data.reused).toBe(true);
+    expect(again.data.backendId).toBe(first.data.backendId);
+    expect((await fetch(`${again.data.endpoint}/health`)).status).toBe(200);
+    expect(ownedBackendIds()).toHaveLength(1);
+  });
+
+  it('P112-S14-PERSONKEY: asks for the key in .env, then sends it from the file — the value is in no result', async () => {
+    const KEY = 'own015-canary-' + Math.random().toString(36).slice(2);
+    const provisioned = JSON.parse(await callRawText(session, 'provision_backend', { name: 'App backend' }));
+    expect(provisioned.provisioned).toBe(true);
+
+    // 1. The agent asks; the tool writes the line and says what to tell the person.
+    const ask = JSON.parse(await callRawText(session, 'set_function_secret', { name: 'GEMINI_API_KEY' }));
+    expect(ask).toMatchObject({ set: false, waitingForPerson: true, line: 'GEMINI_API_KEY=' });
+    expect(ask.tellThePerson).toContain('right after the = sign');
+    expect(fs.readFileSync(path.join(projectDir, '.env'), 'utf8')).toContain('GEMINI_API_KEY=\n');
+
+    // 2. Asked again before the person has pasted: still waiting, nothing sent.
+    const early = JSON.parse(await callRawText(session, 'set_function_secret', { name: 'GEMINI_API_KEY' }));
+    expect(early.set).toBe(false);
+
+    // 3. The person pastes the key after the = and saves (as an editor would: the line edited in place).
+    const envFile = path.join(projectDir, '.env');
+    fs.writeFileSync(envFile, fs.readFileSync(envFile, 'utf8').replace('GEMINI_API_KEY=\n', `GEMINI_API_KEY=${KEY}\n`));
+
+    const sentText = await callRawText(session, 'set_function_secret', { name: 'GEMINI_API_KEY' });
+    const sent = JSON.parse(sentText);
+    expect(sent).toMatchObject({ set: true, name: 'GEMINI_API_KEY', characters: KEY.length });
+    // The claim: the value is in nothing the agent was shown…
+    expect(sentText).not.toContain(KEY);
+    expect(await callRawText(session, 'list_function_secrets', {})).not.toContain(KEY);
+    // …and it reached the backend's own store (the known-firing control for the search above).
+    const secrets = JSON.parse(fs.readFileSync(path.join(root, provisioned.backendId, 'secrets.json'), 'utf8'));
+    expect(secrets.functions.GEMINI_API_KEY).toBe(KEY);
   });
 
   it('stops a backend it owns, and drops the record with it', async () => {

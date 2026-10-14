@@ -183,14 +183,13 @@ describe('the Parse wire', () => {
       ignore: USER_OUTPUT_IGNORE_PARSE
     });
 
-    // ⚠️ Exact, not a subset. `ACL` is here on purpose: `shouldShowField` hides
-    // it and applying that filter uniformly would silently remove an output the
-    // `User` node has always had — and a removed output drops its wire.
+    // ⚠️ Exact, not a subset. `ACL` is NOT here (P107-S84-USERACL, ruled R29 "Hide it,
+    // like the Record nodes"): `shouldShowField` hides it on every wire now. Until
+    // then the Parse wire drew it, and only the User family did.
     expect(names(ports, 'output').filter((name) => name.startsWith('prop-'))).toEqual([
       'prop-objectId',
       'prop-createdAt',
       'prop-updatedAt',
-      'prop-ACL',
       'prop-emailVerified',
       'prop-nickname',
       'prop-age',
@@ -199,7 +198,8 @@ describe('the Parse wire', () => {
     ]);
 
     // One `changed-` signal per property, as before.
-    expect(names(ports).filter((name) => name.startsWith('changed-'))).toHaveLength(9);
+    expect(names(ports).filter((name) => name.startsWith('changed-'))).toHaveLength(8);
+    expect(names(ports)).not.toContain('changed-ACL');
 
     // The `Relation` column is not a value and never had a port.
     expect(names(ports)).not.toContain('prop-team');
@@ -216,7 +216,8 @@ describe('the Parse wire', () => {
     expect(typeOf('prop-emailVerified')).toEqual({ name: 'boolean' });
     // Everything with no entry in the Parse table has always been `*`.
     expect(typeOf('prop-avatar')).toEqual({ name: '*' });
-    expect(typeOf('prop-ACL')).toEqual({ name: '*' });
+    // R29: the ACL is the account's access rules, and no node draws a port for it.
+    expect(typeOf('prop-ACL')).toBeUndefined();
   });
 
   it('produces exactly the browser-side inputs the old generator produced', () => {
@@ -225,7 +226,6 @@ describe('the Parse wire', () => {
 
     expect(names(ports, 'input')).toEqual([
       'prop-objectId',
-      'prop-ACL',
       'prop-nickname',
       'prop-age',
       'prop-joinedAt',

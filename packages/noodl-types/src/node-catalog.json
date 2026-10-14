@@ -6732,6 +6732,9 @@
           "after the first: only where Reset returns to → Count Changed stays silent",
           "the first one: the count starts there too → Count Changed"
         ]
+      },
+      "warnings": {
+        "counter/min-above-max": "Min Value is above Max Value"
       }
     },
     {
@@ -10782,6 +10785,18 @@
         "refresh": [
           "always: a rebuild at the end of the frame, one however many Refreshes arrived — every row goes and one is built per item, then Done for each Refresh; Failure for each when Template Type has nothing to build from, or there are no Items"
         ]
+      },
+      "warnings": {
+        "repeater/items-not-a-collection": "Items is not a list",
+        "repeater/items-empty-entry": "Items has an empty entry",
+        "repeater/template-script-syntax-error": "Script does not compile",
+        "repeater/template-script-threw": "Script threw for an item, or set its component to something other than a name",
+        "repeater/no-template-for-item": "an item has no component to build its row from",
+        "repeater/template-component-not-found": "an item's component is not in the project",
+        "repeater/input-mapping-syntax-error": "the input mapping does not compile",
+        "repeater/input-mapping-threw": "the input mapping threw for an item",
+        "repeater/no-template": "a Refresh found nothing to build the rows from",
+        "repeater/no-items": "a Refresh found no Items"
       }
     },
     {
@@ -14746,8 +14761,8 @@
           "always: read at a drop — which files count as accepted"
         ],
         "focus": [
-          "off the page: nothing is listed → Unchanged; Focused stays silent",
-          "off the page, after outcomes this frame resolved and has not reported: nothing is listed, and Unchanged comes after them → Focused stays silent",
+          "off the page: nothing is listed, and the editor is told → Unchanged; Focused stays silent",
+          "off the page, after outcomes this frame resolved and has not reported: nothing is listed, the editor is told, and Unchanged comes after them → Focused stays silent",
           "already listed as focused → Done; Focused stays silent",
           "already listed, after outcomes this frame has not reported: Done comes after them → Focused stays silent",
           "on the page: listed as focused → Focused, Done",
@@ -14765,6 +14780,9 @@
         "scrollToElement.do": [
           "always: runs at the end of the frame, waiting as Scroll To Index does — Done when Element is empty (nothing to scroll to), Failure for a value that is not an element"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page"
       }
     },
     {
@@ -30152,7 +30170,7 @@
           "always: the list of states; while none is current, the first (or Start State) is entered at the end of the frame"
         ],
         "values": [
-          "always: the values that differ between states, each an output"
+          "always: the values that differ between states, each an output; a value named as one of the node's outputs is refused and the editor is told"
         ],
         "useTransitions": [
           "always: whether the next move animates its values or jumps"
@@ -30162,6 +30180,12 @@
           "already in, or already heading to, the next state → Unchanged",
           "otherwise it moves to the next state, wrapping round after the last, at the end of the frame — State Changed, then Done"
         ]
+      },
+      "warnings": {
+        "states/unknown-state": "a state was asked for that is not in the list, and no state in the list has been asked for since",
+        "states/no-states": "a Toggle or a To arrived with no States list",
+        "states/unreadable-transition": "a move would have animated along a transition that is not a curve",
+        "states/reserved-port-name": "a value is named as one of the node's own outputs"
       }
     },
     {
@@ -36588,7 +36612,7 @@
             "allowConnectionsOnly": true
           },
           "isSignal": true,
-          "description": "Stops playback and seeks to the beginning"
+          "description": "Stops playback and seeks to Start Time (the beginning when there is none)"
         },
         {
           "name": "restart",
@@ -36600,7 +36624,7 @@
             "allowConnectionsOnly": true
           },
           "isSignal": true,
-          "description": "Seeks to the beginning and plays, then fires Done"
+          "description": "Seeks to Start Time (the beginning when there is none) and plays, then fires Done"
         },
         {
           "name": "scrollIntoView",
@@ -37594,7 +37618,7 @@
           "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and plays at the paint that puts the video there — Done then"
         ],
         "restart": [
-          "on the page: wants the video playing and, once it has loaded, goes back to second 0 (Playback Position 0 — not Start Time) and starts it as Play does; before the load, only the wanting; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
+          "on the page: wants the video playing and, once it has loaded, goes back to Start Time as last drawn (Playback Position; second 0 when there is none) and starts it as Play does; before the load, only the wanting; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
           "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and restarts at the paint that puts the video there — Done then"
         ],
         "pause": [
@@ -37602,7 +37626,7 @@
           "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and pauses at the paint that puts the video there — Done then"
         ],
         "reset": [
-          "on the page: stops wanting the video playing, goes back to second 0 (Playback Position 0 once loaded — not Start Time) and pauses it — On Pause if it was playing; Autoplay no longer starts it on this load; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
+          "on the page: stops wanting the video playing, goes back to Start Time as last drawn (Playback Position, once loaded; second 0 when there is none) and pauses it — On Pause if it was playing; Autoplay no longer starts it on this load; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
           "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and resets at the paint that puts the video there — Done then"
         ]
       }
@@ -38679,6 +38703,9 @@
           "the Date cannot be read as a date: Result goes empty → Invalid Date; Changed stays silent",
           "otherwise Result is the Date moved by Amount (0 when not a number) in Unit (days when not one of the eight); in months and years Amount counts whole steps only, and the day stops at the month's last → Changed; Invalid Date stays silent"
         ]
+      },
+      "warnings": {
+        "date-add/unknown-unit": "Unit is not one of the eight"
       }
     },
     {
@@ -39024,6 +39051,9 @@
           "either cannot be read as a date: Difference goes empty → Invalid Date; Changed stays silent",
           "otherwise Difference is To minus From in Unit (days when not one of the eight), negative when To is earlier unless Absolute is on → Changed; Invalid Date stays silent"
         ]
+      },
+      "warnings": {
+        "date-difference/unknown-unit": "Unit is not one of the eight"
       }
     },
     {
@@ -41175,7 +41205,7 @@
       "inputs": [
         {
           "name": "maxBytes",
-          "displayName": "Max Bytes",
+          "displayName": "Max Characters",
           "group": "General",
           "plug": "input",
           "type": {
@@ -41183,7 +41213,7 @@
           },
           "isSignal": false,
           "default": 5242880,
-          "description": "Refuse a document larger than this, before parsing it. Raise it for a source that really does publish its whole archive in one file"
+          "description": "Refuse a document longer than this many characters (not bytes), before parsing it. Raise it for a source that really does publish its whole archive in one file"
         },
         {
           "name": "text",
@@ -41386,7 +41416,7 @@
         },
         {
           "name": "maxBytes",
-          "displayName": "Max Bytes",
+          "displayName": "Max Characters",
           "group": "General",
           "plug": "input",
           "type": {
@@ -41394,7 +41424,7 @@
           },
           "isSignal": false,
           "default": 5242880,
-          "description": "Refuse a document larger than this, before parsing it. A big document costs many times its own size in memory once it is an object, and a server can always send more than you expected"
+          "description": "Refuse a document longer than this many characters (not bytes), before parsing it. A big document costs many times its own size in memory once it is an object, and a server can always send more than you expected"
         },
         {
           "name": "text",
@@ -47109,7 +47139,7 @@
           "always: the element is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -47123,6 +47153,10 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       }
     },
     {
@@ -49289,7 +49323,7 @@
           "always: a label is drawn beside the box, or not; the box and its keyboard stay"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -49303,6 +49337,10 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       }
     },
     {
@@ -51890,7 +51928,7 @@
           "always: a label is drawn beside the list, or not; the list, its keyboard and its pick stay"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -51904,6 +51942,10 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       }
     },
     {
@@ -54067,7 +54109,7 @@
           "always: a label is drawn beside the button, or not; the button and its keyboard stay"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -54081,6 +54123,10 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, it takes no click and a Focus does not reach it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       }
     },
     {
@@ -56449,7 +56495,7 @@
         ],
         "value": [
           "empty: no word, and the handle stays where it is",
-          "not a number: no word (the runtime reports it), and the handle stays where it is",
+          "not a number: no word, the editor is told, and the handle stays where it is",
           "a number: at the next paint the handle goes there, clamped to Min and Max and rounded to the Step; Value and Value Percent follow when they move — Changed does not fire (only a person's slide fires it)"
         ],
         "min": [
@@ -56465,7 +56511,7 @@
           "always: the slider is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint; put back, the handle is where it was left"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -56479,6 +56525,11 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "slider/max-below-min": "Max is below Min",
+        "slider/value-not-a-number": "a Value arrived that is not a number"
       }
     },
     {
@@ -59308,7 +59359,7 @@
           "always: a label is drawn above the field, or not; the field and its keyboard stay"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -59328,6 +59379,10 @@
         "opacity": [
           "always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       }
     },
     {
@@ -62094,6 +62149,9 @@
         "scrollIntoView": [
           "always: the page, or the scrolling Group holding it, scrolls until the icon can be seen"
         ]
+      },
+      "warnings": {
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       }
     },
     {
@@ -62263,7 +62321,21 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "role": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "createRole": [
+          "always: read at the end of the frame by a Do pressed in it — only true creates a missing role"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.aggregate",
@@ -62361,6 +62433,11 @@
             "valueType": "enum",
             "example": "storageFilterType"
           }
+        ]
+      },
+      "rules": {
+        "aggregates": [
+          "always: kept, and read when the next aggregation goes; asks for none itself"
         ]
       }
     },
@@ -62566,6 +62643,26 @@
       "parameterEncoding": {
         "known": false,
         "reason": "The port helper needs project context this generator cannot supply headlessly — a live component, a connected node, or a backend schema."
+      },
+      "rules": {
+        "username": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "email": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "password": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "emailVerified": [
+          "always: read at the end of the frame by a Do pressed in it — only true is verified"
+        ],
+        "properties": [
+          "always: nothing while it runs; each name makes a value input"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
       }
     },
     {
@@ -62701,7 +62798,15 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.getuserroles",
@@ -62836,7 +62941,15 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.hmac",
@@ -62996,7 +63109,24 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "always: read at the end of the frame by a Do pressed in it — as its text, in UTF-8 bytes (nothing, 0 or false as the empty text)"
+        ],
+        "key": [
+          "always: read at the end of the frame by a Do pressed in it — nothing, empty, 0 or false fails that Do; otherwise its text in UTF-8 bytes, and a text that is empty fails it too"
+        ],
+        "algorithm": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as SHA-256; one the host does not know fails that Do)"
+        ],
+        "encoding": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as hex; one not in the list fails that Do)"
+        ],
+        "sign": [
+          "always: one signature at the end of the frame however many presses, of Value under Key as they stand then — Signature and a cleared Error, then Done per press; no Key, an unknown Algorithm or Encoding puts the reason on Error, Signature untouched, Failure per press"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.jwtsign",
@@ -63142,7 +63272,24 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "claims": [
+          "always: read at the end of the frame by a Do pressed in it — nothing signs no claims of its own; text is read as an object literal (not one: no claims); an array, null, a number or true/false fails that Do"
+        ],
+        "key": [
+          "always: read at the end of the frame by a Do pressed in it — nothing, empty, 0 or false fails that Do; otherwise its text in UTF-8 bytes"
+        ],
+        "algorithm": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as HS256; one not HS256/384/512 fails that Do)"
+        ],
+        "expiresIn": [
+          "always: read at the end of the frame by a Do pressed in it — as a number above 0, exp is that many whole seconds after iat; anything else, no exp"
+        ],
+        "sign": [
+          "always: one token at the end of the frame however many presses, iat the clock's second — Token and a cleared Error, then Done per press; claims that are not an object, an unknown Algorithm or no Key put the reason on Error, Token untouched, Failure per press"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.jwtverify",
@@ -63299,7 +63446,24 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "token": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "key": [
+          "always: read at the end of the frame by a Do pressed in it — nothing, empty, 0 or false refuses that Do"
+        ],
+        "algorithm": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as HS256); the token's header must name the same one"
+        ],
+        "clockTolerance": [
+          "always: read at the end of the frame by a Do pressed in it — that many seconds of leeway on nbf and exp (not a number, or below 0, none)"
+        ],
+        "verify": [
+          "always: one check at the end of the frame however many presses — verified: Valid true, Claims the payload, Error cleared, Done per press; refused: Valid false, the reason on Error, Claims untouched, Failure per press"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.listusersinrole",
@@ -63480,7 +63644,21 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "role": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "limit": [
+          "always: read at the end of the frame by a Do pressed in it, handed to the store as is"
+        ],
+        "skip": [
+          "always: read at the end of the frame by a Do pressed in it, handed to the store as is"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.modelrequest",
@@ -63812,7 +63990,48 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "provider": [
+          "always: read when the call is made — blank is Anthropic"
+        ],
+        "model": [
+          "always: read when the request is built — blank is the default model"
+        ],
+        "apiKeySecret": [
+          "always: the name read from the secret store when the call is made"
+        ],
+        "baseUrl": [
+          "always: read when the call is made — blank is the Anthropic API"
+        ],
+        "instructions": [
+          "always: read when the request is built"
+        ],
+        "callInstructions": [
+          "always: read when the request is built"
+        ],
+        "input": [
+          "always: read when the request is built, unless Messages holds a conversation"
+        ],
+        "messages": [
+          "always: read when the request is built — a non-empty list replaces Input"
+        ],
+        "outputSchema": [
+          "always: read when the request is built and again when its answer lands"
+        ],
+        "effort": [
+          "always: read when the request is built — blank is high"
+        ],
+        "maxTokens": [
+          "always: a positive number, floored, read when the request is built — anything else is 16000"
+        ],
+        "timeoutMs": [
+          "always: a positive number, floored, read when the call starts and in its timeout sentence — anything else is 120000"
+        ],
+        "send": [
+          "always: one call at the end of the frame however many presses — Done with the answer published, or Failure with Error, Error Code and Status, per press"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.removeuserfromrole",
@@ -63958,7 +64177,18 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "role": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.request",
@@ -64185,6 +64415,14 @@
             "example": "ptype-Sa1"
           }
         ]
+      },
+      "rules": {
+        "allowNoAuth": [
+          "always: read when a request comes, and again when its caller cannot be looked up"
+        ],
+        "params": [
+          "always: nothing while it runs; read when a request comes — each name a contract row and an output a wire can take"
+        ]
       }
     },
     {
@@ -64356,6 +64594,22 @@
             "example": "pm-Sa1"
           }
         ]
+      },
+      "rules": {
+        "params": [
+          "always: nothing while it runs; each name makes a value input the payload carries"
+        ],
+        "errorMessage": [
+          "always: read when Send is pressed with Status Failure"
+        ],
+        "status": [
+          "always: read when Send is pressed — unset or success is a 200, anything else a 400"
+        ],
+        "send": [
+          "no request reached the function this node is part of: the reason on Error → Failure",
+          "the request was already answered — by another Response, by a refusal, or by the runner's timeout: the reason on Error → Failure",
+          "otherwise: the payload goes out just after — a 200 carrying the Parameters when Status is unset or success, else a 400 carrying the Error Message → Done"
+        ]
       }
     },
     {
@@ -64453,7 +64707,15 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "name": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "fetch": [
+          "always: one read at the end of the frame however many presses — found: Value and a cleared Error, Done per press; outside a backend, not found, or a store that cannot be read: the reason on Error, Value cleared, Failure per press"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.sendemail",
@@ -64610,7 +64872,30 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "to": [
+          "always: stamped on each Do pressed after it; read at the end of the frame by a send whose presses agree"
+        ],
+        "template": [
+          "always: read when a send is made — set and not None, the message is that template"
+        ],
+        "variables": [
+          "always: read when a send is made"
+        ],
+        "subject": [
+          "always: read when a send is made"
+        ],
+        "text": [
+          "always: read when a send is made"
+        ],
+        "html": [
+          "always: read when a send is made"
+        ],
+        "send": [
+          "always: at the end of the frame, one send when the frame's presses agree on To (to To as it stands then), or one send per run of presses stamped with the same To, each after the one before is answered — Done per press, or the reason on Error and Failure per press"
+        ]
+      }
     },
     {
       "typeName": "noodl.cloud.updateuser",
@@ -64753,6 +65038,17 @@
       "parameterEncoding": {
         "known": false,
         "reason": "The port helper needs project context this generator cannot supply headlessly — a live component, a connected node, or a backend schema."
+      },
+      "rules": {
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "password": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "properties": [
+          "always: nothing while it runs; each name makes a value input"
+        ]
       }
     },
     {
@@ -64911,7 +65207,15 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "token": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      }
     }
   ]
 }

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d416af00-381c-5c00-8fe3-a672b7e04efe",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cp-ci",
+      "fromProperty": "options",
+      "toId": "cp-author",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "cp-author",
+      "fromProperty": "value",
+      "toId": "cp-create",
+      "toProperty": "prop-author"
+    },
+    {
+      "fromId": "cp-content",
+      "fromProperty": "value",
+      "toId": "cp-create",
+      "toProperty": "prop-content"
+    },
+    {
+      "fromId": "cp-author",
+      "fromProperty": "value",
+      "toId": "cp-canpost",
+      "toProperty": "author"
+    },
+    {
+      "fromId": "cp-content",
+      "fromProperty": "value",
+      "toId": "cp-canpost",
+      "toProperty": "content"
+    },
+    {
+      "fromId": "cp-canpost",
+      "fromProperty": "asBoolean",
+      "toId": "cp-post",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "cp-post",
+      "fromProperty": "onClick",
+      "toId": "cp-create",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "cp-create",
+      "fromProperty": "done",
+      "toId": "cp-co",
+      "toProperty": "posted"
+    },
+    {
+      "fromId": "cp-create",
+      "fromProperty": "done",
+      "toId": "cp-content",
+      "toProperty": "clear"
+    }
+  ]
+}

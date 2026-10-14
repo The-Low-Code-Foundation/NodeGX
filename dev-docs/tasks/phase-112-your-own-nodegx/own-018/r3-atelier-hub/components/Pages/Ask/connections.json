@@ -1,0 +1,181 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "69eaedf6-7b4a-5222-890a-de10dbf5ed1e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ask-varmessages",
+      "fromProperty": "value",
+      "toId": "ask-list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ask-varmessages",
+      "fromProperty": "value",
+      "toId": "ask-appenduser",
+      "toProperty": "in-messages"
+    },
+    {
+      "fromId": "ask-varmessages",
+      "fromProperty": "value",
+      "toId": "ask-appendanswer",
+      "toProperty": "in-messages"
+    },
+    {
+      "fromId": "ask-varmessages",
+      "fromProperty": "value",
+      "toId": "ask-nomessages",
+      "toProperty": "messages"
+    },
+    {
+      "fromId": "ask-nomessages",
+      "fromProperty": "asBoolean",
+      "toId": "ask-empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ask-input",
+      "fromProperty": "value",
+      "toId": "ask-appenduser",
+      "toProperty": "in-question"
+    },
+    {
+      "fromId": "ask-input",
+      "fromProperty": "value",
+      "toId": "ask-call",
+      "toProperty": "in-question"
+    },
+    {
+      "fromId": "ask-input",
+      "fromProperty": "value",
+      "toId": "ask-cansend",
+      "toProperty": "question"
+    },
+    {
+      "fromId": "ask-varloading",
+      "fromProperty": "value",
+      "toId": "ask-cansend",
+      "toProperty": "asking"
+    },
+    {
+      "fromId": "ask-varloading",
+      "fromProperty": "value",
+      "toId": "ask-thinking",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ask-cansend",
+      "fromProperty": "asBoolean",
+      "toId": "ask-send",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "ask-send",
+      "fromProperty": "onClick",
+      "toId": "ask-appenduser",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ask-appenduser",
+      "fromProperty": "out-history",
+      "toId": "ask-call",
+      "toProperty": "in-history"
+    },
+    {
+      "fromId": "ask-appenduser",
+      "fromProperty": "out-newMessages",
+      "toId": "ask-setmessages",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ask-appenduser",
+      "fromProperty": "out-send",
+      "toId": "ask-setmessages",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "ask-appenduser",
+      "fromProperty": "out-send",
+      "toId": "ask-setloadingtrue",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "ask-appenduser",
+      "fromProperty": "out-send",
+      "toId": "ask-seterrorempty",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "ask-appenduser",
+      "fromProperty": "out-send",
+      "toId": "ask-call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ask-appenduser",
+      "fromProperty": "out-send",
+      "toId": "ask-input",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "ask-call",
+      "fromProperty": "out-answer",
+      "toId": "ask-appendanswer",
+      "toProperty": "in-answer"
+    },
+    {
+      "fromId": "ask-call",
+      "fromProperty": "done",
+      "toId": "ask-appendanswer",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ask-appendanswer",
+      "fromProperty": "out-newMessages",
+      "toId": "ask-setmessages2",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ask-appendanswer",
+      "fromProperty": "out-send",
+      "toId": "ask-setmessages2",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "ask-call",
+      "fromProperty": "completed",
+      "toId": "ask-setloadingfalse",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "ask-call",
+      "fromProperty": "failure",
+      "toId": "ask-seterror",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "ask-call",
+      "fromProperty": "error",
+      "toId": "ask-seterror",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ask-varerror",
+      "fromProperty": "value",
+      "toId": "ask-error",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ask-varerror",
+      "fromProperty": "value",
+      "toId": "ask-haserror",
+      "toProperty": "errorText"
+    },
+    {
+      "fromId": "ask-haserror",
+      "fromProperty": "asBoolean",
+      "toId": "ask-error",
+      "toProperty": "mounted"
+    }
+  ]
+}

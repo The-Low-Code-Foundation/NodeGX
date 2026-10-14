@@ -1,0 +1,343 @@
+{
+  "nouns": [
+    {
+      "id": "learner",
+      "name": "Learner",
+      "sentence": "I'll find the learners, I'll get their needs and I'll produce the pedagogic content. I'll add lots of info about the learner to each new user, to help Claude have the context it might need. Probably best just a free typed text, not a form.",
+      "signsIn": true,
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "email",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "language",
+          "kind": "choice",
+          "values": [
+            "en",
+            "fr"
+          ]
+        },
+        {
+          "name": "prefs",
+          "kind": "anything"
+        },
+        {
+          "name": "aliases",
+          "kind": "anything",
+          "secret": true
+        },
+        {
+          "name": "inviteToken",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "package",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "meetCode",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "notes",
+          "kind": "text",
+          "freeWords": true,
+          "secret": true
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": true,
+        "readAloud": false,
+        "secret": true
+      }
+    },
+    {
+      "id": "conversation",
+      "name": "Conversation",
+      "sentence": "I can imagine being able to open the 'conversations' on the left side with Rick and reviewing old ones. Resetting them if I want to start from the beginning and advance message by message.",
+      "properties": [
+        {
+          "name": "title",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "kind",
+          "kind": "choice",
+          "values": [
+            "lesson",
+            "session-review",
+            "follow-up"
+          ]
+        },
+        {
+          "name": "state",
+          "kind": "choice",
+          "values": [
+            "open",
+            "done",
+            "archived"
+          ]
+        },
+        {
+          "name": "language",
+          "kind": "choice",
+          "values": [
+            "en",
+            "fr"
+          ]
+        },
+        {
+          "name": "dubbed",
+          "kind": "yesno"
+        },
+        {
+          "name": "summary",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "dueBefore",
+          "kind": "date"
+        },
+        {
+          "name": "shareable",
+          "kind": "yesno"
+        },
+        {
+          "name": "run",
+          "kind": "number"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "title",
+        "history": true,
+        "readAloud": false,
+        "secret": false
+      }
+    },
+    {
+      "id": "message",
+      "name": "Message",
+      "sentence": "That Rick can see the messages added by the learner wherever they want at any moment in the lesson is genius, it shows me their understanding as it unfolds in their own heads.",
+      "properties": [
+        {
+          "name": "run",
+          "kind": "number"
+        },
+        {
+          "name": "seq",
+          "kind": "number"
+        },
+        {
+          "name": "from",
+          "kind": "choice",
+          "values": [
+            "rick",
+            "learner"
+          ]
+        },
+        {
+          "name": "origin",
+          "kind": "choice",
+          "values": [
+            "cut",
+            "typed",
+            "drafted",
+            "dictated"
+          ]
+        },
+        {
+          "name": "kind",
+          "kind": "choice",
+          "values": [
+            "text",
+            "clip",
+            "choice",
+            "question",
+            "paste",
+            "learner"
+          ]
+        },
+        {
+          "name": "body",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "clip",
+          "kind": "anything"
+        },
+        {
+          "name": "options",
+          "kind": "list"
+        },
+        {
+          "name": "revealsAfter",
+          "kind": "number"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "body",
+        "history": true,
+        "readAloud": false,
+        "secret": false
+      }
+    },
+    {
+      "id": "progress",
+      "name": "Progress",
+      "sentence": "One message at a time: the next message does not exist until the learner has watched, chosen, or pressed.",
+      "properties": [
+        {
+          "name": "run",
+          "kind": "number"
+        },
+        {
+          "name": "lastSeq",
+          "kind": "number"
+        },
+        {
+          "name": "lastOpened",
+          "kind": "date"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "lastOpened",
+        "history": true,
+        "readAloud": false,
+        "secret": false
+      }
+    },
+    {
+      "id": "coachNote",
+      "name": "Coach note",
+      "sentence": "make notes inside each conversation that they can't see",
+      "properties": [
+        {
+          "name": "text",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "on",
+          "kind": "date"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "text",
+        "history": true,
+        "readAloud": false,
+        "secret": false
+      }
+    },
+    {
+      "id": "objective",
+      "name": "Objective",
+      "sentence": "assign them objectives only I can see",
+      "properties": [
+        {
+          "name": "text",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "setOn",
+          "kind": "date"
+        },
+        {
+          "name": "doneOn",
+          "kind": "date"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "text",
+        "history": true,
+        "readAloud": false,
+        "secret": false
+      }
+    },
+    {
+      "id": "session",
+      "name": "Session",
+      "sentence": "What I think will happen, and I'll type what actually happened, and the system will compare the two and give some advice on the next session to me.",
+      "properties": [
+        {
+          "name": "at",
+          "kind": "date"
+        },
+        {
+          "name": "recordingDriveId",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "predicted",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "happened",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "comparison",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "reminderOn",
+          "kind": "yesno"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "at",
+        "history": true,
+        "readAloud": false,
+        "secret": false
+      }
+    },
+    {
+      "id": "pushSubscription",
+      "name": "Push subscription",
+      "sentence": "One push notification: Rick replied. Yep in the PWA using native push.",
+      "properties": [
+        {
+          "name": "endpoint",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "keys",
+          "kind": "anything"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "endpoint",
+        "history": true,
+        "readAloud": false,
+        "secret": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "_owner": "P119 SRK-003. The privacy notice's words and its version, in one place. The Privacy page (SRK-004) reads them. Every sentence passes the content-authoring skill's offline checks (written, closer, contract, opener, figures, rollercoaster). Rulings behind it: R3 (aliasing before Anthropic, 'if the odd detail slips through'), s2 (2026-10-12): erasure by email to Rick, a copy of his notes on request, session clips private behind a signed link. A line starting TODO is a fact nobody has confirmed yet: it is not shown until it is.",
+  "version": "2026-10-12",
+  "contactEmail": "richard@digitalbricks.io",
+  "privacy": {
+    "title": "Your data",
+    "lede": "This page says what the app keeps about you and who else sees it. It also says how to get a copy, or have it all erased.",
+    "sections": [
+      {
+        "id": "account",
+        "heading": "What the app keeps",
+        "body": "Your email address and your name. Your language and the look you chose for the app. The messages you send to Rick, and how far you've got in each conversation. If you turn on notifications, the address your phone gives the app to send them to."
+      },
+      {
+        "id": "signin",
+        "heading": "Signing in",
+        "body": "There's no password. You type your email address and the app emails you a six-digit code. The code works once, for ten minutes."
+      },
+      {
+        "id": "notes",
+        "heading": "What Rick keeps about you",
+        "body": "Rick keeps notes about you, the goals he's set with you and a record of each session. You don't see them in the app. You can ask Rick for a copy of them at any time."
+      },
+      {
+        "id": "sessions",
+        "heading": "Recordings of your sessions",
+        "body": "Rick records your coaching sessions on Google Meet. Google keeps the recordings in his Google Drive. Short clips from them appear in your conversations. Only you and Rick can play those clips. You need to be signed in to play them. Once the clips are made, the recording is deleted from Rick's computer.",
+        "todo": "TODO: which service turns the speech into text (Google Gemini or Groq, measured in SRK-000 #2), named here once it's chosen."
+      },
+      {
+        "id": "anthropic",
+        "heading": "What goes to Anthropic",
+        "body": "Rick uses Claude, an AI made by Anthropic, a company in the United States. Claude turns his recordings into the messages you see, and sometimes drafts a reply for him. Before anything goes to Anthropic, your name and personal details are swapped for made-up ones. Now and then a detail can slip through."
+      },
+      {
+        "id": "where",
+        "heading": "Where it's stored",
+        "body": "The app runs on a server Rick rents from Hetzner in Falkenstein, Germany. The video clips are in Hetzner's storage in Nuremberg, Germany.",
+        "todo": "TODO: the company that sends the app's emails (DBT uses Brevo, an email company in France, which sees the address and each email; this app's mail is set up in SRK-013), and the nightly backup once SRK-013 sets one up."
+      },
+      {
+        "id": "rights",
+        "heading": "A copy, or erasing it all",
+        "body": "Nothing in the app is ever deleted. To get a copy of everything about you, or to have it all erased, email Rick at {{email}}. He erases your account, your messages, his notes about you and the clips of your sessions."
+      }
+    ]
+  }
+}

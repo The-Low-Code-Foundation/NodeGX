@@ -150,7 +150,18 @@ export const LogIn = defineNode({
 
 export const SignUp = defineNode({
   type: 'net.noodl.user.SignUp',
-  version: 1,
+  // v2 (P107 s92, P107-S84-USERACL ruled R29): no `prop-ACL` input (signup.ts `_ignoreKeys` names ACL)
+  version: 2,
+  changes: [
+    {
+      version: 2,
+      says: 'On the Parse wire the accounts class\'s ACL column draws no input port any more, as no Record node draws one: it is the account\'s access rules, not something about the person. Before, the Parse wire drew prop-ACL here (and only on the User family)',
+      row: 'P107-S84-USERACL (R29)',
+      migration: {
+        none: 'Ruled "Hide it, like the Record nodes" (R29). The reach measured on 2026-10-12 was 429 User-family nodes in 58 of Richard\'s projects and none wired to or from ACL, so no saved wire is dropped'
+      }
+    }
+  ],
   source: 'packages/noodl-viewer-react/src/nodes/std-library/user/signup.ts; userservice.ts; RestAuthAdapter.ts',
   needs: ['backend', 'registry', 'clock'],
   worldPool: { backends: pool('signUp', BEA) },
@@ -178,7 +189,7 @@ export const SignUp = defineNode({
       // Parse table. No Backend picker. At play there is no schema: a write registers each (:185-195)
       inputs: (_params, context) => {
         const out: Record<string, ValueInputDecl> = {};
-        for (const [p, decl] of userFields(context, ['authData', 'password', 'username', 'createdAt', 'updatedAt', 'emailVerified', 'email'])) out['prop-' + p] = { ...signUpProperty(p), type: recordFieldType(decl) };
+        for (const [p, decl] of userFields(context, ['authData', 'password', 'username', 'createdAt', 'updatedAt', 'emailVerified', 'email'], '_User')) out['prop-' + p] = { ...signUpProperty(p), type: recordFieldType(decl) };
         return out;
       },
       needs: ['schema'],

@@ -296,10 +296,249 @@ export function playTimeline(spec: AnyNodeSpec, params: Record<string, unknown>,
       case 'outcome':
         answer(outcomeText(spec, e));
         break;
+      case 'diagnostic':
+        answer(e.message ? `Warning: ${e.message}` : 'the warning goes');
+        break;
       default:
         answer(otherText(e));
     }
   }
   closeFrame();
   return { entries };
+}
+
+// ------------------------------------------------------------------------------------------------
+// the modal's play (R33): the same trace, read as rows, port values and what to light
+
+/** An output the node draws on its card, in declaration order. */
+export interface OutputPort {
+  port: string;
+  label: string;
+  signal: boolean;
+}
+
+export function outputsFor(spec: AnyNodeSpec): OutputPort[] {
+  return Object.entries(spec.outputs).map(([port, decl]) => ({
+    port,
+    label: decl.displayName || port,
+    signal: decl.type === 'signal'
+  }));
+}
+
+/** True for a node whose behaviour moves with the clock — the only ones offered *Move time* and *Same frame*. */
+export function usesClock(spec: AnyNodeSpec): boolean {
+  return Boolean(spec.needs?.includes('clock'));
+}
+
+/**
+ * NSP-019 s95 — what the node told the editor about its settings in that row (spec.ts `diagnostics`): a warning raised, with
+ * its sentence, or one withdrawn, named by the condition it was about.
+ */
+export interface RowProblem {
+  state: 'raised' | 'fixed';
+  text: string;
+}
+
+export interface RowOutcome {
+  /** The input it answers, by display name. */
+  label: string;
+  value: 'done' | 'unchanged' | 'failure';
+  error?: string;
+}
+
+/**
+ * One row of *What happened*: what the person did in one frame (or what the node started with,
+ * for the first row) and everything the node answered before the next thing they did.
+ */
+export interface TryRow {
+  kind: 'load' | 'you';
+  /** What was done, in a few words: "Increase Count", "Start Value 5", "Time moves 1000 ms". */
+  what: string;
+  /** What the node answered, one phrase each: "Current Count → 1", "Count Changed fires". */
+  answers: string[];
+  outcomes: RowOutcome[];
+  /** NSP-019 s95 — the warnings it raised or withdrew. */
+  problems: RowProblem[];
+  /** The frame ended and nothing came out of it. */
+  quiet: boolean;
+}
+
+export interface TryPlay {
+  rows: TryRow[];
+  /** Each value input as it stands after the last step (the start params, then every set). */
+  inputs: Record<string, unknown>;
+  /** Each value output's last sent value; a port nothing was sent on is absent. */
+  outputs: Record<string, unknown>;
+  /** The ports the LAST row reached — the ones the stage lights for a moment. */
+  lit: { inputs: string[]; outputs: string[] };
+  /** NSP-019 s95 — the warnings the node shows after the last step: what the editor would ring the node for now. */
+  problems: string[];
+  /** The interpreter refused a step; the rows are the steps before it. */
+  error?: string;
+}
+
+function runLongestPrefix(
+  spec: AnyNodeSpec,
+  params: Record<string, unknown>,
+  steps: readonly Step[]
+): { trace: TraceEvent[]; error?: string } {
+  try {
+    return { trace: run(spec, params, steps) };
+  } catch (first) {
+    const error = first instanceof Error ? first.message : String(first);
+    for (let k = steps.length - 1; k >= 0; k--) {
+      try {
+        return { trace: run(spec, params, steps.slice(0, k)), error };
+      } catch {
+        // a shorter prefix may still be refused (a mount-time error); keep going down
+      }
+    }
+    return { trace: [], error };
+  }
+}
+
+/** A value as a person reads it on a stepper or a switch: booleans as on / off. */
+function setText(spec: AnyNodeSpec, port: string, value: unknown): string {
+  const label = inputLabel(spec, port);
+  if (typeof value === 'boolean') return `${label} ${value ? 'on' : 'off'}`;
+  return `${label} ${showValue(value)}`;
+}
+
+/**
+ * Plays `steps` from a fresh mount, as `playTimeline` does, and reads the trace the way the
+ * modal draws it. Each stimulus that follows a frame end opens a new row; stimuli inside one
+ * frame (*Same frame*) share their row. What the node sends before the first stimulus belongs to
+ * the load row — which is why the modal starts its steps with one `settle`: the node's first frame,
+ * as the app runs one when it mounts.
+ */
+export function playTry(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[]): TryPlay {
+  const { trace, error } = runLongestPrefix(spec, params, steps);
+
+  const rows: TryRow[] = [];
+  const inputs: Record<string, unknown> = {};
+  const outputs: Record<string, unknown> = {};
+  let litInputs = new Set<string>();
+  let litOutputs = new Set<string>();
+
+  let mountSetsLeft = Object.keys(params).length;
+  const load: TryRow = { kind: 'load', what: 'At load', answers: [], outcomes: [], problems: [], quiet: false };
+  const shown: Record<string, string> = {};
+  rows.push(load);
+  let row: TryRow = load;
+  let frameEnded = false;
+  let frameQuiet = false;
+
+  const closeQuiet = () => {
+    if (frameEnded && frameQuiet && row.kind === 'you' && row.answers.length === 0 && row.outcomes.length === 0 && row.problems.length === 0) {
+      row.quiet = true;
+    }
+  };
+  const stimulus = (what: string, port?: string) => {
+    if (row.kind === 'load' || frameEnded) {
+      closeQuiet();
+      row = { kind: 'you', what, answers: [], outcomes: [], problems: [], quiet: false };
+      rows.push(row);
+      litInputs = new Set();
+      litOutputs = new Set();
+      frameEnded = false;
+    } else {
+      row.what = `${row.what} · ${what}`;
+    }
+    if (port !== undefined && port !== '') litInputs.add(port);
+  };
+  const answered = () => {
+    frameQuiet = false;
+  };
+
+  for (const e of trace) {
+    switch (e.t) {
+      case 'set':
+        inputs[e.port] = e.value;
+        if (mountSetsLeft > 0) {
+          mountSetsLeft--;
+          load.answers.push(`${inputLabel(spec, e.port)} starts at ${showValue(e.value)}`);
+        } else {
+          stimulus(setText(spec, e.port, e.value), e.port);
+        }
+        break;
+      case 'in':
+        mountSetsLeft = 0;
+        stimulus(inputLabel(spec, e.port), e.port);
+        break;
+      case 'advance':
+        mountSetsLeft = 0;
+        stimulus(`Time moves ${e.ms} ms`);
+        break;
+      case 'act':
+        mountSetsLeft = 0;
+        stimulus(`A person does ${e.act}${e.value !== undefined ? ` ${showValue(e.value)}` : ''}`);
+        break;
+      case 'settle':
+        mountSetsLeft = 0;
+        closeQuiet();
+        frameEnded = true;
+        frameQuiet = true;
+        break;
+      case 'value':
+        outputs[e.port] = e.value;
+        litOutputs.add(e.port);
+        row.answers.push(`${outputLabel(spec, e.port)} → ${showValue(e.value)}`);
+        answered();
+        break;
+      case 'signal':
+        litOutputs.add(e.port);
+        row.answers.push(`${outputLabel(spec, e.port)} fires`);
+        answered();
+        break;
+      case 'outcome':
+        row.outcomes.push({
+          label: inputLabel(spec, e.port),
+          value: e.value === 'done' || e.value === 'unchanged' ? e.value : 'failure',
+          error: e.error
+        });
+        answered();
+        break;
+      case 'diagnostic':
+        if (e.message) {
+          shown[e.key] = e.message;
+          row.problems.push({ state: 'raised', text: e.message });
+        } else {
+          delete shown[e.key];
+          row.problems.push({ state: 'fixed', text: spec.diagnostics?.[e.key]?.says ?? e.key });
+        }
+        answered();
+        break;
+      default:
+        row.answers.push(otherText(e));
+        answered();
+    }
+  }
+  closeQuiet();
+
+  const lastIsYou = rows[rows.length - 1].kind === 'you';
+  return {
+    rows,
+    inputs,
+    outputs,
+    lit: lastIsYou ? { inputs: [...litInputs], outputs: [...litOutputs] } : { inputs: [], outputs: [] },
+    problems: Object.keys(shown)
+      .sort()
+      .map((key) => shown[key]),
+    error
+  };
+}
+
+/** An input the node draws on its card, in declaration order (signals and values together, as the canvas does). */
+export interface InputPort {
+  port: string;
+  label: string;
+  signal: boolean;
+}
+
+export function inputsFor(spec: AnyNodeSpec): InputPort[] {
+  return Object.entries(spec.inputs).map(([port, decl]) => ({
+    port,
+    label: decl.displayName || port,
+    signal: isSignalInput(decl)
+  }));
 }

@@ -12,6 +12,7 @@
  * than silently at the consumer.
  */
 
+import type { CloudDeployNote } from './cloudDeployNote';
 import type { RunOnChangeTickedSummary } from '../project/runOnChangePins';
 import type {
   CatalogExample,
@@ -515,6 +516,7 @@ export interface CreateComponentResponse
     PageRegistrationSummary,
     NodeIdRemapSummary,
     BackendDisclosureSummary,
+    CloudDeployNote,
     VisualRootsSummary,
     RunOnChangeTickedSummary {
   created: string;
@@ -535,6 +537,7 @@ export interface UpdateComponentResponse
     PageRegistrationSummary,
     NodeIdRemapSummary,
     BackendDisclosureSummary,
+    CloudDeployNote,
     VisualRootsSummary,
     RunOnChangeTickedSummary {
   updated: string;

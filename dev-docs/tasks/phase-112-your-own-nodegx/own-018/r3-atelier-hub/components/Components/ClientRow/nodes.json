@@ -1,0 +1,223 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fbc5d553-fd25-521f-8636-d74864b4eddd",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cr-row",
+      "type": "Group",
+      "label": "Client row",
+      "children": [
+        "cr-main",
+        "cr-sector",
+        "cr-email",
+        "cr-edit"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "borderBottomColor": "var(--border-subtle)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "columnGap": "var(--space-4)",
+        "flexDirection": "row",
+        "paddingBottom": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cr-main",
+      "type": "Group",
+      "label": "Name and contact",
+      "parent": "cr-row",
+      "children": [
+        "cr-name",
+        "cr-contact"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "minWidth": {
+          "unit": "px",
+          "value": 0
+        },
+        "rowGap": "var(--space-1)",
+        "width": {
+          "unit": "%",
+          "value": 40
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "cr-name",
+      "type": "Text",
+      "label": "Client name",
+      "parent": "cr-main",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "minWidth": {
+          "unit": "px",
+          "value": 0
+        },
+        "textOverflow": "ellipsis"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "cr-contact",
+      "type": "Text",
+      "label": "Contact line",
+      "parent": "cr-main",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-sm)",
+        "minWidth": {
+          "unit": "px",
+          "value": 0
+        },
+        "textOverflow": "ellipsis"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "cr-sector",
+      "type": "Text",
+      "label": "Sector",
+      "parent": "cr-row",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-sm)",
+        "minWidth": {
+          "unit": "px",
+          "value": 0
+        },
+        "textOverflow": "ellipsis",
+        "width": {
+          "unit": "%",
+          "value": 25
+        }
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "cr-email",
+      "type": "Text",
+      "label": "Email",
+      "parent": "cr-row",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-sm)",
+        "minWidth": {
+          "unit": "px",
+          "value": 0
+        },
+        "textOverflow": "ellipsis",
+        "width": {
+          "unit": "%",
+          "value": 20
+        }
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "cr-edit",
+      "type": "net.noodl.controls.button",
+      "label": "Edit",
+      "parent": "cr-row",
+      "parameters": {
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-medium)",
+        "label": "Edit",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "cr-ci",
+      "type": "Component Inputs",
+      "label": "Client fields in",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "sector",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "contactName",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "email",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "cr-co",
+      "type": "Component Outputs",
+      "label": "Row actions out",
+      "ports": [
+        {
+          "name": "click",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "edit",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "cr-contactexpr",
+      "type": "Expression",
+      "label": "Contact line",
+      "parameters": {
+        "expression": "contactName || email || ''"
+      },
+      "x": 410,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "cr-row"
+  ]
+}

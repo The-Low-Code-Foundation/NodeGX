@@ -214,3 +214,36 @@ describe('SIG-007 R3 — the operations door keeps what it did not author', () =
     expect(wire.route).toEqual({ xs: [120], ys: [] });
   });
 });
+
+describe('🔴 P112-OWN019-DUPCHILD — a parent added with `children` and a child added with `parent` lists it ONCE', () => {
+  // OWN-019's Sonnet yardstick wrote exactly this shape (a Group with `children: [...]`, then each child with
+  // `parent`): every child landed in its parent's `children` twice, and the packed preview refused the page as
+  // 38 "duplicate node id" errors while validate_project said 0 and the agent's own drives passed.
+  it('add_node: the authored order, each child once, on disk', async () => {
+    await createProbe();
+    const res = await call<UpdateComponentResponse>(session, 'update_component', {
+      path: 'Components/Probe',
+      operations: [
+        { op: 'add_node', node: { id: 'dcShell', type: 'Group', parent: 'band', children: ['dcTitle', 'dcBody'] } },
+        { op: 'add_node', node: { id: 'dcTitle', type: 'Text', parent: 'dcShell', parameters: { text: 'Pack It' } } },
+        { op: 'add_node', node: { id: 'dcBody', type: 'Group', parent: 'dcShell' } }
+      ]
+    });
+    expect(res.isError).toBe(false);
+    expect(nodeOnDisk('Components/Probe', 'band')?.children).toEqual(['dcShell']);
+    expect(nodeOnDisk('Components/Probe', 'dcShell')?.children).toEqual(['dcTitle', 'dcBody']);
+  });
+
+  it('a children list that names a node twice is written with it once', async () => {
+    const res = await call<CreateComponentResponse>(session, 'create_component', {
+      path: 'Components/Twice',
+      nodes: [
+        { id: 'band', type: 'Group', children: ['dcA', 'dcB', 'dcA'] },
+        { id: 'dcA', type: 'Text', parameters: { text: 'A' } },
+        { id: 'dcB', type: 'Text', parameters: { text: 'B' } }
+      ]
+    });
+    expect(res.isError).toBe(false);
+    expect(nodeOnDisk('Components/Twice', 'band')?.children).toEqual(['dcA', 'dcB']);
+  });
+});

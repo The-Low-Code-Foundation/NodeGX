@@ -18,6 +18,7 @@
 
 import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
+import { iconSourceChange, iconSourceDiagnostics } from './icon-source';
 
 type State = {
   /** react-component-node.ts :1267 `wantsToBeMounted` */
@@ -36,7 +37,10 @@ const NONE: Act = { send: [] };
 
 export const Icon = defineNode({
   type: 'net.noodl.visual.icon',
-  version: 1,
+  // v2 (NSP-019 R35): an Icon Source that is not an icon shows as its warning until an icon or nothing arrives (`diagnostics`)
+  version: 2,
+  changes: [iconSourceChange(2)],
+  diagnostics: iconSourceDiagnostics(),
   source: 'packages/noodl-viewer-react/src/nodes/visual/icon.ts',
   needs: ['person'],
 

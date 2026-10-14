@@ -22,7 +22,8 @@
     "Rebuilding what a dedicated node already does (querying cloud data, navigation) — you lose live updates and editor insight.",
     "Connecting `run` to stop the inputs re-running the script. They still re-run it; untick each one under Run On Value Change. Connecting `run` only stops the run at load and on a code change.",
     "Pasting the same helper into several Functions. The copies drift apart; put the helper in a script file and list it under Uses.",
-    "Reading `Noodl`, `window` or `document` inside a script file. They're `undefined` there, so do that work in the Function and pass the values in."
+    "Reading `Noodl`, `window` or `document` inside a script file. They're `undefined` there, so do that work in the Function and pass the values in.",
+    "Setting an output to the value it already holds and expecting it to arrive again. An output is sent only when its value changes, so `Outputs.error = \"Type an item first\"` on a second empty Add sends nothing — and if something cleared the message in between (a Set Variable on typing), it never comes back. When a reaction must happen every run, send a signal beside the value (`Outputs.refused()`) and drive it from that."
   ],
   "relatedNodes": ["Expression", "Javascript2", "REST2", "RunTasks"]
 }

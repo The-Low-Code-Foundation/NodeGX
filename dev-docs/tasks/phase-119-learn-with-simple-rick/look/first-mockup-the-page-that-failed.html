@@ -1,0 +1,368 @@
+<title>Before You Build</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one narrow column, like a note someone wrote you; a fixed bar at the bottom holds the two things you can do. */
+:root {
+  --bg: #F7F6F2;
+  --fg: #1C1F22;
+  --muted: #5E6670;
+  --line: #DAD9D2;
+  --card: #FFFFFF;
+  --accent: #0E6B66;
+  --accent-ink: #FFFFFF;
+  --soft: #E3EFEC;
+  --warn: #B4531C;
+  --warn-soft: #F8E9DF;
+  --screen: #202428;
+  --screen-ink: #D7DEE4;
+  --voice: "Newsreader", Georgia, "Times New Roman", serif;
+  --ui: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15181B; --fg: #E8E6E0; --muted: #9AA3AC; --line: #2C3237; --card: #1D2125;
+    --accent: #4FB8B0; --accent-ink: #0F1A19; --soft: #1C2E2C; --warn: #E08A52; --warn-soft: #3A2619;
+    --screen: #0B0D0F; --screen-ink: #C4CCD3; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15181B; --fg: #E8E6E0; --muted: #9AA3AC; --line: #2C3237; --card: #1D2125;
+  --accent: #4FB8B0; --accent-ink: #0F1A19; --soft: #1C2E2C; --warn: #E08A52; --warn-soft: #3A2619;
+  --screen: #0B0D0F; --screen-ink: #C4CCD3; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--ui); font-size: 17px; line-height: 1.5; }
+.wrap { max-width: 640px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 140px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+a { color: var(--accent); }
+
+/* header */
+.from { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+.face { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-family: var(--voice); font-size: 22px; font-weight: 500; flex: none; }
+.from .who { font-size: 14px; color: var(--muted); line-height: 1.35; }
+.from .who b { color: var(--fg); font-weight: 600; }
+h1 { font-family: var(--voice); font-weight: 500; font-size: 34px; line-height: 1.15; margin-bottom: 10px; }
+.lede { font-family: var(--voice); font-size: 21px; line-height: 1.4; color: var(--fg); }
+.lede em { color: var(--accent); font-style: italic; }
+
+/* the quick version */
+.quick { margin-top: 28px; padding: 20px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; display: grid; gap: 14px; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.says { font-family: var(--voice); font-size: 19px; line-height: 1.45; }
+
+/* clip player (mocked) */
+.clip { position: relative; aspect-ratio: 16/9; max-width: 100%; background: var(--screen); border-radius: 10px; overflow: hidden; color: var(--screen-ink); font-family: var(--mono); font-size: 12px; cursor: pointer; border: 0; width: 100%; text-align: left; padding: 0; }
+.clip:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.clip .win { position: absolute; inset: 10% 8% 0 8%; background: #2A3036; border-radius: 8px 8px 0 0; padding: 10px 12px; overflow: hidden; }
+.clip .win .bar { display: flex; gap: 5px; margin-bottom: 10px; }
+.clip .win .bar i { width: 8px; height: 8px; border-radius: 50%; background: #596470; display: block; }
+.clip .win pre { margin: 0; white-space: pre-wrap; line-height: 1.5; font-family: inherit; color: #C4CCD3; }
+.clip .win pre .k { color: #7EDAD2; }
+.clip .win pre .c { color: #8A96A3; }
+.clip .play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,.92); display: grid; place-items: center; }
+.clip .play::after { content: ""; display: block; width: 0; height: 0; border-left: 18px solid #1C1F22; border-top: 11px solid transparent; border-bottom: 11px solid transparent; margin-left: 4px; }
+.clip .len { position: absolute; right: 10px; bottom: 10px; background: rgba(0,0,0,.6); color: #fff; padding: 2px 7px; border-radius: 4px; font-size: 12px; }
+.clip .cursor { position: absolute; width: 14px; height: 14px; border: 2px solid #FFD36B; border-radius: 50%; }
+.playing { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(14,107,102,.9); color: #fff; font-family: var(--ui); font-size: 15px; text-align: center; padding: 20px; }
+
+/* moves */
+.moves { margin-top: 40px; display: grid; gap: 22px; }
+.moves > h2 { font-family: var(--voice); font-weight: 500; font-size: 26px; }
+.moves > h2 + p { color: var(--muted); font-size: 15px; margin-top: -14px; }
+.move { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 14px; }
+.move.done { border-color: var(--accent); }
+.move .head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.move h3 { font-family: var(--voice); font-weight: 500; font-size: 22px; line-height: 1.25; }
+.at { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.tick { display: none; color: var(--accent); font-weight: 600; font-size: 14px; }
+.move.done .tick { display: inline; }
+.move.done .at { display: none; }
+.yours { display: grid; gap: 8px; padding: 14px; background: var(--soft); border-radius: 10px; }
+.yours .eyebrow { color: var(--accent); }
+.yours p { font-size: 16px; }
+.yours code, .says code { font-family: var(--mono); font-size: .92em; background: rgba(127,127,127,.14); padding: 1px 5px; border-radius: 4px; }
+.capture { display: grid; gap: 8px; }
+.capture label { font-size: 14px; color: var(--muted); }
+.capture .row { display: flex; gap: 8px; flex-wrap: wrap; }
+.capture input, .capture textarea { flex: 1 1 200px; min-width: 0; font: inherit; font-size: 15px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); }
+.capture textarea { min-height: 72px; font-family: var(--mono); font-size: 13px; }
+.capture input:focus-visible, .capture textarea:focus-visible, .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.btn { font: inherit; font-size: 15px; font-weight: 600; padding: 10px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--fg); cursor: pointer; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.saved { font-size: 14px; color: var(--accent); display: none; }
+.move.done .saved { display: block; }
+.move.done .capture .row { display: none; }
+
+.trap { display: grid; gap: 6px; padding: 14px 16px; border-left: 4px solid var(--warn); background: var(--warn-soft); border-radius: 0 10px 10px 0; }
+.trap .eyebrow { color: var(--warn); }
+.trap p { font-family: var(--voice); font-size: 18px; line-height: 1.4; }
+.ask-first { display: grid; gap: 8px; padding: 14px 16px; border: 1px dashed var(--line); border-radius: 10px; }
+.ask-first p { font-family: var(--voice); font-size: 18px; }
+.ask-first .reveal { display: none; font-size: 15px; color: var(--muted); }
+.ask-first.open .reveal { display: block; }
+.ask-first.open .row { display: none; }
+
+/* assignment */
+.assign { margin-top: 40px; padding: 22px; border-radius: 14px; background: var(--fg); color: var(--bg); display: grid; gap: 12px; }
+.assign .eyebrow { color: var(--bg); opacity: .7; }
+.assign h2 { font-family: var(--voice); font-weight: 500; font-size: 26px; }
+.assign p { font-size: 17px; }
+.assign .capture input { background: transparent; color: var(--bg); border-color: rgba(255,255,255,.35); }
+.assign .capture label { color: var(--bg); opacity: .75; }
+.assign .btn.primary { background: var(--bg); color: var(--fg); border-color: var(--bg); }
+
+.foot { margin-top: 36px; font-size: 14px; color: var(--muted); line-height: 1.5; }
+
+/* bottom bar */
+.bar-fixed { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--card); border-top: 1px solid var(--line); }
+.bar-fixed .in { max-width: 640px; margin: 0 auto; display: flex; gap: 10px; }
+.bar-fixed .btn { flex: 1 1 0; text-align: center; padding: 13px 10px; min-width: 0; }
+
+/* ask sheet */
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); border-top: 1px solid var(--line); border-radius: 16px 16px 0 0; padding: 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -8px 30px rgba(0,0,0,.18); }
+.sheet .in { max-width: 640px; margin: 0 auto; display: grid; gap: 12px; }
+.sheet h3 { font-family: var(--voice); font-weight: 500; font-size: 22px; }
+.sheet p { font-size: 15px; color: var(--muted); }
+.sheet textarea { width: 100%; min-height: 90px; font: inherit; font-size: 15px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); }
+.sheet .row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.sheet .sent { font-size: 15px; color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .sheet { animation: up .22s ease-out; } @keyframes up { from { transform: translateY(24px); opacity: 0; } } }
+</style>
+
+<div class="wrap">
+  <div class="from">
+    <div class="face">R</div>
+    <div class="who"><b>From Rick</b>, for Sam · Tuesday 7 October<br>Cut from the recording I made you this morning</div>
+  </div>
+
+  <h1>Before you build the job board</h1>
+  <p class="lede">Three things on your machine first: Claude Desktop, a project folder, and <em>GitHub holding a copy of it</em>. About twenty minutes. Then you can let Claude Code loose.</p>
+
+  <section class="quick">
+    <div class="eyebrow">If you've got ninety seconds</div>
+    <p class="says">The one that matters is GitHub. If you skip it now, you'll do it in week three when the job board has forty files and something just broke, and you'll have no way back to the version that worked. Here's the whole thing in one go, and the pieces are underneath if you'd rather do it step by step.</p>
+    <button class="clip" type="button" aria-label="Play the ninety second version">
+      <div class="win"><div class="bar"><i></i><i></i><i></i></div>
+<pre><span class="c"># Rick's terminal, the whole run, sped up</span>
+<span class="k">npm</span> create nodegx workshop-board
+<span class="k">cd</span> workshop-board
+<span class="k">claude</span>
+<span class="c">› put this project on GitHub as a private repo</span></pre></div>
+      <span class="cursor" style="left:62%;top:58%"></span>
+      <span class="len">1:32</span>
+      <span class="play"></span>
+    </button>
+  </section>
+
+  <section class="moves">
+    <h2>Step by step, on yours</h2>
+    <p>Each clip is me doing it. Under it is what to do on your machine, and a box to drop what you got so I can see it before Tuesday.</p>
+
+    <article class="move" id="m1">
+      <div class="head"><h3>Claude Desktop, signed in</h3><span class="at">0:00–0:48</span><span class="tick">Done ✓</span></div>
+      <button class="clip" type="button" aria-label="Play clip 1">
+        <div class="win"><div class="bar"><i></i><i></i><i></i></div>
+<pre>Claude  ·  Settings  ·  About
+Version 1.9.4
+Signed in as rick@digitalbricks.io</pre></div>
+        <span class="cursor" style="left:30%;top:52%"></span>
+        <span class="len">0:48</span><span class="play"></span>
+      </button>
+      <div class="yours">
+        <div class="eyebrow">On yours</div>
+        <p>Download it from claude.ai/download and sign in with the same email you use for Claude in the browser. Open Settings once so you know where it is.</p>
+      </div>
+      <div class="capture">
+        <label for="c1">Paste the version number you see under Settings, About</label>
+        <div class="row"><input id="c1" type="text" placeholder="1.9.4"><button class="btn primary" type="button" data-done="m1">Done</button></div>
+        <p class="saved">Got it. Rick will see this before your session.</p>
+      </div>
+    </article>
+
+    <article class="move" id="m2">
+      <div class="head"><h3>A folder for the job board</h3><span class="at">0:48–2:05</span><span class="tick">Done ✓</span></div>
+      <button class="clip" type="button" aria-label="Play clip 2">
+        <div class="win"><div class="bar"><i></i><i></i><i></i></div>
+<pre><span class="k">npm</span> create nodegx workshop-board
+
+  Created workshop-board/
+  Wrote .mcp.json  <span class="c">← Claude Code reads this</span>
+  Next: cd workshop-board && claude</pre></div>
+        <span class="cursor" style="left:70%;top:40%"></span>
+        <span class="len">1:17</span><span class="play"></span>
+      </button>
+      <div class="yours">
+        <div class="eyebrow">On yours</div>
+        <p>In the terminal, type <code>npm create nodegx workshop-board</code>. Name it after the app, not after you or the company. Say yes to everything it asks.</p>
+      </div>
+      <div class="capture">
+        <label for="c2">Paste the last few lines it printed</label>
+        <div class="row"><textarea id="c2" placeholder="Created workshop-board/ …"></textarea></div>
+        <div class="row"><button class="btn primary" type="button" data-done="m2">Done</button></div>
+        <p class="saved">Got it. Rick will see this before your session.</p>
+      </div>
+    </article>
+
+    <article class="move" id="m3">
+      <div class="head"><h3>A GitHub account in your name</h3><span class="at">2:05–2:50</span><span class="tick">Done ✓</span></div>
+      <div class="trap">
+        <div class="eyebrow">The bit people get wrong</div>
+        <p>Make the account yours, not the company's. You'll change jobs before this project dies, and the work should follow you.</p>
+      </div>
+      <button class="clip" type="button" aria-label="Play clip 3">
+        <div class="win"><div class="bar"><i></i><i></i><i></i></div>
+<pre>github.com/signup
+Username   samtowers
+Email      sam@…
+<span class="c">Free plan is fine. Private repos are included.</span></pre></div>
+        <span class="cursor" style="left:22%;top:38%"></span>
+        <span class="len">0:45</span><span class="play"></span>
+      </button>
+      <div class="yours">
+        <div class="eyebrow">On yours</div>
+        <p>Sign up at github.com with your own email. Pick a username you'd be happy to see on a CV. Free plan.</p>
+      </div>
+      <div class="capture">
+        <label for="c3">Your GitHub username</label>
+        <div class="row"><input id="c3" type="text" placeholder="samtowers"><button class="btn primary" type="button" data-done="m3">Done</button></div>
+        <p class="saved">Got it. Rick will see this before your session.</p>
+      </div>
+    </article>
+
+    <article class="move" id="m4">
+      <div class="head"><h3>An empty repo for it to live in</h3><span class="at">2:50–4:10</span><span class="tick">Done ✓</span></div>
+      <div class="ask-first" id="q4">
+        <div class="eyebrow">Before you watch</div>
+        <p>On the new-repository screen there's a box that says "Add a README file". What do you think happens if you tick it?</p>
+        <div class="row capture"><div class="row"><input id="q4a" type="text" placeholder="Your guess, one line"><button class="btn" type="button" data-guess="q4">Show me</button></div></div>
+        <p class="reveal">It creates a first version on GitHub that your folder doesn't have, and the first sync fights about it. Leave it unticked. Rick shows this at 3:20.</p>
+      </div>
+      <button class="clip" type="button" aria-label="Play clip 4">
+        <div class="win"><div class="bar"><i></i><i></i><i></i></div>
+<pre>New repository
+Name        workshop-board
+Visibility  ● Private   ○ Public
+☐ Add a README file   <span class="c">← leave this</span>
+[ Create repository ]</pre></div>
+        <span class="cursor" style="left:18%;top:62%"></span>
+        <span class="len">1:20</span><span class="play"></span>
+      </button>
+      <div class="yours">
+        <div class="eyebrow">On yours</div>
+        <p>github.com, the plus button, New repository. Same name as the folder. Private. Nothing ticked. Copy the address it shows you on the next screen.</p>
+      </div>
+      <div class="capture">
+        <label for="c4">Paste the repo address</label>
+        <div class="row"><input id="c4" type="url" placeholder="https://github.com/samtowers/workshop-board"><button class="btn primary" type="button" data-done="m4">Done</button></div>
+        <p class="saved">Got it. Rick will see this before your session.</p>
+      </div>
+    </article>
+
+    <article class="move" id="m5">
+      <div class="head"><h3>Let Claude Code do the sync</h3><span class="at">4:10–6:30</span><span class="tick">Done ✓</span></div>
+      <button class="clip" type="button" aria-label="Play clip 5">
+        <div class="win"><div class="bar"><i></i><i></i><i></i></div>
+<pre><span class="c">› put this project on GitHub at
+  https://github.com/samtowers/workshop-board</span>
+
+I'll initialise git, add a .gitignore so
+secrets.json stays out, commit, and push.
+<span class="k">Proceed? (y/n)</span></pre></div>
+        <span class="cursor" style="left:48%;top:78%"></span>
+        <span class="len">2:20</span><span class="play"></span>
+      </button>
+      <div class="trap">
+        <div class="eyebrow">The bit people get wrong</div>
+        <p>Read what it says it's going to do before you say yes. The line you're looking for is the one about keeping secrets out. If it isn't there, ask for it. You only need to understand this once.</p>
+      </div>
+      <div class="yours">
+        <div class="eyebrow">On yours</div>
+        <p>In the folder, type <code>claude</code>, then tell it in plain words: put this project on GitHub at your address. Say yes once you've seen the secrets line.</p>
+      </div>
+      <div class="capture">
+        <label for="c5">Paste what it said it would do, the whole thing</label>
+        <div class="row"><textarea id="c5" placeholder="I'll initialise git …"></textarea></div>
+        <div class="row"><button class="btn primary" type="button" data-done="m5">Done</button></div>
+        <p class="saved">Got it. Rick will see this before your session.</p>
+      </div>
+    </article>
+
+    <article class="move" id="m6">
+      <div class="head"><h3>See it with your own eyes</h3><span class="at">6:30–7:10</span><span class="tick">Done ✓</span></div>
+      <div class="yours">
+        <div class="eyebrow">On yours</div>
+        <p>Refresh the repo page on github.com. Your files are there. That page is your way back, from now until the job board retires.</p>
+      </div>
+      <div class="capture">
+        <label>No paste needed for this one</label>
+        <div class="row"><button class="btn primary" type="button" data-done="m6">I can see my files on GitHub</button></div>
+        <p class="saved">That's the baseline done.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="assign">
+    <div class="eyebrow">Before Tuesday</div>
+    <h2>Make the first page</h2>
+    <p>Ask Claude Code for one page: a list of jobs, each with a name and a stage. Don't make it look nice. When it's on GitHub, drop the link here and we'll start Tuesday from whatever it did.</p>
+    <div class="capture">
+      <label for="c7">Link to the job board on GitHub</label>
+      <div class="row"><input id="c7" type="url" placeholder="https://github.com/samtowers/workshop-board"><button class="btn primary" type="button" data-done="assign">Send to Rick</button></div>
+    </div>
+  </section>
+
+  <p class="foot">This page was cut from a nine-minute recording Rick made for you. Every line on it is something he said or showed. If a step doesn't match what you see on your screen, use Ask Rick and paste what you've got.</p>
+</div>
+
+<div class="bar-fixed">
+  <div class="in">
+    <button class="btn" type="button" id="askBtn">Ask Rick about this</button>
+    <a class="btn primary" href="https://cal.com" target="_blank" rel="noopener">Book an hour</a>
+  </div>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="in">
+    <h3>Ask Rick</h3>
+    <p>Paste the error, or describe where you got to. If it's in the recording, you'll get the right clip back straight away. If it isn't, Rick reads it today.</p>
+    <textarea id="askText" placeholder="I typed npm create nodegx and it said …"></textarea>
+    <div class="row"><button class="btn" type="button" id="askClose">Close</button><button class="btn primary" type="button" id="askSend">Send</button></div>
+    <p class="sent" id="askSent" hidden>Sent. If it's in the recording you'll hear back in a minute, otherwise Rick will reply today.</p>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('[data-done]').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var id = b.getAttribute('data-done');
+    var m = document.getElementById(id);
+    if (m) m.classList.add('done');
+    if (id === 'assign') { b.textContent = 'Sent to Rick'; b.disabled = true; }
+  });
+});
+document.querySelectorAll('[data-guess]').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var q = document.getElementById(b.getAttribute('data-guess'));
+    if (q) q.classList.add('open');
+  });
+});
+document.querySelectorAll('.clip').forEach(function (c) {
+  c.addEventListener('click', function () {
+    if (c.querySelector('.playing')) return;
+    var p = document.createElement('span');
+    p.className = 'playing';
+    p.textContent = 'In the real thing this clip plays here: Rick’s screen, his voice, just this part.';
+    c.appendChild(p);
+    setTimeout(function () { p.remove(); }, 2200);
+  });
+});
+var sheet = document.getElementById('sheet');
+document.getElementById('askBtn').addEventListener('click', function () { sheet.hidden = false; document.getElementById('askText').focus(); });
+document.getElementById('askClose').addEventListener('click', function () { sheet.hidden = true; });
+document.getElementById('askSend').addEventListener('click', function () {
+  var s = document.getElementById('askSent'); s.hidden = false;
+  document.getElementById('askText').value = '';
+});
+</script>

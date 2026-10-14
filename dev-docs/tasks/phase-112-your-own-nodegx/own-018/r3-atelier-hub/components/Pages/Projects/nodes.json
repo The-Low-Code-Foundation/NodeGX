@@ -1,0 +1,471 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1fa5cc20-eea8-5025-81d2-3fa363592fc3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pj-page",
+      "type": "Page",
+      "label": "Projects page",
+      "children": [
+        "pj-canvas"
+      ],
+      "parameters": {
+        "title": "Projects",
+        "urlPath": "projects"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pj-canvas",
+      "type": "Group",
+      "label": "Page canvas",
+      "parent": "pj-page",
+      "children": [
+        "pj-band"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "backgroundColor": "var(--background)",
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pj-band",
+      "type": "Group",
+      "label": "Band",
+      "parent": "pj-canvas",
+      "children": [
+        "pj-shell"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "flexDirection": "column",
+        "paddingBottom": "var(--space-20)",
+        "paddingTop": "var(--space-12)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pj-shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "pj-band",
+      "children": [
+        "pj-listpanel",
+        "pj-editorpanel"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "maxWidth": {
+          "unit": "px",
+          "value": 1200
+        },
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "rowGap": "var(--space-8)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "pj-listpanel",
+      "type": "Group",
+      "label": "List panel",
+      "parent": "pj-shell",
+      "children": [
+        "pj-header",
+        "pj-filters",
+        "pj-list",
+        "pj-empty"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 280,
+      "y": 520
+    },
+    {
+      "id": "pj-header",
+      "type": "/Components/PageHeader",
+      "label": "Page header",
+      "parent": "pj-listpanel",
+      "children": [
+        "pj-newbtn"
+      ],
+      "parameters": {
+        "eyebrow": "Work",
+        "lead": "Every project with its status and owner. Mark one done and the feed announces it.",
+        "title": "Projects"
+      },
+      "x": 340,
+      "y": 640
+    },
+    {
+      "id": "pj-newbtn",
+      "type": "net.noodl.controls.button",
+      "label": "New project",
+      "parent": "pj-header",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "color": "var(--primary-foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "New project",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentSize"
+      },
+      "x": 400,
+      "y": 760
+    },
+    {
+      "id": "pj-filters",
+      "type": "Group",
+      "label": "Filter bar",
+      "parent": "pj-listpanel",
+      "children": [
+        "pj-statusfilter",
+        "pj-ownerfilter"
+      ],
+      "parameters": {
+        "alignItems": "flex-end",
+        "columnGap": "var(--space-4)",
+        "flexDirection": "row",
+        "flexWrap": "wrap"
+      },
+      "x": 340,
+      "y": 880
+    },
+    {
+      "id": "pj-statusfilter",
+      "type": "/Components/SelectField",
+      "label": "Status filter",
+      "parent": "pj-filters",
+      "parameters": {
+        "label": "Status",
+        "options": [
+          {
+            "Label": "All",
+            "Value": "All"
+          },
+          {
+            "Label": "Backlog",
+            "Value": "Backlog"
+          },
+          {
+            "Label": "In progress",
+            "Value": "In progress"
+          },
+          {
+            "Label": "In review",
+            "Value": "In review"
+          },
+          {
+            "Label": "Done",
+            "Value": "Done"
+          }
+        ],
+        "placeholder": "All statuses"
+      },
+      "x": 400,
+      "y": 1000
+    },
+    {
+      "id": "pj-ownerfilter",
+      "type": "/Components/SelectField",
+      "label": "Owner filter",
+      "parent": "pj-filters",
+      "parameters": {
+        "label": "Owner",
+        "placeholder": "All owners"
+      },
+      "x": 400,
+      "y": 1120
+    },
+    {
+      "id": "pj-list",
+      "type": "For Each",
+      "label": "Project rows",
+      "parent": "pj-listpanel",
+      "parameters": {
+        "template": "/Components/ProjectRow"
+      },
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "pj-empty",
+      "type": "/Components/EmptyState",
+      "label": "Empty projects",
+      "parent": "pj-listpanel",
+      "parameters": {
+        "actionLabel": "New project",
+        "body": "Try a different filter — or add a project.",
+        "title": "No projects to show"
+      },
+      "x": 340,
+      "y": 1360
+    },
+    {
+      "id": "pj-editorpanel",
+      "type": "Group",
+      "label": "Editor panel",
+      "parent": "pj-shell",
+      "children": [
+        "pj-editortitle",
+        "pj-form"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "pj-editortitle",
+      "type": "Text",
+      "label": "Editor title",
+      "parent": "pj-editorpanel",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 340,
+      "y": 1600
+    },
+    {
+      "id": "pj-form",
+      "type": "/Components/ProjectForm",
+      "label": "Project form",
+      "parent": "pj-editorpanel",
+      "x": 340,
+      "y": 1720
+    },
+    {
+      "id": "pj-view",
+      "type": "States",
+      "label": "List or editor",
+      "parameters": {
+        "states": "list,editor"
+      },
+      "x": 650,
+      "y": 520
+    },
+    {
+      "id": "pj-qprojects",
+      "type": "DbCollection2",
+      "label": "Fetch projects",
+      "parameters": {
+        "collectionName": "Project"
+      },
+      "x": 650,
+      "y": 1600
+    },
+    {
+      "id": "pj-qmembers",
+      "type": "DbCollection2",
+      "label": "Fetch team members",
+      "parameters": {
+        "collectionName": "TeamMember"
+      },
+      "x": 650,
+      "y": 2200
+    },
+    {
+      "id": "pj-qclients",
+      "type": "DbCollection2",
+      "label": "Fetch clients",
+      "parameters": {
+        "collectionName": "Client"
+      },
+      "x": 650,
+      "y": 2320
+    },
+    {
+      "id": "pj-memberopts",
+      "type": "/Components/Record Options",
+      "label": "Owner options",
+      "x": 650,
+      "y": 1840
+    },
+    {
+      "id": "pj-clientopts",
+      "type": "/Components/Record Options",
+      "label": "Client options",
+      "x": 650,
+      "y": 1960
+    },
+    {
+      "id": "pj-pfilter",
+      "type": "Filter Collection",
+      "label": "Filter by status and owner",
+      "parameters": {
+        "filterFilter": "status,owner",
+        "filterFilterOp-owner": "in",
+        "filterFilterOp-status": "in",
+        "filterFilterType-owner": "string",
+        "filterFilterType-status": "string",
+        "filterSort": "dueDate",
+        "filterSort-dueDate": "ascending"
+      },
+      "x": 650,
+      "y": 1240
+    },
+    {
+      "id": "pj-statusval",
+      "type": "Expression",
+      "label": "Statuses in scope",
+      "parameters": {
+        "expression": "!statusFilter || statusFilter === 'All' ? ['Backlog','In progress','In review','Done'] : [statusFilter]"
+      },
+      "x": 650,
+      "y": 2440
+    },
+    {
+      "id": "pj-ownerval",
+      "type": "Expression",
+      "label": "Owners in scope",
+      "parameters": {
+        "expression": "ownerFilter ? [ownerFilter] : ownerIds"
+      },
+      "x": 650,
+      "y": 2560
+    },
+    {
+      "id": "pj-statusfiltervar",
+      "type": "Variable2",
+      "label": "Status filter value",
+      "parameters": {
+        "name": "projectStatusFilter"
+      },
+      "x": 650,
+      "y": 2680
+    },
+    {
+      "id": "pj-ownerfiltervar",
+      "type": "Variable2",
+      "label": "Owner filter value",
+      "parameters": {
+        "name": "projectOwnerFilter"
+      },
+      "x": 650,
+      "y": 2800
+    },
+    {
+      "id": "pj-setstatus",
+      "type": "Set Variable",
+      "label": "Write projectStatusFilter",
+      "parameters": {
+        "name": "projectStatusFilter",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 1000
+    },
+    {
+      "id": "pj-setowner",
+      "type": "Set Variable",
+      "label": "Write projectOwnerFilter",
+      "parameters": {
+        "name": "projectOwnerFilter",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 1120
+    },
+    {
+      "id": "pj-editing",
+      "type": "Variable2",
+      "label": "Editing project id",
+      "parameters": {
+        "name": "editingProjectId"
+      },
+      "x": 650,
+      "y": 2080
+    },
+    {
+      "id": "pj-setediting",
+      "type": "Set Variable",
+      "label": "Write editingProjectId",
+      "parameters": {
+        "name": "editingProjectId",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 1360
+    },
+    {
+      "id": "pj-seteditingempty",
+      "type": "Set Variable",
+      "label": "Clear editingProjectId",
+      "parameters": {
+        "name": "editingProjectId",
+        "setWith": "emptyString"
+      },
+      "x": 650,
+      "y": 760
+    },
+    {
+      "id": "pj-markdone",
+      "type": "SetDbModelProperties",
+      "label": "Mark project done",
+      "parameters": {
+        "collectionName": "Project",
+        "idSource": "explicit",
+        "prop-status": "Done"
+      },
+      "x": 650,
+      "y": 1480
+    },
+    {
+      "id": "pj-editortitleexpr",
+      "type": "Expression",
+      "label": "Editor title text",
+      "parameters": {
+        "expression": "recordId ? 'Edit project' : 'New project'"
+      },
+      "x": 650,
+      "y": 1720
+    }
+  ],
+  "visualRoots": [
+    "pj-page"
+  ]
+}

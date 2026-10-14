@@ -764,3 +764,143 @@ gone the L1 way (`onWire`, `discoverOutput`, `hasOutput`; 19 / 19 traces byte-id
 the types oracle (c) grades; both are in `DRAWN_PORT_TYPES` (41). **Oracle (c) did not wait on P107-S79-ADAPTERLABEL:**
 the adapters it needed were read directly. The label (Router, Query Records, Filter Records) stays open; Router is the
 one type still "no view" because of it.
+
+### 6.12 s100 (2026-10-13, Opus) — the cloud nodes' ports: the editor runs no cloud setup() at all
+
+The s99 handoff's step for AC4 was to add `noodl-viewer-cloud/src/nodes` to `nsp-020-ports-parity`'s ROOTS and grade each cloud
+module's `updatePorts` against its spec. **Measured first, in the dev editor (NSP-022 §6.9): that code runs nowhere in the
+editor.** A cloud function has no runtime client since WF-007. Its library is `cloud-node-library.json` (declared ports only),
+and `cloudDynamicPorts.ts` derives only the wire families (SB-017). A new Aggregate Records there has no Class, Property, Filter
+or Do; a new Query Records has no Class or Filter. The front-end control has both. Filed as P107-S100-CLOUDSETUPPORTS.
+
+So a parity row for a cloud module would grade a function no person's editor calls. This task's sentence ("an editor can draw
+every port of every node from the spec alone, without a viewer running") has its one real customer here. The ruling the bug
+asks for decides what AC4's cloud rows grade: the spec drawing the editor's cloud ports, or the modules' hooks run against a fake
+connection, or `cloudDynamicPorts.ts` extended type by type.
+
+**R37 (s100): "From the node specs."** Measured for the build, not built:
+
+| what | count |
+|---|---|
+| types in `cloud-node-library.json` | 88 |
+| … with a spec | 81 (no spec: Component Inputs / Outputs, RunTasks, REST2, Component Object, Set Component Object Properties, On App Error) |
+| … whose spec draws derived inputs (`derived.inputs`) | 29: Expression, JavaScriptFunction, Logic Builder, DbCollection2, DbModel2, Set / Delete / New DbModelProperties, Add / Remove DbModelRelation, FilterDBModels, Model2, SetModelProperties, NewModel, Filter Collection, Set Variable, Sign File URL, And, Or, String Mapper, String Format, Set User Properties, User, cloud Request, Response, Create User, Update User, Aggregate Records, HTTP |
+| … of those 81, in `DRAWN_PORT_TYPES` (draw graded against the runtime's hooks) | 23 |
+
+**The gap the build has to close first: a `DrawnPort` carries less than a panel draws.** It has name, plug, type, displayName,
+group, description, default and enum VALUES. The runtime hooks of those types announce, by a static count over their modules:
+enum `label`s 97, `allowEditOnly` 49 (the spec's decl has `editOnly`, which `drawn()` drops), `allowConnectionsOnly` 15,
+`codeeditor` 8, the filter builder's `schema` 6 / `backend` 2 / `valuePortPrefix` 4, `index` 5. So the build is, in order:
+(1) carry the presentation fields on `DrawnPort` (edit-only, connections-only, enum labels, the code editor, order) from the
+decls, and the filter / sort builder's schema from the `PortContext` the spec already reads; (2) one editor adapter that, for a
+node in a cloud component whose type has a spec, sets its dynamic ports to the derived drawn ports in the editor's port shape.
+It needs one writer per type: `setDynamicPorts` replaces, SB-017's lesson. JavaScriptFunction, the Record family and Query
+Records already have a writer in `CloudDynamicPortsAdapter`, so merge into it, never beside it. (3) Drive it: a new Aggregate
+and a new Query Records in a cloud function show Class, Filter and Property, beside the front-end control; then the Jasmine /
+`test:ci` gate.
+
+### 6.13 s101 (2026-10-13, Opus) — R37 built: the editor draws a cloud node's settings from its spec
+
+**Grade first, then draw.** Oracle (a)'s census now reads `noodl-viewer-cloud/src/nodes`: 17 cloud modules have a hook, 14
+are empty (EXCLUDED, a line each), and Request, Response and Aggregate Records are graded rows. Aggregate's cases hand the hook
+the class list in the editor's own shape (`{ name, columns }`, `meta`); the oracle's `context.schema` fixture is the raw Parse
+list, which `aggregatenode.js` does not read, so the first `visualFilter` disagreement was the fixture's, not the node's.
+
+**The oracle grades what a panel draws.** Two widenings, each with a planted mutant:
+
+- a DERIVED port's enums (before, declared ports only). One finding: Filter Collection's Op offers the operators of the filter's
+  Type (string 5, boolean 2, number 8, `filtercollectionnode.ts` :661-683); the spec offered all nine. Fixed (draw only).
+- the panel's fields, `panelDiffs`: edit-only, connections-only, the code editor, an enum's labels, a filter builder's value-port
+  prefix and whether it is told its backend. Measured on all 43 rows: 125 of 347 cases disagreed, from ~15 sources. All fixed
+  at the source but one pin (For Each's Script: the spec's `editOnly` steers the generator; the runtime leaves it wireable — a
+  GAP, For Each never sits in a cloud function).
+
+The format grew for it (`spec.ts` `ValueInputDecl`: `labels`, `connectionsOnly`, `codeEditor`, `valuePortPrefix`,
+`filterBackend`; `SignalInputDecl.connectionsOnly`; `narrow` may return `labels`), and `DrawnPort` carries them. Presentation
+only: no reducer, generator or target reads them. Plus Aggregate's `derived.outputs` (`agg-<name>`, number or string by its
+column, `onWire` so play is unchanged) and its Javascript filter's default script — the hook announced both, the spec drew
+neither. `DRAWN_PORT_TYPES` + Aggregate, Request, Response; the ledger's ports floor 132 → 133.
+
+**The editor.** `models/nodelibrary/cloudSpecPorts.ts`: `CLOUD_SPEC_PORT_TYPES` — 24 of the 26 cloud-library types that are graded
+and draw derived ports, less Request and Response (a `namedports/list` rule draws theirs). `specPortsForNode` runs `drawnPorts`
+over a one-node `PortProject` (the node, its component's wires, the project metadata — the only `derived.needs` those 24 have:
+schema, backends, wired, wiredOutputs), keeps the derived ports, adds each wired name the spec `discover`s (the runtime registers
+it on the wire), and converts to the editor's port shape. A filter builder's `schema` / `backend` come from the runtime's own
+`recordSchemaContext` + `recordFilterSchema` (no copy), the backend's fallback `nodegx` as `QueryUtils.backendType()` answers with
+no store. Merged into `CloudDynamicPortsAdapter` (one writer per node): the spec's ports first, then any SB-017 family port of a
+name the spec did not draw, then `keepWiredSavedPorts` — a SAVED port a wire uses survives the redraw. A fourth subclass,
+`CloudSpecPortsAdapter`, takes the 20 types no family owns; a `metadataChanged` hook (`registeradapters.ts`, forwarding
+`ProjectModel.metadataChanged`) re-sweeps when the backends or classes change, as the hooks redraw on
+`metadataChanged.dbCollections`.
+
+**Measured on an old project (AC §5, "must agree with the cached list").** lepetitpicnic_local_backend's 113 spec-drawn cloud
+nodes, saved by the old cloud runtime, against today's draw: 50 identical; 63 GAIN settings today's hooks announce and the old
+lists predate (Function and Query Records' Run On Value Change boxes, Search, Realtime); one Set User Properties loses two
+unwired ports today's hook leaves out too (`prop-password`, `prop-emailVerified`). ONE wired port would have been lost — a Query
+Records' Javascript-filter value, `storageFilterValue-ParentRecordId` (the spec leaves the Javascript filter out) — and a deploy
+drops a wire to a missing port. Hence `keepWiredSavedPorts`; with it, 0 wired ports lost. Filed P107-S101-JSFILTERVALUES (low:
+a NEW node's Javascript-filter variables are not drawn; they were not before R37 either).
+
+**Graded in the editor** (`tests-unit/nsp-020/cloud-spec-ports.test.ts`, 17): for Aggregate (6 cases) and Query Records (3) and
+Update Record (1), `specPortsForNode` equals the type's own hook fired against a fake connected editor over the same metadata,
+port by port in the editor's shape (name, plug, type with enum labels, edit-only, connections-only, code editor, prefix, backend,
+the builder's columns; display name, group, default). `index` / `editorName` are not compared (named). Plus: the cloud list is
+the graded types both ways; the rule-drawn two have their rule; the four adapters' type lists are disjoint and cover the list;
+a wired name survives a missing class; a saved wired port survives a redraw.
+
+**Driven** (dev editor, a copy of lepetitpicnic_local_backend's test project, s100's recipe: `LocalProjectsModel` + the fiber
+router; nodes by `NodeGraphNode.fromJSON` + `addRoot`; read with `getPorts()`). The three SAVED Aggregate nodes draw their
+settings after the load sweep (Class, Filter, Do, each aggregate's Property and Operation, the Filter builder or the Javascript
+filter, the `agg-` outputs), and `aggregates: 'AvgAge,Names,Extra'` on one draws `aggprop-Extra` at once (s100: nothing). A NEW
+Aggregate in `/#__cloud__/Records and Objects/Aggregate` draws Class, Filter, Do; with `TestQuery`, `Total`, `Age` it draws
+Property, Operation (`{min Min, max Max, sum Sum, avg Avg}`, edit-only), the Filter builder and `agg-Total`. A NEW Query Records
+there draws the same 13 inputs as the same node in the front-end component `/Tests - Records` (the control: the viewer's hook),
+name for name. The property panel, screenshot: GENERAL Class TestQuery, Filter "Visual"; AGGREGATES Total; FILTER the builder
+("No filter"); TOTAL Property Age, Operation Avg — the panel the bug said was missing.
+
+**Found on the way: an editor import can bring the runtime with it.** `cloudSpecPorts.ts` imports `record-ports.ts`, which
+imported `resolveBackend.ts`, whose lazy `require('../../../noodl-runtime')` webpack follows statically: the editor's first
+compile pulled the whole runtime in (223 TS1202/TS1203 errors on its CommonJS files) and the second ran out of heap. The
+editor's own `tsc --noEmit` passed — its settings are not webpack's. `record-ports.ts` now imports the pure half
+(`resolveBackend.pure.ts`, which `resolveBackend.ts` re-exports): same functions, and the editor compiles clean (0 errors).
+
+### 6.14 s102 (2026-10-13, Opus) — the format names the backend's type; a Javascript filter draws its variables
+
+**Reach first.** 721 project files on Richard's machine (control: 166 have `cloudservices`). 4 have a REST backend, 1 of them
+has Record-family nodes (VerifyFix4, 2), and none binds a cloud function to one. P107-S85-RESTCOLTYPES stays low. It is
+still a gap in the format the backend specs are written in.
+
+**The format change is a copy of two runtime tests.**
+- `BackendSchema.backendType` is the selected backend's type, as `schema-ports.ts` :496 reads it. Absent means the Parse
+  wire (`isParseWireContext`, record-ports.ts :147-149).
+- `BackendField.enhanced` is set when a column has no Parse native type; `recordPortType` :211-221 then types it by
+  `getEnhancedFieldType`. `BackendField.enums` holds a select column's choices.
+- `ValueOutputDecl.enums` draws an enum output's values.
+
+The readers:
+- `classPicker` offers `_User` / `_Role` only on the Parse wire.
+- `recordFieldType` keeps an enhanced column's type, and `recordFieldPort` carries the choices.
+- The User family reads the accounts table by type (`userClassName`: `_User`, `directus_users`, `users`, none on
+  Supabase; user-ports.ts :83-102) and the REST ignore lists (:163-215, RestAuthAdapter.ts :243-261).
+
+The one builder (`port-context.ts` `schemaFor`) hands over the type, marks and fills the columns, and hands over a REST
+schema even when it has no classes, because then the picker is empty. The editor's cloud draw, the MCP server and the wire
+check all read that builder; none changed.
+
+**The drive measured more than the bug said.** The synthetic Directus backend got a `directus_users` table and the User
+family's two write nodes. Before the fix, the User node on it drew none of its 8 property ports and Set User Properties
+none of its 4. After: the 8 RESTCOLTYPES pins came out and (A) is clean on all 12 + 12 + 20 User-family nodes. 8 planted
+mutants (the picker, `enhanced`, `enums`, the accounts table, both REST ignore lists, the builder's type and its flag) each
+turn the drive red.
+
+Sign Up is the exception, and it is the runtime's. Its hook reads `systemCollections._User` whatever the backend
+(signup.ts :199-250), so on Directus it offers the built-in's columns. Pinned (two lines) and filed as
+P107-S102-SIGNUPBACKEND.
+
+**P107-S101-JSFILTERVALUES.** `filterValuePorts(script)` copies the hooks' rule for Query Records (:1459-1487) and Aggregate
+(:635-662): from the saved script with comments removed, a `storageFilterValue-<name>` per `$name`, then per `Inputs.name`
+not already drawn. Each is `*`, connections only, Filter Values, undriven. The parser's `Inputs["x"]` form goes to plug
+`inputs` and is not drawn. Graded by a new oracle (a) case on each row: `$min` twice, `$min2`, `Inputs.max`, `Inputs.min`,
+and three names in comments. 5 mutants are red, and a sixth ("draws nothing") was first rejected because it did not compile
+(`Tests: 0`) and was then replanted. Filter Records has no Javascript-filter ports (0 references in its module), so nothing
+is owed there.

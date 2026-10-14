@@ -458,8 +458,9 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
 
         options.success(res);
       },
-      error: function () {
-        options.error();
+      // P107-S99-AGGWORDS: the server's words, as `query` passes them since HLT-023.
+      error: function (res) {
+        options.error(res && res.error);
       }
     });
   }
@@ -475,8 +476,9 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
       success: function (response) {
         options.success(response.count);
       },
-      error: function () {
-        options.error();
+      // P107-S99-AGGWORDS: the server's words, as `query` passes them since HLT-023.
+      error: function (res) {
+        options.error(res && res.error);
       }
     });
   }
@@ -491,8 +493,9 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
       success: function (response) {
         options.success(response.results);
       },
-      error: function () {
-        options.error();
+      // P107-S99-AGGWORDS: the server's words, as `query` passes them since HLT-023.
+      error: function (res) {
+        options.error(res && res.error);
       }
     });
   }

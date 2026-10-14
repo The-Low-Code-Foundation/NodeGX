@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c551c694-56a1-5c67-8dd8-200307a90fef",
+  "name": "askMistral",
+  "path": "/#__cloud__/askMistral",
+  "type": "cloud",
+  "created": "2026-10-12T17:35:50.827Z",
+  "modified": "2026-10-12T17:35:50.827Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Server-side Ask box: answers questions about the agency's clients, projects, team and wiki using Mistral's mistral-large-4 model. The API key is read from the MISTRAL_API_KEY function secret on the server and never leaves it."
+}

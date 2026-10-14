@@ -1,0 +1,20 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "Learn with Simple Rick",
+  "id": "ad317e5b-295a-4eb4-ad8d-e61528f35c26",
+  "version": "5",
+  "nodegxVersion": "0.1.0",
+  "runtimeVersion": "react19",
+  "created": "2026-10-12T12:54:41.518Z",
+  "modified": "2026-10-12T12:54:41.518Z",
+  "settings": {
+    "htmlTitle": "Learn with Simple Rick",
+    "navigationPathType": "path",
+    "bodyScroll": true
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  },
+  "rootNodeId": "4f571263-ab1b-446b-a347-02914508b2f6"
+}

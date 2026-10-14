@@ -16,10 +16,25 @@ interface CounterNodeInstance extends NodeInstance {
     currentValue: number;
     startValue: number;
     startValueSet: boolean;
+    /** The count `currentCount` answered before the queued Start Value landed (P112-OWN018-COUNTERZERO). */
+    seededCount?: number;
     limitsEnabled: boolean;
     limitsMin: number;
     limitsMax: number;
   };
+}
+
+/**
+ * P107 NSP-019 s95 — the Counter's one diagnostic (DIAGNOSTICS-CONTRACT.md: "two of this node's settings contradict each
+ * other"). Min above Max is a mistake whether or not Limits Enabled is on: with it on, every count stops where neither
+ * Increase nor Decrease can move it. Evaluated in both setters it reads, so the statement that raises it also clears it.
+ * The spec says the same sentence (`nodegx-node-spec/src/nodes/counter.ts`), and the conformance suite compares the two.
+ */
+const MIN_ABOVE_MAX = 'counter/min-above-max';
+
+function checkLimits(node: CounterNodeInstance): void {
+  const { limitsMin: min, limitsMax: max } = node._internal;
+  node.setDiagnostic(MIN_ABOVE_MAX, min > max ? `Min Value ${min} is above Max Value ${max}. With Limits Enabled on, the count gets stuck.` : null);
 }
 
 const CounterNode: NodeDefinitionOptions = {
@@ -126,7 +141,9 @@ const CounterNode: NodeDefinitionOptions = {
         if (this._internal.startValueSet === false) {
           this._internal.startValueSet = true;
           this._internal.currentValue = this._internal.startValue;
-          this.flagOutputDirty('currentCount');
+          // A wire made before this landed was already handed this count (`currentCount`); not a second time.
+          if (this._internal.seededCount !== this._internal.currentValue) this.flagOutputDirty('currentCount');
+          this._internal.seededCount = undefined;
           this.sendSignalOnOutput('countChanged');
         }
       }
@@ -141,6 +158,7 @@ const CounterNode: NodeDefinitionOptions = {
       default: 0,
       set: function (this: CounterNodeInstance, value: unknown) {
         this._internal.limitsMin = Number(value);
+        checkLimits(this);
       }
     },
     limitsMax: {
@@ -153,6 +171,7 @@ const CounterNode: NodeDefinitionOptions = {
       default: 0,
       set: function (this: CounterNodeInstance, value: unknown) {
         this._internal.limitsMax = Number(value);
+        checkLimits(this);
       }
     },
     limitsEnabled: {
@@ -175,6 +194,17 @@ const CounterNode: NodeDefinitionOptions = {
       type: 'number',
       description: 'The count as it stands',
       getter: function (this: CounterNodeInstance) {
+        // P112-OWN018-COUNTERZERO. A node's parameters are queued and land at its first update, but its wires are
+        // made before that, and a wire hands its target this getter's value at once. So a Counter whose Start Value
+        // is 10 used to tell every consumer 0 first: Mistral's quiz countdown (`count === 0` → time's up) fired at
+        // page load and skipped question 1. Until the first Start Value lands, the count is the one the model says.
+        if (this._internal.startValueSet === false) {
+          const start = (this as { model?: { parameters?: Record<string, unknown> } }).model?.parameters?.startValue;
+          if (start !== undefined && start !== null && start !== '' && !isNaN(Number(start))) {
+            this._internal.seededCount = Number(start);
+            return Number(start);
+          }
+        }
         return this._internal.currentValue;
       }
     },

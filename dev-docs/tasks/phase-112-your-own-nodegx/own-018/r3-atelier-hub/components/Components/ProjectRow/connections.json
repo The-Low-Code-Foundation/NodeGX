@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3432cfc5-6320-5f3f-872c-c426286342b8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pr-ci",
+      "fromProperty": "name",
+      "toId": "pr-name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pr-ci",
+      "fromProperty": "client",
+      "toId": "pr-clientid",
+      "toProperty": "client"
+    },
+    {
+      "fromId": "pr-clientid",
+      "fromProperty": "result",
+      "toId": "pr-clientrec",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "pr-clientrec",
+      "fromProperty": "prop-name",
+      "toId": "pr-client",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pr-ci",
+      "fromProperty": "owner",
+      "toId": "pr-ownerid",
+      "toProperty": "owner"
+    },
+    {
+      "fromId": "pr-ownerid",
+      "fromProperty": "result",
+      "toId": "pr-ownerrec",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "pr-ownerrec",
+      "fromProperty": "prop-name",
+      "toId": "pr-owner",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pr-ci",
+      "fromProperty": "status",
+      "toId": "pr-badge",
+      "toProperty": "status"
+    },
+    {
+      "fromId": "pr-ci",
+      "fromProperty": "status",
+      "toId": "pr-notdone",
+      "toProperty": "status"
+    },
+    {
+      "fromId": "pr-notdone",
+      "fromProperty": "asBoolean",
+      "toId": "pr-done",
+      "toProperty": "visible"
+    },
+    {
+      "fromId": "pr-ci",
+      "fromProperty": "dueDate",
+      "toId": "pr-duefmt",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "pr-duefmt",
+      "fromProperty": "currentValue",
+      "toId": "pr-due",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pr-edit",
+      "fromProperty": "onClick",
+      "toId": "pr-co",
+      "toProperty": "edit"
+    },
+    {
+      "fromId": "pr-done",
+      "fromProperty": "onClick",
+      "toId": "pr-co",
+      "toProperty": "markDone"
+    }
+  ]
+}

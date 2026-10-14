@@ -132,8 +132,16 @@ describe('static render (no editor process)', () => {
   });
 
   it('refuses to serve anything outside the project directory', async () => {
-    const res = await get(preview.port, '/../../../../etc/hosts');
-    expect(res.status).toBe(404);
+    const hosts = fs.readFileSync('/etc/hosts', 'utf8');
+    // The URL parser folds the dots away, so this asks for "/etc/hosts" inside the project: an address that names
+    // no file, which is the app page since P112-S16-DEEPLINK — never the file.
+    const folded = await get(preview.port, '/../../../../etc/hosts');
+    expect(folded.body).not.toBe(hosts);
+    expect(folded.body).toBe((await get(preview.port, '/')).body);
+    // An encoded slash survives the parser (it folds %2e%2e too), so this one reaches the outside-the-folder check.
+    const encoded = await get(preview.port, '/..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2fetc/hosts');
+    expect(encoded.status).toBe(404);
+    expect(encoded.body).not.toBe(hosts);
   });
 });
 

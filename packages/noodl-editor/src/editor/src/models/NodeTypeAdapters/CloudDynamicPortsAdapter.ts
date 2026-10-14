@@ -40,6 +40,15 @@
  * parameter change. SB-017 acceptance 6 is the negative control on this: those
  * 69 connections must still export once this exists.
  *
+ * ## P107 R37 — and the settings, from the node's spec
+ *
+ * The families above are what a wire needs. A node's settings — Class, Filter, an aggregate's Property — are drawn
+ * from its spec (`nodelibrary/cloudSpecPorts.ts`), by the same sweep, onto the same `setDynamicPorts` list: the spec's
+ * ports first (typed, labelled), then any family port of a name the spec did not draw. One writer per node still: the
+ * family subclasses draw their types' spec ports too, and `CloudSpecPortsAdapter` takes the other spec-drawn types.
+ * The schema those settings read arrives after the project opens (`schemahandler.ts` → `dbCollections`), so a change
+ * to the backend metadata sweeps again, as the runtime's hooks redraw on `metadataChanged.dbCollections`.
+ *
  * @module models/NodeTypeAdapters/CloudDynamicPortsAdapter
  */
 
@@ -51,6 +60,7 @@ import {
   SCRIPT_PORT_TYPES,
   type ConnectionLike
 } from '@noodl-models/nodelibrary/cloudDynamicPorts';
+import { CLOUD_SPEC_ONLY_TYPES, keepWiredSavedPorts, specPortsForNode } from '@noodl-models/nodelibrary/cloudSpecPorts';
 import { ProjectModel } from '@noodl-models/projectmodel';
 
 import { isCloudFunctionComponent } from '../../utils/exporter/cloudFunctions';
@@ -79,7 +89,8 @@ abstract class CloudDynamicPortsAdapter {
       // change or project load, and until then the author's new wire is red and
       // would not deploy.
       connectionAdded: this.connectionChanged.bind(this),
-      connectionRemoved: this.connectionChanged.bind(this)
+      connectionRemoved: this.connectionChanged.bind(this),
+      metadataChanged: this.metadataChanged.bind(this)
     };
   }
 
@@ -91,9 +102,22 @@ abstract class CloudDynamicPortsAdapter {
     const component = node.owner.owner;
     if (!component || !isCloudFunctionComponent(component)) return;
 
-    node.setDynamicPorts(
-      cloudDynamicPortsForNode(node, node.type.name, (node.owner.connections || []) as ConnectionLike[])
-    );
+    const connections = (node.owner.connections || []) as ConnectionLike[];
+    const metadata = (ProjectModel.instance && ProjectModel.instance.metadata) || {};
+    const ports = specPortsForNode(node, node.type.name, connections, { metadata });
+    const drawn = new Set(ports.map((p) => p.plug + ' ' + p.name));
+    for (const port of cloudDynamicPortsForNode(node, node.type.name, connections)) {
+      if (!drawn.has(port.plug + ' ' + port.name)) ports.push(port);
+    }
+    node.setDynamicPorts(keepWiredSavedPorts(ports, node.dynamicports, node.id, connections));
+  }
+
+  /** The keys the settings read: the backends and the classes (`record-ports.ts recordSchemaContext`). */
+  private metadataChanged(e: TSFixme) {
+    const key = e && e.key;
+    if (key === 'dbCollections' || key === 'systemCollections' || key === 'backendServices' || key === 'cloudservices') {
+      this.updateAllNodes();
+    }
   }
 
   private nodeAdded(e: TSFixme) {
@@ -152,9 +176,15 @@ export class CloudQueryPortsAdapter extends CloudDynamicPortsAdapter {
   protected readonly typenames = QUERY_TYPES;
 }
 
+/** P107 R37 — every other type drawn from its spec in a cloud component (`cloudSpecPorts.ts`). */
+export class CloudSpecPortsAdapter extends CloudDynamicPortsAdapter {
+  protected readonly typenames = CLOUD_SPEC_ONLY_TYPES;
+}
+
 /** Every adapter this module contributes, in the shape a test can drive directly. */
 export const CLOUD_DYNAMIC_PORT_ADAPTERS = [
   CloudScriptPortsAdapter,
   CloudRecordPortsAdapter,
-  CloudQueryPortsAdapter
+  CloudQueryPortsAdapter,
+  CloudSpecPortsAdapter
 ];

@@ -48,6 +48,7 @@ export function propertyTypeInput(p: string): ValueInputDecl {
   return {
     type: 'enum',
     enums: PROPERTY_TYPES,
+    labels: { string: 'String', boolean: 'Boolean', number: 'Number', date: 'Date', array: 'Array', object: 'Object', '*': 'Any' },
     default: '*',
     coerce: 'none',
     editOnly: true,

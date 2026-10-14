@@ -24145,5 +24145,61 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "R35: a Focus while the dropdown is off the page warns the editor, a second one says nothing new, and a Focus once it is on the page withdraws the warning",
+    "because": "controls/utils.ts :410-417 `setDiagnostic('focus/not-mounted', took ? null : …)`: every Focus replaces the sentence by whether the focus tracker took it (focus-not-mounted.ts)",
+    "params": {
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R35: an Icon Source that is not an icon warns the editor — a bare name, then a number replaces the sentence; the picker's {class, code} withdraws it",
+    "because": "react-component-node.ts :689-693 — the icon port's setter calls `setDiagnostic('visual/icon-source-not-an-icon/iconIconSource', iconSourceProblem(value, 'Icon Source'))` on every value (iconSourceProblem.ts :61-75, describeValue diagnostics.ts :104-130)",
+    "params": {
+      "useIcon": true,
+      "iconSourceType": "icon"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "iconIconSource",
+        "value": "account_circle"
+      },
+      "settle",
+      {
+        "set": "iconIconSource",
+        "value": {
+          "class": "material-icons",
+          "code": "search"
+        }
+      },
+      "settle",
+      {
+        "set": "iconIconSource",
+        "value": 7
+      },
+      "settle"
+    ]
   }
 ]

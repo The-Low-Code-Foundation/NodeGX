@@ -33,13 +33,15 @@
 
 import type { GraphModelLike, RuntimeDiscoveredPort } from '@noodl/types';
 
+// the pure half (`resolveBackend.ts` re-exports it): the editor imports this module (P107 R37, `cloudSpecPorts.ts`), and the
+// other half's lazy `require` of the runtime would bring the whole runtime into the editor's bundle
 import {
   backendEntries,
   defaultBackendId,
   endpointBackendEntry,
   type BackendMetaDataSources,
   type CloudServicesMetaData
-} from '../../../api/backends/resolveBackend';
+} from '../../../api/backends/resolveBackend.pure';
 
 import {
   backendPickerPorts,

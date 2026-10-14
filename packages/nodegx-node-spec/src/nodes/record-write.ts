@@ -28,7 +28,7 @@
  */
 
 import type { InputDecl, PortContext, ValueInputDecl } from '../spec';
-import { recordFieldType, recordWiredFieldNames, selectedClass, shownFields } from './record-base';
+import { recordFieldPort, recordWiredFieldNames, selectedClass, shownFields } from './record-base';
 
 /** What the two writes hold of their property ports and their access rules. */
 export type RecordWriteState = {
@@ -63,11 +63,11 @@ function propertyPort(field: string): ValueInputDecl {
 function aclPort(field: string): ValueInputDecl | undefined {
   switch (field) {
     case 'target':
-      return { type: 'enum', enums: ['user', 'everyone', 'role'], default: 'user', coerce: 'none', editOnly: true, displayName: 'Target', group: 'Access Rule' };
+      return { type: 'enum', enums: ['user', 'everyone', 'role'], labels: { user: 'User', everyone: 'Everyone', role: 'Role' }, default: 'user', coerce: 'none', editOnly: true, displayName: 'Target', group: 'Access Rule' };
     case 'role':
       return { type: 'string', coerce: 'none', displayName: 'Role', group: 'Access Rule', examples: ['admin', 'editor'] };
     case 'userid':
-      return { type: 'string', coerce: 'none', displayName: 'User Id', group: 'Access Rule', examples: ['u2', 'u9', ''] };
+      return { type: 'string', coerce: 'none', connectionsOnly: true, displayName: 'User Id', group: 'Access Rule', examples: ['u2', 'u9', ''] };
     case 'read':
     case 'write':
       return { type: 'boolean', default: true, coerce: 'none', displayName: field === 'read' ? 'Read' : 'Write', group: 'Access Rule', examples: [false, true] };
@@ -107,7 +107,7 @@ export function aclInputs(params: Readonly<Record<string, unknown>>): Record<str
  */
 export function recordFieldInputs(params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>): Record<string, ValueInputDecl> {
   const out: Record<string, ValueInputDecl> = {};
-  for (const [field, decl] of shownFields(selectedClass(params, context), false)) out['prop-' + field] = { ...propertyPort(field), type: recordFieldType(decl) };
+  for (const [field, decl] of shownFields(selectedClass(params, context), false)) out['prop-' + field] = { ...propertyPort(field), ...recordFieldPort(decl) };
   for (const field of recordWiredFieldNames(params, context)) if (!('prop-' + field in out)) out['prop-' + field] = propertyPort(field);
   return out;
 }

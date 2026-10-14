@@ -56,13 +56,13 @@
       "connections": [
         {
           "fromId": "fn_request",
-          "fromProperty": "email",
+          "fromProperty": "pm-email",
           "toId": "new_user",
           "toProperty": "username"
         },
         {
           "fromId": "fn_request",
-          "fromProperty": "email",
+          "fromProperty": "pm-email",
           "toId": "new_user",
           "toProperty": "email"
         },
@@ -80,7 +80,7 @@
         },
         {
           "fromId": "fn_request",
-          "fromProperty": "role",
+          "fromProperty": "pm-role",
           "toId": "grant",
           "toProperty": "role"
         },
@@ -94,13 +94,13 @@
           "fromId": "new_user",
           "fromProperty": "userId",
           "toId": "ok_response",
-          "toProperty": "userId"
+          "toProperty": "pm-userId"
         },
         {
           "fromId": "grant",
           "fromProperty": "roles",
           "toId": "ok_response",
-          "toProperty": "roles"
+          "toProperty": "pm-roles"
         },
         {
           "fromId": "grant",

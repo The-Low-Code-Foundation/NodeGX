@@ -26,10 +26,10 @@
         }
       ],
       "connections": [
-        { "fromId": "a_input", "fromProperty": "onTextChanged", "toId": "call_add", "toProperty": "a" },
-        { "fromId": "b_input", "fromProperty": "onTextChanged", "toId": "call_add", "toProperty": "b" },
+        { "fromId": "a_input", "fromProperty": "onTextChanged", "toId": "call_add", "toProperty": "in-a" },
+        { "fromId": "b_input", "fromProperty": "onTextChanged", "toId": "call_add", "toProperty": "in-b" },
         { "fromId": "sum_btn", "fromProperty": "onClick", "toId": "call_add", "toProperty": "call" },
-        { "fromId": "call_add", "fromProperty": "sum", "toId": "sum_text", "toProperty": "text" }
+        { "fromId": "call_add", "fromProperty": "out-sum", "toId": "sum_text", "toProperty": "text" }
       ]
     },
     {
@@ -55,9 +55,9 @@
         }
       ],
       "connections": [
-        { "fromId": "fn_request", "fromProperty": "a", "toId": "fn_sum", "toProperty": "a" },
-        { "fromId": "fn_request", "fromProperty": "b", "toId": "fn_sum", "toProperty": "b" },
-        { "fromId": "fn_sum", "fromProperty": "result", "toId": "fn_response", "toProperty": "sum" },
+        { "fromId": "fn_request", "fromProperty": "pm-a", "toId": "fn_sum", "toProperty": "a" },
+        { "fromId": "fn_request", "fromProperty": "pm-b", "toId": "fn_sum", "toProperty": "b" },
+        { "fromId": "fn_sum", "fromProperty": "result", "toId": "fn_response", "toProperty": "pm-sum" },
         { "fromId": "fn_request", "fromProperty": "receive", "toId": "fn_response", "toProperty": "send" }
       ]
     }

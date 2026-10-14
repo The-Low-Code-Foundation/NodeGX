@@ -101,12 +101,12 @@ const transitionParamPort = (): ValueInputDecl => ({ type: '*', coerce: 'none', 
 const pageParamPort = (): ValueInputDecl => ({ type: '*', coerce: 'none', group: 'Parameters', examples: [1, 2, 'a', '', null] });
 
 /** :338-363 — the Component Stack named Stack, its pages, and the component the target page (Target, else the first) shows. */
-function targetPage(params: Rec, context: Readonly<PortContext>): { pages: readonly string[]; component: ComponentInterface | undefined } | undefined {
+function targetPage(params: Rec, context: Readonly<PortContext>): { pages: readonly string[]; labels?: Readonly<Record<string, string>>; component: ComponentInterface | undefined } | undefined {
   const stack = (context.stacks ?? []).find((st) => st.name === ((params.stack as string) || 'Main'));
   if (!stack || stack.pages.length === 0) return undefined;
   const id = (params.target as string) || stack.pages[0];
   const name = stack.components?.[id];
-  return { pages: stack.pages, component: name !== undefined ? context.components?.[name] : undefined };
+  return { pages: stack.pages, labels: stack.labels, component: name !== undefined ? context.components?.[name] : undefined };
 }
 
 function discover(port: string): InputDecl | undefined {
@@ -225,7 +225,7 @@ export const PushComponentToStack = defineNode({
         if (of) Object.assign(ports, of(params));
         const page = targetPage(params, context);
         if (page) {
-          ports.target = { ...targetPort(), type: 'enum', enums: page.pages, drawnDefault: page.pages[0] };
+          ports.target = { ...targetPort(), type: 'enum', enums: page.pages, drawnDefault: page.pages[0], ...(page.labels ? { labels: page.labels } : {}) };
           for (const name of Object.keys(page.component?.inputs ?? {})) ports['pm-' + name] = { ...pageParamPort(), displayName: name };
         }
         return ports;

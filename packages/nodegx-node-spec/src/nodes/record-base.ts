@@ -149,9 +149,16 @@ export function classPickerPort(context: Readonly<PortContext>): ValueInputDecl 
 /** The same dropdown over a node's own `collectionName` decl (its words and its examples — what a sequence draws from). */
 export function classPicker(base: ValueInputDecl, context: Readonly<PortContext>): ValueInputDecl {
   const classes = Object.keys(context.schema?.classes ?? {});
-  const enums = [...PARSE_SYSTEM_CLASSES.filter((c) => !classes.includes(c)), ...classes];
-  return { ...base, type: 'enum', enums, editOnly: true };
+  // :126-131 — only on the Parse wire: "offering `_User` on a Directus backend would be a class that does not exist"
+  const added = onParseWire(context) ? PARSE_SYSTEM_CLASSES.filter((c) => !classes.includes(c)) : [];
+  const enums = [...added, ...classes];
+  // the words are the added system classes' only: a class the schema lists shows its name, `_User` included
+  const labels = Object.fromEntries(added.map((c) => [c, SYSTEM_CLASS_LABELS[c]]));
+  return { ...base, type: 'enum', enums, editOnly: true, labels };
 }
+
+/** record-ports.ts :78-81 — the words the Class dropdown shows for the system classes; a schema class shows its name. */
+const SYSTEM_CLASS_LABELS: Readonly<Record<string, string>> = { _User: 'User', _Role: 'Role' };
 
 /**
  * schema-ports.ts :546-571 `backendPickerPorts` through record-ports.ts :119-121 (`hideWhenSingleBackend`, group General): the
@@ -161,7 +168,8 @@ export function classPicker(base: ValueInputDecl, context: Readonly<PortContext>
 export function backendPickerPort(context: Readonly<PortContext>): Record<string, ValueInputDecl> {
   const backends = context.backends ?? [];
   if (backends.length <= 1) return {};
-  return { backendId: { ...backendPort(), type: 'enum', enums: ['_active_', ...backends.map((b) => b.id)], default: '_active_' } };
+  const labels = Object.fromEntries([['_active_', 'Active Backend'], ...backends.map((b) => [b.id, b.name])]);
+  return { backendId: { ...backendPort(), type: 'enum', enums: ['_active_', ...backends.map((b) => b.id)], default: '_active_', labels } };
 }
 
 /** The class the node's Class names, when the schema has it — record-ports.ts `recordSchemaContext` :84-99 `selectedCollection`. */
@@ -178,13 +186,46 @@ export function shownFields(klass: { fields: Readonly<Record<string, BackendFiel
   return Object.entries(klass?.fields ?? {}).filter(([field, decl]) => field !== 'ACL' && !(skipRelations && decl.relation !== undefined));
 }
 
+/** record-ports.ts :147-149 `isParseWireContext` — the selected backend speaks the Parse wire: no type recorded, `parse` or `nodegx`. */
+export function onParseWire(context: Readonly<PortContext>): boolean {
+  const type = context.schema?.backendType;
+  return type === undefined || type === 'parse' || type === 'nodegx';
+}
+
 /**
- * record-ports.ts :209-222 `recordPortType` — a Parse column's port type from `PARSE_PORT_TYPES` (:63-68): String, Number,
+ * record-ports.ts :211-221 `recordPortType` — a Parse column's port type from `PARSE_PORT_TYPES` (:63-68): String, Number,
  * Boolean and Date keep theirs, and "anything not in the table has always produced `'*'`" — Object, Array, Pointer, a Relation.
+ * A column with no Parse type (`enhanced`, P107-S85-RESTCOLTYPES) keeps the type schema-ports.ts `getEnhancedFieldType` gave it.
  */
 export function recordFieldType(decl: BackendField): ValueType {
   if (decl.relation !== undefined) return '*';
+  if (decl.enhanced) return decl.type;
   return decl.type === 'string' || decl.type === 'number' || decl.type === 'boolean' || decl.type === 'date' ? decl.type : '*';
+}
+
+/** A column's port as `recordPortType` announces it: its type and, for a select column, its choices (schema-ports.ts :126-133). */
+export function recordFieldPort(decl: BackendField): { type: ValueType; enums?: readonly string[] } {
+  const type = recordFieldType(decl);
+  return type === 'enum' && decl.enums !== undefined ? { type, enums: decl.enums } : { type };
+}
+
+/**
+ * P107-S101-JSFILTERVALUES (s102) — dbcollectionnode2.ts :1459-1487 and aggregatenode.js :635-662, the same lines in both: the
+ * Javascript filter's variable ports, read from the SAVED script (an unset one draws none: the default query is not read). The
+ * script with its comments removed by the hook's own strip, one `storageFilterValue-<name>` per `$name` in order of first
+ * use, then javascriptnodeparser.js :333-338 — one per `Inputs.name` not already drawn. Each is `*` and connections only, in
+ * group Filter Values; drawn, never driven (a play does not accept the name, `discover`). The parser's `Inputs["name"]` form
+ * is announced with `plug: 'inputs'` (:341-346), a plug the editor never offers as an input, so it draws nothing here.
+ */
+export function filterValuePorts(script: unknown): Record<string, ValueInputDecl> {
+  const out: Record<string, ValueInputDecl> = {};
+  if (typeof script !== 'string' || !script) return out;
+  const code = script.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+  const names = (code.match(/\$[A-Za-z0-9]+/g) ?? []).map((v) => v.slice(1));
+  for (const m of code.matchAll(/Inputs\.([A-Za-z0-9_]+)/g)) names.push(m[1]);
+  for (const name of names)
+    if (!('storageFilterValue-' + name in out)) out['storageFilterValue-' + name] = { type: '*', coerce: 'none', connectionsOnly: true, displayName: name, group: 'Filter Values', undriven: 'the Javascript filter is not in this spec (header)' };
+  return out;
 }
 
 /**

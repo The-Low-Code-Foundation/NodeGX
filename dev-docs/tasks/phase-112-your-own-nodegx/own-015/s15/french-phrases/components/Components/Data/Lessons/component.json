@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3bb9ba18-c3c2-5af6-84da-6e26db1a60ab",
+  "name": "Lessons",
+  "path": "/Components/Data/Lessons",
+  "type": "visual",
+  "created": "2026-10-12T12:57:43.122Z",
+  "modified": "2026-10-12T12:57:43.122Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The 3 lessons and their phrases, as one shared static source."
+}

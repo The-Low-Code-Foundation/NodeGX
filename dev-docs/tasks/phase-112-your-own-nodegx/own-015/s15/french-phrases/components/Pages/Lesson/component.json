@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "bf727ba8-df9b-5547-853b-d7bd91bbd3ee",
+  "name": "Lesson",
+  "path": "/Pages/Lesson",
+  "type": "page",
+  "created": "2026-10-12T13:00:32.986Z",
+  "modified": "2026-10-12T13:00:32.986Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One lesson's phrases, tap-to-hear, plus a Mark lesson complete action that upserts Progress by lessonId."
+}

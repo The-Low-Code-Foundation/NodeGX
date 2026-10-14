@@ -74,10 +74,25 @@ export interface MagicLinkConfig {
   allowSignup: boolean;
 }
 
+/**
+ * SRK-001: a six-digit code by email, typed into the app. The same proof as a
+ * magic link (control of the inbox) without a link to tap: an installed PWA is
+ * a different browser context from the one a mail app opens a link in, so a
+ * link signs the person in to Safari and leaves the app signed out.
+ */
+export interface EmailCodeConfig {
+  enabled: boolean;
+  /** Code lifetime. Shorter than a link's: six digits can be guessed, a link cannot. */
+  ttlMinutes: number;
+  /** May an unknown address create an account by typing a code? */
+  allowSignup: boolean;
+}
+
 export interface AuthConfig {
   version: 1;
   providers: AuthProvider[];
   magicLink: MagicLinkConfig;
+  emailCode: EmailCodeConfig;
   /**
    * Absolute app origins the post-sign-in redirect may target.
    *
@@ -175,6 +190,7 @@ export function defaultAuthConfig(): AuthConfig {
     version: 1,
     providers: [],
     magicLink: { enabled: false, ttlMinutes: 15, allowSignup: true },
+    emailCode: { enabled: false, ttlMinutes: 10, allowSignup: true },
     redirectAllowList: [],
     linking: { autoLinkVerifiedEmail: true },
     sessions: { idleDays: DEFAULT_SESSION_IDLE_DAYS }
@@ -273,6 +289,25 @@ export function validateAuthConfig(candidate: unknown): string[] {
           errors.push('magicLink.ttlMinutes must be a positive number');
         } else if (m.ttlMinutes > 24 * 60) {
           errors.push('magicLink.ttlMinutes must be at most 1440 (24h) — a long-lived magic link is a long-lived credential');
+        }
+      }
+    }
+  }
+
+  if (c.emailCode !== undefined) {
+    if (!c.emailCode || typeof c.emailCode !== 'object') {
+      errors.push('emailCode must be an object');
+    } else {
+      const m = c.emailCode as Partial<EmailCodeConfig>;
+      if (m.enabled !== undefined && typeof m.enabled !== 'boolean') errors.push('emailCode.enabled must be a boolean');
+      if (m.allowSignup !== undefined && typeof m.allowSignup !== 'boolean') {
+        errors.push('emailCode.allowSignup must be a boolean');
+      }
+      if (m.ttlMinutes !== undefined) {
+        if (typeof m.ttlMinutes !== 'number' || !Number.isFinite(m.ttlMinutes) || m.ttlMinutes <= 0) {
+          errors.push('emailCode.ttlMinutes must be a positive number');
+        } else if (m.ttlMinutes > 60) {
+          errors.push('emailCode.ttlMinutes must be at most 60 — six digits are guessable, so a code must not live long');
         }
       }
     }

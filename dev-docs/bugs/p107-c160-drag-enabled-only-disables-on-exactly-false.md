@@ -2,11 +2,13 @@
 id: P107-C160
 title: Drag — Enabled disables dragging only on exactly `false`: a wired `0` or the text "false" leaves the element draggable, while the description reads as "off"
 status: fixed
+commit: a94119947
 severity: low
 area: runtime / Drag (noodl-viewer-react/src/components/visual/Drag/Drag.tsx :262; the node's `inputProps.enabled`, noodl-viewer-react/src/nodes/visual/drag.ts :162-168)
 found: P107 NSP-018 s77, 2026-10-10 — writing the node's rules in words
 kit: node-spec
 evidence: read on the runtime 2026-10-10 — Drag.tsx :262 `disabled={props.enabled === false}`; drag.ts :162-168 declares `enabled` as an `inputProps` boolean with no `set`, so the generated setter (react-component-node.ts `defineRegularInputProp`, the final `else` branch: `props[name] = value`) writes the wire's value as it came; nothing coerces it. The spec records it (packages/nodegx-node-spec/src/nodes/drag.ts :215 `enabled: { type: 'boolean', coerce: 'none', … examples: [true, false, 0, 'false'] }`; :506 `… || s.shown.enabled === false) return …` — only the exact `false` refuses the press)
+regression: packages/nodegx-node-spec/scenarios/Drag.json "Enabled wired 0 or the text 'false' disables dragging like false (row C160)" — red on the `=== false` runtime (s92 control)
 ---
 
 Drag's Enabled port is a boolean, default true, described as "Lets the user drag this element; when off it still renders and

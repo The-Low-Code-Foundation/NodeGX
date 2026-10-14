@@ -1,0 +1,118 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4519d10e-ff75-5dae-89b5-c58db12ba7d4",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sf-root",
+      "type": "Group",
+      "label": "Select field",
+      "children": [
+        "sf-label",
+        "sf-dropdown"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "sf-label",
+      "type": "Text",
+      "label": "Label",
+      "parent": "sf-root",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "sf-dropdown",
+      "type": "net.noodl.controls.options",
+      "label": "Dropdown",
+      "parent": "sf-root",
+      "parameters": {
+        "backgroundColor": "var(--background)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "showChevron": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "sf-ci",
+      "type": "Component Inputs",
+      "label": "Select inputs",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "options",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "placeholder",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "sf-co",
+      "type": "Component Outputs",
+      "label": "Select outputs",
+      "ports": [
+        {
+          "name": "value",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "sf-root"
+  ]
+}

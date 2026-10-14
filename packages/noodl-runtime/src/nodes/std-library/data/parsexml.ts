@@ -124,11 +124,11 @@ const ParseXMLNode: NodeDefinitionOptions = {
     },
     maxBytes: {
       type: 'number',
-      displayName: 'Max Bytes',
+      displayName: 'Max Characters',
       group: 'General',
       default: DEFAULT_MAX_BYTES,
       description:
-        'Refuse a document larger than this, before parsing it. A big document costs many times ' +
+        'Refuse a document longer than this many characters (not bytes), before parsing it. A big document costs many times ' +
         'its own size in memory once it is an object, and a server can always send more than you expected',
       set: function (this: ParseXMLNodeInstance, value: number) {
         const n = Number(value);

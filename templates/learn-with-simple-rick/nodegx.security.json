@@ -1,0 +1,428 @@
+{
+  "version": 1,
+  "devOpen": false,
+  "defaults": {
+    "permissions": {
+      "find": "nobody",
+      "get": "nobody",
+      "create": "nobody",
+      "update": "nobody",
+      "delete": "nobody"
+    },
+    "creatorOwns": false
+  },
+  "collections": {
+    "Learner": {
+      "permissions": {
+        "find": [
+          "role:staff",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Learner",
+                  "by": "login"
+                }
+              ],
+              "maxDepth": 1
+            }
+          }
+        ],
+        "get": [
+          "role:staff",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Learner",
+                  "by": "login"
+                }
+              ],
+              "maxDepth": 1
+            }
+          }
+        ],
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "fields": {
+        "notes": {
+          "read": "role:staff"
+        },
+        "aliases": {
+          "read": "role:staff"
+        }
+      }
+    },
+    "LearnerHistory": {
+      "permissions": {
+        "find": "role:staff",
+        "get": "role:staff",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "Conversation": {
+      "permissions": {
+        "find": [
+          "role:staff",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Learner",
+                  "by": "login"
+                },
+                {
+                  "from": "Conversation",
+                  "by": "learner"
+                }
+              ],
+              "maxDepth": 2
+            }
+          }
+        ],
+        "get": [
+          "role:staff",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Learner",
+                  "by": "login"
+                },
+                {
+                  "from": "Conversation",
+                  "by": "learner"
+                }
+              ],
+              "maxDepth": 2
+            }
+          }
+        ],
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "learner"
+            ]
+          }
+        }
+      }
+    },
+    "ConversationHistory": {
+      "permissions": {
+        "find": "role:staff",
+        "get": "role:staff",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "Message": {
+      "permissions": {
+        "find": [
+          "role:staff",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Learner",
+                  "by": "login"
+                },
+                {
+                  "from": "Conversation",
+                  "by": "learner"
+                },
+                {
+                  "from": "Message",
+                  "by": "conversation"
+                }
+              ],
+              "maxDepth": 3
+            }
+          }
+        ],
+        "get": [
+          "role:staff",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Learner",
+                  "by": "login"
+                },
+                {
+                  "from": "Conversation",
+                  "by": "learner"
+                },
+                {
+                  "from": "Message",
+                  "by": "conversation"
+                }
+              ],
+              "maxDepth": 3
+            }
+          }
+        ],
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "conversation"
+            ]
+          }
+        }
+      }
+    },
+    "MessageHistory": {
+      "permissions": {
+        "find": "role:staff",
+        "get": "role:staff",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "Progress": {
+      "permissions": {
+        "find": [
+          "role:staff",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Learner",
+                  "by": "login"
+                },
+                {
+                  "from": "Conversation",
+                  "by": "learner"
+                },
+                {
+                  "from": "Progress",
+                  "by": "conversation"
+                }
+              ],
+              "maxDepth": 3
+            }
+          }
+        ],
+        "get": [
+          "role:staff",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Learner",
+                  "by": "login"
+                },
+                {
+                  "from": "Conversation",
+                  "by": "learner"
+                },
+                {
+                  "from": "Progress",
+                  "by": "conversation"
+                }
+              ],
+              "maxDepth": 3
+            }
+          }
+        ],
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "conversation"
+            ]
+          }
+        }
+      }
+    },
+    "ProgressHistory": {
+      "permissions": {
+        "find": "role:staff",
+        "get": "role:staff",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "CoachNote": {
+      "permissions": {
+        "find": "role:staff",
+        "get": "role:staff",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "learner",
+              "conversation",
+              "message"
+            ]
+          }
+        }
+      }
+    },
+    "CoachNoteHistory": {
+      "permissions": {
+        "find": "role:staff",
+        "get": "role:staff",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "Objective": {
+      "permissions": {
+        "find": "role:staff",
+        "get": "role:staff",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "learner"
+            ]
+          }
+        }
+      }
+    },
+    "ObjectiveHistory": {
+      "permissions": {
+        "find": "role:staff",
+        "get": "role:staff",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "Session": {
+      "permissions": {
+        "find": "role:staff",
+        "get": "role:staff",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "learner",
+              "conversation"
+            ]
+          }
+        }
+      }
+    },
+    "SessionHistory": {
+      "permissions": {
+        "find": "role:staff",
+        "get": "role:staff",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "PushSubscription": {
+      "permissions": {
+        "find": "role:staff",
+        "get": "role:staff",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "learner"
+            ]
+          }
+        }
+      }
+    },
+    "PushSubscriptionHistory": {
+      "permissions": {
+        "find": "role:staff",
+        "get": "role:staff",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    }
+  },
+  "functions": {
+    "sendMessage": {
+      "call": "authenticated"
+    },
+    "setPrefs": {
+      "call": "authenticated"
+    },
+    "resetConversation": {
+      "call": "authenticated"
+    },
+    "markProgress": {
+      "call": "authenticated"
+    },
+    "subscribePush": {
+      "call": "authenticated"
+    },
+    "addLearner": {
+      "call": "role:staff"
+    },
+    "updateLearner": {
+      "call": "role:staff"
+    },
+    "publishThread": {
+      "call": "role:staff"
+    },
+    "appendMessages": {
+      "call": "role:staff"
+    },
+    "replyAsRick": {
+      "call": "role:staff"
+    },
+    "saveCoachNote": {
+      "call": "role:staff"
+    },
+    "saveObjective": {
+      "call": "role:staff"
+    },
+    "saveSession": {
+      "call": "role:staff"
+    },
+    "setConversation": {
+      "call": "role:staff"
+    }
+  },
+  "files": {
+    "upload": "nobody",
+    "read": "nobody",
+    "delete": "nobody"
+  },
+  "signup": "nobody"
+}

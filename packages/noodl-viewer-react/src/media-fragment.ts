@@ -47,6 +47,15 @@ function seconds(value: unknown): number | undefined {
 }
 
 /**
+ * P107-C161, ruled R27: where Restart and Reset seek to — Start Time, read as the fragment reads it, or second 0 when there is
+ * none. A seek to second 0 with a Start Time set played the seconds the Start Time was there to skip, and left the fragment, so
+ * End Time stopped bounding playback too.
+ */
+export function startSeconds(startTime?: unknown): number {
+  return seconds(startTime) ?? 0;
+}
+
+/**
  * Add or replace the `#t=` fragment on `src` according to the two ports.
  *
  * @param src the resolved source URL, or `undefined`/empty for a node with no source yet

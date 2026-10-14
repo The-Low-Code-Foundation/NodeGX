@@ -1,5 +1,7 @@
 # Phase 97 — The way out is the reason to stay
 
+**2026-10-14 — waits on Richard's read (AC8), [board](../../BOARD.md) §3; closes on it.** No session opens here.
+
 **Scoped:** 2026-09-18, from Richard's question in session — *"what would be the easiest, most
 logical path to moving from SQLite to another DB type"* — and a measurement of the persistence seam
 taken the same afternoon at `cline-dev` HEAD `df60eb6f5`.

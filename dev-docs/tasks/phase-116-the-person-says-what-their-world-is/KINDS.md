@@ -1,6 +1,6 @@
 # The relation kinds, read off the apps on this machine
 
-**Counts are about these 8 sources and no others** (ONT-000 §5): `template:members-area`, `template:nightbook`, `template:planning`, `template:todo-list`, `lessons`, `acme`, `tirion`, `sentinel`. Generated 2026-10-11 by `scripts/ontology/census.js` — do not edit by hand; edit `kinds.hand.json` and regenerate. Every source was present.
+**Counts are about these 9 sources and no others** (ONT-000 §5): `template:learn-with-simple-rick`, `template:members-area`, `template:nightbook`, `template:planning`, `template:todo-list`, `lessons`, `acme`, `tirion`, `sentinel`. Generated 2026-10-12 by `scripts/ontology/census.js` — do not edit by hand; edit `kinds.hand.json` and regenerate. Every source was present.
 
 A kind enters this list only with an evidence row that names a file and a line, or a document and a heading; a kind with one row is marked **(1)**; a kind with none makes the script fail. A row is one (collection, field) pair, so a junction contributes one row per end and a relation seen in several places is one row with its sightings counted. The private sources' rows (the membership business and the two prototypes) are held outside the repository (README R6); only their counts are here. The sentence is written per kind and read per row with the row's names in it.
 
@@ -8,6 +8,7 @@ A kind enters this list only with an evidence row that names a file and a line, 
 
 | source | kind | collections | fields seen | read from |
 |---|---|---|---|---|
+| `template:learn-with-simple-rick` | in-repo | 16 | 0 | the files named in the script header |
 | `template:members-area` | in-repo | 5 | 37 | the files named in the script header |
 | `template:nightbook` | in-repo | 5 | 60 | the files named in the script header |
 | `template:planning` | in-repo | 8 | 265 | the files named in the script header |
@@ -19,23 +20,23 @@ A kind enters this list only with an evidence row that names a file and a line, 
 
 ## The kinds
 
-| kind | a person's sentence | rows | `members-area` | `nightbook` | `planning` | `todo-list` | `lessons` | `acme` | `tirion` | `sentinel` |
-|---|---|---|---|---|---|---|---|---|---|---|
-| **belongs-to** | each {from} is attached to one {to} | 78 | 1 | · | 7 | 1 | 30 | 15 | 3 | 21 |
-| **is-on** | a {from} is on a {to} for a while, with details of its own | 20 | 1 | · | · | · | 9 | 8 | 2 | · |
-| **together** | a {from} and a {to} go together | 4 | · | · | · | · | · | · | · | 4 |
-| **one-of** | a {from}'s {field} is one of a fixed list | 24 | · | · | · | · | · | 24 | · | · |
-| **many-by-list** | a {from} carries a list of {to} on itself | 8 | · | · | · | · | · | · | 8 | · |
-| **part-of-tree** (1) | a {from} can sit under another {from} | 1 | · | · | · | · | · | · | · | 1 |
-| **exists-elsewhere** | a {from} also exists in another system, known there by its own id | 16 | · | · | · | · | · | 4 | 11 | 1 |
-| **same-as** | two {from}s turned out to be one thing | 5 | · | · | · | · | · | 2 | 1 | 2 |
-| **ends** | a {from} can end without being deleted | 13 | · | · | · | · | 6 | 4 | 3 | · |
-| **happened-to** | something happened to a {from} at a time, and the record of it is kept | 44 | · | · | 1 | 2 | 14 | 14 | 11 | 2 |
-| **owned-by** | a {from} is seen and changed by whoever it belongs to, and by nobody else unless said | 71 | 8 | · | 8 | 10 | · | 4 | 41 | · |
-| **extends** | a {from} is extra detail about one {to}, at most one each | 11 | · | · | · | · | 2 | 1 | 1 | 7 |
-| **by-name** | a {from} names its {to} by something a person could retype (an email, a code) | 6 | · | · | · | · | 6 | · | · | · |
-| **points-at-one-of** | a {from} points at one thing that may be any of several kinds, and says which | 2 | · | · | · | · | 2 | · | · | · |
-| **settled** | a {from} is agreed at some point, and after that it stays as it was agreed | 8 | · | 1 | 1 | · | 4 | · | 2 | · |
+| kind | a person's sentence | rows | `learn-with-simple-rick` | `members-area` | `nightbook` | `planning` | `todo-list` | `lessons` | `acme` | `tirion` | `sentinel` |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| **belongs-to** | each {from} is attached to one {to} | 78 | · | 1 | · | 7 | 1 | 30 | 15 | 3 | 21 |
+| **is-on** | a {from} is on a {to} for a while, with details of its own | 20 | · | 1 | · | · | · | 9 | 8 | 2 | · |
+| **together** | a {from} and a {to} go together | 4 | · | · | · | · | · | · | · | · | 4 |
+| **one-of** | a {from}'s {field} is one of a fixed list | 24 | · | · | · | · | · | · | 24 | · | · |
+| **many-by-list** | a {from} carries a list of {to} on itself | 8 | · | · | · | · | · | · | · | 8 | · |
+| **part-of-tree** (1) | a {from} can sit under another {from} | 1 | · | · | · | · | · | · | · | · | 1 |
+| **exists-elsewhere** | a {from} also exists in another system, known there by its own id | 16 | · | · | · | · | · | · | 4 | 11 | 1 |
+| **same-as** | two {from}s turned out to be one thing | 5 | · | · | · | · | · | · | 2 | 1 | 2 |
+| **ends** | a {from} can end without being deleted | 13 | · | · | · | · | · | 6 | 4 | 3 | · |
+| **happened-to** | something happened to a {from} at a time, and the record of it is kept | 44 | · | · | · | 1 | 2 | 14 | 14 | 11 | 2 |
+| **owned-by** | a {from} is seen and changed by whoever it belongs to, and by nobody else unless said | 71 | · | 8 | · | 8 | 10 | · | 4 | 41 | · |
+| **extends** | a {from} is extra detail about one {to}, at most one each | 11 | · | · | · | · | · | 2 | 1 | 1 | 7 |
+| **by-name** | a {from} names its {to} by something a person could retype (an email, a code) | 6 | · | · | · | · | · | 6 | · | · | · |
+| **points-at-one-of** | a {from} points at one thing that may be any of several kinds, and says which | 2 | · | · | · | · | · | 2 | · | · | · |
+| **settled** | a {from} is agreed at some point, and after that it stays as it was agreed | 8 | · | · | 1 | 1 | · | 4 | · | 2 | · |
 
 ### belongs-to
 
@@ -332,6 +333,7 @@ A kind enters this list only with an evidence row that names a file and a line, 
 
 | source | deepest path (hops) | how it was counted | the sentence it stands for |
 |---|---|---|---|
+| `template:learn-with-simple-rick` | 1 | a Query Records filter names one field of the collection it queries |  |
 | `template:members-area` | 1 | a Query Records filter names one field of the collection it queries | the members of one association, by the person signed in |
 | `template:nightbook` | 1 | a Query Records filter names one field of the collection it queries | one page, by its id |
 | `template:planning` | 1 | a Query Records filter names one field of the collection it queries | the blocks of one project |
@@ -363,12 +365,12 @@ Not kinds. Four things a Frappe DocType says about a kind of record, looked for 
 
 **The detectors' reach, in (collection, field) pairs read:** `members-area` 37, `nightbook` 60, `planning` 265, `todo-list` 61, `lessons` 153, `acme` 133, `tirion` 414, `sentinel` 199. A template's fields are the ones its record nodes write or filter on; acme's are the field definitions in its schema scripts (the CMS's own UI-made fields are not read); tirion's the columns of its `CREATE TABLE` and `ADD COLUMN` statements; sentinel's the `Column(` lines of its models.
 
-| borrow | a person's sentence | rows kept | `members-area` | `nightbook` | `planning` | `todo-list` | `lessons` | `acme` | `tirion` | `sentinel` |
-|---|---|---|---|---|---|---|---|---|---|---|
-| **secret** | Some details on a record are not for everyone who can see the record, and the system asked me which ones before anyone could read them. | 16 | 1 | 3 | · | · | · | 8 | 4 | · |
-| **settled** | Once something is agreed, it stays as it was agreed. To change it I withdraw it or make a new one that says which one it replaces, and the old one is still there. | 8 | · | 1 | 1 | · | 4 | · | 2 | · |
-| **facts** | The system asked whether there is only one of something, whether people read its number aloud, what I call one in a list, and whether I need to know who changed what. | 57 | 6 | 1 | 4 | 3 | 15 | 10 | 8 | 10 |
-| **sometimes** | A detail that only matters in some cases is asked for in those cases, and never left empty when it mattered. | 9 | · | · | 2 | 2 | 3 | 2 | · | · |
+| borrow | a person's sentence | rows kept | `learn-with-simple-rick` | `members-area` | `nightbook` | `planning` | `todo-list` | `lessons` | `acme` | `tirion` | `sentinel` |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| **secret** | Some details on a record are not for everyone who can see the record, and the system asked me which ones before anyone could read them. | 16 | · | 1 | 3 | · | · | · | 8 | 4 | · |
+| **settled** | Once something is agreed, it stays as it was agreed. To change it I withdraw it or make a new one that says which one it replaces, and the old one is still there. | 8 | · | · | 1 | 1 | · | 4 | · | 2 | · |
+| **facts** | The system asked whether there is only one of something, whether people read its number aloud, what I call one in a list, and whether I need to know who changed what. | 65 | 8 | 6 | 1 | 4 | 3 | 15 | 10 | 8 | 10 |
+| **sometimes** | A detail that only matters in some cases is asked for in those cases, and never left empty when it mattered. | 9 | · | · | · | 2 | 2 | 3 | 2 | · | · |
 
 ### secret
 
@@ -433,7 +435,7 @@ Not kinds. Four things a Frappe DocType says about a kind of record, looked for 
   | only-one — there is only one | 2 | 1 | 1 | members-area 1, planning 1 |
   | read-aloud — people read its number aloud | 3 | 2 | 8 | acme 1, sentinel 2 |
   | called-by — what you call one in a list | 47 | 1 | 1 | members-area 5, nightbook 1, planning 3, todo-list 3, lessons 13, acme 8, tirion 6, sentinel 8 |
-  | who-changed — who changed what | 5 | 2 | 10 | lessons 2, acme 1, tirion 2 |
+  | who-changed — who changed what | 13 | 2 | 10 | learn-with-simple-rick 8, lessons 2, acme 1, tirion 2 |
 
   In this repo:
 
@@ -464,6 +466,14 @@ Not kinds. Four things a Frappe DocType says about a kind of record, looked for 
   | `lessons|ProgrammeDimension.label@called-by` | title-field | **yes**: what one is called in a list | `templates/digital-bricks-training/backend/schema.json:916` |
   | `lessons|ProjectContext.version@who-changed` | version-field | **neighbour**: a counter that Lesson.projectContextVersion reads: provenance | `templates/digital-bricks-training/backend/schema.json:1054` |
   | `lessons|SessionPrep.resourceLabel@called-by` | title-field | **yes**: what one is called in a list | `templates/digital-bricks-training/backend/schema.json:1091` |
+  | `template:learn-with-simple-rick|CoachNoteHistory.(collection)@who-changed` | history-collection | **yes**: a history beside every collection (who changed what, when, before and after), because Richard asked for one on everything (P119 BRIEF.md R11); the world's own history answer projects it, and a cloud function writes each row with its history row | `templates/learn-with-simple-rick/nodegx.security.json:286` |
+  | `template:learn-with-simple-rick|ConversationHistory.(collection)@who-changed` | history-collection | **yes**: a history beside every collection (who changed what, when, before and after), because Richard asked for one on everything (P119 BRIEF.md R11); the world's own history answer projects it, and a cloud function writes each row with its history row | `templates/learn-with-simple-rick/nodegx.security.json:119` |
+  | `template:learn-with-simple-rick|LearnerHistory.(collection)@who-changed` | history-collection | **yes**: a history beside every collection (who changed what, when, before and after), because Richard asked for one on everything (P119 BRIEF.md R11); the world's own history answer projects it, and a cloud function writes each row with its history row | `templates/learn-with-simple-rick/nodegx.security.json:58` |
+  | `template:learn-with-simple-rick|MessageHistory.(collection)@who-changed` | history-collection | **yes**: a history beside every collection (who changed what, when, before and after), because Richard asked for one on everything (P119 BRIEF.md R11); the world's own history answer projects it, and a cloud function writes each row with its history row | `templates/learn-with-simple-rick/nodegx.security.json:188` |
+  | `template:learn-with-simple-rick|ObjectiveHistory.(collection)@who-changed` | history-collection | **yes**: a history beside every collection (who changed what, when, before and after), because Richard asked for one on everything (P119 BRIEF.md R11); the world's own history answer projects it, and a cloud function writes each row with its history row | `templates/learn-with-simple-rick/nodegx.security.json:313` |
+  | `template:learn-with-simple-rick|ProgressHistory.(collection)@who-changed` | history-collection | **yes**: a history beside every collection (who changed what, when, before and after), because Richard asked for one on everything (P119 BRIEF.md R11); the world's own history answer projects it, and a cloud function writes each row with its history row | `templates/learn-with-simple-rick/nodegx.security.json:257` |
+  | `template:learn-with-simple-rick|PushSubscriptionHistory.(collection)@who-changed` | history-collection | **yes**: a history beside every collection (who changed what, when, before and after), because Richard asked for one on everything (P119 BRIEF.md R11); the world's own history answer projects it, and a cloud function writes each row with its history row | `templates/learn-with-simple-rick/nodegx.security.json:368` |
+  | `template:learn-with-simple-rick|SessionHistory.(collection)@who-changed` | history-collection | **yes**: a history beside every collection (who changed what, when, before and after), because Richard asked for one on everything (P119 BRIEF.md R11); the world's own history answer projects it, and a cloud function writes each row with its history row | `templates/learn-with-simple-rick/nodegx.security.json:341` |
   | `template:members-area|Announcement.title@called-by` | title-field | **yes**: what one is called in a list | `templates/members-area/components/Pages/Post/nodes.json:779` |
   | `template:members-area|Association.(collection)@only-one` | hand — claimAssociation refuses unless the association is still unclaimed | **yes**: one association per app; claimAssociation makes it only while none exists | `templates/members-area/components/__cloud__/claimAssociation/nodes.json:70` |
   | `template:members-area|Association.name@called-by` | title-field | **yes**: what one is called in a list | `templates/members-area/components/__cloud__/claimAssociation/nodes.json:235` |
@@ -514,11 +524,11 @@ Not kinds. Four things a Frappe DocType says about a kind of record, looked for 
 
 Not kinds, not Frappe's: a rule over a set of records ("a cohort holds at most twenty"). Found in the apps' **code** — a row count compared with a limit near a create, a sum compared with a total, two date ranges compared — and in a field that holds a limit; each candidate classified by meaning, as above. The same code pass adds **read-aloud** candidates where an app hands out a number itself (a sequence, a counter formatted into text, the highest plus one): ONT-015's warrant, counted under *facts*. Each detector is run on a line it must catch and a near-miss it must not before any source is read (`ACROSS_CONTROLS`), so a zero below is a measured zero. Never read: tests, fixtures, seeds, sandboxes, data generators, vendored code. 
 
-**The code read, in lines:** `members-area` 17085, `nightbook` 42334, `planning` 59734, `todo-list` 44757, `acme` 56119, `tirion` 38104, `sentinel` 7506. A template's lines are the scripts inside its components' node parameters; acme's `src` and `scripts`; tirion's `api`, `pipelines`, `ui/src` and `db`; sentinel's `backend`.
+**The code read, in lines:** `learn-with-simple-rick` 111, `members-area` 17085, `nightbook` 42334, `planning` 59744, `todo-list` 44757, `acme` 56119, `tirion` 38104, `sentinel` 7506. A template's lines are the scripts inside its components' node parameters; acme's `src` and `scripts`; tirion's `api`, `pipelines`, `ui/src` and `db`; sentinel's `backend`.
 
-| rule | a person's sentence | rows kept | `members-area` | `nightbook` | `planning` | `todo-list` | `lessons` | `acme` | `tirion` | `sentinel` |
-|---|---|---|---|---|---|---|---|---|---|---|
-| **across** | A cohort holds at most twenty learners, the bills never add up to more than the budget, and no two bookings of a room overlap. | 2 | · | 1 | · | · | · | 1 | · | · |
+| rule | a person's sentence | rows kept | `learn-with-simple-rick` | `members-area` | `nightbook` | `planning` | `todo-list` | `lessons` | `acme` | `tirion` | `sentinel` |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| **across** | A cohort holds at most twenty learners, the bills never add up to more than the budget, and no two bookings of a room overlap. | 2 | · | · | 1 | · | · | · | 1 | · | · |
 
 ### across
 

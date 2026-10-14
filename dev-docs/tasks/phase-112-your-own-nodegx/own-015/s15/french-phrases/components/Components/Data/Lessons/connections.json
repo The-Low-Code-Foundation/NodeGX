@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3bb9ba18-c3c2-5af6-84da-6e26db1a60ab",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lessons_data",
+      "fromProperty": "items",
+      "toId": "lessons_outputs",
+      "toProperty": "lessons"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "049ae438-7a87-5635-8cbf-800db0a54117",
+  "name": "MessageBubble",
+  "path": "/Components/MessageBubble",
+  "type": "visual",
+  "created": "2026-10-12T17:52:19.310Z",
+  "modified": "2026-10-12T17:52:19.310Z",
+  "modifiedBy": "noodl-mcp"
+}

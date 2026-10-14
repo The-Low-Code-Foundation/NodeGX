@@ -19,8 +19,10 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import { BackendClient, listBackends, requireBackend } from '../backend/client';
+import { ensureEnvPlaceholder, readEnvSecret } from '../backend/envSecret';
 import { writeProposal } from '../backend/workflowProposals';
 import { ToolError } from '../errors';
+import type { ProjectBinding } from '../project/ProjectBinding';
 import { guarded, jsonResult } from './util';
 
 const ruleValue = z
@@ -583,7 +585,7 @@ export function registerBackendReadTools(server: McpServer): void {
   );
 }
 
-export function registerBackendWriteTools(server: McpServer): void {
+export function registerBackendWriteTools(server: McpServer, binding?: ProjectBinding): void {
   server.registerTool(
     'set_collection_permissions',
     {
@@ -798,18 +800,57 @@ export function registerBackendWriteTools(server: McpServer): void {
       title: 'Set a cloud function secret',
       description:
         'Store a credential (an API key, a token) on a running backend for cloud functions to read with a Secret ' +
-        'node of the same name. The value is stored in the backend\'s secrets.json, never in the project and never ' +
-        'echoed back. Use this for any key a page must not see. Setting a name again replaces its value.',
+        'node of the same name. It lands in the backend\'s secrets.json, never in the project or the page, and is ' +
+        'never echoed. LEAVE OUT `value` (the person\'s way, P112-S14-PERSONKEY): the first call adds `NAME=` to ' +
+        "the project's .env and tells you what to say; once the person has pasted the key there and saved, call it " +
+        'again and it goes from the file to the backend without entering this conversation. Never open .env ' +
+        'yourself, and never ask for a key in the chat.',
       inputSchema: {
         backendId: z.string().optional(),
         name: z.string().describe('The name a Secret node asks for, e.g. "GOOGLE_TTS_KEY". Letters, digits, _ . -'),
-        value: z.string().describe('The secret itself — write-only')
+        value: z.string().optional().describe('Only if the person typed the key to you on purpose. Write-only.')
       }
     },
     guarded(async ({ backendId, name, value }) => {
+      if (value !== undefined) {
+        const client = await requireBackend(backendId);
+        const { json } = await client.request('PUT', `/admin/secrets/${encodeURIComponent(name)}`, { value });
+        return jsonResult(json);
+      }
+      const projectDir = binding?.peek()?.projectDir;
+      if (!projectDir) {
+        throw new ToolError(
+          'invalid-argument',
+          'No project is open, so there is no .env to read the key from. Open the project first (open_project).'
+        );
+      }
+      const reading = readEnvSecret(projectDir, name);
+      if (reading.state !== 'filled') {
+        const { file } = ensureEnvPlaceholder(projectDir, name);
+        return jsonResult({
+          set: false,
+          waitingForPerson: true,
+          file,
+          line: `${name}=`,
+          tellThePerson:
+            `Open the file ".env" in your project folder (${file}). On the line ${name}=, paste your key right ` +
+            'after the = sign, with no spaces, then save the file and tell me you are done. The file stays on ' +
+            'your computer: it is never published and git ignores it.',
+          next: `When the person says it is done, call set_function_secret { name: "${name}" } again (no value).`
+        });
+      }
       const client = await requireBackend(backendId);
-      const { json } = await client.request('PUT', `/admin/secrets/${encodeURIComponent(name)}`, { value });
-      return jsonResult(json);
+      const { json } = await client.request('PUT', `/admin/secrets/${encodeURIComponent(name)}`, {
+        value: reading.value
+      });
+      return jsonResult({
+        ...(json as object),
+        set: true,
+        name,
+        from: reading.file,
+        characters: reading.value.length,
+        note: 'Sent from .env to the backend. The value did not pass through this conversation.'
+      });
     })
   );
 

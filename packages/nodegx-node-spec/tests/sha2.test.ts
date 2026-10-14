@@ -3,10 +3,10 @@
  * 300 bytes (that crosses every padding boundary: 55/56/64 for SHA-256, 111/112/128 for the
  * 512 family), the standard's vectors, and a 100 KB message.
  */
-import { createHash, randomBytes } from 'crypto';
+import { createHash, createHmac, randomBytes } from 'crypto';
 
 import { sha256, sha384, sha512 } from '../src/sha2';
-import { digestBytes } from '../src/world';
+import { digestBytes, hmacBytes } from '../src/world';
 
 const hex = (b: Uint8Array) => Buffer.from(b).toString('hex');
 const node = (alg: string, b: Uint8Array) => createHash(alg).update(b).digest('hex');
@@ -42,5 +42,21 @@ describe('sha2', () => {
     expect(hex(digestBytes('SHA-384', b))).toBe(node('sha384', b));
     expect(hex(digestBytes('SHA-512', b))).toBe(node('sha512', b));
     expect(() => digestBytes('SHA-1', b)).toThrow('Unrecognized algorithm name: SHA-1');
+  });
+
+  test("NSP-022 — the world's hmacBytes agrees with Node's createHmac: keys of every length across the block (0 excepted), all three digests", () => {
+    for (const [alg, name, block] of [['SHA-256', 'sha256', 64], ['SHA-384', 'sha384', 128], ['SHA-512', 'sha512', 128]] as const) {
+      for (const keyLength of [1, 5, block - 1, block, block + 1, 200]) {
+        for (const dataLength of [0, 1, 55, 56, 64, 111, 112, 128, 300]) {
+          const key = new Uint8Array(randomBytes(keyLength));
+          const data = new Uint8Array(randomBytes(dataLength));
+          expect(hex(hmacBytes(alg, key, data))).toBe(createHmac(name, key).update(data).digest('hex'));
+        }
+      }
+    }
+    // RFC 4231 test case 2
+    expect(hex(hmacBytes('SHA-256', Buffer.from('Jefe'), Buffer.from('what do ya want for nothing?')))).toBe('5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843');
+    expect(() => hmacBytes('SHA-1', Buffer.from('k'), Buffer.from('m'))).toThrow('Unrecognized algorithm name: SHA-1');
+    expect(() => hmacBytes('SHA-256', new Uint8Array(0), Buffer.from('m'))).toThrow('Zero-length key is not supported');
   });
 });

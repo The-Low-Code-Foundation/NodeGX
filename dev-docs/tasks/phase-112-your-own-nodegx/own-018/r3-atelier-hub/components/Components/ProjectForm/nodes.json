@@ -1,0 +1,350 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "72a99978-8b1a-5c58-8283-9aa3abbb4460",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pfm-card",
+      "type": "Group",
+      "label": "Project form card",
+      "children": [
+        "pfm-name",
+        "pfm-desc",
+        "pfm-client",
+        "pfm-owner",
+        "pfm-status",
+        "pfm-dates",
+        "pfm-actions"
+      ],
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "flexDirection": "column",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "paddingTop": "var(--space-5)",
+        "rowGap": "var(--space-4)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pfm-name",
+      "type": "/Components/TextField",
+      "label": "Name field",
+      "parent": "pfm-card",
+      "parameters": {
+        "label": "Project name",
+        "placeholder": "Brand identity — Maison Vernet"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pfm-desc",
+      "type": "/Components/TextField",
+      "label": "Description field",
+      "parent": "pfm-card",
+      "parameters": {
+        "label": "Description",
+        "multiline": true,
+        "placeholder": "What the project covers"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "pfm-client",
+      "type": "/Components/SelectField",
+      "label": "Client picker",
+      "parent": "pfm-card",
+      "parameters": {
+        "label": "Client",
+        "placeholder": "Choose a client"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "pfm-owner",
+      "type": "/Components/SelectField",
+      "label": "Owner picker",
+      "parent": "pfm-card",
+      "parameters": {
+        "label": "Owner",
+        "placeholder": "Who is leading this"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "pfm-status",
+      "type": "/Components/SelectField",
+      "label": "Status picker",
+      "parent": "pfm-card",
+      "parameters": {
+        "label": "Status",
+        "options": [
+          {
+            "Label": "Backlog",
+            "Value": "Backlog"
+          },
+          {
+            "Label": "In progress",
+            "Value": "In progress"
+          },
+          {
+            "Label": "In review",
+            "Value": "In review"
+          },
+          {
+            "Label": "Done",
+            "Value": "Done"
+          }
+        ],
+        "placeholder": "Choose a status"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "pfm-dates",
+      "type": "Group",
+      "label": "Dates row",
+      "parent": "pfm-card",
+      "children": [
+        "pfm-start",
+        "pfm-due"
+      ],
+      "parameters": {
+        "columnGap": "var(--space-4)",
+        "flexDirection": "row"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "pfm-start",
+      "type": "/Components/TextField",
+      "label": "Start date field",
+      "parent": "pfm-dates",
+      "parameters": {
+        "label": "Start date",
+        "placeholder": "2026-11-30"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "pfm-due",
+      "type": "/Components/TextField",
+      "label": "Due date field",
+      "parent": "pfm-dates",
+      "parameters": {
+        "label": "Due date",
+        "placeholder": "2026-12-15"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "pfm-actions",
+      "type": "Group",
+      "label": "Actions",
+      "parent": "pfm-card",
+      "children": [
+        "pfm-cancel",
+        "pfm-save"
+      ],
+      "parameters": {
+        "columnGap": "var(--space-3)",
+        "flexDirection": "row",
+        "justifyContent": "flex-end"
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "pfm-cancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "parent": "pfm-actions",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "Cancel",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "pfm-save",
+      "type": "net.noodl.controls.button",
+      "label": "Save project",
+      "parent": "pfm-actions",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "color": "var(--primary-foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "Save project",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "pfm-ci",
+      "type": "Component Inputs",
+      "label": "Form inputs",
+      "ports": [
+        {
+          "name": "recordId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "clientOptions",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "ownerOptions",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "pfm-co",
+      "type": "Component Outputs",
+      "label": "Form outputs",
+      "ports": [
+        {
+          "name": "saved",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cancelled",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "pfm-rec",
+      "type": "DbModel2",
+      "label": "Project record",
+      "parameters": {
+        "collectionName": "Project"
+      },
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "pfm-clientid",
+      "type": "Expression",
+      "label": "Client id",
+      "parameters": {
+        "expression": "typeof client === 'string' ? client : ((client && (client.id || client.objectId)) || '')"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "pfm-ownerid",
+      "type": "Expression",
+      "label": "Owner id",
+      "parameters": {
+        "expression": "typeof owner === 'string' ? owner : ((owner && (owner.id || owner.objectId)) || '')"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "pfm-isnew",
+      "type": "Expression",
+      "label": "Is new project",
+      "parameters": {
+        "expression": "!recordId"
+      },
+      "x": 410,
+      "y": 1600
+    },
+    {
+      "id": "pfm-isnewcond",
+      "type": "Condition",
+      "label": "Create or update",
+      "x": 410,
+      "y": 1360,
+      "parameters": {
+        "runOnChange-condition": false
+      }
+    },
+    {
+      "id": "pfm-create",
+      "type": "NewDbModelProperties",
+      "label": "Create project",
+      "parameters": {
+        "collectionName": "Project"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "pfm-update",
+      "type": "SetDbModelProperties",
+      "label": "Update project",
+      "parameters": {
+        "collectionName": "Project",
+        "idSource": "explicit"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "pfm-ok",
+      "type": "Expression",
+      "label": "Required fields present",
+      "parameters": {
+        "expression": "!!(name && client && owner && status)"
+      },
+      "x": 410,
+      "y": 1480
+    }
+  ],
+  "visualRoots": [
+    "pfm-card"
+  ]
+}

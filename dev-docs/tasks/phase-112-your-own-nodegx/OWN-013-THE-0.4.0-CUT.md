@@ -4,7 +4,7 @@
 properly via main*). **Model:** **Opus** for the cut point, the gates and the measurements; the changelog and release
 notes go through the content-authoring skill.
 
-**Status: 🟡 — s12 (2026-10-11/12): G1 measured, G2 written and approved, R17 built and driven, OPENWRITES fixed (§6, §7). The version is bumped on `cline-dev` (`88366e69f`, pushed). Nothing is pushed or branched for the release yet.**
+**Status: 🟡 — s13 (2026-10-14): the first draft was BROKEN (blank window, no `fast-xml-parser`), never published. RE-CUT (R26, R27, §11): fix `0728e42f4`, everything on `cline-dev` folded in, PR #49 `release/0.4.0` → `main`. Next: #49's six required checks → merge → delete the draft + `v0.4.0` tag → re-tag → Release run → G8–G10 on the new DMG → Publish. Before s13: s12 (2026-10-11/12): `v0.4.0` TAGGED on `main` (`2a258a4b5`, PR #48, R22); the Release run builds the draft. Left: G8–G10, Publish (§9). Earlier: G1 measured, G2 written and approved, R17 built and driven, OPENWRITES fixed (§6, §7). The version is bumped on `cline-dev` (`88366e69f`, pushed). Nothing is pushed or branched for the release yet.**
 
 ## 1. The person sentence
 
@@ -27,15 +27,15 @@ was created (`gh release view v0.4.0` → not found), tag deleted on origin and 
 
 | # | gate | owner | state |
 |---|---|---|---|
-| G1 | **The cut point.** `origin/main` = `202314165` (Release 0.3.0, #47); `cline-dev` is 1,000+ commits ahead. Pick a commit, check what it carries (peers' half-done work: read each phase README's live rows), `git merge-tree --write-tree origin/main <cut>` exit 0. Branch `release/0.4.0` = the cut + the release docs commit, made through a temporary index (UPG-008 §2.1) | agent | ✅ measured s12 (§6.1); the branch is not made |
+| G1 | **The cut point.** `origin/main` = `202314165` (Release 0.3.0, #47); `cline-dev` is 1,000+ commits ahead. Pick a commit, check what it carries (peers' half-done work: read each phase README's live rows), `git merge-tree --write-tree origin/main <cut>` exit 0. Branch `release/0.4.0` = the cut + the release docs commit, made through a temporary index (UPG-008 §2.1) | agent | ✅ measured s12 (§6.1); **`release/0.4.0` = `0a271100e`** (cline-dev `b7e84fa67` + `main` merged, tree identical; R21) |
 | G2 | **CHANGELOG.md `## 0.4.0 · <date>`** — what 0.4.0 is for in one bold sentence, then New / Changed / Fixed / Good to know, plain words (the header comment). Same commit on `cline-dev` and the release branch (nodegx-web reads the primary checkout). Content-authoring skill | agent | ✅ s12 (§6.2): in CHANGELOG.md on `cline-dev`; the date is set on the tag day |
 | G3 | `GITHUB-RELEASE-0.4.0.md` (draft body) and the what's-new feed post (`whats-new-0.3.0.READY-TO-PUSH.json`'s shape) — pushed **only after Publish** (every installed editor fetches it on project open) | agent | ✅ drafted s12 (§8): `GITHUB-RELEASE-0.4.0.md`, `whats-new-0.4.0.READY-TO-PUSH.json` (copy checks clean) |
-| G4 | **The PR `release/0.4.0` → `main`**, six required checks green (*Typecheck, Lint, Test (editor), Test (platform-node), Build (viewer + editor bundles), Check build artefacts*). `enforce_admins`: red means stop. Read each run's duration. 0.3.0 had three red on first CI | CI | 🟡 s12 (§8): the last CI on `cline-dev` (`88366e69f`) had 3 of the 6 red; Typecheck and Test (editor) fixed locally, Lint's `type` fixed, Lint's `tsfixme` raised visibly (R19, `7efa3395d`). **CI on the pushed `cline-dev` (`01aeb0868`, run `38219618264`): all six required ✅**; Test (editor) 3015 specs, 0 failures, seed 19863. Release branch + PR wait for Richard |
+| G4 | **The PR `release/0.4.0` → `main`**, six required checks green (*Typecheck, Lint, Test (editor), Test (platform-node), Build (viewer + editor bundles), Check build artefacts*). `enforce_admins`: red means stop. Read each run's duration. 0.3.0 had three red on first CI | CI | 🟡 s12 (§8): the last CI on `cline-dev` (`88366e69f`) had 3 of the 6 red; Typecheck and Test (editor) fixed locally, Lint's `type` fixed, Lint's `tsfixme` raised visibly (R19, `7efa3395d`). **CI on the pushed `cline-dev` (`01aeb0868`, run `38219618264`): all six required ✅**; Test (editor) 3015 specs, 0 failures, seed 19863. **PR #48 `release/0.4.0` → `main` opened 2026-10-12 (R20/R21)**; its checks: see §8 end |
 | G5 | `npm run ci:build:editor` **on the cut tree** (a worktree with its own build output). s11 ran it in the shared checkout at `88366e69f` + peers' open edits: exit 0, so the production config itself is not broken there | agent | ✅ CI's Build (viewer + editor bundles) green at `88366e69f` (5 min, clean runner); the release run re-checks the sidecars (§8) |
 | G6 | Editor test floor **by name**. s11's `test:ci` (HEAD `120baf39`): 3,012 specs, 2 failures — SUB-006 *nonexistent-port … lists available alternatives*, and *pending project saves … re-arms a held save* (the order-dependent one) | agent | ✅ s12 (§8): cut tree `76372696` + two spec fixes, seed 44986 → 3015 specs, **1 failure by name**: *re-arms a held save* (order-dependent, known since s43) |
 | G7 | **Opening writes.** Richard ruled the release knowing opening still writes: P112-S11-PAGEPORTS (a Page's `dynamicports`), P112-S11-OPENWRITES (`nodegx.project.json` on every open). Fixed before the cut if cheap; otherwise named under *Good to know*. P112-S11-IDREPLACE is fixed (`f2505b83f`) and **undriven in the editor** — drive it on the cut | agent | 🟡 s12 (§6.3, §7): R17's copy built and **driven**; OPENWRITES **fixed and driven** (`1ed87f2ef`); IDREPLACE **driven**; PAGEPORTS still open (named under *Good to know*) |
 | G8 | **The upgrade 0.3.0 → 0.4.0**: install over 0.3.0 and open (a) a 0.3.0 project — the 4 → 5 migration runs once (ISL-018) and the project still works; (b) a project the npm kit made — it opens. P112-S11-REFUSALWORDS stays visible to anyone still on 0.3.0 opening a 0.4.0 project | agent + Richard | ⬜ |
-| G9 | The shelf: the tag run's *every authored library entry is installable*; if red, Publish library first | agent / CI | ⬜ |
+| G9 | The shelf: the tag run's *every authored library entry is installable*; if red, Publish library first | agent / CI | ✅ s12: red on the tag run (4 unreachable entries); Publish library run `38231663830` (R24) → 47/47, 36/36 |
 | G10 | Richard's drives of what 0.4.0 announces (each phase's owed driven rows — list them from the phase READMEs at the cut) | Richard | ⬜ |
 
 ## 4. The cut (after G1–G10)
@@ -168,3 +168,79 @@ required checks all green** — Typecheck (3m11s), Lint (1m06s), Test (editor) (
 red, as at `88366e69f`: Test (runtime, backend, viewer, mcp, preview), Library check (LIB-001), Docs site builds
 (HLT-013), Lesson bundles (FIX-027), Node catalog freshness. Not read this session; none blocks the merge.
 
+**The release branch and PR (2026-10-12, R21 "ship now"; then "yes, branch + PR"):** `release/0.4.0` = `0a271100e`,
+parents `b7e84fa67` (cline-dev) and `202314165` (origin/main), `git merge -s ours` after §6.1's per-file check, tree
+diff vs `b7e84fa67` = 0 lines, `packages/noodl-editor/package.json` 0.4.0. Made in the worktree `own013-cut`.
+🔴 The first attempt's `git switch` refused on a dirty file and the merge landed on the scratch branch instead (local,
+unpushed; moved back with `git branch -f`) — check the switch's exit before merging. **PR #48** opened with the merge-
+commit instruction, the checks, R17/R19/R21. Since the CI'd `01aeb0868`: `a94119947` (P107 Drag fix), `613ff7200`
+(npm 0.2.0 bump + its changelog entry, below 0.4.0's), `82221132a`/`8693f6cfd` (P112 s13), `b7e84fa67` (docs).
+
+## 9. The merge and the tag (2026-10-12, R22 "Yes, merge and tag")
+
+- PR #48's run on `0a271100e`: the six required ✅ (Test (editor) on the merge ref `6a2cce1f`: **3015 specs, 0
+  failures, seed 81716**); the five non-required red as before; GitHub *MERGEABLE / UNSTABLE*.
+- CHANGELOG dated the tag day: `## 0.4.0 · 2026-10-12` — `fefbb8968` on `cline-dev`, cherry-picked as `7162e1b83` on
+  the release branch (same blob). That push's six required ✅ (run `38228279219`).
+- **Merged** `gh pr merge 48 --merge` → `2a258a4b5` "Release 0.4.0 (#48)", second parent `7162e1b83`; tree diff main vs
+  release branch 0 lines; editor `package.json` 0.4.0.
+- **Tagged** `v0.4.0` → `2a258a4b5`, pushed (no tag existed on origin before). Release run `38228960399` (§4).
+
+## 10. The Release run (`38228960399`, 2026-10-12 09:17–09:41 UTC)
+
+| leg | result |
+|---|---|
+| linux-x64, win32-x64 | ✅ — the draft holds 7 files: `.deb`, `.AppImage`, `.rpm`, `latest-linux.yml`, `.exe`, `.exe.blockmap`, `latest.yml` |
+| darwin-arm64, darwin-x64 | ❌ — **signed** (Developer ID, Osborne Solutions) and then **refused by notarytool: "HTTP status code: 403. A required agreement is missing or has expired"**. Not code: Apple's updated agreement is unsigned (R23) |
+| merge mac update feed, verify draft release is complete | ❌ — follow from the Mac legs |
+| every authored library entry is installable | ❌ — 4 unreachable entries; fixed by Publish library (R24) |
+
+**After Richard accepts the agreement:** `gh run rerun 38228960399 --failed` re-runs the two Mac legs (publishing to the
+same draft), the library check, the feed merge and the verify step. A draft with files in it is not a green run:
+read *verify draft release is complete*.
+
+**Re-runs after Richard accepted the agreement (R23), `gh run rerun 38228960399 --failed`:**
+
+| attempt | darwin-arm64 | darwin-x64 | library | feed / verify |
+|---|---|---|---|---|
+| 2 (10:14–10:44) | ✅ signed, notarised; `.dmg`, `.zip` + blockmaps, `latest-mac.yml` in the draft | ❌ `codesign --timestamp` on `dugite/git/libexec/git-core/git`: *"A timestamp was expected but was not found"* (Apple's timestamp server) | ✅ | ❌ (x64 missing) |
+| 3 (10:44–11:16) | — | ❌ signed **and notarised**, then *"Failed to staple … code 68"*: the stapler lost its connection to `api.apple-cloudkit.com` (`NSURLErrorDomain -1005`) | — | ❌ |
+| 4 (11:17–11:43) | — | ❌ notarised, then the same staple failure (`-1005`, Error 68) | — | ❌ |
+| 5 (11:45–12:05) | — | ❌ the same again | — | ❌ |
+
+Five Intel attempts: the agreement, Apple's timestamp server once, then the ticket server three times running —
+none in the code. Apple Silicon stapled at 10:36 between them. The draft holds 12 files: Linux, Windows, Apple
+Silicon. 🔴 **Do not publish without Intel:** `latest-mac.yml` would list only the Apple Silicon files, and an Intel
+Mac on 0.3.0 would be offered them. **R25 (Richard): re-run later today, no code change.** A re-run is scheduled for
+~14:20 CEST (`gh run rerun 38228960399 --failed`). `e471cb8e6` on `cline-dev` retries the staple over 30–240 s for
+the next release (a re-run of this tag's run does not use it).
+
+## 11. Session 13 (2026-10-14, Opus) — the draft would not start; the re-cut
+
+- **Richard downloaded the draft's Apple Silicon DMG: a blank launcher,** devtools `Cannot find module
+  'fast-xml-parser'` from `src/editor/index.bundle.js`. Cause: the production webpack leaves every root
+  `node_modules` package external (`get-externals-modules.js`), and electron-builder packs only what `noodl-editor`
+  declares. Parse XML / Parse Feed (`fcf68a1c7`, `75fd8ef10`) brought it in through `noodl-runtime` and
+  `nodegx-node-spec`. **Measured on the mounted DMG's `app.asar`:** of every bare `require` in the three bundles,
+  `fast-xml-parser` is the only package missing. Linux and Windows build from the same package list (inferred, not
+  opened). A dependency walk is not the honest list: it called `deprecation` missing, but the asar holds it (the
+  editor's nested `@octokit/request-error`).
+- **Fix `0728e42f4`:** `fast-xml-parser ^4.5.7` in `noodl-editor` dependencies (+ its lock line), and
+  `build/check-packaged-modules.js` as the `afterPack` hook. It reads the packed asar and throws before signing if a
+  bundle requires a package the asar lacks. **Control pair on the real artefacts:** the 0.4.0 draft's asar → exit 1
+  naming `fast-xml-parser` only; 0.3.0's → exit 0. Not yet run inside electron-builder: the Release run is its
+  first firing (a wrong asar path would fail loud, not silent).
+- **R26 (Richard): fold in everything** on `cline-dev` since the tag (154 commits, ~45 touching the app).
+  **R27: re-tag `v0.4.0`** (the draft was never published) rather than 0.4.1.
+- **G1 again:** `git merge-tree --write-tree origin/main 0728e42f4` exit 0, the merged tree equals HEAD's (0 diff
+  lines). `release/0.4.0` fast-forwarded to `ecd5045c8` (HEAD + `main`), then `e1d99d3fd` (the changelog commit,
+  same tree as `cline-dev` `8763a64c6`). PR #49. The survey (subagent, spot-checked: `6253b4c54`, `a5abefe4d`,
+  `dd7ff4756`, `be46f18bc`, `agentConfig.ts`): no feature flag, nothing marked *do not ship*; the node version bumps
+  are spec versions with `migration: none`, so none rewrites a project on open.
+- **G2 again (`8763a64c6`):** the *two folded sections* bullet was wrong since `6253b4c54` (the *How this node works*
+  window replaced them) — rewritten. Added the fold-in's features and fixes; dated 2026-10-14 (re-date if the tag
+  lands later). Held back: the six-digit email code (`b5fba6137`, off, no switch in the app, P119 owes the client),
+  the rules column's *It warns you when* (`99625cc67`, never driven in the editor), the npm-only Vibe profile.
+  GITHUB-RELEASE-0.4.0.md and the what's-new post updated to match.
+- **G10 for Richard on the new DMG, added by the fold-in:** the *How this node works* window (signed off in dev,
+  not in a packaged build), a Counter with Min above Max, a new Aggregate Records in a cloud function.

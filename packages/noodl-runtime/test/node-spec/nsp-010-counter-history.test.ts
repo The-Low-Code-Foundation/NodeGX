@@ -71,10 +71,13 @@ describe('NSP-010 AC3 — Counter v1 records FH-022 slice 3', () => {
     const golden = JSON.parse(fs.readFileSync(path.join(GOLDEN, 'Counter.json'), 'utf8')) as Golden;
     const after = new Map(golden.scenarios.map((s) => [s.name, s.trace]));
 
+    // v1's change is FH-022's Reset. v2 (NSP-019 s95) added the editor's `diagnostic` events, which the Counter of 5 August
+    // never raised: read both sides without them, or v2's scenario would read as moved by v1
+    const v1Wire = (t: TraceEvent[]) => t.filter((e) => e.t !== 'diagnostic');
     const moved: History['scenarios'] = [];
     for (const sc of loadScenarios('Counter')) {
-      const before = canonicalise(await play(old, 'Counter', sc.params, sc.steps)) as unknown as TraceEvent[];
-      const now = after.get(sc.name)!;
+      const before = v1Wire(canonicalise(await play(old, 'Counter', sc.params, sc.steps)) as unknown as TraceEvent[]);
+      const now = v1Wire(after.get(sc.name)!);
       if (JSON.stringify(before) !== JSON.stringify(now)) moved.push({ name: sc.name, before, after: now });
     }
 

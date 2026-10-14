@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "fe071479-9bfb-5ad4-8748-18088286aae7",
+  "name": "LessonCard",
+  "path": "/Components/LessonCard",
+  "type": "visual",
+  "created": "2026-10-12T12:58:04.213Z",
+  "modified": "2026-10-12T12:58:04.213Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A lesson's card on Home: title, phrase count, completed badge. Tapping it publishes open."
+}

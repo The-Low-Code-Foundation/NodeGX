@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "58a4fdaa-ae80-5e79-80fa-cbd38443446d",
+  "name": "TextField",
+  "path": "/Components/TextField",
+  "type": "visual",
+  "created": "2026-10-12T17:43:58.839Z",
+  "modified": "2026-10-12T17:43:58.839Z",
+  "modifiedBy": "noodl-mcp"
+}

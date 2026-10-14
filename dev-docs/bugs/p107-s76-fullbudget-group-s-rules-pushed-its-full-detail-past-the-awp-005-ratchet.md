@@ -10,6 +10,7 @@ found: P107 NSP-018 s76, 2026-10-10 — running the MCP budget specs after a bat
 kit: mcp
 regression: packages/noodl-mcp/tests/nodeDocBudget.test.ts "keeps any single full-detail response under 17,900 tokens"
 evidence: `npx jest tests/nodeDocBudget.test.ts` in packages/noodl-mcp — `[{ name: "Group", cost: 17292 }]`; Group's catalog entry is byte-identical to HEAD's, so HEAD is red too
+commit: 991457d2d
 ---
 
 `nodeDocBudget.test.ts` fails on `HEAD` (`6d7e64388`): Group's `get_node_type` with `detail: "full"` costs **17,292**

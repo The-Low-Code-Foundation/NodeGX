@@ -1,0 +1,140 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ce0a7f8c-7604-57b4-8f4e-7431a70a28a2",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "es-root",
+      "type": "Group",
+      "label": "Empty state",
+      "children": [
+        "es-title",
+        "es-body",
+        "es-action"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "backgroundColor": "var(--surface)",
+        "borderColor": "var(--border-strong)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "dashed",
+        "borderWidth": "var(--border-1)",
+        "flexDirection": "column",
+        "paddingBottom": "var(--space-16)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-16)",
+        "rowGap": "var(--space-4)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        },
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "es-title",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "es-root",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "es-body",
+      "type": "Text",
+      "label": "Explanation",
+      "parent": "es-root",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "maxWidth": {
+          "unit": "px",
+          "value": 380
+        },
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "es-action",
+      "type": "net.noodl.controls.button",
+      "label": "Action",
+      "parent": "es-root",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "color": "var(--primary-foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentSize",
+        "visible": false
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "es-ci",
+      "type": "Component Inputs",
+      "label": "Empty state inputs",
+      "ports": [
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "actionLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mounted",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "es-co",
+      "type": "Component Outputs",
+      "label": "Empty state outputs",
+      "ports": [
+        {
+          "name": "clicked",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "es-root"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0894b2e4-bcf3-5407-8dcf-38f67052ba21",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mr-ci",
+      "fromProperty": "name",
+      "toId": "mr-name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mr-ci",
+      "fromProperty": "name",
+      "toId": "mr-initialexpr",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "mr-initialexpr",
+      "fromProperty": "result",
+      "toId": "mr-initials",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mr-ci",
+      "fromProperty": "role",
+      "toId": "mr-role",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mr-ci",
+      "fromProperty": "email",
+      "toId": "mr-email",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mr-row",
+      "fromProperty": "onClick",
+      "toId": "mr-co",
+      "toProperty": "click"
+    }
+  ]
+}

@@ -46,8 +46,21 @@
  * C135, C140); each is caught now where it happens — the build of a component the project does not have (`repeater/template-component-
  * not-found`, no row), a Script's component that is not text (`repeater/template-script-threw`, no row), a mapping's throw (`repeater/
  * input-mapping-threw`, the row keeps what it set), a rebuild's copy (its Refreshes fail `repeater/items-copy-threw`, the rows stay; v4: unreached in a play) — and
- * the runner catches anything else (`repeater/operation-threw`). The errors are the bus's, outside the trace (graded in viewer-react's
- * nda-012 corpus test).
+ * the runner catches anything else (`repeater/operation-threw`). The errors are the bus's; since v11 what they tell the editor is in the
+ * trace (THE EDITOR, below), and the rest of what the bus carries is graded in viewer-react's nda-012 corpus test.
+ *
+ * THE EDITOR (v11, NSP-019 R35). What the node tells the editor is declared in `diagnostics`. Items' sentence is a `setDiagnostic`
+ * (:320), set or withdrawn on every write, before the same-value check. The rest reach the editor through the error bus
+ * (`raiseRuntimeError` → runtimeerror.ts `createEditorWarningSubscriber` → `sendWarning`, keyed by the code); a later raise of the
+ * same code replaces the sentence. Two are withdrawn: the Script's syntax error when a Script that compiles is written (:371-373),
+ * and the input mapping's at EVERY write of a mapping (:1102-1104), raised again when it does not compile. The rest stay until the
+ * node is deleted. A row's problem (no component for an item, a component the project does not have) is raised once per sentence
+ * per rebuild (`reportTemplateProblem` :491-505; the set a rebuild makes at its start is kept after it, so an addition later is
+ * checked against it too). An empty entry is told once per Items value (:1031). A Refresh's Failure reaches the editor under its
+ * code (`repeater/no-template`, `repeater/no-items`) once per Refresh answered — a rebuild nobody asked for tells nothing. Four the
+ * runtime can raise a play cannot reach — `row-build-failed` (a component the project has whose build throws), `items-copy-threw`,
+ * `no-target` (a play's Repeater always sits in a Group) and `operation-threw` — so this spec does not raise them; a target that
+ * raises one diverges, which is the right reading.
  *
  * SCRIPT (v2, :348-378). Compiled as it arrives — `new Function('item', 'var component;' + code + ';return component;')` — and the
  * spec compiles and runs the same code on the same record. Code that does not compile leaves no function (the one before is dropped,
@@ -123,6 +136,7 @@
 
 import { defineNode, said, type ComponentInterface, type InputDecl, type OutputDecl, type Patch, type SignalOutputDecl, type ValueType } from '../spec';
 import type { CollectionRef, RecordRef } from '../registry';
+import { describeValue } from './describe-value';
 
 /** What a row template is in the play's project: a component a target registers by name before the node is placed. */
 export interface RowTemplate {
@@ -227,7 +241,7 @@ function heardField(w: Work, row: Row, name: string, value: unknown): Row {
   const fn = w.st.mapCompiles ? compileMapping(w.st.mapping) : undefined;
   if (!fn) return row;
   // v3 — a throw is the Repeater's (raised), never the writer's: the row keeps what the mapping set before it (row C141)
-  return { ...row, inputs: mapInputs(fn, row.rec, row.template, row.inputs) };
+  return { ...row, inputs: mapInputs(w, fn, row.rec, row.template, row.inputs) };
 }
 
 /** v2 — each change a row's record told, in the order told: the row as it stands then hears it */
@@ -328,6 +342,7 @@ const MAPPINGS: readonly unknown[] = [
 const MAPPING_PORT = {
   type: 'string',
   editOnly: true,
+  codeEditor: 'javascript',
   coerce: 'none',
   displayName: 'Script',
   group: 'Input Mapping',
@@ -342,6 +357,18 @@ const DEFAULT_SCRIPT =
   "// A component in a sheet is referred to by '/#Sheet Name/Comopnent Name'.\n" +
   "// The data for each item is available in a variable called 'item'\n" +
   "component = '/MyComponent';";
+
+// v11 — THE EDITOR's keys (foreach.tsx)
+const ITEMS_CODE = 'repeater/items-not-a-collection'; // :36, :320
+const EMPTY_ENTRY_CODE = 'repeater/items-empty-entry'; // :1033-1038
+const SCRIPT_SYNTAX_CODE = 'repeater/template-script-syntax-error'; // :361-380
+const SCRIPT_THREW_CODE = 'repeater/template-script-threw'; // :520-524, :533-536
+const NO_TEMPLATE_FOR_ITEM_CODE = 'repeater/no-template-for-item'; // :597-602
+const NOT_FOUND_CODE = 'repeater/template-component-not-found'; // :626-629
+const MAPPING_SYNTAX_CODE = 'repeater/input-mapping-syntax-error'; // :1099-1123
+const MAPPING_THREW_CODE = 'repeater/input-mapping-threw'; // :576-582
+const NO_TEMPLATE_CODE = 'repeater/no-template'; // :783-790
+const NO_ITEMS_CODE = 'repeater/no-items'; // :792-794
 
 /** One operation on the queue (:240-254, :465) */
 type Op = { kind: 'add'; rec: RecordRef; index: number } | { kind: 'remove'; rec: RecordRef } | { kind: 'refresh' } | { kind: 'copy' };
@@ -424,6 +451,13 @@ type State = {
   // ---- the outputs as last written ----
   itemId: unknown;
   outs: Readonly<Record<string, unknown>>;
+  // ---- v11 — THE EDITOR ----
+  /** what the editor shows now, by key; replaced, never edited in place */
+  warnings: Readonly<Record<string, string>>;
+  /** `reportedTemplateProblems` (:491-505) — the sentences a row's problem raised since the last rebuild began; null before the first */
+  reported: readonly string[] | null;
+  /** `reportedEmptyEntriesIn` (:1031) — the Items value whose empty entries were last reported, the very value */
+  emptyReportedIn: unknown;
 };
 
 type Work = {
@@ -481,7 +515,8 @@ export const Repeater = defineNode({
   // v8 (P109 ISL-049, s32): items that repeat an id are one row at the first item's place, kept there by every copy (row C131)
   // v9 (P109 ISL-049, s32): every row's signal heard in a pass is reported with its own row (row C142)
   // v10 (P109 ISL-049, s32): a row is placed among the Repeater's own rows, never counting one on its way out (row C143)
-  version: 10,
+  // v11 (NSP-019 R35, P107 s104): what the node tells the editor is declared (`diagnostics`); nothing on a wire moves
+  version: 11,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/data/foreach.tsx',
   needs: ['person', 'registry', 'project'],
   worldPool: {
@@ -493,6 +528,27 @@ export const Repeater = defineNode({
   },
   // ERG-001 §4 :426-433 — Refresh's: Done or Failure, never Unchanged
   outcomes: ['done', 'failure'],
+  changes: [
+    {
+      version: 11,
+      says: 'What the node tells the editor is now in this spec: Items that is not a list, an empty entry in Items, a Script or an input mapping that does not compile, a Script that throws or names no component, a component the project does not have, a mapping that throws, and a Refresh with no Template or no Items. The runtime has always told it',
+      row: 'NSP-019 R35 (P107 s104)',
+      migration: { none: 'Only the editor is told, and the runtime already told it. Nothing a wire carries changes' }
+    }
+  ],
+  // THE EDITOR (above): each key shows the last sentence raised under it
+  diagnostics: {
+    [ITEMS_CODE]: { says: 'Items is not a list', message: (_i: unknown, s: State) => s.warnings[ITEMS_CODE] },
+    [EMPTY_ENTRY_CODE]: { says: 'Items has an empty entry', message: (_i: unknown, s: State) => s.warnings[EMPTY_ENTRY_CODE] },
+    [SCRIPT_SYNTAX_CODE]: { says: 'Script does not compile', message: (_i: unknown, s: State) => s.warnings[SCRIPT_SYNTAX_CODE] },
+    [SCRIPT_THREW_CODE]: { says: 'Script threw for an item, or set its component to something other than a name', message: (_i: unknown, s: State) => s.warnings[SCRIPT_THREW_CODE] },
+    [NO_TEMPLATE_FOR_ITEM_CODE]: { says: 'an item has no component to build its row from', message: (_i: unknown, s: State) => s.warnings[NO_TEMPLATE_FOR_ITEM_CODE] },
+    [NOT_FOUND_CODE]: { says: "an item's component is not in the project", message: (_i: unknown, s: State) => s.warnings[NOT_FOUND_CODE] },
+    [MAPPING_SYNTAX_CODE]: { says: 'the input mapping does not compile', message: (_i: unknown, s: State) => s.warnings[MAPPING_SYNTAX_CODE] },
+    [MAPPING_THREW_CODE]: { says: 'the input mapping threw for an item', message: (_i: unknown, s: State) => s.warnings[MAPPING_THREW_CODE] },
+    [NO_TEMPLATE_CODE]: { says: 'a Refresh found nothing to build the rows from', message: (_i: unknown, s: State) => s.warnings[NO_TEMPLATE_CODE] },
+    [NO_ITEMS_CODE]: { says: 'a Refresh found no Items', message: (_i: unknown, s: State) => s.warnings[NO_ITEMS_CODE] }
+  },
 
   state: {
     own: null,
@@ -521,7 +577,10 @@ export const Repeater = defineNode({
     afterFrame: false,
     made: 0,
     itemId: undefined,
-    outs: {}
+    outs: {},
+    warnings: {},
+    reported: null,
+    emptyReportedIn: undefined
   } as State,
   // `initialize` :232 — its own list (an anonymous array: ten draws); placed, it learns its parent before its parameters are set and asks
   // for a rebuild (`updateTarget` :436-439)
@@ -559,6 +618,10 @@ export const Repeater = defineNode({
       said(
         'the same list again: nothing; a new one is copied into its own list at the end of the frame — a row added for each new item and taken down for each one gone, then Items Rendered if a row came or went; anything not a list empties it',
         run(s, view, (w) => {
+          // v11 — :320, before the same-value check: the editor is told on every write (THE EDITOR)
+          const problem = itemsProblem(v, view);
+          if (problem === null) unwarn(w, ITEMS_CODE);
+          else warn(w, ITEMS_CODE, problem);
           if (v === w.st.items) return;
           if (view.registry.isCollection(w.st.items)) view.unwatch({ collection: w.st.items.getId() });
           if (view.registry.isCollection(v)) view.watch({ collection: v.getId() });
@@ -578,6 +641,10 @@ export const Repeater = defineNode({
         run(s, view, (w) => {
           w.st.script = v;
           w.st.compiles = compileScript(v) !== undefined;
+          // v11 — :365-380: code that compiles withdraws the editor's sentence; code that does not raises it
+          const error = compileError(() => compileScript(v, true));
+          if (error === undefined) unwarn(w, SCRIPT_SYNTAX_CODE);
+          else warn(w, SCRIPT_SYNTAX_CODE, `The Repeater's Script does not compile: ${error}`);
           scheduleRefresh(w);
         })
       ),
@@ -618,6 +685,10 @@ export const Repeater = defineNode({
           ? run(s, view as View, (w) => {
               w.st.mapping = v;
               w.st.mapCompiles = compileMapping(v) !== undefined;
+              // v11 — :1102-1123: every write withdraws the editor's sentence first; text that does not compile raises it again
+              unwarn(w, MAPPING_SYNTAX_CODE);
+              const error = v ? compileError(() => compileMapping(v, true)) : undefined;
+              if (error !== undefined) warn(w, MAPPING_SYNTAX_CODE, `The Repeater's input mapping script does not compile, so no item inputs are mapped: ${error}`);
               scheduleRefresh(w);
             })
           : { send: [] }
@@ -729,6 +800,46 @@ function frameWork(w: Work): void {
 }
 
 // ---------------------------------------------------------------------------------------------
+// v11 — THE EDITOR: what the node tells it, by key
+// ---------------------------------------------------------------------------------------------
+
+/** `raiseRuntimeError` (or `setDiagnostic`) reaching the editor: the key's sentence, replacing any before it */
+function warn(w: Work, key: string, message: string): void {
+  w.st.warnings = { ...w.st.warnings, [key]: message };
+}
+/** `clearWarning` (or `setDiagnostic(key, null)`): the key's sentence withdrawn */
+function unwarn(w: Work, key: string): void {
+  if (w.st.warnings[key] === undefined) return;
+  const rest = { ...w.st.warnings };
+  delete rest[key];
+  w.st.warnings = rest;
+}
+/**
+ * `reportTemplateProblem` (:491-505): a sentence raised once per rebuild — the set `refresh` makes at its start (:764) is never
+ * dropped, so after the first rebuild an addition outside one is checked against the last rebuild's set too; before it, every time.
+ */
+function reportTemplateProblem(w: Work, key: string, message: string): void {
+  const reported = w.st.reported;
+  if (reported) {
+    if (reported.includes(message)) return;
+    w.st.reported = [...reported, message];
+  }
+  warn(w, key, message);
+}
+/**
+ * `itemsProblem` (:53-71): a sentence when Items cannot be repeated over, `null` when it can — nothing and null clear (by design), an
+ * array or a registry array is a list; a record gets its own sentence.
+ */
+function itemsProblem(value: unknown, view: View): string | null {
+  if (value === undefined || value === null) return null;
+  if (Array.isArray(value) || view.registry.isCollection(value)) return null;
+  if (view.registry.isRecord(value)) {
+    return 'Items expects an array of records, received a single record. Nothing will render — wire a query or collection here, or an array containing this record.';
+  }
+  return `Items expects an array, received ${describeValue(value)}. Nothing will render — a Repeater indexes its input by position, and this value has no length.`;
+}
+
+// ---------------------------------------------------------------------------------------------
 // THE LIST — the registry's array is the runtime's diff
 // ---------------------------------------------------------------------------------------------
 
@@ -753,9 +864,20 @@ function copy(w: Work, src: unknown): void {
 function copyInto(w: Work, src: unknown): void {
   const own = w.st.own as CollectionRef;
   const source = (src || []) as ArrayLike<unknown>;
-  let empty = false;
-  for (let i = 0; i < source.length; i++) if (source[i] === null || source[i] === undefined) empty = true;
-  if (empty) src = Array.prototype.filter.call(source, (item: unknown) => item !== null && item !== undefined);
+  let empty = 0;
+  for (let i = 0; i < source.length; i++) if (source[i] === null || source[i] === undefined) empty++;
+  if (empty > 0) {
+    // v11 — :1031-1039: once per Items value (the very value), the count of that copy
+    if (w.st.emptyReportedIn !== src) {
+      w.st.emptyReportedIn = src;
+      warn(
+        w,
+        EMPTY_ENTRY_CODE,
+        empty === 1 ? "The Repeater's Items has an empty entry (null or undefined), so it has no row" : `The Repeater's Items has ${empty} empty entries (null or undefined), so they have no rows`
+      );
+    }
+    src = Array.prototype.filter.call(source, (item: unknown) => item !== null && item !== undefined);
+  }
   const ops: Op[] = [];
   const list = own as unknown as { on(e: string, f: (a: { item: RecordRef; index: number }) => void): void; off(e: string, f: (a: { item: RecordRef; index: number }) => void): void };
   const add = (a: { item: RecordRef; index: number }) => void ops.push({ kind: 'add', rec: a.item, index: a.index });
@@ -881,11 +1003,12 @@ function start(w: Work, op: Op): void {
 }
 
 /** v2 :977-998 — the function an input mapping compiles to: none for a mapping that is empty or does not compile */
-function compileMapping(code: unknown): ((map: (m: unknown) => void, object: unknown) => void) | undefined {
+function compileMapping(code: unknown, rethrow = false): ((map: (m: unknown) => void, object: unknown) => void) | undefined {
   if (!code) return undefined;
   try {
     return new Function('map', 'object', code as string) as (map: (m: unknown) => void, object: unknown) => void;
-  } catch {
+  } catch (e) {
+    if (rethrow) throw e;
     return undefined;
   }
 }
@@ -895,7 +1018,7 @@ function compileMapping(code: unknown): ((map: (m: unknown) => void, object: unk
  * (a string) or from a function of the record; any other value passed over. What it does not set keeps its value (`prev`). v3 — a
  * throw is caught there and raised (`repeater/input-mapping-threw`): what it set before it stays (rows C140, C141).
  */
-function mapInputs(fn: (map: (m: unknown) => void, object: unknown) => void, rec: RecordRef, template: string, prev: Readonly<Record<string, unknown>>): Record<string, unknown> {
+function mapInputs(w: Work, fn: (map: (m: unknown) => void, object: unknown) => void, rec: RecordRef, template: string, prev: Readonly<Record<string, unknown>>): Record<string, unknown> {
   const inputs: Record<string, unknown> = { ...prev };
   const has = REPEATER_TEMPLATES[template].inputs;
   try {
@@ -908,18 +1031,31 @@ function mapInputs(fn: (map: (m: unknown) => void, object: unknown) => void, rec
         if (v !== undefined) inputs[key] = v;
       }
     }, rec);
-  } catch {
+  } catch (e) {
+    // v11 — :576-582
+    warn(w, MAPPING_THREW_CODE, `The Repeater's input mapping threw for the item ${JSON.stringify(rec.getId())}, so its row keeps the inputs it had: ${(e as Error)?.message ?? String(e)}`);
     return inputs;
   }
   return inputs;
 }
 
 /** :357-360 — the function Script compiles to, or `undefined` when it does not compile */
-function compileScript(code: unknown): ((item: unknown) => unknown) | undefined {
+function compileScript(code: unknown, rethrow = false): ((item: unknown) => unknown) | undefined {
   try {
     return new Function('item', 'var component;' + code + ';return component;') as (item: unknown) => unknown;
-  } catch {
+  } catch (e) {
+    if (rethrow) throw e;
     return undefined;
+  }
+}
+
+/** v11 — what a compile threw, as the runtime's sentence quotes it (`(e as Error).message`), or `undefined` when it compiled */
+function compileError(compile: () => unknown): string | undefined {
+  try {
+    compile();
+    return undefined;
+  } catch (e) {
+    return (e as Error).message;
   }
 }
 
@@ -927,17 +1063,23 @@ function compileScript(code: unknown): ((item: unknown) => unknown) | undefined 
  * `getTemplateForModel` (:501-537): Explicit (or never set) reads Template; anything else runs Script on the record — no function, or
  * a throw (raised, :507-520), is no component. v3 — so is a component that is not text, raised the same way (row C135).
  */
-function templateFor(st: State, rec: RecordRef): unknown {
+function templateFor(w: Work, rec: RecordRef): unknown {
+  const st = w.st;
   if (st.templateType === undefined || st.templateType === 'explicit') return st.template;
   const fn = st.compiles ? compileScript(st.script) : undefined;
   if (!fn) return undefined;
   let template: unknown;
   try {
     template = fn(rec);
-  } catch {
+  } catch (e) {
+    // v11 — :518-524, raised every time (not once per rebuild)
+    warn(w, SCRIPT_THREW_CODE, `The Repeater's Script threw while choosing a component for an item, so that item has no row: ${(e as Error).message}`);
+  }
+  if (template && typeof template !== 'string') {
+    // v11 — :532-536
+    warn(w, SCRIPT_THREW_CODE, `The Repeater's Script set component to ${JSON.stringify(template) ?? String(template)}, which is not a component path, so that item has no row`);
     return undefined;
   }
-  if (template && typeof template !== 'string') return undefined;
   return template;
 }
 
@@ -947,11 +1089,25 @@ function templateFor(st: State, rec: RecordRef): unknown {
  * found`), no row (MISSING, row C128); one it has is the row to land.
  */
 function addItem(w: Work, rec: RecordRef, _index: number): Row | null | typeof MISSING {
-  const template = templateFor(w.st, rec);
-  if (!template) return null;
+  const template = templateFor(w, rec);
+  if (!template) {
+    // v11 — :597-602, the sentence naming the port the author has to open
+    reportTemplateProblem(
+      w,
+      NO_TEMPLATE_FOR_ITEM_CODE,
+      w.st.templateType === 'dynamic'
+        ? "The Repeater's Script returned no component for an item, so that item has no row — set `component` to a component path in the Script"
+        : 'The Repeater has no Template, so its items have no rows — pick the component to repeat on the Template input'
+    );
+    return null;
+  }
   for (let i = 0; i < 8; i++) w.view.random();
   const name = String(template);
-  if (!Object.prototype.hasOwnProperty.call(REPEATER_TEMPLATES, name)) return MISSING;
+  if (!Object.prototype.hasOwnProperty.call(REPEATER_TEMPLATES, name)) {
+    // v11 — :626-629 (`row-build-failed` :619-624 is for a component the project HAS whose build threw: none in a play)
+    reportTemplateProblem(w, NOT_FOUND_CODE, `The Repeater cannot find the component ${JSON.stringify(template)}, so its items have no rows — it may have been renamed or deleted`);
+    return MISSING;
+  }
   return { rec, template: name, mapped: false, inputs: {}, born: -1 };
 }
 
@@ -977,7 +1133,7 @@ function land(w: Work, b: Building): void {
   // each change of the record (heard: `watch`). v3 — a mapping that throws lands the row with what it set before it (row C140)
   let row = b.row;
   const fn = w.st.mapCompiles ? compileMapping(w.st.mapping) : undefined;
-  if (fn) row = { ...row, mapped: true, inputs: mapInputs(fn, row.rec, row.template, {}) };
+  if (fn) row = { ...row, mapped: true, inputs: mapInputs(w, fn, row.rec, row.template, {}) };
   else row = { ...row, inputs: directInputs(row.rec, row.template) };
   // the row listens to its record (:610, :628): what is written elsewhere reaches it (`world.change`)
   w.view.watch({ model: row.rec.getId() });
@@ -1117,17 +1273,28 @@ function refresh(w: Work): void {
   st.refreshScheduled = false;
   const tokens = st.tokens;
   st.tokens = 0;
-  const settle = (outcome: 'done' | 'failure', error?: string) => {
+  // v11 — :764 a new `reportedTemplateProblems` for this rebuild, before anything is checked
+  st.reported = [];
+  // v11 — a Failure reaches the editor under its code (the outcome's raise), once per Refresh answered: none, nothing is told
+  const settle = (outcome: 'done' | 'failure', error?: string, message?: string) => {
     for (let i = 0; i < tokens; i++) w.outcomes.push(error === undefined ? { port: 'refresh', outcome } : { port: 'refresh', outcome, error });
+    if (tokens > 0 && error !== undefined && message !== undefined) warn(w, error, message);
   };
   // :745-752 — v6 (row C136, ruled): only what Template Type uses — Template on Explicit (or never set), a compiled Script otherwise
-  if (st.templateType === undefined || st.templateType === 'explicit' ? !st.template : !st.compiles) {
-    settle('failure', 'repeater/no-template');
+  const explicit = st.templateType === undefined || st.templateType === 'explicit';
+  if (explicit ? !st.template : !st.compiles) {
+    settle(
+      'failure',
+      NO_TEMPLATE_CODE,
+      explicit
+        ? 'The Repeater has no Template, so there is nothing to build each item from'
+        : 'The Repeater picks each component with its Script, and it has no Script that compiles, so there is nothing to build each item from'
+    );
     st.hops = 1;
     return;
   }
   if (!st.items) {
-    settle('failure', 'repeater/no-items');
+    settle('failure', NO_ITEMS_CODE, 'The Repeater has no Items bound, so there is no list to rebuild');
     // pinned (s66): "a Refresh with no Items, then a removal queued behind it" is red at 0 and at 2
     st.hops = 1;
     return;

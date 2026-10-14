@@ -102,6 +102,8 @@
 
 import { defineNode, said, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
+import { FIELD_FOCUS_NOT_MOUNTED, focusDiagnostics, focusMissed } from './focus-not-mounted';
+import { focusAndIconSourceChange, iconSourceDiagnostics } from './icon-source';
 import { dataAttributeInput, dataAttributeNames } from './data-attributes';
 
 type State = {
@@ -172,6 +174,8 @@ type State = {
   elementFocused: boolean;
   /** the component is on the page (`innerReactComponentRef`, text-input.ts :423, :431): follows `mounted` at each paint */
   onPage: boolean;
+  /** v7 — the last Focus found the node off the page: the editor is told (focus-not-mounted.ts) */
+  focusMissed: boolean;
 };
 
 type O = typeof TextInput extends { outputs: infer X } ? X : never;
@@ -253,7 +257,10 @@ export const TextInput = defineNode({
   // v4 (P109 ISL-031, P107-D33 "Check the field's text"): Clear is Unchanged only when the field's text was empty too.
   // v5 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
   // v6 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
-  version: 6,
+  // v7 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it, and an Icon Source that is not an icon shows as one until an icon or nothing arrives (`diagnostics`)
+  version: 7,
+  changes: [focusAndIconSourceChange(7)],
+  diagnostics: { ...focusDiagnostics(FIELD_FOCUS_NOT_MOUNTED), ...iconSourceDiagnostics() },
   source: 'packages/noodl-viewer-react/src/nodes/controls/text-input.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the page following the node at each paint, like the disabled
@@ -288,7 +295,8 @@ export const TextInput = defineNode({
     opacityZero: false,
     pageOpacityZero: false,
     elementFocused: false,
-    onPage: false
+    onPage: false,
+    focusMissed: false
   } as State,
   // text-input.ts :412-419 `outcomeOutputs({ done, unchanged })`
   outcomes: ['done', 'unchanged'],
@@ -552,9 +560,9 @@ export const TextInput = defineNode({
     // text-input.ts :293-308 → focus-tracker.ts :57-78: `_canFocus` is "the component is on the page" (:431-433); a disabled
     // element takes nothing, silently (`focus()` on it is a no-op — the focusing steps); none, Unchanged (R13)
     focus: (s) => {
-      if (!s.onPage) return { says: 'not on the page: nothing to focus, and the Focus is not kept', send: [], outcome: 'unchanged' };
-      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { says: 'it holds the keyboard already, or is disabled or hidden: nothing changes', send: [], outcome: 'done' };
-      return { says: 'otherwise the keyboard is put on it, and the Focused state goes true', set: { focused: true, elementFocused: true, hadCaret: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
+      if (!s.onPage) return { says: 'not on the page: nothing to focus, the Focus is not kept, and the editor is told', set: focusMissed(s, true), send: [], outcome: 'unchanged' };
+      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { says: 'it holds the keyboard already, or is disabled or hidden: nothing changes', set: focusMissed(s, false), send: [], outcome: 'done' };
+      return { says: 'otherwise the keyboard is put on it, and the Focused state goes true', set: { focused: true, elementFocused: true, hadCaret: true, ...focusMissed(s, false) }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     // text-input.ts :315-319 → focus-tracker.ts :87-89: `blur()` on the element; Done either way
     blur: (s) => {

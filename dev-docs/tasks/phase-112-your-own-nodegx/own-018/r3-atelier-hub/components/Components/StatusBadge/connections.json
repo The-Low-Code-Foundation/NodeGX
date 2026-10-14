@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2614e598-8e5a-5e5c-8d0b-e32eb500336c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sb-ci",
+      "fromProperty": "status",
+      "toId": "sb-states",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "sb-ci",
+      "fromProperty": "status",
+      "toId": "sb-label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sb-states",
+      "fromProperty": "backgroundColor",
+      "toId": "sb-pill",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "sb-states",
+      "fromProperty": "color",
+      "toId": "sb-label",
+      "toProperty": "color"
+    }
+  ]
+}

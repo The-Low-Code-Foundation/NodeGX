@@ -1,0 +1,30 @@
+[
+  {
+    "name": "a live session: Valid, User Id and Username from the answer, done",
+    "because": "verifysessiontoken.ts doVerify; system-users.ts :131-176",
+    "params": { "token": "r:live" },
+    "steps": [{ "signal": "verify" }, "settle"],
+    "world": { "host": { "services": ["users"], "answers": [{ "answer": { "ok": { "outcome": "done", "valid": true, "userId": "u1", "username": "ada" } } }] } }
+  },
+  {
+    "name": "then a token that is not live: the three cleared at the frame end, Unchanged — the 401 branch; as Done when Treat Unchanged as says so",
+    "because": "doVerify clears Valid, User Id and Username before anything is checked; nodegx-backend SystemUsers.ts :469-481",
+    "params": { "token": "r:live" },
+    "steps": [{ "signal": "verify" }, "settle", { "set": "token", "value": "r:dead" }, { "signal": "verify" }, "settle", { "set": "treatUnchangedAs", "value": "done" }, { "signal": "verify" }, "settle"],
+    "world": { "host": { "services": ["users"], "answers": [{ "match": { "request": { "token": "r:live" } }, "answer": { "ok": { "outcome": "done", "valid": true, "userId": "u1", "username": "ada" } } }, { "answer": { "ok": { "outcome": "unchanged", "code": "user/token-invalid", "valid": false } } }] } }
+  },
+  {
+    "name": "no Token: the three cleared, then Failure with the node's sentence; then an Unchanged that says why replaces that Error; as Failure, the same Error",
+    "because": "doVerify's check after the clear; system-users.ts :160-163 an Unchanged's error is published",
+    "params": {},
+    "steps": [{ "signal": "verify" }, "settle", { "set": "token", "value": "r:abc123" }, { "signal": "verify" }, "settle", { "signal": "verify" }, { "set": "token", "value": "" }, "settle", { "set": "token", "value": "r:abc123" }, { "set": "treatUnchangedAs", "value": "failure" }, { "signal": "verify" }, "settle"],
+    "world": { "host": { "services": ["users"], "answers": [{ "answer": { "ok": { "outcome": "unchanged", "valid": false, "error": "The session has expired." } } }] } }
+  },
+  {
+    "name": "outside a backend: the three cleared, Failure (user/no-backend)",
+    "because": "system-users.ts :138-147",
+    "params": { "token": "r:live" },
+    "steps": [{ "signal": "verify" }, "settle"],
+    "world": { "host": {} }
+  }
+]

@@ -29,12 +29,12 @@
         { "id": "fail_response", "type": "noodl.cloud.response", "label": "Failure", "parameters": { "status": "failure" } }
       ],
       "connections": [
-        { "fromId": "fn_request", "fromProperty": "page", "toId": "page_offset", "toProperty": "page" },
-        { "fromId": "fn_request", "fromProperty": "role", "toId": "members", "toProperty": "role" },
+        { "fromId": "fn_request", "fromProperty": "pm-page", "toId": "page_offset", "toProperty": "page" },
+        { "fromId": "fn_request", "fromProperty": "pm-role", "toId": "members", "toProperty": "role" },
         { "fromId": "page_offset", "fromProperty": "asNumber", "toId": "members", "toProperty": "skip" },
         { "fromId": "fn_request", "fromProperty": "receive", "toId": "members", "toProperty": "read" },
-        { "fromId": "members", "fromProperty": "users", "toId": "ok_response", "toProperty": "users" },
-        { "fromId": "members", "fromProperty": "total", "toId": "ok_response", "toProperty": "total" },
+        { "fromId": "members", "fromProperty": "users", "toId": "ok_response", "toProperty": "pm-users" },
+        { "fromId": "members", "fromProperty": "total", "toId": "ok_response", "toProperty": "pm-total" },
         { "fromId": "members", "fromProperty": "done", "toId": "ok_response", "toProperty": "send" },
         { "fromId": "members", "fromProperty": "unchanged", "toId": "ok_response", "toProperty": "send" },
         { "fromId": "members", "fromProperty": "error", "toId": "fail_response", "toProperty": "errorMessage" },

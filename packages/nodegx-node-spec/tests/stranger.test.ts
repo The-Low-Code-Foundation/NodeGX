@@ -31,7 +31,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import type { AnyNodeSpec, Step, TargetAdapter, TraceEvent } from '../src';
-import { compareTraces, discoverBranches, formatReport, generateSequence, interpreterAdapter, loadScenarios, mutantsOf, play, PlayError, runConformance, validateTrace, World, type WorldScript } from '../src';
+import { compareTraces, discoverBranches, formatReport, generateSequence, interpreterAdapter, loadScenarios, mutantsOf, play, PlayError, runConformance, validateTrace, withoutUnseenDiagnostics, World, type WorldScript } from '../src';
 import { specFor } from '../src/nodes';
 import { EQUIVALENT_MUTANTS } from '../src/nodes/equivalent-mutants';
 
@@ -181,14 +181,25 @@ for (const round of rounds.ROUNDS) {
         for (const item of suite) await play(probe, spec.type, item.params, item.steps, worldFor(spec, item.world));
         const mutants = mutantsOf(spec, discovered.branches);
         expect(mutants.length).toBeGreaterThan(0);
+        // NSP-019 s95 — the reference as this target can see it (runConformance does the same): a stranger's target has no
+        // editor, so a `diagnostic` event in the reference would "catch" every mutant of a node that declares one, for nothing
+        const seenBy = strangerTarget();
+        // NSP-019 R35 (s103) — what an editor would see of the spec itself: a mutant this target cannot catch that differs from it
+        // there changes only what the node tells the editor (runConformance's `editorOnly`), graded where there is one
+        const truth: TraceEvent[][] = [];
+        for (const item of suite) truth.push(await play(interpreterAdapter({ resolve: () => spec }), spec.type, item.params, item.steps, worldFor(spec, item.world)));
         const survivors: string[] = [];
+        let editorOnly = 0;
         for (const m of mutants) {
           const mutant = interpreterAdapter({ resolve: () => m.spec });
           let caught: string | undefined;
-          for (const item of suite) {
+          let seenByEditor = false;
+          for (const [i, item] of suite.entries()) {
             let reference: TraceEvent[];
             try {
-              reference = await play(mutant, spec.type, item.params, item.steps, worldFor(spec, item.world));
+              const full = await play(mutant, spec.type, item.params, item.steps, worldFor(spec, item.world));
+              if (!seenBy.diagnostics && !seenByEditor && compareTraces(truth[i], full).index >= 0) seenByEditor = true;
+              reference = withoutUnseenDiagnostics(full, seenBy);
             } catch (e) {
               caught = `${item.name}: the mutant broke a spec rule (${(e as Error).message})`;
               break;
@@ -206,10 +217,11 @@ for (const round of rounds.ROUNDS) {
               break;
             }
           }
-          if (!caught && !declaredEquivalent(spec.type, m)) survivors.push(`${m.reducer} ${m.kind} on ${m.branch}${m.swappedWith ? ' ↔ ' + m.swappedWith : ''}`);
+          if (!caught && seenByEditor) editorOnly++;
+          else if (!caught && !declaredEquivalent(spec.type, m)) survivors.push(`${m.reducer} ${m.kind} on ${m.branch}${m.swappedWith ? ' ↔ ' + m.swappedWith : ''}`);
         }
         // eslint-disable-next-line no-console
-        console.log(`${spec.type}: ${mutants.length - survivors.length} / ${mutants.length} mutants caught by the stranger's target`);
+        console.log(`${spec.type}: ${mutants.length - survivors.length - editorOnly} / ${mutants.length} mutants caught by the stranger's target${editorOnly ? `, ${editorOnly} seen only by an editor` : ''}`);
         expect(survivors).toEqual([]);
       }, 300_000);
     }

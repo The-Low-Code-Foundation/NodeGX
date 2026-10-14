@@ -108769,5 +108769,117 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "R35: a Focus while the slider is off the page warns the editor, a second one says nothing new, and a Focus once it is on the page withdraws the warning",
+    "because": "controls/utils.ts :410-417 `setDiagnostic('focus/not-mounted', took ? null : …)`: every Focus replaces the sentence by whether the focus tracker took it (focus-not-mounted.ts)",
+    "params": {
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R39: Max below Min warns the editor, a Step written while it holds says nothing new, and a Min below Max withdraws it",
+    "because": "slider.ts `_attributeChanged` (R39, ruled \"Yes, warn\"): every Min, Max or Step write sets `slider/max-below-min` over the attributes as the browser reads them; the handle holds Min meanwhile (`browserRangeValue`) (v7)",
+    "steps": [
+      "settle",
+      {
+        "set": "min",
+        "value": 60
+      },
+      "settle",
+      {
+        "set": "max",
+        "value": 40
+      },
+      "settle",
+      {
+        "set": "step",
+        "value": 5
+      },
+      "settle",
+      {
+        "set": "min",
+        "value": 20
+      },
+      "settle",
+      {
+        "set": "max",
+        "value": null
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R39: a Value that is not a number tells the editor, the next one replaces the sentence, and a number does not withdraw it",
+    "because": "slider.ts `_setInputValue` raises `slider/value-not-a-number` on the error bus, which the editor shows under that key; nothing withdraws it (v7 declares it: the editor now records the node's `slider/` keys)",
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": "abc"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": {}
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click on a pressed, focused slider whose Mounted went off in the same frame: the click's paint takes it off the page, so a Focus right after it finds nothing to focus (Unchanged)",
+    "because": "P107-S95-SEED20738: the `person.click` branch that leaves the page holding the keyboard and the press (slider.ts `painted`: `!mounted && onPage`, then `leftPage`) was reached only by a seed's luck, and its two swap-branch mutants survived on 20739: a click that took nothing off the page leaves it to the next paint, which says the same in the same settle. The Focus action reads the page without painting, so it tells them apart: off the page it is Unchanged, still on it Done. Pinned here, every day",
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
   }
 ]

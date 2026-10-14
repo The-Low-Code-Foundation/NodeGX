@@ -67,7 +67,7 @@ const VideoNode: ReactNodeDefinition = {
       type: 'signal',
       group: 'Video Actions',
       displayName: 'Restart',
-      description: 'Seeks to the beginning and plays, then fires Done',
+      description: 'Seeks to Start Time (the beginning when there is none) and plays, then fires Done',
       tooltip: {
         standard: 'Restart the video from the beginning'
       },
@@ -102,7 +102,7 @@ const VideoNode: ReactNodeDefinition = {
       type: 'signal',
       group: 'Video Actions',
       displayName: 'Reset',
-      description: 'Stops playback and seeks to the beginning',
+      description: 'Stops playback and seeks to Start Time (the beginning when there is none)',
       valueChangedToTrue() {
         this.outcomeOnInnerComponent((inner) => inner.reset(), { code: 'video/reset-failed' });
       }

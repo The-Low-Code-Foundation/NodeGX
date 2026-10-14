@@ -15,7 +15,8 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
-import { BOOTSTRAP_INSTRUCTIONS, projectInstructions } from './instructions';
+import { setClientProfile, type ClientProfileName } from './clientProfile';
+import { bootstrapInstructions, projectInstructions } from './instructions';
 import { ToolError } from './errors';
 import { installProjectOverlay } from './kitOverlay';
 import { ProjectBinding } from './project/ProjectBinding';
@@ -45,7 +46,7 @@ import { registerKitTools } from './tools/kitTools';
 import { registerProjectSettingsTools } from './tools/projectSettingsTools';
 import { registerLibraryTools } from './tools/libraryTools';
 import { registerLessonTools } from './tools/lessonTools';
-import { ToolDisclosure, recordTools, registerFindTools } from './tools/disclosure';
+import { ToolDisclosure, recordTools, registerCallTool, registerFindTools } from './tools/disclosure';
 import { refuseUnknownArguments } from './tools/unknownArguments';
 import type { ReproducibleOutput } from './project/writeClock';
 
@@ -94,6 +95,20 @@ export interface ServerOptions {
    * parameter: the model does not choose it.
    */
   reproducible?: ReproducibleOutput;
+  /**
+   * P112 OWN-018 s2 — screenshots go to files unless the caller asks otherwise: `render_report` with no `out_dir`
+   * writes into `<project>/.previews/render` and returns the manifest instead of inline images, and `drive_page`
+   * screenshot steps default to `<project>/.previews/drive`. Chosen by whoever starts the server (create-nodegx sets
+   * it for OpenCode and Mistral Vibe), never by the model. Measured on Mistral Large 4 (P112-OWN018-IMAGECACHE):
+   * one image part anywhere in a request turns its prompt cache off, so an inline screenshot made every later step
+   * of a session full price until a compaction dropped it. Claude caches across images, so `.mcp.json` leaves it off.
+   */
+  screenshotsToFiles?: boolean;
+  /**
+   * P112 OWN-019 — which client the agent-facing text is worded for (`clientProfile.ts`). Set by whoever starts the
+   * server (`--profile vibe` from the Vibe kit), never by the model; `undefined` is the default (Claude Code's).
+   */
+  profile?: ClientProfileName;
 }
 
 export interface CreatedServer {
@@ -109,6 +124,7 @@ export interface CreatedServer {
 }
 
 export function createServer(options: ServerOptions): CreatedServer {
+  setClientProfile(options.profile);
   // ⚠️ BST-001 §4 — `create_project` is registered inside the write gate below,
   // so an unbound read-only server has nothing in it at all: it would start,
   // appear connected in the client's MCP panel, advertise three listing tools
@@ -150,7 +166,7 @@ export function createServer(options: ServerOptions): CreatedServer {
       // MCP has no "instructions changed" notification. See that module.
       instructions:
         store === null
-          ? BOOTSTRAP_INSTRUCTIONS
+          ? bootstrapInstructions()
           : projectInstructions({ projectDir: store.projectDir, allowWrites: options.allowWrites, deferTools })
     }
   );
@@ -198,7 +214,7 @@ export function createServer(options: ServerOptions): CreatedServer {
   // LAS-005 — read-only and unconditional, the same posture as the rest of the
   // read surface: rendering a project changes nothing about it, and a read-only
   // server is exactly where "is this page actually right?" gets asked.
-  registerRenderTools(rec, binding, renderLedger);
+  registerRenderTools(rec, binding, renderLedger, { screenshotsToFiles: options.screenshotsToFiles === true });
   // BST-006. Takes no store, like `create_project`: it reads the launcher's own
   // recent-projects file, which is machine state rather than project state. That
   // is what makes it answerable on a server with nothing bound — and it is the
@@ -237,6 +253,8 @@ export function createServer(options: ServerOptions): CreatedServer {
   // backend *read* tools too, so the door out of the deferred set cannot be
   // behind the write flag.
   registerFindTools(rec, disclosure);
+  // P112-OWN018-LISTCHANGED — resident in every mode: the door for a client that never re-reads the tool list.
+  registerCallTool(rec, disclosure);
   if (options.allowWrites) {
     // LAS-006 §4 — one plan registry, shared by the two write groups that both
     // have an opinion about it: the plan tools own the plans, and
@@ -251,7 +269,7 @@ export function createServer(options: ServerOptions): CreatedServer {
     registerStyleWriteTools(rec, binding);
     registerDocsWriteTools(rec, binding);
     registerScriptWriteTools(rec, binding);
-    registerBackendWriteTools(rec);
+    registerBackendWriteTools(rec, binding);
     registerWorldWriteTools(rec, binding);
     // AAQ-011/F13. Write-gated, and it is the strongest write in the server: it
     // starts a process and creates a database. Read-only callers get the

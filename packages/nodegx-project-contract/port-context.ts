@@ -26,6 +26,10 @@ export interface PortContextField {
   type: PortValueType;
   /** The class a Parse `Relation` column points at. */
   relation?: string;
+  /** The column has no Parse native type: the runtime typed it by `getEnhancedFieldType`, and `type` is that port type. */
+  enhanced?: true;
+  /** A select column's choices (its `enumValues`). */
+  enums?: string[];
 }
 
 export interface PortContextComponent {
@@ -39,6 +43,7 @@ export interface PortContextPages {
   name: string;
   pages: string[];
   components?: Record<string, string>;
+  labels?: Record<string, string>;
 }
 
 export interface ProjectPortContext {
@@ -48,7 +53,7 @@ export interface ProjectPortContext {
   components?: Record<string, PortContextComponent>;
   routers?: PortContextPages[];
   stacks?: PortContextPages[];
-  schema?: { classes: Record<string, { fields: Record<string, PortContextField> }> };
+  schema?: { classes: Record<string, { fields: Record<string, PortContextField> }>; backendType?: string };
 }
 
 // ─── The project, as the builder reads it ──────────────────────────────────────────────────────────────────────────
@@ -219,16 +224,20 @@ function schemaFor(metadata: Record<string, unknown>, params: Record<string, unk
   const selected = entries.find((e) => e.id === selectedId);
 
   const classes: Record<string, { fields: Record<string, PortContextField> }> = {};
+  const parseWire = !selected?.type || PARSE_WIRE_TYPES.includes(selected.type);
   const introspected = selected?.schema?.collections ?? [];
   if (introspected.length > 0) {
     for (const c of introspected) if (c && c.name) classes[c.name] = { fields: normalisedFields(c) };
-  } else if (!selected?.type || PARSE_WIRE_TYPES.includes(selected.type)) {
+  } else if (parseWire) {
     for (const c of [...parseClassList(metadata.dbCollections), ...parseClassList(metadata.systemCollections)]) {
       const name = (c.className ?? c.name) as string | undefined;
       if (name) classes[name] = { fields: parseFields(c) };
     }
   }
-  return Object.keys(classes).length ? { classes } : undefined;
+  // P107-S85-RESTCOLTYPES — the backend's type (schema-ports.ts `backendType`): off the Parse wire the Class picker has no
+  // system classes and the User family reads the type's accounts table, so a REST backend with no classes is still a schema
+  if (!Object.keys(classes).length && parseWire) return undefined;
+  return selected?.type ? { classes, backendType: selected.type } : { classes };
 }
 
 type ParseClass = { className?: string; name?: string; fields?: Record<string, ParseField>; schema?: { properties?: Record<string, ParseField> }; columns?: (ParseField & { name?: string })[] };
@@ -283,7 +292,11 @@ function normalisedFields(c: NormalisedCollection): Record<string, PortContextFi
     if (f.hidden && f.name !== 'ACL') continue;
     if (f.relationType === 'many-to-many') out[f.name] = { type: '*', relation: f.relationTarget ?? '' };
     else if (f.nativeType !== undefined) out[f.name] = parseField({ type: f.nativeType });
-    else out[f.name] = { type: enhancedType(f) };
+    else {
+      const field: PortContextField = { type: enhancedType(f), enhanced: true };
+      if (field.type === 'enum') field.enums = (f.enumValues ?? []).map(String);
+      out[f.name] = field;
+    }
   }
   return out;
 }
@@ -311,6 +324,13 @@ function stackPages(params: Record<string, unknown>): PortContextPages {
   for (const id of pages) if (typeof params['pageComp-' + id] === 'string') components[id] = params['pageComp-' + id] as string;
   const out: PortContextPages = { name: (params.name as string) || 'Main', pages };
   if (Object.keys(components).length) out.components = components;
+  // P107 s101 — each page's name, what the Target picker shows (navigate.ts :1389-1392 reads `pages[].label`)
+  const labels: Record<string, string> = {};
+  for (const p of Array.isArray(params.pages) ? params.pages : []) {
+    const { id, label } = (p ?? {}) as { id?: unknown; label?: unknown };
+    if (typeof id === 'string' && typeof label === 'string') labels[id] = label;
+  }
+  if (Object.keys(labels).length) out.labels = labels;
   return out;
 }
 

@@ -117,7 +117,7 @@ export interface WriteAgentConfigOptions {
 }
 
 /**
- * Write `.mcp.json` and `CLAUDE.md` into a project this server just created.
+ * Write `.mcp.json`, `CLAUDE.md` and `AGENTS.md` into a project this server just created.
  *
  * ⚠️ **Never throws.** Project creation must not fail because a `CLAUDE.md`
  * could not be written — the caller asked for a project, and a project without
@@ -141,7 +141,7 @@ export async function writeAgentConfig(options: WriteAgentConfigOptions): Promis
     return {
       files: [
         {
-          path: '.mcp.json, CLAUDE.md',
+          path: '.mcp.json, CLAUDE.md, AGENTS.md',
           outcome: 'skipped',
           reason: `Could not write the agent configuration: ${(err as Error).message}`
         }

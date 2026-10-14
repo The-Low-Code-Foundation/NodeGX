@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5b27cb06-b350-5720-8ee2-ed63a0420811",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "3823b25b-89c4-4042-8a24-56a46173129a",
+      "type": "Page",
+      "label": "Home",
+      "parameters": {
+        "title": "Home",
+        "urlPath": "home"
+      },
+      "children": [
+        "d9fb879d-0e98-4473-bc11-68a56b57b9b5"
+      ]
+    },
+    {
+      "id": "d9fb879d-0e98-4473-bc11-68a56b57b9b5",
+      "type": "Text",
+      "label": "Placeholder",
+      "parent": "3823b25b-89c4-4042-8a24-56a46173129a",
+      "parameters": {
+        "text": "Learn with Simple Rick — nothing built yet. Review the plan in docs/ and start when you are ready."
+      }
+    }
+  ],
+  "visualRoots": [
+    "3823b25b-89c4-4042-8a24-56a46173129a"
+  ]
+}

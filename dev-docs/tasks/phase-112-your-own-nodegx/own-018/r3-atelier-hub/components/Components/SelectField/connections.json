@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4519d10e-ff75-5dae-89b5-c58db12ba7d4",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sf-ci",
+      "fromProperty": "label",
+      "toId": "sf-label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sf-ci",
+      "fromProperty": "label",
+      "toId": "sf-label",
+      "toProperty": "visible"
+    },
+    {
+      "fromId": "sf-ci",
+      "fromProperty": "options",
+      "toId": "sf-dropdown",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "sf-ci",
+      "fromProperty": "value",
+      "toId": "sf-dropdown",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "sf-ci",
+      "fromProperty": "placeholder",
+      "toId": "sf-dropdown",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "sf-dropdown",
+      "fromProperty": "value",
+      "toId": "sf-co",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "sf-dropdown",
+      "fromProperty": "onChange",
+      "toId": "sf-co",
+      "toProperty": "changed"
+    }
+  ]
+}

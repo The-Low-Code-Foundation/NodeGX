@@ -587,7 +587,7 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     ...(scripts ? checkFunctionScriptUses(nodes, { component, scripts }) : []),
     ...checkParameterValues(nodes, catalog, { component }),
     ...(backend ? checkBackendRequirements(nodes, { ...backend, component }) : []),
-    ...checkNavigation(nodes, { component, components, urlPaths }),
+    ...checkNavigation(nodes, { component, components, urlPaths, connectedInputs: connections }),
     ...checkPageShape(nodes, { component, isRoutedPage: looksLikePageComponent(component) }),
     ...checkInstancePorts(nodes, { component }),
     ...(interfaces ? checkInstanceInterfaces(nodes, { component, interfaces }) : []),

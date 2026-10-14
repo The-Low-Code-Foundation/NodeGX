@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "50949c18-44f8-5f45-87d4-29588a9ba10c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tm-view",
+      "fromProperty": "at-list",
+      "toId": "tm-listpanel",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tm-view",
+      "fromProperty": "at-editor",
+      "toId": "tm-editorpanel",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tm-qmembers",
+      "fromProperty": "items",
+      "toId": "tm-membersort",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "tm-membersort",
+      "fromProperty": "items",
+      "toId": "tm-list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "tm-qmembers",
+      "fromProperty": "isEmpty",
+      "toId": "tm-empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tm-list",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "tm-setediting",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tm-list",
+      "fromProperty": "itemActionItemId",
+      "toId": "tm-setediting",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tm-list",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "tm-view",
+      "toProperty": "to-editor"
+    },
+    {
+      "fromId": "tm-editing",
+      "fromProperty": "value",
+      "toId": "tm-form",
+      "toProperty": "recordId"
+    },
+    {
+      "fromId": "tm-editing",
+      "fromProperty": "value",
+      "toId": "tm-editortitleexpr",
+      "toProperty": "recordId"
+    },
+    {
+      "fromId": "tm-editortitleexpr",
+      "fromProperty": "result",
+      "toId": "tm-editortitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tm-form",
+      "fromProperty": "saved",
+      "toId": "tm-view",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "tm-form",
+      "fromProperty": "cancelled",
+      "toId": "tm-view",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "tm-newbtn",
+      "fromProperty": "onClick",
+      "toId": "tm-seteditingempty",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tm-newbtn",
+      "fromProperty": "onClick",
+      "toId": "tm-view",
+      "toProperty": "to-editor"
+    },
+    {
+      "fromId": "tm-empty",
+      "fromProperty": "clicked",
+      "toId": "tm-seteditingempty",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tm-empty",
+      "fromProperty": "clicked",
+      "toId": "tm-view",
+      "toProperty": "to-editor"
+    }
+  ]
+}

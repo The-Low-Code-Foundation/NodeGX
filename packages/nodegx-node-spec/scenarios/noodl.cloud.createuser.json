@@ -1,0 +1,42 @@
+[
+  {
+    "name": "a Username inside a backend: one create at the end of the frame with every field as handed, User Id the new account, done",
+    "because": "createuser.ts :167-197 doCreate; system-users.ts :131-176 callSystemUsers — the request, then the answer's outcome verbatim",
+    "params": { "username": "ada", "email": "ada@example.com", "password": "hunter2", "emailVerified": true },
+    "steps": [{ "signal": "create" }, "settle"],
+    "world": { "host": { "services": ["users"], "answers": [{ "match": { "request": { "op": "create" } }, "answer": { "ok": { "outcome": "done", "userId": "u1" } } }] } }
+  },
+  {
+    "name": "the username is taken: Unchanged, User Id the existing account, Error the store's reason; Treat Unchanged as Done reports Done, as Failure reports Failure (outcome/unchanged-as-failure)",
+    "because": "system-users.ts :160-163 Error is the Unchanged's error; node.ts :1049-1067 the policy read when the outcome is reported",
+    "params": { "username": "taken" },
+    "steps": [{ "signal": "create" }, "settle", { "set": "treatUnchangedAs", "value": "done" }, { "signal": "create" }, "settle", { "set": "treatUnchangedAs", "value": "failure" }, { "signal": "create" }, "settle"],
+    "world": { "host": { "services": ["users"], "answers": [{ "answer": { "ok": { "outcome": "unchanged", "code": "user/already-exists", "userId": "u0", "error": "A user with the username \"taken\" already exists." } } }] } }
+  },
+  {
+    "name": "no Username: Failure at once with the node's sentence, no call; outside a backend: Failure (user/no-backend), no call",
+    "because": "createuser.ts :170-173; system-users.ts :138-147 no `_noodl_system_users`",
+    "params": {},
+    "steps": [{ "signal": "create" }, { "signal": "create" }, "settle", { "set": "username", "value": "ada" }, { "signal": "create" }, "settle"],
+    "world": { "host": {} }
+  },
+  {
+    "name": "the Properties list's inputs travel as `properties`; a press while the answer is out is a second create; each answer settles its own presses",
+    "because": "system-users.ts :105-114 registerPropertyInput; :198-221 the batch drained before the call",
+    "params": { "username": "ada", "properties": "plan,credits", "prop-plan": "pro" },
+    "steps": [{ "set": "prop-credits", "value": 3 }, { "signal": "create" }, "settle", { "signal": "create" }, "settle", { "advance": 10 }, "settle"],
+    "world": { "host": { "services": ["users"], "answers": [{ "answer": { "ok": { "outcome": "done", "userId": "u1" } }, "after": 10 }] } }
+  },
+  {
+    "name": "what the store answers when it fails: its code and reason; with no code or reason, the family's; no answer at all; a rejection",
+    "because": "system-users.ts :150-158 no answer, :155-157 failure, :166-174 the catch — never the thrown value's own shape",
+    "params": { "username": "ada" },
+    "steps": [{ "signal": "create" }, "settle", { "signal": "create" }, "settle", { "signal": "create" }, "settle", { "signal": "create" }, "settle"],
+    "world": { "host": { "services": ["users"], "answers": [
+      { "times": 1, "answer": { "ok": { "outcome": "failure", "code": "user/refused-property", "error": "The backend refused the property \"ACL\"." } } },
+      { "times": 1, "answer": { "ok": { "outcome": "failure" } } },
+      { "times": 1, "answer": { "ok": null } },
+      { "answer": { "throws": "the database is locked" } }
+    ] } }
+  }
+]

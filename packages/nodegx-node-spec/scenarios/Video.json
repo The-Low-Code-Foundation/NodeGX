@@ -107801,6 +107801,149 @@
     ]
   },
   {
+    "name": "Restart with a Start Time of 30 goes to Playback Position 30, not 0 (row C161)",
+    "because": "v6, ruled R27: Video.tsx `restart` / `reset` seek to `startSeconds(this.props.dom.startTime)` — Start Time as last drawn, second 0 when there is none",
+    "params": {
+      "src": "clip.mp4",
+      "muted": true,
+      "startTime": 30
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "loaded",
+        "value": {
+          "width": 640,
+          "height": 360
+        }
+      },
+      {
+        "signal": "play"
+      },
+      {
+        "act": "progress",
+        "value": 45
+      },
+      "settle",
+      {
+        "signal": "restart"
+      },
+      "settle",
+      {
+        "act": "progress",
+        "value": 50
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Restart with Start Time as the text \"12\" goes to 12; a new Start Time loads the video again and the next Restart goes there; a negative or cleared one goes to 0 (row C161)",
+    "because": "v6: Start Time is read as the `#t=` fragment reads it (media-fragment.ts `startSeconds`: a number, below 0 is 0, blank is none); a change of it is a new address, loaded at the frame's end",
+    "params": {
+      "src": "clip.mp4",
+      "muted": true,
+      "startTime": "12"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "loaded",
+        "value": {
+          "width": 640,
+          "height": 360
+        }
+      },
+      {
+        "signal": "play"
+      },
+      {
+        "act": "progress",
+        "value": 40
+      },
+      "settle",
+      {
+        "signal": "restart"
+      },
+      "settle",
+      {
+        "set": "startTime",
+        "value": 20
+      },
+      "settle",
+      {
+        "act": "loaded",
+        "value": {
+          "width": 640,
+          "height": 360
+        }
+      },
+      {
+        "signal": "play"
+      },
+      {
+        "act": "progress",
+        "value": 45
+      },
+      "settle",
+      {
+        "signal": "restart"
+      },
+      "settle",
+      {
+        "set": "startTime",
+        "value": -5
+      },
+      "settle",
+      {
+        "act": "loaded",
+        "value": {
+          "width": 640,
+          "height": 360
+        }
+      },
+      {
+        "signal": "play"
+      },
+      {
+        "act": "progress",
+        "value": 30
+      },
+      "settle",
+      {
+        "signal": "restart"
+      },
+      "settle",
+      {
+        "set": "startTime",
+        "value": ""
+      },
+      "settle",
+      {
+        "act": "loaded",
+        "value": {
+          "width": 640,
+          "height": 360
+        }
+      },
+      {
+        "signal": "play"
+      },
+      {
+        "act": "progress",
+        "value": 30
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
     "name": "Reset while playing at 30: Position 0, On Pause; Reset again: Position 0 only",
     "because": "video.ts :48-117; Video.tsx :177-201; react-component-node.ts :2014-2056 withInnerComponent / outcomeOnInnerComponent",
     "params": {

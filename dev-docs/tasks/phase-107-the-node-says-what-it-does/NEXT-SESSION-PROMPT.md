@@ -1,108 +1,141 @@
 # P107 — next session
 
-**Written 2026-10-12 (s90, Opus).** Read the [README](README.md) §2–§7 (**R24 and R25 are the newest rulings**). Then
-[NSP-021 §6.4](NSP-021-THE-SECOND-EDITOR.md) (what s90 measured and built) and the census's
-[§5 "the source after"](NSP-021-EDITOR-KNOWLEDGE-CENSUS.md).
+**Written 2026-10-14 (s104, Opus).** Read the [README](README.md) §2–§7 (§7 now ends at R40), then
+[P107-S95-MINABOVEMAX](../../bugs/p107-s95-minabovemax-a-counter-with-min-above-max-says-nothing-anywhere.md). Its s102,
+s103 and s104 paragraphs are the record of R35.
 
 **Model: Opus.**
 
-**s90 in one paragraph.** The kit overlay's copy of the child rules was measured against the real kit extractor over 203
-projects: 0 of 358 kit entries differed (a control did), so it now copies the export's fields (`429404268`). Display name
-and deprecation: 0 of 180 types differ between export and catalog, so a spec `displayName` would change nothing. The gap
-was **per node**. 17,130 cards (169 projects) are titled by one of their ports, and the agent named them by type. Richard
-ruled **R24 "Card title + type"**. 52 nodes of retired types exist, which the editor refuses to create while no agent
-check read the flag. Richard ruled **R25 "Warn on any"**. Both are built (`7ce9223ee`): `@nodegx/project-contract/node-title`
-for the editor and `describe.ts`, and `replacedBy` on 16 node definitions through to `deprecated-node`. Also fixed:
-P107-S90-EMPTYLABEL (`97617baab`, 97 nodes named "" by the agent). The new rule found two published examples teaching
-retired nodes; both are handled.
+**Richard's priority (s96):** *"start focussing asap on the remaining node to spec … so the npm package stuff can be finished, and
+the backend specs."* Every picker node is graded (ledger 142 of 147, 3 contracts, 2 exempt, 0 owed). What is left is ports,
+words and the fixes the specs found.
 
-## Board (from the task files)
+**s104 in one paragraph.** For Each v11 declares what it tells the editor. A probe came first: one key declared with an empty
+message lists the runtime's sentences as divergences. It reached 9 `repeater/` keys, and reading foreach.tsx found one more a
+play reaches behind an earlier difference. Ten keys are declared, and four the runtime can raise are unreachable in a play. It
+conformed on its first run. The rules column in the *How this node works* modal now lists a node's warnings under "It warns you
+when". `catalog:generate` writes `warnings` (`{ key: says }`) on the 13 specs that declare any. Richard ruled three questions
+(R38–R40, all as recommended). R39 is built: a Slider with Max below Min now tells the editor, in the runtime and in Slider
+v7. Three of the four SEED20738 survivors named in s103 are pinned by hand scenarios (Slider ×2, Text Input). R38 and R40 are
+ruled and not built.
 
 ## Board (from the task files)
 
 | task | built | committed |
 |---|---|---|
 | NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2's export half and the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18's) | s1 … s44 |
+| NSP-000 the census | ✅ regenerated s104 from HEAD (test counts only) | `7450a121e` |
 | NSP-016 the visual nodes | ✅ s71; s73 SCROLLROOM | `aa8abb06f` … `fd6385beb` |
 | NSP-018 the spec speaks | ✅ s77 | s72 … s77 |
-| NSP-019 Richard reads it | 🟡 s77: AC1, AC2, the §2 table; **s91: driven by Richard — "Needs changes" (R30): a pop-out modal, §5.3** | s77, s91 |
-| NSP-009 the ratchet | ✅ s64; s65 `contract`; s85 `ports` (`floor.ports` **132** since s87) | `6a1ed0084`, s65, s85, s87 |
-| NSP-010 a change is a version | ✅ s78 | `36e08e29e`, `64f9576d9` |
-| NSP-017 the escape hatches | 🟡 s64–s68. Left: AC1's export half (P18's) | s64 … s68 |
+| NSP-019 Richard reads it | ✅ s95; R35's sentences s102–s104; **the rules column lists a node's warnings (s104)** | s77 … `99625cc67` |
+| NSP-009 the ratchet | ✅ s64; floor.runtime **142**, floor.ports **133**, `owed` empty | `6a1ed0084` … s101 |
+| NSP-010 a change is a version | ✅ s78 (22 histories now) | `36e08e29e`, `64f9576d9` |
+| NSP-017 the escape hatches | 🟡 Left: AC1's export half (P18's) | s64 … s68 |
 | NSP-023 the spec without React | ✅ (s50) | s45 … s57 |
-| NSP-006 the stranger | ✅ rounds 1–4 | `649e6864d`, s70 … s84 |
-| NSP-020 ports without a viewer | 🟡 L1–L5 ✅, AC4 ✅, R19 ✅, oracle (c) ✅, R20 ✅ **and driven (s89)**. Left: Router's labels (ADAPTERLABEL) | s79 … s87 |
-| **NSP-021 the second editor** | 🟡 AC1 ✅ (s87); §3.2: Navigate, Cloud Function (s87), `typecasts` ✅ s88, `allowAsChild` ✅ s89 (R23), **kit mirror retired, display name / card title ✅ (R24), deprecation ✅ (R25) s90**. Left in §3.2: singleton, units, enum labels, which runtimes (NSP-022). Round trip (§3.3) = P112 OWN-006 | s87 … s90 |
-| NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
+| NSP-006 the stranger | ✅ rounds 1–4; nothing s104 touched is guarded | `649e6864d`, s70 … s103 |
+| NSP-020 ports without a viewer | 🟡 left: Router's labels (ADAPTERLABEL) | s79 … s102 |
+| NSP-021 the second editor | 🟡 Left in §3.2: which runtimes. Round trip (§3.3) = P112 OWN-006 | s87 … s93 |
+| NSP-022 the cloud-only nodes | ✅ 17 of 17; Aggregate v2 (R36) | s96 … s100 |
+| **R35 (the settings say when they make no sense)** | 🟡 **half 1: 8 of 9 sites.** For Each was added in s104. Left: layout, which is R38. **Half 2:** the Slider (R39, s104). The wider census was not asked for | `0d81cd398` … `4973cc4c2`, `f41a09be3` |
+| **R38 a spec knows which way its parent stacks** | ❌ ruled s104, not built | — |
+| **R40 warnings read from saved settings** | ❌ ruled s104, not built | — |
 
+## What s105 does (in order)
 
-## What s91 does (in order)
+1. **R38 and R40 together.** Both edit the spec format (`spec.ts`, and `adapter.ts` / `scenario.ts` for R38). Those are
+   FORMAT_FILES, guarded in all four stranger rounds. One session that does both pays for one re-grade of the rounds, not two.
+   Round 4 alone takes about 36 minutes.
+   - **R38, the format.** A scenario says how the node's parent stacks it: `parent: 'row' | 'column'`, read like `wired`
+     (spec.ts :266, P107-C155). The default is `'column'`, which is what the runtime target's holder always is
+     (node-spec-target.ts :2437, `props: { layout: 'column' }`). With that default, every existing trace stays byte-identical.
+     The runtime target's holder takes `props.layout` and `style.flexDirection` from it. Then declare
+     `dimensions/wired-dimension-becomes-grow` (viewer-react layout.ts :314-336) on the 11 specs with a size port: Group, Text,
+     Image, Video, Button, Checkbox, Text Input, Dropdown, Slider, Radio Button and Radio Button Group. The sentence needs four
+     things: the parent's axis, `wired(port)`, a percent along that axis that is not fixed (`layout-map.ts` `sizeRule`, the
+     `fill` case), and `style.flexGrow`. Read `Layout.size` :84-108 for what `flexGrow` is set to before writing the sentence.
+     `dimensions/` is a shared namespace in the target, so only the named key is graded. Each spec gets a version bump and a
+     scenario that warns, then clears when the wire goes or the axis turns. Dropdown is in round 4.
+   - **R40, the static reading.** Some warnings are a function of saved settings alone: Counter, Date Add, Date Difference,
+     the Slider's Max, and For Each's two "does not compile" keys. Others need events or the play's fixture world (a Focus, a
+     Refresh, For Each's `template-component-not-found` against the play's four templates). Reading those statically would
+     give false alarms. Proposal: a declared flag on `DiagnosticDecl` (`settings: true`?) marks the first kind. Add a function
+     in the package that plays a spec with a node's saved params only and returns those warnings. Then add ONE rule in the
+     editor's `validation/rules` (`SemanticValidator`). The Problems panel (`ProjectValidationService`) and the MCP's validator
+     both run it, and the validator already imports `@nodegx/node-spec` (`drawnPortLookup.ts`). Skip a node that has a wired
+     value input, because the wire's value replaces the saved one. Before shipping, measure false alarms over Richard's
+     projects (the `portContextFor` corpus: 201 projects).
+   - **Dropdown's `person.blur` survivor** (SEED20738, seed 20739 and round 4). Its scenario file is guarded, so add the hand
+     scenario during this same re-grade.
+   - Then re-grade all four rounds and refresh the hashes:
+     `node -e "require('./tests/stranger-suite-hashes.helper.js').write()"`.
+2. **Drive the rules column in the editor.** It was not driven in s104. Graded only as an element tree over the real catalog
+   (`tests-unit/nsp-019/nodeRules.test.tsx`). Open *How this node works* on a Counter, a Slider and a Repeater, and check that
+   "It warns you when" is visible under the ports. Read visibility with `elementFromPoint`, not with the element's rect.
+3. **P107-S95-SEED20738, the rest.** Delete Record and DbModel2 have not been re-measured since s102. The Video and C96 half is
+   as s95 left it.
 
-1. **See R24 and R25 where a person and the agent see them.** Neither has been driven. (a) The agent: rebuild
-   `packages/noodl-mcp` (`dist/` is stale until then; memory: a stale dist hides a merged field), then call
-   `get_component` on a COPY of a project with unlabelled Variables (Erleah-2-react19 has `screenWidth`, `viewport`) and
-   read `Variable "screenWidth" [id].value` plus `title` on the rows. (b) The editor (run-editor skill, one launch, a
-   copy with a REST2: 34 such nodes in the census, find one by grep on `"REST2"`): the Problems panel lists
-   `deprecated-node` naming HTTP Request; the canvas card titles are unchanged (R24 moved the editor's rule into the
-   contract package and must not move a pixel). Keep a control beside the zero.
-2. **Run `deprecated-node` over the projects.** s90 counted 52 by the export's flag and did not run the rule. Count the
-   rule's warnings over the same 357 (both formats) and compare.
-3. **The next §3.2 rows** (census §5): `singleton` (the editor's warning cannot fire, §3), units, enum labels. Measure
-   the editor's answer against the agent's before designing, as s88–s90 did.
+**The recipe for a diagnostic** (s102–s104):
+- **Probe first** (s104): declare ONE key in the node's namespace with `message: () => undefined`, then run
+  `NSP_ONLY=<type> NSP_SEED=<seed>`. The divergences list the runtime's sentences, but **only each play's first difference**,
+  so the count is a floor. Read the namespace in the source for the rest: `grep "'<ns>/"` for `raiseRuntimeError`,
+  `setDiagnostic`, `reportOutcome(…{ code })`, `clearWarning`.
+- A Refresh-style Failure reaches the editor through the outcome's raise, **once per invocation answered**. A rebuild nobody
+  asked for tells nothing.
+- Keep the sentences in state (`warnings`). Each `message` is `(_i: unknown, s: State) => …`: an **untyped** `(_i, s)` broke the
+  inference of the whole declaration (a signal reducer's `view` became `Inputs`).
+- **`says` is shown to people** in the modal, as written and as "No longer: …", and in the rules column. Write it plain and
+  short: no "registry array".
+- Bump the version, with a `changes` entry whose migration is `none`. Write scenarios that warn and then clear. Run
+  `golden.js --type`. Run conformance at 2 seeds. Plant a control (one letter in a sentence, or a dropped withdrawal), which
+  must turn red.
+- A new state key goes into `tests/page-model.helper.ts` (G1) for a visual spec. Add it before the entry's last field.
+- Run `catalog:generate`, then `catalog:merge`; the warnings column reads them. Then run `catalog:check`, `merge.js --check`,
+  `spec-ledger -- --check` and `spec-disagreements.js --check`.
 
-**The census recipe (s89/s90):** bundle a scratch entry with `require('./scripts/node-catalog/lib/bundle').bundleEntry`
-that imports `scripts/node-catalog/dom-shim` by absolute path, registers the browser and cloud runtimes (as
-`extractor-entry.js` does) and writes `generateNodeLibrary(...).nodetypes` to JSON. Population: `find vscode_projects
--maxdepth 4` for `nodegx.project.json` / `project.json` (OpenNoodl excluded), the launcher's
-`recently_opened_project.json`, the committed `nodegx.project.json` files under `packages/` and `dev-docs/`, by realpath
-(357 on 2026-10-12), plus a synthetic control project. Read both formats: v2 `components/**/nodes.json`, legacy
-`project.json` graph roots. Kits: `node packages/noodl-mcp/dist/kit-extract.cjs <dir>` is the agent's real extractor.
+## Traps s104 hit
 
-**Human decisions — RULED 2026-10-12 (s91, on a rulings page; README R26–R32):**
-- C160 Drag Enabled → **off means off** (R26). C161 Video → **Restart/Reset go to Start Time** (R27). C162 parsers →
-  **rename "Max Characters", keep the check** (R28). USERACL → **hide ACL like the Records** (R29). All four bug files are
-  `scheduled`, each with its regression scenario. None is built. Each is small: runtime + spec `version` + `changes`.
-- NSP-019 AC3 → **"Needs changes"** (R30): the Try panel becomes a pop-out modal ("How this node works" button) with a
-  live mock of the node, data bubbles, inputs lighting up, a timeline that follows the latest event. R31: the folds' open
-  state and the five wordless specs fold into it ("spec in progress", never an empty Try). Brief: NSP-019 §5.3.
-  **Mockup to Richard before building** (a wireframe is not the mockup).
-- The Frappe note → **a named list, built when the first `changes` entry answers `project`** (R32). Nothing to build now.
-- Still Richard's: **P107-S89-NIGHTBOOK** is the template owner's (P78). 14 deprecated types have no `replacedBy`; ask
-  only if a person hits one.
+- **zsh does not split `$FILES`.** `git add $FILES` added nothing, and `commit-tree` made an EMPTY commit. It was replaced by
+  compare-and-swap on the ref (`git update-ref … <new> <empty>`), because a peer had committed under it. Use an array:
+  `FILES=(…); git add "${FILES[@]}"`.
+- **A temp-index commit must read the tree of the parent it commits on**, in the same command:
+  `P=$(git rev-parse HEAD); read-tree $P; add; commit-tree -p $P; update-ref … $C $P`. If `read-tree` runs earlier and a peer
+  commits in between, the commit reverts the peer's work. Check `git show --stat` after every commit.
+- **Scenario files differ in JSON layout.** For Each's is indent 1 with no final newline; the controls' are indent 2 with a
+  newline. Detect the layout before rewriting a file. One rewrite turned a 21,000-line diff into one line, and HEAD's copy was
+  restored.
+- **A swap-branch survivor whose effect the next paint repeats in the same settle** is invisible to anything that paints
+  first. Kill it with a reader that does not paint. The Slider's survivors were killed by the Focus signal (Unchanged off the
+  page, Done on it).
 
-**s91 did only the rulings** (no build): the page, the measurements behind it, Richard's drive of the panel in the dev
-editor (torn down, launcher entry removed, the source's SHA unchanged). The s91 steps 1–3 below are still owed, and now
-sit beside the four R26–R29 fixes and the R30 modal. Suggested order: R26–R29 (one session, small, each with its
-scenario and mutant), then s91's steps 1–3, then the R30 mockup.
+## Human decisions
+
+- None open from s104 (R38–R40 ruled). Still Richard's from before: P107-S89-NIGHTBOOK (P78's); 14 deprecated types have no
+  `replacedBy`. P107-S102-SIGNUPBACKEND has a product question inside it: should Sign Up get a Backend picker?
+
+**Open, filed this phase:** P107-S102-SIGNUPBACKEND (low, the runtime's), P107-S101-VERBSPECCED (low, P116's table),
+P107-S97-NULLBODY, P107-S97-USERIDBOOLEAN (low); P107-S95-MINABOVEMAX (status `fixed`; R38 is its last site),
+P107-S95-SEED20738 (Dropdown, Delete Record, DbModel2, Video/C96 left), P107-S94-DEVHEAP (medium), P107-S93-NOTANAME (low),
+P107-S92-VIDEOEMBEDSEED (low), P107-S89-NIGHTBOOK (medium), P107-S89-CFEXAMPLES (low), P107-S89-XMLEXAMPLE (low);
+P107-S86-STOREDWIRE (medium); P107-S83-SENDFORM; P107-S79-ADAPTERLABEL (low).
+
+**Routed to P18 (the export):** `nodegx-export/src/emit/dragLib.ts` :69 / :356 (R26). **P109 holds:** D38, the Page Stack, the
+Router, LIBRARYDOCS, CHR007SNAPSHOT; P107-S82-STATESVALUEPORT and P107-S82-STATESLOADGATE. **P112 holds:** P107-SIZE.
 
 NSP-010's and NSP-017's uncommitted notes (not this phase's sessions') were left out again.
 
-**Open, filed this phase:** P107-S89-NIGHTBOOK (medium), P107-S89-CFEXAMPLES (low), P107-S89-XMLEXAMPLE (low);
-P107-S86-STOREDWIRE (medium); P107-S85-RESTCOLTYPES (low); P107-S83-SENDFORM; P107-S79-ADAPTERLABEL (low).
-**Fixed s90:** P107-S90-EMPTYLABEL.
+## Gates (s104, 2026-10-13/14)
 
-**P109 holds:** D38, the Page Stack, the Router, LIBRARYDOCS, CHR007SNAPSHOT; P107-S82-STATESVALUEPORT and
-P107-S82-STATESLOADGATE. **P112 holds:** P107-SIZE.
-
-## Gates (s90, 2026-10-12, this tree on `2e3e25ec0` + s90's changes, then committed)
-
-- kit-catalog 83 / 83 (planted: the old derivation → red). project-contract `node-title` + `hierarchy` 17 / 17;
-  `typecheck` 0 (exit read without a pipe).
-- MCP: `nsp021CardTitle` 4 / 4 (planted: the title port unread → 3 red), `nsp021EmptyLabel` 3 / 3 (planted: `??` back → red),
-  the 12 kit suites 215 / 215. **Whole suite: 186 / 198 suites, 3,884 / 3,912 tests** (JSON report, mtime 08:49). 12 red:
-  s89's same 10, none reading s90's files (`sbr009ThemeEditorDrive`, `def018-def020-layout-drive`, `tpl011Template`,
-  `def038SettledTemplates`, `tpl010Template`, `cmp004Parts`, `cmp004RoundTrip`, `writePathConformance`,
-  `nodeIdAllocation`, `fld013ExportReach`); `iw008Crew` (a 5 ms tick budget; alone it passed 1 of 3, at 5.2 and 8.9 ms
-  under load from Firefox and a VM: load, as s89); `nodeDocBudget` **was s90's**: Text Input's summary gained
-  `replacedBy`, +13 measured (8,338 → 8,351, 12 headroom left). Ratchet moved to 8,450 with the note, now green.
-  `typecheck:mcp`: 1 error, P116's `ont002WorldTools.test.ts` (unchanged from s89).
-- editor: `tests-unit/nsp-021` 17 / 17 (planted: rule inverted → 3 red); validation, nsp-019, alpha-006, cn-003/004/008/010
-  24 suites, 339 / 339 (s89's red `rules.test.ts` case passes now); the electron spec `basicnodetype-label.spec.ts` run
-  under jest against the new `labelForNode`, 11 / 11 (temporary copy, removed). `typecheck:editor`, `:editor-tests`,
-  `:runtime`, `:viewer`, `:cloud` all 0.
-- runtime: export and definition tests 90 / 90. backend `cloud-system-roles` 15 / 15; canvas-look 3 / 3.
-- catalog: `catalog:check` 0, `catalog:merge:check` 0, `catalog:examples` 107 / 109 (the two Cloud Function examples,
-  P107-S89-CFEXAMPLES; the new rule's three findings in two examples are handled).
-- **Not run:** any drive (s91 step 1), `test:main`, `test:ci`, the node-spec suite (no spec changed). The
-  `replacedBy` invariant in `build-catalog.js` was not planted.
-- **Committed:** `429404268`, `97617baab`, `7ce9223ee`, then the docs commit.
+- **Runtime conformance:**
+  - For Each v11 at seeds 20739 and 20740: 305 / 305 scenarios, 200 / 200 sequences, 0 divergences, 321 / 321 mutants.
+    Control: 14 scenarios and 6 sequences red.
+  - Slider v7: at 20739, 74 / 74 and 773 / 778; at 20740, 74 / 74 and 788 / 794. 0 divergences, and the mutants not killed
+    are declared equivalents. Control: 2 scenarios and 30 sequences red.
+  - Text Input: at 20739, 119 / 119 and 5903 / 5911; at 20740, 119 / 119 and 5917 / 5925. The rest are declared equivalents.
+- node-spec package (no stranger) **1,954 / 1,954**. `golden --check`: 125 specs, 9,415 scenarios fresh, 22 histories.
+  `spec-ledger --check` 142 / 133. `catalog:check` and `merge.js --check` up to date. `spec-disagreements --check` up to
+  date. `spec-census` regenerated from HEAD.
+- Runtime: typecheck 0 errors; graph + nsp-019-diagnostics + nsp-020 port-context + ports-parity **459 / 459**.
+- viewer-react nda-012-visual-value-ports + fld-004 **27 / 27**.
+- **Editor** `tests-unit/nsp-019` + `nsp-020` + `sb-017`: **551 / 551** (3 new). **MCP** nsp018 + nsp020: **14 / 14**.
+- **`test:ci`: Jasmine 3,015 specs, 0 failures**, seed 87145, exit 0, fresh `test-results.json` (09:34:48 CEST, 2026-10-14),
+  HEAD `7450a121` plus the working tree (peers' open edits included). Run alone, with `.webpack-cache` cleared.

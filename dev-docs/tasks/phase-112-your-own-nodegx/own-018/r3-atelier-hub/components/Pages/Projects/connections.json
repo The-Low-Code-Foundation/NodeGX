@@ -1,0 +1,199 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1fa5cc20-eea8-5025-81d2-3fa363592fc3",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pj-view",
+      "fromProperty": "at-list",
+      "toId": "pj-listpanel",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pj-view",
+      "fromProperty": "at-editor",
+      "toId": "pj-editorpanel",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pj-qprojects",
+      "fromProperty": "items",
+      "toId": "pj-pfilter",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pj-pfilter",
+      "fromProperty": "items",
+      "toId": "pj-list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pj-qprojects",
+      "fromProperty": "isEmpty",
+      "toId": "pj-empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pj-statusfiltervar",
+      "fromProperty": "value",
+      "toId": "pj-statusval",
+      "toProperty": "statusFilter"
+    },
+    {
+      "fromId": "pj-ownerfiltervar",
+      "fromProperty": "value",
+      "toId": "pj-ownerval",
+      "toProperty": "ownerFilter"
+    },
+    {
+      "fromId": "pj-memberopts",
+      "fromProperty": "ids",
+      "toId": "pj-ownerval",
+      "toProperty": "ownerIds"
+    },
+    {
+      "fromId": "pj-statusval",
+      "fromProperty": "result",
+      "toId": "pj-pfilter",
+      "toProperty": "filterFilterValue-status"
+    },
+    {
+      "fromId": "pj-ownerval",
+      "fromProperty": "result",
+      "toId": "pj-pfilter",
+      "toProperty": "filterFilterValue-owner"
+    },
+    {
+      "fromId": "pj-statusfilter",
+      "fromProperty": "value",
+      "toId": "pj-setstatus",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pj-statusfilter",
+      "fromProperty": "changed",
+      "toId": "pj-setstatus",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pj-ownerfilter",
+      "fromProperty": "value",
+      "toId": "pj-setowner",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pj-ownerfilter",
+      "fromProperty": "changed",
+      "toId": "pj-setowner",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pj-qmembers",
+      "fromProperty": "items",
+      "toId": "pj-memberopts",
+      "toProperty": "records"
+    },
+    {
+      "fromId": "pj-qclients",
+      "fromProperty": "items",
+      "toId": "pj-clientopts",
+      "toProperty": "records"
+    },
+    {
+      "fromId": "pj-memberopts",
+      "fromProperty": "options",
+      "toId": "pj-form",
+      "toProperty": "ownerOptions"
+    },
+    {
+      "fromId": "pj-clientopts",
+      "fromProperty": "options",
+      "toId": "pj-form",
+      "toProperty": "clientOptions"
+    },
+    {
+      "fromId": "pj-list",
+      "fromProperty": "itemOutputSignal-markDone",
+      "toId": "pj-markdone",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "pj-list",
+      "fromProperty": "itemActionItemId",
+      "toId": "pj-markdone",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "pj-list",
+      "fromProperty": "itemOutputSignal-edit",
+      "toId": "pj-setediting",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pj-list",
+      "fromProperty": "itemActionItemId",
+      "toId": "pj-setediting",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pj-list",
+      "fromProperty": "itemOutputSignal-edit",
+      "toId": "pj-view",
+      "toProperty": "to-editor"
+    },
+    {
+      "fromId": "pj-editing",
+      "fromProperty": "value",
+      "toId": "pj-form",
+      "toProperty": "recordId"
+    },
+    {
+      "fromId": "pj-editing",
+      "fromProperty": "value",
+      "toId": "pj-editortitleexpr",
+      "toProperty": "recordId"
+    },
+    {
+      "fromId": "pj-editortitleexpr",
+      "fromProperty": "result",
+      "toId": "pj-editortitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pj-form",
+      "fromProperty": "saved",
+      "toId": "pj-view",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "pj-form",
+      "fromProperty": "cancelled",
+      "toId": "pj-view",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "pj-newbtn",
+      "fromProperty": "onClick",
+      "toId": "pj-seteditingempty",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pj-newbtn",
+      "fromProperty": "onClick",
+      "toId": "pj-view",
+      "toProperty": "to-editor"
+    },
+    {
+      "fromId": "pj-empty",
+      "fromProperty": "clicked",
+      "toId": "pj-seteditingempty",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pj-empty",
+      "fromProperty": "clicked",
+      "toId": "pj-view",
+      "toProperty": "to-editor"
+    }
+  ]
+}

@@ -1,0 +1,328 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3432cfc5-6320-5f3f-872c-c426286342b8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pr-row",
+      "type": "Group",
+      "label": "Project row",
+      "children": [
+        "pr-main",
+        "pr-badge",
+        "pr-owner",
+        "pr-due",
+        "pr-actions"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "borderBottomColor": "var(--border-subtle)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "columnGap": "var(--space-4)",
+        "flexDirection": "row",
+        "paddingBottom": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pr-main",
+      "type": "Group",
+      "label": "Name and client",
+      "parent": "pr-row",
+      "children": [
+        "pr-name",
+        "pr-client"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "minWidth": {
+          "unit": "px",
+          "value": 0
+        },
+        "rowGap": "var(--space-1)",
+        "width": {
+          "unit": "%",
+          "value": 40
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pr-name",
+      "type": "Text",
+      "label": "Project name",
+      "parent": "pr-main",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "minWidth": {
+          "unit": "px",
+          "value": 0
+        },
+        "textOverflow": "ellipsis"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pr-client",
+      "type": "Text",
+      "label": "Client name",
+      "parent": "pr-main",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-sm)",
+        "minWidth": {
+          "unit": "px",
+          "value": 0
+        },
+        "textOverflow": "ellipsis"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "pr-badge",
+      "type": "/Components/StatusBadge",
+      "label": "Status",
+      "parent": "pr-row",
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "pr-owner",
+      "type": "Text",
+      "label": "Owner name",
+      "parent": "pr-row",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-sm)",
+        "minWidth": {
+          "unit": "px",
+          "value": 0
+        },
+        "textOverflow": "ellipsis",
+        "width": {
+          "unit": "%",
+          "value": 18
+        }
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "pr-due",
+      "type": "Text",
+      "label": "Due date",
+      "parent": "pr-row",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-sm)",
+        "minWidth": {
+          "unit": "px",
+          "value": 0
+        },
+        "textOverflow": "ellipsis",
+        "width": {
+          "unit": "%",
+          "value": 16
+        }
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "pr-actions",
+      "type": "Group",
+      "label": "Actions",
+      "parent": "pr-row",
+      "children": [
+        "pr-done",
+        "pr-edit"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "flexDirection": "row"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "pr-done",
+      "type": "net.noodl.controls.button",
+      "label": "Mark done",
+      "parent": "pr-actions",
+      "parameters": {
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "Mark done",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "pr-edit",
+      "type": "net.noodl.controls.button",
+      "label": "Edit",
+      "parent": "pr-actions",
+      "parameters": {
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-medium)",
+        "label": "Edit",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "pr-ci",
+      "type": "Component Inputs",
+      "label": "Project fields in",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "status",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "client",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "owner",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "dueDate",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "pr-co",
+      "type": "Component Outputs",
+      "label": "Row actions out",
+      "ports": [
+        {
+          "name": "edit",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "markDone",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "pr-clientid",
+      "type": "Expression",
+      "label": "Client id",
+      "parameters": {
+        "expression": "typeof client === 'string' ? client : ((client && (client.id || client.objectId)) || '')"
+      },
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "pr-ownerid",
+      "type": "Expression",
+      "label": "Owner id",
+      "parameters": {
+        "expression": "typeof owner === 'string' ? owner : ((owner && (owner.id || owner.objectId)) || '')"
+      },
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "pr-clientrec",
+      "type": "DbModel2",
+      "label": "Client record",
+      "parameters": {
+        "collectionName": "Client"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "pr-ownerrec",
+      "type": "DbModel2",
+      "label": "Owner record",
+      "parameters": {
+        "collectionName": "TeamMember"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "pr-duefmt",
+      "type": "Date To String",
+      "label": "Due date format",
+      "parameters": {
+        "formatString": "{d} {monthName} {year}",
+        "locale": "fr-FR"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "pr-notdone",
+      "type": "Expression",
+      "label": "Not done yet",
+      "parameters": {
+        "expression": "status !== 'Done'"
+      },
+      "x": 410,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "pr-row"
+  ]
+}

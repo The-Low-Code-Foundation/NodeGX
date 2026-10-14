@@ -1,5 +1,7 @@
 # Phase 84 — The defects the field report found
 
+**2026-10-14 — CLOSED as a phase by the [board](../../BOARD.md) §5, at 3 of 17.** The fourteen unbuilt items stay below as a bug list; a session that takes one logs it in `dev-docs/bugs/` and works it from there.
+
 **Scoped:** 2026-09-09, from 15 confirmed community issues, re-measured against `cline-dev` HEAD
 (`11b2d3a9`) rather than against the 0.2.2 AppImage they were filed from.
 **Status: OPEN — 3 of 17 built (FLD-001 2026-09-09; FLD-007 and FLD-009 2026-09-10).** **Prefix: `FLD`.** **Release: ⬜ NOT RULED** (see §2).

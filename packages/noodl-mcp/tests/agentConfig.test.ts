@@ -23,6 +23,7 @@ import {
   authoringServerName,
   backfillAgentConfig,
   installAgentConfig,
+  renderAgentsMd,
   renderClaudeMd,
   upgradeAgentConfigForDocs
 } from '../src/editor-deps';
@@ -276,6 +277,12 @@ describe('BST-005 CLAUDE.md does not restate the server briefing', () => {
     expect(duplicated).toEqual([]);
   });
 
+  it('and neither does AGENTS.md (P112-OWN018-PROJECTAGENTS)', () => {
+    const agents = renderAgentsMd(OPTIONS).replace(/\s+/g, ' ');
+    const duplicated = briefings.flatMap(sentencesOf).filter((sentence) => agents.includes(sentence));
+    expect(duplicated).toEqual([]);
+  });
+
   it('and the check would catch a copy-paste', () => {
     // The assertion above is only worth having if it can fail. This proves it
     // does, rather than passing because the matcher never matches anything.
@@ -458,5 +465,80 @@ describe('FIX-021 slice 0 — re-rendering CLAUDE.md once docs/ has landed', () 
     await upgradeAgentConfigForDocs(host, OPTIONS);
 
     expect(host.files[AGENT_CONFIG_PATHS.mcp]).toBe(mcpBefore);
+  });
+});
+
+/**
+ * P112-OWN018-PROJECTAGENTS — Mistral Vibe (OWN-018), Codex, Cline and most agents that aren't Claude Code read
+ * AGENTS.md and never .mcp.json. A project's own rules ("use the server, don't hand-edit components/") reached
+ * only Claude.
+ */
+describe('P112-OWN018-PROJECTAGENTS — AGENTS.md beside CLAUDE.md', () => {
+  it('writes AGENTS.md with CLAUDE.md, saying the same except how to reach the server', async () => {
+    const host = memoryHost();
+    const report = await installAgentConfig(host, OPTIONS);
+
+    expect(report.written).toEqual(expect.arrayContaining([AGENT_CONFIG_PATHS.claude, AGENT_CONFIG_PATHS.agents]));
+    const claude = host.files[AGENT_CONFIG_PATHS.claude];
+    const agents = host.files[AGENT_CONFIG_PATHS.agents];
+    expect(agents).toBe(renderAgentsMd(OPTIONS));
+    // The project's own rule reaches every agent.
+    expect(agents).toContain('Editing that JSON by hand skips');
+    expect(agents).toContain(OPTIONS.summary);
+    // An agent that never reads .mcp.json gets the command to register, env included — and the folder as a
+    // placeholder, because AGENTS.md is committed and the absolute path names this machine's user.
+    expect(agents).toContain(
+      'ELECTRON_RUN_AS_NODE=1 /Applications/NodeGX.app/Contents/MacOS/NodeGX ' +
+        '/Applications/NodeGX.app/Contents/Resources/noodl-mcp/noodl-mcp.cjs <this folder> --allow-writes'
+    );
+    expect(agents).not.toContain('/tmp/proj');
+    expect(agents).not.toContain('is registered for this folder in');
+    expect(claude).toContain('is registered for this folder in');
+    // Everything but that paragraph is the same file.
+    const withoutServer = (t: string) => t.replace(/Use the `[^`]+` MCP server instead[\s\S]*?\n\n(```[\s\S]*?```\n\n)?/, '');
+    expect(withoutServer(agents)).toBe(withoutServer(claude));
+  });
+
+  it("leaves the agent notes alone where the person's own CLAUDE.md is", async () => {
+    const host = memoryHost({ [AGENT_CONFIG_PATHS.claude]: '# my own notes\n' });
+    const report = await installAgentConfig(host, OPTIONS);
+
+    expect(host.files[AGENT_CONFIG_PATHS.agents]).toBeUndefined();
+    expect(report.written).not.toContain(AGENT_CONFIG_PATHS.agents);
+  });
+
+  it('never overwrites an AGENTS.md, and says so', async () => {
+    const host = memoryHost({ [AGENT_CONFIG_PATHS.agents]: '# rules for my agents\n' });
+    const report = await installAgentConfig(host, OPTIONS);
+
+    expect(host.files[AGENT_CONFIG_PATHS.agents]).toBe('# rules for my agents\n');
+    expect(report.files.find((f) => f.path === AGENT_CONFIG_PATHS.agents)?.outcome).toBe('kept-existing');
+  });
+
+  it('a project opened later (backfill) gets the same AGENTS.md a created one does', async () => {
+    const created = memoryHost();
+    await installAgentConfig(created, OPTIONS);
+    const opened = memoryHost({ 'nodegx.project.json': '{}', 'docs/BRIEF.md': '# brief' });
+    const { hasDocs: _ignored, ...backfill } = OPTIONS;
+    await backfillAgentConfig(opened, backfill);
+    expect(opened.files[AGENT_CONFIG_PATHS.agents]).toBe(
+      renderAgentsMd({ ...OPTIONS, summary: OPTIONS.summary })
+    );
+  });
+
+  it('upgrades AGENTS.md with CLAUDE.md once docs land, and only the one creation wrote', async () => {
+    const bare = { ...OPTIONS, summary: undefined, hasDocs: false };
+    const host = memoryHost();
+    await installAgentConfig(host, bare);
+    expect(host.files[AGENT_CONFIG_PATHS.agents]).not.toContain('docs/CONVENTIONS.md');
+
+    await upgradeAgentConfigForDocs(host, OPTIONS);
+    expect(host.files[AGENT_CONFIG_PATHS.agents]).toBe(renderAgentsMd(OPTIONS));
+
+    const edited = memoryHost();
+    await installAgentConfig(edited, bare);
+    edited.files[AGENT_CONFIG_PATHS.agents] += '\nMy own line.\n';
+    await upgradeAgentConfigForDocs(edited, OPTIONS);
+    expect(edited.files[AGENT_CONFIG_PATHS.agents]).toContain('My own line.');
   });
 });

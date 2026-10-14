@@ -1,0 +1,510 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6105ff25-a0f2-531a-86f5-6f3081a41f63",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "wk-page",
+      "type": "Page",
+      "label": "Wiki page",
+      "children": [
+        "wk-canvas"
+      ],
+      "parameters": {
+        "title": "Wiki",
+        "urlPath": "wiki"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "wk-canvas",
+      "type": "Group",
+      "label": "Page canvas",
+      "parent": "wk-page",
+      "children": [
+        "wk-band"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "backgroundColor": "var(--background)",
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "wk-band",
+      "type": "Group",
+      "label": "Band",
+      "parent": "wk-canvas",
+      "children": [
+        "wk-shell"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "flexDirection": "column",
+        "paddingBottom": "var(--space-20)",
+        "paddingTop": "var(--space-12)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "wk-shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "wk-band",
+      "children": [
+        "wk-listpanel",
+        "wk-viewpanel",
+        "wk-editorpanel"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "maxWidth": {
+          "unit": "px",
+          "value": 900
+        },
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "rowGap": "var(--space-8)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "wk-listpanel",
+      "type": "Group",
+      "label": "List panel",
+      "parent": "wk-shell",
+      "children": [
+        "wk-header",
+        "wk-list",
+        "wk-empty"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 280,
+      "y": 520
+    },
+    {
+      "id": "wk-header",
+      "type": "/Components/PageHeader",
+      "label": "Page header",
+      "parent": "wk-listpanel",
+      "children": [
+        "wk-newbtn"
+      ],
+      "parameters": {
+        "eyebrow": "Wiki",
+        "lead": "How-tos and references. Anyone can write, anyone can edit.",
+        "title": "Wiki"
+      },
+      "x": 340,
+      "y": 640
+    },
+    {
+      "id": "wk-newbtn",
+      "type": "net.noodl.controls.button",
+      "label": "New page",
+      "parent": "wk-header",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "color": "var(--primary-foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "New page",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "sizeMode": "contentSize"
+      },
+      "x": 400,
+      "y": 760
+    },
+    {
+      "id": "wk-list",
+      "type": "For Each",
+      "label": "Wiki page rows",
+      "parent": "wk-listpanel",
+      "parameters": {
+        "template": "/Components/WikiPageRow"
+      },
+      "x": 340,
+      "y": 880
+    },
+    {
+      "id": "wk-empty",
+      "type": "/Components/EmptyState",
+      "label": "Empty wiki",
+      "parent": "wk-listpanel",
+      "parameters": {
+        "actionLabel": "New page",
+        "body": "Write the first how-to — the team will thank you.",
+        "title": "No pages yet"
+      },
+      "x": 340,
+      "y": 1000
+    },
+    {
+      "id": "wk-viewpanel",
+      "type": "Group",
+      "label": "View panel",
+      "parent": "wk-shell",
+      "children": [
+        "wk-backrow",
+        "wk-title",
+        "wk-meta",
+        "wk-body"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "wk-backrow",
+      "type": "Group",
+      "label": "Back row",
+      "parent": "wk-viewpanel",
+      "children": [
+        "wk-back",
+        "wk-editbtn"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between"
+      },
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "wk-back",
+      "type": "net.noodl.controls.button",
+      "label": "Back to list",
+      "parent": "wk-backrow",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "label": "← All pages",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-2)",
+        "sizeMode": "contentSize"
+      },
+      "x": 400,
+      "y": 1360
+    },
+    {
+      "id": "wk-editbtn",
+      "type": "net.noodl.controls.button",
+      "label": "Edit page",
+      "parent": "wk-backrow",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "label": "Edit page",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "sizeMode": "contentSize"
+      },
+      "x": 400,
+      "y": 1480
+    },
+    {
+      "id": "wk-title",
+      "type": "Text",
+      "label": "Page title",
+      "parent": "wk-viewpanel",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-semibold)",
+        "letterSpacing": "var(--tracking-tight)",
+        "lineHeight": "var(--leading-tight)"
+      },
+      "x": 340,
+      "y": 1600
+    },
+    {
+      "id": "wk-meta",
+      "type": "Text",
+      "label": "Page meta",
+      "parent": "wk-viewpanel",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-sm)"
+      },
+      "x": 340,
+      "y": 1720
+    },
+    {
+      "id": "wk-body",
+      "type": "Text",
+      "label": "Page body",
+      "parent": "wk-viewpanel",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "styleCss": "white-space: pre-wrap;"
+      },
+      "x": 340,
+      "y": 1840
+    },
+    {
+      "id": "wk-editorpanel",
+      "type": "Group",
+      "label": "Editor panel",
+      "parent": "wk-shell",
+      "children": [
+        "wk-editortitle",
+        "wk-form"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "wk-editortitle",
+      "type": "Text",
+      "label": "Editor title",
+      "parent": "wk-editorpanel",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 340,
+      "y": 2080
+    },
+    {
+      "id": "wk-form",
+      "type": "/Components/WikiPageForm",
+      "label": "Wiki page form",
+      "parent": "wk-editorpanel",
+      "x": 340,
+      "y": 2200
+    },
+    {
+      "id": "wk-view",
+      "type": "States",
+      "label": "List, view or editor",
+      "parameters": {
+        "states": "list,view,editor"
+      },
+      "x": 650,
+      "y": 520
+    },
+    {
+      "id": "wk-qwiki",
+      "type": "DbCollection2",
+      "label": "Fetch wiki pages",
+      "parameters": {
+        "collectionName": "WikiPage"
+      },
+      "x": 650,
+      "y": 1120
+    },
+    {
+      "id": "wk-wikifilter",
+      "type": "Filter Collection",
+      "label": "Sort by title",
+      "parameters": {
+        "filterSort": "title",
+        "filterSort-title": "ascending"
+      },
+      "x": 650,
+      "y": 880
+    },
+    {
+      "id": "wk-rec",
+      "type": "DbModel2",
+      "label": "Selected page record",
+      "parameters": {
+        "collectionName": "WikiPage"
+      },
+      "x": 650,
+      "y": 1600
+    },
+    {
+      "id": "wk-qmembers",
+      "type": "DbCollection2",
+      "label": "Fetch team members",
+      "parameters": {
+        "collectionName": "TeamMember"
+      },
+      "x": 650,
+      "y": 2440
+    },
+    {
+      "id": "wk-memberopts",
+      "type": "/Components/Record Options",
+      "label": "Author options",
+      "x": 650,
+      "y": 2200
+    },
+    {
+      "id": "wk-authorid",
+      "type": "Expression",
+      "label": "Author id",
+      "parameters": {
+        "expression": "typeof author === 'string' ? author : ((author && (author.id || author.objectId)) || '')"
+      },
+      "x": 650,
+      "y": 2560
+    },
+    {
+      "id": "wk-authorrec",
+      "type": "DbModel2",
+      "label": "Author record",
+      "parameters": {
+        "collectionName": "TeamMember"
+      },
+      "x": 650,
+      "y": 2680
+    },
+    {
+      "id": "wk-datefmt",
+      "type": "Date To String",
+      "label": "Updated date",
+      "parameters": {
+        "formatString": "{d} {monthName} {year}",
+        "locale": "fr-FR"
+      },
+      "x": 650,
+      "y": 2800
+    },
+    {
+      "id": "wk-metafmt",
+      "type": "String Format",
+      "label": "Meta line",
+      "parameters": {
+        "format": "{date} · by {author}"
+      },
+      "x": 650,
+      "y": 1720
+    },
+    {
+      "id": "wk-selected",
+      "type": "Variable2",
+      "label": "Selected page id",
+      "parameters": {
+        "name": "selectedWikiId"
+      },
+      "x": 650,
+      "y": 2920
+    },
+    {
+      "id": "wk-editing",
+      "type": "Variable2",
+      "label": "Editing page id",
+      "parameters": {
+        "name": "editingWikiId"
+      },
+      "x": 650,
+      "y": 2320
+    },
+    {
+      "id": "wk-setselected",
+      "type": "Set Variable",
+      "label": "Write selectedWikiId",
+      "parameters": {
+        "name": "selectedWikiId",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 1000
+    },
+    {
+      "id": "wk-setediting",
+      "type": "Set Variable",
+      "label": "Write editingWikiId",
+      "parameters": {
+        "name": "editingWikiId",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 1480
+    },
+    {
+      "id": "wk-seteditingempty",
+      "type": "Set Variable",
+      "label": "Clear editingWikiId",
+      "parameters": {
+        "name": "editingWikiId",
+        "setWith": "emptyString"
+      },
+      "x": 650,
+      "y": 760
+    },
+    {
+      "id": "wk-editortitleexpr",
+      "type": "Expression",
+      "label": "Editor title text",
+      "parameters": {
+        "expression": "recordId ? 'Edit page' : 'New page'"
+      },
+      "x": 650,
+      "y": 2080
+    }
+  ],
+  "visualRoots": [
+    "wk-page"
+  ]
+}

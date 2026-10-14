@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "133e40a2-9e06-54da-86b1-e64526cb9dac",
+  "name": "announceProjectDone",
+  "path": "/#__cloud__/announceProjectDone",
+  "type": "cloud",
+  "created": "2026-10-12T17:35:50.892Z",
+  "modified": "2026-10-12T17:35:50.892Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Server-side automation helper: when a Project record is updated, decide whether that update marks the project Done, and if so create a system post in the team feed announcing it. Called by the db-change trigger on the Project collection."
+}

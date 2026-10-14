@@ -46,8 +46,9 @@ const ROUNDS = [
   // NSP-023 step 8 (AC5, s49): a converted visual control on plain DOM, no React — the Dropdown, drawn by the target into the
   // page's document and acted on through it (`tests/stranger-page.js`); the module of the two helpers dropdown.ts imports — in
   // text-input.ts when round 4 ran, moved to `data-attributes.ts` in s50 (round 4's finding: the stranger had to read another
-  // node's spec to find them)
-  round(4, 'stranger-4', 's49', ['net.noodl.controls.options'], ['src/world.ts', 'src/nodes/data-attributes.ts', 'tests/stranger-page.js'], true)
+  // node's spec to find them); and since s103 the modules of the two warnings it imports (`focus-not-mounted.ts`, `icon-source.ts`
+  // and its `describe-value.ts`, R35 — what the editor is told, which a stranger's target, having no editor, is not graded on)
+  round(4, 'stranger-4', 's49', ['net.noodl.controls.options'], ['src/world.ts', 'src/nodes/data-attributes.ts', 'src/nodes/focus-not-mounted.ts', 'src/nodes/icon-source.ts', 'src/nodes/describe-value.ts', 'tests/stranger-page.js'], true)
 ];
 
 /** The union, sorted — the hash file's keys. */

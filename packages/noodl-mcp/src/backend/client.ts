@@ -177,7 +177,8 @@ export async function requireBackend(backendId?: string): Promise<BackendClient>
       'no-backend',
       `No running backend. Configured: ${all
         .map((b) => b.id)
-        .join(', ')}. Start one from the editor's Backend Services panel, then pass its id as backendId.`
+        .join(', ')}. Start this project's with provision_backend (the same name as before restarts it on its ` +
+        `own data), or from the editor's Backend Services panel, then pass its id as backendId.`
     );
   }
   throw new ToolError(

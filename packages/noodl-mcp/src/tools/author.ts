@@ -47,6 +47,7 @@ import type { ExampleBudget } from './attachments';
 import { examplesBlock } from './attachments';
 import type { ToolDisclosure } from './disclosure';
 import { backendRevealPayload } from './disclosure';
+import { cloudDeployPayload } from './cloudDeployNote';
 import type { PlanRegistry } from './planTools';
 import type { WriteValidation } from '../validate';
 import { validateCandidate, validateDeletion } from '../validate';
@@ -596,6 +597,8 @@ export function registerAuthorTools(
           // AWP-006 — after the write, because a rejected candidate is not
           // evidence that anybody intends to build a data app.
           ...backendRevealPayload(disclosure?.revealForNodes(candidate.nodes.nodes) ?? []),
+          // P112-S14-UNDEPLOYED — after the write: the files hold the function, the backend doesn't yet.
+          ...cloudDeployPayload([legacyName], store, disclosure),
           ...visualRootsPayload(candidate, args.visual_roots),
           // LAS-006 §4 — one line, on the door a page most often comes through
           // without a plan. Advisory and not a refusal: the bag-of-nodes door
@@ -749,6 +752,7 @@ export function registerAuthorTools(
           ...tickedPayload(ticked),
           ...successPayload(validation),
           ...backendRevealPayload(disclosure?.revealForNodes(candidate.nodes.nodes) ?? []),
+          ...(unchanged ? {} : cloudDeployPayload([stored.legacyName], store, disclosure)),
           ...visualRootsPayload(candidate, args.set?.visual_roots),
           ...(drawsSomething(candidate) ? completionPayload(ledger.state(store.projectDir)) : {})
         };

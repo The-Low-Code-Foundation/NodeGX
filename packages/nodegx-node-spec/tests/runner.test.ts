@@ -146,7 +146,7 @@ describe('AC3 — every mutant of the Counter spec is killed, listed by branch',
     expect(report.conforms).toBe(true);
     // AC5 — the time per node is in the report and printed
     expect(report.timeMs).toBeGreaterThanOrEqual(0);
-    expect(formatReport(report)).toMatch(/^Counter v1 on interpreter: CONFORMS \(\d+ ms, seed 1\)/);
+    expect(formatReport(report)).toMatch(new RegExp(`^Counter v${Counter.version} on interpreter: CONFORMS \\(\\d+ ms, seed 1\\)`));
   });
 
   test('a branch the suite never reaches is reported as unreached, so a trivially surviving mutant is named before it runs', async () => {

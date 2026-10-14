@@ -42,7 +42,7 @@
     "steps": [{ "set": "text", "value": "<!DOCTYPE x [ ]><x/>" }, "settle", { "set": "text", "value": "<?xml version=\"1.0\"?><!DOCTYPE rss><rss><channel><title>T</title></channel></rss>" }, "settle"]
   },
   {
-    "name": "Max Bytes counts characters: a text over it is xml/too-large before parsing; 0, a negative and non-numeric text fall back to the 5 MB default",
+    "name": "Max Characters counts characters: a text over it is xml/too-large before parsing; 0, a negative and non-numeric text fall back to the 5 MB default",
     "because": "parsexml.ts :132-133; xml.ts :144, :150-158",
     "params": { "maxBytes": 8 },
     "steps": [{ "set": "text", "value": "<a>12345</a>" }, "settle", { "set": "maxBytes", "value": 0 }, "settle", { "set": "maxBytes", "value": 12 }, "settle", { "set": "maxBytes", "value": "x" }, "settle"]

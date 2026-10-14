@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "66499bab-5cc5-5c23-8891-8862440bc1d5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lessons_src-2",
+      "fromProperty": "lessons",
+      "toId": "merge_fn",
+      "toProperty": "in-lessons"
+    },
+    {
+      "fromId": "progress_query",
+      "fromProperty": "items",
+      "toId": "merge_fn",
+      "toProperty": "in-progress"
+    },
+    {
+      "fromId": "progress_query",
+      "fromProperty": "fetched",
+      "toId": "merge_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "merge_fn",
+      "fromProperty": "out-items",
+      "toId": "repeater-2",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "repeater-2",
+      "fromProperty": "itemActionItemId",
+      "toId": "go_lesson",
+      "toProperty": "pm-lessonId"
+    },
+    {
+      "fromId": "repeater-2",
+      "fromProperty": "itemOutputSignal-open",
+      "toId": "go_lesson",
+      "toProperty": "navigate"
+    }
+  ]
+}

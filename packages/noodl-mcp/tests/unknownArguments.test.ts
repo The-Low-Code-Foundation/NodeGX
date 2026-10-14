@@ -68,3 +68,13 @@ describe('P109-S12 — the pieces', () => {
     expect(closestArgument('wibble', ['path', 'nodes'])).toBeUndefined();
   });
 });
+
+describe('P112-OWN018-READWASTE — a synonym no edit distance finds', () => {
+  it('offers summary for the description Mistral passed create_project (2 of 2 rounds)', () => {
+    expect(closestArgument('description', ['directory', 'name', 'request', 'summary'])).toBe('summary');
+  });
+  it('offers a synonym only when the tool declares it', () => {
+    expect(closestArgument('description', ['directory', 'name'])).toBeUndefined();
+  });
+});
+

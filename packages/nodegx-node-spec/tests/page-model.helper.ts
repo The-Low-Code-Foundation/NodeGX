@@ -85,14 +85,19 @@ const media = { keeps: 'the media' } as const;
 /** video.ts `kindOf` — a Source naming a YouTube or Vimeo video draws an embed (video-embed.ts) */
 const videoKind = (source: unknown): 'video' | 'embed' =>
   typeof source === 'string' && [/youtu\.be\/[A-Za-z0-9_-]{6,}/i, /(?:youtube\.com|youtube-nocookie\.com)\/(?:watch\?(?:[^#]*&)?v=|embed\/|v\/|shorts\/)[A-Za-z0-9_-]{6,}/i, /player\.vimeo\.com\/video\/\d+/i, /vimeo\.com\/(?:channels\/[^/]+\/)?\d+/i].some((p) => p.test(source)) ? 'embed' : 'video';
-/** Video.tsx :129-201 — the component's calls meet the element: its kind, its media, whether it may play, its `src` (a reload) */
-const VIDEO_CALL = ['onPage', 'kind', 'srcAttr', 'elMuted', 'paused', 'position', 'ready', 'failed', 'pending', 'atEnd', 'activated', 'canAutoplay', 'loading', 'width', 'height'];
+/**
+ * Video.tsx :129-201 — the component's calls meet the element: its kind, its media, whether it may play, its `src` (a reload);
+ * and (v6, row C161, s92 — added here s95) Restart and Reset seek to the Start Time the component was last drawn with
+ * (`this.props.dom.startTime`), `elStart`
+ */
+const VIDEO_CALL = ['onPage', 'kind', 'srcAttr', 'elMuted', 'elStart', 'paused', 'position', 'ready', 'failed', 'pending', 'atEnd', 'activated', 'canAutoplay', 'loading', 'width', 'height'];
 const FOCUS_CALLS = {
   'on.focus': ['onPage', 'pageEnabled', 'pageVisible', 'elementFocused'],
   'on.blur': ['onPage', 'pageEnabled', 'pageVisible', 'elementFocused']
 };
 const FIELD_CALL = ['onPage', 'elementFocused', 'field', 'pageType', 'caret', 'hadCaret'];
-const CONTROL_NODE = ['enabled', 'hover', 'pressed', 'focused', 'mounted', 'visible'];
+/** `focusMissed` (s103, R35): the Focus action's own record of whether the element it asked for was there (focus-not-mounted.ts) */
+const CONTROL_NODE = ['enabled', 'hover', 'pressed', 'focused', 'mounted', 'visible', 'focusMissed'];
 /**
  * P109 ISL-031 (P107-D30, ruled "Reset and announce") — a control's element leaving the page takes its states with it: the paint
  * that unmounts it writes Focused, Hover and Pressed false and fires Blurred and Hover End for the ones that were on. That is the
@@ -177,7 +182,10 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
       srcAttr: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? s.srcAttr : KEEP), preset: false, why: 'a `src` taken away stays as it was (HTML: removing it loads nothing), so it follows the Source only while there is one' },
       elMuted: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? !!s.muted : KEEP) },
       elAutoplay: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? !!s.autoplay : KEEP) },
-      elLoop: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? !!s.loop : KEEP) }
+      elLoop: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? !!s.loop : KEEP) },
+      // v6 (row C161, s92): the Start Time the component was drawn with, where Restart and Reset seek — drawn with the flags.
+      // s92 added it to the spec and not here, so G1 read it as classified 0 times (found s95)
+      elStart: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? s.startTime : KEEP) }
     },
     element: { elem: { changesWith: ['onPage', 'kind'] } },
     held: { focusedElem: keyboard, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
@@ -203,7 +211,7 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
   // s52 — the Text's model with the Group's additions: the focus tracker's list (the viewer's, moved by Focus and by clicks), the
   // element the component mounted with (the tracker finds the node on it, C86), the gesture's index, Block Pointer Events, the scrolls
   Group: {
-    node: ['mounted', 'tag', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'blocks', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'index', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile', 'scrollIndex', 'scrollElement', 'scheduled', 'waiting', 'ran'],
+    node: ['mounted', 'tag', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'blocks', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'index', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile', 'scrollIndex', 'scrollElement', 'scheduled', 'waiting', 'ran', 'focusMissed'],
     attr: {
       onPage,
       shownTag: { follows: (s) => (s.onPage ? s.tag : KEEP), preset: false }
@@ -240,7 +248,8 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     elementCalls: { ...FOCUS_CALLS, 'on.clear': FIELD_CALL, 'on.backspace': FIELD_CALL, 'on.startValue': FIELD_CALL }
   },
   'net.noodl.controls.range': {
-    node: [...CONTROL_NODE, 'min', 'max', 'step', 'authorValue', 'out', 'percent', 'pending'],
+    // v7 (R39) — `valueWarning`: the sentence a Value that is not a number raised, the node's
+    node: [...CONTROL_NODE, 'min', 'max', 'step', 'authorValue', 'out', 'percent', 'valueWarning', 'pending'],
     attr: { onPage, pageEnabled, pageVisible },
     // the handle shows the Value (R14: the last word, a person's or the graph's)
     held: { elementFocused: keyboard, shown: { shows: (s) => (s.onPage ? s.out : KEEP) } },
@@ -310,13 +319,15 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
   // element of its own to draw); the frame's end runs its callbacks (the copy, the rebuild) and the queue they start, which fires Items
   // Rendered and answers Refresh
   'For Each': {
-    node: ['own', 'items', 'template', 'templateType', 'script', 'compiles', 'mapping', 'mapCompiles', 'copyScheduled', 'refreshScheduled', 'callbacks', 'tokens', 'queue', 'running', 'changed', 'hops', 'settling', 'owed', 'building', 'rows', 'answered', 'pending', 'dirty', 'afterFrame', 'made', 'itemId', 'outs'],
+    node: ['own', 'items', 'template', 'templateType', 'script', 'compiles', 'mapping', 'mapCompiles', 'copyScheduled', 'refreshScheduled', 'callbacks', 'tokens', 'queue', 'running', 'changed', 'hops', 'settling', 'owed', 'building', 'rows', 'answered', 'pending', 'dirty', 'afterFrame', 'made', 'itemId', 'warnings', 'reported', 'emptyReportedIn', 'outs'],
     attr: {},
     held: {},
     // s61 (v2) — Script and whether it compiled are the node's, written by the input; a rebuild's pending answers (`settling`) the queue's.
     // s62 (v2) — the input mapping and whether it compiled likewise (a row's mapped inputs ride in `rows`).
     // s63 (v2) — the frame's end is a drain: the rows' waiting signals are heard and reported there (Item Id, the item outputs)
-    frameEnd: ['copyScheduled', 'refreshScheduled', 'callbacks', 'tokens', 'queue', 'running', 'changed', 'hops', 'settling', 'owed', 'building', 'rows', 'answered', 'pending', 'dirty', 'afterFrame', 'made', 'itemId', 'outs'],
+    // s104 (v11, R35) — what the editor is told is the node's; the frame's end tells it too (an empty entry the copy met, a rebuild's
+    // Failure, a row's problem — once per rebuild, the set it starts)
+    frameEnd: ['copyScheduled', 'refreshScheduled', 'callbacks', 'tokens', 'queue', 'running', 'changed', 'hops', 'settling', 'owed', 'building', 'rows', 'answered', 'pending', 'dirty', 'afterFrame', 'made', 'itemId', 'warnings', 'reported', 'emptyReportedIn', 'outs'],
     framePulses: ['itemsRendered']
   },
   // s60 — the Columns (columns.ts): the props and what each size port holds are the node's; the page's width is the layout's, moved only
@@ -347,7 +358,10 @@ export const isVisual = (spec: AnyNodeSpec) => !!spec.acts || !!spec.world?.plac
 
 /** The format's world kinds (spec.ts `WorldHandlers`), pinned: a new one is sorted (NSP-023 §3) before it lands. */
 // s70 (P107) / P109 s36 — `popstate`: a `history.back()` the page made landed; a browser event, heard by the node's own listener
-export const WORLD_KINDS = ['timer', 'response', 'change', 'resize', 'page', 'popup', 'backend', 'store', 'auth', 'authReturn', 'mount', 'place', 'picker', 'realtime', 'socket', 'resume', 'popstate', 'stream', 'group'] as const;
+// NSP-022 s96 — `host`: a service of the backend process answered (world.ts HOST); a world answer as `backend` is (a promise landing),
+// not a turn of the page — and only cloud-only nodes, which are never on a page, have it
+// NSP-022 s97 — `invoke`: the backend process handed the function its request (world.ts HOST, THE INVOCATION); a world hand-off, as `host`
+export const WORLD_KINDS = ['timer', 'response', 'change', 'resize', 'page', 'popup', 'backend', 'host', 'invoke', 'store', 'auth', 'authReturn', 'mount', 'place', 'picker', 'realtime', 'socket', 'resume', 'popstate', 'stream', 'group'] as const;
 
 const LIFECYCLE = new Set(['didMount', 'willUnmount']);
 

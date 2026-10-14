@@ -1,0 +1,668 @@
+[
+  {
+    "action": "createTable",
+    "table": "Learner",
+    "description": "I'll find the learners, I'll get their needs and I'll produce the pedagogic content. I'll add lots of info about the learner to each new user, to help Claude have the context it might need. Probably best just a free typed text, not a form.",
+    "columns": [
+      {
+        "name": "name",
+        "type": "String"
+      },
+      {
+        "name": "email",
+        "type": "String"
+      },
+      {
+        "name": "language",
+        "type": "String"
+      },
+      {
+        "name": "prefs",
+        "type": "Object"
+      },
+      {
+        "name": "aliases",
+        "type": "Object"
+      },
+      {
+        "name": "inviteToken",
+        "type": "String"
+      },
+      {
+        "name": "package",
+        "type": "String"
+      },
+      {
+        "name": "meetCode",
+        "type": "String"
+      },
+      {
+        "name": "notes",
+        "type": "String"
+      },
+      {
+        "name": "login",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "a learner is who signs in"
+      }
+    ],
+    "checks": [
+      {
+        "field": "language",
+        "oneOf": [
+          "en",
+          "fr"
+        ]
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "LearnerHistory",
+    "description": "who changed what on a learner, and when: one record per change Not kept by the database yet: every change to a learner is written to its history.",
+    "columns": [
+      {
+        "name": "learner",
+        "type": "Pointer",
+        "targetClass": "Learner",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the learner that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Conversation",
+    "description": "I can imagine being able to open the 'conversations' on the left side with Rick and reviewing old ones. Resetting them if I want to start from the beginning and advance message by message. Not kept by the database yet: no conversation sits under itself.",
+    "columns": [
+      {
+        "name": "title",
+        "type": "String"
+      },
+      {
+        "name": "kind",
+        "type": "String"
+      },
+      {
+        "name": "state",
+        "type": "String"
+      },
+      {
+        "name": "language",
+        "type": "String"
+      },
+      {
+        "name": "dubbed",
+        "type": "Boolean"
+      },
+      {
+        "name": "summary",
+        "type": "String"
+      },
+      {
+        "name": "dueBefore",
+        "type": "Date"
+      },
+      {
+        "name": "shareable",
+        "type": "Boolean"
+      },
+      {
+        "name": "run",
+        "type": "Number"
+      },
+      {
+        "name": "learner",
+        "type": "Pointer",
+        "targetClass": "Learner",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each conversation is with one learner"
+      },
+      {
+        "name": "parent",
+        "type": "Pointer",
+        "targetClass": "Conversation",
+        "whenTargetGoes": "blocks",
+        "description": "The what to do before next time should link to a new conversation, so we keep them linked but separate"
+      }
+    ],
+    "checks": [
+      {
+        "field": "kind",
+        "oneOf": [
+          "lesson",
+          "session-review",
+          "follow-up"
+        ]
+      },
+      {
+        "field": "state",
+        "oneOf": [
+          "open",
+          "done",
+          "archived"
+        ]
+      },
+      {
+        "field": "language",
+        "oneOf": [
+          "en",
+          "fr"
+        ]
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "ConversationHistory",
+    "description": "who changed what on a conversation, and when: one record per change Not kept by the database yet: every change to a conversation is written to its history.",
+    "columns": [
+      {
+        "name": "conversation",
+        "type": "Pointer",
+        "targetClass": "Conversation",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the conversation that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Message",
+    "description": "That Rick can see the messages added by the learner wherever they want at any moment in the lesson is genius, it shows me their understanding as it unfolds in their own heads.",
+    "columns": [
+      {
+        "name": "run",
+        "type": "Number"
+      },
+      {
+        "name": "seq",
+        "type": "Number"
+      },
+      {
+        "name": "from",
+        "type": "String"
+      },
+      {
+        "name": "origin",
+        "type": "String"
+      },
+      {
+        "name": "kind",
+        "type": "String"
+      },
+      {
+        "name": "body",
+        "type": "String"
+      },
+      {
+        "name": "clip",
+        "type": "Object"
+      },
+      {
+        "name": "options",
+        "type": "Array"
+      },
+      {
+        "name": "revealsAfter",
+        "type": "Number"
+      },
+      {
+        "name": "conversation",
+        "type": "Pointer",
+        "targetClass": "Conversation",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each message is in one conversation"
+      }
+    ],
+    "checks": [
+      {
+        "field": "from",
+        "oneOf": [
+          "rick",
+          "learner"
+        ]
+      },
+      {
+        "field": "origin",
+        "oneOf": [
+          "cut",
+          "typed",
+          "drafted",
+          "dictated"
+        ]
+      },
+      {
+        "field": "kind",
+        "oneOf": [
+          "text",
+          "clip",
+          "choice",
+          "question",
+          "paste",
+          "learner"
+        ]
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "MessageHistory",
+    "description": "who changed what on a message, and when: one record per change Not kept by the database yet: every change to a message is written to its history.",
+    "columns": [
+      {
+        "name": "message",
+        "type": "Pointer",
+        "targetClass": "Message",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the message that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Progress",
+    "description": "One message at a time: the next message does not exist until the learner has watched, chosen, or pressed.",
+    "columns": [
+      {
+        "name": "run",
+        "type": "Number"
+      },
+      {
+        "name": "lastSeq",
+        "type": "Number"
+      },
+      {
+        "name": "lastOpened",
+        "type": "Date"
+      },
+      {
+        "name": "conversation",
+        "type": "Pointer",
+        "targetClass": "Conversation",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each progress is how far a learner is in one conversation"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "ProgressHistory",
+    "description": "who changed what on a progress, and when: one record per change Not kept by the database yet: every change to a progress is written to its history.",
+    "columns": [
+      {
+        "name": "progress",
+        "type": "Pointer",
+        "targetClass": "Progress",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the progress that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "CoachNote",
+    "description": "make notes inside each conversation that they can't see",
+    "columns": [
+      {
+        "name": "text",
+        "type": "String"
+      },
+      {
+        "name": "on",
+        "type": "Date"
+      },
+      {
+        "name": "learner",
+        "type": "Pointer",
+        "targetClass": "Learner",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each coach note is about one learner"
+      },
+      {
+        "name": "conversation",
+        "type": "Pointer",
+        "targetClass": "Conversation",
+        "whenTargetGoes": "blocks",
+        "description": "a coach note can be inside one conversation"
+      },
+      {
+        "name": "message",
+        "type": "Pointer",
+        "targetClass": "Message",
+        "whenTargetGoes": "blocks",
+        "description": "a coach note can be on one message"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "CoachNoteHistory",
+    "description": "who changed what on a coachNote, and when: one record per change Not kept by the database yet: every change to a coachNote is written to its history.",
+    "columns": [
+      {
+        "name": "coachNote",
+        "type": "Pointer",
+        "targetClass": "CoachNote",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the coachNote that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Objective",
+    "description": "assign them objectives only I can see",
+    "columns": [
+      {
+        "name": "text",
+        "type": "String"
+      },
+      {
+        "name": "setOn",
+        "type": "Date"
+      },
+      {
+        "name": "doneOn",
+        "type": "Date"
+      },
+      {
+        "name": "learner",
+        "type": "Pointer",
+        "targetClass": "Learner",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each objective is for one learner"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "ObjectiveHistory",
+    "description": "who changed what on an objective, and when: one record per change Not kept by the database yet: every change to an objective is written to its history.",
+    "columns": [
+      {
+        "name": "objective",
+        "type": "Pointer",
+        "targetClass": "Objective",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the objective that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Session",
+    "description": "What I think will happen, and I'll type what actually happened, and the system will compare the two and give some advice on the next session to me.",
+    "columns": [
+      {
+        "name": "at",
+        "type": "Date"
+      },
+      {
+        "name": "recordingDriveId",
+        "type": "String"
+      },
+      {
+        "name": "predicted",
+        "type": "String"
+      },
+      {
+        "name": "happened",
+        "type": "String"
+      },
+      {
+        "name": "comparison",
+        "type": "String"
+      },
+      {
+        "name": "reminderOn",
+        "type": "Boolean"
+      },
+      {
+        "name": "learner",
+        "type": "Pointer",
+        "targetClass": "Learner",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each session is with one learner"
+      },
+      {
+        "name": "conversation",
+        "type": "Pointer",
+        "targetClass": "Conversation",
+        "whenTargetGoes": "blocks",
+        "description": "a session has one review conversation"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "SessionHistory",
+    "description": "who changed what on a session, and when: one record per change Not kept by the database yet: every change to a session is written to its history.",
+    "columns": [
+      {
+        "name": "session",
+        "type": "Pointer",
+        "targetClass": "Session",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the session that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "PushSubscription",
+    "description": "One push notification: Rick replied. Yep in the PWA using native push.",
+    "columns": [
+      {
+        "name": "endpoint",
+        "type": "String"
+      },
+      {
+        "name": "keys",
+        "type": "Object"
+      },
+      {
+        "name": "learner",
+        "type": "Pointer",
+        "targetClass": "Learner",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each push subscription is one learner's phone"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "PushSubscriptionHistory",
+    "description": "who changed what on a pushSubscription, and when: one record per change Not kept by the database yet: every change to a pushSubscription is written to its history.",
+    "columns": [
+      {
+        "name": "pushSubscription",
+        "type": "Pointer",
+        "targetClass": "PushSubscription",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the pushSubscription that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  }
+]

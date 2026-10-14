@@ -14,6 +14,7 @@
   },
   "files": [
     "bin",
+    "profiles",
     "README.md",
     "LICENSE"
   ],

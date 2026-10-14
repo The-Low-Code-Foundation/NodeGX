@@ -61,6 +61,7 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { callHint, clientProfile } from './clientProfile';
 import type { RenderFindingPayload, RenderReportPayload } from './render';
 
 /**
@@ -176,7 +177,9 @@ export function verdictFor(report: RenderReportPayload): RenderVerdict {
       reason: poverty.length
         ? `Rendered, and nothing is broken — but it measures as a default template: ${codes.join(', ')}. ` +
           alsoWarns +
-          'Nothing here blocks; look at the screenshot before calling it finished.'
+          (clientProfile().imagesCostly
+            ? 'Nothing here blocks; check it with drive_page before calling it finished.'
+            : 'Nothing here blocks; look at the screenshot before calling it finished.')
         : warned.length
           ? `Rendered, and nothing is broken — but it warns: ${warned.join(', ')}. ` +
             'Nothing here blocks; read the warnings before calling it finished.'
@@ -304,9 +307,16 @@ export function projectSignature(projectDir: string): string {
  * What a caller is told when the project has changed since the last look — or
  * when there has never been one.
  */
-const NEVER_LOOKED =
-  'NOT DONE — nothing has rendered this project in its current state, so nobody has looked at it. ' +
-  'Call render_report (and look at the screenshots: a picture that loads is not a picture of the right thing).';
+function neverLooked(): string {
+  // OWN-019 census #42.
+  return (
+    'NOT DONE — nothing has rendered this project in its current state, so nobody has looked at it. ' +
+    (clientProfile().imagesCostly
+      ? `Call ${callHint('render_report')}, then prove it with ${callHint('drive_page')} read steps (a picture ` +
+        'that loads is not the right picture, and opening one costs this session its cache).'
+      : 'Call render_report (and look at the screenshots: a picture that loads is not a picture of the right thing).')
+  );
+}
 
 /**
  * The session's memory of what a render said, and of the project it said it
@@ -345,7 +355,7 @@ export class RenderLedger {
       // `poverty: []` here means "nobody measured", not "no poverty" — which is
       // exactly what `looked: false` beside it says. A reader that treats an
       // empty list as a clean bill has read past the field that qualifies it.
-      return { looked: false, done: false, blocking: [], unmeasuredPages: [], poverty: [], reason: NEVER_LOOKED };
+      return { looked: false, done: false, blocking: [], unmeasuredPages: [], poverty: [], reason: neverLooked() };
     }
     if (this.last.signature !== projectSignature(projectDir)) {
       return {

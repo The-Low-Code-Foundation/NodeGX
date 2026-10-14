@@ -98,11 +98,11 @@ import type { Step } from './adapter';
 import { canonicalise, canonicalKey } from './canonical';
 import { coerce } from './coerce';
 import { isRegistryEntry, performRegistryWrite } from './registry';
-import type { AnswerCall, AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, PlayContext, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SocketEvent, SpecBackendCall, StreamEvent, SpecRequest, SpecSocketOp, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
+import type { AnswerCall, AnyNodeSpec, BackendAnswerEvent, ChangeEvent, HostAnswerEvent, SpecHostCall, Outcome, InputDecl, PlayContext, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SocketEvent, SpecBackendCall, StreamEvent, SpecRequest, SpecSocketOp, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
 import { isSignalInput, playContextOf } from './spec';
 import { outcomePorts, playOutputs } from './ports';
 import type { TraceEvent } from './trace';
-import { backendEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PickerClick, type PickerEvent, type PopupCall, type PopupEvent, type StoreEvent, type StreamDelivery, type WorldSocket, type WorldSubscription } from './world';
+import { backendEvent, hostEvent, invocationEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PickerClick, type PickerEvent, type PopupCall, type PopupEvent, type StoreEvent, type StreamDelivery, type WorldSocket, type WorldSubscription, type InvocationRequest } from './world';
 
 /** One thing the world handed back, waiting to be delivered to the spec. */
 type Inbound =
@@ -132,6 +132,10 @@ type Inbound =
   | { kind: 'realtime'; event: RealtimeEvent }
   // s34: a WebSocket the node made fired an event (world.ts SOCKET)
   | { kind: 'socket'; event: SocketEvent }
+  // NSP-022 s96: a service of the backend process answered a call (world.ts HOST)
+  | { kind: 'host'; answer: HostAnswerEvent }
+  // NSP-022 s97: the backend process handed the function its request (world.ts HOST, THE INVOCATION)
+  | { kind: 'invoke'; request: InvocationRequest }
   // s34: a streamed body said something after its head (world.ts NETWORK, A STREAMED BODY)
   | { kind: 'stream'; event: StreamEvent };
 
@@ -191,6 +195,8 @@ export interface Instance {
    * `rederive` param (states.ts :338-358 registers a value output when `values` is written).
    */
   written: Record<string, unknown>;
+  /** NSP-019 s95: the sentence each declared diagnostic last recorded (spec.ts `diagnostics`); a key absent shows nothing. */
+  diagnosticsShown: Record<string, string>;
 }
 
 export class SpecError extends Error {
@@ -296,12 +302,17 @@ function viewOf(inst: Instance): WorldView {
     href: () => world.location?.href,
     projectSettings: () => world.projectSettings,
     cloudServices: () => world.cloudServices,
+    collections: () => world.collections,
+    dbVersionMajor: () => world.dbVersionMajor,
     stackAnswer: (op, stack, target) => world.stack.answer(op, stack, target),
     backAnswer: (ahead) => world.stack.backAnswer(ahead ?? 0),
     routeAnswer: (router, target, openInNewTab) => world.router.answer(router, target, openInNewTab),
     popupAnswer: (target) => world.popup.answer(target),
     popupsInside: () => world.popup.inside,
     backendFor: (backendId) => world.backend.resolve(backendId),
+    hostHas: (service) => world.host.has(service),
+    invocation: () => world.host.requestState(),
+    hostCloud: () => world.host.cloudServices,
     backendUser: (backend) => world.backend.userOn(backend),
     session: (backend) => world.backend.session(backend),
     userService: () => startUserService(world),
@@ -495,7 +506,8 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
     watches: new Map(),
     wired: new Set(wired),
     playContext: portContext,
-    written: { ...params }
+    written: { ...params },
+    diagnosticsShown: {}
   };
   (inst as { view: WorldView }).view = viewOf(inst);
   // P107-C155 — a wired port is one the node has (the runtime's `connectInput` throws on one it does not); checked before
@@ -541,6 +553,13 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
       if (p.at > 0) world.clock.schedule(p.at, () => handleInbound(inst, item));
       else inst.inbox.push(item);
     }
+  }
+  // HOST, THE INVOCATION (world.ts, NSP-022 s97): the request handed to the function, at its time on the clock — to a spec that
+  // takes one (its `world.invoke` handler: a Request node)
+  if (spec.needs?.includes('host') && spec.world?.invoke && world.host.invocation) {
+    const { at, request } = world.host.invocation;
+    const item: Inbound = { kind: 'invoke', request: deepFreeze({ ...request, headers: { ...request.headers } }) };
+    world.clock.schedule(at, () => handleInbound(inst, item));
   }
   // GROUP (world.ts, NSP-016 s42): the graph's writes to the Value of the group the node sits in, each at its time on the clock
   if (spec.needs?.includes('group')) {
@@ -786,6 +805,7 @@ interface PatchLike {
   subscribe?: SpecBackendCall;
   subscribeFirst?: boolean;
   socket?: readonly SpecSocketOp[];
+  host?: SpecHostCall | readonly SpecHostCall[];
   answers?: readonly AnswerCall[];
   resume?: string;
 }
@@ -964,6 +984,17 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
     backendCalls();
     realtime();
   }
+  // HOST (world.ts, NSP-022 s96): calls on the backend process's services in the order made — each a `host` event in the request
+  // group, as handed; the answer lands in the inbox (a `secrets` lookup's inside the call)
+  for (const c of patch.host === undefined ? [] : Array.isArray(patch.host) ? (patch.host as readonly SpecHostCall[]) : [patch.host as SpecHostCall]) {
+    if (!spec.world?.host) throw new SpecError(`${spec.type}.${port}: called a host service but the spec has no world.host handler`);
+    if (typeof c.id !== 'string') throw new SpecError(`${spec.type}.${port}: a host call needs an id`);
+    if (!world.host.has(c.service)) throw new SpecError(`${spec.type}.${port}: called ${c.service}, which the process does not have — check WorldView.hostHas first`);
+    const recordFrom = world.host.calls.length;
+    if (c.service === 'secrets') inst.inbox.push({ kind: 'host', answer: { id: c.id, ...world.host.lookup(c.request) } as HostAnswerEvent });
+    else world.host.issue({ service: c.service, request: c.request }, (d) => inst.inbox.push({ kind: 'host', answer: { id: c.id, ...d } as HostAnswerEvent }));
+    for (const call of world.host.calls.slice(recordFrom)) inst.pending.requests.push(hostEvent(call));
+  }
   // SOCKET (world.ts, NSP-014 s34): calls on WebSockets in the order made — each a `socket` event in the request group, as the
   // world records it; what a socket tells runs the spec's handler at its moment on the clock
   if (patch.socket !== undefined) {
@@ -1104,7 +1135,16 @@ function stackEffects(inst: Instance, port: string, patch: PatchLike): void {
     } else if (a.op === 'push' || a.op === 'replace' || a.op === 'back' || a.op === 'navigate') {
       if (a.value === 'failure' && (typeof a.error !== 'string' || a.error.length === 0)) throw new SpecError(`${spec.type}.${port}: a failure answer carries its code`);
       inst.pending.location.push(a.value === 'failure' ? { t: 'answer', op: a.op, value: a.value, error: a.error } : { t: 'answer', op: a.op, value: a.value });
-    } else throw new SpecError(`${spec.type}.${port}: an answer's op is push, replace, back, navigate, returned or page, not ${String((a as { op?: unknown }).op)}`);
+    } else if (a.op === 'respond') {
+      // NSP-022 s97 — a Response's payload, delivered while the request is open (world.ts HOST, THE INVOCATION)
+      if (world.host.requestState() !== 'open') throw new SpecError(`${spec.type}.${port}: responded to a request that is ${world.host.requestState()} — check WorldView.invocation first`);
+      world.host.respond();
+      inst.pending.location.push(invocationEvent({ op: 'respond', status: a.status, body: a.body }));
+    } else if (a.op === 'refuse') {
+      // NSP-022 s97 — the Request's refusal, recorded when it lands, open or not; it settles the request
+      world.host.refuse();
+      inst.pending.location.push(invocationEvent(a.fields === undefined ? { op: 'refuse', reason: a.reason } : { op: 'refuse', reason: a.reason, fields: a.fields }));
+    } else throw new SpecError(`${spec.type}.${port}: an answer's op is push, replace, back, navigate, returned, page, respond or refuse, not ${String((a as { op?: unknown }).op)}`);
   }
   // PICKER (world.ts, NSP-014 s31): a click recorded as the element holds it — a `picker` event in the same group; the
   // answer fires at its moment, as a DOM event's handler runs at its dispatch (inside the `advance` that reaches it)
@@ -1187,6 +1227,13 @@ function handleInbound(inst: Instance, item: Inbound): void {
   } else if (item.kind === 'realtime') {
     name = 'world.realtime';
     patch = asWriter(inst, () => spec.world!.realtime!(inst.state as never, inst.inputs as never, item.event, view));
+  } else if (item.kind === 'host') {
+    name = 'world.host';
+    if (!spec.world?.host) throw new SpecError(`${spec.type}: a host service answered and the spec has no world.host handler`);
+    patch = asWriter(inst, () => spec.world!.host!(inst.state as never, inst.inputs as never, item.answer, view));
+  } else if (item.kind === 'invoke') {
+    name = 'world.invoke';
+    patch = asWriter(inst, () => spec.world!.invoke!(inst.state as never, inst.inputs as never, item.request, view));
   } else if (item.kind === 'socket') {
     name = 'world.socket';
     patch = asWriter(inst, () => spec.world!.socket!(inst.state as never, inst.inputs as never, item.event, view));
@@ -1312,6 +1359,28 @@ export function settle(inst: Instance): void {
   for (const r of inst.pending.requests) inst.trace.push(r);
   for (const l of inst.pending.location) inst.trace.push(l);
   inst.pending = { signals: [], outcomes: inst.pending.outcomes.filter((o) => o.reportedAt === undefined), requests: [], location: [] };
+  recordDiagnostics(inst);
+}
+
+/**
+ * NSP-019 s95 — what the node tells the editor (spec.ts `diagnostics`), read against the frame's final inputs and state, one
+ * event per key whose sentence changed, sorted by key (trace.ts). The runtime re-evaluates in the setters of the ports a
+ * predicate reads (DIAGNOSTICS-CONTRACT.md "When to clear"), so what it shows at a frame's end is this.
+ */
+function recordDiagnostics(inst: Instance): void {
+  const declared = inst.spec.diagnostics;
+  if (!declared) return;
+  for (const key of Object.keys(declared).sort()) {
+    const message = declared[key].message(inst.inputs as never, inst.state as never) || undefined;
+    if (message === inst.diagnosticsShown[key]) continue;
+    if (message === undefined) {
+      delete inst.diagnosticsShown[key];
+      inst.trace.push({ t: 'diagnostic', key });
+    } else {
+      inst.diagnosticsShown[key] = message;
+      inst.trace.push({ t: 'diagnostic', key, message });
+    }
+  }
 }
 
 /**

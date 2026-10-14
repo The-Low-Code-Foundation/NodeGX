@@ -1048,6 +1048,9 @@ export class BackendService {
         { name: 'redirectUrl', type: 'String' }
       ]
     });
+    // SRK-001: a six-digit code counts its wrong guesses. An ALTER, because
+    // `createTable` leaves an existing table alone (see `_ApiKey` above).
+    sm.addColumn('_EmailToken', { name: 'attempts', type: 'Number' });
     // BAK-004: (provider, subject) -> userId. A system collection like the
     // rest, so `isSystemCollection` keeps it off /api and /classes.
     ensureIdentityTable(sm);

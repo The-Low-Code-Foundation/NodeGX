@@ -232,6 +232,9 @@ const AUTH_PATTERNS = new Set([
   'auth/signed-in',
   'auth/magic-link',
   'auth/magic-link/callback',
+  // SRK-001: asking for a six-digit code, and typing one.
+  'auth/email-code',
+  'auth/email-code/verify',
   'oauth/:provider/start',
   'oauth/:provider/callback',
   'oauth/exchange'

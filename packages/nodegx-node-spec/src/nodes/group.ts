@@ -55,6 +55,7 @@
 
 import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
+import { focusChange, focusDiagnostics, focusMissed, GROUP_FOCUS_NOT_MOUNTED } from './focus-not-mounted';
 
 type Phase = 'idle' | 'pending' | 'holding' | 'lifted';
 type ScrollOp = 'scrollToIndex.do' | 'scrollToElement.do';
@@ -64,6 +65,8 @@ type State = {
   mounted: boolean;
   /** the element is on the page: mounted and painted (the inner component and its ref exist) */
   onPage: boolean;
+  /** v8 — the last Focus found the node off the page: the editor is told (focus-not-mounted.ts) */
+  focusMissed: boolean;
   /** Group.tsx render — the element type the next paint draws: `props.as || 'div'` */
   tag: unknown;
   /** the element type the element on the page was made with; a NEW element is made when it changes */
@@ -188,7 +191,10 @@ export const Group = defineNode({
   // v5 (P109 ISL-038, s29): a file drop zone tracks itself — an enter on a new element starts the count again, and Accept File Drops off or leaving the page turns Is Dragging Over off (row C81)
   // v6 (P109 ISL-031, s30): a drag never takes its own node as its zone — a keyboard lift does not start in itself, Enter or Space then cancels, and a pointer drag over a new element of its own finds no zone (row C78)
   // v7 (P109 ISL-031, s30–31): every element of a Draggable node takes the keyboard — a remount, a new Tag or a mount however late gets the attributes (row C77); which element is on the page is the paint's sync (`synced`), and the keyboard is held by an element (`focusedElem`), so a paint writes nothing about it
-  version: 7,
+  // v8 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it (`diagnostics`)
+  version: 8,
+  changes: [focusChange(8)],
+  diagnostics: focusDiagnostics(GROUP_FOCUS_NOT_MOUNTED),
   source: 'packages/noodl-viewer-react/src/nodes/visual/group.ts',
   needs: ['person', 'clock'],
   // the page's syncs (spec.ts `synced`): which element is on the page, written only by a paint. Not branches (row C77, P109 s31):
@@ -201,6 +207,7 @@ export const Group = defineNode({
   state: {
     mounted: true,
     onPage: false,
+    focusMissed: false,
     tag: 'div',
     shownTag: 'div',
     elem: 0,
@@ -479,21 +486,22 @@ export const Group = defineNode({
     // s74 (NSP-018): the listed / not-listed cases written out, so each says what it sends (it was a spread of a computed listing)
     focus: (s) => {
       if (!s.onPage) {
-        if (s.ran.length === 0) return { says: 'off the page: nothing is listed', send: [], outcome: 'unchanged' };
+        if (s.ran.length === 0) return { says: 'off the page: nothing is listed, and the editor is told', set: focusMissed(s, true), send: [], outcome: 'unchanged' };
         return {
-          says: 'off the page, after outcomes this frame resolved and has not reported: nothing is listed, and Unchanged comes after them',
-          set: { ran: [...s.ran, { port: 'focus' as const, outcome: 'unchanged' as const }] },
+          says: 'off the page, after outcomes this frame resolved and has not reported: nothing is listed, the editor is told, and Unchanged comes after them',
+          set: { ran: [...s.ran, { port: 'focus' as const, outcome: 'unchanged' as const }], ...focusMissed(s, true) },
           send: [],
           outcome: 'pending'
         };
       }
       const ran = [...s.ran, { port: 'focus' as const, outcome: 'done' as const }];
       if (s.listed) {
+        // listed means on the page since its last Focus (leaving the page unlists it — the paint, below), so no Focus has missed: nothing to clear
         if (s.ran.length === 0) return { says: 'already listed as focused', set: {}, send: [], emit: [], outcome: 'done' };
         return { says: 'already listed, after outcomes this frame has not reported: Done comes after them', set: { ran }, send: [], emit: [], outcome: 'pending' };
       }
-      if (s.ran.length === 0) return { says: 'on the page: listed as focused', set: { listed: true }, send: [], emit: ['focused'], outcome: 'done' };
-      return { says: 'on the page, after outcomes this frame has not reported: listed as focused, and Done comes after them', set: { listed: true, ran }, send: [], emit: ['focused'], outcome: 'pending' };
+      if (s.ran.length === 0) return { says: 'on the page: listed as focused', set: { listed: true, ...focusMissed(s, false) }, send: [], emit: ['focused'], outcome: 'done' };
+      return { says: 'on the page, after outcomes this frame has not reported: listed as focused, and Done comes after them', set: { listed: true, ran, ...focusMissed(s, false) }, send: [], emit: ['focused'], outcome: 'pending' };
     },
     // group.ts :129-146
     'scrollToIndex.index': (_s, v) => ({ says: 'always: read when Scroll To Index runs, at the end of the frame', set: { scrollIndex: v }, send: [] }),

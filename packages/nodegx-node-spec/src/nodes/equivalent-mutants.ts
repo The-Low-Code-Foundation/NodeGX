@@ -164,8 +164,8 @@ function onVideo(row: EquivalentMutant): EquivalentMutant[] {
   return [{ ...c, branch: shape(c.branch), ...(c.swappedWith !== undefined ? { swappedWith: shape(c.swappedWith) } : {}) }];
 }
 
-/** What every paint of the Video writes (video.ts `painted`): the `<video>`'s three flags, and the element and its media as they stand. */
-const VIDEO_PAINT = ['atEnd', 'canAutoplay', 'domElement', 'elAutoplay', 'elLoop', 'elMuted', 'failed', 'height', 'kind', 'loading', 'paused', 'pending', 'position', 'ready', 'srcAttr', 'width'];
+/** What every paint of the Video writes (video.ts `painted`): the `<video>`'s three flags and the Start Time it was drawn with (`elStart`, v6), and the element and its media as they stand. */
+const VIDEO_PAINT = ['atEnd', 'canAutoplay', 'domElement', 'elAutoplay', 'elLoop', 'elMuted', 'elStart', 'failed', 'height', 'kind', 'loading', 'paused', 'pending', 'position', 'ready', 'srcAttr', 'width'];
 
 // P109 ISL-031 (P107-D30) — the paint that takes a control's element off the page resets Focused, Hover and Pressed. A leave
 // that was not pressed, handed its twin's example that was: the twin fires the same pulses (Blurred with Focused, Hover End with
@@ -530,7 +530,7 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
       reducer: 'afterInputs',
       kind: 'drop-set',
       why:
-        "the frame end sends every output where the runtime flags it (`world.send` from its working copy, node.ts :832-835), so the frame's observations stand without its `set`; only the NEXT settle shows the state it failed to keep — the queue re-run, the move undone. A sequence ending at that settle cannot show it, and the branch keys are combinations of state names, so which branches end a sequence moves with the seed (seed 13: 1, seed 20727: 9). As Model2's frame end; every hand scenario settles again after its moves, and a frame end reached there is killed"
+        "the frame end sends every output where the runtime flags it (`world.send` from its working copy, node.ts :832-835), so the frame's observations stand without its `set`; only the NEXT settle shows the state it failed to keep — the queue re-run, the move undone. A sequence ending at that settle cannot show it, and the branch keys are combinations of state names, so which branches end a sequence moves with the seed (seed 13: 1, seed 20727: 9). As Model2's frame end; every hand scenario settles again after its moves, and a frame end reached there is killed. Since v5 a frame end that raises a warning is killed at once (the editor sees it in that frame), so only one whose wire ends where it began survives (A → B → A); the To Last / To First scenario shows one on every seed"
     }
   ],
   // NSP-015 s20 — Close Popup likewise (closepopup.ts :102-121): Results and Close Actions decide only which ports the

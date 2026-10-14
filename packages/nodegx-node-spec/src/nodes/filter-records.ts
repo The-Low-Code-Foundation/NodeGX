@@ -298,13 +298,13 @@ export const FilterRecords = defineNode({
         }
         if (params.collectionName === undefined) return out;
         if (selectedClass(params, context)) {
-          out.visualFilter = { ...(discover('visualFilter') as ValueInputDecl), type: 'query-filter' }; // :683-702
+          out.visualFilter = { ...(discover('visualFilter') as ValueInputDecl), type: 'query-filter', valuePortPrefix: 'fp-', filterBackend: true }; // :683-702
           out.visualSorting = { ...(discover('visualSorting') as ValueInputDecl), type: 'query-sorting' }; // :703-709
         }
         if (params.visualFilter !== undefined) {
           for (const name of filterParameterNames(params.visualFilter, 'fp-')) {
             out['fp-' + name] = discover('fp-' + name)!; // :712-727
-            out['runOnChange-fp-' + name] = checkbox(name);
+            out['runOnChange-fp-' + name] = { ...(checkbox(name) as ValueInputDecl), editOnly: true };
           }
         }
         return out;

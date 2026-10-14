@@ -19,6 +19,7 @@
  *                      "condition inverted" defect (the Counter limit guard reading `>` for `>=`)
  *   - `drop-request`   the branch's request is never issued (NSP-007: the "forgot to fetch" defect)
  *   - `drop-backend`   the branch's backend call is never made (NSP-014 s21: the same defect, one seam over)
+ *   - `drop-host`      the branch's call on a service of the backend process is never made (NSP-022 s96, world.ts HOST)
  *   - `drop-picker`    the branch's click on the file input is never made (NSP-014 s31: the dialog never opens)
  *   - `drop-subscribe` / `drop-unsubscribe`  the branch's subscription is never opened / never disposed (NSP-014 s33)
  *   - `drop-socket`    the branch's calls on its WebSockets are never made — no connect, no send, no close (NSP-014 s34)
@@ -36,7 +37,7 @@
 
 import type { AnyNodeSpec, ErasedReducer, WorldView } from '../spec';
 
-export type MutationKind = 'drop-emit' | 'drop-set' | 'flip-outcome' | 'swap-branch' | 'drop-request' | 'drop-backend' | 'drop-picker' | 'drop-subscribe' | 'drop-unsubscribe' | 'drop-socket' | 'drop-subscribe-first' | 'drop-answers' | 'drop-resume';
+export type MutationKind = 'drop-emit' | 'drop-set' | 'flip-outcome' | 'swap-branch' | 'drop-request' | 'drop-backend' | 'drop-host' | 'drop-picker' | 'drop-subscribe' | 'drop-unsubscribe' | 'drop-socket' | 'drop-subscribe-first' | 'drop-answers' | 'drop-resume';
 
 export interface Branch {
   reducer: string;
@@ -85,6 +86,8 @@ export interface PatchLike {
   subscribeFirst?: boolean;
   /** NSP-014 s34: calls on WebSockets (spec.ts `Patch.socket`). */
   socket?: ReadonlyArray<{ op: string }>;
+  /** NSP-022 s96: calls on the backend process's services (spec.ts `Patch.host`). */
+  host?: { service: string } | ReadonlyArray<{ service: string }>;
   /** NSP-016 s56: answers to callers, and an awaited promise (spec.ts `Patch.answers`, `Patch.resume`). */
   answers?: ReadonlyArray<{ op: string; value?: string }>;
   resume?: string;
@@ -120,6 +123,8 @@ export function shapeOf(patch: unknown, synced: ReadonlySet<string> = NO_SYNCED)
     ...(p.subscribeFirst ? { subscribeFirst: true } : {}),
     // s34 — likewise only when the branch makes calls on a WebSocket: WHICH calls, not how many
     ...(p.socket !== undefined && p.socket.length > 0 ? { socket: [...new Set(p.socket.map((o) => o.op))].sort() } : {}),
+    // NSP-022 s96 — likewise only when the branch calls a host service: WHICH services, not how many
+    ...(p.host !== undefined ? { host: [...new Set((Array.isArray(p.host) ? p.host : [p.host]).map((c: { service: string }) => c.service))].sort() } : {}),
     // NSP-016 s56 — likewise only when the branch answers a caller (WHICH answers, not how many). Not whether it awaits (`resume`):
     // an await is the state's progress, like a write — in the shape it split every branch by whether the queue started working there,
     // and each split was a branch only a scenario of its own could reach (seeds 13, 20733, 20729, 7 each found another)
@@ -148,6 +153,8 @@ export function reducerNames(spec: AnyNodeSpec): string[] {
   if (spec.world?.picker) names.push('world.picker');
   if (spec.world?.realtime) names.push('world.realtime');
   if (spec.world?.socket) names.push('world.socket');
+  if (spec.world?.host) names.push('world.host');
+  if (spec.world?.invoke) names.push('world.invoke');
   if (spec.world?.stream) names.push('world.stream');
   if (spec.world?.group) names.push('world.group');
   if (spec.world?.resume) names.push('world.resume');
@@ -197,6 +204,10 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
     if (spec.world.realtime) w.realtime = wrap('world.realtime', spec.world.realtime as unknown as ErasedReducer) as unknown as typeof spec.world.realtime;
     // s34 — what a WebSocket fires (world.ts SOCKET): a copy without it never hears a socket open
     if (spec.world.socket) w.socket = wrap('world.socket', spec.world.socket as unknown as ErasedReducer) as unknown as typeof spec.world.socket;
+    // NSP-022 s96 — a host service's answer (world.ts HOST): a copy without it never hears a secret, a user or a mail answer
+    if (spec.world.host) w.host = wrap('world.host', spec.world.host as unknown as ErasedReducer) as unknown as typeof spec.world.host;
+    // NSP-022 s97 — the request handed to the function (world.ts HOST, THE INVOCATION): a copy without it never hears one
+    if (spec.world.invoke) w.invoke = wrap('world.invoke', spec.world.invoke as unknown as ErasedReducer) as unknown as typeof spec.world.invoke;
     // s34 — what a streamed body says (world.ts NETWORK): a copy without it never hears a chunk
     if (spec.world.stream) w.stream = wrap('world.stream', spec.world.stream as unknown as ErasedReducer) as unknown as typeof spec.world.stream;
     // NSP-016 s42 — the graph's writes to the group the node sits in (world.ts GROUP): a copy without it never hears one
@@ -296,6 +307,10 @@ function mutatePatch(patch: PatchLike, kind: MutationKind, sibling?: PatchLike, 
       const { backend: _b, ...rest } = patch;
       return rest;
     }
+    case 'drop-host': {
+      const { host: _h, ...rest } = patch;
+      return rest;
+    }
     case 'drop-picker': {
       const { picker: _p, ...rest } = patch;
       return rest;
@@ -349,6 +364,7 @@ export function mutantsOf(spec: AnyNodeSpec, branches: Map<string, Branch>): Mut
     if ((ex.outcome !== undefined && ex.outcome !== 'deferred' && ex.outcome !== 'pending') || (ex.outcomes && ex.outcomes.length > 0) || (ex.opens && ex.opens.length > 0) || (ex.settles && ex.settles.length > 0)) kinds.push(['flip-outcome', undefined]);
     if (ex.request !== undefined) kinds.push(['drop-request', undefined]);
     if (ex.backend !== undefined) kinds.push(['drop-backend', undefined]);
+    if (ex.host !== undefined) kinds.push(['drop-host', undefined]);
     if (ex.picker !== undefined) kinds.push(['drop-picker', undefined]);
     if (ex.subscribe !== undefined) kinds.push(['drop-subscribe', undefined]);
     if (ex.unsubscribe !== undefined && ex.unsubscribe.length > 0) kinds.push(['drop-unsubscribe', undefined]);

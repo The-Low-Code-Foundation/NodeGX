@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4bdac92b-c59e-5cdc-8e38-8054f611a32e",
+  "name": "Speak Phrase",
+  "path": "/#__cloud__/Cloud Functions/Speak Phrase",
+  "type": "cloud",
+  "created": "2026-10-12T12:57:32.628Z",
+  "modified": "2026-10-12T13:02:46.142Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Server-side Gemini TTS: receives text, reads GEMINI_API_KEY from the backend's secret store, calls gemini-3.8-flash-tts, returns audio."
+}

@@ -39,7 +39,7 @@ import { ProjectModel } from '@noodl-models/projectmodel';
 import * as Exporter from '@noodl-utils/exporter';
 import { HtmlProcessor } from '@noodl-utils/compilation/build/processors/html-processor';
 
-import { PREVIEW_EXPORT_OPTIONS, projectModelFromLegacy } from './projectExport';
+import { previewExportOptions, projectModelFromLegacy } from './projectExport';
 import { validateLegacyProject, type PreviewReport } from './validate';
 
 /** Everything the preview server serves for one snapshot of the project. */
@@ -250,7 +250,7 @@ export async function loadPreview(dir: string, format: ProjectFormat): Promise<P
     warnings.push(...built.warnings);
 
     const exportJson = Exporter.exportToJSON(project, {
-      ...PREVIEW_EXPORT_OPTIONS,
+      ...previewExportOptions(legacy.metadata),
       useBundles: true,
       useBundleHashes: true
     });

@@ -1,0 +1,35 @@
+[
+  {
+    "name": "a Role and a User Id inside a backend: one add, Roles and Role Was Created from the answer, done",
+    "because": "addusertorole.ts doAdd; system-roles.ts :93-140 callSystemRoles",
+    "params": { "role": "staff", "userId": "u1", "createRole": true },
+    "steps": [{ "signal": "add" }, { "signal": "add" }, "settle"],
+    "world": { "host": { "services": ["roles"], "answers": [{ "answer": { "ok": { "outcome": "done", "roles": ["staff"], "roleCreated": true } } }] } }
+  },
+  {
+    "name": "already a member: Unchanged with Roles; as Done, then as Failure by Treat Unchanged as; a Done with no roles is []",
+    "because": "nodegx-backend roles/SystemRoles.ts :277; node.ts :1049-1067; system-roles.ts :215-218 `result.roles || []`",
+    "params": { "role": "staff", "userId": "u1" },
+    "steps": [{ "signal": "add" }, "settle", { "set": "treatUnchangedAs", "value": "done" }, { "signal": "add" }, "settle", { "set": "treatUnchangedAs", "value": "failure" }, { "signal": "add" }, "settle", { "signal": "add" }, "settle"],
+    "world": { "host": { "services": ["roles"], "answers": [{ "times": 3, "answer": { "ok": { "outcome": "unchanged", "code": "role/already-member", "roles": ["staff", "editors"] } } }, { "answer": { "ok": { "outcome": "done" } } }] } }
+  },
+  {
+    "name": "the checks in order: no Role, then no User Id — each at once, never the caller; outside a backend: role/no-backend",
+    "because": "addusertorole.ts doAdd's two checks; system-roles.ts :101-110",
+    "params": {},
+    "steps": [{ "signal": "add" }, "settle", { "set": "role", "value": "staff" }, { "signal": "add" }, "settle", { "set": "userId", "value": "u1" }, { "signal": "add" }, "settle"],
+    "world": { "host": {} }
+  },
+  {
+    "name": "the store's failure, its reason; no answer; a rejection — Roles untouched",
+    "because": "system-roles.ts :113-139",
+    "params": { "role": "staff", "userId": "u1" },
+    "steps": [{ "signal": "add" }, "settle", { "signal": "add" }, "settle", { "signal": "add" }, "settle", { "signal": "add" }, "settle"],
+    "world": { "host": { "services": ["roles"], "answers": [
+      { "times": 1, "answer": { "ok": { "outcome": "done", "roles": ["staff"] } } },
+      { "times": 1, "answer": { "ok": { "outcome": "failure", "code": "role/not-found", "error": "There is no role named \"staff\"." } } },
+      { "times": 1, "answer": { "ok": null } },
+      { "answer": { "throws": "the database is locked" } }
+    ] } }
+  }
+]

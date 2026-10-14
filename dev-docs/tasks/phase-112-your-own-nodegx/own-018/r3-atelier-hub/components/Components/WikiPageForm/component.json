@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b97bd391-0b1b-5aba-8ac7-fcca165ef09f",
+  "name": "WikiPageForm",
+  "path": "/Components/WikiPageForm",
+  "type": "visual",
+  "created": "2026-10-12T17:55:41.367Z",
+  "modified": "2026-10-12T18:24:11.280Z",
+  "modifiedBy": "noodl-mcp"
+}

@@ -7,6 +7,40 @@ const CloudStore = require('@noodl/runtime/src/api/cloudstore'),
 /** NDA-004 §2 — see `setError`. Also the editor's warning key; the bus keys by `code`. */
 const AGGREGATE_ERROR_CODE = 'aggregate-records/aggregate-failed';
 
+/**
+ * P107-S99-AGGCOLUMNS — a class's columns, by name, from either cached shape: a Parse-era `dbCollections` entry carries
+ * `schema.properties`; the built-in backend's (SchemaHandler reading `backend:getSchema`) carries a `columns` array. Reading
+ * only the first left a project on our own backend with no Property to pick and nothing ever aggregated. Same reading as
+ * `queryutils.ts schemaFor`.
+ */
+function classProperties(c) {
+  if (!c) return undefined;
+  if (c.schema && c.schema.properties) return c.schema.properties;
+  if (Array.isArray(c.columns)) {
+    const properties = {};
+    for (const column of c.columns) {
+      if (column && column.name) properties[column.name] = column;
+    }
+    return properties;
+  }
+  return undefined;
+}
+
+/**
+ * P107-S99-AGGNOPROP (ruled R36, "Fail, naming it") — the first aggregate the list names with no Property chosen, as the
+ * sentence the node fails with; undefined when every one has its Property. Before, the lookup threw inside the frame-end
+ * callback and the node did nothing at all: no request, no Success, no Failure.
+ */
+function missingProperty(list, defs) {
+  if (typeof list !== 'string' || list === '') return undefined;
+  for (const a of list.split(',')) {
+    if (defs[a] !== undefined && defs[a].prop !== undefined) continue;
+    if (a === '') return 'Aggregates lists an empty name.';
+    return 'The aggregate "' + a + '" has no Property chosen.';
+  }
+  return undefined;
+}
+
 var AggregateNode = {
   name: 'noodl.cloud.aggregate',
   docs: 'https://docs.noodl.net/nodes/cloud-functions/cloud-data/aggregate-records',
@@ -150,19 +184,31 @@ var AggregateNode = {
         this.setError(f.failed);
         return;
       }
+      const missing = missingProperty(this._internal.aggregatesList, this._internal.aggregates);
+      if (missing !== undefined) {
+        this.setError(missing);
+        return;
+      }
       this._internal.currentQuery = {
         where: f.where,
       };
+      const group = this.getAggregates();
       CloudStore.forScope(this.nodeScope.modelScope).aggregate({
         collection: this._internal.name,
         where: f.where,
-        group: this.getAggregates(),
+        group: group,
         success: (results) => {
-            this._internal.aggregateValues = results;
-            for(const key in results) {
-                if(this.hasOutput('agg-'+key))
-                    this.flagOutputDirty('agg-'+key);
-            }
+          // P107-S99-AGGSTALE (ruled R36, "Empty, like our backend") — every aggregate asked gets a value: what the answer
+          // carried, or null when it carried none. A Parse server answers no row when nothing matches, and the outputs used to
+          // keep the previous aggregation's totals; our own backend answers one row of nulls (`LocalSQLAdapter.aggregate`).
+          const values = {};
+          for (const key of Object.keys(group)) {
+            values[key] = results && results[key] !== undefined ? results[key] : null;
+          }
+          this._internal.aggregateValues = values;
+          for (const key in values) {
+            if (this.hasOutput('agg-' + key)) this.flagOutputDirty('agg-' + key);
+          }
           this.sendSignalOnOutput('fetched');
         },
         error: (err) => {
@@ -177,9 +223,12 @@ var AggregateNode = {
         let _where;
         if (this._internal.visualFilter !== undefined) {
           try {
+            // P107-S99-AGGFILTERPREFIX — the builder saves a connected value as `qp-<field>_<id>`; without the prefix the
+            // lookup missed the parameter (kept by its bare name), dropped the condition, and aggregated the whole class.
             _where = QueryUtils.convertVisualFilter(this._internal.visualFilter, {
               queryParameters: this._internal.queryParameters,
-              collectionName: this._internal.name
+              collectionName: this._internal.name,
+              valuePortPrefix: 'qp-'
             });
           } catch (e) {
             return { failed: e.message || 'The filter could not be applied.' };
@@ -287,15 +336,14 @@ var AggregateNode = {
         if(!this._internal.aggregatesList) return {};
         if(!this._internal.aggregates) return {};
 
-        const schema = CloudStore._collections;
-        const classSchema = schema[this._internal.name];
-        if(!classSchema || !classSchema.schema || !classSchema.schema.properties) return {};
+        const properties = classProperties(CloudStore._collections[this._internal.name]);
+        if(!properties) return {};
 
         const defs = this._internal.aggregates;
         const aggs = {};
         this._internal.aggregatesList.split(',').forEach(a => {
-            if(defs[a].prop === undefined) return;
-            const propSchema = classSchema.schema.properties[defs[a].prop];
+            if(defs[a] === undefined || defs[a].prop === undefined) return;
+            const propSchema = properties[defs[a].prop];
             if(propSchema === undefined) return;
 
             const op = {}
@@ -452,11 +500,12 @@ function updatePorts(nodeId, parameters, editorConnection, graphModel) {
   if(parameters['aggregates'] !== undefined && parameters.collectionName !== undefined) {
     var c = dbCollections && dbCollections.find((c) => c.name === parameters.collectionName);
       if (c === undefined && systemCollections) c = systemCollections.find((c) => c.name === parameters.collectionName);
-      if (c && c.schema && c.schema.properties) {
+      const properties = classProperties(c);
+      if (properties) {
 
         const aggs = parameters['aggregates'].split(',');
 
-        const props = Object.keys(c.schema.properties).filter(k => c.schema.properties[k].type === 'Number' || c.schema.properties[k].type === 'String');
+        const props = Object.keys(properties).filter(k => properties[k].type === 'Number' || properties[k].type === 'String');
 
         aggs.forEach(a => {
             ports.push({
@@ -470,7 +519,7 @@ function updatePorts(nodeId, parameters, editorConnection, graphModel) {
 
             if(parameters['aggprop-'+a] !== undefined) {
                 const prop = parameters['aggprop-'+a];
-                const schema = c.schema.properties[prop];
+                const schema = properties[prop];
 
                 if(schema && schema.type === 'Number') {
                     // Number aggregate
@@ -526,14 +575,16 @@ function updatePorts(nodeId, parameters, editorConnection, graphModel) {
     if (parameters.collectionName !== undefined) {
       var c = dbCollections && dbCollections.find((c) => c.name === parameters.collectionName);
       if (c === undefined && systemCollections) c = systemCollections.find((c) => c.name === parameters.collectionName);
-      if (c && c.schema && c.schema.properties) {
-        const schema = JSON.parse(JSON.stringify(c.schema));
+      const properties = classProperties(c);
+      if (properties) {
+        const schema = { properties: JSON.parse(JSON.stringify(properties)) };
 
         // Find all records that have a relation with this type
         function _findRelations(c) {
-          if (c.schema !== undefined && c.schema.properties !== undefined)
-            for (var key in c.schema.properties) {
-              var p = c.schema.properties[key];
+          const cp = classProperties(c);
+          if (cp !== undefined)
+            for (var key in cp) {
+              var p = cp[key];
               if (p.type === 'Relation' && p.targetClass === parameters.collectionName) {
                 if (schema.relations === undefined) schema.relations = {};
                 if (schema.relations[c.name] === undefined) schema.relations[c.name] = [];
@@ -549,23 +600,16 @@ function updatePorts(nodeId, parameters, editorConnection, graphModel) {
         ports.push({
           name: 'visualFilter',
           plug: 'input',
-          type: { name: 'query-filter', schema: schema, allowEditOnly: true },
+          type: { name: 'query-filter', schema: schema, allowEditOnly: true, valuePortPrefix: 'qp-' },
           displayName: 'Filter',
           group: 'Filter'
         });
       }
 
       if (parameters.visualFilter !== undefined) {
-        // Find all input ports
-        const uniqueInputs = {};
-        function _collectInputs(query) {
-          if (query === undefined) return;
-          if (query.rules !== undefined) query.rules.forEach((r) => _collectInputs(r));
-          else if (query.input !== undefined) uniqueInputs[query.input] = true;
-        }
-
-        _collectInputs(parameters.visualFilter);
-        Object.keys(uniqueInputs).forEach((input) => {
+        // P107-S99-AGGFILTERPREFIX — both saved shapes, as Query Records reads them: the retired `{combinator, rules}` and
+        // the builder's `{type, conditions}`, whose connected values were never drawn as ports and so could not be wired.
+        QueryUtils.collectFilterParameters(parameters.visualFilter, 'qp-').forEach((input) => {
           ports.push({
             name: 'qp-' + input,
             plug: 'input',

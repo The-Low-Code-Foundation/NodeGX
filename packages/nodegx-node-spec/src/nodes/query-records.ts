@@ -89,7 +89,7 @@ import { defineNode } from '../spec';
 import type { RecordRef } from '../registry';
 import type { BackendScript, RealtimeScriptEvent } from '../world';
 import { valueDidChange } from './condition';
-import { backendPickerPort, classPicker, NO_BACKEND_MESSAGE, selectedClass } from './record-base';
+import { backendPickerPort, classPicker, filterValuePorts, NO_BACKEND_MESSAGE, selectedClass } from './record-base';
 import { compareObjects, filterParameterNames, lowerToParse, matchesQuery, toNeutral } from './record-match';
 import { sameList } from '../world';
 
@@ -152,6 +152,9 @@ const GENERIC_SETTING = (name: string): InputDecl => ({
 });
 
 /** :1261-1262 — the script a Javascript filter starts with. */
+/** The words the Filter dropdown shows (dbcollectionnode2.ts `storageFilterType`). */
+const FILTER_TYPE_LABELS = { simple: 'Visual', json: 'Javascript' };
+
 const DEFAULT_JSON_QUERY = '// Write your query script here, check out the reference documentation for examples\n' + 'where({ })\n';
 
 /** A setting as the editor draws it (`updatePorts` :1310-1391): its type, its label, its group. */
@@ -484,7 +487,7 @@ export const QueryRecords = defineNode({
         const out: Record<string, InputDecl> = {
           ...backendPickerPort(context),
           collectionName: classPicker(discover('collectionName') as ValueInputDecl, context),
-          storageFilterType: { type: 'enum', enums: ['simple', 'json'], drawnDefault: 'simple', coerce: 'none', editOnly: true, displayName: 'Filter', group: 'General', undriven: 'the Javascript filter is not in this spec (header)' },
+          storageFilterType: { type: 'enum', enums: ['simple', 'json'], labels: FILTER_TYPE_LABELS, drawnDefault: 'simple', coerce: 'none', editOnly: true, displayName: 'Filter', group: 'General', undriven: 'the Javascript filter is not in this spec (header)' },
           search: discover('search')!,
           storageEnableLimit: setting('storageEnableLimit', 'boolean', 'Use limit', 'Limit')
         };
@@ -493,21 +496,25 @@ export const QueryRecords = defineNode({
           out.storageSkip = { ...setting('storageSkip', 'number', 'Skip', 'Limit'), drawnDefault: 0 };
         }
         out.storageFetch = discover('storageFetch')!;
-        for (const [governed, label] of [['collectionName', 'Class'], ['search', 'Search'], ['records', 'Record changes'], ['querySettings', 'Query settings']]) out['runOnChange-' + governed] = checkbox(label);
+        // the boxes are drawn edit-only (run-on-value-change.ts `allowEditOnly`): a box takes no wire
+        for (const [governed, label] of [['collectionName', 'Class'], ['search', 'Search'], ['records', 'Record changes'], ['querySettings', 'Query settings']]) out['runOnChange-' + governed] = { ...(checkbox(label) as ValueInputDecl), editOnly: true };
         out.realtime = discover('realtime')!;
         out.storageEnableCount = setting('storageEnableCount', 'boolean', 'Fetch total count', 'Total Count');
-        // :1452-1458 — the Javascript filter's script, drawn and never driven; its `storageFilterValue-` ports (:1460-1486, read
-        // from the script's `$name`s and `Inputs.name`s) are not drawn here: the Javascript filter is not in this spec (header)
-        if (params.storageFilterType === 'json') out.storageJSONFilter = { type: 'string', coerce: 'none', editOnly: true, displayName: 'Filter', group: 'Filter', drawnDefault: DEFAULT_JSON_QUERY, undriven: 'the Javascript filter is not in this spec (header)' };
+        // :1452-1458 — the Javascript filter's script, drawn and never driven; then its variables' ports (:1459-1487), drawn so a
+        // wire can reach them (P107-S101-JSFILTERVALUES): the Javascript filter is not in this spec (header)
+        if (params.storageFilterType === 'json') {
+          out.storageJSONFilter = { type: 'string', coerce: 'none', editOnly: true, codeEditor: 'javascript', displayName: 'Filter', group: 'Filter', drawnDefault: DEFAULT_JSON_QUERY, undriven: 'the Javascript filter is not in this spec (header)' };
+          Object.assign(out, filterValuePorts(params.storageJSONFilter));
+        }
         if ((params.storageFilterType === undefined || params.storageFilterType === 'simple') && params.collectionName !== undefined) {
           if (selectedClass(params, context)) {
-            out.visualFilter = { ...(discover('visualFilter') as ValueInputDecl), type: 'query-filter' };
+            out.visualFilter = { ...(discover('visualFilter') as ValueInputDecl), type: 'query-filter', valuePortPrefix: 'qp-', filterBackend: true };
             out.visualSort = { ...(discover('visualSort') as ValueInputDecl), type: 'query-sorting' };
           }
           if (params.visualFilter !== undefined) {
             for (const name of filterParameterNames(params.visualFilter, 'qp-')) {
               out['qp-' + name] = queryParameter(name);
-              out['runOnChange-qp-' + name] = checkbox(name);
+              out['runOnChange-qp-' + name] = { ...(checkbox(name) as ValueInputDecl), editOnly: true };
             }
           }
         }

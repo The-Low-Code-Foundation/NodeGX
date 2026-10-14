@@ -350,9 +350,29 @@ export interface ListNodeTypesFilter {
   includeHidden?: boolean;
 }
 
+/**
+ * P112-OWN019-NODETYPEWORDS — a query is a phrase first, then its words, as `list_examples` (P112-OWN018-READWASTE).
+ * Mistral Large 4 searches with a list of synonyms ("timer interval delay countdown repeat"): as one substring that
+ * found no row, and o2 walked all fifteen categories one call each. When the phrase finds nothing, a type is kept when
+ * it has any of the words, most words first — the words are alternatives, not a conjunction.
+ */
 export function listNodeTypes(filter: ListNodeTypesFilter = {}): NodeTypeRow[] {
-  const q = filter.query?.toLowerCase();
-  const rows: NodeTypeRow[] = [];
+  const q = filter.query?.toLowerCase().trim();
+  if (!q) return listNodeTypesScored(filter, null).map((s) => s.row);
+  const phrase = listNodeTypesScored(filter, (hay) => (hay.includes(q) ? 1 : 0)).map((s) => s.row);
+  // Split on spaces and list punctuation only: a dotted name or a URL ("net.noodl.HTTP", "docs.noodl.net") is one word.
+  const words = [...new Set(q.split(/[\s,;|]+/).filter((w) => w.length >= 3 && !QUERY_STOPWORDS.has(w)))];
+  if (phrase.length > 0 || words.length < 2) return phrase;
+  return listNodeTypesScored(filter, (hay) => words.filter((w) => hay.includes(w)).length)
+    .sort((a, b) => b.score - a.score)
+    .map((s) => s.row);
+}
+
+function listNodeTypesScored(
+  filter: ListNodeTypesFilter,
+  scoreOf: ((hay: string) => number) | null
+): { row: NodeTypeRow; score: number }[] {
+  const rows: { row: NodeTypeRow; score: number }[] = [];
   // CN-003 — the merged document, so a project's own node types are listed
   // beside the built-ins. ✅ **P1**: there is no capability difference between a
   // kit node and a shipped one, and a picker an author's own node is missing
@@ -367,7 +387,8 @@ export function listNodeTypes(filter: ListNodeTypesFilter = {}): NodeTypeRow[] {
     // matches a node the caller then cannot see the reason for.
     const summary = summaryOf(n);
     const origin = kitOrigin(n);
-    if (q) {
+    let score = 0;
+    if (scoreOf) {
       const hay = [
         n.typeName,
         n.displayName,
@@ -380,7 +401,8 @@ export function listNodeTypes(filter: ListNodeTypesFilter = {}): NodeTypeRow[] {
       ]
         .join(' ')
         .toLowerCase();
-      if (!hay.includes(q)) continue;
+      score = scoreOf(hay);
+      if (score === 0) continue;
     }
     const row: NodeTypeRow = {
       typeName: n.typeName,
@@ -399,9 +421,9 @@ export function listNodeTypes(filter: ListNodeTypesFilter = {}): NodeTypeRow[] {
     }
     const exportInfo = exportInfoOf(n.typeName);
     if (exportInfo && worthListing(exportInfo)) row.export = exportInfo;
-    rows.push(row);
+    rows.push({ row, score });
   }
-  rows.sort((a, b) => (a.typeName < b.typeName ? -1 : 1));
+  rows.sort((a, b) => (a.row.typeName < b.row.typeName ? -1 : 1));
   return rows;
 }
 
@@ -1119,17 +1141,36 @@ export interface ExampleRow {
   demonstrates: string[];
 }
 
+/**
+ * P112-OWN018-READWASTE — a query is a phrase first, then its words. Mistral Large 4 (OWN-018) searched the examples
+ * in sentences ("db change automation webhook", "navigate target path parameter record id detail"): as one substring
+ * 5 of its 6 searches found nothing and it fell back to the whole catalog (131k characters). The phrase still wins
+ * when it matches; otherwise an example is kept when it has at least half the query's words, best match first — the
+ * same widening `find_tools` got for the same reason (P109 S13-FINDTOOLSPHRASE).
+ */
+const QUERY_STOPWORDS = new Set(['the', 'and', 'for', 'with', 'from', 'into', 'that', 'this', 'one', 'how', 'use']);
+
 export function listExamples(filter: { nodeType?: string; query?: string } = {}): ExampleRow[] {
-  const q = filter.query?.toLowerCase();
-  return allExamples()
-    .filter((ex) => {
-      if (filter.nodeType && !ex.demonstrates.includes(filter.nodeType)) return false;
-      if (q) {
-        const hay = [ex.id, ex.title, ex.description ?? '', ...ex.demonstrates].join(' ').toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      return true;
-    })
+  const q = filter.query?.toLowerCase().trim();
+  const typed = allExamples().filter((ex) => !filter.nodeType || ex.demonstrates.includes(filter.nodeType));
+  const hayOf = (ex: CatalogExample) => [ex.id, ex.title, ex.description ?? '', ...ex.demonstrates].join(' ').toLowerCase();
+  let matched = typed;
+  if (q) {
+    matched = typed.filter((ex) => hayOf(ex).includes(q));
+    const words = [...new Set(q.split(/[^a-z0-9]+/).filter((w) => w.length >= 3 && !QUERY_STOPWORDS.has(w)))];
+    if (matched.length === 0 && words.length > 1) {
+      const need = Math.max(1, Math.ceil(words.length / 2));
+      matched = typed
+        .map((ex) => {
+          const hay = hayOf(ex);
+          return { ex, score: words.filter((w) => hay.includes(w)).length };
+        })
+        .filter((row) => row.score >= need)
+        .sort((a, b) => b.score - a.score)
+        .map((row) => row.ex);
+    }
+  }
+  return matched
     .map((ex) => ({
       id: ex.id,
       title: ex.title,

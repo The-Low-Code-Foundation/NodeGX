@@ -2,7 +2,7 @@
 #
 # P112 OWN-016 — ship an npm-kit NodeGX app to a VM you own, from the folder the agent built it in.
 #
-#   ship-to-vm.sh <project-dir> <local-backend-dir> <user@host> <app> <port> [domain]
+#   ship-to-vm.sh [--ssh-key f] [--preview pkg|tgz] [--mcp-tgz tgz] <project-dir> <local-backend-dir> <user@host> <app> <port> [domain]
 #
 #   <local-backend-dir>  the backend provision_backend made for this project (~/.noodl/backends/<id>): its
 #                        workflows/ are the cloud functions deploy_cloud_functions put there, and its secrets.json
@@ -18,6 +18,15 @@
 # to a local file, an argument list or the site.
 
 set -euo pipefail
+# The three environment settings may also be given as flags, before the positional arguments.
+while [[ "${1:-}" == --* ]]; do
+  case "$1" in
+    --ssh-key) SSH_KEY="$2"; shift 2 ;;
+    --preview) NODEGX_PREVIEW_PKG="$2"; shift 2 ;;
+    --mcp-tgz) NODEGX_MCP_TGZ="$2"; shift 2 ;;
+    *) echo "unknown flag $1" >&2; exit 2 ;;
+  esac
+done
 PROJECT="${1:?project dir}"; BACKEND="${2:?local backend dir}"; HOST="${3:?user@host}"; APP="${4:?app}"; PORT="${5:?port}"; DOMAIN="${6:-}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 SSH_OPTS=(-o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new)

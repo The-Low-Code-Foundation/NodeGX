@@ -1,0 +1,205 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a8c719c9-017b-5c3f-828f-8a7f33aaf626",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cfm-ci",
+      "fromProperty": "recordId",
+      "toId": "cfm-rec",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "cfm-ci",
+      "fromProperty": "recordId",
+      "toId": "cfm-update",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "cfm-ci",
+      "fromProperty": "recordId",
+      "toId": "cfm-isnew",
+      "toProperty": "recordId"
+    },
+    {
+      "fromId": "cfm-isnew",
+      "fromProperty": "asBoolean",
+      "toId": "cfm-isnewcond",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "cfm-rec",
+      "fromProperty": "prop-name",
+      "toId": "cfm-name",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cfm-rec",
+      "fromProperty": "prop-sector",
+      "toId": "cfm-sector",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cfm-rec",
+      "fromProperty": "prop-contactName",
+      "toId": "cfm-contact",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cfm-rec",
+      "fromProperty": "prop-email",
+      "toId": "cfm-email",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cfm-rec",
+      "fromProperty": "prop-phone",
+      "toId": "cfm-phone",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cfm-rec",
+      "fromProperty": "prop-address",
+      "toId": "cfm-address",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cfm-rec",
+      "fromProperty": "prop-notes",
+      "toId": "cfm-notes",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cfm-name",
+      "fromProperty": "value",
+      "toId": "cfm-create",
+      "toProperty": "prop-name"
+    },
+    {
+      "fromId": "cfm-name",
+      "fromProperty": "value",
+      "toId": "cfm-update",
+      "toProperty": "prop-name"
+    },
+    {
+      "fromId": "cfm-name",
+      "fromProperty": "value",
+      "toId": "cfm-nameok",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "cfm-sector",
+      "fromProperty": "value",
+      "toId": "cfm-create",
+      "toProperty": "prop-sector"
+    },
+    {
+      "fromId": "cfm-sector",
+      "fromProperty": "value",
+      "toId": "cfm-update",
+      "toProperty": "prop-sector"
+    },
+    {
+      "fromId": "cfm-contact",
+      "fromProperty": "value",
+      "toId": "cfm-create",
+      "toProperty": "prop-contactName"
+    },
+    {
+      "fromId": "cfm-contact",
+      "fromProperty": "value",
+      "toId": "cfm-update",
+      "toProperty": "prop-contactName"
+    },
+    {
+      "fromId": "cfm-email",
+      "fromProperty": "value",
+      "toId": "cfm-create",
+      "toProperty": "prop-email"
+    },
+    {
+      "fromId": "cfm-email",
+      "fromProperty": "value",
+      "toId": "cfm-update",
+      "toProperty": "prop-email"
+    },
+    {
+      "fromId": "cfm-phone",
+      "fromProperty": "value",
+      "toId": "cfm-create",
+      "toProperty": "prop-phone"
+    },
+    {
+      "fromId": "cfm-phone",
+      "fromProperty": "value",
+      "toId": "cfm-update",
+      "toProperty": "prop-phone"
+    },
+    {
+      "fromId": "cfm-address",
+      "fromProperty": "value",
+      "toId": "cfm-create",
+      "toProperty": "prop-address"
+    },
+    {
+      "fromId": "cfm-address",
+      "fromProperty": "value",
+      "toId": "cfm-update",
+      "toProperty": "prop-address"
+    },
+    {
+      "fromId": "cfm-notes",
+      "fromProperty": "value",
+      "toId": "cfm-create",
+      "toProperty": "prop-notes"
+    },
+    {
+      "fromId": "cfm-notes",
+      "fromProperty": "value",
+      "toId": "cfm-update",
+      "toProperty": "prop-notes"
+    },
+    {
+      "fromId": "cfm-nameok",
+      "fromProperty": "asBoolean",
+      "toId": "cfm-save",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "cfm-save",
+      "fromProperty": "onClick",
+      "toId": "cfm-isnewcond",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "cfm-isnewcond",
+      "fromProperty": "ontrue",
+      "toId": "cfm-create",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "cfm-isnewcond",
+      "fromProperty": "onfalse",
+      "toId": "cfm-update",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "cfm-create",
+      "fromProperty": "done",
+      "toId": "cfm-co",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "cfm-update",
+      "fromProperty": "done",
+      "toId": "cfm-co",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "cfm-cancel",
+      "fromProperty": "onClick",
+      "toId": "cfm-co",
+      "toProperty": "cancelled"
+    }
+  ]
+}

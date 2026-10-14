@@ -1,0 +1,144 @@
+{
+  "relations": [
+    {
+      "id": "conversationOfLearner",
+      "from": "conversation",
+      "to": "learner",
+      "kind": "belongs-to",
+      "sentence": "each conversation is with one learner",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "messageInConversation",
+      "from": "message",
+      "to": "conversation",
+      "kind": "belongs-to",
+      "sentence": "each message is in one conversation",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "progressOnConversation",
+      "from": "progress",
+      "to": "conversation",
+      "kind": "belongs-to",
+      "sentence": "each progress is how far a learner is in one conversation",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "conversationLinkedFrom",
+      "from": "conversation",
+      "to": "conversation",
+      "kind": "part-of-tree",
+      "sentence": "The what to do before next time should link to a new conversation, so we keep them linked but separate",
+      "answers": {
+        "ownAncestor": false
+      }
+    },
+    {
+      "id": "coachNoteOnLearner",
+      "from": "coachNote",
+      "to": "learner",
+      "kind": "belongs-to",
+      "sentence": "each coach note is about one learner",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "coachNoteOnConversation",
+      "from": "coachNote",
+      "to": "conversation",
+      "kind": "belongs-to",
+      "sentence": "a coach note can be inside one conversation",
+      "answers": {
+        "several": false,
+        "required": false,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "coachNoteOnMessage",
+      "from": "coachNote",
+      "to": "message",
+      "kind": "belongs-to",
+      "sentence": "a coach note can be on one message",
+      "answers": {
+        "several": false,
+        "required": false,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "objectiveOfLearner",
+      "from": "objective",
+      "to": "learner",
+      "kind": "belongs-to",
+      "sentence": "each objective is for one learner",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "sessionOfLearner",
+      "from": "session",
+      "to": "learner",
+      "kind": "belongs-to",
+      "sentence": "each session is with one learner",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "sessionReview",
+      "from": "session",
+      "to": "conversation",
+      "kind": "belongs-to",
+      "sentence": "a session has one review conversation",
+      "answers": {
+        "several": false,
+        "required": false,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "pushOfLearner",
+      "from": "pushSubscription",
+      "to": "learner",
+      "kind": "belongs-to",
+      "sentence": "each push subscription is one learner's phone",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    }
+  ]
+}

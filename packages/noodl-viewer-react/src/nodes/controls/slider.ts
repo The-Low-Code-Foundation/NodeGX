@@ -5,6 +5,9 @@ import { createNodeFromReactComponent } from '../../react-component-node';
 import Utils from './utils';
 
 const thumbPopout = { group: 'thumb-styles', label: 'Thumb Styles' };
+
+/** P107 R39 — the editor's key for a Max below Min (`_attributeChanged`) */
+const MAX_BELOW_MIN = 'slider/max-below-min';
 const trackPopout = { group: 'track-styles', label: 'Track Styles' };
 
 const RangeNode = {
@@ -241,6 +244,12 @@ const RangeNode = {
     },
     /** Min, Max or Step written: the next paint draws the handle against them (C74) — no word for it */
     _attributeChanged() {
+      // P107 R39 (2026-10-14, Richard: "Yes, warn"), as the Counter's `counter/min-above-max`: a Max below Min holds the
+      // handle at Min and a person's slide takes nothing (`browserRangeValue`), and nothing said why. Over the attributes as
+      // the browser reads them (a blank Min or Max is 0 or 100). The spec says the same sentence (nodegx-node-spec slider.ts).
+      const min = rangeAttribute(this.props.min) ?? 0;
+      const max = rangeAttribute(this.props.max) ?? 100;
+      this.setDiagnostic(MAX_BELOW_MIN, max < min ? `Max ${max} is below Min ${min}, so the handle stays at Min and cannot be moved.` : null);
       this.props.valueWrites++;
       this.forceUpdate();
     },

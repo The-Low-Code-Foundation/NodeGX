@@ -58,6 +58,7 @@ import {
 import type { ComponentFiles } from './graph';
 import type { ProjectStore } from './project/ProjectStore';
 import { drawnPortCheck } from './specPorts';
+import { makeProjectVisualPredicate, type VisualTypePredicate } from './visualRoots';
 import { listScriptPaths } from './tools/scriptTools';
 
 let semanticValidator: SemanticValidator | undefined;
@@ -243,7 +244,65 @@ export function preconditionDiagnostics(
     // P109 ISL-005 — a Function's `uses` against the files in scripts/, read from disk now.
     scripts: listScriptPaths(store.projectDir),
     catalog: catalogIndex()
+  }).concat(detachedVisualDiagnostics(legacyName, candidate, storeVisualPredicate(store)));
+}
+
+/** "Does a node of this type draw?", with the project's components resolved — `projectVisualPredicate`'s answer. */
+function storeVisualPredicate(store: ProjectStore): VisualTypePredicate {
+  return makeProjectVisualPredicate((legacyName) => {
+    if (!store.resolve(legacyName)) return undefined;
+    try {
+      return store.readComponent(legacyName).files.nodes.nodes ?? [];
+    } catch {
+      return undefined;
+    }
   });
+}
+
+/**
+ * P112-S14-DETACHEDVISUAL — a visual node the runtime never mounts.
+ *
+ * The runtime draws a component from its `visualRoots` and what hangs under them (`componentinstance.ts`). An explicit
+ * `visual_roots` is kept verbatim (AWP-001), so a visual node with no parent that the list leaves out is never mounted:
+ * OWN-015's stranger round used a hidden `Video` as an audio player beside `visualRoots: ["row"]`, wired `src` and
+ * `play`, validated 0 errors, and the tap played nothing. Moved under the row, the same tap played the WAV to the end.
+ *
+ * Only when the list is non-empty: a component with no `visualRoots` at all draws nothing, which is F43's check, and a
+ * file the editor saved can't hold this state (it re-derives the list). One warning per detached subtree, on its top
+ * node. A warning, not an error: the write is legal and a person may keep a spare node on the canvas.
+ */
+export function detachedVisualDiagnostics(
+  legacyName: string,
+  candidate: ComponentFiles,
+  isVisual: VisualTypePredicate
+): Diagnostic[] {
+  const roots = candidate.nodes.visualRoots;
+  const nodes = candidate.nodes.nodes ?? [];
+  if (!roots || roots.length === 0) return [];
+  const listed = new Set(roots);
+  const isChild = new Set<string>();
+  for (const node of nodes) for (const child of node.children ?? []) isChild.add(child);
+  const rootNames = nodes
+    .filter((n) => listed.has(n.id))
+    .map((n) => `"${n.label ?? n.id}"`)
+    .join(', ');
+
+  const out: Diagnostic[] = [];
+  for (const node of nodes) {
+    if (listed.has(node.id) || node.parent !== undefined || isChild.has(node.id)) continue;
+    if (!isVisual(node.type)) continue;
+    const name = node.label ? `"${node.label}"` : node.id;
+    out.push({
+      code: DiagnosticCode.DetachedVisualNode,
+      severity: 'warning',
+      message:
+        `${node.type} ${name} is outside the visual tree: it has no parent and visualRoots lists only ${rootNames}, ` +
+        'so it is never drawn and anything wired into it (play, src, text…) does nothing.',
+      location: { component: legacyName, nodeId: node.id, nodeType: node.type, nodeLabel: node.label },
+      suggestion: `Put ${name} under ${rootNames.split(', ')[0]} (a hidden player can sit there with opacity 0), or add "${node.id}" to visual_roots.`
+    });
+  }
+  return out;
 }
 
 function structuralCheck(files: ComponentFiles): StructuralFailure[] {

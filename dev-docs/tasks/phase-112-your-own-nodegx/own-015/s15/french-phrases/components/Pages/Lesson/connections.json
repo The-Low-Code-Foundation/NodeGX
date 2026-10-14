@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "bf727ba8-df9b-5547-853b-d7bd91bbd3ee",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "page_inputs",
+      "fromProperty": "pm-lessonId",
+      "toId": "find_lesson",
+      "toProperty": "in-lessonId"
+    },
+    {
+      "fromId": "lessons_src",
+      "fromProperty": "lessons",
+      "toId": "find_lesson",
+      "toProperty": "in-lessons"
+    },
+    {
+      "fromId": "find_lesson",
+      "fromProperty": "out-title",
+      "toId": "lesson_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "find_lesson",
+      "fromProperty": "out-phrases",
+      "toId": "repeater",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "back_button",
+      "fromProperty": "onClick",
+      "toId": "go_home",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mark_button",
+      "fromProperty": "onClick",
+      "toId": "create_progress",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "page_inputs",
+      "fromProperty": "pm-lessonId",
+      "toId": "create_progress",
+      "toProperty": "prop-lessonId"
+    },
+    {
+      "fromId": "create_progress",
+      "fromProperty": "done",
+      "toId": "completed_switch",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "completed_switch",
+      "fromProperty": "state",
+      "toId": "completed_banner",
+      "toProperty": "mounted"
+    }
+  ]
+}

@@ -17,8 +17,9 @@
  * back. With --real the function calls FIXTURE_ENDPOINT itself and the answer must be a RIFF/WAVE file.
  *
  * Then OWN-015 AC2: the key's value is searched for in every file under the project folder and in every tool result
- * the agent was shown. Zero hits is the claim. The control arm puts the same key in an HTTP Request node in a page
- * and searches again, which must find it; otherwise the search could not see a key and the zero proves nothing.
+ * the agent was shown. Zero hits is the claim. The control arm puts a canary (never the key) in an HTTP Request node
+ * in a page and runs the same search for it, which must find it; otherwise the search could not see a key and the
+ * zero proves nothing.
  *
  * Prints one JSON line per step; exit 1 on any failed step.
  */
@@ -219,10 +220,13 @@ try {
   });
   check('AC2 the key IS in the backend store (where it belongs)', inStore === 1, { store });
 
-  // The control: the same key, put where a page would hold it, must be found by the same search.
-  const ctrl = await call('create_component', controlPage(KEY));
-  const ctrlHits = searchTree(projectDir, KEY);
-  check('AC2 control: the key in a page is found', !ctrl.isError && ctrlHits.length > 0, {
+  // The control: a value put where a page would hold a key must be found by the same search. 🔴 A CANARY, never the
+  // key: with --real the key is a real credential, and planting it in a page puts it in every deploy of this project
+  // (P112-S13-CONTROLKEY — it reached nexus-1's site folder once). The search is the same; only the needle differs.
+  const CANARY = 'own015-canary-' + crypto.randomBytes(12).toString('hex');
+  const ctrl = await call('create_component', controlPage(CANARY));
+  const ctrlHits = searchTree(projectDir, CANARY);
+  check('AC2 control: a canary in a page is found', !ctrl.isError && ctrlHits.length > 0, {
     hits: ctrlHits,
     head: ctrl.isError ? ctrl.text.slice(0, 300) : undefined
   });

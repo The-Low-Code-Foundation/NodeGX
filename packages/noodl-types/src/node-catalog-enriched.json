@@ -5344,7 +5344,7 @@
       "enrichment": {
         "typeName": "CloudFunction2",
         "summary": "Calls a cloud function component from the browser: send parameters, run the server-side graph, receive its results.",
-        "description": "Cloud Function is the browser-side caller of a cloud function — a component that lives on the cloud runtime and starts with a Request node and ends with a Response node. Pick the target in the `function` input; the node then grows one `in-<name>` input per parameter declared on the function's Request node and one `out-<name>` output per value declared on its Response nodes. Triggering `call` (Call, signal) POSTs the current `in-` values to the server, where the function's graph runs; when the Response sends a success reply the `out-` outputs update and `done` (signal) fires. On a failure reply — or any transport error — `error` (string value) is set and `failure` (signal) fires. The logged-in user's session token is sent along automatically, so the function sees the caller's identity.",
+        "description": "Cloud Function is the browser-side caller of a cloud function — a component that lives on the cloud runtime and starts with a Request node and ends with a Response node. Pick the target in the `function` input; the node then grows one `in-<name>` input per parameter declared on the function's Request node and one `out-<name>` output per value declared on its Response nodes. Wire the prefixed names (`in-text`, `out-audioUrl`): a bare `text` is never made, so nothing is sent or read. Triggering `call` (Call, signal) POSTs the current `in-` values to the server, where the function's graph runs; when the Response sends a success reply the `out-` outputs update and `done` (signal) fires. On a failure reply — or any transport error — `error` (string value) is set and `failure` (signal) fires. The logged-in user's session token is sent along automatically, so the function sees the caller's identity.",
         "whenToUse": "Use it whenever browser logic needs work done with server-side trust: secrets, security-sensitive writes, aggregations, or multi-record transactions. For plain reads of database classes prefer DbCollection2 (Query Records) directly. Do not use the deprecated v1 'Cloud Function' node in new graphs.",
         "ports": {
           "call": "Signal input; sends the request with the current `in-` parameter values after all pending input updates have been applied.",
@@ -7124,7 +7124,11 @@
           "`isfalse` → a message's `visible`: show an error as a level rather than pulsing it with a signal."
         ],
         "antiPatterns": [
-          "Wiring `ontrue` (signal) to a boolean input like `visible` delivers only a momentary pulse — use `result` for anything that must stay on."
+          "Wiring `ontrue` (signal) to a boolean input like `visible` delivers only a momentary pulse — use `result` for anything that must stay on.",
+          "Leaving Run On Value Change on when `ontrue`/`onfalse` DOES something (advance a question, navigate, set a Variable, start a Timer): the gate then fires whenever its input settles, including once while the page loads, before anyone has acted. Set `runOnChange-condition: false` and wire `eval` from the signal that should ask — a Repeat's tick, a button's click, a Timer's finish.",
+          "Two gates evaluated by one signal, where one gate's On True changes what the other one reads (advancing a question index that the other's 'is the answer right?' compares against): the second can read the changed value. Chain them instead — the reader's `done` → the writer's `eval` — so the reader decides first.",
+          "Expecting a second Evaluate with an unchanged condition to stay silent: every Evaluate fires On True or On False again, whether or not the value changed.",
+          "A gate left on Run On Value Change fires the moment its condition is true, even for one step in the middle of a chain of Set Variables. A timeout watching 'time is up AND not answered' fires again while moving on if `answered` is cleared while the countdown still reads 0: the next question starts answered and its first tap is refused (a quiz that scored the right answer after a timeout as wrong). Reset the value that makes it true (the countdown back to 10) before the one that holds it off (`answered` back to false)."
         ],
         "relatedNodes": [
           "And",
@@ -7314,6 +7318,9 @@
           "after the first: only where Reset returns to → Count Changed stays silent",
           "the first one: the count starts there too → Count Changed"
         ]
+      },
+      "warnings": {
+        "counter/min-above-max": "Min Value is above Max Value"
       },
       "enrichment": {
         "typeName": "Counter",
@@ -11761,6 +11768,18 @@
           "always: a rebuild at the end of the frame, one however many Refreshes arrived — every row goes and one is built per item, then Done for each Refresh; Failure for each when Template Type has nothing to build from, or there are no Items"
         ]
       },
+      "warnings": {
+        "repeater/items-not-a-collection": "Items is not a list",
+        "repeater/items-empty-entry": "Items has an empty entry",
+        "repeater/template-script-syntax-error": "Script does not compile",
+        "repeater/template-script-threw": "Script threw for an item, or set its component to something other than a name",
+        "repeater/no-template-for-item": "an item has no component to build its row from",
+        "repeater/template-component-not-found": "an item's component is not in the project",
+        "repeater/input-mapping-syntax-error": "the input mapping does not compile",
+        "repeater/input-mapping-threw": "the input mapping threw for an item",
+        "repeater/no-template": "a Refresh found nothing to build the rows from",
+        "repeater/no-items": "a Refresh found no Items"
+      },
       "enrichment": {
         "typeName": "For Each",
         "summary": "Repeater: instantiates a template component once per item of an input array, inserting the instances as children at its position.",
@@ -11786,12 +11805,15 @@
         ],
         "patterns": [
           "Query Records `items` → Repeater `items`: the canonical data-driven list.",
-          "Item component declares Component Inputs matching record property names — no explicit per-field wiring at the list level."
+          "Item component declares Component Inputs matching record property names — no explicit per-field wiring at the list level.",
+          "A row tells the list what it needs with a signal and values side by side: when a row sends a Component Outputs signal, For Each first fills every `itemOutput-<name>` (and `itemActionItemId`) with that row's values, then sends `itemOutputSignal-<name>` — and a node takes its waiting values before its waiting signals — so a node wired to both reads the tapped row's values when the signal arrives. A signal itself carries no value: send the value on its own Component Output beside it.",
+          "There is no row-index port: when a row needs its position (which answer was tapped), put it on each item (`{ \"id\": \"a0\", \"label\": \"Lisbon\", \"index\": 0 }`) and read it in the row through Component Inputs."
         ],
         "antiPatterns": [
           "Triggering `refresh` whenever data changes: the repeater already diffs `items`; refresh forces a full rebuild and loses instance state.",
           "Binding huge unpaged query results into a repeater; page or limit the query instead.",
-          "Two lists numbering rows alike (`l0, l1…`) each keep their own, but a lookup by id (an Object node given the row's `Id`, a write to `itemActionItemId`) finds the first list's row. In a row, use From repeater; give rows edited by id unique ids."
+          "Two lists numbering rows alike (`l0, l1…`) each keep their own, but a lookup by id (an Object node given the row's `Id`, a write to `itemActionItemId`) finds the first list's row. In a row, use From repeater; give rows edited by id unique ids.",
+          "Feeding `items` from a Function or Expression that builds a fresh array of objects with no `id` each time it runs: a row is matched to its item by `id` (or, without one, by being the very same object), so every run draws every row again and the rows lose their state. Give each item a stable `id`."
         ],
         "relatedNodes": [
           "DbCollection2",
@@ -15814,8 +15836,8 @@
           "always: read at a drop — which files count as accepted"
         ],
         "focus": [
-          "off the page: nothing is listed → Unchanged; Focused stays silent",
-          "off the page, after outcomes this frame resolved and has not reported: nothing is listed, and Unchanged comes after them → Focused stays silent",
+          "off the page: nothing is listed, and the editor is told → Unchanged; Focused stays silent",
+          "off the page, after outcomes this frame resolved and has not reported: nothing is listed, the editor is told, and Unchanged comes after them → Focused stays silent",
           "already listed as focused → Done; Focused stays silent",
           "already listed, after outcomes this frame has not reported: Done comes after them → Focused stays silent",
           "on the page: listed as focused → Focused, Done",
@@ -15833,6 +15855,9 @@
         "scrollToElement.do": [
           "always: runs at the end of the frame, waiting as Scroll To Index does — Done when Element is empty (nothing to scroll to), Failure for a value that is not an element"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page"
       },
       "enrichment": {
         "typeName": "Group",
@@ -18494,7 +18519,8 @@
           "Rebuilding what a dedicated node already does (querying cloud data, navigation) — you lose live updates and editor insight.",
           "Connecting `run` to stop the inputs re-running the script. They still re-run it; untick each one under Run On Value Change. Connecting `run` only stops the run at load and on a code change.",
           "Pasting the same helper into several Functions. The copies drift apart; put the helper in a script file and list it under Uses.",
-          "Reading `Noodl`, `window` or `document` inside a script file. They're `undefined` there, so do that work in the Function and pass the values in."
+          "Reading `Noodl`, `window` or `document` inside a script file. They're `undefined` there, so do that work in the Function and pass the values in.",
+          "Setting an output to the value it already holds and expecting it to arrive again. An output is sent only when its value changes, so `Outputs.error = \"Type an item first\"` on a second empty Add sends nothing — and if something cleared the message in between (a Set Variable on typing), it never comes back. When a reaction must happen every run, send a signal beside the value (`Outputs.refused()`) and drive it from that."
         ],
         "relatedNodes": [
           "Expression",
@@ -18700,7 +18726,8 @@
         ],
         "antiPatterns": [
           "Using Script for a simple transform that reruns on input change — the Function node does that with less ceremony.",
-          "Assigning outputs without the declared `outputs` entry: undeclared names never become ports."
+          "Assigning outputs without the declared `outputs` entry: undeclared names never become ports.",
+          "Setting an output at the top level of the code (`Script.Outputs.x = 'start'` outside any function): that line runs while the code is read and overwrites the declaration, so nothing is sent. Set a starting value in `setup`."
         ],
         "relatedNodes": [
           "JavaScriptFunction",
@@ -30578,7 +30605,7 @@
       "enrichment": {
         "typeName": "RouterNavigate",
         "summary": "Navigate: tells a named Router to switch to a target page, passing typed path parameters, when its navigate signal fires.",
-        "description": "Navigate drives a Router. When `navigate` is triggered it switches the router named in its `router` parameter to the page chosen in `target`, updating the URL if the router does. Path/query parameters declared by the target page become input ports on this node, so per-page data (an id, a tab name) is wired like any other value. `done` fires when the transition completes, `unchanged` when the router is already showing that page with those parameters, and `failure` when the target is not a page of that router; `completed` fires after all three. `openInNewTab` opens the target in a new browser tab instead of transitioning in place.",
+        "description": "Navigate drives a Router. When `navigate` is triggered it switches the router named in its `router` parameter to the page chosen in `target`, updating the URL if the router does. Path/query parameters declared by the target page become input ports on this node named `pm-<parameter>` — a target whose Page `urlPath` is `client/{clientId}` gives an input `pm-clientId` — so per-page data (an id, a tab name) is wired like any other value. `done` fires when the transition completes, `unchanged` when the router is already showing that page with those parameters, and `failure` when the target is not a page of that router; `completed` fires after all three. `openInNewTab` opens the target in a new browser tab instead of transitioning in place.",
         "whenToUse": "All URL-style page switching with a Router. For stack-style flows (push/pop with transitions, e.g. wizards or mobile-style drill-in) use Page Stack with PageStackNavigate instead; for external URLs use net.noodl.externallink.",
         "ports": {
           "navigate": "Signal; performs the navigation. Typically fed from a Button's `onClick`.",
@@ -30586,13 +30613,13 @@
           "unchanged": "Signal; the router was already showing that page with those parameters, so it was not rebuilt.",
           "openInNewTab": "Boolean; when true the navigation opens a new tab rather than switching this router."
         },
-        "runtimeBehavior": "Runtime-determined inputs (runtime-discovered + editor-adapter): the `router` and `target` choices come from the routers and pages that exist in the project, and each parameter declared by the chosen target page is registered as an input port on demand. The port set therefore depends on project content, not the node type.",
+        "runtimeBehavior": "Runtime-determined inputs (runtime-discovered + editor-adapter): the `router` and `target` choices come from the routers and pages that exist in the project, and each parameter declared by the chosen target page is registered as an input port named `pm-<parameter>` on demand. The port set therefore depends on project content, not the node type.",
         "examples": [
           "navigate-on-click"
         ],
         "patterns": [
           "Button `onClick` → `navigate` with `target` set on the node: the standard menu/link wiring.",
-          "Record id from a list item → the page-parameter input, so the detail page can query its record from the URL."
+          "Record id from a list item → `pm-<parameter>` (e.g. `pm-clientId`), so the detail page can query its record from the URL."
         ],
         "antiPatterns": [
           "Encoding app state in many routers when one router plus page parameters suffices; multiple routers are for genuinely independent regions."
@@ -32346,7 +32373,7 @@
           "always: the list of states; while none is current, the first (or Start State) is entered at the end of the frame"
         ],
         "values": [
-          "always: the values that differ between states, each an output"
+          "always: the values that differ between states, each an output; a value named as one of the node's outputs is refused and the editor is told"
         ],
         "useTransitions": [
           "always: whether the next move animates its values or jumps"
@@ -32356,6 +32383,12 @@
           "already in, or already heading to, the next state → Unchanged",
           "otherwise it moves to the next state, wrapping round after the last, at the end of the frame — State Changed, then Done"
         ]
+      },
+      "warnings": {
+        "states/unknown-state": "a state was asked for that is not in the list, and no state in the list has been asked for since",
+        "states/no-states": "a Toggle or a To arrived with no States list",
+        "states/unreadable-transition": "a move would have animated along a transition that is not a curve",
+        "states/reserved-port-name": "a value is named as one of the node's own outputs"
       },
       "enrichment": {
         "typeName": "States",
@@ -37079,7 +37112,8 @@
         "antiPatterns": [
           "Using `start` for debouncing — while running it ignores triggers, so the action fires on the first quiet gap after the *first* event, not the last. Use `restart`.",
           "Treating `duration` as seconds — it is milliseconds.",
-          "`timerFinished` looped into its own `restart` for a repeating tick — use Repeat, which does not drift and stops when its page is left."
+          "`timerFinished` looped into its own `restart` for a repeating tick — use Repeat, which does not drift and stops when its page is left.",
+          "Acting on `done` or `completed` to mean the time is up: they fire as soon as a Start or Restart has been handled, before any time passes. The time running out is `timerFinished` (Finished)."
         ],
         "relatedNodes": [
           "Value Changed",
@@ -38034,7 +38068,7 @@
         ],
         "antiPatterns": [
           "Expecting each Variable2 instance to hold its own value — the name is the identity, all instances with one name share one value. For private per-node state use Boolean/Number/String/Color.",
-          "Using variables as persistent storage — the store is in-memory and resets on page reload; persist important data in the cloud database or browser storage nodes."
+          "Using variables as persistent storage — the store is in-memory and resets on page reload. A value one person keeps on their own device (a best score, a setting) needs no backend: a Function saves it with `localStorage.setItem` and reads it back at load. A backend is for data shared between people or devices."
         ],
         "relatedNodes": [
           "Set Variable",
@@ -39270,7 +39304,7 @@
             "allowConnectionsOnly": true
           },
           "isSignal": true,
-          "description": "Stops playback and seeks to the beginning"
+          "description": "Stops playback and seeks to Start Time (the beginning when there is none)"
         },
         {
           "name": "restart",
@@ -39282,7 +39316,7 @@
             "allowConnectionsOnly": true
           },
           "isSignal": true,
-          "description": "Seeks to the beginning and plays, then fires Done"
+          "description": "Seeks to Start Time (the beginning when there is none) and plays, then fires Done"
         },
         {
           "name": "scrollIntoView",
@@ -40276,7 +40310,7 @@
           "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and plays at the paint that puts the video there — Done then"
         ],
         "restart": [
-          "on the page: wants the video playing and, once it has loaded, goes back to second 0 (Playback Position 0 — not Start Time) and starts it as Play does; before the load, only the wanting; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
+          "on the page: wants the video playing and, once it has loaded, goes back to Start Time as last drawn (Playback Position; second 0 when there is none) and starts it as Play does; before the load, only the wanting; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
           "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and restarts at the paint that puts the video there — Done then"
         ],
         "pause": [
@@ -40284,7 +40318,7 @@
           "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and pauses at the paint that puts the video there — Done then"
         ],
         "reset": [
-          "on the page: stops wanting the video playing, goes back to second 0 (Playback Position 0 once loaded — not Start Time) and pauses it — On Pause if it was playing; Autoplay no longer starts it on this load; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
+          "on the page: stops wanting the video playing, goes back to Start Time as last drawn (Playback Position, once loaded; second 0 when there is none) and pauses it — On Pause if it was playing; Autoplay no longer starts it on this load; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
           "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and resets at the paint that puts the video there — Done then"
         ]
       },
@@ -41574,6 +41608,9 @@
           "otherwise Result is the Date moved by Amount (0 when not a number) in Unit (days when not one of the eight); in months and years Amount counts whole steps only, and the day stops at the month's last → Changed; Invalid Date stays silent"
         ]
       },
+      "warnings": {
+        "date-add/unknown-unit": "Unit is not one of the eight"
+      },
       "enrichment": {
         "typeName": "net.noodl.DateAdd",
         "summary": "A date shifted by an amount of a unit. Months and years CLAMP: 31 January plus one month is 28 February.",
@@ -41980,6 +42017,9 @@
           "either cannot be read as a date: Difference goes empty → Invalid Date; Changed stays silent",
           "otherwise Difference is To minus From in Unit (days when not one of the eight), negative when To is earlier unless Absolute is on → Changed; Invalid Date stays silent"
         ]
+      },
+      "warnings": {
+        "date-difference/unknown-unit": "Unit is not one of the eight"
       },
       "enrichment": {
         "typeName": "net.noodl.DateDifference",
@@ -44588,7 +44628,7 @@
       "inputs": [
         {
           "name": "maxBytes",
-          "displayName": "Max Bytes",
+          "displayName": "Max Characters",
           "group": "General",
           "plug": "input",
           "type": {
@@ -44596,7 +44636,7 @@
           },
           "isSignal": false,
           "default": 5242880,
-          "description": "Refuse a document larger than this, before parsing it. Raise it for a source that really does publish its whole archive in one file"
+          "description": "Refuse a document longer than this many characters (not bytes), before parsing it. Raise it for a source that really does publish its whole archive in one file"
         },
         {
           "name": "text",
@@ -44842,7 +44882,7 @@
         },
         {
           "name": "maxBytes",
-          "displayName": "Max Bytes",
+          "displayName": "Max Characters",
           "group": "General",
           "plug": "input",
           "type": {
@@ -44850,7 +44890,7 @@
           },
           "isSignal": false,
           "default": 5242880,
-          "description": "Refuse a document larger than this, before parsing it. A big document costs many times its own size in memory once it is an object, and a server can always send more than you expected"
+          "description": "Refuse a document longer than this many characters (not bytes), before parsing it. A big document costs many times its own size in memory once it is an object, and a server can always send more than you expected"
         },
         {
           "name": "text",
@@ -51116,7 +51156,7 @@
           "always: the element is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -51130,6 +51170,10 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       },
       "enrichment": {
         "typeName": "net.noodl.controls.button",
@@ -53328,7 +53372,7 @@
           "always: a label is drawn beside the box, or not; the box and its keyboard stay"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -53342,6 +53386,10 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       },
       "enrichment": {
         "typeName": "net.noodl.controls.checkbox",
@@ -55953,7 +56001,7 @@
           "always: a label is drawn beside the list, or not; the list, its keyboard and its pick stay"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -55967,6 +56015,10 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       },
       "enrichment": {
         "typeName": "net.noodl.controls.options",
@@ -58152,7 +58204,7 @@
           "always: a label is drawn beside the button, or not; the button and its keyboard stay"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -58166,6 +58218,10 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, it takes no click and a Focus does not reach it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       },
       "enrichment": {
         "typeName": "net.noodl.controls.radiobutton",
@@ -60555,7 +60611,7 @@
         ],
         "value": [
           "empty: no word, and the handle stays where it is",
-          "not a number: no word (the runtime reports it), and the handle stays where it is",
+          "not a number: no word, the editor is told, and the handle stays where it is",
           "a number: at the next paint the handle goes there, clamped to Min and Max and rounded to the Step; Value and Value Percent follow when they move — Changed does not fire (only a person's slide fires it)"
         ],
         "min": [
@@ -60571,7 +60627,7 @@
           "always: the slider is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint; put back, the handle is where it was left"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -60585,6 +60641,11 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "slider/max-below-min": "Max is below Min",
+        "slider/value-not-a-number": "a Value arrived that is not a number"
       },
       "enrichment": {
         "typeName": "net.noodl.controls.range",
@@ -63437,7 +63498,7 @@
           "always: a label is drawn above the field, or not; the field and its keyboard stay"
         ],
         "focus": [
-          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "not on the page: nothing to focus, the Focus is not kept, and the editor is told → Unchanged; Focused stays silent",
           "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
           "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
         ],
@@ -63457,6 +63518,10 @@
         "opacity": [
           "always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it"
         ]
+      },
+      "warnings": {
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
       },
       "enrichment": {
         "typeName": "net.noodl.controls.textinput",
@@ -66537,6 +66602,9 @@
           "always: the page, or the scrolling Group holding it, scrolls until the icon can be seen"
         ]
       },
+      "warnings": {
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
+      },
       "enrichment": {
         "typeName": "net.noodl.visual.icon",
         "summary": "Displays a glyph from a project icon font, or an image, at a given size — tintable via color for font icons.",
@@ -66734,6 +66802,20 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "role": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "createRole": [
+          "always: read at the end of the frame by a Do pressed in it — only true creates a missing role"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.addusertorole",
         "summary": "Adds a user to a named permission role from inside a cloud function, as the system. Cloud-only — the only way an account gains privilege.",
@@ -66866,6 +66948,11 @@
             "valueType": "enum",
             "example": "storageFilterType"
           }
+        ]
+      },
+      "rules": {
+        "aggregates": [
+          "always: kept, and read when the next aggregation goes; asks for none itself"
         ]
       },
       "enrichment": {
@@ -67099,6 +67186,26 @@
         "known": false,
         "reason": "The port helper needs project context this generator cannot supply headlessly — a live component, a connected node, or a backend schema."
       },
+      "rules": {
+        "username": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "email": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "password": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "emailVerified": [
+          "always: read at the end of the frame by a Do pressed in it — only true is verified"
+        ],
+        "properties": [
+          "always: nothing while it runs; each name makes a value input"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.createuser",
         "summary": "Creates a user account from inside a cloud function, as the system. Cloud-only — it does not exist in the browser.",
@@ -67277,6 +67384,14 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.deleteuser",
         "summary": "Deletes a named user account and every session it holds, from inside a cloud function, as the system. Cloud-only.",
@@ -67445,6 +67560,14 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.getuserroles",
         "summary": "Reads every permission role a user is currently in, from inside a cloud function. Cloud-only and read-only — nothing is written.",
@@ -67635,6 +67758,23 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "always: read at the end of the frame by a Do pressed in it — as its text, in UTF-8 bytes (nothing, 0 or false as the empty text)"
+        ],
+        "key": [
+          "always: read at the end of the frame by a Do pressed in it — nothing, empty, 0 or false fails that Do; otherwise its text in UTF-8 bytes, and a text that is empty fails it too"
+        ],
+        "algorithm": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as SHA-256; one the host does not know fails that Do)"
+        ],
+        "encoding": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as hex; one not in the list fails that Do)"
+        ],
+        "sign": [
+          "always: one signature at the end of the frame however many presses, of Value under Key as they stand then — Signature and a cleared Error, then Done per press; no Key, an unknown Algorithm or Encoding puts the reason on Error, Signature untouched, Failure per press"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.hmac",
         "summary": "Keyed SHA-2 signature of a string. Cloud-only, because it takes a shared secret.",
@@ -67813,6 +67953,23 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "claims": [
+          "always: read at the end of the frame by a Do pressed in it — nothing signs no claims of its own; text is read as an object literal (not one: no claims); an array, null, a number or true/false fails that Do"
+        ],
+        "key": [
+          "always: read at the end of the frame by a Do pressed in it — nothing, empty, 0 or false fails that Do; otherwise its text in UTF-8 bytes"
+        ],
+        "algorithm": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as HS256; one not HS256/384/512 fails that Do)"
+        ],
+        "expiresIn": [
+          "always: read at the end of the frame by a Do pressed in it — as a number above 0, exp is that many whole seconds after iat; anything else, no exp"
+        ],
+        "sign": [
+          "always: one token at the end of the frame however many presses, iat the clock's second — Token and a cleared Error, then Done per press; claims that are not an object, an unknown Algorithm or no Key put the reason on Error, Token untouched, Failure per press"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.jwtsign",
         "summary": "Mint a signed JSON Web Token (HS256/384/512). Cloud-only — signing in a browser means the key is in the browser.",
@@ -68002,6 +68159,23 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "token": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "key": [
+          "always: read at the end of the frame by a Do pressed in it — nothing, empty, 0 or false refuses that Do"
+        ],
+        "algorithm": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as HS256); the token's header must name the same one"
+        ],
+        "clockTolerance": [
+          "always: read at the end of the frame by a Do pressed in it — that many seconds of leeway on nbf and exp (not a number, or below 0, none)"
+        ],
+        "verify": [
+          "always: one check at the end of the frame however many presses — verified: Valid true, Claims the payload, Error cleared, Done per press; refused: Valid false, the reason on Error, Claims untouched, Failure per press"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.jwtverify",
         "summary": "Check a JWT somebody else issued: signature, algorithm, exp and nbf. Not how you authenticate your own users.",
@@ -68217,6 +68391,20 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "role": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "limit": [
+          "always: read at the end of the frame by a Do pressed in it, handed to the store as is"
+        ],
+        "skip": [
+          "always: read at the end of the frame by a Do pressed in it, handed to the store as is"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.listusersinrole",
         "summary": "Lists the accounts in a permission role, from inside a cloud function. Cloud-only and read-only — the inverse of Get User Roles.",
@@ -68586,6 +68774,47 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "provider": [
+          "always: read when the call is made — blank is Anthropic"
+        ],
+        "model": [
+          "always: read when the request is built — blank is the default model"
+        ],
+        "apiKeySecret": [
+          "always: the name read from the secret store when the call is made"
+        ],
+        "baseUrl": [
+          "always: read when the call is made — blank is the Anthropic API"
+        ],
+        "instructions": [
+          "always: read when the request is built"
+        ],
+        "callInstructions": [
+          "always: read when the request is built"
+        ],
+        "input": [
+          "always: read when the request is built, unless Messages holds a conversation"
+        ],
+        "messages": [
+          "always: read when the request is built — a non-empty list replaces Input"
+        ],
+        "outputSchema": [
+          "always: read when the request is built and again when its answer lands"
+        ],
+        "effort": [
+          "always: read when the request is built — blank is high"
+        ],
+        "maxTokens": [
+          "always: a positive number, floored, read when the request is built — anything else is 16000"
+        ],
+        "timeoutMs": [
+          "always: a positive number, floored, read when the call starts and in its timeout sentence — anything else is 120000"
+        ],
+        "send": [
+          "always: one call at the end of the frame however many presses — Done with the answer published, or Failure with Error, Error Code and Status, per press"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.modelrequest",
         "summary": "Calls a language model from a cloud function — Anthropic, or an OpenAI-compatible server such as a model on this computer.",
@@ -68788,6 +69017,17 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "role": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.removeuserfromrole",
         "summary": "Takes a user out of a named permission role from inside a cloud function, as the system. Cloud-only — the other half of Add User To Role.",
@@ -69047,10 +69287,18 @@
           }
         ]
       },
+      "rules": {
+        "allowNoAuth": [
+          "always: read when a request comes, and again when its caller cannot be looked up"
+        ],
+        "params": [
+          "always: nothing while it runs; read when a request comes — each name a contract row and an output a wire can take"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.request",
         "summary": "Entry point of a cloud function component: receives the call's parameters and fires Received to start the server-side flow.",
-        "description": "Request is the entry node of a cloud function — it only exists in the cloud runtime, and a component containing one becomes callable from the browser through a Cloud Function (CloudFunction2) node. Declare the function's parameters as a name list in `params`; each name becomes an output carrying the value the caller sent, and a matching `in-<name>` input appears on the browser-side caller. When a call arrives the node checks authentication (rejecting unauthenticated calls unless `allowNoAuth` is true), publishes each parameter, then fires `receive` (Received, signal) — wire that signal into your logic and end the flow at a Response node. The caller's identity, parameters and headers are also placed on a 'Request' model readable elsewhere in the function.",
+        "description": "Request is the entry node of a cloud function — it only exists in the cloud runtime, and a component containing one becomes callable from the browser through a Cloud Function (CloudFunction2) node. Declare the function's parameters as a name list in `params`; each name becomes an output named `pm-<name>` carrying the value the caller sent (wire `pm-text`, never `text`: a name without the prefix is never made), and a matching `in-<name>` input appears on the browser-side caller. When a call arrives the node checks authentication (rejecting unauthenticated calls unless `allowNoAuth` is true), publishes each parameter, then fires `receive` (Received, signal) — wire that signal into your logic and end the flow at a Response node. The caller's identity, parameters and headers are also placed on a 'Request' model readable elsewhere in the function.",
         "whenToUse": "Place exactly one at the start of every cloud function component. It is meaningless in browser components — there, use Component Inputs for inputs and CloudFunction2 to call the function.",
         "ports": {
           "receive": "Signal; fires once per incoming call, after authentication has been checked and all parameter outputs hold the call's values. Start the function's logic from here.",
@@ -69251,10 +69499,26 @@
           }
         ]
       },
+      "rules": {
+        "params": [
+          "always: nothing while it runs; each name makes a value input the payload carries"
+        ],
+        "errorMessage": [
+          "always: read when Send is pressed with Status Failure"
+        ],
+        "status": [
+          "always: read when Send is pressed — unset or success is a 200, anything else a 400"
+        ],
+        "send": [
+          "no request reached the function this node is part of: the reason on Error → Failure",
+          "the request was already answered — by another Response, by a refusal, or by the runner's timeout: the reason on Error → Failure",
+          "otherwise: the payload goes out just after — a 200 carrying the Parameters when Status is unset or success, else a 400 carrying the Error Message → Done"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.response",
         "summary": "Exit point of a cloud function component: collects result values and sends the reply back to the caller.",
-        "description": "Response ends a cloud function — it only exists in the cloud runtime. Declare the function's result values as a name list in `params`; each name becomes an input to feed, and a matching `out-<name>` output appears on the browser-side Cloud Function (CloudFunction2) caller. Triggering `send` (Send, signal) replies to the pending call: with `status` 'success' (the default) it returns HTTP 200 with the collected result values, with `status` 'failure' it returns HTTP 400 carrying `errorMessage`, which the caller surfaces on its `error` output before firing `failure`. A function can contain several Response nodes — for example one success and one failure path — but exactly one should send per call.",
+        "description": "Response ends a cloud function — it only exists in the cloud runtime. Declare the function's result values as a name list in `params`; each name becomes an input named `pm-<name>` to feed (wire `pm-audioUrl`, never `audioUrl`: a name without the prefix is never made), and a matching `out-<name>` output appears on the browser-side Cloud Function (CloudFunction2) caller. Triggering `send` (Send, signal) replies to the pending call: with `status` 'success' (the default) it returns HTTP 200 with the collected result values, with `status` 'failure' it returns HTTP 400 carrying `errorMessage`, which the caller surfaces on its `error` output before firing `failure`. A function can contain several Response nodes — for example one success and one failure path — but exactly one should send per call.",
         "whenToUse": "End every path through a cloud function with one. Without a `send`, the caller's request never completes. In browser components use Component Outputs instead.",
         "ports": {
           "send": "Signal input; sends the reply for the current call using the current status, result values and error message. Trigger it exactly once per call.",
@@ -69377,6 +69641,14 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "name": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "fetch": [
+          "always: one read at the end of the frame however many presses — found: Value and a cleared Error, Done per press; outside a backend, not found, or a store that cannot be read: the reason on Error, Value cleared, Failure per press"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.secret",
         "summary": "Reads one of the project's stored credentials by name, inside a cloud function. Cloud-only — it does not exist in the browser.",
@@ -69566,6 +69838,29 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "to": [
+          "always: stamped on each Do pressed after it; read at the end of the frame by a send whose presses agree"
+        ],
+        "template": [
+          "always: read when a send is made — set and not None, the message is that template"
+        ],
+        "variables": [
+          "always: read when a send is made"
+        ],
+        "subject": [
+          "always: read when a send is made"
+        ],
+        "text": [
+          "always: read when a send is made"
+        ],
+        "html": [
+          "always: read when a send is made"
+        ],
+        "send": [
+          "always: at the end of the frame, one send when the frame's presses agree on To (to To as it stands then), or one send per run of presses stamped with the same To, each after the one before is answered — Done per press, or the reason on Error and Failure per press"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.sendemail",
         "summary": "Sends an email through the backend's configured SMTP server from inside a cloud function or workflow.",
@@ -69735,6 +70030,17 @@
       "parameterEncoding": {
         "known": false,
         "reason": "The port helper needs project context this generator cannot supply headlessly — a live component, a connected node, or a backend schema."
+      },
+      "rules": {
+        "userId": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "password": [
+          "always: read at the end of the frame by a Do pressed in it"
+        ],
+        "properties": [
+          "always: nothing while it runs; each name makes a value input"
+        ]
       },
       "enrichment": {
         "typeName": "noodl.cloud.updateuser",
@@ -69930,6 +70236,14 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "token": [
+          "always: read at the end of the frame by a Do pressed in it — blank fails that Do"
+        ],
+        "treatUnchangedAs": [
+          "always: read when an Unchanged is reported"
+        ]
+      },
       "enrichment": {
         "typeName": "noodl.cloud.verifysessiontoken",
         "summary": "Asks this backend whether a session token is one of its own live sessions, and whose. Cloud-only.",
@@ -72982,7 +73296,7 @@
           "connections": [
             {
               "fromId": "fn_request",
-              "fromProperty": "sessionToken",
+              "fromProperty": "pm-sessionToken",
               "toId": "check",
               "toProperty": "token"
             },
@@ -72996,19 +73310,19 @@
               "fromId": "check",
               "fromProperty": "valid",
               "toId": "ok_response",
-              "toProperty": "valid"
+              "toProperty": "pm-valid"
             },
             {
               "fromId": "check",
               "fromProperty": "userId",
               "toId": "ok_response",
-              "toProperty": "userId"
+              "toProperty": "pm-userId"
             },
             {
               "fromId": "check",
               "fromProperty": "username",
               "toId": "ok_response",
-              "toProperty": "username"
+              "toProperty": "pm-username"
             },
             {
               "fromId": "check",
@@ -73127,7 +73441,7 @@
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "rawBody",
+              "fromProperty": "pm-rawBody",
               "toId": "body_signature",
               "toProperty": "value"
             },
@@ -73145,7 +73459,7 @@
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "partnerToken",
+              "fromProperty": "pm-partnerToken",
               "toId": "check_token",
               "toProperty": "token"
             },
@@ -73165,13 +73479,13 @@
               "fromId": "body_signature",
               "fromProperty": "signature",
               "toId": "ok_response",
-              "toProperty": "signature"
+              "toProperty": "pm-signature"
             },
             {
               "fromId": "check_token",
               "fromProperty": "valid",
               "toId": "ok_response",
-              "toProperty": "tokenValid"
+              "toProperty": "pm-tokenValid"
             },
             {
               "fromId": "check_token",
@@ -73428,7 +73742,7 @@
               "fromId": "purge",
               "fromProperty": "sessionsRevoked",
               "toId": "ok_response",
-              "toProperty": "sessionsRevoked"
+              "toProperty": "pm-sessionsRevoked"
             },
             {
               "fromId": "purge",
@@ -73778,13 +74092,13 @@
           "connections": [
             {
               "fromId": "fn_request",
-              "fromProperty": "email",
+              "fromProperty": "pm-email",
               "toId": "new_user",
               "toProperty": "username"
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "email",
+              "fromProperty": "pm-email",
               "toId": "new_user",
               "toProperty": "email"
             },
@@ -73802,7 +74116,7 @@
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "role",
+              "fromProperty": "pm-role",
               "toId": "grant",
               "toProperty": "role"
             },
@@ -73816,13 +74130,13 @@
               "fromId": "new_user",
               "fromProperty": "userId",
               "toId": "ok_response",
-              "toProperty": "userId"
+              "toProperty": "pm-userId"
             },
             {
               "fromId": "grant",
               "fromProperty": "roles",
               "toId": "ok_response",
-              "toProperty": "roles"
+              "toProperty": "pm-roles"
             },
             {
               "fromId": "grant",
@@ -74450,7 +74764,7 @@
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "role",
+              "fromProperty": "pm-role",
               "toId": "revoke",
               "toProperty": "role"
             },
@@ -74468,7 +74782,7 @@
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "revokedBy",
+              "fromProperty": "pm-revokedBy",
               "toId": "stamp",
               "toProperty": "revokedBy"
             },
@@ -74500,7 +74814,7 @@
               "fromId": "roles_now",
               "fromProperty": "roles",
               "toId": "ok_response",
-              "toProperty": "roles"
+              "toProperty": "pm-roles"
             },
             {
               "fromId": "roles_now",
@@ -74625,7 +74939,7 @@
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "claims",
+              "fromProperty": "pm-claims",
               "toId": "mint",
               "toProperty": "claims"
             },
@@ -74639,7 +74953,7 @@
               "fromId": "mint",
               "fromProperty": "token",
               "toId": "ok_response",
-              "toProperty": "token"
+              "toProperty": "pm-token"
             },
             {
               "fromId": "mint",
@@ -75240,13 +75554,13 @@
           "connections": [
             {
               "fromId": "fn_request",
-              "fromProperty": "page",
+              "fromProperty": "pm-page",
               "toId": "page_offset",
               "toProperty": "page"
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "role",
+              "fromProperty": "pm-role",
               "toId": "members",
               "toProperty": "role"
             },
@@ -75266,13 +75580,13 @@
               "fromId": "members",
               "fromProperty": "users",
               "toId": "ok_response",
-              "toProperty": "users"
+              "toProperty": "pm-users"
             },
             {
               "fromId": "members",
               "fromProperty": "total",
               "toId": "ok_response",
-              "toProperty": "total"
+              "toProperty": "pm-total"
             },
             {
               "fromId": "members",
@@ -81751,7 +82065,7 @@
             },
             {
               "fromId": "call_stats",
-              "fromProperty": "taskCount",
+              "fromProperty": "out-taskCount",
               "toId": "count_text",
               "toProperty": "text"
             }
@@ -81802,7 +82116,7 @@
               "fromId": "count_tasks",
               "fromProperty": "taskCount",
               "toId": "fn_response",
-              "toProperty": "taskCount"
+              "toProperty": "pm-taskCount"
             },
             {
               "fromId": "count_tasks",
@@ -81900,13 +82214,13 @@
               "fromId": "a_input",
               "fromProperty": "onTextChanged",
               "toId": "call_add",
-              "toProperty": "a"
+              "toProperty": "in-a"
             },
             {
               "fromId": "b_input",
               "fromProperty": "onTextChanged",
               "toId": "call_add",
-              "toProperty": "b"
+              "toProperty": "in-b"
             },
             {
               "fromId": "sum_btn",
@@ -81916,7 +82230,7 @@
             },
             {
               "fromId": "call_add",
-              "fromProperty": "sum",
+              "fromProperty": "out-sum",
               "toId": "sum_text",
               "toProperty": "text"
             }
@@ -81953,13 +82267,13 @@
           "connections": [
             {
               "fromId": "fn_request",
-              "fromProperty": "a",
+              "fromProperty": "pm-a",
               "toId": "fn_sum",
               "toProperty": "a"
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "b",
+              "fromProperty": "pm-b",
               "toId": "fn_sum",
               "toProperty": "b"
             },
@@ -81967,7 +82281,7 @@
               "fromId": "fn_sum",
               "fromProperty": "result",
               "toId": "fn_response",
-              "toProperty": "sum"
+              "toProperty": "pm-sum"
             },
             {
               "fromId": "fn_request",
@@ -82028,19 +82342,19 @@
           "connections": [
             {
               "fromId": "fn_request",
-              "fromProperty": "to",
+              "fromProperty": "pm-to",
               "toId": "fn_send_email",
               "toProperty": "to"
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "subject",
+              "fromProperty": "pm-subject",
               "toId": "fn_send_email",
               "toProperty": "subject"
             },
             {
               "fromId": "fn_request",
-              "fromProperty": "message",
+              "fromProperty": "pm-message",
               "toId": "fn_send_email",
               "toProperty": "text"
             },

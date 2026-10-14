@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8981f534-8ce9-5326-82ac-e7e745f99d65",
+  "name": "TeamMemberForm",
+  "path": "/Components/TeamMemberForm",
+  "type": "visual",
+  "created": "2026-10-12T17:55:41.395Z",
+  "modified": "2026-10-12T18:24:11.335Z",
+  "modifiedBy": "noodl-mcp"
+}

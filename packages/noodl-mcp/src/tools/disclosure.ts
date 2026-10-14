@@ -36,7 +36,12 @@
  */
 
 import type { McpServer, RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { getParseErrorMessage, normalizeObjectSchema, safeParseAsync } from '@modelcontextprotocol/sdk/server/zod-compat.js';
+import { toJsonSchemaCompat } from '@modelcontextprotocol/sdk/server/zod-json-schema-compat.js';
 import { z } from 'zod';
+
+import { callHint, clientProfile } from '../clientProfile';
+import { ToolError } from '../errors';
 
 import { backendRequirementFor } from '../editor-deps';
 import {
@@ -48,7 +53,7 @@ import {
   type ToolGroupId
 } from '../toolGroups';
 import type { FindToolsResponse } from './responses';
-import { guarded, jsonResult } from './util';
+import { errorResult, guarded, jsonResult } from './util';
 
 /** A node as it arrives at a write door: only its `type` matters here. */
 export interface TypedNodeLike {
@@ -122,6 +127,11 @@ export class ToolDisclosure {
    */
   useBoundDescription(describe: () => string): void {
     this.describeForBoundMode = describe;
+  }
+
+  /** P112-OWN018-LISTCHANGED — the SDK handle for a registered tool, advertised or not, for `call_tool`. */
+  handleFor(name: string): RegisteredTool | undefined {
+    return this.handles.get(name);
   }
 
   /** Every tool name this server registered, revealed or not. */
@@ -302,9 +312,17 @@ export function recordTools(server: McpServer, disclosure: ToolDisclosure): McpS
  * and it is the sentence that saves a session: a model whose client did not
  * refresh will otherwise conclude the tool does not exist.
  */
-const REFRESH_NOTE =
-  'Revealed tools are advertised from your next tool list. If your client does not refresh tool lists on ' +
-  'notifications/tools/list_changed, restart the server with --all-tools to advertise everything up front.';
+function refreshNote(): string {
+  // OWN-019 census #34: on a client whose list never changes (Vibe) "your next tool list" never comes, and the
+  // restart exit was measured to change nothing (6 → 6) — so it says the one way that works.
+  if (clientProfile().staticToolList) {
+    return 'Your tool list will not change: call them through call_tool({ name, arguments }); call_tool({ name, describe: true }) shows a tool\'s arguments.';
+  }
+  return (
+    'Revealed tools are advertised from your next tool list. If your client does not refresh tool lists on ' +
+    'notifications/tools/list_changed, call them through call_tool (or restart the server with --all-tools).'
+  );
+}
 
 /**
  * BST-001 — what `find_tools` says on a server with no project.
@@ -317,12 +335,27 @@ const REFRESH_NOTE =
  * has, and the reason it stays advertised at all rather than answering "unknown
  * tool".
  */
-const BOOTSTRAP_FIND_TOOLS_DESCRIPTION =
-  'This server has no project bound, so it advertises everything it currently has: ' +
-  BOOTSTRAP_TOOLS.join(', ') +
-  '. The rest of the server — reading and authoring components, validation, rendering, the backend — needs a ' +
-  'project, and arrives when a server is started with a project directory. This tool cannot reveal them here. ' +
-  'Call list_projects to find a project that already exists, or create_project to make one.';
+function bootstrapFindToolsDescription(): string {
+  const surface =
+    'This server has no project bound, so it advertises everything it currently has: ' +
+    BOOTSTRAP_TOOLS.join(', ') +
+    '. The rest of the server — reading and authoring components, validation, rendering, the backend — needs a ' +
+    'project';
+  const exits = 'Call list_projects to find a project that already exists, or create_project to make one.';
+  // OWN-019 census #16. A client that lists tools once (Vibe) keeps THIS description all session — the bound one
+  // swapped in at bind is never re-read — so it must stay true after the bind and name the door that works.
+  if (clientProfile().staticToolList) {
+    return (
+      surface +
+      '. ' +
+      exits +
+      ' Once one is open, call any of its tools through call_tool({ name, arguments }) — your tool list will not ' +
+      'change — and find_tools({ query }) names them.'
+    );
+  }
+  // "arrives when a server is started with a project directory" predates open_project (BST-002); census #16.
+  return surface + ', and arrives once one is open. This tool cannot reveal them here. ' + exits;
+}
 
 /**
  * The bound-mode description.
@@ -342,12 +375,12 @@ export function boundFindToolsDescription(): string {
     .map((g) => `"${g.id}" (${g.tools.length} tools) — ${g.purpose}`)
     .join(' ');
 
+  // P112-OWN018-LISTCHANGED — the fixed prose shortened (same contract) for `call_tool`'s resident slot.
   return (
-    'Reveal tools this server has but is not currently advertising. The authoring set is advertised up ' +
-    'front; the rest is held back so it is not re-sent on every turn, and is one call away. Held back: ' +
+    'Reveal tools held back from your tool list so they are not re-sent every turn: ' +
     catalogue +
-    ' Pass `group` to reveal a whole group, or `query` to search tool names and group subjects and reveal ' +
-    'what matches. Call with neither for the inventory.'
+    ' `group` reveals a whole group; `query` searches tool names and group subjects and reveals matches. ' +
+    'Neither: the inventory.'
   );
 }
 
@@ -363,7 +396,7 @@ export function registerFindTools(server: McpServer, disclosure: ToolDisclosure)
     'find_tools',
     {
       title: 'Find tools',
-      description: bootstrap ? BOOTSTRAP_FIND_TOOLS_DESCRIPTION : boundFindToolsDescription(),
+      description: bootstrap ? bootstrapFindToolsDescription() : boundFindToolsDescription(),
       inputSchema: {
         // 🔴 Derived from the manifest, not written out. Hand-listed, this enum
         // is a second statement of which groups exist — and it was already one
@@ -386,7 +419,7 @@ export function registerFindTools(server: McpServer, disclosure: ToolDisclosure)
       // false` — that shape reads as "ask again for one of these", which is the
       // turn this whole mode exists to save.
       if (disclosure.isBootstrap) {
-        const payload: FindToolsResponse = { revealed: [], groups: [], note: BOOTSTRAP_FIND_TOOLS_DESCRIPTION };
+        const payload: FindToolsResponse = { revealed: [], groups: [], note: bootstrapFindToolsDescription() };
         return jsonResult(payload);
       }
       const revealed: string[] = [];
@@ -444,7 +477,7 @@ export function registerFindTools(server: McpServer, disclosure: ToolDisclosure)
       const payload: FindToolsResponse = {
         revealed,
         groups: disclosure.groupStates(),
-        ...(revealed.length > 0 ? { note: REFRESH_NOTE } : {})
+        ...(revealed.length > 0 ? { note: refreshNote() } : {})
       };
       return jsonResult(payload);
     })
@@ -492,8 +525,141 @@ export function backendRevealPayload(revealed: readonly string[]): { backendTool
   if (revealed.length === 0) return {};
   return {
     backendToolsRevealed:
-      `This graph has nodes that need a backend, so the ${revealed.length} backend tools are now advertised — ` +
-      'call provision_backend before expecting those nodes to do anything at run time. ' +
-      REFRESH_NOTE
+      (clientProfile().staticToolList
+        ? `This graph has nodes that need a backend — call ${callHint('provision_backend')} before expecting ` +
+          `those nodes to do anything at run time (the ${revealed.length} backend tools are all called that way). `
+        : `This graph has nodes that need a backend, so the ${revealed.length} backend tools are now advertised — ` +
+          'call provision_backend before expecting those nodes to do anything at run time. ') + refreshNote()
   };
 }
+
+/**
+ * P112-OWN018-LISTCHANGED — `call_tool`, the door for a client that never re-reads the tool list.
+ *
+ * Measured 2026-10-12: Mistral Vibe 2.26.1 lists tools once per session, in both its harnesses. Started on a
+ * bootstrap server it keeps the six bootstrap tools after `create_project` binds, and `--all-tools` changes nothing
+ * there (6 → 6 before the bind, either way). Mistral Large 4 scoped and created the app, then spent ten turns looking
+ * for tools it could not see. Every tool is registered at startup and only disabled ({@link ToolDisclosure}), so
+ * the handle is here to call whether or not it is advertised.
+ *
+ * It runs the tool exactly as `tools/call` would — the tool's own input schema, then its own handler with the same
+ * `extra` — so a result, a refusal and its diagnostics are the tool's, byte for byte. `describe: true` hands back
+ * what `tools/list` would have said about it, because a client that never re-lists has never seen the schema.
+ * Unbound, a project tool answers with `ProjectBinding`'s own no-project refusal, as a direct call would.
+ *
+ * 🔴 **A refusal comes back as an ANSWER, `{ ok: false, tool, error }`, never as `isError`.** P112-OWN018-OPAQUEERRORS:
+ * Vibe's default harness replaces every `isError` result with "The MCP tool returned an error", so the diagnostics
+ * that tell an agent what to fix never reach it. `call_tool` is the door those clients use, so its answer carries the
+ * refusal in the one shape every client passes through. `ok: false` says it plainly; the tool's own payload follows.
+ */
+const CALL_TOOL_DESCRIPTION =
+  "Run any of this server's tools by name, even one your list never showed. describe: true returns its " +
+  'description and arguments instead; comma-separate names for several.';
+
+export function registerCallTool(server: McpServer, disclosure: ToolDisclosure): void {
+  server.registerTool(
+    'call_tool',
+    {
+      title: 'Call a tool by name',
+      description: CALL_TOOL_DESCRIPTION,
+      inputSchema: {
+        name: z.string(),
+        arguments: z.record(z.unknown()).optional(),
+        describe: z.boolean().optional()
+      }
+    },
+    async (outer: { name: string; arguments?: Record<string, unknown>; describe?: boolean }, extra: unknown) => {
+      // P112-OWN019-NESTEDCALLTOOL — Large 4 asks call_tool to call call_tool (o2: `{ name: "call_tool", arguments:
+      // { name: "drive_page", describe: true } }`, six times, every one "no tool named call_tool"). That is the inner
+      // call, one level deep.
+      const inner = outer.name === 'call_tool' ? outer.arguments : undefined;
+      const args =
+        inner && typeof inner.name === 'string'
+          ? {
+              name: inner.name,
+              arguments: inner.arguments as Record<string, unknown> | undefined,
+              describe: inner.describe === true || outer.describe === true
+            }
+          : outer;
+      try {
+        // P112-OWN018-READWASTE — round 3's Mistral spent 26 calls describing one tool at a time; several at once.
+        if (args.describe && args.name.includes(',')) {
+          const names = [...new Set(args.name.split(',').map((n) => n.trim()).filter(Boolean))];
+          const described = names.map((name) => {
+            const h = name === 'call_tool' ? undefined : disclosure.handleFor(name);
+            if (!h) return { name, error: 'no such tool' };
+            const sch = h.inputSchema ? normalizeObjectSchema(h.inputSchema) ?? h.inputSchema : undefined;
+            return {
+              name,
+              description: h.description ?? '',
+              inputSchema: sch
+                ? toJsonSchemaCompat(sch as Parameters<typeof toJsonSchemaCompat>[0], { strictUnions: true, pipeStrategy: 'input' })
+                : { type: 'object', properties: {} }
+            };
+          });
+          return jsonResult({ tools: described });
+        }
+        const handle = args.name === 'call_tool' ? undefined : disclosure.handleFor(args.name);
+        if (!handle) {
+          throw new ToolError(
+            'not-found',
+            `This server has no tool named "${args.name}". Its tools: ${disclosure
+              .registeredNames()
+              .filter((n) => n !== 'call_tool')
+              .join(', ')}.`
+          );
+        }
+        // Unbound, a project tool is NOT refused here: its own handler asks `ProjectBinding`, which owns the one
+        // no-project refusal (BST-001, `projectBinding.test.ts`), so the answer is the one a direct call would get.
+        const schema = handle.inputSchema ? normalizeObjectSchema(handle.inputSchema) ?? handle.inputSchema : undefined;
+        if (args.describe) {
+          return jsonResult({
+            name: args.name,
+            description: handle.description ?? '',
+            inputSchema: schema
+              ? toJsonSchemaCompat(schema as Parameters<typeof toJsonSchemaCompat>[0], {
+                  strictUnions: true,
+                  pipeStrategy: 'input'
+                })
+              : { type: 'object', properties: {} }
+          });
+        }
+        let parsed: unknown = undefined;
+        if (schema) {
+          const result = await safeParseAsync(schema as Parameters<typeof safeParseAsync>[0], args.arguments ?? {});
+          if (!result.success) {
+            throw new ToolError(
+              'invalid-argument',
+              `Arguments for ${args.name} don't match its schema: ${getParseErrorMessage(
+                (result as { error: unknown }).error as Parameters<typeof getParseErrorMessage>[0]
+              )}. call_tool with describe: true returns the schema.`
+            );
+          }
+          parsed = (result as { data: unknown }).data;
+        }
+        const handler = handle.handler as unknown as (...a: unknown[]) => unknown;
+        const result = (await (schema ? handler(parsed, extra) : handler(extra))) as ReturnType<typeof jsonResult>;
+        return result.isError ? asAnswer(args.name, result) : result;
+      } catch (err) {
+        const refusal = err instanceof ToolError ? err : new ToolError('io-error', `Unexpected failure: ${(err as Error).message}`);
+        return asAnswer(args.name, errorResult(refusal));
+      }
+    }
+  );
+}
+
+/** A refused call as an answer: `{ ok: false, tool, ...the refusal's own payload }` (see {@link registerCallTool}). */
+function asAnswer(tool: string, refused: ReturnType<typeof jsonResult>): ReturnType<typeof jsonResult> {
+  const text = (refused.content ?? [])
+    .map((c) => ('text' in c && typeof c.text === 'string' ? c.text : ''))
+    .join('\n');
+  let payload: Record<string, unknown>;
+  try {
+    const parsed = JSON.parse(text);
+    payload = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : { message: text };
+  } catch {
+    payload = { message: text };
+  }
+  return jsonResult({ ok: false, tool, ...payload });
+}
+

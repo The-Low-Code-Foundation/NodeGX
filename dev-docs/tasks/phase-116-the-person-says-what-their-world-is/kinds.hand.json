@@ -351,7 +351,8 @@
       "template:nightbook|sealEnvelope.helps@count": "no: the length of one text, not a count of records",
       "template:todo-list|Projects.nextPosition@read-aloud": "neighbour: the next drag-sort position (the highest plus one) — an order, not a number that names the record",
       "template:todo-list|Selected task.nextActionPosition@read-aloud": "neighbour: the next drag-sort position for an action — an order, not a number that names the record",
-      "template:todo-list|Task rows.nextPosition@read-aloud": "neighbour: the next drag-sort position for a task — an order, not a number that names the record"
+      "template:todo-list|Task rows.nextPosition@read-aloud": "neighbour: the next drag-sort position for a task — an order, not a number that names the record",
+      "template:learn-with-simple-rick|*.(collection)@who-changed": "yes: a history beside every collection (who changed what, when, before and after), because Richard asked for one on everything (P119 BRIEF.md R11); the world's own history answer projects it, and a cloud function writes each row with its history row"
     },
     "hand": [
       {

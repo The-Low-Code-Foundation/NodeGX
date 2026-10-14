@@ -1,0 +1,11 @@
+# Vibe hooks for this folder, written by `npm create nodegx-vibe`. Edit anything; it is never overwritten.
+#
+# The hand-over: at 100 tool calls a session is asked to write docs/NEXT.md (where things are) and stop, and once a
+# session has written an app's docs/NEXT.md only reading and the notes stay open — so a new session carries on from
+# the note with a clear head (see AGENTS.md). Delete this entry to turn it off.
+[[hooks]]
+name = "hand-over"
+type = "pre_tool"
+command = "node .vibe/hooks/hand-over.mjs"
+timeout = 10
+description = "Asks a long session to hand over through docs/NEXT.md"

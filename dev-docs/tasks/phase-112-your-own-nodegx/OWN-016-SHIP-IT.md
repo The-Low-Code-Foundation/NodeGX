@@ -5,7 +5,7 @@ the VM route only. The rest of P115 stays parked (Richard, 2026-10-07: *"after p
 experiment phase"*). **Model:** **Opus** for step 1 and the packaging. **Fable** if step 3's server layout (static
 site, backend, TLS, restarts) turns out to have no existing design to follow.
 
-**Status: 🟡 s13 (2026-10-12): step 1 built and AC1 ✅ from a packed tarball (§6): `npx --package @nodegx/preview nodegx-deploy <project> <out>`. Steps 2–4 (the VM) need Richard: a VM with SSH, a domain, and the go-ahead.**
+**Status: 🟡 s13 (2026-10-12): AC1 ✅ (§6); the VM route ✅ on nexus-1 (§8): site, backend, function and secret shipped by `own-016/ship-to-vm.sh`; **live at https://lingo.nodegx.io** with real Gemini speech through it, the key nowhere public, admin routes 404; restart, crash and a real reboot survived (AC4 ✅). Owed: the phone check with the real app, publish.**
 
 ## 1. The person sentence
 
@@ -114,3 +114,73 @@ permission rule for it. Then: health, `/functions/speak` over loopback returns R
 `/srv/<app>` and `/opt/<app>` finds 0 (with `/etc/<app>/secrets.env` as the known-firing control),
 `systemctl restart` comes back, and `is-enabled` says enabled. A real reboot of nexus-1 is Richard's call: it serves
 live sites.
+
+## 8. Session 13, continued: the VM route, run
+
+Richard ran `ship-to-vm.sh` himself (`bash …/ship-to-vm.sh --ssh-key … --preview <0.2.0 preview tgz> --mcp-tgz <0.2.0
+mcp tgz> <project> <local backend> root@49.12.102.195 lingo 8692`, no domain, so Caddy was untouched): "it worked".
+The script lost its executable bit because the `chmod +x` was inside a refused command, so run it as `bash …`.
+
+**Read back on the box (this session, over SSH):**
+- `lingo-backend` is active and enabled at boot, and `/health` answers 200.
+- `/etc/lingo/secrets.env` is 640 root:lingo and holds `NODEGX_SECRET_GOOGLE_TTS_KEY` only. The function
+  `Lingo-babb9778.workflow.json` is installed.
+- `POST /functions/speak` over loopback → **real Gemini audio**: `audio/wav`, 119,394 bytes, RIFF/WAVE.
+- **Restart:** `systemctl restart` → new PID, health 200, `speak` 71,394 bytes RIFF. **Crash:** `kill -9` →
+  systemd restarted it within 5 s, health 200.
+- Neighbours: `nodegx.io`, `community.nodegx.io`, `todo.digitalbricks.io` and `digitalbricks.io` all answer 200. No
+  `lingo` Caddy drop-in exists.
+- 🔴 **AC3's search found the key in the site folder**: `/srv/lingo/site/noodl_bundles/b2-…json`. It was the OWN-015
+  driver's control page, which under `--real` carried the real key (P112-S13-CONTROLKEY, fixed, not exposed: no Caddy
+  route). It was deleted on the box. **After: 0 files under `/srv`, `/opt` and `/var/lib/lingo`; 1 in
+  `secrets.env` (the known-firing control).** The search did its job.
+
+**AC status:**
+- AC1 ✅ (§6).
+- AC2: the app runs on the VM and speaks over loopback. The public `https://` address and the phone check wait for a
+  DNS record and a real app (Richard: "we don't need the real app yet").
+- AC3 ✅ on the box, as above.
+- AC4: restart and crash recovery ✅, enabled at boot ✅. A real reboot of nexus-1 is Richard's call, because it
+  serves live sites.
+- AC5: publish (the commands are with Richard).
+
+**AC4 ✅, the real reboot (Richard: "go ahead and reboot", 2026-10-12 08:44 UTC).**
+- **Before:** 29 running services were snapshotted, and each was checked for being enabled at boot. That found
+  `nexus.service` **disabled**: it had been running by hand since 2026-09-11 and would not have come back. Richard ruled
+  "Enable it, then reboot", and it was enabled. SSH is socket-activated (`ssh.socket` enabled) and PostgreSQL starts
+  through `postgresql.service`.
+- **The reboot** applied a pending kernel (6.8.0-137 → 146), and the box was back in about 20 s.
+- **After:** 28 of 29 services are running; the missing one is `polkit` (D-Bus-activated, on demand). There are 0 failed
+  units and the listening ports are the same.
+- `lingo-backend` came back on its own: health 200, and `speak` returned 94,434 bytes RIFF.
+- `nodegx.io`, `community.nodegx.io`, `todo.digitalbricks.io`, `digitalbricks.io` and `nexus.digitalbricks.io` all
+  answer 200.
+
+**Next:** Richard adds an A record `lingo.nodegx.io` → `49.12.102.195` (Namecheap, `nodegx.io` → Advanced DNS; no AAAA,
+since the zone is IPv4 only). Then re-run `ship-to-vm.sh` with `lingo.nodegx.io` as the sixth argument. That adds the
+Caddy drop-in (validated, removed again if invalid) and gets the certificate, which completes AC2's `https://` half.
+The phone check comes with the real app.
+
+**AC2's public half ✅: `https://lingo.nodegx.io` (2026-10-12, after Richard saved the A record at Namecheap).**
+- The record was missing from both authoritative nameservers for 40 minutes (a row not saved). Once it was saved it
+  was live in about 15 s.
+- Caddy obtained the Let's Encrypt certificate at 09:50:30 by itself on its next retry (`CN=lingo.nodegx.io`, until
+  2027-01-10), with no re-run.
+- Checked from outside with the IP pinned (this Mac's resolver still held the earlier NXDOMAIN):
+  - `/` answers 200 over HTTP/2, with HSTS and nosniff.
+  - `/_admin`, `/admin`, `/executions` and `/metrics` all return 404.
+  - `POST /functions/speak` → `audio/wav`, 100,194 bytes, RIFF/WAVE: **real Gemini speech through the public
+    address**.
+  - The key appears in 0 of the 5 public files fetched, and all 5 answered 200, so the search read them.
+  - In headless Chrome the page renders with 0 exceptions and 0 console errors.
+- The five neighbouring sites answer 200.
+- **Owed:** the phone check comes with the real app. AC5, the publish, waits for Richard's 2FA.
+
+## 9. Session 14 (2026-10-12): the real app, at phone width, locally
+
+OWN-015 §7's stranger-built language app (repaired copy, the checkout's preview, the round's backend with the real
+key) was driven in headless Chrome at 390×844: Home → *Greetings* → tap *Bonjour* → the WAV played to the end (1.45 s
+of 1.45 s), 0 console errors, the key in 0 of the page's requests. **The phone check on the live site is still
+owed:** lingo.nodegx.io serves s13's fixture function, not this app. It's deployed there once CFPORTS, UNDEPLOYED and
+DETACHEDVISUAL are fixed and a fresh round builds it with no repair. Two s14 fixes reach this task: the preview no
+longer serves `.env` (ENVSERVED), and a copied or moved project can't redeploy its functions (MOVEDDEPLOY, open).

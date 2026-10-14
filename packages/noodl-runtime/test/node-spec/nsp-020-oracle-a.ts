@@ -64,6 +64,34 @@ function enumValues(t: unknown): string[] | undefined {
   );
 }
 
+/**
+ * P107 s101 (R37) — the panel's fields an announced input's type carries, against the drawn port's (`DrawnPort`'s
+ * presentation fields): edit-only, connections-only, the code editor, a filter builder's value-port prefix and whether it
+ * is told its backend, an enum's labels. A label equal to its value is no label (the editor shows the value). The builder's `schema` / `backend` are not
+ * compared: the editor reads them from the project as the runtime does (`recordFilterSchema`).
+ */
+export function panelDiffs(type: unknown, d: DrawnPort): string[] {
+  const t = type && typeof type === 'object' ? (type as Record<string, unknown>) : {};
+  const out: string[] = [];
+  const pair = (field: string, runtime: unknown, spec: unknown) => {
+    if (JSON.stringify(runtime) !== JSON.stringify(spec)) out.push(`${field} runtime ${show(runtime)}, spec ${show(spec)}`);
+  };
+  pair('editOnly', t.allowEditOnly === true || undefined, d.editOnly || undefined);
+  pair('connectionsOnly', t.allowConnectionsOnly === true || undefined, d.connectionsOnly || undefined);
+  pair('codeEditor', t.codeeditor, d.codeEditor);
+  pair('valuePortPrefix', t.valuePortPrefix, d.valuePortPrefix);
+  pair('filterBackend', t.backend !== undefined || undefined, d.filterBackend || undefined);
+  if (Array.isArray(t.enums)) {
+    const runtime: Record<string, string> = {};
+    for (const e of t.enums as Array<{ value?: unknown; label?: unknown } | string>)
+      if (e && typeof e === 'object' && e.label !== undefined && String(e.label) !== String(e.value)) runtime[String(e.value)] = String(e.label);
+    // a label is read only for a value the dropdown offers: one map may serve several narrowings (Filter Collection's Op by Type)
+    const spec = Object.fromEntries(Object.entries(d.labels ?? {}).filter(([v, l]) => v !== l && (d.enums ?? []).includes(v)));
+    pair('labels', Object.keys(runtime).length ? runtime : undefined, Object.keys(spec).length ? spec : undefined);
+  }
+  return out;
+}
+
 export function fromAnnounced(p: Announced): Compared {
   return {
     name: p.name,
@@ -159,7 +187,7 @@ export function announcedPorts(
     type: 'Page Stack',
     parameters: {
       name: st.name,
-      pages: st.pages.map((id) => ({ id, label: id })),
+      pages: st.pages.map((id) => ({ id, label: st.labels?.[id] ?? id })),
       ...Object.fromEntries(Object.entries(st.components ?? {}).map(([id, c]) => ['pageComp-' + id, c]))
     },
     on: () => undefined
@@ -318,13 +346,13 @@ export function compareWithSpec(
       if (JSON.stringify(got[f]) !== JSON.stringify(want[f]))
         diffs.push(`${k}: ${f} runtime ${show(got[f])}, spec ${show(want[f])}`);
     }
-    if (d.source === 'declared') {
-      const re = enumValues(a.type);
-      if (re !== undefined || d.enums !== undefined) {
-        if (JSON.stringify(re) !== JSON.stringify(d.enums ? [...d.enums] : undefined))
-          diffs.push(`${k}: enums runtime ${show(re)}, spec ${show(d.enums)}`);
-      }
+    // P107 s101 (R37) — a derived port's enums too: an editor with no runtime client draws its dropdown from the spec
+    const re = enumValues(a.type);
+    if (re !== undefined || d.enums !== undefined) {
+      if (JSON.stringify(re) !== JSON.stringify(d.enums ? [...d.enums] : undefined))
+        diffs.push(`${k}: enums runtime ${show(re)}, spec ${show(d.enums)}`);
     }
+    if (a.plug === 'input') for (const line of panelDiffs(a.type, d)) diffs.push(`${k}: ${line}`);
   }
   for (const d of drawn) {
     const k = key(d.plug, d.name);

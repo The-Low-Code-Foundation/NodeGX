@@ -677,5 +677,33 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "R35: an Icon Source that is not an icon warns the editor — a bare name, then a number replaces the sentence; the picker's {class, code} withdraws it",
+    "because": "react-component-node.ts :689-693 — the icon port's setter calls `setDiagnostic('visual/icon-source-not-an-icon/iconIconSource', iconSourceProblem(value, 'Icon Source'))` on every value (iconSourceProblem.ts :61-75, describeValue diagnostics.ts :104-130)",
+    "params": {
+      "iconSourceType": "icon"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "iconIconSource",
+        "value": "account_circle"
+      },
+      "settle",
+      {
+        "set": "iconIconSource",
+        "value": {
+          "class": "material-icons",
+          "code": "search"
+        }
+      },
+      "settle",
+      {
+        "set": "iconIconSource",
+        "value": 7
+      },
+      "settle"
+    ]
   }
 ]

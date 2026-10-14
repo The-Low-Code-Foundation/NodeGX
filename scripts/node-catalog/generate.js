@@ -237,6 +237,11 @@ export interface CatalogNode {
    * have been given their words.
    */
   rules?: Record<string, string[]>;
+  /**
+   * NSP-019 (phase 107, R35) — for a node with an executable spec, what it can warn the editor about: each warning's key
+   * (the one the editor shows it under) and, in words, when it holds. Generated from the spec's \`diagnostics\`.
+   */
+  warnings?: Record<string, string>;
 }
 
 export interface Typecast {
@@ -326,6 +331,12 @@ async function main() {
     // NSP-018 — a specced node's rules in words, from its reducers' `says` (scripts/node-spec/rules.js)
     const rules = rulesFor(specs);
     for (const node of catalog.nodes) if (rules[node.typeName]) node.rules = rules[node.typeName];
+    // NSP-019 (R35, s104) — what a specced node can warn the editor about, in the spec's words: each declared diagnostic's
+    // `says`, by key, in the spec's order
+    for (const node of catalog.nodes) {
+      const diagnostics = specs[node.typeName] && specs[node.typeName].diagnostics;
+      if (diagnostics) node.warnings = Object.fromEntries(Object.entries(diagnostics).map(([key, d]) => [key, d.says]));
+    }
     const json = JSON.stringify(catalog, null, 2) + '\n';
     const dts = emitTypes(catalog);
 

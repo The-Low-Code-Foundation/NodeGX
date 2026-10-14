@@ -525,6 +525,7 @@ export {
   AGENT_CONFIG_PATHS,
   backfillAgentConfig,
   installAgentConfig,
+  renderAgentsMd,
   renderClaudeMd,
   renderMcpJson,
   upgradeAgentConfigForDocs

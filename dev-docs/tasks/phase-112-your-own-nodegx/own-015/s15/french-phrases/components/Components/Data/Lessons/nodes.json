@@ -1,0 +1,32 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3bb9ba18-c3c2-5af6-84da-6e26db1a60ab",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lessons_data",
+      "type": "Static Data",
+      "label": "3 lessons, each with its phrases",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"id\":\"greetings\",\"title\":\"Greetings\",\"phrases\":[{\"french\":\"Bonjour\",\"english\":\"Hello\"},{\"french\":\"Bonsoir\",\"english\":\"Good evening\"},{\"french\":\"Salut\",\"english\":\"Hi / Bye (informal)\"},{\"french\":\"Comment ça va ?\",\"english\":\"How are you?\"},{\"french\":\"Merci\",\"english\":\"Thank you\"},{\"french\":\"Au revoir\",\"english\":\"Goodbye\"}]},{\"id\":\"everyday\",\"title\":\"Everyday Phrases\",\"phrases\":[{\"french\":\"S'il vous plaît\",\"english\":\"Please\"},{\"french\":\"Excusez-moi\",\"english\":\"Excuse me\"},{\"french\":\"Je m'appelle...\",\"english\":\"My name is...\"},{\"french\":\"Enchanté\",\"english\":\"Nice to meet you\"},{\"french\":\"Oui\",\"english\":\"Yes\"},{\"french\":\"Je ne comprends pas\",\"english\":\"I don't understand\"}]},{\"id\":\"getting-around\",\"title\":\"Getting Around\",\"phrases\":[{\"french\":\"Où sont les toilettes ?\",\"english\":\"Where is the bathroom?\"},{\"french\":\"Combien ça coûte ?\",\"english\":\"How much does it cost?\"},{\"french\":\"Je voudrais un café\",\"english\":\"I would like a coffee\"},{\"french\":\"L'addition, s'il vous plaît\",\"english\":\"The check, please\"},{\"french\":\"Parlez-vous anglais ?\",\"english\":\"Do you speak English?\"},{\"french\":\"À bientôt\",\"english\":\"See you soon\"}]}]"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "lessons_outputs",
+      "type": "Component Outputs",
+      "label": "Lessons out",
+      "ports": [
+        {
+          "name": "lessons",
+          "plug": "input",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    }
+  ]
+}

@@ -4,7 +4,7 @@
  * Inputs and outputs in one ordered stream; `settle` marks where the target drains its frame.
  * Between two settles the events are grouped canonically: `value` events SORTED BY PORT NAME
  * (changed since the last settle only), then `signal` events in emission order, then `outcome`
- * events in the order they were REPORTED, then `request` events, (s21) `backend` events and (s34) `socket` events, one group, in the order they
+ * events in the order they were REPORTED, then `request` events, (s21) `backend` events, (s34) `socket` events and (NSP-022) `host` events, one group, in the order they
  * were issued, then
  * the LOCATION events — `open`, `history`, `dispatch`, (s18) `stack`, (s19) `route`, (s20) `popup`, (NSP-014 s31) `picker` and (NSP-016 s56) `answer`, one group — in the order they were made
  * (NSP-015).
@@ -30,7 +30,7 @@
  * Component Stack a push, a replace or a pop (world.ts STACK); s19 `route` — it handed the Routers a navigate
  * (world.ts ROUTE). NSP-014 s21 adds `backend` — it handed a backend an operation in the backend contract's words
  * (world.ts BACKEND, R9): `op`, `backend` the id it went to, `args` canonical, callbacks left out. s31 adds `picker` — it clicked a file
- * input (world.ts PICKER): `accept` and `capture`, what the element held at the click, each a string. s34 adds `socket` — it made a call on a WebSocket (world.ts SOCKET): a `connect`, a `send` or a `close`, as handed, in the request group. The world's answers are not events: they are scripted (world.ts), so what they were is
+ * input (world.ts PICKER): `accept` and `capture`, what the element held at the click, each a string. s34 adds `socket` — it made a call on a WebSocket (world.ts SOCKET): a `connect`, a `send` or a `close`, as handed, in the request group. NSP-022 s96 adds `host` — it called a service of the backend process (world.ts HOST): `service` and `request` as handed, in the request group. The world's answers are not events: they are scripted (world.ts), so what they were is
  * known from the scenario, and what the node did with them is on the wire.
  * That grouping is a rule of the FORMAT, so that a runtime which
  * pulses a signal synchronously inside a setter and delivers the value at frame end (the
@@ -115,6 +115,12 @@ export type TraceEvent =
    */
   | (Base & { t: 'socket'; op: 'connect' | 'send' | 'close'; url?: unknown; protocols?: unknown; data?: unknown; code?: unknown; reason?: unknown })
   /**
+   * observation (NSP-022 s96): the node called a service of the backend process it runs in (world.ts HOST) — `service`
+   * `secrets`, `users`, `roles` or `mail`, `request` as handed (for `secrets` the name; absent when it was `undefined`),
+   * canonical at the call. In the request group.
+   */
+  | (Base & { t: 'host'; service: 'secrets' | 'users' | 'roles' | 'mail'; request?: unknown })
+  /**
    * observation (NSP-016 s56): the node answered a request another node handed it (spec.ts THE CALLERS) — a Component Stack's
    * answer to a `push`, a `replace` or a `back`: `value` done, unchanged or failure, `error` the failure's CODE (as an outcome's);
    * or `returned` — the page a back popped hands the node that pushed it the back's `action` (absent when none) and `results`
@@ -122,7 +128,21 @@ export type TraceEvent =
    * a Navigate (`value`, `error` as a push's) — and `page`: the `params` it hands the Page Inputs of the page it shows (canonical at
    * the call), one per Page Inputs.
    */
-  | (Base & { t: 'answer'; op: 'push' | 'replace' | 'back' | 'returned' | 'navigate' | 'page'; value?: Outcome; error?: string; action?: unknown; results?: unknown; params?: unknown });
+  | (Base & { t: 'answer'; op: 'push' | 'replace' | 'back' | 'returned' | 'navigate' | 'page'; value?: Outcome; error?: string; action?: unknown; results?: unknown; params?: unknown })
+  /**
+   * observation (NSP-022 s97): a cloud function's answer to the request it was handed (world.ts HOST, THE INVOCATION) — `respond`,
+   * a Response's payload (`status`, `body` the text it carries), or `refuse`, the Request's refusal (`reason` the message it rejected
+   * with; `fields` the contract's refused fields, canonical, only for its 400). In the LOCATION group, in the order made.
+   */
+  | (Base & { t: 'answer'; op: 'respond'; status: number; body: string })
+  | (Base & { t: 'answer'; op: 'refuse'; reason: string; fields?: unknown })
+  /**
+   * observation (NSP-019 s95): what the node tells the EDITOR about its own settings (spec.ts `diagnostics`; the runtime's
+   * `setDiagnostic`) — `key` as the runtime keys it, `message` the sentence it now shows, absent when it was withdrawn. One per
+   * declared key whose sentence changed since the last settle, sorted by key, closing the frame's group. A target without an
+   * editor (adapter.ts `diagnostics`) is not graded on these: the runner leaves them out of its reference.
+   */
+  | (Base & { t: 'diagnostic'; key: string; message?: string });
 
 /**
  * NSP-016 s37 — the canonical form of a node's reference to ITSELF (a visual node's `This` output,

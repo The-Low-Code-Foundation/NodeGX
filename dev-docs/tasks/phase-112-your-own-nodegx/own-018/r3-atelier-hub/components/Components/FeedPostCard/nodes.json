@@ -1,0 +1,304 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e5c6a7bd-e763-57ba-88c0-df556d83013e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fc-card",
+      "type": "Group",
+      "label": "Post card",
+      "children": [
+        "fc-avatar",
+        "fc-col"
+      ],
+      "parameters": {
+        "alignItems": "flex-start",
+        "backgroundColor": "var(--surface)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "columnGap": "var(--space-4)",
+        "flexDirection": "row",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "paddingTop": "var(--space-5)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "fc-avatar",
+      "type": "Group",
+      "label": "Avatar disc",
+      "parent": "fc-card",
+      "children": [
+        "fc-initials"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "borderRadius": "var(--radius-full)",
+        "flexDirection": "row",
+        "height": {
+          "unit": "px",
+          "value": 40
+        },
+        "justifyContent": "center",
+        "sizeMode": "explicit",
+        "width": {
+          "unit": "px",
+          "value": 40
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "fc-initials",
+      "type": "Text",
+      "label": "Initials",
+      "parent": "fc-avatar",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "fc-col",
+      "type": "Group",
+      "label": "Post column",
+      "parent": "fc-card",
+      "children": [
+        "fc-meta",
+        "fc-content"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "minWidth": {
+          "unit": "px",
+          "value": 0
+        },
+        "rowGap": "var(--space-1)",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "fc-meta",
+      "type": "Group",
+      "label": "Meta row",
+      "parent": "fc-col",
+      "children": [
+        "fc-name",
+        "fc-time",
+        "fc-tag"
+      ],
+      "parameters": {
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "flexDirection": "row"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "fc-name",
+      "type": "Text",
+      "label": "Author name",
+      "parent": "fc-meta",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "fc-time",
+      "type": "Text",
+      "label": "Post time",
+      "parent": "fc-meta",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-xs)"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "fc-tag",
+      "type": "Group",
+      "label": "Auto tag",
+      "parent": "fc-meta",
+      "children": [
+        "fc-tagtext"
+      ],
+      "parameters": {
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-full)",
+        "mounted": false,
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "fc-tagtext",
+      "type": "Text",
+      "label": "Auto label",
+      "parent": "fc-tag",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-medium)",
+        "text": "auto"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "fc-content",
+      "type": "Text",
+      "label": "Post content",
+      "parent": "fc-col",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "styleCss": "white-space: pre-wrap;"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "fc-ci",
+      "type": "Component Inputs",
+      "label": "Post fields in",
+      "ports": [
+        {
+          "name": "author",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "content",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "kind",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "createdAt",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 530,
+      "y": 1120
+    },
+    {
+      "id": "fc-authorid",
+      "type": "Expression",
+      "label": "Author id",
+      "parameters": {
+        "expression": "typeof author === 'string' ? author : ((author && (author.id || author.objectId)) || '')"
+      },
+      "x": 530,
+      "y": 1240
+    },
+    {
+      "id": "fc-authorrec",
+      "type": "DbModel2",
+      "label": "Author record",
+      "parameters": {
+        "collectionName": "TeamMember"
+      },
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "fc-nameexpr",
+      "type": "Expression",
+      "label": "Display name",
+      "parameters": {
+        "expression": "kind === 'system' ? 'Atelier Hub' : (authorName || 'Someone')"
+      },
+      "x": 530,
+      "y": 640
+    },
+    {
+      "id": "fc-initialexpr",
+      "type": "Expression",
+      "label": "Initials",
+      "parameters": {
+        "expression": "kind === 'system' ? 'AH' : ((authorName || '?').split(' ').map(function (w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase())"
+      },
+      "x": 530,
+      "y": 280
+    },
+    {
+      "id": "fc-avatbgexpr",
+      "type": "Expression",
+      "label": "Avatar background",
+      "parameters": {
+        "expression": "kind === 'system' ? 'var(--primary)' : 'var(--muted)'"
+      },
+      "x": 530,
+      "y": 160
+    },
+    {
+      "id": "fc-avatfgexpr",
+      "type": "Expression",
+      "label": "Avatar foreground",
+      "parameters": {
+        "expression": "kind === 'system' ? 'var(--primary-foreground)' : 'var(--foreground)'"
+      },
+      "x": 530,
+      "y": 400
+    },
+    {
+      "id": "fc-systagexpr",
+      "type": "Expression",
+      "label": "Is system post",
+      "parameters": {
+        "expression": "kind === 'system'"
+      },
+      "x": 530,
+      "y": 880
+    },
+    {
+      "id": "fc-datefmt",
+      "type": "Date To String",
+      "label": "Post date",
+      "parameters": {
+        "formatString": "{d} {monthName} {year} · {h12}:{minutes} {ampm}",
+        "locale": "fr-FR"
+      },
+      "x": 530,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "fc-card"
+  ]
+}

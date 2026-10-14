@@ -203,10 +203,11 @@ const BUILT_FIELDS = ['wired', 'wiredOutputs', 'backends', 'schema', 'stacks', '
  * a builder error anywhere else); each must still be produced, or the gate below is red and the pin comes out.
  */
 const DRIVE_PINS: Record<string, string> = {
-  'input prop-extra: type runtime "object", spec "*"': 'P107-S85-RESTCOLTYPES',
-  'output prop-extra: type runtime "object", spec "*"': 'P107-S85-RESTCOLTYPES',
-  'input prop-status: type runtime "enum", spec "*"': 'P107-S85-RESTCOLTYPES',
-  'output prop-status: type runtime "enum", spec "*"': 'P107-S85-RESTCOLTYPES'
+  // P107 s102 — Sign Up reads the Parse `_User` from `systemCollections` whatever backend is selected (signup.ts :199-250):
+  // on the rig's Directus it offers the built-in's columns, which `directus_users` does not have. The spec reads the
+  // selected backend's schema, as every other User-family node does
+  'input prop-nickname: announced; the spec does not draw it': 'P107-S102-SIGNUPBACKEND',
+  'input prop-born: announced; the spec does not draw it': 'P107-S102-SIGNUPBACKEND'
 };
 const pinsSeen = new Set<string>();
 
@@ -279,7 +280,9 @@ function twoBackends(version: number): PortProject {
     { id: `rec${i}`, type: 'DbModel2', parameters: { ...(backendId ? { backendId } : {}), collectionName: i % 2 ? 'posts' : 'Lesson' } },
     { id: `new${i}`, type: 'NewDbModelProperties', parameters: { ...(backendId ? { backendId } : {}), collectionName: i % 2 ? 'posts' : 'Lesson' } },
     { id: `q${i}`, type: 'DbCollection2', parameters: { ...(backendId ? { backendId } : {}), collectionName: i % 2 ? 'posts' : 'Lesson' } },
-    { id: `u${i}`, type: 'net.noodl.user.User', parameters: { ...(backendId ? { backendId } : {}) } }
+    { id: `u${i}`, type: 'net.noodl.user.User', parameters: { ...(backendId ? { backendId } : {}) } },
+    { id: `su${i}`, type: 'net.noodl.user.SetUserProperties', parameters: { ...(backendId ? { backendId } : {}) } },
+    { id: `sg${i}`, type: 'net.noodl.user.SignUp', parameters: { ...(backendId ? { backendId } : {}) } }
   ]);
   return {
     metadata: {
@@ -304,6 +307,19 @@ function twoBackends(version: number): PortProject {
                     { name: 'published', type: 'date' },
                     { name: 'extra', type: 'json' },
                     { name: 'status', type: 'string', enumValues: ['draft', 'live'] }
+                  ]
+                },
+                {
+                  // user-ports.ts :83-88 — Directus keeps its accounts here, and the User family reads it there
+                  name: 'directus_users',
+                  fields: [
+                    { name: 'id', type: 'uuid' },
+                    { name: 'email', type: 'string' },
+                    { name: 'password', type: 'hash' },
+                    { name: 'first_name', type: 'string' },
+                    { name: 'age', type: 'integer' },
+                    { name: 'prefs', type: 'json' },
+                    { name: 'last_access', type: 'timestamp' }
                   ]
                 }
               ]
@@ -469,7 +485,7 @@ describe('NSP-020 L5 — portContextFor graded on saved projects', () => {
     expect(face('/Pages/Detail')).toEqual({ ...want.Detail, nodes: want.Detail.nodes });
     expect(face('/Popups/Dialog')).toEqual({ ...want.Dialog, nodes: want.Dialog.nodes });
     expect(face('/Rows/Row')).toEqual({ ...want.Row, nodes: {} });
-    expect(ctx.stacks).toEqual([{ name: 'Main', pages: ['home', 'detail'], components: { home: '/Pages/Home', detail: '/Pages/Detail' } }]);
+    expect(ctx.stacks).toEqual([{ name: 'Main', pages: ['home', 'detail'], components: { home: '/Pages/Home', detail: '/Pages/Detail' }, labels: { home: 'Home', detail: 'Detail' } }]);
   });
 
   it('REACH — every field the builder fills is graded on some node (dropping it turns that node red)', () => {

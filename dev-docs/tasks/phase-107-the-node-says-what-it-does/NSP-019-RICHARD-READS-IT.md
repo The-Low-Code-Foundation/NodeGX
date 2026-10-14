@@ -1,7 +1,7 @@
 # NSP-019 — Richard reads it: the inspector shows a node's rules, and *Try this node*
 
 **Opened 2026-09-29.** **Depends on NSP-018.**
-**Status: 🟡 s91 (2026-10-12): Richard drove it — "Needs changes" (R30, §5.3): the Try panel moves into a pop-out modal with a live mock of the node. AC1 and AC2 built s77, the §2 disagreements table too (§5.1). AC3 stays open until the modal is driven. The three fold/gating choices are ruled (R31). The phase's only surface a person sees.**
+**Status: ✅ s95 (2026-10-12): AC3 met — Richard drove the modal, found that nothing said his settings were wrong (R35, §5.6), the warning was built and he signed it off in the running editor: "Yes, that's it" (§5.7). (s94: the R33 modal built, §5.5; s93: the mockup, §5.4; s91: "Needs changes", §5.3; AC1/AC2 s77.)**
 
 ## 1. The person sentence
 
@@ -158,3 +158,139 @@ minutes. The editor's webpack had begun a recompile right after launch ("App upd
 `webpack-dev-middleware` held the lazy chunk (`…spec_tryNodeModel_ts.bundle.js`) until it finished (99 s). The chunk then
 served 200. The panel shows no timeout or error while it waits. Dev-only (a packaged build has no dev server), but a
 spinner that never says why is worth a line in the modal's loading state.
+
+### 5.4 s93, 2026-10-12 — the modal as a mockup, for Richard's look (not built)
+
+A canvas of two artboards, private to Richard: https://claude.ai/artifact/CmkJLfJu7NGhzsquJgoDHS. Answers §5.3's five points
+on the Counter, the node he tried:
+
+1. **The button** sits at the top of the property panel, under the node's name: *How this node works* (artboard 2). A node
+   whose spec has no words (the five) shows a dashed *How it works: spec in progress* in its place instead (R31's second
+   choice; the first, no button at all, is one line to change).
+2. **The modal**, 1,200 × 788 over the dimmed editor: the rules on the left (each input with its cases and the outcome as a
+   chip, Done or Unchanged, in the spec's own words), *Try it* on the right. Both open (R31).
+3. **The node as the canvas draws it**, on the canvas's dotted ground: its card (icon, title, type), inputs left and outputs
+   right with their dots, a value bubble on each port, and the canvas's dark preview pill above it showing Current Count.
+   A press lights the input it reached, the outputs it moved, and the preview for about a second; a signal's bubble reads
+   *sent* or *fired* while lit.
+4. **Styled controls** from the editor's tokens: the signals as 44-px blue pill buttons, numbers as − / + steppers, Limits
+   Enabled as a switch. No clock or *Same frame* for the Counter (it has no timer); a node with one would show them here.
+5. **What happened follows the latest event**: newest at the bottom, scrolled into view and tinted on arrival, its outcome as
+   a chip. *Start over* clears it.
+
+The artboard works (press the buttons on the canvas's Play). It plays a hand-written copy of the Counter's rules, not the
+interpreter: the built modal runs `tryNodeModel` as the panel does today. Not yet asked: the modal's loading state
+(§5.3's two-minute "Loading the spec…" in the dev stack).
+
+### 5.5 s94, 2026-10-12 — the modal, built as drawn (R33) and driven
+
+**Built** (commit `feat(p107/nsp-019 s94)`), all under `views/panels/propertyeditor/spec/`; the two folds (`SpecSections`,
+`NodeRulesSection`, `TryNodePanel`, `TryTimeline`) are gone:
+
+- **The entry** — `HowItWorksButton`, mounted under `NodeLabel` (`propertyeditor/index.tsx`), above the tab strip, so it shows
+  on every tab. Three arms: the catalog has `rules` → *How this node works*; the type has a spec and no words →
+  a dashed *How it works: spec in progress* (R31's second choice); anything else → nothing (AC1's absent arm). The five are a
+  committed list (`spec-in-progress.json`: And, DbCollection2, Or, PageInputs, Screen Resolution), and
+  `tests-unit/nsp-019/nodeRules.test.tsx` recomputes it from the spec registry (108 specs, 103 worded) and goes red when it moves
+  (planted control: one name dropped → red).
+- **The shell** — `HowItWorksModal`: the editor's `BaseDialog` with its backdrop (the pattern `Modal` uses). Focus moves into the
+  modal on open and its root is a `data-keyboard-scope`, so `keyboardhandler.ts` runs no canvas command behind it (Backspace or
+  Delete would otherwise delete the selected node); Escape closes; a press outside closes.
+- **Left: the rules** — `NodeRulesColumn`. `ruleParts` takes a catalog line apart without changing a word (the case; the pulses as
+  "Sends …"; the outcome as a chip — Done, Unchanged, Failure, Completed; the "stays silent" tail); a test puts every one of the
+  catalog's 400+ lines back together from its parts. The spec/runtime disagreements and their rulings sit at the foot.
+- **Right: *Try it*** — `TryIt`, `TryStage`, `TryRows`, over a new `playTry` in `tryNodeModel.ts` (the same trace as
+  `playTimeline`, read as rows, each input's value, each output's last sent value, and the ports the last row reached). The node is
+  drawn as the canvas draws it: a white card with its title, inputs left and outputs right with their dots (square for a signal),
+  a bubble per value port, a signal's bubble only while lit (*sent* / *fired*), the dark preview pill above with the first value
+  output. What a step reached lights for about a second. Controls: signal pills, − / + steppers with a typeable middle (so `"abc"`
+  can still be tried), a switch per boolean, a native `<select>` per enum; *Move time* and *Same frame* only for a spec whose
+  `needs` has `clock` (24 of 108: Delay, HTTP, the visual nodes…). *What happened* is one row per thing done (one frame's presses
+  share a row), the outcome as a chip, the newest tinted and scrolled into view; a row whose only answer is an outcome reads
+  "nothing moves". The steps start with one frame end, so row 1 says what the node does at load. After 4 s of loading, the column
+  says why it waits (§5.3's dev-server hold).
+
+**Driven** (`npm run dev:debug`, a renamed copy of nodegx-debug-demo registered with the launcher and removed afterwards; the
+source's SHA unchanged; 28 MCP server processes alive after teardown). The Counter's panel shows the button under its name
+([shot](shots/nsp-019-s94-panel-button.png)); the modal opened with the spec loaded in 1–3 s. Eight real clicks — Increase ×2,
+Reset ×2, Limits Enabled, Max Value +, Increase ×2 — wrote exactly eight rows: `Current Count → 1`, `→ 2`, Reset `→ 0` Done,
+Reset *nothing moves* Unchanged, *Limits Enabled on* and *Max Value 1* (each *nothing happens*), Increase `→ 1` Done, Increase
+*nothing moves* Unchanged; the row list sat at its bottom (`scrollTop` 165 of 165) and the dialog never scrolled. Beside the
+mockup: [built](shots/nsp-019-s94-modal-built.png) · [mockup](shots/nsp-019-s94-modal-mockup.png).
+
+**Where it differs from the mockup, on purpose:** the rules are the catalog's (Counter has four worded inputs; the mockup's hand
+copy also had Min/Max and Count Changed groups); the steppers carry the full port name (no generic way to shorten one); the
+backdrop is the editor's own (a white wash in the light theme, where the mockup drew a dark dim); the card's colours are the
+canvas card's, not the node picker's category scheme (grey for most logic nodes).
+
+**Found while driving:** the dev server ran out of heap on its second or third rebuild, twice, and took the stack with it →
+[P107-S94-DEVHEAP](../../bugs/p107-s94-devheap-the-editor-dev-server-runs-out-of-heap-on-its-second-or-third-rebuild.md).
+An earlier "7 rows for 6 presses" happened while the dialog itself was scrolling under the click (the Try column overflowed);
+after `.Modal` clipped and the column scrolled on its own, every count matched.
+
+**Not driven:** the dark theme; a spec-in-progress node in the panel (graded by react-dom/server only); a clock node's controls in
+the app (graded with Delay, type `Timer`, by react-dom/server).
+
+**Left: AC3** — Richard drives the modal and his verdict is recorded here in his words.
+
+### 5.6 s95, 2026-10-12 — Richard drove the modal: "It's cool, but…" — the settings that make no sense said nothing
+
+Driven by Richard in the running dev editor (`npm run dev:debug`, a renamed copy of nodegx-debug-demo registered with the
+launcher and removed afterwards; the source's SHA `fa5f5a42…` unchanged). He opened the Counter's *How this node works*, set
+Start 2, Min 3, Max 1 with Limits Enabled off, and pressed Increase twice. **His verdict, verbatim:**
+
+> *"It's cool, but I'm fucking with it and that infamous auto checking system doesn't seem to be doing shit. I should be able
+> to see that because I've fucked the settings, there's going to be errors. The min value is higher than the start value.
+> The max value is 1. Yet I can still click Increase Count and it all works fine. This is a test of 'what's the point in
+> using this instead of just vibe coding', you said it would include automated checks and tests so there's no way to fuck it
+> up. I just managed to fuck it up first try"*
+
+Asked whether to build a separate "settings that don't make sense" check, he answered: *"No, the how it works modal should
+function using the specs, like a real node really wired up, and so if something is set wrong it'll of course be able to
+throw an error in the 'what happened' and show why the settings are FUBAR. Or do the specs not actually protect against
+stuff like that the way they were advertised to?"*
+
+**The answer, measured:** they did not. The modal was faithful: it runs the spec, and the spec copied a runtime Counter that
+said nothing. The runtime had the channel (`setDiagnostic`, DIAGNOSTICS-CONTRACT.md, whose table already says "two of this
+node's settings contradict each other → diagnostic") and the Counter never used it; the spec format could not declare one
+(Date Add's spec: "not on the wire, so not in the trace"); the conformance harness had no editor, so no diagnostic reached a
+trace. → [P107-S95-MINABOVEMAX](../../bugs/p107-s95-minabovemax-a-counter-with-min-above-max-says-nothing-anywhere.md).
+With his settings and Limits Enabled ON, both Increase and Decrease report Unchanged for good, silently.
+
+**Built (s95, `0d81cd398`):**
+- **The format:** `diagnostics` on a spec (`<node-type>/<condition>` → `{ says, message(inputs, state) }`) and a `diagnostic`
+  trace event (`key`, `message` absent when withdrawn; one per key whose sentence changed, sorted by key, closing the frame's
+  group). Schema, validator, `hasObservation`. The interpreter records them at each settle.
+- **The runner:** `TargetAdapter.diagnostics` — `true` on the interpreter and the runtime; a target without it (the export,
+  the four strangers) is graded with diagnostics left out of its reference (`withoutUnseenDiagnostics`, also in the
+  strangers' mutant check, which would otherwise have "caught" every Counter mutant for nothing).
+- **The runtime target:** a recording editor (`isRunningLocally` true, `sendWarning` / `clearWarning` / `clearWarnings`); for
+  a spec that declares `diagnostics` it records every key the node shows that is its own (not `node/…`), declared or not.
+- **Counter v2** (changes entry, migration none): `counter/min-above-max` from both limit setters, the same sentence in the
+  runtime and the spec — *"Min Value 3 is above Max Value 1. With Limits Enabled on, the count gets stuck."* An eighth hand
+  scenario plays Richard's settings and the fix.
+- **The modal:** the warning sits above the card while it holds, the card wears a danger ring, the row that raised it reads
+  the sentence chipped *Warning*, the row that cleared it *No longer: Min Value is above Max Value*, chipped *Fixed*.
+
+**Not built:** the rules column does not list a node's diagnostics (it reads the generated catalog; a regen of a shared file);
+no other node declares one yet (9 runtime call sites already raise one); the Problems panel and the agent's checker do not
+read `diagnostics` statically — the panel shows the runtime's warning only while the preview runs.
+
+### 5.7 s95 (later the same day) — the warning, driven in the editor and signed off
+
+A second launch on a fresh renamed copy (unregistered afterwards; source SHA unchanged; 26 processes stopped). The Counter
+selected, *How this node works* opened, Start Value +2, Min Value +3, Max Value +1, Limits Enabled on, Increase pressed, each a
+real button in the visible dialog. On screen ([shot](shots/nsp-019-s95-warning.png)): the red line above the card, *"Min Value 3
+is above Max Value 1. With Limits Enabled on, the count gets stuck."*, the card's danger ring, row 7 *Max Value 1* with the
+sentence and its *Warning* chip, row 9 *Increase Count — nothing moves — Unchanged*.
+
+Asked in plain words whether this is what he meant: **"Yes, that's it."** AC3 is met.
+
+**Seen, not measured:** at the 1368 × 784 window the banner pushes the newest rows below the dialog's bottom edge (row 7 was
+the last one visible; rows 8 and 9 were in the list below it). Whether the Try column scrolls them into view on its own was
+not read. And Current Count read 1 beside Start Value 2: the Counter's real rule (only the first Start Value seeds the count;
+stepping 0 → 1 → 2 made 1 the first), said to Richard in one line.
+
+**Trap met again:** the first attempt clicked the dialog's hidden measuring copy (two `[role=dialog]` in the DOM; memory
+"`cdp click` HITS GHOST in Modal"). Pick the dialog that `elementFromPoint` lands in.
+

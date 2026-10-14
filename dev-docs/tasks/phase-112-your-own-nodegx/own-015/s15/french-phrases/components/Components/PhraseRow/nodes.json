@@ -1,0 +1,153 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f6cdc78f-7741-575d-81f3-e14611be18fe",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "row",
+      "type": "Group",
+      "label": "Phrase row",
+      "children": [
+        "text_col",
+        "speaker_icon"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "justifyContent": "space-between",
+        "columnGap": "var(--space-3)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "styleCss": "cursor: pointer;"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "text_col",
+      "type": "Group",
+      "label": "Text column",
+      "parent": "row",
+      "children": [
+        "french_text",
+        "english_text"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "french_text",
+      "type": "Text",
+      "label": "French",
+      "parent": "text_col",
+      "parameters": {
+        "text": "Bonjour",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "english_text",
+      "type": "Text",
+      "label": "English",
+      "parent": "text_col",
+      "parameters": {
+        "text": "Hello",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "speaker_icon",
+      "type": "Text",
+      "label": "Speaker icon",
+      "parent": "row",
+      "parameters": {
+        "text": "🔊",
+        "fontSize": "var(--text-lg)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "row_inputs",
+      "type": "Component Inputs",
+      "label": "Phrase in",
+      "ports": [
+        {
+          "name": "french",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "english",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "call_speak",
+      "type": "CloudFunction2",
+      "label": "Call Speak Phrase",
+      "parameters": {
+        "function": "Cloud Functions/Speak Phrase"
+      },
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "play_audio",
+      "type": "JavaScriptFunction",
+      "label": "Convert PCM to WAV and play",
+      "parameters": {
+        "functionScript": "const base64 = Inputs.audioBase64;\nconst mimeType = Inputs.mimeType;\nif (base64 === undefined) return;\n\nconst rateMatch = /rate=(\\d+)/.exec(mimeType || \"\");\nconst sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;\n\nconst binary = atob(base64);\nconst pcmBytes = new Uint8Array(binary.length);\nfor (let i = 0; i < binary.length; i++) {\n  pcmBytes[i] = binary.charCodeAt(i);\n}\n\nconst numChannels = 1;\nconst bitsPerSample = 16;\nconst byteRate = (sampleRate * numChannels * bitsPerSample) / 8;\nconst blockAlign = (numChannels * bitsPerSample) / 8;\nconst buffer = new ArrayBuffer(44 + pcmBytes.length);\nconst view = new DataView(buffer);\n\nfunction writeString(offset, str) {\n  for (let i = 0; i < str.length; i++) {\n    view.setUint8(offset + i, str.charCodeAt(i));\n  }\n}\n\nwriteString(0, \"RIFF\");\nview.setUint32(4, 36 + pcmBytes.length, true);\nwriteString(8, \"WAVE\");\nwriteString(12, \"fmt \");\nview.setUint32(16, 16, true);\nview.setUint16(20, 1, true);\nview.setUint16(22, numChannels, true);\nview.setUint32(24, sampleRate, true);\nview.setUint32(28, byteRate, true);\nview.setUint16(32, blockAlign, true);\nview.setUint16(34, bitsPerSample, true);\nwriteString(36, \"data\");\nview.setUint32(40, pcmBytes.length, true);\nnew Uint8Array(buffer, 44).set(pcmBytes);\n\nlet wavBinary = \"\";\nconst wavBytes = new Uint8Array(buffer);\nfor (let i = 0; i < wavBytes.length; i++) {\n  wavBinary += String.fromCharCode(wavBytes[i]);\n}\nconst dataUrl = \"data:audio/wav;base64,\" + btoa(wavBinary);\n\nconst audio = new Audio(dataUrl);\naudio.play().catch((e) => console.log(\"Playback failed:\", e));\n"
+      },
+      "metadata": {
+        "comment": "Gemini TTS returns raw PCM (no file header); this builds a minimal WAV header around it so the browser's Audio element can play it."
+      },
+      "x": 410,
+      "y": 400,
+      "ports": [
+        {
+          "name": "in-audioBase64",
+          "displayName": "audioBase64",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-mimeType",
+          "displayName": "mimeType",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "row"
+  ]
+}

@@ -38,10 +38,12 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 
+
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { RUN_ON_VALUE_CHANGE_FORMAT_VERSION } from '@nodegx/project-contract/run-on-value-change-migration';
 import { z } from 'zod';
 
+import { callHint, clientProfile } from '../clientProfile';
 import type { AuthoringPlan } from '../../../noodl-editor/src/editor/src/models/AiAssistant/authoring/plan';
 import { validatePlan } from '../../../noodl-editor/src/editor/src/models/AiAssistant/authoring/plan';
 import type {
@@ -379,7 +381,9 @@ const scopeSchema = {
     .optional()
     .describe(
       'What it stores data in. Either prose, or {kind, description, collections, needsAuth} — "nodegx" means ' +
-        'the returned plan will include an operation offering to create a built-in backend.'
+        'the returned plan will include an operation offering to create a built-in backend. A backend is for data ' +
+        'shared between people or devices; what one person keeps on their own device (a best score, a list, ' +
+        'settings) is kind "none", saved by a Function with localStorage.'
     ),
   conventions: z
     .array(z.string())
@@ -588,9 +592,11 @@ export function completeBind(bind: CreateProjectBinding, projectDir: string): Bi
       'you can build in it from this same conversation, with no second registration and no restart. ' +
       // ⚠️ Named, because a client that ignores `list_changed` would otherwise
       // see a note promising tools it cannot call. Measured 2026-08-11: Claude
-      // Code re-lists 3ms after the notification.
-      'They arrive in your next tool list; if your client does not refresh on notifications/tools/' +
-      'list_changed, restart the server with the project directory as its argument. ' +
+      // Code re-lists 3ms after the notification. 🔴 P112-OWN018-LISTCHANGED
+      // (2026-10-12): Mistral Vibe never does, and a restart is no exit for an
+      // agent, so the note names the door it can use from here.
+      'They arrive in your next tool list; if your client does not refresh on notifications/tools/list_changed, ' +
+      "call them through call_tool (describe: true gives a tool's arguments). " +
       // 🔴 §3 — the briefing `initialize` already spent, and the reason this
       // field exists at all.
       'Read `guidance` below before authoring: it is what a server started with this project would have ' +
@@ -601,8 +607,12 @@ export function completeBind(bind: CreateProjectBinding, projectDir: string): Bi
       // launcher entry rather than as a missing door. Said here, in a per-call payload, because
       // the resident surface has seven tokens of headroom (C65) and this sentence is only useful
       // in the one turn where a project has just been bound.
-      'When the user should see it, call open_in_editor with this directory — find_tools({query:' +
-      ' "editor"}) reveals it — and the running editor will open it and list it under Recent projects.',
+      // OWN-019 census #27.
+      (clientProfile().staticToolList
+        ? `When the user should see it, call ${callHint('open_in_editor', '{ directory }')} and the running ` +
+          'editor will open it and list it under Recent projects.'
+        : 'When the user should see it, call open_in_editor with this directory — find_tools({query:' +
+          ' "editor"}) reveals it — and the running editor will open it and list it under Recent projects.'),
     guidance: bindGuidance(projectDir, bind.deferTools)
   };
 }

@@ -162,7 +162,9 @@ const drawnCheckboxPort = (label: string): InputDecl => ({ ...checkboxPort(), di
 /** :1049-1062, :1019-1031 — a written row's type picker; nothing reads it at run time (:870-892). */
 const typePort = (): InputDecl => ({ type: 'string', default: 'string', coerce: 'none', editOnly: true });
 /** The picker as the editor draws it: an enum named Type, Signal among an output's choices. */
-const drawnTypePort = (enums: readonly string[], drawnDefault = 'string'): InputDecl => ({ type: 'enum', enums, default: drawnDefault, coerce: 'none', editOnly: true, displayName: 'Type' });
+/** simplejavascript.ts — the words the Type dropdowns show */
+const TYPE_LABELS: Readonly<Record<string, string>> = { '*': 'Any', string: 'String', boolean: 'Boolean', number: 'Number', object: 'Object', date: 'Date', array: 'Array', color: 'Color', signal: 'Signal' };
+const drawnTypePort = (enums: readonly string[], drawnDefault = 'string'): InputDecl => ({ type: 'enum', enums, labels: TYPE_LABELS, default: drawnDefault, coerce: 'none', editOnly: true, displayName: 'Type' });
 /** :903-920 — a value output the code's write (or a wire) brings into being; it reads what the code last wrote. */
 const valueOutput = (name: string): OutputDecl<FunctionState> => ({ type: '*', from: (s: Readonly<FunctionState>) => s.outputs[name] });
 

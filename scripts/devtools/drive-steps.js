@@ -60,7 +60,12 @@
  *   { "read": R, "expect": V? }          R is { "text": T } (its innerText), { "variable": "name" } (an app
  *                                        Variable), { "storage": "key" } (localStorage), { "url": true },
  *                                        { "stub": "/path" } or { "expression": "js" }; with `expect` the step passes only when the
- *                                        value equals V, or contains V.contains. What the run has seen SO FAR:
+ *                                        value equals V, or contains V.contains. { "look": T } is what a person
+ *                                        sees of T (P112 OWN-019): { text, visible, opacity, background,
+ *                                        backgroundName, color, colorName } — the box around T's text, its
+ *                                        painted background and a plain colour word ("green", "red", "white"…);
+ *                                        its `expect` names only the fields that matter ({ "backgroundName":
+ *                                        "green" }). What the run has seen SO FAR:
  *                                        { "console_errors": true } (the page's errors and throws), { "network_errors":
  *                                        true } (a request that failed to load, or answered 400 or above, with its
  *                                        URL) and { "other_origins": true } (every origin other than the page's own
@@ -70,6 +75,18 @@
  *                                        even for the route it is on (measured s14 on the garden, 4 of 4) — the
  *                                        way to prove what survives a reload; on a hash-routed one it is a
  *                                        fragment change and nothing reloads
+ *   { "reload": true }                   reload the page the run is on, as a person does — the way to prove what a
+ *                                        reload of THIS screen shows (P112-OWN019-RELOADHERE: o2 proved "the best
+ *                                        survives a reload" by navigating to its start page, and a reload of its
+ *                                        results page showed "You scored  out of 5")
+ *   { "watch": { "look": T }, "for_ms": 1500?, "expect"?: { "never": {…} } }
+ *                                        read T's look about every 25 ms for for_ms (≤ 10000) and answer every
+ *                                        DISTINCT state in order, each with the ms it began and ended — what a
+ *                                        person sees DURING a change, where a read's look waits for it to settle
+ *                                        (P112-OWN019-WATCHMOMENT: the quiz's new answers wore the last question's
+ *                                        green and red for a moment, and every settled look read them idle).
+ *                                        T absent reads as null. `expect: { never: { backgroundName: "green" } }`
+ *                                        fails the step when any state had those fields
  *   { "viewport": "phone" | "390x844" }  resize
  *   { "screenshot": "name" }             a PNG of the viewport into --out-dir
  *   { "seed_storage": { "key": "value" } } write localStorage, and navigate afterwards to load it
@@ -118,7 +135,9 @@ const VERBS = [
   'seed_storage',
   'clear_storage',
   'stub_route',
-  'reduced_motion'
+  'reduced_motion',
+  'reload',
+  'watch'
 ];
 
 /** The keys `key` understands, as CDP wants them. */
@@ -357,10 +376,56 @@ function networkLog(tab) {
 
 /** The `read` forms answered from what the run itself recorded, not from the page. */
 const RUN_READS = ['stub', 'console_errors', 'network_errors', 'other_origins'];
-const READ_FORMS = 'text | variable | storage | url | stub | console_errors | network_errors | other_origins | expression';
+const READ_FORMS = 'text | look | variable | storage | url | stub | console_errors | network_errors | other_origins | expression';
+
+/**
+ * P112 OWN-019 — `{ read: { look: T } }`: what a person sees of T, without a screenshot (an image costs a Mistral
+ * session its prompt cache, P112-OWN018-IMAGECACHE). Mistral's quiz drives read text only, so a quiz whose green and
+ * red never reached the screen passed its own checks (OWN-018 run 8) — this is the read that would have failed them.
+ *
+ * The box is T's element widened to the outermost ancestor holding no other text (a button around its label, as
+ * the OWN-018 grader measures); the background is the first painted one from the box outwards; the colour words are
+ * coarse on purpose (a hue band, white/grey/black below 15% saturation), so an `expect` survives a token change.
+ */
+function lookExpression(target) {
+  return `(() => {
+    const { all } = ${finder(target)};
+    const leaf = all[0];
+    if (!leaf) return null;
+    let box = leaf;
+    const label = (leaf.innerText || '').trim();
+    while (box.parentElement && box.parentElement !== document.body && (box.parentElement.innerText || '').trim() === label) box = box.parentElement;
+    const rgba = (c) => { const m = String(c).match(/rgba?\\(([^)]+)\\)/); if (!m) return null; const [r, g, b, a = 1] = m[1].split(/[ ,/]+/).filter(Boolean).map(Number); return { r, g, b, a }; };
+    const name = (c) => {
+      const v = rgba(c);
+      if (!v || v.a === 0) return 'none';
+      const r = v.r / 255, g = v.g / 255, b = v.b / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2;
+      const s = mx === mn ? 0 : l > 0.5 ? (mx - mn) / (2 - mx - mn) : (mx - mn) / (mx + mn);
+      if (l < 0.15) return 'black';
+      if (l > 0.94) return 'white';
+      if (s < 0.15 || mx - mn < 0.06) return l > 0.9 ? 'white' : 'grey';
+      let h = mx === r ? (g - b) / (mx - mn) + (g < b ? 6 : 0) : mx === g ? (b - r) / (mx - mn) + 2 : (r - g) / (mx - mn) + 4;
+      h *= 60;
+      return h < 15 || h >= 345 ? 'red' : h < 45 ? 'orange' : h < 70 ? 'yellow' : h < 165 ? 'green' : h < 200 ? 'cyan' : h < 260 ? 'blue' : h < 290 ? 'purple' : 'pink';
+    };
+    let painted = 'rgba(0, 0, 0, 0)';
+    for (let e = box; e && e !== document.documentElement; e = e.parentElement) {
+      const bg = getComputedStyle(e).backgroundColor;
+      if (rgba(bg) && rgba(bg).a > 0) { painted = bg; break; }
+    }
+    let opacity = 1;
+    for (let e = box; e; e = e.parentElement) opacity *= Number(getComputedStyle(e).opacity);
+    const st = getComputedStyle(box);
+    const r = box.getBoundingClientRect();
+    const visible = r.width > 0 && r.height > 0 && st.visibility !== 'hidden' && st.display !== 'none' && opacity > 0.05;
+    const color = getComputedStyle(leaf).color;
+    return { text: label, visible, opacity: Math.round(opacity * 100) / 100, background: painted, backgroundName: name(painted), color, colorName: name(color) };
+  })()`;
+}
 
 function readExpression(r) {
   if (!r || typeof r !== 'object') throw new UsageError(`read takes { ${READ_FORMS} }; got ${JSON.stringify(r)}.`);
+  if (r.look !== undefined) return lookExpression(r.look);
   if (r.text !== undefined) {
     return `(() => { const { all } = ${finder(r.text)}; const e = all[0]; return e ? (e.value !== undefined && e.value !== null && e.value !== '' ? e.value : (e.innerText || '').trim()) : null; })()`;
   }
@@ -405,6 +470,21 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), network
   // After an input, let the app answer before the next step looks: two animation frames is a condition
   // (React has committed and painted), not a sleep.
   const frames = () => evaluate('new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(true))))');
+  // A look is what a person settles on seeing: a colour fading in after a tap (~250 ms, OWN-018 run 10) is not yet
+  // the colour. Read every 50 ms until three reads agree (≥100 ms still), for at most 2 s; `settledMs` says how long.
+  const settledLook = async (expr) => {
+    const t0 = Date.now();
+    let last = JSON.stringify(await evaluate(expr));
+    let same = 1;
+    while (same < 3 && Date.now() - t0 < 2000) {
+      await wait(50);
+      const next = JSON.stringify(await evaluate(expr));
+      same = next === last ? same + 1 : 1;
+      last = next;
+    }
+    const value = JSON.parse(last);
+    return value && typeof value === 'object' ? { ...value, settledMs: Date.now() - t0 } : value;
+  };
   const press = async (target) => {
     let p = await evaluate(locateExpression(target));
     // A target that is not there YET (an animation, a route still mounting) gets a short grace, as the
@@ -487,8 +567,15 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), network
                 ? network.errors()
                 : own === 'other_origins'
                   ? network.otherOrigins()
-                  : await evaluate(readExpression(step.read));
-        if ('expect' in step && !matches(row.value, step.expect)) {
+                  : r.look !== undefined
+                    ? await settledLook(readExpression(step.read))
+                    : await evaluate(readExpression(step.read));
+        // A look's expect names only the fields that matter (its other fields move with every token change).
+        const wanted =
+          r.look !== undefined && step.expect && typeof step.expect === 'object' && !Array.isArray(step.expect) && !('contains' in step.expect)
+            ? row.value && typeof row.value === 'object' && Object.keys(step.expect).every((k) => matches(row.value[k], step.expect[k]))
+            : !('expect' in step) || matches(row.value, step.expect);
+        if (!wanted) {
           row.ok = false;
           row.error = `read ${JSON.stringify(row.value)}, expected ${JSON.stringify(step.expect)}`;
         }
@@ -500,6 +587,39 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), network
           await client.send('Page.removeScriptToEvaluateOnNewDocument', { identifier }).catch(() => {});
         }
         row.url = await evaluate('location.pathname + location.hash');
+      } else if (verb === 'reload') {
+        await client.send('Page.reload', {});
+        await page.settle('reload', 15000, 2);
+        for (const identifier of pendingSeeds.splice(0)) {
+          await client.send('Page.removeScriptToEvaluateOnNewDocument', { identifier }).catch(() => {});
+        }
+        row.url = await evaluate('location.pathname + location.hash');
+      } else if (verb === 'watch') {
+        const w = step.watch && typeof step.watch === 'object' ? step.watch : {};
+        if (w.look === undefined) throw new UsageError(`Step ${i + 1}: watch takes { look: T }.`);
+        const forMs = Math.min(10000, Math.max(100, Number(step.for_ms ?? 1500)));
+        const expr = lookExpression(w.look);
+        // The fields a person tells apart; a look's box geometry moves with layout and is not a different state.
+        const keyOf = (v) => (v && typeof v === 'object' ? JSON.stringify({ text: v.text, visible: v.visible, backgroundName: v.backgroundName, colorName: v.colorName, opacity: v.opacity === undefined ? undefined : Math.round(v.opacity * 10) / 10 }) : 'null');
+        const states = [];
+        const t0 = Date.now();
+        while (Date.now() - t0 <= forMs) {
+          const v = await evaluate(expr);
+          const at = Date.now() - t0;
+          const last = states[states.length - 1];
+          if (last && last.key === keyOf(v)) last.until = at;
+          else states.push({ key: keyOf(v), from: at, until: at, look: v && typeof v === 'object' ? { text: v.text, visible: v.visible, backgroundName: v.backgroundName, colorName: v.colorName, opacity: v.opacity } : null });
+          await wait(25);
+        }
+        row.value = states.map(({ from, until, look }) => ({ from, until, look }));
+        const never = step.expect && typeof step.expect === 'object' ? step.expect.never : undefined;
+        if (never && typeof never === 'object') {
+          const hit = states.find((st) => st.look && Object.keys(never).every((k) => matches(st.look[k], never[k])));
+          if (hit) {
+            row.ok = false;
+            row.error = `${JSON.stringify(never)} was seen from ${hit.from} to ${hit.until} ms: ${JSON.stringify(hit.look)}`;
+          }
+        }
       } else if (verb === 'viewport') {
         const [vp] = parseViewports(String(step.viewport));
         await page.setViewport(vp);
