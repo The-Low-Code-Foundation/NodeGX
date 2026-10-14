@@ -43,6 +43,36 @@ const portAt = argv.indexOf('--port');
 const PORT = portAt >= 0 ? Number(argv[portAt + 1]) : 8799;
 fs.mkdirSync(OUT, { recursive: true });
 let n = 0;
+
+/** Reads an SSE stream's `data: {…}` lines whole, however the chunks split them; the last usage and finish win. */
+export function sseReader() {
+  const decoder = new TextDecoder();
+  let pending = '';
+  let usage = null;
+  let finish = null;
+  const line = (l) => {
+    const m = /^data: (\{.*\})\s*$/.exec(l);
+    if (!m) return;
+    try {
+      const d = JSON.parse(m[1]);
+      if (d.usage) usage = d.usage;
+      const f = d.choices?.[0]?.finish_reason;
+      if (f) finish = f;
+    } catch {}
+  };
+  return {
+    push(chunk) {
+      const lines = (pending + decoder.decode(chunk, { stream: true })).split('\n');
+      pending = lines.pop();
+      lines.forEach(line);
+    },
+    end() {
+      line(pending + decoder.decode());
+      return { usage, finish };
+    }
+  };
+}
+
 http.createServer(async (req, res) => {
   const chunks = [];
   for await (const c of req) chunks.push(c);
@@ -65,30 +95,21 @@ http.createServer(async (req, res) => {
     res.writeHead(upstream.status, out);
     let firstAt = null;
     let bytes = 0;
-    let tail = '';
+    // The stream's data lines carry `usage` and the finish reason — read every COMPLETE line as it arrives. (s5: the
+    // last 8 KB of the stream used to be kept and searched, and a last chunk carrying a big tool call's arguments with
+    // its usage is one line longer than that: L1's sitting 1 lost 8 of 43 calls' usage, $2.29 recorded vs Vibe's $2.70.)
+    const sse = sseReader();
     if (upstream.body) {
       for await (const c of upstream.body) {
         if (firstAt === null) firstAt = Date.now();
         bytes += c.length;
-        tail = (tail + Buffer.from(c).toString('utf8')).slice(-8192);
+        sse.push(c);
         res.write(c);
       }
     }
     res.end();
     const endAt = Date.now();
-    // The stream's last data lines carry `usage` and the finish reason.
-    let usage = null;
-    let finish = null;
-    for (const line of tail.split('\n')) {
-      const m = /^data: (\{.*\})\s*$/.exec(line);
-      if (!m) continue;
-      try {
-        const d = JSON.parse(m[1]);
-        if (d.usage) usage = d.usage;
-        const f = d.choices?.[0]?.finish_reason;
-        if (f) finish = f;
-      } catch {}
-    }
+    const { usage, finish } = sse.end();
     let msgs = null;
     try {
       msgs = JSON.parse(body.toString('utf8')).messages?.length ?? null;
