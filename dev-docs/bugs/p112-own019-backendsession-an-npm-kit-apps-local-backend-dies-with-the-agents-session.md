@@ -2,6 +2,7 @@
 id: P112-OWN019-BACKENDSESSION
 title: "An npm-kit app's local backend runs only while an agent's MCP session is open — after the session the app's Records and saves fail, and nothing tells the person how to start it again"
 status: fixed
+commit: c04c1cc63
 phase: P112
 task: OWN-019
 severity: high
