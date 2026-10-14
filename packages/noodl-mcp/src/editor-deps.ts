@@ -745,3 +745,8 @@ export type { GeneratedPort } from '../../noodl-editor/src/editor/src/models/nod
 export { toIconSets, iconValueForGlyph } from '../../noodl-editor/src/shared/utils/iconsets';
 export type { IconSetDescriptor, IconSetValue } from '../../noodl-editor/src/shared/utils/iconsets';
 export { scanModuleManifestsSync } from '@nodegx/module-inject';
+
+// P112-OWN018-NOSTARTERASSETS — the starter set a new project gets (Inter, Lucide, the imagery). The editor's own
+// list, so the npm route and the editor's new-project route cannot drift. `starterAssetList` imports nothing.
+export { STARTER_ASSETS } from '../../noodl-editor/src/editor/src/models/template/starterAssetList';
+export type { StarterAsset } from '../../noodl-editor/src/editor/src/models/template/starterAssetList';

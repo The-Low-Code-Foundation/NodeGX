@@ -11,11 +11,14 @@ import { getExample, listExamples } from '../src/catalog';
 
 const ID = 'fn-play-audio-a-cloud-function-returns';
 
+type ExampleNode = { id: string; type: string; parameters?: Record<string, unknown> };
+const nodesOf = (component: { nodes: unknown[] } | undefined) => (component?.nodes ?? []) as ExampleNode[];
+
 function playScript(): string {
   const example = getExample(ID);
   if (!example) throw new Error(`${ID} is not in the shipped catalog`);
   const page = example.components.find((c) => !c.name.startsWith('/#__cloud__/'));
-  const play = page?.nodes.find((n) => n.id === 'play');
+  const play = nodesOf(page).find((n) => n.id === 'play');
   return String(play?.parameters?.functionScript ?? '');
 }
 
@@ -89,8 +92,8 @@ describe('P112-S15-WAVTWICE — the example that plays a cloud function’s audi
 
   it('keeps the key on the server: the cloud function reads a Secret and sends it in a header, not the URL', () => {
     const cloud = getExample(ID)!.components.find((c) => c.name === '/#__cloud__/Speak')!;
-    expect(cloud.nodes.some((n) => n.type === 'noodl.cloud.secret')).toBe(true);
-    const script = String(cloud.nodes.find((n) => n.id === 'speak_tts')!.parameters!.functionScript);
+    expect(nodesOf(cloud).some((n) => n.type === 'noodl.cloud.secret')).toBe(true);
+    const script = String(nodesOf(cloud).find((n) => n.id === 'speak_tts')!.parameters!.functionScript);
     expect(script).toContain("'x-goog-api-key': key");
     expect(script).not.toMatch(/\?key=/);
   });
