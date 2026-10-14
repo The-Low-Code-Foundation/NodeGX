@@ -14,6 +14,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { kitTarball, hasTarball } from '../own-018/kit-tarball.mjs';
 
 const GALLERY = path.join(process.env.HOME, 'vscode_projects', 'NodeGX test projects', 'OWN-019 Mistral apps');
 const INDEX_PORT = 4800;
@@ -43,7 +44,7 @@ if (cmd === 'add') {
   if (!round || !app) throw new Error('usage: gallery.mjs add <round> <round-root|app-dir> --tgz <tgz-dir> --brief <name>');
   const tgzDir = path.resolve(opt('--tgz', ''));
   const kit = path.basename(tgzDir);
-  if (!fs.existsSync(path.join(tgzDir, 'nodegx-preview-0.2.0.tgz'))) throw new Error(`no preview tarball in ${tgzDir}`);
+  if (!hasTarball(tgzDir, 'nodegx-preview')) throw new Error(`no preview tarball in ${tgzDir}`);
   const kitDir = path.join(GALLERY, 'tgz', kit);
   if (!fs.existsSync(kitDir)) fs.cpSync(tgzDir, kitDir, { recursive: true, filter: (s) => !/\.log$/.test(s) });
   const dest = path.join(GALLERY, round, path.basename(app));
@@ -99,7 +100,7 @@ if (cmd === 'add') {
       console.log(`${a.round.padEnd(6)} backend ${fs.existsSync(ready) ? fs.readFileSync(ready, 'utf8').trim() : 'did not start (see logs)'}`);
     }
     const out = fs.openSync(path.join(logs, `${a.round}.log`), 'w');
-    const p = spawn('npx', ['-y', `--package=${path.join(GALLERY, 'tgz', a.kit, 'nodegx-preview-0.2.0.tgz')}`, 'noodl-preview', path.join(GALLERY, a.app), '--port', String(a.port), '--no-watch'],
+    const p = spawn('npx', ['-y', `--package=${kitTarball(path.join(GALLERY, 'tgz', a.kit), 'nodegx-preview')}`, 'noodl-preview', path.join(GALLERY, a.app), '--port', String(a.port), '--no-watch'],
       { env, cwd: home, detached: true, stdio: ['ignore', out, out] });
     p.unref();
     pids.push(-p.pid); // the process group: npx and the server it starts
@@ -124,7 +125,7 @@ if (cmd === 'add') {
   const env = { ...process.env, HOME: home, npm_config_cache: path.join(GALLERY, '.home', '.npm') };
   for (const k of Object.keys(env)) if (k.startsWith('NODEGX_') || k.startsWith('NOODL_') || /KEY|TOKEN|SECRET/.test(k)) delete env[k];
   const client = new Client({ name: 'own019-gallery-keeper', version: '0' });
-  await client.connect(new StdioClientTransport({ command: 'npx', args: ['-y', `--package=${path.join(GALLERY, 'tgz', a.kit, 'nodegx-mcp-0.2.0.tgz')}`, 'noodl-mcp', appDir, '--allow-writes'], cwd: home, env, stderr: 'inherit' }));
+  await client.connect(new StdioClientTransport({ command: 'npx', args: ['-y', `--package=${kitTarball(path.join(GALLERY, 'tgz', a.kit), 'nodegx-mcp')}`, 'noodl-mcp', appDir, '--allow-writes'], cwd: home, env, stderr: 'inherit' }));
   const r = await client.callTool({ name: 'call_tool', arguments: { name: 'provision_backend', arguments: { name } } }, undefined, { timeout: 180000 });
   const text = (r.content || []).map((c) => c.text).join('');
   console.log(text.slice(0, 400));

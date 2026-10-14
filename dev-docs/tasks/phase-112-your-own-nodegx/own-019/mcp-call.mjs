@@ -6,13 +6,14 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { kitTarball, hasTarball } from '../own-018/kit-tarball.mjs';
 
 const argv = process.argv.slice(2);
 const APP = path.resolve(argv[0] || '');
 const ti = argv.indexOf('--tgz');
 const TGZ = path.resolve(argv[ti + 1] || '');
 const calls = argv.slice(1).filter((_, i, a) => i !== ti - 1 && i !== ti);
-if (!fs.existsSync(path.join(APP, 'nodegx.project.json')) || !fs.existsSync(path.join(TGZ, 'nodegx-mcp-0.2.0.tgz')) || calls.length % 2) {
+if (!fs.existsSync(path.join(APP, 'nodegx.project.json')) || !hasTarball(TGZ, 'nodegx-mcp') || calls.length % 2) {
   throw new Error("usage: node mcp-call.mjs <app-dir> --tgz <tgz-dir> <tool> '<json>' …");
 }
 const home = fs.mkdtempSync(path.join(os.tmpdir(), 'mcp-call-'));
@@ -21,7 +22,7 @@ for (const k of Object.keys(env)) if (k.startsWith('NODEGX_') || k.startsWith('N
 const mcpRequire = createRequire(path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../../../packages/noodl-mcp/package.json'));
 const { Client } = await import(mcpRequire.resolve('@modelcontextprotocol/sdk/client/index.js'));
 const { StdioClientTransport } = await import(mcpRequire.resolve('@modelcontextprotocol/sdk/client/stdio.js'));
-const transport = new StdioClientTransport({ command: 'npx', args: ['-y', `--package=${path.join(TGZ, 'nodegx-mcp-0.2.0.tgz')}`, 'noodl-mcp', APP, '--allow-writes'], cwd: home, env, stderr: 'ignore' });
+const transport = new StdioClientTransport({ command: 'npx', args: ['-y', `--package=${kitTarball(TGZ, 'nodegx-mcp')}`, 'noodl-mcp', APP, '--allow-writes'], cwd: home, env, stderr: 'ignore' });
 const client = new Client({ name: 'own019-mcp-call', version: '0' });
 await client.connect(transport);
 try {

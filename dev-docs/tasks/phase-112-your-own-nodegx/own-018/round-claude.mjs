@@ -16,6 +16,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
+import { kitTarball, kitVersion } from './kit-tarball.mjs';
 
 const [rootArg, tgzDir, promptFile, ...rest] = process.argv.slice(2);
 if (!rootArg || !tgzDir || !promptFile) throw new Error('usage: node round-claude.mjs <root> <tgz-dir> <prompt-file> [--model sonnet]');
@@ -26,7 +27,7 @@ fs.mkdirSync(rootArg, { recursive: true });
 const root = fs.realpathSync(rootArg);
 const HOME = path.join(root, 'home');
 const APPS = path.join(root, 'work', 'apps');
-const tgz = (name) => path.resolve(tgzDir, name);
+const tgz = (pkg) => kitTarball(path.resolve(tgzDir), pkg); // by package name, any version (s6)
 for (const d of [path.join(HOME, 'tmp'), path.dirname(APPS)]) fs.mkdirSync(d, { recursive: true });
 
 const labEnv = { ...process.env };
@@ -34,7 +35,7 @@ for (const k of Object.keys(labEnv)) if (k.startsWith('NODEGX_') || k.startsWith
 const serverEnv = { HOME, TMPDIR: path.join(HOME, 'tmp'), npm_config_cache: path.join(HOME, '.npm') };
 
 // 1. npm create nodegx apps, from the packed tarball, HOME empty.
-const created = spawnSync('npx', ['-y', `--package=${tgz('create-nodegx-0.2.0.tgz')}`, 'create-nodegx', APPS], { cwd: path.dirname(APPS), env: { ...labEnv, ...serverEnv }, encoding: 'utf8' });
+const created = spawnSync('npx', ['-y', `--package=${tgz('create-nodegx')}`, 'create-nodegx', APPS], { cwd: path.dirname(APPS), env: { ...labEnv, ...serverEnv }, encoding: 'utf8' });
 fs.writeFileSync(path.join(root, 'create.log'), created.stdout + created.stderr);
 if (created.status !== 0) throw new Error(`create-nodegx exited ${created.status}; see create.log`);
 
@@ -52,8 +53,8 @@ if (!/Claude Code: cd apps && claude\) and accept the "nodegx" server/.test(crea
 // 2. The server the person accepts, with the registry name → the tarball and an empty HOME.
 const mcp = JSON.parse(fs.readFileSync(path.join(APPS, '.mcp.json'), 'utf8'));
 const server = mcp.mcpServers.nodegx;
-if (JSON.stringify(server.args) !== JSON.stringify(['-y', '@nodegx/mcp@0.2.0', '--allow-writes'])) throw new Error(`apps/.mcp.json changed: ${JSON.stringify(server)}`);
-server.args = ['-y', `--package=${tgz('nodegx-mcp-0.2.0.tgz')}`, 'noodl-mcp', '--allow-writes'];
+if (JSON.stringify(server.args) !== JSON.stringify(['-y', `@nodegx/mcp@${kitVersion(path.resolve(tgzDir))}`, '--allow-writes'])) throw new Error(`apps/.mcp.json changed: ${JSON.stringify(server)}`);
+server.args = ['-y', `--package=${tgz('nodegx-mcp')}`, 'noodl-mcp', '--allow-writes'];
 server.env = serverEnv;
 const mcpFile = path.join(root, 'mcp.json');
 fs.writeFileSync(mcpFile, JSON.stringify(mcp, null, 2) + '\n');

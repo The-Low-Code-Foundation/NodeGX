@@ -33,12 +33,13 @@ import net from 'node:net';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
+import { kitTarball, hasTarball } from '../own-018/kit-tarball.mjs';
 
 const argv = process.argv.slice(2);
 const opt = (name, dflt) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : dflt; };
 const target = path.resolve(argv[0] || '');
 const TGZ = path.resolve(opt('--tgz', ''));
-if (!argv[0] || !fs.existsSync(path.join(TGZ, 'nodegx-preview-0.2.0.tgz'))) throw new Error('usage: node grade-editor.mjs <round-root | app-dir> --tgz <tgz-dir> [--out <dir>] [--home <dir>]');
+if (!argv[0] || !hasTarball(TGZ, 'nodegx-preview')) throw new Error('usage: node grade-editor.mjs <round-root | app-dir> --tgz <tgz-dir> [--out <dir>] [--home <dir>]');
 const findApp = (dir, depth = 0) => {
   if (fs.existsSync(path.join(dir, 'nodegx.project.json'))) return dir;
   if (depth > 3) return null;
@@ -117,7 +118,7 @@ const startBackend = async () => {
   const instance = (projectText().match(/"instanceId"\s*:\s*"([^"]+)"/) || [])[1];
   const mine = configs.find((c) => c.id === instance) || configs[0];
   if (!mine?.name) return { backend: true, started: false, why: `no backend config for ${instance} under ${dir}` };
-  const transport = new StdioClientTransport({ command: 'npx', args: ['-y', `--package=${path.join(TGZ, 'nodegx-mcp-0.2.0.tgz')}`, 'noodl-mcp', APP, '--allow-writes'], cwd: LABHOME, env: cleanEnv(ROUNDHOME), stderr: 'ignore' });
+  const transport = new StdioClientTransport({ command: 'npx', args: ['-y', `--package=${kitTarball(TGZ, 'nodegx-mcp')}`, 'noodl-mcp', APP, '--allow-writes'], cwd: LABHOME, env: cleanEnv(ROUNDHOME), stderr: 'ignore' });
   mcp = new Client({ name: 'own019-grade-editor', version: '0' });
   await mcp.connect(transport);
   const r = await mcp.callTool({ name: 'call_tool', arguments: { name: 'provision_backend', arguments: { name: mine.name } } }, undefined, { timeout: 180000 });
@@ -129,7 +130,7 @@ const stopBackend = async () => { if (mcp) { try { await mcp.close(); } catch {}
 // ---------------------------------------------------------------- the preview
 let preview = null;
 const startPreview = async () => {
-  preview = spawn('npx', ['-y', `--package=${path.join(TGZ, 'nodegx-preview-0.2.0.tgz')}`, 'noodl-preview', APP, '--port', '0', '--no-watch'], { env: cleanEnv(LABHOME), cwd: LABHOME, stdio: ['ignore', 'pipe', 'pipe'] });
+  preview = spawn('npx', ['-y', `--package=${kitTarball(TGZ, 'nodegx-preview')}`, 'noodl-preview', APP, '--port', '0', '--no-watch'], { env: cleanEnv(LABHOME), cwd: LABHOME, stdio: ['ignore', 'pipe', 'pipe'] });
   let log = '';
   return new Promise((resolve, reject) => {
     const t = setTimeout(() => reject(new Error(`preview printed no URL in 120 s: ${log.slice(-600)}`)), 120000);

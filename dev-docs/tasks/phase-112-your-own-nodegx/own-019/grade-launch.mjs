@@ -46,6 +46,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
+import { kitTarball, hasTarball } from '../own-018/kit-tarball.mjs';
 // s5 LAPTOPGAPS (R39): the render measure itself, so this grader and render_report read a laptop page the same way.
 const rm = createRequire(import.meta.url)('../../../../packages/nodegx-render-measure/src/index.js');
 
@@ -53,7 +54,7 @@ const argv = process.argv.slice(2);
 const opt = (name, dflt) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : dflt; };
 const target = path.resolve(argv[0] || '');
 const TGZ = path.resolve(opt('--tgz', ''));
-if (!argv[0] || !fs.existsSync(path.join(TGZ, 'nodegx-preview-0.2.0.tgz'))) throw new Error('usage: node grade-launch.mjs <round-root | app-dir> --tgz <tgz-dir> [--out <dir>] [--no-audit]');
+if (!argv[0] || !hasTarball(TGZ, 'nodegx-preview')) throw new Error('usage: node grade-launch.mjs <round-root | app-dir> --tgz <tgz-dir> [--out <dir>] [--no-audit]');
 
 const findApp = (dir, depth = 0) => {
   if (fs.existsSync(path.join(dir, 'nodegx.project.json'))) return dir;
@@ -106,7 +107,7 @@ const RE = {
 const reSrc = (re) => re.toString();
 
 // ---------------------------------------------------------------- the preview, from the tarball
-const preview = spawn('npx', ['-y', `--package=${path.join(TGZ, 'nodegx-preview-0.2.0.tgz')}`, 'noodl-preview', APP, '--port', '0', '--no-watch'], { env, cwd: LABHOME, stdio: ['ignore', 'pipe', 'pipe'] });
+const preview = spawn('npx', ['-y', `--package=${kitTarball(TGZ, 'nodegx-preview')}`, 'noodl-preview', APP, '--port', '0', '--no-watch'], { env, cwd: LABHOME, stdio: ['ignore', 'pipe', 'pipe'] });
 let previewLog = '';
 const url = await new Promise((resolve, reject) => {
   const t = setTimeout(() => reject(new Error(`preview printed no URL in 120 s: ${previewLog.slice(-600)}`)), 120000);
@@ -674,7 +675,7 @@ if (!argv.includes('--no-audit')) {
     const mcpRequire = createRequire(path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../../../packages/noodl-mcp/package.json'));
     const { Client } = await import(mcpRequire.resolve('@modelcontextprotocol/sdk/client/index.js'));
     const { StdioClientTransport } = await import(mcpRequire.resolve('@modelcontextprotocol/sdk/client/stdio.js'));
-    const transport = new StdioClientTransport({ command: 'npx', args: ['-y', `--package=${path.join(TGZ, 'nodegx-mcp-0.2.0.tgz')}`, 'noodl-mcp', APP], cwd: LABHOME, env, stderr: 'ignore' });
+    const transport = new StdioClientTransport({ command: 'npx', args: ['-y', `--package=${kitTarball(TGZ, 'nodegx-mcp')}`, 'noodl-mcp', APP], cwd: LABHOME, env, stderr: 'ignore' });
     const client = new Client({ name: 'own019-grade', version: '0' });
     await client.connect(transport);
     const txt = (r) => (r.content || []).filter((c) => c.type === 'text').map((c) => c.text).join('\n');

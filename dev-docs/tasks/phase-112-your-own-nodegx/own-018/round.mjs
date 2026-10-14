@@ -16,6 +16,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
+import { kitTarball } from './kit-tarball.mjs';
 
 const [root, tgzDir, promptFile, ...rest] = process.argv.slice(2);
 if (!root || !tgzDir || !promptFile) throw new Error('usage: node round.mjs <root> <tgz-dir> <prompt-file> [--max-price N] [--max-turns N]');
@@ -30,7 +31,7 @@ const VIBE = 'mistral-vibe==2.26.1';
 const HOME = path.join(root, 'home');
 const APPS = path.join(root, 'work', 'apps');
 const OUT = path.join(root, `out${tag}`);
-const tgz = (name) => path.resolve(tgzDir, name);
+const tgz = (pkg) => kitTarball(path.resolve(tgzDir), pkg); // by package name, any version (s6)
 fs.mkdirSync(path.join(HOME, '.vibe'), { recursive: true });
 fs.mkdirSync(path.dirname(APPS), { recursive: true });
 
@@ -50,11 +51,11 @@ Object.assign(env, {
 
 // 1. The person: `npm create nodegx apps`, from the packed tarball.
 if (!project) {
-const created = spawnSync('npx', ['-y', `--package=${tgz('create-nodegx-0.2.0.tgz')}`, 'create-nodegx', APPS], { cwd: path.dirname(APPS), env, encoding: 'utf8' });
+const created = spawnSync('npx', ['-y', `--package=${tgz('create-nodegx')}`, 'create-nodegx', APPS], { cwd: path.dirname(APPS), env, encoding: 'utf8' });
 fs.writeFileSync(path.join(root, 'create.log'), created.stdout + created.stderr);
 if (created.status !== 0) throw new Error(`create-nodegx exited ${created.status}; see create.log`);
 }
-const serverArgs = ['-y', `--package=${tgz('nodegx-mcp-0.2.0.tgz')}`, 'noodl-mcp', ...(project ? [path.join(APPS, project)] : []), '--allow-writes', ...(project ? ['--all-tools'] : [])];
+const serverArgs = ['-y', `--package=${tgz('nodegx-mcp')}`, 'noodl-mcp', ...(project ? [path.join(APPS, project)] : []), '--allow-writes', ...(project ? ['--all-tools'] : [])];
 
 // 2. The person adds Mistral Large 4 to Vibe (2.26.1 ships no entry for it) by copying the one Mistral model entry
 //    Vibe does ship (Mistral Medium 3.5: temperature 1.0, thinking high) and changing the name and prices, then

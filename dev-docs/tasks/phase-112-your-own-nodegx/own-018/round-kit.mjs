@@ -34,6 +34,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
+import { kitTarball, kitVersion } from './kit-tarball.mjs';
 
 const [rootArg, tgzDir, promptFile, ...rest] = process.argv.slice(2);
 if (!rootArg || !tgzDir || !promptFile) throw new Error('usage: node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price N] [--max-turns N] [--thinking high|low]');
@@ -47,7 +48,7 @@ const VIBE = 'mistral-vibe==2.26.1';
 const HOME = path.join(root, 'home');
 const APPS = path.join(root, 'work', 'apps');
 const OUT = path.join(root, 'out');
-const tgz = (name) => path.resolve(tgzDir, name);
+const tgz = (pkg) => kitTarball(path.resolve(tgzDir), pkg); // by package name, any version (s6)
 fs.mkdirSync(path.join(HOME, '.vibe'), { recursive: true });
 fs.mkdirSync(path.join(HOME, 'tmp'), { recursive: true });
 fs.mkdirSync(path.dirname(APPS), { recursive: true });
@@ -113,7 +114,7 @@ fs.writeFileSync(
 
 // 1. npm create nodegx apps, from the packed tarball.
 const kit = opt('--kit', 'core');
-const created = spawnSync('npx', ['-y', `--package=${tgz('create-nodegx-0.2.0.tgz')}`, 'create-nodegx', APPS, ...(kit === 'vibe' ? ['--vibe'] : [])], { cwd: path.dirname(APPS), env, encoding: 'utf8' });
+const created = spawnSync('npx', ['-y', `--package=${tgz('create-nodegx')}`, 'create-nodegx', APPS, ...(kit === 'vibe' ? ['--vibe'] : [])], { cwd: path.dirname(APPS), env, encoding: 'utf8' });
 fs.writeFileSync(path.join(root, 'create.log'), created.stdout + created.stderr);
 if (created.status !== 0) throw new Error(`create-nodegx exited ${created.status}; see create.log`);
 
@@ -130,9 +131,9 @@ if (seedArg) {
 // 2. The registry name → the tarball, in the config create-nodegx wrote (and nothing else in it).
 const cfgFile = path.join(APPS, '.vibe', 'config.toml');
 const cfg = fs.readFileSync(cfgFile, 'utf8');
-const pinned = '"@nodegx/mcp@0.2.0"';
-if (!cfg.includes(pinned)) throw new Error('create-nodegx wrote no @nodegx/mcp@0.2.0 server into .vibe/config.toml');
-let next = cfg.replace(pinned, `"--package=${tgz('nodegx-mcp-0.2.0.tgz')}", "noodl-mcp"`);
+const pinned = `"@nodegx/mcp@${kitVersion(path.resolve(tgzDir))}"`; // the kit's pin = the packed server's version (s6)
+if (!cfg.includes(pinned)) throw new Error(`create-nodegx wrote no ${pinned} server into .vibe/config.toml`);
+let next = cfg.replace(pinned, `"--package=${tgz('nodegx-mcp')}", "noodl-mcp"`);
 const thinking = opt('--thinking', null);
 if (thinking) next = next.replace(/^thinking = "[a-z]+"$/m, `thinking = "${thinking}"`); // a control arm, recorded in command.txt
 const temperature = opt('--temperature', null); // OWN-019 s2: a control arm, as --thinking
@@ -178,6 +179,12 @@ const argsFor = (prompt, out) => [
   '--workdir', APPS
 ];
 fs.writeFileSync(path.join(root, 'command.txt'), ['uvx', ...argsFor(path.resolve(promptFile), OUT)].join(' ') + `\n# key: ${keyName}; kit: ${kit}${model ? `; model = ${model}` : ''}${seedArg ? `; seed = ${seedArg}` : ''}${thinking ? `; thinking = ${thinking}` : ''}${temperature ? `; temperature = ${temperature}` : ''}${sittings > 1 ? `; sittings ≤ ${sittings}, later prompts ${CONTINUE}, max-total $${maxTotal}` : ''}\n`);
+// OWN-019 s6: `--dry` stops here — the kit created and rewritten to the tarball, command.txt written, no Vibe started.
+if (rest.includes('--dry')) {
+  proxy?.kill();
+  console.log(`dry: ${root} — kit ${path.basename(path.resolve(tgzDir))}, server ${tgz('nodegx-mcp')}`);
+  process.exit(0);
+}
 
 // OWN-019 s2: 12 was shorter than Large 4's own productive thinks. Vibe writes a think to the journal only when it
 // ends; the long design thinks of rounds that finished took up to 10.1 min (9–17 KB/min), and v4/v8 were stopped at

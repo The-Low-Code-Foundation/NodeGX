@@ -44,6 +44,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
+import { kitTarball, kitVersion } from './kit-tarball.mjs';
+const MCP_AT = () => `@nodegx/mcp@${kitVersion(path.resolve(tgzDir))}`; // the kit's pin = the packed server's version (s6)
 
 const [rootArg, tgzDir, promptFile, ...rest] = process.argv.slice(2);
 if (!rootArg || !tgzDir || !promptFile) throw new Error('usage: node round-opencode.mjs <root> <tgz-dir> <prompt-file> [--max-steps N] [--variant none|high] [--max-usd X]');
@@ -63,7 +65,7 @@ const XDG = {
   XDG_CACHE_HOME: path.join(HOME, '.cache'),
   XDG_STATE_HOME: path.join(HOME, '.local', 'state')
 };
-const tgz = (name) => path.resolve(tgzDir, name);
+const tgz = (pkg) => kitTarball(path.resolve(tgzDir), pkg); // by package name, any version (s6)
 for (const d of [...Object.values(XDG), path.join(HOME, 'tmp'), path.join(XDG.XDG_CONFIG_HOME, 'opencode'), path.dirname(APPS)]) fs.mkdirSync(d, { recursive: true });
 
 const envLine = fs.readFileSync(path.join(REPO, '.env'), 'utf8').split('\n').find((l) => l.startsWith('MISTRAL_API_KEY='));
@@ -96,10 +98,10 @@ fs.writeFileSync(sealFile, JSON.stringify(seal, null, 2) + '\n');
 fs.writeFileSync(path.join(root, 'opencode-seal.json'), JSON.stringify(seal, null, 2) + '\n');
 
 // 1. npm create nodegx apps, from the packed tarball.
-const created = spawnSync('npx', ['-y', `--package=${tgz('create-nodegx-0.2.0.tgz')}`, 'create-nodegx', APPS], { cwd: path.dirname(APPS), env, encoding: 'utf8' });
+const created = spawnSync('npx', ['-y', `--package=${tgz('create-nodegx')}`, 'create-nodegx', APPS], { cwd: path.dirname(APPS), env, encoding: 'utf8' });
 fs.writeFileSync(path.join(root, 'create.log'), created.stdout + created.stderr);
 if (created.status !== 0) throw new Error(`create-nodegx exited ${created.status}; see create.log`);
-if (!/Another AI coder: give it the server "npx -y @nodegx\/mcp@0\.2\.0 --allow-writes" \(stdio\)\./.test(created.stdout)) throw new Error('create-nodegx no longer prints the "Another AI coder" line this round follows; see create.log');
+if (!created.stdout.includes(`Another AI coder: give it the server "npx -y ${MCP_AT()} --allow-writes" (stdio).`)) throw new Error('create-nodegx no longer prints the "Another AI coder" line this round follows; see create.log');
 
 // 2. The folder's opencode.json. Since s2 (17b992839) create-nodegx writes it (the server, Large 4's 128k context) and
 // says `opencode -m mistral/mistral-large-4`; before, the person wrote it from the "Another AI coder" line. Either way
@@ -108,12 +110,12 @@ const configFile = path.join(APPS, 'opencode.json');
 const kitWrote = fs.existsSync(configFile);
 const project = kitWrote
   ? JSON.parse(fs.readFileSync(configFile, 'utf8'))
-  : { $schema: 'https://opencode.ai/config.json', mcp: { nodegx: { type: 'local', command: ['npx', '-y', '@nodegx/mcp@0.2.0', '--allow-writes'], enabled: true } } };
+  : { $schema: 'https://opencode.ai/config.json', mcp: { nodegx: { type: 'local', command: ['npx', '-y', MCP_AT(), '--allow-writes'], enabled: true } } };
 const asWritten = JSON.stringify(project.mcp.nodegx.command);
 const written = project.mcp.nodegx.command;
-if (JSON.stringify(written.slice(0, 4)) !== JSON.stringify(['npx', '-y', '@nodegx/mcp@0.2.0', '--allow-writes'])) throw new Error(`opencode.json names the server as ${asWritten}`);
+if (JSON.stringify(written.slice(0, 4)) !== JSON.stringify(['npx', '-y', MCP_AT(), '--allow-writes'])) throw new Error(`opencode.json names the server as ${asWritten}`);
 // The registry name → the tarball; every flag the kit wrote after it (s2: --screenshots-to-files) is kept.
-project.mcp.nodegx.command = ['npx', '-y', `--package=${tgz('nodegx-mcp-0.2.0.tgz')}`, 'noodl-mcp', ...written.slice(3)];
+project.mcp.nodegx.command = ['npx', '-y', `--package=${tgz('nodegx-mcp')}`, 'noodl-mcp', ...written.slice(3)];
 if (opt('--context', null) !== null) {
   if (Number(opt('--context')) === 0) delete project.provider;
   else project.provider = { mistral: { models: { 'mistral-large-4': { limit: { context: Number(opt('--context')), output: 32000 } } } } };
