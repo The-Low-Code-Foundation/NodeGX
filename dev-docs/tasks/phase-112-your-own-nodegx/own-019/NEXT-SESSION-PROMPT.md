@@ -94,6 +94,10 @@ has R1–R3 (4810, 4811, 4813), RL1 (4812), RL2b (4814), RL3 (4815).
    **Window 2, from the recorder (s7 prep):** after the 16:06 reading (€57.16) s5 spent **$20.57 list** — R3 4.17
    (0.22 of its 4.39 was before 16:06), RL2 0.03, RL2b 6.82, RL3 9.55 (per-call `sent` × the kit's list prices; every
    round total matches the table to the cent). No Mistral round since. At €0.42/$ the console would read ≈ €65.8.
+   **The real price (Richard, 2026-10-14 ~20:50): the €255 monthly allowance costs €18 a month, tax included** ⇒ ×0.0706
+   on every console €: a quiz (€1.0–1.8) ≈ **€0.07–0.13**, a landing page (€2.9–4.0) ≈ **€0.20–0.28**; s4+s5's whole
+   day (≈ €35) ≈ €2.50. Capacity: ≈ 64 landing pages or ≈ 140 quizzes a month. If the rate doubles after the sale
+   (~10-20), the per-app price doubles and the capacity halves. Use these figures in AC8.
 6. **The claim write-up (AC8)** once tgz33's series is in, then **R35: Richard's own run, last.**
 
 ## Needs Richard
