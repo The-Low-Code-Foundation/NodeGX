@@ -200,7 +200,8 @@ export function registerRenderTools(
         'a change — a look waits for it to settle and misses a moment\'s flash). A target T is {text: "exact label"} or {text_contains} (a field\'s ' +
         'placeholder counts), {testid} (a data-testid set in the node\'s Data Attributes list — NOT its node id) ' +
         'or {selector}; a bare string is exact text. A tap is a real pointer press at the element\'s centre and is ' +
-        'REFUSED when something else covers it, naming what a finger would hit. The first failing step stops the run.',
+        'REFUSED when something else covers it, naming what a finger would hit; it answers once any scroll it started has ' +
+        'stopped (≤2 s). The first failing step stops the run.',
       inputSchema: {
         steps: z
           .array(z.record(z.unknown()))

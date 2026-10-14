@@ -213,10 +213,12 @@ function locateExpression(target) {
     if (all.length === 0) return { found: false, matched: 0 };
     let last;
     for (const el of all) {
-      el.scrollIntoView({ block: 'center', inline: 'center' });
+      // 'instant': under \`html { scroll-behavior: smooth }\` a plain scrollIntoView glides, the rect below is read
+      // before it arrives, and every target off screen was refused as off screen (P112-OWN019-TAPHOLD, L1's page).
+      el.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
       const r = el.getBoundingClientRect();
       const x = r.left + r.width / 2, y = r.top + r.height / 2;
-      if (x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) { last = { x, y, offscreen: true, wouldHit: 'nothing (off screen)' }; continue; }
+      if (x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) { last = { x, y, offscreen: true, wouldHit: 'nothing (off screen)', target: describe(el) }; continue; }
       // Lent pointer-events for the one measurement: elementFromPoint skips an element that has none.
       const before = el.style.pointerEvents;
       el.style.pointerEvents = 'auto';
@@ -485,6 +487,24 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), network
     const value = JSON.parse(last);
     return value && typeof value === 'object' ? { ...value, settledMs: Date.now() - t0 } : value;
   };
+  // A tap can start a glide (`scrollIntoView({ behavior: 'smooth' })`, `html { scroll-behavior: smooth }`): on L1's
+  // landing page (OWN-019 s4) it took ~1 s to reach the form, the step answered after two frames, and a read then
+  // said 101 px of 3788 — a working "scroll to the form" button read as broken (P112-OWN019-TAPHOLD). So a tap
+  // answers once no scroll position has moved for two frame pairs, for at most 2 s (`watch` is for during).
+  const SCROLLS = `(() => { const a = [scrollX, scrollY]; for (const e of document.querySelectorAll('*')) if (e.scrollTop || e.scrollLeft) a.push(e.scrollTop, e.scrollLeft); return a.join(','); })()`;
+  const scrollSettled = async () => {
+    const t0 = Date.now();
+    let last = await evaluate(SCROLLS);
+    let moved = false;
+    for (let same = 0; same < 2 && Date.now() - t0 < 2000; ) {
+      await frames();
+      const next = await evaluate(SCROLLS);
+      if (next === last) same++;
+      else (same = 0), (moved = true);
+      last = next;
+    }
+    return moved ? { scrolledMs: Date.now() - t0, still: Date.now() - t0 >= 2000 } : null;
+  };
   const press = async (target) => {
     let p = await evaluate(locateExpression(target));
     // A target that is not there YET (an animation, a route still mounting) gets a short grace, as the
@@ -529,6 +549,11 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), network
         row.pressed = p.target;
         if (p.matched > 1) row.matched = p.matched;
         await frames();
+        const glide = await scrollSettled();
+        if (glide) {
+          row.scrolledMs = glide.scrolledMs;
+          if (glide.still) row.stillScrolling = true;
+        }
       } else if (verb === 'type') {
         if (typeof step.type !== 'string') throw new UsageError(`Step ${i + 1}: type takes a string.`);
         if (step.into !== undefined) await press(step.into);
