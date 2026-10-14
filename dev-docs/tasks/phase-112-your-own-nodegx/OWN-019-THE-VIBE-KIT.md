@@ -9,7 +9,7 @@ package that only work well with Claude and Claude Code, we need to be able to o
 vibe version."*
 **Depends on** OWN-018 (the lab: `round-kit.mjs`, `grade-quiz.mjs`, kit tgz12, everything Mistral taught the kit) and
 Richard's Vibe subscription key (`MISTRAL_VIBE_API_KEY` in the repo `.env`, made under Code › Vibe CLI).
-**Status: 🟡 s3 done (2026-10-13). AC5 met (s2). AFTERTIMEOUT found and fixed (the app's graph; Condition note). R31 built as a process kit (sittings + hook + three teaching skills), then R32 (one session, taught); o1 showed one session re-creates the whole-app design think (171 KB) that sittings kept small; Mistral ran at half speed after 20:00. The field guide `own-019/VIBE-AND-LARGE4.md`; the lab records (`anatomy.mjs`, `--record`). Next: the same-window daytime comparison (o2 vs q7), then AC4. Handoff: `own-019/NEXT-SESSION-PROMPT.md`.**
+**Status: 🟡 s4 scoped (2026-10-14, Fable, with Richard): R33 no fork, R34 no Fable audit, R35 the series then Richard's own run last. AC5 met (s2); AC4 open; a third brief "Launch" (`own-019/sentence-launch.txt`: look, forms, a faked call, logic, storage) written, its grader owed. The sprint guide is `own-019/NEXT-SESSION-PROMPT.md` (Opus runs it). Earlier: s3 built the process kit (R31) then R32 (one session, taught, tgz27); q6 was the first process-kit 12/12; the field guide `own-019/VIBE-AND-LARGE4.md`.**
 **Model:** Opus for the sessions that build and read the rounds. The agent under test: **Mistral Large 4
 (`mistral-large-4`, never `-latest`) in Mistral Vibe**, pinned to a version per round (2.26.1 at opening).
 
@@ -75,15 +75,23 @@ post-tool, post-agent) — and the kit uses none of them yet.
   rounds whose apps the grader fails (or planted mutants), where its checklist goes red on the same lines.
 - **AC4 — the quiz, three in a row.** Three fresh headless Vibe rounds grade 12/12, `carryover` clean, finished by
   itself, no intervention.
-- **AC5 — a second brief, three in a row**, on its own grader.
-- **AC6 — Richard's own.** Richard runs `npm create nodegx-vibe`, opens Vibe himself and builds something of his
-  choosing with only what the kit printed; the task closes on his words.
+- **AC5 — a second brief, three in a row**, on its own grader. ✅ s2 (Pack It pk2–pk4, tgz17–19).
+- **AC5b — a third brief, three in a row (R35, 2026-10-14).** "Launch" (`own-019/sentence-launch.txt`): a landing
+  page where the look is the agent's own choice (the style challenge), a pricing toggle, an FAQ that closes the
+  others, a waitlist form with validation, a faked API call with a timed "Sending…" and a deterministic failure
+  (`@fail.test`), and the joined state kept over a reload. Its grader measures what it can (the sentences, the
+  timings, a non-default font, a palette, a type scale, contrast, no sideways scroll on a phone, a different layout
+  on a laptop) and puts each round's screens in front of Richard for the verdict it can't. Three different looks is
+  part of the result. A fourth brief (more moving parts) only if this one passes.
+- **AC6 — Richard's own, last (R35).** Only after our rounds and experiments are finished: Richard runs `npm create
+  nodegx-vibe`, opens Vibe interactively and asks for one of the three test apps **in his own words**; we grade it
+  with that brief's grader and compare with the lab's rounds. The task closes on his words.
 - **AC7 — shipped.** Published to npm with the core (publishing is Richard's step, R11).
-- **AC8 — the audit (Richard, 2026-10-13, s2).** When the experimenting is finished, a **Fable 5.1** session audits the
-  whole record — every round's journal, grade and cost, the kit's levers and what each measured, the bugs, the lab's
-  own faults (s2 found two: the unsealed root and the 12-minute watchdog) — and answers one question: *can Vibe +
-  Large 4 on the Vibe Code subscription (R30) be made to work, or not?* Its options include the Mistral issues R30
-  keeps (no PRs: the repo takes no code). Richard rules on its answer.
+- **AC8 — the claim write-up (reworded 2026-10-14, R34; was a Fable audit).** The round table, the four proofs with
+  their numbers (passes repeatedly; three kinds of app; the money read in the console, not inferred; a person gets
+  it), the three Launch looks side by side, the open defects, the levers kept and dropped, the fork trigger — in plain
+  words, so Richard can rule *yes* or *no* on **"Mistral Large 4 in Vibe is a great way to build NodeGX apps, for €20 a
+  month."** The field guide is the audit's record; Fable is not needed for it (*"this one is already pretty good"*).
 
 ## 7. Sessions
 
@@ -407,3 +415,20 @@ post-tool, post-agent) — and the kit uses none of them yet.
   (sittings 1–3: 48–94 chars/s, 26–54%). For the comparison: s2's one-shot quiz passes cost $2.44–4.90 list in 41–64
   min at afternoon speed; q6 cost about 2–4× that, mostly in the evening's slow window — the daytime pair (o2 vs q7)
   decides it.
+- **s4 scoping (2026-10-14 morning, Fable 5.1, with Richard) — three rulings, no rounds run.** Richard asked for the
+  verdict so far and about forking Vibe. Measured for the answer: Vibe 2.26.1 is the latest release (PyPI, 9 Oct);
+  the community has **no report of Large 4's long thinks** (every Vibe issue since 25 Sep searched: the nearest are a
+  Slovak prose loop, #1176, and GLM's empty turns, #1116 — Large 4 is a week old and Vibe's default model is GLM);
+  #1227 (error text hidden on the unified harness) and #1240 (`tools/list_changed` ignored) are open and unanswered;
+  the unified harness's Rust core is public (`harness/core`), Apache-2.0. Our own record, re-read: most "long-think
+  failures" were the lab's watchdog cutting productive thinks (v4, v8, o1); one real loop (v11) and two dropped
+  streams (q1, q2) in ~24 rounds. **R33 — no fork**: it would win little on cost (the thinking is the cost; editing
+  history breaks the prefix cache), a little on reliability, and compatibility only once legacy is gone; **trigger to
+  reopen: Mistral removes legacy before fixing #1227 and #1240**. Everything short of a fork is allowed, including a
+  Mistral-specific integration in the MCP. **R34 — no Fable audit** (the field guide is it; AC8 reworded as the claim
+  write-up). **R35 — the series**: three or more briefs × three rounds on one kit, levers between series, the
+  integration tuned throughout; **Richard's own interactive run comes last**, in his own words, after our rounds.
+  Written this session: the third brief (`own-019/sentence-launch.txt`) and the sprint guide
+  (`own-019/NEXT-SESSION-PROMPT.md`: the four proofs, the series rules, the round columns including the console's
+  allowance Δ that Richard reads, the Launch grader's checks and mutants, the lever list). The kit stays tgz27 (a copy
+  survives in the s3 scratchpad; matches HEAD). Opus runs the sprint.
