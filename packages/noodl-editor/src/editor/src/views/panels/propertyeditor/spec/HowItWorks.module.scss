@@ -589,7 +589,7 @@
   background: transparent;
   color: var(--theme-color-fg-default);
   font: inherit;
-  font-size: 18px;
+  font-size: var(--font-size-xl);
   cursor: pointer;
 
   &:hover {
