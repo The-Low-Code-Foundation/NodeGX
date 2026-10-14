@@ -163,7 +163,14 @@ const openBrowser = async (url, label) => {
     return r.result?.result?.value;
   };
   const page = (expr) => ev(`(() => { ${LIB}; return (${expr}); })()`);
-  const press = async (b) => { for (const type of ['mousePressed', 'mouseReleased']) await send('Input.dispatchMouseEvent', { type, x: b.x, y: b.y, button: 'left', clickCount: 1 }); };
+  // A press is held 100 ms, as a finger is: pressed and released in the same instant, a button's focus-scroll lands on
+// top of the smooth scroll its click started and cancels it (L1, s4: "Join the waitlist" stopped 2–201 px down; held
+// 120 ms, or tapped by touch, it reaches the form) — a fault no person can make.
+const press = async (b) => {
+  await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: b.x, y: b.y, button: 'left', clickCount: 1 });
+  await sleep(100);
+  await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: b.x, y: b.y, button: 'left', clickCount: 1 });
+};
   const waitFor = async (fn, ms, poll = 100) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (await fn()) return Date.now() - t0; await sleep(poll); } return null; };
   const seen = (re) => page(`seen(${re})`);
   const shot = async (name) => fs.writeFileSync(path.join(OUT, `${name}.png`), Buffer.from((await send('Page.captureScreenshot', { format: 'png' })).result.data, 'base64'));

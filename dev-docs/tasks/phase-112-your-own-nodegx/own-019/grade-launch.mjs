@@ -201,6 +201,8 @@ const at = (el, scroll = true) => {
 };
 const inView = (el) => { const r = el.getBoundingClientRect(); return r.top >= -1 && r.bottom <= innerHeight + 1 && r.height > 0; };
 // The page's scroller: the document, or the tallest element that scrolls (a NodeGX page may scroll inside a box).
+// The grader's own scrolls are instant: a page's 'scroll-behavior: smooth' (L1, s4) turns 'scrollTop = y' into a glide,
+// and a press or a screenshot taken mid-glide reads the wrong place.
 const scroller = () => {
   const d = document.scrollingElement;
   if (d.scrollHeight > innerHeight + 2) return d;
@@ -236,7 +238,14 @@ const formJoin = () => {
 const heroJoin = () => leaves(${reSrc(RE.joinHero)}).map(outer).sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0] || null;
 `;
 const page = (expr) => ev(`(() => { ${LIB}; return (${expr}); })()`);
-const press = async (b) => { for (const type of ['mousePressed', 'mouseReleased']) await send('Input.dispatchMouseEvent', { type, x: b.x, y: b.y, button: 'left', clickCount: 1 }); };
+// A press is held 100 ms, as a finger is: pressed and released in the same instant, a button's focus-scroll lands on
+// top of the smooth scroll its click started and cancels it (L1, s4: "Join the waitlist" stopped 2–201 px down; held
+// 120 ms, or tapped by touch, it reaches the form) — a fault no person can make.
+const press = async (b) => {
+  await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: b.x, y: b.y, button: 'left', clickCount: 1 });
+  await sleep(100);
+  await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: b.x, y: b.y, button: 'left', clickCount: 1 });
+};
 const seen = (re) => page(`seen(${reSrc(re)})`);
 const text = () => page(`vtext(document.body)`);
 const shot = async (name) => fs.writeFileSync(path.join(OUT, `${name}.png`), Buffer.from((await send('Page.captureScreenshot', { format: 'png' })).result.data, 'base64'));
@@ -245,8 +254,8 @@ const shot = async (name) => fs.writeFileSync(path.join(OUT, `${name}.png`), Buf
 // a box, which captureBeyondViewport never sees). Scrolling through also wakes any reveal-on-scroll animation.
 const scrollThrough = async () => {
   const h = await page(`(() => { const s = scroller(); return { h: s.scrollHeight, v: s === document.scrollingElement ? innerHeight : s.clientHeight }; })()`);
-  for (let y = 0; y < h.h; y += Math.max(200, h.v - 100)) { await page(`(() => { scroller().scrollTop = ${y}; return true; })()`); await sleep(250); }
-  await page(`(() => { scroller().scrollTop = 0; return true; })()`);
+  for (let y = 0; y < h.h; y += Math.max(200, h.v - 100)) { await page(`(() => { scroller().scrollTo({ top: ${y}, behavior: 'instant' }); return true; })()`); await sleep(250); }
+  await page(`(() => { scroller().scrollTo({ top: 0, behavior: 'instant' }); return true; })()`);
   await sleep(400);
 };
 const fullShot = async (name) => {
@@ -254,14 +263,14 @@ const fullShot = async (name) => {
   const step = g.v;
   const slices = [];
   for (let y = 0; y < Math.min(g.h, 16000); y += step) {
-    await page(`(() => { scroller().scrollTop = ${y}; return true; })()`);
+    await page(`(() => { scroller().scrollTo({ top: ${y}, behavior: 'instant' }); return true; })()`);
     await sleep(300);
     const real = await page(`scroller().scrollTop`);
     const png = (await send('Page.captureScreenshot', { format: 'png' })).result.data;
     slices.push({ y: real, png });
     if (real + step >= g.h) break;
   }
-  await page(`(() => { scroller().scrollTop = 0; return true; })()`);
+  await page(`(() => { scroller().scrollTo({ top: 0, behavior: 'instant' }); return true; })()`);
   // Stitch: the header above the scroller from the first slice, then each slice's scroller part at its scroll offset.
   const data = await ev(`(async () => {
     const g = ${JSON.stringify(g)}; const ys = ${JSON.stringify(slices.map((s) => s.y))}; const pngs = ${JSON.stringify(slices.map((s) => s.png))};
@@ -426,12 +435,12 @@ try {
   }
   check('contrast', cons.length >= 3 && cons.every((x) => x.ratio !== null && x.ratio >= 4.5), { min: cons.length ? Math.min(...cons.map((x) => x.ratio ?? 0)) : null, lines: cons });
 
-  await page(`(() => { scroller().scrollTop = 0; return true; })()`);
+  await page(`(() => { scroller().scrollTo({ top: 0, behavior: 'instant' }); return true; })()`);
   await sleep(300);
   await fullShot('phone');
 
   // scroll: the form is out of view, then "Join the waitlist" brings it in
-  await page(`(() => { scroller().scrollTop = 0; return true; })()`);
+  await page(`(() => { scroller().scrollTo({ top: 0, behavior: 'instant' }); return true; })()`);
   await sleep(400);
   const before = await fieldInfo();
   const hb = await page(`(() => { const b = heroJoin(); return b ? { text: norm(b.textContent), ...at(b) } : null; })()`);
