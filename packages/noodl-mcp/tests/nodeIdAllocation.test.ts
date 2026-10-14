@@ -66,9 +66,12 @@ describe('node id allocation (AAQ-011/F12)', () => {
         { id: 'page', type: 'Page', label: 'Dash', parameters: { title: 'Dash', urlPath: 'dash' }, children: ['layout'] },
         { id: 'layout', type: 'Group', label: 'Layout', parent: 'page', children: ['title', 'sub'] },
         { id: 'title', type: 'Text', label: 'Title', parent: 'layout', parameters: { text: 'Dash' } },
-        { id: 'sub', type: 'Text', label: 'Sub', parent: 'layout', parameters: { text: 'Numbers' } }
+        { id: 'sub', type: 'Text', label: 'Sub', parent: 'layout', parameters: { text: 'Numbers' } },
+        // P112-S15-TWOMCPREDS: a Text has no `text` OUTPUT, and the port door refuses a wire to a port a node can't
+        // have. The wire now arrives AT the colliding `title`, so it still has to follow a reallocated id.
+        { id: 'heading', type: 'String', label: 'Heading', parameters: { value: 'Dash' } }
       ],
-      connections: [{ fromId: 'title', fromProperty: 'text', toId: 'sub', toProperty: 'text' }],
+      connections: [{ fromId: 'heading', fromProperty: 'savedValue', toId: 'title', toProperty: 'text' }],
       visual_roots: ['page']
     });
     expect(res.isError).toBe(false);
@@ -97,8 +100,9 @@ describe('node id allocation (AAQ-011/F12)', () => {
     expect(layout.children).toEqual([title.id, 'sub']);
     expect(title.parent).toBe(layout.id);
     expect(nodes.visualRoots).toEqual([page.id]);
+    expect(ids).toContain('heading');
     expect(connections.connections).toEqual([
-      { fromId: title.id, fromProperty: 'text', toId: 'sub', toProperty: 'text' }
+      { fromId: 'heading', fromProperty: 'savedValue', toId: title.id, toProperty: 'text' }
     ]);
 
     // The reallocated ids still read like what the caller asked for.
