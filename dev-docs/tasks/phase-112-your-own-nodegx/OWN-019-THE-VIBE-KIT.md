@@ -528,4 +528,9 @@ post-tool, post-agent) — and the kit uses none of them yet.
     He saw RL1's WAITLIST eyebrow off its centred "Join the waitlist" block, which render_report did not name: RL1's
     group holds a 290 px form card and the drift rule skipped any group with a part > 240 px. **DRIFTTALLPART fixed
     `c52e01e4f`** (skip only with two or more tall parts); gallery corpus moved by exactly that one finding (302 px).
+  - **The Launch control drifted under the fix** — Sonnet's Driftwood hero: "DRIFTWOOD" wordmark 528 px left of a centred
+    3-line headline (the headline was the tall part that hid it). **Richard (~20:15): yes, that is a drift too.** The
+    control's `hero_wordmark` gets `textAlignX: center` (validates clean, drift gone); the 12 mutants regenerated from
+    it (s6 scratchpad `lchk/c/driftwood`, `lchk/lmut2`, control as `ctl`). **Graded on tgz33: control 19/19, 12/12
+    mutants fail exactly their declared checks (13/13).**
 

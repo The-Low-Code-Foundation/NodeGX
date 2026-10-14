@@ -71,8 +71,9 @@ has R1–R3 (4810, 4811, 4813), RL1 (4812), RL2b (4814), RL3 (4815).
    lists; the only diff is that clause, bundled three times. From the tarball: RL1's WAITLIST eyebrow named (302 px),
    RL2b unchanged. Gallery corpus from source: exactly that one new finding. **But the Launch control (`lctl`, Sonnet's
    Driftwood) now drifts too:** its hero's "DRIFTWOOD" wordmark sits 528 px left of the centred 3-line headline (the
-   headline was the hidden tall part) — all 12 mutants carry it. Grader `align` reads render-measure from SOURCE, so the
-   control is 18/19 until Richard rules (Needs Richard). Read his answer in the task file §7 s6 before grading.
+   headline was the hidden tall part) — all 12 mutants carry it. Richard: yes, a drift. **The control is now s6's `lchk/c/driftwood`**
+   (wordmark centred), mutants `lchk/lmut2` (control as `ctl`) — use these, not s5's `lchk/lctl` / `lmut`.
+   Graded on tgz33 (grader at `c52e01e4f`): control 19/19, all 12 mutants exact — 13/13 (`lchk/mutants.log`).
 3. **The series on tgz33, Large 4, by day, two at a time:** quiz ×3 (**CARRYOVER needs 3 clean in a row on one kit**),
    Launch ×3 (do they still drift/gap now that render_report says so?), the editor brief ×1 (`--seed` q6, the
    BACKENDSESSION brief — "start it again tomorrow" is now true; grade it AND restart the preview once by hand to see
@@ -92,9 +93,7 @@ has R1–R3 (4810, 4811, 4813), RL1 (4812), RL2b (4814), RL3 (4815).
 - **npm 0.2.1.** A peer's bump (`c2eab03bf`) carries every s5 kit change; origin/cline-dev has them (pushed 17:47).
   Publishing is Richard's (the release peer was told what 0.2.1 carries: opennoodl-a4, 17:58). s5's last commits
   (lab + docs, after 17:47) are local until the next push.
-- ✅ R40: the eyebrow drift IS a look failure (s6). **Open:** is the control's hero wordmark ("DRIFTWOOD" top-left over
-  a centred headline, `lchk/shot/33` in s6's scratchpad) a drift too? Yes → the control is 18/19 and needs its hero
-  centred (or a nav row) to be a control again; no → a wordmark at a section's top is exempt from `alignment-drift`.
+- ✅ R40: the eyebrow drift IS a look failure, and so is the control's hero wordmark (s6, both "yes").
 - Console readings.
 
 ## Where things are
