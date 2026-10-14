@@ -1,5 +1,31 @@
 # Next session — session 101 (2026-09-26/27) BUILT §76: `Pattern Extractor` — picker **122 → 123 of 130 (94.6%)**, the second row of Richard's 2026-09-26 ruling ("If we had 100% coverage that would be a big deal"). `Hash`'s crypto-call shape (§59) widened to seven seeded value outputs and a third signal pair (`Found`/`Not Found`, printed before `Done`, as `doExtract` fires them).
 
+## ✅ Session 103 (2026-10-14, BOARD lane 6): `P18-S102-GRAPHNOSPEC` fixed (`b01053e2b`). NSP-008 runs on the export again
+
+**The cause was in the shared runner, not the export.** The export's `canPlay` already puts an unspecced node outside.
+But `74a73de91` (P112 s8, 2026-10-11) made `runGraphScenarios` ask `graphReach` eagerly, beside `canPlay`. The
+export's `graphReach` builds the graph, so it threw on the scenarios `canPlay` had excluded, and the run ended there.
+Fixed in `nodegx-node-spec/src/runner/graph.ts` by putting the order back. A regression is in the node-spec kit
+(`tests/graph.test.ts`, "a scenario canPlay puts outside is never asked its reach"): red on the eager line, green on
+the fix.
+
+**Under the throw, G1 was stale** from `8a177580d` (ISL-033 corrected C6; the export's atomic And was never declared).
+It is declared now: c06 `divergence.export`, CONTRACT.md Part 2 C6 ⚠️ partial, and the node-spec gate's set is
+C6/C7/C8.
+
+Readings: the export graph runs 6/6 (**CONFORM: 1 passed, 3 diverged as declared, 81 outside, 0 failed of 85**).
+That is ISL-043's instrument, working. Node-spec graph 129/129, runtime graph 102/102. **The whole-package export
+jest reads `Test Suites: 3 failed, 112 passed, 115`**, and the three by name are `hls001-catalog-cardinality`
+(CATALOGNAME), `date-family` (DATEHARNESS) and `navigate-to-path` (NAVENCODE). Any fourth red is new.
+
+**Next, in order:** `P18-S102-NAVENCODE`, then `-DATEHARNESS`, then `-CATALOGNAME` / `-NOEXPORTCI`, then ISL-043.
+For ISL-043, note that 81 of 85 graph scenarios are *outside* on the export, so only 4 are graded today (1 passed,
+3 declared differences). "CONFORM" counts outside as conforming; the ledger line must not. The outside
+reasons are all in the report (`npx jest tests/node-spec-graph.test.ts`, the console block). Most are the harness's
+own limits (no world, one component, no `set`), not the exporter's.
+
+---
+
 ## ✅ Session 102 (2026-10-14, BOARD lane 6): the owed gates are read and session 101's pile is COMMITTED
 
 Everything below this section that says "uncommitted" or "owed gates" is history now: both gates ran. The
