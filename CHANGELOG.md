@@ -17,10 +17,10 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
-## 0.4.0 · 2026-10-12
+## 0.4.0 · 2026-10-14
 
-**NodeGX now opens the apps you make with `npm create nodegx`. This release also brings script files, new kinds of
-backend rule, and many fixes to how nodes behave.**
+**NodeGX now opens the apps you make with `npm create nodegx`. This release also brings script files, a window that
+explains each node, new kinds of backend rule and many fixes to how nodes behave.**
 
 ### New
 
@@ -29,9 +29,15 @@ backend rule, and many fixes to how nodes behave.**
 - **Functions can share code through script files.** Put `.js` files in your project's `scripts` folder. Scripts have
   their own section in the Components panel. A script opens in its own tab. A Function picks the scripts it needs
   in its Uses list. Code export includes the scripts.
-- **A node's properties now end with two folded sections.** *What this node does* explains each input in a sentence.
-  *Try this node* lets you set the inputs, press its signals and see what comes out.
-- **The Problems panel flags a wire to a port the node doesn't have.**
+- **A node can explain itself.** In the properties panel, *How this node works* under the node's name opens a window.
+  Its left side says what the node does with each input. Its right side lets you set the inputs, press the signals
+  and see what comes out.
+- **A Counter or a Slider whose minimum is above its maximum now says so.** A warning shows on the node while the app
+  runs in the editor.
+- **The Problems panel flags a wire to a port the node doesn't have.** It also flags a component with two Page nodes,
+  and a cloud function with two Request nodes.
+- **Nodes in a cloud function show their settings.** A new Aggregate Records shows its Class, Filter, Property and
+  Operation. On a REST backend, the class picker and the Record and User nodes show the backend's own field types.
 - **Keep When Leaving** on Page keeps a page as it was when someone navigates away and comes back. Component Stack has
   the same option, *Keep Pages When Unmounted*.
 - **Data Attributes** on every visual node, for example `data-testid`. Every visual node also has a *Scroll Into View*
@@ -50,10 +56,14 @@ backend rule, and many fixes to how nodes behave.**
   it. It makes a backup first.
 - **An existing field can be made required.**
 - **The Permissions page has an *Enforce my rules on this machine* switch,** to test your real rules locally.
+- **Agents other than Claude Code can build with NodeGX.** Mistral Vibe, for example, can now reach every NodeGX tool.
+  A new project gets an `AGENTS.md` beside its `CLAUDE.md`, because most other agents read that file instead.
 
 ### Changed
 
 - **A sign-in ends after 30 days without use.** The person signs in again.
+- Parse XML and Parse Feed's limit is now called *Max Characters*, which is what it counts. Existing wires keep
+  working.
 
 ### Fixed
 
@@ -76,6 +86,16 @@ backend rule, and many fixes to how nodes behave.**
   was an npm package.
 - A deploy no longer publishes your agent's files, such as `.mcp.json` and `CLAUDE.md`. `.mcp.json` names folders on
   your computer.
+- A Counter with a Start Value no longer sends 0 first.
+- A Variable read when a page mounts already holds its value. Before, it could write 0 over a saved value.
+- A Script node's wired outputs and signals now work outside the editor, for example in the npm preview.
+- A Video's Restart and Reset go back to its Start Time.
+- Aggregate Records in a cloud function now filters on a wired filter value, and reads the built-in backend's columns.
+- Model Request fails once when a provider sends back something that isn't an answer. Before, it sent the request
+  three times.
+- A cloud function no longer hangs when the signed-in user's details come back unreadable.
+- The User, Set User Properties and Sign Up nodes no longer show the accounts table's access rules as a property.
+- A Problems panel row no longer asks "did you mean" about the name it's just given.
 - Many smaller fixes to how nodes behave.
 
 ### Good to know
@@ -88,6 +108,8 @@ backend rule, and many fixes to how nodes behave.**
   is missing. The person needs to update to 0.4.0.
 - The first time you open a page your agent wrote, NodeGX rewrites that page's files. In a project kept in git, this
   leaves them changed.
+- **Aggregate Records behaves differently once you redeploy a cloud function that uses it.** A wired filter now
+  filters. When nothing matches, its outputs are empty.
 - Code export is still in alpha.
 - Windows installers aren't signed, so SmartScreen will warn you. Choose More info, then Run anyway.
 - If you use the MCP server with an assistant, restart the assistant's session after updating.
