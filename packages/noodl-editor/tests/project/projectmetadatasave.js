@@ -16,7 +16,7 @@
 // Asserted here end-to-end, against a real project on disk, because the corpus
 // check that found it runs against a live editor this suite cannot launch.
 const FileSystem = require('@noodl-utils/filesystem');
-const { ProjectModel } = require('@noodl-models/projectmodel');
+const { ProjectModel, flushPendingProjectSave } = require('@noodl-models/projectmodel');
 const { projectFromDirectory } = require('@noodl-models/projectmodel.editor');
 const Utils = require('@noodl-utils/utils');
 const Process = require('process');
@@ -128,6 +128,58 @@ describe('F44 project metadata reaches disk', function () {
         dir,
         (json) => json.metadata && json.metadata.f44merge && json.metadata.f44merge.colors.Brand === '#FF00AA'
       )
+        .then((json) => {
+          expect(json).not.toBe(null);
+          done();
+        })
+        .catch(done.fail);
+    });
+  });
+
+  // P112-S11-PAGEPORTS. `SchemaHandler._store` writes these three keys on open and
+  // on every window focus, `undefined` over `undefined` with no backend. Each armed
+  // a save, and the save wrote whatever else had changed in memory meanwhile: on
+  // open, the port cache the viewer had just announced for a Page. The cache fill
+  // is played here with `setDynamicPorts`, which is what the viewer's message calls.
+  it('a write of the value already there arms no save, and a changed value still does', function (done) {
+    withProjectCopy(function (project, dir) {
+      // The spec before this one can leave its save timer armed, and it would fire
+      // here, against this project (seed 29054). Drain it, as the save-trigger specs do.
+      flushPendingProjectSave().then(function () {
+        const file = path.join(dir, 'project.json');
+        const before = fs.readFileSync(file, 'utf8');
+        const group = project.getComponentWithName('/Home').graph.roots[0];
+        group.setDynamicPorts([{ name: 'pageportsProbe', plug: 'input', type: 'string' }]);
+
+        project.setMetaData('dbCollections', undefined);
+        project.setMetaData('systemCollections', undefined);
+        project.setMetaData('dbVersionMajor', undefined);
+
+        setTimeout(function () {
+          expect(fs.readFileSync(file, 'utf8')).toBe(before);
+
+          // The control: a value that differs is saved, and the save carries the
+          // cache along — which is what the three no-op writes above would have done.
+          project.setMetaData('dbVersionMajor', '5');
+          onDiskWhen(dir, (json) => json.metadata && json.metadata.dbVersionMajor === '5')
+            .then((json) => {
+              expect(json).not.toBe(null);
+              expect(JSON.stringify(json.components)).toContain('pageportsProbe');
+              done();
+            })
+            .catch(done.fail);
+        }, SAVE_DEBOUNCE_MS + 500);
+      }, done.fail);
+    });
+  });
+
+  it('the same object handed back after an in-place change still saves', function (done) {
+    withProjectCopy(function (project, dir) {
+      const styles = project.getMetaData('styles');
+      styles.pageportsInPlace = { written: true };
+      project.setMetaData('styles', styles);
+
+      onDiskWhen(dir, (json) => json.metadata && json.metadata.styles && json.metadata.styles.pageportsInPlace)
         .then((json) => {
           expect(json).not.toBe(null);
           done();
