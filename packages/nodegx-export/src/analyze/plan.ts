@@ -12746,6 +12746,36 @@ function planComponent(
     return { curve: [...curve] as number[], dur, delay };
   };
 
+  /**
+   * One snapshot per handler owner; a stateful control's own chain seeds its user-path value.
+   *
+   * 🔴 **Declared here, above `statesPlanOf`, and not beside the snapshot rule further down**
+   * (P100-UPG001-SNAP). A States node's listeners are snapshotted when it registers, and the first
+   * registration can be a Component Outputs read in the value-output pass, which runs before the
+   * snapshot rule's own lines. Declared below, both were a temporal-dead-zone throw.
+   */
+  const chainSnapshots = new Map<string, ChainSnapshot>();
+  function chainSnapshotFor(ownerKey: string, seedControlId?: string): ChainSnapshot {
+    let snap = chainSnapshots.get(ownerKey);
+    if (snap === undefined) {
+      snap = new Map();
+      if (seedControlId !== undefined) {
+        const stateVar = controlStateVars.get(seedControlId);
+        const spec = controlSpecOf(seedControlId);
+        if (stateVar !== undefined && spec !== undefined) {
+          snap.set(
+            stateVar.name,
+            spec.coerce === 'textinput'
+              ? { kind: 'input-text', inputId: seedControlId }
+              : { kind: 'control-event', controlId: seedControlId, form: spec.eventForm }
+          );
+        }
+      }
+      chainSnapshots.set(ownerKey, snap);
+    }
+    return snap;
+  }
+
   const statesPlans = new Map<string, StatesPlan | { defer: string }>();
   const statesLocals = new Map<string, string>();
   /**
@@ -15574,7 +15604,15 @@ function planComponent(
   // to the written expression; a read after an `op` write defers the reading node — the
   // compiler never silently emits the stale read.
   type ChainSnapshot = Map<string, ValueExpr | 'op'>;
-  const exprTouchesSnap = (e: ValueExpr, snap: ChainSnapshot): boolean => {
+  /**
+   * 🔴 **Function declarations, not `const` arrows, because the four are reached before this line runs**
+   * (P100-UPG001-SNAP). The component-output pass far above asks `resolveExpr` for a States output,
+   * which registers the node through `statesPlanOf`, and its chains are snapshotted here. As `const`s,
+   * that was a temporal-dead-zone throw, "Cannot access 'snapActionList' before initialization", and the
+   * export stopped on four real projects. The four close over nothing but each other, so hoisting them
+   * is safe wherever they are first called.
+   */
+  function exprTouchesSnap(e: ValueExpr, snap: ChainSnapshot): boolean {
     switch (e.kind) {
       case 'state-get':
         return snap.has(e.name);
@@ -15622,8 +15660,8 @@ function planComponent(
       default:
         return false;
     }
-  };
-  const snapExpr = (expr: ValueExpr, snap: ChainSnapshot): ValueExpr | { defer: string } => {
+  }
+  function snapExpr(expr: ValueExpr, snap: ChainSnapshot): ValueExpr | { defer: string } {
     switch (expr.kind) {
       case 'state-get': {
         const written = snap.get(expr.name);
@@ -15710,8 +15748,8 @@ function planComponent(
       default:
         return expr;
     }
-  };
-  const snapActionList = (actions: HandlerAction[], snap: ChainSnapshot): HandlerAction[] | { defer: string } => {
+  }
+  function snapActionList(actions: HandlerAction[], snap: ChainSnapshot): HandlerAction[] | { defer: string } {
     const out: HandlerAction[] = [];
     for (const a of actions) {
       const r = snapAction(a, snap);
@@ -15719,8 +15757,8 @@ function planComponent(
       out.push(r);
     }
     return out;
-  };
-  const snapAction = (action: HandlerAction, snap: ChainSnapshot): HandlerAction | { defer: string } => {
+  }
+  function snapAction(action: HandlerAction, snap: ChainSnapshot): HandlerAction | { defer: string } {
     switch (action.kind) {
       case 'state-set': {
         if (action.expr !== undefined) {
@@ -16098,29 +16136,7 @@ function planComponent(
       default:
         return action;
     }
-  };
-  /** One snapshot per handler owner; a stateful control's own chain seeds its user-path value. */
-  const chainSnapshots = new Map<string, ChainSnapshot>();
-  const chainSnapshotFor = (ownerKey: string, seedControlId?: string): ChainSnapshot => {
-    let snap = chainSnapshots.get(ownerKey);
-    if (snap === undefined) {
-      snap = new Map();
-      if (seedControlId !== undefined) {
-        const stateVar = controlStateVars.get(seedControlId);
-        const spec = controlSpecOf(seedControlId);
-        if (stateVar !== undefined && spec !== undefined) {
-          snap.set(
-            stateVar.name,
-            spec.coerce === 'textinput'
-              ? { kind: 'input-text', inputId: seedControlId }
-              : { kind: 'control-event', controlId: seedControlId, form: spec.eventForm }
-          );
-        }
-      }
-      chainSnapshots.set(ownerKey, snap);
-    }
-    return snap;
-  };
+  }
 
   // Every action sink compiles before attachment — the sweeps that report unattached sinks
   // read compiledSinks for their reasons. (This loop sits below outputSinkOf because the popup
