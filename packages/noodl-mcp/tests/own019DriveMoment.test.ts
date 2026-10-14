@@ -65,6 +65,24 @@ describeOrSkip('P112-OWN019 — drive_page sees the moment, and reloads the page
     expect((settled.steps[1] as { value: { backgroundName: string } }).value.backgroundName).toBe('white');
   }, 120_000);
 
+  // P112-OWN019-WATCHONE (s5): R3 watched Canberra while the carried green landed, by position, on Sydney.
+  it('a watch of every answer sees the flash on the one a single watch missed (control in the same run)', async () => {
+    const THREE =
+      "(() => { const names = ['One', 'Two', 'Three']; const bs = names.map((n, i) => { const b = document.createElement('button'); b.textContent = n; b.style.cssText = 'position:fixed;top:' + (10 + i * 50) + 'px;left:10px;width:120px;height:40px;background:#ffffff;color:#000000;z-index:99999'; document.body.appendChild(b); return b; }); setTimeout(() => { bs[0].style.background = '#16a34a'; }, 300); setTimeout(() => { bs[0].style.background = '#ffffff'; }, 380); return true; })()";
+    const never = { never: { backgroundName: 'green' } };
+    // Control: the one answer R3 watched — clean, and wrong to call it clean.
+    const one = await drive(session, [{ read: { expression: THREE } }, { watch: { look: { text: 'Two' } }, for_ms: 900, expect: never }]);
+    expect(one.steps[1].ok).toBe(true);
+    const all = await drive(session, [{ read: { expression: THREE } }, { watch: { look: [{ text: 'One' }, { text: 'Two' }, { text: 'Three' }] }, for_ms: 900, expect: never }]);
+    const row = all.steps[1] as { ok: boolean; error?: string; value: Array<{ target: unknown; states: Array<{ look: { backgroundName?: string } | null }> }> };
+    expect({ ok: row.ok, names: /^\{"text":"One"\}: /.test(row.error ?? ''), one: row.value[0].states.map((st) => st.look?.backgroundName), two: row.value[1].states.map((st) => st.look?.backgroundName) }).toEqual({
+      ok: false,
+      names: true,
+      one: ['white', 'green', 'white'],
+      two: ['white']
+    });
+  }, 120_000);
+
   it('reload loads THIS page again: what lived only in memory is gone, the URL is the same', async () => {
     const r = await drive(session, [
       { read: { expression: "(() => { window.__own019 = 'here'; return location.pathname + location.hash; })()" } },

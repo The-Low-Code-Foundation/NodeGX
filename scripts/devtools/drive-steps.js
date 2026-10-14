@@ -79,14 +79,17 @@
  *                                        reload of THIS screen shows (P112-OWN019-RELOADHERE: o2 proved "the best
  *                                        survives a reload" by navigating to its start page, and a reload of its
  *                                        results page showed "You scored  out of 5")
- *   { "watch": { "look": T }, "for_ms": 1500?, "expect"?: { "never": {…} } }
+ *   { "watch": { "look": T | [T, …] }, "for_ms": 1500?, "expect"?: { "never": {…} } }
  *                                        read T's look about every 25 ms for for_ms (≤ 10000) and answer every
  *                                        DISTINCT state in order, each with the ms it began and ended — what a
  *                                        person sees DURING a change, where a read's look waits for it to settle
  *                                        (P112-OWN019-WATCHMOMENT: the quiz's new answers wore the last question's
  *                                        green and red for a moment, and every settled look read them idle).
  *                                        T absent reads as null. `expect: { never: { backgroundName: "green" } }`
- *                                        fails the step when any state had those fields
+ *                                        fails the step when any state had those fields. A LIST of targets (≤ 8) is
+ *                                        read on every tick and answers per target; `never` fails on any of them
+ *                                        (P112-OWN019-WATCHONE: R3 watched Canberra while the carried green landed,
+ *                                        by position, on Sydney)
  *   { "viewport": "phone" | "390x844" }  resize
  *   { "screenshot": "name" }             a PNG of the viewport into --out-dir
  *   { "seed_storage": { "key": "value" } } write localStorage, and navigate afterwards to load it
@@ -621,28 +624,40 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), network
         row.url = await evaluate('location.pathname + location.hash');
       } else if (verb === 'watch') {
         const w = step.watch && typeof step.watch === 'object' ? step.watch : {};
-        if (w.look === undefined) throw new UsageError(`Step ${i + 1}: watch takes { look: T }.`);
+        if (w.look === undefined) throw new UsageError(`Step ${i + 1}: watch takes { look: T } or { look: [T, T, …] }.`);
         const forMs = Math.min(10000, Math.max(100, Number(step.for_ms ?? 1500)));
-        const expr = lookExpression(w.look);
+        // P112-OWN019-WATCHONE — a list watches every target on every tick. R3 (s5) proved "nothing left over" on
+        // Canberra while the last question's green landed, by position, on Sydney: one target proves nothing about
+        // the rest. One target keeps the answer it always had (a list of states); a list answers per target.
+        const many = Array.isArray(w.look);
+        const targets = many ? w.look : [w.look];
+        if (targets.length === 0 || targets.length > 8) throw new UsageError(`Step ${i + 1}: watch looks at 1 to 8 targets.`);
+        const expr = `Promise.all([${targets.map((t) => lookExpression(t)).join(', ')}])`;
         // The fields a person tells apart; a look's box geometry moves with layout and is not a different state.
         const keyOf = (v) => (v && typeof v === 'object' ? JSON.stringify({ text: v.text, visible: v.visible, backgroundName: v.backgroundName, colorName: v.colorName, opacity: v.opacity === undefined ? undefined : Math.round(v.opacity * 10) / 10 }) : 'null');
-        const states = [];
+        const states = targets.map(() => []);
         const t0 = Date.now();
         while (Date.now() - t0 <= forMs) {
-          const v = await evaluate(expr);
+          const vs = await evaluate(expr);
           const at = Date.now() - t0;
-          const last = states[states.length - 1];
-          if (last && last.key === keyOf(v)) last.until = at;
-          else states.push({ key: keyOf(v), from: at, until: at, look: v && typeof v === 'object' ? { text: v.text, visible: v.visible, backgroundName: v.backgroundName, colorName: v.colorName, opacity: v.opacity } : null });
+          vs.forEach((v, k) => {
+            const list = states[k];
+            const last = list[list.length - 1];
+            if (last && last.key === keyOf(v)) last.until = at;
+            else list.push({ key: keyOf(v), from: at, until: at, look: v && typeof v === 'object' ? { text: v.text, visible: v.visible, backgroundName: v.backgroundName, colorName: v.colorName, opacity: v.opacity } : null });
+          });
           await wait(25);
         }
-        row.value = states.map(({ from, until, look }) => ({ from, until, look }));
+        const shown = (list) => list.map(({ from, until, look }) => ({ from, until, look }));
+        row.value = many ? targets.map((t, k) => ({ target: t, states: shown(states[k]) })) : shown(states[0]);
         const never = step.expect && typeof step.expect === 'object' ? step.expect.never : undefined;
         if (never && typeof never === 'object') {
-          const hit = states.find((st) => st.look && Object.keys(never).every((k) => matches(st.look[k], never[k])));
-          if (hit) {
-            row.ok = false;
-            row.error = `${JSON.stringify(never)} was seen from ${hit.from} to ${hit.until} ms: ${JSON.stringify(hit.look)}`;
+          for (let k = 0; k < targets.length && row.ok; k++) {
+            const hit = states[k].find((st) => st.look && Object.keys(never).every((key) => matches(st.look[key], never[key])));
+            if (hit) {
+              row.ok = false;
+              row.error = `${many ? `${JSON.stringify(targets[k])}: ` : ''}${JSON.stringify(never)} was seen from ${hit.from} to ${hit.until} ms: ${JSON.stringify(hit.look)}`;
+            }
           }
         }
       } else if (verb === 'viewport') {

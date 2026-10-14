@@ -200,8 +200,9 @@ export function registerRenderTools(
         'edit: "js changing v"} (applied again on the next load, before the app can overwrite it), ' +
         '{clear_storage: true}, {stub_route: "/api/x", json?, body?, status?} (answers that path itself; put it ' +
         'first to meet a fetch made at boot), {reduced_motion: true|false}, {reload: true} (reload THIS page, as a person ' +
-        'does), {watch: {look: T}, for_ms?, expect?: {never: {backgroundName: "green"}}} (every state T showed DURING ' +
-        'a change — a look waits for it to settle and misses a moment\'s flash). A target T is {text: "exact label"} or {text_contains} (a field\'s ' +
+        'does), {watch: {look: T or [T, T, …]}, for_ms?, expect?: {never: {backgroundName: "green"}}} (every state each T ' +
+        'showed DURING a change — a look waits for it to settle and misses a moment\'s flash; watch EVERY answer, ' +
+        'not one: a colour left over lands by position). A target T is {text: "exact label"} or {text_contains} (a field\'s ' +
         'placeholder counts), {testid} (a data-testid set in the node\'s Data Attributes list — NOT its node id) ' +
         'or {selector}; a bare string is exact text. A tap is a real pointer press at the element\'s centre and is ' +
         'REFUSED when something else covers it, naming what a finger would hit; it answers once any scroll it started has ' +

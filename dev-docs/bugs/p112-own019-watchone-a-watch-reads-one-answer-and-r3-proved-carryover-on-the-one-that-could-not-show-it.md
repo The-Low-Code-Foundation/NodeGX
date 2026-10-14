@@ -1,13 +1,15 @@
 ---
 id: P112-OWN019-WATCHONE
 title: "drive_page's `watch` reads one target, and nothing says which — R3 proved \"nothing is left over\" by watching Canberra (answer 2) after tapping Lisbon (answer 1), while the last question's green lands by position on Sydney (answer 1): its proof passed, the grader saw the flash on every question"
-status: open
+status: fixed
 phase: P112
 task: OWN-019
 severity: medium
 area: drive steps (`scripts/devtools/drive-steps.js` `watch`, shipped in @nodegx/mcp's render harness; `renderTools.ts` drive_page description); the Vibe AGENTS.md "Driving a line" (the CARRYOVER line's example)
 found: P112 OWN-019 s5, 2026-10-14 (series round R3, Mistral Large 4, the quiz brief, tgz30 — read while grading)
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-019-THE-VIBE-KIT.md §7 (s5)
+regression: packages/noodl-mcp/tests/own019DriveMoment.test.ts "a watch of every answer sees the flash on the one a single watch missed (control in the same run)"
+kit: mcp
 ---
 
 The s5 quiz series on tgz30: R1 and R2 12/12 with carryover clean — both watched **Sydney** as question 2 appeared.
@@ -25,3 +27,9 @@ So CARRYOVER is not three in a row on one kit (R1 ✓, R2 ✓, R3 ✗ on tgz30).
 `never` failing on any of them; the description and the AGENTS.md example say "watch every answer of the new question,
 not one". Regression: a fixture whose flash lands on target 1 — a one-target watch on target 2 passes (control), the
 all-targets watch fails.
+
+**Fixed (s5, same day):** `watch: { look: [T, …] }` (≤ 8) reads every target on each tick and answers per target;
+`never` fails on any, naming it. One target answers exactly as before. The drive_page description and the Vibe
+AGENTS.md example now watch every answer ("a colour left over lands by position"). Regression: the flash on "One" —
+a single watch of "Two" passes (control, same run), the list watch fails naming "One"; on HEAD the list is refused
+as a target. Ships in tgz31; CARRYOVER's three-in-a-row is re-run there.

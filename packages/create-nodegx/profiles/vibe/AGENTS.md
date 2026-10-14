@@ -79,8 +79,10 @@ lines to the checklist and go on.
 person sees of a thing by its label — `{ "read": { "look": "Lisbon" }, "expect": { "backgroundName": "green" } }`. A
 read answers what a screenshot would; each screenshot you open makes every later step of the session cost more.
 A look waits for things to settle, so it can't see the moment a screen appears. For that line, `watch` right after
-the tap that changes the screen: `{ "watch": { "look": "Sydney" }, "for_ms": 2000, "expect": { "never": {
-"backgroundName": "green" } } }` lists every state Sydney showed and fails on a flash of green. For a reload line,
+the tap that changes the screen, on EVERY answer of the new screen: `{ "watch": { "look": ["Sydney", "Canberra",
+"Melbourne"] }, "for_ms": 2000, "expect": { "never": { "backgroundName": "green" } } }` lists every state each one
+showed and fails on a flash of green on any of them. Watch them all — a colour left over lands by position, so one
+answer watched can be the one it never touches. For a reload line,
 reload the screen you are on — `{ "reload": true }` — not a navigation to another one.
 
 ## Tools
