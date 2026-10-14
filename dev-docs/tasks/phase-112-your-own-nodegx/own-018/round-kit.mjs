@@ -224,8 +224,19 @@ function runSitting(prompt, tag) {
     const how = stalled ? `stalled (no journal growth for ${stalled} min)` : String(code);
     const seconds = Math.round((Date.now() - t0) / 1000);
     fs.writeFileSync(path.join(root, `agent${tag}.exit`), `${how} ${seconds}s`);
-    resolve({ how, stalled: Boolean(stalled), seconds, ...measure(out) });
+    resolve({ how, stalled: Boolean(stalled), seconds, ...measure(out), ...approvalEnd(path.join(root, `agent${tag}.jsonl`)) });
   }));
+}
+
+/** A headless Vibe that needs an approval (a tool outside the work folder) ends there, exit 0, outcome "finished" —
+ *  Q1's sitting 2 (s4): 42 s, NEXT.md unchanged, its last entry "Allow grep?" on the round root. Say so. */
+function approvalEnd(journal) {
+  try {
+    const tail = fs.readFileSync(journal, 'utf8').trim().split('\n').slice(-3).map((l) => JSON.parse(l));
+    const cb = tail.find((e) => e.type === 'callback' && e.detail?.kind === 'approval');
+    if (cb) return { outcome: 'approval', stop: `${cb.title} ${cb.detail?.effect?.display?.summary ?? ''}`.trim() };
+  } catch {}
+  return {};
 }
 
 /** One sitting's measures from Vibe's own export and journal: list $, tokens, calls, input per call, longest think. */

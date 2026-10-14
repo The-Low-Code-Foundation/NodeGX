@@ -314,7 +314,7 @@ export function firstFrameNote(): string {
   // OWN-019 census #38 — the note that leads an agent from the first frame to behaviour testing; on a client whose
   // list never changes, revealing does nothing it can see, so it names the call.
   const door = clientProfile().staticToolList
-    ? 'call call_tool({ name: "drive_page", arguments: { steps: [...] } }) — describe: true shows the steps it takes'
+    ? 'call call_tool({ name: "drive_page", arguments: { steps: [...] } }) — call_tool({ name: "drive_page", describe: true }) shows the steps it takes'
     : 'call find_tools({ query: "press" }) to reveal drive_page and send it a list of steps';
   return (
     'This report is the FIRST FRAME only: nothing was pressed, typed or waited for. To prove a button, form or ' +
