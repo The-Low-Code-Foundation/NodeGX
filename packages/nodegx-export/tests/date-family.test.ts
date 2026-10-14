@@ -8,6 +8,7 @@ import { parseProject } from '../src/parse/parseProject';
 import { dateLibSource } from '../src/emit/dateLib';
 import { ExportIR, ComponentIR, ConnectionIR, NodeIR, ParamValue } from '../src/ir/types';
 
+import * as runtimeDatemath from '../../noodl-runtime/src/nodes/std-library/date/datemath';
 import {
   addToDate,
   differenceBetween,
@@ -93,8 +94,19 @@ const runtimeDateToStringNode = (() => {
   }).outputText;
   const exported: Record<string, unknown> = {};
   const module = { exports: exported };
+  /**
+   * 🔴 **Every import the node makes is answered for real, and any other one throws** (P18-S102-DATEHARNESS).
+   * This used to be `require: () => ({})`. ISL-032 (`844f8569b`) made the node read its Date through
+   * `toDate` from `./date/datemath`, the stub answered `undefined` for it, the node's catch blanked every
+   * reading, and the three "agrees with the real _format" rows went red, so the export went ungraded for
+   * eight days. An import this harness does not know is now a load failure that names the module.
+   */
+  const runtimeRequire = (id: string): unknown => {
+    if (id === './date/datemath') return runtimeDatemath;
+    throw new Error(`date-family harness: datetostring.ts requires ${JSON.stringify(id)}, which the harness does not provide`);
+  };
   // eslint-disable-next-line no-new-func
-  new Function('exports', 'module', 'require', js)(exported, module, () => ({}));
+  new Function('exports', 'module', 'require', js)(exported, module, runtimeRequire);
   return (module.exports as { node: unknown }).node as {
     initialize: (this: unknown) => void;
     inputs: Record<string, { set: (this: unknown, value: unknown) => void }>;
@@ -224,7 +236,7 @@ describe('EXP-011 Tier 1.3 §A — the emitted module against the interpreter', 
     }
   });
 
-  it('dateToString agrees with the real _format — tokens, blanks, and the number it will not parse', () => {
+  it('dateToString agrees with the real _format — tokens, blanks, and the number it now reads', () => {
     const formats = [
       '{year}-{month}-{date}',
       '{date}/{month}/{yearShort}',
@@ -246,9 +258,14 @@ describe('EXP-011 Tier 1.3 §A — the emitted module against the interpreter', 
       '2024-02-29T09:05:03',
       'cake',
       new Date('nope'),
-      // 🔴 The number is the interesting one: this node does NOT read epoch milliseconds, where
-      // the other four do. Both sides must answer the blank.
-      1709197503000
+      // 🔴 The number is the interesting one. Until ISL-032 (P107-D14) this node did NOT read epoch
+      // milliseconds where the other four did, and both sides answered the blank. It reads them
+      // through toDate now, so both sides must render it — the row that caught the export still
+      // transcribing the old read (P18-S102-DATEHARNESS).
+      1709197503000,
+      // An empty Date, and two values toDate cannot read: blank on both sides, before and after D14.
+      {},
+      true
     ];
     for (const format of formats) {
       for (const input of inputs) {

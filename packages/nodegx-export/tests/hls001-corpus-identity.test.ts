@@ -210,6 +210,12 @@
  *    tree emit the file byte-identically, and reverting just that commit's two message lines in the emitted
  *    file reproduces the old hash exactly.
  *  - **20 added**, all `pattern-desk/**`.
+ *
+ * ✅ **Regenerated for P18-S102-DATEHARNESS (session 104, 2026-10-14), predicted before and counted after.**
+ * The emitted `dateToString` now reads its input through `toDate`, as the runtime has since ISL-032. The two
+ * corpus projects with a Date To String move one entry each, `deadline-desk/src/lib/date.ts` and
+ * `due-desk/src/lib/date.ts`: **2 lines moved, 0 added, 0 removed**, diffed key by key against the
+ * pre-regenerate golden.
  */
 import * as fs from 'fs';
 import * as path from 'path';

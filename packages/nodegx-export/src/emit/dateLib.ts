@@ -14,13 +14,12 @@
  *   author has already seen in the interpreter.
  * - `noodl-runtime/src/nodes/std-library/datetostring.ts` — `_format` and `fieldsInZone`.
  *
- * 🔴 **`Date To String` reads its input differently from the other four, and that is faithful.**
- * It predates `datemath.ts` (its own module comment calls itself "the whole date vocabulary
- * before this task") and its setter is `typeof value === 'string' ? new Date(value) : value` —
- * so a millisecond **number** is passed through unconverted, `getDate()` throws on it, and the
- * node's own catch turns that into a blank. The other four go through `toDate`, which reads a
- * number as epoch milliseconds. Normalising the two would "fix" a blank an author has already
- * worked around.
+ * 🔴 **`Date To String` reads its input through `toDate`, like the other four, since P107-D14.**
+ * It predates `datemath.ts` and used to read a millisecond **number** unconverted, so `getDate()`
+ * threw and the catch blanked it, while the Timezone branch rendered it. ISL-032 (`844f8569b`,
+ * ruled "One rule, like the other date nodes") moved the runtime to `toDate`. This module kept the
+ * old read for eight days, unseen, because the spec that grades it had been given a `require` stub
+ * that blanked the runtime's side too (P18-S102-DATEHARNESS).
  *
  * ⚠️ **These functions are pure; the nodes are not.** A node holds its last answer, and when its
  * Date input goes from a value to *unset* the interpreter abstains (`_recompute` returns early on
@@ -351,25 +350,24 @@ export function dateLibSource(): string {
     '/**',
     ' * Date To String — an instant rendered through a format template.',
     ' *',
-    ' * 🔴 THE INPUT IS READ DIFFERENTLY FROM THE OTHER FOUR, ON PURPOSE. This node predates the',
-    ' * shared date math, and its own setter is `typeof value === \'string\' ? new Date(value) : value`',
-    ' * — so a millisecond NUMBER arrives unconverted and getDate() throws on it, which the catch',
-    ' * below turns into a blank. Routing it through toDate() would "fix" a blank the author has',
-    ' * already seen and worked around.',
+    ' * The input is read through toDate(), as the other four read theirs (P107-D14, ISL-032): a',
+    ' * millisecond number renders, with or without a Timezone, and a value toDate() cannot read is',
+    " * the node's own catch. Until then this node read a number unconverted and blanked it.",
     ' *',
     ' * Undefined before anything has arrived (the node never formats until its setter runs); the',
     " * empty string for a date it could not read, which is the node's own catch.",
     ' */',
     'export function dateToString(value: unknown, format: unknown, timeZone: unknown, locale?: unknown): string | undefined {',
     "  if (value === undefined || value === null || value === '') return undefined;",
-    '  // The cast is the node\'s own read, lie included: a number reaches getDate() and throws.',
-    "  const t = (typeof value === 'string' ? new Date(value) : value) as Date;",
+    '  const t = toDate(value);',
     "  // The Timezone setter is `value || ''`, so a blank, a null and an unset input are one case.",
     "  const zone = (timeZone || '') as string;",
     '  // CMP-005. The Locale port reads the same way, and an empty one is the en-US that used to',
     '  // be written into the Intl call below.',
     "  const lang = (locale || 'en-US') as string;",
     '  try {',
+    "    // The node's own `if (!t) throw`, so an unreadable date lands in the same catch as before.",
+    "    if (!t) throw new RangeError('Invalid date');",
     '    const fields = zone',
     '      ? fieldsInZone(t, zone)',
     '      : {',
