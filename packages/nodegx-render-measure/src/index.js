@@ -561,7 +561,10 @@ function measureExpression(placeholders, probes = []) {
       // two parts, a centred heading block and a toggle-and-price group ~260 px left of it.
       const byTop = [...inks].sort((a, b) => a.top - b.top);
       if (!byTop.every((k, i) => i === 0 || k.top >= byTop[i - 1].bottom - 2)) continue;
-      if (byTop.some((k) => k.height > 240)) continue;
+      // Two or more tall parts, not one: RL1's waitlist is eyebrow, heading, line and a 290 px form card in ONE group,
+      // and "any part > 240" skipped it — Richard saw the eyebrow off the centred heading (s6). A page of sections
+      // has many tall children; a section with one card has one.
+      if (byTop.filter((k) => k.height > 240).length > 1) continue;
       const centre = pr.left + pr.width / 2;
       const offOf = (k) => k.left + k.width / 2 - centre;
       const centred = byTop.filter((k) => Math.abs(offOf(k)) <= 12 && k.width < pr.width * 0.9);
