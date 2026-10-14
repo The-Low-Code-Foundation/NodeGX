@@ -2,7 +2,7 @@
 
 **Opened 2026-10-06** from [DIRECTION.md](../../DIRECTION.md) D1 (ruled by Richard: the install command lives in this
 phase). **Depends on R2 (publish at 0.x), OWN-001, OWN-002, OWN-004.**
-**Status: 🟡 s12 (2026-10-14): AC1, AC3, AC4 ✅; AC2 — the made project opens in the released 0.4.0 and the first open writes nothing; a reopen with a page active still writes that page (PAGEPORTS, open) (§10).** **R2 ruled 2026-10-10 (s6): publish at 0.x**, after each package declares what it uses (node-spec → `@noodl/backend-contract`; project-contract → `ajv`, `ajv-formats`; the preview's page build → `buffer`, `@nodegx/project-contract`, `@nodegx/module-inject`). **R5 (s6): `@nodegx/canvas-look` ships with the kit, optional. R6 (s6): a package cannot publish while one of its `kit:` bugs is an open blocker; lesser ones are listed as known issues.**
+**Status: 🟡 s13 (2026-10-14): AC1, AC3, AC4 ✅; AC2 fixed in source (`76f37308c`, PAGEPORTS: the open-time save was armed by a no-op `setMetaData`), proven on the 0.4.0 release with the rule patched into its renderer; AC2 closes on the next release, re-driven (§11).** **R2 ruled 2026-10-10 (s6): publish at 0.x**, after each package declares what it uses (node-spec → `@noodl/backend-contract`; project-contract → `ajv`, `ajv-formats`; the preview's page build → `buffer`, `@nodegx/project-contract`, `@nodegx/module-inject`). **R5 (s6): `@nodegx/canvas-look` ships with the kit, optional. R6 (s6): a package cannot publish while one of its `kit:` bugs is an open blocker; lesser ones are listed as known issues.**
 **Rulings s9 (2026-10-11, one round, all four as recommended):** **R8** the npm names are `@nodegx/mcp` and `@nodegx/preview`, in the repo and on npm (the `@noodl` scope belongs to the original Noodl team; the bins keep their names) — done, `749bd0a38`. **R9** the command sets the folder up and the agent makes the app: it writes ONE file, the folder's `.mcp.json`, and `create_project` stays the one writer of projects, so the scoping conversation is never skipped. AC1 therefore reads *the command plus the agent's first `create_project`*. **R10** people type `npm create nodegx` (package `create-nodegx`). **R11** Richard runs `npm login` (this Mac's token answers 401); a later session publishes, after asking him once more just before it goes out.
 **Model:** **Opus.** Packaging and one install command with a stranger's run as the test; Fable only if the publish order turns into a design question. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
@@ -237,3 +237,41 @@ active). AC2 closes when PAGEPORTS is fixed.
 four bold lead sentences and its link white on white, and its header named the running version, not the post's.
 Every 0.3.0 and 0.4.0 install still shows it until the next release. A plain-`<p>` rewrite of the live feed post
 would fix it for them now (Richard's call).
+
+## 11. Session 13 (2026-10-14, Opus): PAGEPORTS, found and fixed
+
+**Method.** A fresh project from the registry (`make-project.mjs`, as §10: `npm create nodegx@0.2.0` +
+`create_project` over `@nodegx/mcp@0.2.0`, 16 files, `shasum` snapshot and a pristine copy restored between opens),
+opened in the release's own 0.4.0 (`--user-data-dir` in the scratchpad, CDP on 9333). In its renderer, through the
+bundle's module table: a `Model.*` listener on `EventDispatcher` (module 11138), hooks on the editor's `filesystem`
+writes (29215), on `ProjectModel.setMetaData` / `toDirectory` (33917), and a `setTimeout` probe for the 1000 ms
+autosave debounce. Each with its stack.
+
+**What armed the save.** No `projectSaveTriggers` event fires at load. `SchemaHandler._fetch` → `_store()` calls
+`setMetaData('dbCollections' | 'systemCollections' | 'dbVersionMajor', undefined)` (no backend; the values were already
+`undefined`), and `setMetaData` arms the autosave unconditionally (F44). 1000 ms later
+`ProjectStructureService.saveProject` diffs memory against disk; the viewer announced the Page's ports at +460 ms, so
+Home differs and `ComponentSaver` writes its three files and `_registry.json`. `_store()` also runs on every window
+focus, so any focus re-armed it.
+
+**A race, not "the second open".** Unpatched, this build wrote Home on 3 of 3 opens, the first open (lands on `App`)
+included. §10's first open wrote nothing because its viewer answered after the timer. The trigger is "the save timer
+against the viewer's port message", and which one wins varies by open.
+
+**Fix (`76f37308c`).** `setMetaData` arms a save only when the value changed (`_.isEqual`); the same object handed back
+still saves, because a caller may have mutated it in place. The MCP needs no change: the Page's cache is now written
+the next time the person edits that page, which is an edit.
+
+**Proved.** On the release, with the same rule patched into its renderer: **Open project…** (lands on `App`), then Home
+opened from the Components panel, a `window-focused`, back to the launcher, then the launcher card (restores Home):
+**0 project files written on both opens**, with the three `setMetaData` calls seen as unchanged and the Page's
+`instancePortsChanged` seen on each open. In the repo: `test:ci` **3017 / 0** at seed 29054, exit 0; with the old
+unconditional save put back, red on exactly the new spec (`projectmetadatasave.js`, "a write of the value already
+there arms no save…"). Its control sets a changed value and asserts the save carries the probe cache along.
+
+**Found on the way:** the new spec first failed at seed 29054 because the spec before it can leave a save timer armed
+that fires against the next project. The spec now drains with `flushPendingProjectSave()`, as the save-trigger specs
+do.
+
+**AC2:** fixed in source. It closes when the next editor release is opened on a made project and writes nothing,
+first open and card reopen both. The released 0.4.0 keeps the defect until then.

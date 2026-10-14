@@ -6,7 +6,27 @@ copies a 0.3.0 project to `<project>.before-0.4` before its format moves to 5 (`
 the drive in the dev editor found the copy made twice per open, and measured OPENWRITES' cause; both fixed and driven
 (`1ed87f2ef`, OWN-013 §7). IDREPLACE is driven too. Nothing was pushed, branched or tagged. Earlier handoffs are in this file's git history.
 
-## ▶ Lane 1 now (2026-10-14, Opus, after s17): PAGEPORTS, then Richard's G8 click
+## ▶ Lane 1 now (2026-10-14, Opus, after s18): the next editor release carries three fixes; then AC2 and AC4
+
+**Done s18** (`76f37308c` code): **PAGEPORTS found and fixed** (OWN-011 §11). Nothing in `projectSaveTriggers` armed
+the open-time save: `SchemaHandler._store` → `setMetaData(…, undefined)` over `undefined` (no backend) armed it, on
+open and on every window focus, and the save 1 s later swept in the Page port cache the viewer had just sent. It is a
+race (the release wrote Home on 3 of 3 opens here, first open included), not "the second open". `setMetaData` now
+arms a save only on a changed value. Proved on the release with the rule patched into its renderer (0 files written
+on two opens, the Page's ports seen arriving on each), `test:ci` 3017 / 0 at seed 29054, mutant red. The MCP needed
+no change.
+
+**Next, lane 1:** nothing agent-sized is left that does not wait. (1) **The next editor release** (Richard's go) ships
+UPDATEBEHIND, NEWSWHITE (`2925e3e74`) and PAGEPORTS (`76f37308c`). On it, re-drive OWN-011 AC2 by §10/§11's method
+(first open and launcher card reopen, `shasum` of every file) to close AC2. (2) **OWN-014 AC4** needs OWN-015's
+language app (lane 3). (3) Richard's three waits below are unchanged.
+
+🔴 **Instrumenting the RELEASED bundle** (no source maps, no `req.c`): push a chunk onto `webpackChunknoodl_editor`
+for `req`, then find a module by scanning `req.m[id].toString()` and calling `req(id)`. In 0.4.0: `EventDispatcher` =
+`req(11138).EventDispatcher`, `ProjectModel` = `req(33917).ProjectModel`, `filesystem` = `req(29215).filesystem`.
+Wrapping `window.setTimeout` for `ms === 1000` catches the autosave debounce with its caller's stack.
+
+## Lane 1 s17 (2026-10-14, Opus): PAGEPORTS, then Richard's G8 click
 
 **Done this session** (`2925e3e74` code, `ffbee2c58` docs): OWN-011 AC2 re-driven on the release zip's 0.4.0
 (§10: the first open writes nothing; a reopen with Home active writes Home = PAGEPORTS); OWN-013 G8's agent half

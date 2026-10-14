@@ -1,12 +1,14 @@
 ---
 id: P112-S11-PAGEPORTS
 title: "A Page the agent server writes is rewritten the first time the editor opens it: the editor adds the Page's `dynamicports` cache and saves the component and the registry"
-status: open
+status: fixed
 severity: medium
-area: mcp / authoring (Page nodes written without `dynamicports`, e.g. `packages/noodl-mcp/src/tools/createProject.ts`'s skeleton) + editor / dynamic-ports cache marks a component dirty on load (see P107-S79-SILENTCACHE)
+area: editor / autosave — `ProjectModel.setMetaData` armed a save on a write of the unchanged value (`SchemaHandler._store` on open and on window focus); the save then swept in the Page dynamic-ports cache the viewer had just announced
 kit: mcp
 found: P112 OWN-011 s11, 2026-10-11
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-011-ONE-INSTALL.md §9
+regression: packages/noodl-editor/tests/project/projectmetadatasave.js "a write of the value already there arms no save, and a changed value still does"
+commit: 76f37308c
 ---
 
 **Measured** in the dev editor at `ec116ed5a`, two arms opened through **Open project…**:
@@ -34,3 +36,22 @@ restores `/Pages/Home` as the component being edited, and at load it writes Home
 `dynamicports` `title`, `urlPath`; `parent` moves after `parameters`), `component.json` and `_registry.json`
 (`modified` / `lastUpdated`). A third open changes nothing. So it is one write per page, made when the editor *loads*
 with that page active.
+
+**Cause measured (2026-10-14, lane 1 s18), and it is not the cache.** On the released 0.4.0, with a `Model.*` listener,
+hooks on the editor's `filesystem` writes and on `ProjectModel.setMetaData` / `toDirectory`, and a `setTimeout` probe:
+no `projectSaveTriggers` event fires at load. The save is armed by **`SchemaHandler._fetch` → `_store()`**, which on
+project open (and on every window focus) calls `setMetaData` for `dbCollections`, `systemCollections` and
+`dbVersionMajor` — `undefined` over `undefined` when the project has no backend — and `setMetaData` arms the autosave
+unconditionally (F44). The save fires 1000 ms later; by then the viewer has announced the Page's ports (+460 ms), so
+`getChangedComponents` finds Home differing from disk and writes it (`ComponentSaver.saveComponent` → `updateRegistry`).
+The cache fill is only what the no-op save happened to find.
+
+So it is a **race**, not "the second open": the save timer against the viewer's port message. Unpatched, this build
+wrote Home on 3 of 3 opens here, the first open included (§10 saw the first open write nothing; the viewer was slower
+than the timer that time).
+
+**Fix:** `ProjectModel.setMetaData` arms a save only when the value changed (`_.isEqual`); the same object handed back
+still saves, since a caller may have mutated it in place. Proved on the release by patching the same rule into its
+renderer: open via **Open project…**, then Home opened, a window focus, then the launcher card (Home restored) —
+**0 project files written** on both opens, with the Page's `instancePortsChanged` seen on each (the known-firing signal
+beside the absence). The released 0.4.0 keeps the defect until the next editor release; nothing in the MCP changes.
