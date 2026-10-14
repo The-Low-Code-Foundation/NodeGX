@@ -6,6 +6,28 @@ copies a 0.3.0 project to `<project>.before-0.4` before its format moves to 5 (`
 the drive in the dev editor found the copy made twice per open, and measured OPENWRITES' cause; both fixed and driven
 (`1ed87f2ef`, OWN-013 §7). IDREPLACE is driven too. Nothing was pushed, branched or tagged. Earlier handoffs are in this file's git history.
 
+## 🔴 2026-10-14 (s17, Opus): npm packages 0.2.0 — packed, tested, waiting on Richard's one-time password
+
+`cline-dev` pushed at `54a0ce946` (it carries OWN-019's `cda7ea056` + `5f8dee6d7`, OWN-007's skill, and
+`007e80905` TWOMCPREDS fixed: both MCP specs 19 / 19). Packed in a clean worktree at that commit
+(`scratchpad/npm020-s17`, every build-output link to primary removed; node-spec, canvas-look and the runtime's
+`dist-types` built inside it). Tarballs in this session's `scratchpad/tgz020/`:
+
+| tarball | shasum | checked |
+|---|---|---|
+| `nodegx-preview-0.2.0.tgz` | `7312c5fc1663…` | 971 + 984 bundle inputs, 0 outside the worktree; installed in an empty folder: `/` 200, a planted `.env` and `.mcp.json` **404** (ENVSERVED), Chrome draws the page in 207 ms, 0 page errors |
+| `nodegx-mcp-0.2.0.tgz` | `e332f1d1a733…` | 486 kit-extract inputs, 0 outside; `dist/preset-fonts` 15 files, `drive-steps.js` has `for_ms` (OWN-019's checks); P18's uncommitted `patternLib` absent; `stranger-render.mjs` DONE clean, `--plant` sees the planted defect; `stranger-backend.mjs` key never in the project, canary control found |
+| `create-nodegx-0.2.0.tgz` | `52075786e1e0…` | from the tarball in an empty folder, `HOME` untouched: `.mcp.json` pins `@nodegx/mcp@0.2.0`, CLAUDE.md, AGENTS.md, `.claude/skills/nodegx-your-own-editor/SKILL.md`, `.vibe/`, `opencode.json` |
+
+Gates: `publishable.js` 3 / 0; `bugs.js gate` 0 blockers (mcp, preview, project-contract, node-spec, canvas-look).
+`npm publish` stopped on `EOTP` (2FA) before anything went out. **Richard runs, in his own terminal:**
+`scripts/own/publish-npm.sh <that tgz020 folder>`. Then: poll `npm view <name>@0.2.0 dist.shasum` (a first read can
+404 for a minute) against the table; run `stranger-render.mjs @nodegx/mcp@0.2.0` from the registry; tell the OWN-013
+peer (opennoodl-a4) that nodegx-web may deploy (it is holding so the changelog's npm 0.2.0 section doesn't go live
+before the packages do); then remove the worktree (`git worktree remove --force` it, build outputs only).
+CHANGELOG's npm 0.2.0 section was rewritten for what ships (`54a0ce946`). Known open, high:
+P112-OWN019-BACKENDSESSION (a local backend stops with the agent's session) — in *Good to know*.
+
 ## The board (re-derived from the task files, 2026-10-11)
 
 | task | built | driven / gated | Model |
