@@ -51,7 +51,8 @@ function findMissingModules(asarPath) {
       problems.push({ bundle, missing: ['(the bundle itself is not in the app)'] });
       continue;
     }
-    const source = asar.extractFile(asarPath, bundle).toString('utf8');
+    // asar splits an archive path on path.sep: on Windows a `/` path is "not found in this archive".
+    const source = asar.extractFile(asarPath, bundle.split('/').join(path.sep)).toString('utf8');
     const missing = new Set();
     for (const match of source.matchAll(/require\("([^"]+)"\)/g)) {
       const specifier = match[1];
