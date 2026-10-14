@@ -1,6 +1,6 @@
 # ISL-043 — The exported app does what the running one does
 
-**Status: ⬜ not started. Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 8 bugs
+**Status: 🟡 7 of 8 fixed (P18 session 104, 2026-10-14); EXPORTBLENDNAN re-measured, still firing, design in its ledger file.** AC1 done: every row re-measured at HEAD, and all eight still fired. Fixed, one commit each: SNAP `0b313f736`, D82 `272fda402`, EXPORTBADBODY `7ace943da`, EXPORTDATEUNITWIRED `86b7a744b`, VARIANT `101041369`, EXPORTFEEDZONE `5ae68f683` (D17 too), EXPORTSTATESRUN `e4504cb99` (D19 too). Found on the way and filed: P18-S104-RESPONSETYPE, -FEEDCOUNT, -PACKRUNTIMENPX. Export jest 118 / 118. **Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 8 bugs
 from the ledger (`dev-docs/bugs/`) that no phase owned: 2 high · 6 low. **Side:** nodegx-export (plan, emitters, the report, the package build)
 
 ## 1. The person sentence

@@ -1,6 +1,6 @@
 # Next session — session 101 (2026-09-26/27) BUILT §76: `Pattern Extractor` — picker **122 → 123 of 130 (94.6%)**, the second row of Richard's 2026-09-26 ruling ("If we had 100% coverage that would be a big deal"). `Hash`'s crypto-call shape (§59) widened to seven seeded value outputs and a third signal pair (`Found`/`Not Found`, printed before `Done`, as `doExtract` fires them).
 
-## ✅ Session 104 (2026-10-14, BOARD lane 6): all four P18-S102 rows fixed. The export's own jest reads 115 / 115
+## ✅ Session 104 (2026-10-14, BOARD lane 6): all four P18-S102 rows fixed, then 7 of ISL-043's 8. Export jest 118 / 118
 
 | row | commit | what it was |
 |---|---|---|
@@ -13,13 +13,31 @@ Readings: whole-package export jest `Test Suites: 115 passed, 115` (exit 0, 543 
 **Any red in this package from here on is new.** CI's `test:packages` job is still red (VERBSPECCED, KITTYPESDRIFT),
 but each package's result can now be read in it.
 
+**Then ISL-043, in the same session: 7 of its 8 rows fixed.** All eight still fired at HEAD (AC1).
+
+| row | commit | note |
+|---|---|---|
+| SNAP | `0b313f736` | **Two** TDZs: the snapshot helpers became hoisted `function`s, and `chainSnapshots` / `chainSnapshotFor` moved above `statesPlanOf`. *Landing page test V2* and its 3 copies export; the shipped CLI's dry-run now exits 4 (it ran, with things left out), not 2 |
+| D82 | `272fda402` | Reproduced off Windows with `env PATH=/nonexistent node build.mjs` (`spawnSync npx ENOENT`). tsc now runs via `process.execPath` |
+| EXPORTBADBODY | `7ace943da` | Graded by running the emitted `fetchQuote` against a stub `fetch` |
+| EXPORTDATEUNITWIRED | `86b7a744b` | `unitOrDays` in the emitted lib also fixes a *literal* unknown unit |
+| VARIANT | `101041369` | An export-side `PRESET_MARKERS`, held equal to the editor's by a text-reading spec |
+| EXPORTFEEDZONE | `5ae68f683` | D16 dates, plus D17. The differential's runtime side was a hand copy of the OLD node, so the drift was invisible |
+| EXPORTSTATESRUN | `e4504cb99` | C22, plus D19 (which *did* reach the export) |
+
+Filed on the way: **P18-S104-RESPONSETYPE** (medium: the export ignores Response Type entirely), **-FEEDCOUNT** (D18:
+Items and Count de-duplicated by guid), **-PACKRUNTIMENPX** (the D82 mechanism in noodl-preview), **-KITTYPESDRIFT**
+(P107's). Final readings: export jest **118 / 118**, editor `tsc` 0.
+
 **Next (BOARD lane 6), in order:**
-1. **ISL-043** (`dev-docs/tasks/phase-109-the-defects-the-island-found/ISL-043-…`): eight rows. Start with AC1,
-   re-measuring every row at HEAD before building, because several may be gone. SNAP and D82 come first (no export
-   at all), then the five runtime twins, then VARIANT. Sibling ISL-035 goes in the same session if it fits.
-2. For the ledger line "N graph scenarios conform on the export": 81 of 85 are *outside* today, and outside must not
+1. **EXPORTBLENDNAN**, the last ISL-043 row. The design is in its ledger file: a per-node `useRef`, recorded by
+   **both** walkers (`collectExprUse` and `hookExprSources`). Then ISL-043 AC4 (`node scripts/bugs.js` lists none of its
+   rows), and close ISL-043.
+2. **P18-S104-RESPONSETYPE**, the one medium finding: an HTTP Request's Response Type is silently dropped.
+3. ISL-035 (ISL-043's sibling).
+4. For the ledger line "N graph scenarios conform on the export": 81 of 85 are *outside* today, and outside must not
    count as conforming (s103 below).
-3. Then EXP-011's seven (§77 Action Dispatcher / Handler first).
+5. Then EXP-011's seven (§77 Action Dispatcher / Handler first).
 
 ---
 
