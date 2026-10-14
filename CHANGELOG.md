@@ -17,6 +17,57 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## 0.4.1 · 2026-10-14
+
+**A small release that fixes three things in 0.4.0: opening a project no longer changes its files, the update window
+shows when a project is open, and the What's new window is readable.**
+
+### Fixed
+
+- **Opening a project no longer changes its files.** In 0.4.0, a page could be saved again a second after the project
+  opened, although nobody had changed anything. In Git it showed up as changed files.
+- **The update window shows when a project is open.** In 0.4.0 it opened behind the editor, so *New version
+  available* seemed to do nothing. From the projects list it always worked.
+- **The What's new window is readable.** Its bold sentences and its links were white on white.
+
+### Good to know
+
+- **To update from 0.4.0, go back to your projects first.** 0.4.0 still has the hidden update window, so it shows the
+  update to 0.4.1 on the projects list, not inside a project.
+
+## npm packages 0.2.1 · 2026-10-14
+
+**New apps start with a typeface, icons and pictures. Your agent's checks now agree with the preview, and the preview
+starts your app's backend for you.**
+
+### New
+
+- **New apps start with a typeface, icons and pictures.** `create_project` now adds Inter, the Lucide icons and the
+  starter pictures, the same set the editor gives a new project. Before, an app made from npm had none of them.
+- **The preview starts your app's backend.** `npx @nodegx/preview <app folder>` starts the app's backend on your
+  machine if it isn't running, and stops it when the preview stops. Add `--no-backend` to leave it alone.
+- **An example of an app that speaks.** `fn-play-audio-a-cloud-function-returns` calls a text-to-speech service from
+  a cloud function, so the key stays on the server, and plays the audio in the page as it came. Your agent finds it
+  when it searches the examples for text to speech.
+- **`render_report` looks at three sizes:** desktop, a portrait tablet (768 × 1024) and a phone. On desktop it also
+  names a row with a big gap in it, and a part of a section that sits off the line of its heading.
+- **`drive_page` can watch several things at once,** for example every answer on a quiz screen.
+
+### Fixed
+
+- `validate_project` passed some pages that the preview then refused to show. It now also runs the preview's own
+  check, and says what the preview would refuse.
+- A new project's first check warned that its typeface wasn't there. It is now.
+- The agent was offered library tools (`list_library`, `install_prefab`) that only work inside the NodeGX source code,
+  and every call failed. They're no longer offered.
+- Two examples called a cloud function by a name that no function had. Now each call names its function.
+- On a page that scrolls smoothly, a tap read the page before the scrolling stopped. It now waits.
+
+### Good to know
+
+- The backend needs Node 22.13 or later.
+- A folder set up with 0.2.0 keeps using 0.2.0. To move it to 0.2.1, change the version in its `.mcp.json` files.
+
 ## 0.4.0 · 2026-10-14
 
 **NodeGX now opens the apps you make with `npm create nodegx`. This release also brings script files, a window that
