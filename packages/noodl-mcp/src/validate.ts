@@ -58,6 +58,9 @@ import {
 } from './editor-deps';
 import type { ComponentFiles } from './graph';
 import type { ProjectStore } from './project/ProjectStore';
+// P112-OWN019-TWOLOADERS — the preview's own read and gate, so the two cannot disagree.
+import { readLegacyProject, resolveTarget as resolvePreviewTarget } from '../../noodl-preview/src/readProject';
+import { validateLegacyProject, type PreviewReport } from '../../noodl-preview/src/validate';
 import { drawnPortCheck } from './specPorts';
 import { makeProjectVisualPredicate, type VisualTypePredicate } from './visualRoots';
 import { listScriptPaths } from './tools/scriptTools';
@@ -552,9 +555,49 @@ export function validateOnDisk(
     report: withPreconditions(report, [
       ...onDiskPreconditions(store, views, targets, emitSkipNotes),
       ...fontFaceDiagnostics(store, root ? root.legacyName : ''),
-      ...tokenComposableDiagnostics(store, root ? root.legacyName : '')
+      ...tokenComposableDiagnostics(store, root ? root.legacyName : ''),
+      ...previewGateDiagnostics(store, report.diagnostics)
     ])
   };
+}
+
+/**
+ * P112-OWN019-TWOLOADERS — what the preview and `nodegx deploy` would refuse, read the way they read it.
+ *
+ * This validator reads each `nodes.json` flat. The preview and the deploy rebuild the project through the editor's
+ * io engine, which walks `children`, and gate on the result (`@nodegx/preview`'s `readLegacyProject` +
+ * `validateLegacyProject`, imported here rather than restated). A graph one reader tolerates and the other refuses
+ * read as "done" to the agent and as a blank page to the person (a child listed twice: 0 errors here, 38
+ * `duplicate-node-id` there). So the gate runs here too, and every ERROR it raises that this pass did not is
+ * reported, worded as what it is. Warnings are not gates there, so they are not repeated. A project the io engine
+ * cannot read at all is left to this pass's own read diagnostics.
+ */
+function previewGateDiagnostics(store: ProjectStore, flat: readonly Diagnostic[]): Diagnostic[] {
+  let gate: PreviewReport;
+  try {
+    const { format } = resolvePreviewTarget(store.projectDir);
+    const { legacy } = readLegacyProject(store.projectDir, format);
+    gate = validateLegacyProject(legacy as unknown as Parameters<typeof validateLegacyProject>[0]);
+  } catch {
+    return [];
+  }
+  const key = (code: string, component: string, nodeId?: string) => `${code}|${component}|${nodeId ?? ''}`;
+  const seen = new Set(flat.filter((d) => d.severity === 'error').map((d) => key(d.code, d.location.component, d.location.nodeId)));
+  return gate.diagnostics
+    .filter((d) => d.severity === 'error' && !seen.has(key(d.code, d.component, d.nodeId)))
+    .map((d) => ({
+      code: d.code as DiagnosticCode,
+      severity: 'error' as const,
+      message: `The preview and \`nodegx deploy\` refuse this (they read the component as a tree, through children): ${d.message}`,
+      location: {
+        component: d.component,
+        ...(d.nodeId ? { nodeId: d.nodeId } : {}),
+        ...(d.nodeType ? { nodeType: d.nodeType } : {}),
+        ...(d.nodeLabel ? { nodeLabel: d.nodeLabel } : {}),
+        ...(d.port ? { port: d.port } : {})
+      },
+      ...(d.suggestion ? { suggestion: d.suggestion } : {})
+    }));
 }
 
 /**

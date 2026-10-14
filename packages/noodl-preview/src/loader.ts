@@ -23,23 +23,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { ProjectImporter, type ImportInput } from '../../noodl-editor/src/editor/src/io/ProjectImporter';
-import { normalizeScriptPath } from '../../noodl-runtime/src/scriptfiles';
 import type { LegacyProject } from '../../noodl-editor/src/editor/src/io/ProjectExporter';
-import type {
-  ComponentV2File,
-  ConnectionsV2File,
-  NodesV2File,
-  ProjectV2File,
-  RegistryV2File,
-  RoutesV2File,
-  StylesV2File
-} from '../../noodl-editor/src/editor/src/schemas';
 import { ProjectModel } from '@noodl-models/projectmodel';
 import * as Exporter from '@noodl-utils/exporter';
 import { HtmlProcessor } from '@noodl-utils/compilation/build/processors/html-processor';
 
 import { previewExportOptions, projectModelFromLegacy } from './projectExport';
+import { readLegacyProject, type ProjectFormat } from './readProject';
 import { validateLegacyProject, type PreviewReport } from './validate';
 
 /** Everything the preview server serves for one snapshot of the project. */
@@ -71,101 +61,7 @@ export type PreviewLoad =
   /** Could not be read at all (torn write, bad JSON, no root node). */
   | { status: 'error'; message: string };
 
-export type ProjectFormat = 'v2' | 'legacy';
-
-const readJson = <T>(file: string): T => JSON.parse(fs.readFileSync(file, 'utf8')) as T;
-
-/**
- * Classifies the target and returns the project directory.
- * Accepts a v2 directory, a directory containing a legacy `project.json`, or
- * the `project.json` file itself — the same inputs the validator's
- * `loadProject` takes, so a folder that validates can always be previewed.
- */
-export function resolveTarget(target: string): { dir: string; format: ProjectFormat } {
-  const abs = path.resolve(target);
-  if (!fs.existsSync(abs)) throw new Error(`No such file or directory: ${abs}`);
-
-  const dir = fs.statSync(abs).isDirectory() ? abs : path.dirname(abs);
-
-  if (fs.existsSync(path.join(dir, 'components', '_registry.json')) || fs.existsSync(path.join(dir, 'nodegx.project.json'))) {
-    return { dir, format: 'v2' };
-  }
-  if (fs.existsSync(path.join(dir, 'project.json'))) {
-    return { dir, format: 'legacy' };
-  }
-  throw new Error(
-    `${dir} is not a Noodl project — expected components/_registry.json (v2) or project.json (legacy).`
-  );
-}
-
-/** P109 ISL-005 — `scripts/**.js` as `{ 'engine/world.js': source }`, as the editor's `ScriptFileStore` reads it. */
-export function readScriptFiles(dir: string): Record<string, string> {
-  const root = path.join(dir, 'scripts');
-  const scripts: Record<string, string> = {};
-  if (!fs.existsSync(root)) return scripts;
-  const walk = (folder: string) => {
-    for (const entry of fs.readdirSync(folder, { withFileTypes: true })) {
-      const full = path.join(folder, entry.name);
-      if (entry.isDirectory()) walk(full);
-      else if (entry.name.endsWith('.js')) {
-        const p = normalizeScriptPath(path.relative(root, full).split(path.sep).join('/'));
-        if (p !== undefined) scripts[p] = fs.readFileSync(full, 'utf8');
-      }
-    }
-  };
-  walk(root);
-  return scripts;
-}
-
-/** Reads a v2 directory into the legacy project object, via the io engine. */
-function readV2(dir: string): { project: LegacyProject; warnings: string[] } {
-  const registry = readJson<RegistryV2File>(path.join(dir, 'components', '_registry.json'));
-  const componentsDir = path.join(dir, 'components');
-
-  const components: ImportInput['components'] = {};
-  for (const [key, entry] of Object.entries(registry.components ?? {})) {
-    const compDir = path.join(componentsDir, entry.path);
-    const maybe = <T>(name: string, fallback: T): T =>
-      fs.existsSync(path.join(compDir, name)) ? readJson<T>(path.join(compDir, name)) : fallback;
-    components[key] = {
-      component: maybe('component.json', {} as ComponentV2File),
-      nodes: maybe('nodes.json', { nodes: [] } as NodesV2File),
-      connections: maybe('connections.json', { connections: [] } as ConnectionsV2File)
-    };
-  }
-
-  const optional = <T>(name: string): T | undefined =>
-    fs.existsSync(path.join(dir, name)) ? readJson<T>(path.join(dir, name)) : undefined;
-
-  const result = new ProjectImporter().import({
-    project: readJson<ProjectV2File>(path.join(dir, 'nodegx.project.json')),
-    registry,
-    routes: optional<RoutesV2File>('nodegx.routes.json'),
-    styles: optional<StylesV2File>('nodegx.styles.json'),
-    scripts: readScriptFiles(dir),
-    components
-  });
-
-  return { project: result.project, warnings: result.warnings };
-}
-
-/**
- * Reads the project on disk into the legacy project object, whichever format it is in.
- *
- * Split out of {@link loadPreview} by HLS-015 so the deploy reads a project through the same code
- * the preview does. Two readers of the same directory drift, and the first thing they disagree
- * about is which of them is right.
- */
-export function readLegacyProject(
-  dir: string,
-  format: ProjectFormat
-): { legacy: LegacyProject; warnings: string[] } {
-  if (format === 'v2') {
-    const read = readV2(dir);
-    return { legacy: read.project, warnings: read.warnings };
-  }
-  return { legacy: readJson<LegacyProject>(path.join(dir, 'project.json')), warnings: [] };
-}
+export { readLegacyProject, readScriptFiles, resolveTarget, type ProjectFormat } from './readProject';
 
 /**
  * Builds the `ProjectModel` the exporter needs, with a root node resolved.
