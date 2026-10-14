@@ -2,13 +2,13 @@
 id: P112-OWN019-RECORDERTAIL
 title: "The lab's recording proxy lost the usage of every call whose last stream line was longer than 8 KB — L1's sitting 1 recorded 35 of 43 calls' usage ($2.29 against Vibe's $2.70), so per-round money from the recorder ran low"
 status: fixed
+commit: bd149ba2c
 phase: P112
 task: OWN-019
 severity: medium
 area: the lab — `dev-docs/tasks/phase-112-your-own-nodegx/own-018/record-proxy.mjs` (`--record` in round-kit)
 found: P112 OWN-019 s5, 2026-10-14 (lever 5: recorder vs Vibe $ on L1, tgz28)
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-019-THE-VIBE-KIT.md §7 (s5)
-kit: lab
 ---
 
 Measured on L1's `calls/calls.jsonl`: sitting 1 has 43 chat calls, all 200, 8 with `usage: null` and `finish: null`

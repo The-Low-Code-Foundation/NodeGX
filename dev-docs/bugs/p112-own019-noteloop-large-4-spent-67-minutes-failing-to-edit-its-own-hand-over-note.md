@@ -2,6 +2,7 @@
 id: P112-OWN019-NOTELOOP
 title: "Large 4 spent 67 minutes failing to edit its own hand-over note — 23 `edit` calls on docs/NEXT.md, 18 refused as not matching, probe files written to calibrate the tool — after the app was finished; nothing in the kit caps work on the notes"
 status: fixed
+commit: 3153bb4fc
 phase: P112
 task: OWN-019
 severity: medium
@@ -9,7 +10,6 @@ area: kit — the Vibe AGENTS.md process and skills (`packages/create-nodegx/pro
 found: P112 OWN-019 s4, 2026-10-14 (round E1, Mistral Large 4, the "your own editor" brief, tgz29)
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-019-THE-VIBE-KIT.md §7 (s4)
 regression: packages/create-nodegx/test/create.test.js "P112-OWN019-NOTELOOP: after this session writes NEXT.md, three more writes to the notes pass and the fourth is refused"
-kit: vibe
 ---
 
 E1's first session built and proved the editor and handed over at the 100-call line. The second session's last

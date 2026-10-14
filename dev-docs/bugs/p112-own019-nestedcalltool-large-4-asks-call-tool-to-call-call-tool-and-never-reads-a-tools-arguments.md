@@ -2,6 +2,7 @@
 id: P112-OWN019-NESTEDCALLTOOL
 title: "Large 4 asks call_tool to call call_tool — `{name: \"call_tool\", arguments: {name: \"drive_page\", describe: true}}` — and the server answered \"no tool named call_tool\" six times, so it never read create_component's, update_component's, drive_page's or render_report's arguments"
 status: fixed
+commit: cda7ea056
 phase: P112
 task: OWN-019
 severity: medium

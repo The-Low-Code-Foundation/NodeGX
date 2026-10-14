@@ -2,6 +2,7 @@
 id: P112-OWN019-TAPHOLD
 title: "drive_page's tap leaves a smooth-scrolling page 2–201 px down where a person's tap reaches the target — so an agent can be told a working 'scroll to the form' button is broken (or, at one width, that it works)"
 status: fixed
+commit: d256c1ab1
 phase: P112
 task: OWN-019
 severity: medium

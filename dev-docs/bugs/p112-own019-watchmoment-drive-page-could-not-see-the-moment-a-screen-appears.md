@@ -2,6 +2,7 @@
 id: P112-OWN019-WATCHMOMENT
 title: "drive_page could not see the moment a screen appears — a look waits for the page to settle, so o2's 55 ms flash of the last question's green read idle, its checklist line passed, and the grader saw the flash on every question"
 status: fixed
+commit: 5f8dee6d7
 phase: P112
 task: OWN-019
 severity: high

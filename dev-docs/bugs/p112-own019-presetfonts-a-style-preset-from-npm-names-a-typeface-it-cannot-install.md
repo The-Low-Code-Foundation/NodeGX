@@ -2,6 +2,7 @@
 id: P112-OWN019-PRESETFONTS
 title: "From npm, set_style_preset names a typeface it cannot install — `@nodegx/mcp` ships no preset font files, so the preset sets --font-sans to a face that never loads and the page paints in the system font"
 status: fixed
+commit: cda7ea056
 phase: P112
 task: OWN-019
 severity: medium

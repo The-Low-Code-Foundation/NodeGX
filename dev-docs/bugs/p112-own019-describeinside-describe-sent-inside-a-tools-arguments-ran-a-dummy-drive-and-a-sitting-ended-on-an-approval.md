@@ -2,6 +2,7 @@
 id: P112-OWN019-DESCRIBEINSIDE
 title: "`describe: true` sent inside a tool's arguments was stripped by its schema — Q1 ran a dummy drive instead of reading drive_page's steps, went looking for them outside its folder, and Vibe's approval prompt ended the sitting in 42 s"
 status: fixed
+commit: 620e6723e
 phase: P112
 task: OWN-019
 severity: medium
