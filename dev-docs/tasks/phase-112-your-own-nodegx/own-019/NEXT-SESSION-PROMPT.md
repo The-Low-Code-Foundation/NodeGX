@@ -1,4 +1,4 @@
-# OWN-019 — s7: the series on tgz32, by day (CARRYOVER's three, the Launch looks, the editor, Pack It)
+# OWN-019 — s7: the series on tgz33, by day (CARRYOVER's three, the Launch looks, the editor, Pack It)
 
 **Written 2026-10-14 ~18:05 CEST by Opus (s5); s6 (19:42–20:00, evening — no rounds) did steps 1–2 and updated this
 file.** Read, in order: this file; the task file `../OWN-019-THE-VIBE-KIT.md` §7 "s5" and "s6"; `VIBE-AND-LARGE4.md`
@@ -66,7 +66,14 @@ has R1–R3 (4810, 4811, 4813), RL1 (4812), RL2b (4814), RL3 (4815).
      because the gallery's keeper holds 8578, its stale `runtime.json` removed) → "✓ started the app's backend" and
      GET 200; SIGINT the preview → the backend pid gone, 8681 closed; started again → back, 200; `--no-backend`
      control → 000.
-3. **The series on tgz32, Large 4, by day, two at a time:** quiz ×3 (**CARRYOVER needs 3 clean in a row on one kit**),
+2b. ✅ **s6: tgz33 = `c52e01e4f`** (same folder's sibling: `…/af093de6-…/scratchpad/tgz33`) = tgz32 + **DRIFTTALLPART**
+   (R40, below): `alignment-drift` now reads a section holding ONE tall part (a form card, a 3-line headline). Same file
+   lists; the only diff is that clause, bundled three times. From the tarball: RL1's WAITLIST eyebrow named (302 px),
+   RL2b unchanged. Gallery corpus from source: exactly that one new finding. **But the Launch control (`lctl`, Sonnet's
+   Driftwood) now drifts too:** its hero's "DRIFTWOOD" wordmark sits 528 px left of the centred 3-line headline (the
+   headline was the hidden tall part) — all 12 mutants carry it. Grader `align` reads render-measure from SOURCE, so the
+   control is 18/19 until Richard rules (Needs Richard). Read his answer in the task file §7 s6 before grading.
+3. **The series on tgz33, Large 4, by day, two at a time:** quiz ×3 (**CARRYOVER needs 3 clean in a row on one kit**),
    Launch ×3 (do they still drift/gap now that render_report says so?), the editor brief ×1 (`--seed` q6, the
    BACKENDSESSION brief — "start it again tomorrow" is now true; grade it AND restart the preview once by hand to see
    the backend come back), Pack It ×1. `s5lane.sh` in the s5 scratchpad is the template (cutoffs 17:00 / 16:30).
@@ -78,14 +85,16 @@ has R1–R3 (4810, 4811, 4813), RL1 (4812), RL2b (4814), RL3 (4815).
    reports). He did not raise the eyebrow drift (`align` ✗ on all three) — ask him whether it matters before
    treating `align` as a look failure in the claim.
 5. **Console readings** at quiet boundaries (ask in plain text; s5's ≈ €0.42/list $ needs a second clean window).
-6. **The claim write-up (AC8)** once tgz32's series is in, then **R35: Richard's own run, last.**
+6. **The claim write-up (AC8)** once tgz33's series is in, then **R35: Richard's own run, last.**
 
 ## Needs Richard
 
 - **npm 0.2.1.** A peer's bump (`c2eab03bf`) carries every s5 kit change; origin/cline-dev has them (pushed 17:47).
   Publishing is Richard's (the release peer was told what 0.2.1 carries: opennoodl-a4, 17:58). s5's last commits
   (lab + docs, after 17:47) are local until the next push.
-- Whether the eyebrow drift (`align`) matters to him — he passed all three looks without raising it.
+- ✅ R40: the eyebrow drift IS a look failure (s6). **Open:** is the control's hero wordmark ("DRIFTWOOD" top-left over
+  a centred headline, `lchk/shot/33` in s6's scratchpad) a drift too? Yes → the control is 18/19 and needs its hero
+  centred (or a nav row) to be a control again; no → a wordmark at a section's top is exempt from `alignment-drift`.
 - Console readings.
 
 ## Where things are

@@ -524,4 +524,8 @@ post-tool, post-agent) — and the kit uses none of them yet.
     weird spacing" — the LAPTOPGAPS row, built on tgz30 before render_report reported `row-gap`. He did not raise the
     eyebrow drift the grader's `align` fails all three on. The tgz32 question: does a Launch round still leave the gap
     now that the tool reports it?
+  - **R40 (Richard, ~20:10): the eyebrow drift IS a look failure** ("I can imagine my ex clients pulling me up on it").
+    He saw RL1's WAITLIST eyebrow off its centred "Join the waitlist" block, which render_report did not name: RL1's
+    group holds a 290 px form card and the drift rule skipped any group with a part > 240 px. **DRIFTTALLPART fixed
+    `c52e01e4f`** (skip only with two or more tall parts); gallery corpus moved by exactly that one finding (302 px).
 
