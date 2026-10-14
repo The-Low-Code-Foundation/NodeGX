@@ -77,7 +77,7 @@ export function registerRenderTools(
         viewports: z
           .string()
           .optional()
-          .describe('Comma-separated: "desktop,tablet,phone" (the default) or explicit sizes like "1440x900,390x844"'),
+          .describe('Comma-separated: "desktop,768x1024,phone" (the default) or explicit sizes like "1440x900,390x844"'),
         screenshot: z
           .enum(['full', 'viewport', 'none'])
           .optional()
@@ -127,10 +127,11 @@ export function registerRenderTools(
               ? path.join(projectDir, '.previews', 'render')
               : undefined;
         const { report, screenshots } = await runRenderReport(projectDir, {
-          // P112-OWN019 R39 (Richard, 2026-10-14): three sizes by default — a laptop row with a hole in it, or a
+          // P112-OWN019 R39 (Richard, 2026-10-14): three sizes by default (768 portrait, not the named 1024 `tablet`: the middle
+          // width is the one a layout breaks at, and 1024 is already the desktop line the layout tells measure at) — a laptop row with a hole in it, or a
           // section that drifts off its axis, is a width problem the phone shot cannot show. The shared measure's
           // DEFAULT_VIEWPORTS stays two (the editor's captures); this is the agent's tool deciding for itself.
-          viewports: args.viewports ?? 'desktop,tablet,phone',
+          viewports: args.viewports ?? 'desktop,768x1024,phone',
           screenshot: args.screenshot,
           scale,
           backendPort: args.backend_port,

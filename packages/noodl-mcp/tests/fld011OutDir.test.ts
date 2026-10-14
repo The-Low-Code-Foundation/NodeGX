@@ -157,7 +157,7 @@ describe('FLD-011 — render_report out_dir', () => {
     // the failure this guards against is an EXTRA flag — `--out-dir` leaking into the default —
     // and a containment check cannot see one.
     // P112-OWN019 R39 (2026-10-14): render_report now asks for three sizes by default — the one deliberate extra flag.
-    expect(argvSent()).toEqual([projectDir, '--json', '--screenshot', 'full', '--inline-screenshots', '--scale', '0.4', '--viewports', 'desktop,tablet,phone']);
+    expect(argvSent()).toEqual([projectDir, '--json', '--screenshot', 'full', '--inline-screenshots', '--scale', '0.4', '--viewports', 'desktop,768x1024,phone']);
   });
 
   it('🔴 AC1 control — the default response really does carry an image, so the absence below means something', async () => {

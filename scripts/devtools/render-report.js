@@ -67,6 +67,7 @@ const WS_MODULE = HARNESS_PATHS.WS_MODULE.path;
  */
 const {
   DEFAULT_VIEWPORTS,
+  NAMED_VIEWPORTS,
   DESKTOP_WIDTH,
   RenderFinding,
   SEVERITY_ORDER,
@@ -1109,7 +1110,9 @@ function checkPrerequisites(projectDir) {
  */
 function parseViewports(spec) {
   if (!spec) return DEFAULT_VIEWPORTS;
-  const known = new Map(DEFAULT_VIEWPORTS.map((v) => [v.name, v]));
+  // Every NAMED viewport, as the module note promises ('the CLI, the MCP tool and the editor all resolve names from
+  // here') — the CLI had only the defaults, so `tablet` was refused here alone (found P112 OWN-019 s5).
+  const known = new Map(NAMED_VIEWPORTS.map((v) => [v.name, v]));
   return spec.split(',').map((token) => {
     const trimmed = token.trim();
     if (known.has(trimmed)) return known.get(trimmed);
