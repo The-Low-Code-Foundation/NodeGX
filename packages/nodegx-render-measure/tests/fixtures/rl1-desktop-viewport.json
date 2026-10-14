@@ -1,0 +1,299 @@
+{
+ "requested": {
+  "width": 1280,
+  "height": 900
+ },
+ "lists": [],
+ "layout": {
+  "rowGaps": [
+   {
+    "cls": "ndl-d-fh8w99eoqj",
+    "gap": 899,
+    "rowWidth": 1152,
+    "tallest": 22,
+    "left": "Driftwood",
+    "right": "Waitlist open"
+   },
+   {
+    "cls": "columns-container  ndl-d-9n80m449bx",
+    "gap": 217,
+    "rowWidth": 1176,
+    "tallest": 113,
+    "left": "01",
+    "right": "Plan the week in one sitting"
+   },
+   {
+    "cls": "columns-container  ndl-d-9n80m449bx",
+    "gap": 217,
+    "rowWidth": 1176,
+    "tallest": 87,
+    "left": "02",
+    "right": "See what's left at a glance"
+   },
+   {
+    "cls": "columns-container  ndl-d-9n80m449bx",
+    "gap": 217,
+    "rowWidth": 1176,
+    "tallest": 87,
+    "left": "03",
+    "right": "Quiet by default"
+   },
+   {
+    "cls": "ndl-d-fh8w99eoqj",
+    "gap": 886,
+    "rowWidth": 1152,
+    "tallest": 26,
+    "left": "When does Driftwood launch?",
+    "right": "+"
+   },
+   {
+    "cls": "ndl-d-fh8w99eoqj",
+    "gap": 996,
+    "rowWidth": 1152,
+    "tallest": 26,
+    "left": "What will it cost?",
+    "right": "+"
+   },
+   {
+    "cls": "ndl-d-fh8w99eoqj",
+    "gap": 925,
+    "rowWidth": 1152,
+    "tallest": 26,
+    "left": "Where does my plan live?",
+    "right": "+"
+   }
+  ],
+  "drifts": [
+   {
+    "cls": "ndl-d-fh8w99eoqj",
+    "offBy": -148,
+    "sectionWidth": 1200,
+    "text": "Pricing",
+    "centredText": "Monthly"
+   },
+   {
+    "cls": "ndl-d-fh8w99eoqj",
+    "offBy": -547,
+    "sectionWidth": 1152,
+    "text": "Pricing",
+    "centredText": "One price. No tiers."
+   }
+  ]
+ },
+ "visibleCount": 134,
+ "transparentExcluded": 0,
+ "layoutWidth": 1280,
+ "clientWidth": 1280,
+ "clientHeight": 900,
+ "scrollWidth": 1280,
+ "pageHeight": 3300,
+ "contentBottom": 3300,
+ "overflowing": [],
+ "overflowingCount": 0,
+ "textsWiderThanBox": [],
+ "textsWiderThanBoxCount": 0,
+ "text": {
+  "elements": 47,
+  "onScreen": 16,
+  "unreachable": 0,
+  "fontWeights": {
+   "400": 12,
+   "500": 16,
+   "600": 16,
+   "700": 3
+  },
+  "fontSizes": {
+   "20px": 4,
+   "12px": 11,
+   "94.08px": 1,
+   "18px": 6,
+   "14px": 13,
+   "16px": 4,
+   "30px": 3,
+   "24px": 3,
+   "48px": 1,
+   "72px": 1
+  },
+  "distinctFontSizes": 10,
+  "largestFontSize": 94.08,
+  "bodyFontFamily": "\"DM Sans\", ui-sans-serif, system-ui, sans-serif"
+ },
+ "placeholders": {
+  "count": 0,
+  "byText": {},
+  "samples": []
+ },
+ "images": {
+  "total": 0,
+  "icons": 1,
+  "onScreen": 0,
+  "unreachable": 0,
+  "broken": 0,
+  "brokenSources": []
+ },
+ "emptyDecoratedBoxes": {
+  "count": 5,
+  "samples": [
+   {
+    "tag": "DIV",
+    "cls": "ndl-d-midw50kz1z",
+    "width": 89,
+    "height": 12
+   },
+   {
+    "tag": "DIV",
+    "cls": "ndl-d-midw50kz1z",
+    "width": 56,
+    "height": 12
+   },
+   {
+    "tag": "DIV",
+    "cls": "ndl-d-midw50kz1z",
+    "width": 85,
+    "height": 12
+   },
+   {
+    "tag": "DIV",
+    "cls": "ndl-d-midw50kz1z",
+    "width": 33,
+    "height": 12
+   },
+   {
+    "tag": "DIV",
+    "cls": "ndl-d-midw50kz1z",
+    "width": 71,
+    "height": 12
+   }
+  ]
+ },
+ "colors": {
+  "distinctAccents": 3,
+  "accents": [
+   {
+    "color": "rgb(246, 241, 231)",
+    "area": 1016072,
+    "share": 0.882
+   },
+   {
+    "color": "rgb(184, 92, 56)",
+    "area": 36302,
+    "share": 0.032
+   },
+   {
+    "color": "rgb(237, 228, 208)",
+    "area": 16123,
+    "share": 0.014
+   }
+  ],
+  "distinctNeutrals": 1,
+  "viewportArea": 1152000
+ },
+ "grounds": {
+  "distinct": 3,
+  "values": [
+   {
+    "ground": "rgb(253, 251, 244)",
+    "count": 2
+   },
+   {
+    "ground": "rgb(246, 241, 231)",
+    "count": 1
+   },
+   {
+    "ground": "linear-gradient(155deg, rgb(38, 36, 30) 0%, rgb(44, 40, 32) 45%, rgb(74, 52, 35) 100%)",
+    "count": 1
+   }
+  ]
+ },
+ "rhythm": {
+  "bands": 6,
+  "distinctSpacings": 4,
+  "spacings": [
+   {
+    "px": 24,
+    "count": 1
+   },
+   {
+    "px": 32,
+    "count": 2
+   },
+   {
+    "px": 80,
+    "count": 7
+   },
+   {
+    "px": 96,
+    "count": 2
+   }
+  ]
+ },
+ "repeatedGroups": [
+  {
+   "kind": "siblings",
+   "count": 3,
+   "columns": 1,
+   "rows": 3,
+   "itemWidth": 1152,
+   "itemHeight": 184,
+   "parentWidth": 1152,
+   "tag": "DIV",
+   "cls": "ndl-d-pt2h9k2s1e"
+  },
+  {
+   "kind": "siblings",
+   "count": 3,
+   "columns": 2,
+   "rows": 3,
+   "itemWidth": 1152,
+   "itemHeight": 14,
+   "parentWidth": 1152,
+   "tag": "DIV",
+   "cls": "ndl-visual-text  ndl-d-2433hheeg5x"
+  },
+  {
+   "kind": "siblings",
+   "count": 3,
+   "columns": 1,
+   "rows": 3,
+   "itemWidth": 1152,
+   "itemHeight": 67,
+   "parentWidth": 1152,
+   "tag": "DIV",
+   "cls": "ndl-d-pt2h9k2s1e"
+  },
+  {
+   "kind": "siblings",
+   "count": 3,
+   "columns": 2,
+   "rows": 3,
+   "itemWidth": 672,
+   "itemHeight": 14,
+   "parentWidth": 720,
+   "tag": "DIV",
+   "cls": "ndl-visual-text  ndl-d-2433hheeg5x"
+  },
+  {
+   "kind": "siblings",
+   "count": 3,
+   "columns": 1,
+   "rows": 3,
+   "itemWidth": 552,
+   "itemHeight": 282,
+   "parentWidth": 552,
+   "tag": "DIV",
+   "cls": "ndl-visual-text  ndl-d-2433hheeg5x"
+  },
+  {
+   "kind": "columns",
+   "count": 5,
+   "columns": 5,
+   "rows": 1,
+   "itemWidth": 102,
+   "itemHeight": 52,
+   "parentWidth": 510,
+   "tag": "DIV",
+   "cls": "column-item"
+  }
+ ],
+ "consoleErrors": []
+}

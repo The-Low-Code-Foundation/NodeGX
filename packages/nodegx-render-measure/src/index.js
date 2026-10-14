@@ -502,6 +502,78 @@ function measureExpression(placeholders, probes = []) {
   // viewport height with content laid out past it is clipped; a page that is
   // simply short has nothing past it. That difference is the whole of
   // \`clipped-page\`, and neither number alone can tell them apart.
+  // P112-OWN019-LAPTOPGAPS (R39) — where the INK is, not where the boxes are. Richard on RL1's laptop page: a
+  // feature number in a Columns "1 4" row had a fifth of the page to itself, ~215 px of nothing before its title;
+  // L1's pricing toggle and price sat ~260 px left of their centred heading. Every box there is well-formed — the
+  // number's column box abuts the title's — so the measure is each child's ink: the union of its shown text runs
+  // (a Range, so a full-width text block counts only as far as its words reach) and its painted boxes. Desktop only:
+  // that is where a row has room to open a hole. Raw numbers here; the judgement is summarise's.
+  const layout = { rowGaps: [], drifts: [] };
+  // (The API guard is for the fake DOMs the unit suites hand this expression; every browser has both.)
+  if (vw >= 1024 && typeof document.createRange === 'function' && typeof document.createTreeWalker === 'function') {
+    const shown = new Set(visible);
+    const textInk = [];
+    const range = document.createRange();
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      if (!n.textContent.trim() || !shown.has(n.parentElement)) continue;
+      range.selectNodeContents(n);
+      const r = range.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) textInk.push({ node: n, r });
+    }
+    const PAINTED_TAGS = ['IMG', 'SVG', 'CANVAS', 'VIDEO', 'INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'svg'];
+    const paintedInk = visible
+      .filter((el) => {
+        if (PAINTED_TAGS.includes(el.tagName)) return true;
+        const cs = styleOf(el);
+        const bg = cs.backgroundColor;
+        return (bg && bg !== 'transparent' && !/rgba\\([^)]*,\\s*0\\)$/.test(bg)) || cs.backgroundImage !== 'none' || parseFloat(cs.borderTopWidth) > 0;
+      })
+      .map((el) => ({ el, r: el.getBoundingClientRect() }))
+      .filter((p) => p.r.width > 0 && p.r.height > 0 && p.r.width < vw * 0.98);
+    const inkOf = (el) => {
+      let l = Infinity, t = Infinity, rr = -Infinity, b = -Infinity, text = '';
+      const take = (r) => { l = Math.min(l, r.left); t = Math.min(t, r.top); rr = Math.max(rr, r.right); b = Math.max(b, r.bottom); };
+      for (const x of textInk) if (el.contains(x.node)) { take(x.r); if (!text) text = x.node.textContent.trim().slice(0, 50); }
+      for (const p of paintedInk) if (el === p.el || el.contains(p.el)) take(p.r);
+      return l === Infinity ? null : { left: l, top: t, right: rr, bottom: b, width: rr - l, height: b - t, text };
+    };
+    const ROW_GAP_MIN_PX = 160;
+    for (const parent of visible) {
+      const kids = [...parent.children].filter((k) => shown.has(k));
+      if (kids.length < 2) continue;
+      const pr = parent.getBoundingClientRect();
+      if (pr.width < 600) continue;
+      const inks = kids.map(inkOf).filter(Boolean);
+      if (inks.length < 2) continue;
+      // Side by side: consecutive by left edge, overlapping vertically, the second starting after the first ends.
+      const byLeft = [...inks].sort((a, b) => a.left - b.left);
+      for (let i = 1; i < byLeft.length; i++) {
+        const a = byLeft[i - 1], b = byLeft[i];
+        const overlap = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+        const gap = b.left - a.right;
+        if (overlap <= 0 || gap < ROW_GAP_MIN_PX) continue;
+        layout.rowGaps.push({ cls: cls(parent), gap: round(gap), rowWidth: round(pr.width), tallest: round(Math.max(a.height, b.height)), left: a.text, right: b.text });
+      }
+      // Stacked, each starting below the one before, and the parts of ONE section: every part under 240 px tall (a
+      // page whose children are whole sections compared section against section — measured on L1 and GL1, s5). The
+      // section's axis is set by a centred part among its first two (its heading, usually); L1's pricing is just
+      // two parts, a centred heading block and a toggle-and-price group ~260 px left of it.
+      const byTop = [...inks].sort((a, b) => a.top - b.top);
+      if (!byTop.every((k, i) => i === 0 || k.top >= byTop[i - 1].bottom - 2)) continue;
+      if (byTop.some((k) => k.height > 240)) continue;
+      const centre = pr.left + pr.width / 2;
+      const offOf = (k) => k.left + k.width / 2 - centre;
+      const centred = byTop.filter((k) => Math.abs(offOf(k)) <= 12 && k.width < pr.width * 0.9);
+      if (!centred.some((k) => byTop.indexOf(k) < 2)) continue;
+      for (const k of byTop) {
+        if (Math.abs(offOf(k)) > 40 && k.width < pr.width * 0.8) {
+          layout.drifts.push({ cls: cls(parent), offBy: round(offOf(k)), sectionWidth: round(pr.width), text: k.text, centredText: centred[0].text });
+        }
+      }
+    }
+  }
+
   const contentBottom = visible.reduce((lowest, el) => {
     const r = el.getBoundingClientRect();
     return r.width > 0 && r.height > 0 && r.bottom > lowest ? r.bottom : lowest;
@@ -509,6 +581,7 @@ function measureExpression(placeholders, probes = []) {
 
   return {
     lists,
+    layout,
     // FLD-012 AC3 — the SIZE of the population every rule below is computed over, and the number of
     // elements the visibility correction took out of it. Reported directly because a rule's finding
     // count can move for several reasons at once, and 'the fix changed what is measured' is a
@@ -660,10 +733,23 @@ const RenderFinding = {
    */
   SingleGround: 'single-ground',
   NoImagery: 'no-imagery',
-  NoDisplayType: 'no-display-type'
+  NoDisplayType: 'no-display-type',
+  /**
+   * P112-OWN019-LAPTOPGAPS (R39, Richard 2026-10-14). On a laptop, two things side by side in one row with a hole
+   * between their ink — RL1's feature number given a fifth of the page by a Columns "1 4" row, L1's text and card
+   * pushed to the row's two edges. A warning: a hole can be meant, and the screenshots are the arbiter.
+   */
+  RowGap: 'row-gap',
+  /** P112-OWN019-LAPTOPGAPS — a section that centres its heading and leaves another part off that centre (L1's price). */
+  AlignmentDrift: 'alignment-drift'
 };
 
 const SEVERITY_ORDER = { error: 0, warning: 1, info: 2 };
+
+/** P112-OWN019-LAPTOPGAPS — a row gap is reported when its taller side is more than one line … */
+const ROW_GAP_MIN_TALLEST = 48;
+/** … and the hole is at least this share of the row (the in-page floor is 160 px). RL1's number row: 215 / 1150. */
+const ROW_GAP_MIN_SHARE = 0.12;
 
 /**
  * VIB-007 M3 — **the poverty family, as one list, exported.**
@@ -1094,6 +1180,43 @@ function summarise(viewports, diagnosis, overridden = {}) {
           'read as sections rather than as one column.',
         evidence: v.grounds.values
       });
+    }
+
+    // P112-OWN019-LAPTOPGAPS. A row gap counts when one side is taller than a line (a nav bar, an FAQ question and its
+    // "+", a footer are single lines pushed apart on purpose) and the hole is more than an eighth of the row.
+    if (isDesktop && v.layout) {
+      const gaps = (v.layout.rowGaps || []).filter((g) => g.tallest >= ROW_GAP_MIN_TALLEST && g.gap >= g.rowWidth * ROW_GAP_MIN_SHARE);
+      const seen = new Set();
+      for (const g of gaps) {
+        const key = `${g.left}|${g.right}`;
+        if (seen.has(key) || seen.size >= 3) continue;
+        seen.add(key);
+        add({
+          code: RenderFinding.RowGap,
+          severity: 'warning',
+          viewport: name,
+          message:
+            `"${g.left}" and "${g.right}" sit side by side with ${g.gap}px of empty space between them ` +
+            `(${Math.round((g.gap / g.rowWidth) * 100)}% of the ${g.rowWidth}px row). A label or number beside text reads as one ` +
+            'thing at its own width with a small gap — a row Group, the label at its natural width and the text growing — ' +
+            'not a column given a share of the page (Columns widths are proportions); two parts pushed to a wide ' +
+            "row's edges leave the same hole: give the row a max width and a gap. Look at this width's screenshot.",
+          evidence: g
+        });
+      }
+      const drifts = (v.layout.drifts || []).slice(0, 3);
+      for (const d of drifts) {
+        add({
+          code: RenderFinding.AlignmentDrift,
+          severity: 'warning',
+          viewport: name,
+          message:
+            `This section centres "${d.centredText}", but "${d.text}" sits ${Math.abs(d.offBy)}px ${d.offBy < 0 ? 'left' : 'right'} ` +
+            'of that centre. One section, one alignment: centre the rest too, or align everything to the same left edge. ' +
+            "Look at this width's screenshot.",
+          evidence: d
+        });
+      }
     }
 
     if (v.consoleErrors && v.consoleErrors.length) {

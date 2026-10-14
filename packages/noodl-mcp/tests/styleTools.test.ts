@@ -57,6 +57,15 @@ describe('AIX-006 style MCP tools', () => {
     await session.close();
   });
 
+  it('P112-OWN019-LAPTOPGAPS (R39): the vocabulary says what the look leaves to layout, in both forms', async () => {
+    const full = await call<StyleVocabulary & { layout?: string }>(session, 'get_style_vocabulary', {});
+    expect(full.data.layout).toMatch(/three widths — phone 390, tablet 768, laptop 1280/);
+    expect(full.data.layout).toMatch(/a label or number beside text is a row Group/);
+    expect(full.data.layout).toMatch(/One section, one alignment/);
+    const prompt = await call<{ vocabulary: string }>(session, 'get_style_vocabulary', { detail: 'prompt' });
+    expect(prompt.data.vocabulary).toMatch(/LAYOUT: check 390\/768\/1280; a label beside text is a row Group/);
+  });
+
   it('get_style_vocabulary enumerates tokens, elements and presets', async () => {
     const { isError, data } = await call<StyleVocabulary>(session, 'get_style_vocabulary', {});
     expect(isError).toBe(false);

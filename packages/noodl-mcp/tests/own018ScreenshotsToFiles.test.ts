@@ -100,7 +100,8 @@ describe('P112 OWN-018 — --screenshots-to-files', () => {
 
   it('🟢 control — without the flag, the default still inlines the images, exactly as before', async () => {
     const { res, argv, projectDir } = await render(false);
-    expect(argv).toEqual([projectDir, '--json', '--screenshot', 'full', '--inline-screenshots', '--scale', '0.4']);
+    // P112-OWN019 R39: three sizes by default is the one deliberate extra flag.
+    expect(argv).toEqual([projectDir, '--json', '--screenshot', 'full', '--inline-screenshots', '--scale', '0.4', '--viewports', 'desktop,tablet,phone']);
     expect(res.content.filter((c) => c.type === 'image')).toHaveLength(1);
   });
 

@@ -77,7 +77,7 @@ export function registerRenderTools(
         viewports: z
           .string()
           .optional()
-          .describe('Comma-separated: "desktop,phone" (the default) or explicit sizes like "1440x900,390x844"'),
+          .describe('Comma-separated: "desktop,tablet,phone" (the default) or explicit sizes like "1440x900,390x844"'),
         screenshot: z
           .enum(['full', 'viewport', 'none'])
           .optional()
@@ -127,7 +127,10 @@ export function registerRenderTools(
               ? path.join(projectDir, '.previews', 'render')
               : undefined;
         const { report, screenshots } = await runRenderReport(projectDir, {
-          viewports: args.viewports,
+          // P112-OWN019 R39 (Richard, 2026-10-14): three sizes by default — a laptop row with a hole in it, or a
+          // section that drifts off its axis, is a width problem the phone shot cannot show. The shared measure's
+          // DEFAULT_VIEWPORTS stays two (the editor's captures); this is the agent's tool deciding for itself.
+          viewports: args.viewports ?? 'desktop,tablet,phone',
           screenshot: args.screenshot,
           scale,
           backendPort: args.backend_port,
