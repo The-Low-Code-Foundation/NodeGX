@@ -15,5 +15,15 @@ for name in nodegx-preview nodegx-mcp create-nodegx; do
   if npm view "$pkg" version >/dev/null 2>&1; then echo "skip $pkg: already published"; continue; fi
   echo "publishing $pkg from $(basename "$tgz") (shasum $(shasum "$tgz" | cut -c1-40))"
   npm publish "$tgz" --access public
+  # 2026-10-14 (npm 0.2.0): npm can STAGE a publish (staged publishing, GA May 2026) instead of making it live, and
+  # create-nodegx then pins an MCP version nobody can install. Wait until the registry serves each one, with the
+  # tested shasum, before the next; stop rather than publish create-nodegx over a version that isn't there.
+  want=$(shasum "$tgz" | cut -c1-40)
+  for i in $(seq 1 30); do
+    got=$(npm view "$pkg" dist.shasum 2>/dev/null || true)
+    [ "$got" = "$want" ] && { echo "live: $pkg"; break; }
+    [ "$i" = 30 ] && { echo "STOP: $pkg is not live after 5 min (staged? run: npx npm@11.15.0 stage list). Nothing after it was published." >&2; exit 1; }
+    sleep 10
+  done
 done
 echo "done. A first read of a new version can 404 for a minute or two; poll with: npm view <name>@<version> dist.shasum"

@@ -6,7 +6,24 @@ copies a 0.3.0 project to `<project>.before-0.4` before its format moves to 5 (`
 the drive in the dev editor found the copy made twice per open, and measured OPENWRITES' cause; both fixed and driven
 (`1ed87f2ef`, OWN-013 §7). IDREPLACE is driven too. Nothing was pushed, branched or tagged. Earlier handoffs are in this file's git history.
 
-## 🔴 2026-10-14 (s17, Opus): npm packages 0.2.0 — packed, tested, waiting on Richard's one-time password
+## ✅ 2026-10-14 (s17, Opus): npm packages 0.2.0 PUBLISHED
+
+All three live and `latest` (UTC): `create-nodegx` ~12:00, `@nodegx/preview` ~12:00, `@nodegx/mcp` 12:07:52. Each
+registry `dist.shasum` equals the tested tarball's in the table below. **From the registry**, empty folder, `HOME`
+empty: `npm create nodegx@0.2.0` writes `.mcp.json` pinning `@nodegx/mcp@0.2.0` and the `nodegx-your-own-editor`
+skill; `stranger-render.mjs @nodegx/mcp@0.2.0` → `create_project`, `render_report` DONE clean. The OWN-013 peer was
+told nodegx-web may deploy. Worktree removed.
+
+🔴 **npm's staged publishing (GA May 2026) bit the MCP publish.** Richard's first run published preview and
+create-nodegx, but `@nodegx/mcp` 0.2.0 landed as a STAGED version (the 7.6 MB upload went through npm's browser
+sign-in flow, "Press ENTER to open in the browser"). For about seven minutes `create-nodegx@latest` pinned an MCP that
+did not exist on the registry, so a new folder's agent had no server. The re-run answered `E409 Cannot publish over
+previously staged version "0.2.0"`; the version then appeared (approved through that browser flow). npm 10.9.4 has
+no `npm stage`; `npx npm@11.15.0 stage list` reads the queue (`approve <id>` needs 2FA). **Next publish:** publish
+`@nodegx/mcp` first and poll it to live before `create-nodegx`, or `npm stage publish` all three and approve them
+together. `publish-npm.sh`'s order (preview, mcp, create-nodegx) is right; it does not wait for a staged one.
+
+### What was packed and tested (kept for the record)
 
 `cline-dev` pushed at `54a0ce946` (it carries OWN-019's `cda7ea056` + `5f8dee6d7`, OWN-007's skill, and
 `007e80905` TWOMCPREDS fixed: both MCP specs 19 / 19). Packed in a clean worktree at that commit
