@@ -41,6 +41,10 @@ describe('P112-OWN019-LAPTOPGAPS — row-gap and alignment-drift', () => {
     expect(codes({ desktop: desktop({ rowGaps: [{ cls: 'hero', gap: 160, rowWidth: 1400, tallest: 300, left: 'Make space', right: 'This week' }], drifts: [] }) })).toEqual([]);
   });
 
+  it("a drawing is not a row: RL3's hero scene (a log at left, a dot at the right edge, no words) says nothing", () => {
+    expect(codes({ desktop: desktop({ rowGaps: [{ cls: 'scene', gap: 473, rowWidth: 758, tallest: 60, left: '', right: '' }], drifts: [] }) })).toEqual([]);
+  });
+
   it('only on a laptop: the same numbers at phone width say nothing', () => {
     expect(codes({ phone: { ...desktop(RL1), requested: { width: 390, height: 844 } } })).toEqual([]);
   });

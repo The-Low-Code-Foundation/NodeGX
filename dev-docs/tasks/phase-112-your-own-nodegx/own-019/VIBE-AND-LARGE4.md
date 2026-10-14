@@ -112,11 +112,11 @@ a new measurement goes in the section it belongs to, with its round.
 
 - **The money, re-read against Vibe's own export:** console €51.54 (14:30) → €57.16 (16:06) = €5.62 while R1, R2
   and RL1 ended ($13.66 list by Vibe's export, ≈ $13.5 inside the window) — **≈ €0.42 per list $**, which fits list ÷ 2
-  then $→€ (~0.86), not "÷ 2" alone. A quiz ≈ €1.0–1.8 ($2.45–4.39 list); a landing page ≈ €2.9–3.1 ($6.82–7.27).
+  then $→€ (~0.86), not "÷ 2" alone. A quiz ≈ €1.0–1.8 ($2.45–4.39 list); a landing page ≈ €2.9–4.0 ($6.82–9.55).
   Over s4's whole day: €20.64 against ≥ $29.8 list (GLM at unverified prices, E1/Q2 partly unexported) — the same
   ~0.55–0.69 band at most.
 - **Daytime held:** every series round finished by itself, cached 82–92%, in 1–3 sittings (quiz 39–66 min, Launch
-  87–100 min). Longest think 180 KB (R1) — no stall.
+  87–132 min). Longest think 180 KB (R1) — no stall.
 - **The hand-over rail works as built:** R1 reached past its "# Done" once and the hook stopped it; no round looped
   on its notes (NOTELOOP's new cap never fired in the series — it was not needed, which is not the same as proven).
 - **Its proofs read what the tool lets them — again:** R3 proved "nothing left over" by watching Canberra while the

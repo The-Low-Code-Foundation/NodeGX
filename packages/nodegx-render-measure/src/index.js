@@ -1185,7 +1185,9 @@ function summarise(viewports, diagnosis, overridden = {}) {
     // P112-OWN019-LAPTOPGAPS. A row gap counts when one side is taller than a line (a nav bar, an FAQ question and its
     // "+", a footer are single lines pushed apart on purpose) and the hole is more than an eighth of the row.
     if (isDesktop && v.layout) {
-      const gaps = (v.layout.rowGaps || []).filter((g) => g.tallest >= ROW_GAP_MIN_TALLEST && g.gap >= g.rowWidth * ROW_GAP_MIN_SHARE);
+      // …and words on at least one side: RL3's hero drawing (a log on the sand at left, a dot at the right edge) is a
+      // picture, not a row with a hole in it (s5).
+      const gaps = (v.layout.rowGaps || []).filter((g) => (g.left || g.right) && g.tallest >= ROW_GAP_MIN_TALLEST && g.gap >= g.rowWidth * ROW_GAP_MIN_SHARE);
       const seen = new Set();
       for (const g of gaps) {
         const key = `${g.left}|${g.right}`;

@@ -9,7 +9,7 @@ package that only work well with Claude and Claude Code, we need to be able to o
 vibe version."*
 **Depends on** OWN-018 (the lab: `round-kit.mjs`, `grade-quiz.mjs`, kit tgz12, everything Mistral taught the kit) and
 Richard's Vibe subscription key (`MISTRAL_VIBE_API_KEY` in the repo `.env`, made under Code › Vibe CLI).
-**Status: 🟡 s5 ran (2026-10-14, Opus): every s4 lever in tgz30 (NOTELOOP, TAPHOLD — misread in s4 —, DESCRIBEINSIDE, RECORDERTAIL, the editor grader's mutants) + BACKENDSESSION (R38: the preview starts the backend); the series on tgz30 by day — quiz 12/12 ×3 (carryover clean ×2, R3 ✗ = WATCHONE, fixed), Launch RL1 17/19, RL2b 18/19 (behaviour all ✓; LAPTOPGAPS, R39: row gaps and eyebrow drift, now measured), one lab failure (Mistral's stream); money ≈ €0.42 per list $. Next: tgz31 (s5's fixes + peers' starter assets, 0.2.1) and the series again — sprint guide `own-019/NEXT-SESSION-PROMPT.md`. Earlier: s4 (daytime; Q1 12/12, L1 17/17, R36 Large 4 only, R37 levers first).**
+**Status: 🟡 s5 ran (2026-10-14, Opus): every s4 lever in tgz30 (NOTELOOP, TAPHOLD — misread in s4 —, DESCRIBEINSIDE, RECORDERTAIL, the editor grader's mutants) + BACKENDSESSION (R38: the preview starts the backend); the series on tgz30 by day — quiz 12/12 ×3 (carryover clean ×2, R3 ✗ = WATCHONE, fixed), Launch RL1 17/19, RL2b 18/19, RL3 18/19 (behaviour all ✓; LAPTOPGAPS, R39: row gaps and eyebrow drift, now measured), one lab failure (Mistral's stream); money ≈ €0.42 per list $. Next: tgz31 (s5's fixes + peers' starter assets, 0.2.1) and the series again — sprint guide `own-019/NEXT-SESSION-PROMPT.md`. Earlier: s4 (daytime; Q1 12/12, L1 17/17, R36 Large 4 only, R37 levers first).**
 **Model:** Opus for the sessions that build and read the rounds. The agent under test: **Mistral Large 4
 (`mistral-large-4`, never `-latest`) in Mistral Vibe**, pinned to a version per round (2.26.1 at opening).
 
@@ -498,7 +498,8 @@ post-tool, post-agent) — and the kit uses none of them yet.
   - **The series on tgz30, by day (all Large 4, every round finished by itself, cached 82–92%):** R1 12/12 carryover ✓
     (39 min, $2.45), R2 12/12 ✓ (59 min, $3.94), R3 12/12 **carryover ✗** (66 min, $4.39) — it watched Canberra while
     the carried green landed, by position, on Sydney: **WATCHONE, fixed `7f6bee6d9`** (watch takes a list). RL1 17/19
-    (100 min, $7.27), RL2b 18/19 (87 min, $6.82); RL2 a lab failure (Mistral's stream died 27 s in; round-kit now
+    (100 min, $7.27), RL2b 18/19 (87 min, $6.82), RL3 18/19 (132 min, $9.55, ran past 18:00; its first ✗gaps was
+    its hero drawing — `row-gap` now needs words on one side); RL2 a lab failure (Mistral's stream died 27 s in; round-kit now
     reruns the brief when no note exists). Every Launch behaviour check passed; the reds are the look.
   - **Richard on RL1's laptop rows** ("funny justification choices and spacing"): **LAPTOPGAPS, R39 — all of it plus
     three screenshot sizes.** render_report's `row-gap` / `alignment-drift` (graded on the gallery: Launch apps fire,

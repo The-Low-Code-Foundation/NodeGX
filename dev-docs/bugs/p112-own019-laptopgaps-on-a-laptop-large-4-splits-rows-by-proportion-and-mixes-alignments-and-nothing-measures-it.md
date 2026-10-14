@@ -43,3 +43,6 @@ ink (text runs via Range, painted boxes); graded on the gallery: RL1 3 gaps + 2 
 carried it). (3) `get_style_vocabulary` says the layout rules (`layout`, and a LAYOUT line in the prompt form).
 (4) The Launch grader's `gaps` and `align` (render-measure's own measure and summarise at 1280): control 19/19, RL1
 17/19 (exactly those two). Ships in tgz31; whether Large 4 then builds without the holes is measured there.
+RL3 (18:19): its first grade read ✗gaps on its hero DRAWING (a log on the sand at left, a dot at the right edge — no
+words either side); `row-gap` now needs text on at least one side (unit case added; RL3 regraded 18/19, ✗align only).
+That rule landed after tgz31 was packed — repack (tgz32) before s6's series.
