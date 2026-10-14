@@ -56,7 +56,7 @@ export const DateDifference = defineNode({
   ],
   // the Unit setter (:75, `setDiagnostic('date-difference/unknown-unit', unknownUnitMessage(value))`): the last Unit that arrived, as it arrived
   diagnostics: {
-    'date-difference/unknown-unit': { says: 'Unit is not one of the eight', message: (_i, s) => unknownUnitMessage(s.unit) }
+    'date-difference/unknown-unit': { says: 'Unit is not one of the eight', settings: ['unit'], message: (_i, s) => unknownUnitMessage(s.unit) }
   },
   source: 'packages/noodl-runtime/src/nodes/std-library/date/datedifference.ts; packages/noodl-runtime/src/nodes/std-library/date/datemath.ts',
   needs: ['timezone'],

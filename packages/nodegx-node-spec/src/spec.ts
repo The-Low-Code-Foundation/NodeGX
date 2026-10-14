@@ -272,6 +272,13 @@ export interface WorldView {
    */
   wired(port: string): boolean;
   /**
+   * NSP-019 R38 (s105) — how the node's parent stacks it (`ParentAxis`): the runtime's `parentLayout` (react-component-node.ts
+   * :1113, the parent's Layout), which `Layout.size` reads to turn a percent along that axis into a share of the room. A fact of
+   * the graph, like `wired`. A scenario names it under `parent` (scenario.ts; the adapter's `mount` takes it in its context);
+   * absent, a column — the holder every target puts a lone node in.
+   */
+  parent(): ParentAxis;
+  /**
    * NSP-020 (s82) — whether THIS node has the output now: the runtime's `hasOutput` (node.ts), which every send of a
    * `registerOutputIfNeeded` port is gated on (dbmodelnode2.ts :140-142, states.ts :257/:842/:860, simplejavascript.ts
    * :609). A declared output always; a derived output when the params derived it, a wire asked for it
@@ -937,6 +944,23 @@ export function playContextOf(context: Readonly<PortContext> | undefined): PlayC
   return out;
 }
 
+/**
+ * NSP-019 R38 (s105) — how the node's parent stacks its children: the runtime's `parentLayout` (layout.ts `Layout.size`), which
+ * turns a percent along that axis into a share of the room (`flex-grow`). A play's parent is a column unless the scenario names
+ * a row (scenario.ts `parent`): the holder every target puts a lone node in is a column, so a play that names none is what
+ * every play before R38 was.
+ */
+export type ParentAxis = 'row' | 'column';
+
+/**
+ * NSP-019 R38 (s105) — what a target's `mount` is handed beyond the params and the wired inputs: the play's context
+ * (`PlayContext`, the only part `derived.*` sees) and the parent's axis (`ParentAxis`; absent, a column). Where the node sits,
+ * never the project.
+ */
+export interface MountContext extends PlayContext {
+  parent?: ParentAxis;
+}
+
 export interface DerivedPorts<S, O> {
   /**
    * The ports an EDITOR draws for these params — R6's `ports(params)`, what the runtime today
@@ -1282,6 +1306,15 @@ export interface DiagnosticDecl<S, I> {
   says: string;
   /** The sentence the editor shows while the condition holds; `null` / `undefined` / `''` when it does not. */
   message: (inputs: Inputs<I>, state: Readonly<S>) => string | null | undefined;
+  /**
+   * NSP-019 R40 (s105) — the sentence follows from these inputs' saved settings alone: a node placed with its params and
+   * settled once, with nothing pressed, nothing sent and nothing answered, shows it whenever an app would, and it moves only
+   * when one of them is written (tests/settings-diagnostics.test.ts grades both). An editor may then read it without running
+   * the app (`settingsDiagnostics`, the validator's `settings-diagnostic` rule), unless a wire or an expression feeds one of
+   * them. Absent: it needs something to happen first (a Focus, a Refresh, an answer), or the play's own world (For Each's
+   * templates), and reading it from settings would warn about an app that never shows it.
+   */
+  settings?: readonly string[];
 }
 
 /** NSP-018 — one shape of hand-written code a node replaces (`NodeDecl.idioms`). */
@@ -1467,7 +1500,7 @@ export interface AnyNodeSpec {
   outcomes?: readonly Outcome[];
   inspect?: (state: never, world: WorldView) => string;
   /** NSP-019 s95 — what the node tells the editor (`NodeDecl.diagnostics`), erased. */
-  diagnostics?: Readonly<Record<string, { says: string; message: (inputs: never, state: never) => string | null | undefined }>>;
+  diagnostics?: Readonly<Record<string, { says: string; message: (inputs: never, state: never) => string | null | undefined; settings?: readonly string[] }>>;
   /** NSP-017 AC3 — a contract, not a behaviour (`NodeDecl.contract`). */
   contract?: string;
   idioms?: readonly Idiom[];

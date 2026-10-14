@@ -45,6 +45,7 @@ import {
   SCHEMA_IDS,
   SchemaValidator,
   SemanticValidator,
+  settingsDiagnosticLookup,
   sortDiagnostics,
   buildEffectiveTokens,
   checkFontFaces,
@@ -357,7 +358,7 @@ export function validateCandidate(
   const name = candidate.component.path ?? key;
   const candidateProject = store.buildNormProject({ replace: { key, files: candidate } });
   // NSP-020 R19 — a wire to a port the node's spec does not draw is refused, judged on the project this write leaves
-  const report = validator().validateComponent(candidateProject, name, { strict, drawnPorts: drawnPortCheck(store, new Map([[legacyNameOf(key, candidate), candidate]])) });
+  const report = validator().validateComponent(candidateProject, name, { strict, drawnPorts: drawnPortCheck(store, new Map([[legacyNameOf(key, candidate), candidate]])), settingsDiagnostics: settingsDiagnosticLookup });
 
   const views = authoredProjectViews(store, new Map([[name, candidate]]));
   const diagnostics = dedupeDiagnostics([
@@ -369,7 +370,7 @@ export function validateCandidate(
   if (baseline) {
     const baselineName = baseline.component.path ?? key;
     const baselineProject = store.buildNormProject({ replace: { key, files: baseline } });
-    const baselineReport = validator().validateComponent(baselineProject, baselineName, { strict, drawnPorts: drawnPortCheck(store, new Map([[legacyNameOf(key, baseline), baseline]])) });
+    const baselineReport = validator().validateComponent(baselineProject, baselineName, { strict, drawnPorts: drawnPortCheck(store, new Map([[legacyNameOf(key, baseline), baseline]])), settingsDiagnostics: settingsDiagnosticLookup });
     // Exempted on **blocking** identity, not on `severity === 'error'`, and
     // over the same four preconditions the candidate is judged by — the editor's
     // rule, and the correction AAQ-005 made to it after this package's own
@@ -528,7 +529,8 @@ export function validateOnDisk(
 ): { report: ValidationReport; target?: string } {
   const project = store.buildNormProject();
   // NSP-020 R19 — the same wire check a write meets, so a check before a write says what the write will
-  const validatorOptions = { strict: options.strict ?? false, drawnPorts: drawnPortCheck(store) };
+  // P107 R40 — a node's settings-only warnings, from its spec (settingsDiagnosticLookup.ts)
+  const validatorOptions = { strict: options.strict ?? false, drawnPorts: drawnPortCheck(store), settingsDiagnostics: settingsDiagnosticLookup };
   const views = authoredProjectViews(store, new Map());
   const emitSkipNotes = options.emitSkipNotes === true;
 

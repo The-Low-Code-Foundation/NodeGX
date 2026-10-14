@@ -294,3 +294,52 @@ stepping 0 → 1 → 2 made 1 the first), said to Richard in one line.
 **Trap met again:** the first attempt clicked the dialog's hidden measuring copy (two `[role=dialog]` in the DOM; memory
 "`cdp click` HITS GHOST in Modal"). Pick the dialog that `elementFromPoint` lands in.
 
+
+### 5.8 s105, 2026-10-14 — R38 and R40: where a node sits, and its warnings read before the app runs
+
+**R38, built on 9 specs.** The format gained one fact of the graph beside `wired`: how the node's parent stacks it. A scenario
+says `parent: 'row' | 'column'` (a column when it says nothing, which is what every target's holder already was, so every
+earlier trace is unchanged), the runtime target's holder lays out that way, and a spec reads it as `WorldView.parent()`.
+Probed on the runtime first: Group, Text, Image, Video, Button, Text Input, Dropdown, Slider and Radio Button Group warn when
+the size along the parent's axis is wired and a percent. The Checkbox and Radio Button were in the plan's 11 and never warn:
+their Width and Height are the box's, in px, vw or vh (checkbox.ts :114-141). `src/nodes/wired-grow.ts` is the one model the
+nine share: what a size port holds (node.ts :446-458 merges a bare number into the unit it holds), what reaches the style
+(react-component-node.ts :706-753), and the rule (layout.ts `Layout.size` :138-156, `reportMainAxisGrow`). The runtime says
+it in the node's render and remembers it, so a node off the page keeps its sentence. The spec keeps it in `grow`, written at
+every paint. Writing it only on the page split each frame-end branch in two, and the twins survived as swap mutants. The
+Slider's Width has no Fixed mark (slider.ts :145-157); conformance found that. Each spec has a version bump and 10 hand
+scenarios per axis it has (warn; a bare number in the held unit; px clears; Fixed clears; the other axis; not wired; off the
+page and back; Absolute; refused and empty values; Size Mode).
+
+**R40, built.** A diagnostic names the inputs its sentence follows from (`settings: ['limitsMin', 'limitsMax']`), on six
+keys: Counter, Date Add, Date Difference, the Slider's Max, For Each's Script and input mapping. `tests/settings-diagnostics.test.ts`
+holds the mark to it: over every hand scenario and 200 sequences of each, the sentence moves only in a frame that writes one
+of the named inputs (two controls: the Slider's Focus warning marked in a copy goes red, and a Counter mark naming only Min
+Value). `settingsDiagnostics(spec, params, wired)` reads them; a wire or an expression on a named input skips that sentence
+only. The validator's `settings-diagnostic` rule takes the reading as a callback (`ValidatorOptions.settingsDiagnostics`, as
+`drawnPorts`: the rules index must not import `@nodegx/node-spec`), passed by the Problems panel and by the MCP's three
+validator calls. A warning: no write is refused. **Measured before shipping**, over 285 of Richard's projects (2,228 nodes of
+the five types): 3,876 readings, 113 skipped for a wire into a named input, **0 warnings**. A Counter and a For Each from those
+projects, planted with Min 10 / Max 2 and a Script that does not compile, both fire. The first version skipped any node with
+any wired value input and read 423 of 2,228; a For Each's Items is almost always wired.
+
+**Driven (s105), the rules column and R40.** The editor on a renamed copy of the *Poke it* lesson (in the scratchpad; the
+source unchanged by `git status`; unregistered afterwards; 26 processes stopped), with a Counter (Min 10, Max 2, Limits on), a
+Slider (Min 50, Max 10) and a For Each whose Script does not compile, added to its Home page. *How this node works* on each,
+visibility read with `elementFromPoint` on the dialog that is not the measuring copy:
+- the Counter: *It warns you when — Min Value is above Max Value*, under the ports, seen without scrolling
+  ([shot](shots/nsp-019-s105-counter-warns-you-when.png));
+- the Slider: four lines, the new one *"A wired Width in a row, or a wired Height in a column, is a percent, so it shares out
+  the space instead of setting a size"* among them, and Width's rule *"the size it holds now, a bare number read in the unit it
+  held"*. The section is below the fold of the rules column: seen once the column is scrolled to it
+  ([shot](shots/nsp-019-s105-slider-warns-you-when.png));
+- the Repeater: the heading and its first six of ten lines seen without scrolling, the last four below the fold.
+
+The Problems panel read **0 errors · 3 warnings**, R40's three rows in the runtime's words: *"Stock" (Counter): Min Value 10
+is above Max Value 2…*, *"Rows" (For Each): The Repeater's Script does not compile: Unexpected token ';'*, *"Volume"
+(net.noodl.controls.range): Max 10 is below Min 50…* ([shot](shots/nsp-019-s105-problems-panel-settings.png)). The
+toolbar's ⚠ 3 popup is a different channel: the live preview's own warnings, which said the same three.
+
+**Seen, not filed:** after a node is selected through the graph API (`nodeGraph.selectNode`), the property panel stayed on the
+previous node for 15 s, so *How this node works* opened the previous node's dialog. A click in the Layers tree moved it at once.
+The API is not a person's path; it is noted for the next drive script, not as a defect.

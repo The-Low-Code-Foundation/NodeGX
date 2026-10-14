@@ -215,4 +215,4 @@ export { checkTypographyHierarchy, MIN_TEXT_NODES, TEXT_WEIGHT_TYPES } from './t
 export type { CheckTypographyHierarchyOptions } from './typographyHierarchy';
 export { SemanticValidator, validateProject } from './SemanticValidator';
 export { ALL_RULES } from './rules';
-export type { DrawnPortsLookup, Rule, RuleContext, ValidatorOptions } from './rules';
+export type { DrawnPortsLookup, Rule, RuleContext, SettingsDiagnosticsLookup, ValidatorOptions } from './rules';

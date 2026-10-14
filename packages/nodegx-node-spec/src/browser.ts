@@ -24,4 +24,5 @@ export * from './nodes';
 export * from './runner';
 export * from './layout';
 export * from './layout-map';
+export * from './settings-diagnostics';
 export { sha256, sha384, sha512 } from './sha2';

@@ -14717,6 +14717,12 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
+        "height": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "opacity": [
           "always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it"
         ],
@@ -14782,7 +14788,8 @@
         ]
       },
       "warnings": {
-        "focus/not-mounted": "the last Focus arrived while it was not on the page"
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size"
       }
     },
     {
@@ -16941,6 +16948,12 @@
         "scrollIntoView": [
           "always: the page, or the scrolling Group holding it, scrolls until the element can be seen"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
+        "height": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer"
         ],
@@ -16990,6 +17003,9 @@
         "srcSet": [
           "always: the sizes the browser may pick from instead, drawn at the end of the frame"
         ]
+      },
+      "warnings": {
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size"
       }
     },
     {
@@ -26616,9 +26632,18 @@
         "scrollIntoView": [
           "always: the page, or the scrolling Group holding it, scrolls until the group can be seen"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
+        "height": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, its buttons take no click"
         ]
+      },
+      "warnings": {
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size"
       }
     },
     {
@@ -32968,6 +32993,12 @@
         "as": [
           "always: the HTML element the next paint draws (a div when empty) — a new Tag draws a new element"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
+        "height": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer"
         ],
@@ -33011,6 +33042,9 @@
         "acceptedFileTypes": [
           "always: read at a drop — which files count as accepted"
         ]
+      },
+      "warnings": {
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size"
       }
     },
     {
@@ -37547,6 +37581,12 @@
         "scrollIntoView": [
           "always: the page, or the scrolling Group holding it, scrolls until the element can be seen"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
+        "height": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer"
         ],
@@ -37629,6 +37669,9 @@
           "on the page: stops wanting the video playing, goes back to Start Time as last drawn (Playback Position, once loaded; second 0 when there is none) and pauses it — On Pause if it was playing; Autoplay no longer starts it on this load; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
           "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and resets at the paint that puts the video there — Done then"
         ]
+      },
+      "warnings": {
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size"
       }
     },
     {
@@ -47150,13 +47193,20 @@
         "scrollIntoView": [
           "always: the page, or the scrolling Group holding it, scrolls until the button can be seen"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
+        "height": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
       },
       "warnings": {
         "focus/not-mounted": "the last Focus arrived while it was not on the page",
-        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon",
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size"
       }
     },
     {
@@ -51939,13 +51989,20 @@
         "scrollIntoView": [
           "always: the page, or the scrolling Group holding it, scrolls until the list can be seen"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
+        "height": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
       },
       "warnings": {
         "focus/not-mounted": "the last Focus arrived while it was not on the page",
-        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon",
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size"
       }
     },
     {
@@ -56522,12 +56579,16 @@
         "scrollIntoView": [
           "always: the page, or the scrolling Group holding it, scrolls until the slider can be seen"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
       },
       "warnings": {
         "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size",
         "slider/max-below-min": "Max is below Min",
         "slider/value-not-a-number": "a Value arrived that is not a number"
       }
@@ -59373,6 +59434,12 @@
         "blockTouch": [
           "always: on, a pointer act that lands here goes no further — the nodes it sits inside do not hear it"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
+        "height": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ],
@@ -59382,7 +59449,8 @@
       },
       "warnings": {
         "focus/not-mounted": "the last Focus arrived while it was not on the page",
-        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon",
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size"
       }
     },
     {

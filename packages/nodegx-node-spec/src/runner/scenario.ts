@@ -17,6 +17,7 @@
 import type { Step } from '../adapter';
 import { canonicalise, revive } from '../canonical';
 import type { TraceEvent } from '../trace';
+import type { ParentAxis } from '../spec';
 import type { WorldScript } from '../world';
 
 export interface Scenario {
@@ -42,6 +43,12 @@ export interface Scenario {
    * on a scenario) is gone: at play a node has its params and its wires, never the project (§6.6).
    */
   wiredOutputs?: string[];
+  /**
+   * NSP-019 R38 (s105): how the node's parent stacks it for the whole play (spec.ts `ParentAxis`) — the holder the target puts
+   * the node in lays out as a row or a column, and a diagnostic's `site.parent` reads it. Absent, a column: the holder every
+   * scenario before this had, and what the generated sequences still have.
+   */
+  parent?: ParentAxis;
   /** When present, both targets are graded against it; when absent, against the interpreter. */
   expect?: TraceEvent[];
   /** For a replay file: the seed the sequence came from. */
@@ -78,6 +85,7 @@ export function reviveScenarios(parsed: unknown, type: string, file = `${type}.j
     const sc = s as Scenario;
     if (!sc || typeof sc.name !== 'string' || !Array.isArray(sc.steps)) throw new Error(`${file}[${i}]: a scenario needs a name and steps`);
     if (sc.wired !== undefined && (!Array.isArray(sc.wired) || sc.wired.some((p) => typeof p !== 'string'))) throw new Error(`${file}[${i}]: \`wired\` is a list of port names`);
+    if (sc.parent !== undefined && sc.parent !== 'row' && sc.parent !== 'column') throw new Error(`${file}[${i}]: \`parent\` is "row" or "column"`);
     if (sc.wiredOutputs !== undefined && (!Array.isArray(sc.wiredOutputs) || sc.wiredOutputs.some((p) => typeof p !== 'string'))) throw new Error(`${file}[${i}]: \`wiredOutputs\` is a list of port names`);
     if ('context' in (sc as object)) throw new Error(`${file}[${i}]: a scenario has no \`context\` — at play a node has its params and its wires (\`wired\`, \`wiredOutputs\`), never the project (NSP-020 §6.6)`);
     const out: Scenario = { ...sc, node: sc.node ?? type, params: reviveParams(sc.params ?? {}), steps: sc.steps.map(reviveStep) };

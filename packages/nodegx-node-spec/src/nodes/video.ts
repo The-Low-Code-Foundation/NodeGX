@@ -48,6 +48,7 @@
 
 import { defineNode, said, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
+import { growChange, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, withGrow, type Sizes } from './wired-grow';
 
 /**
  * NSP-016 s54 — the canonical form of a node's own DOM element (the Video's `DOM Element`, `type: 'domelement'`): what a wire from it
@@ -143,6 +144,9 @@ type State = {
   waiting: readonly Waiting[];
   /** the outcomes resolved since the frame began and not yet reported (group.ts `ran`) */
   ran: readonly Resolved[];
+  /** NSP-019 R38 — what the size ports hold, and what the last render on the page said of them (wired-grow.ts) */
+  sizes: Sizes;
+  grow: string | null;
 };
 
 type FileLike = { readonly name?: unknown; readonly type?: unknown; readonly size?: unknown };
@@ -216,7 +220,8 @@ export const Video = defineNode({
   // v4 (P109 ISL-031, s30): a drag never takes its own node as its zone — a keyboard lift does not start in itself, Enter or Space then cancels, and a pointer drag over a new element of its own finds no zone (row C78)
   // v5 (P109 ISL-031, s30–31): every element of a Draggable node takes the keyboard — a remount, a new Tag or a mount however late gets the attributes (row C77); which element is on the page is the paint's sync (`synced`), and the keyboard is held by an element (`focusedElem`), so a paint writes nothing about it
   // v6 (P107 s92, row C161 — R27): Restart and Reset seek to Start Time, not second 0
-  version: 6,
+  // v7 (NSP-019 R38): a wired Width in a row, or a wired Height in a column, that is a percent shows as its warning (wired-grow.ts)
+  version: 7,
   changes: [
     {
       version: 6,
@@ -225,8 +230,10 @@ export const Video = defineNode({
       migration: {
         none: 'Ruled "Restart and Reset go to Start Time" (R27): the two port descriptions already promised "the beginning". A Video with no Start Time seeks to second 0 as before, and the reach measured on 2026-10-12 was 13 Video nodes in 8 of Richard\'s projects, none with a Start Time'
       }
-    }
+    },
+    growChange(7)
   ],
+  diagnostics: wiredGrowDiagnostic,
   source: 'packages/noodl-viewer-react/src/nodes/visual/video.ts',
   needs: ['person', 'clock'],
   // the page's syncs (spec.ts `synced`): which element is on the page, written only by a paint. Not branches (row C77, P109 s31):
@@ -237,6 +244,8 @@ export const Video = defineNode({
   outcomes: ['done', 'failure'],
 
   state: {
+    sizes: { width: sizeAtDefault(), height: sizeAtDefault() },
+    grow: null,
     mounted: true,
     onPage: false,
     elem: 0,
@@ -486,6 +495,9 @@ export const Video = defineNode({
         : { says: 'the value it already holds: nothing', send: [] },
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
     scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the element can be seen', send: [] }),
+    // NSP-019 R38 — node.ts :446-458, react-component-node.ts :706-753 (wired-grow.ts)
+    width: sizeReducer('width'),
+    height: sizeReducer('height'),
     visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer', set: { visible: !!v }, send: [] }),
     // Video.tsx :214 — the style holds the value as written; compared with the number 0
     opacity: (_s, v) => ({ says: 'always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it', set: { opacityZero: v === 0 }, send: [] }),
@@ -558,8 +570,8 @@ export const Video = defineNode({
   {
     world: {
       // placed on the page with its params set — the first render: the element the Source names, Did Mount
-      place: (s) => {
-        const p = painted(s);
+      place: (s, i, w) => {
+        const p = withGrow(s, painted(s), i.sizeMode, i.position, w);
         return { set: p.set, send: p.send, emit: p.emit };
       },
       timer: (s, _i, tag) => {
@@ -569,8 +581,8 @@ export const Video = defineNode({
       }
     },
     // the frame's end: the paint (which runs what waited, at a mount); the frame's outcomes in the order they were resolved (`ran` first)
-    afterInputs: (s) => {
-      const p = painted(s);
+    afterInputs: (s, i, w) => {
+      const p = withGrow(s, painted(s), i.sizeMode, i.position, w);
       return toPatch({ set: { ...p.set, ran: [] }, send: p.send, emit: p.emit, outcomes: [...s.ran, ...(p.outcomes ?? [])] });
     },
     person: {

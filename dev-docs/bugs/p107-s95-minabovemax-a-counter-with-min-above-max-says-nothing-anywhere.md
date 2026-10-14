@@ -89,3 +89,13 @@ which the runtime has always raised on the error bus and the editor records once
 scenarios were added. Slider v7 conforms at 20739 and 20740. Control: one letter in the spec's sentence gives 2 scenarios and
 30 sequences red.
 Left: layout (R38: a scenario names the parent's direction), and the census of other contradictions (not asked for).
+
+**s105 (2026-10-14) — layout, the last site (R38), and the reading before the app runs (R40).** A scenario now names how
+its parent stacks the node (`parent: 'row' | 'column'`, a column by default, so every earlier trace is unchanged), and the
+runtime target's holder follows it. `dimensions/wired-dimension-becomes-grow` is declared on 9 specs, not the 11 the s104 plan
+named: probed on the runtime, the Checkbox's and Radio Button's sizes are the box's, in px / vw / vh, and never say it. The
+sentence is the runtime's render memo, so the spec writes it at every paint (`wired-grow.ts`: what a size port holds after
+node.ts's merge, what reaches the style, and the rule). The Slider's Width has no Fixed mark (slider.ts :145-157), found by
+conformance. R40: six of these warnings are marked as following from named settings, and the Problems panel and the agent
+server now read them from a project before it runs (`settings-diagnostic`). Over 285 of Richard's projects it says nothing (0
+false alarms), and two plants fire. Every site of R35's half 1 is now declared.

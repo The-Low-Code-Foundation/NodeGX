@@ -51,6 +51,8 @@ export const Counter = defineNode({
   diagnostics: {
     'counter/min-above-max': {
       says: 'Min Value is above Max Value',
+      // R40 — Min Value and Max Value as saved: the warning shows at the placing
+      settings: ['limitsMin', 'limitsMax'],
       message: (i) => (i.limitsMin > i.limitsMax ? `Min Value ${i.limitsMin} is above Max Value ${i.limitsMax}. With Limits Enabled on, the count gets stuck.` : null)
     }
   },

@@ -44,6 +44,7 @@
 
 import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
+import { growChange, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, withGrow, type Sizes } from './wired-grow';
 
 /** The Values of the Radio Buttons on the group's page, in order (THE FIRST VISUAL WITH CHILDREN, above): `undefined` is a button with no Value. */
 export const PAGE_VALUES: readonly unknown[] = ['a', 'b', 1, undefined];
@@ -59,6 +60,9 @@ type State = {
   visible: boolean;
   /** NSP-016 s43 — as painted: a hidden group's buttons inherit `visibility: hidden`, so a pick finds none under the pointer */
   pageVisible: boolean;
+  /** NSP-019 R38 — what the size ports hold, and what the last render on the page said of them (wired-grow.ts) */
+  sizes: Sizes;
+  grow: string | null;
 };
 
 type O = typeof RadioButtonGroup extends { outputs: infer X } ? X : never;
@@ -71,13 +75,16 @@ const NONE: Act = { send: [] };
 export const RadioButtonGroup = defineNode({
   type: 'Radio Button Group',
   // v2 (NSP-023 step 5, 2026-10-06): the selection is the node's Value — v1 copied the component's selection and its effect (row C76)
-  version: 2,
+  // v3 (NSP-019 R38): a wired Width in a row, or a wired Height in a column, that is a percent shows as its warning (wired-grow.ts)
+  version: 3,
+  changes: [growChange(3)],
+  diagnostics: wiredGrowDiagnostic,
   source: 'packages/noodl-viewer-react/src/nodes/controls/radiobuttongroup.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches
   synced: ['pageVisible'],
 
-  state: { value: undefined, mounted: true, onPage: false, visible: true, pageVisible: true } as State,
+  state: { sizes: { width: sizeAtDefault(), height: sizeAtDefault() }, grow: null, value: undefined, mounted: true, onPage: false, visible: true, pageVisible: true } as State,
 
   acts: {
     pick: { description: 'a person clicks the Radio Button inside this group whose Value is the one given (none given: the button with no Value)', values: PAGE_VALUES }
@@ -162,14 +169,17 @@ export const RadioButtonGroup = defineNode({
     mounted: (_s, v) => ({ says: 'always: the group is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint; its buttons go with it', set: { mounted: !!v }, send: [] }),
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
     scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the group can be seen', send: [] }),
+    // NSP-019 R38 — node.ts :446-458, react-component-node.ts :706-753 (wired-grow.ts)
+    width: sizeReducer('width'),
+    height: sizeReducer('height'),
     // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
     visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, its buttons take no click', set: { visible: !!v }, send: [] })
   },
   {
     // placed on the page with its params set and its buttons added — the first render: Did Mount; the buttons' count at the frame's end
-    world: { place: (s) => ({ ...painted(s), send: ['childrenCount'] }) },
+    world: { place: (s, i, w) => ({ ...withGrow(s, painted(s), i.sizeMode, i.position, w), send: ['childrenCount'] }) },
     // every frame's end is a paint (react-component-node.ts :1675-1689)
-    afterInputs: (s) => ({ ...painted(s), send: [] }),
+    afterInputs: (s, i, w) => ({ ...withGrow(s, painted(s), i.sizeMode, i.position, w), send: [] }),
     // a person acts on a PAINTED page (adapter.ts `act`): the page follows first
     person: {
       pick: (s, _i, v) =>

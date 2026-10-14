@@ -58,6 +58,7 @@ import { SELF_REFERENCE } from '../trace';
 import { controlFocusNotMounted, focusDiagnostics, focusMissed } from './focus-not-mounted';
 import { focusAndIconSourceChange, iconSourceDiagnostics } from './icon-source';
 import { dataAttributeInput, dataAttributeNames } from './data-attributes';
+import { growChange, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, withGrow, type Sizes } from './wired-grow';
 
 type State = {
   /** utils.ts :75-89 `_internal.enabled` */
@@ -85,6 +86,9 @@ type State = {
   items: unknown;
   /** the `<select>`'s own selection: an option's value, '' for the hidden empty option (:217), or `null` when it selects nothing */
   domSelected: string | null;
+  /** NSP-019 R38 — what the size ports hold, and what the last render on the page said of them (wired-grow.ts) */
+  sizes: Sizes;
+  grow: string | null;
 };
 
 type O = typeof Dropdown extends { outputs: infer X } ? X : never;
@@ -117,7 +121,8 @@ export const Dropdown = defineNode({
   // v7 (P109 ISL-045, P109-S21-DROPDOWNEMPTYRESET): the spec correcting itself — after Items offered no options the element selects nothing, and the next option to arrive is selected as it arrives
   // v8 (P107 R21, P107-S88-OPTIONSCAST): a word in a list on Items is an option, labelled and valued by the word — v7 drew an option with no text and the value ''
   // v9 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it, and an Icon Source that is not an icon shows as one until an icon or nothing arrives (`diagnostics`)
-  version: 9,
+  // v10 (NSP-019 R38): a wired Width in a row, or a wired Height in a column, that is a percent shows as its warning (wired-grow.ts)
+  version: 10,
   // NSP-010 — v7 is the spec correcting itself, not the runtime changing
   changes: [
     {
@@ -138,15 +143,18 @@ export const Dropdown = defineNode({
         none: 'Nothing an app relied on: a word in a wired list drew an option a person could not read, all with the same empty value. No stored project changes — typed Items were already read this way'
       }
     },
-    focusAndIconSourceChange(9)
+    focusAndIconSourceChange(9),
+    growChange(10)
   ],
-  diagnostics: { ...focusDiagnostics(controlFocusNotMounted('dropdown')), ...iconSourceDiagnostics() },
+  diagnostics: { ...focusDiagnostics(controlFocusNotMounted('dropdown')), ...iconSourceDiagnostics(), ...wiredGrowDiagnostic },
   source: 'packages/noodl-viewer-react/src/nodes/controls/options.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the browser's selection with them
   synced: ['pageEnabled', 'pageVisible', 'domSelected'],
 
   state: {
+    sizes: { width: sizeAtDefault(), height: sizeAtDefault() },
+    grow: null,
     enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false, focusMissed: false,
     value: 'Option 1', items: DEFAULT_ITEMS, domSelected: ''
   } as State,
@@ -394,6 +402,9 @@ export const Dropdown = defineNode({
     },
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
     scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the list can be seen', send: [] }),
+    // NSP-019 R38 — node.ts :446-458, react-component-node.ts :706-753 (wired-grow.ts)
+    width: sizeReducer('width'),
+    height: sizeReducer('height'),
     // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
     visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it', set: { visible: !!v }, send: [] })
   },
@@ -407,8 +418,8 @@ export const Dropdown = defineNode({
       on: () => NOTHING
     },
     // placed on the page with its params set — the first render: Did Mount, and the mount's effect (Select.tsx :44-47)
-    world: { place: (s) => painted(s) },
-    afterInputs: (s) => painted(s),
+    world: { place: (s, i, w) => withGrow(s, painted(s), i.sizeMode, i.position, w) },
+    afterInputs: (s, i, w) => withGrow(s, painted(s), i.sizeMode, i.position, w),
     person: {
       hover: (s) => onPainted(s, () => ({ set: { hover: true }, send: ['hoverState'], emit: ['hoverStart'] })),
       leave: (s) => onPainted(s, () => ({ set: { hover: false, pressed: false }, send: ['hoverState', 'pressedState'], emit: ['hoverEnd'] })),

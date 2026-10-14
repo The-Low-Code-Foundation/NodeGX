@@ -27,7 +27,7 @@ import type { Step, TargetAdapter } from '../adapter';
 import { play, PlayError } from '../adapter';
 import { canonicalise } from '../canonical';
 import { interpreterAdapter } from '../adapters/interpreter';
-import type { AnyNodeSpec, PlayContext } from '../spec';
+import type { AnyNodeSpec, MountContext, ParentAxis } from '../spec';
 import type { TraceEvent } from '../trace';
 import { World, type WorldScript } from '../world';
 import { compareTraces, differenceWithThrow, formatDifference, hasObservation, type Difference } from './compare';
@@ -189,12 +189,18 @@ function worldFor(spec: AnyNodeSpec, script: WorldScript | undefined): World | u
 }
 
 /** The reference play: the interpreter, on its own world. A spec that violates its own script is a scenario error, not a divergence. */
-/** NSP-020 (s82) — the play context a scenario or a generated sequence names: its `wiredOutputs`, or none. */
-export function playContextOfScenario(sc: { wiredOutputs?: readonly string[] }): Readonly<PlayContext> | undefined {
-  return sc.wiredOutputs && sc.wiredOutputs.length > 0 ? { wiredOutputs: sc.wiredOutputs } : undefined;
+/**
+ * NSP-020 (s82) — the play context a scenario or a generated sequence names: its `wiredOutputs`, or none. R38 (s105): and the
+ * parent's axis a scenario names (`parent`); a sequence names none, so it plays in a column.
+ */
+export function playContextOfScenario(sc: { wiredOutputs?: readonly string[]; parent?: ParentAxis }): Readonly<MountContext> | undefined {
+  const out: { wiredOutputs?: readonly string[]; parent?: ParentAxis } = {};
+  if (sc.wiredOutputs && sc.wiredOutputs.length > 0) out.wiredOutputs = sc.wiredOutputs;
+  if (sc.parent !== undefined) out.parent = sc.parent;
+  return Object.keys(out).length > 0 ? out : undefined;
 }
 
-export async function playReference(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], script: WorldScript | undefined, wired?: readonly string[], context?: Readonly<PlayContext>): Promise<TraceEvent[]> {
+export async function playReference(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], script: WorldScript | undefined, wired?: readonly string[], context?: Readonly<MountContext>): Promise<TraceEvent[]> {
   const world = worldFor(spec, script);
   const t = await play(interpreterAdapter({ resolve: () => spec }), spec.type, params, steps, world, wired, context);
   if (world && world.violations.length > 0) throw new Error(`${spec.type}: the reference play touched what the script did not answer — ${world.violations.join('; ')}`);
@@ -208,7 +214,7 @@ export async function playReference(spec: AnyNodeSpec, params: Record<string, un
  * play VIOLATED the world (a request no rule answers, AC5) is a divergence too, reported as a
  * throw at the end of its trace: the traces may agree, and the run still may not pass.
  */
-async function playTarget(spec: AnyNodeSpec, target: TargetAdapter, params: Record<string, unknown>, steps: readonly Step[], reference: TraceEvent[], script: WorldScript | undefined, wired?: readonly string[], context?: Readonly<PlayContext>) {
+async function playTarget(spec: AnyNodeSpec, target: TargetAdapter, params: Record<string, unknown>, steps: readonly Step[], reference: TraceEvent[], script: WorldScript | undefined, wired?: readonly string[], context?: Readonly<MountContext>) {
   const world = worldFor(spec, script);
   try {
     const actual = await play(target, spec.type, params, steps, world, wired, context);
@@ -228,7 +234,7 @@ export function withoutUnseenDiagnostics(trace: TraceEvent[], target: TargetAdap
   return target.diagnostics ? trace : trace.filter((e) => e.t !== 'diagnostic');
 }
 
-async function playBoth(spec: AnyNodeSpec, target: TargetAdapter, params: Record<string, unknown>, steps: readonly Step[], reach?: Reach, script?: WorldScript, context?: Readonly<PlayContext>) {
+async function playBoth(spec: AnyNodeSpec, target: TargetAdapter, params: Record<string, unknown>, steps: readonly Step[], reach?: Reach, script?: WorldScript, context?: Readonly<MountContext>) {
   const full = withoutUnseenDiagnostics(await playReference(spec, params, steps, script, undefined, context), target);
   const reference = reach ? projectTrace(full, reach) : full;
   return { reference, ...(await playTarget(spec, target, params, steps, reference, script, undefined, context)) };
@@ -325,10 +331,10 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
 
   // 3. mutants — the suite is the hand scenarios plus the same generated sequences
   if (options.mutants) {
-    const suite: Array<{ name: string; params: Record<string, unknown>; steps: Step[]; world?: WorldScript; wired?: readonly string[]; wiredOutputs?: readonly string[] }> = [
+    const suite: Array<{ name: string; params: Record<string, unknown>; steps: Step[]; world?: WorldScript; wired?: readonly string[]; wiredOutputs?: readonly string[]; parent?: ParentAxis }> = [
       ...(options.scenarios ?? scenarioIO.load(spec.type))
         .filter((s) => !reach || outsideReach(s.params, s.steps, reach) === undefined)
-        .map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps, world: s.world, wired: s.wired, wiredOutputs: s.wiredOutputs }))
+        .map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps, world: s.world, wired: s.wired, wiredOutputs: s.wiredOutputs, parent: s.parent }))
     ];
     for (let i = 0; i < requested; i++) {
       const seq = generateSequence(spec, seed, i, { reach, withheld: options.withheld });

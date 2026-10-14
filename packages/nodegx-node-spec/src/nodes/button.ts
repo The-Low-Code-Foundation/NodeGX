@@ -54,6 +54,7 @@ import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
 import { controlFocusNotMounted, focusDiagnostics, focusMissed } from './focus-not-mounted';
 import { focusAndIconSourceChange, iconSourceDiagnostics } from './icon-source';
+import { growChange, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, withGrow, type Sizes } from './wired-grow';
 
 type State = {
   /** utils.ts :75-89 `_internal.enabled` (true at :377) */
@@ -85,6 +86,9 @@ type State = {
   onPage: boolean;
   /** v4 — the last Focus found the node off the page: the editor is told (focus-not-mounted.ts) */
   focusMissed: boolean;
+  /** NSP-019 R38 — what the size ports hold, and what the last render on the page said of them (wired-grow.ts) */
+  sizes: Sizes;
+  grow: string | null;
 }
 
 type O = typeof Button extends { outputs: infer X } ? X : never;
@@ -99,15 +103,16 @@ export const Button = defineNode({
   // v2 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
   // v3 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
   // v4 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it, and an Icon Source that is not an icon shows as one until an icon or nothing arrives (`diagnostics`)
-  version: 4,
-  changes: [focusAndIconSourceChange(4)],
-  diagnostics: { ...focusDiagnostics(controlFocusNotMounted('button')), ...iconSourceDiagnostics() },
+  // v5 (NSP-019 R38): a wired Width in a row, or a wired Height in a column, that is a percent shows as its warning (wired-grow.ts)
+  version: 5,
+  changes: [focusAndIconSourceChange(4), growChange(5)],
+  diagnostics: { ...focusDiagnostics(controlFocusNotMounted('button')), ...iconSourceDiagnostics(), ...wiredGrowDiagnostic },
   source: 'packages/noodl-viewer-react/src/nodes/controls/button.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches
   synced: ['pageEnabled', 'pageVisible'],
 
-  state: { enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false, focusMissed: false } as State,
+  state: { sizes: { width: sizeAtDefault(), height: sizeAtDefault() }, grow: null, enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false, focusMissed: false } as State,
   // utils.ts :366-376 `outcomeOutputs({ done, unchanged })`
   outcomes: ['done', 'unchanged'],
 
@@ -285,16 +290,19 @@ export const Button = defineNode({
     },
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
     scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the button can be seen', send: [] }),
+    // NSP-019 R38 — node.ts :446-458, react-component-node.ts :706-753 (wired-grow.ts)
+    width: sizeReducer('width'),
+    height: sizeReducer('height'),
     // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
     visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it', set: { visible: !!v }, send: [] })
   },
   {
     // placed on the page with its params set — the first paint (react-component-node.ts :1740-1743 reads `wantsToBeMounted`):
     // Did Mount, unless a Mounted parameter said no
-    world: { place: (s) => painted(s) },
+    world: { place: (s, i, w) => withGrow(s, painted(s), i.sizeMode, i.position, w) },
     // and every frame's end is a paint: the page follows what the node wants (react-component-node.ts :1675-1689, :2310-2320
     // → the element added or removed, NoodlReactComponent :982-990 / :993-1003)
-    afterInputs: (s) => painted(s),
+    afterInputs: (s, i, w) => withGrow(s, painted(s), i.sizeMode, i.position, w),
     // a person acts on a PAINTED page (adapter.ts `act`): the page follows first, then the act meets what is there
     person: {
       // utils.ts :216-234 — not dropped on a disabled control

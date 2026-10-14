@@ -54,7 +54,7 @@ export const DateAdd = defineNode({
   ],
   // the Unit setter (:79, `setDiagnostic('date-add/unknown-unit', unknownUnitMessage(value))`): the last Unit that arrived, as it arrived
   diagnostics: {
-    'date-add/unknown-unit': { says: 'Unit is not one of the eight', message: (_i, s) => unknownUnitMessage(s.unit) }
+    'date-add/unknown-unit': { says: 'Unit is not one of the eight', settings: ['unit'], message: (_i, s) => unknownUnitMessage(s.unit) }
   },
   source: 'packages/noodl-runtime/src/nodes/std-library/date/dateadd.ts; packages/noodl-runtime/src/nodes/std-library/date/datemath.ts',
   needs: ['timezone'],

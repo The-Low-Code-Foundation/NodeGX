@@ -53,7 +53,7 @@ The ratchet (NSP-009) holds those floors in PR CI. A new picker node ships with 
 | NSP-005, NSP-011–015, NSP-017: "AC2's export half" | board lane 6 |
 | NSP-020: Router's labels (ADAPTERLABEL) | P112 OWN-006, the editor suite |
 | NSP-021 §3.2: which runtimes | P110, the day it unparks |
-| R38, R40 | s105, landing as this is written |
+| R38, R40 | landed s105: R38 on 9 specs (not 11: the Checkbox's and Radio Button's sizes never warn), R40 as the validator's `settings-diagnostic` rule ([NSP-019 §5.8](NSP-019-RICHARD-READS-IT.md)) |
 | the 31 open `p107-*` ledger rows | the ledger; `node scripts/bugs.js` lists them |
 
 ## From now on

@@ -24201,5 +24201,512 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "R38 — Height in a column: a wired Height in a column at its default 100%: the warning, flex-grow 100",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "wired": [
+      "height"
+    ],
+    "params": {
+      "sizeMode": "explicit"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Height in a column: a bare number on the wired Height is read in the unit it holds: 30% is flex-grow 30; a px size withdraws it, and a bare number after it is px",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "wired": [
+      "height"
+    ],
+    "params": {
+      "sizeMode": "explicit"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "height",
+        "value": 30
+      },
+      "settle",
+      {
+        "set": "height",
+        "value": {
+          "value": 30,
+          "unit": "px"
+        }
+      },
+      "settle",
+      {
+        "set": "height",
+        "value": 40
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Height in a column: a fixed percent on the wired Height is a size, not a share: withdrawn; a bare number keeps the mark; a percent without it warns again",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "wired": [
+      "height"
+    ],
+    "params": {
+      "sizeMode": "explicit"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "height",
+        "value": {
+          "value": 50,
+          "unit": "%",
+          "isFixed": true
+        }
+      },
+      "settle",
+      {
+        "set": "height",
+        "value": 60
+      },
+      "settle",
+      {
+        "set": "height",
+        "value": {
+          "value": 60,
+          "unit": "%"
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Height in a column: the parent stacks the other way: a wired Height at 100% says nothing",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "parent": "row",
+    "wired": [
+      "height"
+    ],
+    "params": {
+      "sizeMode": "explicit"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "height",
+        "value": 30
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Height in a column: Height at 100% in a column but not wired: nothing",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "wired": [],
+    "params": {
+      "sizeMode": "explicit"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "height",
+        "value": 30
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Height in a column: off the page nothing renders, so nothing is said; on it, the warning; off again the editor keeps it through a px size, and back on it is withdrawn",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "wired": [
+      "height"
+    ],
+    "params": {
+      "sizeMode": "explicit",
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "height",
+        "value": {
+          "value": 20,
+          "unit": "px"
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Height in a column: an Absolute node is laid over its parent, not stacked in it: nothing; In Layout, the warning",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "wired": [
+      "height"
+    ],
+    "params": {
+      "sizeMode": "explicit",
+      "position": "absolute"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "position",
+        "value": "relative"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Height in a column: what the wired Height cannot use is refused and the style keeps 100%; null empties it; numeric text merges into %; a token withdraws it; a bare number after a token is %",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "wired": [
+      "height"
+    ],
+    "params": {
+      "sizeMode": "explicit"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "height",
+        "value": "tall"
+      },
+      "settle",
+      {
+        "set": "height",
+        "value": null
+      },
+      "settle",
+      {
+        "set": "height",
+        "value": "45"
+      },
+      "settle",
+      {
+        "set": "height",
+        "value": "var(--space-4)"
+      },
+      "settle",
+      {
+        "set": "height",
+        "value": 12
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Height in a column: Size Mode contentSize does not assign Height: nothing",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "wired": [
+      "height"
+    ],
+    "params": {
+      "sizeMode": "contentSize"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Height in a column: Size Mode contentWidth assigns Height: the warning",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "wired": [
+      "height"
+    ],
+    "params": {
+      "sizeMode": "contentWidth"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Width in a row: a wired Width in a row at its default 100%: the warning, flex-grow 100",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "parent": "row",
+    "wired": [
+      "width"
+    ],
+    "params": {
+      "sizeMode": "explicit"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Width in a row: a bare number on the wired Width is read in the unit it holds: 30% is flex-grow 30; a px size withdraws it, and a bare number after it is px",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "parent": "row",
+    "wired": [
+      "width"
+    ],
+    "params": {
+      "sizeMode": "explicit"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "width",
+        "value": 30
+      },
+      "settle",
+      {
+        "set": "width",
+        "value": {
+          "value": 30,
+          "unit": "px"
+        }
+      },
+      "settle",
+      {
+        "set": "width",
+        "value": 40
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Width in a row: a fixed percent on the wired Width is a size, not a share: withdrawn; a bare number keeps the mark; a percent without it warns again",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "parent": "row",
+    "wired": [
+      "width"
+    ],
+    "params": {
+      "sizeMode": "explicit"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "width",
+        "value": {
+          "value": 50,
+          "unit": "%",
+          "isFixed": true
+        }
+      },
+      "settle",
+      {
+        "set": "width",
+        "value": 60
+      },
+      "settle",
+      {
+        "set": "width",
+        "value": {
+          "value": 60,
+          "unit": "%"
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Width in a row: the parent stacks the other way: a wired Width at 100% says nothing",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "wired": [
+      "width"
+    ],
+    "params": {
+      "sizeMode": "explicit"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "width",
+        "value": 30
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Width in a row: Width at 100% in a row but not wired: nothing",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "parent": "row",
+    "wired": [],
+    "params": {
+      "sizeMode": "explicit"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "width",
+        "value": 30
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Width in a row: off the page nothing renders, so nothing is said; on it, the warning; off again the editor keeps it through a px size, and back on it is withdrawn",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "parent": "row",
+    "wired": [
+      "width"
+    ],
+    "params": {
+      "sizeMode": "explicit",
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "width",
+        "value": {
+          "value": 20,
+          "unit": "px"
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Width in a row: an Absolute node is laid over its parent, not stacked in it: nothing; In Layout, the warning",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "parent": "row",
+    "wired": [
+      "width"
+    ],
+    "params": {
+      "sizeMode": "explicit",
+      "position": "absolute"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "position",
+        "value": "relative"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Width in a row: what the wired Width cannot use is refused and the style keeps 100%; null empties it; numeric text merges into %; a token withdraws it; a bare number after a token is %",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "parent": "row",
+    "wired": [
+      "width"
+    ],
+    "params": {
+      "sizeMode": "explicit"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "width",
+        "value": "tall"
+      },
+      "settle",
+      {
+        "set": "width",
+        "value": null
+      },
+      "settle",
+      {
+        "set": "width",
+        "value": "45"
+      },
+      "settle",
+      {
+        "set": "width",
+        "value": "var(--space-4)"
+      },
+      "settle",
+      {
+        "set": "width",
+        "value": 12
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Width in a row: Size Mode contentWidth does not assign Width: nothing",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "parent": "row",
+    "wired": [
+      "width"
+    ],
+    "params": {
+      "sizeMode": "contentWidth"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "R38 — Width in a row: Size Mode contentHeight assigns Width: the warning",
+    "because": "layout.ts :138-156 `Layout.size`, :314-336 `reportMainAxisGrow`; node.ts :446-458 (wired-grow.ts)",
+    "parent": "row",
+    "wired": [
+      "width"
+    ],
+    "params": {
+      "sizeMode": "contentHeight"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "a blur on a hovered dropdown that does not hold the keyboard, whose Mounted went off in the same frame: the blur's paint takes it off the page (Will Unmount, Hover End), so a Focus right after it finds nothing to focus (Unchanged)",
+    "because": "P107-S95-SEED20738: the `person.blur` branch that leaves the page holding the hover and not the Focused state (dropdown.ts `painted`: `!mounted && onPage`, then `leftPage`) was reached only by a seed's luck, and its swap-branch mutant survived on 20739 and in stranger round 4: a blur that took nothing off the page leaves it to the next paint, which says the same in the same settle. The Focus action reads the page without painting, so it tells them apart: off the page it is Unchanged, still on it Done (the Slider's click, s104). Pinned here, every day",
+    "steps": [
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle"
+    ]
   }
 ]

@@ -73,6 +73,8 @@ export { checkInstancePorts } from '../../noodl-editor/src/editor/src/validation
 // P107 R19 / R20 — the validator's `drawnPorts` callback, one body for the agent server and the editor's Problems panel.
 // Imported by path, not through the validation index: it brings `@nodegx/node-spec`.
 export { drawnPortLookup } from '../../noodl-editor/src/editor/src/validation/drawnPortLookup';
+// P107 R40 — the validator's `settingsDiagnostics` callback, by path for the same reason.
+export { settingsDiagnosticLookup } from '../../noodl-editor/src/editor/src/validation/settingsDiagnosticLookup';
 // AWP-006 — the same reviewed table, used for a second decision. `Record` nodes
 // in a graph already produce a backend precondition diagnostic; they now also
 // reveal the backend tool group, so an agent is never in the position of having

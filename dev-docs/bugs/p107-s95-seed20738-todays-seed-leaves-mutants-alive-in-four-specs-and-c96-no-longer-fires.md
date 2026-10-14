@@ -40,3 +40,10 @@ waiting Value into the start value, and a remount shows it once Run On Value Cha
 and 20740. **Left:** Dropdown `person.blur` (20739, and stranger round 4). Its scenario file is in round 4's guarded set, so
 adding one costs the 36-minute re-grade. It goes with R38's format change, which re-grades every round anyway. Delete Record
 and DbModel2 have not been re-measured since s102.
+
+**s105 (2026-10-14): the Dropdown's `person.blur` pinned.** The survivor is a blur on a dropdown that is hovered and does not
+hold the Focused state, whose Mounted went off in the same frame: the blur's paint takes it off the page (Will Unmount, Hover
+End). A first scenario that focused it first reached a different branch (Focused adds itself to the set) and the mutant lived.
+The scenario now hovers only, then sends a Focus, which reads the page without painting: Unchanged off it, Done on it (the
+Slider's recipe, s104). Dropdown v10 conforms at 20739. **Left:** Delete Record and DbModel2 (not re-measured since s102), and
+the Video and C96 half.
