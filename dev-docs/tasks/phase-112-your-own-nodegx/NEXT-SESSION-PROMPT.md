@@ -6,7 +6,24 @@ copies a 0.3.0 project to `<project>.before-0.4` before its format moves to 5 (`
 the drive in the dev editor found the copy made twice per open, and measured OPENWRITES' cause; both fixed and driven
 (`1ed87f2ef`, OWN-013 §7). IDREPLACE is driven too. Nothing was pushed, branched or tagged. Earlier handoffs are in this file's git history.
 
-## ▶ Lane 1 now (2026-10-14, Opus, end of s18): 0.4.1 and npm 0.2.1 are built and tested; Richard merges, tags, publishes
+## ▶ Lane 1 now (2026-10-14, Opus, after s18): SHIPPED — 0.4.1 and npm 0.2.1 are live; next, the language-app stranger round
+
+**Shipped 2026-10-14.** Richard gave the go. PR #51 merged (`73f52de91`), `v0.4.1` tagged on `main`, the Release run
+green on all four platforms, the draft checked (Mac arm64 zip sha512 = `latest-mac.yml`, notarised, stapled, version
+0.4.1; the merged feed lists both Mac arches; 16 assets) and published as Latest at 18:13 UTC. Richard published npm
+0.2.1 himself; all three registry shasums equal the tested tarballs'. From the registry: `stranger-render.mjs
+@nodegx/mcp@0.2.1` DONE clean; `npm create nodegx@latest` pins 0.2.1. nodegx.io deployed (nodegx-web `a0b52be`): the
+homepage offers the 0.4.1 downloads (it had linked v0.4.0's files), and the changelog shows 0.4.1 and npm 0.2.1.
+**OWN-011 AC2 ✅** on the released 0.4.1 (OWN-011 §12): 0 files written on either open. Windows and Linux were
+not installed on clean machines, as for 0.4.0.
+
+**Next, lane 1:** (1) **the language app built by a stranger from the registry** (OWN-015's sentence, Claude Code,
+an empty folder): does the agent find `fn-play-audio-a-cloud-function-returns`, and is the static gone? That is
+WAVTWICE's unproved half, and the tutorial depends on it. (2) OWN-014 AC4 with that app. (3) P112-S18-HLT010CI (CI's
+renderer gate, red on any tree since ~12:00 UTC). Richard's remaining waits: G8's in-place update click on his own
+0.3.0 (now to 0.4.1), the 0.4.0 feed post's `<strong>` leads (NEWSWHITE for 0.4.0 installs), `build.mac.notarize`.
+
+### The release as it was handed over (s18, before Richard's go)
 
 Richard wants tutorial videos (the language app with text-to-speech, no editor) and the subscriber email about 0.4.0
 and the npm kit as soon as possible. So s18 cut both releases.

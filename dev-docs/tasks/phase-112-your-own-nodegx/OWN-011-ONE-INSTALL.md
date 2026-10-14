@@ -2,7 +2,7 @@
 
 **Opened 2026-10-06** from [DIRECTION.md](../../DIRECTION.md) D1 (ruled by Richard: the install command lives in this
 phase). **Depends on R2 (publish at 0.x), OWN-001, OWN-002, OWN-004.**
-**Status: 🟡 s13 (2026-10-14): AC1, AC3, AC4 ✅; AC2 fixed in source (`76f37308c`, PAGEPORTS: the open-time save was armed by a no-op `setMetaData`), proven on the 0.4.0 release with the rule patched into its renderer; AC2 closes on the next release, re-driven (§11).** **R2 ruled 2026-10-10 (s6): publish at 0.x**, after each package declares what it uses (node-spec → `@noodl/backend-contract`; project-contract → `ajv`, `ajv-formats`; the preview's page build → `buffer`, `@nodegx/project-contract`, `@nodegx/module-inject`). **R5 (s6): `@nodegx/canvas-look` ships with the kit, optional. R6 (s6): a package cannot publish while one of its `kit:` bugs is an open blocker; lesser ones are listed as known issues.**
+**Status: ✅ s13 (2026-10-14): AC1–AC4 met. AC2 closed on the released 0.4.1 with npm 0.2.1 (§12): a made project opens, first open and launcher-card reopen, and 78 / 78 files are unchanged.** **R2 ruled 2026-10-10 (s6): publish at 0.x**, after each package declares what it uses (node-spec → `@noodl/backend-contract`; project-contract → `ajv`, `ajv-formats`; the preview's page build → `buffer`, `@nodegx/project-contract`, `@nodegx/module-inject`). **R5 (s6): `@nodegx/canvas-look` ships with the kit, optional. R6 (s6): a package cannot publish while one of its `kit:` bugs is an open blocker; lesser ones are listed as known issues.**
 **Rulings s9 (2026-10-11, one round, all four as recommended):** **R8** the npm names are `@nodegx/mcp` and `@nodegx/preview`, in the repo and on npm (the `@noodl` scope belongs to the original Noodl team; the bins keep their names) — done, `749bd0a38`. **R9** the command sets the folder up and the agent makes the app: it writes ONE file, the folder's `.mcp.json`, and `create_project` stays the one writer of projects, so the scoping conversation is never skipped. AC1 therefore reads *the command plus the agent's first `create_project`*. **R10** people type `npm create nodegx` (package `create-nodegx`). **R11** Richard runs `npm login` (this Mac's token answers 401); a later session publishes, after asking him once more just before it goes out.
 **Model:** **Opus.** Packaging and one install command with a stranger's run as the test; Fable only if the publish order turns into a design question. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
@@ -275,3 +275,25 @@ do.
 
 **AC2:** fixed in source. It closes when the next editor release is opened on a made project and writes nothing,
 first open and card reopen both. The released 0.4.0 keeps the defect until then.
+
+## 12. Session 13, continued: AC2 closed on the released 0.4.1
+
+Richard asked for a hotfix before his tutorial videos and subscriber email. **0.4.1** (`v0.4.1` = PR #51, merged as
+`73f52de91`; published 2026-10-14 18:13 UTC, Latest) carries PAGEPORTS, UPDATEBEHIND and NEWSWHITE. **npm 0.2.1** was
+published by Richard; each registry shasum equals the tested tarball's.
+
+**Method, as §10/§11.** From the registry, `HOME` empty: `npm create -y nodegx@0.2.1` → `.mcp.json` pins
+`@nodegx/mcp@0.2.1` (the server answered `noodl-mcp 0.4.1`) → `create_project` "Reading List" → **78 files** (16 + the
+62-file starter set); `validate_project` **0 errors, 0 warnings** (FRESHFONT gone). The editor: the draft's
+`NodeGX-0.4.1-mac-arm64.zip`, sha512 equal to `latest-mac.yml`'s, `spctl` accepted (Notarized Developer ID), stapler
+valid. Run from the scratchpad, `--user-data-dir`, CDP 9333, hooks on the editor's `filesystem` writes and on
+`instancePortsChanged`.
+
+| step | Page's ports arrived | project files written |
+|---|---|---|
+| **Open project…** (lands on `App`) | yes | **0** |
+| Home opened, `window-focused` fired | — | **0** |
+| launcher card (restores Home as the edited component) | yes | **0** |
+
+`shasum` of all 78 files after the last step: unchanged. On the 0.4.0 release, the same steps wrote Home on 3 of 3
+opens. The What's new window drew its bold leads and its link readable under *What's new in NodeGX*. **AC2 ✅.**
