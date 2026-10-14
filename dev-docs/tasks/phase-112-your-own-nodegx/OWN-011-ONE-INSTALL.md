@@ -2,7 +2,7 @@
 
 **Opened 2026-10-06** from [DIRECTION.md](../../DIRECTION.md) D1 (ruled by Richard: the install command lives in this
 phase). **Depends on R2 (publish at 0.x), OWN-001, OWN-002, OWN-004.**
-**Status: 🟡 s11 (2026-10-11): PUBLISHED at 0.1.0 (§8); AC1, AC3 and AC4 met (§9); AC2's editor half FAILS — the released editor refuses the made project and the current one writes four files on open (§9, five bugs).** **R2 ruled 2026-10-10 (s6): publish at 0.x**, after each package declares what it uses (node-spec → `@noodl/backend-contract`; project-contract → `ajv`, `ajv-formats`; the preview's page build → `buffer`, `@nodegx/project-contract`, `@nodegx/module-inject`). **R5 (s6): `@nodegx/canvas-look` ships with the kit, optional. R6 (s6): a package cannot publish while one of its `kit:` bugs is an open blocker; lesser ones are listed as known issues.**
+**Status: 🟡 s12 (2026-10-14): AC1, AC3, AC4 ✅; AC2 — the made project opens in the released 0.4.0 and the first open writes nothing; a reopen with a page active still writes that page (PAGEPORTS, open) (§10).** **R2 ruled 2026-10-10 (s6): publish at 0.x**, after each package declares what it uses (node-spec → `@noodl/backend-contract`; project-contract → `ajv`, `ajv-formats`; the preview's page build → `buffer`, `@nodegx/project-contract`, `@nodegx/module-inject`). **R5 (s6): `@nodegx/canvas-look` ships with the kit, optional. R6 (s6): a package cannot publish while one of its `kit:` bugs is an open blocker; lesser ones are listed as known issues.**
 **Rulings s9 (2026-10-11, one round, all four as recommended):** **R8** the npm names are `@nodegx/mcp` and `@nodegx/preview`, in the repo and on npm (the `@noodl` scope belongs to the original Noodl team; the bins keep their names) — done, `749bd0a38`. **R9** the command sets the folder up and the agent makes the app: it writes ONE file, the folder's `.mcp.json`, and `create_project` stays the one writer of projects, so the scoping conversation is never skipped. AC1 therefore reads *the command plus the agent's first `create_project`*. **R10** people type `npm create nodegx` (package `create-nodegx`). **R11** Richard runs `npm login` (this Mac's token answers 401); a later session publishes, after asking him once more just before it goes out.
 **Model:** **Opus.** Packaging and one install command with a stranger's run as the test; Fable only if the publish order turns into a design question. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
@@ -206,3 +206,34 @@ time (renderer webpack at 4 GB on its second compile, load 32, swap 14.8 / 16 GB
 
 **Owed:** R15's release — **OWN-013** (re-ruled: via `main`; my `cline-dev` tag was cancelled before any draft); PAGEPORTS and OPENWRITES, then AC2 re-driven on both routes (0.4.0 and the dev
 editor); REFUSALWORDS. §4.4 unchanged.
+
+## 10. Session 12 (2026-10-14, Opus): AC2 on the released 0.4.0
+
+**Method.** From the registry, `HOME` empty: `npm create -y nodegx@0.2.0 my-apps` → `.mcp.json` pins
+`@nodegx/mcp@0.2.0` (the server answered `noodl-mcp 0.4.0`), plus the `nodegx-your-own-editor` skill → over stdio,
+`create_project` "Reading List" (Home and Book agreed) → 16 files; `validate_project` 0 errors and 1 warning
+(FRESHFONT). The editor was the release's own `NodeGX-0.4.0-mac-arm64.zip`. Its sha512 equals `latest-mac.yml`'s, and it
+is notarised. It ran from the scratchpad with `--user-data-dir` and `NOODLPORT=8774`, launched under
+`env -u ELECTRON_RUN_AS_NODE` (peer tip). Opened through the real **Open project…** with `filesystem.openDialog`
+stubbed: in the release bundle it is `req(29215).filesystem`, reached by pushing a chunk onto
+`webpackChunknoodl_editor`. 🔴 Stubbing `require('@electron/remote').dialog` does NOT reach the bundle's copy. The
+real folder dialog opened on Richard's screen, and I quit the app to clear it. Graded by `shasum` of every file
+against the snapshot.
+
+| open | route | written |
+|---|---|---|
+| 1st | Open project… (lands on `App`), then Home opened from the Components panel | **nothing**: 16 / 16 unchanged at +40 s; no `.before-0.4` (format 5) |
+| 2nd | launcher card (restores `/Pages/Home` as the edited component) | **3 files: PAGEPORTS**. Home's `nodes.json` (Page gains `dynamicports` `title`, `urlPath`), `component.json`, `_registry.json` (timestamps) |
+| 3rd | launcher card | nothing |
+
+`nodegx.project.json` and the project id were never touched on any open: **OPENWRITES and IDREPLACE hold in the
+release.** The made project draws in the canvas and the preview (*Reading List — nothing built yet…*).
+
+**AC2:** the made project opens in the released editor (OWN-013 AC2 ✅). *"No change written on open"* still fails
+once per page through PAGEPORTS (re-measured in its bug file: it fires when the editor loads with that page
+active). AC2 closes when PAGEPORTS is fixed.
+
+**Found on the way, fixed (`2925e3e74`):** **P112-OWN011-NEWSWHITE**. The what's-new window drew the 0.4.0 post's
+four bold lead sentences and its link white on white, and its header named the running version, not the post's.
+Every 0.3.0 and 0.4.0 install still shows it until the next release. A plain-`<p>` rewrite of the live feed post
+would fix it for them now (Richard's call).

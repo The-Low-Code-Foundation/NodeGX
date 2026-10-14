@@ -26,3 +26,11 @@ or the editor stops treating a cache it derived on load as an edit to save (the 
 territory).
 
 Blocks OWN-011 AC2 (no change written on open beyond the three agent files).
+
+**Re-measured on the released 0.4.0 (2026-10-14, OWN-011 §10), still open, with its trigger narrowed.** A project from
+`npm create nodegx@0.2.0` + `create_project` (`@nodegx/mcp@0.2.0`): the **first** open lands on `App` and writes
+nothing, even after opening Home from the Components panel (16 / 16 files unchanged at +40 s). The **second** open
+restores `/Pages/Home` as the component being edited, and at load it writes Home's `nodes.json` (the Page gains
+`dynamicports` `title`, `urlPath`; `parent` moves after `parameters`), `component.json` and `_registry.json`
+(`modified` / `lastUpdated`). A third open changes nothing. So it is one write per page, made when the editor *loads*
+with that page active.

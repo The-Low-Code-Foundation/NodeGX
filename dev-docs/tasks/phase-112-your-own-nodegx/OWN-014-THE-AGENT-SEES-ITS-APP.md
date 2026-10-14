@@ -4,7 +4,7 @@
 kit is ready for a tutorial video: *vibe code a Duolingo clone with Google text-to-speech, no editor*). **Model:**
 **Opus** — the shape is fixed (ship the harness the checkout already has), and a gate says when it is done.
 
-**Status: 🟡 s13 (2026-10-12): built and passing from a packed tarball — AC1 ✅, AC2 ✅ (§7). AC3 (publish) waits on Richard (R11); AC4 waits on OWN-015's language app.**
+**Status: 🟡 s13 (2026-10-12): built and passing from a packed tarball — AC1 ✅, AC2 ✅ (§7). AC3 ✅ 2026-10-14: `@nodegx/mcp` 0.2.0 published after asking Richard, and `stranger-render.mjs @nodegx/mcp@0.2.0` from the registry renders clean (P112 NEXT-SESSION-PROMPT, s17; `d6414d61c`). AC4 waits on OWN-015's language app (Home measured; Lesson needs a route-parameter value, §8).**
 
 ## 1. The person sentence
 
