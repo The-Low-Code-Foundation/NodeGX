@@ -16,6 +16,7 @@ const {
   VIBE_ALLOWED_TOOLS,
   VIBE_CONFIG,
   VIBE_SERVER_FLAGS,
+  coreSkillFiles,
   renderOpenCodeConfig,
   renderVibeConfig,
   serverEntry,
@@ -37,7 +38,7 @@ test('an empty folder gets the bootstrap server, pinned, and the two agent notes
   const dir = path.join(tmp(), 'my-apps');
   const run = spawnSync(process.execPath, [BIN, dir], { encoding: 'utf8' });
   assert.equal(run.status, 0, run.stderr);
-  assert.deepEqual(fs.readdirSync(dir).sort(), ['.mcp.json', '.vibe', 'AGENTS.md', 'CLAUDE.md', 'opencode.json']);
+  assert.deepEqual(fs.readdirSync(dir).sort(), ['.claude', '.mcp.json', '.vibe', 'AGENTS.md', 'CLAUDE.md', 'opencode.json']);
   const entry = read(path.join(dir, '.mcp.json')).mcpServers.nodegx;
   assert.deepEqual(entry, serverEntry());
   assert.ok(entry.args.includes(`${MCP_PACKAGE}@${MCP_VERSION}`));
@@ -53,6 +54,36 @@ test('P112-S14-NOTNODEGX: the agent notes say an app here is a NodeGX app, and h
   assert.match(AGENT_NOTE, /Don't\nwrite a separate web server/);
   assert.match(AGENT_NOTE, /`set_function_secret` without a value/);
   assert.match(AGENT_NOTE, /`\.env` file/);
+});
+
+test('P112 OWN-007 (R3): the folder gets the editor brief as a project skill, named for Claude Code and readable by any agent', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  const run = spawnSync(process.execPath, [BIN, dir], { encoding: 'utf8' });
+  assert.equal(run.status, 0, run.stderr);
+  const skill = path.join(dir, '.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md');
+  assert.ok(fs.existsSync(skill), skill);
+  const text = fs.readFileSync(skill, 'utf8');
+  // Claude Code lists a project skill by its frontmatter; the name must match its folder.
+  assert.match(text, /^---\nname: nodegx-your-own-editor\ndescription: "/);
+  assert.match(text, /LOAD when the person asks for an editor/);
+  // The brief's spine: the kit, the suite, the traps, what it must not do.
+  for (const heading of ['## The kit', '## Done means PASS', '## What the editors before yours got wrong', '## What your editor must not do']) {
+    assert.ok(text.includes(`\n${heading}\n`), heading);
+  }
+  // The kit is written as a copy of profiles/core, so a change there is what ships.
+  assert.deepEqual(coreSkillFiles().map((f) => f.to), [path.join('.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md')]);
+  // Every other agent is pointed at the same file from the agent notes.
+  assert.match(AGENT_NOTE, /`nodegx-your-own-editor` \(`\.claude\/skills\/nodegx-your-own-editor\/SKILL\.md`\)/);
+  assert.match(run.stdout, /Wrote \.claude\/skills\/nodegx-your-own-editor\/SKILL\.md/);
+});
+
+test("P112 OWN-007: a person's own skill file is never replaced", () => {
+  const dir = tmp();
+  const skill = path.join(dir, '.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md');
+  fs.mkdirSync(path.dirname(skill), { recursive: true });
+  fs.writeFileSync(skill, 'mine\n');
+  assert.deepEqual(setUp(dir).skills, []);
+  assert.equal(fs.readFileSync(skill, 'utf8'), 'mine\n');
 });
 
 test("a person's own CLAUDE.md or AGENTS.md is never replaced", () => {

@@ -52,8 +52,46 @@ const AGENT_NOTE = [
   // that pressing Start skipped question 1.
   "Try it the way a person arrives: `drive_page` from the app's start page (leave out `page`) and press through it,",
   'not a page opened on its own.',
+  '',
+  // P112 OWN-007 (R3): the method for building an editor of one's own is a skill in this folder, not a server tool.
+  'If I ask for an editor, a viewer or a tool of my own that reads or changes an app here, the guide is the skill',
+  '`nodegx-your-own-editor` (`.claude/skills/nodegx-your-own-editor/SKILL.md`). Read it first; any agent can.',
   ''
 ].join('\n');
+
+/**
+ * P112 OWN-007 (R3, Richard 2026-10-10: "a skill in a public repo, recommended for Claude but can be used with any AI
+ * coder") — the core kit's own skills, kept as plain files under `profiles/core/skills/` and written into the folder's
+ * `.claude/skills/` where Claude Code lists them as project skills; AGENTS.md names the file for every other agent.
+ * Written only when absent, like everything here. The Vibe kit (R29) writes its own skills instead.
+ */
+const CORE_PROFILE_DIR = path.join(__dirname, '..', 'profiles', 'core');
+
+function coreSkillFiles() {
+  const out = [];
+  const walk = (rel) => {
+    for (const entry of fs.readdirSync(path.join(CORE_PROFILE_DIR, rel), { withFileTypes: true })) {
+      const next = path.join(rel, entry.name);
+      if (entry.isDirectory()) walk(next);
+      else out.push(next);
+    }
+  };
+  walk('skills');
+  return out.sort().map((rel) => ({ from: path.join(CORE_PROFILE_DIR, rel), to: path.join('.claude', rel) }));
+}
+
+/** Writes each core skill file that is absent. Returns the paths written. */
+function writeCoreSkills(dir) {
+  const written = [];
+  for (const { from, to } of coreSkillFiles()) {
+    const file = path.join(dir, to);
+    if (fs.existsSync(file)) continue;
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.copyFileSync(from, file);
+    written.push(to);
+  }
+  return written;
+}
 
 /**
  * P112 OWN-018 s2 — OpenCode's settings for this folder (`opencode.json`, read from the folder it runs in): the same
@@ -252,7 +290,7 @@ function setUp(folder, platform = process.platform, options = {}) {
 
   if (!fs.existsSync(file)) {
     fs.writeFileSync(file, JSON.stringify({ mcpServers: { [SERVER_NAME]: entry } }, null, 2) + '\n');
-    return { folder: dir, file, outcome: 'written', notes: writeAgentNotes(dir), vibe: writeVibeConfig(dir, platform), opencode: writeOpenCodeConfig(dir, platform) };
+    return { folder: dir, file, outcome: 'written', notes: writeAgentNotes(dir), skills: writeCoreSkills(dir), vibe: writeVibeConfig(dir, platform), opencode: writeOpenCodeConfig(dir, platform) };
   }
   let config;
   try {
@@ -262,10 +300,10 @@ function setUp(folder, platform = process.platform, options = {}) {
   }
   if (!config || typeof config !== 'object' || Array.isArray(config)) throw new Error(`${file} is not a JSON object; left as it is.`);
   const servers = config.mcpServers && typeof config.mcpServers === 'object' ? config.mcpServers : {};
-  if (servers[SERVER_NAME]) return { folder: dir, file, outcome: 'present', notes: writeAgentNotes(dir), vibe: writeVibeConfig(dir, platform), opencode: writeOpenCodeConfig(dir, platform) };
+  if (servers[SERVER_NAME]) return { folder: dir, file, outcome: 'present', notes: writeAgentNotes(dir), skills: writeCoreSkills(dir), vibe: writeVibeConfig(dir, platform), opencode: writeOpenCodeConfig(dir, platform) };
   config.mcpServers = { ...servers, [SERVER_NAME]: entry };
   fs.writeFileSync(file, JSON.stringify(config, null, 2) + '\n');
-  return { folder: dir, file, outcome: 'added', notes: writeAgentNotes(dir), vibe: writeVibeConfig(dir, platform), opencode: writeOpenCodeConfig(dir, platform) };
+  return { folder: dir, file, outcome: 'added', notes: writeAgentNotes(dir), skills: writeCoreSkills(dir), vibe: writeVibeConfig(dir, platform), opencode: writeOpenCodeConfig(dir, platform) };
 }
 
 function vibeSentence(result) {
@@ -293,6 +331,7 @@ function sentence(result) {
       ? `${result.file} already has a "${SERVER_NAME}" server; it was left as it is.`
       : `${result.outcome === 'written' ? 'Wrote' : 'Added the NodeGX server to'} ${result.file}.`;
   const notes = result.notes && result.notes.length ? [`Wrote ${result.notes.join(' and ')}: they tell your agent that apps here are NodeGX apps.`] : [];
+  if (result.skills && result.skills.length) notes.push(`Wrote ${result.skills.join(', ')}: how your agent builds you an editor of your own.`);
   if (result.vibe === 'written') notes.push(`Wrote ${VIBE_CONFIG}: Mistral Vibe uses Mistral Large 4 and the NodeGX server here.`);
   if (result.opencode === 'written') notes.push(`Wrote ${OPENCODE_CONFIG}: OpenCode gets the NodeGX server here.`);
   return [
@@ -330,4 +369,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { AGENT_FILES, AGENT_NOTE, MCP_PACKAGE, MCP_VERSION, MISTRAL_SERVER_FLAGS, OPENCODE_CONFIG, SERVER_NAME, VIBE_AGENT, VIBE_ALLOWED_TOOLS, VIBE_CONFIG, VIBE_SERVER_FLAGS, renderOpenCodeConfig, renderVibeConfig, serverEntry, setUp, vibeProfileFiles };
+module.exports = { AGENT_FILES, AGENT_NOTE, MCP_PACKAGE, MCP_VERSION, MISTRAL_SERVER_FLAGS, OPENCODE_CONFIG, SERVER_NAME, VIBE_AGENT, VIBE_ALLOWED_TOOLS, VIBE_CONFIG, VIBE_SERVER_FLAGS, coreSkillFiles, renderOpenCodeConfig, renderVibeConfig, serverEntry, setUp, vibeProfileFiles };

@@ -15,9 +15,12 @@ and builds it. To see it running:
 npx @nodegx/preview my-apps/<your app> --open
 ```
 
-The command writes one file, `my-apps/.mcp.json`, which gives your agent the NodeGX server (`@nodegx/mcp`, pinned to
-the version this release was made with). It never touches your global agent settings, and if `.mcp.json` already
-has a server called `nodegx` it leaves it alone.
+The command writes `my-apps/.mcp.json`, which gives your agent the NodeGX server (`@nodegx/mcp`, pinned to the
+version this release was made with), a short `CLAUDE.md` and `AGENTS.md` that tell the agent apps here are NodeGX
+apps, the same server for Mistral Vibe (`.vibe/config.toml`) and OpenCode (`opencode.json`), and one skill,
+`.claude/skills/nodegx-your-own-editor/SKILL.md`: how your agent builds you an editor of your own for these apps, from
+the published kit. It never touches your global agent settings, never replaces a file you already have, and if
+`.mcp.json` already has a server called `nodegx` it leaves it alone.
 
 Not using Claude Code? Any agent that speaks MCP can use the same server: `npx -y @nodegx/mcp@<version> --allow-writes`
 over stdio.

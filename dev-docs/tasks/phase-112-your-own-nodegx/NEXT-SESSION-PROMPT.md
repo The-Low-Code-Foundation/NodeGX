@@ -11,7 +11,7 @@ the drive in the dev editor found the copy made twice per open, and measured OPE
 | task | built | driven / gated | Model |
 |---|---|---|---|
 | OWN-000 – OWN-006 | 🟢 | as s10 (OWN-006 gains a fourth fixture, s11) | — |
-| OWN-007 the brief | 📋 (R3: a skill in a public repo) | — | see its file |
+| OWN-007 the brief | 🟢 **s17 (2026-10-14, Fable): the kit's skill `nodegx-your-own-editor`**, written by `npm create nodegx` into `.claude/skills/`; AC1 ✅, AC2 measured, AC3 waits on OWN-008 (§6) | PASS / FAIL control pair from the registry at 0.1.0; `create-nodegx` tests 23 / 23 | ships on the next `create-nodegx` publish (R11) |
 | OWN-008 three strangers | 📋 | — | see its file |
 | OWN-009 Richard's own | 📋 | — | see its file |
 | OWN-010 every bug teaches the kit | 🟡 ledger + `gate <kit>` | `gate mcp`: 0 blockers, 2 known issues (FORMATSKEW, PAGEPORTS) | see its file |
