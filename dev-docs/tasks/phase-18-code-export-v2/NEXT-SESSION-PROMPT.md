@@ -1,5 +1,28 @@
 # Next session — session 101 (2026-09-26/27) BUILT §76: `Pattern Extractor` — picker **122 → 123 of 130 (94.6%)**, the second row of Richard's 2026-09-26 ruling ("If we had 100% coverage that would be a big deal"). `Hash`'s crypto-call shape (§59) widened to seven seeded value outputs and a third signal pair (`Found`/`Not Found`, printed before `Done`, as `doExtract` fires them).
 
+## ✅ Session 104 (2026-10-14, BOARD lane 6): all four P18-S102 rows fixed. The export's own jest reads 115 / 115
+
+| row | commit | what it was |
+|---|---|---|
+| NAVENCODE | `e767962a1` | The exported Navigate To Path transcribed the pre-D21 node. The query half is now encoded and a null is left out; the path half stays as written (D20). §15.7 reads the url back with `URLSearchParams` and runs the wired loop. |
+| DATEHARNESS | `42d0f5530` | 🔴 **The stub hid a real defect.** With a real `require`, the export blanked a timestamp the app renders (ISL-032 / D14). The emitted `dateToString` now reads through `toDate`. Golden: 2 lines predicted, 2 counted. |
+| CATALOGNAME | `3b02233b0` | The P109-S5 spec's stand-in file wore the real catalog's name. AC4's count is unchanged. |
+| NOEXPORTCI | `1300fdbd2` | 🔴 **The premise was wrong.** CI does run this suite (`test:packages` scopes `@nodegx/export`). Nx **bailed** at `@nodegx/project-contract`, the first package and red on VERBSPECCED, and listed the other 19 "not run". The fix is `--no-bail`. It also found `@nodegx/node-kit-types` red (P18-S104-KITTYPESDRIFT, filed, P107's). |
+
+Readings: whole-package export jest `Test Suites: 115 passed, 115` (exit 0, 543 s), package `tsc --noEmit` 0.
+**Any red in this package from here on is new.** CI's `test:packages` job is still red (VERBSPECCED, KITTYPESDRIFT),
+but each package's result can now be read in it.
+
+**Next (BOARD lane 6), in order:**
+1. **ISL-043** (`dev-docs/tasks/phase-109-the-defects-the-island-found/ISL-043-…`): eight rows. Start with AC1,
+   re-measuring every row at HEAD before building, because several may be gone. SNAP and D82 come first (no export
+   at all), then the five runtime twins, then VARIANT. Sibling ISL-035 goes in the same session if it fits.
+2. For the ledger line "N graph scenarios conform on the export": 81 of 85 are *outside* today, and outside must not
+   count as conforming (s103 below).
+3. Then EXP-011's seven (§77 Action Dispatcher / Handler first).
+
+---
+
 ## ✅ Session 103 (2026-10-14, BOARD lane 6): `P18-S102-GRAPHNOSPEC` fixed (`b01053e2b`). NSP-008 runs on the export again
 
 **The cause was in the shared runner, not the export.** The export's `canPlay` already puts an unspecced node outside.
