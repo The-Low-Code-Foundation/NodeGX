@@ -140,7 +140,7 @@ describe('§A the fixture, whole — a card in a bounded board, four live reads,
     expect(ledgerEntryOf('Drag')?.status).toBe('translated');
     expect(exportBadgeOf('Drag')).toBeUndefined();
     const ledger = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'coverage-ledger.json'), 'utf8'));
-    expect(ledger.pickerCoverageFloor).toBe(122); // EXP-011 §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §63 Drag + §61 the component-stack trio (session 86) on top of §57 + §58 + §59 (session 85)
+    expect(ledger.pickerCoverageFloor).toBe(123); // EXP-011 §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §63 Drag + §61 the component-stack trio (session 86) on top of §57 + §58 + §59 (session 85)
   });
 
   test('A9 style.ts\'s own port list names exactly the option ports plan.ts prints (the two files cannot import each other)', () => {
@@ -767,7 +767,7 @@ describe('§C the refused shapes, by mutation — each sentence exact', () => {
   test('C7 an option fed by a node with no rule: dropped with that node\'s own sentence', () => {
     const ir = cloneIr();
     const component = componentOf(ir, HOME);
-    addNode(component, { id: 'extractor', type: 'net.noodl.PatternExtractor' });
+    addNode(component, { id: 'extractor', type: 'net.noodl.user.SignInWith' });
     connect(component, 'extractor', 'result', 'drag', 'scale', 'value');
     const out = emitApp(ir, catalog);
     const note = out.notes.find((n) => n.includes('drag:scale dropped'));

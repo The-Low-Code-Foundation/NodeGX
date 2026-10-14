@@ -130,13 +130,14 @@ Twenty-two nodes. With Tier 3.11's three: **25 scheduled ⇒ ceiling 117 of 127 
 ### Not a target — re-ruled 2026-09-03 (§50), and every one of them must now be **badged**
 
 `Action Dispatcher` / `Action Handler`, `Optimistic Update`, `State History` / `State Snapshot` /
-`Undo / Redo`, ~~`Parse CSV` / `To CSV`~~, `Pattern Extractor`, and `Sign In With` (until provider
+`Undo / Redo`, ~~`Parse CSV` / `To CSV`~~, ~~`Pattern Extractor`~~, and `Sign In With` (until provider
 sign-in is a product decision).
 
-Ten nodes — **eight since 2026-09-26**: Richard reversed the parsers' exclusion (*"Can we not finish
-the code export nodes? If we had 100% coverage that would be a big deal"* — the whole list is now a
-target, §75), and `Parse CSV` / `To CSV` are **built in §75** beside `Parse XML` / `Parse Feed`, which
-his 2026-09-18 ruling had already scheduled. The original list held twenty-two; the other twelve are in Tier 2.8 and 3.11 above.
+Ten nodes — **eight since 2026-09-26, seven since session 101**: Richard reversed the parsers'
+exclusion (*"Can we not finish the code export nodes? If we had 100% coverage that would be a big
+deal"* — the whole list is now a target, §75), and `Parse CSV` / `To CSV` are **built in §75** beside
+`Parse XML` / `Parse Feed`, which his 2026-09-18 ruling had already scheduled. `Pattern Extractor` is
+**built in §76** (session 101). The original list held twenty-two; the other twelve are in Tier 2.8 and 3.11 above.
 🔴 **An exclusion is only honest if the person placing the node is told.** Nothing in the editor
 reads the ledger today (§50.2): the first a person hears is the pre-flight modal at export, which
 lists components with counts, not nodes. That is **EXP-013**, and it is the next first job — before
@@ -6675,7 +6676,7 @@ Richard, 2026-09-03: *"Let's do it"*, on this split —
 - **Build, Tier 3.11, the transports**: Subscribe To Changes, Server-Sent Events, WebSocket.
 - **Out of scope, and badged**: Action Dispatcher, Action Handler, Optimistic Update, State History,
   State Snapshot, Undo / Redo, ~~Parse CSV, To CSV~~ (built §75, 2026-09-26 — the ruling reversed, see §3),
-  Pattern Extractor, Sign In With.
+  ~~Pattern Extractor~~ (built §76, session 101 — same reversal), Sign In With.
 - **EXP-013 before row 1**: *"we need to be super clear when someone is doing code export which
   nodes can't be exported and what will happen"* — a badge where the node is placed, the pre-flight
   naming nodes and what each refusal silences, and a plain verdict when the cascade is large:
@@ -11124,3 +11125,162 @@ editor's webpack pass would add is the editor tsconfig's dialect over the same f
 4. `To CSV` over a `Parse CSV` with Has Header unticked writes rows of cells (the runtime's `isRowsOfCells`) — covered by §A but not
    by a §B graph; and `Parse CSV` → `Array Filter` / `Array Map` (a transform over a parsed list) is untested in either direction.
    Both are the existing paths composing; neither has a new clause. Owner NONE.
+
+## §76 `Pattern Extractor` — `Hash`'s crypto-call shape widened to seven value outputs and a third signal pair (session 101, 2026-09-26/27)
+
+**Continues §75's ruling** (Richard, 2026-09-26: *"Can we not finish the code export nodes? If we had 100% coverage
+that would be a big deal"*): the second of the eight remaining picker rows, and the first §50.3 exclusion actually
+reversed rather than merely re-scoped (the four parsers were already scheduled by the 2026-09-18 ruling). **122 →
+123 of 130 (93.8% → 94.6%).**
+
+### §76.0 What was measured before a line of code
+
+- **`Pattern Extractor` is `Hash`'s shape (§59, `crypto-call`), generalised.** `doExtract` reads the four setter
+  values into `extractPattern`, writes every value output on every run (a failure CLEARS the values — where `Hash`
+  leaves its Digest as it was), raises `pattern-extractor/extract-failed` on the channel before the Failure pulse,
+  and on success sends `Found` or `Not Found` **before** `reportOutcome('done')` — two results off one Extract,
+  where the two verbs have one result and one outcome. `CRYPTO_NODES` gained `values` (a table of typed, SEEDED
+  value outputs — `PATTERN_VALUE_OUTPUTS`) and `results` (`['found', 'notFound']`); `node: CryptoNodeKind` widens
+  to include `'pattern'`; `CryptoCallAction` gained `foundThen` / `notFoundThen` (compiled as two more chain arms
+  off `cryptoChainScope`, which widened to `'done' | 'failure' | 'found' | 'notFound'`) and `materializeByPort` (one
+  row per value output a read allocates, by port name).
+- **Every value row is seeded, unlike the two verbs'.** `initialize` writes `match: null` (→ `''`), `matches: []`,
+  `groups: []`, `namedGroups: {}`, `error: ''` before the first Extract — so nothing here is ever undefined, in
+  either the row or the chain-local form. `maybeUndefinedExpr` (`crypto-out`) and the fold whitelist both gained
+  the `expr.node !== 'pattern'` guard; the Error row is the family's odd one (allocated by `cryptoErrorStateOf`,
+  which every other crypto node leaves `null`-booted) and needed its own marker — `outcome-error` gained an optional
+  `seeded` field, set true only for the extractor's Error, so `{percentError}` prints bare where `{hashError ?? ''}`
+  folds. **Found by building it, not by reading**: the first emit printed `{percentError ?? ''}`, silently wrong
+  in the same direction §59's finding named for `Hash` — the tenth instance of the text-sink-fold hazard, this time
+  in the *opposite* direction (a row that never needed the fold, printing one anyway, rather than a row that needed
+  one and got none).
+- **Matches and Groups are lists, and the repeater's gate is `tsType.endsWith('[]')` (Pass 5 §4e).** `exprTsType`
+  for a `crypto-out` reads `PATTERN_VALUE_OUTPUTS[field].tsType` — `string[]` for the two — so a For Each over
+  `percent.matches` binds directly, keyed by index (`listExprFields` answers `null` for it: a match is a string,
+  not a record, so nothing maps a field off the row).
+- **The inputs are the four setters' coercions, transcribed once** in `src/lib/pattern.ts`, not re-derived per
+  argument: `asText` (`''` for null/undefined, `String(value)` otherwise) for Text/Pattern/Flags, `!!value` for
+  Extract All. `extractPattern` itself (NDA-012's blank-pattern refusal, the flag filter, `describeError`,
+  `captureGroups`/`namedCaptureGroups`) is transcribed from `stream-parsers.ts` unchanged.
+- **Every crypto-family call's arguments needed to become optional.** The emitter drops trailing `undefined`
+  arguments so a Hash with nothing authored prints `tryHash()` rather than `tryHash(undefined, undefined,
+  undefined)` — `browser-utilities.test.ts` E2 already asserted this — but `tryHash`/`tryRandomBytes`'s own
+  signatures still required all their parameters, so `tryHash()` was a call the exported app's own strict `tsc`
+  refused. Not caught by any existing gate (E2 asserts the printed *text*, never typechecks it) — found writing
+  §76's differential and fixed at the same time (`cryptoLib.ts`'s two signatures now take optional arguments,
+  with the reason stated at the call site).
+
+### §76.1 What is built
+
+**`src/emit/patternLib.ts` → `src/lib/pattern.ts`.** One module, one verb: `tryExtract(text?, pattern?, flags?,
+extractAll?): ExtractResult`, a single result object carrying every value port plus `ok` and `found` — a
+discriminated shape would not fit, since the runtime writes all seven fields on both outcomes. Generated from a
+real `.ts` file, typechecked strict with no ambient types, and graded by `tests/the-pattern-extractor.test.ts`
+§B's differential before being turned into the string-array form.
+
+**The plan (`plan.ts`).** `PATTERN_EXTRACTOR_TYPE`; `CryptoNodeKind = 'hash' | 'random-bytes' | 'pattern'`;
+`PATTERN_VALUE_OUTPUTS` (six ports, each labelled, typed, and seeded — `bootCode: '[]'` / `'{}'` where the boot
+is not a plain literal); `CRYPTO_NODES[PATTERN_EXTRACTOR_TYPE]` (four inputs, `results: ['found', 'notFound']`);
+`cryptoOutputLabel` (the sentence helper, now reading a value's own label or the two verbs' `outputLabel`);
+`cryptoStateOf` widened to take an optional `port` and key its cache by `node:port`; `cryptoErrorStateOf`'s row is
+`string` (never `| undefined`) and seeded `''` for the extractor; `compileCryptoCall` compiles two more chain arms
+(`found`, `notFound`) after `done`/`failure`, refusing a pulse-into-value-sink on each by its own display name
+*before* the chain compiler tries and mis-names it (§59.4 #2's rule, generalised); `resolveExpr`'s crypto branch
+gained the `values` lookup (any of the six ports, inside any of the four arms via the local, outside via a seeded
+row) ahead of the existing `output`/`error` checks; the date-sweep's "never fired" sentence and the two-wires-per-
+input sentence both read `cryptoOutputLabel`/`CRYPTO_INPUT_LABELS` so they name Text/Pattern/Flags/Extract All
+correctly rather than the two verbs' four labels.
+
+**The emitter (`component.ts`, `emitApp.ts`).** The `crypto-call` print branches on `action.node === 'pattern'`:
+every value row and the Error row written from the result BEFORE any arm (as `doExtract` writes them), then
+`if (ok)` — the Found/Not Found `if` first (only printed where a chain hangs off one of the two), the Done chain
+after it — `else` the raise and the Failure chain. `cryptoLocalReadOf` takes an optional `field` and reads
+`${local}.${field}` for the extractor, `.digest`/`.value` for the two verbs. The import splits three ways now:
+`crypto.ts` for the two verbs, `pattern.ts` for the extractor (`isPatternHelper`), never both from one component
+unless it uses both families. `emitApp.ts` ships `src/lib/pattern.ts` only where a component calls `tryExtract`.
+
+### §76.2 The test — `tests/the-pattern-extractor.test.ts`, 39 rows, and the fixture
+
+Built on `tests/fixtures/pattern-desk`: a text input → Variable → the extractor's Text; a button fires Extract
+over an authored `(\d+)%`; Match/First Group/Match Count/Error are four Texts; Matches feeds a For Each of a
+one-line `MatchRow` component; Found/Not Found each remember a word in a Variable; Done writes the Match Count
+into another. **§A** the fixture whole (17 files, the pattern lib shipped and the crypto lib absent, the app
+typechecks, every seeded row prints bare with no `?? ''`, the repeater keyed by index). **§B** `tryExtract`
+against the runtime's own `extractPattern` plus the node's setters/getters applied by hand — an 11×12×8×5 grid
+(5,280 cells) agreeing on all nine fields, the NDA-012 blank-pattern sentence, an invalid-regex sentence through
+`describeError`, the flag filter, unmatched optional groups as `''`, named groups by name, the setters'
+coercions, and every argument's optionality. **§C** the shapes a wire changes: a value read from the Failure arm
+(the local, because a failure clears the row), Error refused from the Found chain (cleared before Found fires,
+same as Done), wired vs. authored inputs, only-Not-Found/neither/nothing-wired forms, a value read only inside a
+chain (no row), Groups/Named Groups from render (a `string[]` row and a `Record` row, both seeded), Extract fired
+from a non-element trigger. **§D** nine refusals by exact sentence. **§E** the fold finding and the crypto-verb
+optional-arguments finding, both pinned. **§F** the ledger row and the earned-not-shipped controls.
+
+### §76.3 The gate chain
+
+**This tree, read off exit status.** `tests/the-pattern-extractor.test.ts` **39/39**. The nine tests that
+previously used `net.noodl.Hash` or `net.noodl.PatternExtractor` as their "node with no rule" example
+(`drag.test.ts`, `component-object-trio.test.ts`, `relation-pair.test.ts` D18, `relation-verbs.test.ts` ×2,
+`streaming-trio.test.ts`, `script.test.ts` ×2, `record.test.ts`, `unreported-deferrals.test.ts`) re-pointed to
+`net.noodl.user.SignInWith` — the next row down the §75.5 order (§79) — and re-run **353/353**.
+`browser-utilities.test.ts` (the two crypto verbs, whose signatures this section changed) re-run **55/55**.
+Package `tsc --noEmit` **exit 0**. `export-ledger:check` **OK — 180 types, 130 translated, 32 deferred, 1
+stubbed, 17 backend-only**. `export-ledger:picker --check` **holds at 123/130 (94.6%)**, floor raised in the
+ledger in the same change. Fifteen `pickerCoverageFloor` pin comments moved to the new number and note.
+**Editor `tsc -p tsconfig.json --noEmit`: exit 0, empty log** (run on this tree before building, per the §75
+handoff's owed-gates order). ⚠️ **Not yet run at session close: the whole-package `nodegx-export` jest** (101+
+files) and the editor's `test:ci` — the box was carrying a peer's session for the whole drive, and the session
+closed before a slot opened. **Owed by the next session before anything else.** Nothing under `src/` was touched
+after the specs above went green, so a clean whole-package run is the expectation, not a risk — but it is
+unverified, and this section does not claim more than what actually ran.
+
+### §76.4 What this leaves
+
+1. 🔴 **The whole-package jest run and the editor `test:ci` are owed** — see §76.3. Read them before building the
+   next row; if either is red for a reason unrelated to this section, that is this session's own miss, not a
+   pre-existing floor.
+2. **Seven rows left on the picker** (`export-ledger:picker`): `Action Dispatcher` / `Action Handler` (~1,600
+   runtime lines, an in-app bus — read `Send Event`/`Receive Event`'s translation first), the history family —
+   `State Snapshot` / `State History` / `Undo / Redo` / `Optimistic Update` (~1,300 lines + `outcome.ts`,
+   stateful, two sessions), `Sign In With` (the §48 "waits on a provider decision" reason is stale — the backend
+   has a GitHub provider and `RestAuthAdapter.signInWithProvider` is implemented; needs a drive of the redirect's
+   return leg against the real backend).
+3. **Two Do pulses in one tick** are coalesced by `scheduleAfterInputsHaveUpdated` into one Extract that answers
+   both tokens; the export runs once per pulse. Recorded, not translated — the same divergence §59 recorded for
+   Hash/Random Bytes and §75 for the parsers' Changed/Failure.
+4. Per-parameter coverage (EXP-008's open question, §75.5 #3) is still open: a 130/130 badge would still hide a
+   parameter gap the node-count number cannot see. One session, still queued.
+5. The extractor's own catastrophic-backtracking risk is the author's, in both the interpreter and the export —
+   recorded in the lib's header, not fixed (the runtime cannot bound the platform regex engine either).
+6. Not driven in a built app (no browser drive this session — see §76.3's owed-gates note). The differential (§B,
+   5,280 cells) and the emitted-app typecheck (§A2) are the instruments that graded it this session.
+
+### §76.5 Session 102 (2026-10-14): the two owed gates, read, and the pile committed
+
+**Measured before anything else.** The pile was still s101's alone (every file last written 26 Sep). Five of its
+files had since been committed to by P109 (`a6193856c`, `b9a17871a`, `06e65ab47`); the pile's diff against HEAD
+is purely additive on all five, so committing it reverts none of their work.
+
+**Gate 1 — whole-package `nodegx-export` jest, on this tree: 6 suites / 16 tests red, exit 1** (3845 passed,
+397 s). Attributed by a control, the same six suites run in a fresh worktree at HEAD `a66ebd2c5` (no pile):
+- **Two were the pile's, and are fixed in this commit.** `sse.test.ts` F1 pinned the floor at 122. s101 moved 15 pins
+  and missed this one, the 16th (`git grep "pickerCoverageFloor).toBe("`: 15 × 123, 1 × 122). And HLS-001's corpus
+  golden did not know `pattern-desk` (52 → 53) or the README sentence. Regenerated and counted line by line: 52
+  `README.md` (the sentence only, read as text), `utility-desk/src/lib/crypto.ts` (§76's optional arguments), and
+  `sheet-desk/src/lib/parse.ts`, red at HEAD from P107 `dccaa77e0`, attributed by a control that reproduces the old hash.
+  The record is in the test's docblock.
+- **Four are red at HEAD without the pile, each from another phase's commit, and none is §76's:**
+  P18-S102-NAVENCODE (§15.6's tripwire fired on P107-D21's runtime fix: the exported Navigate To Path still
+  sends Query values unencoded), P18-S102-DATEHARNESS (ISL-032's `toDate` import blanks the date-family harness),
+  P18-S102-GRAPHNOSPEC (NSP-008 on the export throws on NSP-012's Global Store scenario, since 2026-10-01), and
+  P18-S102-CATALOGNAME (ISL-034's regression spec names the catalog). Each one is a row in `dev-docs/bugs/`.
+- **Why nobody saw them:** no CI job runs this package's jest (P18-S102-NOEXPORTCI).
+
+After the two fixes, `sse` and `hls001-corpus-identity` pass 40/40. `export-ledger:check` reads OK (180 types, 130 translated)
+and `export-ledger:picker --check` holds at 123/130.
+
+**Gate 2 — editor `test:ci`, on this tree: `Jasmine: 3017 specs, 0 failures`, exit 0**, seed 35586, HEAD `a66ebd2c`.
+
+**What this leaves (lane 6, in order):** the three graders ISL-043 needs come first: GRAPHNOSPEC (the instrument
+itself), then NAVENCODE and DATEHARNESS (both are the exported app disagreeing with the running one, or nobody
+being able to tell). CATALOGNAME and NOEXPORTCI are small. After them come ISL-043, and then §77–§79 (the seven picker rows).

@@ -1,3 +1,135 @@
+# Next session — session 101 (2026-09-26/27) BUILT §76: `Pattern Extractor` — picker **122 → 123 of 130 (94.6%)**, the second row of Richard's 2026-09-26 ruling ("If we had 100% coverage that would be a big deal"). `Hash`'s crypto-call shape (§59) widened to seven seeded value outputs and a third signal pair (`Found`/`Not Found`, printed before `Done`, as `doExtract` fires them).
+
+## ✅ Session 102 (2026-10-14, BOARD lane 6): the owed gates are read and session 101's pile is COMMITTED
+
+Everything below this section that says "uncommitted" or "owed gates" is history now: both gates ran. The
+whole-package jest had 6 suites red. Two were the pile's (the 16th floor pin, and the HLS-001 golden that did not
+know `pattern-desk`), and both are fixed in the same commit. Four are red at HEAD without the pile, each from
+another phase. `test:ci` passed 3017 / 0. The record is in EXP-011 §76.5.
+
+**Next, in order (BOARD lane 6):**
+1. `P18-S102-GRAPHNOSPEC`: NSP-008 on the export throws on a node it has no spec for. This is ISL-043's instrument.
+2. `P18-S102-NAVENCODE`: the exported Navigate To Path sends Query values unencoded. The runtime has encoded them
+   since D21.
+3. `P18-S102-DATEHARNESS`: date-family's runtime harness stubs `require`, so the export has gone ungraded since ISL-032.
+4. `P18-S102-CATALOGNAME`, `P18-S102-NOEXPORTCI`: small.
+5. Then ISL-043, and §77–§79 below.
+
+`node scripts/bugs.js --from P18` lists them. The whole-package suite should read `Test Suites: 4 failed` (those
+four, by name) until they are fixed. Any fifth red is new.
+
+---
+
+**(Session 101's hand-off, kept as written.)** Session 101's work was uncommitted at hand-off. Session 102 committed it.
+
+## 🔴 Read this first — Richard, 2026-09-02: *"Stop fucking up the CPU."*
+
+One heavy job at a time on this 16 GB box. Session 101 ran individual specs only (`the-pattern-extractor.test.ts`
+39/39, the nine re-pointed no-rule specs 353/353, `browser-utilities.test.ts` 55/55 after the crypto verbs'
+signatures changed, package `tsc --noEmit` 0, `export-ledger:check`/`--picker` both green) and the editor's
+`tsc -p tsconfig.json --noEmit` (exit 0, empty log — the gate the §75 handoff owed). **It did NOT run the
+whole-package `nodegx-export` jest (101+ files) or the editor's `test:ci`** — a peer session held the box for
+the whole drive and no slot opened before this session closed. Session closed on the user's own instruction
+("Close out here, just update docs") rather than push through a busy box.
+
+## 🔴 The next session's FIRST job: the two owed gates, before building anything else
+
+1. `cd packages/nodegx-export && npx jest` — whole package, once. Expect green: nothing under `src/` was
+   touched after the individual specs above went green, and the fifteen `pickerCoverageFloor` pin comments
+   were moved by the same session that moved the ledger's own number (never by hand). If it is NOT clean,
+   that is this session's own miss — read the failing file's own reasoning before assuming a peer's collision.
+2. `cd packages/noodl-editor && npx webpack-cli --config=webpackconfigs/webpack.test-ci.js && node scripts/run-electron-tests.js --ci` (`npm run test:ci`) — the editor's own gate, which typechecks this package's tests
+   under a different tsconfig dialect (`the-editor-test-ci-webpack-typechecks-a-sibling-packages-tests`).
+   The plain editor `tsc --noEmit` already ran clean this session; `test:ci` is the one that has not.
+
+Only after both read clean should the next session move to building a further row — building on top of an
+unread gate is exactly the trap `a-read-before-pointer-is-a-precondition-not-a-label` and
+`a-run-list-is-not-a-log` name.
+
+## The board, re-derived from the task files
+
+| task | status |
+|---|---|
+| EXP-001 `@nodegx/core` | ✅ Published `0.1.0` (4 `0.1.1` rows carried) |
+| EXP-002 / 003 / 005 / 006 / 007 | unchanged |
+| EXP-004 | 🟡 built + driven; drill-down panel + the comprehension test remain (Richard's); §69.4 #1 |
+| EXP-008 | ✅ `export-ledger:check` OK — **180 types, 130 translated, 32 deferred, 1 stubbed, 17 backend-only**. 🔴 Open: no per-parameter coverage (§75.5 #3 / §76.4 #4 restate it — do not quote 100% without it) |
+| EXP-009 / EXP-010 / EXP-012 / EXP-013 | 🟢 |
+| EXP-011 picker coverage | 🟡 **123/130 (94.6%)** — §76 built `Pattern Extractor`. **7 left**: Action Dispatcher, Action Handler, State Snapshot, State History, Undo / Redo, Optimistic Update, Sign In With |
+| EXP-014 / 015 / 016 / 017 | 🟢 |
+
+## What session 101 did (EXP-011 §76 — read it; this is the summary)
+
+1. **Measured `Pattern Extractor` against `Hash`'s shape (§59) before writing anything.** Both are
+   `crypto-call`: an action port, an outcome pair, a raise on Failure. The extractor differs in degree, not kind:
+   SEVEN value outputs where Hash has one (each SEEDED by `initialize`, unlike Hash's row, which boots
+   undefined), and a third signal pair — `Found`/`Not Found` — sent *before* `reportOutcome('done')`, so two
+   more chain arms compile off one Extract. `CryptoNodeKind` widened to `'hash' | 'random-bytes' | 'pattern'`;
+   `CryptoCallAction` gained `foundThen`/`notFoundThen` and `materializeByPort`.
+2. **`src/emit/patternLib.ts` → emitted `src/lib/pattern.ts`**: one verb, `tryExtract`, transcribed from
+   `stream-parsers.ts`'s `extractPattern` plus the node's own setters/getters. Generated from a real `.ts` file,
+   typechecked strict with no ambient types, graded by a 5,280-cell differential against the runtime before
+   being turned into the string-array form.
+3. 🔴 **Found writing the differential, not by reading: every crypto-family call needed optional arguments.**
+   The emitter already drops trailing `undefined`s (`tryHash()` for an unconfigured Hash), but `tryHash`/
+   `tryRandomBytes`'s own signatures still *required* every parameter — so that printed call was one the
+   exported app's own strict `tsc` refused. No existing gate caught it (`browser-utilities.test.ts` E2 asserts
+   the printed text, never typechecks it). Fixed in the same session: both verbs' signatures now take optional
+   arguments, with the reason at the call site.
+4. **The fold whitelist's hazard, in the opposite direction from every prior instance.** §37/§59/§75 each found
+   a row that NEEDED the `?? ''` fold and silently didn't get one. The extractor's rows are all seeded — never
+   undefined — and the first emit printed `{percentError ?? ''}` anyway: a fold that was never needed, applied
+   because `outcome-error`'s existing rule read `viaState !== undefined` with no way to say "and this one is
+   seeded". Fixed with a `seeded` marker on the expression, read in both `plan.ts` and `component.ts`.
+5. **Nine tests across the package had borrowed `net.noodl.Hash` or `net.noodl.PatternExtractor` as their
+   "node with no rule" example** (§59 and prior sessions re-pointed some of these already, moving the target as
+   each phase translated the previous one). Re-pointed to `net.noodl.user.SignInWith` — the next untranslated
+   row down the §75.5/§76.4 order — and re-run 353/353.
+6. **`tests/the-pattern-extractor.test.ts` 39 rows**: §A the fixture whole (17 files, pattern lib shipped,
+   crypto lib absent, app typechecks, every row prints bare), §B the differential (11×12×8×5 grid, 5,280
+   cells), §C nine wire-shape variations, §D nine refusals by exact sentence, §E the two findings pinned, §F
+   the ledger and earned-not-shipped controls. Ledger: one row → translated, fifteen pins moved, floor 122 →
+   123.
+
+## Uncommitted at hand-off
+
+**Everything from session 101 is uncommitted.** `git status --short` in the repo root shows, under
+`packages/nodegx-export/`:
+- Modified: `coverage-ledger.json`, `src/analyze/plan.ts`, `src/emit/component.ts`, `src/emit/cryptoLib.ts`,
+  `src/emit/emitApp.ts`, and fifteen `tests/*.test.ts` files (the floor-pin moves and the nine re-pointed specs).
+- New: `src/emit/patternLib.ts`, `tests/the-pattern-extractor.test.ts`, `tests/fixtures/pattern-desk/` (the
+  fixture directory, incl. a `Components/MatchRow` template).
+
+Also under `dev-docs/tasks/phase-18-code-export-v2/`: this file, `README.md` (headline number + the §3
+strike-through), and `EXP-011-PICKER-COVERAGE.md` (§76 appended, §3's list amended).
+
+PEERS' work, untouched and heavy, is also sitting uncommitted in the same working tree (unrelated to this
+phase): `dev-docs/tasks/phase-78-the-templates/**`, `packages/nodegx-backend/tests/**`,
+`packages/noodl-mcp/tests/**`, `package.json`/`package-lock.json`, and others outside `nodegx-export` and this
+phase's docs. 🔴 **Commit through a temporary index with pathspecs that name only this session's files**;
+never `git add -A` or a plain `git commit` on this tree (`commit-your-delta-through-a-temporary-index`,
+`a-pathspec-commit-skips-untracked-files` — the new files above need explicit paths, not just the modified
+ones).
+
+## 🔴 Do this next (BUILD) — after the two owed gates in §76.3/above
+
+1. **§77 `Action Dispatcher` / `Action Handler`** (`agent/action-dispatcher.ts` 963 + `actiondispatchernode.ts`
+   673 lines) — an in-app bus; read `Send Event`/`Receive Event`'s translation first, it is the nearest shape.
+2. **§78 the history family** — `State Snapshot`, `State History`, `Undo / Redo`, `Optimistic Update`
+   (`statesnapshotnode.ts`, `statehistory.ts`, `undonode.ts`, `outcome.ts`). Two sessions; stateful.
+3. **§79 `Sign In With`** — the §48 reason ("waits on a provider decision") is STALE: `nodegx-backend/src/
+   auth/github.ts` exists and `RestAuthAdapter.signInWithProvider` is implemented. Needs a drive of the
+   redirect's return leg (`_consumeAuthReturn`) against the real backend, not a spec alone.
+4. **Before anyone quotes 100%:** EXP-008's per-parameter coverage question (§75.5 #3 / §76.4 #4) — one
+   session on a per-parameter ledger check.
+5. Still queued from earlier sessions: §74.5 #1 (the `unknown`-into-a-typed-store-key sink), §69.4 #1 (the
+   cascade sentence), §71.5 (Richard's ruling).
+6. **No drive was run this session** (§76.4 #6) — the built `pattern-desk` export has not been served/driven
+   headless. Not blocking (the differential + emitted-app typecheck graded it), but owed before the row is
+   called fully proved the way §59's utility-desk was.
+
+## Earlier hand-off (session 100), kept for the record
+
 # Next session — session 100 (2026-09-26) BUILT §75: the four parsers (`Parse CSV`, `To CSV`, `Parse XML`, `Parse Feed`) — picker **118 → 122 of 130 (93.8%)**, the first move on the headline number since GAM-013. Richard's ruling this session: *"Can we not finish the code export nodes? If we had 100% coverage that would be a big deal"* — **every remaining picker row is a target now**; §50.3's exclusion list is reversed (EXP-011 §3 and §50.3 amended, §75.0).
 
 **Session 100's commit: `fcf68a1c7`** (feature); this handoff's own commit follows it.
@@ -73,107 +205,3 @@ Nothing of session 100's after its commits (see `git log`). PEERS' work, untouch
 
 ---
 
-## Earlier hand-off (session 99), kept for the record
-
-
-## 🔴 Read this first — Richard, 2026-09-02: *"Stop fucking up the CPU."*
-
-One heavy job at a time on this 16 GB box. Session 99 ran single-spec jest for the rows and the
-15 arms, then **one** whole-package run (repeated once, after the corpus golden and four pins moved
-under it), the drive (one `npm install` shared by both arms through a symlinked `node_modules`, two
-builds, two `vite preview`s and one headless Chrome, all torn down by port the moment the readings
-were taken, the worktree `git worktree remove`d), the editor tsc, and `test:ci` — and **waited for a
-peer's `jest tests/tpl007Engine.test.ts` at 99% CPU to finish before starting `test:ci`**.
-
-## The board, re-derived from the task files
-
-| task | status |
-|---|---|
-| EXP-001 `@nodegx/core` | ✅ Published `0.1.0` (4 `0.1.1` rows carried) |
-| EXP-002 / 003 / 005 / 006 / 007 | unchanged. ⚠️ EXP-002-TARGET-OUTPUT §1 (PuppyCard) and EXP-002-VISUALS-TARGET-OUTPUT's Image/Video rows were rewritten by s99 |
-| EXP-004 | 🟡 built + driven; drill-down panel + the comprehension test remain (Richard's); §69.4 #1 (the cascade sentence on the node in front) |
-| EXP-008 | ✅ `export-ledger:check` OK — 176 types, 124 translated. 🔴 Open question from EXP-014 AC5: no per-parameter coverage — §14.5 is the FOURTH parameter gap found green behind a `translated` row |
-| EXP-009 / EXP-010 / EXP-012 / EXP-013 | 🟢 |
-| EXP-011 picker coverage | 🟡 **117/127 (92.1%)** — every scheduled tier built and driven; the 10 left are §50 out-of-scope RULINGS. §74.5 #1 still open |
-| EXP-014 the ground | 🟢 built s97; **§14.5 CLOSED s99**; one runtime-side residual in its place, §14.6, owner NONE |
-| EXP-015 / EXP-016 | 🟢 |
-| EXP-017 the deploy engine | 🟢 built + gated s98 (AC4's duplicate deliberately narrowed — read the file before re-opening) |
-
-## What session 99 did
-
-1. **Re-measured the register and found it right but smaller than the surface** — two ways. The
-   register named four ports; `renderIcon` printed a picture icon's source verbatim too (five). And
-   it named the LITERAL channel, where the landing-pages template carries **2** literal `Image.src`
-   and **~18** pictures through `Static Data` rows wired into a card — the wired path is the product.
-2. **`src/emit/mediaLib.ts`**: `absoluteUrl` = the runtime's `getAbsoluteUrl` (base `/`); `mediaSrc` =
-   the viewer's `resolveMediaSource` in front of it (`null`/`undefined`/`''` ⇒ NO attribute — `src=""`
-   refetches the document); `mediaSrcSet` = the HTML `srcset` tokeniser (a comma inside a `data:` URI
-   survives); `MEDIA_ATTRS` keyed by ATTRIBUTE like `ATTR_SINK`; `mediaLibSource()` the same three as
-   emitted text. `contentAttrs`: a literal resolved at emit time, a wire printed `src={mediaSrc(x)}`
-   with the import set AFTER the render (imports join after `jsxLines`); the icon takes `absoluteUrl`
-   because the runtime's `iconImageSource` setter has no empty gate. `emitApp` ships the module iff a
-   component named a helper.
-3. **`tests/fixtures/picture-desk`** — the first corpus project two segments deep (`gallery/team`),
-   with four real SVGs in its module folder so the drive can fetch them; **`tests/the-picture-path.test.ts`
-   26 rows**, §E transpiling the emitted module beside the package's functions over one table, §F the
-   reverted arm as Node's WHATWG `URL` reading; **15 arms, 15/15**.
-4. **Counted before any golden moved**: 9 hashes in the three corpus projects with a wired picture
-   (`gallery-desk`, `photo-desk` off a Cloud File's https `url` — passes through untouched, as the viewer —
-   and `puppy-test-3`) + 3 `src/lib/media.ts`, **zero in the other 42**. The HLS-001 golden regenerated
-   with that count in its comment (45 → 46 projects), the PuppyCard golden in `visual.test.ts` and its
-   twin in EXP-002-TARGET-OUTPUT §1 moved by the same two lines, the two Cloud File pins re-pointed,
-   the ledger's Image/Video notes corrected.
-
-## The gate chain — READ on this tree
-
-**whole pkg jest 101 files (101 on disk) 3491 passed / 1 skipped exit 0** (run twice — the second after
-the golden and pins moved) · **package `tsc --noEmit` exit 0** · **editor `tsc -p tsconfig.json --noEmit`
-exit 0, empty log** · **`export-ledger:check` OK — 176 types, 124 translated** · **picker 117/127
-exit 0** · **editor `test:ci` 2983 specs, 0 failures, exit 0** (seed 42557; `tests/test-results.json` fresh; `.webpack-cache` cleared first; HEAD `ae2574f2`) — ⚠️ the AIX-006 ×4 floor s97/s98 recorded is GONE on this tree: 0 failures, so the floor by name is now 0. **Drive**: reverted worktree (`git worktree add --detach HEAD` + the fixture
-copied in) vs this tree, both `tsc -b` 0 and `vite build` 0 (48 vs 49 modules — the module), served on
-4173/4174, one headless Chrome at `/gallery/team`: local pictures **0/4 → 4/4 decode**, poster
-`/gallery/…` (`text/html`) → `/noodl_modules/…` (`image/svg+xml`), `src=""` → no attribute, errors `[]`
-both. Pictures `drive-before.png` / `drive-after.png` in the s99 scratchpad `736ed0fd-…`.
-
-## Uncommitted at hand-off
-
-Nothing of session 99's after its two commits (feature, docs — see `git log`). PEERS' work, untouched:
-`dev-docs/tasks/phase-78-the-templates/**` (TPL-007), `library/prefabs/form-fields/project/project.json`,
-`library/modules/game-kit/`, `packages/noodl-mcp/tests/tpl007*`.
-
-## 🔴 Do this next (BUILD)
-
-1. **§74.5 #1 — the `unknown`-into-a-typed-store-key sink.** `mood.set({ theme: ghost.get() })` where
-   `theme: string` is TS2322 in the built app (`probe74c.ts` in the s96 scratchpad `47ba0b96-…`
-   reproduces it). §72's treatment one sink over: where the key's `tsType` is `string` and the expr is
-   an `unknown` read, print `String(x ?? '')`. Check the `object-set` and `store-set` twins (MEASURE,
-   do not reason). One session.
-2. **§69.4 #1 — the cascade sentence lands on the node IN FRONT of the refused sink** (seen §69.0,
-   §70.0, §73's F4). Registration pass; every `dropped:` note pin moves, so the whole-package run is
-   the sweep.
-3. **§71.5 — the editor cannot author a `Model2` `prop-*` value.** A product-surface ruling for
-   Richard. And EXP-008's per-parameter coverage question — §14.5 is the fourth parameter gap that
-   sat green behind a `translated` row.
-4. **§14.6 (runtime, owner NONE)** — the viewer's `Image.srcSet` is verbatim (`image.ts`, `propPath:
-   'dom'`, no setter) while `src` goes through `getAbsoluteUrl`; under `navigationPathType: "path"` a
-   two-segment route 404s exactly as the export did. Not this phase's file to fix.
-
-## What this session learned, and would want said again
-
-🔴 **A register names the channel it was found on; count the reach on the PRODUCT before choosing
-the shape.** "Apply `cssUrl`'s rule to the `attr:src` channel" was right and would have fixed 2 of
-the template's 20 pictures — the other 18 arrive on a wire from `Static Data`, and a wire needs a
-run-time helper the app ships, not an emit-time string.
-🔴 **`vite preview`'s SPA fallback answers 200 `text/html` for a picture that is not there.**
-`PerformanceResourceTiming.responseStatus` graded the reverted arm GREEN on every broken image. The
-reading is the decode (`naturalWidth`), and `curl -I`'s content type is the server-side control.
-🔴 **A `srcset` picture picks the candidate the VIEWPORT wants**, in both arms alike — a "local
-picture" filter written on the `src` attribute counted it broken after the fix. Filter on `currentSrc`.
-🔴 **A count gate's `not.toContain('src')` over the notes matched the router shell's `src/App.tsx`.**
-Pin the whole list, not a substring.
-⚠️ The HLS-001 corpus golden is a design conversation, and its count row carries the counted diff of
-every regeneration — this one was NOT additive and says so.
-⚠️ Imports are joined AFTER the JSX renders (`component.ts` ~6230 vs `jsxLines` ~6150), so a helper
-first named while printing an attribute still earns its import line — set it between the two.
-⚠️ A Cloud File's `url` is https and passes through `mediaSrc` untouched; an unset one now clears the
-attribute rather than printing `src=""` — the viewer's behaviour, and why the two file pins moved.

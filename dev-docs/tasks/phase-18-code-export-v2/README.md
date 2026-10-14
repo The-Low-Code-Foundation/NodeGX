@@ -43,7 +43,7 @@ npm run export-ledger:picker          # ratcheted in PR CI
 node scripts/export-ledger/picker-coverage.js    # the readable report
 ```
 
-> **PICKER COVERAGE: 122 of 130 placeable nodes export (93.8%)** — 2026-09-26, session 100 (§75, the four parsers). Was 73 of 127 (57.5%) at session 65.
+> **PICKER COVERAGE: 123 of 130 placeable nodes export (94.6%)** — 2026-09-26/27, session 101 (§76, Pattern Extractor). Was 73 of 127 (57.5%) at session 65.
 
 "Placeable" means `inNodePicker`, not deprecated, browser-capable: what a person can actually drop
 on a canvas. The floor lives in `coverage-ledger.json` as `pickerCoverageFloor` and ratchets both

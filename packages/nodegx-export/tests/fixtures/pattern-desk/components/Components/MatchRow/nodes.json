@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e7a1c4d2-5b3f-4e8d-9c1a-000000000105",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "matchRow",
+      "type": "Group",
+      "label": "Match row",
+      "children": [
+        "bullet"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "bullet",
+      "type": "Text",
+      "label": "Bullet",
+      "parent": "matchRow",
+      "parameters": {
+        "text": "\u2022 a match",
+        "fontSize": "var(--text-sm)"
+      },
+      "x": 40,
+      "y": 120
+    }
+  ],
+  "visualRoots": [
+    "matchRow"
+  ]
+}

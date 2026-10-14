@@ -811,11 +811,11 @@ describe('§F the refused shapes, by mutation — each sentence exact, and the c
     expect(
       sentence('parser', (ir) => {
         const home = componentOf(ir, HOME);
-        // §59 made `net.noodl.Hash` readable the same session this row was written; Pattern Extractor is §50's own out-of-scope list.
-        home.nodes.push({ id: 'pattern', type: 'net.noodl.PatternExtractor', catalogRef: 'net.noodl.PatternExtractor', parameters: [], declaredPorts: [], portKnowledge: 'partial' });
+        // §59 made `net.noodl.Hash` readable the same session this row was written; Sign In With is the last row of the §75.5 order (§79, owed a backend drive) — §76 translated Pattern Extractor.
+        home.nodes.push({ id: 'pattern', type: 'net.noodl.user.SignInWith', catalogRef: 'net.noodl.user.SignInWith', parameters: [], declaredPorts: [], portKnowledge: 'partial' });
         connect(home, 'pattern', 'matches', 'parser', 'maxLength', 'value');
       })
-    ).toBe('its Max Pending input is fed by net.noodl.PatternExtractor — no statically known source in the emit vocabulary');
+    ).toBe('its Max Pending input is fed by net.noodl.user.SignInWith — no statically known source in the emit vocabulary');
   });
 
   test('a listener chain into an untranslatable sink refuses the node with doneChainOf’s sentence', () => {
@@ -905,7 +905,7 @@ describe('§H the ledger', () => {
       expect(exportBadgeOf(type)).toBeUndefined();
     }
     const ledger = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'coverage-ledger.json'), 'utf8'));
-    expect(ledger.pickerCoverageFloor).toBe(122); // EXP-011 §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §61 the component-stack trio + §60 the component-object trio + §62 the relation pair + §63 Drag (session 86); §57 + §58 + §59 (session 85)
+    expect(ledger.pickerCoverageFloor).toBe(123); // EXP-011 §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §61 the component-stack trio + §60 the component-object trio + §62 the relation pair + §63 Drag (session 86); §57 + §58 + §59 (session 85)
   });
 });
 

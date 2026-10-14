@@ -445,8 +445,8 @@ describe('EXP-011 §43 §D — the §40 class, for this node', () => {
       connect(notes, 'rec', 'prop-title', 'notesHeading', 'text');
       // A wire INTO fetch keeps the port wired (so the effect form does not apply) from a node
       // that carries no signal this slice can hear. (§59 re-pointed it from `Hash`, whose Done is
-      // a chain the exporter owns since, to `Pattern Extractor` — §50's own out-of-scope list.)
-      addNode(notes, { id: 'pattern', type: 'net.noodl.PatternExtractor' });
+      // a chain the exporter owns since, to `Sign In With` — §79, the last of the §75.5 order (§76 translated Pattern Extractor).)
+      addNode(notes, { id: 'pattern', type: 'net.noodl.user.SignInWith' });
       connect(notes, 'pattern', 'done', 'rec', 'fetch', 'signal');
     }, { connected: true, schema: true });
     // The attach pass disposes the sink with the trigger's own reason — the class rule, not this

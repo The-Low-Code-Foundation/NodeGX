@@ -45,6 +45,7 @@ import { WEBSOCKET_LIB_PATH, websocketLibSource } from './websocketLib';
 import { REALTIME_LIB_PATH, realtimeLibSource } from './realtimeLib';
 import { REPEAT_LIB_PATH, repeatLibSource } from './repeatLib';
 import { CRYPTO_LIB_PATH, cryptoLibSource } from './cryptoLib';
+import { PATTERN_LIB_PATH, isPatternHelper, patternLibSource } from './patternLib';
 import { SCREEN_LIB_PATH, screenLibSource } from './screenLib';
 import { MEDIA_LIB_PATH, mediaLibSource } from './mediaLib';
 import { COMPONENT_OBJECT_LIB_PATH, componentObjectLibSource } from './componentObjectLib';
@@ -178,6 +179,8 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   // EXP-011 §59.
   let cryptoLibUsed = false;
   let screenLibUsed = false;
+  // EXP-011 §76. The extractor's verb — the crypto family's third member, its own module.
+  let patternLibUsed = false;
   // EXP-014 §14.5. The media URL helpers — earned where a component printed a wired src/srcSet/poster.
   const mediaHelpersUsed = new Set<string>();
   // EXP-011 §60. The component-object record, its context and the parent hook; the lib raises on errors.ts.
@@ -247,7 +250,8 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     if (emitted.websocketLib) websocketLibUsed = true;
     if (emitted.realtimeLib) realtimeLibUsed = true;
     if (emitted.repeatLib) repeatLibUsed = true;
-    if (emitted.cryptoHelpers.size > 0) cryptoLibUsed = true;
+    if ([...emitted.cryptoHelpers].some((fn) => !isPatternHelper(fn))) cryptoLibUsed = true;
+    if ([...emitted.cryptoHelpers].some(isPatternHelper)) patternLibUsed = true;
     if (emitted.screenLib) screenLibUsed = true;
     for (const helper of emitted.mediaHelpers) mediaHelpersUsed.add(helper);
     if (emitted.componentObjectLib) componentObjectLibUsed = true;
@@ -358,6 +362,10 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   // EXP-011 §59. The crypto verbs and the viewport hook, each only where a component calls into it.
   if (cryptoLibUsed) {
     files[CRYPTO_LIB_PATH] = GENERATED_MODULE_TS + cryptoLibSource();
+  }
+  // EXP-011 §76. `src/lib/pattern.ts` — the extractor's verb, where a component calls it.
+  if (patternLibUsed) {
+    files[PATTERN_LIB_PATH] = GENERATED_MODULE_TS + patternLibSource();
   }
   // EXP-011 §61. Owed by a rendered stack, a push, a pop, or a component the stack pushes (its reserved prop's type).
   if (pageStackLibUsed) {

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e7a1c4d2-5b3f-4e8d-9c1a-000000000104",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "statusInput",
+      "fromProperty": "onTextChanged",
+      "toId": "statusVar",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "statusVar",
+      "fromProperty": "value",
+      "toId": "percent",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "extractBtn",
+      "fromProperty": "onClick",
+      "toId": "percent",
+      "toProperty": "extract"
+    },
+    {
+      "fromId": "percent",
+      "fromProperty": "match",
+      "toId": "matchText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "percent",
+      "fromProperty": "firstGroup",
+      "toId": "firstGroupText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "percent",
+      "fromProperty": "matchCount",
+      "toId": "countText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "percent",
+      "fromProperty": "error",
+      "toId": "errorText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "percent",
+      "fromProperty": "found",
+      "toId": "setFound",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "percent",
+      "fromProperty": "notFound",
+      "toId": "setMissed",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "percent",
+      "fromProperty": "done",
+      "toId": "setRuns",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "percent",
+      "fromProperty": "matchCount",
+      "toId": "setRuns",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "verdictVar",
+      "fromProperty": "value",
+      "toId": "verdictText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "runsVar",
+      "fromProperty": "value",
+      "toId": "runsText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "percent",
+      "fromProperty": "matches",
+      "toId": "hits",
+      "toProperty": "items"
+    }
+  ]
+}

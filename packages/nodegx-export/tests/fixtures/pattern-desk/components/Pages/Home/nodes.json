@@ -1,0 +1,240 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e7a1c4d2-5b3f-4e8d-9c1a-000000000104",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "shell"
+      ],
+      "parameters": {
+        "title": "Pattern Desk",
+        "urlPath": "home"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "page",
+      "children": [
+        "headline",
+        "statusInput",
+        "extractBtn",
+        "matchText",
+        "firstGroupText",
+        "countText",
+        "errorText",
+        "verdictText",
+        "runsText",
+        "hits"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-8)",
+        "paddingLeft": "var(--space-6)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "headline",
+      "type": "Text",
+      "label": "Headline",
+      "parent": "shell",
+      "parameters": {
+        "text": "Pattern Desk",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "statusInput",
+      "type": "net.noodl.controls.textinput",
+      "label": "Status line",
+      "parent": "shell",
+      "parameters": {
+        "placeholder": "Processing... 45% complete"
+      },
+      "x": 100,
+      "y": 360
+    },
+    {
+      "id": "extractBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Extract",
+      "parent": "shell",
+      "parameters": {
+        "label": "Extract"
+      },
+      "x": 100,
+      "y": 440
+    },
+    {
+      "id": "matchText",
+      "type": "Text",
+      "label": "Match",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "firstGroupText",
+      "type": "Text",
+      "label": "First group",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 600
+    },
+    {
+      "id": "countText",
+      "type": "Text",
+      "label": "Count",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 680
+    },
+    {
+      "id": "errorText",
+      "type": "Text",
+      "label": "Error",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "verdictText",
+      "type": "Text",
+      "label": "Verdict",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 840
+    },
+    {
+      "id": "runsText",
+      "type": "Text",
+      "label": "Runs",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 920
+    },
+    {
+      "id": "hits",
+      "type": "For Each",
+      "label": "One row per match",
+      "parent": "shell",
+      "parameters": {
+        "template": "/Components/MatchRow"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "statusVar",
+      "type": "Variable2",
+      "label": "Status variable",
+      "parameters": {
+        "name": "status"
+      },
+      "x": 400,
+      "y": 360
+    },
+    {
+      "id": "percent",
+      "type": "net.noodl.PatternExtractor",
+      "label": "Percent",
+      "parameters": {
+        "pattern": "(\\d+)%"
+      },
+      "x": 400,
+      "y": 440
+    },
+    {
+      "id": "setFound",
+      "type": "Set Variable",
+      "label": "Remember found",
+      "parameters": {
+        "name": "verdict",
+        "value": "found"
+      },
+      "x": 700,
+      "y": 440
+    },
+    {
+      "id": "setMissed",
+      "type": "Set Variable",
+      "label": "Remember missed",
+      "parameters": {
+        "name": "verdict",
+        "value": "missed"
+      },
+      "x": 700,
+      "y": 520
+    },
+    {
+      "id": "setRuns",
+      "type": "Set Variable",
+      "label": "Count the run",
+      "parameters": {
+        "name": "runs"
+      },
+      "x": 700,
+      "y": 600
+    },
+    {
+      "id": "verdictVar",
+      "type": "Variable2",
+      "label": "Verdict",
+      "parameters": {
+        "name": "verdict"
+      },
+      "x": 400,
+      "y": 840
+    },
+    {
+      "id": "runsVar",
+      "type": "Variable2",
+      "label": "Runs",
+      "parameters": {
+        "name": "runs"
+      },
+      "x": 400,
+      "y": 920
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

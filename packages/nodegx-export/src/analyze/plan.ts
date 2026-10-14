@@ -267,6 +267,28 @@ export const HASH_TYPE = 'net.noodl.Hash';
 /** `Random Bytes` (EXP-011 §59). `crypto.getRandomValues` rendered as text — synchronous, never `Math.random()`. */
 export const RANDOM_BYTES_TYPE = 'net.noodl.RandomBytes';
 /**
+ * `Pattern Extractor` (EXP-011 §76). A regular expression over a text — `Hash`'s shape (an action port, an
+ * outcome pair, a raise on failure) with SEVEN value outputs where Hash has one, and a third signal pair
+ * (`Found` / `Not Found`) the runtime fires BEFORE `Done` off the same Extract: two RESULTS, one outcome.
+ */
+export const PATTERN_EXTRACTOR_TYPE = 'net.noodl.PatternExtractor';
+/** The crypto family's members — `node` on {@link CRYPTO_NODES}, on `crypto-out` and on `crypto-call`. */
+export type CryptoNodeKind = 'hash' | 'random-bytes' | 'pattern';
+/**
+ * `Pattern Extractor`'s value outputs (EXP-011 §76), each a row of its own when read outside the chain —
+ * and, unlike the two crypto rows, each SEEDED: `initialize` writes every internal (`match: null`, `[]`,
+ * `{}`, `''`) and the getters answer them, so nothing here is ever undefined. `tsType` is what the getter
+ * publishes; `boot` / `bootCode` is what `initialize` leaves for the getter to read.
+ */
+export const PATTERN_VALUE_OUTPUTS: Record<string, { label: string; tsType: string; boot: string | number; bootCode?: string }> = {
+  match: { label: 'Match', tsType: 'string', boot: '' },
+  matches: { label: 'Matches', tsType: 'string[]', boot: '', bootCode: '[]' },
+  groups: { label: 'Groups', tsType: 'string[]', boot: '', bootCode: '[]' },
+  firstGroup: { label: 'First Group', tsType: 'string', boot: '' },
+  namedGroups: { label: 'Named Groups', tsType: 'Record<string, string>', boot: '', bootCode: '{}' },
+  matchCount: { label: 'Match Count', tsType: 'number', boot: 0 }
+};
+/**
  * The two crypto verbs (EXP-011 §59), which are `UUID`'s shape (§37) and not a request's: read the
  * inputs the setters stored, answer a value or a failure in the one call (`_run` / `_generate`),
  * write the value row or leave it as it was, clear or write the Error, report the outcome. Two
@@ -281,16 +303,27 @@ export const RANDOM_BYTES_TYPE = 'net.noodl.RandomBytes';
 export const CRYPTO_NODES: Record<
   string,
   {
-    node: 'hash' | 'random-bytes';
-    /** The value output port. */
+    node: CryptoNodeKind;
+    /** The value output port — the ONE for the two verbs, the first of {@link PATTERN_VALUE_OUTPUTS} for the extractor. */
     output: string;
+    /**
+     * EXP-011 §76. Every value output where a node has more than one, each typed and seeded; a read of any of
+     * them is a `crypto-out` carrying the port as `field`. Absent for the two verbs (their one output is `output`).
+     */
+    values?: Record<string, { label: string; tsType: string; boot: string | number; bootCode?: string }>;
+    /**
+     * EXP-011 §76. The RESULT pulses the node fires before `Done` — `Found` when the pattern matched at least
+     * once, `Not Found` when it ran and matched nothing (ERG-001 §4: a result, not an `Unchanged`). Two more
+     * chains compiled off one Extract, printed inside the Done arm ahead of the Done chain.
+     */
+    results?: readonly ['found', 'notFound'];
     /** The action port, and what the editor shows it as. */
     trigger: string;
     triggerLabel: string;
     /** The value output's display name, for the sentence about a read nothing ever writes. */
     outputLabel: string;
     /** The lib verb, the raised code, whether the call is awaited. */
-    fn: 'tryHash' | 'tryRandomBytes';
+    fn: 'tryHash' | 'tryRandomBytes' | 'tryExtract';
     code: string;
     async: boolean;
     inputs: readonly string[];
@@ -327,10 +360,42 @@ export const CRYPTO_NODES: Record<
     numeric: 'length',
     label: 'Random Bytes',
     neverFired: 'no random bytes are ever generated'
+  },
+  // EXP-011 §76. `doExtract`: the four setters' values into `extractPattern`, every value output rewritten
+  // on every run (a failed pattern CLEARS them — where the two verbs leave their value as it was), the
+  // Error `''` on success, `pattern-extractor/extract-failed` raised before the Failure pulse, and on
+  // success `Found` or `Not Found` sent BEFORE `Done`. Synchronous.
+  [PATTERN_EXTRACTOR_TYPE]: {
+    node: 'pattern',
+    output: 'match',
+    trigger: 'extract',
+    triggerLabel: 'Extract',
+    outputLabel: 'Match',
+    fn: 'tryExtract',
+    code: 'pattern-extractor/extract-failed',
+    async: false,
+    inputs: ['text', 'pattern', 'flags', 'extractAll'],
+    label: 'Pattern Extractor',
+    neverFired: 'no pattern is ever run',
+    values: PATTERN_VALUE_OUTPUTS,
+    results: ['found', 'notFound']
   }
 };
 /** The display name of a crypto input port, for a sentence. */
-const CRYPTO_INPUT_LABELS: Record<string, string> = { value: 'Value', algorithm: 'Algorithm', encoding: 'Encoding', length: 'Length' };
+const CRYPTO_INPUT_LABELS: Record<string, string> = {
+  value: 'Value',
+  algorithm: 'Algorithm',
+  encoding: 'Encoding',
+  length: 'Length',
+  // EXP-011 §76.
+  text: 'Text',
+  pattern: 'Pattern',
+  flags: 'Flags',
+  extractAll: 'Extract All'
+};
+/** EXP-011 §76. The display name of a crypto-family value output, for the sentence about a read nothing ever writes. */
+const cryptoOutputLabel = (type: string, port: string): string =>
+  port === 'error' ? 'Error' : (CRYPTO_NODES[type].values?.[port]?.label ?? CRYPTO_NODES[type].outputLabel);
 
 /** `Screen Resolution` (EXP-011 §59). The type id IS the display name. Three numbers off one `resize` listener. */
 export const SCREEN_RESOLUTION_TYPE = 'Screen Resolution';
@@ -898,6 +963,8 @@ const OWN_CHAIN_OUTPUTS: Record<string, readonly string[]> = {
   // EXP-011 §59. The two crypto verbs, UUID's shape; `completed` is refused by their compile, on UUID's sentence.
   [HASH_TYPE]: ['done', 'failure', 'completed'],
   [RANDOM_BYTES_TYPE]: ['done', 'failure', 'completed'],
+  // EXP-011 §76. The extractor's outcome pair plus its two result pulses; `completed` refused on the same sentence.
+  [PATTERN_EXTRACTOR_TYPE]: ['done', 'failure', 'found', 'notFound', 'completed'],
   [CLOUD_FUNCTION_TYPE]: ['done', 'failure', 'completed'],
   [RECORD_TYPE]: ['done', 'failure', 'completed'],
   // EXP-011 §45. The picker owns an Unchanged arm (cancel / nothing chosen / superseded).
@@ -1682,7 +1749,13 @@ export type ValueExpr =
    * the chain-local (`<local>.digest` / `<local>.value`) inside the node's own Done arm. The row is
    * always maybe-undefined: neither node seeds it, so it reads nothing until the first Do.
    */
-  | { kind: 'crypto-out'; nodeId: string; node: 'hash' | 'random-bytes'; viaState?: string }
+  | { kind: 'crypto-out'; nodeId: string; node: CryptoNodeKind; viaState?: string; field?: string }
+  /**
+   * EXP-011 §76. A `Pattern Extractor`'s value output carries its port as `field` (`match`, `matches`,
+   * `groups`, `firstGroup`, `namedGroups`, `matchCount`); the row is one per field, seeded, never
+   * undefined; inside ANY of the node's four arms the read is the local's field — the Failure arm too,
+   * because a failed pattern clears the values and the render closure's row is the stale one.
+   */
   /**
    * A `Screen Resolution`'s width, height or aspect ratio (EXP-011 §59) — a number off the
    * `useScreenResolution` handle, never undefined (the hook seeds from the window at mount).
@@ -1735,7 +1808,12 @@ export type ValueExpr =
    * `local` is carried on the expression rather than looked up from the node, so the emitter
    * needs no second table to agree with about a name.
    */
-  | { kind: 'outcome-error'; nodeId: string; local: string; viaState?: string }
+  | { kind: 'outcome-error'; nodeId: string; local: string; viaState?: string; seeded?: true }
+  /**
+   * EXP-011 §76. `seeded` marks an Error row that `initialize` wrote `''` into and every run rewrites — the
+   * extractor's — so the row form is never undefined either. Absent for every other node, whose row reads
+   * undefined until the first failure.
+   */
   /**
    * One of the five **pure** date nodes (EXP-011 Tier 1.3) — `Date Add`, `Date Compare`,
    * `Date Difference`, `Date Parts`, `Date To String`.
@@ -2583,8 +2661,8 @@ export interface MintedArrayPlan {
 export type CryptoCallAction = {
   kind: 'crypto-call';
   nodeId: string;
-  node: 'hash' | 'random-bytes';
-  fn: 'tryHash' | 'tryRandomBytes';
+  node: CryptoNodeKind;
+  fn: 'tryHash' | 'tryRandomBytes' | 'tryExtract';
   /** The raised code — `hash/failed` / `random-bytes/failed` (the node files). */
   code: string;
   /** Whether the call is awaited (`crypto.subtle.digest` is a promise; `getRandomValues` is not). */
@@ -2602,8 +2680,16 @@ export type CryptoCallAction = {
   materialize?: string;
   /** The Error row, allocated by a read. */
   errorMaterialize?: string;
+  /**
+   * EXP-011 §76. A `Pattern Extractor`'s rows, one per value output something reads outside the chain —
+   * written from the local's field of the same name BEFORE the arms, on every run, as `doExtract` writes them.
+   */
+  materializeByPort?: Array<{ port: string; state: string }>;
   then: HandlerAction[];
   failThen: HandlerAction[];
+  /** EXP-011 §76. The `Found` / `Not Found` chains — printed inside the Done arm, ahead of `then`. Empty for the two verbs. */
+  foundThen: HandlerAction[];
+  notFoundThen: HandlerAction[];
 };
 
 /**
@@ -6870,20 +6956,39 @@ function planComponent(
    * no row and no setter. Boots `undefined`: the getter reads an unwritten `_internal` until the first Do.
    */
   const cryptoVars = new Map<string, StateVarPlan>();
-  const cryptoStateOf = (node: NodeIR): StateVarPlan => {
-    let stateVar = cryptoVars.get(node.id);
+  /**
+   * EXP-011 §76. Keyed by node for the two verbs (one row), by `node:port` for the extractor (a row per value
+   * output read). An extractor's row is SEEDED from {@link PATTERN_VALUE_OUTPUTS} — `initialize` writes every
+   * internal, so the getter never reads undefined — and rewritten on every Extract, success or failure.
+   */
+  const cryptoStateOf = (node: NodeIR, port?: string): StateVarPlan => {
+    const spec = CRYPTO_NODES[node.type];
+    const value = port === undefined ? undefined : spec.values?.[port];
+    const key = value === undefined ? node.id : `${node.id}:${port}`;
+    let stateVar = cryptoVars.get(key);
     if (stateVar === undefined) {
-      const spec = CRYPTO_NODES[node.type];
-      stateVar = allocStateVar(
-        node.authoredLabel,
-        spec.node === 'hash' ? 'digest' : 'randomBytes',
-        'string | undefined',
-        null,
-        node.id,
-        'crypto',
-        `The ${spec.outputLabel} ${node.authoredLabel ? `"${node.authoredLabel}"` : spec.label} holds. Empty until the first ${spec.triggerLabel}, replaced on every one that succeeds and left as it was by one that fails.`
-      );
-      cryptoVars.set(node.id, stateVar);
+      stateVar =
+        value === undefined
+          ? allocStateVar(
+              node.authoredLabel,
+              spec.node === 'hash' ? 'digest' : 'randomBytes',
+              'string | undefined',
+              null,
+              node.id,
+              'crypto',
+              `The ${spec.outputLabel} ${node.authoredLabel ? `"${node.authoredLabel}"` : spec.label} holds. Empty until the first ${spec.triggerLabel}, replaced on every one that succeeds and left as it was by one that fails.`
+            )
+          : allocStateVar(
+              node.authoredLabel === undefined ? undefined : `${node.authoredLabel} ${value.label}`,
+              port!,
+              value.tsType,
+              value.boot,
+              node.id,
+              'crypto',
+              `The ${value.label} ${node.authoredLabel ? `"${node.authoredLabel}"` : spec.label} holds. Rewritten on every ${spec.triggerLabel}, whether the pattern matched, missed or could not run.`
+            );
+      if (value !== undefined && value.bootCode !== undefined) stateVar.bootCode = value.bootCode;
+      cryptoVars.set(key, stateVar);
     }
     return stateVar;
   };
@@ -6893,11 +6998,12 @@ function planComponent(
     let stateVar = cryptoErrorVars.get(node.id);
     if (stateVar === undefined) {
       const spec = CRYPTO_NODES[node.type];
+      // EXP-011 §76. The extractor's Error is seeded `''` by `initialize` and written on every run (`''` on success).
       stateVar = allocStateVar(
         node.authoredLabel === undefined ? undefined : `${node.authoredLabel} Error`,
-        spec.node === 'hash' ? 'digestError' : 'randomBytesError',
-        'string | undefined',
-        null,
+        spec.node === 'hash' ? 'digestError' : spec.node === 'pattern' ? 'patternError' : 'randomBytesError',
+        spec.node === 'pattern' ? 'string' : 'string | undefined',
+        spec.node === 'pattern' ? '' : null,
         node.id,
         'crypto-error',
         `Why ${node.authoredLabel ? `"${node.authoredLabel}"` : spec.label} failed. Cleared on every ${spec.triggerLabel} that succeeds, as the node's own run clears it.`
@@ -6907,7 +7013,7 @@ function planComponent(
     return stateVar;
   };
   /** The crypto nodes currently having a chain compiled, and which arm — `idChainScope`'s shape. */
-  const cryptoChainScope = new Map<string, 'done' | 'failure'>();
+  const cryptoChainScope = new Map<string, 'done' | 'failure' | 'found' | 'notFound'>();
   /** Crypto nodes whose Do / New attached to a handler. `attachedIdNodes`'s twin, and the same rule. */
   const attachedCryptoNodes = new Set<string>();
 
@@ -8994,7 +9100,7 @@ function planComponent(
         const rowIsReadable = (): boolean => {
           if (arm === undefined && !attachedCryptoNodes.has(fromNode.id)) {
             if (!wiredPorts.has(`${fromNode.id}:${spec.trigger}`)) {
-              ctx.defer = `its ${fromProperty === 'error' ? 'Error' : spec.outputLabel} is read, but nothing fires its ${spec.triggerLabel} — ${spec.neverFired}`;
+              ctx.defer = `its ${cryptoOutputLabel(fromNode.type, fromProperty)} is read, but nothing fires its ${spec.triggerLabel} — ${spec.neverFired}`;
               return false;
             }
             const compiled = compiledOf(fromNode, spec.trigger);
@@ -9004,6 +9110,17 @@ function planComponent(
           ctx.logicNodeIds.push(fromNode.id);
           return true;
         };
+        // EXP-011 §76. The extractor: any of its value outputs, by field; inside ANY of its four arms the local's
+        // field (a failed pattern clears the values, so the render closure's row is stale in the Failure arm too);
+        // outside, a seeded row per field.
+        if (spec.values !== undefined && spec.values[fromProperty] !== undefined) {
+          if (arm !== undefined) {
+            ctx.logicNodeIds.push(fromNode.id);
+            return { kind: 'crypto-out', nodeId: fromNode.id, node: spec.node, field: fromProperty };
+          }
+          if (!rowIsReadable()) return null;
+          return { kind: 'crypto-out', nodeId: fromNode.id, node: spec.node, field: fromProperty, viaState: cryptoStateOf(fromNode, fromProperty).name };
+        }
         if (fromProperty === spec.output) {
           if (arm === 'done') {
             ctx.logicNodeIds.push(fromNode.id);
@@ -9013,7 +9130,7 @@ function planComponent(
           return { kind: 'crypto-out', nodeId: fromNode.id, node: spec.node, viaState: cryptoStateOf(fromNode).name };
         }
         if (fromProperty === 'error') {
-          if (arm === 'done') {
+          if (arm === 'done' || arm === 'found' || arm === 'notFound') {
             ctx.defer =
               'its Error is read from its own Done chain — the node clears the message before Done fires, so that read is always empty';
             return null;
@@ -9027,13 +9144,20 @@ function planComponent(
             kind: 'outcome-error',
             nodeId: fromNode.id,
             local: `${cryptoLocalOf(fromNode)}.error`,
-            viaState: cryptoErrorStateOf(fromNode).name
+            viaState: cryptoErrorStateOf(fromNode).name,
+            // EXP-011 §76. The extractor's Error is seeded and rewritten on every run.
+            ...(spec.node === 'pattern' ? { seeded: true as const } : {})
           };
         }
         ctx.defer =
           fromProperty === 'done' || fromProperty === 'failure' || fromProperty === 'completed'
             ? `its ${fromProperty.charAt(0).toUpperCase()}${fromProperty.slice(1)} output is consumed as a value — a pulse carries nothing to read`
-            : `its ${fromProperty} output is not a port this node has`;
+            : // EXP-011 §76. The two result pulses, by their display names.
+              fromProperty === 'found' && spec.results !== undefined
+              ? 'its Found output is consumed as a value — a pulse carries nothing to read'
+              : fromProperty === 'notFound' && spec.results !== undefined
+                ? 'its Not Found output is consumed as a value — a pulse carries nothing to read'
+                : `its ${fromProperty} output is not a port this node has`;
         return null;
       }
     }
@@ -9302,7 +9426,8 @@ function planComponent(
        * is minted only in the Done arm, where the verb has just answered. Must agree with component.ts.
        */
       case 'crypto-out':
-        return expr.viaState !== undefined;
+        // EXP-011 §76. An extractor's rows are seeded by `initialize`; never undefined in either form.
+        return expr.node !== 'pattern' && expr.viaState !== undefined;
       /** EXP-011 §59. The hook seeds all three from the window at mount; never undefined. */
       case 'screen-out':
         return false;
@@ -9322,7 +9447,8 @@ function planComponent(
        * (EXP-011 §24). Must agree with component.ts maybeUndefined.
        */
       case 'outcome-error':
-        return expr.viaState !== undefined;
+        // EXP-011 §76. A seeded row (the extractor's) is never undefined in either form.
+        return expr.viaState !== undefined && expr.seeded !== true;
       case 'state-get':
         return expr.maybeUndefined === true;
       // FLD-015. A hoisted Static Data constant is a frozen module-scope literal: it exists from
@@ -9654,7 +9780,8 @@ function planComponent(
         return 'string';
       /** EXP-011 §59. A rendered digest or block is a string in both forms; the viewport's three are numbers. */
       case 'crypto-out':
-        return 'string';
+        // EXP-011 §76. An extractor's field carries the getter's own type — `string[]` for the two lists.
+        return expr.node === 'pattern' ? (PATTERN_VALUE_OUTPUTS[expr.field ?? 'match']?.tsType ?? 'string') : 'string';
       case 'screen-out':
         return 'number';
       // EXP-011 §60. The key's own type, read off its statically-known writers; `unknown` for a parent read.
@@ -11739,7 +11866,7 @@ function planComponent(
    */
   const compileCryptoCall = (node: NodeIR): CompiledSink => {
     const spec = CRYPTO_NODES[node.type];
-    const readable = new Set([spec.output, 'done', 'failure', 'error']);
+    const readable = new Set([spec.output, 'done', 'failure', 'error', ...Object.keys(spec.values ?? {}), ...(spec.results ?? [])]);
     for (const wire of component.connections.filter((c) => c.fromId === node.id)) {
       if (readable.has(wire.fromProperty)) continue;
       if (wire.fromProperty === 'completed') {
@@ -11777,24 +11904,34 @@ function planComponent(
     // A pulse into a value port is a read of nothing, and the sentence has to say which — decided from the
     // sink's own port kind BEFORE the chain compiles (§52.4's rule), or the chain compiler names it first
     // as "drives no translatable action", which is true of the wire and silent about the mistake.
-    for (const wireOut of component.connections.filter((c) => c.fromId === node.id && (c.fromProperty === 'done' || c.fromProperty === 'failure'))) {
+    const PULSE_LABELS: Record<string, string> = { done: 'Done', failure: 'Failure', found: 'Found', notFound: 'Not Found' };
+    const pulses = ['done', 'failure', ...(spec.results ?? [])];
+    for (const wireOut of component.connections.filter((c) => c.fromId === node.id && pulses.includes(c.fromProperty))) {
       const target = nodeById.get(wireOut.toId);
       if (target === undefined || target.type === 'Component Outputs') continue;
       const sinkKind =
         target.declaredPorts.find((p) => p.plug === 'input' && p.name === wireOut.toProperty)?.kind ??
         catalog.portKind(target.type, wireOut.toProperty, 'input');
       if (sinkKind === 'value') {
-        return { defer: `its ${wireOut.fromProperty === 'done' ? 'Done' : 'Failure'} output is consumed as a value — a pulse carries nothing to read` };
+        return { defer: `its ${PULSE_LABELS[wireOut.fromProperty]} output is consumed as a value — a pulse carries nothing to read` };
       }
     }
     const local = cryptoLocalOf(node);
+    const emptyChain: DoneChain = { then: [], consumes: [], collapses: [], subscribes: [] };
     cryptoChainScope.set(node.id, 'done');
     const done = doneChainOf(node, 'done');
     cryptoChainScope.set(node.id, 'failure');
-    const fail = !('defer' in done) ? doneChainOf(node, 'failure') : { then: [], consumes: [], collapses: [], subscribes: [] };
+    const fail = !('defer' in done) ? doneChainOf(node, 'failure') : emptyChain;
+    // EXP-011 §76. The two result chains, each compiled in its own arm (the local is readable in both).
+    cryptoChainScope.set(node.id, 'found');
+    const found = spec.results !== undefined && !('defer' in done) && !('defer' in fail) ? doneChainOf(node, 'found') : emptyChain;
+    cryptoChainScope.set(node.id, 'notFound');
+    const notFound = spec.results !== undefined && !('defer' in done) && !('defer' in fail) && !('defer' in found) ? doneChainOf(node, 'notFound') : emptyChain;
     cryptoChainScope.delete(node.id);
     if ('defer' in done) return { defer: done.defer };
     if ('defer' in fail) return { defer: fail.defer };
+    if ('defer' in found) return { defer: found.defer };
+    if ('defer' in notFound) return { defer: notFound.defer };
     return {
       action: {
         kind: 'crypto-call',
@@ -11806,11 +11943,13 @@ function planComponent(
         inputs,
         local,
         then: done.then,
-        failThen: fail.then
+        failThen: fail.then,
+        foundThen: found.then,
+        notFoundThen: notFound.then
       },
-      consumes: [...consumes, ...done.consumes, ...fail.consumes],
-      collapses: [...collapses, ...done.collapses, ...fail.collapses],
-      subscribes: [...subscribes, ...done.subscribes, ...fail.subscribes]
+      consumes: [...consumes, ...done.consumes, ...fail.consumes, ...found.consumes, ...notFound.consumes],
+      collapses: [...collapses, ...done.collapses, ...fail.collapses, ...found.collapses, ...notFound.collapses],
+      subscribes: [...subscribes, ...done.subscribes, ...fail.subscribes, ...found.subscribes, ...notFound.subscribes]
     };
   };
 
@@ -14786,7 +14925,9 @@ function planComponent(
           return (
             action.inputs.every((i) => i.expr === undefined || exprValidIn(i.expr, context, invokedScope)) &&
             actionsValidIn(action.then, context, invokedScope) &&
-            actionsValidIn(action.failThen, context, invokedScope)
+            actionsValidIn(action.failThen, context, invokedScope) &&
+            actionsValidIn(action.foundThen, context, invokedScope) &&
+            actionsValidIn(action.notFoundThen, context, invokedScope)
           );
         // EXP-011 §61. The parameters are read where the handler is; every callback runs in that same closure.
         case 'stack-push':
@@ -15916,7 +16057,11 @@ function planComponent(
         if (!Array.isArray(then)) return then;
         const failThen = snapActionList(action.failThen, snap);
         if (!Array.isArray(failThen)) return failThen;
-        return { ...action, inputs, then, failThen };
+        const foundThen = snapActionList(action.foundThen, snap);
+        if (!Array.isArray(foundThen)) return foundThen;
+        const notFoundThen = snapActionList(action.notFoundThen, snap);
+        if (!Array.isArray(notFoundThen)) return notFoundThen;
+        return { ...action, inputs, then, failThen, foundThen, notFoundThen };
       }
       // EXP-011 §39. The message and data are read where the handler is, so a `Set Variable`
       // earlier in the chain must reach them; the chain carries the map onward.
@@ -16669,6 +16814,8 @@ function planComponent(
           attachedCryptoNodes.add(action.nodeId);
           scanActions(action.then);
           scanActions(action.failThen);
+          scanActions(action.foundThen);
+          scanActions(action.notFoundThen);
         } else if (action.kind === 'stack-push') {
           // EXP-011 §61. Every callback is a chain like any other; the pusher gets a registry for the sweep's reason.
           attachedStackPushes.add(action.nodeId);
@@ -17607,7 +17754,10 @@ function planComponent(
     // EXP-011 §59. A crypto verb's value or Error (the id nodes' footing), and the viewport's three (a handle read).
     const isCryptoRead =
       CRYPTO_NODES[fromNode.type] !== undefined &&
-      (connection.fromProperty === CRYPTO_NODES[fromNode.type].output || connection.fromProperty === 'error');
+      (connection.fromProperty === CRYPTO_NODES[fromNode.type].output ||
+        connection.fromProperty === 'error' ||
+        // EXP-011 §76. Any of the extractor's value outputs.
+        CRYPTO_NODES[fromNode.type].values?.[connection.fromProperty] !== undefined);
     const isScreenRead = fromNode.type === SCREEN_RESOLUTION_TYPE;
     // EXP-011 §63. A Drag's four value outputs, off its handle — the same footing.
     const isDragRead = fromNode.type === DRAG_TYPE && DRAG_VALUE_OUTPUTS[connection.fromProperty] !== undefined;
@@ -18416,6 +18566,8 @@ function planComponent(
             for (const input of action.inputs) if (input.expr !== undefined) walkExpr(input.expr);
             walkActions(action.then);
             walkActions(action.failThen);
+            walkActions(action.foundThen);
+            walkActions(action.notFoundThen);
             break;
           // EXP-011 §61. The signed-in user's id is an ordinary parameter to push, or result to hand back.
           case 'stack-push':
@@ -19019,8 +19171,16 @@ function planComponent(
             if (row !== undefined && plan.stateVars.includes(row)) action.materialize = row.name;
             const errorRow = cryptoErrorVars.get(action.nodeId);
             if (errorRow !== undefined && plan.stateVars.includes(errorRow)) action.errorMaterialize = errorRow.name;
+            // EXP-011 §76. One row per value output a read allocated, in the table's order.
+            const byPort = Object.keys(CRYPTO_NODES[nodeById.get(action.nodeId)?.type ?? '']?.values ?? {})
+              .map((port) => ({ port, row: cryptoVars.get(`${action.nodeId}:${port}`) }))
+              .filter((e): e is { port: string; row: StateVarPlan } => e.row !== undefined && plan.stateVars.includes(e.row))
+              .map((e) => ({ port: e.port, state: e.row.name }));
+            if (byPort.length > 0) action.materializeByPort = byPort;
             fillMaterialize(action.then);
             fillMaterialize(action.failThen);
+            fillMaterialize(action.foundThen);
+            fillMaterialize(action.notFoundThen);
             break;
           }
           /**

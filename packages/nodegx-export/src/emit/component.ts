@@ -23,6 +23,7 @@ import {
   HandlerAction,
   IdNewAction,
   CryptoCallAction,
+  CryptoNodeKind,
   MintedTarget,
   JsFunctionPlan,
   RefusedScriptPlan,
@@ -66,6 +67,7 @@ import { REPEAT_LIB_PATH } from './repeatLib';
 import { SCRIPT_CODE_PREFIX } from '../analyze/script';
 import { ID_HELPERS_BY_FN, ID_LIB_PATH, IdHelper } from './idLib';
 import { CRYPTO_LIB_PATH, CryptoHelper } from './cryptoLib';
+import { PATTERN_LIB_PATH, PatternHelper, isPatternHelper } from './patternLib';
 import { SCREEN_LIB_PATH } from './screenLib';
 import { MEDIA_ATTRS, MEDIA_LIB_PATH, MediaHelper, absoluteUrl } from './mediaLib';
 import { COMPONENT_OBJECT_LIB_PATH } from './componentObjectLib';
@@ -521,7 +523,7 @@ export function emitComponent(
   const usedIdHelpers = new Set<IdHelper>();
   // EXP-011 §59. The crypto verbs called, and the Screen Resolution nodes some emitted expression reads —
   // a registered hook nothing reads prints no line (§56 E1's rule, decided here at emit time).
-  const usedCryptoHelpers = new Set<CryptoHelper>();
+  const usedCryptoHelpers = new Set<CryptoHelper | PatternHelper>();
   const usedScreenNodeIds = new Set<string>();
   // EXP-011 §60. Whether an emitted expression or action reaches the record hook / the parent hook — the parent hook
   // prints only where something reads or writes through it; the record hook prints whenever the plan registered it
@@ -780,9 +782,13 @@ export function emitComponent(
     if (action.kind === 'crypto-call') {
       if (action.materialize !== undefined) referencedStateNames.add(action.materialize);
       if (action.errorMaterialize !== undefined) referencedStateNames.add(action.errorMaterialize);
+      // EXP-011 §76. The extractor's rows by port, and its two result chains.
+      for (const m of action.materializeByPort ?? []) referencedStateNames.add(m.state);
       for (const input of action.inputs) if (input.expr !== undefined) collectExprUse(input.expr);
       action.then.forEach(collectActionUse);
       action.failThen.forEach(collectActionUse);
+      action.foundThen.forEach(collectActionUse);
+      action.notFoundThen.forEach(collectActionUse);
     }
     // EXP-011 §61. The parameters the push sets, the row its callback writes, and every callback's chain.
     if (action.kind === 'stack-push') {
@@ -917,8 +923,11 @@ export function emitComponent(
             ? [a, ...deepActions(a.then), ...deepActions(a.failThen), ...deepActions(a.completedThen)]
           : // EXP-011 §37. Two arms, so it cannot join the single-chain list below — a popup
             // opened from a UUID's Failure chain is a popup nothing here knows is attached.
-            a.kind === 'id-new' || a.kind === 'crypto-call'
+            a.kind === 'id-new'
             ? [a, ...deepActions(a.then), ...deepActions(a.failThen)]
+          : // EXP-011 §76. Four arms: the extractor's two result chains print inside the Done arm.
+            a.kind === 'crypto-call'
+            ? [a, ...deepActions(a.then), ...deepActions(a.failThen), ...deepActions(a.foundThen), ...deepActions(a.notFoundThen)]
             : // EXP-011 §60. Three chains — a popup opened from a record write's Done, or a raise in a parent write's
               // Failure, is nowhere without this line.
               a.kind === 'component-object-set'
@@ -1595,8 +1604,9 @@ export function emitComponent(
       case 'id-out':
         return expr.fn === 'randomUuid' && expr.viaState !== undefined;
       // EXP-011 §59. The row until the first Do; the local never. Must agree with plan.ts maybeUndefinedExpr.
+      // EXP-011 §76. An extractor's rows are seeded — never undefined in either form.
       case 'crypto-out':
-        return expr.viaState !== undefined;
+        return expr.node !== 'pattern' && expr.viaState !== undefined;
       case 'screen-out':
         return false;
       // EXP-011 §60. The record boots empty; a parent read is undefined at the root. Must agree with plan.ts maybeUndefinedExpr.
@@ -1614,7 +1624,8 @@ export function emitComponent(
       // The row is undefined until the first failure; the chain-local is assigned on the line
       // above the read and never is. Must agree with plan.ts maybeUndefinedExpr (EXP-011 §24).
       case 'outcome-error':
-        return expr.viaState !== undefined;
+        // EXP-011 §76. A seeded row (the extractor's) is never undefined in either form. Must agree with plan.ts.
+        return expr.viaState !== undefined && expr.seeded !== true;
       case 'state-get':
         return expr.maybeUndefined === true;
       // FLD-015. A hoisted Static Data constant is a frozen module-scope literal — present from
@@ -1802,9 +1813,11 @@ export function emitComponent(
     return action.fn === 'randomUuid' ? `${action.local}.uuid` : action.local;
   };
   /** EXP-011 §59. The same, one family over: the local is the whole result, and the value is `.digest` / `.value`. */
-  const cryptoLocalReadOf = (nodeId: string, node: 'hash' | 'random-bytes'): string => {
+  const cryptoLocalReadOf = (nodeId: string, node: CryptoNodeKind, field?: string): string => {
     const action = deepActions(allActions).find((a) => a.kind === 'crypto-call' && a.nodeId === nodeId);
     const local = action !== undefined && action.kind === 'crypto-call' ? action.local : 'cryptoResult';
+    // EXP-011 §76. The extractor's local carries every value port under the port's own name.
+    if (node === 'pattern') return `${local}.${field ?? 'match'}`;
     return `${local}.${node === 'hash' ? 'digest' : 'value'}`;
   };
   const exprCode = (expr: ValueExpr, mode: 'handler' | 'render'): string => {
@@ -1927,7 +1940,7 @@ export function emitComponent(
         return expr.viaState ?? idLocalReadOf(expr.nodeId);
       // EXP-011 §59. The row anywhere, the Done arm's own binding inside it; the viewport's field off its handle.
       case 'crypto-out':
-        return expr.viaState ?? cryptoLocalReadOf(expr.nodeId, expr.node);
+        return expr.viaState ?? cryptoLocalReadOf(expr.nodeId, expr.node, expr.field);
       case 'screen-out':
       // EXP-011 §63. A live getter off the handle, in both modes.
       case 'drag-out':
@@ -2527,7 +2540,13 @@ export function emitComponent(
           return a.then.some(inAction) || a.failThen.some(inAction);
         // EXP-011 §59. The inputs, then both arms.
         case 'crypto-call':
-          return a.inputs.some((i) => i.expr !== undefined && reads(i.expr)) || a.then.some(inAction) || a.failThen.some(inAction);
+          return (
+            a.inputs.some((i) => i.expr !== undefined && reads(i.expr)) ||
+            a.then.some(inAction) ||
+            a.failThen.some(inAction) ||
+            a.foundThen.some(inAction) ||
+            a.notFoundThen.some(inAction)
+          );
         // EXP-011 §61. The parameters, then every callback; the results, then both arms; the one chain.
         case 'stack-push':
           return (
@@ -3825,6 +3844,36 @@ export function emitComponent(
         // Trailing `undefined`s are the lib's own defaults — dropped so `tryRandomBytes(16, 'hex')` reads as written.
         while (args.length > 0 && args[args.length - 1] === 'undefined') args.pop();
         const call = `${action.async ? 'await ' : ''}${action.fn}(${args.join(', ')})`;
+        /**
+         * EXP-011 §76. The extractor is `doExtract`'s order, not `_run`'s: every value row and the Error row
+         * are written from the result BEFORE the arms, on every run (a failed pattern clears the values —
+         * `Hash` leaves its Digest); then `if (ok)` — the `Found` / `Not Found` chain first (the runtime sends
+         * that pulse before `reportOutcome('done')`), then the Done chain — `else` the raise and the Failure
+         * chain. The result-pulse `if` prints only where a chain hangs off one of the two.
+         */
+        if (action.node === 'pattern') {
+          const head = `const ${action.local} = ${call};`;
+          const writes: string[] = [];
+          for (const m of action.materializeByPort ?? []) writes.push(`${at}${stateSetterOf(m.state)}(${action.local}.${m.port});`);
+          if (action.errorMaterialize !== undefined) writes.push(`${at}${stateSetterOf(action.errorMaterialize)}(${action.local}.error);`);
+          const found = blockBody(expandActions(action.foundThen), indent + 4);
+          const notFound = blockBody(expandActions(action.notFoundThen), indent + 4);
+          const okLines: string[] = [];
+          if (found.length > 0) {
+            okLines.push(`${inner}if (${action.local}.found) {`, ...found);
+            if (notFound.length > 0) okLines.push(`${inner}} else {`, ...notFound);
+            okLines.push(`${inner}}`);
+          } else if (notFound.length > 0) {
+            okLines.push(`${inner}if (!${action.local}.found) {`, ...notFound, `${inner}}`);
+          }
+          okLines.push(...blockBody(expandActions(action.then), indent + 2));
+          const failLines = [
+            `${inner}${raiseLine(action.nodeId, errorCodeOf(action), `${action.local}.error`)}`,
+            ...blockBody(expandActions(action.failThen), indent + 2)
+          ];
+          if (okLines.length === 0) return [head, ...writes, `${at}if (!${action.local}.ok) {`, ...failLines, `${at}}`].join('\n');
+          return [head, ...writes, `${at}if (${action.local}.ok) {`, ...okLines, `${at}} else {`, ...failLines, `${at}}`].join('\n');
+        }
         const valueField = action.node === 'hash' ? 'digest' : 'value';
         const doneStatements: string[] = [];
         if (action.materialize !== undefined) doneStatements.push(`${stateSetterOf(action.materialize)}(${action.local}.${valueField})`);
@@ -4314,9 +4363,16 @@ export function emitComponent(
     // EXP-011 §59. `src/lib/crypto.ts`, earned from the calls that print.
     if (a.kind === 'crypto-call') usedCryptoHelpers.add(a.fn);
   }
-  if (usedCryptoHelpers.size > 0) {
+  // EXP-011 §76. One kind, two modules: the extractor's verb imports from `src/lib/pattern.ts`, the two verbs from `crypto.ts`.
+  const usedPlainCryptoHelpers = [...usedCryptoHelpers].filter((fn) => !isPatternHelper(fn)).sort();
+  const usedPatternHelpers = [...usedCryptoHelpers].filter(isPatternHelper).sort();
+  if (usedPlainCryptoHelpers.length > 0) {
     const specifier = `${relRoot}/${CRYPTO_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
-    internalImports.set(specifier, `import { ${[...usedCryptoHelpers].sort().join(', ')} } from '${specifier}';`);
+    internalImports.set(specifier, `import { ${usedPlainCryptoHelpers.join(', ')} } from '${specifier}';`);
+  }
+  if (usedPatternHelpers.length > 0) {
+    const specifier = `${relRoot}/${PATTERN_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
+    internalImports.set(specifier, `import { ${usedPatternHelpers.join(', ')} } from '${specifier}';`);
   }
   // EXP-011 §61. `src/lib/pageStack.ts`, earned from the calls that print, the hook line, and the reserved prop's type.
   const usedPageStackNames = new Set<string>();
@@ -6951,7 +7007,9 @@ export function emitComponent(
         return [
           ...a.inputs.flatMap((i) => (i.expr !== undefined ? [i.expr] : [])),
           ...a.then.flatMap(actionExprsOf),
-          ...a.failThen.flatMap(actionExprsOf)
+          ...a.failThen.flatMap(actionExprsOf),
+          ...a.foundThen.flatMap(actionExprsOf),
+          ...a.notFoundThen.flatMap(actionExprsOf)
         ];
       // EXP-011 §61. The parameters, then every callback; the results, then both arms; the one chain.
       case 'stack-push':
