@@ -77,7 +77,7 @@ export function registerRenderTools(
         viewports: z
           .string()
           .optional()
-          .describe('Comma-separated: "desktop,768x1024,phone" (the default) or explicit sizes like "1440x900,390x844"'),
+          .describe('Comma-separated, default "desktop,768x1024,phone"; or sizes like "1440x900"'),
         screenshot: z
           .enum(['full', 'viewport', 'none'])
           .optional()
