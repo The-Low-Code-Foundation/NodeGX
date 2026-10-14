@@ -225,6 +225,10 @@
  * lib gains `unitOrDays`, and Date Add / Date Difference apply it. No corpus project wires a Unit or a Granularity
  * (searched first), so the only lines to move were the lib's: `deadline-desk` and `due-desk` `src/lib/date.ts`,
  * **2 moved, 0 added, 0 removed**.
+ *
+ * ✅ **Regenerated for P109-S25-EXPORTFEEDZONE (session 104, 2026-10-14), predicted and counted.** The emitted parse
+ * lib reads feed dates by D16's rule and sends Feed Updated as `''` (D17). One corpus project emits `src/lib/parse.ts`:
+ * `sheet-desk`, **1 moved, 0 added, 0 removed**.
  */
 import * as fs from 'fs';
 import * as path from 'path';

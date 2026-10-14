@@ -213,6 +213,45 @@ describe('EXP-011 §75 §A — the emitted module against the interpreter', () =
     expect(lib.parseXml(undefined, '@', '', true, undefined, 'result')).toBeUndefined();
   });
 
+  /**
+   * P109-S25-EXPORTFEEDZONE (P107-D16, ruled "UTC, and no date if unknown"). Each date goes through the emitted parseFeed
+   * as one item's pubDate, and the item's Published is held against the runtime's own exported `toISODate`.
+   *
+   * ⚠️ The zoneless rows distinguish the old reader from the new one only on a machine whose zone is not UTC, which is
+   * why the unknown-zone rows (CEST, BST) are here: they distinguish the two on every machine.
+   */
+  const FEED_DATES = [
+    'Mon, 15 Sep 2026 08:00:00 +0000',
+    'Mon, 15 Sep 2026 08:00:00 GMT',
+    'Mon, 15 Sep 2026 08:00:00',
+    'Mon, 15 Sep 2026 08:00:00 CEST',
+    'Mon, 15 Sep 2026 08:00:00 BST',
+    'Mon, 15 Sep 2026 08:00:00 EST',
+    'Mon, 15 Sep 2026 08:00:00 PDT',
+    'Mon, 15 Sep 2026 08:00:00 +0000 (UTC)',
+    '2026-09-15T08:00:00',
+    '2026-09-15T08:00:00Z',
+    '2026-09-15T08:00:00+02:00',
+    '2026-09-15',
+    '  2026-09-15T08:00:00Z  ',
+    'not a date',
+    ''
+  ];
+  const publishedOf = (date: string): unknown => {
+    const rss = `<?xml version="1.0"?><rss version="2.0"><channel><title>t</title><item><title>a</title><guid>g</guid><pubDate>${date}</pubDate></item></channel></rss>`;
+    const items = lib.parseFeed(rss, undefined, 'items') as Array<{ published: unknown }> | undefined;
+    return items?.[0]?.published;
+  };
+  it.each(FEED_DATES)('an item published %j reads as the runtime reads it', (date) => {
+    expect(publishedOf(date)).toBe(runtimeFeed.toISODate(date));
+  });
+
+  /** The control: a known zone still parses, so the null rows above are about the zone, not about the harness. */
+  it('a known zone parses and an unknown one gives no date', () => {
+    expect(publishedOf('Mon, 15 Sep 2026 08:00:00 GMT')).toBe('2026-09-15T08:00:00.000Z');
+    expect(publishedOf('Mon, 15 Sep 2026 08:00:00 CEST')).toBeNull();
+  });
+
   it('parseFeed agrees with feed.ts over every fixture the runtime grades itself on — items, meta, kind, source, the id ladder', () => {
     const disagreements: string[] = [];
     let compared = 0;
@@ -228,11 +267,15 @@ describe('EXP-011 §75 §A — the emitted module against the interpreter', () =
           ? { items: undefined, count: 0, feedTitle: '', feedLink: '', feedDescription: '', feedUpdated: undefined, kind: '', source: '', error: r.error.message, errorCode: r.error.code }
           : {
               items: r.items,
+              // ⚠️ The node's Count is `collection.size()` since P107-D18 (two items with one guid are one record), and
+              // the export's is still the parsed length: P18-S104-FEEDCOUNT, filed. No fixture here repeats a guid.
               count: r.items!.length,
               feedTitle: r.feed!.title || '',
               feedLink: r.feed!.link || '',
               feedDescription: r.feed!.description || '',
-              feedUpdated: r.feed!.updated || undefined,
+              // P107-D17: the node's own line, `(feed && feed.updated) || ''`. This copy read `|| undefined` until
+              // P109-S25-EXPORTFEEDZONE, which is why the export's drift from the node went ungraded.
+              feedUpdated: r.feed!.updated || '',
               kind: r.feed!.kind,
               source: r.feed!.source,
               error: undefined,

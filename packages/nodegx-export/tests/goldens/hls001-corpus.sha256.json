@@ -876,7 +876,7 @@
     "src/App.tsx": "4c325498bb21e3a755517c43c2cb6ff7cdac33ff379edce259bd89453b1d14f2",
     "src/components/PersonRow.module.css": "be599b543d7cb395a30e273d924733a605317f2859e7fe8b0be47f223f42443c",
     "src/components/PersonRow.tsx": "01c72d1e71bdae73d57e2a67de427f63d0f4401beed75d76457a702fafbd3f90",
-    "src/lib/parse.ts": "0e2d806780c6694e17a066b13e7017ea5172ab12aa045d96dcb091d1d8b1f935",
+    "src/lib/parse.ts": "c0a2a19104c11174179be9dd4357e91abbcd95073c5617ed53b6e8bffa1e1d14",
     "src/main.tsx": "505969740deeb6eafacd9c9f802c287fe2dcbd3a1db237b5ebfcae8696dc4cd8",
     "src/pages/Home.module.css": "067fc65ddbe71b99e34db84b2f254036a6a4ba63547953835ce68a710d7d3b53",
     "src/pages/Home.tsx": "407f3832fd4e369b458461e972b599194bbd00484f0c87f33b8d2c724936d722",
