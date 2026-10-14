@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { platform } from '@noodl/platform';
 
 import getContentEndpoint from '@noodl-utils/getContentEndpoint';
 
@@ -20,7 +19,6 @@ export function NewsModal({ content, onFinished }: NewsModalProps) {
   const [isVisible, setIsVisible] = useState(undefined);
   const [activeSlide, setActiveSlide] = useState(0);
   const host = getContentEndpoint();
-  const version = platform.getVersion();
 
   const parsedContent = useMemo(() => {
     const parseContainer = document.createElement('div');
@@ -75,7 +73,9 @@ export function NewsModal({ content, onFinished }: NewsModalProps) {
     >
       <div className={css['Root']}>
         <div className={css['Header']}>
-          <Text>New updates in {version}</Text>
+          {/* The post names its own version. The running one was wrong for anyone a release behind: 0.3.0 showed the
+              0.4.0 post under "New updates in 0.3.0" (P112-OWN011-NEWSWHITE). */}
+          <Text>{"What's new in NodeGX"}</Text>
         </div>
         <div className={css['Inner']}>
           {parsedContent.map((slide, i) => (

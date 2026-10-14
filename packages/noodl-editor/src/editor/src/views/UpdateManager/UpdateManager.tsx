@@ -22,6 +22,12 @@ const PILL_STYLE: React.CSSProperties = {
   maxWidth: '320px'
 };
 
+// The dialog's own layer. BaseDialog's root is `position: fixed` with no z-index, and in the editor this component is
+// mounted BEFORE the editor's panels (BaseWindow), so every positioned panel painted over it: a 0.3.0 user inside a
+// project saw only a dimmed title bar, and "New version available" toggled a dialog nobody could see
+// (P112-OWN013-UPDATEBEHIND). The pill's layer, so the two stay together.
+const DIALOG_LAYER: React.CSSProperties = { position: 'relative', zIndex: 1000 };
+
 const PILL_TRACK: React.CSSProperties = {
   height: '4px',
   width: '100%',
@@ -91,17 +97,19 @@ export function UpdateManager({
   return (
     <>
       {isOpen && (
-        <UpdateDialog
-          state={state}
-          onDownload={(version) => download(version)}
-          onInstall={install}
-          onSetIncludePrereleases={setIncludePrereleases}
-          onDismiss={() => {
-            dismiss();
-            setIsOpen(false);
-          }}
-          onClose={() => setIsOpen(false)}
-        />
+        <div style={DIALOG_LAYER}>
+          <UpdateDialog
+            state={state}
+            onDownload={(version) => download(version)}
+            onInstall={install}
+            onSetIncludePrereleases={setIncludePrereleases}
+            onDismiss={() => {
+              dismiss();
+              setIsOpen(false);
+            }}
+            onClose={() => setIsOpen(false)}
+          />
+        </div>
       )}
 
       {showPill && (
