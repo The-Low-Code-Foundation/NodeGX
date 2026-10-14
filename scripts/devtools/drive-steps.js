@@ -75,6 +75,18 @@
  *                                        even for the route it is on (measured s14 on the garden, 4 of 4) — the
  *                                        way to prove what survives a reload; on a hash-routed one it is a
  *                                        fragment change and nothing reloads
+ *   { "reload": true }                   reload the page the run is on, as a person does — the way to prove what a
+ *                                        reload of THIS screen shows (P112-OWN019-RELOADHERE: o2 proved "the best
+ *                                        survives a reload" by navigating to its start page, and a reload of its
+ *                                        results page showed "You scored  out of 5")
+ *   { "watch": { "look": T }, "for_ms": 1500?, "expect"?: { "never": {…} } }
+ *                                        read T's look about every 25 ms for for_ms (≤ 10000) and answer every
+ *                                        DISTINCT state in order, each with the ms it began and ended — what a
+ *                                        person sees DURING a change, where a read's look waits for it to settle
+ *                                        (P112-OWN019-WATCHMOMENT: the quiz's new answers wore the last question's
+ *                                        green and red for a moment, and every settled look read them idle).
+ *                                        T absent reads as null. `expect: { never: { backgroundName: "green" } }`
+ *                                        fails the step when any state had those fields
  *   { "viewport": "phone" | "390x844" }  resize
  *   { "screenshot": "name" }             a PNG of the viewport into --out-dir
  *   { "seed_storage": { "key": "value" } } write localStorage, and navigate afterwards to load it
@@ -123,7 +135,9 @@ const VERBS = [
   'seed_storage',
   'clear_storage',
   'stub_route',
-  'reduced_motion'
+  'reduced_motion',
+  'reload',
+  'watch'
 ];
 
 /** The keys `key` understands, as CDP wants them. */
@@ -573,6 +587,39 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), network
           await client.send('Page.removeScriptToEvaluateOnNewDocument', { identifier }).catch(() => {});
         }
         row.url = await evaluate('location.pathname + location.hash');
+      } else if (verb === 'reload') {
+        await client.send('Page.reload', {});
+        await page.settle('reload', 15000, 2);
+        for (const identifier of pendingSeeds.splice(0)) {
+          await client.send('Page.removeScriptToEvaluateOnNewDocument', { identifier }).catch(() => {});
+        }
+        row.url = await evaluate('location.pathname + location.hash');
+      } else if (verb === 'watch') {
+        const w = step.watch && typeof step.watch === 'object' ? step.watch : {};
+        if (w.look === undefined) throw new UsageError(`Step ${i + 1}: watch takes { look: T }.`);
+        const forMs = Math.min(10000, Math.max(100, Number(step.for_ms ?? 1500)));
+        const expr = lookExpression(w.look);
+        // The fields a person tells apart; a look's box geometry moves with layout and is not a different state.
+        const keyOf = (v) => (v && typeof v === 'object' ? JSON.stringify({ text: v.text, visible: v.visible, backgroundName: v.backgroundName, colorName: v.colorName, opacity: v.opacity === undefined ? undefined : Math.round(v.opacity * 10) / 10 }) : 'null');
+        const states = [];
+        const t0 = Date.now();
+        while (Date.now() - t0 <= forMs) {
+          const v = await evaluate(expr);
+          const at = Date.now() - t0;
+          const last = states[states.length - 1];
+          if (last && last.key === keyOf(v)) last.until = at;
+          else states.push({ key: keyOf(v), from: at, until: at, look: v && typeof v === 'object' ? { text: v.text, visible: v.visible, backgroundName: v.backgroundName, colorName: v.colorName, opacity: v.opacity } : null });
+          await wait(25);
+        }
+        row.value = states.map(({ from, until, look }) => ({ from, until, look }));
+        const never = step.expect && typeof step.expect === 'object' ? step.expect.never : undefined;
+        if (never && typeof never === 'object') {
+          const hit = states.find((st) => st.look && Object.keys(never).every((k) => matches(st.look[k], never[k])));
+          if (hit) {
+            row.ok = false;
+            row.error = `${JSON.stringify(never)} was seen from ${hit.from} to ${hit.until} ms: ${JSON.stringify(hit.look)}`;
+          }
+        }
       } else if (verb === 'viewport') {
         const [vp] = parseViewports(String(step.viewport));
         await page.setViewport(vp);

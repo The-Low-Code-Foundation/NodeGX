@@ -1902,6 +1902,7 @@ async function withRenderedPage(options, fn) {
       evaluate: main.evaluate,
       goto: main.goto,
       navigate: main.navigate,
+      settle: main.settle,
       setViewport: main.setViewport,
       onEvent: main.onEvent,
       openTab,

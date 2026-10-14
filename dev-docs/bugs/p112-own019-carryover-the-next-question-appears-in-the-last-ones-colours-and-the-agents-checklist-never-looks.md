@@ -23,3 +23,10 @@ advance, never the colours at the moment of the advance. AC4 requires carryover 
 **Lever (s2, measuring):** the Vibe AGENTS.md checklist step now asks for "what the next screen looks like the
 moment it appears: nothing left over from the one before … Reset that state before the words change, not after."
 Open until rounds on it come back clean; then the same line for the core kit.
+
+**s4 (o2, tgz27, 2026-10-14): the checklist line held, the proof could not.** o2 wrote the line and drove it, and read
+the answers idle "right after the advance" — with `read: { look }`, which waits for the page to settle. The grader saw
+the flash on every advance (Sydney green 1022–1077 ms after the tap). The words were never the gap; the tool was:
+P112-OWN019-WATCHMOMENT (fixed) gives drive_page a `watch` step. Still open until rounds on a kit with `watch` come back
+clean.
+

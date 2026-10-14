@@ -36,7 +36,8 @@ the drive is faster and it's never wrong about what happened.
 
 Many bugs aren't in either screen; they're in the instant between them — a value cleared one step too late, a gate
 that fires while things are half-reset, the last screen's colour on the new words. Drive the transition and read
-right after it, not only once things have settled.
+right after it, not only once things have settled: `drive_page`'s `watch` step lists every state a thing showed
+during a change — a look on its own waits for the dust to settle and will tell you all is well.
 
 ## 5. Two tries, then hand over
 

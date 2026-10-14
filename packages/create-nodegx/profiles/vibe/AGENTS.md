@@ -77,6 +77,10 @@ lines to the checklist and go on.
 `drive_page` starts from the app's start page (leave out `page`): tap, wait, then read the text, a variable, or what a
 person sees of a thing by its label — `{ "read": { "look": "Lisbon" }, "expect": { "backgroundName": "green" } }`. A
 read answers what a screenshot would; each screenshot you open makes every later step of the session cost more.
+A look waits for things to settle, so it can't see the moment a screen appears. For that line, `watch` right after
+the tap that changes the screen: `{ "watch": { "look": "Sydney" }, "for_ms": 2000, "expect": { "never": {
+"backgroundName": "green" } } }` lists every state Sydney showed and fails on a flash of green. For a reload line,
+reload the screen you are on — `{ "reload": true }` — not a navigation to another one.
 
 ## Tools
 
