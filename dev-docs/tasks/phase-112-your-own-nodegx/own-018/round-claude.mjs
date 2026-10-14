@@ -37,6 +37,16 @@ const serverEnv = { HOME, TMPDIR: path.join(HOME, 'tmp'), npm_config_cache: path
 const created = spawnSync('npx', ['-y', `--package=${tgz('create-nodegx-0.2.0.tgz')}`, 'create-nodegx', APPS], { cwd: path.dirname(APPS), env: { ...labEnv, ...serverEnv }, encoding: 'utf8' });
 fs.writeFileSync(path.join(root, 'create.log'), created.stdout + created.stderr);
 if (created.status !== 0) throw new Error(`create-nodegx exited ${created.status}; see create.log`);
+
+// OWN-019 s4 (Richard's bonus: a second run on the quiz app — "your own editor"): `--seed <app-dir>` puts an app that
+// already exists into the folder after create-nodegx, as a person's earlier session would have left it (its docs/
+// included). Copied without its previews, grades or caches; the round's command.txt names the seed.
+const seedArg = opt('--seed', null);
+if (seedArg) {
+  const seed = path.resolve(seedArg);
+  if (!fs.existsSync(path.join(seed, 'nodegx.project.json'))) throw new Error(`--seed ${seed} holds no nodegx.project.json`);
+  fs.cpSync(seed, path.join(APPS, path.basename(seed)), { recursive: true, filter: (s) => !/[\\/](\.previews|grade|node_modules[\\/]\.cache)([\\/]|$)/.test(s) });
+}
 if (!/Claude Code: cd apps && claude\) and accept the "nodegx" server/.test(created.stdout)) throw new Error('create-nodegx no longer prints the Claude Code line this round follows; see create.log');
 
 // 2. The server the person accepts, with the registry name → the tarball and an empty HOME.

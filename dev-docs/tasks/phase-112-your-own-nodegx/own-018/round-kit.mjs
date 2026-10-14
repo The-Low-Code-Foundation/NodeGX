@@ -117,6 +117,16 @@ const created = spawnSync('npx', ['-y', `--package=${tgz('create-nodegx-0.2.0.tg
 fs.writeFileSync(path.join(root, 'create.log'), created.stdout + created.stderr);
 if (created.status !== 0) throw new Error(`create-nodegx exited ${created.status}; see create.log`);
 
+// OWN-019 s4 (Richard's bonus: a second run on the quiz app — "your own editor"): `--seed <app-dir>` puts an app that
+// already exists into the folder after create-nodegx, as a person's earlier session would have left it (its docs/
+// included). Copied without its previews, grades or caches; the round's command.txt names the seed.
+const seedArg = opt('--seed', null);
+if (seedArg) {
+  const seed = path.resolve(seedArg);
+  if (!fs.existsSync(path.join(seed, 'nodegx.project.json'))) throw new Error(`--seed ${seed} holds no nodegx.project.json`);
+  fs.cpSync(seed, path.join(APPS, path.basename(seed)), { recursive: true, filter: (s) => !/[\\/](\.previews|grade|node_modules[\\/]\.cache)([\\/]|$)/.test(s) });
+}
+
 // 2. The registry name → the tarball, in the config create-nodegx wrote (and nothing else in it).
 const cfgFile = path.join(APPS, '.vibe', 'config.toml');
 const cfg = fs.readFileSync(cfgFile, 'utf8');
@@ -167,7 +177,7 @@ const argsFor = (prompt, out) => [
   '--max-turns', opt('--max-turns', '250'),
   '--workdir', APPS
 ];
-fs.writeFileSync(path.join(root, 'command.txt'), ['uvx', ...argsFor(path.resolve(promptFile), OUT)].join(' ') + `\n# key: ${keyName}; kit: ${kit}${model ? `; model = ${model}` : ''}${thinking ? `; thinking = ${thinking}` : ''}${temperature ? `; temperature = ${temperature}` : ''}${sittings > 1 ? `; sittings ≤ ${sittings}, later prompts ${CONTINUE}, max-total $${maxTotal}` : ''}\n`);
+fs.writeFileSync(path.join(root, 'command.txt'), ['uvx', ...argsFor(path.resolve(promptFile), OUT)].join(' ') + `\n# key: ${keyName}; kit: ${kit}${model ? `; model = ${model}` : ''}${seedArg ? `; seed = ${seedArg}` : ''}${thinking ? `; thinking = ${thinking}` : ''}${temperature ? `; temperature = ${temperature}` : ''}${sittings > 1 ? `; sittings ≤ ${sittings}, later prompts ${CONTINUE}, max-total $${maxTotal}` : ''}\n`);
 
 // OWN-019 s2: 12 was shorter than Large 4's own productive thinks. Vibe writes a think to the journal only when it
 // ends; the long design thinks of rounds that finished took up to 10.1 min (9–17 KB/min), and v4/v8 were stopped at
