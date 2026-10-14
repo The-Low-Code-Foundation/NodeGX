@@ -69,9 +69,10 @@ rendered `flexGrow`: graph and render facts that a single-node play does not hol
 
 **s104 — For Each (v11).** A probe came first. The spec declared only `repeater/items-not-a-collection`, with a message that
 was always empty, and ran at seed 20739. The runtime's sentences then show up as divergences. A play reached 9 `repeater/`
-keys in the first difference of each play. Reading foreach.tsx found two more that a play can reach behind an earlier
-difference: `template-script-threw` (a Script that throws, or a component that is not text) and `template-component-not-found`
-with a Template that is not text (`{}`, `-1`). Ten keys are declared. Four of the 15 cannot happen in a play:
+keys in the first difference of each play. Reading foreach.tsx found one more that a play can reach behind an earlier
+difference: `template-script-threw` (a Script that throws, or a component that is not text). The probe also showed
+`template-component-not-found` with a Template that is not text (`{}`, `-1`), so its sentence uses `JSON.stringify` as the
+runtime does. Ten keys are declared. Four of the 15 cannot happen in a play:
 `row-build-failed`, `items-copy-threw`, `no-target` and `operation-threw`. Items is a `setDiagnostic` on every write. Two
 sentences are withdrawn: the Script's, when a Script compiles, and the mapping's, at every mapping write. A row's problem is
 raised once per sentence per rebuild, and the set a rebuild starts is kept after it. An empty entry is told once per Items
