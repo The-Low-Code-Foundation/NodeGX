@@ -23,14 +23,15 @@
     "dist/node-catalog.json",
     "dist/backend",
     "dist/render-harness",
+    "dist/preset-fonts",
     "dist/src/external/viewer",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
     "build": "node build.mjs",
-    "prepack": "node build.mjs && node build-render-harness.mjs && node build-backend-copy.mjs",
-    "postpack": "node build-render-harness.mjs --remove && node build-backend-copy.mjs --remove",
+    "prepack": "node build.mjs && node build-render-harness.mjs && node build-backend-copy.mjs && node build-preset-fonts-copy.mjs",
+    "postpack": "node build-render-harness.mjs --remove && node build-backend-copy.mjs --remove && node build-preset-fonts-copy.mjs --remove",
     "test": "jest",
     "typecheck": "tsc --noEmit"
   },

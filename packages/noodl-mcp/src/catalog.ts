@@ -350,9 +350,29 @@ export interface ListNodeTypesFilter {
   includeHidden?: boolean;
 }
 
+/**
+ * P112-OWN019-NODETYPEWORDS — a query is a phrase first, then its words, as `list_examples` (P112-OWN018-READWASTE).
+ * Mistral Large 4 searches with a list of synonyms ("timer interval delay countdown repeat"): as one substring that
+ * found no row, and o2 walked all fifteen categories one call each. When the phrase finds nothing, a type is kept when
+ * it has any of the words, most words first — the words are alternatives, not a conjunction.
+ */
 export function listNodeTypes(filter: ListNodeTypesFilter = {}): NodeTypeRow[] {
-  const q = filter.query?.toLowerCase();
-  const rows: NodeTypeRow[] = [];
+  const q = filter.query?.toLowerCase().trim();
+  if (!q) return listNodeTypesScored(filter, null).map((s) => s.row);
+  const phrase = listNodeTypesScored(filter, (hay) => (hay.includes(q) ? 1 : 0)).map((s) => s.row);
+  // Split on spaces and list punctuation only: a dotted name or a URL ("net.noodl.HTTP", "docs.noodl.net") is one word.
+  const words = [...new Set(q.split(/[\s,;|]+/).filter((w) => w.length >= 3 && !QUERY_STOPWORDS.has(w)))];
+  if (phrase.length > 0 || words.length < 2) return phrase;
+  return listNodeTypesScored(filter, (hay) => words.filter((w) => hay.includes(w)).length)
+    .sort((a, b) => b.score - a.score)
+    .map((s) => s.row);
+}
+
+function listNodeTypesScored(
+  filter: ListNodeTypesFilter,
+  scoreOf: ((hay: string) => number) | null
+): { row: NodeTypeRow; score: number }[] {
+  const rows: { row: NodeTypeRow; score: number }[] = [];
   // CN-003 — the merged document, so a project's own node types are listed
   // beside the built-ins. ✅ **P1**: there is no capability difference between a
   // kit node and a shipped one, and a picker an author's own node is missing
@@ -367,7 +387,8 @@ export function listNodeTypes(filter: ListNodeTypesFilter = {}): NodeTypeRow[] {
     // matches a node the caller then cannot see the reason for.
     const summary = summaryOf(n);
     const origin = kitOrigin(n);
-    if (q) {
+    let score = 0;
+    if (scoreOf) {
       const hay = [
         n.typeName,
         n.displayName,
@@ -380,7 +401,8 @@ export function listNodeTypes(filter: ListNodeTypesFilter = {}): NodeTypeRow[] {
       ]
         .join(' ')
         .toLowerCase();
-      if (!hay.includes(q)) continue;
+      score = scoreOf(hay);
+      if (score === 0) continue;
     }
     const row: NodeTypeRow = {
       typeName: n.typeName,
@@ -399,9 +421,9 @@ export function listNodeTypes(filter: ListNodeTypesFilter = {}): NodeTypeRow[] {
     }
     const exportInfo = exportInfoOf(n.typeName);
     if (exportInfo && worthListing(exportInfo)) row.export = exportInfo;
-    rows.push(row);
+    rows.push({ row, score });
   }
-  rows.sort((a, b) => (a.typeName < b.typeName ? -1 : 1));
+  rows.sort((a, b) => (a.row.typeName < b.row.typeName ? -1 : 1));
   return rows;
 }
 

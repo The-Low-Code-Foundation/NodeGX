@@ -316,7 +316,7 @@ function refreshNote(): string {
   // OWN-019 census #34: on a client whose list never changes (Vibe) "your next tool list" never comes, and the
   // restart exit was measured to change nothing (6 → 6) — so it says the one way that works.
   if (clientProfile().staticToolList) {
-    return 'Your tool list will not change: call them through call_tool({ name, arguments }) (describe: true shows a tool\'s arguments).';
+    return 'Your tool list will not change: call them through call_tool({ name, arguments }); call_tool({ name, describe: true }) shows a tool\'s arguments.';
   }
   return (
     'Revealed tools are advertised from your next tool list. If your client does not refresh tool lists on ' +
@@ -568,7 +568,19 @@ export function registerCallTool(server: McpServer, disclosure: ToolDisclosure):
         describe: z.boolean().optional()
       }
     },
-    async (args: { name: string; arguments?: Record<string, unknown>; describe?: boolean }, extra: unknown) => {
+    async (outer: { name: string; arguments?: Record<string, unknown>; describe?: boolean }, extra: unknown) => {
+      // P112-OWN019-NESTEDCALLTOOL — Large 4 asks call_tool to call call_tool (o2: `{ name: "call_tool", arguments:
+      // { name: "drive_page", describe: true } }`, six times, every one "no tool named call_tool"). That is the inner
+      // call, one level deep.
+      const inner = outer.name === 'call_tool' ? outer.arguments : undefined;
+      const args =
+        inner && typeof inner.name === 'string'
+          ? {
+              name: inner.name,
+              arguments: inner.arguments as Record<string, unknown> | undefined,
+              describe: inner.describe === true || outer.describe === true
+            }
+          : outer;
       try {
         // P112-OWN018-READWASTE — round 3's Mistral spent 26 calls describing one tool at a time; several at once.
         if (args.describe && args.name.includes(',')) {
