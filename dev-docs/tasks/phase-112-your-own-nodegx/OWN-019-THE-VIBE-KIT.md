@@ -9,7 +9,7 @@ package that only work well with Claude and Claude Code, we need to be able to o
 vibe version."*
 **Depends on** OWN-018 (the lab: `round-kit.mjs`, `grade-quiz.mjs`, kit tgz12, everything Mistral taught the kit) and
 Richard's Vibe subscription key (`MISTRAL_VIBE_API_KEY` in the repo `.env`, made under Code › Vibe CLI).
-**Status: 🟡 s4 ran (2026-10-14, Opus): daytime works (306–406 chars/s, 85–91% cached), R32 holds; Q1 12/12 carryover clean and L1 (Launch) 17/17 by themselves, the editor bonus 13/13 with one lab stop (NOTELOOP); five kit defects fixed (tgz29), four open; GLM-5.3 and Sonnet compared then dropped (R36); levers first, the series on tgz30 (R37). Sprint guide for s5: `own-019/NEXT-SESSION-PROMPT.md`. Earlier: s4 scoped (R33 no fork, R34 no Fable audit, R35 the series then Richard's own run); s3 the process kit then R32 (one session, taught, tgz27).**
+**Status: 🟡 s5 ran (2026-10-14, Opus): every s4 lever in tgz30 (NOTELOOP, TAPHOLD — misread in s4 —, DESCRIBEINSIDE, RECORDERTAIL, the editor grader's mutants) + BACKENDSESSION (R38: the preview starts the backend); the series on tgz30 by day — quiz 12/12 ×3 (carryover clean ×2, R3 ✗ = WATCHONE, fixed), Launch RL1 17/19, RL2b 18/19 (behaviour all ✓; LAPTOPGAPS, R39: row gaps and eyebrow drift, now measured), one lab failure (Mistral's stream); money ≈ €0.42 per list $. Next: tgz31 (s5's fixes + peers' starter assets, 0.2.1) and the series again — sprint guide `own-019/NEXT-SESSION-PROMPT.md`. Earlier: s4 (daytime; Q1 12/12, L1 17/17, R36 Large 4 only, R37 levers first).**
 **Model:** Opus for the sessions that build and read the rounds. The agent under test: **Mistral Large 4
 (`mistral-large-4`, never `-latest`) in Mistral Vibe**, pinned to a version per round (2.26.1 at opening).
 
@@ -495,4 +495,19 @@ post-tool, post-agent) — and the kit uses none of them yet.
     (+ the core-only OWN-007 skill, absent from a Vibe kit). Proven from the tarballs: the read straight after the
     tap 99 (tgz29) → 3788 (tgz30); an off-screen "Yearly" pressed; describe-inside returns the schema; a kit made by
     tgz30 refuses the 4th note write.
+  - **The series on tgz30, by day (all Large 4, every round finished by itself, cached 82–92%):** R1 12/12 carryover ✓
+    (39 min, $2.45), R2 12/12 ✓ (59 min, $3.94), R3 12/12 **carryover ✗** (66 min, $4.39) — it watched Canberra while
+    the carried green landed, by position, on Sydney: **WATCHONE, fixed `7f6bee6d9`** (watch takes a list). RL1 17/19
+    (100 min, $7.27), RL2b 18/19 (87 min, $6.82); RL2 a lab failure (Mistral's stream died 27 s in; round-kit now
+    reruns the brief when no note exists). Every Launch behaviour check passed; the reds are the look.
+  - **Richard on RL1's laptop rows** ("funny justification choices and spacing"): **LAPTOPGAPS, R39 — all of it plus
+    three screenshot sizes.** render_report's `row-gap` / `alignment-drift` (graded on the gallery: Launch apps fire,
+    the nine quizzes and s4's control don't), three sizes by default, the vocabulary's layout rules, the grader's
+    `gaps`/`align`. The first default ("tablet") was refused by the real CLI — caught by a real run, fixed before
+    packing (`ed121860d`).
+  - **Three of four Launch reds were the grader's** (hero, laptop, font) — each fixed, each re-proven on the control
+    and the 12 mutants; one widening let `nofont` through and the mutant caught it.
+  - **Money:** €51.54 → €57.16 over ≈ $13.5 list ⇒ ≈ €0.42 per list $ (s4's "÷ 2" was against the recorder's low sum).
+  - **tgz31 packed (`09ae8b14c`, 0.2.1 — a peer's version bump):** s5's fixes plus peers' starter assets, TWOLOADERS,
+    CLOUDCALLNAME. The lab hardcodes 0.2.0 tarball names — s6's first job.
 

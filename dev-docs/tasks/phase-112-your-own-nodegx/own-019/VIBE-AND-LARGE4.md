@@ -88,9 +88,10 @@ a new measurement goes in the section it belongs to, with its round.
   30 min at evening speed). The evening was load, not the kit.
 - **One taught session finishes by itself** (R32 holds): o2 52 min / 2 sittings (hand-over at 100 calls), Q1 56 min /
   3, L1 90 min / 2 — all `# Done` without the lab. Per round $3.49–5.12 list.
-- **The money, read in the console:** €30.90 (09:12) → €34.49 (10:47) over $7.10 list counted by the recorder — **the
-  allowance falls by Vibe's list $ halved** (the launch sale), number for number. A quiz ≈ €1.8; a landing page ≈ €2.6.
-  The recorder and Vibe disagree on L1 ($2.29 vs $2.70 for its first sitting) — unexplained.
+- **The money, read in the console:** €30.90 (09:12) → €34.49 (10:47) over $7.10 list counted by the recorder — read
+  then as "list $ halved, number for number". 🔴 **Superseded in s5:** the recorder ran low (RECORDERTAIL — it lost
+  the usage of calls whose last stream line was over 8 KB; L1's $2.29 vs Vibe's $2.70 was that), so the ratio was
+  computed against too small a sum. See s5's reading.
 - **Large 4 reaches for a tool with the wrong shape, and routes around it:** a synonym list as one query
   (NODETYPEWORDS: 15 category calls); `call_tool` called through `call_tool` to describe a tool (NESTEDCALLTOOL: ~10
   refusals, then it found the bare form itself). Both now forgiven server-side.
@@ -106,6 +107,27 @@ a new measurement goes in the section it belongs to, with its round.
 - **Against other models, same kit and lab (then dropped, R36):** GLM-5.3 (`zai-glm-5-3`, Vibe's routed default)
   quiz 12/12 in 47 min, Launch 12/17 (its form broken, no font chosen), cached 97–98%; Sonnet in Claude Code quiz
   12/12 in 15 min, editor 13/13 in 27 min.
+
+## s5's new measurements (2026-10-14, 14:22–18:00 CEST, the series on tgz30)
+
+- **The money, re-read against Vibe's own export:** console €51.54 (14:30) → €57.16 (16:06) = €5.62 while R1, R2
+  and RL1 ended ($13.66 list by Vibe's export, ≈ $13.5 inside the window) — **≈ €0.42 per list $**, which fits list ÷ 2
+  then $→€ (~0.86), not "÷ 2" alone. A quiz ≈ €1.0–1.8 ($2.45–4.39 list); a landing page ≈ €2.9–3.1 ($6.82–7.27).
+  Over s4's whole day: €20.64 against ≥ $29.8 list (GLM at unverified prices, E1/Q2 partly unexported) — the same
+  ~0.55–0.69 band at most.
+- **Daytime held:** every series round finished by itself, cached 82–92%, in 1–3 sittings (quiz 39–66 min, Launch
+  87–100 min). Longest think 180 KB (R1) — no stall.
+- **The hand-over rail works as built:** R1 reached past its "# Done" once and the hook stopped it; no round looped
+  on its notes (NOTELOOP's new cap never fired in the series — it was not needed, which is not the same as proven).
+- **Its proofs read what the tool lets them — again:** R3 proved "nothing left over" by watching Canberra while the
+  carried green landed, by position, on Sydney (WATCHONE). R1/R2 watched Sydney and were clean. Teach the tool.
+- **Its laptop pages have holes and drifts** (Richard, on RL1): a number given a fifth of the page by Columns "1 4";
+  eyebrows left of centred headings in all three Launch rounds; L1's price 256 px off its heading. Measured now
+  (LAPTOPGAPS: `row-gap`, `alignment-drift`); the agent never saw them — render_report had no such reading.
+- **Its type is chosen, sometimes only for headings:** RL2b set Fraunces headings over an Inter body.
+- **Infrastructure:** RL2's first sitting died 27 s in — Mistral's stream ended without a finish reason
+  (`infrastructure_failure`); "continue" then had no note to continue and headless Vibe stopped on approval prompts.
+  One in seven series rounds.
 
 ---
 
