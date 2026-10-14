@@ -933,8 +933,8 @@
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 7,
-        "noodl-mcp": 8,
-        "total": 20
+        "noodl-mcp": 9,
+        "total": 21
       },
       "testsTyped": {
         "noodl-runtime": 3,
@@ -1587,8 +1587,8 @@
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 10,
-        "noodl-mcp": 23,
-        "total": 50
+        "noodl-mcp": 24,
+        "total": 51
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -4048,26 +4048,26 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 2,
+        "noodl-runtime": 3,
         "noodl-viewer-react": 0,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 1,
         "noodl-mcp": 1,
-        "total": 4
+        "total": 5
       },
       "testsTyped": {
-        "noodl-runtime": 2,
+        "noodl-runtime": 3,
         "noodl-viewer-react": 0,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 1,
         "noodl-mcp": 0,
-        "total": 3
+        "total": 4
       },
       "dynamicPorts": true,
       "dynamicPortMechanisms": 1,
-      "placesWritten": 7,
+      "placesWritten": 8,
       "exempt": null,
       "warnings": []
     },
@@ -4137,26 +4137,26 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 0,
+        "noodl-runtime": 1,
         "noodl-viewer-react": 2,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 1,
         "noodl-mcp": 3,
-        "total": 6
+        "total": 7
       },
       "testsTyped": {
-        "noodl-runtime": 0,
+        "noodl-runtime": 1,
         "noodl-viewer-react": 2,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 1,
         "noodl-mcp": 0,
-        "total": 3
+        "total": 4
       },
       "dynamicPorts": true,
       "dynamicPortMechanisms": 1,
-      "placesWritten": 6,
+      "placesWritten": 7,
       "exempt": null,
       "warnings": []
     },
@@ -5825,8 +5825,8 @@
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 2,
-        "noodl-mcp": 3,
-        "total": 7
+        "noodl-mcp": 4,
+        "total": 8
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -6734,8 +6734,8 @@
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 5,
-        "noodl-mcp": 3,
-        "total": 12
+        "noodl-mcp": 4,
+        "total": 13
       },
       "testsTyped": {
         "noodl-runtime": 0,

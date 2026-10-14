@@ -1,6 +1,6 @@
 # The census — every picker node, its tier, and where its behaviour is written
 
-**Generated 2026-10-13 by `scripts/node-spec/census.js` — do not edit by hand; edit `tiers.json` and regenerate.**
+**Generated 2026-10-14 by `scripts/node-spec/census.js` — do not edit by hand; edit `tiers.json` and regenerate.**
 
 Catalog format 1.1.0: **180** node types, of which **147** are in the picker and not deprecated (the population), **33** excluded (listed at the end). Cardinality checked both ways by the script.
 
@@ -51,7 +51,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | 1 | **Group** | T5 | NSP-016 | 73 | 0 | — | 72 | 109 |
 | 2 | **Text** | T5 | NSP-016 | 72 | 0 | sseLib.ts | 70 | 109 |
 | 3 | **Set Variable** | T1 | NSP-012 | 49 | 12 | — | 36 | 42 |
-| 4 | **Repeater** (`For Each`) | T5 | NSP-016 | 47 | 24 | — | 22 | 50 |
+| 4 | **Repeater** (`For Each`) | T5 | NSP-016 | 47 | 24 | — | 22 | 51 |
 | 5 | **Component Inputs** | T4 | NSP-015 | 37 | 10 | — | 26 | 51 |
 | 6 | **Component Outputs** | T4 | NSP-015 | 35 | 20 | — | 14 | 27 |
 | 7 | **String** | T1 | NSP-011 | 35 | 1 | — | 33 | 46 |
@@ -68,7 +68,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | node | type name | tier | runs in | runtime file | out | dyn | plan | libs | export | tests | note |
 |---|---|---|---|---|:-:|:-:|---:|---|---|---:|---|
 | **And** | `And` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/and.ts` |  | ✓ | 3 |  | translated | 3 / 7 |  |
-| **Condition** | `Condition` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/condition.ts` | ✓ |  | 7 |  | translated | 10 / 20 |  |
+| **Condition** | `Condition` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/condition.ts` | ✓ |  | 7 |  | translated | 10 / 21 |  |
 | **Counter** | `Counter` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/counter.ts` | ✓ |  | 3 |  | translated | 9 / 19 |  |
 | **String Format** | `String Format` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/stringformat.ts` |  | ✓ | 3 |  | translated | 3 / 6 | dynamic ports from a parameter — proves NSP-001's derived-port design |
 | **Switch** | `Switch` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/switch.ts` | ✓ |  | 4 |  | translated | 6 / 11 |  |
@@ -145,10 +145,10 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **To CSV** | `net.noodl.ToCSV` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/tocsv.ts` |  |  | 2 |  | translated | 1 / 4 |  |
 | **UUID** | `net.noodl.UUID` | T2 | browser+cloud | `noodl-runtime/src/nodes/std-library/crypto/uuid.ts` | ✓ |  | 1 |  | translated | 2 / 3 |  |
 | **On App Error** | `On App Error` | T2 | browser+cloud | `noodl-runtime/src/nodes/std-library/onapperror.ts` |  |  | 11 | errorsLib, realtimeLib | translated | 3 / 14 | listens to the environment's error stream — world-fed |
-| **Repeat** | `Repeat` | T2 | browser | `noodl-viewer-react/src/nodes/std-library/repeat.ts` | ✓ |  | 4 | repeatLib | translated | 2 / 7 |  |
+| **Repeat** | `Repeat` | T2 | browser | `noodl-viewer-react/src/nodes/std-library/repeat.ts` | ✓ |  | 4 | repeatLib | translated | 2 / 8 |  |
 | **Screen Resolution** | `Screen Resolution` | T2 | browser | `noodl-viewer-react/src/nodes/std-library/screenresolution.ts` |  |  | 8 | screenLib | translated | 0 / 3 | reads the environment (window size) — world-fed |
 | **States** | `States` | T2 | browser | `noodl-viewer-react/src/nodes/std-library/states.ts` | ✓ | ✓ | 10 | statesLib | translated | 9 / 25 | sits in Animation; a state machine (T1 shape) with timed transitions — the clock decides the tier |
-| **Delay** | `Timer` | T2 | browser | `noodl-viewer-react/src/nodes/std-library/timer.ts` | ✓ |  | 4 |  | translated | 3 / 12 | one-shot, not a ticker |
+| **Delay** | `Timer` | T2 | browser | `noodl-viewer-react/src/nodes/std-library/timer.ts` | ✓ |  | 4 |  | translated | 3 / 13 | one-shot, not a ticker |
 | **Unique Id** | `Unique Id` | T2 | browser+cloud | `noodl-runtime/src/nodes/std-library/uniqueid.ts` | ✓ |  | 15 | idLib | translated | 4 / 5 | sits in String Manipulation but needs randomness |
 
 ### NSP-014 — records, users, files, HTTP, streams (the browser half; s21 split) (24)
@@ -167,9 +167,9 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Log In** | `net.noodl.user.LogIn` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/login.ts` | ✓ |  | 2 |  | translated | 3 / 6 |  |
 | **Log Out** | `net.noodl.user.LogOut` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/logout.ts` | ✓ |  | 2 |  | translated | 3 / 6 |  |
 | **Request Magic Link** | `net.noodl.user.RequestMagicLink` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/requestmagiclink.ts` | ✓ |  | 2 |  | translated | 2 / 3 |  |
-| **Set User Properties** | `net.noodl.user.SetUserProperties` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/user/setuserproperties.ts` | ✓ | ✓ | 3 |  | translated | 3 / 4 |  |
+| **Set User Properties** | `net.noodl.user.SetUserProperties` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/user/setuserproperties.ts` | ✓ | ✓ | 3 |  | translated | 4 / 5 |  |
 | **Sign In With** | `net.noodl.user.SignInWith` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/signinwith.ts` | ✓ |  | 0 |  | deferred | 2 / 2 |  |
-| **Sign Up** | `net.noodl.user.SignUp` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/signup.ts` | ✓ | ✓ | 2 |  | translated | 3 / 6 |  |
+| **Sign Up** | `net.noodl.user.SignUp` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/signup.ts` | ✓ | ✓ | 2 |  | translated | 4 / 7 |  |
 | **User** | `net.noodl.user.User` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/user/user.ts` | ✓ | ✓ | 3 |  | translated | 4 / 5 |  |
 | **WebSocket** | `net.noodl.WebSocket` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/agent/websocket.ts` | ✓ |  | 1 | websocketLib | translated | 2 / 9 |  |
 | **Create Record** | `NewDbModelProperties` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/newdbmodelpropertiesnode.ts` | ✓ | ✓ | 0 |  | translated | 7 / 19 |  |
@@ -206,7 +206,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Shape** | `Circle` | T5 | browser | `noodl-viewer-react/src/nodes/visual/circle.ts` |  | ✓ | 0 |  | translated | 0 / 8 |  |
 | **Component Children** | `Component Children` | T5 | browser | `noodl-runtime/src/nodelibraryexport.ts` |  |  | 4 |  | translated | 1 / 5 | providedBy noodl-editor in the catalog |
 | **Drag** | `Drag` | T5 | browser | `noodl-viewer-react/src/nodes/visual/drag.ts` |  |  | 10 | dragLib | translated | 3 / 12 |  |
-| **Repeater** | `For Each` | T5 | browser | `noodl-viewer-react/src/nodes/std-library/data/foreach.tsx` | ✓ | ✓ | 24 |  | translated | 22 / 50 |  |
+| **Repeater** | `For Each` | T5 | browser | `noodl-viewer-react/src/nodes/std-library/data/foreach.tsx` | ✓ | ✓ | 24 |  | translated | 22 / 51 |  |
 | **Group** | `Group` | T5 | browser | `noodl-viewer-react/src/nodes/visual/group.ts` | ✓ | ✓ | 0 |  | translated | 72 / 109 |  |
 | **Image** | `Image` | T5 | browser | `noodl-viewer-react/src/nodes/visual/image.ts` |  | ✓ | 0 |  | translated | 2 / 11 |  |
 | **Button** | `net.noodl.controls.button` | T5 | browser | `noodl-viewer-react/src/nodes/controls/button.ts` |  | ✓ | 0 |  | translated | 26 / 43 |  |
