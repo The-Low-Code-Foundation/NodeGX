@@ -29,6 +29,7 @@
 //   node grade-editor.mjs <round-root | app-dir> --tgz <tgz-dir> [--out <dir>] [--home <dir>]
 // --home: the HOME the app's backend was made under (default <round-root>/home): a backend lives in ~/.noodl/backends.
 import fs from 'node:fs';
+import net from 'node:net';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
@@ -61,6 +62,27 @@ const APP = path.join(LABHOME, 'app', path.basename(ROUND_APP));
 fs.cpSync(ROUND_APP, APP, { recursive: true, filter: (s) => !/[\\/](\.previews|grade|node_modules[\\/]\.cache)([\\/]|$)/.test(s) });
 const ROUNDHOME = path.join(LABHOME, 'roundhome');
 if (fs.existsSync(path.join(ROUND_HOME, '.noodl', 'backends'))) fs.cpSync(path.join(ROUND_HOME, '.noodl', 'backends'), path.join(ROUNDHOME, '.noodl', 'backends'), { recursive: true });
+// 🔴 The copy keeps the round's port, and the gallery keeps the round's backend alive ON that port (s5): the copy's
+// backend could not bind, provision answered "exited before becoming ready", the grade went on, and the preview
+// saved "Europe Quiz" into the GALLERY's backend — 13/13 against the wrong database, its restart a restart of
+// nothing. So the copy gets a port of its own (config and the app's endpoint), and a backend that does not start
+// stops the grade.
+const freePort = () => new Promise((resolve) => { const s = net.createServer(); s.listen(0, '127.0.0.1', () => { const { port } = s.address(); s.close(() => resolve(port)); }); });
+{
+  const dir = path.join(ROUNDHOME, '.noodl', 'backends');
+  const projectFile = path.join(APP, 'nodegx.project.json');
+  for (const id of fs.existsSync(dir) ? fs.readdirSync(dir) : []) {
+    const f = path.join(dir, id, 'config.json');
+    if (!fs.existsSync(f)) continue;
+    const c = JSON.parse(fs.readFileSync(f, 'utf8'));
+    const port = await freePort();
+    const project = fs.readFileSync(projectFile, 'utf8');
+    if (project.includes(`"instanceId": "${id}"`) || project.includes(`"instanceId":"${id}"`)) {
+      fs.writeFileSync(projectFile, project.split(`127.0.0.1:${c.port}`).join(`127.0.0.1:${port}`).split(`localhost:${c.port}`).join(`localhost:${port}`));
+    }
+    fs.writeFileSync(f, JSON.stringify({ ...c, port }, null, 2) + '\n');
+  }
+}
 const cleanEnv = (home) => {
   const env = { ...process.env, HOME: home, npm_config_cache: path.join(LABHOME, '.npm'), TMPDIR: LABHOME };
   for (const k of Object.keys(env)) if (k.startsWith('NODEGX_') || k.startsWith('NOODL_') || /KEY|TOKEN|SECRET/.test(k)) delete env[k];
@@ -223,6 +245,7 @@ const found = {};
 try {
   observed.backend = await startBackend();
   say('backend', observed.backend);
+  if (observed.backend.backend && !observed.backend.started) throw new Error(`the app's backend did not start: ${observed.backend.why ?? observed.backend.answer}`);
   let url = await startPreview();
   say('preview', { url });
 
@@ -342,6 +365,7 @@ try {
   await stopPreview();
   await stopBackend();
   observed.backendAgain = await startBackend();
+  if (observed.backendAgain.backend && !observed.backendAgain.started) throw new Error(`the app's backend did not start again: ${observed.backendAgain.why ?? observed.backendAgain.answer}`);
   url = await startPreview();
   const C = await openBrowser(url, 'c');
   const title = await C.seen('/europe quiz/i');
