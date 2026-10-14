@@ -519,5 +519,9 @@ post-tool, post-agent) — and the kit uses none of them yet.
     three sizes by default; RL1's feature rows fire on both kits, RL3's hero drawing fires on tgz31 only; a list
     `watch` is clean on R1 and catches o2's 58 ms green on Sydney (the known-firing control); the preview starts SE1's
     backend (a copy on its own port), stops it on SIGINT, starts it again, and `--no-backend` leaves it off.
-  - RL1, RL2b and RL3 shots at three sizes (tgz32) opened for Richard's look verdict.
+  - **Richard's look verdict on RL1, RL2b, RL3 (20:05):** "a nice looking landing page", all three, except RL1's
+    "Why Driftwood" rows: "the numbers on each row on the left, then a big space, then the text block further right,
+    weird spacing" — the LAPTOPGAPS row, built on tgz30 before render_report reported `row-gap`. He did not raise the
+    eyebrow drift the grader's `align` fails all three on. The tgz32 question: does a Launch round still leave the gap
+    now that the tool reports it?
 

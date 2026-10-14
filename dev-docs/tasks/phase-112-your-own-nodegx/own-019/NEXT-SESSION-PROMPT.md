@@ -73,8 +73,10 @@ has R1–R3 (4810, 4811, 4813), RL1 (4812), RL2b (4814), RL3 (4815).
    Peek every ~20 min; read every red before believing it (s5: 3 of 4 Launch reds were the grader's).
 4. **After each Launch round:** its phone / 768 / laptop shots to Richard for the look verdict (`open -a Preview`, never
    a link). s6 opened RL1, RL2b, RL3 at all three sizes (rendered on tgz32, `proof/shots/`) — **ask for his verdict if
-   it is not recorded in the task file yet.** What s6 saw on desktop: all three centre a heading under a left-set
-   eyebrow (PRICING; RL3 FAQ too); RL1's feature numbers sit 217 px from their text.
+   it is not recorded in the task file yet.** ✅ Recorded for RL1, RL2b, RL3 (s6, 20:05): all three "a nice looking
+   landing page"; the one complaint is RL1's feature rows (number far left, big space, text — the gap `row-gap` now
+   reports). He did not raise the eyebrow drift (`align` ✗ on all three) — ask him whether it matters before
+   treating `align` as a look failure in the claim.
 5. **Console readings** at quiet boundaries (ask in plain text; s5's ≈ €0.42/list $ needs a second clean window).
 6. **The claim write-up (AC8)** once tgz32's series is in, then **R35: Richard's own run, last.**
 
@@ -83,7 +85,7 @@ has R1–R3 (4810, 4811, 4813), RL1 (4812), RL2b (4814), RL3 (4815).
 - **npm 0.2.1.** A peer's bump (`c2eab03bf`) carries every s5 kit change; origin/cline-dev has them (pushed 17:47).
   Publishing is Richard's (the release peer was told what 0.2.1 carries: opennoodl-a4, 17:58). s5's last commits
   (lab + docs, after 17:47) are local until the next push.
-- The look verdicts on RL1, RL2b, RL3.
+- Whether the eyebrow drift (`align`) matters to him — he passed all three looks without raising it.
 - Console readings.
 
 ## Where things are
