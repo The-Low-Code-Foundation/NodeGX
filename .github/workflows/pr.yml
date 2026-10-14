@@ -225,6 +225,13 @@ jobs:
       # integrity test), nodegx-backend, the viewer's SSR/hydration specs, the
       # MCP server, the preview renderer and the cloud runtime. Serial, because
       # several of them bind real sockets.
+      #
+      # `--no-bail` (P18-S102-NOEXPORTCI, 2026-10-14): without it Nx stops at the
+      # first red package and lists the rest "not run", and the job reads the same
+      # red either way. On 14 October one low bug in @nodegx/project-contract, which
+      # Nx runs first, hid the other 19 packages, and two of them (export,
+      # node-kit-types) had gone red unseen. This is the 2026-08-07 trap above,
+      # for a second time. Every package runs now, and the job still fails.
       - run: npm run test:packages
 
       # WFA-002: the editor's main-process jest suites (`packages/noodl-editor/
