@@ -6,6 +6,35 @@ copies a 0.3.0 project to `<project>.before-0.4` before its format moves to 5 (`
 the drive in the dev editor found the copy made twice per open, and measured OPENWRITES' cause; both fixed and driven
 (`1ed87f2ef`, OWN-013 §7). IDREPLACE is driven too. Nothing was pushed, branched or tagged. Earlier handoffs are in this file's git history.
 
+## ▶ Lane 1 now (2026-10-14, Opus, after s17): PAGEPORTS, then Richard's G8 click
+
+**Done this session** (`2925e3e74` code, `ffbee2c58` docs): OWN-011 AC2 re-driven on the release zip's 0.4.0
+(§10: the first open writes nothing; a reopen with Home active writes Home = PAGEPORTS); OWN-013 G8's agent half
+(§13: 0.3.0's own updater → 0.4.0 downloaded; installed over, a 0.3.0 project migrates once, reopen clean); OWN-014
+AC3 met. Found and fixed for the next release: **UPDATEBEHIND** (the update dialog is invisible inside a project) and
+**NEWSWHITE** (the what's-new post's bold leads and link are white on white; the header named the running version).
+
+**Next: P112-S11-PAGEPORTS** (closes OWN-011 AC2; `kit: mcp`). `instancePortsChanged` is NOT a save trigger
+(`projectmodel.ts` ~:1920), so something else arms the save at load and the component is written with the cache the
+viewer just announced. First suspect: `NodeGraphModel` books `scheduleUpdateTypes` on every
+`Model.instancePortsChanged` (:245-258). Instrument in a dev editor (log which `projectSaveTriggers` event armed the
+save) on a copy of `scratchpad/ac2/my-apps/reading-list`, then choose: the editor stops treating a cache fill as an
+edit (next release) and/or the MCP writes the Page's cache as the viewer would (helps the released 0.4.0 now). The
+indexes differ by project (5, 6 here; 2 in Deadline Desk), so measure before writing them from the kit.
+
+**Waiting on Richard:** (1) G8's in-place update on his own `/Applications/NodeGX.app` (still 0.3.0): launcher →
+*Download and install* → *Restart now*; the zip is already in his updater cache. (2) Whether to rewrite the live 0.4.0
+feed post's `<strong>` leads as plain `<p>` so current installs can read them (NEWSWHITE). (3) `build.mac.notarize:
+false` (OWN-013 §12).
+
+🔴 **Driving the RELEASED app** (no dev stack): `ditto` the bundle to the scratchpad, launch
+`env -u ELECTRON_RUN_AS_NODE NOODLPORT=8774 NOODL_REMOTE_DEBUG_PORT=9333 <app>/Contents/MacOS/NodeGX --user-data-dir=<scratch> -ApplePersistenceIgnoreState YES`.
+Stub the folder picker with `webpackChunknoodl_editor.push([[Symbol()],{},r=>req=r])` and then
+`req(29215).filesystem.openDialog = async () => '<dir>'` (same id in 0.3.0 and 0.4.0). Stubbing
+`require('@electron/remote').dialog` does NOT reach the bundle and pops the real dialog on Richard's screen. The
+updater cache `~/Library/Caches/noodl-editor-updater` is shared with his real app, and *Restart now* relaunches with
+his real profile, so never press it on a copy.
+
 ## ✅ 2026-10-14 (s17, Opus): npm packages 0.2.0 PUBLISHED
 
 All three live and `latest` (UTC): `create-nodegx` ~12:00, `@nodegx/preview` ~12:00, `@nodegx/mcp` 12:07:52. Each
