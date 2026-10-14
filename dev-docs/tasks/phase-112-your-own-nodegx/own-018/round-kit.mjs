@@ -281,7 +281,10 @@ const sittingsDone = [];
 let unchanged = 0;
 for (let k = 1; k <= sittings; k++) {
   const before = nextLine();
-  const r = await runSitting(k === 1 ? path.resolve(promptFile) : CONTINUE, k === 1 ? '' : String(k));
+  // s5 (RL2): sitting 1 died 27 s in (Mistral's stream ended without a finish reason — infrastructure_failure) before
+  // any NEXT.md existed, and "continue" then sent three sittings grepping above their folder for a note that was never
+  // written. With no NEXT.md there is nothing to continue: a person would say their request again, so the lab does.
+  const r = await runSitting(k === 1 || !before ? path.resolve(promptFile) : CONTINUE, k === 1 ? '' : String(k));
   const after = nextLine();
   sittingsDone.push({ sitting: k, ...r, next: after?.first ?? null, nextFile: after?.file ?? null });
   fs.writeFileSync(path.join(root, 'sittings.json'), JSON.stringify(sittingsDone, null, 2));

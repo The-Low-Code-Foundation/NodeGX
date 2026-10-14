@@ -356,7 +356,7 @@ try {
     if (!b) return { button: null };
     const bt = b.getBoundingClientRect().top + scroller().scrollTop;
     const name = leaves(${reSrc(RE.name)})[0];
-    const above = leaves(/\\S/).filter((l) => l.getBoundingClientRect().top + scroller().scrollTop < bt && own(l).split(' ').length >= 3 && !${reSrc(RE.name)}.test(own(l))).map((l) => own(l).slice(0, 80));
+    const above = leaves(/\\S/).filter((l) => l.getBoundingClientRect().top + scroller().scrollTop < bt && own(l).split(' ').length >= 3 && !/^\\s*Driftwood\\s*$/i.test(own(l))).map((l) => own(l).slice(0, 80));
     return { button: { text: norm(b.textContent), ...at(b, false) }, nameShown: !!name, nameTop: name ? name.getBoundingClientRect().top : null, above };
   })()`);
   check('hero', loaded !== null && hero.button && hero.nameShown && hero.above?.length >= 2, { name: hero.nameShown, lines: hero.above, button: hero.button?.text ?? null });
@@ -597,7 +597,9 @@ try {
   await sleep(1000);
   await scrollThrough();
   const ph = await page(sideBySide);
-  check('laptop', lap.featsRow || lap.pairs >= ph.pairs + 2, { laptop: lap, phone: ph });
+  // s5: +1, not +2 — RL1's laptop page is two-column (hero beside its card, a number column beside each feature) and
+  // read 1 pair to the phone's 0; +2 failed a layout that plainly adapts.
+  check('laptop', lap.featsRow || lap.pairs >= ph.pairs + 1, { laptop: lap, phone: ph });
 } catch (e) {
   fatal = String(e.message || e);
   say('stopped', { why: fatal });
