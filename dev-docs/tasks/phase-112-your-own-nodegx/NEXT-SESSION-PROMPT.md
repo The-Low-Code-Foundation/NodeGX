@@ -6,9 +6,50 @@ copies a 0.3.0 project to `<project>.before-0.4` before its format moves to 5 (`
 the drive in the dev editor found the copy made twice per open, and measured OPENWRITES' cause; both fixed and driven
 (`1ed87f2ef`, OWN-013 §7). IDREPLACE is driven too. Nothing was pushed, branched or tagged. Earlier handoffs are in this file's git history.
 
-## ▶ Lane 1 now (2026-10-14, Opus, after s18): the next editor release carries three fixes; then AC2 and AC4
+## ▶ Lane 1 now (2026-10-14, Opus, end of s18): 0.4.1 and npm 0.2.1 are built and tested; Richard merges, tags, publishes
 
-**Done s18** (`76f37308c` code): **PAGEPORTS found and fixed** (OWN-011 §11). Nothing in `projectSaveTriggers` armed
+Richard wants tutorial videos (the language app with text-to-speech, no editor) and the subscriber email about 0.4.0
+and the npm kit as soon as possible. So s18 cut both releases.
+
+**Editor 0.4.1, a hotfix from `v0.4.0`:** branch `release/0.4.1` = `v0.4.0` + `2925e3e74` (UPDATEBEHIND, NEWSWHITE) +
+`76f37308c` (PAGEPORTS), cherry-picked clean, + `afb370d8d` (version, CHANGELOG). **PR #51** into `main`: all six
+required checks green. Four optional checks are red: three were red on PR #50 too, and **HLT-010** is red on every tree
+since about 12:00 UTC, the unchanged v0.4.0 included (P112-S18-HLT010CI, filed). 🔴 **`gh pr merge` was refused by the
+auto-mode classifier ("merge without review")**, so these steps are Richard's:
+1. Merge PR #51 on GitHub with a **merge commit** (not squash).
+2. `git fetch origin main && git tag v0.4.1 origin/main && git push origin v0.4.1`. Then watch Actions → Release
+   (four legs). The draft must hold every asset.
+3. RELEASE-PROCESS §4 checks on the draft, then *Publish release*. 0.4.0 users see the update on the projects list (the
+   changelog's *Good to know* says so). Inside a project, 0.4.0's own update window is the hidden one.
+4. After publishing: re-drive OWN-011 AC2 on 0.4.1 by §10/§11's method to close AC2; deploy nodegx-web for the
+   changelog (step 10). `cline-dev` already says 0.4.1 (`c2eab03bf`) and carries the same changelog entry (`e88ebeeec`).
+
+**npm 0.2.1** (`@nodegx/mcp`, `@nodegx/preview`, `create-nodegx`), packed in a clean worktree at the pushed `e88ebeeec`
+(every dependency's `dist` rebuilt there, not linked). It carries s18's WAVTWICE example (`135244dc0`), the starter set +
+FRESHFONT (`00e569472`), NOLIBRARY (`23ea136b9`), TWOLOADERS (`9e40fc5ab`) and CLOUDCALLNAME (`2aceb7ec2`), plus lane 5's
+s5 commits up to `7f6bee6d9` (BACKENDSESSION, LAPTOPGAPS, TAPHOLD, WATCHONE, DESCRIBEINSIDE, NOTELOOP). Lane 5
+(opennoodl-54) was asked whether any of it should not ship and had not answered by the pack. Tarballs in
+`~/vscode_projects/OpenNoodl-worktrees/tgz021/`:
+
+| tarball | shasum | checked |
+|---|---|---|
+| `nodegx-preview-0.2.1.tgz` | `1aa40877e7e3…` | 973 + 985 bundle inputs, 0 outside the worktree; installed in an empty folder: `/` 200, a planted `.env` and `.mcp.json` 404, rendered in 9 ms |
+| `nodegx-mcp-0.2.1.tgz` | `8647ecf820cb…` | MCP 602 / kit-extract 486 / cloud 702 inputs, 0 first-party outside; `dist/starter-assets` present; `stranger-render.mjs <tgz>`: `create_project` (62 starter files) → `render_report` DONE clean |
+| `create-nodegx-0.2.1.tgz` | `7b93676cbea4…` | empty folder, `HOME` empty: `.mcp.json` pins `@nodegx/mcp@0.2.1`, the skill, CLAUDE.md, AGENTS.md, `.vibe/`, `opencode.json`; its tests 24 / 24 |
+
+Gates: `publishable.js` 6 packages / 0 problems; `bugs.js gate` 0 blockers (mcp, preview, project-contract, node-spec,
+canvas-look). **Richard runs** `scripts/own/publish-npm.sh ~/vscode_projects/OpenNoodl-worktrees/tgz021` in his own
+terminal (2FA). It publishes the MCP before `create-nodegx` and waits for each one to go live. Then:
+`node scripts/own/stranger-render.mjs @nodegx/mcp@0.2.1` from the registry.
+
+**Before the tutorial is recorded:** one stranger round of the language app from the registry (OWN-015's sentence) to
+see whether the agent finds the speaking example and the static is gone. That is WAVTWICE's unproved half.
+
+**Known and open for the video:** P112-S14-KITROOTDEPLOY (a kit-rooted component: the preview and `nodegx deploy`
+refuse it; GAM-014's preview spec is 5 / 5 red on HEAD too; `validate_project` now says so). The example plays audio
+with a Function, so the language app needs no kit node.
+
+**Done s18, first half** (`76f37308c` code): **PAGEPORTS found and fixed** (OWN-011 §11). Nothing in `projectSaveTriggers` armed
 the open-time save: `SchemaHandler._store` → `setMetaData(…, undefined)` over `undefined` (no backend) armed it, on
 open and on every window focus, and the save 1 s later swept in the Page port cache the viewer had just sent. It is a
 race (the release wrote Home on 3 of 3 opens here, first open included), not "the second open". `setMetaData` now

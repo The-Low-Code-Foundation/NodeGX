@@ -8,7 +8,7 @@ kit: mcp
 found: P112 lane 1 s18, 2026-10-14 (writing WAVTWICE's example beside them)
 evidence: this file
 regression: packages/noodl-mcp/tests/own015WavTwice.test.ts "every example call names a cloud function the same example ships"
-commit: (this commit)
+commit: 2aceb7ec2
 ---
 
 The runtime finds a cloud function by the component's path after `/#__cloud__/` (`noodl-viewer-cloud/src/index.ts`

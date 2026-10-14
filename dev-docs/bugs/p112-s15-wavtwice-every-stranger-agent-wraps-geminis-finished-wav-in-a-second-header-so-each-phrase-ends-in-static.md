@@ -1,11 +1,14 @@
 ---
 id: P112-S15-WAVTWICE
 title: "Both stranger agents that built the language app wrapped Gemini's finished WAV in a second WAV header, so every phrase ends in half a second of loud static — nothing in the kit shows how to play a cloud function's audio"
-status: open
+status: fixed
 severity: medium
 area: kit guidance / examples (no `get_example` plays audio a cloud function returns; no audio node or kit); the agents' own code (`PhraseRow` `play_audio`), not a NodeGX runtime defect
 found: P112 OWN-015 s15, 2026-10-12 (2 of 2 rounds: s14's `bonjour`, s15's `french-phrases`)
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-015-THE-BACKEND-FROM-NPM.md §8 (s14, measured by ear and RMS) and §10 (s15, RMS)
+kit: mcp
+regression: packages/noodl-mcp/tests/own015WavTwice.test.ts "plays a finished WAV byte for byte, with no second header"
+commit: 135244dc0
 ---
 
 `gemini-3.8-flash-tts` now returns a finished WAV file (`mimeType: audio/wav`; chunks `fmt ` 16, `data` 46,080,
@@ -26,3 +29,12 @@ agent is likely to get right by luck.
 2. A sentence in the Cloud Function / JavaScriptFunction guidance: "audio from an API is usually a finished file;
    play it as it is".
 3. Larger: an audio-playback kit node (R18's note: *playback = a kit node the agent writes*).
+
+**Fixed 2026-10-14 (lane 1, `135244dc0`), proposal 1 and 2.** The example `fn-play-audio-a-cloud-function-returns`:
+the cloud function reads `GEMINI_API_KEY` from a Secret, sends it in `x-goog-api-key`, and passes `inlineData`'s base64
+and MIME type through untouched; the page plays a finished file as it came and wraps only `audio/L16` / `audio/pcm`.
+`CloudFunction2` and `Response` cite it, and `CloudFunction2` carries the anti-pattern. The test runs the example's own
+play script on a finished WAV with a trailing chunk (byte for byte) and on raw L16 (one header, the named rate), and
+checks that "text to speech", "tts", "play audio from a cloud function", "speak a phrase" and "gemini audio" find it
+in the top three. With the strangers' always-wrap put back, the first is red. Not proved: that a fresh stranger round
+now finds and follows it. That is the tutorial's dry run.
