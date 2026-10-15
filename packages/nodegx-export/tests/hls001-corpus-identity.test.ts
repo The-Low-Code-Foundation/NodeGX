@@ -341,7 +341,13 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // `README.md` and nothing else — the coverage sentence reads 125 of 130 — counted on the red run, then again in the
     // regenerated golden's diff (53 lines out, all README; 53 README lines and action-desk's 19 in). A peer's uncommitted
     // catalog edit (noodl-types, Upload File's photo ports) was on the tree and moved no emitted byte.
-    expect(corpusProjects().length).toBe(54);
+    //
+    // 54 → 55 on 2026-10-15 (EXP-011 §78, session 107): `history-desk`, the first project in the corpus that places a
+    // State History, an Undo / Redo and a State Snapshot (the snapshot in a second component). The red run moved 74
+    // paths: every one of the 54 projects' `README.md` (the coverage sentence reads 128 of 130) and history-desk's own 20
+    // files, nothing else. The regenerated golden's diff counted the same: 54 lines out, all README; 54 README lines and
+    // history-desk's 22-line block in.
+    expect(corpusProjects().length).toBe(55);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 

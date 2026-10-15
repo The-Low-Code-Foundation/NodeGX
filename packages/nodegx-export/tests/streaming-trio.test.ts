@@ -130,7 +130,8 @@ describe('§A the plan — three hooks, the data read at the pulse, the config a
       // §64 made the data port optional (the SSE has none) — the row now grades the table's fourth member too. §66's Class is a
       // config port the runtime DISCOVERS (`param: 'collectionName'`, `dynamicPorts.mechanisms: runtime-discovered`), so the catalog
       // declares it nowhere: a config entry carrying `param` is graded as absent from the catalog, and present on disk by name.
-      expect({ type, inputs }).toEqual({ type, inputs: [...(spec.data !== undefined ? [spec.data.port] : []), ...spec.config.filter((c) => c.param === undefined).map((c) => c.port), ...Object.keys(spec.actions)].sort() });
+      // EXP-011 §78. A history-family node's Store Name is the store module the hook is handed — in the table as `store`.
+      expect({ type, inputs }).toEqual({ type, inputs: [...(spec.data !== undefined ? [spec.data.port] : []), ...(spec.store !== undefined ? [spec.store.port] : []), ...spec.config.filter((c) => c.param === undefined).map((c) => c.port), ...Object.keys(spec.actions)].sort() });
       expect({ type, outputs }).toEqual({ type, outputs: [...spec.signals, ...Object.keys(spec.values)].sort() });
     }
   });
@@ -905,7 +906,7 @@ describe('§H the ledger', () => {
       expect(exportBadgeOf(type)).toBeUndefined();
     }
     const ledger = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'coverage-ledger.json'), 'utf8'));
-    expect(ledger.pickerCoverageFloor).toBe(125); // EXP-011 §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §61 the component-stack trio + §60 the component-object trio + §62 the relation pair + §63 Drag (session 86); §57 + §58 + §59 (session 85)
+    expect(ledger.pickerCoverageFloor).toBe(128); // EXP-011 §78 State History + Undo / Redo + State Snapshot (session 107) on top of §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §61 the component-stack trio + §60 the component-object trio + §62 the relation pair + §63 Drag (session 86); §57 + §58 + §59 (session 85)
   });
 });
 

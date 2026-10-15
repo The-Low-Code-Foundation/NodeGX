@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a7c10d00-0000-4000-8000-000000000188",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "modified": "2026-10-15T12:00:00.000Z",
+  "description": "EXP-011 §78 fixture: a Global Store \"app\" declares title \"Untitled\"; a text input feeds a Set Global Store on title, written by a Save button, and a Subscribe on title shows it. A State History records the store (Max History 20) and shows History Size, Current Index and Can Undo in three Texts, with a Clear History button. An Undo / Redo drives it: Undo, Redo, and Back to start (Jump To, Target Index 0); its Error is a fourth Text. The Checkpoint placed below holds a State Snapshot of the same store, so the history and the checkpoints are reached from two components by the store alone."
+}

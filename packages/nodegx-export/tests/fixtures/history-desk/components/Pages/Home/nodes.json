@@ -1,0 +1,258 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a7c10d00-0000-4000-8000-000000000188",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "shell"
+      ],
+      "parameters": {
+        "title": "History Desk",
+        "urlPath": "home"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "page",
+      "children": [
+        "headline",
+        "titleInput",
+        "saveBtn",
+        "titleText",
+        "undoBtn",
+        "redoBtn",
+        "startBtn",
+        "clearBtn",
+        "sizeText",
+        "indexText",
+        "canUndoText",
+        "errorText",
+        "checkpoint"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-8)",
+        "paddingLeft": "var(--space-6)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "headline",
+      "type": "Text",
+      "label": "Headline",
+      "parent": "shell",
+      "parameters": {
+        "text": "History Desk",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "titleInput",
+      "type": "net.noodl.controls.textinput",
+      "label": "Title",
+      "parent": "shell",
+      "parameters": {
+        "placeholder": "A title"
+      },
+      "x": 100,
+      "y": 360
+    },
+    {
+      "id": "saveBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Save title",
+      "parent": "shell",
+      "parameters": {
+        "label": "Save title"
+      },
+      "x": 100,
+      "y": 440
+    },
+    {
+      "id": "titleText",
+      "type": "Text",
+      "label": "Title now",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "undoBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Undo",
+      "parent": "shell",
+      "parameters": {
+        "label": "Undo"
+      },
+      "x": 100,
+      "y": 600
+    },
+    {
+      "id": "redoBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Redo",
+      "parent": "shell",
+      "parameters": {
+        "label": "Redo"
+      },
+      "x": 100,
+      "y": 680
+    },
+    {
+      "id": "startBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Back to start",
+      "parent": "shell",
+      "parameters": {
+        "label": "Back to start"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "clearBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Clear history",
+      "parent": "shell",
+      "parameters": {
+        "label": "Clear history"
+      },
+      "x": 100,
+      "y": 840
+    },
+    {
+      "id": "sizeText",
+      "type": "Text",
+      "label": "History size",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 920
+    },
+    {
+      "id": "indexText",
+      "type": "Text",
+      "label": "Current index",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "canUndoText",
+      "type": "Text",
+      "label": "Can undo",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 1080
+    },
+    {
+      "id": "errorText",
+      "type": "Text",
+      "label": "Step error",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 1160
+    },
+    {
+      "id": "checkpoint",
+      "type": "/Components/Checkpoint",
+      "label": "Checkpoint",
+      "parent": "shell",
+      "parameters": {},
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "appStore",
+      "type": "net.noodl.GlobalStore",
+      "label": "App store",
+      "parameters": {
+        "storeName": "app",
+        "initialState": {
+          "title": "Untitled"
+        }
+      },
+      "x": 400,
+      "y": 280
+    },
+    {
+      "id": "setTitle",
+      "type": "net.noodl.GlobalStore.Set",
+      "label": "Write title",
+      "parameters": {
+        "storeName": "app",
+        "key": "title"
+      },
+      "x": 400,
+      "y": 440
+    },
+    {
+      "id": "watchTitle",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "label": "Watch title",
+      "parameters": {
+        "storeName": "app",
+        "keys": "title"
+      },
+      "x": 400,
+      "y": 520
+    },
+    {
+      "id": "history",
+      "type": "net.noodl.StateHistory",
+      "label": "History",
+      "parameters": {
+        "storeName": "app",
+        "maxHistory": 20
+      },
+      "x": 400,
+      "y": 840
+    },
+    {
+      "id": "steps",
+      "type": "net.noodl.StateHistory.Undo",
+      "label": "Steps",
+      "parameters": {
+        "storeName": "app",
+        "targetIndex": 0
+      },
+      "x": 400,
+      "y": 600
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

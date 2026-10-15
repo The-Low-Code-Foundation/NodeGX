@@ -390,6 +390,6 @@ describe('§E the ledger', () => {
 
   test('the picker floor moved by two in the same change', () => {
     const ledger = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'coverage-ledger.json'), 'utf8'));
-    expect(ledger.pickerCoverageFloor).toBe(125); // EXP-011 §77 Action Dispatcher + Action Handler (session 106)
+    expect(ledger.pickerCoverageFloor).toBe(128); // EXP-011 §78 State History + Undo / Redo + State Snapshot (session 107) on top of §77 Action Dispatcher + Action Handler (session 106)
   });
 });

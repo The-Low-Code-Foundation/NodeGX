@@ -65,6 +65,7 @@ import { WEBSOCKET_LIB_PATH } from './websocketLib';
 import { REALTIME_LIB_PATH } from './realtimeLib';
 import { REPEAT_LIB_PATH } from './repeatLib';
 import { ACTIONS_LIB_PATH } from './actionsLib';
+import { HISTORY_LIB_PATH } from './historyLib';
 import { SCRIPT_CODE_PREFIX } from '../analyze/script';
 import { ID_HELPERS_BY_FN, ID_LIB_PATH, IdHelper } from './idLib';
 import { CRYPTO_LIB_PATH, CryptoHelper } from './cryptoLib';
@@ -287,6 +288,8 @@ export interface EmittedComponent {
   repeatLib: boolean;
   /** EXP-011 §77. `src/lib/actions.ts` is owed when this component keeps an Action Dispatcher or an Action Handler. */
   actionsLib: boolean;
+  /** EXP-011 §78. `src/lib/history.ts` is owed when this component keeps a State History, an Undo / Redo or a State Snapshot. */
+  historyLib: boolean;
   /** EXP-011 §59. `src/lib/crypto.ts` verbs this component calls; `src/lib/screen.ts` is owed when a viewport hook prints. */
   cryptoHelpers: Set<string>;
   screenLib: boolean;
@@ -923,6 +926,8 @@ export function emitComponent(
     ...plan.drags.flatMap((d) => Object.values(d.listeners).flatMap((chain) => chain ?? []))
   ];
   allActions.forEach(collectActionUse);
+  // EXP-011 §78. A history-family hook is handed its store module.
+  for (const stream of plan.streams) if (stream.store !== undefined) usedStoreNames.add(stream.store);
   /** Nested actions (branch arms, popup done-chains) flattened — the `usesNavigate` sweep. */
   const deepActions = (actions: HandlerAction[]): HandlerAction[] =>
     actions.flatMap((a) =>
@@ -4376,10 +4381,11 @@ export function emitComponent(
   // EXP-011 §58 + §64 + §65 + §66. The streaming hooks, one import per hook the plan kept, grouped by the module each lives in.
   // GAM-013. Repeat's hook is the table's seventh, in its own module.
   // EXP-011 §77. The dispatcher's and the handler's hooks, the eighth and ninth, share one module.
-  for (const lib of ['streaming', 'sse', 'websocket', 'realtime', 'repeat', 'actions'] as const) {
+  // EXP-011 §78. The history family's three, the tenth to twelfth, share another.
+  for (const lib of ['streaming', 'sse', 'websocket', 'realtime', 'repeat', 'actions', 'history'] as const) {
     const hooks = [...new Set(plan.streams.filter((s) => STREAM_NODES[s.type].lib === lib).map((s) => STREAM_NODES[s.type].hook))].sort();
     if (hooks.length === 0) continue;
-    const libPath = lib === 'streaming' ? STREAMING_LIB_PATH : lib === 'sse' ? SSE_LIB_PATH : lib === 'websocket' ? WEBSOCKET_LIB_PATH : lib === 'repeat' ? REPEAT_LIB_PATH : lib === 'actions' ? ACTIONS_LIB_PATH : REALTIME_LIB_PATH;
+    const libPath = lib === 'streaming' ? STREAMING_LIB_PATH : lib === 'sse' ? SSE_LIB_PATH : lib === 'websocket' ? WEBSOCKET_LIB_PATH : lib === 'repeat' ? REPEAT_LIB_PATH : lib === 'actions' ? ACTIONS_LIB_PATH : lib === 'history' ? HISTORY_LIB_PATH : REALTIME_LIB_PATH;
     const specifier = `${relRoot}/${libPath.replace(/^src\//, '').replace(/\.ts$/, '')}`;
     internalImports.set(specifier, `import { ${hooks.join(', ')} } from '${specifier}';`);
   }
@@ -6734,7 +6740,12 @@ export function emitComponent(
   // listeners print inline so each closes over this render; the config is read live by the hook.
   for (const stream of plan.streams) {
     const spec = STREAM_NODES[stream.type];
-    const options = stream.config.length > 0 ? `{ ${stream.config.map((c) => `${c.port}: ${exprCode(c.expr, 'render')}`).join(', ')} }` : '{}';
+    // EXP-011 §78. A history-family node's store module leads its options.
+    const optionEntries = [
+      ...(stream.store !== undefined ? [`store: ${storeByName.get(stream.store)!.exportName}`] : []),
+      ...stream.config.map((c) => `${c.port}: ${exprCode(c.expr, 'render')}`)
+    ];
+    const options = optionEntries.length > 0 ? `{ ${optionEntries.join(', ')} }` : '{}';
     const listenerLines = spec.signals
       .filter((port) => stream.listeners[port] !== undefined)
       .map((port) => `    ${port}: ${handlerArrow(stream.listeners[port], '()', 4)}`);
@@ -7251,6 +7262,8 @@ export function emitComponent(
     repeatLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'repeat'),
     // EXP-011 §77.
     actionsLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'actions'),
+    // EXP-011 §78.
+    historyLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'history'),
     // EXP-011 §59.
     cryptoHelpers: usedCryptoHelpers,
     screenLib: screenHooks.length > 0,

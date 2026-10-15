@@ -129,11 +129,12 @@ Twenty-two nodes. With Tier 3.11's three: **25 scheduled ⇒ ceiling 117 of 127 
 
 ### Not a target — re-ruled 2026-09-03 (§50), and every one of them must now be **badged**
 
-`Action Dispatcher` / `Action Handler`, `Optimistic Update`, `State History` / `State Snapshot` /
-`Undo / Redo`, ~~`Parse CSV` / `To CSV`~~, ~~`Pattern Extractor`~~, and `Sign In With` (until provider
+~~`Action Dispatcher` / `Action Handler`~~, `Optimistic Update`, ~~`State History` / `State Snapshot` /
+`Undo / Redo`~~, ~~`Parse CSV` / `To CSV`~~, ~~`Pattern Extractor`~~, and `Sign In With` (until provider
 sign-in is a product decision).
 
-Ten nodes — **eight since 2026-09-26, seven since session 101**: Richard reversed the parsers'
+Ten nodes — **eight since 2026-09-26, seven since session 101, two since session 107** (§77 built the Dispatcher
+pair, §78 State History, State Snapshot and Undo / Redo): Richard reversed the parsers'
 exclusion (*"Can we not finish the code export nodes? If we had 100% coverage that would be a big
 deal"* — the whole list is now a target, §75), and `Parse CSV` / `To CSV` are **built in §75** beside
 `Parse XML` / `Parse Feed`, which his 2026-09-18 ruling had already scheduled. `Pattern Extractor` is
@@ -11374,3 +11375,122 @@ The picker is at **125 / 130**: State Snapshot, State History, Undo / Redo, Opti
 Built-ins on the Dispatcher are the next slice of this row. They need the Dispatcher's store resolved as a Global Store
 module (`appState.ts` discovery, a key typed `unknown` for each key a server may write) and a store adapter over
 `@nodegx/core`'s `Store`, which has no delete.
+
+## §78 State History, Undo / Redo and State Snapshot (session 107, 2026-10-15): picker 125 → 128 of 130
+
+### §78.1 What is built
+
+**The shape: the streaming table, members ten to twelve.** Every port fits the table as §77 left it. The signal inputs
+are verbs on a handle (`clearHistory()`; `undo()` / `redo()` / `jumpTo(index)`; `save(name)` / `restore(name)`), the
+signal outputs are listeners, the value outputs live getters, and the value inputs options applied through the node's
+own setters when they change. Two ports are carried by the pulse rather than read from the render, because the runtime
+defers each verb to the end of the frame and so reads the value that arrived with it: Target Index rides Jump To, and
+Snapshot Name rides both Save and Restore.
+
+**Store Name is the store module, not an option.** A history-family plan carries `store` (the store's name), and the
+component prints it first in the options (`{ store: app, maxHistory: 20 }`) and imports `../stores/app`. The lib is
+handed the same `@nodegx/core` `store()` object the app's Set and Subscribe nodes write and read. Resolving the store by
+name inside the lib was rejected: `store(name, {})` creates a store when none is registered yet, so a history that ran
+before the store module would have created it empty and the module's initial state would have been lost. `appState.ts`
+now counts the three as naming their store (`historians`), so a store only a history node names still gets its module,
+and the module's doc comment says which nodes keep its history, step through it and checkpoint it.
+
+**`src/emit/historyLib.ts` → emitted `src/lib/history.ts`**, in three parts:
+
+- **The store seam.** `globalstore.ts` gives the runtime's history five things `@nodegx/core`'s store has not got, and
+  the seam supplies each over the store's public surface (`peek`, `set`, `subscribe`): which keys a write changed (a
+  write that changed nothing is no commit, though the core store notifies on every `set`, CONTRACT.md C2); a key filter
+  on a subscription; a deep snapshot with the keys it can only hold by reference (`cloneValue` verbatim); a full replace
+  that deletes what the snapshot has not got; and the runtime's key order (§78.3 #1). A deleted key is written as
+  `undefined`, and `undefined` is absence throughout: the exported store has no delete, and a Set never sends
+  `undefined`, so a key holding it is a key the runtime would not have.
+- **The manager**, `statehistory.ts`'s `StateHistoryManager` near-verbatim with each `globalStoreManager` call replaced
+  by the seam: one history per store name for the app, reference-counted attach, Max History with the current entry
+  never dropped, Coalesce in a sliding window, a restore never recording itself, Track Keys projecting and restoring
+  only its keys, Enabled pausing and resuming with a fresh entry if the state drifted, and the named snapshots.
+- **The three node shells and their hooks**: each node's setters, values before every signal, and the outcome contract
+  (Undo / Redo's failures raise `undo/operation-failed` through `reportOutcome`; State Snapshot raises
+  `state-snapshot/operation-failed` itself, once per new message, and reports its Failure per invocation with
+  `raise: false`; Completed after every outcome). A State History attaches after mount and reconfigures in place when an
+  option changes, which is the runtime's scheduled setup; unmounting detaches it.
+
+The lib was written as a plain `.ts` (session scratchpad `historylib/history.ts`), typechecked strict, graded (§78.2),
+and turned into the line array by `historylib/gen.js`, which checks the round trip byte for byte.
+
+**Plan (`plan.ts`).** Three table rows, `StreamKind += history | undo | snapshot`, `lib += history`, `streamTypeOfKind`
+and `OWN_CHAIN_OUTPUTS`. Two refusals in `streamPlanOf`, by sentence:
+- `its Store Name is wired — which store it works on must be readable off the graph, where the store module is`
+- `the store "<name>" it names is not exported: <the store's own reason>` (an authored Persist, for one).
+
+### §78.2 The test: `tests/the-state-history.test.ts`, 20 rows, and `tests/fixtures/history-desk`
+
+§A runs the fixture whole: the app typechecks, `history.ts` and `errors.ts` ship, no notes beyond the router shell, and
+a State Snapshot in `Components/Checkpoint` is handed the same store module as the State History and Undo / Redo on
+`Pages/Home`. **§B is the differential.** The runtime's own `statehistory.ts` over its own `globalstore.ts` and
+`model.ts` (each loaded fresh per script) against the lib over `@nodegx/core`'s own store (from source, fresh per
+script), on **300 seeded scripts of 30 steps**: writes of 16 value shapes (two of them by reference), deletes, undo,
+redo, jump, clear, save, restore by name, restore from data (good, JSON text, bad, not JSON), a clock advance,
+reconfigure (Max History, Coalesce, Enabled, Track Keys, including the clamps) and a second attach that detaches. After
+every step the result, the number of history listeners that heard it, the whole history and the store's snapshot must
+be equal. A control asserts the grid reached every verb, every end-stop and refusal, coalescing, a by-reference key, a
+pause and resume, and a projected restore. Two mutants must be caught: a seam that commits a write which changed
+nothing, and a recorder that records its own restores. §C covers the wire shapes and the refusals by sentence, §D the
+findings, §E the ledger.
+
+**On the export, the node shells are graded by NSP-008** (`tests/node-spec-graph.test.ts`): t02's four scenarios (State
+History records each commit; a new write discards the redo stack; an untracked store and an out-of-range Jump To are
+failures that say so; Save and Restore with the restore undone) **all play and pass**. The graph line moves from 4 to
+**8 of 85 conforming, 15 played**. Their claims on the Global Store node's own `state` output are not graded on the
+export: that output is not lifted (t01, §78.5), so the reach drops those claims and grades the history's.
+
+### §78.3 What building it found
+
+1. **The store's key order leaks into two outputs.** The runtime's Model deletes a key outright, so writing it again
+   appends it at the end; the exported store keeps a deleted key in place. The first differential run had 26 of 300
+   scripts differ, in the State History's By-Reference Keys (`d,a` against `a,d`) and in the order of a full restore's
+   Changed description. The seam now keeps the runtime's order itself (a key that appears joins at the end, one that
+   disappears leaves), and snapshots, restores and the by-reference keys walk it: 1,000 scripts, 0 differ.
+2. **The graph harness could not load a store module.** It served a component's `../lib/<name>` and nothing under
+   `../stores/`. No scenario had played one before: t01's three Global Store scenarios have always been outside on the
+   store translation's own refusals. It now serves `src/stores/<name>.ts` once per graph, over a cleared store registry
+   (`store(name, initial)` would otherwise return the store a previous scenario made under that name).
+3. **The graph harness had no clock.** The runtime target installs the world's clock (`Date.now` reads it for the play),
+   so a history entry is stamped 0 there; the export stamped the real time and all four t02 scenarios differed on
+   `history[0].timestamp`. The export target's `install` now puts `Date.now` on the world's clock the same way.
+   Advancing it is still outside (`canPlay` keeps every `advance` step out).
+4. **The table's own invariant caught a port the first draft left out.** `streaming-trio.test.ts` holds every row to
+   the catalog's port set, and Store Name was in none of data / config / actions. The row now carries it as `store`
+   (StreamNodeSpec.store), and the invariant counts it, rather than the test excusing it.
+
+### §78.4 Recorded differences (not refused)
+
+- **A deleted key is `undefined`, not absent, in the store itself.** Every reader of the history and the snapshots
+  treats the two as one. A key the store module's interface types as required (one from a declarer's initial state)
+  can read `undefined` after a Restore from Snapshot Data that lacks it; in the runtime it reads `undefined` too, because
+  the key is gone.
+- **A step runs at its pulse.** The runtime queues Undo / Redo / Jump To, Save / Restore and Clear History and runs them
+  at the end of the frame, after every input that arrived with them; the export runs each where it is pulsed. A chain
+  that writes the store and steps the history in the same frame orders the two differently.
+- **A State History attaches after mount.** The runtime attaches once the node is in a scope. A write made in an
+  earlier mount effect lands in the baseline rather than as the first entry.
+- **A Snapshot's `revision`** counts the commits the history module has seen since it first saw the store, not the
+  store's whole life (the runtime counts the initial-state fill as a commit, too).
+
+### §78.5 What this leaves
+
+The picker is at **128 / 130**: Optimistic Update (the history family's fourth, `optimisticupdatenode.ts` over
+`globalstore.ts`'s patches: `applyPatch` / `commitPatch` / `rollbackPatch` with overlapping patches handing values to
+each other, and a deadline) and Sign In With (§79). Optimistic Update can be built on this module's seam: a patch is a
+`writeKeys` with the values each key held before, and the seam already sees every write. t03's two clock-free scenarios
+will grade it; its third needs the harness's clock to advance.
+
+The t01 line is the store translation itself: a Global Store node's outputs (`state`, `changedKeys`, `stateChanged`) are
+not lifted, and a number written to a key the initial state types as a number is refused ("only string writes translate
+in this slice"). Lifting those would put three more scenarios on the line and grade the t02 claims this section could not.
+
+**Readings.** Whole-package export jest: the first full run read `Test Suites: 2 failed, 119 passed, 121` (386 s). One
+was `streaming-trio` (§78.3 #4, fixed; 60 / 60 after). The other was HLS-001, red on the corpus count (54 → 55) and on 74
+paths, counted by cause: the 54 projects' `README.md` (the coverage sentence) and history-desk's own 20 files, nothing
+else. Golden regenerated and its diff counted the same way (54 lines out, all README; 54 README lines and history-desk's
+22-line block in); HLS-001 4 / 4 after. `the-state-history` 20 / 20 and `node-spec-graph` 7 / 7 rerun on the final tree.
+`export-ledger:check` OK (135 translated); `export-ledger:picker --check` holds at 128 / 130; package and editor `tsc` 0.

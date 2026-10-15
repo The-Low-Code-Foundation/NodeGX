@@ -474,6 +474,21 @@ export function emitGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires:
     const mod = { exports: exported };
     const req = (id: string): unknown => {
       if (id.endsWith('.css')) return new Proxy({}, { get: (_t, k) => String(k) });
+      // EXP-011 §78. A component imports the store module a history-family hook is handed (`../stores/app`). Served
+      // from the emitted app like a lib, once per graph, and over a cleared registry: `store(name, initial)` returns
+      // the store a previous scenario made under that name, so without the clear a scenario would start from the
+      // last one's state.
+      const st = /^\.\.\/stores\/([\w-]+)$/.exec(id);
+      if (st) {
+        const file = `src/stores/${st[1]}.ts`;
+        if (!libs.has(file)) {
+          const source = app.files[file];
+          if (source === undefined) throw new Error(`${self} imports ${id} and the emitted app has no ${file}`);
+          (require('@nodegx/core') as { clearStores(): void }).clearStores();
+          libs.set(file, load(transpile(source), file));
+        }
+        return libs.get(file);
+      }
       // a component imports `../lib/<name>`; a lib imports its sibling as `./<name>` (actions.ts's `./errors`)
       const m = /^\.\.\/lib\/([\w-]+)$/.exec(id) ?? (self.startsWith('src/lib/') ? /^\.\/([\w-]+)$/.exec(id) : null);
       if (m) {
@@ -610,9 +625,16 @@ export function exportGraphTarget(): GraphTarget<ExportGraphHandle> {
       return handles;
     },
 
-    // canPlay admits only an empty world script, so there is nothing to seed: the emitted app makes its own stores
-    install() {
-      return () => undefined;
+    // canPlay admits only an empty world script, so there is nothing to seed: the emitted app makes its own stores.
+    // EXP-011 §78. The world's clock is installed as the runtime target's installWorld installs it: `Date.now` reads it
+    // for the play, so a State History entry is stamped with the world's time on both sides. Nothing advances it here
+    // (canPlay keeps every `advance` step outside).
+    install(world) {
+      const dateNow = Date.now;
+      Date.now = () => world.clock.now();
+      return () => {
+        Date.now = dateNow;
+      };
     },
 
     mount() {

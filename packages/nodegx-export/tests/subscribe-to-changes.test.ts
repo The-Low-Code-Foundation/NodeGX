@@ -1009,7 +1009,7 @@ describe('§F the ledger', () => {
     const row = ledger.entries.find((e) => e.typeName === SUBSCRIBE_TO_CHANGES_TYPE)!;
     expect(row.exemption).toBeUndefined();
     expect(String(row.note)).toContain('useSubscribeToChanges');
-    expect(ledger.pickerCoverageFloor).toBe(125); // EXP-011 §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89)
+    expect(ledger.pickerCoverageFloor).toBe(128); // EXP-011 §78 State History + Undo / Redo + State Snapshot (session 107) on top of §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89)
     expect(ledger.$pickerCoverageFloorComment).toContain('117 after Tier 3.11 row 3 Subscribe To Changes');
   });
 

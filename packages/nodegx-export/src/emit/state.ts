@@ -118,6 +118,11 @@ function declarersComment(store: StorePlan): string {
         return `Seeded with { ${w.seeds.map((seed) => `${propKey(seed.key)}: ${tsLiteral(seed.value)}`).join(', ')} } by ${who} on every mount of its component.`;
       }
       return `Written by ${who}.`;
+    }),
+    // EXP-011 §78. The nodes handed this module by src/lib/history.ts.
+    ...(store.historians ?? []).map((h) => {
+      const who = `${h.label !== undefined ? `"${h.label}" ` : ''}(${h.nodeType} \`${h.nodeId}\` on /${h.componentPath})`;
+      return `${h.nodeType === 'net.noodl.StateHistory' ? 'History kept by' : h.nodeType === 'net.noodl.StateSnapshot' ? 'Checkpointed by' : 'Stepped through by'} ${who}.`;
     })
   ];
   if (lines.length === 0) {

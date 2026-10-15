@@ -81,6 +81,11 @@ export interface StorePlan {
   declarers: VariableWriter[];
   /** `net.noodl.GlobalStore.Set` nodes writing this store. */
   writers: VariableWriter[];
+  /**
+   * EXP-011 §78. The State History, Undo / Redo and State Snapshot nodes naming this store. Each is handed the store
+   * module itself, so a store one of them names is emitted even when no Global Store node declares it.
+   */
+  historians?: VariableWriter[];
   /** Set: the whole store defers (authored persist, unparseable initial state on every declarer). */
   deferred?: string;
   /** Merged initial states, ignored storageKeys — surfaced through the component notes. */
@@ -102,6 +107,12 @@ export const GLOBAL_STORE_SUBSCRIBE = 'net.noodl.GlobalStore.Subscribe';
 
 export function isGlobalStoreFamily(type: string): boolean {
   return type === GLOBAL_STORE || type === GLOBAL_STORE_SET || type === GLOBAL_STORE_SUBSCRIBE;
+}
+
+/** EXP-011 §78. The nodes `src/lib/history.ts` hosts — each names a Global Store with the same `storeName` port. */
+const HISTORY_FAMILY = new Set(['net.noodl.StateHistory', 'net.noodl.StateHistory.Undo', 'net.noodl.StateSnapshot']);
+export function isHistoryFamily(type: string): boolean {
+  return HISTORY_FAMILY.has(type);
 }
 
 /** `Object` — displayed "Object", stored as `Model2` (modelnode2.ts). */
@@ -443,7 +454,7 @@ export function collectAppState(ir: ExportIR): AppStateRegistry {
   const objectIds = new Set<string>();
   for (const component of ir.components) {
     for (const node of component.nodes) {
-      if (isGlobalStoreFamily(node.type)) {
+      if (isGlobalStoreFamily(node.type) || isHistoryFamily(node.type)) {
         const name = storeNameOf(node, wiredPortsOf(component));
         if (name !== undefined) globalStoreNames.add(name);
       }
@@ -553,6 +564,14 @@ export function collectAppState(ir: ExportIR): AppStateRegistry {
           for (const key of payloadKeysOf(node)) {
             if (!plan.payload.some((p) => p.key === key)) plan.payload.push({ key, tsType: 'unknown' });
           }
+        }
+      }
+      // EXP-011 §78. A history-family node names the store it is handed; a wired name defers in plan.ts.
+      if (isHistoryFamily(node.type)) {
+        const storeName = storeNameOf(node, wiredPortsOf(component));
+        if (storeName !== undefined) {
+          const plan = ensureStore(storeName);
+          plan.historians = [...(plan.historians ?? []), writerRef(component, node)];
         }
       }
       if (isGlobalStoreFamily(node.type)) {
@@ -1029,7 +1048,8 @@ export function isTextInputType(type: string): boolean {
 
 /**
  * The store a node names: the literal `storeName`, `'app'` when absent or empty (all three
- * runtime nodes default exactly so), undefined when wired or non-literal — genuinely dynamic.
+ * runtime nodes default exactly so, and the history family's three with them), undefined when wired or
+ * non-literal — genuinely dynamic.
  */
 export function storeNameOf(node: NodeIR, wiredPorts: Set<string>): string | undefined {
   if (wiredPorts.has(`${node.id}:storeName`)) return undefined;

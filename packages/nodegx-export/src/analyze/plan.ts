@@ -641,7 +641,7 @@ export const APP_ERROR_TS_TYPE = '{ code: string; message: string; nodeId: strin
 export const STREAM_PARSER_TYPE = 'net.noodl.JSONStreamParser';
 export const STREAM_BUFFER_TYPE = 'net.noodl.StreamBuffer';
 export const TEXT_ACCUMULATOR_TYPE = 'net.noodl.TextAccumulator';
-export type StreamKind = 'parser' | 'buffer' | 'accumulator' | 'sse' | 'websocket' | 'subscription' | 'repeat' | 'dispatcher' | 'handler';
+export type StreamKind = 'parser' | 'buffer' | 'accumulator' | 'sse' | 'websocket' | 'subscription' | 'repeat' | 'dispatcher' | 'handler' | 'history' | 'undo' | 'snapshot';
 /** EXP-011 §64. `Server-Sent Events` — the fourth member of the table: no data port, two Actions, its own module. */
 export const SSE_TYPE = 'net.noodl.SSE';
 /** EXP-011 §65. `WebSocket` — the fifth member: a data port (Message) that only the Send verb carries, three Actions, its own module. */
@@ -666,6 +666,15 @@ export const ACTION_DISPATCHER_TYPE = 'net.noodl.ActionDispatcher';
 export const ACTION_HANDLER_TYPE = 'net.noodl.ActionHandler';
 /** The four built-in store actions (action-dispatcher.ts BUILT_IN_ACTIONS) — a dispatcher that enables one is refused in this slice. */
 export const ACTION_BUILT_INS = ['SET_STORE', 'MERGE_STORE', 'DELETE_STORE_KEY', 'CLEAR_STORE'] as const;
+/**
+ * EXP-011 §78. `State History`, `Undo / Redo` and `State Snapshot` — the tenth, eleventh and twelfth members, one module
+ * (`src/lib/history.ts`) holding the app's one history manager and its named checkpoints over the exported Global Store.
+ * Each names its store by a literal Store Name, printed as the store module itself (`store: app`), so the history reads
+ * and writes the same `store()` the app's Set and Subscribe nodes do.
+ */
+export const STATE_HISTORY_TYPE = 'net.noodl.StateHistory';
+export const UNDO_REDO_TYPE = 'net.noodl.StateHistory.Undo';
+export const STATE_SNAPSHOT_TYPE = 'net.noodl.StateSnapshot';
 /** EXP-011 §66. The structural RealtimeError — `src/lib/realtime.ts`'s, spelled so a store row needs no import. */
 export const REALTIME_ERROR_TS_TYPE = '{ message: string; code: string; kind: string } | null';
 export interface StreamValueField {
@@ -681,11 +690,13 @@ export interface StreamNodeSpec {
   hook: string;
   localStem: string;
   /** The module the hook lives in (component.ts maps it to a path; emitApp.ts ships it). */
-  lib: 'streaming' | 'sse' | 'websocket' | 'realtime' | 'repeat' | 'actions';
+  lib: 'streaming' | 'sse' | 'websocket' | 'realtime' | 'repeat' | 'actions' | 'history';
   /** The runtime file the hook transcribes, for the emitted comment. */
   sourceFile: string;
   /** The data port, delivered with the pulse — absent on a node whose actions carry nothing (§64's SSE). */
   data?: { port: string; displayName: string };
+  /** EXP-011 §78. The input naming the store module the hook is handed (StreamPlan.store) — never an option. */
+  store?: { port: string; displayName: string };
   /** The config ports, read live off the options object. `param` names the on-disk parameter / wire port where it differs from the option (§66's Class is `collectionName` on disk). */
   config: Array<{ port: string; displayName: string; param?: string }>;
   /** The action ports: the verb on the handle, and whether the call carries the data port's value. */
@@ -990,12 +1001,91 @@ export const STREAM_NODES: Record<string, StreamNodeSpec> = {
       triggeredCount: { tsType: 'number', cast: 'number', maybeUndefined: false },
       error: { tsType: 'string', cast: 'string', maybeUndefined: false }
     }
+  },
+  // EXP-011 §78. Store Name is the store module (StreamPlan.store), never an option; the other four inputs are config,
+  // applied through the node's setters as they change (the runtime's scheduled setup: reconfigure in place, keeping the
+  // history). Clear History carries nothing. History Changed and the outcome pair are the listeners (no Failure: the
+  // node is the tracker, so there is no store it can be asked for and fail to find). Every value a live getter.
+  [STATE_HISTORY_TYPE]: {
+    kind: 'history',
+    store: { port: 'storeName', displayName: 'Store Name' },
+    displayName: 'State History',
+    hook: 'useStateHistory',
+    localStem: 'History',
+    lib: 'history',
+    sourceFile: 'statehistorynode.ts',
+    config: [
+      { port: 'trackKeys', displayName: 'Track Keys' },
+      { port: 'maxHistory', displayName: 'Max History' },
+      { port: 'coalesceMs', displayName: 'Coalesce (ms)' },
+      { port: 'enabled', displayName: 'Enabled' }
+    ],
+    actions: { clearHistory: { verb: 'clearHistory', takesData: false } },
+    signals: ['historyChanged', 'done', 'completed', 'unchanged'],
+    values: {
+      historySize: { tsType: 'number', cast: 'number', maybeUndefined: false },
+      currentIndex: { tsType: 'number', cast: 'number', maybeUndefined: false },
+      canUndo: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      canRedo: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      fullyRestorable: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      byReferenceKeys: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      history: { tsType: 'unknown[]', cast: 'array', maybeUndefined: false }
+    }
+  },
+  // EXP-011 §78. Target Index is the data port, carried by Jump To and read at the pulse (the runtime defers the jump
+  // to the end of the frame so the index that arrived with it is the one it reads); Undo and Redo carry nothing. The
+  // three per-step Events and the outcome trio are the listeners in undonode.ts's declaration order. Error is
+  // undefined until a step fails, as the node's `_internal` holds it.
+  [UNDO_REDO_TYPE]: {
+    kind: 'undo',
+    store: { port: 'storeName', displayName: 'Store Name' },
+    displayName: 'Undo / Redo',
+    hook: 'useUndoRedo',
+    localStem: 'UndoRedo',
+    lib: 'history',
+    sourceFile: 'undonode.ts',
+    data: { port: 'targetIndex', displayName: 'Target Index' },
+    config: [],
+    actions: {
+      undo: { verb: 'undo', takesData: false },
+      redo: { verb: 'redo', takesData: false },
+      jumpTo: { verb: 'jumpTo', takesData: true }
+    },
+    signals: ['undone', 'redone', 'jumped', ...OUTCOME_SIGNALS],
+    values: {
+      fullyRestorable: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      byReferenceKeys: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      error: { tsType: 'string', cast: 'string', maybeUndefined: true }
+    }
+  },
+  // EXP-011 §78. Snapshot Name is the data port, carried by both Save and Restore and read at the pulse; Snapshot Data
+  // is config (an exported Snapshot fed back in wins over the name). Saved, Restored and the outcome pair (no
+  // Unchanged: Save copies and Restore writes every time) are the listeners. Snapshot and Error are undefined until a
+  // Save or Restore, as the node's `_internal` holds them.
+  [STATE_SNAPSHOT_TYPE]: {
+    kind: 'snapshot',
+    store: { port: 'storeName', displayName: 'Store Name' },
+    displayName: 'State Snapshot',
+    hook: 'useStateSnapshot',
+    localStem: 'Snapshot',
+    lib: 'history',
+    sourceFile: 'statesnapshotnode.ts',
+    data: { port: 'snapshotName', displayName: 'Snapshot Name' },
+    config: [{ port: 'snapshotData', displayName: 'Snapshot Data' }],
+    actions: { save: { verb: 'save', takesData: true }, restore: { verb: 'restore', takesData: true } },
+    signals: ['saved', 'restored', 'done', 'completed', 'failure'],
+    values: {
+      snapshot: { tsType: 'unknown', cast: 'unknown', maybeUndefined: true },
+      fullyRestorable: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      byReferenceKeys: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      error: { tsType: 'string', cast: 'string', maybeUndefined: true }
+    }
   }
 };
 
 /** EXP-011 §64. The type id behind a `stream-out`'s kind — the one ladder component.ts and the maybe-undefined answer share. */
 export function streamTypeOfKind(kind: StreamKind): string {
-  return kind === 'parser' ? STREAM_PARSER_TYPE : kind === 'buffer' ? STREAM_BUFFER_TYPE : kind === 'accumulator' ? TEXT_ACCUMULATOR_TYPE : kind === 'sse' ? SSE_TYPE : kind === 'websocket' ? WEBSOCKET_TYPE : kind === 'repeat' ? REPEAT_TYPE : kind === 'dispatcher' ? ACTION_DISPATCHER_TYPE : kind === 'handler' ? ACTION_HANDLER_TYPE : SUBSCRIBE_TO_CHANGES_TYPE;
+  return kind === 'parser' ? STREAM_PARSER_TYPE : kind === 'buffer' ? STREAM_BUFFER_TYPE : kind === 'accumulator' ? TEXT_ACCUMULATOR_TYPE : kind === 'sse' ? SSE_TYPE : kind === 'websocket' ? WEBSOCKET_TYPE : kind === 'repeat' ? REPEAT_TYPE : kind === 'dispatcher' ? ACTION_DISPATCHER_TYPE : kind === 'handler' ? ACTION_HANDLER_TYPE : kind === 'history' ? STATE_HISTORY_TYPE : kind === 'undo' ? UNDO_REDO_TYPE : kind === 'snapshot' ? STATE_SNAPSHOT_TYPE : SUBSCRIBE_TO_CHANGES_TYPE;
 }
 export const RUN_TASKS_TYPE = 'RunTasks';
 /** EXP-011 §57. `Repeater Item` — the type id is the runtime's `name`, not the display name. */
@@ -1034,6 +1124,10 @@ const OWN_CHAIN_OUTPUTS: Record<string, readonly string[]> = {
   // EXP-011 §77. The dispatcher's and the handler's signals, the same footing.
   [ACTION_DISPATCHER_TYPE]: STREAM_NODES[ACTION_DISPATCHER_TYPE].signals,
   [ACTION_HANDLER_TYPE]: STREAM_NODES[ACTION_HANDLER_TYPE].signals,
+  // EXP-011 §78. The history family's signals, the same footing.
+  [STATE_HISTORY_TYPE]: STREAM_NODES[STATE_HISTORY_TYPE].signals,
+  [UNDO_REDO_TYPE]: STREAM_NODES[UNDO_REDO_TYPE].signals,
+  [STATE_SNAPSHOT_TYPE]: STREAM_NODES[STATE_SNAPSHOT_TYPE].signals,
   [LOG_TYPE]: ['done'],
   [TIMER_TYPE]: TIMER_OUTPUTS,
   [VALUE_CHANGED_TYPE]: ['valueChanged'],
@@ -3290,6 +3384,8 @@ export interface StreamPlan {
   config: Array<{ port: string; expr: ValueExpr }>;
   /** The signal outputs, as the chains wired off them. */
   listeners: Record<string, HandlerAction[]>;
+  /** EXP-011 §78. The store a history-family node names — printed as its store module (`store: app`) and imported. */
+  store?: string;
   comment: string;
 }
 
@@ -13704,6 +13800,16 @@ function planComponent(
     if (spec.kind === 'handler' && wiredPorts.has(`${node.id}:result`) && (wiredPorts.has(`${node.id}:autoComplete`) || literalParam(node, 'autoComplete') !== false)) {
       return refuse('its Result input is wired while Auto Complete is on — the runtime hands back the value its Trigger chain has just written, and the export would hand back the one from the render before');
     }
+    // EXP-011 §78. A history-family node's Store Name is the store module the hook is handed, so it must name one the
+    // export emits: a literal (or the default 'app'), never a wire, and not a store that defers as a whole.
+    let store: string | undefined;
+    if (spec.store !== undefined) {
+      if (wiredPorts.has(`${node.id}:${spec.store.port}`)) return refuse('its Store Name is wired — which store it works on must be readable off the graph, where the store module is');
+      const named = storePlanOf(node);
+      if (named === undefined) return refuse('its Store Name is not a literal');
+      if (named.deferred !== undefined) return refuse(`the store "${named.name}" it names is not exported: ${named.deferred}`);
+      store = named.name;
+    }
     const valueInputs: Array<{ port: string; displayName: string; param?: string }> = [...(spec.data !== undefined ? [spec.data] : []), ...spec.config];
     for (const wire of component.connections.filter((c) => c.toId === node.id)) {
       if (spec.actions[wire.toProperty] !== undefined || valueInputs.some((p) => (p.param ?? p.port) === wire.toProperty)) continue;
@@ -13758,6 +13864,7 @@ function planComponent(
       data,
       config,
       listeners: {},
+      ...(store !== undefined ? { store } : {}),
       comment: `${label} — ${/^[AEIOU]/.test(spec.displayName) ? 'an' : 'a'} ${spec.displayName} (${spec.sourceFile}), hosted by ${spec.lib}.ts; its value outputs read live off the handle.`
     };
     streamPlans.set(node.id, core);
