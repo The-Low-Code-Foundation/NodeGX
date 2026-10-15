@@ -246,8 +246,12 @@ function runSitting(prompt, tag, resume) {
  *  Q1's sitting 2 (s4): 42 s, NEXT.md unchanged, its last entry "Allow grep?" on the round root. Say so. */
 function approvalEnd(journal) {
   try {
-    const tail = fs.readFileSync(journal, 'utf8').trim().split('\n').slice(-3).map((l) => JSON.parse(l));
-    const cb = tail.find((e) => e.type === 'callback' && e.detail?.kind === 'approval');
+    // s8 (SP1 sitting 3): Vibe writes the approval callback and THEN the effect and a hooks notice — "Allow grep?" sat
+    // fourth from the end and the sitting read as finished. The last approval among the last 12 entries, with no
+    // assistant answer after it, is where the sitting ended.
+    const tail = fs.readFileSync(journal, 'utf8').trim().split('\n').slice(-12).map((l) => { try { return JSON.parse(l); } catch { return {}; } });
+    const at = tail.map((e) => e.type === 'callback' && e.detail?.kind === 'approval').lastIndexOf(true);
+    const cb = at >= 0 && !tail.slice(at + 1).some((e) => e.role === 'assistant') ? tail[at] : undefined;
     if (cb) return { outcome: 'approval', stop: `${cb.title} ${cb.detail?.effect?.display?.summary ?? ''}`.trim() };
   } catch {}
   return {};
