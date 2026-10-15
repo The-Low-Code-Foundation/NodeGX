@@ -96,6 +96,9 @@ let proxy = null;
 if (record) {
   proxy = spawn(process.execPath, [path.join(path.dirname(new URL(import.meta.url).pathname), 'record-proxy.mjs'), path.join(root, 'calls'), '--port', String(RECORD_PORT)], { stdio: ['ignore', 'pipe', 'pipe'] });
   await new Promise((resolve) => proxy.stdout.once('data', resolve));
+  // s7 (PROXYDIES): the proxy's stderr was piped and never read — T1's proxy died and said so to no one.
+  proxy.stderr.pipe(fs.createWriteStream(path.join(root, 'calls', 'proxy.stderr'), { flags: 'a' }));
+  proxy.on('exit', (code, sig) => { if (code !== null && code !== 0) fs.appendFileSync(path.join(root, 'calls', 'log.txt'), `proxy exited ${code} ${sig || ''}\n`); });
 }
 fs.writeFileSync(
   path.join(HOME, '.vibe', 'config.toml'),

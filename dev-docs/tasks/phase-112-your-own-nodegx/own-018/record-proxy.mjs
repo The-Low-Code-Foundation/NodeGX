@@ -73,6 +73,11 @@ export function sseReader() {
   };
 }
 
+// s7 (PROXYDIES): the upstream is api.mistral.ai; RECORD_UPSTREAM points it elsewhere only for the lab's own test.
+const UPSTREAM = process.env.RECORD_UPSTREAM || 'https://api.mistral.ai';
+// Nothing a single call does may end the proxy: the round behind it is hours of work.
+for (const ev of ['unhandledRejection', 'uncaughtException']) process.on(ev, (e) => fs.appendFileSync(path.join(OUT, 'log.txt'), `${ev}: ${String(e?.stack || e).slice(0, 400)}\n`));
+
 http.createServer(async (req, res) => {
   const chunks = [];
   for await (const c of req) chunks.push(c);
@@ -84,7 +89,7 @@ http.createServer(async (req, res) => {
   delete headers['content-length'];
   const sent = Date.now();
   try {
-    const upstream = await fetch(`https://api.mistral.ai${req.url.replace(/^\/v1/, '/v1')}`, { method: req.method, headers, body: body.length ? body : undefined, duplex: 'half' });
+    const upstream = await fetch(`${UPSTREAM}${req.url.replace(/^\/v1/, '/v1')}`, { method: req.method, headers, body: body.length ? body : undefined, duplex: 'half' });
     const headersAt = Date.now();
     const out = {};
     const limits = {};
@@ -117,8 +122,17 @@ http.createServer(async (req, res) => {
     fs.appendFileSync(path.join(OUT, 'calls.jsonl'), JSON.stringify({ n: i, url: req.url, status: upstream.status, reqBytes: body.length, messages: msgs, sent, headersMs: headersAt - sent, firstChunkMs: firstAt === null ? null : firstAt - sent, totalMs: endAt - sent, resBytes: bytes, finish, usage, limits }) + '\n');
     fs.appendFileSync(path.join(OUT, 'log.txt'), `${i} ${req.method} ${req.url} → ${upstream.status} ${body.length}B\n`);
   } catch (e) {
-    res.writeHead(502);
-    res.end(String(e));
-    fs.appendFileSync(path.join(OUT, 'log.txt'), `${i} ${req.method} ${req.url} → proxy error ${String(e).slice(0, 200)}\n`);
+    // s7 (PROXYDIES, T1): a stream that broke AFTER its headers were sent made writeHead(502) throw here, the handler's
+    // rejection went unhandled and the proxy process died — sitting 2 lost, sitting 3 retried a dead port for 5 min and
+    // the round was stopped. Now: a broken stream is passed on broken (the socket destroyed, as a direct connection
+    // would see it) and the proxy lives on for Vibe's retry.
+    if (res.headersSent) res.destroy(e);
+    else {
+      res.writeHead(502);
+      res.end(String(e));
+    }
+    const cause = e?.cause ? ` (cause: ${e.cause.code || e.cause.name || ''} ${String(e.cause.message || e.cause).slice(0, 120)})` : '';
+    fs.appendFileSync(path.join(OUT, 'calls.jsonl'), JSON.stringify({ n: i, url: req.url, status: null, reqBytes: body.length, sent, totalMs: Date.now() - sent, error: String(e).slice(0, 200) + cause }) + '\n');
+    fs.appendFileSync(path.join(OUT, 'log.txt'), `${i} ${req.method} ${req.url} → proxy error after ${Date.now() - sent} ms: ${String(e).slice(0, 200)}${cause}\n`);
   }
 }).listen(PORT, '127.0.0.1', () => console.log(`recording on http://127.0.0.1:${PORT}/v1 → ${OUT}`));
