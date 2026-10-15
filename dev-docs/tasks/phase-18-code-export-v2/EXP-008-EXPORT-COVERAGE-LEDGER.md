@@ -237,9 +237,30 @@ evaluation over its unset inputs; unticked, it is still refused, with the box na
 sides. §B: the mutants. Removing the unticked guard turns exactly the 7 unticked/nothing rows red; removing the load
 evaluation's null turns exactly the 3 ticked NaN/throw/nothing rows red. HLS-001: 2 paths moved (budget-desk's
 Gauge, cheer's Home), golden regenerated, diff 2 out / 2 in. `jsfun` gained three cases and re-pinned two. `stores-events`' hand-written cheer Home target and HLS-004 AC4 were re-pinned to the guard.
-**9 gap ports remain:** P18-S110-ROUTERSELF (6), -NOWRAP, -PLACEHOLDEROPACITY, P18-S111-RECORDLIVE.
 
 **Not modelled, recorded:** before anything arrives, Result is `null` on both sides, but the export's `isTrue` /
 `asNumber` folds still compute from it where the runtime's getters abstain (`plan.ts`'s jsfun-out comment). Once an
 input arrives and its source goes back to `undefined`, the runtime holds the last value and the export reads
 `undefined` again. That is the general wire-hold gap, not this box's.
+
+**Then the Text `white-space` rule (P18-S110-NOWRAP), rendered before it was written — 1,227 of 1,396.** The row had
+been widened by reading, so session 112 rendered it first. One headless Chrome, three arms: the runtime
+(`render-from-disk.js`), HEAD's export and the patched export, four Texts, one per arm
+(`s112-nowrap-render/`). HEAD differed on all four: a typed line break collapsed to one line; a long word overflowed
+an 80 px box; Content Size wrapped at its parent; Ellipsis wrapped to three lines. **Two defects, not one.** The CSS had
+no `white-space` in any arm. And the line break never reached the CSS, because `jsxText` printed a literal bare
+and JSX turns a line break into a space. Fixed: the three arms on every `Text` in `emit/style.ts` (by type: the
+deprecated Label shares the role and sets none), Text Overflow carried, and `jsxText` taking the string form wherever
+JSX would rewrite a character. The patched export equals the runtime on every measured field but one: **the
+runtime's Ellipsis draws no "…"**, because its Text is `display: flex`. Filed as a runtime defect, P18-S112-FLEXELLIPSIS;
+the export keeps the author's choice, pinned in §D. **Graded:** `tests/the-white-space-arms.test.ts` (15). Mutant
+controls: the old `jsxText` turns 4 cases red, not the 5 predicted. A short child printed inline keeps its spaces in
+JSX, so only the own-line case needed the string form; the spec says so. Removing the arms turns exactly the 6 Text
+cases red. HLS-001: **103 paths moved, every one a `.module.css`, 0 `.tsx`**. Cross-checked both ways: a file moved
+if and only if it now holds a `white-space` rule. Golden diff 103 / 103. 403 Text nodes, 213 rules: identical
+Text styles share one class, and every Text class carries the rule. `Text.sizeMode` leaves `silent`: it now reaches
+(floor 1,226 → 1,227). Two hand-written targets pinned a Text's exact CSS and were re-pinned to the arm each Text's
+size mode gives (`visual.test.ts`'s PuppyCard: 2 × `pre`, 2 × `pre-wrap`; `sty004` AC4.7's lost style still adds
+nothing). Whole package (`nice -n 19 --runInBand`, 547 s): 124 / 127 suites, the three reds being those two specs
+(re-pinned, 63 / 63) and `parameter-coverage` on the P121 peer's three uncommitted Upload File ports, as in s110–s111.
+**8 gap ports remain:** P18-S110-ROUTERSELF (6), -PLACEHOLDEROPACITY, P18-S111-RECORDLIVE.

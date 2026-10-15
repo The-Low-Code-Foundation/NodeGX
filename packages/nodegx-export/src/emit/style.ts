@@ -414,6 +414,10 @@ const PROPERTY_ORDER = [
   'letter-spacing',
   'text-transform',
   'text-align',
+  // P18-S110-NOWRAP. Text's three white-space arms, together, after the text block they shape.
+  'white-space',
+  'overflow-wrap',
+  'text-overflow',
   'color',
   'opacity',
   'user-select'
@@ -773,6 +777,28 @@ export function computeNodeStyle(
 
   // The stack's clip is decided with its defaults above (its declared default is true, and the class states it).
   if (role !== 'stack' && literal('clip') === true) decls.push({ prop: 'overflow', value: 'hidden' });
+
+  /*
+   * P18-S110-NOWRAP. `Text.tsx` sets `white-space` on every Text, in three arms, and until now the export set none, so
+   * the default arm differed as well: a typed line break collapsed into a space and a long word ran out of its box.
+   * Truncating (Text Overflow Clip or Ellipsis): `nowrap`, the overflow itself, and `overflow: hidden` unless the
+   * author's clip already stated it. Content Size / Content Width: `pre`. Otherwise `pre-wrap` with
+   * `overflow-wrap: anywhere`. Keyed on the type, not the role: the deprecated Label shares the role and sets none.
+   */
+  if (node.type === 'Text') {
+    const textOverflow = String(literal('textOverflow') ?? catalogDefault('textOverflow') ?? 'wrap');
+    if (textOverflow === 'ellipsis' || textOverflow === 'clip') {
+      decls.push({ prop: 'white-space', value: 'nowrap' });
+      decls.push({ prop: 'text-overflow', value: textOverflow });
+      if (!decls.some((d) => d.prop === 'overflow')) decls.push({ prop: 'overflow', value: 'hidden' });
+    } else if (sizeMode === 'contentSize' || sizeMode === 'contentWidth') {
+      decls.push({ prop: 'white-space', value: 'pre' });
+    } else {
+      decls.push({ prop: 'white-space', value: 'pre-wrap' });
+      decls.push({ prop: 'overflow-wrap', value: 'anywhere' });
+    }
+    consumed.add('textOverflow');
+  }
 
   boxShorthand('padding', params, decls);
   boxShorthand('margin', params, decls);

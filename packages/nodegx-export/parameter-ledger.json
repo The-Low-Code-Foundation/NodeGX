@@ -1,6 +1,6 @@
 {
   "$comment": "EXP-008's per-parameter half (P18 session 110). tests/parameter-coverage.test.ts measures, for every translated picker node, whether each non-signal input changes the emitted files or notes (tests/helpers/parameter-probe.ts). This file holds what it cannot count as reaching: every SILENT port with its adjudication, and every UNPROBED port with its type. The spec holds both lists to the measurement in both directions and holds the reaching count to parameterCoverageFloor exactly — a rise must raise it in the same commit, like pickerCoverageFloor. A silent port is not a verdict until classified: gap (the runtime reads it, the export drops it with no note — names a dev-docs/bugs row), gated (reaches in a context the probe does not build — says which), refused-with (matters only where the export refuses out loud), inert (the runtime does not act on it either), unexamined (not yet read — the honest default for a new one).",
-  "parameterCoverageFloor": 1226,
+  "parameterCoverageFloor": 1227,
   "parameterCoverageTotal": 1396,
   "silent": {
     "AddDbModelRelation.modelId": {
@@ -169,11 +169,6 @@
     "SubscribeToChanges.enabled": {
       "class": "gated",
       "why": "Reaches with a backend and a collection (enabled: false emitted); the probe's fixture declares no backend, which is refused out loud"
-    },
-    "Text.sizeMode": {
-      "class": "gap",
-      "why": "Width / Height are gated as on Group, but Content Size / Content Width also switch white-space to pre, which the export never emits",
-      "bug": "P18-S110-NOWRAP"
     },
     "Upload File.file": {
       "class": "refused-with",

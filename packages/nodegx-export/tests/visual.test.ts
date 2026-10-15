@@ -53,6 +53,8 @@ export function PuppyCard({ photo, name, breed, age, description }: PuppyCardPro
 }
 `;
 
+// P18-S110-NOWRAP (s112): every Text wears the runtime's white-space arm — `pre` on the two Content Size
+// Texts, `pre-wrap` + `overflow-wrap: anywhere` on the two at the default size mode (rendered against the runtime).
 const GOLDEN_PUPPY_CARD_CSS = `/* @nodegx:generated (visual) */
 
 .card {
@@ -97,6 +99,7 @@ const GOLDEN_PUPPY_CARD_CSS = `/* @nodegx:generated (visual) */
   font-weight: var(--font-semibold);
   line-height: var(--leading-snug);
   letter-spacing: var(--tracking-tight);
+  white-space: pre;
   color: var(--foreground);
 }
 
@@ -114,6 +117,7 @@ const GOLDEN_PUPPY_CARD_CSS = `/* @nodegx:generated (visual) */
   font-size: var(--text-xs);
   font-weight: var(--font-semibold);
   letter-spacing: var(--tracking-wide);
+  white-space: pre;
   color: var(--muted-foreground);
 }
 
@@ -122,6 +126,8 @@ const GOLDEN_PUPPY_CARD_CSS = `/* @nodegx:generated (visual) */
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
   letter-spacing: var(--tracking-wide);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   color: var(--primary);
 }
 
@@ -129,6 +135,8 @@ const GOLDEN_PUPPY_CARD_CSS = `/* @nodegx:generated (visual) */
   margin: 0;
   font-size: var(--text-sm);
   line-height: var(--leading-relaxed);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   color: var(--muted-foreground);
 }
 `;

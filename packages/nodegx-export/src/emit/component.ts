@@ -7500,9 +7500,13 @@ function jsxAttr(name: string, value: string | number | boolean): string {
   return `${name}={${value}}`;
 }
 
-/** JSX text children: plain prose passes through; anything JSX-significant becomes a string literal. */
+/**
+ * A literal as a JSX child, exactly. Bare text is kept where JSX reads it back unchanged; anything JSX would rewrite takes
+ * the string form. P18-S110-NOWRAP: JSX turns a line break into a space and drops the whitespace beside it, trims a
+ * child printed on its own line, and decodes `&amp;`. Under a Text's `pre-wrap` each of those is visible.
+ */
 function jsxText(text: string): string {
-  if (/[{}<>]/.test(text)) return `{${JSON.stringify(text)}}`;
+  if (/[{}<>&\r\n]/.test(text) || /^\s|\s$/.test(text)) return `{${JSON.stringify(text)}}`;
   return text;
 }
 

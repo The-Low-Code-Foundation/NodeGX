@@ -186,7 +186,8 @@ describe('§AC4 a text style reaches the CSS', () => {
     // `lostHeading` names `Subheading`, which nothing defines. Consuming that name unconditionally
     // would hide the loss, which is precisely the old behaviour this task closed.
     expect(looks.files[REPORT]).toContain('parameter textStyle on lostHeading');
-    expect(rule(looks.files[CSS], 'lostHeading')).toEqual(['margin: 0']);
+    // The lost style adds nothing: what is left is the reset and the size mode's white-space arm (P18-S110-NOWRAP).
+    expect(rule(looks.files[CSS], 'lostHeading')).toEqual(['margin: 0', 'white-space: pre-wrap', 'overflow-wrap: anywhere']);
   });
 });
 
