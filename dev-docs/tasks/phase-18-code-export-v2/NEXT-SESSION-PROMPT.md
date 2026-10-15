@@ -1,4 +1,27 @@
-# Next session — session 106 (2026-10-15, BOARD lane 6) put the graph-scenario ledger line on P18's README: **2 of 85 conform on the export, 9 played** (was 4). Next: EXP-011's seven, §77 first.
+# Next session — session 106 (2026-10-15, BOARD lane 6) put the graph-scenario ledger line on P18's README, then built **EXP-011 §77: Action Dispatcher and Action Handler export** — picker **125 / 130**, graph line **4 of 85 conform, 11 played**. Next: §78, the history family.
+
+## ✅ Session 106, part 2: §77 (`7c2a9ed1a`)
+
+Read EXP-011 §77 for the whole record; in short:
+
+- **`src/lib/actions.ts`** (from `src/emit/actionsLib.ts`): the runtime's registry and queue near-verbatim, both nodes'
+  setters / values-before-signals / outcome contract / delete listeners, and `useActionDispatcher` /
+  `useActionHandler`. One module-level registry, so the two meet across components by channel name. The lib was
+  generated from a plain `.ts` (session scratchpad `actionslib/actions.ts` + `gen.js`); the array round-trips byte-exact.
+- **Plan:** two STREAM_NODES rows. Refused by name: built-ins enabled or Enabled Built-ins wired, and a wired Result
+  with Auto Complete on.
+- **Found:** a streaming node nothing pulses whose own chain reads its own value read as "its trigger chain is cyclic"
+  (§54's trap); the trigger-side loop now registers it. The graph harness now loads a lib's `./errors`.
+- **Graded:** `tests/the-action-bus.test.ts` 24 / 24, including a seeded differential against the runtime's own
+  `action-dispatcher.ts` (8 option rows × 60 scripts). NSP-008: t04's two Dispatcher scenarios **pass** on the export.
+
+Readings: **whole-package export jest 120 / 120** (the full run read 119 / 120, HLS-001 red on exactly the corpus count
+and 53 README coverage sentences; golden regenerated and its diff counted: 53 README lines out and in, action-desk's 19
+added; HLS-001 4 / 4 after). `export-ledger:check` OK, 132 translated; `export-ledger:picker --check` holds at 125 / 130;
+package and editor `tsc` 0.
+
+🔴 **A peer's uncommitted edit sits in `packages/noodl-types/src/node-catalog*.json`** (Upload File's photo ports,
+2026-10-14 20:17). It is not this phase's and was not committed; the HLS-001 run showed it moves no emitted byte.
 
 ## ✅ Session 106 (2026-10-15, BOARD lane 6): the second ledger line, pinned (`d2773e022`)
 
@@ -27,10 +50,14 @@ Readings: node-spec-graph 7 / 7 exit 0; node-spec-conformance 6 passed, 2 skippe
 `tsc --noEmit` 0. The whole-package export jest was **not** run (only the helper and its two suites changed).
 
 **Next (BOARD lane 6):**
-1. **EXP-011 §77, Action Dispatcher / Action Handler.** When it lands, t04's three playable scenarios should move from
-   exporter-verdict to played. Expect the pinned ledger counts to move, and move them in the same commit.
-2. §78 the history family, then §79 Sign In With.
-3. Raising the line: the one-component limit (17) is the largest harness limit after the seeded world.
+1. **EXP-011 §78, the history family**: State History, Undo / Redo, State Snapshot, Optimistic Update (runtime
+   `statehistory.ts`, `undonode.ts`, `statesnapshotnode.ts`, `outcome.ts`). They work on a Global Store, so the store
+   module (`src/stores/<name>.ts` over `@nodegx/core`'s `store()`, which has no delete) is the seam. 6 graph scenarios
+   (t02 ×4 incl. Snapshot, t03 ×2) sit outside on the exporter's verdict and will grade it; t03's third needs the
+   harness clock. Same recipe as §77: measure the table fit, a plain-source lib graded by a differential, the fixture,
+   refusals by sentence, ledger + floor + the 17 pins + HLS-001's count (54 → 55) in one commit.
+2. §79 Sign In With; the Dispatcher's built-ins (§77.5).
+3. Raising the line: the harness clock (t04 ×2, t03 ×1 and others) or the one-component limit (17).
 4. Rows: P18-S106-PARSERAISE, P18-S104-FEEDCOUNT, P18-S105-KITHEAD (all low), P18-S104-PACKRUNTIMENPX.
 
 ---
