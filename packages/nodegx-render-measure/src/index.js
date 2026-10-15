@@ -577,6 +577,47 @@ function measureExpression(placeholders, probes = []) {
     }
   }
 
+  // P112-OWN019-LETTEREDGE — words hard against the edge of the box that frames them. Richard on TL2's hero: seven
+  // outlined day chips, each letter pressed to its chip's left edge. The chip Group centred its child the way CSS
+  // would, but a Text stretches to its Group's width and sets its letters left, so the centring moved nothing. The
+  // frame is the nearest of the text's first four ancestors with a border or a fill (a page-wide band is not a frame,
+  // nor an inline highlight); the reading is the gap between the words' own ink (a Range) and the frame's inner left
+  // and right edges. Every width: a chip is a chip on a phone too. Raw numbers here; the judgement is summarise's.
+  layout.edgeTexts = [];
+  const EDGE_TEXT_MAX_GAP = 3;
+  if (typeof document.createRange === 'function' && typeof document.createTreeWalker === 'function') {
+    const shown = new Set(visible);
+    const range = document.createRange();
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const framed = (el) => {
+      const cs = styleOf(el);
+      if (cs.display === 'inline') return false;
+      const bg = cs.backgroundColor;
+      return (bg && bg !== 'transparent' && !/rgba\\([^)]*,\\s*0\\)$/.test(bg)) || cs.backgroundImage !== 'none' ||
+        parseFloat(cs.borderLeftWidth) > 0 || parseFloat(cs.borderRightWidth) > 0;
+    };
+    const frames = new Set();
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      const text = n.textContent.trim();
+      if (!text || !shown.has(n.parentElement)) continue;
+      let frame = null;
+      for (let e = n.parentElement, i = 0; e && e !== document.body && i < 4; e = e.parentElement, i++) {
+        if (framed(e)) { frame = e; break; }
+      }
+      if (!frame || frames.has(frame)) continue;
+      const fr = frame.getBoundingClientRect();
+      if (fr.width < 16 || fr.width >= vw * 0.98) continue;
+      range.selectNodeContents(n);
+      const r = range.getBoundingClientRect();
+      if (!(r.width > 0 && r.height > 0)) continue;
+      const fcs = styleOf(frame);
+      const left = r.left - (fr.left + (parseFloat(fcs.borderLeftWidth) || 0));
+      const right = fr.right - (parseFloat(fcs.borderRightWidth) || 0) - r.right;
+      frames.add(frame);
+      if (Math.min(left, right) < EDGE_TEXT_MAX_GAP) layout.edgeTexts.push({ cls: cls(frame), text: text.slice(0, 50), left: round(left), right: round(right), frameWidth: round(fr.width), frameHeight: round(fr.height) });
+    }
+  }
+
   const contentBottom = visible.reduce((lowest, el) => {
     const r = el.getBoundingClientRect();
     return r.width > 0 && r.height > 0 && r.bottom > lowest ? r.bottom : lowest;
@@ -744,7 +785,12 @@ const RenderFinding = {
    */
   RowGap: 'row-gap',
   /** P112-OWN019-LAPTOPGAPS — a section that centres its heading and leaves another part off that centre (L1's price). */
-  AlignmentDrift: 'alignment-drift'
+  AlignmentDrift: 'alignment-drift',
+  /**
+   * P112-OWN019-LETTEREDGE (Richard 2026-10-15, TL2's hero). Words within 3 px of the inner left or right edge of the
+   * box that frames them (a border or a fill) — a letter in an outlined chip set left because its Text stretched.
+   */
+  TextAgainstEdge: 'text-against-edge'
 };
 
 const SEVERITY_ORDER = { error: 0, warning: 1, info: 2 };
@@ -1222,6 +1268,24 @@ function summarise(viewports, diagnosis, overridden = {}) {
           evidence: d
         });
       }
+    }
+
+    // P112-OWN019-LETTEREDGE. Every width; one finding per viewport naming up to three frames, because TL2's seven chips
+    // are one defect seven times.
+    const edges = ((v.layout && v.layout.edgeTexts) || []);
+    if (edges.length) {
+      const named = edges.slice(0, 3).map((e) => `"${e.text}" ${Math.max(0, Math.min(e.left, e.right))}px from the ${e.left <= e.right ? 'left' : 'right'} edge of its ${e.frameWidth}×${e.frameHeight}px box`);
+      add({
+        code: RenderFinding.TextAgainstEdge,
+        severity: 'warning',
+        viewport: name,
+        message:
+          `${plural(edges.length, 'text sits', 'texts sit')} hard against the edge of the outlined or filled box that frames ${edges.length === 1 ? 'it' : 'them'}: ` +
+          `${named.join('; ')}. Centring a Group does not centre a Text's letters — the Text stretches to the Group's width ` +
+          'and sets them left — so give the Text textAlignX: center, or give the box padding. ' +
+          "Look at this width's screenshot.",
+        evidence: edges.slice(0, 6)
+      });
     }
 
     if (v.consoleErrors && v.consoleErrors.length) {

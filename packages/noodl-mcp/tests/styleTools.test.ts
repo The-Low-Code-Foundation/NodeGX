@@ -62,6 +62,8 @@ describe('AIX-006 style MCP tools', () => {
     expect(full.data.layout).toMatch(/three widths — phone 390, tablet 768, laptop 1280/);
     expect(full.data.layout).toMatch(/a label or number beside text is a row Group/);
     expect(full.data.layout).toMatch(/One section, one alignment/);
+    // P112-OWN019-LETTEREDGE (s7): TL2's chip letters, centred by their Group and set left by their stretched Text.
+    expect(full.data.layout).toMatch(/set textAlignX: center on the Text itself/);
     const prompt = await call<{ vocabulary: string }>(session, 'get_style_vocabulary', { detail: 'prompt' });
     expect(prompt.data.vocabulary).toMatch(/LAYOUT: check 390\/768\/1280; a label beside text is a row Group/);
   });

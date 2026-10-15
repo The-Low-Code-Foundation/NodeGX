@@ -106,7 +106,9 @@ export const LAYOUT_RULES =
   "Columns widths are shares of the page, so a two-character number gets a fifth of it. Keep a wide row's parts " +
   'together with a max width and a gap; space-between across the whole page leaves a hole in the middle. One ' +
   'section, one alignment: a centred heading means its eyebrow, line, toggle and price are centred too — or ' +
-  'everything shares one left edge.';
+  'everything shares one left edge. Centring a Group does not centre the letters of a Text inside it: the Text ' +
+  'stretches to the Group\'s width and sets its words left, so a letter in a chip, a badge or a button sits hard ' +
+  'against the left edge — set textAlignX: center on the Text itself.';
 /** The compact form's line — the prompt form has a 4,400-token wire budget (AIX-006), ~40 tokens of it free. */
 export const LAYOUT_RULES_SHORT =
   'check 390/768/1280; a label beside text is a row Group at its own width, not a Columns share; one alignment per section.';
