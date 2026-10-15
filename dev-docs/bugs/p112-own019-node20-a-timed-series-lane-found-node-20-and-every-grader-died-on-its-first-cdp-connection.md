@@ -20,3 +20,8 @@ defined` at `grade-launch.mjs:132` in `TL1-grade.log`, and the gallery listed TL
 **Fixed:** each grader now refuses on a Node without a global WebSocket before it starts a preview, naming the
 version and path (checked: v20 → the error; v22 → past the guard to the usage line). The running series is regraded
 by `regrade.sh watch` (s7 scratchpad) under v22. A lane script should put the Node it means first on PATH.
+
+**It cost a round too (10:06):** the lanes also started each round's MCP server on Node 20, and the editor brief's
+local backend needs `node:sqlite` (Node ≥ 22.13): `provision_backend` refused ("No SQLite engine available… tracked by
+WF-004"), so TE1 could not build its editor (with SEEDDONE, 0/13). TE1b runs with Node 22 first on PATH (its server's
+binary read with `lsof`: v22.22.0). A person on Node 20 meets the same refusal — the message names the cause.

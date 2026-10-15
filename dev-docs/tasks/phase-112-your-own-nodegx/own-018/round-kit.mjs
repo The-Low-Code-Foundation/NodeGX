@@ -129,6 +129,9 @@ if (seedArg) {
   const seed = path.resolve(seedArg);
   if (!fs.existsSync(path.join(seed, 'nodegx.project.json'))) throw new Error(`--seed ${seed} holds no nodegx.project.json`);
   fs.cpSync(seed, path.join(APPS, path.basename(seed)), { recursive: true, filter: (s) => !/[\\/](\.previews|grade|node_modules[\\/]\.cache)([\\/]|$)/.test(s) });
+  // s7 (SEEDDONE, TE1): the seed's own docs/NEXT.md says `# Done` — the build that made the seed finished. Left in place,
+  // a sitting that ends without touching it reads as this round finishing; the round writes its own note.
+  fs.rmSync(path.join(APPS, path.basename(seed), 'docs', 'NEXT.md'), { force: true });
 }
 
 // 2. The registry name → the tarball, in the config create-nodegx wrote (and nothing else in it).
