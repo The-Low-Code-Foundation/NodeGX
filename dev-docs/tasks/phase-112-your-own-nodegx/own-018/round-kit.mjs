@@ -171,9 +171,10 @@ fs.writeFileSync(path.join(root, 'vibe-config.toml'), next);
 const CONTINUE = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../own-019/continue.txt');
 const sittings = Number(opt('--sittings', 1));
 const maxTotal = Number(opt('--max-total', 20));
-const argsFor = (prompt, out) => [
+const argsFor = (prompt, out, resume) => [
   '--from', VIBE, 'vibe',
   '--prompt-file', prompt,
+  ...(resume ? ['--resume', resume] : []),
   '--legacy-harness', '--trust',
   // `bash` resolves its own permission per command and ignores a configured "never" (kit smoke 2: it asked, and the
   // ask ended the run), so the shells are not offered at all — as s15's Claude stranger had no shell approved.
@@ -209,11 +210,11 @@ const journalSize = () => {
   return size;
 };
 
-function runSitting(prompt, tag) {
+function runSitting(prompt, tag, resume) {
   const out = path.join(root, `out${tag}`);
   const log = fs.createWriteStream(path.join(root, `agent${tag}.jsonl`));
   const err = fs.createWriteStream(path.join(root, `agent${tag}.stderr`));
-  const child = spawn('uvx', argsFor(prompt, out), { cwd: APPS, env, stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn('uvx', argsFor(prompt, out, resume), { cwd: APPS, env, stdio: ['ignore', 'pipe', 'pipe'] });
   child.stdout.pipe(log);
   child.stderr.pipe(err);
   const t0 = Date.now();
@@ -290,18 +291,57 @@ function nextLine() {
   return f ? { file: path.relative(APPS, f), text: fs.readFileSync(f, 'utf8'), first: fs.readFileSync(f, 'utf8').split('\n')[0].trim() } : null;
 }
 
+// OWN-019 s8 (Richard: "I'll give you the prompt I write myself and you can send it and monitor and tell me when I
+// need to reply"): `--relay` puts a person in the loop. After every sitting the lab writes waiting-<k>.md (the agent's
+// last words, its session) and waits for ONE of: reply-<k>.txt — the person's answer, sent into the SAME session
+// (`--resume <session_id>`, a reply in the conversation, not a fresh start); continue-<k> — the kit's fixed
+// "Continue." in a fresh sitting, as every other round; stop-<k> — end. Who writes them is the session running the
+// lab, relaying the person's words verbatim; it never words a reply itself.
+const relay = rest.includes('--relay');
+const lastWords = (tag) => {
+  let last = '';
+  try {
+    for (const l of fs.readFileSync(path.join(root, `agent${tag}.jsonl`), 'utf8').split('\n')) {
+      try { const m = JSON.parse(l); if (m.role === 'assistant' && m.content) last = typeof m.content === 'string' ? m.content : m.content.map((x) => x.text || '').join(' '); } catch {}
+    }
+  } catch {}
+  return last;
+};
+const sessionOf = (tag) => { try { return JSON.parse(fs.readFileSync(path.join(root, `out${tag}`, 'export.json'), 'utf8')).session_id; } catch { return null; } };
+async function waitForRelay(k, tag) {
+  fs.writeFileSync(path.join(root, `waiting-${k}.md`), `# After sitting ${k} (session ${sessionOf(tag)})\n\n${lastWords(tag)}\n`);
+  console.log(`WAITING after sitting ${k}: reply-${k}.txt | continue-${k} | stop-${k}`);
+  for (;;) {
+    for (const [f, what] of [[`reply-${k}.txt`, 'reply'], [`continue-${k}`, 'continue'], [`stop-${k}`, 'stop']]) {
+      if (fs.existsSync(path.join(root, f))) return { what, file: path.join(root, f) };
+    }
+    await new Promise((r) => setTimeout(r, 5000));
+  }
+}
+
 const sittingsDone = [];
 let unchanged = 0;
+let relayed = null;
 for (let k = 1; k <= sittings; k++) {
   const before = nextLine();
   // s5 (RL2): sitting 1 died 27 s in (Mistral's stream ended without a finish reason — infrastructure_failure) before
   // any NEXT.md existed, and "continue" then sent three sittings grepping above their folder for a note that was never
   // written. With no NEXT.md there is nothing to continue: a person would say their request again, so the lab does.
-  const r = await runSitting(k === 1 || !before ? path.resolve(promptFile) : CONTINUE, k === 1 ? '' : String(k));
+  const tag = k === 1 ? '' : String(k);
+  const r = relayed?.what === 'reply'
+    ? await runSitting(relayed.file, tag, relayed.session)
+    : await runSitting(k === 1 || !before ? path.resolve(promptFile) : CONTINUE, tag);
   const after = nextLine();
   sittingsDone.push({ sitting: k, ...r, next: after?.first ?? null, nextFile: after?.file ?? null });
   fs.writeFileSync(path.join(root, 'sittings.json'), JSON.stringify(sittingsDone, null, 2));
   console.log(`sitting ${k}: exit ${r.how} ${r.seconds}s $${r.vibeUsd ?? '?'} — ${after?.first ?? '(no NEXT.md)'}`);
+  if (relay) {
+    if (k === sittings) break;
+    relayed = { ...(await waitForRelay(k, tag)), session: sessionOf(tag) };
+    console.log(`relay after sitting ${k}: ${relayed.what}`);
+    if (relayed.what === 'stop') break;
+    continue;
+  }
   if (sittings === 1) break;
   if (r.stalled) { console.log('stop: stalled'); break; }
   if (after && /^#\s*Done\b/i.test(after.first)) { console.log('stop: done'); break; }
