@@ -1,0 +1,419 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "90b2f88f-c187-521d-8707-cd7dab95ccb8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lrIn",
+      "type": "Component Inputs",
+      "label": "The list",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "line",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "editWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "deleteWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "askWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "yesWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "noWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "lrCard",
+      "type": "Group",
+      "label": "The list",
+      "children": [
+        "lrName",
+        "lrLine",
+        "lrButtons",
+        "lrAsk"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "lrName",
+      "type": "Text",
+      "label": "The name",
+      "parent": "lrCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "lrLine",
+      "type": "Text",
+      "label": "How many questions",
+      "parent": "lrCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "lrButtons",
+      "type": "Group",
+      "label": "Edit or delete",
+      "parent": "lrCard",
+      "children": [
+        "lrEdit",
+        "lrDelete"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "lrEdit",
+      "type": "net.noodl.controls.button",
+      "label": "Edit",
+      "parent": "lrButtons",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Edit"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "lrDelete",
+      "type": "net.noodl.controls.button",
+      "label": "Delete",
+      "parent": "lrButtons",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Delete"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "lrAsk",
+      "type": "Group",
+      "label": "Are you sure?",
+      "parent": "lrCard",
+      "children": [
+        "lrAskText",
+        "lrAskButtons"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "lrAskText",
+      "type": "Text",
+      "label": "Delete this list?",
+      "parent": "lrAsk",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "lrAskButtons",
+      "type": "Group",
+      "label": "Keep or delete",
+      "parent": "lrAsk",
+      "children": [
+        "lrNo",
+        "lrYes"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "lrNo",
+      "type": "net.noodl.controls.button",
+      "label": "No, keep it",
+      "parent": "lrAskButtons",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "No"
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "lrYes",
+      "type": "net.noodl.controls.button",
+      "label": "Yes, delete it",
+      "parent": "lrAskButtons",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Yes"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "lrAskState",
+      "type": "States",
+      "label": "Asked yet?",
+      "parameters": {
+        "states": "idle,asking",
+        "values": "asking,idle",
+        "useTransitions": false,
+        "type-asking": "boolean",
+        "value-idle-asking": false,
+        "value-asking-asking": true,
+        "type-idle": "boolean",
+        "value-idle-idle": true,
+        "value-asking-idle": false
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "lrOut",
+      "type": "Component Outputs",
+      "label": "What was pressed",
+      "ports": [
+        {
+          "name": "edit",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "delete",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 1240
+    }
+  ],
+  "visualRoots": [
+    "lrCard"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e6291be0-5bcf-547b-85e3-d6ef424f02eb",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mbIn",
+      "fromProperty": "species",
+      "toId": "mbAlien",
+      "toProperty": "species"
+    },
+    {
+      "fromId": "mbIn",
+      "fromProperty": "grown",
+      "toId": "mbAlien",
+      "toProperty": "grown"
+    },
+    {
+      "fromId": "mbIn",
+      "fromProperty": "colour",
+      "toId": "mbAlien",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "mbIn",
+      "fromProperty": "name",
+      "toId": "mbAlien",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "mbIn",
+      "fromProperty": "name",
+      "toId": "mbName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mbIn",
+      "fromProperty": "line",
+      "toId": "mbLine",
+      "toProperty": "text"
+    }
+  ]
+}

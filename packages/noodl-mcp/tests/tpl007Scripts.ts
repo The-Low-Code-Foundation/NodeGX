@@ -166,17 +166,43 @@ export const PROB_PARTS: Readonly<Record<string, 1>> = (() => {
 /** PLY-002: the cheapest thing on the shelf that is not free — what a purse must hold before the hangar is worth opening. */
 export const SHOP_FROM: number = Math.min(...HANGAR_SHELF.filter((i) => i.free !== true).map((i) => i.cost));
 
+/**
+ * TPL-013 SC-5 (Richard, 2026-10-15: skin tones, for both games). Five tones, each shown as the matching ✋ so choosing one needs no
+ * reading, each one hex DiceBear draws on every kept look (rendered and checked: the eyes and mouth read on the darkest). A child's
+ * pick is `wear.skin`, so the save code carries it with the rest of what they wear. With none picked the face's seed chooses among
+ * SKIN_DEFAULT, and an empty SKIN_DEFAULT leaves DiceBear its own range (about half of it light): that is Rocket School. An edition
+ * sets its own default.
+ */
+export const SKIN_TONES: ReadonlyArray<{ id: string; hex: string; hand: string }> = [
+  { id: 't1', hex: 'f2d3b1', hand: '✋🏻' },
+  { id: 't2', hex: 'e0ac80', hand: '✋🏼' },
+  { id: 't3', hex: 'c68642', hand: '✋🏽' },
+  { id: 't4', hex: '8d5524', hand: '✋🏾' },
+  { id: 't5', hex: '5c3317', hand: '✋🏿' }
+];
+export const SKIN_DEFAULT: ReadonlyArray<string> = [];
+/** The two lines every script that draws or keeps a face carries; an edition swaps the second. */
+export const SKIN_LINES = `var SKIN_TONES = ${JSON.stringify(Object.fromEntries(SKIN_TONES.map((t) => [t.id, t.hex])))};
+var SKIN_DEFAULT = ${JSON.stringify(SKIN_DEFAULT)};
+function skinOf(w) { return w && typeof w.skin === 'string' && SKIN_TONES[w.skin] ? w.skin : ''; }
+function skinOptions(skin) { return SKIN_TONES[skin] ? { skinColor: [SKIN_TONES[skin]] } : SKIN_DEFAULT.length ? { skinColor: SKIN_DEFAULT.map(function (t) { return SKIN_TONES[t]; }) } : {}; }
+`;
+
+/** The new-player form's face, before there is a player: the skin picked so far, or the default's range. */
+export const SKIN_FACE_SCRIPT = `${SKIN_LINES}Outputs.options = skinOptions(String(Inputs.skin || ''));
+`;
+
 export const HANGAR_HELPERS = `
 var PROB_PARTS = ${JSON.stringify(PROB_PARTS)};
 var SHOP_FROM = ${SHOP_FROM};
-function ownedOf(p) { return p && Array.isArray(p.owned) ? p.owned.filter(function (x) { return typeof x === 'string'; }) : []; }
+${SKIN_LINES}function ownedOf(p) { return p && Array.isArray(p.owned) ? p.owned.filter(function (x) { return typeof x === 'string'; }) : []; }
 function costOf(item) { var c = item && Number(item.cost); return isFinite(c) && c > 0 ? Math.round(c) : 0; }
 function spentOf(model) { var s = model && Number(model.spent); return isFinite(s) && s > 0 ? Math.round(s) : 0; }
 function purseOf(model) { return Math.max(0, (Number(model && model.stars) || 0) - spentOf(model)); }
 function ownsItem(p, item) { return !!item && (item.free === true || ownedOf(p).indexOf(item.id) !== -1); }
 function canAfford(item, purse) { return costOf(item) <= (Number(purse) || 0); }
-function wearOf(p) { var w = p && p.wear && typeof p.wear === 'object' ? p.wear : {}; return { face: w.face && typeof w.face === 'object' ? JSON.parse(JSON.stringify(w.face)) : {}, paint: typeof w.paint === 'string' ? w.paint : '', pattern: typeof w.pattern === 'string' ? w.pattern : '' }; }
-function wearOptions(look, wear) { var parts = (wear && wear.face && wear.face[look]) || {}; var o = {}; for (var part in parts) { if (typeof parts[part] !== 'string' || !parts[part]) continue; o[part] = [parts[part]]; if (PROB_PARTS[look + '/' + part]) o[part + 'Probability'] = 100; } return o; }
+function wearOf(p) { var w = p && p.wear && typeof p.wear === 'object' ? p.wear : {}; var out = { face: w.face && typeof w.face === 'object' ? JSON.parse(JSON.stringify(w.face)) : {}, paint: typeof w.paint === 'string' ? w.paint : '', pattern: typeof w.pattern === 'string' ? w.pattern : '' }; if (skinOf(w)) out.skin = w.skin; return out; }
+function wearOptions(look, wear) { var parts = (wear && wear.face && wear.face[look]) || {}; var o = skinOptions(skinOf(wear)); for (var part in parts) { if (typeof parts[part] !== 'string' || !parts[part]) continue; o[part] = [parts[part]]; if (PROB_PARTS[look + '/' + part]) o[part + 'Probability'] = 100; } return o; }
 function itemFits(item, look) { return !!item && (item.kind === 'rocket' || !!(item.faces && item.faces[look])); }
 function itemLayer(item) { return item && typeof item.pattern === 'string' && item.pattern ? 'pattern' : 'paint'; }
 function itemWorn(item, look, wear) {
@@ -2217,6 +2243,8 @@ var profile = {
   answerMode: String(Inputs.answerMode || 'auto'),
   created: Date.now(), days: [], model: { rating: 0, skills: {}, lastSkill: '', answered: 0 }
 };
+// SC-5: the skin picked on the form, if one was; none leaves the face's seed to choose.
+if (skinOf({ skin: String(Inputs.skin || '') })) profile.wear = { face: {}, paint: '', pattern: '', skin: String(Inputs.skin) };
 if (app.profiles.length < ${MAX_PROFILES}) { app.profiles.push(profile); app.activeId = id; }
 Outputs.app = app;
 Outputs.profileId = app.activeId;
@@ -2269,6 +2297,8 @@ Outputs.stars = stars;
 // RKT-011 / PLY-002: what the face and the rocket wear (a part is drawn only on the look it was chosen for), and the purse.
 var wear = wearOf(p);
 Outputs.faceOptions = wearOptions(p.look, wear);
+// SC-5: the skin they picked ('' = none yet, and the seed chooses), for the form and the hangar's row.
+Outputs.skin = skinOf(wear);
 Outputs.paint = wear.paint || 'var(--primary)';
 Outputs.pattern = wear.pattern || '';
 var model0 = withStars(JSON.parse(JSON.stringify(p.model || {})));
@@ -2371,6 +2401,8 @@ for (var i = 0; i < app.profiles.length; i++) {
   if (Inputs.mergeMode === 'easy' || Inputs.mergeMode === 'hard') app.profiles[i].mergeMode = Inputs.mergeMode;
   if (Inputs.look) app.profiles[i].look = String(Inputs.look);
   if (Inputs.seed) app.profiles[i].seed = String(Inputs.seed);
+  // SC-5: a skin from the form or the hangar. Anything that is not one of the tones is ignored, so the face keeps the one it has.
+  if (skinOf({ skin: String(Inputs.skin || '') })) { var worn = wearOf(app.profiles[i]); worn.skin = String(Inputs.skin); app.profiles[i].wear = worn; }
   // P113 REV-001: what to practise — a subject and the skills ticked in it (none = everything), or a list ('set:<id>').
   if (typeof Inputs.focusSubject === 'string' && Inputs.focusSubject) app.profiles[i].focus = { subject: Inputs.focusSubject, skills: Array.isArray(Inputs.focusSkills) ? Inputs.focusSkills.map(String) : [] };
 }
@@ -2902,15 +2934,44 @@ function moonText(bi, lang) { return bi ? (lang === 'fr' ? bi.fr : bi.en) : ''; 
 function moonFind(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return null; }
 function moonOf(p) {
   var m = p && p.moon && typeof p.moon === 'object' ? p.moon : {};
-  var aliens = Array.isArray(m.aliens) ? m.aliens.filter(function (a) { return a && typeof a.id === 'string' && a.id; }) : [];
+  var raw = Array.isArray(m.aliens) ? m.aliens.filter(function (a) { return a && typeof a.id === 'string' && a.id; }) : [];
+  var aliens = raw.map(function (a) {
+    var w = a.wear && typeof a.wear === 'object' ? a.wear : {};
+    return { id: a.id, species: moonFind(MOON.species, a.species) ? a.species : MOON.species[0].id, colour: moonFind(MOON.colours, a.colour) ? a.colour : MOON.colours[0].id, name: String(a.name || ''), meals: Math.max(0, Math.floor(Number(a.meals) || 0)), fav: moonFind(MOON.foods, a.fav) ? a.fav : MOON.foods[0].id, found: a.found === true, wear: { hat: typeof w.hat === 'string' ? w.hat : '', eyes: typeof w.eyes === 'string' ? w.eyes : '', neck: typeof w.neck === 'string' ? w.neck : '' } };
+  });
   return {
-    aliens: aliens.map(function (a) {
-      var w = a.wear && typeof a.wear === 'object' ? a.wear : {};
-      return { id: a.id, species: moonFind(MOON.species, a.species) ? a.species : MOON.species[0].id, colour: moonFind(MOON.colours, a.colour) ? a.colour : MOON.colours[0].id, name: String(a.name || ''), meals: Math.max(0, Math.floor(Number(a.meals) || 0)), fav: moonFind(MOON.foods, a.fav) ? a.fav : MOON.foods[0].id, found: a.found === true, wear: { hat: typeof w.hat === 'string' ? w.hat : '', eyes: typeof w.eyes === 'string' ? w.eyes : '', neck: typeof w.neck === 'string' ? w.neck : '' } };
-    }),
+    aliens: aliens,
     sel: typeof m.sel === 'string' ? m.sel : '',
-    owned: Array.isArray(m.owned) ? m.owned.filter(function (x) { return typeof x === 'string'; }) : []
+    owned: Array.isArray(m.owned) ? m.owned.filter(function (x) { return typeof x === 'string'; }) : [],
+    // TPL-014 M1: every alien ever had (species-colour), for the Alien Book; read as the union with the aliens on the moon,
+    // so a moon from before the book opens with what it already has. The domes built.
+    met: moonMetOf(m, aliens),
+    domes: Array.isArray(m.domes) ? m.domes.filter(function (x) { return !!moonFind(MOON.domes, x); }) : []
   };
+}
+function moonKey(species, colour) { return species + '-' + colour; }
+/** TPL-014 M1: a name to suggest that no alien on this moon already has (the list goes round; then a number). */
+function moonFreshName(sp, moon) {
+  var taken = moon.aliens.map(function (a) { return String(a.name).toLowerCase(); });
+  for (var k = 0; k < sp.names.length; k++) {
+    var nm = sp.names[(moon.aliens.length + k) % sp.names.length];
+    if (taken.indexOf(nm.toLowerCase()) === -1) return nm;
+  }
+  var base = sp.names[moon.aliens.length % sp.names.length], at = 2;
+  while (taken.indexOf((base + ' ' + at).toLowerCase()) !== -1) at++;
+  return base + ' ' + at;
+}
+function moonMetOf(m, aliens) {
+  var met = [];
+  var add = function (k) { if (typeof k !== 'string') return; var bits = k.split('-'); if (moonFind(MOON.species, bits[0]) && moonFind(MOON.colours, bits[1]) && met.indexOf(k) === -1) met.push(k); };
+  (Array.isArray(m.met) ? m.met : []).forEach(add);
+  aliens.forEach(function (a) { add(moonKey(a.species, a.colour)); });
+  return met;
+}
+function moonMax(moon) {
+  var n = MOON.max;
+  for (var i = 0; i < moon.domes.length; i++) n += (moonFind(MOON.domes, moon.domes[i]) || { room: 0 }).room;
+  return n;
 }
 function moonStage(meals) { return meals >= MOON.grow[1] ? 2 : meals >= MOON.grow[0] ? 1 : 0; }
 function moonAlienCost(n) { return n < MOON.cost.length ? MOON.cost[n] : MOON.cost[MOON.cost.length - 1]; }
@@ -2945,7 +3006,7 @@ Outputs.aliens = moon.aliens.map(function (a) {
 });
 Outputs.has = moon.aliens.length > 0;
 Outputs.count = moon.aliens.length;
-Outputs.full = moon.aliens.length >= MOON.max;
+Outputs.full = moon.aliens.length >= moonMax(moon);
 Outputs.purse = purse;
 Outputs.purseLine = (fr ? 'Tu as {n} ⭐' : 'You have {n} ⭐').replace('{n}', purse);
 // The chosen alien.
@@ -2990,10 +3051,30 @@ Outputs.draftSpecies = draftSp.id;
 Outputs.draftColour = draftCol.id;
 Outputs.adoptCost = nextCost;
 Outputs.adoptFree = nextCost === 0;
-Outputs.canAdopt = moon.aliens.length < MOON.max && nextCost <= purse;
-Outputs.suggestedName = draftSp.names[moon.aliens.length % draftSp.names.length];
+Outputs.canAdopt = moon.aliens.length < moonMax(moon) && nextCost <= purse;
+Outputs.suggestedName = moonFreshName(draftSp, moon);
 Outputs.adoptButton = (fr ? 'Adopter · ' : 'Adopt · ') + priceLine;
-Outputs.anotherLine = moon.aliens.length >= MOON.max ? '' : (fr ? '＋ Adopter un autre alien · ' : '＋ Adopt another alien · ') + priceLine;
+Outputs.anotherLine = moon.aliens.length >= moonMax(moon) ? '' : (fr ? '＋ Adopter un autre alien · ' : '＋ Adopt another alien · ') + priceLine;
+// TPL-014 M1 — the Alien Book: every species in every colour; one never had is a grey shape with no name.
+var bookRows = [];
+for (var bs = 0; bs < MOON.species.length; bs++) for (var bc = 0; bc < MOON.colours.length; bc++) {
+  var bsp = MOON.species[bs], bcol = MOON.colours[bc];
+  var isMet = moon.met.indexOf(moonKey(bsp.id, bcol.id)) !== -1;
+  bookRows.push({ id: moonKey(bsp.id, bcol.id), name: isMet ? moonText(bsp.name, lang) : '?', species: bsp.id, colour: isMet ? moonColour(bcol.id) : 'var(--muted)', grown: 2, hat: '', eyes: '', neck: '', happy: 0, selected: false, line: isMet ? moonText(bcol.name, lang) : '' });
+}
+Outputs.book = bookRows;
+Outputs.bookCount = moon.met.length;
+Outputs.bookLine = (fr ? 'Le livre des aliens · {n} sur {t}' : 'Alien Book · {n} of {t}').replace('{n}', moon.met.length).replace('{t}', bookRows.length);
+// The big things: the domes, then the egg. A dome built says so; the egg needs room and says what it does.
+var room = moonMax(moon) - moon.aliens.length;
+var unmet = bookRows.length - moon.met.length;
+var bigs = MOON.domes.map(function (d) {
+  var built = moon.domes.indexOf(d.id) !== -1;
+  return { id: d.id, glyph: d.glyph, label: moonText(d.name, lang), line: built ? (fr ? 'Construit ✓ · +{r} places' : 'Built ✓ · room for {r} more').replace('{r}', d.room) : d.cost + ' ⭐ · ' + (fr ? '+{r} places' : 'room for {r} more').replace('{r}', d.room), cost: d.cost, use: false, ask: !built && d.cost <= purse, dim: !built && d.cost > purse, worn: built, showAlien: false, species: '', colour: '', grown: 2, hat: '', eyes: '', neck: '' };
+});
+var eggLine = room <= 0 ? (fr ? 'La Lune est pleine : construis un dôme' : 'The moon is full: build a dome first') : MOON.egg + ' ⭐ · ' + (unmet > 0 ? (fr ? 'un alien jamais vu ({n} possibles)' : 'an alien you have never had ({n} it could be)').replace('{n}', unmet) : (fr ? 'un alien surprise' : 'a surprise alien'));
+bigs.push({ id: 'egg', glyph: '🥚', label: fr ? 'Œuf surprise' : 'Surprise egg', line: eggLine, cost: MOON.egg, use: false, ask: room > 0 && MOON.egg <= purse, dim: room <= 0 || MOON.egg > purse, worn: false, showAlien: false, species: '', colour: '', grown: 2, hat: '', eyes: '', neck: '' });
+Outputs.bigs = bigs;
 `;
 
 /**
@@ -3021,16 +3102,49 @@ for (var i = 0; i < app.profiles.length; i++) {
   if (action === 'adopt') {
     var n = moon.aliens.length;
     var cost = moonAlienCost(n);
-    if (n >= MOON.max) why = 'full';
+    if (n >= moonMax(moon)) why = 'full';
     else if (cost > purse) why = 'tooDear';
     else {
       var sp = moonFind(MOON.species, String(Inputs.species || '')) || MOON.species[0];
       var col = moonFind(MOON.colours, String(Inputs.colour || '')) || MOON.colours[0];
-      var nm = String(Inputs.name || '').trim().slice(0, 16) || sp.names[n % sp.names.length];
+      var nm = String(Inputs.name || '').trim().slice(0, 16) || moonFreshName(sp, moon);
       al = { id: 'a' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36), species: sp.id, colour: col.id, name: nm, meals: 0, fav: MOON.foods[Math.floor(Math.random() * MOON.foods.length)].id, found: false, wear: { hat: '', eyes: '', neck: '' } };
       moon.aliens.push(al);
+      if (moon.met.indexOf(moonKey(al.species, al.colour)) === -1) moon.met.push(moonKey(al.species, al.colour));
       model.spent = spentOf(model) + cost;
       said = (fr ? 'Bienvenue sur la Lune, {n} !' : 'Welcome to the moon, {n}!').replace('{n}', nm);
+      ok = true;
+    }
+  } else if (action === 'build') {
+    // TPL-014 M1: a dome, built once, makes room for more aliens.
+    var dome = moonFind(MOON.domes, String(Inputs.thingId || ''));
+    if (!dome) why = 'unknown';
+    else if (moon.domes.indexOf(dome.id) !== -1) why = 'owned';
+    else if (dome.cost > purse) why = 'tooDear';
+    else {
+      moon.domes.push(dome.id);
+      model.spent = spentOf(model) + dome.cost;
+      said = (fr ? '{d} est construit : {r} places de plus sur la Lune !' : 'The {d} is built: room for {r} more aliens!').replace('{d}', moonText(dome.name, lang)).replace('{r}', dome.room);
+      ok = true;
+    }
+  } else if (action === 'egg') {
+    // TPL-014 M1: always an alien never had (a species in a colour) while there is one; then any. No rarity, no spin.
+    if (moon.aliens.length >= moonMax(moon)) why = 'full';
+    else if (MOON.egg > purse) why = 'tooDear';
+    else {
+      var pool = [];
+      for (var es = 0; es < MOON.species.length; es++) for (var ec = 0; ec < MOON.colours.length; ec++) {
+        if (moon.met.indexOf(moonKey(MOON.species[es].id, MOON.colours[ec].id)) === -1) pool.push([MOON.species[es], MOON.colours[ec]]);
+      }
+      if (!pool.length) for (var as = 0; as < MOON.species.length; as++) for (var ac = 0; ac < MOON.colours.length; ac++) pool.push([MOON.species[as], MOON.colours[ac]]);
+      var hatch = pool[Math.floor(Math.random() * pool.length)];
+      var hsp = hatch[0], hcol = hatch[1];
+      var hname = moonFreshName(hsp, moon);
+      al = { id: 'a' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36), species: hsp.id, colour: hcol.id, name: hname, meals: 0, fav: MOON.foods[Math.floor(Math.random() * MOON.foods.length)].id, found: false, wear: { hat: '', eyes: '', neck: '' } };
+      moon.aliens.push(al);
+      if (moon.met.indexOf(moonKey(hsp.id, hcol.id)) === -1) moon.met.push(moonKey(hsp.id, hcol.id));
+      model.spent = spentOf(model) + MOON.egg;
+      said = (fr ? 'L’œuf éclot : voici {n}, un {s} {c} !' : 'The egg hatched: meet {n}, a {c} {s}!').replace('{n}', hname).replace('{s}', moonText(hsp.name, lang)).replace('{c}', moonText(hcol.name, lang).toLowerCase());
       ok = true;
     }
   } else if (!al) why = 'noAlien';

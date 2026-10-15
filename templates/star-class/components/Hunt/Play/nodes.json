@@ -1,0 +1,615 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2dd85165-b7df-59fa-84ea-ab5190897102",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hpIn",
+      "type": "Component Inputs",
+      "label": "The player, and the words",
+      "ports": [
+        {
+          "name": "level",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "newGameWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "homeWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pickWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hangarWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nextGridWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "showWayWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 590,
+      "y": 1360
+    },
+    {
+      "id": "hpRoot",
+      "type": "Group",
+      "label": "The game",
+      "children": [
+        "hpTask",
+        "hpProgress",
+        "hpStage"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hpTask",
+      "type": "Text",
+      "label": "What to find",
+      "parent": "hpRoot",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "hpProgress",
+      "type": "Text",
+      "label": "Which grid, and how many ways found",
+      "parent": "hpRoot",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-semibold)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "hpStage",
+      "type": "Group",
+      "label": "The grid, and what goes beside it",
+      "parent": "hpRoot",
+      "children": [
+        "hpBoard",
+        "hpSide"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "justifyContent": "center",
+        "alignItems": "flex-start",
+        "columnGap": "var(--space-6)",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "hpBoard",
+      "type": "Group",
+      "label": "The grid",
+      "parent": "hpStage",
+      "children": [
+        "hpRows"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "cssClassName": "rkt-hunt-board",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "hpRows",
+      "type": "For Each",
+      "label": "One row per row of the grid",
+      "parameters": {
+        "template": "/Hunt/Row",
+        "templateType": "explicit"
+      },
+      "parent": "hpBoard",
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "hpSide",
+      "type": "Group",
+      "label": "The note and the buttons, or the end of the hunt",
+      "parent": "hpStage",
+      "children": [
+        "hpControls",
+        "hpResult"
+      ],
+      "parameters": {
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "hpControls",
+      "type": "Group",
+      "label": "The note, and what to do next",
+      "parent": "hpSide",
+      "children": [
+        "hpNoteBox",
+        "hpNextRow",
+        "hpShow",
+        "hpNew"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "hpNoteBox",
+      "type": "Group",
+      "label": "What the last pick made",
+      "parent": "hpControls",
+      "children": [
+        "hpNote"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "alignItems": "center",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderColor": "var(--border-subtle)"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "hpNote",
+      "type": "Text",
+      "label": "The note",
+      "parent": "hpNoteBox",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)",
+        "textAlignX": "center"
+      },
+      "x": 340,
+      "y": 1120
+    },
+    {
+      "id": "hpNextRow",
+      "type": "Group",
+      "label": "Every way on this grid found",
+      "parent": "hpControls",
+      "children": [
+        "hpNext"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "hpNext",
+      "type": "net.noodl.controls.button",
+      "label": "Next grid",
+      "parent": "hpNextRow",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Next grid"
+      },
+      "x": 340,
+      "y": 1360
+    },
+    {
+      "id": "hpShow",
+      "type": "net.noodl.controls.button",
+      "label": "Show me one",
+      "parent": "hpControls",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Show me one",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "hpNew",
+      "type": "net.noodl.controls.button",
+      "label": "New game",
+      "parent": "hpControls",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "New game"
+      },
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "hpResult",
+      "type": "/Race/Result",
+      "label": "How the hunt ended",
+      "parent": "hpSide",
+      "x": 220,
+      "y": 1720
+    },
+    {
+      "id": "hpNewHunt",
+      "type": "/Logic/New hunt",
+      "label": "A fresh hunt",
+      "x": 590,
+      "y": 40
+    },
+    {
+      "id": "hpTap",
+      "type": "/Logic/Hunt move",
+      "label": "A number tapped",
+      "parameters": {
+        "action": "tap"
+      },
+      "x": 590,
+      "y": 640
+    },
+    {
+      "id": "hpShowWay",
+      "type": "/Logic/Hunt move",
+      "label": "Show one way",
+      "parameters": {
+        "action": "show"
+      },
+      "x": 590,
+      "y": 1600
+    },
+    {
+      "id": "hpNextGrid",
+      "type": "/Logic/Hunt move",
+      "label": "The next grid",
+      "parameters": {
+        "action": "next"
+      },
+      "x": 590,
+      "y": 1480
+    },
+    {
+      "id": "hpGame",
+      "type": "Variable2",
+      "label": "The hunt as it stands",
+      "parameters": {
+        "name": "huntGame"
+      },
+      "x": 590,
+      "y": 1960
+    },
+    {
+      "id": "hpSetGame",
+      "type": "Set Variable",
+      "label": "The hunt after a move",
+      "parameters": {
+        "name": "huntGame"
+      },
+      "x": 590,
+      "y": 2080
+    },
+    {
+      "id": "hpDraw",
+      "type": "/Logic/Draw hunt",
+      "label": "The hunt, drawn",
+      "x": 590,
+      "y": 760
+    },
+    {
+      "id": "hpPhase",
+      "type": "States",
+      "label": "Playing, every way on the grid found, or the hunt over",
+      "parameters": {
+        "states": "playing,found,over",
+        "values": "going,found,over",
+        "useTransitions": false,
+        "type-going": "boolean",
+        "value-playing-going": true,
+        "value-found-going": true,
+        "value-over-going": false,
+        "type-found": "boolean",
+        "value-playing-found": false,
+        "value-found-found": true,
+        "value-over-found": false,
+        "type-over": "boolean",
+        "value-playing-over": false,
+        "value-found-over": false,
+        "value-over-over": true
+      },
+      "x": 590,
+      "y": 880
+    },
+    {
+      "id": "hpTone",
+      "type": "States",
+      "label": "Quiet, right, wrong, or a way shown",
+      "parameters": {
+        "states": "quiet,right,wrong,shown",
+        "values": "ground,edge",
+        "useTransitions": false,
+        "type-ground": "color",
+        "value-quiet-ground": "var(--surface)",
+        "value-right-ground": "var(--accent)",
+        "value-wrong-ground": "var(--surface)",
+        "value-shown-ground": "var(--muted)",
+        "type-edge": "color",
+        "value-quiet-edge": "var(--border-subtle)",
+        "value-right-edge": "var(--foreground)",
+        "value-wrong-edge": "var(--destructive)",
+        "value-shown-edge": "var(--secondary)"
+      },
+      "x": 590,
+      "y": 1000
+    },
+    {
+      "id": "hpIsOver",
+      "type": "Condition",
+      "label": "Every grid cleared?",
+      "parameters": {},
+      "x": 590,
+      "y": 2200
+    },
+    {
+      "id": "hpFinish",
+      "type": "/Logic/Finish hunt",
+      "label": "Pay the hunt, once",
+      "x": 590,
+      "y": 1720
+    },
+    {
+      "id": "hpEndInView",
+      "type": "JavaScriptFunction",
+      "label": "Bring New game on screen",
+      "parameters": {
+        "functionScript": "if (typeof document !== 'undefined') {\n  const word = String(Inputs.word || '').trim();\n  setTimeout(() => {\n    const button = Array.from(document.querySelectorAll('button')).find((b) => b.getClientRects().length > 0 && b.innerText.trim() === word);\n    if (!button) return;\n    // The whole row of ways on (New game, the hangar, Home), not New game alone: build 2's phone showed New game and cut Home off.\n    let row = button.parentElement;\n    while (row && row.querySelectorAll('button').length < 2) row = row.parentElement;\n    (row || button).scrollIntoView({ block: 'nearest', behavior: 'auto' });\n  }, 250);\n}",
+        "runOnChange-in-word": false
+      },
+      "x": 590,
+      "y": 2320,
+      "ports": [
+        {
+          "name": "in-word",
+          "displayName": "word",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "hpOut",
+      "type": "Component Outputs",
+      "label": "What the hunt did",
+      "ports": [
+        {
+          "name": "model",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "graded",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "home",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "hangar",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cheer",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 590,
+      "y": 1840
+    }
+  ],
+  "visualRoots": [
+    "hpRoot"
+  ]
+}

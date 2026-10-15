@@ -1,0 +1,175 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ae90e67f-58fd-53c8-8a25-be68088bb32a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "htIn",
+      "fromProperty": "look",
+      "toId": "htFace",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "seed",
+      "toId": "htFace",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "options",
+      "toId": "htFace",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "paint",
+      "toId": "htRocket",
+      "toProperty": "colorA"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "pattern",
+      "toId": "htRocket",
+      "toProperty": "patternA"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "look",
+      "toId": "htRocket",
+      "toProperty": "styleA"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "seed",
+      "toId": "htRocket",
+      "toProperty": "seedA"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "options",
+      "toId": "htRocket",
+      "toProperty": "optionsA"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "label",
+      "toId": "htLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "note",
+      "toId": "htNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "isFace",
+      "toId": "htKindOf",
+      "toProperty": "isFace"
+    },
+    {
+      "fromId": "htKindOf",
+      "fromProperty": "result",
+      "toId": "htKind",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "htKind",
+      "fromProperty": "face",
+      "toId": "htFaceBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "htKind",
+      "fromProperty": "swatch",
+      "toId": "htSwatch",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "worn",
+      "toId": "htToneOf",
+      "toProperty": "worn"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "dim",
+      "toId": "htToneOf",
+      "toProperty": "dim"
+    },
+    {
+      "fromId": "htToneOf",
+      "fromProperty": "result",
+      "toId": "htTone",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "htTone",
+      "fromProperty": "ground",
+      "toId": "htCard",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "htTone",
+      "fromProperty": "opacity",
+      "toId": "htCard",
+      "toProperty": "opacity"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "canPick",
+      "toId": "htCanPick",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "canWear",
+      "toId": "htCanWear",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "htCard",
+      "fromProperty": "onClick",
+      "toId": "htCanPick",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "htCard",
+      "fromProperty": "onClick",
+      "toId": "htCanWear",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "htCanPick",
+      "fromProperty": "ontrue",
+      "toId": "htOut",
+      "toProperty": "pick"
+    },
+    {
+      "fromId": "htCanWear",
+      "fromProperty": "ontrue",
+      "toId": "htOut",
+      "toProperty": "wear"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "id",
+      "toId": "htOut",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "label",
+      "toId": "htOut",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "htIn",
+      "fromProperty": "cost",
+      "toId": "htOut",
+      "toProperty": "cost"
+    }
+  ]
+}

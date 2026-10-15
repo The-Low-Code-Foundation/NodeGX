@@ -113,6 +113,18 @@
     },
     {
       "fromId": "pfForm",
+      "fromProperty": "skin",
+      "toId": "pfCreate",
+      "toProperty": "skin"
+    },
+    {
+      "fromId": "pfT",
+      "fromProperty": "yourSkin",
+      "toId": "pfForm",
+      "toProperty": "skinWord"
+    },
+    {
+      "fromId": "pfForm",
       "fromProperty": "create",
       "toId": "pfCreate",
       "toProperty": "run"

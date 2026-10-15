@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "97c5f43b-3859-5f4b-81d4-810d38c14135",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "markselectedIn",
+      "fromProperty": "items",
+      "toId": "markselectedFn",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "markselectedIn",
+      "fromProperty": "value",
+      "toId": "markselectedFn",
+      "toProperty": "in-value"
+    },
+    {
+      "fromId": "markselectedFn",
+      "fromProperty": "out-rows",
+      "toId": "markselectedOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "markselectedFn",
+      "fromProperty": "out-count",
+      "toId": "markselectedOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "markselectedFn",
+      "fromProperty": "success",
+      "toId": "markselectedOut",
+      "toProperty": "done"
+    }
+  ]
+}

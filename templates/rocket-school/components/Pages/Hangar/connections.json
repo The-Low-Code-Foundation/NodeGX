@@ -101,6 +101,12 @@
     },
     {
       "fromId": "hgMe",
+      "fromProperty": "skin",
+      "toId": "hgHeader",
+      "toProperty": "skin"
+    },
+    {
+      "fromId": "hgMe",
       "fromProperty": "faceOptions",
       "toId": "hgHeader",
       "toProperty": "options"
@@ -200,6 +206,60 @@
       "fromProperty": "nextText",
       "toId": "hgPreview",
       "toProperty": "line"
+    },
+    {
+      "fromId": "hgT",
+      "fromProperty": "yourSkin",
+      "toId": "hgSkin",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hgSkinItems",
+      "fromProperty": "items",
+      "toId": "hgSkin",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "skin",
+      "toId": "hgSkin",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hgStore",
+      "fromProperty": "app",
+      "toId": "hgSkinSet",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hgMe",
+      "fromProperty": "profileId",
+      "toId": "hgSkinSet",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "hgSkin",
+      "fromProperty": "value",
+      "toId": "hgSkinSet",
+      "toProperty": "skin"
+    },
+    {
+      "fromId": "hgSkin",
+      "fromProperty": "changed",
+      "toId": "hgSkinSet",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hgSkinSet",
+      "fromProperty": "app",
+      "toId": "hgStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "hgSkinSet",
+      "fromProperty": "done",
+      "toId": "hgStore",
+      "toProperty": "write"
     },
     {
       "fromId": "hgStore",

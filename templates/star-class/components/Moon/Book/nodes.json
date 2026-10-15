@@ -1,0 +1,253 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c73a103c-85ba-5f68-8268-940f1311cb94",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mkIn",
+      "type": "Component Inputs",
+      "label": "The book",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "line",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "closeWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "mkCard",
+      "type": "Group",
+      "label": "The book",
+      "children": [
+        "mkOpenIt",
+        "mkBody"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mkOpenIt",
+      "type": "net.noodl.controls.button",
+      "label": "Open the book",
+      "parent": "mkCard",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Alien Book"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mkBody",
+      "type": "Group",
+      "label": "The pages",
+      "parent": "mkCard",
+      "children": [
+        "mkTitle",
+        "mkPages",
+        "mkClose"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "mkTitle",
+      "type": "Text",
+      "label": "How many, of how many",
+      "parent": "mkBody",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "mkPages",
+      "type": "Group",
+      "label": "Every species in every colour",
+      "parent": "mkBody",
+      "children": [
+        "mkEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "center"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "mkEach",
+      "type": "For Each",
+      "label": "One page per species and colour",
+      "parameters": {
+        "template": "/Moon/Book tile",
+        "templateType": "explicit"
+      },
+      "parent": "mkPages",
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "mkClose",
+      "type": "net.noodl.controls.button",
+      "label": "Close the book",
+      "parent": "mkBody",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Close the book"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "mkOpen",
+      "type": "States",
+      "label": "Folded, or open",
+      "parameters": {
+        "states": "folded,open",
+        "values": "folded,open",
+        "useTransitions": false,
+        "type-folded": "boolean",
+        "value-folded-folded": true,
+        "value-open-folded": false,
+        "type-open": "boolean",
+        "value-folded-open": false,
+        "value-open-open": true
+      },
+      "x": 470,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "mkCard"
+  ]
+}

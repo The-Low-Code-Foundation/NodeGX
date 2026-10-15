@@ -1,0 +1,239 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "05e4ec84-f240-56de-8cf4-110ccb03eb02",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rtIn",
+      "type": "Component Inputs",
+      "label": "Who is where",
+      "ports": [
+        {
+          "name": "progressA",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "progressB",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "nameA",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nameB",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lookA",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "seedA",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lookB",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "seedB",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "showB",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "burstA",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "burstB",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "compact",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "optionsA",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "paintA",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "patternA",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "rtCompact",
+      "type": "Expression",
+      "label": "Full or compact?",
+      "parameters": {
+        "expression": "compact === true ? 'compact' : 'full'"
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "rtBudget",
+      "type": "States",
+      "label": "How much of the screen the course takes",
+      "parameters": {
+        "states": "full,compact",
+        "values": "height",
+        "useTransitions": false,
+        "type-height": "number",
+        "value-full-height": 30,
+        "value-compact-height": 18
+      },
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "rtAnimA",
+      "type": "net.noodl.animatetovalue",
+      "label": "Rocket A glides",
+      "parameters": {
+        "duration": 700,
+        "easingCurve": "easeOut"
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "rtAnimB",
+      "type": "net.noodl.animatetovalue",
+      "label": "Rocket B glides",
+      "parameters": {
+        "duration": 700,
+        "easingCurve": "easeOut"
+      },
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "rtRoot",
+      "type": "Group",
+      "label": "The course",
+      "children": [
+        "rtTrack"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "explicit",
+        "flexDirection": "column",
+        "height": {
+          "value": 30,
+          "unit": "vh"
+        },
+        "maxHeight": {
+          "value": 56,
+          "unit": "vw"
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rtTrack",
+      "type": "game-kit.RaceTrack",
+      "label": "The kit’s track",
+      "parent": "rtRoot",
+      "parameters": {
+        "colorA": "var(--primary)",
+        "colorB": "var(--secondary)",
+        "aspect": "auto"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rtLandedA",
+      "type": "Expression",
+      "label": "A at the planet?",
+      "parameters": {
+        "expression": "p >= 1"
+      },
+      "x": 350,
+      "y": 640
+    },
+    {
+      "id": "rtLandedB",
+      "type": "Expression",
+      "label": "B at the planet?",
+      "parameters": {
+        "expression": "p >= 1"
+      },
+      "x": 350,
+      "y": 760
+    },
+    {
+      "id": "rtGateA",
+      "type": "Condition",
+      "label": "Did A land?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 350,
+      "y": 880
+    },
+    {
+      "id": "rtGateB",
+      "type": "Condition",
+      "label": "Did B land?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 350,
+      "y": 1000
+    },
+    {
+      "id": "rtOut",
+      "type": "Component Outputs",
+      "label": "Landings",
+      "ports": [
+        {
+          "name": "reachedA",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "reachedB",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 1120
+    }
+  ],
+  "visualRoots": [
+    "rtRoot"
+  ]
+}

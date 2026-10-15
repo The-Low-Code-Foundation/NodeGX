@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ac07434c-acd3-5268-89b3-5bd56e307b17",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "huntmoveIn",
+      "fromProperty": "game",
+      "toId": "huntmoveFn",
+      "toProperty": "in-game"
+    },
+    {
+      "fromId": "huntmoveIn",
+      "fromProperty": "action",
+      "toId": "huntmoveFn",
+      "toProperty": "in-action"
+    },
+    {
+      "fromId": "huntmoveIn",
+      "fromProperty": "index",
+      "toId": "huntmoveFn",
+      "toProperty": "in-index"
+    },
+    {
+      "fromId": "huntmoveIn",
+      "fromProperty": "run",
+      "toId": "huntmoveFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "huntmoveFn",
+      "fromProperty": "out-game",
+      "toId": "huntmoveOut",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "huntmoveFn",
+      "fromProperty": "out-changed",
+      "toId": "huntmoveOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "huntmoveFn",
+      "fromProperty": "out-note",
+      "toId": "huntmoveOut",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "huntmoveFn",
+      "fromProperty": "success",
+      "toId": "huntmoveOut",
+      "toProperty": "done"
+    }
+  ]
+}

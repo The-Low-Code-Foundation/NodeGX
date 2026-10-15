@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c9bef010-f81d-5728-89d8-a7e2b488188c",
+  "name": "Stat",
+  "path": "/Game/Stat",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One reading: a small label and a big number, in a tone. Tabular numerals so a column does not rag."
+}

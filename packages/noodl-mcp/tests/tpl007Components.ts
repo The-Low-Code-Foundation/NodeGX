@@ -78,6 +78,8 @@ import {
   PICK_QUESTION_SCRIPT,
   SAVE_MODEL_SCRIPT,
   SELECT_PROFILE_SCRIPT,
+  SKIN_FACE_SCRIPT,
+  SKIN_TONES,
   SLIDE_MERGE_SCRIPT,
   TEACH_CARD_SCRIPT,
   TOGGLE_ID_SCRIPT,
@@ -203,6 +205,9 @@ export const C = {
   moonItem: '/Moon/Shop tile',
   moonCare: '/Moon/Care',
   moonAdopt: '/Moon/Adopt',
+  moonBookTile: '/Moon/Book tile',
+  moonBook: '/Moon/Book',
+  moonBig: '/Moon/Big things',
   pageMoon: '/Pages/Moon'
 } as const;
 
@@ -502,7 +507,7 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
   {
     name: 'Logic/Create profile', script: CREATE_PROFILE_SCRIPT, run: true,
     description: 'The store with one more profile, made active.',
-    ins: [['app', 'object'], ['name', 'string'], ['look', 'string'], ['seed', 'string'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['answerMode', 'string']],
+    ins: [['app', 'object'], ['name', 'string'], ['look', 'string'], ['seed', 'string'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['answerMode', 'string'], ['skin', 'string']],
     outs: [['app', 'object'], ['profileId', 'string'], ['created', 'boolean']]
   },
   {
@@ -521,7 +526,7 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
     name: 'Logic/Active profile', script: ACTIVE_PROFILE_SCRIPT,
     description: 'The active profile, field by field, and an honest hasProfile=false when there is none. RKT-011: what the face and rocket wear, the 🎁 picks waiting, and the way to the next one.',
     ins: [['app', 'object']],
-    outs: [['hasProfile', 'boolean'], ['profileId', 'string'], ['name', 'string'], ['look', 'string'], ['seed', 'string'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['sound', 'boolean'], ['soundMode', 'string'], ['answerMode', 'string'], ['mergeMode', 'string'], ['model', 'object'], ['due', 'number'], ['days7', 'number'], ['answered', 'number'], ['stars', 'number'], ['faceOptions', 'object'], ['paint', 'string'], ['pattern', 'string'], ['picks', 'number'], ['hasPicks', 'boolean'], ['nextAt', 'number'], ['nextPct', 'number'], ['nextText', 'string'], ['sets', 'array'], ['focusSubject', 'string'], ['focusSkills', 'array']]
+    outs: [['hasProfile', 'boolean'], ['profileId', 'string'], ['name', 'string'], ['look', 'string'], ['seed', 'string'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['sound', 'boolean'], ['soundMode', 'string'], ['answerMode', 'string'], ['mergeMode', 'string'], ['model', 'object'], ['due', 'number'], ['days7', 'number'], ['answered', 'number'], ['stars', 'number'], ['faceOptions', 'object'], ['skin', 'string'], ['paint', 'string'], ['pattern', 'string'], ['picks', 'number'], ['hasPicks', 'boolean'], ['nextAt', 'number'], ['nextPct', 'number'], ['nextText', 'string'], ['sets', 'array'], ['focusSubject', 'string'], ['focusSkills', 'array']]
   },
   {
     name: 'Logic/Save model', script: SAVE_MODEL_SCRIPT, run: true,
@@ -537,8 +542,8 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
   },
   {
     name: 'Logic/Update settings', script: UPDATE_SETTINGS_SCRIPT, run: true,
-    description: 'The store with a profile\'s name, language, layout, level, sound, answer mode or face changed. A name is trimmed to 24 characters, and an empty one is refused.',
-    ins: [['app', 'object'], ['profileId', 'string'], ['name', 'string'], ['lang', 'string'], ['layout', 'string'], ['layoutSeen', 'string'], ['level', 'string'], ['sound', 'boolean'], ['soundMode', 'string'], ['answerMode', 'string'], ['look', 'string'], ['seed', 'string'], ['mergeMode', 'string'], ['focusSubject', 'string'], ['focusSkills', 'array']],
+    description: 'The store with a profile\'s name, language, layout, level, sound, answer mode, face or skin changed. A name is trimmed to 24 characters, and an empty one is refused.',
+    ins: [['app', 'object'], ['profileId', 'string'], ['name', 'string'], ['lang', 'string'], ['layout', 'string'], ['layoutSeen', 'string'], ['level', 'string'], ['sound', 'boolean'], ['soundMode', 'string'], ['answerMode', 'string'], ['look', 'string'], ['seed', 'string'], ['mergeMode', 'string'], ['focusSubject', 'string'], ['focusSkills', 'array'], ['skin', 'string']],
     outs: [['app', 'object']]
   },
   {
@@ -635,12 +640,12 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
     name: 'Logic/Moon view', script: MOON_VIEW_SCRIPT,
     description: 'P113 REV-005: the moon as the active player sees it — their aliens as rows, the chosen one close up and its lines, the food and the things to wear as tiles with what a tap does, and the adopt card (each species in the Draft Colour, the next alien’s price, a name to suggest). Every line in their language.',
     ins: [['app', 'object'], ['draftSpecies', 'string'], ['draftColour', 'string']],
-    outs: [['aliens', 'array'], ['has', 'boolean'], ['count', 'number'], ['full', 'boolean'], ['purse', 'number'], ['purseLine', 'string'], ['selId', 'string'], ['selName', 'string'], ['selSpecies', 'string'], ['selColour', 'string'], ['selGrown', 'number'], ['selHat', 'string'], ['selEyes', 'string'], ['selNeck', 'string'], ['selHappy', 'number'], ['selLine', 'string'], ['favLine', 'string'], ['foods', 'array'], ['wear', 'array'], ['adoptSpecies', 'array'], ['adoptColours', 'array'], ['draftSpecies', 'string'], ['draftColour', 'string'], ['adoptCost', 'number'], ['adoptFree', 'boolean'], ['canAdopt', 'boolean'], ['suggestedName', 'string'], ['adoptButton', 'string'], ['anotherLine', 'string']]
+    outs: [['book', 'array'], ['bookCount', 'number'], ['bookLine', 'string'], ['bigs', 'array'], ['aliens', 'array'], ['has', 'boolean'], ['count', 'number'], ['full', 'boolean'], ['purse', 'number'], ['purseLine', 'string'], ['selId', 'string'], ['selName', 'string'], ['selSpecies', 'string'], ['selColour', 'string'], ['selGrown', 'number'], ['selHat', 'string'], ['selEyes', 'string'], ['selNeck', 'string'], ['selHappy', 'number'], ['selLine', 'string'], ['favLine', 'string'], ['foods', 'array'], ['wear', 'array'], ['adoptSpecies', 'array'], ['adoptColours', 'array'], ['draftSpecies', 'string'], ['draftColour', 'string'], ['adoptCost', 'number'], ['adoptFree', 'boolean'], ['canAdopt', 'boolean'], ['suggestedName', 'string'], ['adoptButton', 'string'], ['anotherLine', 'string']]
   },
   {
     name: 'Logic/Moon act', script: MOON_ACT_SCRIPT, run: true,
-    description: 'P113 REV-005: one thing done on the moon. Action is a parameter, placed once per action: adopt (Species, Colour, Name; the first alien free), select (Alien Id), feed (Food Id), buy (Wear Id: bought once and put on) or wear (Wear Id, owned: on, or off). Refused with nothing changed when the purse is short, the moon is full or the thing is not theirs (Why). Said is the line to show.',
-    ins: [['app', 'object'], ['profileId', 'string'], ['action', 'string'], ['alienId', 'string'], ['foodId', 'string'], ['wearId', 'string'], ['species', 'string'], ['colour', 'string'], ['name', 'string']],
+    description: 'P113 REV-005: one thing done on the moon. Action is a parameter, placed once per action: adopt (Species, Colour, Name; the first alien free), select (Alien Id), feed (Food Id), buy (Wear Id: bought once and put on) or wear (Wear Id, owned: on, or off); TPL-014: build (Thing Id, a dome: room for more aliens) or egg (always an alien never had, while there is one). Refused with nothing changed when the purse is short, the moon is full or the thing is not theirs (Why). Said is the line to show.',
+    ins: [['app', 'object'], ['profileId', 'string'], ['action', 'string'], ['alienId', 'string'], ['foodId', 'string'], ['wearId', 'string'], ['thingId', 'string'], ['species', 'string'], ['colour', 'string'], ['name', 'string']],
     outs: [['app', 'object'], ['ok', 'boolean'], ['why', 'string'], ['said', 'string'], ['alienId', 'string']]
   },
   {
@@ -1096,11 +1101,11 @@ const GAME_CARD: Tpl007Component = {
 const HEADER: Tpl007Component = {
   path: 'Game/Header',
   description: 'The top bar: one row with the player\'s face and name, which opens the player menu, and Home. The menu opens the hangar, edits the player (or deletes them), sets language, keyboard, sound and answers, and switches player. Every change is written through App in, then App and Write out. Hide Bar takes the bar and the menu away in a live race; Show Hangar false leaves the hangar out of the menu (on the hangar itself). Publishes Home, Hangar, Switch Player and Deleted.',
-  inputs: [port('app', 'object'), port('profileId', 'string'), port('name', 'string'), port('look', 'string'), port('seed', 'string'), port('level', 'string'), port('lang', 'string'), port('layout', 'string'), port('soundMode', 'string'), port('answerMode', 'string'), port('showHome', 'boolean'), port('hideBar', 'boolean'), port('options', 'object', 'RKT-011: what the face wears'), port('showHangar', 'boolean', 'the hangar in the player menu; false on the hangar itself')],
+  inputs: [port('app', 'object'), port('profileId', 'string'), port('name', 'string'), port('look', 'string'), port('seed', 'string'), port('level', 'string'), port('lang', 'string'), port('layout', 'string'), port('soundMode', 'string'), port('answerMode', 'string'), port('showHome', 'boolean'), port('hideBar', 'boolean'), port('options', 'object', 'RKT-011: what the face wears'), port('showHangar', 'boolean', 'the hangar in the player menu; false on the hangar itself'), port('skin', 'string', 'SC-5: the skin they picked, for Edit player')],
   outputs: [port('home', 'signal'), port('switchPlayer', 'signal'), port('app', 'object'), port('write', 'signal'), port('deleted', 'signal'), port('hangar', 'signal')],
   instantiates: [C.face, C.choiceRow, C.newPlayer, C.words, logicName('Logic/Translate words'), logicName('Logic/Update settings'), logicName('Logic/Delete profile')],
   nodes: [
-    inputs('hdIn', 'Who, and the store', [['app', 'object'], ['profileId', 'string'], ['name', 'string'], ['look', 'string'], ['seed', 'string'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['soundMode', 'string'], ['answerMode', 'string'], ['showHome', 'boolean'], ['hideBar', 'boolean'], ['options', 'object'], ['showHangar', 'boolean']]),
+    inputs('hdIn', 'Who, and the store', [['app', 'object'], ['profileId', 'string'], ['name', 'string'], ['look', 'string'], ['seed', 'string'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['soundMode', 'string'], ['answerMode', 'string'], ['showHome', 'boolean'], ['hideBar', 'boolean'], ['options', 'object'], ['showHangar', 'boolean'], ['skin', 'string']]),
     group('hdRoot', 'The bar and its menu', undefined, column({ rowGap: 'var(--space-3)' }), ['hdBar', 'hdMenu', 'hdForm']),
     // 🔴 AC2: one row at every width. It never wraps: the name takes what Home leaves, and wraps inside its own space.
     group('hdBar', 'The bar', 'hdRoot', { ...column(), flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', columnGap: 'var(--space-4)', flexWrap: 'nowrap' }, ['hdWho', 'hdHome']),
@@ -1226,6 +1231,8 @@ const HEADER: Tpl007Component = {
     wire('hdIn', 'look', 'hdForm', 'look0'),
     wire('hdIn', 'seed', 'hdForm', 'seed0'),
     wire('hdIn', 'level', 'hdForm', 'level0'),
+    wire('hdIn', 'skin', 'hdForm', 'skin0'),
+    wire('hdT', 'yourSkin', 'hdForm', 'skinWord'),
     wire('hdT', 'yourName', 'hdForm', 'nameWord'),
     wire('hdT', 'pickAvatar', 'hdForm', 'faceWord'),
     wire('hdT', 'rollAvatar', 'hdForm', 'rollWord'),
@@ -1244,6 +1251,7 @@ const HEADER: Tpl007Component = {
     wire('hdForm', 'look', 'hdRename', 'look'),
     wire('hdForm', 'seed', 'hdRename', 'seed'),
     wire('hdForm', 'level', 'hdRename', 'level'),
+    wire('hdForm', 'skin', 'hdRename', 'skin'),
     wire('hdForm', 'create', 'hdRename', 'run'),
     wire('hdRename', 'app', 'hdOut', 'app'),
     wire('hdRename', 'done', 'hdOut', 'write'),
@@ -1772,6 +1780,8 @@ const LOOK_ITEMS_SCRIPT = [
 ].join('\n');
 
 const LEVEL_ITEMS = JSON.stringify(LEVELS.map((l) => ({ label: l, value: l })));
+/** SC-5: the five skins, each a ✋ in that tone, so a child who cannot read yet can still choose. */
+const SKIN_ITEMS = JSON.stringify(SKIN_TONES.map((t) => ({ label: t.hand, value: t.id })));
 const LANG_ITEMS = JSON.stringify([{ label: 'English', value: 'en' }, { label: 'Français', value: 'fr' }]);
 
 /**
@@ -1783,13 +1793,13 @@ const SHARED_DRAFT = 'Shared on purpose: one player draft at a time. New player 
 
 const NEW_PLAYER_FORM: Tpl007Component = {
   path: 'Profiles/New player form',
-  description: 'The player form: a name, a face (five styles, re-rollable), a class and a language. Publishes Create with every field, or Cancel. RKT-008: with Editing, it is the same form for a player who exists. Fill puts their name, face and class in, the language row steps aside (the menu has it), and Delete asks by name before it publishes Delete.',
-  inputs: [port('mounted', 'boolean'), port('nameWord', 'string'), port('faceWord', 'string'), port('rollWord', 'string'), port('levelWord', 'string'), port('langWord', 'string'), port('createWord', 'string'), port('cancelWord', 'string'), port('reset', 'signal'), port('editing', 'boolean'), port('fill', 'signal'), port('name0', 'string'), port('look0', 'string'), port('seed0', 'string'), port('level0', 'string'), port('deleteWord', 'string'), port('askWord', 'string'), port('yesWord', 'string'), port('noWord', 'string')],
-  outputs: [port('create', 'signal'), port('cancel', 'signal'), port('name', 'string'), port('look', 'string'), port('seed', 'string'), port('level', 'string'), port('lang', 'string'), port('delete', 'signal')],
+  description: 'The player form: a name, a face (five styles, re-rollable), a skin (SC-5: five ✋ tones, or none and the seed chooses), a class and a language. Publishes Create with every field, or Cancel. RKT-008: with Editing, it is the same form for a player who exists. Fill puts their name, face, skin and class in, the language row steps aside (the menu has it), and Delete asks by name before it publishes Delete.',
+  inputs: [port('mounted', 'boolean'), port('nameWord', 'string'), port('faceWord', 'string'), port('rollWord', 'string'), port('levelWord', 'string'), port('langWord', 'string'), port('createWord', 'string'), port('cancelWord', 'string'), port('reset', 'signal'), port('editing', 'boolean'), port('fill', 'signal'), port('name0', 'string'), port('look0', 'string'), port('seed0', 'string'), port('level0', 'string'), port('deleteWord', 'string'), port('askWord', 'string'), port('yesWord', 'string'), port('noWord', 'string'), port('skinWord', 'string'), port('skin0', 'string')],
+  outputs: [port('create', 'signal'), port('cancel', 'signal'), port('name', 'string'), port('look', 'string'), port('seed', 'string'), port('level', 'string'), port('lang', 'string'), port('delete', 'signal'), port('skin', 'string')],
   instantiates: [C.face, C.choiceRow, logicName('Logic/Roll face')],
   nodes: [
-    inputs('nfIn', 'The words', [['mounted', 'boolean'], ['nameWord', 'string'], ['faceWord', 'string'], ['rollWord', 'string'], ['levelWord', 'string'], ['langWord', 'string'], ['createWord', 'string'], ['cancelWord', 'string'], ['reset', 'signal'], ['editing', 'boolean'], ['fill', 'signal'], ['name0', 'string'], ['look0', 'string'], ['seed0', 'string'], ['level0', 'string'], ['deleteWord', 'string'], ['askWord', 'string'], ['yesWord', 'string'], ['noWord', 'string']]),
-    group('nfCard', 'The form', undefined, { ...CARD, rowGap: 'var(--space-5)', paddingTop: 'var(--space-6)', paddingBottom: 'var(--space-6)', paddingLeft: 'var(--space-6)', paddingRight: 'var(--space-6)', maxWidth: px(560) }, ['nfNameLabel', 'nfName', 'nfFaceRow', 'nfLook', 'nfLevel', 'nfLangWrap', 'nfActions', 'nfDanger']),
+    inputs('nfIn', 'The words', [['mounted', 'boolean'], ['nameWord', 'string'], ['faceWord', 'string'], ['rollWord', 'string'], ['levelWord', 'string'], ['langWord', 'string'], ['createWord', 'string'], ['cancelWord', 'string'], ['reset', 'signal'], ['editing', 'boolean'], ['fill', 'signal'], ['name0', 'string'], ['look0', 'string'], ['seed0', 'string'], ['level0', 'string'], ['deleteWord', 'string'], ['askWord', 'string'], ['yesWord', 'string'], ['noWord', 'string'], ['skinWord', 'string'], ['skin0', 'string']]),
+    group('nfCard', 'The form', undefined, { ...CARD, rowGap: 'var(--space-5)', paddingTop: 'var(--space-6)', paddingBottom: 'var(--space-6)', paddingLeft: 'var(--space-6)', paddingRight: 'var(--space-6)', maxWidth: px(560) }, ['nfNameLabel', 'nfName', 'nfFaceRow', 'nfLook', 'nfSkin', 'nfLevel', 'nfLangWrap', 'nfActions', 'nfDanger']),
     text('nfNameLabel', 'Your name', 'nfCard', '', { ...T_META, fontWeight: 'var(--font-semibold)' }),
     place('nfName', TEXT_INPUT_NODE, 'The name box', 'nfCard', { ...FIELD, fontSize: 'var(--text-xl)' }),
     group('nfFaceRow', 'The face and the roll', 'nfCard', row({ columnGap: 'var(--space-4)' }), ['nfFace', 'nfRollWrap']),
@@ -1803,6 +1813,8 @@ const NEW_PLAYER_FORM: Tpl007Component = {
     text('nfPos', 'Which of the faces rolled', 'nfWalk', '', T_META),
     place('nfForward', BUTTON_NODE, 'The face after', 'nfWalk', { ...BTN_OUTLINE, label: '▶', mounted: false }),
     place('nfLook', C.choiceRow, 'Which style', 'nfCard'),
+    // SC-5: the skin, beside the face it colours. None picked (a new form) leaves the seed to choose, as before.
+    place('nfSkin', C.choiceRow, 'Which skin', 'nfCard'),
     place('nfLevel', C.choiceRow, 'Which class', 'nfCard'),
     // RKT-008: a Group, so editing can take the row away (a Choice row instance has no Mounted of its own).
     group('nfLangWrap', 'The language, for a new player', 'nfCard', column(), ['nfLang']),
@@ -1812,6 +1824,13 @@ const NEW_PLAYER_FORM: Tpl007Component = {
     place('nfCancel', BUTTON_NODE, 'Cancel', 'nfActions', { ...BTN_OUTLINE, label: 'Cancel' }),
     logic('nfLookItems', FUNCTION_NODE, 'The faces on offer', { functionScript: LOOK_ITEMS_SCRIPT }),
     { id: 'nfLevelItems', type: STATIC_DATA_NODE, label: 'The four classes', parameters: { type: 'json', json: LEVEL_ITEMS } },
+    { id: 'nfSkinItems', type: STATIC_DATA_NODE, label: 'The five skins', parameters: { type: 'json', json: SKIN_ITEMS } },
+    { ...(logic('nfSkinVar', VARIABLE_NODE, 'The chosen skin', { name: 'newSkin' }) as object), comment: SHARED_DRAFT },
+    logic('nfSetSkin', SET_VARIABLE_NODE, 'Choose a skin', { name: 'newSkin' }),
+    logic('nfSkinFace', FUNCTION_NODE, 'The face in that skin', { functionScript: SKIN_FACE_SCRIPT }),
+    logic('nfDefaultSkin', EXPRESSION_NODE, 'No skin picked yet', { expression: "''" }),
+    logic('nfResetSkin', SET_VARIABLE_NODE, 'Back to none', { name: 'newSkin' }),
+    logic('nfFillSkin', SET_VARIABLE_NODE, 'Their skin', { name: 'newSkin' }),
     { id: 'nfLangItems', type: STATIC_DATA_NODE, label: 'The two languages', parameters: { type: 'json', json: LANG_ITEMS } },
     // The four choices, each held in a Variable and wired back (P2, the controlled value).
     { ...(logic('nfLookVar', VARIABLE_NODE, 'The chosen style', { name: 'newLook' }) as object), comment: SHARED_DRAFT },
@@ -1865,7 +1884,7 @@ const NEW_PLAYER_FORM: Tpl007Component = {
     logic('nfAskLine', FUNCTION_NODE, 'The question, with their name', { functionScript: "Outputs.line = String(Inputs.word || '').replace('{name}', String(Inputs.name || ''));" }),
     logic('nfFillLook', SET_VARIABLE_NODE, 'Their style', { name: 'newLook' }),
     logic('nfFillLevel', SET_VARIABLE_NODE, 'Their class', { name: 'newLevel' }),
-    outputs('nfOut', 'The new player', [['create', 'signal'], ['cancel', 'signal'], ['name', 'string'], ['look', 'string'], ['seed', 'string'], ['level', 'string'], ['lang', 'string'], ['delete', 'signal']])
+    outputs('nfOut', 'The new player', [['create', 'signal'], ['cancel', 'signal'], ['name', 'string'], ['look', 'string'], ['seed', 'string'], ['level', 'string'], ['lang', 'string'], ['delete', 'signal'], ['skin', 'string']])
   ],
   connections: [
     wire('nfIn', 'mounted', 'nfShown', 'm'),
@@ -1882,6 +1901,19 @@ const NEW_PLAYER_FORM: Tpl007Component = {
     wire('nfLookItems', 'out-items', 'nfLook', 'items'),
     wire('nfLevelItems', 'items', 'nfLevel', 'items'),
     wire('nfLangItems', 'items', 'nfLang', 'items'),
+    // SC-5: the skin row, held like the others, and the face drawn in it.
+    wire('nfIn', 'skinWord', 'nfSkin', 'label'),
+    wire('nfSkinItems', 'items', 'nfSkin', 'items'),
+    wire('nfSkinVar', 'value', 'nfSkin', 'value'),
+    wire('nfSkin', 'value', 'nfSetSkin', 'value'),
+    wire('nfSkin', 'changed', 'nfSetSkin', 'do'),
+    wire('nfSkinVar', 'value', 'nfSkinFace', 'in-skin'),
+    wire('nfSkinFace', 'out-options', 'nfFace', 'options'),
+    wire('nfDefaultSkin', 'result', 'nfResetSkin', 'value'),
+    wire('nfIn', 'reset', 'nfResetSkin', 'do'),
+    wire('nfIn', 'skin0', 'nfFillSkin', 'value'),
+    wire('nfIn', 'fill', 'nfFillSkin', 'do'),
+    wire('nfSkinVar', 'value', 'nfOut', 'skin'),
     // Each choice row: value in from the variable, changes written back.
     wire('nfLookVar', 'value', 'nfLook', 'value'),
     wire('nfLook', 'value', 'nfSetLook', 'value'),
@@ -3197,7 +3229,7 @@ function headerWires(p: string, { hangar = true }: { hangar?: boolean } = {}): u
   return [
     // The menu's way to the hangar, on every page but the hangar itself (which places the header with Show Hangar false).
     ...(hangar ? [wire(h, 'hangar', `${p}GoHangar`, 'navigate')] : []),
-    ...(['name', 'look', 'seed', 'lang', 'level', 'layout', 'soundMode', 'answerMode', 'profileId'] as const).map((field) => wire(`${p}Me`, field, h, field)),
+    ...(['name', 'look', 'seed', 'lang', 'level', 'layout', 'soundMode', 'answerMode', 'profileId', 'skin'] as const).map((field) => wire(`${p}Me`, field, h, field)),
     wire(`${p}Me`, 'faceOptions', h, 'options'),
     wire(`${p}Store`, 'app', h, 'app'),
     wire(h, 'app', `${p}Store`, 'app'),
@@ -3292,6 +3324,8 @@ const PAGE_PROFILES: Tpl007Component = {
     wire('pfForm', 'seed', 'pfCreate', 'seed'),
     wire('pfForm', 'level', 'pfCreate', 'level'),
     wire('pfForm', 'lang', 'pfCreate', 'lang'),
+    wire('pfForm', 'skin', 'pfCreate', 'skin'),
+    wire('pfT', 'yourSkin', 'pfForm', 'skinWord'),
     wire('pfForm', 'create', 'pfCreate', 'run'),
     wire('pfCreate', 'app', 'pfStore', 'app'),
     wire('pfCreate', 'done', 'pfStore', 'write'),
@@ -3546,16 +3580,18 @@ const PAGE_RACE: Tpl007Component = {
 const PAGE_HANGAR: Tpl007Component = {
   path: 'Pages/Hangar',
   description: 'The hangar (RKT-011, reshaped by PLY-001 and PLY-002): the child’s face and rocket as they will race, then the shelf — only things the face they chose can wear. Buying spends stars and ASKS FIRST, on a card that says the balance, the price and what is left. What is theirs goes on or off with a tap and costs nothing. Nothing here is random, time-limited or paid, and nothing owned is ever taken away.',
-  instantiates: [C.header, C.hangarPreview, C.hangarShelf, C.hangarConfirm, C.hangarData, C.store, logicName('Logic/Active profile'), logicName('Logic/Translate words'), logicName('Logic/Pick item'), logicName('Logic/Wear item'), C.words],
+  instantiates: [C.header, C.hangarPreview, C.hangarShelf, C.hangarConfirm, C.hangarData, C.store, logicName('Logic/Active profile'), logicName('Logic/Translate words'), logicName('Logic/Pick item'), logicName('Logic/Wear item'), C.words, C.choiceRow, logicName('Logic/Update settings')],
   nodes: [
     { id: 'hgPage', type: 'Page', label: 'Hangar', parameters: { title: 'Rocket School', urlPath: 'hangar' }, children: ['hgOuter'] },
     group('hgOuter', 'The ground', 'hgPage', column({ alignItems: 'center' }), ['hgWrap']),
-    group('hgWrap', 'The screen', 'hgOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['hgHeader', 'hgTitle', 'hgMoon', 'hgPreview', 'hgStack']),
+    group('hgWrap', 'The screen', 'hgOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['hgHeader', 'hgTitle', 'hgMoon', 'hgPreview', 'hgSkin', 'hgStack']),
     place('hgHeader', C.header, 'The bar', 'hgWrap', { showHome: true, showHangar: false }),
     text('hgTitle', 'Hangar', 'hgWrap', '', T_SECTION),
     // P113 REV-005: the way to the moon, where the stars adopt and feed aliens. The hangar is where a child spends; so is the moon.
     place('hgMoon', BUTTON_NODE, 'To the moon', 'hgWrap', { ...BTN_PRIMARY, label: 'Visit your aliens on the Moon', fontSize: 'var(--text-lg)' }),
     place('hgPreview', C.hangarPreview, 'Your face and rocket', 'hgWrap'),
+    // SC-5: the skin, under the face it colours, free and changed with a tap like anything worn.
+    place('hgSkin', C.choiceRow, 'Your skin', 'hgWrap'),
     /*
      * 🔴 R6 (Richard, 2026-09-18) — the buy card sits OVER the shelf, and the shelf keeps the tab the child was on.
      *
@@ -3584,6 +3620,8 @@ const PAGE_HANGAR: Tpl007Component = {
     }),
     logic('hgBuyTitle', EXPRESSION_NODE, 'Buy what?', { expression: "String(word || '').replace('{item}', String(label || ''))" }),
     logic('hgWear', logicName('Logic/Wear item'), 'Put it on, or take it off'),
+    { id: 'hgSkinItems', type: STATIC_DATA_NODE, label: 'The five skins', parameters: { type: 'json', json: SKIN_ITEMS } },
+    logic('hgSkinSet', logicName('Logic/Update settings'), 'Keep the skin'),
     logic('hgNoOne', EXPRESSION_NODE, 'Nobody signed in?', { expression: 'has === false' }),
     gate('hgGuard', 'Send them to the profiles?'),
     logic('hgGoProfiles', NAVIGATE_NODE, 'To the profiles', { router: ROUTER, target: C.pageProfiles }),
@@ -3610,6 +3648,16 @@ const PAGE_HANGAR: Tpl007Component = {
     wire('hgMe', 'paint', 'hgPreview', 'paint'),
     wire('hgMe', 'pattern', 'hgPreview', 'pattern'),
     wire('hgMe', 'nextText', 'hgPreview', 'line'),
+    // SC-5: the skin row shows theirs, and a tap keeps the new one.
+    wire('hgT', 'yourSkin', 'hgSkin', 'label'),
+    wire('hgSkinItems', 'items', 'hgSkin', 'items'),
+    wire('hgMe', 'skin', 'hgSkin', 'value'),
+    wire('hgStore', 'app', 'hgSkinSet', 'app'),
+    wire('hgMe', 'profileId', 'hgSkinSet', 'profileId'),
+    wire('hgSkin', 'value', 'hgSkinSet', 'skin'),
+    wire('hgSkin', 'changed', 'hgSkinSet', 'run'),
+    wire('hgSkinSet', 'app', 'hgStore', 'app'),
+    wire('hgSkinSet', 'done', 'hgStore', 'write'),
     // The shelf.
     wire('hgStore', 'app', 'hgShelf', 'app'),
     wire('hgItems', 'items', 'hgShelf', 'shelf'),
@@ -5176,6 +5224,126 @@ const MOON_ADOPT: Tpl007Component = {
 };
 
 /**
+ * TPL-014 M1 — one page of the Alien Book: a species in a colour, drawn by the kit when the player has had one, a grey shape
+ * with no name when not. Nothing to tap: the book is to look at, and an egg or an adoption is what fills a page.
+ */
+const BOOK_FIELDS = ['id', 'species', 'colour', 'grown', 'name', 'line'];
+const MOON_BOOK_TILE: Tpl007Component = {
+  path: 'Moon/Book tile',
+  description: 'One page of the Alien Book: the kit draws the species in its colour (a grey shape when never had), with its kind and colour under it, or ?.',
+  inputs: [port('id', 'string'), port('species', 'string'), port('colour', 'string'), port('grown', 'number'), port('name', 'string'), port('line', 'string')],
+  nodes: [
+    inputs('mbIn', 'The page', [['id', 'string'], ['species', 'string'], ['colour', 'string'], ['grown', 'number'], ['name', 'string'], ['line', 'string']]),
+    group('mbCard', 'The page', undefined, { ...CARD, width: px(88), sizeMode: 'contentHeight', alignItems: 'center', rowGap: 'var(--space-1)', paddingTop: 'var(--space-2)', paddingBottom: 'var(--space-2)', paddingLeft: 'var(--space-1)', paddingRight: 'var(--space-1)' }, ['mbAlien', 'mbName', 'mbLine']),
+    place('mbAlien', KIT_ALIEN, 'The alien, or its shape', 'mbCard', { size: 60 }),
+    text('mbName', 'Its kind', 'mbCard', '', { ...T_META, fontWeight: 'var(--font-bold)', textAlignX: 'center' }),
+    text('mbLine', 'Its colour', 'mbCard', '', { ...T_META, textAlignX: 'center' })
+  ],
+  connections: [
+    wire('mbIn', 'species', 'mbAlien', 'species'),
+    wire('mbIn', 'grown', 'mbAlien', 'grown'),
+    wire('mbIn', 'colour', 'mbAlien', 'color'),
+    wire('mbIn', 'name', 'mbAlien', 'name'),
+    wire('mbIn', 'name', 'mbName', 'text'),
+    wire('mbIn', 'line', 'mbLine', 'text')
+  ]
+};
+
+/**
+ * TPL-014 M1 — the Alien Book: every species in every colour, folded to one button that says how far the player has got
+ * ("Alien Book · 9 of 36"), so the moon page stays short. "Done" becomes a number with room in it.
+ */
+const MOON_BOOK: Tpl007Component = {
+  path: 'Moon/Book',
+  description: 'The Alien Book (TPL-014 M1): every species in every colour, folded to one button that says how many the player has had ("Alien Book · 9 of 36"). Open, the pages wrap; one never had is a grey shape. Close folds it again.',
+  inputs: [port('rows', 'array'), port('line', 'string'), port('closeWord', 'string')],
+  repeats: { source: 'array', rowFields: BOOK_FIELDS },
+  instantiates: [C.moonBookTile],
+  nodes: [
+    inputs('mkIn', 'The book', [['rows', 'array'], ['line', 'string'], ['closeWord', 'string']]),
+    group('mkCard', 'The book', undefined, { ...CARD, alignItems: 'center', rowGap: 'var(--space-3)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-4)', paddingLeft: 'var(--space-3)', paddingRight: 'var(--space-3)' }, ['mkOpenIt', 'mkBody']),
+    place('mkOpenIt', BUTTON_NODE, 'Open the book', 'mkCard', { ...BTN_OUTLINE, label: 'Alien Book' }),
+    group('mkBody', 'The pages', 'mkCard', column({ alignItems: 'center', rowGap: 'var(--space-3)' }), ['mkTitle', 'mkPages', 'mkClose']),
+    text('mkTitle', 'How many, of how many', 'mkBody', '', { ...T_CARD, textAlignX: 'center' }),
+    group('mkPages', 'Every species in every colour', 'mkBody', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch', columnGap: 'var(--space-2)', rowGap: 'var(--space-2)' }), ['mkEach']),
+    logic('mkEach', FOR_EACH_NODE, 'One page per species and colour', { template: C.moonBookTile, templateType: 'explicit' }),
+    place('mkClose', BUTTON_NODE, 'Close the book', 'mkBody', { ...BTN_OUTLINE, label: 'Close the book' }),
+    withStates('mkOpen', 'Folded, or open', ['folded', 'open'], {
+      folded: { type: 'boolean', by: { folded: true, open: false } },
+      open: { type: 'boolean', by: { folded: false, open: true } }
+    })
+  ],
+  connections: [
+    wire('mkIn', 'line', 'mkOpenIt', 'label'),
+    wire('mkIn', 'line', 'mkTitle', 'text'),
+    wire('mkIn', 'closeWord', 'mkClose', 'label'),
+    wire('mkIn', 'rows', 'mkEach', 'items'),
+    wire('mkOpenIt', 'onClick', 'mkOpen', 'to-open'),
+    wire('mkClose', 'onClick', 'mkOpen', 'to-folded'),
+    wire('mkOpen', 'open', 'mkBody', 'mounted'),
+    wire('mkOpen', 'folded', 'mkOpenIt', 'mounted')
+  ]
+};
+
+/**
+ * TPL-014 M1 — big things to save for: the domes (each makes room for two more aliens, so nobody gives one up) and the
+ * surprise egg (always an alien never had). Every one asks first on the hangar's card, with the purse, the price and what is
+ * left, then Logic/Moon act builds or hatches.
+ */
+const MOON_BIG: Tpl007Component = {
+  path: 'Moon/Big things',
+  description: 'Big things to save for (TPL-014 M1): the domes (room for two more aliens each) and the surprise egg (an alien never had). A tap asks first on Hangar/Confirm, then Logic/Moon act builds the dome or hatches the egg. App in; App, Write and Said out.',
+  inputs: [port('app', 'object'), port('profileId', 'string'), port('items', 'array'), port('purse', 'number'), port('title', 'string'), port('buyTitle', 'string'), ...MOON_CONFIRM_PORTS.map(([n, t]) => port(n, t))],
+  outputs: [port('app', 'object'), port('write', 'signal'), port('said', 'string')],
+  repeats: { source: 'array', rowFields: MOON_ITEM_FIELDS },
+  instantiates: [C.moonItem, C.hangarConfirm, logicName('Logic/Moon act')],
+  nodes: [
+    inputs('btIn', 'The big things, and the store', [['app', 'object'], ['profileId', 'string'], ['items', 'array'], ['purse', 'number'], ['title', 'string'], ['buyTitle', 'string'], ...MOON_CONFIRM_PORTS]),
+    group('btCard', 'Big things', undefined, { ...CARD, alignItems: 'center', rowGap: 'var(--space-3)', paddingTop: 'var(--space-5)', paddingBottom: 'var(--space-5)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)' }, ['btTitle', 'btSaid', 'btStack']),
+    text('btTitle', 'Big things to save for', 'btCard', '', { ...T_CARD, textAlignX: 'center' }),
+    text('btSaid', 'What just happened', 'btCard', '', { ...T_BODY, fontWeight: 'var(--font-bold)', textAlignX: 'center' }),
+    group('btStack', 'The big things, and the question over them', 'btCard', { ...column({ alignItems: 'stretch' }), cssClassName: 'rkt-shelf-stack' }, ['btBox', 'btOver']),
+    group('btBox', 'The big things', 'btStack', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch' }), ['btEach']),
+    logic('btEach', FOR_EACH_NODE, 'One tile per big thing', { template: C.moonItem, templateType: 'explicit' }),
+    group('btOver', 'The question, over the tiles', 'btStack', { ...column({ alignItems: 'center' }), cssClassName: 'rkt-buy-over', mounted: false }, ['btConfirm']),
+    place('btConfirm', C.hangarConfirm, 'Buy it?', 'btOver', { mounted: false }),
+    withStates('btAsk', 'The tiles, or the question', ['idle', 'asking'], {
+      idle: { type: 'boolean', by: { idle: true, asking: false } },
+      asking: { type: 'boolean', by: { idle: false, asking: true } }
+    }),
+    logic('btBuyTitle', EXPRESSION_NODE, 'Buy what?', { expression: "String(word || '').replace('{item}', String(label || ''))" }),
+    logic('btWhich', EXPRESSION_NODE, 'A dome, or the egg?', { expression: "thing === 'egg' ? 'egg' : 'build'" }),
+    logic('btDo', logicName('Logic/Moon act'), 'Build it, or hatch it', { action: 'build' }),
+    outputs('btOut', 'The store to write', [['app', 'object'], ['write', 'signal'], ['said', 'string']])
+  ],
+  connections: [
+    wire('btIn', 'title', 'btTitle', 'text'),
+    wire('btIn', 'items', 'btEach', 'items'),
+    wire('btEach', 'itemOutputSignal-ask', 'btAsk', 'to-asking'),
+    wire('btAsk', 'asking', 'btOver', 'mounted'),
+    wire('btAsk', 'asking', 'btConfirm', 'mounted'),
+    wire('btIn', 'buyTitle', 'btBuyTitle', 'word'),
+    wire('btEach', 'itemOutput-label', 'btBuyTitle', 'label'),
+    wire('btBuyTitle', 'result', 'btConfirm', 'title'),
+    wire('btEach', 'itemOutput-cost', 'btConfirm', 'cost'),
+    wire('btIn', 'purse', 'btConfirm', 'purse'),
+    ...moonConfirmWords('btIn', 'btConfirm'),
+    wire('btConfirm', 'no', 'btAsk', 'to-idle'),
+    wire('btConfirm', 'yes', 'btAsk', 'to-idle'),
+    wire('btIn', 'app', 'btDo', 'app'),
+    wire('btIn', 'profileId', 'btDo', 'profileId'),
+    wire('btEach', 'itemOutput-id', 'btDo', 'thingId'),
+    wire('btEach', 'itemOutput-id', 'btWhich', 'thing'),
+    wire('btWhich', 'result', 'btDo', 'action'),
+    wire('btConfirm', 'yes', 'btDo', 'run'),
+    wire('btDo', 'said', 'btSaid', 'text'),
+    wire('btDo', 'app', 'btOut', 'app'),
+    wire('btDo', 'done', 'btOut', 'write'),
+    wire('btDo', 'said', 'btOut', 'said')
+  ]
+};
+
+/**
  * Pages/Moon — Richard's ruling 4 (2026-10-04): the prize is the moon. The child's aliens in a row (a tap chooses one), the
  * chosen one close up with food and things to wear, and the adopt card. Reached from the hangar (the hangar is not a game, so
  * the moon is not a Home card either: Richard, 2026-09-14), and back to it.
@@ -5183,12 +5351,12 @@ const MOON_ADOPT: Tpl007Component = {
 const PAGE_MOON: Tpl007Component = {
   path: 'Pages/Moon',
   description: 'The moon (P113 REV-005): the player’s aliens as tiles, the chosen one close up (Moon/Care: feed it, dress it), and Moon/Adopt. Spends the same purse as the hangar. Reached from the hangar.',
-  instantiates: [C.header, C.moonTile, C.moonCare, C.moonAdopt, C.store, logicName('Logic/Active profile'), logicName('Logic/Translate words'), logicName('Logic/Moon view'), logicName('Logic/Moon act'), C.words],
+  instantiates: [C.header, C.moonTile, C.moonCare, C.moonAdopt, C.moonBig, C.moonBook, C.store, logicName('Logic/Active profile'), logicName('Logic/Translate words'), logicName('Logic/Moon view'), logicName('Logic/Moon act'), C.words],
   repeats: { source: 'array', rowFields: MOON_ROW_FIELDS },
   nodes: [
     { id: 'mnPage', type: 'Page', label: 'Moon', parameters: { title: 'Rocket School', urlPath: 'moon' }, children: ['mnOuter'] },
     group('mnOuter', 'The ground', 'mnPage', column({ alignItems: 'center' }), ['mnWrap']),
-    group('mnWrap', 'The screen', 'mnOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['mnHeader', 'mnTitle', 'mnPurse', 'mnAliens', 'mnCare', 'mnAdopt', 'mnBack']),
+    group('mnWrap', 'The screen', 'mnOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['mnHeader', 'mnTitle', 'mnPurse', 'mnAliens', 'mnCare', 'mnAdopt', 'mnBig', 'mnBook', 'mnBack']),
     place('mnHeader', C.header, 'The bar', 'mnWrap', { showHome: true, showHangar: true }),
     text('mnTitle', 'The Moon', 'mnWrap', '', T_SECTION),
     text('mnPurse', 'The stars to spend', 'mnWrap', '', { ...T_LEAD, fontWeight: 'var(--font-bold)' }),
@@ -5196,6 +5364,8 @@ const PAGE_MOON: Tpl007Component = {
     logic('mnEach', FOR_EACH_NODE, 'One tile per alien', { template: C.moonTile, templateType: 'explicit' }),
     place('mnCare', C.moonCare, 'The chosen alien', 'mnWrap'),
     place('mnAdopt', C.moonAdopt, 'Adopt an alien', 'mnWrap'),
+    place('mnBig', C.moonBig, 'Big things to save for', 'mnWrap'),
+    place('mnBook', C.moonBook, 'The Alien Book', 'mnWrap'),
     place('mnBack', BUTTON_NODE, 'Back to the hangar', 'mnWrap', { ...BTN_OUTLINE, label: 'Back to the hangar' }),
     logic('mnStore', C.store, 'The store'),
     logic('mnMe', logicName('Logic/Active profile'), 'Who is playing'),
@@ -5267,7 +5437,24 @@ const PAGE_MOON: Tpl007Component = {
     wire('mnT', 'yesBuy', 'mnAdopt', 'yesWord'),
     wire('mnT', 'noThanks', 'mnAdopt', 'noWord'),
     wire('mnAdopt', 'app', 'mnStore', 'app'),
-    wire('mnAdopt', 'write', 'mnStore', 'write')
+    wire('mnAdopt', 'write', 'mnStore', 'write'),
+    // TPL-014 M1: big things to save for, and the Alien Book.
+    wire('mnStore', 'app', 'mnBig', 'app'),
+    wire('mnMe', 'profileId', 'mnBig', 'profileId'),
+    wire('mnView', 'bigs', 'mnBig', 'items'),
+    wire('mnView', 'purse', 'mnBig', 'purse'),
+    wire('mnT', 'moonBig', 'mnBig', 'title'),
+    wire('mnT', 'buyTitle', 'mnBig', 'buyTitle'),
+    wire('mnT', 'youHave', 'mnBig', 'haveWord'),
+    wire('mnT', 'itCosts', 'mnBig', 'costWord'),
+    wire('mnT', 'youllHave', 'mnBig', 'leftWord'),
+    wire('mnT', 'yesBuy', 'mnBig', 'yesWord'),
+    wire('mnT', 'noThanks', 'mnBig', 'noWord'),
+    wire('mnBig', 'app', 'mnStore', 'app'),
+    wire('mnBig', 'write', 'mnStore', 'write'),
+    wire('mnView', 'book', 'mnBook', 'rows'),
+    wire('mnView', 'bookLine', 'mnBook', 'line'),
+    wire('mnT', 'moonBookClose', 'mnBook', 'closeWord')
   ]
 };
 
@@ -5323,6 +5510,9 @@ export const TPL007_COMPONENTS: ReadonlyArray<Tpl007Component> = [
   MOON_ITEM,
   MOON_CARE,
   MOON_ADOPT,
+  MOON_BOOK_TILE,
+  MOON_BOOK,
+  MOON_BIG,
   PAGE_PROFILES,
   PAGE_HOME,
   PAGE_RACE,

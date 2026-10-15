@@ -678,6 +678,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   yourName: s('Your name', 'Ton prénom'),
   pickAvatar: s('Pick your face', 'Choisis ta tête'),
   rollAvatar: s('Roll again', 'Une autre'),
+  yourSkin: s('Your skin', 'Ta peau'),
   yourLevel: s('Your class', 'Ta classe'),
   language: s('Language', 'Langue'),
   keyboard: s('Keyboard', 'Clavier'),
@@ -863,6 +864,9 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   moonAdoptMore: s('Adopt an alien', 'Adopter un alien'),
   moonName: s('Its name', 'Son nom'),
   moonAdoptQ: s('Adopt this alien?', 'Adopter cet alien ?'),
+  // TPL-014 M1.
+  moonBig: s('Big things to save for', 'De grandes choses à gagner'),
+  moonBookClose: s('Close the book', 'Fermer le livre'),
   backToHangar: s('🚀 Back to the hangar', '🚀 Retour au hangar')
 };
 

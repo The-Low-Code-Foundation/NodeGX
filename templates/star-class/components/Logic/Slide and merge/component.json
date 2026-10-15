@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9831fda0-541e-51c5-8d8e-2bee12499579",
+  "name": "Slide and merge",
+  "path": "/Logic/Slide and merge",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The Make Ten board after a slide in Dir: tiles move, two that make a multiple of ten join, and one new tile lands from the pool. Takes and publishes the whole Game (the board, its totals, its id, and the squares that joined and landed). Board is for a bare board with no game."
+}

@@ -1,0 +1,157 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "16ceec30-b25d-5532-8f42-da761af05da4",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rrIn",
+      "fromProperty": "mounted",
+      "toId": "rrCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "won",
+      "toId": "rrIsWon",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rrIsWon",
+      "fromProperty": "ontrue",
+      "toId": "rrTone",
+      "toProperty": "to-won"
+    },
+    {
+      "fromId": "rrIsWon",
+      "fromProperty": "onfalse",
+      "toId": "rrTone",
+      "toProperty": "to-lost"
+    },
+    {
+      "fromId": "rrTone",
+      "fromProperty": "ground",
+      "toId": "rrCard",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "rrTone",
+      "fromProperty": "glyph",
+      "toId": "rrGlyph",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "headline",
+      "toId": "rrTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "line",
+      "toId": "rrLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "line",
+      "toId": "rrHasLine",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "rrHasLine",
+      "fromProperty": "result",
+      "toId": "rrLine",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "stars",
+      "toId": "rrStars",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "why",
+      "toId": "rrWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "stars",
+      "toId": "rrHasStars",
+      "toProperty": "s"
+    },
+    {
+      "fromId": "rrHasStars",
+      "fromProperty": "result",
+      "toId": "rrStars",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rrHasStars",
+      "fromProperty": "result",
+      "toId": "rrWhy",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "againWord",
+      "toId": "rrAgain",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "otherWord",
+      "toId": "rrOther",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rrAgain",
+      "fromProperty": "didMount",
+      "toId": "rrAgain",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "rrAgain",
+      "fromProperty": "onClick",
+      "toId": "rrOut",
+      "toProperty": "again"
+    },
+    {
+      "fromId": "rrOther",
+      "fromProperty": "onClick",
+      "toId": "rrOut",
+      "toProperty": "other"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "hasPick",
+      "toId": "rrPick",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "hasPick",
+      "toId": "rrHangar",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "pickWord",
+      "toId": "rrPick",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "hangarWord",
+      "toId": "rrHangar",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rrHangar",
+      "fromProperty": "onClick",
+      "toId": "rrOut",
+      "toProperty": "hangar"
+    }
+  ]
+}

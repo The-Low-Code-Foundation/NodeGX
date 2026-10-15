@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "63e9116c-e5cb-560c-894d-cc9f9cb64bc0",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "datahangarData",
+      "fromProperty": "items",
+      "toId": "datahangarOut",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "datahangarData",
+      "fromProperty": "count",
+      "toId": "datahangarOut",
+      "toProperty": "count"
+    }
+  ]
+}

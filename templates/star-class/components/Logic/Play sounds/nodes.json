@@ -1,0 +1,147 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7004a2d5-d0da-54c1-82c9-edc27b36c0fb",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "psIn",
+      "type": "Component Inputs",
+      "label": "Which sound",
+      "ports": [
+        {
+          "name": "enabled",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "correct",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "wrong",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "win",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "lose",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "heart",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "tick",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "pop",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ps_correct",
+      "type": "game-kit.Sound",
+      "label": "Sound: correct",
+      "parameters": {
+        "sound": "correct",
+        "volume": 0.4
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ps_wrong",
+      "type": "game-kit.Sound",
+      "label": "Sound: wrong",
+      "parameters": {
+        "sound": "wrong",
+        "volume": 0.4
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "ps_win",
+      "type": "game-kit.Sound",
+      "label": "Sound: win",
+      "parameters": {
+        "sound": "win",
+        "volume": 0.4
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "ps_lose",
+      "type": "game-kit.Sound",
+      "label": "Sound: lose",
+      "parameters": {
+        "sound": "lose",
+        "volume": 0.4
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "ps_heart",
+      "type": "game-kit.Sound",
+      "label": "Sound: heart",
+      "parameters": {
+        "sound": "heart",
+        "volume": 0.4
+      },
+      "x": 40,
+      "y": 640
+    },
+    {
+      "id": "ps_tick",
+      "type": "game-kit.Sound",
+      "label": "Sound: tick",
+      "parameters": {
+        "sound": "tick",
+        "volume": 0.4
+      },
+      "x": 40,
+      "y": 760
+    },
+    {
+      "id": "ps_pop",
+      "type": "game-kit.Sound",
+      "label": "Sound: pop",
+      "parameters": {
+        "sound": "pop",
+        "volume": 0.4
+      },
+      "x": 40,
+      "y": 880
+    },
+    {
+      "id": "psOut",
+      "type": "Component Outputs",
+      "label": "When a sound ends",
+      "ports": [
+        {
+          "name": "ended",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 1000
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "884171b8-8da5-5f09-8f7a-9c72443777af",
+  "name": "Finish merge",
+  "path": "/Logic/Finish merge",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What a finished Make Ten board pays: a star a join (capped) and the five a landing pays, once per board id. Publishes the model (store it), the take and why, whether it crossed a 🎁 milestone, and the end screen’s words."
+}

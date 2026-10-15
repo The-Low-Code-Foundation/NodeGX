@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "92f1e423-5690-5072-809a-499ca2537415",
+  "name": "Choice row",
+  "path": "/Game/Choice row",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A row of pills, one selected. Items is [{ label, value }]. Value in, Value and Changed out — hold the value in a Variable and wire it back."
+}

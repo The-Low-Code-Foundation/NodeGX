@@ -1,0 +1,282 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2ff1cb99-b107-59c4-8634-1ce6b82cc45a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "focuschoicesIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "curriculum",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "sets",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "level",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "subject",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "topic",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "skills",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "listsWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "focuschoicesFn",
+      "type": "JavaScriptFunction",
+      "label": "Focus choices",
+      "parameters": {
+        "functionScript": "\nvar LEVELS = [\"P1\",\"P2\",\"P3\",\"P4\",\"P5\",\"P6\",\"JSS1\",\"JSS2\",\"JSS3\"];\nvar LEVEL_BASE = {\"P1\":300,\"P2\":550,\"P3\":800,\"P4\":1050,\"P5\":1300,\"P6\":1550,\"JSS1\":1800,\"JSS2\":2050,\"JSS3\":2300};\nfunction levelIndex(level) { var i = LEVELS.indexOf(String(level || 'P3')); return i < 0 ? 0 : i; }\nvar START_BELOW = 2;\nvar JUMP_UP = 5, JUMP_DOWN = 3;\n/**\n * A child is \"in\" a class when that class's own skills are the ones they get right 3 times in 4: Elo puts that 400·log10(3) ≈ 190\n * above the skill, so 190 above the class's base. Without it a rating on P2's base is asked P1's skills, and a jump changes nothing.\n */\nvar PLAY_AT = 190;\n/** TPL-013 SC-1: a new player is rated START_BELOW classes below the one picked; the class is a first guess. */\nfunction startRating(level) { return classRating(Math.max(0, levelIndex(level) - START_BELOW)); }\n/** The rating that puts a child at the start of class i. */\nfunction classRating(i) { return LEVEL_BASE[LEVELS[i]] + PLAY_AT + 50; }\n/** The class the race asks from: the highest class whose base the rating has reached. The class picked is only where it began. */\nfunction playIndex(r) { var p = 0; for (var i = 0; i < LEVELS.length; i++) if (r >= LEVEL_BASE[LEVELS[i]] + PLAY_AT) p = i; return p; }\n/** A class with nothing to ask in this subject yet borrows the nearest class that has something, below before above. */\nfunction nearestClass(curriculum, wanted, li) {\n  for (var d = 1; d < LEVELS.length; d++) {\n    var tries = [li - d, li + d];\n    for (var t = 0; t < 2; t++) {\n      var at = tries[t];\n      if (at < 0 || at >= LEVELS.length) continue;\n      var got = curriculum.filter(function (sk) { return wanted.indexOf(subjectOf(sk)) !== -1 && !sk.beyond && levelIndex(sk.level) === at; });\n      if (got.length) return got;\n    }\n  }\n  return [];\n}\nfunction rnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }\nfunction pickOne(arr) { return arr[Math.floor(Math.random() * arr.length)]; }\nfunction shuffle(arr) { var a = arr.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }\nfunction isFr(lang) { return String(lang) === 'fr'; }\n/** 1234567.5 → \"1 234 567,5\" (fr, grouped with a narrow no-break space) or \"1,234,567.5\" (en). RKT-003: an ordinary space let a phone break \"8 266\" across two lines. */\nfunction fmtNum(n, lang) {\n  var neg = n < 0; n = Math.abs(n);\n  var s = String(Math.round(n * 1000) / 1000);\n  var parts = s.split('.');\n  var int = parts[0]; var out = '';\n  while (int.length > 3) { out = (isFr(lang) ? ' ' : ',') + int.slice(-3) + out; int = int.slice(0, -3); }\n  out = int + out;\n  if (parts[1]) out += (isFr(lang) ? ',' : '.') + parts[1];\n  return (neg ? '−' : '') + out;\n}\n/** What a typed answer becomes before comparison: numbers as numbers, words lower-case. */\nfunction normalise(v) {\n  var s = String(v === undefined || v === null ? '' : v).trim().toLowerCase();\n  var num = s.replace(/\\s+/g, '').replace(/,/g, '.');\n  if (/^-?\\d+(\\.\\d+)?$/.test(num)) return String(Number(num));\n  var big = s.replace(/[\\s.,']/g, '');\n  if (/^-?\\d+$/.test(big) && /\\d[\\s.,']\\d{3}/.test(s)) return String(Number(big));\n  // P113: words. A curly apostrophe is an apostrophe, a hyphen is a space (forty-seven, forty seven), a full stop at the end says nothing.\n  return s.replace(/[’ʼ]/g, \"'\").replace(/-/g, ' ').replace(/\\.$/, '').replace(/\\s+/g, ' ').trim();\n}\nfunction sameAnswer(a, b) { return normalise(a) === normalise(b); }\n/** P113 REV-001: the subject a skill is filed under. The maths and typing skills carry none; their strand says. */\nfunction subjectOf(sk) { return sk && sk.subject ? String(sk.subject) : sk && sk.strand === 'typing' ? 'typing' : 'maths'; }\n\nvar EN_ONES = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];\nvar EN_TENS = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];\nfunction enUnder1000(n) {\n  var out = '';\n  if (n >= 100) { out = EN_ONES[Math.floor(n / 100)] + ' hundred'; n = n % 100; if (n > 0) out += ' and '; }\n  if (n >= 20) { out += EN_TENS[Math.floor(n / 10)]; if (n % 10) out += '-' + EN_ONES[n % 10]; }\n  else if (n > 0 || out === '') out += EN_ONES[n];\n  return out;\n}\nfunction spellEn(n) {\n  n = Math.floor(Number(n)); if (n === 0) return 'zero';\n  var blocks = [[1000000000, 'billion'], [1000000, 'million'], [1000, 'thousand']];\n  var parts = [];\n  for (var i = 0; i < blocks.length; i++) { var q = Math.floor(n / blocks[i][0]); if (q > 0) { parts.push(enUnder1000(q) + ' ' + blocks[i][1]); n = n % blocks[i][0]; } }\n  if (n > 0) { if (parts.length && n < 100) parts.push('and ' + enUnder1000(n)); else parts.push(enUnder1000(n)); }\n  return parts.join(' ');\n}\nvar FR_ONES = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize'];\nvar FR_TENS = ['','dix','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];\nfunction frUnder100(n) {\n  if (n < 17) return FR_ONES[n];\n  if (n < 20) return 'dix-' + FR_ONES[n - 10];\n  var t = Math.floor(n / 10), u = n % 10;\n  if (t === 7 || t === 9) { u += 10; }\n  var base = FR_TENS[t];\n  if (t === 8 && u === 0) return 'quatre-vingts';\n  if (u === 0) return base;\n  if (u === 1 && t !== 8) return base + ' et un';\n  if (u === 11 && t === 7) return base + ' et onze';\n  var unit = u < 17 ? FR_ONES[u] : 'dix-' + FR_ONES[u - 10];\n  return base + '-' + unit;\n}\nfunction frUnder1000(n) {\n  var out = '';\n  if (n >= 100) { var h = Math.floor(n / 100); n = n % 100; out = (h === 1 ? 'cent' : FR_ONES[h] + ' cent') + (n === 0 && h > 1 ? 's' : ''); if (n > 0) out += ' '; }\n  if (n > 0 || out === '') out += frUnder100(n);\n  return out;\n}\nfunction spellFr(n) {\n  n = Math.floor(Number(n)); if (n === 0) return 'zéro';\n  var parts = [];\n  var b = Math.floor(n / 1000000000); if (b > 0) { parts.push((b === 1 ? 'un milliard' : frUnder1000(b) + ' milliards')); n = n % 1000000000; }\n  var m = Math.floor(n / 1000000); if (m > 0) { parts.push((m === 1 ? 'un million' : frUnder1000(m) + ' millions')); n = n % 1000000; }\n  var k = Math.floor(n / 1000); if (k > 0) { parts.push((k === 1 ? 'mille' : frUnder1000(k) + ' mille')); n = n % 1000; }\n  if (n > 0) parts.push(frUnder1000(n));\n  return parts.join(' ');\n}\nfunction spell(n, lang) { return isFr(lang) ? spellFr(n) : spellEn(n); }\nfunction skillBase(skill) { return LEVEL_BASE[skill.level] + Number(skill.diff || 0) * 250; }\nfunction predict(r, d) { return 1 / (1 + Math.pow(10, (d - r) / 400)); }\nfunction pickText(bi, lang) { if (!bi) return ''; if (typeof bi === 'string') return bi; return isFr(lang) ? (bi.fr || bi.en || '') : (bi.en || bi.fr || ''); }\n\nvar SUBJECTS = [{\"id\":\"maths\",\"name\":{\"en\":\"Maths\",\"fr\":\"Maths\"},\"glyph\":\"🔢\"},{\"id\":\"english\",\"name\":{\"en\":\"English\",\"fr\":\"Anglais\"},\"glyph\":\"🔤\"},{\"id\":\"science\",\"name\":{\"en\":\"Science\",\"fr\":\"Sciences\"},\"glyph\":\"🔬\"},{\"id\":\"french\",\"name\":{\"en\":\"French\",\"fr\":\"Français\"},\"glyph\":\"📝\"}];\nvar TOPICS = [{\"id\":\"counting\",\"subject\":\"maths\",\"name\":{\"en\":\"Counting and numbers\",\"fr\":\"Compter et les nombres\"}},{\"id\":\"negatives\",\"subject\":\"maths\",\"name\":{\"en\":\"Negative numbers\",\"fr\":\"Nombres relatifs\"}},{\"id\":\"algebra\",\"subject\":\"maths\",\"name\":{\"en\":\"Equations and powers\",\"fr\":\"Équations et puissances\"}},{\"id\":\"measures\",\"subject\":\"maths\",\"name\":{\"en\":\"Area and volume\",\"fr\":\"Aires et volumes\"}},{\"id\":\"sc-spelling\",\"subject\":\"english\",\"name\":{\"en\":\"Spelling\",\"fr\":\"Orthographe\"}},{\"id\":\"sc-words\",\"subject\":\"english\",\"name\":{\"en\":\"Opposites and meanings\",\"fr\":\"Contraires et sens\"}},{\"id\":\"sc-grammar\",\"subject\":\"english\",\"name\":{\"en\":\"Grammar and punctuation\",\"fr\":\"Grammaire et ponctuation\"}},{\"id\":\"sc-life\",\"subject\":\"science\",\"name\":{\"en\":\"Living things\",\"fr\":\"Les êtres vivants\"}},{\"id\":\"sc-health\",\"subject\":\"science\",\"name\":{\"en\":\"The body and health\",\"fr\":\"Le corps et la santé\"}},{\"id\":\"sc-matter-energy\",\"subject\":\"science\",\"name\":{\"en\":\"Matter, machines and magnets\",\"fr\":\"Matière, machines et aimants\"}},{\"id\":\"sc-earth\",\"subject\":\"science\",\"name\":{\"en\":\"The Earth and the sky\",\"fr\":\"La Terre et le ciel\"}},{\"id\":\"add-sub\",\"subject\":\"maths\",\"name\":{\"en\":\"Adding and taking away\",\"fr\":\"Additions et soustractions\"}},{\"id\":\"bonds\",\"subject\":\"maths\",\"name\":{\"en\":\"Pairs that make 10, 20, 100\",\"fr\":\"Compléments à 10, 20, 100\"}},{\"id\":\"tables\",\"subject\":\"maths\",\"name\":{\"en\":\"Times tables\",\"fr\":\"Tables de multiplication\"}},{\"id\":\"multiply\",\"subject\":\"maths\",\"name\":{\"en\":\"Multiplying\",\"fr\":\"Multiplier\"}},{\"id\":\"divide\",\"subject\":\"maths\",\"name\":{\"en\":\"Dividing\",\"fr\":\"Diviser\"}},{\"id\":\"big-numbers\",\"subject\":\"maths\",\"name\":{\"en\":\"Big numbers\",\"fr\":\"Les grands nombres\"}},{\"id\":\"place-value\",\"subject\":\"maths\",\"name\":{\"en\":\"Place value\",\"fr\":\"Rangs et chiffres\"}},{\"id\":\"compare-round\",\"subject\":\"maths\",\"name\":{\"en\":\"Comparing and rounding\",\"fr\":\"Comparer et arrondir\"}},{\"id\":\"fractions\",\"subject\":\"maths\",\"name\":{\"en\":\"Fractions\",\"fr\":\"Fractions\"}},{\"id\":\"decimals\",\"subject\":\"maths\",\"name\":{\"en\":\"Decimals\",\"fr\":\"Nombres décimaux\"}},{\"id\":\"percent-proportion\",\"subject\":\"maths\",\"name\":{\"en\":\"Percentages and proportion\",\"fr\":\"Pourcentages et proportionnalité\"}},{\"id\":\"equations\",\"subject\":\"maths\",\"name\":{\"en\":\"Equals and order of operations\",\"fr\":\"Le signe égal et les priorités\"}},{\"id\":\"conjugation\",\"subject\":\"french\",\"name\":{\"en\":\"Conjugation\",\"fr\":\"Conjugaison\"}},{\"id\":\"verb-study\",\"subject\":\"french\",\"name\":{\"en\":\"The verb: modes, tenses, voices\",\"fr\":\"L’étude du verbe : modes, temps, voix\"}},{\"id\":\"word-classes\",\"subject\":\"french\",\"name\":{\"en\":\"Word classes\",\"fr\":\"Les classes de mots\"}},{\"id\":\"homophones\",\"subject\":\"french\",\"name\":{\"en\":\"Homophones\",\"fr\":\"Les homophones\"}},{\"id\":\"agreement\",\"subject\":\"french\",\"name\":{\"en\":\"Plurals and feminines\",\"fr\":\"Pluriels et féminins\"}},{\"id\":\"en-vocab\",\"subject\":\"french\",\"name\":{\"en\":\"French words\",\"fr\":\"Mots anglais\"}},{\"id\":\"en-numbers\",\"subject\":\"english\",\"name\":{\"en\":\"Numbers in English\",\"fr\":\"Les nombres en anglais\"}},{\"id\":\"en-grammar\",\"subject\":\"english\",\"name\":{\"en\":\"Grammar\",\"fr\":\"Grammaire\"}}];\nvar curriculum = Array.isArray(Inputs.curriculum) ? Inputs.curriculum : [];\nvar sets = Array.isArray(Inputs.sets) ? Inputs.sets : [];\nvar lang = isFr(Inputs.lang) ? 'fr' : 'en';\nvar level = String(Inputs.level || 'P3');\nvar li = levelIndex(level);\nvar subject = String(Inputs.subject || 'maths');\nvar topic = String(Inputs.topic || '');\nvar ticked = Array.isArray(Inputs.skills) ? Inputs.skills.map(String) : [];\nvar listsWord = String(Inputs.listsWord || (lang === 'fr' ? 'Mes listes' : 'My lists'));\nvar isLists = subject === 'lists' || subject.indexOf('set:') === 0;\nvar subjectRows = [];\nfor (var s = 0; s < SUBJECTS.length; s++) {\n  var any = false;\n  for (var k = 0; k < curriculum.length; k++) if (subjectOf(curriculum[k]) === SUBJECTS[s].id && levelIndex(curriculum[k].level) <= li) any = true;\n  if (!any) continue;\n  subjectRows.push({ id: SUBJECTS[s].id, label: SUBJECTS[s].glyph + ' ' + pickText(SUBJECTS[s].name, lang), value: SUBJECTS[s].id, selected: !isLists && subject === SUBJECTS[s].id });\n}\nsubjectRows.push({ id: 'lists', label: '📚 ' + listsWord, value: 'lists', selected: isLists });\nvar topicRows = [], skillRows = [], saveSubject = subject;\nif (isLists) {\n  var wantedSet = subject.indexOf('set:') === 0 ? subject : topic;\n  var known = false;\n  for (var t0 = 0; t0 < sets.length; t0++) if ('set:' + sets[t0].id === wantedSet) known = true;\n  if (!known) wantedSet = sets.length ? 'set:' + sets[0].id : '';\n  for (var t = 0; t < sets.length; t++) { var sid = 'set:' + sets[t].id; topicRows.push({ id: sid, label: String(sets[t].name || '') + ' (' + (Array.isArray(sets[t].items) ? sets[t].items.length : 0) + ')', value: sid, selected: sid === wantedSet }); }\n  topic = wantedSet;\n  saveSubject = wantedSet || 'maths';\n} else {\n  var seen = [];\n  for (var u = 0; u < TOPICS.length; u++) {\n    if (TOPICS[u].subject !== subject) continue;\n    var has = false;\n    for (var k2 = 0; k2 < curriculum.length; k2++) if (curriculum[k2].topic === TOPICS[u].id && levelIndex(curriculum[k2].level) <= li) has = true;\n    if (has) seen.push(TOPICS[u]);\n  }\n  var found = false;\n  for (var v = 0; v < seen.length; v++) if (seen[v].id === topic) found = true;\n  if (!found) topic = seen.length ? seen[0].id : '';\n  for (var w = 0; w < seen.length; w++) {\n    var n = 0;\n    for (var k3 = 0; k3 < curriculum.length; k3++) if (curriculum[k3].topic === seen[w].id && ticked.indexOf(curriculum[k3].id) !== -1) n++;\n    topicRows.push({ id: seen[w].id, label: pickText(seen[w].name, lang) + (n ? ' ✓' + n : ''), value: seen[w].id, selected: seen[w].id === topic });\n  }\n  for (var x = 0; x < curriculum.length; x++) {\n    var sk = curriculum[x];\n    if (sk.topic !== topic || levelIndex(sk.level) > li) continue;\n    // A skill from an earlier class says its class; one from a later class's programme (beyond) says that class instead.\n    var tag = sk.beyond ? sk.beyond : sk.level !== level ? sk.level : '';\n    skillRows.push({ id: sk.id, label: pickText(sk.name, lang) + (tag ? ' · ' + tag : ''), value: sk.id, selected: ticked.indexOf(sk.id) !== -1 });\n  }\n}\nvar topicIds = [];\nfor (var y = 0; y < skillRows.length; y++) topicIds.push(skillRows[y].id);\nvar allOn = topicIds.length > 0;\nfor (var z = 0; z < topicIds.length; z++) if (ticked.indexOf(topicIds[z]) === -1) allOn = false;\nOutputs.subjectRows = subjectRows;\nOutputs.topicRows = topicRows;\nOutputs.skillRows = skillRows;\nOutputs.topic = topic;\nOutputs.topicIds = topicIds;\nOutputs.saveSubject = saveSubject;\nOutputs.isLists = isLists;\nOutputs.hasSets = sets.length > 0;\nOutputs.hasSkills = skillRows.length > 0;\nOutputs.hasTopics = topicRows.length > 0;\nOutputs.tickedCount = ticked.length;\nOutputs.allTicked = allOn;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-curriculum",
+          "displayName": "curriculum",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-sets",
+          "displayName": "sets",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-level",
+          "displayName": "level",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-subject",
+          "displayName": "subject",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-topic",
+          "displayName": "topic",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-skills",
+          "displayName": "skills",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-listsWord",
+          "displayName": "listsWord",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-subjectRows",
+          "displayName": "subjectRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-topicRows",
+          "displayName": "topicRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-skillRows",
+          "displayName": "skillRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-topic",
+          "displayName": "topic",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-topicIds",
+          "displayName": "topicIds",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-saveSubject",
+          "displayName": "saveSubject",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isLists",
+          "displayName": "isLists",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasSets",
+          "displayName": "hasSets",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasSkills",
+          "displayName": "hasSkills",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasTopics",
+          "displayName": "hasTopics",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tickedCount",
+          "displayName": "tickedCount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-allTicked",
+          "displayName": "allTicked",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "focuschoicesOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "subjectRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "topicRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "skillRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "topic",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "topicIds",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "saveSubject",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "isLists",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "hasSets",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "hasSkills",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "hasTopics",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "tickedCount",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "allTicked",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

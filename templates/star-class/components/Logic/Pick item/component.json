@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "68be5291-c6aa-5f78-8323-6cec10ff7993",
+  "name": "Pick item",
+  "path": "/Logic/Pick item",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "RKT-011: the store with one 🎁 pick spent on a shelf item, and the item worn at once. Refused, with nothing changed, when the item is free or already owned, does not fit the face, or no pick is left (Why says which)."
+}

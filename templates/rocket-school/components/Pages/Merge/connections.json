@@ -107,6 +107,12 @@
     },
     {
       "fromId": "mgMe",
+      "fromProperty": "skin",
+      "toId": "mgHeader",
+      "toProperty": "skin"
+    },
+    {
+      "fromId": "mgMe",
       "fromProperty": "faceOptions",
       "toId": "mgHeader",
       "toProperty": "options"

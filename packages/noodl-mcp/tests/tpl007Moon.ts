@@ -78,8 +78,26 @@ export const MOON_WEAR: ReadonlyArray<{ id: string; slot: 'hat' | 'eyes' | 'neck
 ];
 
 /** What the next alien costs, by how many the player already has: the first is free, so the moon is never empty for long. */
-export const ALIEN_COSTS: ReadonlyArray<number> = [0, 60, 90, 120, 160, 200];
-export const MAX_ALIENS = ALIEN_COSTS.length;
+export const ALIEN_COSTS: ReadonlyArray<number> = [0, 60, 90, 120, 160, 200, 240, 280, 320, 360];
+/** The moon holds six aliens; each dome built makes room for more (TPL-014 M1). */
+export const MAX_ALIENS = 6;
+
+/**
+ * TPL-014 M1 — the big things to save for. Richard's eldest, 2026-10-14: five aliens, every favourite found, too many stars
+ * and nothing to do. A dome is the long goal (a race pays 35–45 ⭐, so the first is some 25 games) and it makes room: no child
+ * ever has to give an alien up to meet a new one. The egg is the short one: it always hatches an alien the player has never
+ * had (a species in a colour), drawn from a pool they can see, with no rarity and no spin (TPL-014 §4.6).
+ */
+export const MOON_DOMES: ReadonlyArray<{ id: string; glyph: string; name: Bi; cost: number; room: number }> = [
+  { id: 'crater', glyph: '🏠', name: s('Crater Dome', 'Dôme du cratère'), cost: 1000, room: 2 },
+  { id: 'ridge', glyph: '🏡', name: s('Ridge Dome', 'Dôme de la crête'), cost: 1500, room: 2 }
+];
+export const EGG_COST = 300;
+/** The Alien Book: every species in every colour. */
+export const BOOK_SIZE = MOON_SPECIES.length * ALIEN_COLOURS.length;
+/** The most aliens a moon can ever hold: six, and every dome's room. Adoption has a price for each place. */
+export const MOST_ALIENS = MAX_ALIENS + MOON_DOMES.reduce((n, d) => n + d.room, 0);
+if (ALIEN_COSTS.length < MOST_ALIENS) throw new Error(`ALIEN_COSTS has ${ALIEN_COSTS.length} prices for ${MOST_ALIENS} places`);
 /** Meals to grow: young at the first, grown up at the second. A favourite meal counts as FAVOURITE_MEALS. */
 export const GROW_AT: readonly [number, number] = [6, 18];
 export const FAVOURITE_MEALS = 2;
@@ -92,6 +110,8 @@ export const MOON = {
   wear: MOON_WEAR,
   cost: ALIEN_COSTS,
   max: MAX_ALIENS,
+  domes: MOON_DOMES,
+  egg: EGG_COST,
   grow: GROW_AT,
   fav: FAVOURITE_MEALS
 } as const;

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4b2603aa-cada-58ec-8d7e-b953738bc095",
+  "name": "Row",
+  "path": "/Merge/Row",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One row of the Make Ten board: a Merge/Tile per cell in Cells."
+}

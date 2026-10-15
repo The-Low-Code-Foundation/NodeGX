@@ -1,0 +1,179 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f4b2fe29-4793-5eef-8868-2c149f49c880",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "npIn",
+      "type": "Component Inputs",
+      "label": "How far to the next pick",
+      "ports": [
+        {
+          "name": "text",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "percent",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "hasPicks",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "npCard",
+      "type": "Group",
+      "label": "The line and the bar",
+      "children": [
+        "npText",
+        "npBar"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "cssClassName": "pressable"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "npText",
+      "type": "Text",
+      "label": "The next pick, in words",
+      "parent": "npCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "npBar",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "npCard",
+      "children": [
+        "npFill"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 14,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "backgroundColor": "var(--surface-raised)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "npFill",
+      "type": "Group",
+      "label": "How far",
+      "parent": "npBar",
+      "parameters": {
+        "width": {
+          "value": 0,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "explicit",
+        "backgroundColor": "var(--accent)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "npReady",
+      "type": "Condition",
+      "label": "A pick waiting?",
+      "parameters": {},
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "npTone",
+      "type": "States",
+      "label": "Saving up, or a pick waiting",
+      "parameters": {
+        "states": "saving,ready",
+        "values": "fill",
+        "useTransitions": false,
+        "type-fill": "color",
+        "value-saving-fill": "var(--accent)",
+        "value-ready-fill": "var(--primary)"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "npOut",
+      "type": "Component Outputs",
+      "label": "Tapped",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "npCard"
+  ]
+}

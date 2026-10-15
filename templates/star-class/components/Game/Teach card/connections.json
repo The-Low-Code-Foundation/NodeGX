@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8be7dcbd-ffba-5d78-871b-53f39b4d3dd5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tcIn",
+      "fromProperty": "mounted",
+      "toId": "tcCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tcIn",
+      "fromProperty": "title",
+      "toId": "tcTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tcIn",
+      "fromProperty": "text",
+      "toId": "tcText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tcIn",
+      "fromProperty": "prompt",
+      "toId": "tcPrompt",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tcIn",
+      "fromProperty": "prompt",
+      "toId": "tcLength",
+      "toProperty": "prompt"
+    },
+    {
+      "fromId": "tcLength",
+      "fromProperty": "result",
+      "toId": "tcSize",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "tcSize",
+      "fromProperty": "size",
+      "toId": "tcPrompt",
+      "toProperty": "fontSize"
+    },
+    {
+      "fromId": "tcIn",
+      "fromProperty": "worked",
+      "toId": "tcWorked",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tcIn",
+      "fromProperty": "worked",
+      "toId": "tcHasWorked",
+      "toProperty": "worked"
+    },
+    {
+      "fromId": "tcHasWorked",
+      "fromProperty": "result",
+      "toId": "tcWorkedBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tcIn",
+      "fromProperty": "anExampleWord",
+      "toId": "tcExampleLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tcIn",
+      "fromProperty": "example",
+      "toId": "tcExample",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tcIn",
+      "fromProperty": "worked",
+      "toId": "tcNoWorked",
+      "toProperty": "worked"
+    },
+    {
+      "fromId": "tcNoWorked",
+      "fromProperty": "result",
+      "toId": "tcExampleBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tcIn",
+      "fromProperty": "gotItWord",
+      "toId": "tcGotIt",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tcGotIt",
+      "fromProperty": "didMount",
+      "toId": "tcGotIt",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "tcGotIt",
+      "fromProperty": "onClick",
+      "toId": "tcOut",
+      "toProperty": "gotIt"
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9831fda0-541e-51c5-8d8e-2bee12499579",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "slideandmergIn",
+      "fromProperty": "game",
+      "toId": "slideandmergFn",
+      "toProperty": "in-game"
+    },
+    {
+      "fromId": "slideandmergIn",
+      "fromProperty": "dir",
+      "toId": "slideandmergFn",
+      "toProperty": "in-dir"
+    },
+    {
+      "fromId": "slideandmergIn",
+      "fromProperty": "pool",
+      "toId": "slideandmergFn",
+      "toProperty": "in-pool"
+    },
+    {
+      "fromId": "slideandmergIn",
+      "fromProperty": "board",
+      "toId": "slideandmergFn",
+      "toProperty": "in-board"
+    },
+    {
+      "fromId": "slideandmergIn",
+      "fromProperty": "helper",
+      "toId": "slideandmergFn",
+      "toProperty": "in-helper"
+    },
+    {
+      "fromId": "slideandmergIn",
+      "fromProperty": "run",
+      "toId": "slideandmergFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "slideandmergFn",
+      "fromProperty": "out-game",
+      "toId": "slideandmergOut",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "slideandmergFn",
+      "fromProperty": "out-board",
+      "toId": "slideandmergOut",
+      "toProperty": "board"
+    },
+    {
+      "fromId": "slideandmergFn",
+      "fromProperty": "out-moved",
+      "toId": "slideandmergOut",
+      "toProperty": "moved"
+    },
+    {
+      "fromId": "slideandmergFn",
+      "fromProperty": "out-score",
+      "toId": "slideandmergOut",
+      "toProperty": "score"
+    },
+    {
+      "fromId": "slideandmergFn",
+      "fromProperty": "out-merges",
+      "toId": "slideandmergOut",
+      "toProperty": "merges"
+    },
+    {
+      "fromId": "slideandmergFn",
+      "fromProperty": "out-biggest",
+      "toId": "slideandmergOut",
+      "toProperty": "biggest"
+    },
+    {
+      "fromId": "slideandmergFn",
+      "fromProperty": "out-gameOver",
+      "toId": "slideandmergOut",
+      "toProperty": "gameOver"
+    },
+    {
+      "fromId": "slideandmergFn",
+      "fromProperty": "success",
+      "toId": "slideandmergOut",
+      "toProperty": "done"
+    }
+  ]
+}

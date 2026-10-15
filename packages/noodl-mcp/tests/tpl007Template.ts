@@ -76,17 +76,17 @@ export interface AuthoredTemplate {
   applied: Record<string, unknown>;
 }
 
-function writeSkeleton(dir: string): void {
+function writeSkeleton(dir: string, projectName: string = TEMPLATE_PROJECT_NAME): void {
   fs.mkdirSync(path.join(dir, 'components'), { recursive: true });
   fs.writeFileSync(
     path.join(dir, 'nodegx.project.json'),
     JSON.stringify(
       {
         $schema: 'https://opennoodl.dev/schemas/project-v2.json',
-        name: TEMPLATE_PROJECT_NAME,
+        name: projectName,
         version: '4',
         nodegxVersion: '1.1.0',
-        settings: { htmlTitle: TEMPLATE_PROJECT_NAME, navigationPathType: 'path' },
+        settings: { htmlTitle: projectName, navigationPathType: 'path' },
         structure: { componentsDir: 'components', assetsDir: 'assets' }
       },
       null,
@@ -137,13 +137,17 @@ export interface BuildOptions {
   /** Author with a different curriculum — the §8-style proof that the engine is data-driven. */
   components?: ReadonlyArray<Tpl007Component>;
   omitModules?: boolean;
+  /** An edition's project name (TPL-013). Rocket School's when absent. */
+  projectName?: string;
+  /** What the plan says it is building. Rocket School's sentence when absent. */
+  request?: string;
 }
 
 /** Author the whole template through the plan door and read it back. */
 export async function buildRocketTemplateProject(options: BuildOptions = {}): Promise<AuthoredTemplate> {
   process.env.NODEGX_RENDER_DISABLED = '1';
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tpl007-template-'));
-  writeSkeleton(dir);
+  writeSkeleton(dir, options.projectName);
   const modules = options.omitModules ? [] : installModules(dir);
   const components = options.components ?? TPL007_COMPONENTS;
 
@@ -186,7 +190,7 @@ export async function buildRocketTemplateProject(options: BuildOptions = {}): Pr
   const plan = await call(
     'create_plan',
     {
-      request: 'Rocket School — a maths and typing game for 8-12 year olds, EN and FR, profiles in localStorage, no backend.',
+      request: options.request ?? 'Rocket School — a maths and typing game for 8-12 year olds, EN and FR, profiles in localStorage, no backend.',
       scroll: 'page',
       operations: components.map((c) => ({
         kind: 'create',
@@ -230,12 +234,18 @@ export async function buildRocketTemplateProject(options: BuildOptions = {}): Pr
 
 // ── Preparing the directory a person is handed ───────────────────────────────
 
-export function prepareRocketArtefact(built: AuthoredTemplate, output: string): void {
+/** An edition's folder id and START-HERE (TPL-013); Rocket School's when absent. */
+export interface ArtefactIdentity {
+  id: string;
+  writeStartHere: (output: string) => void;
+}
+
+export function prepareRocketArtefact(built: AuthoredTemplate, output: string, identity?: ArtefactIdentity): void {
   pinRunOnValueChangeDefaultsInDirectory(built.projectDir);
   pinComponentFiles(built.projectDir, 'tpl007', TEMPLATE_EPOCH);
   pinRegistry(built.projectDir, TEMPLATE_EPOCH);
 
-  if (path.basename(output) !== TEMPLATE_ID) throw new Error(`refusing to clear ${output}`);
+  if (path.basename(output) !== (identity?.id ?? TEMPLATE_ID)) throw new Error(`refusing to clear ${output}`);
   fs.rmSync(output, { recursive: true, force: true });
   copyTree(built.projectDir, output);
 
@@ -248,7 +258,7 @@ export function prepareRocketArtefact(built: AuthoredTemplate, output: string): 
     }
   }
 
-  writeStartHere(output);
+  (identity?.writeStartHere ?? writeStartHere)(output);
   pinRootNode(output, C.app);
   pinProjectModified(output);
 }

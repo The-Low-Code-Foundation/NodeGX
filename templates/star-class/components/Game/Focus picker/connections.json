@@ -1,0 +1,397 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c56f1054-3913-5b28-8046-3211e6bf3f48",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fpIn",
+      "fromProperty": "mounted",
+      "toId": "fpShown",
+      "toProperty": "m"
+    },
+    {
+      "fromId": "fpShown",
+      "fromProperty": "result",
+      "toId": "fpCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "titleWord",
+      "toId": "fpTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "subjectWord",
+      "toId": "fpSubject",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "topicWord",
+      "toId": "fpTopic",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "skillsHint",
+      "toId": "fpHint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "allWord",
+      "toId": "fpAll",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "noneWord",
+      "toId": "fpNone",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "saveWord",
+      "toId": "fpSave",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "cancelWord",
+      "toId": "fpCancel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "editListsWord",
+      "toId": "fpEditLists",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "noListsWord",
+      "toId": "fpNoLists",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "curriculum",
+      "toId": "fpChoices",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "sets",
+      "toId": "fpChoices",
+      "toProperty": "sets"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "level",
+      "toId": "fpChoices",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "lang",
+      "toId": "fpChoices",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "listsWord",
+      "toId": "fpChoices",
+      "toProperty": "listsWord"
+    },
+    {
+      "fromId": "fpSubjectVar",
+      "fromProperty": "value",
+      "toId": "fpChoices",
+      "toProperty": "subject"
+    },
+    {
+      "fromId": "fpTopicVar",
+      "fromProperty": "value",
+      "toId": "fpChoices",
+      "toProperty": "topic"
+    },
+    {
+      "fromId": "fpSkillsVar",
+      "fromProperty": "value",
+      "toId": "fpChoices",
+      "toProperty": "skills"
+    },
+    {
+      "fromId": "fpChoices",
+      "fromProperty": "subjectRows",
+      "toId": "fpSubject",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fpChoices",
+      "fromProperty": "topicRows",
+      "toId": "fpTopic",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fpChoices",
+      "fromProperty": "skillRows",
+      "toId": "fpEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fpChoices",
+      "fromProperty": "isLists",
+      "toId": "fpSubjectPill",
+      "toProperty": "isLists"
+    },
+    {
+      "fromId": "fpSubjectVar",
+      "fromProperty": "value",
+      "toId": "fpSubjectPill",
+      "toProperty": "subject"
+    },
+    {
+      "fromId": "fpSubjectPill",
+      "fromProperty": "result",
+      "toId": "fpSubject",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "fpChoices",
+      "fromProperty": "topic",
+      "toId": "fpTopic",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "fpSubject",
+      "fromProperty": "value",
+      "toId": "fpSetSubject",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "fpSubject",
+      "fromProperty": "changed",
+      "toId": "fpSetSubject",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "fpTopic",
+      "fromProperty": "value",
+      "toId": "fpSetTopic",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "fpTopic",
+      "fromProperty": "changed",
+      "toId": "fpSetTopic",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "fpSkillsVar",
+      "fromProperty": "value",
+      "toId": "fpToggle",
+      "toProperty": "list"
+    },
+    {
+      "fromId": "fpEach",
+      "fromProperty": "itemOutput-value",
+      "toId": "fpToggle",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "fpEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "fpToggle",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "fpToggle",
+      "fromProperty": "list",
+      "toId": "fpSetSkills",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "fpToggle",
+      "fromProperty": "done",
+      "toId": "fpSetSkills",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "fpSkillsVar",
+      "fromProperty": "value",
+      "toId": "fpTickAll",
+      "toProperty": "list"
+    },
+    {
+      "fromId": "fpChoices",
+      "fromProperty": "topicIds",
+      "toId": "fpTickAll",
+      "toProperty": "ids"
+    },
+    {
+      "fromId": "fpAll",
+      "fromProperty": "onClick",
+      "toId": "fpTickAll",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "fpTickAll",
+      "fromProperty": "list",
+      "toId": "fpSetAll",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "fpTickAll",
+      "fromProperty": "done",
+      "toId": "fpSetAll",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "fpSkillsVar",
+      "fromProperty": "value",
+      "toId": "fpTickNone",
+      "toProperty": "list"
+    },
+    {
+      "fromId": "fpChoices",
+      "fromProperty": "topicIds",
+      "toId": "fpTickNone",
+      "toProperty": "ids"
+    },
+    {
+      "fromId": "fpNone",
+      "fromProperty": "onClick",
+      "toId": "fpTickNone",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "fpTickNone",
+      "fromProperty": "list",
+      "toId": "fpSetNone",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "fpTickNone",
+      "fromProperty": "done",
+      "toId": "fpSetNone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "fpChoices",
+      "fromProperty": "hasTopics",
+      "toId": "fpTopic",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fpChoices",
+      "fromProperty": "hasSkills",
+      "toId": "fpHint",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fpChoices",
+      "fromProperty": "hasSkills",
+      "toId": "fpSkills",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fpChoices",
+      "fromProperty": "hasSkills",
+      "toId": "fpAllRow",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fpChoices",
+      "fromProperty": "isLists",
+      "toId": "fpNoListsShown",
+      "toProperty": "isLists"
+    },
+    {
+      "fromId": "fpChoices",
+      "fromProperty": "hasSets",
+      "toId": "fpNoListsShown",
+      "toProperty": "hasSets"
+    },
+    {
+      "fromId": "fpNoListsShown",
+      "fromProperty": "result",
+      "toId": "fpNoLists",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fpChoices",
+      "fromProperty": "isLists",
+      "toId": "fpEditLists",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "subject0",
+      "toId": "fpLoadSubject",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "open",
+      "toId": "fpLoadSubject",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "fpNoTopic",
+      "fromProperty": "result",
+      "toId": "fpLoadTopic",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "fpLoadSubject",
+      "fromProperty": "done",
+      "toId": "fpLoadTopic",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "fpIn",
+      "fromProperty": "skills0",
+      "toId": "fpLoadSkills",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "fpLoadTopic",
+      "fromProperty": "done",
+      "toId": "fpLoadSkills",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "fpChoices",
+      "fromProperty": "saveSubject",
+      "toId": "fpOut",
+      "toProperty": "subject"
+    },
+    {
+      "fromId": "fpSkillsVar",
+      "fromProperty": "value",
+      "toId": "fpOut",
+      "toProperty": "skills"
+    },
+    {
+      "fromId": "fpSave",
+      "fromProperty": "onClick",
+      "toId": "fpOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "fpCancel",
+      "fromProperty": "onClick",
+      "toId": "fpOut",
+      "toProperty": "cancel"
+    },
+    {
+      "fromId": "fpEditLists",
+      "fromProperty": "onClick",
+      "toId": "fpOut",
+      "toProperty": "editLists"
+    }
+  ]
+}

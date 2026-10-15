@@ -1,0 +1,169 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "eb11b5e6-7cf3-5879-8ba1-778ec25952c1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "btIn",
+      "fromProperty": "title",
+      "toId": "btTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "btIn",
+      "fromProperty": "items",
+      "toId": "btEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "btEach",
+      "fromProperty": "itemOutputSignal-ask",
+      "toId": "btAsk",
+      "toProperty": "to-asking"
+    },
+    {
+      "fromId": "btAsk",
+      "fromProperty": "asking",
+      "toId": "btOver",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "btAsk",
+      "fromProperty": "asking",
+      "toId": "btConfirm",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "btIn",
+      "fromProperty": "buyTitle",
+      "toId": "btBuyTitle",
+      "toProperty": "word"
+    },
+    {
+      "fromId": "btEach",
+      "fromProperty": "itemOutput-label",
+      "toId": "btBuyTitle",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "btBuyTitle",
+      "fromProperty": "result",
+      "toId": "btConfirm",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "btEach",
+      "fromProperty": "itemOutput-cost",
+      "toId": "btConfirm",
+      "toProperty": "cost"
+    },
+    {
+      "fromId": "btIn",
+      "fromProperty": "purse",
+      "toId": "btConfirm",
+      "toProperty": "purse"
+    },
+    {
+      "fromId": "btIn",
+      "fromProperty": "haveWord",
+      "toId": "btConfirm",
+      "toProperty": "haveWord"
+    },
+    {
+      "fromId": "btIn",
+      "fromProperty": "costWord",
+      "toId": "btConfirm",
+      "toProperty": "costWord"
+    },
+    {
+      "fromId": "btIn",
+      "fromProperty": "leftWord",
+      "toId": "btConfirm",
+      "toProperty": "leftWord"
+    },
+    {
+      "fromId": "btIn",
+      "fromProperty": "yesWord",
+      "toId": "btConfirm",
+      "toProperty": "yesWord"
+    },
+    {
+      "fromId": "btIn",
+      "fromProperty": "noWord",
+      "toId": "btConfirm",
+      "toProperty": "noWord"
+    },
+    {
+      "fromId": "btConfirm",
+      "fromProperty": "no",
+      "toId": "btAsk",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "btConfirm",
+      "fromProperty": "yes",
+      "toId": "btAsk",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "btIn",
+      "fromProperty": "app",
+      "toId": "btDo",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "btIn",
+      "fromProperty": "profileId",
+      "toId": "btDo",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "btEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "btDo",
+      "toProperty": "thingId"
+    },
+    {
+      "fromId": "btEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "btWhich",
+      "toProperty": "thing"
+    },
+    {
+      "fromId": "btWhich",
+      "fromProperty": "result",
+      "toId": "btDo",
+      "toProperty": "action"
+    },
+    {
+      "fromId": "btConfirm",
+      "fromProperty": "yes",
+      "toId": "btDo",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "btDo",
+      "fromProperty": "said",
+      "toId": "btSaid",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "btDo",
+      "fromProperty": "app",
+      "toId": "btOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "btDo",
+      "fromProperty": "done",
+      "toId": "btOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "btDo",
+      "fromProperty": "said",
+      "toId": "btOut",
+      "toProperty": "said"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "fc009aba-d0a8-5a11-8e69-3cd63299d429",
+  "name": "Finish monster",
+  "path": "/Logic/Finish monster",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What a finished Monster Gate game pays beyond its answers (already paid as they were graded): a landing's five, win or lose, once per game id. Publishes the model (store it), the game's whole take and why, whether it crossed a 🎁 milestone, and the end screen's words."
+}

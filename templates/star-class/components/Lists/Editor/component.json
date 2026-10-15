@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "eb14f3c5-054d-5487-8add-25a296394a5b",
+  "name": "Editor",
+  "path": "/Lists/Editor",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Make or edit a revision list: a name, a box for the questions one line each (\"question = answer\"), the count that will be saved, whether to ask both ways, Save and Cancel. Fill loads the list Set Id names from Sets (none: an empty new list). Publishes Save with Name, Items, Both and Set Id, or Cancel."
+}

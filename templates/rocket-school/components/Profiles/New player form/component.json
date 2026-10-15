@@ -7,5 +7,5 @@
   "created": "2026-09-12T00:00:00.000Z",
   "modified": "2026-09-12T00:00:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "The player form: a name, a face (five styles, re-rollable), a class and a language. Publishes Create with every field, or Cancel. RKT-008: with Editing, it is the same form for a player who exists. Fill puts their name, face and class in, the language row steps aside (the menu has it), and Delete asks by name before it publishes Delete."
+  "description": "The player form: a name, a face (five styles, re-rollable), a skin (SC-5: five ✋ tones, or none and the seed chooses), a class and a language. Publishes Create with every field, or Cancel. RKT-008: with Editing, it is the same form for a player who exists. Fill puts their name, face, skin and class in, the language row steps aside (the menu has it), and Delete asks by name before it publishes Delete."
 }

@@ -87,6 +87,20 @@ nor a CRUD app. **That preference was legible only as a defect report.**
     ruled slugs), which blocks *the shelf*, not this delivery.
   - 🟢 **[TPL-006 — the story engine](TPL-006-THE-STORY-ENGINE.md)**, roster #7 (`interactive-fiction`). Richard's ask, 2026-09-11: *"another cool template … you can build anything with Claude Code today, fine, but **can you go in and edit it afterwards?**"* — picked from four pitches on his stated criterion, **how much new product a person gets per line of JSON edited**. **BUILT, GATED (62/62) AND DRIVEN 2026-09-12**, committed as `a2b53f9c0`: `templates/story-engine/`, 9 components, 88 nodes, **zero `noodl_modules`**, no backend, 0 validator errors, 0 console errors in a browser. Four verbs and no fifth (`goto`, `gives`, `requires`, and an absent `choices` array is an ending), and a `/remix` page whose box **opens holding the story that is playing** — Richard's ruling, *"it's the point"*. 🔴 **AC6 is proved by doing it**: rebuilt with a completely different story, every component graph diffed, **one parameter of one node differs**. It found **three** defects — **D49** (a `States` node with `useTransitions` true, the DEFAULT, never publishes a colour; this **disproves and replaces D43**), **D50** (`uncollapsible-multi-column` warns about content-sized pills and its suggested fix is wrong), **D51** (`typecheck:mcp` red for a day; fixed). **AC7 blocked on the inherited D44/D48 pair; AC8 is his look; the shelf is still blocked on T3.**
   - 🟢 **[TPL-008 — the todo list](TPL-008-THE-TODO-LIST.md)**, Richard's own, 2026-09-14: *"the simplest todo list ever, because I HATE task management software with a vengeance."* One list ordered only by what you will do next; nothing is ever deleted — you close a task by writing what happened; every move, note, rename, tick and close is kept as history. **Stored in the NodeGX backend** (phone + PC), each row private, `delete: nobody`. **BUILT, GATED (19/19) AND DRIVEN (11/11) in one session** through the plan door: `templates/todo-list/`, 33 components, 12 of them `Commands/`. Found **D71** (the node reference says a wired `run` makes a Function signal-only; it does not), **D72**, **D73**. Left: AC8 (his look and real use) and the demo question.
+  - 🟡 **[TPL-013 — Star Class](TPL-013-STAR-CLASS.md)**. Richard's ask, 2026-10-14: Rocket School for school
+    children in Sub-Saharan Africa, P1 to JSS3, named by him. An **edition** of TPL-007, not a fork:
+    `tpl013Edition.ts` changes the counted French part and the same plan door writes `templates/star-class/`
+    (`npm run template:star-class`). s1: naira and FCFA, no typing, no French history. s2: SC-1, nine classes P1–JSS3 with
+    a new player rated two classes below the one picked; SC-2, nine picture questions for P1–P2 with nothing to read;
+    gated 48/48, driven at 390 and 1024 px, Rocket School byte-identical. s3: the class is a yard stick (up after five
+    right, down after three misses). s4: the jump's own ⬆️ card; SC-5 skin tones for both games (a ✋ row, Star Class darker
+    by default); SC-3, ten JSS maths traps pinned to NERDC topics. s5: Number Hunt and Make Ten follow the rating, P1–P2
+    hunt from `❓ + ❓ = 14`, SC-4's English and Basic Science banks (21 skills, second-read). The build is eight slices (§4): nine classes, P1–P2
+    numbers and pictures, JSS maths, four subject banks, skin tones, offline, country packs, shipped.
+  - 🟡 **[TPL-014 — The moon grows](TPL-014-THE-MOON-GROWS.md)**, for Rocket School and Star Class. Richard's ask,
+    2026-10-14 (his eldest has five aliens, too many stars and nothing to do): the Alien Book, the Crater Dome and the
+    surprise egg; expeditions with your alien and gear bought with stars; the alien school and a fourth form.
+
 - ⬜ **T3** — the **category question**: either extend the ruled vocabulary, or re-file the three
   templates that do not fit it. ⚠️ P75 already found the surface-level cost of getting this wrong —
   the card drew the machine slug `starter` at a person.

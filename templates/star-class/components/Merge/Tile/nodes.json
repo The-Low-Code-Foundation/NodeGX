@@ -1,0 +1,104 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d6f4843e-6e21-52e4-8958-2fb30d6fca7a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mtIn",
+      "type": "Component Inputs",
+      "label": "The square",
+      "ports": [
+        {
+          "name": "word",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fx",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "mtCell",
+      "type": "Group",
+      "label": "The square",
+      "children": [
+        "mtWord"
+      ],
+      "parameters": {
+        "width": {
+          "value": 72,
+          "unit": "px"
+        },
+        "height": {
+          "value": 72,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-subtle)",
+        "cssClassName": "rkt-merge-tile"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mtWord",
+      "type": "Text",
+      "label": "The number",
+      "parent": "mtCell",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "fontWeight": "var(--font-extrabold)",
+        "fontSize": "var(--text-2xl)",
+        "fontVariantNumeric": "tabular-nums",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mtKind",
+      "type": "States",
+      "label": "Empty, a number, a ten, tens, or a hundred and over",
+      "parameters": {
+        "states": "empty,unit,ten,tens,big",
+        "values": "ground,edge",
+        "useTransitions": false,
+        "type-ground": "color",
+        "value-empty-ground": "var(--muted)",
+        "value-unit-ground": "var(--surface)",
+        "value-ten-ground": "var(--accent)",
+        "value-tens-ground": "var(--primary)",
+        "value-big-ground": "var(--secondary)",
+        "type-edge": "color",
+        "value-empty-edge": "var(--border-subtle)",
+        "value-unit-edge": "var(--foreground)",
+        "value-ten-edge": "var(--foreground)",
+        "value-tens-edge": "var(--foreground)",
+        "value-big-edge": "var(--foreground)"
+      },
+      "x": 350,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "mtCell"
+  ]
+}

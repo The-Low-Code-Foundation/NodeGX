@@ -74,6 +74,8 @@ import {
   PICK_QUESTION_SCRIPT,
   RACE_STEP,
   SAVE_MODEL_SCRIPT,
+  SKIN_FACE_SCRIPT,
+  SKIN_TONES,
   SELECT_PROFILE_SCRIPT,
   SLIDE_MERGE_SCRIPT,
   STAR_RULE,
@@ -2690,6 +2692,192 @@ describe('TPL-007 — the engine', () => {
       const there = runScript(DECODE_SAVE_SCRIPT, { app: { profiles: [], activeId: '', sets: [] }, code });
       expect(view(there.app).aliens).toEqual(now.aliens);
       expect(view(there.app).purse).toBe(now.purse);
+    });
+  });
+
+  describe('TPL-014 M1 — the Alien Book, the domes and the surprise egg: somewhere for the stars to go', () => {
+    const withPurse = (stars: number, lang = 'en') => {
+      let app: any = runScript(CREATE_PROFILE_SCRIPT, { app: undefined, name: 'Ellie', level: '6e', lang }).app;
+      app = runScript(SAVE_MODEL_SCRIPT, { app, model: { rating: 0, answered: 0, lastSkill: '', skills: {}, stars, spent: 0, bests: {} } }).app;
+      return app;
+    };
+    const act = (app: any, action: string, over: Record<string, unknown> = {}) => runScript(MOON_ACT_SCRIPT, { app, action, ...over });
+    const view = (app: any, over: Record<string, unknown> = {}) => runScript(MOON_VIEW_SCRIPT, { app, ...over });
+    const me = (app: any) => app.profiles.find((p: any) => p.id === app.activeId);
+    const fill = (app: any, n: number) => { for (let i = 0; i < n; i++) app = act(app, 'adopt', { species: 'star', colour: 'sunny' }).app; return app; };
+
+    it('🔴 the book has every species in every colour; an alien had is drawn and named, one never had is a grey shape with no name', () => {
+      let app = act(withPurse(0), 'adopt', { species: 'bean', colour: 'pink', name: 'Tilly' }).app;
+      const v = view(app);
+      expect(v.book).toHaveLength(36);
+      expect([v.bookCount, v.bookLine]).toEqual([1, 'Alien Book · 1 of 36']);
+      expect(v.book.find((r: any) => r.id === 'bean-pink')).toEqual(expect.objectContaining({ name: 'Bean', line: 'Pink', colour: 'var(--alien-pink)', species: 'bean' }));
+      expect(v.book.find((r: any) => r.id === 'bean-lime')).toEqual(expect.objectContaining({ name: '?', line: '', colour: 'var(--muted)', species: 'bean' }));
+      expect(view(app, {}).book.filter((r: any) => r.name !== '?')).toHaveLength(1);
+      expect(runScript(MOON_VIEW_SCRIPT, { app: withPurse(0, 'fr') }).bookLine).toBe('Le livre des aliens · 0 sur 36');
+    });
+
+    it('🔴 a moon from before the book opens with the aliens it already has, and the first thing done on it keeps them', () => {
+      let app = withPurse(500);
+      // An old moon: aliens, no `met`, no `domes`.
+      const p = me(app);
+      p.moon = { aliens: [{ id: 'a1', species: 'blob', colour: 'lime', name: 'Zib', meals: 20, fav: 'cake', found: true, wear: { hat: 'crown' } }, { id: 'a2', species: 'squid', colour: 'sky', name: 'Wiggo', meals: 3, fav: 'pizza', found: false, wear: {} }], sel: 'a1', owned: ['crown'] };
+      expect(view(app).bookCount).toBe(2);
+      app = act(app, 'feed', { foodId: 'cookie' }).app;
+      expect(me(app).moon.met).toEqual(['blob-lime', 'squid-sky']);
+      expect(me(app).moon.domes).toEqual([]);
+    });
+
+    it('🔴 a dome makes room for two more aliens; built once; too dear refused with the store as it was', () => {
+      let app = fill(withPurse(3200), 6); // 3200 − 630 (six) − 1000 (dome) − 520 (two more) = 1050, short of 1500
+      expect(view(app)).toEqual(expect.objectContaining({ full: true, canAdopt: false }));
+      const crater = view(app).bigs.find((b: any) => b.id === 'crater');
+      expect(crater).toEqual(expect.objectContaining({ label: 'Crater Dome', line: '1000 ⭐ · room for 2 more', ask: true, dim: false, worn: false }));
+      const spentBefore = me(app).model.spent;
+      const built = act(app, 'build', { thingId: 'crater' });
+      expect([built.ok, built.said]).toEqual([true, 'The Crater Dome is built: room for 2 more aliens!']);
+      app = built.app;
+      expect(me(app).model.spent).toBe(spentBefore + 1000);
+      expect(view(app)).toEqual(expect.objectContaining({ full: false, canAdopt: true, anotherLine: '＋ Adopt another alien · 240 ⭐' }));
+      expect(view(app).bigs.find((b: any) => b.id === 'crater')).toEqual(expect.objectContaining({ line: 'Built ✓ · room for 2 more', ask: false, worn: true }));
+      expect(act(app, 'build', { thingId: 'crater' }).why).toBe('owned');
+      app = fill(app, 2);
+      expect([me(app).moon.aliens.length, view(app).full]).toEqual([8, true]);
+      expect(act(app, 'adopt', {}).why).toBe('full');
+      // The ridge dome is 1500; with less left, it is greyed and refused, and nothing changes.
+      const purse = view(app).purse;
+      expect(purse).toBeLessThan(1500);
+      expect(view(app).bigs.find((b: any) => b.id === 'ridge')).toEqual(expect.objectContaining({ ask: false, dim: true }));
+      const short = act(app, 'build', { thingId: 'ridge' });
+      expect([short.ok, short.why]).toEqual([false, 'tooDear']);
+      expect(short.app).toEqual(app);
+      expect(act(app, 'build', { thingId: 'castle' }).why).toBe('unknown');
+    });
+
+    it('🔴 the egg always hatches an alien never had, until every one has been had, and needs room', () => {
+      let app = withPurse(100000);
+      const seen = new Set<string>();
+      for (let i = 0; i < 6; i++) {
+        const r = act(app, 'egg');
+        expect(r.ok).toBe(true);
+        app = r.app;
+        const born = me(app).moon.aliens[me(app).moon.aliens.length - 1];
+        const key = `${born.species}-${born.colour}`;
+        expect(seen.has(key)).toBe(false);
+        seen.add(key);
+        expect(r.said).toMatch(/^The egg hatched: meet \S+, a [a-z]+ \S+!$/);
+        expect(me(app).moon.sel).toBe(born.id);
+      }
+      expect(view(app).full).toBe(true);
+      expect(view(app).bigs.find((b: any) => b.id === 'egg')).toEqual(expect.objectContaining({ ask: false, dim: true, line: 'The moon is full: build a dome first' }));
+      expect(act(app, 'egg').why).toBe('full');
+      expect(me(app).model.spent).toBe(6 * 300);
+      // Every page met, the book is full, and an egg still hatches (any alien).
+      const p = me(app);
+      p.moon.met = [];
+      for (const sp of ['blob', 'bean', 'trio', 'squid', 'fuzz', 'star']) for (const c of ['lime', 'mint', 'sky', 'lilac', 'pink', 'sunny']) p.moon.met.push(`${sp}-${c}`);
+      app = act(app, 'build', { thingId: 'crater' }).app;
+      expect(view(app).bigs.find((b: any) => b.id === 'egg').line).toBe('300 ⭐ · a surprise alien');
+      expect(act(app, 'egg').ok).toBe(true);
+    });
+
+    it('🔴 a hatched or adopted alien is never given a name another alien on the moon already has', () => {
+      // Driven 2026-10-14: her moon had Tilly the pink Bean; an egg hatched a lime Bean and called it Tilly too.
+      let app = withPurse(100000);
+      for (let i = 0; i < 6; i++) app = act(app, 'adopt', { species: 'bean', colour: 'pink' }).app;
+      app = act(app, 'build', { thingId: 'crater' }).app;
+      app = act(app, 'build', { thingId: 'ridge' }).app;
+      for (let i = 0; i < 4; i++) app = act(app, 'egg').app;
+      const names = me(app).moon.aliens.map((a: any) => a.name.toLowerCase());
+      expect(new Set(names).size).toBe(names.length);
+      expect(names.slice(0, 6)).toEqual(['zorp', 'tilly', 'nok', 'beep', 'zorp 2', 'tilly 2']);
+      expect(names.includes(view(app, { draftSpecies: 'bean' }).suggestedName.toLowerCase())).toBe(false);
+    });
+
+    it('the egg says how many it could be, in both languages', () => {
+      const app = act(withPurse(400), 'adopt', { species: 'blob', colour: 'lime' }).app;
+      expect(view(app).bigs.find((b: any) => b.id === 'egg')).toEqual(expect.objectContaining({ line: '300 ⭐ · an alien you have never had (35 it could be)', ask: true }));
+      const fr = act(withPurse(400, 'fr'), 'adopt', { species: 'blob', colour: 'lime' }).app;
+      expect(view(fr).bigs.map((b: any) => b.label)).toEqual(['Dôme du cratère', 'Dôme de la crête', 'Œuf surprise']);
+      expect(act(fr, 'egg').said).toMatch(/^L’œuf éclot : voici \S+, un /);
+    });
+
+    it('🔴 the save code carries the book and the domes', () => {
+      let app = withPurse(3000);
+      app = act(app, 'egg').app;
+      app = act(app, 'build', { thingId: 'crater' }).app;
+      const before = view(app);
+      const code = runScript(ENCODE_SAVE_SCRIPT, { app }).code;
+      const there = runScript(DECODE_SAVE_SCRIPT, { app: { profiles: [], activeId: '', sets: [] }, code });
+      const after = view(there.app);
+      expect([after.bookCount, after.bigs[0].worn, after.purse]).toEqual([before.bookCount, true, before.purse]);
+    });
+  });
+
+  // ── TPL-013 SC-5 — skin tones, for both games (Richard, 2026-10-15) ──
+  describe('TPL-013 SC-5 — a skin a child picks, kept with what they wear', () => {
+    const me = (app: any) => app.profiles.find((p: any) => p.id === app.activeId);
+    const make = (skin?: string, look = 'big-smile') => runScript(CREATE_PROFILE_SCRIPT, { app: undefined, name: 'Ada', look, seed: 'Ada', lang: 'en', skin }).app;
+
+    it('five tones, each its own colour and its own ✋, light to dark', () => {
+      expect(SKIN_TONES.map((t) => t.id)).toEqual(['t1', 't2', 't3', 't4', 't5']);
+      expect(new Set(SKIN_TONES.map((t) => t.hex)).size).toBe(5);
+      expect(SKIN_TONES.map((t) => t.hand)).toEqual(['✋🏻', '✋🏼', '✋🏽', '✋🏾', '✋🏿']);
+      // Light to dark by luminance, so the row reads in order.
+      const lum = (hex: string) => [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16)).reduce((a, c, i) => a + c * [0.2126, 0.7152, 0.0722][i], 0);
+      const l = SKIN_TONES.map((t) => lum(t.hex));
+      expect(l).toEqual([...l].sort((a, b) => b - a));
+    });
+
+    it('🔴 a skin picked on the form is the face’s skin on every look, and it reads back as the one picked', () => {
+      for (const look of HANGAR_LOOKS) {
+        const a = runScript(ACTIVE_PROFILE_SCRIPT, { app: make('t4', look) });
+        expect({ look, skin: a.skin, skinColor: a.faceOptions.skinColor }).toEqual({ look, skin: 't4', skinColor: ['8d5524'] });
+      }
+    });
+
+    it('none picked: no skinColor at all, so DiceBear keeps its own range (Rocket School’s faces, unchanged — the control)', () => {
+      const a = runScript(ACTIVE_PROFILE_SCRIPT, { app: make() });
+      expect([a.skin, a.faceOptions]).toEqual(['', {}]);
+      expect(me(make()).wear).toBeUndefined();
+    });
+
+    it('a skin that is not one of the five is refused, at making and at changing', () => {
+      expect(me(make('purple')).wear).toBeUndefined();
+      let app = make('t2');
+      app = runScript(UPDATE_SETTINGS_SCRIPT, { app, skin: '#000' }).app;
+      expect(runScript(ACTIVE_PROFILE_SCRIPT, { app }).skin).toBe('t2');
+    });
+
+    it('🔴 changing the skin keeps everything worn (a hat on the face, the rocket’s paint), and what is worn keeps the skin', () => {
+      let app = make('t1', 'pixel-art');
+      me(app).wear = { ...me(app).wear, face: { 'pixel-art': { hat: 'variant03' } }, paint: 'var(--chart-2)' };
+      app = runScript(UPDATE_SETTINGS_SCRIPT, { app, skin: 't5' }).app;
+      const a = runScript(ACTIVE_PROFILE_SCRIPT, { app });
+      expect([a.skin, a.faceOptions.skinColor, a.faceOptions.hat, a.paint]).toEqual(['t5', ['5c3317'], ['variant03'], 'var(--chart-2)']);
+      // The other way: putting an item on goes through wearOf, which must not drop the skin.
+      const item = HANGAR_SHELF.find((i) => i.kind === 'face' && i.free === true && i.faces && (i.faces as any)['pixel-art']);
+      if (item) {
+        app = runScript(WEAR_ITEM_SCRIPT, { app, shelf: HANGAR_SHELF, itemId: item.id }).app;
+        expect(runScript(ACTIVE_PROFILE_SCRIPT, { app }).skin).toBe('t5');
+      }
+    });
+
+    it('🔴 the skin survives a reload (the store is JSON) and the save code, and a code from before it restores with none', () => {
+      const app = JSON.parse(JSON.stringify(make('t3')));
+      expect(runScript(ACTIVE_PROFILE_SCRIPT, { app }).skin).toBe('t3');
+      const code = runScript(ENCODE_SAVE_SCRIPT, { app }).code;
+      const there = runScript(DECODE_SAVE_SCRIPT, { app: { profiles: [], activeId: '', sets: [] }, code });
+      expect([there.ok, runScript(ACTIVE_PROFILE_SCRIPT, { app: there.app }).skin]).toEqual([true, 't3']);
+      const old = runScript(ENCODE_SAVE_SCRIPT, { app: make() }).code;
+      const back = runScript(DECODE_SAVE_SCRIPT, { app: { profiles: [], activeId: '', sets: [] }, code: old });
+      expect([back.ok, runScript(ACTIVE_PROFILE_SCRIPT, { app: back.app }).skin]).toEqual([true, '']);
+    });
+
+    it('the form’s face, before there is a player: the skin picked, or nothing for DiceBear to override', () => {
+      expect(runScript(SKIN_FACE_SCRIPT, { skin: 't2' }).options).toEqual({ skinColor: ['e0ac80'] });
+      expect(runScript(SKIN_FACE_SCRIPT, { skin: '' }).options).toEqual({});
+      expect(runScript(SKIN_FACE_SCRIPT, { skin: 'nope' }).options).toEqual({});
     });
   });
 });

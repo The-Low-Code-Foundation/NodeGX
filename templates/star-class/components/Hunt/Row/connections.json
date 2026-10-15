@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3b843f86-bca8-5731-8699-6e8748d4eeaa",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hwIn",
+      "fromProperty": "cells",
+      "toId": "hwCells",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hwCells",
+      "fromProperty": "itemOutput-at",
+      "toId": "hwOut",
+      "toProperty": "at"
+    },
+    {
+      "fromId": "hwCells",
+      "fromProperty": "itemOutputSignal-tapped",
+      "toId": "hwOut",
+      "toProperty": "tapped"
+    }
+  ]
+}

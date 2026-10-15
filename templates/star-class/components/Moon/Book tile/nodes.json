@@ -1,0 +1,137 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e6291be0-5bcf-547b-85e3-d6ef424f02eb",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mbIn",
+      "type": "Component Inputs",
+      "label": "The page",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "species",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "colour",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "grown",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "line",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "mbCard",
+      "type": "Group",
+      "label": "The page",
+      "children": [
+        "mbAlien",
+        "mbName",
+        "mbLine"
+      ],
+      "parameters": {
+        "width": {
+          "value": 88,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-1)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-1)",
+        "paddingRight": "var(--space-1)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mbAlien",
+      "type": "game-kit.Alien",
+      "label": "The alien, or its shape",
+      "parent": "mbCard",
+      "parameters": {
+        "size": 60
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mbName",
+      "type": "Text",
+      "label": "Its kind",
+      "parent": "mbCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-bold)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "mbLine",
+      "type": "Text",
+      "label": "Its colour",
+      "parent": "mbCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "mbCard"
+  ]
+}

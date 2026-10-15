@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2dd85165-b7df-59fa-84ea-ab5190897102",
+  "name": "Play",
+  "path": "/Hunt/Play",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Number Hunt itself (§2.2 C). A new hunt on mount and on New game: five grids of sixteen numbers, each with a target and one to three ways to make it, and the child is told how many. A tap on a number runs Logic/Hunt move (tap), and a full pick is checked at once: a right one stays teal, a wrong one shakes and says its sum. After two misses on a grid, Show me one reveals a way (it pays nothing). When every way is found, Next grid (focused) brings the next. Untimed. The whole hunt is one Variable (huntGame, global by name: one hunt per page). When the last grid is cleared, Logic/Finish hunt pays it once and Race/Result takes the buttons' place. Publishes Model and Graded (store the model), Home, Hangar and Cheer."
+}

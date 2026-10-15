@@ -1,0 +1,217 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "02fcc340-9ee1-5d3c-8a42-4fbd98078d49",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "qbIn",
+      "fromProperty": "skillName",
+      "toId": "qbSkill",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qbIn",
+      "fromProperty": "enabled",
+      "toId": "qbSkillShown",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "qbSkillShown",
+      "fromProperty": "result",
+      "toId": "qbSkill",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "qbIn",
+      "fromProperty": "prompt",
+      "toId": "qbPrompt",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qbIn",
+      "fromProperty": "prompt",
+      "toId": "qbLength",
+      "toProperty": "prompt"
+    },
+    {
+      "fromId": "qbLength",
+      "fromProperty": "result",
+      "toId": "qbSize",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "qbSize",
+      "fromProperty": "size",
+      "toId": "qbPrompt",
+      "toProperty": "fontSize"
+    },
+    {
+      "fromId": "qbIn",
+      "fromProperty": "placeholder",
+      "toId": "qbPad",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "qbIn",
+      "fromProperty": "checkWord",
+      "toId": "qbPad",
+      "toProperty": "submitLabel"
+    },
+    {
+      "fromId": "qbIn",
+      "fromProperty": "enabled",
+      "toId": "qbPad",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "qbIn",
+      "fromProperty": "padKeys",
+      "toId": "qbPad",
+      "toProperty": "keys"
+    },
+    {
+      "fromId": "qbIn",
+      "fromProperty": "numeric",
+      "toId": "qbPad",
+      "toProperty": "numeric"
+    },
+    {
+      "fromId": "qbIn",
+      "fromProperty": "prompt",
+      "toId": "qbPad",
+      "toProperty": "question"
+    },
+    {
+      "fromId": "qbIn",
+      "fromProperty": "kind",
+      "toId": "qbStates",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "qbStates",
+      "fromProperty": "showTyped",
+      "toId": "qbShowTyped",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "qbIn",
+      "fromProperty": "enabled",
+      "toId": "qbShowTyped",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "qbShowTyped",
+      "fromProperty": "result",
+      "toId": "qbTyped",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "qbStates",
+      "fromProperty": "showOptions",
+      "toId": "qbShowOptions",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "qbIn",
+      "fromProperty": "enabled",
+      "toId": "qbShowOptions",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "qbShowOptions",
+      "fromProperty": "result",
+      "toId": "qbOptions",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "qbIn",
+      "fromProperty": "choices",
+      "toId": "qbEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "qbTyped",
+      "fromProperty": "didMount",
+      "toId": "qbFocusBox",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "qbPad",
+      "fromProperty": "onText",
+      "toId": "qbSetTyped",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "qbPad",
+      "fromProperty": "onSubmit",
+      "toId": "qbSetTyped",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "qbEach",
+      "fromProperty": "itemOutput-value",
+      "toId": "qbSetPicked",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "qbEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "qbSetPicked",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "qbAnswer",
+      "fromProperty": "value",
+      "toId": "qbOut",
+      "toProperty": "answer"
+    },
+    {
+      "fromId": "qbSetTyped",
+      "fromProperty": "done",
+      "toId": "qbOut",
+      "toProperty": "answered"
+    },
+    {
+      "fromId": "qbSetPicked",
+      "fromProperty": "done",
+      "toId": "qbOut",
+      "toProperty": "answered"
+    },
+    {
+      "fromId": "qbPad",
+      "fromProperty": "onText",
+      "toId": "qbOut",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qbPad",
+      "fromProperty": "onLayout",
+      "toId": "qbOut",
+      "toProperty": "layoutSeen"
+    },
+    {
+      "fromId": "qbPad",
+      "fromProperty": "onLayoutSeen",
+      "toId": "qbOut",
+      "toProperty": "layoutSeenNow"
+    },
+    {
+      "fromId": "qbIn",
+      "fromProperty": "expected",
+      "toId": "qbPad",
+      "toProperty": "expected"
+    },
+    {
+      "fromId": "qbPad",
+      "fromProperty": "onMistakes",
+      "toId": "qbOut",
+      "toProperty": "mistakes"
+    },
+    {
+      "fromId": "qbPad",
+      "fromProperty": "onWrongKey",
+      "toId": "qbOut",
+      "toProperty": "wrongKey"
+    }
+  ]
+}

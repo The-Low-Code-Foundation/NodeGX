@@ -1,0 +1,277 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "eb14f3c5-054d-5487-8add-25a296394a5b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "leIn",
+      "fromProperty": "mounted",
+      "toId": "leShown",
+      "toProperty": "m"
+    },
+    {
+      "fromId": "leShown",
+      "fromProperty": "result",
+      "toId": "leCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "nameWord",
+      "toId": "leNameLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "nameHint",
+      "toId": "leName",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "linesWord",
+      "toId": "leLinesLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "linesHint",
+      "toId": "leText",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "saveWord",
+      "toId": "leSave",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "cancelWord",
+      "toId": "leCancel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "bothWord",
+      "toId": "leBothItems",
+      "toProperty": "in-both"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "oneWayWord",
+      "toId": "leBothItems",
+      "toProperty": "in-one"
+    },
+    {
+      "fromId": "leBothItems",
+      "fromProperty": "out-items",
+      "toId": "leBoth",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "sets",
+      "toId": "leFill",
+      "toProperty": "in-sets"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "setId",
+      "toId": "leFill",
+      "toProperty": "in-setId"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "fill",
+      "toId": "leFill",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "leFill",
+      "fromProperty": "out-name",
+      "toId": "leSetName",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "leFill",
+      "fromProperty": "success",
+      "toId": "leSetName",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "leFill",
+      "fromProperty": "out-text",
+      "toId": "leSetText",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "leSetName",
+      "fromProperty": "done",
+      "toId": "leSetText",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "leFill",
+      "fromProperty": "out-both",
+      "toId": "leSetBoth",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "leSetText",
+      "fromProperty": "done",
+      "toId": "leSetBoth",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "leFill",
+      "fromProperty": "out-id",
+      "toId": "leSetId",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "leSetBoth",
+      "fromProperty": "done",
+      "toId": "leSetId",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "leNameVar",
+      "fromProperty": "value",
+      "toId": "leName",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "leSetName",
+      "fromProperty": "done",
+      "toId": "leName",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "leTextVar",
+      "fromProperty": "value",
+      "toId": "leText",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "leSetText",
+      "fromProperty": "done",
+      "toId": "leText",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "leName",
+      "fromProperty": "onTextChanged",
+      "toId": "leNameVar",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "leText",
+      "fromProperty": "onTextChanged",
+      "toId": "leTextVar",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "leTextVar",
+      "fromProperty": "value",
+      "toId": "leParse",
+      "toProperty": "json"
+    },
+    {
+      "fromId": "leParse",
+      "fromProperty": "count",
+      "toId": "leCountLine",
+      "toProperty": "in-n"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "countWord",
+      "toId": "leCountLine",
+      "toProperty": "in-word"
+    },
+    {
+      "fromId": "leIn",
+      "fromProperty": "emptyWord",
+      "toId": "leCountLine",
+      "toProperty": "in-empty"
+    },
+    {
+      "fromId": "leCountLine",
+      "fromProperty": "out-line",
+      "toId": "leCount",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "leParse",
+      "fromProperty": "valid",
+      "toId": "leSave",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "leBothVar",
+      "fromProperty": "value",
+      "toId": "leBothVal",
+      "toProperty": "both"
+    },
+    {
+      "fromId": "leBothVal",
+      "fromProperty": "result",
+      "toId": "leBoth",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "leBoth",
+      "fromProperty": "value",
+      "toId": "leIsBoth",
+      "toProperty": "v"
+    },
+    {
+      "fromId": "leIsBoth",
+      "fromProperty": "result",
+      "toId": "leSetBothPick",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "leBoth",
+      "fromProperty": "changed",
+      "toId": "leSetBothPick",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "leNameVar",
+      "fromProperty": "value",
+      "toId": "leOut",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "leParse",
+      "fromProperty": "items",
+      "toId": "leOut",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "leBothVar",
+      "fromProperty": "value",
+      "toId": "leOut",
+      "toProperty": "both"
+    },
+    {
+      "fromId": "leIdVar",
+      "fromProperty": "value",
+      "toId": "leOut",
+      "toProperty": "setId"
+    },
+    {
+      "fromId": "leSave",
+      "fromProperty": "onClick",
+      "toId": "leOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "leCancel",
+      "fromProperty": "onClick",
+      "toId": "leOut",
+      "toProperty": "cancel"
+    }
+  ]
+}

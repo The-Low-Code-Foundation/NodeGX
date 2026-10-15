@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ebeaf769-6a21-5603-882e-cfff1ba44d5e",
+  "name": "Grade answer",
+  "path": "/Logic/Grade answer",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Was it right, was it fast, and what the learner model now believes. Publishes the new model — store it."
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5137bc6a-aa27-59f2-8a16-09cb35a0c4d8",
+  "name": "Draw hunt",
+  "path": "/Logic/Draw hunt",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The hunt as the graph draws it: four rows of four numbers (id, at, word, kind, fx) for the nested repeaters, the instruction, the progress, a note on the last pick and its kind (quiet, right, wrong, shown), Phase (playing, found or over), and Can Show once two misses are on the grid."
+}

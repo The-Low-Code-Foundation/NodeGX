@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3c366a11-4238-5e85-8388-fadfc722e559",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "zlIn",
+      "fromProperty": "hearts",
+      "toId": "zlHearts",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "zlIn",
+      "fromProperty": "line",
+      "toId": "zlLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "zlIn",
+      "fromProperty": "pips",
+      "toId": "zlPips",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "zlIn",
+      "fromProperty": "pips",
+      "toId": "zlHasPips",
+      "toProperty": "p"
+    },
+    {
+      "fromId": "zlHasPips",
+      "fromProperty": "result",
+      "toId": "zlPips",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "zlIn",
+      "fromProperty": "note",
+      "toId": "zlNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "zlIn",
+      "fromProperty": "laneClass",
+      "toId": "zlLane",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "zlIn",
+      "fromProperty": "monsterClass",
+      "toId": "zlMonster",
+      "toProperty": "monsterClass"
+    },
+    {
+      "fromId": "zlIn",
+      "fromProperty": "walking",
+      "toId": "zlWalk",
+      "toProperty": "in-walking"
+    },
+    {
+      "fromId": "zlIn",
+      "fromProperty": "walkFrom",
+      "toId": "zlWalk",
+      "toProperty": "in-walkFrom"
+    },
+    {
+      "fromId": "zlIn",
+      "fromProperty": "left",
+      "toId": "zlWalk",
+      "toProperty": "in-left"
+    },
+    {
+      "fromId": "zlIn",
+      "fromProperty": "rest",
+      "toId": "zlWalk",
+      "toProperty": "in-rest"
+    },
+    {
+      "fromId": "zlWalk",
+      "fromProperty": "out-width",
+      "toId": "zlMover",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "zlWalk",
+      "fromProperty": "out-moverClass",
+      "toId": "zlMover",
+      "toProperty": "cssClassName"
+    }
+  ]
+}

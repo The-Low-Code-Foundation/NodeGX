@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "39a76cff-4f44-54c5-8493-d67fdcdbb7c1",
+  "name": "Monster move",
+  "path": "/Logic/Monster move",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The Monster Gate game after one move. Action is a parameter, placed once per action: answer (the round was graded: Outcome, Gain and Cpu Gain as the grader wrote them — a hit, a creep closer, a push, a step, a heart gone, a monster beaten, a heart back) or next (the next monster arrives). Time Scale is the next question's clock as a share of the skill's: the walk from where the monster stands. Takes and publishes the whole Game."
+}

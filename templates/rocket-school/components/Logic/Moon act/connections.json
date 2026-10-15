@@ -41,6 +41,12 @@
     },
     {
       "fromId": "moonactIn",
+      "fromProperty": "thingId",
+      "toId": "moonactFn",
+      "toProperty": "in-thingId"
+    },
+    {
+      "fromId": "moonactIn",
       "fromProperty": "species",
       "toId": "moonactFn",
       "toProperty": "in-species"

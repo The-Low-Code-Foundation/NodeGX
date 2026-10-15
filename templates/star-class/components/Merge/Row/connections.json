@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4b2603aa-cada-58ec-8d7e-b953738bc095",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mwIn",
+      "fromProperty": "cells",
+      "toId": "mwCells",
+      "toProperty": "items"
+    }
+  ]
+}

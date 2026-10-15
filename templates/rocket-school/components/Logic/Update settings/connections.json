@@ -95,6 +95,12 @@
     },
     {
       "fromId": "updatesettinIn",
+      "fromProperty": "skin",
+      "toId": "updatesettinFn",
+      "toProperty": "in-skin"
+    },
+    {
+      "fromId": "updatesettinIn",
       "fromProperty": "run",
       "toId": "updatesettinFn",
       "toProperty": "run"

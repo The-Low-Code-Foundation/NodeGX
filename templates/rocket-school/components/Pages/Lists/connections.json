@@ -107,6 +107,12 @@
     },
     {
       "fromId": "lsMe",
+      "fromProperty": "skin",
+      "toId": "lsHeader",
+      "toProperty": "skin"
+    },
+    {
+      "fromId": "lsMe",
       "fromProperty": "faceOptions",
       "toId": "lsHeader",
       "toProperty": "options"

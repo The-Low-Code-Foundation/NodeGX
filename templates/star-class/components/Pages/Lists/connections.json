@@ -1,0 +1,457 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0813c475-b837-5144-8461-3770030d7c77",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lsStore",
+      "fromProperty": "app",
+      "toId": "lsMe",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "lsWords",
+      "fromProperty": "words",
+      "toId": "lsT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "lsMe",
+      "fromProperty": "lang",
+      "toId": "lsT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "lsMe",
+      "fromProperty": "hasProfile",
+      "toId": "lsNoOne",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "lsNoOne",
+      "fromProperty": "result",
+      "toId": "lsGuard",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "lsPage",
+      "fromProperty": "didMount",
+      "toId": "lsGuard",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "lsGuard",
+      "fromProperty": "ontrue",
+      "toId": "lsGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "lsHeader",
+      "fromProperty": "hangar",
+      "toId": "lsGoHangar",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "lsMe",
+      "fromProperty": "name",
+      "toId": "lsHeader",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "lsMe",
+      "fromProperty": "look",
+      "toId": "lsHeader",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "lsMe",
+      "fromProperty": "seed",
+      "toId": "lsHeader",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "lsMe",
+      "fromProperty": "lang",
+      "toId": "lsHeader",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "lsMe",
+      "fromProperty": "level",
+      "toId": "lsHeader",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "lsMe",
+      "fromProperty": "layout",
+      "toId": "lsHeader",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "lsMe",
+      "fromProperty": "soundMode",
+      "toId": "lsHeader",
+      "toProperty": "soundMode"
+    },
+    {
+      "fromId": "lsMe",
+      "fromProperty": "answerMode",
+      "toId": "lsHeader",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "lsMe",
+      "fromProperty": "profileId",
+      "toId": "lsHeader",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "lsMe",
+      "fromProperty": "skin",
+      "toId": "lsHeader",
+      "toProperty": "skin"
+    },
+    {
+      "fromId": "lsMe",
+      "fromProperty": "faceOptions",
+      "toId": "lsHeader",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "lsStore",
+      "fromProperty": "app",
+      "toId": "lsHeader",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "lsHeader",
+      "fromProperty": "app",
+      "toId": "lsStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "lsHeader",
+      "fromProperty": "write",
+      "toId": "lsStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "lsHeader",
+      "fromProperty": "switchPlayer",
+      "toId": "lsGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "lsHeader",
+      "fromProperty": "deleted",
+      "toId": "lsGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "lsHeader",
+      "fromProperty": "home",
+      "toId": "lsGoHome",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "listsTitle",
+      "toId": "lsTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "listsBlurb",
+      "toId": "lsBlurb",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "newList",
+      "toId": "lsNew",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lsStore",
+      "fromProperty": "app",
+      "toId": "lsSets",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "listCount",
+      "toId": "lsSets",
+      "toProperty": "countWord"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "listEdit",
+      "toId": "lsSets",
+      "toProperty": "editWord"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "listDelete",
+      "toId": "lsSets",
+      "toProperty": "deleteWord"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "listDeleteAsk",
+      "toId": "lsSets",
+      "toProperty": "askWord"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "deleteYes",
+      "toId": "lsSets",
+      "toProperty": "yesWord"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "deleteNo",
+      "toId": "lsSets",
+      "toProperty": "noWord"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "listBothWays",
+      "toId": "lsSets",
+      "toProperty": "bothWord"
+    },
+    {
+      "fromId": "lsSets",
+      "fromProperty": "sets",
+      "toId": "lsEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lsEmpty",
+      "fromProperty": "result",
+      "toId": "lsClearId",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "lsNew",
+      "fromProperty": "onClick",
+      "toId": "lsClearId",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "lsClearId",
+      "fromProperty": "done",
+      "toId": "lsEditor",
+      "toProperty": "fill"
+    },
+    {
+      "fromId": "lsClearId",
+      "fromProperty": "done",
+      "toId": "lsPanel",
+      "toProperty": "to-editing"
+    },
+    {
+      "fromId": "lsEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "lsSetEditId",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "lsEach",
+      "fromProperty": "itemOutputSignal-edit",
+      "toId": "lsSetEditId",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "lsSetEditId",
+      "fromProperty": "done",
+      "toId": "lsEditor",
+      "toProperty": "fill"
+    },
+    {
+      "fromId": "lsSetEditId",
+      "fromProperty": "done",
+      "toId": "lsPanel",
+      "toProperty": "to-editing"
+    },
+    {
+      "fromId": "lsMe",
+      "fromProperty": "sets",
+      "toId": "lsEditor",
+      "toProperty": "sets"
+    },
+    {
+      "fromId": "lsEditId",
+      "fromProperty": "value",
+      "toId": "lsEditor",
+      "toProperty": "setId"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "listName",
+      "toId": "lsEditor",
+      "toProperty": "nameWord"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "listNameHint",
+      "toId": "lsEditor",
+      "toProperty": "nameHint"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "listLines",
+      "toId": "lsEditor",
+      "toProperty": "linesWord"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "listLinesHint",
+      "toId": "lsEditor",
+      "toProperty": "linesHint"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "listCount",
+      "toId": "lsEditor",
+      "toProperty": "countWord"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "listEmpty",
+      "toId": "lsEditor",
+      "toProperty": "emptyWord"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "listBothWays",
+      "toId": "lsEditor",
+      "toProperty": "bothWord"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "listOneWay",
+      "toId": "lsEditor",
+      "toProperty": "oneWayWord"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "save",
+      "toId": "lsEditor",
+      "toProperty": "saveWord"
+    },
+    {
+      "fromId": "lsT",
+      "fromProperty": "cancel",
+      "toId": "lsEditor",
+      "toProperty": "cancelWord"
+    },
+    {
+      "fromId": "lsStore",
+      "fromProperty": "app",
+      "toId": "lsSave",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "lsEditor",
+      "fromProperty": "setId",
+      "toId": "lsSave",
+      "toProperty": "setId"
+    },
+    {
+      "fromId": "lsEditor",
+      "fromProperty": "name",
+      "toId": "lsSave",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "lsEditor",
+      "fromProperty": "items",
+      "toId": "lsSave",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lsEditor",
+      "fromProperty": "both",
+      "toId": "lsSave",
+      "toProperty": "both"
+    },
+    {
+      "fromId": "lsEditor",
+      "fromProperty": "save",
+      "toId": "lsSave",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "lsSave",
+      "fromProperty": "app",
+      "toId": "lsStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "lsSave",
+      "fromProperty": "done",
+      "toId": "lsStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "lsSave",
+      "fromProperty": "done",
+      "toId": "lsPanel",
+      "toProperty": "to-closed"
+    },
+    {
+      "fromId": "lsEditor",
+      "fromProperty": "cancel",
+      "toId": "lsPanel",
+      "toProperty": "to-closed"
+    },
+    {
+      "fromId": "lsStore",
+      "fromProperty": "app",
+      "toId": "lsDelete",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "lsEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "lsDelete",
+      "toProperty": "setId"
+    },
+    {
+      "fromId": "lsEach",
+      "fromProperty": "itemOutputSignal-delete",
+      "toId": "lsDelete",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "lsDelete",
+      "fromProperty": "app",
+      "toId": "lsStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "lsDelete",
+      "fromProperty": "done",
+      "toId": "lsStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "lsPanel",
+      "fromProperty": "closed",
+      "toId": "lsList",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lsPanel",
+      "fromProperty": "closed",
+      "toId": "lsNew",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lsPanel",
+      "fromProperty": "open",
+      "toId": "lsEditor",
+      "toProperty": "mounted"
+    }
+  ]
+}

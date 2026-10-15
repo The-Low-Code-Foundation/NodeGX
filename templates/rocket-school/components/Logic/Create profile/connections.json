@@ -53,6 +53,12 @@
     },
     {
       "fromId": "createprofilIn",
+      "fromProperty": "skin",
+      "toId": "createprofilFn",
+      "toProperty": "in-skin"
+    },
+    {
+      "fromId": "createprofilIn",
       "fromProperty": "run",
       "toId": "createprofilFn",
       "toProperty": "run"

@@ -1,0 +1,469 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7c09fdb3-ffc0-588f-802d-d26daf4a0daa",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mpIn",
+      "fromProperty": "level",
+      "toId": "mpNewBoard",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "model",
+      "toId": "mpNewBoard",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "mpRoot",
+      "fromProperty": "didMount",
+      "toId": "mpNewBoard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpNew",
+      "fromProperty": "onClick",
+      "toId": "mpNewBoard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpResult",
+      "fromProperty": "again",
+      "toId": "mpNewBoard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpNewBoard",
+      "fromProperty": "game",
+      "toId": "mpSetGame",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "mpNewBoard",
+      "fromProperty": "done",
+      "toId": "mpSetGame",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "modeWord",
+      "toId": "mpMode",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "easyWord",
+      "toId": "mpModeItems",
+      "toProperty": "in-easy"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "hardWord",
+      "toId": "mpModeItems",
+      "toProperty": "in-hard"
+    },
+    {
+      "fromId": "mpModeItems",
+      "fromProperty": "out-items",
+      "toId": "mpMode",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "mergeMode",
+      "toId": "mpMode",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "mergeMode",
+      "toId": "mpNewBoard",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "mpMode",
+      "fromProperty": "value",
+      "toId": "mpNewBoard",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "mpMode",
+      "fromProperty": "changed",
+      "toId": "mpNewBoard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpMode",
+      "fromProperty": "value",
+      "toId": "mpOut",
+      "toProperty": "mergeMode"
+    },
+    {
+      "fromId": "mpMode",
+      "fromProperty": "changed",
+      "toId": "mpOut",
+      "toProperty": "modeChanged"
+    },
+    {
+      "fromId": "mpGame",
+      "fromProperty": "value",
+      "toId": "mpSlideUp",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "mpKeyUp",
+      "fromProperty": "pressed",
+      "toId": "mpSlideUp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpBtnUp",
+      "fromProperty": "onClick",
+      "toId": "mpSlideUp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpSlideUp",
+      "fromProperty": "game",
+      "toId": "mpSetGame",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "mpSlideUp",
+      "fromProperty": "done",
+      "toId": "mpSetGame",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "mpPhase",
+      "fromProperty": "playing",
+      "toId": "mpKeyUp",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "mpGame",
+      "fromProperty": "value",
+      "toId": "mpSlideLeft",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "mpKeyLeft",
+      "fromProperty": "pressed",
+      "toId": "mpSlideLeft",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpBtnLeft",
+      "fromProperty": "onClick",
+      "toId": "mpSlideLeft",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpSlideLeft",
+      "fromProperty": "game",
+      "toId": "mpSetGame",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "mpSlideLeft",
+      "fromProperty": "done",
+      "toId": "mpSetGame",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "mpPhase",
+      "fromProperty": "playing",
+      "toId": "mpKeyLeft",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "mpGame",
+      "fromProperty": "value",
+      "toId": "mpSlideDown",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "mpKeyDown",
+      "fromProperty": "pressed",
+      "toId": "mpSlideDown",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpBtnDown",
+      "fromProperty": "onClick",
+      "toId": "mpSlideDown",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpSlideDown",
+      "fromProperty": "game",
+      "toId": "mpSetGame",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "mpSlideDown",
+      "fromProperty": "done",
+      "toId": "mpSetGame",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "mpPhase",
+      "fromProperty": "playing",
+      "toId": "mpKeyDown",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "mpGame",
+      "fromProperty": "value",
+      "toId": "mpSlideRight",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "mpKeyRight",
+      "fromProperty": "pressed",
+      "toId": "mpSlideRight",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpBtnRight",
+      "fromProperty": "onClick",
+      "toId": "mpSlideRight",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpSlideRight",
+      "fromProperty": "game",
+      "toId": "mpSetGame",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "mpSlideRight",
+      "fromProperty": "done",
+      "toId": "mpSetGame",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "mpPhase",
+      "fromProperty": "playing",
+      "toId": "mpKeyRight",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "mpGame",
+      "fromProperty": "value",
+      "toId": "mpDraw",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "lang",
+      "toId": "mpDraw",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "mpDraw",
+      "fromProperty": "rows",
+      "toId": "mpRows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mpDraw",
+      "fromProperty": "scoreLine",
+      "toId": "mpScore",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mpDraw",
+      "fromProperty": "phase",
+      "toId": "mpPhase",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "mpPhase",
+      "fromProperty": "playing",
+      "toId": "mpControls",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mpPhase",
+      "fromProperty": "over",
+      "toId": "mpResult",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mpPhase",
+      "fromProperty": "boardOpacity",
+      "toId": "mpBoard",
+      "toProperty": "opacity"
+    },
+    {
+      "fromId": "mpDraw",
+      "fromProperty": "fullness",
+      "toId": "mpFull",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "mpFull",
+      "fromProperty": "rule",
+      "toId": "mpRule",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mpFull",
+      "fromProperty": "hint",
+      "toId": "mpHintBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "fullWord",
+      "toId": "mpHint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "ruleWord",
+      "toId": "mpRule",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "newGameWord",
+      "toId": "mpNew",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "mpDraw",
+      "fromProperty": "over",
+      "toId": "mpIsOver",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "mpIsOver",
+      "fromProperty": "ontrue",
+      "toId": "mpFinish",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpGame",
+      "fromProperty": "value",
+      "toId": "mpFinish",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "model",
+      "toId": "mpFinish",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "lang",
+      "toId": "mpFinish",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "mpFinish",
+      "fromProperty": "model",
+      "toId": "mpOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "mpFinish",
+      "fromProperty": "done",
+      "toId": "mpOut",
+      "toProperty": "graded"
+    },
+    {
+      "fromId": "mpFinish",
+      "fromProperty": "done",
+      "toId": "mpOut",
+      "toProperty": "cheer"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "newGameWord",
+      "toId": "mpEndInView",
+      "toProperty": "in-word"
+    },
+    {
+      "fromId": "mpFinish",
+      "fromProperty": "done",
+      "toId": "mpEndInView",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpFinish",
+      "fromProperty": "won",
+      "toId": "mpResult",
+      "toProperty": "won"
+    },
+    {
+      "fromId": "mpFinish",
+      "fromProperty": "headline",
+      "toId": "mpResult",
+      "toProperty": "headline"
+    },
+    {
+      "fromId": "mpFinish",
+      "fromProperty": "line",
+      "toId": "mpResult",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "mpFinish",
+      "fromProperty": "starsText",
+      "toId": "mpResult",
+      "toProperty": "stars"
+    },
+    {
+      "fromId": "mpFinish",
+      "fromProperty": "why",
+      "toId": "mpResult",
+      "toProperty": "why"
+    },
+    {
+      "fromId": "mpFinish",
+      "fromProperty": "earnedPick",
+      "toId": "mpResult",
+      "toProperty": "hasPick"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "newGameWord",
+      "toId": "mpResult",
+      "toProperty": "againWord"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "homeWord",
+      "toId": "mpResult",
+      "toProperty": "otherWord"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "pickWord",
+      "toId": "mpResult",
+      "toProperty": "pickWord"
+    },
+    {
+      "fromId": "mpIn",
+      "fromProperty": "hangarWord",
+      "toId": "mpResult",
+      "toProperty": "hangarWord"
+    },
+    {
+      "fromId": "mpResult",
+      "fromProperty": "other",
+      "toId": "mpOut",
+      "toProperty": "home"
+    },
+    {
+      "fromId": "mpResult",
+      "fromProperty": "hangar",
+      "toId": "mpOut",
+      "toProperty": "hangar"
+    }
+  ]
+}
