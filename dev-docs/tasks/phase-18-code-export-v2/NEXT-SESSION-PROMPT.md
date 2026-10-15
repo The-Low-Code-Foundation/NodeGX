@@ -1,4 +1,43 @@
-# Next session — session 106 (2026-10-15, BOARD lane 6) put the graph-scenario ledger line on P18's README, then built **EXP-011 §77: Action Dispatcher and Action Handler export** — picker **125 / 130**, graph line **4 of 85 conform, 11 played**. Next: §78, the history family.
+# Next session — session 107 (2026-10-15, BOARD lane 6) built **EXP-011 §78: State History, Undo / Redo and State Snapshot export** — picker **128 / 130**, graph line **8 of 85 conform, 15 played**. Next: Optimistic Update (§78 part 2), then §79 Sign In With.
+
+## ✅ Session 107: §78, the history family's three (`b629c2953`)
+
+Read EXP-011 §78 for the whole record; in short:
+
+- **`src/lib/history.ts`** (from `src/emit/historyLib.ts`): a **store seam** over `@nodegx/core`'s `store()` that gives
+  the history what `globalstore.ts` gives the runtime's (changed keys, a write that changed nothing is no commit, a key
+  filter, a deep snapshot with its by-reference keys, a full replace that deletes, the runtime's key order); then
+  `statehistory.ts`'s manager near-verbatim over it; then the three node shells and their hooks. A deleted key is
+  written as `undefined`. Generated from session scratchpad `historylib/history.ts` + `gen.js` (round trip byte-exact).
+- **Store Name is the store module**: the hook is handed `store: app` and the component imports `../stores/app`;
+  `appState.ts` counts the three as naming their store (`historians`). Refused by name: a wired Store Name; a store that
+  defers as a whole. Target Index rides Jump To; Snapshot Name rides Save and Restore.
+- **Graded:** `tests/the-state-history.test.ts` 20 / 20, including a differential against the runtime's own
+  `statehistory.ts` over its own `globalstore.ts` and `model.ts` (300 seeded scripts × 30 steps, a reach control, two
+  mutants it must catch). NSP-008: **t02's four scenarios play and pass** on the export.
+- **Found:** the store's key order leaks into By-Reference Keys and a restore's Changed description (26 / 300 differed
+  until the seam kept the runtime's order); the graph harness could not load `../stores/<name>` and had no clock — it
+  now serves store modules over a cleared registry and installs the world's clock (no advance).
+
+Readings: whole-package export jest 119 / 121 on the full run, the two reds counted and fixed: `streaming-trio`'s
+table invariant caught Store Name missing from the row (now `StreamNodeSpec.store`; 60 / 60), and HLS-001 moved on
+exactly the 54 README coverage sentences and history-desk's 20 files (golden regenerated, diff counted, 4 / 4).
+`export-ledger:check` OK, 135 translated; picker 128 / 130; package and editor `tsc` 0.
+
+**Next (BOARD lane 6):**
+1. **§78 part 2, Optimistic Update** (`optimisticupdatenode.ts`, 822 lines, over `globalstore.ts`'s `applyPatch` /
+   `commitPatch` / `rollbackPatch`). Build the patches on `history.ts`'s seam (a patch is a `writeKeys` with the values
+   each key held before; overlapping patches hand values to each other). t03's two clock-free scenarios will grade it;
+   its third needs the harness clock to advance. Same recipe: plain-source lib, a differential against the runtime's own
+   `globalstore.ts` patches, the fixture, refusals by sentence, ledger + floor + the 19 floor pins + HLS-001 (55 → 56).
+2. §79 Sign In With; the Dispatcher's built-ins (§77.5).
+3. Raising the line: t01's three are the store translation itself (Global Store outputs not lifted; a number write to a
+   number-typed key refused); the harness clock's advance (t04 ×2, t03 ×1); the one-component limit (17).
+4. Rows: P18-S106-PARSERAISE, P18-S104-FEEDCOUNT, P18-S105-KITHEAD (all low), P18-S104-PACKRUNTIMENPX.
+
+---
+
+# Session 106's handoff (2026-10-15, BOARD lane 6) put the graph-scenario ledger line on P18's README, then built **EXP-011 §77: Action Dispatcher and Action Handler export** — picker **125 / 130**, graph line **4 of 85 conform, 11 played**.
 
 ## ✅ Session 106, part 2: §77 (`7c2a9ed1a`)
 
