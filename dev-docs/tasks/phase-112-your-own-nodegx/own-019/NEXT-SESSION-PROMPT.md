@@ -4,6 +4,21 @@
 file.** Read, in order: this file; the task file `../OWN-019-THE-VIBE-KIT.md` §7 "s5" and "s6"; `VIBE-AND-LARGE4.md`
 § "s5's new measurements"; the P112 README's R36–R39. Say "Opus" in your first message.
 
+## ▶ s7 LIVE (2026-10-15, from 06:00 CEST) — read this first
+
+The series is RUNNING, from the timer (`s7start.sh`, scratchpad `447c4862-…`): lanes A (T1–T3, TE1) and B (TL1–TL3,
+TP1) started 06:00:58. Everything logs to `v/lane.log`. Three lab faults found and fixed this morning:
+- **NODE20** (`4f2af625a`): the timer's lanes found `/usr/local/bin/node` v20 → every grader died ("WebSocket is not
+  defined"). `regrade.sh watch` (nohup) regrades each round under Node 22 as it ends; graders now refuse Node < 22.
+- **HEROPILL** (`4f2af625a`): the Launch grader failed TL1's hero (top-bar pill) and laptop (text beside a photo).
+  Fixed and proven: TL1 control 19/19 + `nohero`/`nolaptop` mutants exact (`tchk/`); s6's control + 12 mutants 13/13.
+- **PROXYDIES** (`cfe371e46`, high): a stream broken after its headers killed the recording proxy; **T1 lost to it**
+  (8/12, stopped by the lab). Rounds started before 07:30 (T2, TL2) still run the OLD proxy. **T1b** (`s7t1b.sh`,
+  nohup) replaces T1 when lane A ends.
+
+Results so far: **TL1 19/19** (06:00, 45 min, $3.19 list, 2 sittings) — the first Launch with ✓gaps ✓align;
+screenshots opened to Richard 07:40 (verdict not yet recorded). T1 = lab loss. Gallery: TL1 on 4816.
+
 **Model:** Opus. Agent under test: **Mistral Large 4 only** (`mistral-large-4`, pinned) in Vibe 2.26.1, legacy harness,
 the Vibe Code key (`MISTRAL_VIBE_API_KEY`, repo `.env`). Daytime only (before ~18:00).
 
