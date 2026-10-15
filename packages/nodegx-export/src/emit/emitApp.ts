@@ -654,6 +654,9 @@ function apiModules(
   // EXP-011 §79. The return leg ships where the app can START a sign-in that comes back to it: a Sign In With, or a Request
   // Magic Link (whose link returns the same `?nodegx_auth=` code). Every other app's client is byte-identical.
   const hasReturnLeg = hasSignIns || project.plans.some((plan) => plan.sessionCalls.some((call) => call.verb === 'magic-link'));
+  // P18-S111-RECORDLIVE. The client holds one copy of each record only where a Record shows it live; every other app's
+  // client is byte-identical.
+  const liveRecords = project.plans.some((plan) => plan.recordReads.some((read) => read.live));
   const hasApi = byCollection.size > 0 || hasSessionCalls || hasCloudCalls || hasFileOps || hasSubscriptions || hasSignIns;
   const notes: string[] = [];
   // No collection module can collide with `client.ts` (or `session.ts`): moduleBase is the
@@ -841,7 +844,7 @@ function apiModules(
   if (files !== null) stubs.push(files);
 
   if (backend !== undefined && hasApi) {
-    stubs.push(['src/api/client.ts', clientModule(backend, hasReturnLeg)]);
+    stubs.push(['src/api/client.ts', clientModule(backend, hasReturnLeg, liveRecords)]);
     stubs.push(['.env.example', envExample(backend)]);
     // ⚠️ `README.md` used to be pushed here too, and that was the defect EXP-004 closed: it made
     // the repository's front door conditional on the project having a backend to query. It is now
@@ -1604,6 +1607,89 @@ function envLine(name: string, value: string): string {
   return `${name}=${value.replace(/[\r\n]/g, '')}\n`;
 }
 
+/** The record update every client without a live Record ships. */
+const PLAIN_UPDATE_SOURCE = `export async function update<T extends { id: string }>(collection: string, id: string, data: Partial<T>): Promise<T> {
+  // The wire answers a PUT with the changed fields only (\`updatedAt\`), so the
+  // caller's own data is the record the graph continues with.
+  const response = await request<Record<string, unknown>>(\`/classes/\${collection}/\${encodeURIComponent(id)}\`, {
+    method: 'PUT',
+    body: data
+  });
+  const { objectId: _objectId, ...fields } = response;
+  return { ...data, ...fields, id } as unknown as T;
+}
+`;
+
+/**
+ * P18-S111-RECORDLIVE. The running app holds one copy of each record: `Model.get(id)`, keyed by the id alone. Every read
+ * merges its answer into that copy (`CloudStore._fromJSON`: the Record's fetch, Query Records' rows, Create Record's
+ * answer), Set Record Properties writes it, and a Record with "Record properties" ticked (the default) re-flags its
+ * outputs on every change to it (dbmodelnode2.ts `onModelChangedCallback`). Before this the exported Record's row was
+ * component state written only by its own read, so a page kept showing the old values after a form elsewhere saved new
+ * ones. Shipped only where a live Record is, so every other client is byte-identical.
+ */
+const HELD_RECORDS_SOURCE = `
+/**
+ * The app's one copy of each record, keyed by its id alone as the running app keys them
+ * (\`Model.get(id)\`). Every read merges into it field by field, as the running app's
+ * \`_fromJSON\` does, and nothing removes a field. A Record shows this copy, so a write
+ * anywhere in the app reaches it at once.
+ */
+type HeldRecord = { id: string } & Record<string, unknown>;
+const heldRecords = new Map<string, HeldRecord>();
+const recordListeners = new Map<string, Set<(row: HeldRecord) => void>>();
+
+function holdRecord<T extends { id: string }>(fields: T): T {
+  const row = { ...heldRecords.get(fields.id), ...fields } as HeldRecord;
+  heldRecords.set(fields.id, row);
+  recordListeners.get(fields.id)?.forEach((listener) => listener(row));
+  return row as unknown as T;
+}
+
+/** Hands \`listener\` the record's copy now, and again after every write to it, until the returned function is called. */
+export function subscribeRecord<T extends { id: string }>(id: string, listener: (row: T) => void): () => void {
+  const call = listener as unknown as (row: HeldRecord) => void;
+  const listeners = recordListeners.get(id) ?? new Set<(row: HeldRecord) => void>();
+  recordListeners.set(id, listeners);
+  listeners.add(call);
+  const held = heldRecords.get(id);
+  if (held !== undefined) call(held);
+  return () => {
+    listeners.delete(call);
+  };
+}
+`;
+
+/**
+ * P18-S111-RECORDLIVE. Set Record Properties in the running app (setdbmodelpropertiesnode.ts): the values are written
+ * into the record BEFORE the save, the answer's fields after it, and a failed save puts back what the record held
+ * (P107-C34, "Put the old values back"), so a Record showing it moves at the press and never keeps a refused value.
+ */
+const HELD_UPDATE_SOURCE = `export async function update<T extends { id: string }>(collection: string, id: string, data: Partial<T>): Promise<T> {
+  // The running app writes the record before the save and puts back what it held if the
+  // save fails, so a Record showing it moves at the press. The wire answers a PUT with
+  // the changed fields only (\`updatedAt\`), so the caller's own data is the record the
+  // graph continues with.
+  const held: Record<string, unknown> = heldRecords.get(id) ?? {};
+  const before: Record<string, unknown> = {};
+  for (const key of Object.keys(data)) before[key] = held[key];
+  holdRecord({ ...data, id });
+  let response: Record<string, unknown>;
+  try {
+    response = await request<Record<string, unknown>>(\`/classes/\${collection}/\${encodeURIComponent(id)}\`, {
+      method: 'PUT',
+      body: data
+    });
+  } catch (error) {
+    holdRecord({ ...before, id });
+    throw error;
+  }
+  const { objectId: _objectId, ...fields } = response;
+  holdRecord({ ...fields, id });
+  return { ...data, ...fields, id } as unknown as T;
+}
+`;
+
 /**
  * `src/api/client.ts` — the Parse wire protocol the running app speaks (noodl-runtime's
  * `ParseWireAdapter` / `ParseAuthAdapter` / `SessionStore`), reduced to what the generated
@@ -1619,7 +1705,7 @@ function envLine(name: string, value: string): string {
  *   merged into the stored session (`ParseAuthAdapter.signUp` — its absence was a live defect).
  * - no master key, ever: it is a server credential, and this file ships in a browser bundle.
  */
-function clientModule(backend: CloudServicesIR, returnLeg: boolean): string {
+function clientModule(backend: CloudServicesIR, returnLeg: boolean, liveRecords: boolean): string {
   return (
     GENERATED_CLIENT_TS +
     `/**
@@ -1773,7 +1859,7 @@ function fromWire<T extends { id: string }>(record: Record<string, unknown>): T 
   for (const [key, value] of Object.entries(fields)) row[key] = fromWireValue(value);
   return row as unknown as T;
 }
-
+${liveRecords ? HELD_RECORDS_SOURCE : ''}
 export interface QueryParams {
   where?: unknown;
   sort?: string[];
@@ -1794,13 +1880,13 @@ export async function query<T extends { id: string }>(collection: string, params
       skip: params.skip
     }
   });
-  return response.results.map((record) => fromWire<T>(record));
+  return response.results.map((record) => ${liveRecords ? 'holdRecord(fromWire<T>(record))' : 'fromWire<T>(record)'});
 }
 
 /** One record by Id — the runtime's own \`GET /classes/<collection>/<id>\` (ParseWireAdapter.fetch). */
 export async function fetchOne<T extends { id: string }>(collection: string, id: string): Promise<T> {
   const response = await request<Record<string, unknown>>(\`/classes/\${collection}/\${encodeURIComponent(id)}\`);
-  return fromWire<T>(response);
+  return ${liveRecords ? 'holdRecord(fromWire<T>(response))' : 'fromWire<T>(response)'};
 }
 
 export async function create<T extends { id: string }>(collection: string, data: Partial<T>): Promise<T> {
@@ -1808,20 +1894,10 @@ export async function create<T extends { id: string }>(collection: string, data:
     method: 'POST',
     body: data
   });
-  return fromWire<T>({ ...data, ...response });
+  return ${liveRecords ? 'holdRecord(fromWire<T>({ ...data, ...response }))' : 'fromWire<T>({ ...data, ...response })'};
 }
 
-export async function update<T extends { id: string }>(collection: string, id: string, data: Partial<T>): Promise<T> {
-  // The wire answers a PUT with the changed fields only (\`updatedAt\`), so the
-  // caller's own data is the record the graph continues with.
-  const response = await request<Record<string, unknown>>(\`/classes/\${collection}/\${encodeURIComponent(id)}\`, {
-    method: 'PUT',
-    body: data
-  });
-  const { objectId: _objectId, ...fields } = response;
-  return { ...data, ...fields, id } as unknown as T;
-}
-
+${liveRecords ? HELD_UPDATE_SOURCE : PLAIN_UPDATE_SOURCE}
 export async function remove(collection: string, id: string): Promise<void> {
   await request<unknown>(\`/classes/\${collection}/\${encodeURIComponent(id)}\`, { method: 'DELETE' });
 }

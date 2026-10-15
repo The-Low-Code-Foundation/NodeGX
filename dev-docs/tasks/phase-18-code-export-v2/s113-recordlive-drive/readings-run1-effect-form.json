@@ -1,0 +1,118 @@
+{
+ "seededId": "4bdb22e1-a935-47c8-90be-9c640f623742",
+ "runtime": {
+  "D0": [
+   "Record Desk",
+   "Save"
+  ],
+  "D1": [
+   "Record Desk",
+   "Save"
+  ],
+  "D2": [
+   "Record Desk",
+   "Welcome",
+   "Save"
+  ],
+  "D3": {
+   "backendTitle": "Welcome"
+  },
+  "D4": [
+   "Record Desk",
+   "Welcome",
+   "Save",
+   "Failed to save."
+  ],
+  "D4backendTitle": "Welcome",
+  "requests": [
+   "PUT /__backend/classes/Page/4bdb22e1-a935-47c8-90be-9c640f623742",
+   "PUT /__backend/classes/Page/4bdb22e1-a935-47c8-90be-9c640f623742"
+  ],
+  "console": [
+   "[noodl] SetDbModelProperties (/Components/Rename): Failed to save. [record/storage-op-failed] Object"
+  ],
+  "refused": 1
+ },
+ "export-control": {
+  "D0": [
+   "Record Desk",
+   "Save"
+  ],
+  "D1": [
+   "Record Desk",
+   "Home",
+   "Home",
+   "Save"
+  ],
+  "D2": [
+   "Record Desk",
+   "Home",
+   "Home",
+   "Save"
+  ],
+  "D3": {
+   "backendTitle": "Welcome"
+  },
+  "D4": [
+   "Record Desk",
+   "Home",
+   "Home",
+   "Save",
+   "Could not reach the backend at http://localhost:8594"
+  ],
+  "D4backendTitle": "Welcome",
+  "requests": [
+   "OPTIONS /classes/Page/4bdb22e1-a935-47c8-90be-9c640f623742",
+   "OPTIONS /classes/Page/4bdb22e1-a935-47c8-90be-9c640f623742",
+   "GET /classes/Page/4bdb22e1-a935-47c8-90be-9c640f623742",
+   "GET /classes/Page/4bdb22e1-a935-47c8-90be-9c640f623742",
+   "PUT /classes/Page/4bdb22e1-a935-47c8-90be-9c640f623742",
+   "PUT /classes/Page/4bdb22e1-a935-47c8-90be-9c640f623742"
+  ],
+  "console": [
+   "SetDbModelProperties (/Components/Rename): Could not reach the backend at http://localhost:8594 [record/storage-op-failed] Object"
+  ],
+  "refused": 1
+ },
+ "export-fixed": {
+  "D0": [
+   "Record Desk",
+   "Save"
+  ],
+  "D1": [
+   "Record Desk",
+   "Home",
+   "Home",
+   "Save"
+  ],
+  "D2": [
+   "Record Desk",
+   "Welcome",
+   "Home",
+   "Save"
+  ],
+  "D3": {
+   "backendTitle": "Welcome"
+  },
+  "D4": [
+   "Record Desk",
+   "Welcome",
+   "Home",
+   "Save",
+   "Could not reach the backend at http://localhost:8594"
+  ],
+  "D4backendTitle": "Welcome",
+  "requests": [
+   "GET /classes/Page/4bdb22e1-a935-47c8-90be-9c640f623742",
+   "GET /classes/Page/4bdb22e1-a935-47c8-90be-9c640f623742",
+   "OPTIONS /classes/Page/4bdb22e1-a935-47c8-90be-9c640f623742",
+   "OPTIONS /classes/Page/4bdb22e1-a935-47c8-90be-9c640f623742",
+   "PUT /classes/Page/4bdb22e1-a935-47c8-90be-9c640f623742",
+   "PUT /classes/Page/4bdb22e1-a935-47c8-90be-9c640f623742"
+  ],
+  "console": [
+   "SetDbModelProperties (/Components/Rename): Could not reach the backend at http://localhost:8594 [record/storage-op-failed] Object"
+  ],
+  "refused": 1
+ }
+}

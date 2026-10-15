@@ -1213,6 +1213,11 @@ export function emitComponent(
     }
   }
   const referencedStateVars = plan.stateVars.filter((v) => referencedStateNames.has(v.name));
+  /** P18-S111-RECORDLIVE. Each live Record whose row this component holds, with that row's state var. */
+  const liveRecordRows = plan.recordReads.flatMap((read) => {
+    const row = read.live ? referencedStateVars.find((v) => v.originNodeId === read.nodeId && v.origin === 'record-row') : undefined;
+    return row === undefined ? [] : [{ read, row }];
+  });
 
   // EXP-011 §15. Both kinds call `navigate(...)`, so both earn the hook. A `some` over one
   // kind is the shape that silently emits a call to an undeclared identifier.
@@ -3187,7 +3192,15 @@ export function emitComponent(
         // transcription; `?? ''` keeps an unwritten variable on the `Missing Record Id` road.
         if (action.coerceId === 'string') args[0] = `String(${args[0]} ?? '')`;
         const inner = pad(indent + 2);
+        // P18-S113-IDREADTWICE. An Id read through a call (`pageId.get()`) is bound once, as the relation guards below
+        // bind theirs: TypeScript narrows a local, never a second call (TS2345), and the runtime reads the stored value
+        // once. A plain identifier narrows already, and a coerced read is a `string`, so both are left as they were.
+        const boundId =
+          action.guardId && action.coerceId !== 'string' && args[0].endsWith(')') ? `${action.errorState.replace(/Error$/, '')}RecordId` : undefined;
+        const idRead = args[0];
+        if (boundId !== undefined) args[0] = boundId;
         const body = [
+          ...(boundId !== undefined ? [`${inner}const ${boundId} = ${idRead};`] : []),
           // The runtime's "Missing Record Id" (RECORD-VERBS-TARGET §1), thrown rather than
           // branched so it lands in the catch below — which is already the graph's own error
           // path — skips the call and the done chain, and narrows the id for the call itself.
@@ -3280,9 +3293,10 @@ export function emitComponent(
       /**
        * A `Record`'s Fetch (EXP-011 §43). One argument, the Id; the runtime's own `Missing Id.`
        * thrown inside the try where the Id is empty — `scheduleFetch` reports it as Failure before
-       * any request, so the catch is exactly the arm it belongs in. The row is replaced, not
-       * merged: `setModelID` binds a fresh model per Id, so a column the answer lacks reads
-       * undefined, as the node's output does for a record that never carried it.
+       * any request, so the catch is exactly the arm it belongs in. The row is replaced by what
+       * the read answers. Where the app has a live Record (P18-S111-RECORDLIVE) that answer is the
+       * client's one copy of the record, the read merged into it field by field as `_fromJSON`
+       * merges into `Model.get(id)`; otherwise it is the wire's answer alone.
        */
       case 'record-fetch': {
         const names = recordNamesOf(action.nodeId);
@@ -4186,6 +4200,8 @@ export function emitComponent(
       plan.valueChangedEffects.length > 0 ||
       // EXP-011 §43. A Record with Fetch unwired is an effect keyed on its Id.
       plan.recordEffects.length > 0 ||
+      // P18-S111-RECORDLIVE. A live Record's row subscribes to the client's copy of its record.
+      liveRecordRows.length > 0 ||
       // EXP-011 §67. A Variable's authored Value is a mount effect.
       plan.variableSeeds.length > 0 ||
       // EXP-011 §71. An Object's own authored property values are a mount effect.
@@ -4256,6 +4272,8 @@ export function emitComponent(
       `import { ${[...fetchNames, ...fnNames, ...typeNames.map((t) => `type ${t}`)].join(', ')} } from '${specifier}';`
     );
   }
+  // P18-S111-RECORDLIVE. A live Record's row follows the client's one copy of its record.
+  if (liveRecordRows.length > 0) internalImports.set(`${relRoot}/api/client`, `import { subscribeRecord } from '${relRoot}/api/client';`);
   // The session module is not keyed on anything — a project has one session — so every
   // user-family node in this component imports from the same specifier (USER-FAMILY-TARGET §4d).
   if (plan.sessionCalls.length > 0) {
@@ -6976,6 +6994,17 @@ export function emitComponent(
     const action = effect.action as Extract<HandlerAction, { kind: 'record-fetch' }>;
     const deps = effectDeps(action.id).join(', ');
     body.push(`  // ${effect.comment}`, '  useEffect(() => {', ...effectBody([action], 4), `  }, [${deps}]);`, '');
+  }
+  // P18-S111-RECORDLIVE. The runtime binds a Record to the app's one copy of its record (`Model.get(id)`), and with
+  // "Record properties" ticked every write to that copy re-flags the node's outputs: a Set Record Properties
+  // elsewhere in the app shows here at once. The row follows the client's copy of the record it last read.
+  for (const { read, row } of liveRecordRows) {
+    const label = nodeById.get(read.nodeId)?.authoredLabel;
+    body.push(
+      `  // ${label ? `"${label}"` : 'The Record'} shows the app's one copy of its record, so a write anywhere in the app reaches it (dbmodelnode2.ts, "Record properties" ticked).`,
+      `  useEffect(() => (${row.name}?.id === undefined ? undefined : subscribeRecord<${read.typeName}>(${row.name}.id, ${stateSetterOf(row.name)})), [${row.name}?.id]);`,
+      ''
+    );
   }
   // EXP-011 §39. A Delay's countdown dies with the component — `addDeleteListener` in timer.ts.
   for (const [, ref] of delayRefs) {

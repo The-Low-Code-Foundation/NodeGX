@@ -1,3 +1,49 @@
+# Next session — session 113 (2026-10-15, BOARD lane 6) closed **EXP-008's last gap port, P18-S111-RECORDLIVE**, driven: reaching **1,233 → 1,234 of 1,396, 0 gap ports**. Found two rows of the same family on the way.
+
+## ✅ Session 113: a Record shows the app's one copy of its record
+
+Read EXP-011 §80 for the whole record; in short:
+
+| what | where |
+|---|---|
+| The exported client holds one copy of each record, keyed by the id alone (`Model.get(id)`): `fetchOne` / `query` / `create` merge into it field by field (`_fromJSON`); `update` writes before the save, merges the answer, and puts back on failure (P107-C34). Shipped only where a live Record is | `emitApp.ts` `HELD_RECORDS_SOURCE`, `HELD_UPDATE_SOURCE` |
+| A Record with "Record properties" ticked subscribes its row: `useEffect(() => … subscribeRecord(row.id, setRow), [row?.id])` | `component.ts` `liveRecordRows`; `plan.ts` `RecordReadPlan.live` |
+| Spec, 21 rows (§C runs the emitted client against a scripted wire in the runtime's order); eight mutant arms, each killing its own rows | `tests/the-live-record.test.ts`, `tests/fixtures/record-desk` |
+| Driven, three arms (runtime, HEAD-equivalent control, fixed) on a real backend: runtime == fixed on every title in every step | `s113-recordlive-drive/` |
+| Fixed beside it: P18-S113-IDREADTWICE (an Update Record whose Id is a Variable read twice did not typecheck) | `component.ts` `api-call` |
+
+**Found, filed (open):** **P18-S113-IDBINDREAD** (medium): §43's effect form (Fetch unwired) reads the backend on
+every Id change; the runtime only binds to the copy it holds. Measured in the drive's run 1, and the published doc says
+so. **P18-S113-LISTLIVE** (medium): an exported Query Records list never sees a create / save / delete made elsewhere;
+the runtime's follows them (`bindStoreEvents`).
+
+- 🔴 **An export drive owes a runtime arm.** §43's effect form passed its own 72-cell drive in s71, graded against a
+  sheet written from the same misreading of `runOnValueChange: { controlSignal: 'fetch' }`. Only the runtime arm showed
+  that the running app never reads on an Id change. The control signal governs whether the Id *rebinds*.
+- 🔴 **A mutant that breaks a narrowing fails to compile and kills nothing.** Arm G first read 0: `cond` → `false` lost
+  the narrowing that typed `action.errorState`. Change the leaf test, never the guard.
+- 🔴 **The parser settles a box the way the editor does.** A wired Fetch with "Record properties" unstated is settled
+  unticked (NDA-017's migration, `settleComponent`), so page-desk's wired Record is correctly not live. To drive a live
+  wired Record, tick the box by hand (record-desk's Shown does).
+
+Readings: `the-live-record` 21 / 21; HLS-001 4 / 4 (8 hashes moved, exactly `client.ts` + `Home.tsx` in the four
+effect-form projects, plus record-desk); package `tsc` 0. Whole export package (`nice -n 19 --runInBand`, 382 s):
+**129 / 130 suites, 4,375 passed, 3 skipped**; the one red is `parameter-coverage` on the P121 peer's three uncommitted
+Upload File ports (`photoQuality`, `readers`, `shrinkTo`; total 1,399 vs 1,396), as in sessions 110 to 112. The first
+whole-package run (on a source without the backend gate) was red in exactly the no-backend rows; see EXP-011 §80.3.
+
+**Next (BOARD lane 6):**
+1. **P18-S113-IDBINDREAD**: the effect form becomes a bind (the row is the held copy for the Id via `subscribeRecord`:
+   no request, no Error, no Done). Moves the four effect-form fixtures (due/gallery/link/page-desk) and re-grades
+   `record.test.ts`'s effect rows and §43.6. Drive it with the runtime arm (`s113-recordlive-drive/` is the harness).
+2. **P18-S113-LISTLIVE**: the store's create / save / delete in the exported client, with the query's filter and sort
+   applied in the browser (`QueryUtils.matchesQuery` / `compareObjects`).
+3. P18-S112-NATIVESELECT; when P121 commits Upload File's three ports, classify them (P121-TWO001-EXPORTREADERS /
+   -TWO003-EXPORTSHRINK); the two `unexamined` ports (Radio Button icon colour and size).
+4. Then the backlog: P18-S109-MOUNTPULSE, §77.5, the graph line, the 112 unprobed ports, the four low rows.
+
+---
+
 # Next session — session 112 (2026-10-15, BOARD lane 6) closed **nine of the ten gap ports**: reaching **1,225 → 1,233 of 1,396**; one gap port left, **P18-S111-RECORDLIVE**. Found three new rows on the way.
 
 ## ✅ Session 112: the last silent parameters, each one rendered or measured first

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5e4d0000-0000-4000-8000-000000000006",
+  "name": "Rename",
+  "path": "/Components/Rename",
+  "type": "visual",
+  "modified": "2026-10-15T21:30:00.000Z",
+  "description": "Elsewhere in the app: a form that writes the record the page shows."
+}

@@ -1,0 +1,147 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5e4d0000-0000-4000-8000-000000000003",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "5e4d0000-0000-4000-8000-000000000005",
+      "type": "Page",
+      "label": "Home",
+      "parameters": {
+        "title": "Record Desk",
+        "urlPath": "home"
+      },
+      "children": [
+        "shell"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Desk",
+      "parent": "5e4d0000-0000-4000-8000-000000000005",
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-4)",
+        "paddingLeft": "var(--space-6)",
+        "paddingTop": "var(--space-6)"
+      },
+      "children": [
+        "heading",
+        "pageIdInput",
+        "loadBtn",
+        "shownTitle",
+        "frozenTitle",
+        "rename"
+      ],
+      "x": 100,
+      "y": 140
+    },
+    {
+      "id": "heading",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "shell",
+      "parameters": {
+        "text": "Record Desk",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 100,
+      "y": 220
+    },
+    {
+      "id": "pageIdInput",
+      "type": "net.noodl.controls.textinput",
+      "label": "Page id",
+      "parent": "shell",
+      "parameters": {
+        "placeholder": "a page id"
+      },
+      "x": 100,
+      "y": 300
+    },
+    {
+      "id": "loadBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Load",
+      "parent": "shell",
+      "parameters": {
+        "label": "Load"
+      },
+      "x": 100,
+      "y": 340
+    },
+    {
+      "id": "shownTitle",
+      "type": "Text",
+      "label": "Shown title",
+      "parent": "shell",
+      "parameters": {
+        "text": ""
+      },
+      "x": 100,
+      "y": 380
+    },
+    {
+      "id": "frozenTitle",
+      "type": "Text",
+      "label": "Frozen title",
+      "parent": "shell",
+      "parameters": {
+        "text": ""
+      },
+      "x": 100,
+      "y": 440
+    },
+    {
+      "id": "rename",
+      "type": "/Components/Rename",
+      "label": "Rename",
+      "parent": "shell",
+      "parameters": {},
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "pageIdVar",
+      "type": "Variable2",
+      "label": "Page id variable",
+      "parameters": {
+        "name": "pageId"
+      },
+      "x": 600,
+      "y": 300
+    },
+    {
+      "id": "shownRec",
+      "type": "DbModel2",
+      "label": "Shown page",
+      "parameters": {
+        "collectionName": "Page",
+        "idSource": "explicit",
+        "runOnChange-record": true
+      },
+      "x": 600,
+      "y": 380
+    },
+    {
+      "id": "frozenRec",
+      "type": "DbModel2",
+      "label": "Frozen page",
+      "parameters": {
+        "collectionName": "Page",
+        "idSource": "explicit",
+        "runOnChange-record": false
+      },
+      "x": 600,
+      "y": 440
+    }
+  ],
+  "visualRoots": [
+    "5e4d0000-0000-4000-8000-000000000005"
+  ]
+}

@@ -3773,6 +3773,13 @@ export interface RecordReadPlan {
   idLocal: string;
   /** Columns the graph reads off this node that the schema snapshot does not carry — `unknown` in the interface. */
   reads: Array<{ name: string; tsType: string }>;
+  /**
+   * P18-S111-RECORDLIVE. "Record properties" ticked under Run On Value Change, the default: the node shows the app's one
+   * copy of its record, so a write anywhere in the app reaches its outputs (dbmodelnode2.ts `onModelChangedCallback`).
+   * Unticked, the callback returns early and the outputs move only on the node's own read, which is the row as it was.
+   * False where the project declares no backend: the read is a stub that throws and no client is emitted.
+   */
+  live: boolean;
 }
 
 /**
@@ -11899,7 +11906,9 @@ function planComponent(
       answerLocal: names.answerLocal,
       messageLocal: names.messageLocal,
       idLocal: names.idLocal,
-      reads
+      reads,
+      // With no backend the read is a stub that throws, the row is never set, and there is no client to hold a copy.
+      live: ir.project.cloudservices !== undefined && literalParam(node, 'runOnChange-record') !== false
     });
     return {
       action: {

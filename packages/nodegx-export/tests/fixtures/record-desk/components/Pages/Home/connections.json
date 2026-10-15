@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5e4d0000-0000-4000-8000-000000000003",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pageIdInput",
+      "fromProperty": "onTextChanged",
+      "toId": "pageIdVar",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pageIdVar",
+      "fromProperty": "value",
+      "toId": "shownRec",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "pageIdVar",
+      "fromProperty": "value",
+      "toId": "frozenRec",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "loadBtn",
+      "fromProperty": "onClick",
+      "toId": "shownRec",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "loadBtn",
+      "fromProperty": "onClick",
+      "toId": "frozenRec",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "shownRec",
+      "fromProperty": "prop-title",
+      "toId": "shownTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "frozenRec",
+      "fromProperty": "prop-title",
+      "toId": "frozenTitle",
+      "toProperty": "text"
+    }
+  ]
+}

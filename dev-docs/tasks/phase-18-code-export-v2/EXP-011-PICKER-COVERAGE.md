@@ -11704,3 +11704,115 @@ The picker is complete: **130 / 130**. The graph line is unchanged at 10 of 85.
 2. **Before anyone quotes 100%: EXP-008's per-parameter coverage** (§75.5 #3). Now the next row, not a footnote.
 3. The Dispatcher's built-ins (§77.5); raising the graph line (t01's three, the harness clock, the one-component limit).
 4. Not driven: a magic link's own round trip (it needs a mail transport); the return leg it uses is the one driven here.
+
+
+## §80 A Record shows the app's one copy of its record (session 113, 2026-10-15): P18-S111-RECORDLIVE, EXP-008's last gap port
+
+### §80.0 What the runtime does
+
+Every Record is bound to the process-wide `Model` for its Id (`Model.get(id)`, keyed by the id alone). With "Record
+properties" ticked under Run On Value Change (the default), every change to that Model re-flags the node's `prop-*`
+outputs (dbmodelnode2.ts `onModelChangedCallback`). Three things write it: a read merges its answer field by field
+(`CloudStore._fromJSON`: a Record's Fetch, Query Records' rows, Create Record's answer); Set Record Properties writes
+its values **before** the save, the answer's fields after it, and puts back what the record held when the save fails
+(setdbmodelpropertiesnode.ts, P107-C34). Delete only notifies `delete`, which a Record does not listen to. With Fetch
+wired and the box unstated, NDA-017's migration settles it unticked, and the export's parser settles it the same way
+(`settleComponent`), so that Record follows nothing, in the editor and in the export alike.
+
+Before this the exported Record's row was component state written only by its own read: a page kept the old title
+after a form elsewhere renamed the record. Counted first: 236 of 312 Records in the fixtures, templates and test
+projects share a collection with a Set Record Properties in the same app (most are site-builder copies of one Page
+editor; none of those translates today, for other reasons), so the reach is the product surface: a detail page and an
+edit form.
+
+### §80.1 What is built
+
+| piece | what it is |
+|---|---|
+| the held records (`emitApp.ts` `HELD_RECORDS_SOURCE`) | `heldRecords: Map<id, row>` and `holdRecord(fields)`, which merges and hands the new row to every listener; `subscribeRecord(id, listener)` hands the current copy at once and every later one, and returns the unsubscribe |
+| the merges | `fetchOne` returns `holdRecord(fromWire(answer))`, so the Record's row is the merged copy; `query` holds each row; `create` holds its answer |
+| `update` (`HELD_UPDATE_SOURCE`) | the runtime's order: `holdRecord({ ...data, id })` before the PUT; on a throw, `holdRecord({ ...before, id })` then rethrow (the node's Failure arm is unchanged); after the answer, `holdRecord({ ...fields, id })` |
+| the gate | `RecordReadPlan.live` = the project declares a backend and the box is not literally `false`; `emitApp` ships the held records only where some Record is live, so every other client is byte-identical (`PLAIN_UPDATE_SOURCE` is the old body, verbatim) |
+| the component | per live Record whose row this component holds: `useEffect(() => (row?.id === undefined ? undefined : subscribeRecord<T>(row.id, setRow)), [row?.id])`, the import from `../api/client`, and `useEffect` in the react import gate. The row's setters are untouched: the Record's own read still sets it, now to the held copy |
+
+Beside it, **P18-S113-IDREADTWICE**, found by the new fixture: an Update Record whose Id is a Variable exported
+`if (!pageId.get()) throw …; await updatePage(pageId.get(), …)`, which fails `tsc` (a second call is not narrowed).
+The record verbs' `guardId` now binds a call-shaped read to `<stem>RecordId` first, the relations' naming (§62). A plain
+identifier and a coerced read are left as they were; no corpus app moved.
+
+### §80.2 The test: `tests/the-live-record.test.ts`, 21 rows, and `tests/fixtures/record-desk`
+
+§A the client (the held records shipped with a live Record; every read merges; the update's five steps in order; with
+every Record unticked the plain client, the old `update` verbatim). §B the component (one subscription, for the ticked
+Record only; none unticked; page-desk's wired Fetch with the box unstated settles unticked, and ticked by hand it
+subscribes; with no backend, no client and no subscription, and the app typechecks; the form unchanged). §C the emitted client transpiled and run against a scripted wire whose every request
+waits to be answered: nothing before a read; the read hands the row; a late subscriber gets the row at once, the same
+object; an update shows before the PUT answers, then carries `updatedAt`; a refused update hands back the old values
+and still throws; a query's rows reach the Record; a read keeps a field its answer lacks; a created record is held;
+another id's write and an unsubscribed listener hear nothing. §D record-desk whole: the notes are the router shell and
+the backend only, the form reads its Id once, and it and page-desk typecheck.
+
+`record-desk`: two Records on one Id with Load wired to both Fetches, **Shown** ticked by hand and **Frozen** unticked,
+and a `Rename` component with a Set Record Properties. Generated by `s113-recordlive-drive/gen-fixture.py`.
+
+**Mutant arms**, each restored and `cmp`-checked: no held records 13 rows; no write before the save 3; no put-back 2;
+query not held 2; no subscription 2; the box ignored 4; replace instead of merge 2; the Id read twice 3. 🔴 The last
+arm first read **0**: replacing its whole condition with `false` lost the narrowing of `action`, the suite failed to
+compile, and a suite that does not run prints no ✕. Re-shaped to keep the types, it kills 3.
+
+### §80.3 What building it found
+
+- 🔴 **P18-S113-IDBINDREAD (open, medium).** §43's "effect form" (Fetch unwired) reads the backend on every Id change.
+  The runtime never did: the Id setter only binds (`setModelID`), and the one `scheduleFetch()` is behind the Fetch
+  port, unchanged since the initial commit; the published doc says the same. The drive measured it (run 1: the runtime
+  made no request and showed nothing until the write). §43.1's reading of `runOnValueChange: { controlSignal: 'fetch' }`
+  was the error: the control signal governs whether the Id *rebinds*, not whether it reads.
+- **P18-S113-LISTLIVE (open, medium).** One node over: the runtime's Query Records list follows a create, save or delete
+  anywhere in the app (`bindStoreEvents`); the exported list is state written only by its own read.
+- **P18-S113-IDREADTWICE (fixed, above).**
+- 🔴 **The first whole-package run found a defect of this change**: an app with no backend ships no `client.ts`, and its
+  live Record imported `subscribeRecord` from it (TS2307 in `file-record`, `css-definition` and `date-column`'s
+  "without a backend" rows). With no backend the read is a stub that throws, so nothing can be held: `live` now
+  requires `ir.project.cloudservices`, and §B has the row. That run had loaded the pre-fix `plan.ts`, so its four reds
+  served as the control: exactly the no-backend rows.
+
+### §80.4 Recorded differences (not refused)
+
+- The copy is keyed by the id alone, as the runtime's is: two classes holding the same id share it, in both.
+- A read merges and never removes a field, as `_fromJSON`; a column deleted on the backend stays in the copy until the
+  page reloads, in both.
+- `Changed` / `changed-<column>` stay refused by name (§43): the copy now changes as the runtime's does, but the
+  export still has no pulse to fire from it.
+- A refused save's sentence: the runtime's store says `Failed to save.` where the export's client says `Could not reach
+  the backend at …` for a refused connection, two producers (§43.6).
+- The relation verbs and Set User Properties do not write the copy; a Record bound to a user record or reading a
+  relation's `updatedAt` does not follow them.
+
+### §80.5 The drive: a real backend, a real browser, three arms (`s113-recordlive-drive/`)
+
+`EXPECTED.md` first. The real `nodegx-backend` from `src` on :8594, one `Page` seeded `Home`; the runtime arm through
+`render-from-disk.js` (its viewer bundle newer than every runtime file involved), the export arms bundled with esbuild,
+the control being the same export with every Record's box unticked (the plain client and no subscription, which is what
+HEAD emitted for this app). Run 2, every cell as expected:
+
+| step | runtime | export-control | export-fixed |
+|---|---|---|---|
+| D1 id typed, Load | Home / Home | Home / Home | Home / Home |
+| D2 `Welcome` saved (200) | **Welcome** / Home | **Home** / Home | **Welcome** / Home |
+| D4 the next PUT refused, `Gone` saved | **Welcome** / Home + error | Home / Home + error | **Welcome** / Home + error |
+
+The backend held `Welcome` after D2 and D4 in every arm. Run 1 (Fetch unwired) is what found IDBINDREAD.
+
+### §80.6 What this leaves
+
+EXP-008: **0 gap ports**, floor 1,234 of 1,396. HLS-001: 58 projects; this change moved exactly `client.ts` and
+`Home.tsx` in the four projects with an effect-form Record (65 diff lines each, read by hand in three), plus
+`record-desk`'s entries.
+
+1. **P18-S113-IDBINDREAD**: the effect form becomes a bind (the row is the held copy for the Id, via `subscribeRecord`;
+   no request, no Error, no Done). Re-grades `record.test.ts`'s effect rows and §43.6's drive, and moves the four
+   fixtures. Its own change.
+2. **P18-S113-LISTLIVE**: the store's create / save / delete events in the exported client, with the query's filter
+   and sort applied in the browser.
+3. P18-S112-NATIVESELECT; then P18-S109-MOUNTPULSE, §77.5, the graph line, the two `unexamined` ports (Radio Button's
+   icon colour and size), the 112 unprobed ports, the four low rows.

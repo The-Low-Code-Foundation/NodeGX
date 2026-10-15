@@ -1,0 +1,93 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5e4d0000-0000-4000-8000-000000000006",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "renameGroup",
+      "type": "Group",
+      "label": "Rename",
+      "children": [
+        "titleInput",
+        "saveBtn",
+        "renameError"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "columnGap": "var(--space-2)",
+        "alignItems": "center"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "titleInput",
+      "type": "net.noodl.controls.textinput",
+      "label": "New title",
+      "parent": "renameGroup",
+      "parameters": {
+        "placeholder": "a new title"
+      },
+      "x": 100,
+      "y": 120
+    },
+    {
+      "id": "saveBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "parent": "renameGroup",
+      "parameters": {
+        "label": "Save"
+      },
+      "x": 100,
+      "y": 200
+    },
+    {
+      "id": "renameError",
+      "type": "Text",
+      "label": "Rename error",
+      "parent": "renameGroup",
+      "parameters": {
+        "text": "",
+        "color": "var(--destructive)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "renameIdVar",
+      "type": "Variable2",
+      "label": "Page id",
+      "parameters": {
+        "name": "pageId"
+      },
+      "x": 500,
+      "y": 120
+    },
+    {
+      "id": "renameRec",
+      "type": "SetDbModelProperties",
+      "label": "Rename page",
+      "parameters": {
+        "collectionName": "Page"
+      },
+      "dynamicports": [
+        {
+          "name": "prop-title",
+          "displayName": "title",
+          "type": {
+            "name": "string"
+          },
+          "plug": "input",
+          "group": "Properties",
+          "index": 13
+        }
+      ],
+      "x": 500,
+      "y": 200
+    }
+  ],
+  "visualRoots": [
+    "renameGroup"
+  ]
+}

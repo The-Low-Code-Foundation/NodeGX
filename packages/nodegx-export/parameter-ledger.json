@@ -1,6 +1,6 @@
 {
   "$comment": "EXP-008's per-parameter half (P18 session 110). tests/parameter-coverage.test.ts measures, for every translated picker node, whether each non-signal input changes the emitted files or notes (tests/helpers/parameter-probe.ts). This file holds what it cannot count as reaching: every SILENT port with its adjudication, and every UNPROBED port with its type. The spec holds both lists to the measurement in both directions and holds the reaching count to parameterCoverageFloor exactly — a rise must raise it in the same commit, like pickerCoverageFloor. A silent port is not a verdict until classified: gap (the runtime reads it, the export drops it with no note — names a dev-docs/bugs row), gated (reaches in a context the probe does not build — says which), refused-with (matters only where the export refuses out loud), inert (the runtime does not act on it either), unexamined (not yet read — the honest default for a new one).",
-  "parameterCoverageFloor": 1233,
+  "parameterCoverageFloor": 1234,
   "parameterCoverageTotal": 1396,
   "silent": {
     "AddDbModelRelation.modelId": {
@@ -62,11 +62,6 @@
     "Counter.limitsMin": {
       "class": "refused-with",
       "why": "Clamps only with Limits Enabled, and then the node is refused: \"clamped counting is not translated in this slice\""
-    },
-    "DbModel2.runOnChange-record": {
-      "class": "gap",
-      "why": "Unticked matches the export (the row is read only by a fetch). Ticked, the DEFAULT, is the gap: the runtime re-reads the row when anything in the app writes that record; the exported row is component state written only by its own fetch",
-      "bug": "P18-S111-RECORDLIVE"
     },
     "DeleteDbModelProperties.modelId": {
       "class": "gated",

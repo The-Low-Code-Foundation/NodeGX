@@ -1,7 +1,9 @@
 ---
 id: P18-S111-RECORDLIVE
 title: An exported Record keeps showing the old row after a Set Record Properties elsewhere in the app writes it
-status: open
+status: fixed
+commit: (s113)
+regression: packages/nodegx-export/tests/the-live-record.test.ts
 severity: medium
 area: export / Record
 found: P18 EXP-008, session 111, 2026-10-15 (split out of P18-S110-RUNONCHANGE)
@@ -26,3 +28,18 @@ Not a refusal case. Refusing every Record that shares a collection with a write 
 (read a row, edit it in a form). The fix is a shared record cache in the exported client (one row per collection and
 id, which the write functions update and the Record hook subscribes to), sized as its own EXP-011 section. Until then
 the one honest cheap step is a note on a ticked Record whose collection has a translated update in the app.
+
+**Fixed, session 113, driven** (`dev-docs/tasks/phase-18-code-export-v2/s113-recordlive-drive/`). The exported client
+holds one copy of each record, keyed by the id alone as `Model.get(id)` is (`emitApp.ts` `HELD_RECORDS_SOURCE`):
+`fetchOne`, `query` and `create` merge their answers into it field by field, as `_fromJSON` does, and `update` writes
+before the save, merges the answer after it, and puts back what the record held when the save fails (P107-C34).
+A Record with "Record properties" ticked subscribes its row to that copy (`subscribeRecord`, one effect per Record
+whose row the component holds). Shipped only where a live Record is (and a project with no backend has none: its read is a stub), so every other
+client is byte-identical.
+Unticked (or settled unticked: a wired Fetch with the box unstated, NDA-017's migration, as the editor settles it), the
+Record keeps the row it read, as before.
+
+Drive, run 2: the runtime and the fixed export agree on every title in every step (Shown follows the save, Frozen does
+not, a refused save puts the old title back); the HEAD-equivalent control keeps the old title. Spec 21 rows, eight
+mutant arms each killing their own rows. Parameter ledger: `DbModel2.runOnChange-record` leaves `silent`, floor
+1,233 → 1,234. Found on the way: P18-S113-IDREADTWICE (fixed beside it) and P18-S113-IDBINDREAD (open).

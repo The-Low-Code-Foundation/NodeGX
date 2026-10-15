@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5e4d0000-0000-4000-8000-000000000003",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "modified": "2026-10-15T21:30:00.000Z",
+  "description": "P18-S111-RECORDLIVE fixture: a Record shows a page by Id; a form in another component renames it."
+}

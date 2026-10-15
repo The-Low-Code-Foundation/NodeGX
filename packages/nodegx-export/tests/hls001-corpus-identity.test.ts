@@ -362,7 +362,14 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // `src/api/client.ts` (its Request Magic Link earns the client's new return leg, P18-S109-MAGICRETURN), plus
     // signin-desk's own 21 entries, nothing else. The regenerated golden's diff counted the same: 57 lines out (56
     // README, account-desk's client.ts); those 57 back in and signin-desk's 23-line block.
-    expect(corpusProjects().length).toBe(57);
+    //
+    // 57 → 58 on 2026-10-15 (P18-S111-RECORDLIVE, session 113): `record-desk`, the first project in the corpus where a
+    // Record shows a page and a form in another component renames it. Predicted before the red run, then counted: 8
+    // paths moved — `src/api/client.ts` and `src/pages/Home.tsx` in the four projects whose Record reads on its Id
+    // (due-desk, gallery-desk, link-desk, page-desk: the client holds one copy of each record, and the row subscribes
+    // to it; 65 diff lines in each of the three read by hand), plus record-desk's own 22 entries, nothing else. The
+    // regenerated golden's diff counted the same: 8 lines out, those 8 back in, and record-desk's block.
+    expect(corpusProjects().length).toBe(58);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 

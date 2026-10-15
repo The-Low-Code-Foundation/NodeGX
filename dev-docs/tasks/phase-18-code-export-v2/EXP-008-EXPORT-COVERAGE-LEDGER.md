@@ -289,3 +289,24 @@ floor, which stays 1,233. The render also showed what is not this row, filed as 
 Dropdown is the native select (its box about 22 px against 32, the native chevron, `FieldText` where the runtime's text
 is `--foreground`). The carry's one cost: the native chevron fades with the text.
 **1 gap port remains:** P18-S111-RECORDLIVE (a shared record cache, sized as an EXP-011 section).
+
+**Session 113: the last gap port (P18-S111-RECORDLIVE), driven — 1,234 of 1,396, 0 gap ports.** Counted first: 236 of
+312 Records in the fixtures, templates and test projects share a collection with a Set Record Properties in the same
+app (most are site-builder copies of one Page editor), though none of those Records translates today for other
+reasons. The exported client now holds **one copy of each record**, keyed by the id alone as the runtime's
+`Model.get(id)` is: `fetchOne`, `query` and `create` merge their answers into it field by field (`_fromJSON`), and
+`update` writes before the save, merges the answer after it, and puts back what the record held when the save fails
+(P107-C34). A Record with "Record properties" ticked subscribes its row to that copy; unticked, or settled unticked as
+the editor settles it (a wired Fetch with the box unstated, NDA-017's migration), it keeps the row it read. Shipped only
+where a live Record is, so every other client is byte-identical. Full record: EXP-011 §80. **Graded:**
+`tests/the-live-record.test.ts` (21; the client run against a scripted wire in the runtime's order), eight mutant arms
+each killing their own rows (one first read as a blank: it broke the narrowing and failed to compile; re-shaped, it
+kills 3). **Driven** (`s113-recordlive-drive/`): the runtime and the fixed export agree on every title in every step,
+the HEAD-equivalent control keeps the old title. HLS-001: 8 hashes moved, exactly `client.ts` and `Home.tsx` in the four
+projects with an effect-form Record, plus the new `record-desk`. Ledger: `DbModel2.runOnChange-record` leaves `silent`,
+floor 1,233 → 1,234. **Found:** P18-S113-IDREADTWICE (an Update Record whose Id is a Variable read twice did not
+typecheck; fixed beside it), P18-S113-IDBINDREAD (open, medium: §43's effect form reads the backend on every Id change;
+the runtime only binds to the copy it holds, measured in run 1 of the drive).
+**0 gap ports remain.** The 50 silent ports left: `gated` 23, `refused-with` 23, `inert` 2, `unexamined` 2 (not yet
+read). Beside them, the P121 peer's three uncommitted Upload File ports, which the gate will ask to classify when they
+land.
