@@ -1749,6 +1749,12 @@ export function emitComponent(
    * got subtly wrong. Where the row shape is unknown the reader is the plain member access, and
    * every field is fine because the row is already `any`.
    */
+  /**
+   * P109-S15-ARRAYFILTERPATHEXPORT. Whether an Array Filter test printed a dotted key through `rowField`, the
+   * transcription of `filtercollectionnode.ts` `fieldOf` appended to the file. Set where the read prints, which is
+   * before the file is assembled, so no walker has to predict it.
+   */
+  let usesRowField = false;
   const rowFieldReader = (source: ValueExpr, what: string): ((field: string) => string) => {
     const known = listExprFields(source);
     return (field: string) => {
@@ -2115,7 +2121,14 @@ export function emitComponent(
         let code = listSourceCode(expr.source, mode);
         const readTest = rowFieldReader(expr.source, 'Array Filter');
         for (const test of expr.tests) {
-          code = `${code}.filter((${LIST_ROW}) => ${readTest(test.field)} ${FILTER_OPERATORS[test.op]} ${tsLiteral(test.value)})`;
+          /**
+           * P109-S15-ARRAYFILTERPATHEXPORT. The runtime reads a dotted key as a path (`owner.id` is the id inside
+           * `owner`) unless the row has a field with that exact name — per row, so it prints as the runtime's own
+           * rule rather than as a member read. The sort keeps flat reads: `sorter` reads `a[key]`.
+           */
+          const read = test.field.includes('.') ? `rowField(${LIST_ROW}, ${JSON.stringify(test.field)})` : readTest(test.field);
+          if (test.field.includes('.')) usesRowField = true;
+          code = `${code}.filter((${LIST_ROW}) => ${read} ${FILTER_OPERATORS[test.op]} ${tsLiteral(test.value)})`;
         }
         if (expr.sort.length > 0) {
           const comparisons = expr.sort.map((s) => {
@@ -7145,6 +7158,25 @@ export function emitComponent(
   if (jsxLines.length === 1 && jsxLines[0] === '    null') body.push(...preReturnComment, '  return null;', '}');
   else body.push(...preReturnComment, '  return (', ...providedJsx, '  );', '}');
 
+  if (usesRowField) {
+    body.push(
+      '',
+      '/**',
+      ' * An Array Filter key, read as the runtime reads it (`filtercollectionnode.ts` `fieldOf`): the field with that exact',
+      ' * name when the row has one, else the path through the row, `undefined` past anything that is not an object.',
+      ' */',
+      'function rowField(row: unknown, key: string): any {',
+      '  const item = row as Record<string, unknown>;',
+      "  if (Object.prototype.hasOwnProperty.call(item, key) || !key.includes('.')) return item[key];",
+      '  let at: unknown = item;',
+      "  for (const step of key.split('.')) {",
+      "    if (at === null || typeof at !== 'object') return undefined;",
+      '    at = (at as Record<string, unknown>)[step];',
+      '  }',
+      '  return at;',
+      '}'
+    );
+  }
   const tsx = GENERATED_TS + importLines.join('\n') + '\n\n' + body.join('\n') + '\n';
 
   const files: Record<string, string> = {};

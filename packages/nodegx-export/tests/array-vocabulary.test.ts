@@ -5,6 +5,7 @@ import * as ts from 'typescript';
 import { Catalog, loadCatalog } from '../src/catalog';
 import { emitApp } from '../src/emit/emitApp';
 import { parseProject } from '../src/parse/parseProject';
+import { typecheckEmittedApp } from './helpers/typecheckApp';
 import { ExportIR, ComponentIR, ConnectionIR, NodeIR, ParamValue } from '../src/ir/types';
 
 /**
@@ -604,5 +605,75 @@ describe('a transform reading a field the array does not carry', () => {
 
   it('says so in the report', () => {
     expect(sabotaged().notes.join('\n')).toContain('Array Map reads "nope", which the array it reads does not carry');
+  });
+});
+
+/**
+ * P109-S15-ARRAYFILTERPATHEXPORT — since `7c4bcbf38` the runtime reads a dotted filter key as a path (`owner.id` is the
+ * id inside `owner`) unless the row has a field with that exact name; the export read it as one field name, so the
+ * exported list came out empty where the running app shows rows.
+ *
+ * 🔴 Graded against the runtime's own `fieldOf`, cut out of `filtercollectionnode.ts` and run beside the emitted
+ * `rowField` over a grid of rows and keys — so a change to the runtime's rule turns this red rather than drifting.
+ */
+describe('P109-S15-ARRAYFILTERPATHEXPORT — a dotted Array Filter key is a path, as the runtime reads it', () => {
+  const RUNTIME_FILTER = fs.readFileSync(
+    path.join(__dirname, '..', '..', 'noodl-runtime', 'src', 'nodes', 'std-library', 'data', 'filtercollectionnode.ts'),
+    'utf8'
+  );
+  const cut = (source: string, name: string): ((row: unknown, key: string) => unknown) => {
+    const start = source.indexOf(`function ${name}(`);
+    expect(start).toBeGreaterThanOrEqual(0);
+    const end = source.indexOf('\n}\n', start) + 2;
+    const js = ts.transpileModule(`${source.slice(start, end)}\nmodule.exports = ${name};`, {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 }
+    }).outputText;
+    const module = { exports: {} as unknown };
+    // eslint-disable-next-line no-new-func
+    new Function('module', js)(module);
+    return module.exports as (row: unknown, key: string) => unknown;
+  };
+  const dotted = () => emit(withTransforms({ omitMap: true, filter: { filterFilter: 'owner.id', 'filterFilterOp-owner.id': 'eq', 'filterFilterValue-owner.id': 7 } }).ir);
+
+  it('the filter reads the key through rowField, and the file carries it', () => {
+    const app = dotted();
+    const page = notesFile(app);
+    expect(rowsLine(page)).toContain('.filter((row) => rowField(row, "owner.id") == 7)');
+    expect(page).toContain('function rowField(row: unknown, key: string): any {');
+    expectParses(app);
+    expect(typecheckEmittedApp(app)).toEqual([]);
+  });
+
+  it('rowField answers what the runtime’s fieldOf answers, over exact names, paths, nulls and primitives', () => {
+    const runtime = cut(RUNTIME_FILTER, 'fieldOf');
+    const emitted = cut(notesFile(dotted()), 'rowField');
+    const rows: Array<Record<string, unknown>> = [
+      { 'owner.id': 1, owner: { id: 2 } },
+      { owner: { id: 2 } },
+      { owner: null },
+      { owner: 'abc' },
+      { a: { b: { c: 3 } } },
+      { mood: 'sunny' },
+      {}
+    ];
+    const keys = ['owner.id', 'owner.length', 'a.b.c', 'a.b', 'mood', 'x.y'];
+    const disagreements: string[] = [];
+    for (const row of rows) {
+      for (const key of keys) {
+        const theirs = runtime(row, key);
+        const mine = emitted(row, key);
+        if (mine !== theirs) disagreements.push(`${JSON.stringify(row)} @ ${key}: ${String(mine)} vs ${String(theirs)}`);
+      }
+    }
+    expect(disagreements).toEqual([]);
+    // The grid reaches all three answers: an exact name, a path, and undefined past a primitive.
+    expect(runtime(rows[0], 'owner.id')).toBe(1);
+    expect(runtime(rows[1], 'owner.id')).toBe(2);
+    expect(runtime(rows[3], 'owner.length')).toBeUndefined();
+  });
+
+  it('a key with no dot is the plain member read it always was, with no helper', () => {
+    const page = notesFile(emit(withTransforms({ omitMap: true }).ir));
+    expect(page).not.toContain('rowField');
   });
 });
