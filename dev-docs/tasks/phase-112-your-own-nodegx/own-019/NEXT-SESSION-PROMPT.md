@@ -19,7 +19,9 @@ TP1) started 06:00:58. Everything logs to `v/lane.log`. Three lab faults found a
 **Results at 11:05 (all Large 4, tgz33, every round finished by itself):** Launch **TL1 19/19, TL2 19/19, TL3 19/19**
 (AC5b's three in a row; 45/72/69 min, $3.19/4.89/4.69 list) · quiz **T2, T3, T1b 12/12, carryover clean ×3** (AC4's
 three; T1 = PROXYDIES lab loss) · Pack It **TP1 12/12** · editor **TE1 0/13 = lab loss** (NODE20: backend needs Node ≥ 22.13;
-SEEDDONE, `225198677`) → **TE1b started 11:03 on Node 22** (`s7te1b.sh`). Richard's look verdicts on TL1–TL3: not yet.
+SEEDDONE, `225198677`) → **TE1b started 11:03 on Node 22** (`s7te1b.sh`). Richard's look verdicts: **TL2 — "a weird artifact" in the hero's week strip** (letters against the chip edge →
+LETTEREDGE, open, `73c129730`); TL1 chosen for the show-off deploy instead (`netlify/driftwood-tl1` + `.zip`, static
+serve checked at 390 and 1280, Fraunces + Instrument Sans load from Google Fonts, no errors); TL3 not yet.
 **Show-off deploy (Richard, 11:00):** TL2 via the kit's own `nodegx-deploy` (tgz33) → `NodeGX test projects/OWN-019
 Mistral apps/netlify/driftwood-tl2` (+ `.zip`) for Netlify Drop; static serve checked: 1280 and 390 (CDP emulation)
 render, no overflow, DM Sans loaded, no console errors.
