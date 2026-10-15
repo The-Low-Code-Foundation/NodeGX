@@ -1,4 +1,41 @@
-# Next session — session 105 (2026-10-15, BOARD lane 6) CLOSED ISL-043 and ISL-035 and fixed RESPONSETYPE: five ledger rows, one commit each, export jest **119 / 119**. Next: the graph-scenario ledger line, then EXP-011's seven.
+# Next session — session 106 (2026-10-15, BOARD lane 6) put the graph-scenario ledger line on P18's README: **2 of 85 conform on the export, 9 played** (was 4). Next: EXP-011's seven, §77 first.
+
+## ✅ Session 106 (2026-10-15, BOARD lane 6): the second ledger line, pinned (`d2773e022`)
+
+Session 103's report said "CONFORM" with 81 of 85 outside, and 67 of the 81 were the **harness's** limits, not the
+exporter's. Three of them are lifted in `tests/helpers/node-spec-target.ts`:
+
+| limit | now |
+|---|---|
+| a `set` step "is not drivable" | the set input is a Component Inputs port `<id>_<port>` wired into the node; `set` re-renders with the prop moved |
+| any `world` puts a scenario outside | an **empty** world (`{}`) is admitted: it seeds nothing (25 scenarios declared `{}`); a seeding world is still outside |
+| a node with no reducer spec is outside | the probe is built from the exporter's catalog ports (`graphPorts`) |
+
+A scenario the exporter emits but whose observed outputs it will not lift is outside **in the exporter's words**, not
+refused. The line is a pinned test in `tests/node-spec-graph.test.ts`, and it prints:
+
+> P18 ledger: 2 of 85 graph scenarios conform on the export — 9 played (2 conform, 3 differ as declared, 0 known rows,
+> 4 fail on filed rows); 30 outside on the exporter's verdict, 46 on this harness's limits
+
+C10 now plays and passes. t07's four On App Error scenarios play and **fail**: the export's parsers never raise on the
+app error channel. That is **P18-S106-PARSERAISE** (low, reach 0), and the four are pinned to it by name (`FAILING_ROWS`).
+Of the 30 exporter-verdict scenarios, **9 are EXP-011's seven** (Action Dispatcher 3, State History 3, State Snapshot 1,
+Optimistic Update 2), plus 3 more of theirs that need a world clock. The 46 harness limits: 23 seed a world, 17 need
+more than one component (NSP-015 AC2), 3 advance a clock, 3 make a wire after mount.
+
+Readings: node-spec-graph 7 / 7 exit 0; node-spec-conformance 6 passed, 2 skipped; package `tsc --noEmit` 0; editor
+`tsc --noEmit` 0. The whole-package export jest was **not** run (only the helper and its two suites changed).
+
+**Next (BOARD lane 6):**
+1. **EXP-011 §77, Action Dispatcher / Action Handler.** When it lands, t04's three playable scenarios should move from
+   exporter-verdict to played. Expect the pinned ledger counts to move, and move them in the same commit.
+2. §78 the history family, then §79 Sign In With.
+3. Raising the line: the one-component limit (17) is the largest harness limit after the seeded world.
+4. Rows: P18-S106-PARSERAISE, P18-S104-FEEDCOUNT, P18-S105-KITHEAD (all low), P18-S104-PACKRUNTIMENPX.
+
+---
+
+# Session 105's handoff (2026-10-15, BOARD lane 6) CLOSED ISL-043 and ISL-035 and fixed RESPONSETYPE: five ledger rows, one commit each, export jest **119 / 119**.
 
 ## ✅ Session 105 (2026-10-15, BOARD lane 6): ISL-043 closed (8 / 8), RESPONSETYPE fixed, ISL-035 closed (2 / 2)
 
