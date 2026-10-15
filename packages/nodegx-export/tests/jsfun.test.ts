@@ -154,7 +154,11 @@ describe('the fixture translation (EXP-003 §4 A1 — asserted piecewise; the by
   });
 
   test('the Expression collapses to a return; Is True gates the truthiness sink', () => {
-    expect(home).toContain("return ((name || '').length > 1);");
+    // P18-S110-EVALATLOAD: `name` is wire-fed from a Variable that may be unset, so until it
+    // arrives this is the load's evaluation, which keeps null for a throw or a NaN (GAM-001).
+    expect(home).toContain('const __unset = name === undefined;');
+    expect(home).toContain("const __value = ((name || '').length > 1);");
+    expect(home).toContain('return __unset && Number.isNaN(__value) ? null : __value;');
     expect(home).toContain('disabled={!hasLongNameOut}');
   });
 
@@ -272,11 +276,48 @@ describe('the graph-side gate (EXP-003 §3.5–§3.7), each a named defer', () =
     expect(result.notes.join('\n')).toContain('node junk (JavaScriptFunction) deferred: its outputs feed nothing statically translatable');
   });
 
-  test('an Expression whose inputs never arrive never evaluates — deferred, not computed', () => {
+  test('an Expression whose inputs never arrive still evaluates at load, over them (GAM-001, P18-S110-EVALATLOAD)', () => {
+    // This row used to pin a refusal ("never evaluates"), the rule from before GAM-001. Ticked —
+    // the default — the runtime evaluates over the unset inputs and keeps null for a throw or NaN.
     const mutated = cloneIr();
     unwire(mutated, 'Pages/Home', 'visitorVar:value->hasLongName:name');
     const result = emitApp(mutated, catalog);
-    expect(result.notes.join('\n')).toContain('none of its inputs is ever delivered');
+    expect(result.notes.join('\n')).not.toContain('hasLongName (Expression) deferred');
+    const home = result.files['src/pages/Home.tsx'];
+    expect(home).toContain('function hasLongName(__inputs: { name?: any }) {');
+    expect(home).toContain('  } catch {\n    return null;\n  }');
+    expect(home).toContain('const hasLongNameOut = hasLongName({});');
+  });
+
+  test('unticked Evaluate At Load over inputs nothing feeds never evaluates — deferred by name', () => {
+    const mutated = cloneIr();
+    unwire(mutated, 'Pages/Home', 'visitorVar:value->hasLongName:name');
+    setParam(nodeOf(mutated, 'Pages/Home', 'hasLongName'), 'evaluateAtLoad', { kind: 'literal', value: false });
+    const result = emitApp(mutated, catalog);
+    expect(result.notes.join('\n')).toContain(
+      'Evaluate At Load is unticked and none of its inputs is ever delivered — the expression never evaluates'
+    );
+  });
+
+  test('unticked Evaluate At Load over a wire-fed input publishes nothing until it arrives', () => {
+    const mutated = cloneIr();
+    setParam(nodeOf(mutated, 'Pages/Home', 'hasLongName'), 'evaluateAtLoad', { kind: 'literal', value: false });
+    const home = emitApp(mutated, catalog).files['src/pages/Home.tsx'];
+    expect(home).toContain('  if (name === undefined) return null;\n  try {\n    return ((name || \'\').length > 1);');
+  });
+
+  test('a literal on any input arrives at load, so the box changes nothing (P18-S110-EVALATLOAD)', () => {
+    const ticked = cloneIr();
+    setParam(nodeOf(ticked, 'Pages/Home', 'hasLongName'), 'name', { kind: 'literal', value: 'Ada' });
+    unwire(ticked, 'Pages/Home', 'visitorVar:value->hasLongName:name');
+    const unticked = cloneIr();
+    setParam(nodeOf(unticked, 'Pages/Home', 'hasLongName'), 'name', { kind: 'literal', value: 'Ada' });
+    unwire(unticked, 'Pages/Home', 'visitorVar:value->hasLongName:name');
+    setParam(nodeOf(unticked, 'Pages/Home', 'hasLongName'), 'evaluateAtLoad', { kind: 'literal', value: false });
+    const a = emitApp(ticked, catalog).files['src/pages/Home.tsx'];
+    expect(emitApp(unticked, catalog).files['src/pages/Home.tsx']).toBe(a);
+    expect(a).toContain("    return ((name || '').length > 1);");
+    expect(a).not.toContain('__unset');
   });
 
   test('a boolean output lands only in the truthiness sink — a text sink defers named', () => {

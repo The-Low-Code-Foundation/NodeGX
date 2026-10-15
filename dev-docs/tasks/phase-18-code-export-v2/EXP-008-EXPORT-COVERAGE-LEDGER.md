@@ -211,3 +211,35 @@ the spec (`tests/silent-parameters-closed.test.ts`, renamed from `the-silent-ten
 context the probe does not. **10 gap ports remain:** P18-S110-ROUTERSELF (6), -EVALATLOAD, -NOWRAP, -PLACEHOLDEROPACITY,
 P18-S111-RECORDLIVE. The last two Text/Dropdown rows were found **wider on the default side**: an exported Text has
 no `white-space` in any arm, and a placeholder's default opacity is 0.5. Both are written into their rows, and neither is a cheap close.
+
+### Session 112 (2026-10-15): Evaluate At Load, carried — **1,226 of 1,396**
+
+P18-S110-EVALATLOAD closed by **carrying** the box rather than refusing it. The rule is GAM-001's
+(`expression.ts` `_scheduleEvaluateExpression`): the box matters only when no referenced input has arrived by the
+load's evaluation. A literal on any input is set at load, so it always arrives, and the box is inert there. The
+export's own model: an input has arrived once its wire-fed value is not `undefined`, because the runtime never
+delivers `undefined` over a wire. `JsFunctionPlan.loadGate` records which inputs are wire-fed and the box, and the
+wrapper prints:
+
+- **unticked** (`wait`): `if (<every wire-fed input> === undefined) return null;`: nothing until an input arrives;
+- **ticked** (`evaluate`, the default): the load evaluation keeps `null` for a throw or a NaN where an arrival's
+  answers `0` and `NaN`. This is a gap on the **default side** that the probe could not see: an exported
+  `months + drift` with `months` unset rendered "NaN" where the editor renders nothing.
+
+**The refusal the row's side note named is gone.** "None of its inputs is ever delivered — the expression never
+evaluates" was the rule from before GAM-001. Ticked, an Expression nothing feeds is now translated as the load
+evaluation over its unset inputs; unticked, it is still refused, with the box named in the sentence.
+
+**Graded:** `tests/the-evaluate-at-load.test.ts` (117). §A runs the runtime's own Expression node in a
+`NodeContext` against the emitted wrapper (transpiled and called): 7 bodies × the box × 8 arrivals (nothing, then
+`'Ada'`, `''`, `0`, `false`, `true`, `null` and an object), 112 rows with 0 differences, plus a reach control
+(the box moves `name !== false` from `true` to `null` on both sides). §A2: a literal makes the box inert on both
+sides. §B: the mutants. Removing the unticked guard turns exactly the 7 unticked/nothing rows red; removing the load
+evaluation's null turns exactly the 3 ticked NaN/throw/nothing rows red. HLS-001: 2 paths moved (budget-desk's
+Gauge, cheer's Home), golden regenerated, diff 2 out / 2 in. `jsfun` gained three cases and re-pinned two. `stores-events`' hand-written cheer Home target and HLS-004 AC4 were re-pinned to the guard.
+**9 gap ports remain:** P18-S110-ROUTERSELF (6), -NOWRAP, -PLACEHOLDEROPACITY, P18-S111-RECORDLIVE.
+
+**Not modelled, recorded:** before anything arrives, Result is `null` on both sides, but the export's `isTrue` /
+`asNumber` folds still compute from it where the runtime's getters abstain (`plan.ts`'s jsfun-out comment). Once an
+input arrives and its source goes back to `undefined`, the runtime holds the last value and the export reads
+`undefined` again. That is the general wire-hold gap, not this box's.

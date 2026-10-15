@@ -3114,6 +3114,18 @@ export interface JsFunctionPlan {
    * invoked — `run` wired: calls inline inside its own handler chain only (grade I).
    */
   mode: 'reactive' | 'invoked';
+  /**
+   * P18-S110-EVALATLOAD. Expression only, reactive only: present when nothing is sure to arrive at
+   * load — no input has a literal (a parameter is set at load, so it always arrives) and the body
+   * reads at least one port. `unset` names the wire-fed inputs; while every one reads `undefined`
+   * nothing has arrived, because the runtime never delivers `undefined` over a wire.
+   *
+   * That is the state GAM-001's load evaluation runs in (`expression.ts` `_scheduleEvaluateExpression`):
+   * ticked (`evaluate`, the default) it evaluates over the unset inputs but publishes no answer for
+   * a throw or a NaN — Result stays `null`, where an arrival's evaluation answers `0` and `NaN`;
+   * unticked (`wait`) it publishes nothing until an input arrives.
+   */
+  loadGate?: { unset: string[]; atLoad: 'evaluate' | 'wait' };
 }
 
 export interface ReceiverPlan {
@@ -6023,6 +6035,9 @@ function planComponent(
       const logicNodeIds: string[] = [];
       const subscriberIds: string[] = [];
       let anyDelivery = false;
+      // P18-S110-EVALATLOAD: a literal is set at load, under a wire or not, so it always arrives.
+      let anyLiteral = false;
+      const wireFed: string[] = [];
       jsResolving.add(node.id);
       try {
         for (const name of inputNames) {
@@ -6032,6 +6047,7 @@ function planComponent(
             return { defer: `two wires feed input "${name}" — last-writer-wins is not statically ordered` };
           }
           const runChangeParam = kind === 'function' ? `runOnChange-in-${name}` : `runOnChange-${name}`;
+          if (literalParam(node, port) !== undefined) anyLiteral = true;
           if (wires.length === 1) {
             const wire = wires[0];
             // Absent means ticked (the Evaluate-additive family). An unticked input's changes
@@ -6055,6 +6071,7 @@ function planComponent(
               return { defer: `input "${name}" is fed a logic truth value — only truthiness sinks take one in this slice` };
             }
             anyDelivery = true;
+            wireFed.push(name);
             const tsType = exprTsType(expr);
             inputs.push({
               name,
@@ -6080,11 +6097,24 @@ function planComponent(
         jsResolving.delete(node.id);
       }
 
-      // Automatic evaluation is gated on any input having arrived unless the expression
-      // references no ports (expression.ts) — an expression whose inputs never arrive never
-      // evaluates, and its outputs abstain null where a render local would compute.
-      if (kind === 'expression' && mode === 'reactive' && exprIds.ports.length > 0 && !anyDelivery) {
-        return { defer: 'none of its inputs is ever delivered — the expression never evaluates (its outputs abstain null)' };
+      /**
+       * P18-S110-EVALATLOAD. The load's evaluation, when no referenced input can have arrived by then
+       * (GAM-001, `expression.ts` `_scheduleLoadEvaluation`). An Expression that reads no port, or has
+       * a literal on any input, evaluates at load as an arrival would, so the box changes nothing there.
+       * Unticked over inputs nothing ever feeds, it never evaluates at all: refused, because there is
+       * no answer to compute. Ticked, the default, it runs over them — the refusal that stood here
+       * read the rule from before GAM-001, and dropped a value the editor computes.
+       */
+      const evaluateAtLoad = literalParam(node, 'evaluateAtLoad') !== false;
+      const loadGate: JsFunctionPlan['loadGate'] =
+        kind === 'expression' && mode === 'reactive' && exprIds.ports.length > 0 && !anyLiteral
+          ? { unset: wireFed, atLoad: evaluateAtLoad ? 'evaluate' : 'wait' }
+          : undefined;
+      if (loadGate?.atLoad === 'wait' && !anyDelivery) {
+        return {
+          defer:
+            'Evaluate At Load is unticked and none of its inputs is ever delivered — the expression never evaluates (its outputs abstain null)'
+        };
       }
 
       // The Outputs record types every name the body can write: mined value assignments,
@@ -6158,6 +6188,7 @@ function planComponent(
         signals,
         mathAliases: exprIds.mathAliases,
         mode,
+        ...(loadGate !== undefined ? { loadGate } : {}),
         ...(scriptUses.length > 0 ? { scripts: scriptUses } : {}),
         ...(kind === 'visual'
           ? {
@@ -6235,8 +6266,9 @@ function planComponent(
     switch (output) {
       case 'result':
         return base;
-      // The abstain-null pre-first-evaluation state is unreachable in the emitted world —
-      // every vocabulary source has a boot value (§4, noted not modeled).
+      // The abstain-null pre-first-evaluation state: Result is `null` there (a `loadGate`,
+      // P18-S110-EVALATLOAD), but the four folds below still compute from it where the runtime's
+      // getters abstain (§4, noted not modeled) — `isTrue` reads false, not "nothing yet".
       case 'isTrue':
         return truthyExpr(base);
       case 'isFalse':

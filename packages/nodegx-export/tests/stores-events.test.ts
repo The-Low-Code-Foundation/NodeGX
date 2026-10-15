@@ -133,9 +133,13 @@ Outputs.text = name.toUpperCase() + '!';
 // From the Expression node "hasLongName" — the expression is preserved verbatim (EXP-003 §4).
 function hasLongName(__inputs: { name: string | undefined }) {
   const { name } = __inputs as { [K in keyof typeof __inputs]: any };
+  // Until an input arrives this is the load evaluation, which keeps null for a throw or a NaN.
+  const __unset = name === undefined;
   try {
-    return ((name || '').length > 1);
+    const __value = ((name || '').length > 1);
+    return __unset && Number.isNaN(__value) ? null : __value;
   } catch (e) {
+    if (__unset) return null;
     console.error('Expression node hasLongName threw:', e);
     return 0;
   }

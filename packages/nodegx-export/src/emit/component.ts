@@ -6265,12 +6265,45 @@ export function emitComponent(
       for (const alias of def.mathAliases) {
         lines.push(alias === 'pi' ? '  const pi = Math.PI;' : `  const ${alias} = Math.${alias};`);
       }
-      lines.push('  try {');
-      lines.push(`    return (${def.body});`);
-      lines.push('  } catch (e) {');
-      lines.push(`    console.error('Expression node ${def.fnName} threw:', e);`);
-      lines.push('    return 0;');
-      lines.push('  }');
+      /*
+       * P18-S110-EVALATLOAD, the load's evaluation (`JsFunctionPlan.loadGate`). Nothing has arrived
+       * while every wire-fed input reads `undefined`; unticked, the runtime publishes nothing then,
+       * and ticked it evaluates but keeps `null` for a throw or a NaN. With no wire-fed input at
+       * all, every evaluation is that one.
+       */
+      const gate = def.loadGate;
+      const unsetTest = gate !== undefined ? gate.unset.map((n) => `${n} === undefined`).join(' && ') : '';
+      if (gate?.atLoad === 'wait') {
+        lines.push(`  // Evaluate At Load is unticked: no answer until an input arrives.`);
+        lines.push(`  if (${unsetTest}) return null;`);
+      }
+      if (gate?.atLoad === 'evaluate' && gate.unset.length === 0) {
+        lines.push('  // Nothing feeds its inputs: the load evaluation over them, which keeps null for a throw or a NaN.');
+        lines.push('  try {');
+        lines.push(`    const __value = (${def.body});`);
+        lines.push('    return Number.isNaN(__value) ? null : __value;');
+        lines.push('  } catch {');
+        lines.push('    return null;');
+        lines.push('  }');
+      } else if (gate?.atLoad === 'evaluate') {
+        lines.push('  // Until an input arrives this is the load evaluation, which keeps null for a throw or a NaN.');
+        lines.push(`  const __unset = ${unsetTest};`);
+        lines.push('  try {');
+        lines.push(`    const __value = (${def.body});`);
+        lines.push('    return __unset && Number.isNaN(__value) ? null : __value;');
+        lines.push('  } catch (e) {');
+        lines.push('    if (__unset) return null;');
+        lines.push(`    console.error('Expression node ${def.fnName} threw:', e);`);
+        lines.push('    return 0;');
+        lines.push('  }');
+      } else {
+        lines.push('  try {');
+        lines.push(`    return (${def.body});`);
+        lines.push('  } catch (e) {');
+        lines.push(`    console.error('Expression node ${def.fnName} threw:', e);`);
+        lines.push('    return 0;');
+        lines.push('  }');
+      }
       lines.push('}');
     }
     return lines;
