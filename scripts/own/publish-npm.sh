@@ -7,9 +7,11 @@
 # exactly as tested (the session packed them in a worktree at a pushed commit), never re-packed here.
 set -euo pipefail
 dir="${1:?usage: publish-npm.sh <folder of .tgz files>}"
-# @nodegx/mcp before create-nodegx: create-nodegx sets folders up with the mcp version it pins.
-for name in nodegx-preview nodegx-mcp create-nodegx; do
-  tgz=$(ls "$dir"/"$name"-*.tgz 2>/dev/null | head -1 || true)
+# @nodegx/mcp before create-nodegx: create-nodegx sets folders up with the mcp version it pins; create-nodegx-vibe
+# (OWN-019, `npm create nodegx-vibe`) last, because it pins create-nodegx. `<name>-[0-9]*` so that create-nodegx
+# never picks up create-nodegx-vibe-<v>.tgz.
+for name in nodegx-preview nodegx-mcp create-nodegx create-nodegx-vibe; do
+  tgz=$(ls "$dir"/"$name"-[0-9]*.tgz 2>/dev/null | head -1 || true)
   [ -n "$tgz" ] || { echo "skip $name: no tarball in $dir"; continue; }
   pkg=$(tar -xzOf "$tgz" package/package.json | node -pe 'const p=JSON.parse(require("fs").readFileSync(0,"utf8")); p.name+"@"+p.version')
   if npm view "$pkg" version >/dev/null 2>&1; then echo "skip $pkg: already published"; continue; fi

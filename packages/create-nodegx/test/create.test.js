@@ -369,3 +369,26 @@ test('P112-OWN019-NOTELOOP: after this session writes NEXT.md, three more writes
   // Reading stays open.
   assert.equal(ask('read_file', { file_path: next }), 'allow');
 });
+
+test('P112 OWN-019 (R29): `npm create nodegx-vibe` is create-nodegx --vibe, pinned to the same version', () => {
+  const wrapper = path.join(__dirname, '..', 'vibe');
+  const pkg = read(path.join(wrapper, 'package.json'));
+  const core = read(path.join(__dirname, '..', 'package.json'));
+  assert.equal(pkg.name, 'create-nodegx-vibe');
+  // One release, one version: the wrapper ships with the core it was tested against (R13), pinned exactly.
+  assert.equal(pkg.version, core.version);
+  assert.deepEqual(pkg.dependencies, { 'create-nodegx': core.version });
+  assert.equal(pkg.license, core.license);
+  // Not in create-nodegx's own tarball, and not a workspace (packages/* would take it into the shared lockfile).
+  assert.ok(!core.files.includes('vibe'));
+  const dir = path.join(tmp(), 'my-apps');
+  const run = spawnSync(process.execPath, [path.join(wrapper, pkg.bin['create-nodegx-vibe']), dir], { encoding: 'utf8' });
+  assert.equal(run.status, 0, run.stderr);
+  // The same folder `create-nodegx --vibe` writes, file for file.
+  const direct = path.join(tmp(), 'my-apps');
+  assert.equal(spawnSync(process.execPath, [BIN, direct, '--vibe'], { encoding: 'utf8' }).status, 0);
+  const files = (d) => fs.readdirSync(d, { recursive: true }).sort();
+  assert.deepEqual(files(dir), files(direct));
+  for (const f of files(dir)) if (fs.statSync(path.join(dir, f)).isFile()) assert.equal(fs.readFileSync(path.join(dir, f), 'utf8'), fs.readFileSync(path.join(direct, f), 'utf8'), f);
+  assert.match(run.stdout, /vibe --legacy-harness/);
+});
