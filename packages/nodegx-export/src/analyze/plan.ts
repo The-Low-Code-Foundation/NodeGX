@@ -1862,6 +1862,12 @@ export type ValueExpr =
       fn: UtilHelper;
       args: ValueExpr[];
       cases?: Array<{ from: string; to: string | undefined }>;
+      /**
+       * P109-S21-EXPORTBLENDNAN — `blendColorKept`'s first argument: the `useRef` local holding the blend this
+       * Color Blend last received and the colour it last showed, declared once per node at the top of the component. 🔴 Both expression walkers
+       * (`collectExprUse` and `hookExprSources`) record it; missing one prints a call naming a local nobody declared.
+       */
+      kept?: string;
     }
   /**
    * A `States` node's value outputs (EXP-011 §49) — a read off the `useStates` handle the
@@ -8000,6 +8006,9 @@ function planComponent(
     return { kind: 'date-call', fn: spec.fn, args };
   };
 
+  /** The `useRef` local a Color Blend's last shown colour lives in — one per node, whichever reader asks (EXPORTBLENDNAN). */
+  const blendShownLocals = new Map<string, string>();
+
   /**
    * One of the three small pure utilities read as a value (EXP-011 Tier 2.7).
    *
@@ -8143,6 +8152,18 @@ function planComponent(
     // EXP-011 §75. Several answers off one node: the output port's name selects, as `DATE_NODES`' selector does.
     if (spec.select === true) args.push({ kind: 'literal', value: fromProperty });
     ctx.logicNodeIds.push(node.id);
+    /**
+     * P109-S21-EXPORTBLENDNAN (P107-D8, ruled "Keep last colour"). A Blend Value that is not a number keeps the
+     * colour the node last showed, and an unset source delivers nothing, so the blend last received stands —
+     * per-instance memory either way, so the call carries a ref the component holds. Only a wire earns it; a
+     * numeric literal is neither, and an authored blend still prints the pure call.
+     */
+    if (spec.fn === 'blendColor') {
+      const blend = args[0];
+      if (!(blend.kind === 'literal' && !Number.isNaN(Number(blend.value)))) {
+        return { kind: 'util-call', fn: 'blendColorKept', args, kept: mintLocal(blendShownLocals, node, 'colorBlend', 'Shown') };
+      }
+    }
     return { kind: 'util-call', fn: spec.fn, args, ...(cases !== undefined ? { cases } : {}) };
   };
 

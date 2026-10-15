@@ -233,6 +233,11 @@
  * ✅ **Regenerated for P109-S25-EXPORTSTATESRUN (session 104, 2026-10-14), predicted and counted.** The emitted states
  * lib stops a running animation on every move (P107-C22) and sends an unset text as `''` (D19). One corpus project
  * emits `src/lib/states.ts`: `glow-desk`, **1 moved, 0 added, 0 removed**.
+ *
+ * ✅ **Regenerated for P109-S21-EXPORTBLENDNAN (P18 session 105, 2026-10-15), predicted and counted.** The emitted util
+ * lib gains `blendColorKept`, so every project that emits `src/lib/util.ts` moves (gallery-, mood-, photo-, tick- and
+ * ticket-desk), and the corpus's one Color Blend, wired from a Variable, prints the kept call: `mood-desk`'s
+ * `src/pages/Mood.tsx`. **6 moved, 0 added, 0 removed.**
  */
 import * as fs from 'fs';
 import * as path from 'path';

@@ -35,6 +35,7 @@ const baseIr = parseProject(FIXTURE, catalog);
 interface UtilLib {
   booleanToString(selector: unknown, whenTrue: unknown, whenFalse: unknown): string;
   blendColor(blend: unknown, ...colors: unknown[]): string;
+  blendColorKept(shown: { current: { blend: unknown; color?: string } }, blend: unknown, ...colors: unknown[]): string;
 }
 
 const loadUtilLib = (source = utilLibSource()): UtilLib => {
@@ -177,19 +178,85 @@ describe('EXP-011 §38 §A — the emitted helpers against the interpreter', () 
       [undefined, '#0000ff'],
       ['#ff8800', '#0088ff', '#88ff00', '#ffffff']
     ];
-    // NaN left the grid in P109 ISL-026: the runtime keeps its last colour for a Blend Value that is not a number (P107-D8),
-    // the export's blendColor still renders '#NaNNaNNaN' — P109-S21-EXPORTBLENDNAN, P18's to fix (then put NaN back).
-    const blends = [-1, 0, 0.25, 0.5, 0.999, 1, 1.5, 2, 2.75, 3, 10];
+    // NaN and text are back (P109-S21-EXPORTBLENDNAN): the runtime keeps the colour it showed at blend 0 for a first
+    // Blend Value that is not a number (P107-D8), and so does the kept helper. A number goes through blendColor.
+    const blends = [-1, 0, 0.25, 0.5, 0.999, 1, 1.5, 2, 2.75, 3, 10, NaN, 'abc'];
     for (const list of lists) {
       for (const blend of blends) {
         compared += 1;
-        const mine = lib.blendColor(blend, ...list);
+        const mine = lib.blendColorKept({ current: { blend: 0 } }, blend, ...list);
         const theirs = runtimeBlend(blend, list);
         if (mine !== theirs) disagreements.push(`${JSON.stringify(list)} @ ${blend}: "${mine}" vs "${theirs}"`);
       }
     }
     expect(disagreements).toEqual([]);
-    expect(compared).toBe(66);
+    expect(compared).toBe(78);
+  });
+
+  /**
+   * P109-S21-EXPORTBLENDNAN — one node over time, against one runtime instance. `undefined` is what an unset wire
+   * source reads as in the export; the runtime never receives it (`Node.sendValue` drops it), so its turn is a
+   * colour change with the blend left alone. The colour changes during a non-number blend are the "keeps the
+   * colour LAST SHOWN" half: the runtime does not re-blend them.
+   *
+   * ⚠️ One arrival per step. A colour and a non-number blend arriving in the same update are order-dependent in the
+   * runtime (the colour first re-blends at the old blend, then the NaN keeps THAT); one render sees both at once and
+   * keeps the colour from before. Named in the ledger row, not graded here.
+   */
+  it('blendColorKept follows one runtime node through a sequence of blends and colour changes', () => {
+    type Step = { blend?: unknown; color?: [number, string] };
+    const steps: Step[] = [
+      { blend: 0.5 },
+      { blend: NaN },
+      { color: [1, '#ff00ff'] },
+      { blend: 'abc' },
+      { blend: undefined },
+      { blend: 1 },
+      { blend: undefined },
+      { color: [0, '#00ffff'] },
+      { blend: 0.5 },
+      { blend: undefined, color: [1, '#000000'] },
+      { blend: null },
+      { blend: NaN },
+      { color: [0, '#ffffff'] },
+      { blend: '0.5' }
+    ];
+    const colors: Array<string | undefined> = ['#ff0000', '#0000ff'];
+    const instance = instanceFor(blendNode);
+    colors.forEach((color, index) => blendNode.numberedInputs!.color.createSetter.call(instance, index).call(instance, color));
+    const shown = { current: { blend: 0 as unknown } as { blend: unknown; color?: string } };
+    const read: string[] = [];
+    for (const step of steps) {
+      if (step.color !== undefined) {
+        colors[step.color[0]] = step.color[1];
+        blendNode.numberedInputs!.color.createSetter.call(instance, step.color[0]).call(instance, step.color[1]);
+      }
+      if ('blend' in step && step.blend !== undefined) blendNode.inputs.blendValue.set!.call(instance, step.blend);
+      const theirs = blendNode.outputs.result.getter!.call(instance) as string;
+      const mine = lib.blendColorKept(shown, step.blend, ...colors);
+      read.push(`${String(step.blend)} → ${mine}${mine === theirs ? '' : ` (runtime ${theirs})`}`);
+    }
+    expect(read).toEqual([
+      '0.5 → #7f007f',
+      'NaN → #7f007f',
+      'undefined → #7f007f',
+      'abc → #7f007f',
+      'undefined → #7f007f',
+      '1 → #ff00ff',
+      'undefined → #ff00ff',
+      'undefined → #ff00ff',
+      '0.5 → #7f7fff',
+      'undefined → #007f7f',
+      'null → #00ffff',
+      'NaN → #00ffff',
+      'undefined → #00ffff',
+      '0.5 → #7f7f7f'
+    ]);
+  });
+
+  it('the control: the pure blendColor in its place disagrees with the runtime on a blend that is not a number', () => {
+    expect(runtimeBlend(NaN, ['#ff0000', '#0000ff'])).toBe('#ff0000');
+    expect(lib.blendColor(NaN, '#ff0000', '#0000ff')).toBe('#NaNNaNNaN');
   });
 
   it('no colours at all is the #000000 initialize wrote, in both', () => {
@@ -232,6 +299,17 @@ describe('EXP-011 §38 §A — the emitted helpers against the interpreter', () 
   it('three-digit hex blends on all three channels, in both', () => {
     expect(lib.blendColor(0.5, '#000', '#fff')).toBe(runtimeBlend(0.5, ['#000', '#fff']));
     expect(lib.blendColor(0.5, '#000', '#fff')).toBe('#7f7f7f');
+  });
+
+  it('the control: a kept helper without either of its two interpreter rules disagrees with the runtime', () => {
+    // An `undefined` taken as a delivered blend: the runtime never receives it, and goes on showing 0.5's colour.
+    const forgetsTheBlend = loadUtilLib(utilLibSource().replace('if (blend !== undefined) shown.current.blend = blend;', 'shown.current.blend = blend;'));
+    const ref = { current: { blend: 0 as unknown } as { blend: unknown; color?: string } };
+    forgetsTheBlend.blendColorKept(ref, 0.5, '#ff0000', '#0000ff');
+    expect(forgetsTheBlend.blendColorKept(ref, undefined, '#ff0000', '#00ff00')).not.toBe(runtimeBlend(0.5, ['#ff0000', '#00ff00']));
+    // A first non-number kept as #000000: the runtime showed the colours at blend 0 before it arrived.
+    const seedsBlack = loadUtilLib(utilLibSource().replace('shown.current.color = blendColor(0, ...colors);', "shown.current.color = '#000000';"));
+    expect(seedsBlack.blendColorKept({ current: { blend: 0 } }, NaN, '#ff0000', '#0000ff')).not.toBe(runtimeBlend(NaN, ['#ff0000', '#0000ff']));
   });
 
   it('the control: a helper that rounds instead of flooring disagrees with the interpreter', () => {
@@ -385,6 +463,62 @@ describe('EXP-011 §38 §B — the translation', () => {
     expect(app.notes.join('\n')).not.toContain('moodBlend');
   });
 
+  /**
+   * P109-S21-EXPORTBLENDNAN. A wired Blend Value earns the kept call and its ref; the ref is recorded by BOTH walkers,
+   * so each read is graded alone (a render read, then a handler read with no render read beside it) and the emitted
+   * app typechecks — a walker that missed it prints a call naming a local nobody declared.
+   */
+  const wiredBlend = (notes: ComponentIR) => {
+    addNode(notes, {
+      id: 'moodBlend',
+      type: 'Color Blend',
+      authoredLabel: 'Mood colour',
+      parameters: [
+        { name: 'color 0', value: literal('#ff0000') },
+        { name: 'color 1', value: literal('#0000ff') }
+      ]
+    });
+    connect(notes, 'noteDraftVar', 'value', 'moodBlend', 'blendValue');
+  };
+
+  it('a wired Blend Value read in render prints the kept call over a ref the component declares', () => {
+    const app = withNotes((notes) => {
+      wiredBlend(notes);
+      connect(notes, 'moodBlend', 'result', 'notesHeading', 'text');
+    });
+    const page = notesFile(app);
+    expect(page).toMatch(/import \{ blendColorKept \} from '\.\.\/lib\/util';/);
+    const ref = /const (\w+) = useRef<\{ blend: unknown; color\?: string \}>\(\{ blend: 0 \}\);/.exec(page);
+    expect(ref).not.toBeNull();
+    expect(page).toMatch(new RegExp(`blendColorKept\\(${ref![1]}, \\w+, '#ff0000', '#0000ff'\\)`));
+    expect(app.files['src/lib/util.ts']).toContain('export function blendColorKept');
+    expect(typecheckEmittedApp(app)).toEqual([]);
+  });
+
+  it('a wired Blend Value read only in a handler declares the same ref', () => {
+    const app = withNotes((notes) => {
+      wiredBlend(notes);
+      addNode(notes, { id: 'sv', type: 'Set Variable', parameters: [{ name: 'name', value: literal('shade') }] });
+      connect(notes, 'moodBlend', 'result', 'sv', 'value');
+      connect(notes, 'addButton', 'onClick', 'sv', 'do', 'signal');
+    });
+    const page = notesFile(app);
+    const ref = /const (\w+) = useRef<\{ blend: unknown; color\?: string \}>\(\{ blend: 0 \}\);/.exec(page);
+    expect(ref).not.toBeNull();
+    expect(page).toContain(`blendColorKept(${ref![1]}, `);
+    expect(typecheckEmittedApp(app)).toEqual([]);
+  });
+
+  it('an authored Blend Value still prints the pure call, with no ref', () => {
+    const app = withNotes((notes) => {
+      addNode(notes, { id: 'moodBlend', type: 'Color Blend', parameters: [{ name: 'blendValue', value: literal(0.5) }] });
+      connect(notes, 'moodBlend', 'result', 'notesHeading', 'text');
+    });
+    const page = notesFile(app);
+    expect(page).toContain('blendColor(0.5)');
+    expect(page).not.toContain('blendColorKept');
+  });
+
   it('two wires into one colour port defer the read, with the reason the family shares', () => {
     const app = withNotes((notes) => {
       addNode(notes, { id: 'tintA', type: 'String', parameters: [{ name: 'value', value: literal('#00ff00') }] });
@@ -413,7 +547,8 @@ describe('EXP-011 §38 §C — tests/fixtures/mood-desk', () => {
 
   it('renders both calls', () => {
     expect(page).toContain("booleanToString(");
-    expect(page).toContain("blendColor(");
+    // The blend is wired from the `mood` Variable, so it is the kept call (P109-S21-EXPORTBLENDNAN).
+    expect(page).toContain("blendColorKept(moodColourShown, ");
     expect(page).toContain("'#ff0000', '#00ff00', '#0000ff'");
   });
 

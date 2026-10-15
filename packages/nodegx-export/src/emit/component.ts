@@ -535,6 +535,11 @@ export function emitComponent(
   // a registered hook nothing reads prints no line (§56 E1's rule, decided here at emit time).
   const usedCryptoHelpers = new Set<CryptoHelper | PatternHelper>();
   const usedScreenNodeIds = new Set<string>();
+  /**
+   * P109-S21-EXPORTBLENDNAN — the `useRef` locals a `blendColorKept` call reads, one per Color Blend. 🔴 Recorded by
+   * BOTH walkers, in the clause that earns the helper's import, so the declaration and the import cannot part.
+   */
+  const usedKeptLocals = new Set<string>();
   // EXP-011 §60. Whether an emitted expression or action reaches the record hook / the parent hook — the parent hook
   // prints only where something reads or writes through it; the record hook prints whenever the plan registered it
   // (the provider is owed to descendants even when the host itself reads nothing).
@@ -601,6 +606,7 @@ export function emitComponent(
     // nothing; only the arguments read anything.
     if (expr.kind === 'util-call') {
       usedUtilHelpers.add(expr.fn);
+      if (expr.kept !== undefined) usedKeptLocals.add(expr.kept);
       expr.args.forEach(collectExprUse);
     }
     // A read through the row earns that row; the chain-local form names a local the enclosing
@@ -1062,6 +1068,7 @@ export function emitComponent(
     }
     if (expr.kind === 'util-call') {
       usedUtilHelpers.add(expr.fn);
+      if (expr.kept !== undefined) usedKeptLocals.add(expr.kept);
       expr.args.forEach(hookExprSources);
     }
     if (expr.kind === 'now-out' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
@@ -2005,6 +2012,7 @@ export function emitComponent(
           const entries = expr.cases.map((c) => `${tsLiteral(c.from)}: ${c.to === undefined ? 'undefined' : tsLiteral(c.to)}`);
           printed.splice(1, 0, `{ ${entries.join(', ')} }`);
         }
+        if (expr.kept !== undefined) printed.unshift(expr.kept);
         return `${expr.fn}(${printed.join(', ')})`;
       }
       // One `const session = useSession()` per component, read the same way in both modes — the
@@ -4170,7 +4178,7 @@ export function emitComponent(
   }
   if (radioNameLocals.size > 0) reactImports.push('useId');
   // EXP-011 §39. The timer handle and the last value seen both live in refs.
-  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0) reactImports.push('useRef');
+  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0) reactImports.push('useRef');
   // EXP-011 §53. A task template's mount effect and its once-guard (StrictMode mounts twice; startTask pulses once).
   // EXP-011 §57. A Repeater Item's Added effect takes the same pair, for the same reason.
   if (plan.task !== undefined || plan.repeaterItems.length > 0) {
@@ -6553,6 +6561,9 @@ export function emitComponent(
         ? `export function ${symbol}(_props: ${symbol}Props) {`
         : `export function ${symbol}() {`;
   body.push(signature);
+  // P109-S21-EXPORTBLENDNAN. A Color Blend's memory (the blend it last received, the colour it last showed), first:
+  // it reads nothing, and a render local may read it.
+  for (const local of usedKeptLocals) body.push(`  const ${local} = useRef<{ blend: unknown; color?: string }>({ blend: 0 });`);
   if (usesNavigate) body.push('  const navigate = useNavigate();');
   // EXP-011 Tier 2.5. `useSearchParams` returns a tuple whose setter this slice never uses —
   // nothing in the vocabulary writes the query string.

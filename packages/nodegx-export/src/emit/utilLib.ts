@@ -38,7 +38,7 @@ import { ParseHelper, isParseHelper, parseOutputMayBeUndefined, parseSelectorOf 
 export const UTIL_LIB_PATH = 'src/lib/util.ts';
 
 /** The exported helpers, one per translated node. Sorted — the import list is sorted too. */
-export const UTIL_HELPERS = ['blendColor', 'booleanToString', 'log', 'mapString', 'pickFile', 'remapNumber', 'substring'] as const;
+export const UTIL_HELPERS = ['blendColor', 'blendColorKept', 'booleanToString', 'log', 'mapString', 'pickFile', 'remapNumber', 'substring'] as const;
 
 /**
  * A `util-call`'s verb. EXP-011 §75 widens it by the four parse helpers, which live in `src/lib/parse.ts`
@@ -62,6 +62,8 @@ export type UtilHelper = (typeof UTIL_HELPERS)[number] | ParseHelper;
 export const UTIL_HELPER_MAY_BE_UNDEFINED: Record<UtilHelper, boolean> = {
   // EXP-011 §38: a string from two coerced strings, and a hex string (or `#000000`) — never absent.
   blendColor: false,
+  // P109-S21-EXPORTBLENDNAN: `blendColor`'s answer, or the colour last shown — a string either way.
+  blendColorKept: false,
   booleanToString: false,
   // EXP-011 §39: a write, not a read — `log` returns nothing and no expression is ever built from it.
   log: false,
@@ -221,6 +223,36 @@ export function utilLibSource(): string {
     "    return hex.length === 1 ? '0' + hex : hex;",
     '  };',
     "  return '#' + [0, 1, 2].map((i) => part(Math.floor(from[i] + (to[i] - from[i]) * t))).join('');",
+    '}',
+    '',
+    '/**',
+    ' * `Color Blend` with a wired Blend Value. `shown` is the node\'s memory, one per instance: the blend it',
+    ' * last received (0, the default, until one arrives) and the colour it last showed.',
+    ' *',
+    ' * Three rules of the interpreter, all kept here:',
+    ' * - **`undefined` is never delivered.** `Node.sendValue` drops it, so a wire whose source is unset leaves',
+    ' *   the previous blend in place, and the node keeps blending the colours with it.',
+    ' * - **A blend that is not a number keeps the colour last shown** (P107-D8, ruled "Keep last colour, warn',
+    ' *   once"), even while the colours change. The warning has no bus in an exported app, so keeping the',
+    ' *   colour is the whole of the behaviour here, as it is for a colour `blendColor` cannot read.',
+    ' * - **Before the first blend, the node showed the colours at blend 0**: an authored colour is set when',
+    ' *   the node is created, and each colour setter blends with the default. So a blend that is not a',
+    ' *   number from the start keeps that colour, and `#000000` only when there are no colours.',
+    ' *',
+    ' * `blendColor` itself stays pure.',
+    ' */',
+    'export function blendColorKept(',
+    '  shown: { current: { blend: unknown; color?: string } },',
+    '  blend: unknown,',
+    '  ...colors: unknown[]',
+    '): string {',
+    '  if (blend !== undefined) shown.current.blend = blend;',
+    '  if (Number.isNaN(Number(shown.current.blend))) {',
+    '    if (shown.current.color === undefined) shown.current.color = blendColor(0, ...colors);',
+    '    return shown.current.color;',
+    '  }',
+    '  shown.current.color = blendColor(shown.current.blend, ...colors);',
+    '  return shown.current.color;',
     '}',
     '',
     '/**',
