@@ -33,7 +33,8 @@
 //   phone     no sideways scroll and no shown text past the right edge at 390 wide
 //   gaps      at 1280: no row with a hole between its parts' ink (render-measure's row-gap; s5 LAPTOPGAPS, R39)
 //   align     at 1280: no section centred by its heading with a part off that centre (alignment-drift)
-//   laptop    at 1280×800 the layout differs: two feature titles side by side, or ≥2 pairs of long text lines side by
+//   laptop    at 1280×800 the layout differs: two feature titles side by side, or more pairs of a long text line beside
+//             another or beside a picture (s7, TL1: text beside its photo) than the phone has; was: ≥2 pairs of long text lines side by
 //             side (phone has none)
 // A press is a real CDP mouse press at the element's centre, its target re-read just before; typing is CDP insertText
 // into the focused field, then a settle. Text is read from text nodes whose element is SHOWN (no display:none,
@@ -47,6 +48,9 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { kitTarball, hasTarball } from '../own-018/kit-tarball.mjs';
+// OWN-019 s7 (NODE20): the grader talks CDP over Node's global WebSocket (Node ≥ 22). A lane started from a shell
+// whose PATH found /usr/local/bin/node (v20) graded nothing: say so before a preview starts.
+if (typeof WebSocket === 'undefined') throw new Error(`this grader needs Node 22 or later (a global WebSocket); this is Node ${process.version} at ${process.execPath}`);
 // s5 LAPTOPGAPS (R39): the render measure itself, so this grader and render_report read a laptop page the same way.
 const rm = createRequire(import.meta.url)('../../../../packages/nodegx-render-measure/src/index.js');
 
@@ -358,11 +362,15 @@ try {
 
   // hero
   const hero = await page(`(() => {
-    const b = heroJoin();
+    // s7 (TL1): a top bar can carry its own "Join the waitlist" pill above the hero, with nothing above it. The hero's
+    // button is the first one in the first 1.5 screens with the pitch above it; the form's lower down never counts.
+    const top = (e) => e.getBoundingClientRect().top + scroller().scrollTop;
+    const lines = (b) => leaves(/\\S/).filter((l) => top(l) < top(b) && own(l).split(' ').length >= 3 && !/^\\s*Driftwood\\s*$/i.test(own(l)) && !${reSrc(RE.joinHero)}.test(own(l))).map((l) => own(l).slice(0, 80));
+    const near = leaves(${reSrc(RE.joinHero)}).map(outer).filter((e) => top(e) < 1.5 * innerHeight).sort((a, c) => top(a) - top(c));
+    const b = near.find((e) => lines(e).length >= 2) || near[0] || heroJoin();
     if (!b) return { button: null };
-    const bt = b.getBoundingClientRect().top + scroller().scrollTop;
     const name = leaves(${reSrc(RE.name)})[0];
-    const above = leaves(/\\S/).filter((l) => l.getBoundingClientRect().top + scroller().scrollTop < bt && own(l).split(' ').length >= 3 && !/^\\s*Driftwood\\s*$/i.test(own(l))).map((l) => own(l).slice(0, 80));
+    const above = lines(b);
     return { button: { text: norm(b.textContent), ...at(b, false) }, nameShown: !!name, nameTop: name ? name.getBoundingClientRect().top : null, above };
   })()`);
   check('hero', loaded !== null && hero.button && hero.nameShown && hero.above?.length >= 2, { name: hero.nameShown, lines: hero.above, button: hero.button?.text ?? null });
@@ -605,6 +613,11 @@ try {
     const ls = leaves(/\\S/).filter((l) => own(l).length >= 20).map((l) => { const r = l.getBoundingClientRect(); return { t: r.top + scroller().scrollTop, b: r.bottom + scroller().scrollTop, l: r.left, r: r.right }; });
     let n = 0;
     for (let i = 0; i < ls.length; i++) for (let j = i + 1; j < ls.length; j++) { const a = ls[i], b = ls[j]; if (Math.min(a.b, b.b) - Math.max(a.t, b.t) > 4 && (a.r <= b.l + 2 || b.r <= a.l + 2)) n++; }
+    // s7 (TL1): a long line beside a picture is a pair too — each feature's text beside its photo, stacked on a phone.
+    // A picture is a shown <img> or a background-image of at least 120×80; one behind the text (a hero) overlaps it, so
+    // is never beside it.
+    const pics = [...document.querySelectorAll('body *')].filter((e) => shown(e) && (e.tagName === 'IMG' || /url\\(/.test(getComputedStyle(e).backgroundImage))).map((e) => { const r = e.getBoundingClientRect(); return { t: r.top + scroller().scrollTop, b: r.bottom + scroller().scrollTop, l: r.left, r: r.right, w: r.width, h: r.height }; }).filter((p) => p.w >= 120 && p.h >= 80);
+    for (const a of ls) for (const p of pics) if (Math.min(a.b, p.b) - Math.max(a.t, p.t) > 4 && (a.r <= p.l + 2 || p.r <= a.l + 2)) n++;
     const ft = FEATURES.map((t) => { const l = leaves(exact(t))[0]; if (!l) return null; const r = l.getBoundingClientRect(); return { top: Math.round(r.top + scroller().scrollTop), left: Math.round(r.left) }; });
     const featsRow = ft.filter(Boolean).some((a, i, all) => all.some((b, j) => j !== i && Math.abs(a.top - b.top) < 30 && Math.abs(a.left - b.left) > 50));
     return { pairs: n, features: ft, featsRow };

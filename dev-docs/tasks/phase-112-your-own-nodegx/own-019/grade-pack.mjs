@@ -37,6 +37,9 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { kitTarball, hasTarball } from '../own-018/kit-tarball.mjs';
+// OWN-019 s7 (NODE20): the grader talks CDP over Node's global WebSocket (Node ≥ 22). A lane started from a shell
+// whose PATH found /usr/local/bin/node (v20) graded nothing: say so before a preview starts.
+if (typeof WebSocket === 'undefined') throw new Error(`this grader needs Node 22 or later (a global WebSocket); this is Node ${process.version} at ${process.execPath}`);
 
 const argv = process.argv.slice(2);
 const opt = (name, dflt) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : dflt; };
