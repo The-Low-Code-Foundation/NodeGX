@@ -41,6 +41,11 @@ import {
 import { YOUNG_GENERATORS, YOUNG_KINDS, YOUNG_SKILLS } from './tpl013Young';
 import { JSS_SKILLS, JSS_SOURCES } from './tpl013Jss';
 import { BANK_SKILLS, BANK_SOURCES, BANK_TOPICS } from './tpl013Banks';
+import { QR_SKILLS, REASONING_SKILLS, REASONING_TOPICS, VR_SKILLS } from './tpl013Reasoning';
+import { GEO_SKILLS, GEO_SOURCES, GEO_TOPICS } from './tpl013Geography';
+
+/** SC-4's list banks: English, Basic Science, Verbal Reasoning and Geography. Quantitative Reasoning is a generator. */
+const TEXT_BANKS = [...BANK_SKILLS, ...VR_SKILLS, ...GEO_SKILLS];
 
 jest.setTimeout(600_000);
 
@@ -116,7 +121,7 @@ describe('TPL-013 the edition', () => {
     const skills = editionCurriculum();
     expect(skills.every((s) => CLASSES.includes(String(s.level)))).toBe(true);
     expect(skills.filter((s) => s.subject === 'history' || s.subject === 'typing')).toEqual([]);
-    expect(skills.length).toBe(CURRICULUM.filter((s) => s.subject !== 'history' && s.subject !== 'typing').length + YOUNG_SKILLS.length + JSS_SKILLS.length + BANK_SKILLS.length);
+    expect(skills.length).toBe(CURRICULUM.filter((s) => s.subject !== 'history' && s.subject !== 'typing').length + YOUNG_SKILLS.length + JSS_SKILLS.length + BANK_SKILLS.length + REASONING_SKILLS.length + GEO_SKILLS.length);
     const used = new Set(skills.map((s) => s.teach).filter(Boolean));
     expect(editionTeachCards().every((c) => used.has(c.id))).toBe(true);
   });
@@ -210,7 +215,7 @@ describe('TPL-013 SC-1 nine classes', () => {
     const skills = editionCurriculum();
     expect(skills.filter((s) => s.beyond)).toEqual([]);
     // SC-3's own JSS1 maths and SC-4's JSS1 banks sit beside them.
-    expect(skills.filter((s) => String(s.level) === 'JSS1' && !JSS_SKILLS.includes(s) && !BANK_SKILLS.includes(s)).map((s) => s.id).sort()).toEqual(CURRICULUM.filter((s) => s.beyond).map((s) => s.id).sort());
+    expect(skills.filter((s) => String(s.level) === 'JSS1' && !JSS_SKILLS.includes(s) && !TEXT_BANKS.includes(s)).map((s) => s.id).sort()).toEqual(CURRICULUM.filter((s) => s.beyond).map((s) => s.id).sort());
   });
 
   it.each(CLASSES)('%s: Number Hunt builds its own class’s grids, 1–3 ways each, no square over the class’s biggest', (level) => {
@@ -812,18 +817,18 @@ describe('TPL-013 s5 Number Hunt and Make Ten play at the rating’s class; P1�
   });
 });
 
-describe('TPL-013 SC-4 the text banks: English and Basic Science', () => {
+describe('TPL-013 SC-4 the text banks: English, Basic Science, Verbal Reasoning and Geography', () => {
   type Item = { q: string; a: string; opts?: string[]; note?: { en: string }; src?: string };
   const itemsOf = (sk: { params: Record<string, unknown> }) => (sk.params as { items: Item[] }).items;
-  const text = (sk: (typeof BANK_SKILLS)[number]) => JSON.stringify(sk);
+  const text = (sk: (typeof TEXT_BANKS)[number]) => JSON.stringify(sk);
   const ask = (id: string, lang = 'en') =>
     runScript(scriptOf('Logic/Pick next question'), {
       curriculum: editionCurriculum(),
-      model: ratedAt(String(BANK_SKILLS.find((x) => x.id === id)!.level)),
+      model: ratedAt(String([...TEXT_BANKS, ...QR_SKILLS].find((x) => x.id === id)!.level)),
       level: 'P3',
       lang,
       layout: 'qwerty',
-      mode: String(BANK_SKILLS.find((x) => x.id === id)!.subject),
+      mode: String([...TEXT_BANKS, ...QR_SKILLS].find((x) => x.id === id)!.subject),
       answerMode: 'auto',
       focus: [id],
       wordLists: [{ lang: 'en', words: WORD_LISTS.en }, { lang: 'fr', words: WORD_LISTS.fr }],
@@ -834,7 +839,7 @@ describe('TPL-013 SC-4 the text banks: English and Basic Science', () => {
     const subjects = edition.subjects.map((x) => x.id);
     const topics = editionTopics().map((t) => t.id);
     const rocketIds = new Set(CURRICULUM.map((x) => x.id));
-    for (const sk of BANK_SKILLS) {
+    for (const sk of TEXT_BANKS) {
       expect({ id: sk.id, level: CLASSES.indexOf(String(sk.level)) >= CLASSES.indexOf('P3'), subject: subjects.includes(String(sk.subject)), topic: topics.includes(String(sk.topic)), fresh: !rocketIds.has(sk.id) }).toEqual({ id: sk.id, level: true, subject: true, topic: true, fresh: true });
       expect(itemsOf(sk).length).toBeGreaterThanOrEqual(8);
     }
@@ -842,20 +847,20 @@ describe('TPL-013 SC-4 the text banks: English and Basic Science', () => {
   });
 
   it('🔴 no two items of a skill share the engine’s key (their first 48 characters)', () => {
-    for (const sk of BANK_SKILLS) {
+    for (const sk of TEXT_BANKS) {
       const keys = itemsOf(sk).map((it) => it.q.slice(0, 48));
       expect({ id: sk.id, dup: keys.filter((k, i) => keys.indexOf(k) !== i) }).toEqual({ id: sk.id, dup: [] });
     }
   });
 
   it('an item with its own buttons has its answer among them once, and at least one other', () => {
-    for (const sk of BANK_SKILLS) for (const it of itemsOf(sk)) if (it.opts) {
+    for (const sk of TEXT_BANKS) for (const it of itemsOf(sk)) if (it.opts) {
       expect({ q: it.q, once: it.opts.filter((o) => o === it.a).length, others: it.opts.length - 1 >= 1, distinct: new Set(it.opts).size === it.opts.length }).toEqual({ q: it.q, once: 1, others: true, distinct: true });
     }
   });
 
   it('🔴 a bank whose buttons are the other items’ answers never uses a question word as an answer (it would be right twice)', () => {
-    for (const sk of BANK_SKILLS) {
+    for (const sk of TEXT_BANKS) {
       const bare = itemsOf(sk).filter((it) => !it.opts);
       if (!bare.length) continue;
       const qs = new Set(bare.map((it) => it.q));
@@ -864,25 +869,30 @@ describe('TPL-013 SC-4 the text banks: English and Basic Science', () => {
     }
   });
 
-  it('🔴 every science item names a source the table has, and every source is used', () => {
+  it.each([
+    ['science', BANK_SOURCES],
+    ['geography', GEO_SOURCES]
+  ] as const)('🔴 every %s item names a source the table has, and every source is used', (subject, sources) => {
     const used = new Set<string>();
-    for (const sk of BANK_SKILLS.filter((x) => x.subject === ('science' as never))) for (const it of itemsOf(sk)) {
-      expect({ q: it.q, src: !!it.src && it.src in BANK_SOURCES }).toEqual({ q: it.q, src: true });
+    const skills = TEXT_BANKS.filter((x) => x.subject === (subject as never));
+    expect(skills.length).toBeGreaterThan(0);
+    for (const sk of skills) for (const it of itemsOf(sk)) {
+      expect({ q: it.q, src: !!it.src && it.src in sources }).toEqual({ q: it.q, src: true });
       used.add(String(it.src));
     }
-    expect(Object.keys(BANK_SOURCES).filter((k) => !used.has(k))).toEqual([]);
+    expect(Object.keys(sources).filter((k) => !used.has(k))).toEqual([]);
   });
 
   it('British spelling, and none of the research’s traps (§2.2.4)', () => {
     const us = /\b(color|colors|center|favorite|neighbor|gray|program|organize|recognize|practise\b(?= is)|meter\b|liter\b|aluminum|diarrhea|fiber|behavior|tumor)\b/i;
     const traps = /Sheba|richest|never colon|\b5[45] countries|Ghana Empire.*\d{3,4}|discovered/i;
-    for (const sk of BANK_SKILLS) expect({ id: sk.id, us: us.exec(text(sk))?.[0] ?? null, trap: traps.exec(text(sk))?.[0] ?? null }).toEqual({ id: sk.id, us: null, trap: null });
+    for (const sk of TEXT_BANKS) expect({ id: sk.id, us: us.exec(text(sk))?.[0] ?? null, trap: traps.exec(text(sk))?.[0] ?? null }).toEqual({ id: sk.id, us: null, trap: null });
     // The known-firing controls: each pattern sees what it is for.
     expect(us.test('my favorite color')).toBe(true);
     expect(traps.test('Mansa Musa, the richest man')).toBe(true);
   });
 
-  it.each(BANK_SKILLS.map((x) => x.id))('%s: the picker asks it, with the answer among two to four distinct buttons', (id) => {
+  it.each(TEXT_BANKS.map((x) => x.id))('%s: the picker asks it, with the answer among two to four distinct buttons', (id) => {
     for (let n = 0; n < 25; n++) {
       const q = ask(id);
       expect(q.skillId).toBe(id);
@@ -890,20 +900,108 @@ describe('TPL-013 SC-4 the text banks: English and Basic Science', () => {
     }
   });
 
-  it('the chooser offers Maths, English, Science and French, and Rocket School’s English word lists sit under French as French words', () => {
+  it('the chooser offers Maths, English, Science, Reasoning, Geography and French, and Rocket School’s English word lists sit under French as French words', () => {
+    expect(edition.subjects.map((x) => x.id)).toEqual(['maths', 'english', 'science', 'reasoning', 'geography', 'french']);
     expect(scriptOf('Logic/Focus choices')).toContain(`var SUBJECTS = ${JSON.stringify(edition.subjects)};`);
     const moved = editionTopics().find((t) => t.id === 'en-vocab')!;
     expect(moved).toMatchObject({ subject: 'french', name: { en: 'French words' } });
     const vocab = editionCurriculum().filter((x) => x.topic === 'en-vocab');
     expect(vocab.length).toBeGreaterThan(5);
     expect(vocab.every((x) => x.subject === 'french')).toBe(true);
-    for (const t of BANK_TOPICS) expect(editionTopics().map((x) => x.id)).toContain(t.id);
+    for (const t of [...BANK_TOPICS, ...REASONING_TOPICS, ...GEO_TOPICS]) expect(editionTopics().map((x) => x.id)).toContain(t.id);
   });
 
   it('a P3 Science race asks only science (the subject is the mode)', () => {
     for (let n = 0; n < 40; n++) {
       const q = pick({ level: 'P3', mode: 'science', model: ratedAt('P3') });
       expect(String(editionCurriculum().find((x) => x.id === q.skillId)?.subject)).toBe('science');
+    }
+  });
+
+  it('Reasoning is P4–P6, where the Common Entrance is; Geography is P4–JSS3; each class has some', () => {
+    const at = (skills: ReadonlyArray<{ level: unknown }>) => [...new Set(skills.map((x) => String(x.level)))].sort((a, b) => CLASSES.indexOf(a) - CLASSES.indexOf(b));
+    expect(at(REASONING_SKILLS)).toEqual(['P4', 'P5', 'P6']);
+    expect(at(GEO_SKILLS)).toEqual(['P4', 'P5', 'P6', 'JSS1', 'JSS2', 'JSS3']);
+    expect(REASONING_SKILLS.every((x) => x.subject === ('reasoning' as never))).toBe(true);
+    expect(GEO_SKILLS.every((x) => x.subject === ('geography' as never))).toBe(true);
+  });
+
+  it.each([
+    ['P4', 'reasoning'],
+    ['P6', 'reasoning'],
+    ['P4', 'geography'],
+    ['JSS3', 'geography']
+  ])('a %s %s race asks only that subject', (level, mode) => {
+    for (let n = 0; n < 30; n++) {
+      const q = pick({ level, mode, model: ratedAt(level) });
+      expect(String(editionCurriculum().find((x) => x.id === q.skillId)?.subject)).toBe(mode);
+    }
+  });
+
+  it('an alphabetical-order item’s answer is the word a dictionary lists first, among its four', () => {
+    for (const it of itemsOf(VR_SKILLS.find((x) => x.id === 'vr-alphabet')!)) {
+      const sorted = [...it.opts!].sort((x, y) => x.toLowerCase().localeCompare(y.toLowerCase()));
+      expect({ q: it.q, first: sorted[0] }).toEqual({ q: it.q, first: it.a });
+    }
+  });
+
+  it('a code item’s answer follows the code its question shows (each letter moved on, back, or the word reversed)', () => {
+    const shift = (w: string, k: number) => w.replace(/[A-Z]/g, (ch) => String.fromCharCode(((ch.charCodeAt(0) - 65 + k + 26) % 26) + 65));
+    let read = 0;
+    for (const it of itemsOf(VR_SKILLS.find((x) => x.id === 'vr-codes')!)) {
+      const m = /([A-Z]{2,}) is written ([A-Z]{2,})[,.] How is ([A-Z]{2,}) written\?/i.exec(it.q);
+      if (!m) continue; // the number codes are read by their note
+      const [, from, to, ask] = m;
+      const rule = to === [...from].reverse().join('') ? (w: string) => [...w].reverse().join('') : (w: string) => shift(w, to.charCodeAt(0) - from.charCodeAt(0));
+      expect({ q: it.q, coded: rule(from) === to, a: rule(ask) }).toEqual({ q: it.q, coded: true, a: it.a });
+      read++;
+    }
+    expect(read).toBeGreaterThanOrEqual(8);
+    // The known-firing control: a shift the item does not use gives another word.
+    expect(shift('DOG', 2)).not.toBe('EPH');
+  });
+
+  /** The rules a Common Entrance number pattern follows; a list fits one when every step obeys it. */
+  function fitsARule(ns: number[]): boolean {
+    const d = ns.slice(1).map((n, i) => n - ns[i]);
+    const same = (xs: number[]) => xs.every((x) => x === xs[0]);
+    if (same(d)) return true;
+    if (ns.every((n) => n !== 0) && same(ns.slice(1).map((n, i) => n / ns[i]))) return true;
+    if (same(d.slice(1).map((x, i) => x - d[i]))) return true;
+    return d.length >= 4 && same(d.filter((_, i) => i % 2 === 0)) && same(d.filter((_, i) => i % 2 === 1));
+  }
+
+  it('the rule-reader sees a pattern and refuses a near miss (the control)', () => {
+    expect([[3, 6, 9, 12, 15], [3, 6, 12, 24, 48], [1, 4, 9, 16, 25], [2, 8, 5, 11, 8, 14], [48, 24, 12, 6, 3]].map(fitsARule)).toEqual([true, true, true, true, true]);
+    expect([[3, 6, 9, 12, 16], [3, 6, 12, 24, 36], [1, 4, 9, 16, 23], [2, 8, 5, 11, 8, 13]].map(fitsARule)).toEqual([false, false, false, false]);
+  });
+
+  it.each(QR_SKILLS.map((x) => x.id))('%s: 60 questions in both languages; exactly one button fits a rule, and it is the answer', (id) => {
+    for (let n = 0; n < 60; n++) {
+      const lang = n % 2 ? 'fr' : 'en';
+      const q = ask(id, lang);
+      expect(q.skillId).toBe(id);
+      expect(q.optionValues.length).toBe(4);
+      expect(new Set(q.optionValues).size).toBe(4);
+      expect(q.optionValues).toContain(q.answer);
+      for (const text of [q.prompt, q.worked, ...q.options]) expect(String(text)).not.toMatch(/undefined|NaN|null|Infinity|-/);
+      // 🔴 Second reader, s6: a falling series ending at 1 offered a 0 button.
+      expect(q.optionValues.filter((v: string) => Number(v) <= 0)).toEqual([]);
+      const fit = q.optionValues.filter((v: string) => {
+        if (id === 'qr-rule') {
+          const pairs = [...String(q.prompt).matchAll(/(\d+)\u00a0→\u00a0(\d+|\?)/g)].map((m) => [Number(m[1]), m[2] === '?' ? Number(v) : Number(m[2])]);
+          expect(pairs.length).toBe(3);
+          // 🔴 Second reader, s6: when the examples add up to the ×, x × x + k fits them too; its answer must not be a button.
+          const sq = pairs[0][1] - pairs[0][0] ** 2;
+          if (pairs[1][1] === pairs[1][0] ** 2 + sq && v !== q.answer && Number(v) === pairs[2][0] ** 2 + sq) return true;
+          const k = (pairs[1][1] - pairs[0][1]) / (pairs[1][0] - pairs[0][0]);
+          return Number.isInteger(k) && pairs[2][1] === pairs[0][1] + k * (pairs[2][0] - pairs[0][0]);
+        }
+        const list = String(q.prompt).split(': ').pop()!.split(', ');
+        expect(list.filter((x) => x === '?').length).toBe(1);
+        return fitsARule(list.map((x) => Number(x === '?' ? v : x)));
+      });
+      expect({ prompt: q.prompt, fit }).toEqual({ prompt: q.prompt, fit: [q.answer] });
     }
   });
 });

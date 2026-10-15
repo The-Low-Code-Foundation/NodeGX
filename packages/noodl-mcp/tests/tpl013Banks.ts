@@ -50,7 +50,7 @@
 import type { Skill } from './tpl007Curriculum';
 import type { ListItem } from './tpl007Subjects';
 
-const s = (en: string, fr: string) => ({ en, fr });
+export const s = (en: string, fr: string) => ({ en, fr });
 
 /**
  * Where each fact comes from. A curriculum topic (the briefing's §3 list of what every country's Basic Science teaches,
@@ -76,13 +76,13 @@ export const BANK_SOURCES: Readonly<Record<string, string>> = {
 };
 
 /** A gap-fill: the sentence with ___, the right word, and the buttons (the right one among them). */
-const gap = (q: string, a: string, opts: string[], note?: string): ListItem => ({ q, a, opts, ...(note ? { note: s(note, note) } : {}) });
+export const gap = (q: string, a: string, opts: string[], note?: string): ListItem => ({ q, a, opts, ...(note ? { note: s(note, note) } : {}) });
 /** A spelling: the sentence with ___, the right spelling first, then three wrong ones a child really writes. */
 const spell = (q: string, right: string, wrong: [string, string, string]): ListItem => ({ q, a: right, opts: [right, ...wrong] });
 /** A pair: the word and its answer; the wrong buttons are the other items' answers. */
-const pair = (q: string, a: string, note?: string): ListItem => ({ q, a, ...(note ? { note: s(note, note) } : {}) });
+export const pair = (q: string, a: string, note?: string): ListItem => ({ q, a, ...(note ? { note: s(note, note) } : {}) });
 /** A science fact: its question, its answer, its buttons (or none: the other items' answers), its source, and a note. */
-const fact = (q: string, a: string, src: string, opts?: string[], note?: string): ListItem & { src: string } => ({
+export const fact = (q: string, a: string, src: string, opts?: string[], note?: string): ListItem & { src: string } => ({
   q,
   a,
   ...(opts ? { opts } : {}),
@@ -414,12 +414,13 @@ const CELLS_LIFE: ListItem[] = [
 
 // ── The skills ──────────────────────────────────────────────────────────────
 
-type Level = 'P3' | 'P4' | 'P5' | 'P6' | 'JSS1' | 'JSS2' | 'JSS3';
+export type Level = 'P3' | 'P4' | 'P5' | 'P6' | 'JSS1' | 'JSS2' | 'JSS3';
 
-function bank(
+/** A `generator: "list"` skill: its items, and the words it asks them with. Also used by tpl013Reasoning.ts and tpl013Geography.ts. */
+export function bank(
   id: string,
   level: Level,
-  subject: 'english' | 'science',
+  subject: 'english' | 'science' | 'reasoning' | 'geography',
   topic: string,
   diff: number,
   name: { en: string; fr: string },

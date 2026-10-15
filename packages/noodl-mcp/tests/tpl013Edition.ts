@@ -44,6 +44,8 @@ import { DISPLAY_FONT } from './tpl007Theme';
 import { YOUNG_CASES, YOUNG_GENERATORS, YOUNG_SKILLS, YOUNG_TOPIC } from './tpl013Young';
 import { JSS_CASES, JSS_GENERATORS, JSS_SKILLS, JSS_TOPICS } from './tpl013Jss';
 import { BANK_SKILLS, BANK_TOPICS } from './tpl013Banks';
+import { QR_CASES, QR_GENERATORS, REASONING_SKILLS, REASONING_TOPICS } from './tpl013Reasoning';
+import { GEO_SKILLS, GEO_TOPICS } from './tpl013Geography';
 import { TEMPLATE_ID as ROCKET_ID, TEMPLATE_PROJECT_NAME as ROCKET_NAME } from './tpl007Template';
 
 export interface Edition {
@@ -206,10 +208,11 @@ export const AFRICA_EDITION: Edition = {
   },
   // TPL-013 §2.2.2: P1–P2 cannot read the questions, so their skills are numbers and pictures (tpl013Young.ts).
   // SC-3: JSS1–JSS3's own maths, each pinned to a programme topic (tpl013Jss.ts), so they no longer borrow P6's.
-  // SC-4: the text banks, English and Basic Science (tpl013Banks.ts), from P3.
-  addSkills: [...YOUNG_SKILLS, ...JSS_SKILLS, ...BANK_SKILLS],
-  addTopics: [YOUNG_TOPIC, ...JSS_TOPICS, ...BANK_TOPICS],
-  addGenerators: { code: YOUNG_GENERATORS + JSS_GENERATORS, cases: YOUNG_CASES + JSS_CASES },
+  // SC-4: the text banks, English and Basic Science (tpl013Banks.ts), from P3; Verbal and Quantitative Reasoning, P4–P6
+  // (tpl013Reasoning.ts, Nigeria's Common Entrance); Africa and world geography, P4–JSS3 (tpl013Geography.ts).
+  addSkills: [...YOUNG_SKILLS, ...JSS_SKILLS, ...BANK_SKILLS, ...REASONING_SKILLS, ...GEO_SKILLS],
+  addTopics: [YOUNG_TOPIC, ...JSS_TOPICS, ...BANK_TOPICS, ...REASONING_TOPICS, ...GEO_TOPICS],
+  addGenerators: { code: YOUNG_GENERATORS + JSS_GENERATORS + QR_GENERATORS, cases: YOUNG_CASES + JSS_CASES + QR_CASES },
   // Richard, 2026-10-14: "We can dump typing practice for sure". The keyboard layout only ever served typing.
   dropSubjects: ['history', 'typing'],
   // SC-4. English is the language of school here, so its glyph is a letter, not a flag.
@@ -217,6 +220,8 @@ export const AFRICA_EDITION: Edition = {
     { id: 'maths', name: { en: 'Maths', fr: 'Maths' }, glyph: '🔢' },
     { id: 'english', name: { en: 'English', fr: 'Anglais' }, glyph: '🔤' },
     { id: 'science', name: { en: 'Science', fr: 'Sciences' }, glyph: '🔬' },
+    { id: 'reasoning', name: { en: 'Reasoning', fr: 'Raisonnement' }, glyph: '🧩' },
+    { id: 'geography', name: { en: 'Geography', fr: 'Géographie' }, glyph: '🌍' },
     { id: 'french', name: { en: 'French', fr: 'Français' }, glyph: '📝' }
   ],
   moveTopics: { 'en-vocab': { subject: 'french', name: { en: 'French words', fr: 'Mots anglais' } } },

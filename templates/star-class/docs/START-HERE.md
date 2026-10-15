@@ -1,6 +1,6 @@
 # Star Class
 
-Maths, English, Science and French practice for school children from P1 to JSS3 (P1, P2, P3, P4, P5, P6, JSS1, JSS2, JSS3), in an
+Maths, English, Science, Reasoning, Geography and French practice for school children from P1 to JSS3 (P1, P2, P3, P4, P5, P6, JSS1, JSS2, JSS3), in an
 English or French interface, built entirely out of NodeGX nodes. Press **Run**, make a player, and race the computer
 to the planet.
 
@@ -18,7 +18,7 @@ another device.
 ## The first thing to change
 
 Open **Data/Curriculum** and find the node labelled **"the skills — this list IS the school"**. One entry is one
-skill, with the class it starts in (`"level": "P3"`). 133 skills ship: maths (73), English (16), Science (11) and French (33).
+skill, with the class it starts in (`"level": "P3"`). 154 skills ship: maths (73), English (16), Science (11), Reasoning (10), Geography (11) and French (33).
 Add an entry and every game can ask about it.
 
 ## How it is made
