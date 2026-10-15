@@ -169,9 +169,8 @@
       "why": "Colours an author icon only, and an author icon on a control is refused out loud"
     },
     "net.noodl.controls.options.placeholderOpacity": {
-      "class": "gap",
-      "why": "The runtime dims the placeholder option; the export tags the port as consumed and never reads it",
-      "bug": "P18-S110-PLACEHOLDEROPACITY"
+      "class": "gated",
+      "why": "Carried (P18-S110-PLACEHOLDEROPACITY, s112): the fade is a rule on the hidden placeholder option, so it reaches only with a Placeholder set, and no probe context sets one; graded by tests/the-dropdown-placeholder.test.ts"
     },
     "net.noodl.controls.options.sizeMode": {
       "class": "gated",

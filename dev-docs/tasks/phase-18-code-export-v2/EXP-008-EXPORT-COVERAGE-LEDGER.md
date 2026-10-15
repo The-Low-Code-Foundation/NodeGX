@@ -276,3 +276,16 @@ Path, and the four style ports are **said** (`routerNotes`, both channels), with
 the export byte-identical. **Graded:** `tests/the-router-itself.test.ts` (24); mutants: no prefix → exactly 2 red,
 no notes → exactly 12 red, as predicted. Ledger: six rows out of `silent`, floor 1,227 → 1,233; HLS-001 unmoved.
 **2 gap ports remain:** P18-S110-PLACEHOLDEROPACITY, P18-S111-RECORDLIVE.
+
+**Then the Dropdown placeholder's fade (P18-S110-PLACEHOLDEROPACITY), rendered first — carried, and `gated`.** Three
+Dropdowns in one Chrome (`s112-placeholder-render/`): the visible fade is 0.5 / 1 / 0.3 in the runtime, 1 / 1 / 1 at
+HEAD, 0.5 / 1 / 0.3 patched. The runtime fades only its label span; the export's placeholder is the hidden option
+`renderSelect` selects, so `computeRoleCss` gives the select a `:has(> option[hidden]:checked)` rule mixing its text
+colour toward transparent by the opacity (clamped as CSS clamps), and keeps the open list's options at full colour.
+**Graded:** `tests/the-dropdown-placeholder.test.ts` (9); the mutant (no rule) turns exactly the 5 predicted cases red.
+HLS-001 unmoved (no corpus Dropdown has a placeholder). 🔴 **The probe still reads the port silent, correctly:** the
+fade exists only with a placeholder, and no probe context sets one. So the port moves `gap` → `gated`, not into the
+floor, which stays 1,233. The render also showed what is not this row, filed as P18-S112-NATIVESELECT: the exported
+Dropdown is the native select (its box about 22 px against 32, the native chevron, `FieldText` where the runtime's text
+is `--foreground`). The carry's one cost: the native chevron fades with the text.
+**1 gap port remains:** P18-S111-RECORDLIVE (a shared record cache, sized as an EXP-011 section).

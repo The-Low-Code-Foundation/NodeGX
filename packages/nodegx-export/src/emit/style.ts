@@ -1028,6 +1028,31 @@ export function computeRoleCss(
     }
   }
 
+  if (role === 'select') {
+    // P18-S110-PLACEHOLDEROPACITY. The runtime draws the placeholder as its own label, `<span style={{ opacity }}>`
+    // (Select.tsx), so only the text fades, never the box. The export's placeholder is the hidden option `renderSelect`
+    // selects, so the fade is the select's text colour while that option is the checked one, mixed toward transparent
+    // by the same factor; the open list's options keep the full colour. Opacity clamps as CSS clamps it. With no
+    // authored colour the select's text is the UA's `FieldText`, and that is what fades.
+    const placeholder = literal('placeholder');
+    if (typeof placeholder === 'string' && placeholder.length > 0) {
+      const raw = params.get('placeholderOpacity');
+      if (raw !== undefined && raw.kind !== 'literal') {
+        result.notes.push(`node ${node.id}'s Placeholder opacity is not a literal; the placeholder is drawn at full opacity`);
+      } else {
+        const authored = Number(raw?.value ?? catalogDefault('placeholderOpacity') ?? 0.5);
+        const opacity = Number.isFinite(authored) ? Math.min(1, Math.max(0, authored)) : 1;
+        if (opacity < 1) {
+          const color = cssParam('color') ?? 'FieldText';
+          const percent = `${Number((opacity * 100).toFixed(4))}%`;
+          const checked = ':has(> option[hidden]:checked)';
+          result.blocks.push({ suffix: checked, decls: [{ prop: 'color', value: `color-mix(in srgb, ${color} ${percent}, transparent)` }] });
+          result.blocks.push({ suffix: `${checked} > option`, decls: [{ prop: 'color', value: color }] });
+        }
+      }
+    }
+  }
+
   if (role === 'columns') {
     // Container width, not viewport width, is the runtime's breakpoint key (NDA-006 §3) — which
     // is @container. Medium emits before small so the cascade gives small the final word, the

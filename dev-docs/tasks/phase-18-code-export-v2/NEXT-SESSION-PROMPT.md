@@ -1,3 +1,46 @@
+# Next session — session 112 (2026-10-15, BOARD lane 6) closed **nine of the ten gap ports**: reaching **1,225 → 1,233 of 1,396**; one gap port left, **P18-S111-RECORDLIVE**. Found three new rows on the way.
+
+## ✅ Session 112: the last silent parameters, each one rendered or measured first
+
+Read EXP-008 § *Session 111* onward for the whole record; in short:
+
+| row | commit | what |
+|---|---|---|
+| EVALATLOAD | `52318ee89` | An exported Expression holds what the editor's Result holds at load; unticked, still refused by name |
+| NOWRAP | `d0c50d483` | **Rendered first** (`s112-nowrap-render/`): every exported Text wears the runtime's `white-space` arm by size mode, Text Overflow is carried, and `jsxText` keeps a typed line break (JSX turned it into a space). HLS-001: 103 CSS modules moved, 0 TSX |
+| ROUTERSELF | `8ca7aef05` | **Counted first**: 1 Router of 227 authors any of the six. Url Path carried into the routes and every `navigate(…)`; Mounted and the Router's own Background / Clip / CSS Class / CSS Style **said** by name (`routerNotes`). No wrapper element (it would move every page's layout) |
+| PLACEHOLDEROPACITY | (s112, see `git log`) | **Rendered first** (`s112-placeholder-render/`): fade 0.5 / 1 / 0.3 in the runtime, 1 / 1 / 1 at HEAD, 0.5 / 1 / 0.3 patched. A `:has(> option[hidden]:checked)` rule mixes the select's text colour toward transparent. The port is `gated`, not reaching: no probe context sets a placeholder |
+
+**Found, filed:** P18-S112-FLEXELLIPSIS (runtime, medium: a Text set to Ellipsis never draws its "…", because the
+runtime's Text is `display: flex`); P18-S112-BLANKURLPATH (runtime, low, measured on the real `matchPageFromUrl`:
+a cleared Url Path `''` pushes `#/home` and matches nothing); P18-S112-NATIVESELECT (export, low: the exported
+Dropdown is the native select, so its box is ~22 px not 32, the chevron is native, and its text is `FieldText` not
+`--foreground`).
+
+- 🔴 **A probe that sees nothing may be right.** The placeholder carry is real and rendered, and the probe still reads
+  the port silent, because the rule only exists with a placeholder and no probe context sets one. That is `gated` by
+  the ledger's own taxonomy; do not raise the floor for it, and do not build a probe context just to move a number.
+- 🔴 **Read a node's own ports at emit time, not from a parse-time summary.** `RouterIR` is built once at parse; the
+  probe and every spec vary the node's parameters. A carry that read `RouterIR` would have looked fixed to nothing.
+- 🔴 **After `/clear`, the "peer" on your lane can be you.** This session found uncommitted lane-6 work three minutes
+  old and a jest run under way, and treated it as a live peer, until a background task's notification arrived for a
+  tool-use id in the pre-clear transcript. Check that before standing down.
+
+Readings: the whole export package, run after each fix (`nice -n 19 --runInBand`): the only red each time is
+`parameter-coverage` on the P121 peer's three uncommitted Upload File ports (`photoQuality`, `readers`, `shrinkTo`;
+total 1,399 vs 1,396), as in sessions 110–111. NOWRAP's run also turned two hand-written targets red (PuppyCard,
+sty004 AC4.7), which pinned a Text's exact CSS; both re-pinned to the arm each Text's size mode gives.
+
+**Next (BOARD lane 6):**
+1. **P18-S111-RECORDLIVE**, the last gap port: Record's "Record properties" box defaults ticked, and the exported client
+   has no shared record cache, so a write elsewhere never reaches a Record. Sized as an EXP-011 section, not a cheap close.
+2. **P18-S112-NATIVESELECT**: `color: inherit` beside `base.css`'s `font: inherit` closes the text colour (it moves every
+   project's `base.css`); the box and chevron want `appearance: none` and the runtime's padding, rendered against the runtime.
+3. When P121 commits Upload File's three ports, classify them (their rows P121-TWO001-EXPORTREADERS / -TWO003-EXPORTSHRINK).
+4. Then the backlog: P18-S109-MOUNTPULSE, §77.5, the graph line, the 112 unprobed ports, the four low rows.
+
+---
+
 # Next session — session 111 (2026-10-15, BOARD lane 6) closed **seven rows** (six of the per-parameter check's ten gap rows, and -STORENOTES): reaching **1,215 → 1,225 of 1,396**, gap ports **21 → 10**. Next: the last ten, which are not cheap.
 
 ## ✅ Session 111: the silent parameters, cheapest first
