@@ -1,9 +1,11 @@
 # EXP-008 — The export coverage ledger and its gate
 
-**Status:** Built (2026-08-27, session 8) · **picker ratchet added 2026-08-28, session 32**
+**Status:** Built (2026-08-27, session 8) · **picker ratchet added 2026-08-28, session 32** ·
+**per-parameter check added 2026-10-15, P18 session 110** (§ *The per-parameter check* at the end)
 **Artifacts:** `packages/nodegx-export/coverage-ledger.json` · `scripts/export-ledger/check.js`
 (`export-ledger:check`) · `scripts/export-ledger/picker-coverage.js` (`export-ledger:picker`) —
-both in the PR workflow's `node-catalog` job
+both in the PR workflow's `node-catalog` job · `packages/nodegx-export/parameter-ledger.json` +
+`tests/parameter-coverage.test.ts` (in the export jest suite)
 
 ---
 
@@ -129,3 +131,51 @@ the designed boundary.
      treat a new *visual or interaction* node arriving as `deferred` as a smell — the
      announcement this phase is building toward is only as true as this file.
 3. Backend-only node (`availableIn: ['cloud']`)? Mark `backend-only` and you're done.
+4. CI red in `tests/parameter-coverage.test.ts` after you added or changed a **port** on a translated
+   node? §A prints the port by name. Add it to `parameter-ledger.json`'s `silent` as `unexamined`
+   (honest) or better, and copy the reaching count §A measured into `parameterCoverageFloor`.
+
+## The per-parameter check (P18 session 110, 2026-10-15)
+
+> **1,215 of 1,396 parameters of the 129 translated picker nodes reach the export (87.0%).**
+> 69 change nothing, and each is adjudicated: **21 are real silent drops** (10 bug rows), 21 reach in a
+> context the probe does not build, 23 matter only where the export refuses out loud, 2 are inert,
+> 2 unexamined. 112 have a type the probe cannot vary (component, array, object, image, font…).
+
+**Why.** The picker number counts nodes: 130 of 130. A node can translate while a parameter vanishes
+— §67–§70 of EXP-011 were four sessions of exactly that behind a `translated` row, and §75.5 #3 said
+not to quote 100% without this. It was the open question of this file.
+
+**The instrument** (`tests/helpers/parameter-probe.ts`). For every translated picker type, every
+non-signal input is set to a value other than the one it holds and `emitApp` re-run; if neither the
+emitted files nor the notes move, it is retried with each boolean / enum sibling flipped, then with
+every boolean of its panel group on (a shadow token waits for Shadow Enabled AND Source = token).
+Contexts: the node placed alone on `cheer`'s Home (inside a Radio Button Group for a Radio Button,
+with a child for a Drag); the same with every output and signal wired; then every placed instance in
+the 57 fixtures. **A refusal sentence counts as reaching** — what the gate forbids is silence.
+
+🔴 **Three traps in the instrument, found by reading its silences against the runtime** (each would
+have filed a false defect): `indexPageStacks` caches per IR object, so re-emitting a mutated IR read
+a stale index (Page Stack's Name and Use Routes) — the probe now emits a fresh shallow copy each time;
+a Drag with no child is never drawn; a Router added after parsing never enters `ir.project.routers`
+(the corpus grades Routers instead). And a silence is a measurement, not a verdict:
+`treatUnchangedAs` is silent because the only graph where it matters is refused by name.
+
+**The gate** (`tests/parameter-coverage.test.ts`, 9 specs, ~40 s). §A: the silent set and the
+unprobed set are exactly `parameter-ledger.json`'s, by name in both directions; the reaching count is
+`parameterCoverageFloor` and the total `parameterCoverageTotal`, exactly (a rise must raise the floor
+in the same commit, like the picker). §B: every class is one of five and every `gap` names a bug row
+that exists. §C: a mutant emitter that drops one parameter turns Text's Font Size silent and nothing
+else (the control); a gated port names its sibling; Page Stack's Name reaches past the cache.
+
+**The gaps** (`parameter-ledger.json` `"class": "gap"`): P18-S110-ROUTERSELF (a Router's own
+background, clip, class, style, Mounted and URL Path — six ports), -RUNONCHANGE (Run On Value Change
+boxes on Object, Record, Array Filter and Variable that their twins honour — seven), -NEWTAB
+(Navigate's Open In New Tab), -EVALATLOAD, -DYNAMICTEMPLATE (For Each), -ONLYIFUNCHANGED (Set Record
+Properties), -UPSERTON (Create Record), -TASKERROR (Run Tasks), -NOWRAP (Text), -PLACEHOLDEROPACITY
+(Dropdown). Found beside them: -STORENOTES (a store plan's notes never reach the report),
+-BREAKPOINTS (Columns), -VALUECHANGED (a wrong refusal sentence).
+
+**What 100% would now mean.** The node number can be quoted as "every placeable node exports"; the
+parameter number cannot be quoted as complete until the 21 gaps close or are refused by name. The 112
+unprobed ports are the next measurement (a probe value per structured type).

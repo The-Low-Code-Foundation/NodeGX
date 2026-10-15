@@ -1,3 +1,42 @@
+# Next session — session 110 (2026-10-15, BOARD lane 6) built **EXP-008's per-parameter check**: **1,215 of 1,396 parameters reach the export (87.0%)**, 21 real silent drops filed as 10 rows. Next: close the gaps, cheapest first.
+
+## ✅ Session 110: the per-parameter check
+
+Read EXP-008 § *The per-parameter check* for the whole record; in short:
+
+- **`tests/helpers/parameter-probe.ts`** varies every non-signal input of every translated picker node, re-runs `emitApp`,
+  and reads whether the files or notes moved (a refusal sentence counts — silence is what it forbids); a silent port is
+  retried under each boolean / enum sibling and under its whole panel group switched on. Contexts: alone on `cheer`'s
+  Home, then fully wired, then every placed instance in the 57 fixtures.
+- **`parameter-ledger.json`** holds the 69 silent ports, each adjudicated against the runtime (gap 21, gated 21,
+  refused-with 23, inert 2, unexamined 2), and the 112 unprobed ports with their types. **`tests/parameter-coverage.test.ts`**
+  (9 specs, ~40 s) holds both lists to the measurement BY NAME in both directions and the reaching count to
+  `parameterCoverageFloor` exactly; a mutant emitter that drops Font Size is its control.
+- 🔴 **The instrument had three traps of its own, each a false defect** (found because every silence was read against the
+  runtime before filing): `indexPageStacks` caches per IR object (fresh shallow copy per emit now), a childless Drag never
+  draws, a Router added after parse is not in `ir.project.routers`.
+- **Filed** (all open, `node scripts/bugs.js --from "P18 EXP-008"`): P18-S110-ROUTERSELF (6 ports), -RUNONCHANGE (7),
+  -NEWTAB, -EVALATLOAD, -DYNAMICTEMPLATE, -ONLYIFUNCHANGED, -UPSERTON, -TASKERROR, -NOWRAP, -PLACEHOLDEROPACITY; beside
+  them -STORENOTES (a store plan's notes have no reader), -BREAKPOINTS, -VALUECHANGED.
+
+Readings: the new spec on this checkout **7 / 9, red on exactly the predicted rows** — a P121 peer's uncommitted catalog
+edit adds Upload File's `photoQuality`, `readers`, `shrinkTo` (all silent; total 1,399 vs 1,396). The ledger was measured
+against HEAD's catalog, so it is green at HEAD; **when that peer commits the three ports the gate asks them to classify
+them** (their own rows P121-TWO001-EXPORTREADERS / -TWO003-EXPORTSHRINK are the `gap` rows to cite). Package `tsc
+--noEmit` 0. `bugs.js check`: 0 problems in the 13 new rows (90 pre-existing elsewhere). Whole-package export jest
+(`nice -n 19 --runInBand`, 439 s): **123 / 124 suites, 4,150 passed, 3 skipped** — the one red is the new spec on exactly
+those three peer ports.
+
+**Next (BOARD lane 6):**
+1. **Close the gaps, cheapest first.** Each closed or refused-by-name row leaves `silent` and raises the floor by the
+   count §A prints. Cheapest: -RUNONCHANGE (the twins' refusal, four call sites), -NEWTAB (External Link's shape one node
+   over), -ONLYIFUNCHANGED and -UPSERTON (refuse by name, or carry the option), -STORENOTES (route the notes).
+2. The 112 unprobed ports: a probe value per structured type (array, object, component, stringlist…).
+3. P18-S109-MOUNTPULSE; the Dispatcher's built-ins (§77.5); raising the graph line; rows P18-S106-PARSERAISE,
+   -S104-FEEDCOUNT, -S105-KITHEAD (low), -S104-PACKRUNTIMENPX.
+
+---
+
 # Next session — session 109 (2026-10-15, BOARD lane 6) built **EXP-011 §79: Sign In With export** — picker **130 / 130**, the last row. Next: the per-parameter check before anyone quotes 100%.
 
 ## ✅ Session 109: §79, Sign In With

@@ -1,0 +1,418 @@
+{
+  "$comment": "EXP-008's per-parameter half (P18 session 110). tests/parameter-coverage.test.ts measures, for every translated picker node, whether each non-signal input changes the emitted files or notes (tests/helpers/parameter-probe.ts). This file holds what it cannot count as reaching: every SILENT port with its adjudication, and every UNPROBED port with its type. The spec holds both lists to the measurement in both directions and holds the reaching count to parameterCoverageFloor exactly — a rise must raise it in the same commit, like pickerCoverageFloor. A silent port is not a verdict until classified: gap (the runtime reads it, the export drops it with no note — names a dev-docs/bugs row), gated (reaches in a context the probe does not build — says which), refused-with (matters only where the export refuses out loud), inert (the runtime does not act on it either), unexamined (not yet read — the honest default for a new one).",
+  "parameterCoverageFloor": 1215,
+  "parameterCoverageTotal": 1396,
+  "silent": {
+    "AddDbModelRelation.modelId": {
+      "class": "gated",
+      "why": "Reaches once a Target Record Id is wired from a Record or Query Records (plan.ts compileRelation); the probe wired none, which is refused out loud"
+    },
+    "AddDbModelRelation.targetId": {
+      "class": "refused-with",
+      "why": "Connections-only in the panel; with nothing wired the node is refused: \"no Target Record Id is wired, so the runtime answers Failure\""
+    },
+    "Boolean.treatUnchangedAs": {
+      "class": "refused-with",
+      "why": "Matters only when Done or Unchanged is wired, and then the node is refused: \"its done signal is consumed — change-conditional pulses are not translated in this slice\""
+    },
+    "Circle.cornerRadius": {
+      "class": "refused-with",
+      "why": "Acts only on a non-circle shape (Circle.tsx: \"Ignored by Circle\"), and every other shape is refused out loud"
+    },
+    "Circle.points": {
+      "class": "refused-with",
+      "why": "Acts only on a star / polygon shape, which is refused out loud (\"only Circle renders statically today\")"
+    },
+    "Circle.svgSource": {
+      "class": "refused-with",
+      "why": "Read only with Shape = SVG, which is refused out loud (\"author markup is not translated into JSX in this slice\")"
+    },
+    "Collection2.runOnChange-array": {
+      "class": "refused-with",
+      "why": "Governs Count / First Item Id / Changed only; the export refuses every Array output but Items out loud"
+    },
+    "CollectionInsert.modifyId": {
+      "class": "refused-with",
+      "why": "Connections-only in the panel; with no Object Id wire the insert is refused out loud"
+    },
+    "CollectionRemove.modifyId": {
+      "class": "refused-with",
+      "why": "Connections-only in the panel; with no Object Id wire the node is refused (\"every Do answers Failure\")"
+    },
+    "Color.runOnChange-value": {
+      "class": "gated",
+      "why": "Read only when Value is wired (plan.ts Variables mirror); unwired, the box governs nothing in the runtime either"
+    },
+    "Color.treatEmptyAs": {
+      "class": "gated",
+      "why": "Read on the wired-Value mirror path (nullability and the sync coercion); a constant Color has no empty case — its cast never yields NaN"
+    },
+    "Color.treatUnchangedAs": {
+      "class": "refused-with",
+      "why": "As Boolean: matters only with Done/Unchanged wired, which is refused out loud"
+    },
+    "Condition.condition": {
+      "class": "gated",
+      "why": "Reaches with Result wired and Evaluate unwired (true / false emitted); the probe wired Evaluate, which is refused out loud"
+    },
+    "Counter.limitsMax": {
+      "class": "refused-with",
+      "why": "As Limits Min"
+    },
+    "Counter.limitsMin": {
+      "class": "refused-with",
+      "why": "Clamps only with Limits Enabled, and then the node is refused: \"clamped counting is not translated in this slice\""
+    },
+    "DbModel2.runOnChange-modelId": {
+      "class": "gap",
+      "why": "Unticked, the runtime never binds the Id and the props read nothing; the export fetches anyway",
+      "bug": "P18-S110-RUNONCHANGE"
+    },
+    "DbModel2.runOnChange-record": {
+      "class": "gap",
+      "why": "Default (ticked): the runtime re-reads the row after an in-process write; the export row is written only by the fetch",
+      "bug": "P18-S110-RUNONCHANGE"
+    },
+    "DeleteDbModelProperties.modelId": {
+      "class": "gated",
+      "why": "Reaches with a class and a fired Do (deletePuppy('pup-1') → ('zq probe'))"
+    },
+    "Expression.evaluateAtLoad": {
+      "class": "gap",
+      "why": "Unticked, the runtime leaves Result null until an input arrives; the export evaluates at once",
+      "bug": "P18-S110-EVALATLOAD"
+    },
+    "Filter Collection.runOnChange-array": {
+      "class": "gap",
+      "why": "Unticked, the runtime does not re-filter when the list contents change; the export filter is always live",
+      "bug": "P18-S110-RUNONCHANGE"
+    },
+    "Filter Collection.runOnChange-enabled": {
+      "class": "refused-with",
+      "why": "Governs a wired Enabled only, which is refused out loud (\"whether the filter applies is a runtime value\")"
+    },
+    "Filter Collection.runOnChange-filterSettings": {
+      "class": "refused-with",
+      "why": "Governs wired settings only, which are refused out loud (\"the filter is not statically known\")"
+    },
+    "Filter Collection.runOnChange-items": {
+      "class": "gap",
+      "why": "Unticked, a new list on Items does not re-filter; the export filter is always live",
+      "bug": "P18-S110-RUNONCHANGE"
+    },
+    "For Each.templateScript": {
+      "class": "gap",
+      "why": "With Template Type = dynamic the runtime picks each row's component by script; the export renders the static Template for every row",
+      "bug": "P18-S110-DYNAMICTEMPLATE"
+    },
+    "Logic Builder.workspace": {
+      "class": "gated",
+      "why": "The probe writes a string, which is not a workspace; the export reads a real one (emit logicbuilder.ts) — \"has no blocks yet\" either way for an invalid one"
+    },
+    "Model2.runOnChange-modelId": {
+      "class": "gap",
+      "why": "Unticked, setModelID never runs at boot and the props stay empty until a Fetch; the export reads the store at once",
+      "bug": "P18-S110-RUNONCHANGE"
+    },
+    "Model2.runOnChange-object": {
+      "class": "gap",
+      "why": "Unticked, the outputs freeze after a Set Object Properties write; the export reads the store live (Component Object refuses this same box)",
+      "bug": "P18-S110-RUNONCHANGE"
+    },
+    "NewDbModelProperties.upsertOn": {
+      "class": "gap",
+      "why": "The runtime updates the existing row on a unique-key clash; the export always creates",
+      "bug": "P18-S110-UPSERTON"
+    },
+    "Number.treatUnchangedAs": {
+      "class": "refused-with",
+      "why": "As Boolean: matters only with Done/Unchanged wired, which is refused out loud"
+    },
+    "PageStackNavigateToPath.openInNewTab": {
+      "class": "gated",
+      "why": "Reaches once Path is set; with none the node is refused out loud (\"no Path is set\")"
+    },
+    "Radio Button Group.sizeMode": {
+      "class": "gated",
+      "why": "Filters an authored Width / Height only (style.ts sizeMode); reaches with both authored"
+    },
+    "Radio Button Group.value": {
+      "class": "gated",
+      "why": "Reaches with Radio Button children of matching values (defaultChecked moves)"
+    },
+    "RemoveDbModelRelation.modelId": {
+      "class": "gated",
+      "why": "As Add Record Relation: reaches once a Target Record Id is wired"
+    },
+    "RemoveDbModelRelation.targetId": {
+      "class": "refused-with",
+      "why": "As Add Record Relation: connections-only; with nothing wired the node is refused out loud"
+    },
+    "Router.backgroundColor": {
+      "class": "gap",
+      "why": "The Router collapses into App.tsx with no element to carry it",
+      "bug": "P18-S110-ROUTERSELF"
+    },
+    "Router.clip": {
+      "class": "gap",
+      "why": "The Router collapses into App.tsx with no element to carry it",
+      "bug": "P18-S110-ROUTERSELF"
+    },
+    "Router.cssClassName": {
+      "class": "gap",
+      "why": "The Router collapses into App.tsx with no element to carry it",
+      "bug": "P18-S110-ROUTERSELF"
+    },
+    "Router.mounted": {
+      "class": "gap",
+      "why": "Unticked, the runtime renders no Router at all; the export routes every page",
+      "bug": "P18-S110-ROUTERSELF"
+    },
+    "Router.name": {
+      "class": "inert",
+      "why": "With one Router mounted every Navigate reaches it whatever the name; several Routers are a separate question (routedPages reads routers[0])"
+    },
+    "Router.scrollIntoViewAlign": {
+      "class": "inert",
+      "why": "Read only when the Scroll Into View signal fires, a connections-only port"
+    },
+    "Router.styleCss": {
+      "class": "gap",
+      "why": "The Router collapses into App.tsx with no element to carry it",
+      "bug": "P18-S110-ROUTERSELF"
+    },
+    "Router.urlPath": {
+      "class": "gap",
+      "why": "The runtime prefixes every page path with it; the exported routes do not, so URLs and deep links differ",
+      "bug": "P18-S110-ROUTERSELF"
+    },
+    "RouterNavigate.openInNewTab": {
+      "class": "gap",
+      "why": "The runtime opens the page in a new tab; the export always navigates in place",
+      "bug": "P18-S110-NEWTAB"
+    },
+    "RunTasks.taskErrorOutput": {
+      "class": "gap",
+      "why": "The runtime reads the template's named output into the task-failed error; the export says so only in a comment in src/lib, never in a note",
+      "bug": "P18-S110-TASKERROR"
+    },
+    "SetDbModelProperties.modelId": {
+      "class": "gated",
+      "why": "Reaches with a class and a fired Do"
+    },
+    "SetDbModelProperties.onlyIfUnchanged": {
+      "class": "gap",
+      "why": "The runtime sends an ifMatch precondition and can fire Failure; the export writes unconditionally and says nothing",
+      "bug": "P18-S110-ONLYIFUNCHANGED"
+    },
+    "Static Data.csv": {
+      "class": "refused-with",
+      "why": "Every type but JSON is refused out loud (\"CSV is not translated in this slice\")"
+    },
+    "String.treatUnchangedAs": {
+      "class": "refused-with",
+      "why": "As Boolean: matters only with Done/Unchanged wired, which is refused out loud"
+    },
+    "SubscribeToChanges.enabled": {
+      "class": "gated",
+      "why": "Reaches with a backend and a collection (enabled: false emitted); the probe's fixture declares no backend, which is refused out loud"
+    },
+    "Text.sizeMode": {
+      "class": "gap",
+      "why": "Width / Height are gated as on Group, but Content Size / Content Width also switch white-space to pre, which the export never emits",
+      "bug": "P18-S110-NOWRAP"
+    },
+    "Upload File.file": {
+      "class": "refused-with",
+      "why": "Only a wire from Open File Picker translates; with nothing fed the node is refused out loud"
+    },
+    "Value Changed.value": {
+      "class": "refused-with",
+      "why": "With nothing wired into Input the node is refused out loud (the sentence is wrong for an authored literal: P18-S110-VALUECHANGED)"
+    },
+    "Variable2.runOnChange-name": {
+      "class": "refused-with",
+      "why": "Governs a wired Name only, which is refused out loud (\"variable name is not a literal\")"
+    },
+    "Variable2.runOnChange-variable": {
+      "class": "gap",
+      "why": "Unticked, a reader keeps its old value after a Set; the export updates live",
+      "bug": "P18-S110-RUNONCHANGE"
+    },
+    "Video.sizeMode": {
+      "class": "gated",
+      "why": "As Radio Button Group: filters an authored Width / Height"
+    },
+    "net.noodl.GlobalStore.storageKey": {
+      "class": "refused-with",
+      "why": "Read by the runtime only under Persist, and Persist is refused out loud (\"browser-storage rehydration is not translatable\")"
+    },
+    "net.noodl.animatetovalue.jumpValue": {
+      "class": "refused-with",
+      "why": "Read only by Jump To, and a wired Jump To is refused out loud"
+    },
+    "net.noodl.animatetovalue.targetValue": {
+      "class": "gated",
+      "why": "Reaches with Jump To unwired (useAnimatedValue(5) → (12)); the probe wired every signal input"
+    },
+    "net.noodl.controls.checkbox.iconColor": {
+      "class": "refused-with",
+      "why": "Colours an author icon only, and an author icon on a control is refused out loud"
+    },
+    "net.noodl.controls.options.placeholderOpacity": {
+      "class": "gap",
+      "why": "The runtime dims the placeholder option; the export tags the port as consumed and never reads it",
+      "bug": "P18-S110-PLACEHOLDEROPACITY"
+    },
+    "net.noodl.controls.options.sizeMode": {
+      "class": "gated",
+      "why": "As Radio Button Group: filters an authored Width / Height"
+    },
+    "net.noodl.controls.radiobutton.iconColor": {
+      "class": "unexamined",
+      "why": "Not examined in session 110; probably the Checkbox case (an author icon, refused out loud)"
+    },
+    "net.noodl.controls.radiobutton.iconSize": {
+      "class": "unexamined",
+      "why": "Not examined in session 110; probably the Checkbox case (an author icon, refused out loud)"
+    },
+    "net.noodl.externallink.openInNewTab": {
+      "class": "gated",
+      "why": "Read whenever the Link translates (plan.ts External Link); the probe's Link had no target"
+    },
+    "net.noodl.visual.columns.mediumBreakpoint": {
+      "class": "gated",
+      "why": "Needs its partner Medium Layout, as in the runtime; the pair emits an @container rule"
+    },
+    "net.noodl.visual.columns.mediumLayout": {
+      "class": "gated",
+      "why": "Needs its partner Medium Breakpoint, as in the runtime"
+    },
+    "net.noodl.visual.columns.smallBreakpoint": {
+      "class": "gated",
+      "why": "Needs its partner Small Layout, as in the runtime"
+    },
+    "net.noodl.visual.columns.smallLayout": {
+      "class": "gated",
+      "why": "Needs its partner Small Breakpoint, as in the runtime"
+    },
+    "net.noodl.visual.icon.iconColor": {
+      "class": "gated",
+      "why": "Needs an Icon Source, a type the probe cannot write; with a font source the colour reaches"
+    }
+  },
+  "unprobed": {
+    "AddDbModelRelation.repeaterComponent": "component",
+    "Circle.dataAttributes": "stringlist",
+    "Cloud File.file": "cloudfile",
+    "Collection2.items": "array",
+    "CollectionNew.items": "array",
+    "Date To String.input": "date",
+    "DbModel2.repeaterComponent": "component",
+    "DeleteDbModelProperties.repeaterComponent": "component",
+    "Event Sender.payload": "stringlist",
+    "Filter Collection.items": "array",
+    "FilterDBModels.items": "array",
+    "For Each.items": "array",
+    "For Each.template": "component",
+    "Group.backgroundImage": "image",
+    "Group.dataAttributes": "stringlist",
+    "Group.scrollToElement.element": "reference",
+    "Image.dataAttributes": "stringlist",
+    "Image.src": "image",
+    "JavaScriptFunction.scriptInputs": "proplist",
+    "JavaScriptFunction.scriptOutputs": "proplist",
+    "JavaScriptFunction.uses": "stringlist",
+    "Javascript2.externalFile": "source",
+    "Javascript2.scriptInputs": "proplist",
+    "Javascript2.scriptOutputs": "proplist",
+    "Map Collection.items": "array",
+    "Model2.properties": "stringlist",
+    "Model2.repeaterComponent": "component",
+    "NavigationClosePopup.closeActions": "stringlist",
+    "NavigationClosePopup.results": "stringlist",
+    "NavigationClosePopup.targetComponent": "component",
+    "NavigationShowPopup.target": "component",
+    "NewDbModelProperties.accessControl": "proplist",
+    "NewModel.properties": "stringlist",
+    "Page Stack.dataAttributes": "stringlist",
+    "Page Stack.pages": "proplist",
+    "PageInputs.pathParams": "stringlist",
+    "PageInputs.queryParams": "stringlist",
+    "PageStackNavigateBack.backActions": "stringlist",
+    "PageStackNavigateBack.results": "stringlist",
+    "PageStackNavigateToPath.queryNames": "stringlist",
+    "Radio Button Group.dataAttributes": "stringlist",
+    "RemoveDbModelRelation.repeaterComponent": "component",
+    "Router.dataAttributes": "stringlist",
+    "Router.pages": "pages",
+    "RunTasks.items": "array",
+    "RunTasks.taskTemplate": "component",
+    "SetDbModelProperties.accessControl": "proplist",
+    "SetDbModelProperties.repeaterComponent": "component",
+    "SetModelProperties.properties": "stringlist",
+    "SetModelProperties.repeaterComponent": "component",
+    "Sign File URL.file": "cloudfile",
+    "States.states": "stringlist",
+    "States.values": "stringlist",
+    "Text.dataAttributes": "stringlist",
+    "Text.fontFamily": "font",
+    "Text.textStyle": "textStyle",
+    "Video.dataAttributes": "stringlist",
+    "Video.poster": "image",
+    "Video.srcObject": "mediastream",
+    "net.noodl.ComponentObject.properties": "stringlist",
+    "net.noodl.DateAdd.input": "date",
+    "net.noodl.DateCompare.a": "date",
+    "net.noodl.DateCompare.b": "date",
+    "net.noodl.DateDifference.from": "date",
+    "net.noodl.DateDifference.to": "date",
+    "net.noodl.DateParts.input": "date",
+    "net.noodl.GlobalStore.initialState": "object",
+    "net.noodl.Log.data": "object",
+    "net.noodl.ParentComponentObject.properties": "stringlist",
+    "net.noodl.ParentComponentObject.targetComponent": "component",
+    "net.noodl.SSE.headers": "object",
+    "net.noodl.SetComponentObjectProperties.properties": "stringlist",
+    "net.noodl.SetParentComponentObjectProperties.properties": "stringlist",
+    "net.noodl.SetParentComponentObjectProperties.targetComponent": "component",
+    "net.noodl.StateSnapshot.snapshotData": "object",
+    "net.noodl.ToCSV.columns": "stringlist",
+    "net.noodl.ToCSV.items": "array",
+    "net.noodl.controls.button.dataAttributes": "stringlist",
+    "net.noodl.controls.button.fontFamily": "font",
+    "net.noodl.controls.button.iconIconSource": "icon",
+    "net.noodl.controls.button.iconImageSource": "image",
+    "net.noodl.controls.button.textStyle": "textStyle",
+    "net.noodl.controls.checkbox.dataAttributes": "stringlist",
+    "net.noodl.controls.checkbox.iconIconSource": "icon",
+    "net.noodl.controls.checkbox.iconImageSource": "image",
+    "net.noodl.controls.checkbox.labelfontFamily": "font",
+    "net.noodl.controls.checkbox.labeltextStyle": "textStyle",
+    "net.noodl.controls.options.dataAttributes": "stringlist",
+    "net.noodl.controls.options.fontFamily": "font",
+    "net.noodl.controls.options.iconIconSource": "icon",
+    "net.noodl.controls.options.iconImageSource": "image",
+    "net.noodl.controls.options.items": "optionslist",
+    "net.noodl.controls.options.labelfontFamily": "font",
+    "net.noodl.controls.options.labeltextStyle": "textStyle",
+    "net.noodl.controls.options.textStyle": "textStyle",
+    "net.noodl.controls.radiobutton.dataAttributes": "stringlist",
+    "net.noodl.controls.radiobutton.iconIconSource": "icon",
+    "net.noodl.controls.radiobutton.iconImageSource": "image",
+    "net.noodl.controls.radiobutton.labelfontFamily": "font",
+    "net.noodl.controls.radiobutton.labeltextStyle": "textStyle",
+    "net.noodl.controls.range.dataAttributes": "stringlist",
+    "net.noodl.controls.textinput.dataAttributes": "stringlist",
+    "net.noodl.controls.textinput.fontFamily": "font",
+    "net.noodl.controls.textinput.iconIconSource": "icon",
+    "net.noodl.controls.textinput.iconImageSource": "image",
+    "net.noodl.controls.textinput.labelfontFamily": "font",
+    "net.noodl.controls.textinput.labeltextStyle": "textStyle",
+    "net.noodl.controls.textinput.textStyle": "textStyle",
+    "net.noodl.visual.columns.dataAttributes": "stringlist",
+    "net.noodl.visual.icon.dataAttributes": "stringlist",
+    "net.noodl.visual.icon.iconIconSource": "icon",
+    "net.noodl.visual.icon.iconImageSource": "image"
+  }
+}
