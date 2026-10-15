@@ -86,9 +86,8 @@
       "why": "Governs wired settings only, which are refused out loud (\"the filter is not statically known\")"
     },
     "For Each.templateScript": {
-      "class": "gap",
-      "why": "With Template Type = dynamic the runtime picks each row's component by script; the export renders the static Template for every row",
-      "bug": "P18-S110-DYNAMICTEMPLATE"
+      "class": "refused-with",
+      "why": "Read only under Template Type dynamic, which is refused out loud (\"its Template Type is dynamic — each row's component is chosen by the Template Script at run time\")"
     },
     "Logic Builder.workspace": {
       "class": "gated",
@@ -157,9 +156,8 @@
       "bug": "P18-S110-ROUTERSELF"
     },
     "RunTasks.taskErrorOutput": {
-      "class": "gap",
-      "why": "The runtime reads the template's named output into the task-failed error; the export says so only in a comment in src/lib, never in a note",
-      "bug": "P18-S110-TASKERROR"
+      "class": "gated",
+      "why": "Reaches when the Template declares an output by that name: a per-node note says the value is dropped (tests/silent-parameters-closed.test.ts). No fixture's template declares one, and the probe adds no template ports"
     },
     "SetDbModelProperties.modelId": {
       "class": "gated",

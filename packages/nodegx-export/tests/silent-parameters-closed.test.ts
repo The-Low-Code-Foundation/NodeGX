@@ -1,5 +1,5 @@
 /**
- * P18 session 111 — the first ten of the per-parameter check's silent ports, closed (EXP-008).
+ * The per-parameter check's silent ports, closed (EXP-008; P18 session 111 onward).
  *
  * `parameter-coverage.test.ts` holds each port to "the export moved" by name; this file holds it to
  * *what* moved. Every case varies one parameter on every node of its type in a corpus fixture and
@@ -12,6 +12,8 @@
  *   P18-S110-UPSERTON     — Create Record with Upsert On is refused by name.
  *   P18-S110-ONLYIFUNCHANGED — Set Record Properties with Only If Unchanged is refused by name.
  *   P18-S110-STORENOTES   — a Global Store declarer's notes reach the app notes and the report.
+ *   P18-S110-DYNAMICTEMPLATE — a For Each with Template Type dynamic is refused by name.
+ *   P18-S110-TASKERROR    — a Run Tasks whose template has the named error output says it is dropped.
  */
 import * as path from 'path';
 
@@ -125,5 +127,36 @@ describe('P18-S110-STORENOTES — a store declarer’s notes have a reader', () 
     expect(built.report.project).toContain(line);
     expect(built.files['EXPORT-REPORT.md']).toContain('sets storageKey without persist');
     expect(emitApp(irOf('cheer'), catalog).notes.join('\n')).not.toContain('storageKey');
+  });
+});
+
+describe('P18-S110-DYNAMICTEMPLATE — a dynamic template is refused by name', () => {
+  it('Template Type dynamic: the For Each is refused, where the static one renders its Template per row', () => {
+    const sentence = "its Template Type is dynamic — each row's component is chosen by the Template Script";
+    expect(notesOf(irOf('cheer'))).not.toContain(sentence);
+    expect(notesOf(varied('cheer', 'For Each', 'templateType', 'dynamic'))).toContain(sentence);
+  });
+});
+
+describe('P18-S110-TASKERROR — a dropped task error output is said, per node', () => {
+  /** batch-desk's `/Notify` template declares Success and Failure; this gives it an error output named `name`. */
+  const withErrorOutput = (ir: ExportIR, name: string): ExportIR => {
+    const outputs = ir.components.find((c) => c.path === 'Notify')!.nodes.find((n) => n.type === 'Component Outputs')!;
+    outputs.declaredPorts.push({ ...outputs.declaredPorts.find((p) => p.plug === 'input')!, name, kind: 'value', type: 'string' });
+    return ir;
+  };
+  const sentence = 'a failed task is reported without its Template';
+
+  it('no error output on the template: nothing is lost, nothing said', () => {
+    expect(notesOf(irOf('batch-desk'))).not.toContain(sentence);
+  });
+
+  it('the default name, Error, declared: said, naming it', () => {
+    expect(notesOf(withErrorOutput(irOf('batch-desk'), 'Error'))).toContain(`${sentence}'s "Error" output`);
+  });
+
+  it('an authored name follows the parameter: the template’s Why is lost only when the node names Why', () => {
+    expect(notesOf(withErrorOutput(irOf('batch-desk'), 'Why'))).not.toContain(sentence);
+    expect(notesOf(withErrorOutput(varied('batch-desk', 'RunTasks', 'taskErrorOutput', 'Why'), 'Why'))).toContain(`${sentence}'s "Why" output`);
   });
 });

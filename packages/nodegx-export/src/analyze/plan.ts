@@ -4679,6 +4679,13 @@ function planComponent(
   const renderedStackIds: string[] = [];
   const roleOf = (node: NodeIR): RenderRole | 'unsupported' | null => {
     const role = renderRole(node, catalog, kits);
+    // P18-S110-DYNAMICTEMPLATE. Template Type dynamic chooses each row's component with `templateScript(model)`
+    // (foreach.tsx); the repeater path renders the static Template for every row, so the node is refused whole —
+    // the template-host index above already treats a dynamic For Each as the template of nothing.
+    if (role === 'repeater' && (literalParam(node, 'templateType') === 'dynamic' || wiredIn.has(`${node.id}:templateType`))) {
+      deferReasons.set(node.id, "its Template Type is dynamic — each row's component is chosen by the Template Script at run time, and this slice renders one static template");
+      return 'unsupported';
+    }
     if (role === null || role === 'unsupported' || role === 'instance' || role === 'repeater' || role === 'slot') return role;
     // EXP-010: the structure/content walls are statements about *built-in* ports — a wired
     // `layoutString`, a wire-fed icon source. A kit node has none of those ports; every port it
@@ -13647,6 +13654,13 @@ function planComponent(
     for (const key of consumes) consumed.add(key);
     for (const id of collapses) dispositions[id] = { kind: 'collapsed', into };
     for (const id of subscribes) boundSubscribers.add(id);
+    // P18-S110-TASKERROR. runtasks.ts reads the template's error output off the failing task into its
+    // run-tasks/task-failed report; runTasks.ts has no value channel from the element and says so in a comment.
+    // Said per node, and only where the template has that output to lose.
+    const errorPort = outputPorts.find((p) => p.name === contract.error);
+    if (errorPort !== undefined) {
+      notes.push(`node ${node.id} (${RUN_TASKS_TYPE}): a failed task is reported without its Template's "${contract.error}" output — the runtime puts that value in the run-tasks/task-failed error, and the exported host has no value channel from a task`);
+    }
     return core;
   };
 
