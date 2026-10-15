@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a7c10d00-0000-4000-8000-000000000178",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "actionInput",
+      "fromProperty": "onTextChanged",
+      "toId": "actionVar",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "actionVar",
+      "fromProperty": "value",
+      "toId": "desk",
+      "toProperty": "action"
+    },
+    {
+      "fromId": "dispatchBtn",
+      "fromProperty": "onClick",
+      "toId": "desk",
+      "toProperty": "dispatch"
+    },
+    {
+      "fromId": "cancelBtn",
+      "fromProperty": "onClick",
+      "toId": "desk",
+      "toProperty": "cancel"
+    },
+    {
+      "fromId": "desk",
+      "fromProperty": "result",
+      "toId": "resultText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "desk",
+      "fromProperty": "refusalReason",
+      "toId": "refusalText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "desk",
+      "fromProperty": "waitingFor",
+      "toId": "waitingText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "desk",
+      "fromProperty": "completedCount",
+      "toId": "countText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "desk",
+      "fromProperty": "isExecuting",
+      "toId": "busyText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "desk",
+      "fromProperty": "actionCompleted",
+      "toId": "setLast",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "desk",
+      "fromProperty": "actionType",
+      "toId": "setLast",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "lastVar",
+      "fromProperty": "value",
+      "toId": "lastText",
+      "toProperty": "text"
+    }
+  ]
+}

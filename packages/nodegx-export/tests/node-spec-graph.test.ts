@@ -73,7 +73,7 @@ describe('NSP-008 on the export', () => {
     };
     // eslint-disable-next-line no-console
     console.log(`P18 ledger: ${line.conforming} of ${line.of} graph scenarios conform on the export — ${line.played} played (${line.conforming} conform, ${line.declaredDifferent} differ as declared, ${line.knownRows} known rows, ${line.failing} fail on filed rows); ${line.outsideExporter} outside on the exporter's verdict, ${line.outsideHarness} on this harness's limits`);
-    expect(line).toEqual({ of: 85, played: 9, conforming: 2, declaredDifferent: 3, knownRows: 0, failing: 4, outsideExporter: 30, outsideHarness: 46 });
+    expect(line).toEqual({ of: 85, played: 11, conforming: 4, declaredDifferent: 3, knownRows: 0, failing: 4, outsideExporter: 28, outsideHarness: 46 }); // s106 §77: t04 S1 and S3 play and pass
   });
 
   test('C2 — two values in one frame are both delivered: the emitted Counter → Value Changed → Counter reads 3, as the runtime does', () => {

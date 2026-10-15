@@ -44,6 +44,7 @@ import { SSE_LIB_PATH, sseLibSource } from './sseLib';
 import { WEBSOCKET_LIB_PATH, websocketLibSource } from './websocketLib';
 import { REALTIME_LIB_PATH, realtimeLibSource } from './realtimeLib';
 import { REPEAT_LIB_PATH, repeatLibSource } from './repeatLib';
+import { ACTIONS_LIB_PATH, actionsLibSource } from './actionsLib';
 import { CRYPTO_LIB_PATH, cryptoLibSource } from './cryptoLib';
 import { PATTERN_LIB_PATH, isPatternHelper, patternLibSource } from './patternLib';
 import { SCREEN_LIB_PATH, screenLibSource } from './screenLib';
@@ -176,6 +177,8 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   let realtimeLibUsed = false;
   // GAM-013. Repeat's host — earned by a component whose plan kept a Repeat node; it imports errors.ts only.
   let repeatLibUsed = false;
+  // EXP-011 §77. The action bus's host — earned by a component whose plan kept a Dispatcher or a Handler; it imports errors.ts only.
+  let actionsLibUsed = false;
   // EXP-011 §59.
   let cryptoLibUsed = false;
   let screenLibUsed = false;
@@ -250,6 +253,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     if (emitted.websocketLib) websocketLibUsed = true;
     if (emitted.realtimeLib) realtimeLibUsed = true;
     if (emitted.repeatLib) repeatLibUsed = true;
+    if (emitted.actionsLib) actionsLibUsed = true;
     if ([...emitted.cryptoHelpers].some((fn) => !isPatternHelper(fn))) cryptoLibUsed = true;
     if ([...emitted.cryptoHelpers].some(isPatternHelper)) patternLibUsed = true;
     if (emitted.screenLib) screenLibUsed = true;
@@ -333,7 +337,8 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   // EXP-011 §64. sse.ts raises `sse/connect-failed` on the channel, so it earns errors.ts too. §65: websocket.ts raises its own codes.
   // EXP-011 §66. realtime.ts raises subscribe-to-changes/realtime-failed on the channel.
   // GAM-013. repeat.ts raises repeat/interval-not-positive on the channel.
-  if (errorsLibUsed || scriptLibUsed || runTasksLibUsed || streamingLibUsed || sseLibUsed || websocketLibUsed || realtimeLibUsed || repeatLibUsed || componentObjectLibUsed || dragLibUsed) {
+  // EXP-011 §77. actions.ts raises action-dispatcher/nothing-admitted and action-handler/operation-failed on the channel.
+  if (errorsLibUsed || scriptLibUsed || runTasksLibUsed || streamingLibUsed || sseLibUsed || websocketLibUsed || realtimeLibUsed || repeatLibUsed || actionsLibUsed || componentObjectLibUsed || dragLibUsed) {
     files[ERRORS_LIB_PATH] = GENERATED_MODULE_TS + errorsLibSource();
   }
   // EXP-011 §58. `src/lib/streaming.ts` — the trio's host; it raises on the channel, so it earns errors.ts above.
@@ -357,6 +362,10 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   // GAM-013. `src/lib/repeat.ts` — the Repeat hook, where a component printed one; it imports errors.ts only.
   if (repeatLibUsed) {
     files[REPEAT_LIB_PATH] = GENERATED_MODULE_TS + repeatLibSource();
+  }
+  // EXP-011 §77. `src/lib/actions.ts` — the action bus (one registry for the app), where a component printed a Dispatcher or a Handler.
+  if (actionsLibUsed) {
+    files[ACTIONS_LIB_PATH] = GENERATED_MODULE_TS + actionsLibSource();
   }
   // EXP-011 §56. `src/lib/filterRecords.ts` — the Filter Records matcher, when a component printed one.
   // EXP-011 §59. The crypto verbs and the viewport hook, each only where a component calls into it.

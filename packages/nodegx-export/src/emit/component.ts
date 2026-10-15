@@ -64,6 +64,7 @@ import { SSE_LIB_PATH } from './sseLib';
 import { WEBSOCKET_LIB_PATH } from './websocketLib';
 import { REALTIME_LIB_PATH } from './realtimeLib';
 import { REPEAT_LIB_PATH } from './repeatLib';
+import { ACTIONS_LIB_PATH } from './actionsLib';
 import { SCRIPT_CODE_PREFIX } from '../analyze/script';
 import { ID_HELPERS_BY_FN, ID_LIB_PATH, IdHelper } from './idLib';
 import { CRYPTO_LIB_PATH, CryptoHelper } from './cryptoLib';
@@ -284,6 +285,8 @@ export interface EmittedComponent {
   realtimeLib: boolean;
   /** GAM-013. `src/lib/repeat.ts` is owed when this component keeps a Repeat node. */
   repeatLib: boolean;
+  /** EXP-011 §77. `src/lib/actions.ts` is owed when this component keeps an Action Dispatcher or an Action Handler. */
+  actionsLib: boolean;
   /** EXP-011 §59. `src/lib/crypto.ts` verbs this component calls; `src/lib/screen.ts` is owed when a viewport hook prints. */
   cryptoHelpers: Set<string>;
   screenLib: boolean;
@@ -4372,10 +4375,11 @@ export function emitComponent(
   }
   // EXP-011 §58 + §64 + §65 + §66. The streaming hooks, one import per hook the plan kept, grouped by the module each lives in.
   // GAM-013. Repeat's hook is the table's seventh, in its own module.
-  for (const lib of ['streaming', 'sse', 'websocket', 'realtime', 'repeat'] as const) {
+  // EXP-011 §77. The dispatcher's and the handler's hooks, the eighth and ninth, share one module.
+  for (const lib of ['streaming', 'sse', 'websocket', 'realtime', 'repeat', 'actions'] as const) {
     const hooks = [...new Set(plan.streams.filter((s) => STREAM_NODES[s.type].lib === lib).map((s) => STREAM_NODES[s.type].hook))].sort();
     if (hooks.length === 0) continue;
-    const libPath = lib === 'streaming' ? STREAMING_LIB_PATH : lib === 'sse' ? SSE_LIB_PATH : lib === 'websocket' ? WEBSOCKET_LIB_PATH : lib === 'repeat' ? REPEAT_LIB_PATH : REALTIME_LIB_PATH;
+    const libPath = lib === 'streaming' ? STREAMING_LIB_PATH : lib === 'sse' ? SSE_LIB_PATH : lib === 'websocket' ? WEBSOCKET_LIB_PATH : lib === 'repeat' ? REPEAT_LIB_PATH : lib === 'actions' ? ACTIONS_LIB_PATH : REALTIME_LIB_PATH;
     const specifier = `${relRoot}/${libPath.replace(/^src\//, '').replace(/\.ts$/, '')}`;
     internalImports.set(specifier, `import { ${hooks.join(', ')} } from '${specifier}';`);
   }
@@ -7245,6 +7249,8 @@ export function emitComponent(
     realtimeLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'realtime'),
     // GAM-013.
     repeatLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'repeat'),
+    // EXP-011 §77.
+    actionsLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'actions'),
     // EXP-011 §59.
     cryptoHelpers: usedCryptoHelpers,
     screenLib: screenHooks.length > 0,

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a7c10d00-0000-4000-8000-000000000179",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "greet",
+      "fromProperty": "trigger",
+      "toId": "setGreeting",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "greet",
+      "fromProperty": "payload",
+      "toId": "setGreeting",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "greetingVar",
+      "fromProperty": "value",
+      "toId": "greetingText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "slow",
+      "fromProperty": "triggeredCount",
+      "toId": "slowCountText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "completeBtn",
+      "fromProperty": "onClick",
+      "toId": "slow",
+      "toProperty": "complete"
+    },
+    {
+      "fromId": "failBtn",
+      "fromProperty": "onClick",
+      "toId": "slow",
+      "toProperty": "fail"
+    }
+  ]
+}

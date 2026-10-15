@@ -641,7 +641,7 @@ export const APP_ERROR_TS_TYPE = '{ code: string; message: string; nodeId: strin
 export const STREAM_PARSER_TYPE = 'net.noodl.JSONStreamParser';
 export const STREAM_BUFFER_TYPE = 'net.noodl.StreamBuffer';
 export const TEXT_ACCUMULATOR_TYPE = 'net.noodl.TextAccumulator';
-export type StreamKind = 'parser' | 'buffer' | 'accumulator' | 'sse' | 'websocket' | 'subscription' | 'repeat';
+export type StreamKind = 'parser' | 'buffer' | 'accumulator' | 'sse' | 'websocket' | 'subscription' | 'repeat' | 'dispatcher' | 'handler';
 /** EXP-011 §64. `Server-Sent Events` — the fourth member of the table: no data port, two Actions, its own module. */
 export const SSE_TYPE = 'net.noodl.SSE';
 /** EXP-011 §65. `WebSocket` — the fifth member: a data port (Message) that only the Send verb carries, three Actions, its own module. */
@@ -658,6 +658,14 @@ export const SUBSCRIBE_TO_CHANGES_TYPE = 'SubscribeToChanges';
  * where Delay's per-verb callbacks (§39) could not carry a node whose Tick belongs to the node and whose Count is a value.
  */
 export const REPEAT_TYPE = 'Repeat';
+/**
+ * EXP-011 §77. `Action Dispatcher` and `Action Handler` — the eighth and ninth members, one module (`src/lib/actions.ts`)
+ * holding the app's one registry, so the two meet across components by channel name alone, as in the runtime.
+ */
+export const ACTION_DISPATCHER_TYPE = 'net.noodl.ActionDispatcher';
+export const ACTION_HANDLER_TYPE = 'net.noodl.ActionHandler';
+/** The four built-in store actions (action-dispatcher.ts BUILT_IN_ACTIONS) — a dispatcher that enables one is refused in this slice. */
+export const ACTION_BUILT_INS = ['SET_STORE', 'MERGE_STORE', 'DELETE_STORE_KEY', 'CLEAR_STORE'] as const;
 /** EXP-011 §66. The structural RealtimeError — `src/lib/realtime.ts`'s, spelled so a store row needs no import. */
 export const REALTIME_ERROR_TS_TYPE = '{ message: string; code: string; kind: string } | null';
 export interface StreamValueField {
@@ -673,7 +681,7 @@ export interface StreamNodeSpec {
   hook: string;
   localStem: string;
   /** The module the hook lives in (component.ts maps it to a path; emitApp.ts ships it). */
-  lib: 'streaming' | 'sse' | 'websocket' | 'realtime' | 'repeat';
+  lib: 'streaming' | 'sse' | 'websocket' | 'realtime' | 'repeat' | 'actions';
   /** The runtime file the hook transcribes, for the emitted comment. */
   sourceFile: string;
   /** The data port, delivered with the pulse — absent on a node whose actions carry nothing (§64's SSE). */
@@ -910,12 +918,84 @@ export const STREAM_NODES: Record<string, StreamNodeSpec> = {
     values: {
       count: { tsType: 'number', cast: 'number', maybeUndefined: false }
     }
+  },
+  // EXP-011 §77. Action is the data port — stored by its setter, read by Dispatch at the pulse (the runtime acts on the
+  // signal at once, never deferred, so the action that belongs to the pulse has already landed); the other nine inputs
+  // are config, applied through the node's setters as they change; the four per-action Events, Idle, Refused, Cancelled
+  // and the outcome trio are the listeners in actiondispatchernode.ts's declaration order; every value a live getter.
+  // Payload and Result are undefined until the first action, as the node's `_internal` holds them.
+  [ACTION_DISPATCHER_TYPE]: {
+    kind: 'dispatcher',
+    displayName: 'Action Dispatcher',
+    hook: 'useActionDispatcher',
+    localStem: 'Dispatcher',
+    lib: 'actions',
+    sourceFile: 'actiondispatchernode.ts',
+    data: { port: 'action', displayName: 'Action' },
+    config: [
+      { port: 'channel', displayName: 'Channel' },
+      { port: 'builtIns', displayName: 'Enabled Built-ins' },
+      { port: 'storeName', displayName: 'Store Name' },
+      { port: 'allowedKeys', displayName: 'Allowed Keys' },
+      { port: 'handlerTimeout', displayName: 'Handler Timeout (ms)' },
+      { port: 'waitForHandler', displayName: 'Wait For Handler (ms)' },
+      { port: 'maxQueueSize', displayName: 'Max Queue Size' },
+      { port: 'rateLimit', displayName: 'Rate Limit' },
+      { port: 'rateLimitWindow', displayName: 'Rate Limit Window (ms)' }
+    ],
+    actions: { dispatch: { verb: 'dispatch', takesData: true }, cancel: { verb: 'cancel', takesData: false } },
+    signals: ['dispatched', 'actionCompleted', 'failed', 'idle', 'refused', 'cancelled', ...OUTCOME_SIGNALS],
+    values: {
+      actionType: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      actionId: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      payload: { tsType: 'unknown', cast: 'unknown', maybeUndefined: true },
+      result: { tsType: 'unknown', cast: 'unknown', maybeUndefined: true },
+      refusedType: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      refusalReason: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      refusalMessage: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      lastError: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      queueSize: { tsType: 'number', cast: 'number', maybeUndefined: false },
+      isExecuting: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      waitingFor: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      completedCount: { tsType: 'number', cast: 'number', maybeUndefined: false },
+      failedCount: { tsType: 'number', cast: 'number', maybeUndefined: false },
+      refusedCount: { tsType: 'number', cast: 'number', maybeUndefined: false },
+      cancelledCount: { tsType: 'number', cast: 'number', maybeUndefined: false }
+    }
+  },
+  // EXP-011 §77. No data port; six config inputs (Channel, Action Type and Enabled re-register, as the runtime's scheduled
+  // setup does; Result and Error Message are read when the action completes or fails); Complete and Fail carry nothing;
+  // Trigger and the outcome pair are the listeners (no Unchanged: neither verb has a state where nothing needs doing).
+  [ACTION_HANDLER_TYPE]: {
+    kind: 'handler',
+    displayName: 'Action Handler',
+    hook: 'useActionHandler',
+    localStem: 'Handler',
+    lib: 'actions',
+    sourceFile: 'actionhandlernode.ts',
+    config: [
+      { port: 'channel', displayName: 'Channel' },
+      { port: 'actionType', displayName: 'Action Type' },
+      { port: 'enabled', displayName: 'Enabled' },
+      { port: 'autoComplete', displayName: 'Auto Complete' },
+      { port: 'result', displayName: 'Result' },
+      { port: 'errorMessage', displayName: 'Error Message' }
+    ],
+    actions: { complete: { verb: 'complete', takesData: false }, fail: { verb: 'fail', takesData: false } },
+    signals: ['trigger', 'done', 'completed', 'failure'],
+    values: {
+      payload: { tsType: 'unknown', cast: 'unknown', maybeUndefined: true },
+      actionId: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      registered: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      triggeredCount: { tsType: 'number', cast: 'number', maybeUndefined: false },
+      error: { tsType: 'string', cast: 'string', maybeUndefined: false }
+    }
   }
 };
 
 /** EXP-011 §64. The type id behind a `stream-out`'s kind — the one ladder component.ts and the maybe-undefined answer share. */
 export function streamTypeOfKind(kind: StreamKind): string {
-  return kind === 'parser' ? STREAM_PARSER_TYPE : kind === 'buffer' ? STREAM_BUFFER_TYPE : kind === 'accumulator' ? TEXT_ACCUMULATOR_TYPE : kind === 'sse' ? SSE_TYPE : kind === 'websocket' ? WEBSOCKET_TYPE : kind === 'repeat' ? REPEAT_TYPE : SUBSCRIBE_TO_CHANGES_TYPE;
+  return kind === 'parser' ? STREAM_PARSER_TYPE : kind === 'buffer' ? STREAM_BUFFER_TYPE : kind === 'accumulator' ? TEXT_ACCUMULATOR_TYPE : kind === 'sse' ? SSE_TYPE : kind === 'websocket' ? WEBSOCKET_TYPE : kind === 'repeat' ? REPEAT_TYPE : kind === 'dispatcher' ? ACTION_DISPATCHER_TYPE : kind === 'handler' ? ACTION_HANDLER_TYPE : SUBSCRIBE_TO_CHANGES_TYPE;
 }
 export const RUN_TASKS_TYPE = 'RunTasks';
 /** EXP-011 §57. `Repeater Item` — the type id is the runtime's `name`, not the display name. */
@@ -951,6 +1031,9 @@ const OWN_CHAIN_OUTPUTS: Record<string, readonly string[]> = {
   [SUBSCRIBE_TO_CHANGES_TYPE]: STREAM_NODES[SUBSCRIBE_TO_CHANGES_TYPE].signals,
   // GAM-013. Tick and the outcome trio, the same footing.
   [REPEAT_TYPE]: STREAM_NODES[REPEAT_TYPE].signals,
+  // EXP-011 §77. The dispatcher's and the handler's signals, the same footing.
+  [ACTION_DISPATCHER_TYPE]: STREAM_NODES[ACTION_DISPATCHER_TYPE].signals,
+  [ACTION_HANDLER_TYPE]: STREAM_NODES[ACTION_HANDLER_TYPE].signals,
   [LOG_TYPE]: ['done'],
   [TIMER_TYPE]: TIMER_OUTPUTS,
   [VALUE_CHANGED_TYPE]: ['valueChanged'],
@@ -13607,6 +13690,20 @@ function planComponent(
       const filtered = node.parameters.some((p) => p.name === 'visualFilter') || component.connections.some((c) => c.toId === node.id && (c.toProperty === 'visualFilter' || c.toProperty.startsWith('qp-')));
       if (filtered) return refuse('its Filter is authored — a subscription filter is evaluated by the server and this slice does not translate the filter tree; dropping it would deliver every change in the class');
     }
+    // EXP-011 §77. The built-in store actions write a Global Store a server names keys in; which store and which keys must be
+    // readable off the graph, and this slice exports none of them. A literal naming only misspelt built-ins enables nothing
+    // (the node reports them on Last Error, and the lib does the same), so it translates.
+    if (spec.kind === 'dispatcher') {
+      if (wiredPorts.has(`${node.id}:builtIns`)) return refuse('its Enabled Built-ins input is wired — which store writes a server may make must be readable off the graph');
+      const builtIns = literalParam(node, 'builtIns');
+      const enabled = typeof builtIns === 'string' ? builtIns.split(',').map((n) => n.trim()).filter((n) => (ACTION_BUILT_INS as readonly string[]).includes(n)) : [];
+      if (enabled.length > 0) return refuse(`it enables the built-in store action${enabled.length > 1 ? 's' : ''} ${enabled.join(', ')} — a server writing the app's Global Store is not exported in this slice`);
+    }
+    // EXP-011 §77. With Auto Complete on, the runtime completes with the Result its Trigger chain has just written; the
+    // export reads Result from the render the Trigger fired in, so a wired Result would hand back the value from before.
+    if (spec.kind === 'handler' && wiredPorts.has(`${node.id}:result`) && (wiredPorts.has(`${node.id}:autoComplete`) || literalParam(node, 'autoComplete') !== false)) {
+      return refuse('its Result input is wired while Auto Complete is on — the runtime hands back the value its Trigger chain has just written, and the export would hand back the one from the render before');
+    }
     const valueInputs: Array<{ port: string; displayName: string; param?: string }> = [...(spec.data !== undefined ? [spec.data] : []), ...spec.config];
     for (const wire of component.connections.filter((c) => c.toId === node.id)) {
       if (spec.actions[wire.toProperty] !== undefined || valueInputs.some((p) => (p.param ?? p.port) === wire.toProperty)) continue;
@@ -13661,7 +13758,7 @@ function planComponent(
       data,
       config,
       listeners: {},
-      comment: `${label} — a ${spec.displayName} (${spec.sourceFile}), hosted by ${spec.lib}.ts; its value outputs read live off the handle.`
+      comment: `${label} — ${/^[AEIOU]/.test(spec.displayName) ? 'an' : 'a'} ${spec.displayName} (${spec.sourceFile}), hosted by ${spec.lib}.ts; its value outputs read live off the handle.`
     };
     streamPlans.set(node.id, core);
     plan.streams.push(core);
@@ -16196,7 +16293,12 @@ function planComponent(
       for (const port of ['run', 'abort']) if (wiredPorts.has(`${node.id}:${port}`)) compiledOf(node, port);
     } else if (STREAM_NODES[node.type] !== undefined) {
       // EXP-011 §58. Every wired action port compiles.
-      for (const port of Object.keys(STREAM_NODES[node.type].actions)) if (wiredPorts.has(`${node.id}:${port}`)) compiledOf(node, port);
+      const fired = Object.keys(STREAM_NODES[node.type].actions).filter((port) => wiredPorts.has(`${node.id}:${port}`));
+      for (const port of fired) compiledOf(node, port);
+      // EXP-011 §77. With no action port wired, this loop is the node's trigger side, as it is On App Error's below: an
+      // Action Handler whose Trigger chain reads its own Payload was otherwise first registered from inside that chain's
+      // sink and read as "its trigger chain is cyclic".
+      if (fired.length === 0) streamPlanOf(node);
     } else if (node.type === ON_APP_ERROR_TYPE) {
       // EXP-011 §54. No trigger port — it registers HERE, unconditionally, because it must register before any
       // other pass compiles a sink that reads it: a Set Variable in its own Error chain reads its Message, and a

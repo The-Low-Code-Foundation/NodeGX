@@ -474,7 +474,8 @@ export function emitGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires:
     const mod = { exports: exported };
     const req = (id: string): unknown => {
       if (id.endsWith('.css')) return new Proxy({}, { get: (_t, k) => String(k) });
-      const m = /^\.\.\/lib\/([\w-]+)$/.exec(id);
+      // a component imports `../lib/<name>`; a lib imports its sibling as `./<name>` (actions.ts's `./errors`)
+      const m = /^\.\.\/lib\/([\w-]+)$/.exec(id) ?? (self.startsWith('src/lib/') ? /^\.\/([\w-]+)$/.exec(id) : null);
       if (m) {
         const file = `src/lib/${m[1]}.ts`;
         if (!libs.has(file)) {

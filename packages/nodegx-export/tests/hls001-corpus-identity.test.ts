@@ -335,7 +335,13 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     //
     // 52 → 53 on 2026-10-14 (EXP-011 §76, session 101's pile, committed by session 102): `pattern-desk`, the
     // first project in the corpus that places a `Pattern Extractor`. Counted off `ls tests/fixtures/`.
-    expect(corpusProjects().length).toBe(53);
+    //
+    // 53 → 54 on 2026-10-15 (EXP-011 §77, session 106): `action-desk`, the first project in the corpus that places an
+    // Action Dispatcher and Action Handlers (in two components). The 53 that moved on the red run were every project's
+    // `README.md` and nothing else — the coverage sentence reads 125 of 130 — counted on the red run, then again in the
+    // regenerated golden's diff (53 lines out, all README; 53 README lines and action-desk's 19 in). A peer's uncommitted
+    // catalog edit (noodl-types, Upload File's photo ports) was on the tree and moved no emitted byte.
+    expect(corpusProjects().length).toBe(54);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 

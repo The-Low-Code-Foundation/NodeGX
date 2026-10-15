@@ -11284,3 +11284,93 @@ and `export-ledger:picker --check` holds at 123/130.
 **What this leaves (lane 6, in order):** the three graders ISL-043 needs come first: GRAPHNOSPEC (the instrument
 itself), then NAVENCODE and DATEHARNESS (both are the exported app disagreeing with the running one, or nobody
 being able to tell). CATALOGNAME and NOEXPORTCI are small. After them come ISL-043, and then §77–§79 (the seven picker rows).
+
+---
+
+## §77 Action Dispatcher and Action Handler (session 106, 2026-10-15): picker 123 → 125 of 130
+
+### §77.1 What is built
+
+**The shape: the streaming table, members eight and nine.** Every port of both nodes fits the table as it stands. Signal
+inputs are verbs on a handle (`dispatch(action)` / `cancel()`, `complete()` / `fail()`). Signal outputs are listeners.
+Value outputs are live getters. Value inputs are options, applied through the node's own setters. The unmount cleanup is
+the node's delete listener. Two shapes were rejected. Send / Receive Event discovers its channels
+statically and types their payloads, while this registry is dynamic by design. Run Tasks and the crypto family print
+their outcome arms at each call site, while here the outcomes belong to the node.
+
+**`src/emit/actionsLib.ts` → emitted `src/lib/actions.ts`.** `action-dispatcher.ts` is transcribed near-verbatim: the
+registry, the queue, `payloadOf`, `builtInFieldOf`, `parseList`, and the built-in store actions. The one change is the
+store: it is injected, and the default refuses, because no exported dispatcher enables a built-in in this slice. Then
+come the two node shells, which transcribe `actiondispatchernode.ts` and `actionhandlernode.ts`: every setter's
+coercion, values before every signal, `node.ts`'s outcome contract (a Failure raises on `./errors` before its pulse;
+Completed fires after every outcome), and the delete listeners. Then the two hooks. `export const actionRegistry` is a
+module singleton, so a Dispatcher in `Pages/Home` reaches a Handler in `Components/Greeter` by channel name alone, as
+the runtime's process-global registry does. The lib was written as a plain `.ts` file, typechecked strict, and graded
+(§77.2) before it was turned into the string-array form (`gen.js`, the session's scratchpad).
+
+- **Options apply on change.** The hook runs a setter only when an option's value differs from the last one applied
+  (`Object.is`). An undefined option runs nothing, because an undefined value is never sent (C3). Running the setters on
+  every render, as Repeat's idempotent one does, would re-set Last Error from a misspelt Enabled Built-ins on every
+  render and clobber a later refusal.
+- **A Handler registers after mount, and again when Channel, Action Type or Enabled changes.** The effect is keyed on
+  the three; this is the runtime's `scheduleSetup`. It registers only once one of the three has been set, because the
+  runtime schedules a setup only from those setters. A Handler with nothing authored therefore raises nothing, as the
+  runtime's raises nothing.
+
+**Plan (`plan.ts`).** There are two table rows, `StreamKind += dispatcher | handler`, `lib += actions`,
+`streamTypeOfKind` and `OWN_CHAIN_OUTPUTS`. Two refusals are added to `streamPlanOf`, by sentence:
+- `it enables the built-in store action(s) <names> — a server writing the app's Global Store is not exported in this slice`,
+  and `its Enabled Built-ins input is wired — which store writes a server may make must be readable off the graph`. A
+  literal that names only misspelt built-ins enables nothing and translates.
+- `its Result input is wired while Auto Complete is on — the runtime hands back the value its Trigger chain has just
+  written, and the export would hand back the one from the render before`. With Auto Complete off it translates:
+  Complete is a later pulse, after the render that carries Result.
+
+**`component.ts` / `emitApp.ts`.** `actions` joins the hook-import loop, `actionsLib` is the flag, and `actions.ts`
+ships with `errors.ts`.
+
+### §77.2 The test: `tests/the-action-bus.test.ts`, 24 rows, and `tests/fixtures/action-desk`
+
+§A runs the fixture whole: the app typechecks, both modules ship, and there are no notes beyond the router shell. A
+Dispatcher in Home and two Handlers in the placed Greeter import one module. **§B is the differential.** A seeded script
+(register / unregister with five handler behaviours, dispatch from a pool of 23 shapes, complete, fail, cancel, advance
+a scripted clock) is played against the runtime's own `action-dispatcher.ts` and against the lib, each loaded fresh,
+over **8 option rows × 60 scripts × 24 operations**. Every hook, its arguments, and `queueSize` / `isExecuting` /
+`waitingFor` after each event must be equal in order. A control asserts that the grid reached every hook, all four
+store calls and all five refusal reasons. §C covers the wire shapes and the refusals by sentence. §D is the finding
+(§77.3). §E covers the ledger and the floor.
+
+**On the export, the node shells are graded by NSP-008** (`tests/node-spec-graph.test.ts`). t04's "Action Dispatcher
+runs an action through the Action Handler…" and "an array of actions runs in order…" (the late handler and Fail) both
+**play and pass**. The graph line moves from 2 to **4 of 85 conforming**, with 11 played. t04's built-in scenario is
+outside on the new refusal; its two clock scenarios wait on the harness's clock.
+
+### §77.3 What building it found
+
+1. **A streaming node that nothing pulses, whose own chain reads its own value, read as "its trigger chain is cyclic".**
+   GREET's Trigger writes its own Payload into a Variable. The registration pass reaches a node with no wired action
+   port last; the dropped-wire pass compiled the Set Variable first and registered the handler from inside that sink,
+   and the listener compile re-entered the same key. §54 named this trap for On App Error. It is fixed the same way:
+   the trigger-side loop registers a streaming node with no wired action port. This applies to the whole table, not
+   only §77's two (a Subscribe To Changes or a Repeat whose chain reads itself met the same trap).
+2. **The graph harness could not load a lib that imports its sibling.** It resolved a component's `../lib/<name>` and
+   not a lib's `./errors`. No graph scenario had played a raising lib before this one; it is fixed in the harness.
+3. **The comment said "a Action Dispatcher".** The table's article is now computed, and every existing member's name
+   starts with a consonant, so nothing else moved.
+
+### §77.4 Recorded differences (not refused)
+
+- **Registration order across components.** Two handlers on one type in two components register in React's effect
+  order (children first). The runtime registers in node-creation order, and handlers on one type run in registration
+  order.
+- **A wired input re-sent with the same value.** The runtime's setter runs again; for Channel / Action Type / Enabled,
+  that tears down and re-registers, moving the handler to the end of its type's list. The hook sees no change.
+- **The clocks.** Wait For Handler and Handler Timeout run on `setTimeout`. The differential grades them on a scripted
+  clock, but no graph scenario does yet (t04's two clock scenarios are outside on the harness).
+
+### §77.5 What this leaves
+
+The picker is at **125 / 130**: State Snapshot, State History, Undo / Redo, Optimistic Update, Sign In With (§78, §79).
+Built-ins on the Dispatcher are the next slice of this row. They need the Dispatcher's store resolved as a Global Store
+module (`appState.ts` discovery, a key typed `unknown` for each key a server may write) and a store adapter over
+`@nodegx/core`'s `Store`, which has no delete.
