@@ -1,3 +1,42 @@
+# Next session — session 108 (2026-10-15, BOARD lane 6) built **EXP-011 §78 part 2: Optimistic Update export** — picker **129 / 130**, graph line **10 of 85 conform, 17 played**. Next: §79 Sign In With, the last picker row.
+
+## ✅ Session 108: §78 part 2, Optimistic Update
+
+Read EXP-011 §78.6–§78.10 for the whole record; in short:
+
+- **`src/lib/history.ts` grew the patches and the fourth node** (plain source: session 108 scratchpad
+  `historylib/history.ts`, same `gen.js`, round trip byte-exact, 1,211 → 1,689 lines). `globalstore.ts`'s
+  apply / commit / rollback / getOpenPatches over §78's seam (`ABSENT` kept apart; a rollback under a newer open patch
+  hands it the value), then `optimisticupdatenode.ts`'s shell (supersession, oldest-open, the deadline, When Removed).
+- **Table row 13**: Optimistic Value is the data port carried by Apply; Key / Error Message / Transaction Id / Timeout /
+  When Removed are config; Store Name is the store module. No new refusal sentence.
+- **Graded:** `tests/the-optimistic-update.test.ts` 18 / 18. The differential drives the **runtime's own node** in a
+  `NodeContext` over its own `globalstore.ts` (300 scripts × 42 steps, 0 differ; 0 of 1,000 one-off), a reach control,
+  three mutants caught. Fixture `optimistic-desk`. NSP-008: **t03's two clock-free scenarios play and pass.**
+- **Found:** the export graph target drew `Math.random` from the real generator; it now installs the world's seeded one,
+  as the runtime target does (the line moved by exactly the two). **One recorded difference**, pinned on both sides in
+  §D: after an Apply with no Optimistic Value, a delete of the key supersedes the update in the runtime only.
+
+Readings: whole-package export jest **122 / 122 suites, exit 0** (`nice -n 19 --runInBand`, 1,261 s); HLS-001 red on
+exactly the predicted 77 paths, golden regenerated and its diff counted (56 out, 79 in), 4 / 4 after; 19 floor pins
+moved; `export-ledger:check` OK (136 translated); `export-ledger:picker --check` holds at 129 / 130; package `tsc` 0;
+editor `tsc --noEmit` 0.
+
+🔴 **Run a whole-package suite as `nice -n 19 npx jest --runInBand`.** Richard (2026-10-15): `--maxWorkers=4` was
+"murdering my CPU".
+
+**Next (BOARD lane 6):**
+1. **§79 Sign In With**, the last picker row. EXP-011 §45.6 / §75.5 #2: the exported client needs the return leg first
+   (the runtime client's constructor consumes it, `_consumeAuthReturn`), then the node is a launcher plus a mount-time
+   receiver. The backend has a GitHub provider (`auth/github.ts`); a drive of the redirect's return leg against the real
+   backend is the grade. If a provider needs credentials Richard holds, that is a ruling to ask for in plain words.
+2. The Dispatcher's built-ins (§77.5).
+3. Raising the line: t01's three are the store translation itself; the harness clock's advance (t04 ×2, t03 ×1); the
+   one-component limit (17).
+4. Rows: P18-S106-PARSERAISE, P18-S104-FEEDCOUNT, P18-S105-KITHEAD (all low), P18-S104-PACKRUNTIMENPX.
+
+---
+
 # Next session — session 107 (2026-10-15, BOARD lane 6) built **EXP-011 §78: State History, Undo / Redo and State Snapshot export** — picker **128 / 130**, graph line **8 of 85 conform, 15 played**. Next: Optimistic Update (§78 part 2), then §79 Sign In With.
 
 ## ✅ Session 107: §78, the history family's three (`b629c2953`)

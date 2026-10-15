@@ -180,7 +180,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   let repeatLibUsed = false;
   // EXP-011 §77. The action bus's host — earned by a component whose plan kept a Dispatcher or a Handler; it imports errors.ts only.
   let actionsLibUsed = false;
-  // EXP-011 §78. The history's host — earned by a component whose plan kept a State History, an Undo / Redo or a State Snapshot.
+  // EXP-011 §78. The history's host — earned by a component whose plan kept a State History, an Undo / Redo, a State Snapshot or an Optimistic Update.
   let historyLibUsed = false;
   // EXP-011 §59.
   let cryptoLibUsed = false;
@@ -342,7 +342,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   // EXP-011 §66. realtime.ts raises subscribe-to-changes/realtime-failed on the channel.
   // GAM-013. repeat.ts raises repeat/interval-not-positive on the channel.
   // EXP-011 §77. actions.ts raises action-dispatcher/nothing-admitted and action-handler/operation-failed on the channel.
-  // EXP-011 §78. history.ts raises undo/operation-failed and state-snapshot/operation-failed on the channel.
+  // EXP-011 §78. history.ts raises undo/operation-failed, state-snapshot/operation-failed and optimistic-update/operation-failed on the channel.
   if (errorsLibUsed || scriptLibUsed || runTasksLibUsed || streamingLibUsed || sseLibUsed || websocketLibUsed || realtimeLibUsed || repeatLibUsed || actionsLibUsed || historyLibUsed || componentObjectLibUsed || dragLibUsed) {
     files[ERRORS_LIB_PATH] = GENERATED_MODULE_TS + errorsLibSource();
   }
@@ -372,7 +372,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   if (actionsLibUsed) {
     files[ACTIONS_LIB_PATH] = GENERATED_MODULE_TS + actionsLibSource();
   }
-  // EXP-011 §78. `src/lib/history.ts` — the history manager and the named checkpoints, where a component printed one of the three.
+  // EXP-011 §78. `src/lib/history.ts` — the history manager, the named checkpoints and the patches, where a component printed one of the four.
   if (historyLibUsed) {
     files[HISTORY_LIB_PATH] = GENERATED_MODULE_TS + historyLibSource();
   }

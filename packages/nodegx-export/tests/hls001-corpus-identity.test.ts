@@ -347,7 +347,15 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // paths: every one of the 54 projects' `README.md` (the coverage sentence reads 128 of 130) and history-desk's own 20
     // files, nothing else. The regenerated golden's diff counted the same: 54 lines out, all README; 54 README lines and
     // history-desk's 22-line block in.
-    expect(corpusProjects().length).toBe(55);
+    //
+    // 55 → 56 on 2026-10-15 (EXP-011 §78 part 2, session 108): `optimistic-desk`, the first project in the corpus that
+    // places an Optimistic Update (two, the second in a placed component). Predicted before the red run, then counted: 77
+    // paths moved — the 55 projects' `README.md` (the coverage sentence reads 129 of 130), history-desk's
+    // `src/lib/history.ts` (the module grew the patches and the fourth node) and optimistic-desk's own 21 files, nothing
+    // else. The regenerated golden's diff counted the same: 56 lines out (55 README, history-desk's history.ts); 56 README
+    // lines, history-desk's history.ts and optimistic-desk's 22-line block in. A peer's uncommitted catalog edit
+    // (noodl-types, Upload File) was on the tree and moved no emitted byte.
+    expect(corpusProjects().length).toBe(56);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 

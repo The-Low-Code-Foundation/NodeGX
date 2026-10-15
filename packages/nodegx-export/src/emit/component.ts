@@ -288,7 +288,7 @@ export interface EmittedComponent {
   repeatLib: boolean;
   /** EXP-011 §77. `src/lib/actions.ts` is owed when this component keeps an Action Dispatcher or an Action Handler. */
   actionsLib: boolean;
-  /** EXP-011 §78. `src/lib/history.ts` is owed when this component keeps a State History, an Undo / Redo or a State Snapshot. */
+  /** EXP-011 §78. `src/lib/history.ts` is owed when this component keeps a State History, an Undo / Redo, a State Snapshot or an Optimistic Update. */
   historyLib: boolean;
   /** EXP-011 §59. `src/lib/crypto.ts` verbs this component calls; `src/lib/screen.ts` is owed when a viewport hook prints. */
   cryptoHelpers: Set<string>;

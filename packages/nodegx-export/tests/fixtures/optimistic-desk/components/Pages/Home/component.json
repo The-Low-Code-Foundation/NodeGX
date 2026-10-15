@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a7c10d00-0000-4000-8000-000000000191",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "modified": "2026-10-15T12:00:00.000Z",
+  "description": "EXP-011 §78 part 2 fixture: a Global Store \"app\" declares status \"Draft\" and notice \"\". A Subscribe on status shows it. An Optimistic Update \"Publish\" writes status \"Published\" now (Timeout 5000 ms, Error Message \"The server said no\"); Server said yes commits it and Server said no rolls it back, and Rolled Back writes notice \"Put back\" through a Set Global Store, which a second Subscribe shows. Its Value, Pending Count and Error are three Texts. The Rename placed below holds a second Optimistic Update on title, so the patches are reached from two components by the store alone."
+}

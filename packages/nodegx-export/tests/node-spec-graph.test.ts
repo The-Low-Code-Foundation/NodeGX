@@ -75,7 +75,9 @@ describe('NSP-008 on the export', () => {
     console.log(`P18 ledger: ${line.conforming} of ${line.of} graph scenarios conform on the export — ${line.played} played (${line.conforming} conform, ${line.declaredDifferent} differ as declared, ${line.knownRows} known rows, ${line.failing} fail on filed rows); ${line.outsideExporter} outside on the exporter's verdict, ${line.outsideHarness} on this harness's limits`);
     // s107 §78: t02's four (State History, Undo / Redo, State Snapshot) play and pass — the harness now serves a store
     // module and installs the world's clock, as the runtime target does
-    expect(line).toEqual({ of: 85, played: 15, conforming: 8, declaredDifferent: 3, knownRows: 0, failing: 4, outsideExporter: 24, outsideHarness: 46 }); // s106 §77: t04 S1 and S3 play and pass
+    // s108 §78 part 2: t03's two clock-free Optimistic Update scenarios play and pass — the harness now installs the
+    // world's seeded Math.random too, so a generated Transaction Id is the same id on both sides; t03's third advances a clock
+    expect(line).toEqual({ of: 85, played: 17, conforming: 10, declaredDifferent: 3, knownRows: 0, failing: 4, outsideExporter: 22, outsideHarness: 46 }); // s106 §77: t04 S1 and S3 play and pass
   });
 
   test('C2 — two values in one frame are both delivered: the emitted Counter → Value Changed → Counter reads 3, as the runtime does', () => {

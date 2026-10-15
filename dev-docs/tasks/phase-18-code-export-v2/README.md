@@ -43,7 +43,7 @@ npm run export-ledger:picker          # ratcheted in PR CI
 node scripts/export-ledger/picker-coverage.js    # the readable report
 ```
 
-> **PICKER COVERAGE: 128 of 130 placeable nodes export (98.5%)** — 2026-10-15, session 107 (§78, State History, Undo / Redo and State Snapshot). Was 125 at session 106, 123 at session 101, 73 of 127 (57.5%) at session 65. Left: Optimistic Update, Sign In With.
+> **PICKER COVERAGE: 129 of 130 placeable nodes export (99.2%)** — 2026-10-15, session 108 (§78 part 2, Optimistic Update). Was 128 at session 107, 125 at session 106, 123 at session 101, 73 of 127 (57.5%) at session 65. Left: Sign In With.
 
 "Placeable" means `inNodePicker`, not deprecated, browser-capable: what a person can actually drop
 on a canvas. The floor lives in `coverage-ledger.json` as `pickerCoverageFloor` and ratchets both
@@ -56,17 +56,16 @@ is ever lost quietly.
 cd packages/nodegx-export && npx jest tests/node-spec-graph.test.ts   # prints "P18 ledger: …"
 ```
 
-> **GRAPH SCENARIOS: 8 of 85 conform on the export** — 2026-10-15, session 107 (4 after §77 made t04's Dispatcher
-> scenarios play, 2 at the line's first reading). **15 played**: 8 conform, 3 differ as CONTRACT.md Part 2 declares (C6/G1,
-> C7, C8), 4 fail on one filed row (P18-S106-PARSERAISE). **70 did not play**: 24 on
+> **GRAPH SCENARIOS: 10 of 85 conform on the export** — 2026-10-15, session 108 (8 after §78's t02, 4 after §77 made t04's
+> Dispatcher scenarios play, 2 at the line's first reading). **17 played**: 10 conform, 3 differ as CONTRACT.md Part 2
+> declares (C6/G1, C7, C8), 4 fail on one filed row (P18-S106-PARSERAISE). **68 did not play**: 22 on
 > the exporter's own verdict (it refuses part of the graph, or lifts none of the outputs the scenario watches), 46 on the
 > test harness's limits (23 seed a world, 17 need more than one component, 3 advance a clock, 3 make a wire after
 > mount). Was 1 conforming, 4 played, 81 outside (session 103), and "CONFORM" counted the outside as conforming.
 
 Outside never counts as conforming. The test pins all eight counts, so a move in either direction is seen; and each
 failing scenario is pinned by name to its `dev-docs/bugs/` row, so a new failure is new. To raise the number, either
-make the exporter translate the graph (Optimistic Update is 2 of the 24 exporter-verdict scenarios, and t01's three Global
-Store scenarios wait on the store translation itself), or lift a harness
+make the exporter translate the graph (t01's three Global Store scenarios wait on the store translation itself), or lift a harness
 limit. The harness limits are recorded in `tests/helpers/node-spec-target.ts` `canPlay`.
 
 **🔴 There is a second number and it must never again drive priority.** The corpus audit

@@ -629,11 +629,16 @@ export function exportGraphTarget(): GraphTarget<ExportGraphHandle> {
     // EXP-011 §78. The world's clock is installed as the runtime target's installWorld installs it: `Date.now` reads it
     // for the play, so a State History entry is stamped with the world's time on both sides. Nothing advances it here
     // (canPlay keeps every `advance` step outside).
+    // EXP-011 §78 part 2. And `Math.random` reads the world's seeded generator, as installWorld points it: an Optimistic
+    // Update's generated Transaction Id ('tx_' + the clock + the generator) is the same id on both sides only then.
     install(world) {
       const dateNow = Date.now;
+      const mathRandom = Math.random;
       Date.now = () => world.clock.now();
+      Math.random = () => world.random.next();
       return () => {
         Date.now = dateNow;
+        Math.random = mathRandom;
       };
     },
 

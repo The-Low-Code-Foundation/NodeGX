@@ -920,7 +920,7 @@ describe('§F the ledger', () => {
     const row = (ledger.entries as Array<{ typeName: string; note?: string; exemption?: string }>).find((e) => e.typeName === SSE_TYPE)!;
     expect(row.exemption).toBeUndefined();
     expect(String(row.note)).toContain('useServerSentEvents');
-    expect(ledger.pickerCoverageFloor).toBe(128); // EXP-011 §78 State History + Undo / Redo + State Snapshot (session 107) on top of §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of the Tier 2.8 rows
+    expect(ledger.pickerCoverageFloor).toBe(129); // EXP-011 §78 part 2 Optimistic Update (session 108) on top of §78 State History + Undo / Redo + State Snapshot (session 107) on top of §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of the Tier 2.8 rows
     expect(String(ledger.$pickerCoverageFloorComment)).toContain('115 after Tier 3.11 row 1 Server-Sent Events');
     // §65 translated WebSocket and §66 Subscribe To Changes — Tier 3.11 is complete, and no scheduled row remains (subscribe-to-changes.test F2).
     expect(exportBadgeOf('net.noodl.WebSocket')).toBeUndefined();

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a7c10d00-0000-4000-8000-000000000192",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "box",
+      "type": "Group",
+      "label": "Box",
+      "children": [
+        "titleInput",
+        "renameBtn",
+        "confirmBtn",
+        "pendingFlag"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "columnGap": "var(--space-3)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "titleInput",
+      "type": "net.noodl.controls.textinput",
+      "label": "New title",
+      "parent": "box",
+      "parameters": {
+        "placeholder": "A new title"
+      },
+      "x": 100,
+      "y": 120
+    },
+    {
+      "id": "renameBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Rename",
+      "parent": "box",
+      "parameters": {
+        "label": "Rename"
+      },
+      "x": 100,
+      "y": 200
+    },
+    {
+      "id": "confirmBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Confirm",
+      "parent": "box",
+      "parameters": {
+        "label": "Confirm"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "pendingFlag",
+      "type": "Text",
+      "label": "Rename pending",
+      "parent": "box",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 360
+    },
+    {
+      "id": "draft",
+      "type": "Variable2",
+      "label": "Draft title",
+      "parameters": {
+        "name": "draftTitle"
+      },
+      "x": 400,
+      "y": 120
+    },
+    {
+      "id": "renameUpdate",
+      "type": "net.noodl.OptimisticUpdate",
+      "label": "Rename",
+      "parameters": {
+        "storeName": "app",
+        "key": "title",
+        "transactionId": "rename",
+        "timeout": 0,
+        "onDispose": "commit"
+      },
+      "x": 400,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "box"
+  ]
+}

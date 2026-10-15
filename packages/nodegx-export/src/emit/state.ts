@@ -119,10 +119,11 @@ function declarersComment(store: StorePlan): string {
       }
       return `Written by ${who}.`;
     }),
-    // EXP-011 §78. The nodes handed this module by src/lib/history.ts.
+    // EXP-011 §78. The nodes handed this module by src/lib/history.ts (§78 part 2: Optimistic Update with them).
     ...(store.historians ?? []).map((h) => {
       const who = `${h.label !== undefined ? `"${h.label}" ` : ''}(${h.nodeType} \`${h.nodeId}\` on /${h.componentPath})`;
-      return `${h.nodeType === 'net.noodl.StateHistory' ? 'History kept by' : h.nodeType === 'net.noodl.StateSnapshot' ? 'Checkpointed by' : 'Stepped through by'} ${who}.`;
+      const role = h.nodeType === 'net.noodl.StateHistory' ? 'History kept by' : h.nodeType === 'net.noodl.StateSnapshot' ? 'Checkpointed by' : h.nodeType === 'net.noodl.OptimisticUpdate' ? 'Written optimistically by' : 'Stepped through by';
+      return `${role} ${who}.`;
     })
   ];
   if (lines.length === 0) {

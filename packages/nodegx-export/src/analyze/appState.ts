@@ -82,8 +82,8 @@ export interface StorePlan {
   /** `net.noodl.GlobalStore.Set` nodes writing this store. */
   writers: VariableWriter[];
   /**
-   * EXP-011 §78. The State History, Undo / Redo and State Snapshot nodes naming this store. Each is handed the store
-   * module itself, so a store one of them names is emitted even when no Global Store node declares it.
+   * EXP-011 §78. The State History, Undo / Redo, State Snapshot and Optimistic Update nodes naming this store. Each is
+   * handed the store module itself, so a store one of them names is emitted even when no Global Store node declares it.
    */
   historians?: VariableWriter[];
   /** Set: the whole store defers (authored persist, unparseable initial state on every declarer). */
@@ -110,7 +110,7 @@ export function isGlobalStoreFamily(type: string): boolean {
 }
 
 /** EXP-011 §78. The nodes `src/lib/history.ts` hosts — each names a Global Store with the same `storeName` port. */
-const HISTORY_FAMILY = new Set(['net.noodl.StateHistory', 'net.noodl.StateHistory.Undo', 'net.noodl.StateSnapshot']);
+const HISTORY_FAMILY = new Set(['net.noodl.StateHistory', 'net.noodl.StateHistory.Undo', 'net.noodl.StateSnapshot', 'net.noodl.OptimisticUpdate']);
 export function isHistoryFamily(type: string): boolean {
   return HISTORY_FAMILY.has(type);
 }

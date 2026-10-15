@@ -641,7 +641,7 @@ export const APP_ERROR_TS_TYPE = '{ code: string; message: string; nodeId: strin
 export const STREAM_PARSER_TYPE = 'net.noodl.JSONStreamParser';
 export const STREAM_BUFFER_TYPE = 'net.noodl.StreamBuffer';
 export const TEXT_ACCUMULATOR_TYPE = 'net.noodl.TextAccumulator';
-export type StreamKind = 'parser' | 'buffer' | 'accumulator' | 'sse' | 'websocket' | 'subscription' | 'repeat' | 'dispatcher' | 'handler' | 'history' | 'undo' | 'snapshot';
+export type StreamKind = 'parser' | 'buffer' | 'accumulator' | 'sse' | 'websocket' | 'subscription' | 'repeat' | 'dispatcher' | 'handler' | 'history' | 'undo' | 'snapshot' | 'optimistic';
 /** EXP-011 §64. `Server-Sent Events` — the fourth member of the table: no data port, two Actions, its own module. */
 export const SSE_TYPE = 'net.noodl.SSE';
 /** EXP-011 §65. `WebSocket` — the fifth member: a data port (Message) that only the Send verb carries, three Actions, its own module. */
@@ -675,6 +675,12 @@ export const ACTION_BUILT_INS = ['SET_STORE', 'MERGE_STORE', 'DELETE_STORE_KEY',
 export const STATE_HISTORY_TYPE = 'net.noodl.StateHistory';
 export const UNDO_REDO_TYPE = 'net.noodl.StateHistory.Undo';
 export const STATE_SNAPSHOT_TYPE = 'net.noodl.StateSnapshot';
+/**
+ * EXP-011 §78 part 2. `Optimistic Update` — the thirteenth member, in the same module: a patch on the exported Global Store
+ * (apply now, commit or roll back later, overlapping patches handing values to each other) is one write through the
+ * history's store seam, so the history records it and every Subscribe sees it.
+ */
+export const OPTIMISTIC_UPDATE_TYPE = 'net.noodl.OptimisticUpdate';
 /** EXP-011 §66. The structural RealtimeError — `src/lib/realtime.ts`'s, spelled so a store row needs no import. */
 export const REALTIME_ERROR_TS_TYPE = '{ message: string; code: string; kind: string } | null';
 export interface StreamValueField {
@@ -1080,12 +1086,51 @@ export const STREAM_NODES: Record<string, StreamNodeSpec> = {
       byReferenceKeys: { tsType: 'string', cast: 'string', maybeUndefined: false },
       error: { tsType: 'string', cast: 'string', maybeUndefined: true }
     }
+  },
+  // EXP-011 §78 part 2. Optimistic Value is the data port, carried by Apply and read at the pulse (the runtime defers the
+  // apply to the end of the frame, so the value that arrived with it is the one it writes); Commit and Rollback carry
+  // nothing. Key, Error Message, Transaction Id, Timeout and When Removed are config, applied through the node's setters
+  // as they change (a new Key re-subscribes, the runtime's scheduled setup). The four lifecycle Events and the outcome
+  // trio are the listeners. Value follows the key whoever writes it; Previous Value, Transaction Id and Error are
+  // undefined until an Apply (or a refusal), as the node's `_internal` holds them.
+  [OPTIMISTIC_UPDATE_TYPE]: {
+    kind: 'optimistic',
+    store: { port: 'storeName', displayName: 'Store Name' },
+    displayName: 'Optimistic Update',
+    hook: 'useOptimisticUpdate',
+    localStem: 'Update',
+    lib: 'history',
+    sourceFile: 'optimisticupdatenode.ts',
+    data: { port: 'optimisticValue', displayName: 'Optimistic Value' },
+    config: [
+      { port: 'key', displayName: 'Key' },
+      { port: 'errorMessage', displayName: 'Error Message' },
+      { port: 'transactionId', displayName: 'Transaction Id' },
+      { port: 'timeout', displayName: 'Timeout (ms)' },
+      { port: 'onDispose', displayName: 'When Removed' }
+    ],
+    actions: {
+      apply: { verb: 'apply', takesData: true },
+      commit: { verb: 'commit', takesData: false },
+      rollback: { verb: 'rollback', takesData: false }
+    },
+    signals: ['applied', 'committed', 'rolledBack', 'timedOut', ...OUTCOME_SIGNALS],
+    values: {
+      value: { tsType: 'unknown', cast: 'unknown', maybeUndefined: true },
+      previousValue: { tsType: 'unknown', cast: 'unknown', maybeUndefined: true },
+      isPending: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      pendingCount: { tsType: 'number', cast: 'number', maybeUndefined: false },
+      isCommitted: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      isRolledBack: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      transactionId: { tsType: 'string', cast: 'string', maybeUndefined: true },
+      error: { tsType: 'string', cast: 'string', maybeUndefined: true }
+    }
   }
 };
 
 /** EXP-011 §64. The type id behind a `stream-out`'s kind — the one ladder component.ts and the maybe-undefined answer share. */
 export function streamTypeOfKind(kind: StreamKind): string {
-  return kind === 'parser' ? STREAM_PARSER_TYPE : kind === 'buffer' ? STREAM_BUFFER_TYPE : kind === 'accumulator' ? TEXT_ACCUMULATOR_TYPE : kind === 'sse' ? SSE_TYPE : kind === 'websocket' ? WEBSOCKET_TYPE : kind === 'repeat' ? REPEAT_TYPE : kind === 'dispatcher' ? ACTION_DISPATCHER_TYPE : kind === 'handler' ? ACTION_HANDLER_TYPE : kind === 'history' ? STATE_HISTORY_TYPE : kind === 'undo' ? UNDO_REDO_TYPE : kind === 'snapshot' ? STATE_SNAPSHOT_TYPE : SUBSCRIBE_TO_CHANGES_TYPE;
+  return kind === 'parser' ? STREAM_PARSER_TYPE : kind === 'buffer' ? STREAM_BUFFER_TYPE : kind === 'accumulator' ? TEXT_ACCUMULATOR_TYPE : kind === 'sse' ? SSE_TYPE : kind === 'websocket' ? WEBSOCKET_TYPE : kind === 'repeat' ? REPEAT_TYPE : kind === 'dispatcher' ? ACTION_DISPATCHER_TYPE : kind === 'handler' ? ACTION_HANDLER_TYPE : kind === 'history' ? STATE_HISTORY_TYPE : kind === 'undo' ? UNDO_REDO_TYPE : kind === 'snapshot' ? STATE_SNAPSHOT_TYPE : kind === 'optimistic' ? OPTIMISTIC_UPDATE_TYPE : SUBSCRIBE_TO_CHANGES_TYPE;
 }
 export const RUN_TASKS_TYPE = 'RunTasks';
 /** EXP-011 §57. `Repeater Item` — the type id is the runtime's `name`, not the display name. */
@@ -1128,6 +1173,7 @@ const OWN_CHAIN_OUTPUTS: Record<string, readonly string[]> = {
   [STATE_HISTORY_TYPE]: STREAM_NODES[STATE_HISTORY_TYPE].signals,
   [UNDO_REDO_TYPE]: STREAM_NODES[UNDO_REDO_TYPE].signals,
   [STATE_SNAPSHOT_TYPE]: STREAM_NODES[STATE_SNAPSHOT_TYPE].signals,
+  [OPTIMISTIC_UPDATE_TYPE]: STREAM_NODES[OPTIMISTIC_UPDATE_TYPE].signals,
   [LOG_TYPE]: ['done'],
   [TIMER_TYPE]: TIMER_OUTPUTS,
   [VALUE_CHANGED_TYPE]: ['valueChanged'],
