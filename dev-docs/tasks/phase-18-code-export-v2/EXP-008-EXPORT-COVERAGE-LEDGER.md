@@ -264,3 +264,15 @@ size mode gives (`visual.test.ts`'s PuppyCard: 2 × `pre`, 2 × `pre-wrap`; `sty
 nothing). Whole package (`nice -n 19 --runInBand`, 547 s): 124 / 127 suites, the three reds being those two specs
 (re-pinned, 63 / 63) and `parameter-coverage` on the P121 peer's three uncommitted Upload File ports, as in s110–s111.
 **8 gap ports remain:** P18-S110-ROUTERSELF (6), -PLACEHOLDEROPACITY, P18-S111-RECORDLIVE.
+
+**Then a Router's own six (P18-S110-ROUTERSELF) — 1,233 of 1,396.** Counted before building: 1 Router of 227 in the
+fixtures, templates and test projects authors any of them with a value that does anything, so the wrapper element
+(a layout change on every exported page, owed a render) was not built. **Url Path carried**: `routedPages` reads the
+Router node's own parameter at emit time (the probe and the specs vary the node, and `RouterIR` is built once at
+parse), and puts the runtime's `_trimUrlPart(urlPath) + '/'` in front of every page, so routes and every
+`navigate(…)` wear it. Blank is none here; in the runtime it is a defect, measured on the real `matchPageFromUrl`:
+`''` pushes `#/home` and matches nothing (P18-S112-BLANKURLPATH, filed). **Mounted** (unticked or wired), a wired Url
+Path, and the four style ports are **said** (`routerNotes`, both channels), with each port's do-nothing value leaving
+the export byte-identical. **Graded:** `tests/the-router-itself.test.ts` (24); mutants: no prefix → exactly 2 red,
+no notes → exactly 12 red, as predicted. Ledger: six rows out of `silent`, floor 1,227 → 1,233; HLS-001 unmoved.
+**2 gap ports remain:** P18-S110-PLACEHOLDEROPACITY, P18-S111-RECORDLIVE.

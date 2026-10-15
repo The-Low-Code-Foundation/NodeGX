@@ -1,6 +1,6 @@
 {
   "$comment": "EXP-008's per-parameter half (P18 session 110). tests/parameter-coverage.test.ts measures, for every translated picker node, whether each non-signal input changes the emitted files or notes (tests/helpers/parameter-probe.ts). This file holds what it cannot count as reaching: every SILENT port with its adjudication, and every UNPROBED port with its type. The spec holds both lists to the measurement in both directions and holds the reaching count to parameterCoverageFloor exactly — a rise must raise it in the same commit, like pickerCoverageFloor. A silent port is not a verdict until classified: gap (the runtime reads it, the export drops it with no note — names a dev-docs/bugs row), gated (reaches in a context the probe does not build — says which), refused-with (matters only where the export refuses out loud), inert (the runtime does not act on it either), unexamined (not yet read — the honest default for a new one).",
-  "parameterCoverageFloor": 1227,
+  "parameterCoverageFloor": 1233,
   "parameterCoverageTotal": 1396,
   "silent": {
     "AddDbModelRelation.modelId": {
@@ -112,26 +112,6 @@
       "class": "refused-with",
       "why": "As Add Record Relation: connections-only; with nothing wired the node is refused out loud"
     },
-    "Router.backgroundColor": {
-      "class": "gap",
-      "why": "The Router collapses into App.tsx with no element to carry it",
-      "bug": "P18-S110-ROUTERSELF"
-    },
-    "Router.clip": {
-      "class": "gap",
-      "why": "The Router collapses into App.tsx with no element to carry it",
-      "bug": "P18-S110-ROUTERSELF"
-    },
-    "Router.cssClassName": {
-      "class": "gap",
-      "why": "The Router collapses into App.tsx with no element to carry it",
-      "bug": "P18-S110-ROUTERSELF"
-    },
-    "Router.mounted": {
-      "class": "gap",
-      "why": "Unticked, the runtime renders no Router at all; the export routes every page",
-      "bug": "P18-S110-ROUTERSELF"
-    },
     "Router.name": {
       "class": "inert",
       "why": "With one Router mounted every Navigate reaches it whatever the name; several Routers are a separate question (routedPages reads routers[0])"
@@ -139,16 +119,6 @@
     "Router.scrollIntoViewAlign": {
       "class": "inert",
       "why": "Read only when the Scroll Into View signal fires, a connections-only port"
-    },
-    "Router.styleCss": {
-      "class": "gap",
-      "why": "The Router collapses into App.tsx with no element to carry it",
-      "bug": "P18-S110-ROUTERSELF"
-    },
-    "Router.urlPath": {
-      "class": "gap",
-      "why": "The runtime prefixes every page path with it; the exported routes do not, so URLs and deep links differ",
-      "bug": "P18-S110-ROUTERSELF"
     },
     "RunTasks.taskErrorOutput": {
       "class": "gated",

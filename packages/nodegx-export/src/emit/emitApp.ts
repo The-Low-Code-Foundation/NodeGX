@@ -58,7 +58,7 @@ import { POPUP_DIALOG_LIB_PATH, popupDialogLibSource } from './popupDialogLib';
 import { EmittedCopy, emitKits } from './kits';
 import { README_PATH, renderReadme } from './readme';
 import { ExportReportData, REPORT_PATH, ReportComponent, StylesReport, renderReport, stripScope } from './report';
-import { emitScaffold } from './scaffold';
+import { emitScaffold, routerNotes } from './scaffold';
 import { emitStateModules } from './state';
 
 const GENERATED_TS = '// @nodegx:generated (api stub — provenance markers complete in EXP-007)\n';
@@ -145,6 +145,12 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
       notes.push(line);
       projectNotes.push(line);
     }
+  }
+
+  // P18-S110-ROUTERSELF. The Router's own ports the export does not carry: it has no Router element. App-wide, both channels.
+  for (const line of routerNotes(ir)) {
+    notes.push(line);
+    projectNotes.push(line);
   }
 
   // Reachability is reported, never acted on: an unreachable component is still emitted, because
