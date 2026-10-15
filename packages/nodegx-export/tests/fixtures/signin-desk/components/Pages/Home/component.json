@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a7c3e9d1-5b2d-4e8f-9c1a-000000000110",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "modified": "2026-10-15T18:00:00.000Z",
+  "description": "EXP-011 §79 fixture: two Sign In With nodes on a project whose backend is at http://localhost:8591. `acme` (Provider acme, Redirect blank: come back here) is pressed by the Sign in with Acme button; its Signing In, Error and Notice each show in a Text, and Done / Failure write a `last` Variable through String-fed Set Variables. `nobody` has no Provider — the refusal — pressed by its own button; its Error shows, and its Completed writes a `refused` Variable. A User node shows who is signed in, which is how the return leg's session is seen."
+}

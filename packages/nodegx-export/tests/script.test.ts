@@ -688,16 +688,16 @@ describe('§G the graph gates', () => {
   test('an input fed by something with no static source refuses the node, naming the feeder', () => {
     const ir = cloneIr();
     const home = componentOf(ir, HOME);
-    // §59 re-pointed the feeder from `Hash` (translated since) to `Pattern Extractor`; §76 translated that too, so it is `Sign In With` now — §79, the last of the §75.5 order.
-    home.nodes.push({ id: 'pattern', type: 'net.noodl.user.SignInWith', catalogRef: 'net.noodl.user.SignInWith', parameters: [], declaredPorts: [], portKnowledge: 'partial' });
+    // §59 re-pointed the feeder from `Hash` (translated since) to `Pattern Extractor`; §76 translated that too, and §79 Sign In With, the last picker row — so it is `Verify Email`, a retired type.
+    home.nodes.push({ id: 'pattern', type: 'net.noodl.user.VerifyEmail', catalogRef: 'net.noodl.user.VerifyEmail', parameters: [], declaredPorts: [], portKnowledge: 'partial' });
     unwire(ir, HOME, 'nameConst:savedValue->greeter:Name');
     wire(ir, HOME, 'pattern', 'match', 'greeter', 'Name');
-    expect(dispositionOf(ir, HOME, 'greeter').reason).toBe('its Name input is fed by net.noodl.user.SignInWith — no statically known source in the emit vocabulary');
+    expect(dispositionOf(ir, HOME, 'greeter').reason).toBe('its Name input is fed by net.noodl.user.VerifyEmail — no statically known source in the emit vocabulary');
   });
   test('a signal-output chain that lands on nothing translatable refuses the node with the chain\'s reason', () => {
     const ir = cloneIr();
     const home = componentOf(ir, HOME);
-    home.nodes.push({ id: 'pattern', type: 'net.noodl.user.SignInWith', catalogRef: 'net.noodl.user.SignInWith', parameters: [], declaredPorts: [], portKnowledge: 'partial' });
+    home.nodes.push({ id: 'pattern', type: 'net.noodl.user.VerifyEmail', catalogRef: 'net.noodl.user.VerifyEmail', parameters: [], declaredPorts: [], portKnowledge: 'partial' });
     wire(ir, HOME, 'greeter', 'Greeted', 'pattern', 'extract', 'signal');
     expect(dispositionOf(ir, HOME, 'greeter').reason).toBe('its Greeted output drives no translatable action');
   });
@@ -765,7 +765,7 @@ describe('§H the ledger and the pre-flight', () => {
     expect(ledgerEntryOf('Javascript2')).toEqual({ typeName: 'Javascript2', status: 'translated' });
     expect(exportBadgeOf('Javascript2')).toBeUndefined();
     const ledger = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'coverage-ledger.json'), 'utf8'));
-    expect(ledger.pickerCoverageFloor).toBe(129); // EXP-011 §78 part 2 Optimistic Update (session 108) on top of §78 State History + Undo / Redo + State Snapshot (session 107) on top of §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §61 the component-stack trio + §60 the component-object trio + §62 the relation pair + §63 Drag (session 86); §57 + §58 + §59 (session 85) // §56 Filter Records (session 84)
+    expect(ledger.pickerCoverageFloor).toBe(130); // EXP-011 §79 Sign In With (session 109) on top of EXP-011 §78 part 2 Optimistic Update (session 108) on top of §78 State History + Undo / Redo + State Snapshot (session 107) on top of §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §61 the component-stack trio + §60 the component-object trio + §62 the relation pair + §63 Drag (session 86); §57 + §58 + §59 (session 85) // §56 Filter Records (session 84)
   });
   test('the clean fixture pre-flights with nothing to attend to', () => {
     const summary = summarizePreflight(app);

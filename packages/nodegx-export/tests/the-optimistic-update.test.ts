@@ -577,6 +577,6 @@ describe('§E the ledger', () => {
 
   test('the picker floor moved by one in the same change', () => {
     const ledger = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'coverage-ledger.json'), 'utf8'));
-    expect(ledger.pickerCoverageFloor).toBe(129); // EXP-011 §78 part 2 Optimistic Update (session 108) on top of §78 State History + Undo / Redo + State Snapshot (session 107)
+    expect(ledger.pickerCoverageFloor).toBe(130); // EXP-011 §79 Sign In With (session 109) on top of EXP-011 §78 part 2 Optimistic Update (session 108) on top of §78 State History + Undo / Redo + State Snapshot (session 107)
   });
 });

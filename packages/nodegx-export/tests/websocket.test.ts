@@ -930,7 +930,7 @@ describe('§F the ledger', () => {
     const row = (ledger.entries as Array<{ typeName: string; note?: string; exemption?: string }>).find((e) => e.typeName === WEBSOCKET_TYPE)!;
     expect(row.exemption).toBeUndefined();
     expect(String(row.note)).toContain('useWebSocket');
-    expect(ledger.pickerCoverageFloor).toBe(129); // EXP-011 §78 part 2 Optimistic Update (session 108) on top of §78 State History + Undo / Redo + State Snapshot (session 107) on top of §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88)
+    expect(ledger.pickerCoverageFloor).toBe(130); // EXP-011 §79 Sign In With (session 109) on top of EXP-011 §78 part 2 Optimistic Update (session 108) on top of §78 State History + Undo / Redo + State Snapshot (session 107) on top of §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88)
     expect(String(ledger.$pickerCoverageFloorComment)).toContain('116 after Tier 3.11 row 2 WebSocket');
     // §66 (session 90) translated the last scheduled node; the badge reads nothing for it now, and the ledger's control for
     // "a node nothing translates" is subscribe-to-changes.test.ts F2's out-of-scope set.

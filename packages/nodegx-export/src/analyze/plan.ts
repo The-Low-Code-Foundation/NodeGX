@@ -641,7 +641,7 @@ export const APP_ERROR_TS_TYPE = '{ code: string; message: string; nodeId: strin
 export const STREAM_PARSER_TYPE = 'net.noodl.JSONStreamParser';
 export const STREAM_BUFFER_TYPE = 'net.noodl.StreamBuffer';
 export const TEXT_ACCUMULATOR_TYPE = 'net.noodl.TextAccumulator';
-export type StreamKind = 'parser' | 'buffer' | 'accumulator' | 'sse' | 'websocket' | 'subscription' | 'repeat' | 'dispatcher' | 'handler' | 'history' | 'undo' | 'snapshot' | 'optimistic';
+export type StreamKind = 'parser' | 'buffer' | 'accumulator' | 'sse' | 'websocket' | 'subscription' | 'repeat' | 'dispatcher' | 'handler' | 'history' | 'undo' | 'snapshot' | 'optimistic' | 'signin';
 /** EXP-011 §64. `Server-Sent Events` — the fourth member of the table: no data port, two Actions, its own module. */
 export const SSE_TYPE = 'net.noodl.SSE';
 /** EXP-011 §65. `WebSocket` — the fifth member: a data port (Message) that only the Send verb carries, three Actions, its own module. */
@@ -681,6 +681,12 @@ export const STATE_SNAPSHOT_TYPE = 'net.noodl.StateSnapshot';
  * history's store seam, so the history records it and every Subscribe sees it.
  */
 export const OPTIMISTIC_UPDATE_TYPE = 'net.noodl.OptimisticUpdate';
+/**
+ * EXP-011 §79. `Sign In With` — the fourteenth member, its own module (`src/lib/signIn.ts`): a launcher (Do hands the browser
+ * over to the backend's `/oauth/<provider>/start`) and a receiver (at mount it hears the sign-in coming back, which the
+ * client consumes when the app starts). Rides EXP-009's client, so it is kept only where the project declares a backend.
+ */
+export const SIGN_IN_WITH_TYPE = 'net.noodl.user.SignInWith';
 /** EXP-011 §66. The structural RealtimeError — `src/lib/realtime.ts`'s, spelled so a store row needs no import. */
 export const REALTIME_ERROR_TS_TYPE = '{ message: string; code: string; kind: string } | null';
 export interface StreamValueField {
@@ -696,7 +702,7 @@ export interface StreamNodeSpec {
   hook: string;
   localStem: string;
   /** The module the hook lives in (component.ts maps it to a path; emitApp.ts ships it). */
-  lib: 'streaming' | 'sse' | 'websocket' | 'realtime' | 'repeat' | 'actions' | 'history';
+  lib: 'streaming' | 'sse' | 'websocket' | 'realtime' | 'repeat' | 'actions' | 'history' | 'signIn';
   /** The runtime file the hook transcribes, for the emitted comment. */
   sourceFile: string;
   /** The data port, delivered with the pulse — absent on a node whose actions carry nothing (§64's SSE). */
@@ -1125,12 +1131,34 @@ export const STREAM_NODES: Record<string, StreamNodeSpec> = {
       transactionId: { tsType: 'string', cast: 'string', maybeUndefined: true },
       error: { tsType: 'string', cast: 'string', maybeUndefined: true }
     }
+  },
+  // EXP-011 §79. Provider and Redirect are config, held as they arrive and read at the press; Do is the one Action and
+  // carries nothing. Done, Completed and Failure are the listeners, in the node's declaration order (outcomeOutputs; no
+  // Unchanged). Signing In starts false (initialize); Error and Notice are undefined until a refusal or a return.
+  [SIGN_IN_WITH_TYPE]: {
+    kind: 'signin',
+    displayName: 'Sign In With',
+    hook: 'useSignInWith',
+    localStem: 'SignIn',
+    lib: 'signIn',
+    sourceFile: 'signinwith.ts',
+    config: [
+      { port: 'provider', displayName: 'Provider' },
+      { port: 'redirect', displayName: 'Redirect' }
+    ],
+    actions: { signIn: { verb: 'signIn', takesData: false } },
+    signals: ['done', 'completed', 'failure'],
+    values: {
+      signingIn: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      error: { tsType: 'string', cast: 'string', maybeUndefined: true },
+      notice: { tsType: 'string', cast: 'string', maybeUndefined: true }
+    }
   }
 };
 
 /** EXP-011 §64. The type id behind a `stream-out`'s kind — the one ladder component.ts and the maybe-undefined answer share. */
 export function streamTypeOfKind(kind: StreamKind): string {
-  return kind === 'parser' ? STREAM_PARSER_TYPE : kind === 'buffer' ? STREAM_BUFFER_TYPE : kind === 'accumulator' ? TEXT_ACCUMULATOR_TYPE : kind === 'sse' ? SSE_TYPE : kind === 'websocket' ? WEBSOCKET_TYPE : kind === 'repeat' ? REPEAT_TYPE : kind === 'dispatcher' ? ACTION_DISPATCHER_TYPE : kind === 'handler' ? ACTION_HANDLER_TYPE : kind === 'history' ? STATE_HISTORY_TYPE : kind === 'undo' ? UNDO_REDO_TYPE : kind === 'snapshot' ? STATE_SNAPSHOT_TYPE : kind === 'optimistic' ? OPTIMISTIC_UPDATE_TYPE : SUBSCRIBE_TO_CHANGES_TYPE;
+  return kind === 'parser' ? STREAM_PARSER_TYPE : kind === 'buffer' ? STREAM_BUFFER_TYPE : kind === 'accumulator' ? TEXT_ACCUMULATOR_TYPE : kind === 'sse' ? SSE_TYPE : kind === 'websocket' ? WEBSOCKET_TYPE : kind === 'repeat' ? REPEAT_TYPE : kind === 'dispatcher' ? ACTION_DISPATCHER_TYPE : kind === 'handler' ? ACTION_HANDLER_TYPE : kind === 'history' ? STATE_HISTORY_TYPE : kind === 'undo' ? UNDO_REDO_TYPE : kind === 'snapshot' ? STATE_SNAPSHOT_TYPE : kind === 'optimistic' ? OPTIMISTIC_UPDATE_TYPE : kind === 'signin' ? SIGN_IN_WITH_TYPE : SUBSCRIBE_TO_CHANGES_TYPE;
 }
 export const RUN_TASKS_TYPE = 'RunTasks';
 /** EXP-011 §57. `Repeater Item` — the type id is the runtime's `name`, not the display name. */
@@ -1174,6 +1202,8 @@ const OWN_CHAIN_OUTPUTS: Record<string, readonly string[]> = {
   [UNDO_REDO_TYPE]: STREAM_NODES[UNDO_REDO_TYPE].signals,
   [STATE_SNAPSHOT_TYPE]: STREAM_NODES[STATE_SNAPSHOT_TYPE].signals,
   [OPTIMISTIC_UPDATE_TYPE]: STREAM_NODES[OPTIMISTIC_UPDATE_TYPE].signals,
+  // EXP-011 §79. Sign In With's outcomes, the same footing.
+  [SIGN_IN_WITH_TYPE]: STREAM_NODES[SIGN_IN_WITH_TYPE].signals,
   [LOG_TYPE]: ['done'],
   [TIMER_TYPE]: TIMER_OUTPUTS,
   [VALUE_CHANGED_TYPE]: ['valueChanged'],
@@ -13831,6 +13861,11 @@ function planComponent(
       }
       const filtered = node.parameters.some((p) => p.name === 'visualFilter') || component.connections.some((c) => c.toId === node.id && (c.toProperty === 'visualFilter' || c.toProperty.startsWith('qp-')));
       if (filtered) return refuse('its Filter is authored — a subscription filter is evaluated by the server and this slice does not translate the filter tree; dropping it would deliver every change in the class');
+    }
+    // EXP-011 §79. A Sign In With hands over to the project's own backend and hears its return through EXP-009's client.
+    // The node has no Backend input: the runtime always reaches the active backend (userservice.ts, `backendId` absent).
+    if (spec.kind === 'signin' && ir.project.cloudservices === undefined) {
+      return refuse('the project declares no backend (metadata.cloudservices is absent) — there is no /oauth/<provider>/start to hand the browser over to');
     }
     // EXP-011 §77. The built-in store actions write a Global Store a server names keys in; which store and which keys must be
     // readable off the graph, and this slice exports none of them. A literal naming only misspelt built-ins enables nothing

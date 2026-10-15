@@ -168,7 +168,7 @@ describe('§A the fixture, whole — a Variable → Extract on a button, four Te
     expect(ledgerEntryOf('net.noodl.PatternExtractor')?.status).toBe('translated');
     expect(exportBadgeOf('net.noodl.PatternExtractor')).toBeUndefined();
     const ledger = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'coverage-ledger.json'), 'utf8'));
-    expect(ledger.pickerCoverageFloor).toBe(129); // EXP-011 §78 part 2 Optimistic Update (session 108) on top of §78 State History + Undo / Redo + State Snapshot (session 107) on top of §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100)
+    expect(ledger.pickerCoverageFloor).toBe(130); // EXP-011 §79 Sign In With (session 109) on top of EXP-011 §78 part 2 Optimistic Update (session 108) on top of §78 State History + Undo / Redo + State Snapshot (session 107) on top of §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100)
     expect(ledger.pickerCoverageTotal).toBe(130);
   });
 });

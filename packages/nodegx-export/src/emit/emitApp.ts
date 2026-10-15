@@ -46,6 +46,7 @@ import { REALTIME_LIB_PATH, realtimeLibSource } from './realtimeLib';
 import { REPEAT_LIB_PATH, repeatLibSource } from './repeatLib';
 import { ACTIONS_LIB_PATH, actionsLibSource } from './actionsLib';
 import { HISTORY_LIB_PATH, historyLibSource } from './historyLib';
+import { SIGN_IN_LIB_PATH, signInLibSource } from './signInLib';
 import { CRYPTO_LIB_PATH, cryptoLibSource } from './cryptoLib';
 import { PATTERN_LIB_PATH, isPatternHelper, patternLibSource } from './patternLib';
 import { SCREEN_LIB_PATH, screenLibSource } from './screenLib';
@@ -182,6 +183,8 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   let actionsLibUsed = false;
   // EXP-011 §78. The history's host — earned by a component whose plan kept a State History, an Undo / Redo, a State Snapshot or an Optimistic Update.
   let historyLibUsed = false;
+  // EXP-011 §79. Sign In With's host — earned by a component whose plan kept one; it imports the client and errors.ts.
+  let signInLibUsed = false;
   // EXP-011 §59.
   let cryptoLibUsed = false;
   let screenLibUsed = false;
@@ -258,6 +261,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     if (emitted.repeatLib) repeatLibUsed = true;
     if (emitted.actionsLib) actionsLibUsed = true;
     if (emitted.historyLib) historyLibUsed = true;
+    if (emitted.signInLib) signInLibUsed = true;
     if ([...emitted.cryptoHelpers].some((fn) => !isPatternHelper(fn))) cryptoLibUsed = true;
     if ([...emitted.cryptoHelpers].some(isPatternHelper)) patternLibUsed = true;
     if (emitted.screenLib) screenLibUsed = true;
@@ -343,7 +347,8 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   // GAM-013. repeat.ts raises repeat/interval-not-positive on the channel.
   // EXP-011 §77. actions.ts raises action-dispatcher/nothing-admitted and action-handler/operation-failed on the channel.
   // EXP-011 §78. history.ts raises undo/operation-failed, state-snapshot/operation-failed and optimistic-update/operation-failed on the channel.
-  if (errorsLibUsed || scriptLibUsed || runTasksLibUsed || streamingLibUsed || sseLibUsed || websocketLibUsed || realtimeLibUsed || repeatLibUsed || actionsLibUsed || historyLibUsed || componentObjectLibUsed || dragLibUsed) {
+  // EXP-011 §79. signIn.ts raises user/sign-in-with-failed on the channel.
+  if (errorsLibUsed || scriptLibUsed || runTasksLibUsed || streamingLibUsed || sseLibUsed || websocketLibUsed || realtimeLibUsed || repeatLibUsed || actionsLibUsed || historyLibUsed || signInLibUsed || componentObjectLibUsed || dragLibUsed) {
     files[ERRORS_LIB_PATH] = GENERATED_MODULE_TS + errorsLibSource();
   }
   // EXP-011 §58. `src/lib/streaming.ts` — the trio's host; it raises on the channel, so it earns errors.ts above.
@@ -375,6 +380,10 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   // EXP-011 §78. `src/lib/history.ts` — the history manager, the named checkpoints and the patches, where a component printed one of the four.
   if (historyLibUsed) {
     files[HISTORY_LIB_PATH] = GENERATED_MODULE_TS + historyLibSource();
+  }
+  // EXP-011 §79. `src/lib/signIn.ts` — the launcher and the receiver, where a component printed a Sign In With.
+  if (signInLibUsed) {
+    files[SIGN_IN_LIB_PATH] = GENERATED_MODULE_TS + signInLibSource();
   }
   // EXP-011 §56. `src/lib/filterRecords.ts` — the Filter Records matcher, when a component printed one.
   // EXP-011 §59. The crypto verbs and the viewport hook, each only where a component calls into it.
@@ -623,7 +632,13 @@ function apiModules(
   // EXP-011 §66. A Subscribe To Changes rides the client too — its stream is the backend's `/realtime`, its token the session's;
   // the plan keeps one only where the project declares a backend (streamPlanOf refuses it otherwise), so this never lands in the stub arm.
   const hasSubscriptions = project.plans.some((plan) => plan.streams.some((stream) => stream.kind === 'subscription'));
-  const hasApi = byCollection.size > 0 || hasSessionCalls || hasCloudCalls || hasFileOps || hasSubscriptions;
+  // EXP-011 §79. A Sign In With hands over to the backend and hears its return through the client; streamPlanOf keeps one
+  // only where the project declares a backend, as it does a subscription.
+  const hasSignIns = project.plans.some((plan) => plan.streams.some((stream) => stream.kind === 'signin'));
+  // EXP-011 §79. The return leg ships where the app can START a sign-in that comes back to it: a Sign In With, or a Request
+  // Magic Link (whose link returns the same `?nodegx_auth=` code). Every other app's client is byte-identical.
+  const hasReturnLeg = hasSignIns || project.plans.some((plan) => plan.sessionCalls.some((call) => call.verb === 'magic-link'));
+  const hasApi = byCollection.size > 0 || hasSessionCalls || hasCloudCalls || hasFileOps || hasSubscriptions || hasSignIns;
   const notes: string[] = [];
   // No collection module can collide with `client.ts` (or `session.ts`): moduleBase is the
   // pluralized class name and every pluralize() result ends in "s"/"es"/"ies", while neither
@@ -810,7 +825,7 @@ function apiModules(
   if (files !== null) stubs.push(files);
 
   if (backend !== undefined && hasApi) {
-    stubs.push(['src/api/client.ts', clientModule(backend)]);
+    stubs.push(['src/api/client.ts', clientModule(backend, hasReturnLeg)]);
     stubs.push(['.env.example', envExample(backend)]);
     // ⚠️ `README.md` used to be pushed here too, and that was the defect EXP-004 closed: it made
     // the repository's front door conditional on the project having a backend to query. It is now
@@ -1588,7 +1603,7 @@ function envLine(name: string, value: string): string {
  *   merged into the stored session (`ParseAuthAdapter.signUp` — its absence was a live defect).
  * - no master key, ever: it is a server credential, and this file ships in a browser bundle.
  */
-function clientModule(backend: CloudServicesIR): string {
+function clientModule(backend: CloudServicesIR, returnLeg: boolean): string {
   return (
     GENERATED_CLIENT_TS +
     `/**
@@ -1960,8 +1975,160 @@ export async function callFunction<T>(name: string, params: Record<string, unkno
   // No result is still success: the node keeps its previous results and fires Done.
   return (json?.result ?? {}) as T;
 }
-`
+` +
+    (returnLeg ? authReturnLegSource() : '')
   );
+}
+
+/**
+ * EXP-011 §79 — the sign-in return leg, appended to `src/api/client.ts` where the app can START a sign-in that comes back
+ * to it: a `Sign In With` (the provider's redirect) or a `Request Magic Link` (the link in the inbox). Both come back as
+ * `?nodegx_auth=<one-time code>` or `?nodegx_auth_error=<sentence>` on the page they named, and the runtime's UserService
+ * picks either up in its constructor (`_consumeAuthReturn` → `ParseAuthAdapter.consumeAuthReturn`). Before this the
+ * exported client had no return leg at all, so a magic link signed nobody in (P18-S109-MAGICRETURN).
+ *
+ * Transcribed: the strip before anything else, the error deferred a tick so a node mounting in the same tick hears it,
+ * `POST /oauth/exchange { code }` read as `_makeRequest` reads it (its own request, not `request()`, whose sentences
+ * differ: the differential found a 500 with no `error` reading "Request failed (500)"), the whole answer stored as the
+ * session (as Log In stores its own), then the announcement. Run once, when the module is first evaluated — at app start, where the runtime runs it at the first
+ * user-family node; see §79.4.
+ */
+function authReturnLegSource(): string {
+  return [
+    '',
+    '// ── The sign-in return leg (EXP-011 §79) ─────────────────────────────────────',
+    '',
+    '/** A sign-in coming back to this page load, as the runtime keeps it (ParseAuthAdapter\'s OAuthReturnState). */',
+    'export interface AuthReturnState {',
+    '  inProgress: boolean;',
+    '  /** Set once the exchange resolves. */',
+    '  succeeded?: boolean;',
+    '  error?: string;',
+    '  /** `created` | `signed-in` | `linked` | `linked-credentials-revoked`. */',
+    '  outcome?: string;',
+    '  /** A message worth showing the user — set when the linking rule revoked an old password. */',
+    '  notice?: string;',
+    '}',
+    '',
+    'let authReturn: AuthReturnState = { inProgress: false };',
+    'const authReturnListeners = new Set<(state: AuthReturnState) => void>();',
+    '',
+    '/** The state of this page load\'s sign-in return: not one, in progress, or settled. */',
+    'export function readAuthReturn(): AuthReturnState {',
+    '  return authReturn;',
+    '}',
+    '',
+    '/** Hear the return settle (and an exchange start). Returns an unsubscribe function. */',
+    'export function subscribeAuthReturn(listener: (state: AuthReturnState) => void): () => void {',
+    '  authReturnListeners.add(listener);',
+    '  return () => {',
+    '    authReturnListeners.delete(listener);',
+    '  };',
+    '}',
+    '',
+    'function announceAuthReturn(): void {',
+    '  for (const listener of [...authReturnListeners]) listener(authReturn);',
+    '}',
+    '',
+    '/**',
+    ' * The Sign In With node\'s handover (ParseAuthAdapter.signInWithProvider). This NAVIGATES AWAY: nothing after it runs,',
+    ' * and the result arrives on a later page load, below. A blank Redirect comes back to this page, minus any leftover',
+    ' * sign-in parameters; the backend refuses a target that is neither same-origin nor on its redirect allow-list.',
+    ' * Refused, in the call and before anything navigates, when no provider is set.',
+    ' */',
+    'export function signInWithProviderRequest(provider: unknown, redirect: unknown): void {',
+    '  if (!provider) throw new Error(\'Sign In With: no provider was set.\');',
+    '  const target = redirect || currentUrlWithoutAuthParams();',
+    '  window.location.href =',
+    '    ENDPOINT + \'/oauth/\' + encodeURIComponent(String(provider)) + \'/start?redirect=\' + encodeURIComponent(String(target));',
+    '}',
+    '',
+    '/** Rewrite the address bar without the sign-in parameters, keeping everything else. */',
+    'function stripAuthParamsFromUrl(remaining: URLSearchParams): void {',
+    '  if (!window.history || typeof window.history.replaceState !== \'function\') return;',
+    '  const query = remaining.toString();',
+    '  const cleaned = window.location.pathname + (query ? \'?\' + query : \'\') + window.location.hash;',
+    '  try {',
+    '    window.history.replaceState(window.history.state, \'\', cleaned);',
+    '  } catch {',
+    '    // A sandboxed iframe can refuse replaceState. Not fatal: the exchange still runs and the code is still single-use.',
+    '  }',
+    '}',
+    '',
+    '/**',
+    ' * Look for a sign-in result in this page\'s URL and act on it (ParseAuthAdapter.consumeAuthReturn). The parameters are',
+    ' * stripped BEFORE anything else: a one-time code left in the address bar survives into history and into anything the',
+    ' * user copies, and a refresh would re-attempt a code that is already spent.',
+    ' */',
+    'function consumeAuthReturn(): boolean {',
+    '  if (typeof window === \'undefined\' || !window.location) return false;',
+    '  let params: URLSearchParams;',
+    '  try {',
+    '    params = new URLSearchParams(window.location.search);',
+    '  } catch {',
+    '    return false;',
+    '  }',
+    '  const code = params.get(\'nodegx_auth\');',
+    '  const error = params.get(\'nodegx_auth_error\');',
+    '  if (!code && !error) return false;',
+    '',
+    '  params.delete(\'nodegx_auth\');',
+    '  params.delete(\'nodegx_auth_error\');',
+    '  stripAuthParamsFromUrl(params);',
+    '',
+    '  if (error) {',
+    '    authReturn = { inProgress: false, succeeded: false, error };',
+    '    // Deferred so a listener attached during this same tick still hears it.',
+    '    setTimeout(announceAuthReturn, 0);',
+    '    return true;',
+    '  }',
+    '',
+    '  authReturn = { inProgress: true };',
+    '  void exchangeAuthCode(code as string);',
+    '  return true;',
+    '}',
+    '',
+    '/**',
+    ' * `POST /oauth/exchange { code }` — the one-time code traded for the session, read as the runtime\'s own auth request',
+    ' * reads its answer (ParseAuthAdapter._makeRequest), not as request() does: 200 or 201 is the session, stored whole as',
+    ' * Log In stores its own; anything else is the body\'s `error`, else its raw text, else the node\'s own sentence — which',
+    ' * is also what an unreachable backend reads (the browser reports status 0 and no text).',
+    ' */',
+    'async function exchangeAuthCode(code: string): Promise<void> {',
+    '  const headers: Record<string, string> = {',
+    '    \'X-Parse-Application-Id\': APP_ID,',
+    '    \'Content-Type\': \'application/json\'',
+    '  };',
+    '  const sessionToken = readSession()?.sessionToken;',
+    '  if (sessionToken !== undefined) headers[\'X-Parse-Session-Token\'] = sessionToken;',
+    '  let status = 0;',
+    '  let text = \'\';',
+    '  try {',
+    '    const response = await fetch(ENDPOINT + \'/oauth/exchange\', { method: \'POST\', headers, body: JSON.stringify({ code }) });',
+    '    status = response.status;',
+    '    text = await response.text();',
+    '  } catch {',
+    '    // status 0 and no text, as the runtime\'s request reads a network failure',
+    '  }',
+    '  let json: (WireSession & { authOutcome?: string; authNotice?: string | null; error?: unknown }) | undefined;',
+    '  try {',
+    '    json = JSON.parse(text);',
+    '  } catch {',
+    '    json = undefined;',
+    '  }',
+    '  if (status === 200 || status === 201) {',
+    '    const response = (json || text) as WireSession & { authOutcome?: string; authNotice?: string | null };',
+    '    writeSession(response);',
+    '    authReturn = { inProgress: false, succeeded: true, outcome: response.authOutcome, notice: response.authNotice || undefined };',
+    '  } else {',
+    '    authReturn = { inProgress: false, succeeded: false, error: ((json ? json.error : text) as string) || \'Sign-in could not be completed.\' };',
+    '  }',
+    '  announceAuthReturn();',
+    '}',
+    '',
+    'consumeAuthReturn();',
+    ''
+  ].join('\n');
 }
 
 function envExample(backend: CloudServicesIR): string {

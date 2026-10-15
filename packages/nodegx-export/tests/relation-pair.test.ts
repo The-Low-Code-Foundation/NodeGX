@@ -218,7 +218,7 @@ describe('§A the fixture, whole — a Record feeds the target, a Variable the r
       expect(exportBadgeOf(type)).toBeUndefined();
     }
     const ledger = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'coverage-ledger.json'), 'utf8'));
-    expect(ledger.pickerCoverageFloor).toBe(129); // EXP-011 §78 part 2 Optimistic Update (session 108) on top of §78 State History + Undo / Redo + State Snapshot (session 107) on top of §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §62 the relation pair + §61 the component-stack trio + §60 + §63 (session 86)
+    expect(ledger.pickerCoverageFloor).toBe(130); // EXP-011 §79 Sign In With (session 109) on top of EXP-011 §78 part 2 Optimistic Update (session 108) on top of §78 State History + Undo / Redo + State Snapshot (session 107) on top of §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §62 the relation pair + §61 the component-stack trio + §60 + §63 (session 86)
   });
 });
 
@@ -470,9 +470,9 @@ describe('§D refusals by mutation', () => {
     expect(reasonOf(source, 'link')).toBe('its Target Record Id has no statically known source');
   });
 
-  test('D18 an Id from a node with no rule names the feeder (net.noodl.user.SignInWith — §79, the last row of the §75.5 order; §76 translated Pattern Extractor)', () => {
+  test('D18 an Id from a node with no rule names the feeder (net.noodl.user.VerifyEmail — a retired type; §79 translated Sign In With, the last picker row)', () => {
     const source = mutated((h) => {
-      addNode(h, { id: 'extract', type: 'net.noodl.user.SignInWith' });
+      addNode(h, { id: 'extract', type: 'net.noodl.user.VerifyEmail' });
       disconnect(h, (c) => c.toId === 'link' && c.toProperty === 'modelId');
       connect(h, 'extract', 'match', 'link', 'modelId');
     });

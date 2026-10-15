@@ -208,18 +208,18 @@ describe('§17 — the Record node', () => {
    * fails for a reason that has nothing to do with what it is testing. `net.noodl.ToCSV` is one
    * nobody is waiting on, so the example stops being a moving target.
    */
-  // EXP-011 §75 translated `To CSV`, this row's former example of an untranslated feeder; `Sign In With`
+  // EXP-011 §75 translated `To CSV`, this row's former example of an untranslated feeder; `Verify Email`
   // is the one still out (relation-pair D18 uses it for the same reason).
   it('a Record whose Id is fed by an untranslated node names that feeder', () => {
     const source = cloneIr();
-    addNode(source, ADMIN, 'toCsv', 'net.noodl.user.SignInWith', {});
+    addNode(source, ADMIN, 'toCsv', 'net.noodl.user.VerifyEmail', {});
     addNode(source, ADMIN, 'puppyModel', 'DbModel2', {
       collectionName: lit('Puppy'),
       idSource: lit('explicit')
     });
     wire(source, ADMIN, 'toCsv', 'match', 'puppyModel', 'modelId');
     expect(reasonFor(source, ADMIN, 'puppyModel')).toBe(
-      'its Id is fed by net.noodl.user.SignInWith, which has no statically known source'
+      'its Id is fed by net.noodl.user.VerifyEmail, which has no statically known source'
     );
   });
 
@@ -367,12 +367,12 @@ describe('§17 — the sweep replaces the catch-all and nothing else', () => {
    * `Counter` was the first pick here and it does **not** fall to the catch-all — it has a reason
    * of its own. A control that never reaches the thing it controls for proves nothing, so this
    * uses a type the audit shows genuinely landing on `logic node (…)`. (`net.noodl.WebSocket` stood here until
-   * EXP-011 §65 translated it; Sign In With is the last row of the §75.5 order (§79), so it stays on the catch-all — §76 translated Pattern Extractor.)
+   * EXP-011 §65 translated it; §79 translated Sign In With, the last picker row, so the catch-all's example is `Verify Email`, a retired type.)
    */
   it('a node the sweep does not know still falls to the catch-all', () => {
     const source = cloneIr();
-    addNode(source, ADMIN, 'someLogic', 'net.noodl.user.SignInWith');
-    expect(reasonFor(source, ADMIN, 'someLogic')).toBe('logic node (net.noodl.user.SignInWith)');
+    addNode(source, ADMIN, 'someLogic', 'net.noodl.user.VerifyEmail');
+    expect(reasonFor(source, ADMIN, 'someLogic')).toBe('logic node (net.noodl.user.VerifyEmail)');
   });
 });
 
@@ -404,11 +404,11 @@ describe('§17 — a component with no visual root gets the named reasons too', 
 
   it('the component really does take the early return — the control this needs', () => {
     const source = withLogicOnlyComponent();
-    addNode(source, LOGIC_ONLY, 'someLogic', 'net.noodl.user.SignInWith');
+    addNode(source, LOGIC_ONLY, 'someLogic', 'net.noodl.user.VerifyEmail');
     const project = planProject(source, new CatalogIndex(catalog));
     const plan = project.plans.find((p) => p.path === LOGIC_ONLY)!;
     expect(plan.skipReason).toBe('no visual root — logic-only components defer to EXP-003');
-    expect(reasonFor(source, LOGIC_ONLY, 'someLogic')).toBe('logic node (net.noodl.user.SignInWith)');
+    expect(reasonFor(source, LOGIC_ONLY, 'someLogic')).toBe('logic node (net.noodl.user.VerifyEmail)');
   });
 
   it('a relation verb there is named, not swept into the catch-all', () => {

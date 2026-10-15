@@ -43,11 +43,13 @@ const CARD = 'Components/PuppyCard';
  * ⚠️ Re-pointed in EXP-011 §39: the orphan was a `Timer`, and `Timer` is now `Delay`, translated —
  * its own verdict sweep names it, which is exactly what this control must not have. Re-pointed AGAIN
  * in §59: `Hash` was chosen because §3 kept it out of scope "for good", and §50 reversed that — it is
- * translated now, with a sweep of its own. `Sign In With` (re-pointed AGAIN in §76, which translated Pattern Extractor) is the last row of the §75.5 order, §79 — was the §50 ruling's own "deliberately
- * out of scope" list, so no pass will ever claim it — and if one does, this control is the alarm.
+ * translated now, with a sweep of its own. `Sign In With` (re-pointed AGAIN in §76, which translated Pattern Extractor) was translated in §79, the last picker row,
+ * so no placeable node is left without a rule: the orphan is `Verify Email`, deprecated and out of the picker (the
+ * ledger defers it by name, "a node its own editor has retired") — no pass will claim it, and if one does, this control
+ * is the alarm.
  */
 const ORPHAN = 'orphan-signin-row';
-const ORPHAN_TYPE = 'net.noodl.user.SignInWith';
+const ORPHAN_TYPE = 'net.noodl.user.VerifyEmail';
 
 const cloneIr = (): ExportIR => structuredClone(baseIr);
 const componentOf = (source: ExportIR, componentPath: string): ComponentIR =>
@@ -107,8 +109,8 @@ describe('a deferred node the report never mentioned', () => {
     // "Nodes left out" (built from `dispositions`, which is the list this sweep exists to keep
     // honest) and once as the sweep's own note. Two lines, each asserted by shape.
     expect(lines.length).toBe(2);
-    // The row carries the picker's name for the type ("Sign In With"), the note the catalog typeName.
-    expect(lines[0]).toContain(`Sign In With \`${ORPHAN}\` — the export has no rule for this node yet`);
+    // The row carries the catalog's display name for the type ("Verify Email"), the note the catalog typeName.
+    expect(lines[0]).toContain(`Verify Email \`${ORPHAN}\` — the export has no rule for this node yet`);
     expect(lines[1]).toContain(`(${ORPHAN_TYPE}) has no translation in this slice — it is not in the generated app`);
   });
 

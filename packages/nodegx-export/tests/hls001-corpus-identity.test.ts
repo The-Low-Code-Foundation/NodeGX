@@ -355,7 +355,14 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // else. The regenerated golden's diff counted the same: 56 lines out (55 README, history-desk's history.ts); 56 README
     // lines, history-desk's history.ts and optimistic-desk's 22-line block in. A peer's uncommitted catalog edit
     // (noodl-types, Upload File) was on the tree and moved no emitted byte.
-    expect(corpusProjects().length).toBe(56);
+    //
+    // 56 → 57 on 2026-10-15 (EXP-011 §79, session 109): `signin-desk`, the first project in the corpus that places a
+    // Sign In With. Predicted before the red run, then counted: 57 paths moved — the 56 projects' `README.md` (the
+    // picker is complete, so the alpha sentence reads "All 130 nodes you can place export today.") and account-desk's
+    // `src/api/client.ts` (its Request Magic Link earns the client's new return leg, P18-S109-MAGICRETURN), plus
+    // signin-desk's own 21 entries, nothing else. The regenerated golden's diff counted the same: 57 lines out (56
+    // README, account-desk's client.ts); those 57 back in and signin-desk's 23-line block.
+    expect(corpusProjects().length).toBe(57);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 

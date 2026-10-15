@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a7c3e9d1-5b2d-4e8f-9c1a-000000000110",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "acmeBtn",
+      "fromProperty": "onClick",
+      "toId": "acme",
+      "toProperty": "signIn"
+    },
+    {
+      "fromId": "acme",
+      "fromProperty": "signingIn",
+      "toId": "signingInText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "acme",
+      "fromProperty": "error",
+      "toId": "errorText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "acme",
+      "fromProperty": "notice",
+      "toId": "noticeText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "me",
+      "fromProperty": "email",
+      "toId": "whoText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "acme",
+      "fromProperty": "done",
+      "toId": "setDone",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "doneStr",
+      "fromProperty": "savedValue",
+      "toId": "setDone",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "acme",
+      "fromProperty": "failure",
+      "toId": "setFailed",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "failedStr",
+      "fromProperty": "savedValue",
+      "toId": "setFailed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "lastVar",
+      "fromProperty": "value",
+      "toId": "lastText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nobodyBtn",
+      "fromProperty": "onClick",
+      "toId": "nobody",
+      "toProperty": "signIn"
+    },
+    {
+      "fromId": "nobody",
+      "fromProperty": "error",
+      "toId": "refusedErrorText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nobody",
+      "fromProperty": "completed",
+      "toId": "setRefused",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "refusedStr",
+      "fromProperty": "savedValue",
+      "toId": "setRefused",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "refusedVar",
+      "fromProperty": "value",
+      "toId": "refusedText",
+      "toProperty": "text"
+    }
+  ]
+}

@@ -66,6 +66,7 @@ import { REALTIME_LIB_PATH } from './realtimeLib';
 import { REPEAT_LIB_PATH } from './repeatLib';
 import { ACTIONS_LIB_PATH } from './actionsLib';
 import { HISTORY_LIB_PATH } from './historyLib';
+import { SIGN_IN_LIB_PATH } from './signInLib';
 import { SCRIPT_CODE_PREFIX } from '../analyze/script';
 import { ID_HELPERS_BY_FN, ID_LIB_PATH, IdHelper } from './idLib';
 import { CRYPTO_LIB_PATH, CryptoHelper } from './cryptoLib';
@@ -290,6 +291,8 @@ export interface EmittedComponent {
   actionsLib: boolean;
   /** EXP-011 §78. `src/lib/history.ts` is owed when this component keeps a State History, an Undo / Redo, a State Snapshot or an Optimistic Update. */
   historyLib: boolean;
+  /** EXP-011 §79. `src/lib/signIn.ts` is owed when this component keeps a Sign In With. */
+  signInLib: boolean;
   /** EXP-011 §59. `src/lib/crypto.ts` verbs this component calls; `src/lib/screen.ts` is owed when a viewport hook prints. */
   cryptoHelpers: Set<string>;
   screenLib: boolean;
@@ -4382,10 +4385,11 @@ export function emitComponent(
   // GAM-013. Repeat's hook is the table's seventh, in its own module.
   // EXP-011 §77. The dispatcher's and the handler's hooks, the eighth and ninth, share one module.
   // EXP-011 §78. The history family's three, the tenth to twelfth, share another.
-  for (const lib of ['streaming', 'sse', 'websocket', 'realtime', 'repeat', 'actions', 'history'] as const) {
+  // EXP-011 §79. Sign In With's hook, the fourteenth, in its own.
+  for (const lib of ['streaming', 'sse', 'websocket', 'realtime', 'repeat', 'actions', 'history', 'signIn'] as const) {
     const hooks = [...new Set(plan.streams.filter((s) => STREAM_NODES[s.type].lib === lib).map((s) => STREAM_NODES[s.type].hook))].sort();
     if (hooks.length === 0) continue;
-    const libPath = lib === 'streaming' ? STREAMING_LIB_PATH : lib === 'sse' ? SSE_LIB_PATH : lib === 'websocket' ? WEBSOCKET_LIB_PATH : lib === 'repeat' ? REPEAT_LIB_PATH : lib === 'actions' ? ACTIONS_LIB_PATH : lib === 'history' ? HISTORY_LIB_PATH : REALTIME_LIB_PATH;
+    const libPath = lib === 'streaming' ? STREAMING_LIB_PATH : lib === 'sse' ? SSE_LIB_PATH : lib === 'websocket' ? WEBSOCKET_LIB_PATH : lib === 'repeat' ? REPEAT_LIB_PATH : lib === 'actions' ? ACTIONS_LIB_PATH : lib === 'history' ? HISTORY_LIB_PATH : lib === 'signIn' ? SIGN_IN_LIB_PATH : REALTIME_LIB_PATH;
     const specifier = `${relRoot}/${libPath.replace(/^src\//, '').replace(/\.ts$/, '')}`;
     internalImports.set(specifier, `import { ${hooks.join(', ')} } from '${specifier}';`);
   }
@@ -7264,6 +7268,7 @@ export function emitComponent(
     actionsLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'actions'),
     // EXP-011 §78.
     historyLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'history'),
+    signInLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'signIn'),
     // EXP-011 §59.
     cryptoHelpers: usedCryptoHelpers,
     screenLib: screenHooks.length > 0,
