@@ -62,7 +62,7 @@ make it work, no compromises."* So s8 drives every open AC toward the AC8 verdic
   BACKENDSESSION shape — the note tells the next session to re-provision); (6) the hand-over hook's note-write budget
   blocked recording a person's request in NEXT.md after the hand-over; (7) AGENTS.md: "continue" = carry on from
   NEXT.md also made K-nopersist fix when its note said the owner decides.
-- **npm 0.2.2 PREPARED (s8, 20:20), Richard publishes:** bump `aab489337` (mcp, preview, create-nodegx, create-nodegx-vibe;
+- **✅ npm 0.2.2 PUBLISHED (Richard, ~20:30, after `npm login` — the saved token had expired: E404 on PUT).** All four live as `latest`, registry shasums = the tested tarballs; from the registry in an empty HOME `npm create nodegx-vibe@latest apps` writes the Vibe kit pinned to mcp 0.2.2, and stranger-render on `@nodegx/mcp@0.2.2` is clean. **AC7 met** (the Vibe kit is on npm). Prepared: bump `aab489337` (mcp, preview, create-nodegx, create-nodegx-vibe;
   create-nodegx pins mcp 0.2.2, the wrapper pins create-nodegx 0.2.2; lockfile's three workspace lines only — a
   sibling's uncommitted lockfile edit left alone), **pushed** to origin/cline-dev (R12). Packed in `own019-s4-pack` at
   `aab489337` with every borrowed build-output link replaced by a build made there (node-spec, canvas-look, export,
