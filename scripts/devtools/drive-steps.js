@@ -625,7 +625,14 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), network
       } else if (verb === 'watch') {
         const w = step.watch && typeof step.watch === 'object' ? step.watch : {};
         if (w.look === undefined) throw new UsageError(`Step ${i + 1}: watch takes { look: T } or { look: [T, T, …] }.`);
-        const forMs = Math.min(10000, Math.max(100, Number(step.for_ms ?? 1500)));
+        // P112-OWN019-WATCHINSIDE — Large 4 wrote `{ watch: { look: [...], for_ms: 3000, expect: { never: … } } }` and
+        // both were dropped without a word: six "never green" watches passed with green in their own states (s8, AC3).
+        // Either place is read; a key the watch does not know is refused, never ignored.
+        const unknown = Object.keys(w).filter((k) => !['look', 'for_ms', 'expect'].includes(k));
+        if (unknown.length) throw new UsageError(`Step ${i + 1}: watch does not take ${unknown.map((k) => JSON.stringify(k)).join(', ')} — it takes look, for_ms and expect.`);
+        if (step.expect !== undefined && w.expect !== undefined) throw new UsageError(`Step ${i + 1}: give watch one expect, beside it or inside it, not both.`);
+        const forMs = Math.min(10000, Math.max(100, Number(step.for_ms ?? w.for_ms ?? 1500)));
+        const expect = step.expect !== undefined ? step.expect : w.expect;
         // P112-OWN019-WATCHONE — a list watches every target on every tick. R3 (s5) proved "nothing left over" on
         // Canberra while the last question's green landed, by position, on Sydney: one target proves nothing about
         // the rest. One target keeps the answer it always had (a list of states); a list answers per target.
@@ -650,7 +657,7 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), network
         }
         const shown = (list) => list.map(({ from, until, look }) => ({ from, until, look }));
         row.value = many ? targets.map((t, k) => ({ target: t, states: shown(states[k]) })) : shown(states[0]);
-        const never = step.expect && typeof step.expect === 'object' ? step.expect.never : undefined;
+        const never = expect && typeof expect === 'object' ? expect.never : undefined;
         if (never && typeof never === 'object') {
           for (let k = 0; k < targets.length && row.ok; k++) {
             const hit = states[k].find((st) => st.look && Object.keys(never).every((key) => matches(st.look[key], never[key])));

@@ -83,6 +83,22 @@ describeOrSkip('P112-OWN019 — drive_page sees the moment, and reloads the page
     });
   }, 120_000);
 
+  // P112-OWN019-WATCHINSIDE (s8, AC3): Large 4 put `expect` and `for_ms` INSIDE the watch; both were dropped, and six
+  // "never green" watches passed with green in their own states. The same flash, the expect nested: it must fail.
+  it('an expect written inside the watch is read, and a key the watch does not know is refused', async () => {
+    const nested = await drive(session, [{ read: { expression: FLASH } }, { watch: { look: { text: 'Flash' }, for_ms: 900, expect: { never: { backgroundName: 'green' } } } }]);
+    const row = nested.steps[1] as { ok: boolean; error?: string; value: Array<{ until: number; look: { backgroundName?: string } | null }> };
+    expect({ ok: row.ok, saidGreen: /"backgroundName":"green"/.test(row.error ?? ''), states: row.value.map((s) => s.look?.backgroundName) }).toEqual({
+      ok: false,
+      saidGreen: true,
+      states: ['white', 'green', 'white']
+    });
+    // for_ms inside was read too: the watch ran ~900 ms, not the 1500 ms default.
+    expect(row.value[row.value.length - 1].until).toBeLessThan(1200);
+    const res = (await session.client.callTool({ name: 'drive_page', arguments: { steps: [{ watch: { look: { text: 'Flash' }, timeout: 900 } }] } })) as { isError?: boolean; content: Array<{ text?: string }> };
+    expect(`${res.isError} ${res.content.map((c) => c.text).join(' ')}`).toMatch(/true .*watch does not take .{0,3}timeout/);
+  }, 120_000);
+
   it('reload loads THIS page again: what lived only in memory is gone, the URL is the same', async () => {
     const r = await drive(session, [
       { read: { expression: "(() => { window.__own019 = 'here'; return location.pathname + location.hash; })()" } },

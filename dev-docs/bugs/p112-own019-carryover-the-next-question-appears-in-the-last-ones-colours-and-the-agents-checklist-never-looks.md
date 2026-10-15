@@ -30,3 +30,10 @@ the flash on every advance (Sydney green 1022–1077 ms after the tap). The word
 P112-OWN019-WATCHMOMENT (fixed) gives drive_page a `watch` step. Still open until rounds on a kit with `watch` come back
 clean.
 
+
+**s7/s8 (2026-10-15): the Vibe half is met.** Three quiz rounds in a row on one kit (tgz33: T2, T3, T1b — T1 was a
+lab loss, PROXYDIES) graded 12/12 with `carryover` clean, each on its own, the `watch` step on every answer of the new
+screen (WATCHONE). Still open for the half this file names last: **the core kit has no checklist step at all**
+(`create-nodegx`'s AGENT_NOTE says "build in small steps" and "drive_page from the start page", nothing about turning
+the request into lines or the moment a screen appears), so a Claude or OpenCode user's agent is never asked to look.
+That is core-kit work, measured on Claude before it is kept (OWN-019 §5) — not part of the Mistral claim.
