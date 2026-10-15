@@ -59,7 +59,7 @@ import {
   VariantIR
 } from '../ir/types';
 import { normalizeScriptPath } from '../scriptFiles';
-import { parseModules } from './parseModules';
+import { parseModuleDependencies, parseModules } from './parseModules';
 
 export const EXPORTER_VERSION = '0.0.1';
 
@@ -128,7 +128,8 @@ export function parseProject(projectDir: string, catalog: Catalog): ExportIR {
     cloudComponents,
     // EXP-010. ⚠️ This line runs the project's own kit code (`kitSource.ts`) — a custom node's
     // ports are declared nowhere else. Never throws: a broken kit is a row with a status.
-    modules: parseModules(projectDir)
+    modules: parseModules(projectDir),
+    moduleDependencies: parseModuleDependencies(projectDir)
   };
   const cloudservices = parseCloudServices(projectFile.metadata?.cloudservices);
   if (cloudservices !== undefined) project.cloudservices = cloudservices;

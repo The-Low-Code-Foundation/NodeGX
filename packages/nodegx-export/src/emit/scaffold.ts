@@ -227,10 +227,26 @@ function indexHtml(ir: ExportIR): string {
 ${moduleStylesheetLinks(ir)}  </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+${moduleDependencyScripts(ir)}    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
 `;
+}
+
+/**
+ * The `<script>` tags a project's kit `dependencies` earn — P109-S17-EXPORTKITDEPS.
+ *
+ * The export copied each dependency to `public/` and nothing loaded it, so a kit reading `window.THREE` at mount threw
+ * in the exported app and drew in the deployed one. These are the deploy injector's `<%modules_dependencies%>` tags
+ * (`buildInjectionTags`), over the list the injector itself ordered (`parseModuleDependencies`): a classic script
+ * per dependency, each once, an `http` entry at its own URL and anything else against `public/`, where it is copied. Classic and before the app's module script on purpose: a
+ * classic script runs as it is parsed and a module script after the document, so the library is defined before the
+ * bundled kit (`src/kits/modules/…`) evaluates — the order the deployed page has.
+ */
+function moduleDependencyScripts(ir: ExportIR): string {
+  return (ir.project.moduleDependencies ?? [])
+    .map((d) => `    <script src="${escapeHtml(d.startsWith('http') ? d : `/${d}`)}"></script>\n`)
+    .join('');
 }
 
 /**
