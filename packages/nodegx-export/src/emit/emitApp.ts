@@ -1067,6 +1067,59 @@ function httpParamsType(call: HttpCallPlan): string | null {
   return rows.length > 0 ? `{ ${rows.join('; ')} }` : null;
 }
 
+/** P18-S104-RESPONSETYPE — the result type's line about `response`, per Response Type. */
+const HTTP_BODY_DOC: Record<HttpCallPlan['responseType'], string> = {
+  auto: 'The body, parsed as JSON when the server said so and as text otherwise.',
+  text: 'The body as text, whatever the server said it was (Response Type: Text).',
+  json: 'The body parsed as JSON, whatever the server said it was (Response Type: JSON).'
+};
+
+/**
+ * How the emitted request reads the body — `httpnode.ts`'s three arms (FED-001 §3.2), one per Response Type.
+ *
+ * P18-S104-RESPONSETYPE: the export used to print Auto whatever was set, so a Text request handed over an object
+ * for an `application/json` answer and a JSON request handed over a string for JSON served as `text/plain`. JSON
+ * reads the text and parses it itself, as the runtime does, so a body that is not JSON fails under `http/bad-body`
+ * with the runtime's own sentence. In every arm only the JSON parse is marked (P107-D11): a text read that fails
+ * stays a network error.
+ */
+function httpBodyReadLines(responseType: HttpCallPlan['responseType']): string[] {
+  if (responseType === 'text') {
+    return ['  // Response Type: Text — the text, whatever the server called it.', '  const parsed: unknown = await response.text();'];
+  }
+  if (responseType === 'json') {
+    return [
+      '  // Response Type: JSON — parsed whatever the server called it; a body that is not JSON is http/bad-body.',
+      '  const bodyText = await response.text();',
+      '  let parsed: unknown;',
+      '  try {',
+      '    parsed = JSON.parse(bodyText);',
+      '  } catch (error) {',
+      '    throw new HttpError(',
+      "      'Response Type is JSON but the body is not JSON: ' + (error instanceof Error && error.message ? error.message : String(error)),",
+      "      'http/bad-body'",
+      '    );',
+      '  }'
+    ];
+  }
+  return [
+    "  const contentType = response.headers.get('content-type') ?? '';",
+    '  // P107-D11 (P109-S24-EXPORTBADBODY): the server answered and its JSON could not be read. That is',
+    "  // http/bad-body, the runtime's own code, not the network error a request that never arrived gets. Only",
+    '  // the JSON read is marked, as `httpnode.ts` marks only that one; a text read that fails stays a network error.',
+    '  let parsed: unknown;',
+    "  if (contentType.includes('application/json')) {",
+    '    try {',
+    '      parsed = await response.json();',
+    '    } catch (error) {',
+    "      throw new HttpError(error instanceof Error && error.message ? error.message : 'Network error', 'http/bad-body');",
+    '    }',
+    '  } else {',
+    '    parsed = await response.text();',
+    '  }'
+  ];
+}
+
 function httpFunction(componentPath: string, call: HttpCallPlan): string {
   const out: string[] = [];
   const paramsType = httpParamsType(call);
@@ -1085,7 +1138,7 @@ function httpFunction(componentPath: string, call: HttpCallPlan): string {
     `export interface ${call.typeName} {`,
     '  /** True when the server answered 2xx — the node\'s Done outcome; false is its Failure. */',
     '  ok: boolean;',
-    '  /** The body, parsed as JSON when the server said so and as text otherwise. */',
+    `  /** ${HTTP_BODY_DOC[call.responseType]} */`,
     '  response: any;',
     '  statusCode: number;',
     '  /** Every header the server returned, keyed by lower-cased name. */',
@@ -1199,20 +1252,7 @@ function httpFunction(componentPath: string, call: HttpCallPlan): string {
     '  } finally {',
     '    clearTimeout(timer);',
     '  }',
-    "  const contentType = response.headers.get('content-type') ?? '';",
-    '  // P107-D11 (P109-S24-EXPORTBADBODY): the server answered and its JSON could not be read. That is',
-    "  // http/bad-body, the runtime's own code, not the network error a request that never arrived gets. Only",
-    '  // the JSON read is marked, as `httpnode.ts` marks only that one; a text read that fails stays a network error.',
-    '  let parsed: unknown;',
-    "  if (contentType.includes('application/json')) {",
-    '    try {',
-    '      parsed = await response.json();',
-    '    } catch (error) {',
-    "      throw new HttpError(error instanceof Error && error.message ? error.message : 'Network error', 'http/bad-body');",
-    '    }',
-    '  } else {',
-    '    parsed = await response.text();',
-    '  }',
+    ...httpBodyReadLines(call.responseType),
     '  const responseHeaders: Record<string, string> = {};',
     '  response.headers.forEach((value, key) => {',
     '    responseHeaders[key] = value;',

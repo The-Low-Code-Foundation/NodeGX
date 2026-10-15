@@ -209,7 +209,9 @@ const HTTP_CONFIG_PORTS = [
   'bodyType',
   'bodyFields',
   'authType',
-  'responseMapping'
+  'responseMapping',
+  // P18-S104-RESPONSETYPE. `allowEditOnly`, and decides how the body is read, so it is configuration like the rest.
+  'responseType'
 ];
 
 /** The standard value outputs, minus `error` — which is a state row of its own, never in the answer. */
@@ -3434,6 +3436,11 @@ export interface HttpCallPlan {
   method: string;
   /** Milliseconds; `timeout || 30000`, the runtime's own defaulting, already applied. */
   timeout: number;
+  /**
+   * P18-S104-RESPONSETYPE — how the body is read (FED-001 §3.2). `setResponseType` stores `value || 'auto'` and the
+   * fetch tests for `'text'` and `'json'` only, so any other value reads as Auto; that defaulting is applied here.
+   */
+  responseType: 'auto' | 'text' | 'json';
   pathParams: HttpValuePlan[];
   queryParams: HttpValuePlan[];
   headers: HttpValuePlan[];
@@ -10870,6 +10877,8 @@ function planComponent(
     // the default rather than "no timeout".
     const timeoutParam = literalParam(node, 'timeout');
     const timeout = typeof timeoutParam === 'number' && timeoutParam !== 0 ? timeoutParam : 30000;
+    const responseTypeParam = literalParam(node, 'responseType');
+    const responseType = responseTypeParam === 'text' || responseTypeParam === 'json' ? responseTypeParam : 'auto';
 
     const ctx = newCtx();
     const args: Array<{ param: string; expr: ValueExpr }> = [];
@@ -11032,6 +11041,7 @@ function planComponent(
       url,
       method,
       timeout,
+      responseType,
       pathParams,
       queryParams,
       headers,
