@@ -1,4 +1,33 @@
-# Next session — session 101 (2026-09-26/27) BUILT §76: `Pattern Extractor` — picker **122 → 123 of 130 (94.6%)**, the second row of Richard's 2026-09-26 ruling ("If we had 100% coverage that would be a big deal"). `Hash`'s crypto-call shape (§59) widened to seven seeded value outputs and a third signal pair (`Found`/`Not Found`, printed before `Done`, as `doExtract` fires them).
+# Next session — session 105 (2026-10-15, BOARD lane 6) CLOSED ISL-043 and ISL-035 and fixed RESPONSETYPE: five ledger rows, one commit each, export jest **119 / 119**. Next: the graph-scenario ledger line, then EXP-011's seven.
+
+## ✅ Session 105 (2026-10-15, BOARD lane 6): ISL-043 closed (8 / 8), RESPONSETYPE fixed, ISL-035 closed (2 / 2)
+
+| row | commit | what it was, and how it was graded |
+|---|---|---|
+| P109-S21-EXPORTBLENDNAN | `aeb49e430` | A wired Blend Value prints `blendColorKept(<ref>, …)` over a per-node `useRef`, recorded by both walkers. 🔴 **The ledger's design was wrong about `undefined`:** `Node.sendValue` drops it, so an unset source delivers nothing and the runtime keeps blending with the blend it last *received*. The ref holds the last blend and the last colour; a NaN keeps the colour, and before any blend the colour is the colours at blend 0. Graded step by step against one `colorblend.ts` instance; NaN back in the parity grid; each walker red alone. Golden: 6 lines predicted, 6 counted |
+| P18-S104-RESPONSETYPE | `86fca0a03` | The plan reads `responseType` (`value \|\| 'auto'`, unknown reads as Auto) and `httpFunction` emits the matching arm; JSON's bad-body sentence is read out of `httpnode.ts` by the test. Run against a stub `fetch` over every type. Golden 0 |
+| P109-S15-ARRAYFILTERPATHEXPORT | `4c1800cb0` | A dotted filter key prints `rowField(row, "owner.id")`, the runtime's `fieldOf` appended as a hoisted function; graded against `fieldOf` cut out of `filtercollectionnode.ts`. Sort stays flat (the runtime's `sorter` is). Golden 0 |
+| P109-S17-EXPORTKITDEPS (high) | `90ee40009` | `parseProject` asks the deploy injector itself (`toInjectModules`) for the dependency list; `index.html` gets a classic `<script>` per entry before the app. Graded against `buildInjectionTags` over the same project on disk. Golden 0. **Not done: a built, served export with the library seen running** |
+
+ISL-043 and ISL-035 are closed in their task files (AC4: `node scripts/bugs.js --from P109` lists none of their rows).
+Filed on the way: **P18-S105-KITHEAD** (low, reach 0 of 2001 manifests: `browser.head` / `browser.styles` dropped).
+Checked and *not* a defect: HTTP Request's `conditional` (If-None-Match) is not exported, and the runtime's own port
+description says the browser ignores it too.
+
+Readings: export jest `Test Suites: 119 passed, 119` (exit 0, ~6 min) after the last fix; editor `tsc --noEmit` 0 after
+each. **Any red in this package from here on is new.**
+
+**Next (BOARD lane 6), in order:**
+1. **The ledger line "N graph scenarios conform on the export".** 81 of 85 are *outside* today (session 103 below), and
+   outside must not count as conforming. Read the outside reasons (`npx jest tests/node-spec-graph.test.ts`, the console
+   block); most are the harness's limits (no world, one component, no `set`). Make more playable, then put the line on
+   P18's ledger with played, conforming and declared-different counted apart.
+2. **EXP-011's seven** (§77 Action Dispatcher / Handler first; then Optimistic Update, State History, State Snapshot,
+   Undo / Redo, Sign In With).
+3. Open P18 rows when a session has room: P18-S104-FEEDCOUNT (low), P18-S105-KITHEAD (low, reach 0),
+   P18-S104-PACKRUNTIMENPX (noodl-preview's, the D82 mechanism).
+
+---
 
 ## ✅ Session 104 (2026-10-14, BOARD lane 6): all four P18-S102 rows fixed, then 7 of ISL-043's 8. Export jest 118 / 118
 
