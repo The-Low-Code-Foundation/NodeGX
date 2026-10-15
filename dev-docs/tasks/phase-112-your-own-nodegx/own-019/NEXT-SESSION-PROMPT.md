@@ -62,6 +62,21 @@ make it work, no compromises."* So s8 drives every open AC toward the AC8 verdic
   BACKENDSESSION shape — the note tells the next session to re-provision); (6) the hand-over hook's note-write budget
   blocked recording a person's request in NEXT.md after the hand-over; (7) AGENTS.md: "continue" = carry on from
   NEXT.md also made K-nopersist fix when its note said the owner decides.
+- **npm 0.2.2 PREPARED (s8, 20:20), Richard publishes:** bump `aab489337` (mcp, preview, create-nodegx, create-nodegx-vibe;
+  create-nodegx pins mcp 0.2.2, the wrapper pins create-nodegx 0.2.2; lockfile's three workspace lines only — a
+  sibling's uncommitted lockfile edit left alone), **pushed** to origin/cline-dev (R12). Packed in `own019-s4-pack` at
+  `aab489337` with every borrowed build-output link replaced by a build made there (node-spec, canvas-look, export,
+  core, backend, runtime types). Tarballs: `NodeGX test projects/OWN-019 Mistral apps/npm-0.2.2/` (+ s8 scratchpad
+  `npm-0.2.2/`). Same file lists as tgz35; render-harness byte-identical to tgz35; noodl-mcp.cjs also carries P18's
+  committed export work (139 files since c52e01e4f). Smoke on the tarballs: stranger-render clean; `npm create
+  nodegx-vibe` from the tarballs in an empty HOME writes the Vibe kit pinned to mcp 0.2.2; round-kit --dry accepts the
+  pins; LETTEREDGE fires on TL2 and WATCHINSIDE refuses an unknown key through the packed server. Command:
+  `scripts/own/publish-npm.sh "<that folder>"` (2FA per package; create-nodegx-vibe is a NEW name — may land staged:
+  `npx npm@11.15.0 stage list`).
+- **06:00 timer (Richard: "Let's try style tomorrow morning, starting at 6am again as before"):** `morning/s9start.sh`
+  (nohup, pid in `morning/s9start.pid`) → at 06:00 2026-10-16 relays that sentence verbatim as SP1's reply-5 (its
+  question: pick the style before parts 5–10?), and starts **TL4** — a Launch round on the 0.2.2 tarballs (kit022),
+  graded + gallery. Log: `morning/morning.log`. First check in s9: did both fire?
 - **AC4 re-read with painted frames** (`own-019/flash-grade.mjs`): T2/T3/T1b clean, R3 fires, the yardstick fires 4/4.
 - **tgz35** = tgz34 + WATCHINSIDE (`render-harness/drive-steps.js` only), proven from the tarball (nested never → fails;
   unknown key → refused; tgz33 passes both silently).
