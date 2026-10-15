@@ -1216,7 +1216,8 @@ export function emitComponent(
 
   // EXP-011 §15. Both kinds call `navigate(...)`, so both earn the hook. A `some` over one
   // kind is the shape that silently emits a call to an undeclared identifier.
-  const usesNavigate = deepActions(allActions).some((a) => a.kind === 'navigate' || a.kind === 'navigate-path');
+  // A new-tab Navigate is `window.open` and needs no hook (P18-S110-NEWTAB).
+  const usesNavigate = deepActions(allActions).some((a) => (a.kind === 'navigate' && !a.newTab) || a.kind === 'navigate-path');
   // EXP-011 §54. The failure arms that raise on the error channel — each earns the `raiseAppError` import.
   // EXP-011 §60. The parent Set raises on a miss (base.ts reportOutcome 'failure'); the self variant cannot miss.
   const raisesAppErrors = deepActions(allActions).some((a) => RAISING_ACTION_KINDS.has(a.kind) || mintedGuards(a) || (a.kind === 'component-object-set' && a.parent));
@@ -2978,9 +2979,9 @@ export function emitComponent(
         const url = query === '' ? filled : `${filled}?${query}`;
         // A url with nothing substituted into it is the string it always was — a plain literal
         // reads better than a template with no holes, and the two are the same value.
-        return action.pathParams.length === 0 && action.query.length === 0
-          ? `navigate('${url}')`
-          : `navigate(\`${url}\`)`;
+        const literal = action.pathParams.length === 0 && action.query.length === 0 ? `'${url}'` : `\`${url}\``;
+        // P18-S110-NEWTAB. The runtime's own call, bare: no features string, and nothing reads what it returns.
+        return action.newTab ? `window.open(${literal}, '_blank')` : `navigate(${literal})`;
       }
       // The optional call is the runtime's hasOutput/unwired case: a parent that passes
       // nothing gets nothing (COMPONENT-OUTPUTS-TARGET §3).

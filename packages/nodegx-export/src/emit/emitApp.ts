@@ -137,6 +137,16 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     projectNotes.push(cloud);
   }
 
+  // P18-S110-STORENOTES. A Global Store declarer's notes are about the store, which is app-wide, and a declarer
+  // in a component with no file has no component notes to carry them — so they are routed here, both channels.
+  for (const store of project.stores) {
+    for (const n of store.notes) {
+      const line = `${n.componentPath}: node ${n.nodeId} (net.noodl.GlobalStore, store "${store.name}"): ${n.text}`;
+      notes.push(line);
+      projectNotes.push(line);
+    }
+  }
+
   // Reachability is reported, never acted on: an unreachable component is still emitted, because
   // the author may be mid-build and the export is not the place to decide their project has dead
   // code. What it changes is how the rest of this list reads — a deferral in a component no route

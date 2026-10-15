@@ -179,3 +179,25 @@ Properties), -UPSERTON (Create Record), -TASKERROR (Run Tasks), -NOWRAP (Text), 
 **What 100% would now mean.** The node number can be quoted as "every placeable node exports"; the
 parameter number cannot be quoted as complete until the 21 gaps close or are refused by name. The 112
 unprobed ports are the next measurement (a probe value per structured type).
+
+### Session 111 (2026-10-15): the first ten closed, cheapest first — **1,225 of 1,396 (87.8%)**
+
+Ten ports left `silent`, and the floor rose by exactly ten. Five rows, each closed by the smallest honest change:
+
+| row | ports | how |
+|---|---|---|
+| P18-S110-RUNONCHANGE | Object Id + Object properties; Record Id; Array Filter Items + Array changes; Variable changes (6) | **Refused by name** where the box is unticked, each twin's rule: `objectNodeGate`; the Record Id effect (Fetch unwired only — with Fetch wired the export already reads only on Fetch, as the runtime does); `filterReadOf`; both Variable read sites (`VARIABLE_FROZEN`) |
+| P18-S110-NEWTAB | Navigate Open In New Tab | **Carried.** The `navigate` action gains `newTab`; the emitter prints the runtime's own bare `window.open(url, '_blank')` on the page's BrowserRouter path, and a file with no in-place navigate stops importing `useNavigate`. A wired box is refused by name |
+| P18-S110-UPSERTON | Create Record Upsert On | **Refused by name** (the setter's own emptiness: trimmed). Carrying it is an `X-NodeGX-Upsert` header on `create` in the exported client, which changes every connected fixture's `client.ts` and needs the backend's upsert answer measured first |
+| P18-S110-ONLYIFUNCHANGED | Set Record Properties Only If Unchanged | **Refused by name** (split on commas, then trimmed). The precondition is what the record held when read, and the export holds no read copy of a record to take it from |
+| P18-S110-STORENOTES | Global Store storageKey (+ the channel itself) | **Routed.** `StorePlan.notes` became `StoreNote { componentPath, nodeId, text }` and `emitApp` puts each one in the app notes and the report's project section. Not through component notes, because a declarer in a component with no file has none to carry them |
+
+**Split out:** `DbModel2.runOnChange-record` stays a gap under a new row, **P18-S111-RECORDLIVE**. Unticking the box is
+what the export already does, so the probe's variation could never move it. The gap is on the *ticked* side, the
+default: the runtime's Record re-reads when anything in the app writes its record, and the exported row is component
+state that only its own fetch writes. That is a shared record cache in the exported client, not a refusal.
+
+**Graded:** `tests/the-silent-ten.test.ts` (14), each case being the sentence with the parameter varied, beside its
+absence on the same fixture unvaried. Plus the setters' empty values (spaces, bare commas) refusing nothing, and
+Navigate's emitted line. Mutant control: weaken the Variable refusal and the new-tab emission, and exactly those two
+cases go red (12 / 14). `parameter-coverage` at HEAD's catalog: silent 59, floor 1,225.

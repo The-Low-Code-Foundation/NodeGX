@@ -68,6 +68,13 @@ export interface StoreKeyPlan {
   required: boolean;
 }
 
+/** A sentence about one Global Store declarer, with where it sits. */
+export interface StoreNote {
+  componentPath: string;
+  nodeId: string;
+  text: string;
+}
+
 export interface StorePlan {
   /** The authored store name — 'app' when every naming node used the default. */
   name: string;
@@ -88,8 +95,11 @@ export interface StorePlan {
   historians?: VariableWriter[];
   /** Set: the whole store defers (authored persist, unparseable initial state on every declarer). */
   deferred?: string;
-  /** Merged initial states, ignored storageKeys — surfaced through the component notes. */
-  notes: string[];
+  /**
+   * Merged initial states, ignored storageKeys — one per declarer, routed app-wide by `emitApp` (P18-S110-STORENOTES:
+   * this list had no reader, so "nothing dropped silently" did not hold for it).
+   */
+  notes: StoreNote[];
   /**
    * EXP-011 §47. Present when the store is a named **Object** — an `Object` node in "Specify
    * explicitly" mode with a literal Id, and the `Set Object Properties` nodes naming the same
@@ -584,7 +594,7 @@ export function collectAppState(ir: ExportIR): AppStateRegistry {
             plan.deferred =
               plan.deferred ?? 'a declarer authors persist — browser-storage rehydration is not translatable';
           } else if (node.parameters.some((p) => p.name === 'storageKey')) {
-            plan.notes.push(`declarer \`${node.id}\` sets storageKey without persist — inert, ignored`);
+            plan.notes.push({ componentPath: component.path, nodeId: node.id, text: 'sets storageKey without persist — inert, ignored' });
           }
           const initial = initialStateOf(node, wiredPortsOf(component));
           if (initial.kind === 'object') {
@@ -594,13 +604,15 @@ export function collectAppState(ir: ExportIR): AppStateRegistry {
                 entry.required = true;
                 entry.initial = value;
               } else if (JSON.stringify(entry.initial) !== JSON.stringify(value)) {
-                plan.notes.push(
-                  `two declarers give key "${key}" different initial values — first-seen wins (declarer \`${node.id}\` loses)`
-                );
+                plan.notes.push({
+                  componentPath: component.path,
+                  nodeId: node.id,
+                  text: `gives key "${key}" a different initial value from an earlier declarer — first-seen wins, so this one is ignored`
+                });
               }
             }
           } else if (initial.kind === 'bad') {
-            plan.notes.push(`declarer \`${node.id}\` has a non-literal or non-object initialState — contributes nothing`);
+            plan.notes.push({ componentPath: component.path, nodeId: node.id, text: 'has a non-literal or non-object initialState — contributes nothing' });
           }
         }
         if (node.type === GLOBAL_STORE_SET) {

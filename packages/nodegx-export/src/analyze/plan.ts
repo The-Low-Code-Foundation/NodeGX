@@ -548,6 +548,13 @@ const CLOUD_FUNCTION_OUTPUTS = ['done', 'failure', 'completed', 'error'];
  * change of its Id (`runOnValueChange`, `controlSignal: 'fetch'`), which is the effect form.
  */
 const RECORD_TYPE = 'DbModel2';
+/**
+ * P18-S110-RUNONCHANGE. Variable's `runOnChange-variable` unticked: variablenode2.ts's change callback
+ * neither flags Value nor fires Changed, so a reader keeps what it read until a Fetch. The exported
+ * `useValue` is live — a reader of that node is refused rather than made fresher than the runtime.
+ */
+const VARIABLE_FROZEN =
+  'its Variable changes box is unticked under Run On Value Change — it keeps the value it read until a Fetch, and the exported variable is read live';
 const RECORD_OUTPUTS = ['done', 'failure', 'completed', 'error', 'id'];
 
 /**
@@ -2203,6 +2210,12 @@ export type HandlerAction =
       to: string;
       pathParams: Array<{ name: string; expr: ValueExpr }>;
       query: Array<{ name: string; expr: ValueExpr }>;
+      /**
+       * P18-S110-NEWTAB. `Open In New Tab` ticked: router.tsx `navigateAsync` builds the page's
+       * url and calls `window.open(url, '_blank')` — no features string, no blocked test, `Done`
+       * either way. The exported url is the BrowserRouter path the in-place arm would push.
+       */
+      newTab?: true;
     }
   /**
    * `Navigate To Path` (EXP-011 §15, session 44) — a navigation to an **authored path string**
@@ -5200,6 +5213,15 @@ function planComponent(
     return plan !== undefined && plan.origin === 'object' ? plan : undefined;
   };
   const objectNodeGate = (node: NodeIR, store: StorePlan): string | null => {
+    // P18-S110-RUNONCHANGE. The exported store is read live and from the first render; either unticked box
+    // (modelnode2.ts: `setModelID` behind `runOnChange-modelId`, the change callback behind `runOnChange-object`)
+    // makes the runtime's outputs empty until a Fetch or frozen after a write — Component Object's rule, below.
+    if (literalParam(node, 'runOnChange-modelId') === false) {
+      return 'Id is unticked under Run On Value Change — its properties read nothing until a Fetch, and the exported store is read at once';
+    }
+    if (literalParam(node, 'runOnChange-object') === false) {
+      return 'Object properties is unticked under Run On Value Change — its outputs freeze between Fetch pulses, and the exported store is read live';
+    }
     const propInput = component.connections.find((c) => c.toId === node.id && c.toProperty.startsWith('prop-'));
     if (propInput !== undefined) {
       return `its "${propInput.toProperty.slice('prop-'.length)}" property input is wired — a write through the Object node itself is not translated in this slice; a Set Object Properties naming "${store.name}" is`;
@@ -8121,6 +8143,15 @@ function planComponent(
       ctx.defer = `its ${wiredSetting.slice(node.id.length + 1)} setting is wired — the filter is not statically known`;
       return null;
     }
+    // P18-S110-RUNONCHANGE. The exported filter is a derived value, always current; unticked Array or Items
+    // (filtercollectionnode.ts: the change callback and the Items setter) re-filter only on Filter. Enabled
+    // and the settings boxes govern wired inputs only, which are refused above.
+    for (const box of ['items', 'array']) {
+      if (literalParam(node, `runOnChange-${box}`) === false) {
+        ctx.defer = `its Run On Value Change box for "${box === 'items' ? 'Items' : 'Array changes'}" is unticked — it would re-filter only on its Filter signal, which this slice does not translate`;
+        return null;
+      }
+    }
     // `enabled` false passes the array straight through, unfiltered, unsorted and unlimited
     // (`scheduleFilter` skips the whole block) — so the translation is the source itself.
     if (literalParam(node, 'enabled') === false) {
@@ -8850,6 +8881,10 @@ function planComponent(
     }
     if (fromNode.type === 'Variable2' && fromProperty === 'value') {
       const name = variableNameOf(fromNode);
+      if (name !== undefined && literalParam(fromNode, 'runOnChange-variable') === false) {
+        ctx.defer = VARIABLE_FROZEN;
+        return null;
+      }
       return name !== undefined ? { kind: 'store-get', variableName: name } : null;
     }
     if (fromNode.type === GLOBAL_STORE_SUBSCRIBE && fromProperty === 'value') {
@@ -10617,6 +10652,23 @@ function planComponent(
     }
     if (literalParam(node, 'idSource') === 'foreach' || authoredOrWired('repeaterComponent')) {
       return { defer: 'its Id Source is the enclosing repeater\'s row — row identity is not statically knowable in this slice' };
+    }
+    // P18-S110-UPSERTON. A non-empty Upsert On is an `X-NodeGX-Upsert` header on the create (ParseWireAdapter
+    // `create`): a clash on that unique property updates the row there. The api module's create sends none.
+    /** Wired, or authored as text the setter keeps: `upsertOn` trims, `onlyIfUnchanged` splits on commas, then trims. */
+    const namesProperties = (name: 'upsertOn' | 'onlyIfUnchanged') => {
+      const value = literalParam(node, name);
+      if (wiredPorts.has(`${node.id}:${name}`)) return true;
+      if (typeof value !== 'string') return false;
+      return name === 'upsertOn' ? value.trim() !== '' : value.split(',').some((n) => n.trim() !== '');
+    };
+    if (verb === 'create' && namesProperties('upsertOn')) {
+      return { defer: 'its Upsert On names a unique property — a clash would update the existing row in the runtime, and the exported create always creates' };
+    }
+    // P18-S110-ONLYIFUNCHANGED. The precondition is what the record held when it was read (setdbmodelpropertiesnode.ts
+    // `scheduleSave`, an `X-NodeGX-If` header); the export holds no read copy of the record to take it from.
+    if (verb === 'update' && namesProperties('onlyIfUnchanged')) {
+      return { defer: 'its Only If Unchanged names properties — the runtime writes only if they still hold what the record was read with, and the exported update writes unconditionally' };
     }
     if (verb === 'update') {
       if (literalParam(node, 'storeType') === 'local' || wiredPorts.has(`${node.id}:storeType`)) {
@@ -12651,6 +12703,12 @@ function planComponent(
      * the same reason: the runtime's port holds *whichever arrived last*, and a wire that
      * delivers is always after the parameter the project file was loaded with.
      */
+    // P18-S110-NEWTAB. The runtime stores `!!value` in the input's own setter (router-navigate.ts); a wire
+    // would choose between the two arms per press, which this action does not carry.
+    if (wiredPorts.has(`${node.id}:openInNewTab`)) {
+      return { defer: 'its Open In New Tab port is wired — whether it opens a tab or navigates in place is a runtime value' };
+    }
+    const newTab = literalParam(node, 'openInNewTab') === true;
     const values = new Map<string, ValueExpr>();
     for (const param of node.parameters) {
       if (!param.name.startsWith('pm-')) continue;
@@ -12685,7 +12743,7 @@ function planComponent(
     const query = Array.from(values, ([name, expr]) => ({ name, expr }));
 
     return {
-      action: { kind: 'navigate', to: page.urlPath, pathParams, query },
+      action: { kind: 'navigate', to: page.urlPath, pathParams, query, ...(newTab ? { newTab: true as const } : {}) },
       consumes: [...consumes, ...ctx.consumes],
       collapses: ctx.logicNodeIds,
       subscribes: ctx.subscriberIds
@@ -17475,6 +17533,12 @@ function planComponent(
   for (const node of component.nodes) {
     if (node.type !== RECORD_TYPE || dispositions[node.id] !== undefined) continue;
     if (wiredPorts.has(`${node.id}:fetch`)) continue;
+    // P18-S110-RUNONCHANGE. Unticked, the Id setter only stores the Id (dbmodelnode2.ts `modelId`): with
+    // Fetch unwired nothing ever reads the row, and an effect keyed on the Id would.
+    if (literalParam(node, 'runOnChange-modelId') === false) {
+      recordEffectDefers.set(node.id, 'its Id is unticked under Run On Value Change and its Fetch is unwired — the runtime never reads the row');
+      continue;
+    }
     if (!plan.file) {
       recordEffectDefers.set(node.id, 'component emits no file to host the effect');
       continue;
@@ -17685,6 +17749,10 @@ function planComponent(
     const variableName = variableNameOf(fromNode);
     if (variableName === undefined) {
       notes.push(wireNote(connection, `variable name is not a literal`));
+      continue;
+    }
+    if (literalParam(fromNode, 'runOnChange-variable') === false) {
+      notes.push(wireNote(connection, VARIABLE_FROZEN));
       continue;
     }
     if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) {
