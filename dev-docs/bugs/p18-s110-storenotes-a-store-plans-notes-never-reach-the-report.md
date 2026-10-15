@@ -1,7 +1,8 @@
 ---
 id: P18-S110-STORENOTES
 title: A store plan's notes are written and never reach the export report
-status: open
+status: fixed
+commit: 78be5aed5
 severity: medium
 area: export / Global Store
 found: P18 EXP-008 per-parameter check, session 110, 2026-10-15
@@ -12,3 +13,9 @@ evidence: packages/nodegx-export/parameter-ledger.json (measured silent by tests
 :603), but nothing in `src` reads `StorePlan.notes`, so they never reach `app.notes`, the report or the pre-flight. EXP-004's
 "nothing dropped silently" holds only for notes that reach a reader; this channel has none. Fix: route them into the component
 notes as the other plans do, and grep for any other `.notes` array with no reader.
+
+**Fixed, session 111.** `StorePlan.notes` is now `StoreNote { componentPath, nodeId, text }`, and `emitApp` routes
+each one into the app notes and the report's project section, at app level, because a declarer in a component with
+no file has no component notes to carry them. The sweep for other `.notes` arrays with no reader found one more:
+`CollectionPlan.notes` is declared and initialised, but nothing writes to it, so nothing is dropped. Graded in
+`tests/silent-parameters-closed.test.ts`.

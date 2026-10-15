@@ -1,3 +1,46 @@
+# Next session — session 111 (2026-10-15, BOARD lane 6) closed **seven rows** (six of the per-parameter check's ten gap rows, and -STORENOTES): reaching **1,215 → 1,225 of 1,396**, gap ports **21 → 10**. Next: the last ten, which are not cheap.
+
+## ✅ Session 111: the silent parameters, cheapest first
+
+Read EXP-008 § *Session 111* for the whole record; in short:
+
+- **Refused by name** (each setter's own emptiness rule, each twin's sentence shape): Object / Record / Array Filter /
+  Variable with an unticked Run On Value Change box (P18-S110-RUNONCHANGE, 6 ports; Record's only with Fetch unwired);
+  Create Record's Upsert On; Set Record Properties' Only If Unchanged; a For Each whose Template Type is dynamic.
+- **Carried:** Navigate's Open In New Tab → the runtime's own bare `window.open(url, '_blank')`; no `useNavigate`
+  in a file that has no in-place navigate.
+- **Said:** a Global Store declarer's notes reach the app notes and the report (`StoreNote`, routed in `emitApp`);
+  a Run Tasks whose template declares its error output gets a per-node note that the value is dropped.
+- **Reclassified, not reaching** (by construction, recorded): `For Each.templateScript` → `refused-with`,
+  `RunTasks.taskErrorOutput` → `gated`. **Split out:** Record's "Record properties" box is a gap on its *ticked*
+  default side, so no refusal closes it: **P18-S111-RECORDLIVE** (a shared record cache in the exported client).
+- 🔴 **A probe that varies a box can only see the side it flips to.** Record's box defaults ticked and the export
+  already behaves as if it were unticked, so varying it to `false` never moves the export: the gap is on the side
+  the probe starts from. Read every remaining gap for which side holds the defect before refusing anything.
+- 🔴 **Two rows are wider on the default side:** no exported Text has a `white-space` rule at all (P18-S110-NOWRAP),
+  and a Dropdown placeholder's default opacity is 0.5 (P18-S110-PLACEHOLDEROPACITY). Both are written into the rows.
+
+Readings: `tests/silent-parameters-closed.test.ts` 18 / 18 (mutant controls: weakening each fix turns exactly its own
+cases red, 2 and then 3). `parameter-coverage` red on exactly the P121 peer's three uncommitted Upload File ports
+(`photoQuality`, `readers`, `shrinkTo`; total 1,399 vs 1,396), as in session 110. At HEAD's catalog the ledger is exact:
+silent 59, floor 1,225. Package `tsc` 0, and the specs typecheck. Whole export package (`nice -n 19 --runInBand`, 446 s):
+**124 / 125 suites, 4,168 passed, 3 skipped**. The one red is that same gate on those three ports.
+
+**Next (BOARD lane 6):**
+1. **P18-S110-EVALATLOAD**: read `plan.ts` ~:6055's old refusal first (the row says it predates GAM-001 and also
+   drops a value at the default).
+2. **The Text `white-space` rule** (NOWRAP, widened): one rule per arm in `emit/style.ts`, then regenerate HLS-001
+   and count the diff. Render one Text with a typed line break on both sides first: the row's default-side claim is
+   from reading, not yet from a render.
+3. **Dropdown placeholder opacity**: carry it (module CSS on the empty option being checked, text only) or note it on
+   every placeholder Dropdown. A ruling for Richard only if the carry turns out to cost visual fidelity elsewhere.
+4. **-ROUTERSELF** (6 ports, a Router's own box), **P18-S111-RECORDLIVE** (sized as an EXP-011 section).
+5. When P121 commits Upload File's three ports, the gate asks for their classification (their rows
+   P121-TWO001-EXPORTREADERS / -TWO003-EXPORTSHRINK are the `gap` rows to cite). Then the 112 unprobed ports, and the
+   backlog session 110 listed (MOUNTPULSE, §77.5, the graph line, the four low rows).
+
+---
+
 # Next session — session 110 (2026-10-15, BOARD lane 6) built **EXP-008's per-parameter check**: **1,215 of 1,396 parameters reach the export (87.0%)**, 21 real silent drops filed as 10 rows. Next: close the gaps, cheapest first.
 
 ## ✅ Session 110: the per-parameter check

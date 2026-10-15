@@ -197,7 +197,17 @@ what the export already does, so the probe's variation could never move it. The 
 default: the runtime's Record re-reads when anything in the app writes its record, and the exported row is component
 state that only its own fetch writes. That is a shared record cache in the exported client, not a refusal.
 
-**Graded:** `tests/the-silent-ten.test.ts` (14), each case being the sentence with the parameter varied, beside its
+**Graded:** `tests/silent-parameters-closed.test.ts` (14), each case being the sentence with the parameter varied, beside its
 absence on the same fixture unvaried. Plus the setters' empty values (spaces, bare commas) refusing nothing, and
 Navigate's emitted line. Mutant control: weaken the Variable refusal and the new-tab emission, and exactly those two
 cases go red (12 / 14). `parameter-coverage` at HEAD's catalog: silent 59, floor 1,225.
+
+**Two more, same session (no change to the floor, by construction).** P18-S110-DYNAMICTEMPLATE: a For Each with
+Template Type dynamic (or wired) is refused by name in `roleOf`. P18-S110-TASKERROR: a Run Tasks whose template
+declares the node's error output gets a per-node note that the value is dropped. Neither moves the reaching count. The
+probe varies Template Script *under* dynamic, where both sides now refuse identically, and no fixture's template
+declares an error output. So the two ports are reclassified, **`gap` → `refused-with`** and **`gap` → `gated`**, with
+the spec (`tests/silent-parameters-closed.test.ts`, renamed from `the-silent-ten`, now 18 cases) building the
+context the probe does not. **10 gap ports remain:** P18-S110-ROUTERSELF (6), -EVALATLOAD, -NOWRAP, -PLACEHOLDEROPACITY,
+P18-S111-RECORDLIVE. The last two Text/Dropdown rows were found **wider on the default side**: an exported Text has
+no `white-space` in any arm, and a placeholder's default opacity is 0.5. Both are written into their rows, and neither is a cheap close.

@@ -1,7 +1,8 @@
 ---
 id: P18-S110-RUNONCHANGE
 title: Object, Record, Array Filter and Variable ignore a Run On Value Change box their twin nodes honour
-status: open
+status: fixed
+commit: 78be5aed5
 severity: medium
 area: export / Run On Value Change
 found: P18 EXP-008 per-parameter check, session 110, 2026-10-15
@@ -22,3 +23,10 @@ ignored on four:
 
 Fix: the twins' rule — refuse by name on an unticked box the slice cannot honour (and the Record row's default-side behaviour
 needs its own decision).
+
+**Fixed, session 111 (EXP-008 § Session 111).** Six of the seven ports are refused by name when unticked, each with
+its twin's rule: Object's Id and Object-properties boxes in `objectNodeGate`; Record's Id box where Fetch is unwired
+(with Fetch wired the export already reads only on Fetch, as the runtime does); Array Filter's Items and
+Array-changes boxes in `filterReadOf`; Variable's changes box at both read sites. Graded in `tests/silent-parameters-closed.test.ts`.
+The seventh, Record's "Record properties" box, is a gap on its *ticked* (default) side that no refusal can close. It
+moved to its own row, **P18-S111-RECORDLIVE**.
