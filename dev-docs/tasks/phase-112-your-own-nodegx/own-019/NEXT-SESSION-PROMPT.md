@@ -42,6 +42,26 @@ make it work, no compromises."* So s8 drives every open AC toward the AC8 verdic
     grader cannot see (the yardstick's flash) and one kit defect (WATCHINSIDE) found; 1 of 6 changed the app — only
     under the lab's bare "Continue." after its own note said the owner decides.** Cost $1.28–2.35 per check
     (≈ €0.04–0.07 real). Ready for the AC8 write-up.
+- **SP1 — Richard's own music-app prompt (`big/prompt-SP1.txt`, verbatim), tgz35, `--relay`, started 15:57; PAUSED at
+  20:10 on Richard's word ("We'll take a break").** round-kit is still running and WAITING after sitting 5
+  (`big/SP1/waiting-5.md`); **resume = `touch big/SP1/continue-5`** (a fresh sitting picks up NEXT.md: part 5, the player
+  bar), by day. Process followed exactly (verified from the call order: grep `# Next session` → create_project with scope
+  → REQUEST.md verbatim → CHECKLIST.md 27 lines → PLAN.md 11 parts ≤ 4 lines → get_project_info → first build at 16:06;
+  every part built → driven → marked → PLAN "Learned"; each sitting starts from NEXT.md). **13/27 lines proven, parts
+  1–4** (auth, upload incl. backend-verified records, Discover list, search/genre/sort), **$8.31 list ≈ €0.25 real**,
+  5 sittings. Richard's reply after sitting 4 (his words, resumed into the same session): add a design pass — it added
+  part 11 (style options from the presets, pause for his pick) and part 12 (visual-quirks sweep), prove → 13; it asks
+  whether to pick the style BEFORE parts 5–10 instead. Richard looked at the app (preview on :4830, `ada@example.com` /
+  `correct horse battery`). Sitting 3 ended on "Allow grep?" (/root/.noodl/backends) — APPROVALTAIL (lab, fixed).
+  **Candidate kit defects from SP1, to verify from the calls before filing:** (1) the page registrar takes the start
+  page from a deliberate one-line stub Home on every page write (pageRegistration's placeholder rule, editor
+  `isPlaceholderPageGraph`) — confirmed in code, 3×; (2) `Cloud File` does not unwrap a record's file field (cover
+  blank; it used an Expression); (3) drive_page hangs ~240 s on a tap that calls `window.open` to an external URL
+  (it hooked window.open to prove the line); (4) after a server restart the project's root component "missing" —
+  repaired with set_project_settings({home:"App"}); (5) the backend stops with the MCP server between sittings (known
+  BACKENDSESSION shape — the note tells the next session to re-provision); (6) the hand-over hook's note-write budget
+  blocked recording a person's request in NEXT.md after the hand-over; (7) AGENTS.md: "continue" = carry on from
+  NEXT.md also made K-nopersist fix when its note said the owner decides.
 - **AC4 re-read with painted frames** (`own-019/flash-grade.mjs`): T2/T3/T1b clean, R3 fires, the yardstick fires 4/4.
 - **tgz35** = tgz34 + WATCHINSIDE (`render-harness/drive-steps.js` only), proven from the tarball (nested never → fails;
   unknown key → refused; tgz33 passes both silently).
