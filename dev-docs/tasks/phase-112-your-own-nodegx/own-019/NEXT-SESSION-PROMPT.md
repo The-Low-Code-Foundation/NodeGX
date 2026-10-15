@@ -16,6 +16,14 @@ TP1) started 06:00:58. Everything logs to `v/lane.log`. Three lab faults found a
   (8/12, stopped by the lab). Rounds started before 07:30 (T2, TL2) still run the OLD proxy. **T1b** (`s7t1b.sh`,
   nohup) replaces T1 when lane A ends.
 
+**Results at 11:05 (all Large 4, tgz33, every round finished by itself):** Launch **TL1 19/19, TL2 19/19, TL3 19/19**
+(AC5b's three in a row; 45/72/69 min, $3.19/4.89/4.69 list) · quiz **T2, T3, T1b 12/12, carryover clean ×3** (AC4's
+three; T1 = PROXYDIES lab loss) · Pack It **TP1 12/12** · editor **TE1 0/13 = lab loss** (NODE20: backend needs Node ≥ 22.13;
+SEEDDONE, `225198677`) → **TE1b started 11:03 on Node 22** (`s7te1b.sh`). Richard's look verdicts on TL1–TL3: not yet.
+**Show-off deploy (Richard, 11:00):** TL2 via the kit's own `nodegx-deploy` (tgz33) → `NodeGX test projects/OWN-019
+Mistral apps/netlify/driftwood-tl2` (+ `.zip`) for Netlify Drop; static serve checked: 1280 and 390 (CDP emulation)
+render, no overflow, DM Sans loaded, no console errors.
+
 Results so far: **TL1 19/19** (06:00, 45 min, $3.19 list, 2 sittings) — the first Launch with ✓gaps ✓align;
 screenshots opened to Richard 07:40 (verdict not yet recorded). T1 = lab loss. Gallery: TL1 on 4816.
 
