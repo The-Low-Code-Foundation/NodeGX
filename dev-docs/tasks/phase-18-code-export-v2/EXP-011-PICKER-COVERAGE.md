@@ -130,11 +130,11 @@ Twenty-two nodes. With Tier 3.11's three: **25 scheduled ⇒ ceiling 117 of 127 
 ### Not a target — re-ruled 2026-09-03 (§50), and every one of them must now be **badged**
 
 ~~`Action Dispatcher` / `Action Handler`~~, ~~`Optimistic Update`~~, ~~`State History` / `State Snapshot` /
-`Undo / Redo`~~, ~~`Parse CSV` / `To CSV`~~, ~~`Pattern Extractor`~~, and `Sign In With` (until provider
-sign-in is a product decision).
+`Undo / Redo`~~, ~~`Parse CSV` / `To CSV`~~, ~~`Pattern Extractor`~~, and ~~`Sign In With`~~ (built §79, session 109:
+the BOARD's lane 6 of 2026-10-14, "the last seven picker nodes export", is the newer ruling).
 
-Ten nodes — **eight since 2026-09-26, seven since session 101, two since session 107, one since session 108** (§77 built the Dispatcher
-pair, §78 State History, State Snapshot and Undo / Redo): Richard reversed the parsers'
+Ten nodes — **eight since 2026-09-26, seven since session 101, two since session 107, one since session 108, none since
+session 109** (§77 built the Dispatcher pair, §78 State History, State Snapshot and Undo / Redo, §79 Sign In With): Richard reversed the parsers'
 exclusion (*"Can we not finish the code export nodes? If we had 100% coverage that would be a big
 deal"* — the whole list is now a target, §75), and `Parse CSV` / `To CSV` are **built in §75** beside
 `Parse XML` / `Parse Feed`, which his 2026-09-18 ruling had already scheduled. `Pattern Extractor` is
@@ -11582,3 +11582,125 @@ and its diff counted (56 out, 79 in), 4 / 4 after; `streaming-trio` and `the-sta
 moved. Whole-package export jest **122 / 122 suites, exit 0** (4,053 passed, 3 skipped; `nice -n 19 --runInBand`,
 1,261 s). `export-ledger:check` OK (136 translated); `export-ledger:picker --check` holds at 129 / 130; package `tsc` 0;
 editor `tsc --noEmit` 0.
+
+## §79 Sign In With (session 109, 2026-10-15): picker 129 → 130 of 130
+
+The last picker row. §50 had put it out of scope "until provider sign-in is a product decision"; the BOARD's lane 6
+(2026-10-14, "the last seven picker nodes export") is the newer ruling, the same reversal §77 and §78 rode. §75.5 #2 was
+right that nothing waited on a provider: the backend has a generic OIDC provider, and the backend suite already has a
+real OIDC issuer (`tests/helpers/fake-oidc-provider.ts`), so the drive needed nobody's credentials.
+
+### §79.1 What is built
+
+- **`src/api/client.ts` gains the sign-in return leg** (`emitApp.ts` `authReturnLegSource`), shipped where the app can
+  START a sign-in that comes back to it: a Sign In With, or a Request Magic Link (its link returns the same
+  `?nodegx_auth=` code). Every other app's client is byte-identical (live-desk, pinned). Transcribed from
+  `ParseAuthAdapter.ts`: `signInWithProviderRequest` (the handover: `<endpoint>/oauth/<provider>/start?redirect=`, a
+  blank Redirect is this page minus the sign-in parameters, no Provider refused in the call with
+  `Sign In With: no provider was set.`), and `consumeAuthReturn` (strip first, a provider error deferred a tick, the
+  code exchanged, the answer stored whole as the session, then announced), run once when the module is evaluated. The
+  exchange is its own request, `exchangeAuthCode`, read as `_makeRequest` reads an answer (finding 3).
+- **`src/lib/signIn.ts`** (`src/emit/signInLib.ts`, generated from session 109's scratchpad `signinlib/signIn.ts` +
+  `gen.js`, round trip byte-exact): signinwith.ts's launcher (Do: Signing In, then the handover; a refusal sets Error
+  and Signing In, raises `user/sign-in-with-failed`, then Failure and Completed) and its receiver (at mount it subscribes
+  to the client's return and reads it; in progress sets Signing In; a settled return reported once, C50: Done after
+  Notice and Error are written, or Failure with the node's code).
+- **Table row 14** (`plan.ts`): Provider and Redirect are config read at the press; Do (`signIn`) is the verb and
+  carries nothing; Done, Completed and Failure are the listeners in the node's declaration order; Signing In, Error and
+  Notice are live getters. Refused by name: a project with no backend. The node has no Backend input (the runtime always
+  reaches the active backend).
+- **The alpha sentence** (`ledger.ts` `alphaNotice`, read by the pre-flight modal, the settings section and every
+  exported README) reads "All 130 nodes you can place export today." at a complete picker; "the rest are left out by
+  name" named nothing.
+
+### §79.2 The test: `tests/the-sign-in-with.test.ts`, 72 rows, and `tests/fixtures/signin-desk`
+
+The fixture: `acme` (Provider acme) pressed by a button, its three values in Texts, Done and Failure writing `last`;
+`nobody` (no Provider) with its Error shown and its Completed writing `refused`; a User node for who is signed in.
+
+- §A the fixture whole (the app typechecks; the client carries the leg and calls it once; an app that can start no
+  sign-in has none; account-desk's magic link earns it).
+- §B **the client against the runtime's own `ParseAuthAdapter.consumeAuthReturn`**, the same page load and backend
+  answer on both sides (a fake browser: location, history, localStorage, fetch and XHR, the answers held so both see the
+  in-progress window): 9 page-load shapes × 4 answers, 36 rows, compared whole (what was consumed, the state at once and
+  settled, every announcement, the address bar after, every request, the stored session). A reach row (all five arms)
+  and two client mutants (no strip; a provider error announced at once).
+- §C **the node against the runtime's own `signinwith.ts` in a `NodeContext`**, over a UserService stand-in on that
+  same adapter (made at the first reach, consuming then; `on` and `oauthReturn` forwarded; the handover to the active
+  backend). 18 scripts: presses with and without a Provider and Redirect, an encoded Provider, a blank one, values set
+  after mount, a plain page load, returns that land (with and without a notice), returns refused with and without a
+  sentence, a provider error, two nodes, a late mount, an unmount and remount, a press after Done, a refusal during the
+  exchange. Compared whole: every signal with the three values a listener reads at it, every raise, each node's outputs
+  after every step, the navigations, the session, the address bar. A reach row, three lib mutants (no C50 guard; Done
+  before Notice; no Signing In on a press) and a fourth (a mount read that pulses).
+- §D wires and refusals (a wired Provider, a literal Redirect, no backend, a port it has not got, a pulse into a value,
+  two wires). §E the findings pinned. §F the ledger.
+
+No graph scenario plays on the export: every Sign In With scenario seeds a backend world, which the export graph harness
+keeps outside. The line stays at 10 of 85.
+
+### §79.3 What building it found
+
+1. 🔴 **An exported magic link has never signed anyone in** (P18-S109-MAGICRETURN, fixed here). The exported client had no
+   return leg, so the code the backend hands back after the click in the inbox sat in the address bar unexchanged.
+   `Request Magic Link` has been `translated` since §44; its spec asserted the request and never followed the link
+   back. account-desk's client moved in the golden by exactly this.
+2. 🔴 **A return read at mount reaches no wire in the runtime** (P18-S109-MOUNTPULSE, runtime, open). `nodescope.ts`
+   makes every node of a component before it attaches the connections (:425 then :429), and the node reports a
+   settled return in `initialize`, so that pulse goes nowhere. The export transcribes it: a return read at mount sets
+   values and raises, and calls no listener (an exported page entered again does not re-run a Done its first visit
+   handled, which is also what the running app does). The defect is the other half: a provider error is settled
+   before any node exists, so since P107-C50 kept the report made at mount and dropped the announcement, **a person who
+   cancels at the provider never fires Failure** in the running app. The first draft of the lib fired at mount; reading
+   `reportOutcome` and `nodescope` before running the differential caught it, and the §C harness now models the order
+   (a signal is logged only once the node is wired).
+3. **The exchange cannot ride `request()`.** The differential's first run differed on 4 of 36 rows: a 500 with no
+   `error` in its body read `Request failed (500)` in the export and `Sign-in could not be completed.` in the runtime.
+   The exchange now does its own fetch, read as `_makeRequest` reads: 200/201 is the session, else the body's `error`,
+   else the raw text, else the node's sentence — which is also what the runtime says for an unreachable backend (status
+   0, no text), so that difference is gone too rather than recorded. The magic-link spec's §43 cardinality row (A6)
+   now counts three fetch sites, two wrapped.
+4. Eight specs borrowed Sign In With as their "node with no rule". With the picker complete there is no placeable node
+   without one: they use `Verify Email`, deprecated and out of the picker (deferred by name in the ledger).
+5. A one-line harness fact: `nodeRegister._constructors[name]` is a factory, not a class; a patch on its `.prototype`
+   catches nothing. The runtime's raise during `initialize` is caught on the loaded `node.ts`'s `Node.prototype`.
+
+### §79.4 Recorded differences (not refused)
+
+- **When the return is consumed.** The runtime consumes it when UserService is first made, at the first user-family
+  node's `initialize`; the export when `src/api/client.ts` is first evaluated, at app start. On a returning page with
+  no user-family node the runtime leaves the code in the address bar until a page with one is made; the export
+  exchanges at once. Only an app whose redirect target has no user-family node can tell.
+
+### §79.5 The drive: a real backend, a real browser, both arms
+
+`EXPECTED79.md` first (session 109 scratchpad `drive79/`). The real `nodegx-backend` from `src` on :8591, provider
+`acme` = generic OIDC on the backend suite's FakeOidcProvider plus a one-route consent page (`/authorize` → 302 back with
+a code, or with `error=access_denied` in deny mode). The emitted signin-desk built (`npm install` against the published
+`@nodegx/core@0.1.0`, `tsc -b && vite build` exit 0) and served on :4391; the control arm is the same build with the
+`consumeAuthReturn();` call removed, on :4392. Headless Chrome through `drive-page.js`.
+
+| row | expected | read |
+|---|---|---|
+| C1 control boot | Signing In `false`, rest blank | ✓ |
+| C2 control, Sign in with Acme | four hops; back on `/home?nodegx_auth=…`, code still in the address bar, nobody signed in, no exchange | ✓ `?nodegx_auth=bQ7k…`; storage `[]`; 0 exchanges |
+| D1 fixed boot | Signing In `false`, rest blank; errors `[]` | ✓ |
+| D2 Sign in with nobody | Refusal `Sign In With: no provider was set.`, Refused `completed`, no navigation, one error | ✓ |
+| D3 Sign in with Acme | stripped to `/home`; one exchange 200; Last `done`; Signed in as `ann@example.com`; session stored | ✓ (a 204 preflight, then 200; the session whole with its token, `authOutcome` `signed-in`). **Missed:** Refused read `completed` — the `nobody` node is a receiver too and fired Done + Completed on the same return, as the runtime does (§C "two nodes") |
+| D4 reload | still signed in; Last blank; no exchange | ✓ |
+| D5 deny | stripped; Error the backend's sentence; no Failure pulse; one error; no exchange; still signed in | ✓ `Sign-in was not completed: access_denied`, Last and Refused blank. **Missed:** two console errors, one per node (both receivers raise), as the runtime would |
+
+Both misses were the expectation sheet forgetting that the second node is a receiver; neither is a defect. Everything
+started was torn down by its listening port.
+
+### §79.6 What this leaves
+
+The picker is complete: **130 / 130**. The graph line is unchanged at 10 of 85.
+
+**Readings.** `the-sign-in-with` 72 / 72; HLS-001 red on exactly the predicted paths (the 56 projects' README for the alpha sentence, account-desk's `src/api/client.ts`, signin-desk's 21 new entries), golden regenerated and its diff counted (57 out, 80 in), green after; 20 floor pins moved; the eight re-pointed specs and the magic-link spec green. Whole-package export jest **123 / 123 suites, exit 0** (4,143 passed, 3 skipped; `nice -n 19 --runInBand`, 497 s). `export-ledger:check` OK (137 translated); `export-ledger:picker --check` holds at **130 / 130**; package `tsc` 0; editor `tsc --noEmit` 0 (empty log).
+
+1. **P18-S109-MOUNTPULSE** (runtime, Sign In With): Failure on a cancelled sign-in. A small runtime fix; the export's
+   mount read (`applyReturn(s, current, false)`) moves with it.
+2. **Before anyone quotes 100%: EXP-008's per-parameter coverage** (§75.5 #3). Now the next row, not a footnote.
+3. The Dispatcher's built-ins (§77.5); raising the graph line (t01's three, the harness clock, the one-component limit).
+4. Not driven: a magic link's own round trip (it needs a mail transport); the return leg it uses is the one driven here.

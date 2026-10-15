@@ -43,7 +43,7 @@ npm run export-ledger:picker          # ratcheted in PR CI
 node scripts/export-ledger/picker-coverage.js    # the readable report
 ```
 
-> **PICKER COVERAGE: 129 of 130 placeable nodes export (99.2%)** — 2026-10-15, session 108 (§78 part 2, Optimistic Update). Was 128 at session 107, 125 at session 106, 123 at session 101, 73 of 127 (57.5%) at session 65. Left: Sign In With.
+> **PICKER COVERAGE: 130 of 130 placeable nodes export (100%)** — 2026-10-15, session 109 (§79, Sign In With). Was 129 at session 108, 128 at session 107, 125 at session 106, 123 at session 101, 73 of 127 (57.5%) at session 65. Nothing left. ⚠️ Node coverage is not parameter coverage (EXP-008's open question, §75.5 #3): four parameter gaps have been found green behind a `translated` row, so 100% is the node count, not a claim that every port exports.
 
 "Placeable" means `inNodePicker`, not deprecated, browser-capable: what a person can actually drop
 on a canvas. The floor lives in `coverage-ledger.json` as `pickerCoverageFloor` and ratchets both

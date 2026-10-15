@@ -1,3 +1,39 @@
+# Next session — session 109 (2026-10-15, BOARD lane 6) built **EXP-011 §79: Sign In With export** — picker **130 / 130**, the last row. Next: the per-parameter check before anyone quotes 100%.
+
+## ✅ Session 109: §79, Sign In With
+
+Read EXP-011 §79 for the whole record; in short:
+
+- **The exported client gained the sign-in return leg** (`emitApp.ts` `authReturnLegSource`): ParseAuthAdapter's
+  handover and `consumeAuthReturn`, run once when `src/api/client.ts` is evaluated, shipped where a Sign In With or a
+  Request Magic Link can start a sign-in. The exchange is its own request, read as `_makeRequest` reads (not `request()`).
+- **`src/lib/signIn.ts`** (`src/emit/signInLib.ts`, from session 109 scratchpad `signinlib/signIn.ts` + `gen.js`):
+  the launcher and the receiver; **table row 14**. A return read at mount sets values and raises but calls no listener,
+  because the runtime reports it before `nodescope` attaches the wires.
+- **Graded:** `tests/the-sign-in-with.test.ts` (§B 36 page loads against the runtime's own adapter; §C 18 scripts against
+  the runtime's own node in a `NodeContext`; mutants). **Driven** against the real backend through a real OIDC issuer
+  (the backend suite's FakeOidcProvider plus a consent route), both arms: the control lands with the code unexchanged;
+  the fixed arm signs in, Done fires, the session is stored, a deny shows the reason with no Failure pulse.
+- **Found:** an exported magic link never signed anyone in (P18-S109-MAGICRETURN, fixed); in the runtime, a cancelled
+  provider sign-in never fires Failure (P18-S109-MOUNTPULSE, open). The alpha sentence reads "All 130 nodes you can
+  place export today." at a complete picker.
+
+Readings: `the-sign-in-with` 72 / 72; HLS-001 red on exactly the predicted paths (the 56 projects' README for the alpha sentence, account-desk's `src/api/client.ts`, signin-desk's 21 new entries), golden regenerated and its diff counted (57 out, 80 in), green after; 20 floor pins moved; the eight re-pointed specs and the magic-link spec green. Whole-package export jest **123 / 123 suites, exit 0** (4,143 passed, 3 skipped; `nice -n 19 --runInBand`, 497 s). `export-ledger:check` OK (137 translated); `export-ledger:picker --check` holds at **130 / 130**; package `tsc` 0; editor `tsc --noEmit` 0 (empty log).
+
+🔴 Run a whole-package suite as `nice -n 19 npx jest --runInBand`.
+
+**Next (BOARD lane 6):**
+1. **The per-parameter check (EXP-008's open question, §75.5 #3 / §79.6 #2).** 130 / 130 counts nodes; four parameter
+   gaps were found green behind a `translated` row. One session: a per-parameter ledger check, so the number can be
+   quoted.
+2. P18-S109-MOUNTPULSE, if a runtime session takes it: the fix is in `signinwith.ts`'s `initialize`, and the export's
+   mount read (`applyReturn(s, current, false)`) moves with it.
+3. The Dispatcher's built-ins (§77.5); raising the graph line (t01's three, the harness clock, the one-component limit).
+4. Rows: P18-S106-PARSERAISE, P18-S104-FEEDCOUNT, P18-S105-KITHEAD (low), P18-S104-PACKRUNTIMENPX. P121's sessions
+   filed export rows of their own on 2026-10-15 (`node scripts/bugs.js --from P121`), uncommitted at this hand-off.
+
+---
+
 # Next session — session 108 (2026-10-15, BOARD lane 6) built **EXP-011 §78 part 2: Optimistic Update export** — picker **129 / 130**, graph line **10 of 85 conform, 17 played**. Next: §79 Sign In With, the last picker row.
 
 ## ✅ Session 108: §78 part 2, Optimistic Update
