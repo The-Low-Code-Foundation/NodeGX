@@ -2,6 +2,7 @@
 id: P112-OWN019-LETTEREDGE
 title: "TL2's hero week strip draws each day letter hard against its chip's left edge: the chip Group centres its child (alignItems/justifyContent center), but a Text stretches to the Group's width and is left-aligned, and no render_report reading says text touches the edge of its own outlined box"
 status: fixed
+commit: 2ba01d07f
 phase: P112
 task: OWN-019
 severity: medium

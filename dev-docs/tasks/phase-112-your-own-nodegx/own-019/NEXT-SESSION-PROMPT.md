@@ -4,7 +4,70 @@
 file.** Read, in order: this file; the task file `../OWN-019-THE-VIBE-KIT.md` §7 "s5" and "s6"; `VIBE-AND-LARGE4.md`
 § "s5's new measurements"; the P112 README's R36–R39. Say "Opus" in your first message.
 
-## ▶ s7 LIVE (2026-10-15, from 06:00 CEST) — read this first
+## ▶ s8 LIVE (2026-10-15 afternoon, Opus) — read this first
+
+Richard (14:30): *"I need this Mistral thing to be proven out or dump it. So far I like it, so let's do what we can do
+make it work, no compromises."* So s8 drives every open AC toward the AC8 verdict.
+
+- **TE1b 13/13** (editor brief, Node 22, 4 sittings, 109 min, $7.56 list, finished 12:52 by itself) — the s7 series is
+  complete: Launch 19/19 ×3 (AC5b), quiz 12/12 ×3 carryover clean (AC4), Pack It 12/12, editor 13/13. No kit commit
+  between c52e01e4f and s8.
+- **AC3 ("it checks itself") RUNNING** — `ac3lane.sh` A|B in the s8 scratchpad (`089d7f28-…/scratchpad/ac3/`): Large 4
+  (tgz33, Vibe kit) is seeded with a finished quiz — the Sonnet yardstick (`control`) or one of its five planted mutants
+  — and told `own-019/sentence-check-quiz.txt` ("check it against what I asked for, line by line; change nothing").
+  Truth = today's grader on each (`ac3/pre/summary.txt`): control 12/12; noscore ✗score ✗best ✗keep ✗reload; notimer
+  ✗order ✗timer ✗timeout and the play stops (4/12); nopersist ✗reload; nocolour ✗green ✗red; nodelay ✗green ✗red.
+  Started 14:38 (A: control, noscore, nocolour; B: notimer, nopersist, nodelay); `ac3/v/lane.log`; each round's app is
+  graded again after (`K-<m>-after.log`) to see whether it changed anything. Score each report line against the truth.
+- **AC3 results so far (truth = today's grader on each seed; "report" = Large 4's own final words, `ac3/report.py`):**
+  · **K-control** (29 min, $1.28): 22/23 lines work, one defect — a one-frame flash at each question change. **Real:
+    painted frames prove it** (GRADERFLASH, `426d759a8`): the grader is blind to it. App unchanged (12/12 after).
+  · **K-notimer** (31 min, $1.72): fails exactly timer + timeout (17 s at "10s"); played round the hang and passed what the
+    grader marked "not reached"; reported WATCHINSIDE (`426d759a8`, fixed). App unchanged (4/12 after).
+  · **K-noscore** (37 min, $1.50): "the score never goes up … 'Award point' … no wire leaves it" = the planted cut; best
+    "mechanism pass, fails in practice" (it seeded 4 itself to prove the reload). App unchanged (8/12 after).
+  · **K-nopersist** (sitting 1, 29 min): "the best score does not survive a reload … localStorage is empty … kept only in
+    page memory" = the planted cause; + the flash. **But sitting 2 changed the app** (after-grade 12/12): its NEXT.md said
+    "owner reviews the audit and decides which failures to fix", the lab sent the bare "Continue.", and it read that as
+    "carry on from NEXT.md — I'll fix both failures". Stopped by s8 at 82 min ($4.27). The other four wrote no NEXT.md,
+    so their sitting 2 got the brief again and re-checked with zero graph writes. **Finding for the claim:** its check
+    reports are honest; a bare "Continue." can override "don't fix yet" (1 of 5). Kit lesson to measure: AGENTS.md —
+    when NEXT.md says the person decides, "continue" is not their decision; ask. Lab: a check round = 1 sitting.
+  · **K-nocolour** (44 min, $1.71): green + red fail; "styleA/B/C … ignore all three [inputs]" = the planted cause;
+    "new question starts clean — vacuous, re-check after the fix". App unchanged (10/12 after).
+  · **K-nodelay** (50 min, $2.35): "after about a second … FAIL … the 'Reveal delay' timer … duration 0" = the planted
+    cause (it attributes it to the advance line; grade-quiz fails green/red and PASSES advance — its timing starts
+    after a 300 ms sleep, a grader hole). Zero graph writes in both sittings (10/12 after).
+  · **AC3 verdict: 6/6 planted defects named, five with the exact planted cause; no false report; one real defect the
+    grader cannot see (the yardstick's flash) and one kit defect (WATCHINSIDE) found; 1 of 6 changed the app — only
+    under the lab's bare "Continue." after its own note said the owner decides.** Cost $1.28–2.35 per check
+    (≈ €0.04–0.07 real). Ready for the AC8 write-up.
+- **AC4 re-read with painted frames** (`own-019/flash-grade.mjs`): T2/T3/T1b clean, R3 fires, the yardstick fires 4/4.
+- **tgz35** = tgz34 + WATCHINSIDE (`render-harness/drive-steps.js` only), proven from the tarball (nested never → fails;
+  unknown key → refused; tgz33 passes both silently).
+- **`--relay`** (`604af5bbf`) for Richard's own-prompt complex-app round (his idea, 15:20): smoke resumed the same
+  session ($0.02). Waiting for his prompt.
+- **LETTEREDGE fixed** (`2ba01d07f`): render_report `text-against-edge` + the vocabulary's layout line. Gallery corpus
+  from source: TL2 fires (7 chips, 1280 + 390), the other 25 apps silent. **tgz34** (`ac3/../tgz34`) = tgz33 + that
+  one change (MCP only; the pack worktree `own019-s4-pack` is c52e01e4f + the cherry-pick, staged, uncommitted);
+  proven from the tarball: TL2 fires, TL1 silent. Not yet in a Launch round (no third concurrent round beside AC3:
+  Vibe's 429 crash, #1235) → **a Launch on tgz34 first thing next daytime**.
+- **`create-nodegx-vibe` built** (`9a2d8551b`): `packages/create-nodegx/vibe/` (outside the workspaces), runs
+  create-nodegx `--vibe`, pinned to the same version; publish-npm.sh publishes it last. The registry had none (404) —
+  AC6 and AC7 had nothing to run. Publishing it needs a 0.2.2 of the kit (mcp carries row-gap, DRIFTTALLPART and
+  LETTEREDGE; registry 0.2.1's MCP shasum ≠ tgz33's) — Richard's step (R11).
+- **CARRYOVER:** Vibe half met (T2, T3, T1b clean on tgz33); stays open for the core kit, which has no checklist step.
+- **Money, second clean window (Richard, ~14:51): console €84.23.** Since the €57.16 reading (2026-10-14 16:06) the
+  recorder counts $63.70 list — s5 after 16:06 $20.57 + the whole s7 series $41.96 (T1 4.01, T2 2.60, T3 6.32, T1b
+  3.38, TL1 3.19, TL2 4.89, TL3 4.69, TP1 4.14, TE1 1.18, TE1b 7.56) + AC3 to 14:51 $1.17 (per call, list 1.36 / 0.14
+  cached / 4.18 out per M; the recorder matches the round table to the cent on T2, TL1, TE1b). €27.07 ÷ $63.70 =
+  **€0.425 per list $** — s5's window said ≈ €0.42. Real money (R: €18 buys the €255 allowance, ×0.0706): **€0.030 per
+  list $** → a quiz €0.08–0.19, a Launch page €0.10–0.15, the editor €0.23; €255 ≈ $600 list ≈ 150 Launch pages a month.
+- **Look verdicts complete (Richard, ~14:55):** TL1 "I like a lot, no notes"; TL3 "looks great"; TL2 the week strip
+  (LETTEREDGE, fixed — render_report fires on TL2 alone of the three). AC5b's three looks: two clean, one defect the
+  kit now names.
+
+## ▶ s7 LIVE (2026-10-15, from 06:00 CEST)
 
 The series is RUNNING, from the timer (`s7start.sh`, scratchpad `447c4862-…`): lanes A (T1–T3, TE1) and B (TL1–TL3,
 TP1) started 06:00:58. Everything logs to `v/lane.log`. Three lab faults found and fixed this morning:
