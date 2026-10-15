@@ -1,6 +1,6 @@
 # ISL-035 — An exported app loads what the deployed one loads
 
-**Status: ⬜ not started. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 2 bugs from
+**Status: ✅ CLOSED — 2 of 2 fixed (P18 session 105, 2026-10-15, BOARD lane 6).** AC1: both re-measured at HEAD, both still firing. EXPORTKITDEPS `90ee40009`: the exported `index.html` loads each kit dependency as a classic script before the app, from the deploy injector's own `toInjectModules`, graded against `buildInjectionTags` over the same project. ARRAYFILTERPATHEXPORT `4c1800cb0`: a dotted filter key reads through `rowField`, graded against the runtime's own `fieldOf`. AC2: no row needed a ruling. AC4: `node scripts/bugs.js --from P109` lists neither. Found on the way and filed: P18-S105-KITHEAD (low, reach 0: `browser.head` / `browser.styles` dropped). Not done: a built, served export with a kit's library seen running. **Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 2 bugs from
 the ledger (`dev-docs/bugs/`) that had no task: 1 high · 1 low. **Side:** nodegx-export (kit bridge, scaffold, Array Filter plan)
 
 ## 1. The person sentence
