@@ -62,7 +62,7 @@ import type { Handle, Reach, TargetAdapter, TraceEvent } from '../../../nodegx-n
 import { canonicalise } from '../../../nodegx-node-spec/src';
 import { isSignalInput, type AnyNodeSpec } from '../../../nodegx-node-spec/src/spec';
 import { specFor } from '../../../nodegx-node-spec/src/nodes';
-import { Catalog, loadCatalog } from '../../src/catalog';
+import { Catalog, CatalogPort, loadCatalog } from '../../src/catalog';
 import { emitApp } from '../../src/emit/emitApp';
 import { ComponentIR, ExportIR, NodeIR, ParamValue, PortIR } from '../../src/ir/types';
 
@@ -297,15 +297,21 @@ export function exportTarget(): TargetAdapter<ExportHandle> {
 // three of the fourteen graphs whole and refuses the rest with a sentence each — a consumed
 // change pulse, a value wire between two logic nodes "with no deterministic translation", an
 // Inverter that "drives nothing statically translatable" — so `canPlay` returns the exporter's
-// own notes and the runner counts the scenario `outside`. A `set` step and a `wire` step are
-// outside by construction (no value input is drivable; a component is emitted whole).
+// own notes and the runner counts the scenario `outside`. A `wire` step is outside by
+// construction (a component is emitted whole).
+//
+// A `set` step drives the one way an exported component takes a value from outside: a prop. Each
+// value input a scenario sets is a Component Inputs port `<id>_<port>` wired into it (its literal
+// param, if any, becomes the prop's first value), and a `set` re-renders the component with the
+// prop moved. Where the exporter refuses that wire, its sentence puts the scenario outside.
 //
 // The reach: value outputs the exporter LIFTED (the callback props the emitted interface
 // declares); no signal, no outcome. The runner projects the runtime's recording onto it.
 // ---------------------------------------------------------------------------------------------
 
 import type { GraphNodeDecl, GraphReach, GraphScenario, GraphTarget, Wire } from '../../../nodegx-node-spec/src';
-import { parseEndpoint } from '../../../nodegx-node-spec/src';
+import { parseEndpoint, projectGraphTrace } from '../../../nodegx-node-spec/src';
+import { hasObservation } from '../../../nodegx-node-spec/src/runner/compare';
 
 export interface ExportGraphHandle extends Handle {
   graph: ExportGraph;
@@ -323,6 +329,11 @@ interface ExportGraph {
   events: Record<string, TraceEvent[]>;
   lifted: Set<string>;
   live: Set<string>;
+  /** The props the component is rendered with now: the lifted callbacks and the driven inputs' current values. */
+  props: Record<string, unknown>;
+  /** `<id>.<port>` → the prop that drives it. */
+  driven: Map<string, string>;
+  component: EmittedGraph['component'];
 }
 
 interface EmittedGraph {
@@ -331,6 +342,8 @@ interface EmittedGraph {
   component: (props: Record<string, unknown>) => unknown;
   /** `<id>.<port>` → callback prop, for every value output the exporter lifted. */
   lifted: Map<string, string>;
+  /** `<id>.<port>` → the prop that drives it, for every value input a `set` step names and the emitted interface declares. */
+  driven: Map<string, string>;
   /** The notes that say part of the graph did not survive. */
   refused: string[];
 }
@@ -338,51 +351,112 @@ interface EmittedGraph {
 /** The exporter's prop for a Component Outputs port `<id>_<port>`: `on` + each `_`-word capitalised + `Changed` (observed on the spike). */
 const liftedProp = (id: string, port: string) => 'on' + `${id}_${port}`.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('') + 'Changed';
 
-export function graphComponent(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[]): ComponentIR {
+interface GraphPorts {
+  /** The signal inputs, each given a <button>. */
+  signalInputs: string[];
+  /** The value outputs and their types, each lifted into Component Outputs. */
+  valueOutputs: Array<[port: string, type: string]>;
+  input(port: string): { signal: boolean; type?: string } | undefined;
+  outputIsSignal(port: string): boolean;
+}
+
+/**
+ * A node's ports for the probe: its reducer spec's where it has one; otherwise the exporter's own catalog. A node graded
+ * by graph scenarios only (Global Store, State History, Action Dispatcher, Send / Receive Event, On App Error) has no
+ * reducer spec, and before this read stood outside on the harness's limit, never on the exporter's verdict.
+ */
+export function graphPorts(type: string): GraphPorts {
+  const spec = specFor(type);
+  if (spec) {
+    return {
+      signalInputs: Object.entries(spec.inputs).filter(([, d]) => isSignalInput(d)).map(([p]) => p),
+      valueOutputs: Object.entries(spec.outputs).filter(([, d]) => d.type !== 'signal').map(([p, d]) => [p, d.type]),
+      input: (port) => {
+        const d = spec.inputs[port];
+        return d && { signal: isSignalInput(d), type: (d as { type?: string }).type };
+      },
+      outputIsSignal: (port) => spec.outputs[port]?.type === 'signal'
+    };
+  }
+  const node = catalog().nodes.find((n) => n.typeName === type);
+  if (!node) throw new Error(`neither a reducer spec nor the catalog knows ${type}`);
+  const typeOf = (p: CatalogPort) => (typeof p.type === 'string' ? p.type : p.type?.name ?? '*');
+  return {
+    signalInputs: (node.inputs ?? []).filter((p) => p.isSignal).map((p) => p.name),
+    valueOutputs: (node.outputs ?? []).filter((p) => !p.isSignal).map((p) => [p.name, typeOf(p)]),
+    input: (port) => {
+      const p = node.inputs?.find((x) => x.name === port);
+      return p && { signal: !!p.isSignal, type: typeOf(p) };
+    },
+    outputIsSignal: (port) => !!node.outputs?.find((x) => x.name === port)?.isSignal
+  };
+}
+
+/** The value inputs a scenario's `set` steps name, as `<id>.<port>`, in first-set order. */
+export function drivenInputs(sc: Pick<GraphScenario, 'steps'>): string[] {
+  const out: string[] = [];
+  for (const step of sc.steps) {
+    if (step !== 'settle' && 'set' in step && !out.includes(`${step.node}.${step.set}`)) out.push(`${step.node}.${step.set}`);
+  }
+  return out;
+}
+
+/** The Component Inputs port that drives `<id>.<port>`, and the prop the emitted interface names it. */
+const drivenPort = (input: string) => input.replace('.', '_');
+
+export function graphComponent(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[], driven: readonly string[] = []): ComponentIR {
   const irNodes: NodeIR[] = [];
   const connections: ComponentIR['connections'] = [];
   const children: string[] = [];
   const outPorts: PortIR[] = [];
+  const inPorts: PortIR[] = [];
+  for (const input of driven) {
+    const { node: id, port } = parseEndpoint(input);
+    // a port no list holds statically (Object's `prop-<name>`, made from its params) is still a value input
+    const d = graphPorts(nodes[id].type).input(port);
+    if (d?.signal) throw new Error(`a set on ${input}: "${port}" is a signal input of ${nodes[id].type}`);
+    const name = drivenPort(input);
+    inPorts.push({ name, plug: 'output', kind: 'value', type: d?.type ?? '*' });
+    connections.push({ key: `in:${name}->${id}:${port}`, fromId: 'in', fromProperty: name, toId: id, toProperty: port, kind: 'value' });
+  }
   for (const [id, n] of Object.entries(nodes)) {
-    const spec = specFor(n.type);
-    if (!spec) throw new Error(`no spec for ${n.type}`);
+    const ports = graphPorts(n.type);
+    // a driven input's literal is the prop's first value (mountGraph), not a param the wire would contend with
     const params = Object.keys(n.params ?? {})
-      .filter((k) => n.params![k] !== undefined)
+      .filter((k) => n.params![k] !== undefined && !driven.includes(`${id}.${k}`))
       .map((name) => ({ name, value: paramValue(n.params![name]) }));
     irNodes.push({ id, type: n.type, catalogRef: n.type, parameters: params, declaredPorts: [], portKnowledge: 'complete' });
-    for (const [port, d] of Object.entries(spec.inputs)) {
-      if (!isSignalInput(d)) continue;
+    for (const port of ports.signalInputs) {
       const bid = `btn-${id}-${port}`;
       irNodes.push({ id: bid, type: 'net.noodl.controls.button', catalogRef: 'net.noodl.controls.button', parameters: [{ name: 'label', value: { kind: 'literal', value: `${id}.${port}` } }], declaredPorts: [], portKnowledge: 'complete', parent: 'root' });
       children.push(bid);
       connections.push({ key: `${bid}:onClick->${id}:${port}`, fromId: bid, fromProperty: 'onClick', toId: id, toProperty: port, kind: 'signal' });
     }
-    for (const [port, d] of Object.entries(spec.outputs)) {
-      if (d.type === 'signal') continue;
+    for (const [port, type] of ports.valueOutputs) {
       const name = `${id}_${port}`;
-      outPorts.push({ name, plug: 'input', kind: 'value', type: d.type });
+      outPorts.push({ name, plug: 'input', kind: 'value', type });
       connections.push({ key: `${id}:${port}->out:${name}`, fromId: id, fromProperty: port, toId: 'out', toProperty: name, kind: 'value' });
     }
   }
   for (const w of wires) {
     const from = parseEndpoint(w.from);
     const to = parseEndpoint(w.to);
-    const spec = specFor(nodes[from.node].type)!;
-    const kind = spec.outputs[from.port]?.type === 'signal' ? 'signal' : 'value';
+    const kind = graphPorts(nodes[from.node].type).outputIsSignal(from.port) ? 'signal' : 'value';
     connections.push({ key: `${from.node}:${from.port}->${to.node}:${to.port}`, fromId: from.node, fromProperty: from.port, toId: to.node, toProperty: to.port, kind });
   }
   irNodes.unshift({ id: 'root', type: 'Group', catalogRef: 'Group', parameters: [], declaredPorts: [], portKnowledge: 'complete', children });
+  if (inPorts.length) irNodes.push({ id: 'in', type: 'Component Inputs', catalogRef: 'Component Inputs', parameters: [], declaredPorts: inPorts, portKnowledge: 'complete' });
   irNodes.push({ id: 'out', type: 'Component Outputs', catalogRef: 'Component Outputs', parameters: [], declaredPorts: outPorts, portKnowledge: 'complete' });
   return { id: 'probe-graph', path: 'Components/Probe', role: 'component', nodes: irNodes, connections, visualRoots: ['root'], intent: { nodeComments: [], wireLabels: [], regions: [] } };
 }
 
 const emittedGraphs = new Map<string, EmittedGraph>();
 
-export function emitGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[]): EmittedGraph {
-  const key = JSON.stringify([canonicalise(nodes as never) ?? null, wires]);
+export function emitGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[], drivenIn: readonly string[] = []): EmittedGraph {
+  const key = JSON.stringify([canonicalise(nodes as never) ?? null, wires, drivenIn]);
   const hit = emittedGraphs.get(key);
   if (hit) return hit;
-  const app = emitApp(probeProject(graphComponent(nodes, wires)), catalog());
+  const app = emitApp(probeProject(graphComponent(nodes, wires, drivenIn)), catalog());
   const tsx = app.files['src/components/Probe.tsx'];
   if (tsx === undefined) throw new Error(`the exporter emitted no src/components/Probe.tsx for the graph: ${app.notes.join(' | ')}`);
   const notes = app.notes.filter((n) => n.includes('Components/Probe') && !n.includes('no route reaches'));
@@ -427,22 +501,32 @@ export function emitGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires:
   };
   const lifted = new Map<string, string>();
   for (const [id, n] of Object.entries(nodes)) {
-    const spec = specFor(n.type)!;
-    for (const [port, d] of Object.entries(spec.outputs)) {
-      if (d.type === 'signal') continue;
+    for (const [port] of graphPorts(n.type).valueOutputs) {
       const prop = liftedProp(id, port);
       if (new RegExp(`\\b${prop}\\?:`).test(tsx)) lifted.set(`${id}.${port}`, prop);
     }
   }
-  const result: EmittedGraph = { tsx, notes, component, lifted, refused };
+  const driven = new Map<string, string>();
+  for (const input of drivenIn) {
+    const prop = drivenPort(input);
+    if (new RegExp(`\\b${prop}\\?:`).test(tsx)) driven.set(input, prop);
+  }
+  const result: EmittedGraph = { tsx, notes, component, lifted, driven, refused };
   emittedGraphs.set(key, result);
   return result;
 }
+
+/** The reach of an emitted graph: the value outputs the exporter lifted; no signal, no outcome. */
+const reachOf = (lifted: ReadonlyMap<string, string>): GraphReach => ({ signals: false, outcomes: false, output: (subject, port) => lifted.has(`${subject}.${port}`) });
 
 /** A fresh graph target over the export. */
 export function exportGraphTarget(): GraphTarget<ExportGraphHandle> {
   ensureDom();
   const graphs = new Map<string, ExportGraph>();
+  // `mountGraph` is handed the nodes and wires, not the steps; the inputs a scenario's `set` steps drive are read in
+  // `canPlay`, which the runner asks first for the same scenario, and kept here by graph
+  const drivenByGraph = new Map<string, string[]>();
+  const graphKeyOf = (nodes: unknown, wires: unknown) => JSON.stringify([canonicalise(nodes as never) ?? null, wires]);
   let next = 0;
   const graphOf = (h: ExportGraphHandle): ExportGraph => {
     const g = graphs.get(h.graph.key);
@@ -455,7 +539,9 @@ export function exportGraphTarget(): GraphTarget<ExportGraphHandle> {
     canPlay(sc: GraphScenario) {
       // NSP-012: the export has no world (no seeded registry, no store, no clock) and emits ONE
       // component — a scenario that declares a world or a tree of component instances is outside
-      if (sc.world !== undefined) return 'the export has no world to install — a scenario that declares one (a registry, a store, a clock) is outside';
+      // an EMPTY world (`{}`) seeds nothing — the scenario's nodes start from a fresh store, bus or history, which the
+      // emitted app makes for itself; only a script that seeds something is outside (install below is a no-op)
+      if (sc.world !== undefined && Object.keys(sc.world).length > 0) return `the export has no world to install — a scenario that seeds one (${Object.keys(sc.world).join(', ')}) is outside`;
       // NSP-015 s15: the boundary is in the format now; THIS harness emits the graph as one component,
       // so a tree of instances (and the ports between them) needs a multi-component emit — the harness's limit
       if ((sc.components && Object.keys(sc.components).length) || (sc.definitions && Object.keys(sc.definitions).length)) return 'this harness emits ONE component — a tree of component instances needs a multi-component emit (NSP-015 AC2, not built)';
@@ -463,26 +549,35 @@ export function exportGraphTarget(): GraphTarget<ExportGraphHandle> {
         if (step === 'settle') continue;
         if ('wire' in step) return 'the export emits a component whole — no wire is made after mount';
         if ('advance' in step) return 'the export has no world clock to advance';
-        if ('set' in step) return `a value input reaches the export only as a literal param — set on ${step.node}.${step.set} is not drivable`;
       }
-      // NSP-013 s13: this harness builds the emitted graph from reducer specs; a node graded by graph
-      // scenarios only (On App Error) has none — the HARNESS's limit, named as such, not the exporter's
-      const unspecced = [...new Set(Object.values(sc.nodes).map((n) => n.type).filter((t) => !specFor(t)))];
-      if (unspecced.length) return `this harness emits only nodes with a reducer spec — ${unspecced.join(', ')} has none (graded by graph scenarios on the runtime)`;
-      const { refused } = emitGraph(sc.nodes, sc.wires ?? []);
-      if (refused.length) return `the exporter refused part of the graph: ${refused.map((n) => n.replace('Components/Probe: ', '')).join(' | ')}`;
+      // a node with no reducer spec (graded by graph scenarios only) is built from the catalog's ports (graphPorts); only
+      // one neither knows is the harness's limit
+      const unknown = [...new Set(Object.values(sc.nodes).map((n) => n.type).filter((t) => !specFor(t) && !catalog().nodes.some((c) => c.typeName === t)))];
+      if (unknown.length) return `this harness knows no ports for ${unknown.join(', ')} — neither a reducer spec nor the catalog has it`;
+      const driven = drivenInputs(sc);
+      drivenByGraph.set(graphKeyOf(sc.nodes, sc.wires ?? []), driven);
+      const emitted = emitGraph(sc.nodes, sc.wires ?? [], driven);
+      if (emitted.refused.length) return `the exporter refused part of the graph: ${emitted.refused.map((n) => n.replace('Components/Probe: ', '')).join(' | ')}`;
+      const undriven = driven.filter((input) => !emitted.driven.has(input));
+      if (undriven.length) return `the emitted component declares no prop for ${undriven.join(', ')} — the set cannot reach it`;
+      // the runner refuses a scenario with nothing to observe inside the reach; when that is because the exporter lifted
+      // none of the outputs the runtime recorded, it is the exporter's verdict, and it is said in the exporter's words
+      if (sc.expect && !hasObservation(projectGraphTrace(sc.expect, reachOf(emitted.lifted)))) {
+        const unlifted = emitted.notes.filter((n) => n.includes('not lifted in this slice'));
+        return `the exporter lifts none of the outputs this scenario observes (${unlifted.length} not lifted), e.g. ${(unlifted[0] ?? '').replace('Components/Probe: ', '')}`;
+      }
       return undefined;
     },
 
     graphReach(sc: GraphScenario): GraphReach {
-      const { lifted } = emitGraph(sc.nodes, sc.wires ?? []);
-      return { signals: false, outcomes: false, output: (subject, port) => lifted.has(`${subject}.${port}`) };
+      return reachOf(emitGraph(sc.nodes, sc.wires ?? [], drivenInputs(sc)).lifted);
     },
 
     mountGraph(nodes, wires) {
-      const { component, lifted } = emitGraph(nodes, wires);
+      const drivenIn = drivenByGraph.get(graphKeyOf(nodes, wires)) ?? [];
+      const { component, lifted, driven } = emitGraph(nodes, wires, drivenIn);
       const key = `graph#${next++}`;
-      const g: ExportGraph = { key, ids: Object.keys(nodes), root: undefined as never, container: undefined, latest: {}, recorded: {}, events: {}, lifted: new Set(lifted.keys()), live: new Set(Object.keys(nodes)) };
+      const g: ExportGraph = { key, ids: Object.keys(nodes), root: undefined as never, container: undefined, latest: {}, recorded: {}, events: {}, lifted: new Set(lifted.keys()), live: new Set(Object.keys(nodes)), props: {}, driven, component };
       const handles: Record<string, ExportGraphHandle> = {};
       for (const id of g.ids) {
         g.events[id] = [];
@@ -493,11 +588,16 @@ export function exportGraphTarget(): GraphTarget<ExportGraphHandle> {
         }
         handles[id] = { id, type: nodes[id].type, graph: g };
       }
-      const props: Record<string, unknown> = {};
+      const props = g.props;
       for (const [output, prop] of lifted) {
         props[prop] = (v: unknown) => {
           g.latest[output] = v;
         };
+      }
+      for (const [input, prop] of driven) {
+        const { node, port } = parseEndpoint(input);
+        const v = nodes[node].params?.[port];
+        if (v !== undefined) props[prop] = v;
       }
       g.container = document.createElement('div');
       document.body.appendChild(g.container);
@@ -509,11 +609,24 @@ export function exportGraphTarget(): GraphTarget<ExportGraphHandle> {
       return handles;
     },
 
+    // canPlay admits only an empty world script, so there is nothing to seed: the emitted app makes its own stores
+    install() {
+      return () => undefined;
+    },
+
     mount() {
       throw new Error('the export graph target mounts graphs (mountGraph); one node is exportTarget()');
     },
-    set(h, port) {
-      throw new Error(`${h.type} on the export has no drivable value input "${port}" — a value input reaches an exported component only as a literal param`);
+    set(h, port, value) {
+      const g = graphOf(h);
+      const prop = g.driven.get(`${h.id}.${port}`);
+      if (!prop) throw new Error(`${h.type} on the export has no prop driving "${port}" — canPlay admitted a set it cannot reach`);
+      g.events[h.id].push(value === undefined ? { t: 'set', port } : { t: 'set', port, value: canonicalise(value) });
+      // a parent re-rendering with the prop moved: a fresh props object, as React sees one from a parent's render
+      g.props = { ...g.props, [prop]: value };
+      void act(() => {
+        g.root.render(React.createElement(g.component, g.props));
+      });
     },
     signal(h, port) {
       const g = graphOf(h);

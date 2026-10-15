@@ -50,6 +50,23 @@ on a canvas. The floor lives in `coverage-ledger.json` as `pickerCoverageFloor` 
 ways — a fall fails CI, and a rise fails until the floor is raised in the same commit, so no gain
 is ever lost quietly.
 
+**The second line: does the exported app do what the running one does?**
+
+```
+cd packages/nodegx-export && npx jest tests/node-spec-graph.test.ts   # prints "P18 ledger: …"
+```
+
+> **GRAPH SCENARIOS: 2 of 85 conform on the export** — 2026-10-15, session 106. **9 played**: 2 conform, 3 differ as
+> CONTRACT.md Part 2 declares (C6/G1, C7, C8), 4 fail on one filed row (P18-S106-PARSERAISE). **76 did not play**: 30 on
+> the exporter's own verdict (it refuses part of the graph, or lifts none of the outputs the scenario watches), 46 on the
+> test harness's limits (23 seed a world, 17 need more than one component, 3 advance a clock, 3 make a wire after
+> mount). Was 1 conforming, 4 played, 81 outside (session 103), and "CONFORM" counted the outside as conforming.
+
+Outside never counts as conforming. The test pins all eight counts, so a move in either direction is seen; and each
+failing scenario is pinned by name to its `dev-docs/bugs/` row, so a new failure is new. To raise the number, either
+make the exporter translate the graph (EXP-011's seven are 9 of the 30 exporter-verdict scenarios), or lift a harness
+limit. The harness limits are recorded in `tests/helpers/node-spec-target.ts` `canPlay`.
+
 **🔴 There is a second number and it must never again drive priority.** The corpus audit
 (`coverage-audit.ts` over ~40 old test projects) reads **85.00%**, or **93.38%** over components a
 route can reach. Both are true and both are about *those projects*, not about NodeGX. Keep the
