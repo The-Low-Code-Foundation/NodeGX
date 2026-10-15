@@ -1,12 +1,14 @@
 ---
 id: P109-S21-EXPORTBLENDNAN
 title: An exported Color Blend still renders "#NaNNaNNaN" for a Blend Value that is not a number, where the runtime now keeps the colour it last showed
-status: scheduled
+status: fixed
+commit: aeb49e430
 phase: P109
 task: ISL-043
 severity: low
 area: export / Color Blend (the emitted `blendColor` helper)
 found: P109 s21 (ISL-026, the P107-D8 fix), 2026-10-06
+regression: packages/nodegx-export/tests/small-utilities.test.ts "blendColorKept follows one runtime node through a sequence of blends and colour changes" (one runtime instance, step by step), NaN and 'abc' back in the parity grid (66 → 78), and the two walker tests "a wired Blend Value read in render …" / "… read only in a handler …" (each red with its walker's record removed)
 evidence: packages/nodegx-export/tests/small-utilities.test.ts "blendColor agrees with the interpreter over a grid of lists and blend values" — with NaN in the grid it reads 6 disagreements, one per list ("#NaNNaNNaN" vs the runtime's kept colour)
 ---
 
@@ -41,3 +43,22 @@ per-instance memory. The proposal, "the generated component holds it", is right,
 
 A repeater row inlined into its parent's `map` would share the parent's ref. Check how the corpus's Color Blend
 fixtures place it before choosing where the ref lives.
+
+**Fixed 2026-10-15 (P18 session 105, BOARD lane 6).** A Color Blend whose Blend Value is wired prints
+`blendColorKept(<ref>, blend, ...colors)` over a `useRef` the component declares once per node (`moodColourShown` in
+mood-desk); an authored numeric blend still prints the pure `blendColor`, so no golden for a literal blend moved. Both
+walkers record the ref in the clause that earns the helper's import.
+
+🔴 **The design above was wrong about `undefined`, and measuring the runtime corrected it.** `Node.sendValue`
+(`noodl-runtime/src/node.ts`) returns early on `undefined`, so a wire whose source is unset delivers *nothing*: the node
+keeps the blend it last received (0 at first) and goes on blending the colours with it. Keeping the last *colour* for
+`undefined` would have frozen a blend the runtime still recomputes. So the ref holds two things, the blend last received
+and the colour last shown, and the helper has three rules: `undefined` leaves the blend alone; a blend whose `Number()`
+is NaN keeps the colour last shown, even while the colours change; and before any blend, the colour shown is the
+colours at blend 0 (authored colours are set at creation and each setter blends with the default), `#000000` only with
+no colours. The sequence test runs one runtime instance beside the helper, step by step.
+
+**Left, named, not graded:** a colour and a non-number blend arriving in the *same* update are order-dependent in the
+runtime (the colour re-blends at the old blend first, then the NaN keeps that colour); one render sees both at once and
+keeps the colour from before. And the interpreter's one-time `color-blend/unreadable-blend-value` warning has no bus in
+an exported app, the same as the existing `unreadable-color` one; the helper's docblock says so.
