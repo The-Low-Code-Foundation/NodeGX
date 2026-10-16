@@ -1,3 +1,62 @@
+# Next session — session 119 (2026-10-16, BOARD lane 6) measured **the Function-chain gap** and found it was something else: a Function run by an event whose own signals (`Outputs.go()`) drive actions was refused whole. Those signals run their chains now, reading the Function's outputs in the runtime's lockstep. 27 nodes in the shipped templates export that did not.
+
+## ✅ Session 119: the Function says go
+
+Read EXP-011 §86. In short:
+
+| what | where |
+|---|---|
+| The gap measured: every wired filter stopped at a Function is a copy of the Site Builder (3 in the current template, not 42). Behind them: 134 Functions "consumed outside the Run chain by an unrendered sink", 130 of which send a signal of their own into an action | `s119-fnchain-measure/` (scripts + README) |
+| `pulseChainsOf`: each consumed signal of a Run-wired Function is an arm (`jsfun-pulse`) inside one `jsfun-pulses`, first in the run's `then`. Refused by name, the Function's: a ticked/unset value box; one port fed by two signals. The signal's own: its chain does not compile. **A refusal refuses the signals, not the run** (`pulseRefusals`, read where the attach pass reports a trigger) | `src/analyze/plan.ts` |
+| `scanActions` had no case for a Function's chains (a Cloud Function called from Done never earned its export); the control-state rule's eleventh family (a Function run from another element reads its `in-*` there) | `plan.ts` |
+| `src/lib/functionRun.ts`: `functionNode(signals)` + `runFunction(body, inputs, node)`, the runtime's change test, held writes, C3 and C7 lockstep | `src/emit/functionRunLib.ts` |
+| The wrapper takes `Outputs` as a parameter; a `useRef(functionNode…)` per pulsed Function; the run, then one `for … of <fn>Run.pulses` with an arm per signal; arms read `<fn>Pulse.values.x`, Done reads `<fn>Run.outputs.x` | `src/emit/component.ts` |
+| Spec, 37 rows: §A `runFunction` against the runtime's own Function over 16 bodies (`tests/helpers/runtime-function-arm.js`), a control that "last value" is wrong on six; §B the fixture `tests/fixtures/pulse-desk`; §C refusals; §D a Cloud Function from a pulse | `tests/the-function-sends-its-signals.test.ts` |
+| Drive, three arms, `EXPECTED.md` first, no backend: runtime == fixed in all six steps; HEAD did nothing on Send | `s119-pulse-drive/` |
+
+- 🔴 **Measure the current template, not its copies.** The corpus held 18 stale copies of the Site Builder's PageEditor
+  (made before SBR-016 ticked the query's box). `materialize.ts` writes any `*.content.json` out through the editor's own
+  `ProjectExporter`; `templates/` holds the rest. The real surface was 27 template nodes; the corpus moved 0.
+- 🔴 **A new refusal can take exports away.** The first version refused the whole run when a signal's chain failed; the
+  disposition diff over the shipped templates showed 3 gram nodes going collapsed → deferred (HEAD exported them half,
+  and reported the rest). Fixed by refusing the signals, not the run. Diff dispositions HEAD vs tree over `templates/`
+  before calling a refusal safe (`dispdiff.ts`).
+- 🔴 **A mutant that survives names a case you do not have.** Arm E (held writes not published) survived 15 cases: held
+  vs "keep the last delivered" read the same unless a later write queues behind the held one. Added that case,
+  predicted it, the runtime agreed.
+- 🔴 **`compileJsRun` reads only the FIRST stray read** (`find`): a Function whose first stray sink renders materializes,
+  and an unrendered stray behind it falls to pass 6's generic note. Not silent, but the reason is generic. Not changed.
+- 🔴 `onEnter` has no DOM event in the export ("no DOM event equivalent"); a control that runs a Function from a field's
+  own event must use Text Changed.
+- Two bugs filed: **P18-S119-TOKENCLAIM** (high: the Site Builder's Setup sends `claimSite` on every keystroke of the
+  token, before the account exists; the template ticks the box) and **P18-S119-FIRSTWRITE** (needs a ruling: reset then
+  set before a signal hands the target the reset; visible in the drive). And **P18-S119-TICKEDRUN** (open: a Run-wired
+  Function never re-runs on a ticked input in the export).
+
+Readings: `the-function-sends-its-signals` 37 / 37; neighbours (jsfun, controlled-state, emitted-syntax,
+cloud-function, stores-events, hls001 and the other Function specs) green; package `tsc` 0, strict and loose. Whole
+package (`nice -n 19 --runInBand`, 494 s, JSON written 17:25): 134 / 135 suites, 4,708 passed, 2 failed, both
+`parameter-coverage` on the P121 peer's three uncommitted Upload File ports, as in s110–s118. 17 mutant arms in a
+copy, each killing rows (control 36 / 36, then 37 / 37). `hls001` regenerated after predicting: 0 lines out, 19 in
+(pulse-desk). Commit `740d3ed36`.
+
+**Next (BOARD lane 6):**
+1. **The Evaluate-driven Condition**: a Condition whose box is unticked and whose Evaluate a call's Done or Failure
+   sends, its result into a Group's or Text's Mounted ("its value outputs are snapshots of the last Evaluate… only a
+   live comparator translates"). 36 in 11 components of the shipped templates (the Site Builder's ContactForm,
+   landing-pages' Contact, todo-list's Sign in, eight members-area pages), 122 in the corpus (`snapcond.ts`). It is
+   the next step on the Site Builder's contact form: Send → Function → `go` → submitContactForm now compiles, and the
+   form stops at these two Conditions. Measure with `dispdiff.ts` over `templates/` and the materialized templates
+   before and after.
+2. **P18-S119-TICKEDRUN**: a Run-wired Function that also runs on a ticked input (the PageEditor's and the members
+   pages' "Hold the id"; the runtime's coalescing and first delivery).
+3. P18-S118-NUMBERFIELD; the 54 Functions whose reads sit partly off their own signals (§4f state read by a logic
+   sink, Todo's commands); GAM-009's remount rule; P18-S113-LISTLIVE; P18-S115-DYNPROBE; BUTTONLOOK and INPUTLOOK.
+4. Not this lane's, for Richard: **P18-S119-TOKENCLAIM** (the template's box; P77's template) and the ruling
+   P18-S119-FIRSTWRITE asks.
+
+---
+
 # Next session — session 118 (2026-10-16, BOARD lane 6) fixed **P18-S116-FIELDMOUNT**: an exported text input announces its Value as it mounts, as the runtime's does. s116's drive re-run: the runtime and the export agree in every step, S0 included.
 
 ## ✅ Session 118: the field says what it holds as it appears
