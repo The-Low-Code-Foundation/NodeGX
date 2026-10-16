@@ -664,6 +664,8 @@ function apiModules(
   // client is byte-identical.
   // P18-S113-IDBINDREAD. A Record bound by its Id shows the held copy whatever its box says, so it needs them too.
   const liveRecords = project.plans.some((plan) => plan.recordReads.some((read) => read.live || read.binds));
+  // P18-S115-QUERYPARAMS. Some page builds a query's `where` from wired values, through `filterValue`.
+  const wiredFilters = project.plans.some((plan) => plan.queries.some((query) => query.params?.wired !== undefined && query.wiredClient === true));
   const hasApi = byCollection.size > 0 || hasSessionCalls || hasCloudCalls || hasFileOps || hasSubscriptions || hasSignIns;
   const notes: string[] = [];
   // No collection module can collide with `client.ts` (or `session.ts`): moduleBase is the
@@ -859,7 +861,7 @@ function apiModules(
   if (files !== null) stubs.push(files);
 
   if (backend !== undefined && hasApi) {
-    stubs.push(['src/api/client.ts', clientModule(backend, hasReturnLeg, liveRecords)]);
+    stubs.push(['src/api/client.ts', clientModule(backend, hasReturnLeg, liveRecords, wiredFilters)]);
     stubs.push(['.env.example', envExample(backend)]);
     // ⚠️ `README.md` used to be pushed here too, and that was the defect EXP-004 closed: it made
     // the repository's front door conditional on the project having a backend to query. It is now
@@ -1720,7 +1722,27 @@ const HELD_UPDATE_SOURCE = `export async function update<T extends { id: string 
  *   merged into the stored session (`ParseAuthAdapter.signUp` — its absence was a live defect).
  * - no master key, ever: it is a server credential, and this file ships in a browser bundle.
  */
-function clientModule(backend: CloudServicesIR, returnLeg: boolean, liveRecords: boolean): string {
+/**
+ * P18-S115-QUERYPARAMS. A wired filter value on its way to the wire: the runtime translator's `parseValue`
+ * (`@noodl/backend-contract` translators/parse.ts), the one step it takes between a value and a plain comparison.
+ * Graded against the translator itself (tests/the-query-reads-its-wires.test.ts).
+ */
+const FILTER_VALUE_SOURCE = `
+/**
+ * A filter value as the running app puts it on the wire: a Date goes as the backend's date envelope, and so does a
+ * date written as text when its column is a Date. Anything else goes as it is.
+ */
+export function filterValue(value: unknown, dateColumn = false): unknown {
+  if (value instanceof Date) return { __type: 'Date', iso: value.toISOString() };
+  if (dateColumn && value !== null && value !== undefined) {
+    const asDate = new Date(String(value));
+    if (!Number.isNaN(asDate.getTime())) return { __type: 'Date', iso: asDate.toISOString() };
+  }
+  return value;
+}
+`;
+
+function clientModule(backend: CloudServicesIR, returnLeg: boolean, liveRecords: boolean, wiredFilters = false): string {
   return (
     GENERATED_CLIENT_TS +
     `/**
@@ -1874,7 +1896,7 @@ function fromWire<T extends { id: string }>(record: Record<string, unknown>): T 
   for (const [key, value] of Object.entries(fields)) row[key] = fromWireValue(value);
   return row as unknown as T;
 }
-${liveRecords ? HELD_RECORDS_SOURCE : ''}
+${liveRecords ? HELD_RECORDS_SOURCE : ''}${wiredFilters ? FILTER_VALUE_SOURCE : ''}
 export interface QueryParams {
   where?: unknown;
   sort?: string[];

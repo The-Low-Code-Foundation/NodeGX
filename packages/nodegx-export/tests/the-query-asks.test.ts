@@ -203,12 +203,15 @@ describe('§C what it cannot ask the same way is refused by name, and says so in
     expect(refusalOf(withParams({}, (ir) => wire(ir, port)))).toBe(`its ${port} input is wired — which records it asks for must be readable off the graph in this slice`);
   });
 
-  test('a filter value read from a wired port, in either shape (P18-S115-QUERYPARAMS)', () => {
-    const sentence = 'its Filter reads "breed" from a wired input, so the query changes while the app runs — not exported in this slice (P18-S115-QUERYPARAMS)';
-    expect(refusalOf(withParams({ visualFilter: json(conditions('and', connected('breed', 'equalTo', 'qp-breed'))) }, (ir) => wire(ir, 'qp-breed')))).toBe(sentence);
-    expect(
-      refusalOf(withParams({ visualFilter: json({ combinator: 'and', rules: [{ property: 'breed', operator: 'equal to', input: 'breed' }] }) }, (ir) => wire(ir, 'qp-breed')))
-    ).toBe(sentence);
+  test('a filter value read from a wired port, in either shape, is built in the app (P18-S115-QUERYPARAMS)', () => {
+    // Graded value by value in the-query-reads-its-wires.test.ts; here only that it is no longer refused.
+    for (const filter of [conditions('and', connected('breed', 'equalTo', 'qp-breed')), { combinator: 'and', rules: [{ property: 'breed', operator: 'equal to', input: 'breed' }] }]) {
+      const settings = exportAsks(withParams({ visualFilter: json(filter) }, (ir) => wire(ir, 'qp-breed')));
+      expect('params' in settings && settings.params.wired).toEqual({
+        params: ['breed'],
+        cases: [undefined, { breed: { $eq: { '@nodegx/wired-value': 'breed', date: false } } }]
+      });
+    }
   });
 
   test('a relation question with no class, and a points-to condition', () => {

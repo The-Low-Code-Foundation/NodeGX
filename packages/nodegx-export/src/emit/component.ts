@@ -47,6 +47,7 @@ import {
 import { ExportIR, ITEM_OUTPUT_SIGNAL, NodeIR } from '../ir/types';
 import { KitBinding, tsTypeOf as kitPortTsType } from './kits';
 import { assignClassNames, ClassCandidate, partitionMergeGroup, pascalCase, propIdentifier, propIdentifiers } from './naming';
+import { WiredWhere, wiredWhereCode } from '../analyze/querySettings';
 import { tsLiteral } from './state';
 import { UTIL_LIB_PATH, utilCallMayBeUndefined } from './utilLib';
 import { FEED_ITEM_FIELDS, PARSE_LIB_PATH, isParseHelper } from './parseLib';
@@ -82,13 +83,34 @@ import { computeNodeStyle, computeRoleCss, CONTENT_ATTR_ORDER, CONTENT_PARAMS, D
  * P18-S115-QUERYFILTER. A query's parameters as the object literal its fetch is called with, keys in the wire's order.
  * The `where` is the runtime translator's own document, printed as JSON (its `$eq` keys need the quotes).
  */
-function queryParamsLiteral(params: NonNullable<QueryPlan['params']>): string {
+function queryParamsLiteral(params: NonNullable<QueryPlan['params']>, whereLocal?: string): string {
   const parts: string[] = [];
-  if (params.where !== undefined) parts.push(`where: ${JSON.stringify(params.where)}`);
+  if (whereLocal !== undefined) parts.push(whereLocal === 'where' ? 'where' : `where: ${whereLocal}`);
+  else if (params.where !== undefined) parts.push(`where: ${JSON.stringify(params.where)}`);
   if (params.sort !== undefined) parts.push(`sort: [${params.sort.map((s) => tsLiteral(s)).join(', ')}]`);
   if (params.limit !== undefined) parts.push(`limit: ${params.limit}`);
   if (params.skip !== undefined) parts.push(`skip: ${params.skip}`);
   return `{ ${parts.join(', ')} }`;
+}
+
+/**
+ * P18-S115-QUERYPARAMS. The `where` a query with wired filter values sends, as one expression over the values' locals:
+ * a conditional on each value being set, down to the translator's own document for that combination. Two branches that
+ * print the same collapse into one; `undefined` is no `where`.
+ */
+function wiredWhereExpr(wired: WiredWhere, locals: string[], valueCode: (name: string, date: boolean) => string): string {
+  const at = (index: number, mask: number): string => {
+    if (index === wired.params.length) {
+      const where = wired.cases[mask];
+      return where === undefined ? 'undefined' : wiredWhereCode(where, valueCode);
+    }
+    const unset = at(index + 1, mask);
+    const set = at(index + 1, mask | (1 << index));
+    if (unset === set) return set;
+    const arm = (code: string) => (code.includes(' ? ') ? `(${code})` : code);
+    return `${locals[index]} === undefined ? ${arm(unset)} : ${arm(set)}`;
+  };
+  return at(0, 0);
 }
 
 const GENERATED_TS = '// @nodegx:generated (visual — provenance markers complete in EXP-007)\n';
@@ -1172,6 +1194,8 @@ export function emitComponent(
     hookExprSources(animation.delay);
   }
   for (const machine of plan.statesMachines) if (machine.follow !== undefined) hookExprSources(machine.follow);
+  // P18-S115-QUERYPARAMS. A query's wired filter values are read in its effect, as render reads.
+  for (const query of plan.queries) for (const value of query.wiredValues ?? []) hookExprSources(value.expr);
   // EXP-011 §63. The options are render reads — a wired Snap Value off a Variable is its `useValue` local.
   for (const drag of plan.drags) for (const option of drag.options) hookExprSources(option.expr);
   // EXP-011 §58. The config reads are render reads (the data is read at the pulse, in handler mode).
@@ -4286,7 +4310,12 @@ export function emitComponent(
     );
   }
   // P18-S111-RECORDLIVE. A live Record's row follows the client's one copy of its record.
-  if (liveRecordRows.length > 0 || recordBinds.length > 0) internalImports.set(`${relRoot}/api/client`, `import { subscribeRecord } from '${relRoot}/api/client';`);
+  // P18-S115-QUERYPARAMS. A wired filter value goes on the wire through the client's `filterValue`.
+  const clientNames = [
+    ...(plan.queries.some((q) => q.wiredClient === true && q.params?.wired !== undefined) ? ['filterValue'] : []),
+    ...(liveRecordRows.length > 0 || recordBinds.length > 0 ? ['subscribeRecord'] : [])
+  ];
+  if (clientNames.length > 0) internalImports.set(`${relRoot}/api/client`, `import { ${clientNames.join(', ')} } from '${relRoot}/api/client';`);
   // The session module is not keyed on anything — a project has one session — so every
   // user-family node in this component imports from the same specifier (USER-FAMILY-TARGET §4d).
   if (plan.sessionCalls.length > 0) {
@@ -6877,6 +6906,36 @@ export function emitComponent(
     body.push('');
   }
   for (const query of plan.queries) {
+    const wired = query.params?.wired;
+    if (query.params !== undefined && wired !== undefined && query.wiredValues !== undefined) {
+      // P18-S115-QUERYPARAMS. Each wired value is read where the effect runs, and a new one asks again
+      // (`setQueryParameter`, its box ticked). An unset value drops its condition, as the runtime's translator does.
+      const values = query.wiredValues;
+      // A read that is already a render local is used as it is; anything else is bound once, under a name its own code
+      // does not read (`const breedValue = breedValue` would read the binding before it exists).
+      const codes = values.map((v) => exprCode(v.expr, 'render'));
+      const locals = codes.map((code, i) => {
+        if (/^[A-Za-z_$][\w$]*$/.test(code)) return code;
+        let local = `${propIdentifier(values[i].name)}Value`;
+        while (codes.some((c) => new RegExp(`\\b${local.replace(/\$/g, '\\$')}\\b`).test(c))) local = `${local}_`;
+        return local;
+      });
+      const localOf = (name: string) => locals[values.findIndex((v) => v.name === name)];
+      // `filterValue` is the translator's `parseValue`: a Date goes as the date envelope. With no backend the fetch is a stub.
+      const valueCode = (name: string, date: boolean) => (query.wiredClient ? `filterValue(${localOf(name)}${date ? ', true' : ''})` : localOf(name));
+      const deps = [...new Set(values.flatMap((v) => effectDeps(v.expr)))].join(', ');
+      const label = nodeById.get(query.nodeId)?.authoredLabel;
+      body.push(
+        `  // ${label ? `"${label}"` : 'The query'} asks again whenever ${values.map((v) => `"${v.name}"`).join(' or ')} changes (dbcollectionnode2.ts setQueryParameter).`,
+        '  useEffect(() => {',
+        ...codes.flatMap((code, i) => (code === locals[i] ? [] : [`    const ${locals[i]} = ${code};`])),
+        `    const where = ${wiredWhereExpr(wired, locals, valueCode)};`,
+        `    ${query.fetchName}(${queryParamsLiteral(query.params, 'where')}).then(${query.setterName});`,
+        `  }, [${deps}]);`,
+        ''
+      );
+      continue;
+    }
     // P18-S115-QUERYFILTER. The node's own where / order / limit / skip, as the runtime sends them at its first fetch.
     const params = query.params === undefined ? '' : queryParamsLiteral(query.params);
     body.push('  useEffect(() => {', `    ${query.fetchName}(${params}).then(${query.setterName});`, '  }, []);', '');

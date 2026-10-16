@@ -3608,6 +3608,13 @@ export interface QueryPlan {
    * unfiltered query's call is the bare `fetch<Plural>()` it always was.
    */
   params?: QueryParamsPlan;
+  /**
+   * P18-S115-QUERYPARAMS. With `params.wired`: each wired filter value as the render read its wire resolves to, in
+   * `params.wired.params` order. The query re-runs whenever one changes (`setQueryParameter`, its box ticked).
+   */
+  wiredValues?: Array<{ name: string; expr: ValueExpr }>;
+  /** The project declares a backend, so `src/api/client.ts` exists to put each value on the wire (`filterValue`). */
+  wiredClient?: boolean;
 }
 
 /**
@@ -7244,11 +7251,48 @@ function planComponent(
   const staticRowsReadIds = new Set<string>();
   /** P18-S115-QUERYFILTER. One reading per node: what it asks the backend for, or why the export cannot ask the same. */
   const querySettingsCache = new Map<string, QuerySettings>();
+  /**
+   * P18-S115-QUERYPARAMS. A query whose Filter reads wired values: each value's render read, and what the reads
+   * consume, applied when the query lands (the disposition pass below).
+   */
+  const queryWirings = new Map<string, { values: Array<{ name: string; expr: ValueExpr }>; consumes: string[]; collapses: string[]; subscribes: string[] }>();
   const querySettingsFor = (node: NodeIR): QuerySettings => {
     let settings = querySettingsCache.get(node.id);
-    if (settings === undefined) querySettingsCache.set(node.id, (settings = querySettingsOf(node, component, ir.project.collections)));
+    if (settings === undefined) {
+      // A value read off this query's own rows comes back here while it resolves.
+      querySettingsCache.set(node.id, { refuse: 'its Filter reads a value that depends on the query itself' });
+      settings = querySettingsOf(node, component, ir.project.collections);
+      if ('params' in settings && settings.params.wired !== undefined) settings = wireQueryValues(node, settings.params.wired.params) ?? settings;
+      querySettingsCache.set(node.id, settings);
+    }
     return settings;
   };
+  /** Each wired filter value's source as a render read, or the refusal naming the one that has none. */
+  const wireQueryValues = (node: NodeIR, names: string[]): { refuse: string } | undefined => {
+    const wiring = { values: [] as Array<{ name: string; expr: ValueExpr }>, consumes: [] as string[], collapses: [] as string[], subscribes: [] as string[] };
+    for (const name of names) {
+      const wire = component.connections.find((c) => c.toId === node.id && c.toProperty === `qp-${name}`);
+      if (wire === undefined) return { refuse: `its "${name}" input has no wire` };
+      const ctx = newCtx();
+      const expr = resolveExpr(nodeById.get(wire.fromId), wire.fromProperty, ctx);
+      if (expr === null) return { refuse: `its Filter reads "${name}" from a wire the export cannot read: ${ctx.defer ?? 'no statically known source'}` };
+      if (!exprValidIn(expr, { kind: 'render' })) return { refuse: `its Filter reads "${name}" from a value that only exists inside a handler` };
+      wiring.values.push({ name, expr });
+      wiring.consumes.push(wire.key, ...ctx.consumes);
+      wiring.collapses.push(...ctx.logicNodeIds);
+      wiring.subscribes.push(...ctx.subscriberIds);
+    }
+    queryWirings.set(node.id, wiring);
+    return undefined;
+  };
+  /**
+   * A query that the disposition pass keeps: read by a rendered repeater, or by a list transform whose read LANDED
+   * (EXP-011 §56: `queryReaders` fills at read time, and a transform refused after the read would otherwise leave a
+   * state row and a fetch effect nothing prints; the items wire's key is in `consumed` iff it did).
+   */
+  const queryLands = (node: NodeIR): boolean =>
+    Object.values(plan.repeaters).some((r) => r.itemsQueryId === node.id) ||
+    (queryReaders.has(node.id) && component.connections.some((c) => c.fromId === node.id && c.fromProperty === 'items' && consumed.has(c.key)));
   const queryPlanOf = (node: NodeIR): QueryPlan => {
     const existing = plan.queries.find((q) => q.nodeId === node.id);
     if (existing !== undefined) return existing;
@@ -7265,7 +7309,8 @@ function planComponent(
       fetchName,
       typeName,
       moduleBase,
-      ...('params' in settings && Object.keys(settings.params).length > 0 ? { params: settings.params } : {})
+      ...('params' in settings && Object.keys(settings.params).length > 0 ? { params: settings.params } : {}),
+      ...(queryWirings.has(node.id) ? { wiredValues: queryWirings.get(node.id)!.values, wiredClient: ir.project.cloudservices !== undefined } : {})
     };
     plan.queries.push(query);
     return query;
@@ -19221,6 +19266,8 @@ function planComponent(
       walkExpr(effect.watch);
       walkActions(effect.actions);
     }
+    // P18-S115-QUERYPARAMS. A query's wired filter value — the signed-in user's id is the commonest there is.
+    for (const query of plan.queries) for (const value of query.wiredValues ?? []) walkExpr(value.expr);
     // EXP-011 §49. The wired State, the target and its two numbers, and every listener chain.
     for (const machine of plan.statesMachines) {
       if (machine.follow !== undefined) walkExpr(machine.follow);
@@ -19271,6 +19318,17 @@ function planComponent(
       if (readNodeIds.has(node.id)) continue;
       if (dispositions[node.id]?.kind === 'collapsed') delete dispositions[node.id];
     }
+  }
+
+  // P18-S115-QUERYPARAMS. A landing query's wired filter values are read in its effect: their wires and logic land
+  // there. Before pass 6, which reports every wire nothing consumed.
+  for (const node of component.nodes) {
+    const wiring = node.type === 'DbCollection2' ? queryWirings.get(node.id) : undefined;
+    if (wiring === undefined || !queryLands(node)) continue;
+    const into = plan.file ? `src/${plan.file.dir}/${plan.file.fileBase}.tsx` : plan.path;
+    for (const key of wiring.consumes) consumed.add(key);
+    for (const id of wiring.collapses) dispositions[id] = { kind: 'collapsed', into };
+    for (const id of wiring.subscribes) boundSubscribers.add(id);
   }
 
   // Pass 6: report every wire nothing translated.
@@ -19417,14 +19475,7 @@ function planComponent(
       dispositions[node.id] = { kind: 'deferred', to: 'EXP-003', reason: settings.refuse };
       continue;
     }
-    const consumedByRepeater = Object.values(plan.repeaters).some((r) => r.itemsQueryId === node.id);
-    // EXP-011 §56. A query read by a translated list transform (a Filter Records, an Array Filter) is consumed too —
-    // but only when that read LANDED: `queryReaders` fills at read time, and a transform refused after the read would
-    // otherwise leave a state row and a fetch effect nothing prints. The items wire's key is in `consumed` iff it did.
-    const readByLandedTransform =
-      queryReaders.has(node.id) &&
-      component.connections.some((c) => c.fromId === node.id && c.fromProperty === 'items' && consumed.has(c.key));
-    if (!consumedByRepeater && !readByLandedTransform) {
+    if (!queryLands(node)) {
       plan.queries = plan.queries.filter((q) => q.nodeId !== node.id);
       dispositions[node.id] = {
         kind: 'deferred',

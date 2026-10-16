@@ -14,6 +14,9 @@
  * `visualFilter` → `_internal.visualFilter`; `visualSort` → `_internal.visualSorting`; `qp-<x>` →
  * `_internal.queryParameters[x]`; every other input → `storageSettings[name]` (`userInputSetter`). The schema reaches
  * the translator through `CloudStore._collections`, which reads the project's `dbCollections`, as in a running app.
+ *
+ * P18-S115-QUERYPARAMS: a case may carry `values`, the wired parameters' values as `setQueryParameter` stores them
+ * (`{ $date: iso }` is a Date, `{ $undefined: true }` is nothing stored), applied after the parameters.
  */
 
 const path = require('path');
@@ -32,7 +35,10 @@ const methods = QueryRecords.node.prototypeExtensions;
 
 const valueOf = (value) => (value && (value.kind === 'literal' || value.kind === 'json') ? value.value : undefined);
 
-function runCase({ parameters, collections }) {
+const decode = (value) =>
+  value !== null && typeof value === 'object' && '$date' in value ? new Date(value.$date) : value !== null && typeof value === 'object' && '$undefined' in value ? undefined : value;
+
+function runCase({ parameters, collections, values }) {
   NoodlRuntime.instance = { getMetaData: (key) => (key === 'dbCollections' ? collections : []) };
   CloudStore.invalidateCollections();
   const internal = { storageSettings: {}, queryParameters: {} };
@@ -44,6 +50,7 @@ function runCase({ parameters, collections }) {
     else if (name.startsWith('qp-')) internal.queryParameters[name.slice(3)] = v;
     else internal.storageSettings[name] = v;
   }
+  for (const [name, value] of Object.entries(values || {})) internal.queryParameters[name] = decode(value);
   const self = { _internal: internal, context: {}, id: 'query' };
   const filter = methods.getStorageFilter.call(self);
   if (filter && filter.failed) return { failed: filter.failed };

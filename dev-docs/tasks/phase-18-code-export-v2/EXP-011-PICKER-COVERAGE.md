@@ -12004,3 +12004,96 @@ ten after a bare `{"_method":"GET"}`.
    now carries).
 3. **P18-S115-DYNPROBE**: Query Records re-statused `translated`, and a dynamic-port arm for the probe.
 4. Then §81.5's list.
+
+## §83 A Query Records' Filter reads its wires (session 116, 2026-10-16): P18-S115-QUERYPARAMS
+
+### §83.0 What was wrong
+
+Since §82 the export translated a Filter whose values are all known when the project is exported, and refused one
+that reads a value from a wired `qp-` port, so the page lost its list ("tasks of the project a person picked"). In the
+running app `setQueryParameter` stores the value and, its Run On Value Change box ticked (the default), queries again;
+`getStorageFilter` builds the `where` from whatever the inputs hold, and the translator drops a condition whose value
+is unset.
+
+Measured first, on 48 projects (281 Query Records, 105 filtered): **84 read a wired value.** Every wired leaf is in the
+QueryEditor shape, on `equal to` (75), `greater than or equal to` (9) or `less than or equal to` (3), never on a Date
+column; 81 read one value and 3 read two. 0 of 87 wired ports also hold a typed-in value.
+
+### §83.1 What is built
+
+| piece | what it is |
+|---|---|
+| `querySettings.ts` `wiredWhereOf` | the runtime's own translator, run once per combination of the wired values being set or unset (at most 3 values, 8 translations), a NUL-delimited marker standing for each set value. `cases[mask]` is the translator's `where` for that combination, or no `where` |
+| `placeMarkers` | a marker must land whole under `$eq` / `$ne` / `$lt` / `$gt` / `$lte` / `$gte` on a field, where the Parse dialect passes the value through `parseValue` and nothing else; it becomes a `WiredValueMark` carrying whether the field is a Date column. Anywhere else (a lowered regex, an `$in` list, a relation's `objectId`) is refused by name |
+| the refusals, by name | a wired Fetch (the query runs when Fetch is sent: **P18-S116-QUERYFETCH**, filed); an unticked box; two wires into one input; a wired input that also holds a typed-in value; more than three values; a marker outside a plain comparison; a source `resolveExpr` cannot read, or one that only exists in a handler; a value read off the query's own rows (a cycle guard in `querySettingsFor`) |
+| `plan.ts` | `querySettingsFor` resolves each value's wire with `resolveExpr` (the States `follow` path) into `QueryPlan.wiredValues`; the wires, logic nodes and subscribers are consumed **before pass 6** for a query that lands (`queryLands`, the disposition pass's own test, now shared) |
+| `component.ts` | one effect: each value read in render (a render local is used as it is, never re-bound), `const where = <conditional on each value being undefined, down to each case's document>`, `fetch<Plural>({ where, … })`, dependencies the values' (`effectDeps`). A Date column passes `true` |
+| `emitApp.ts` `FILTER_VALUE_SOURCE` | `filterValue(value, dateColumn)` in `src/api/client.ts`: the translator's `parseValue` (a Date instance goes as the date envelope; text on a Date column too, when it parses). Shipped only where a page uses it; with no backend the page passes the raw values to the stub |
+
+### §83.2 The test (`tests/the-query-reads-its-wires.test.ts`, 140 rows)
+
+§A evaluates the `where` line of the **emitted page** (its own text, the Variable's render local holding each value,
+the emitted client's `filterValue`) against the runtime node's own `getStorageFilter`, called in the child-process
+arm on a stand-in `this` whose `queryParameters` hold the same values (the arm now takes `values`, a Date crossing as
+`{ $date }`). Ten filters, both shapes, groups, one value read twice, a range from two values, a Date column, a typed-in
+parameter beside a wired one; each over 11 single values (unset, `"Collie"`, `""`, `null`, `0`, `3`, `false`, `true`,
+a Date, a date as text, text that is not a date) or 12 pairs. A guard row checks each filter both drops and keeps a
+condition across its values. §B pins the effect's text, the two-value conditional, the Date column's `true`, the
+client export and page import, no `filterValue` where no filter reads a wire, the typecheck of every filter's app,
+and the no-backend stub. §C pins every refusal's sentence and that an unreadable source reaches the report.
+
+s115's §C row that pinned the old refusal now pins the wired plan instead (`the-query-asks.test.ts`, 64 rows).
+
+**Mutant arms**, in a copy (`packages/.nx-mut-s116`, removed straight after; the four sources `cmp`-checked against the
+working tree first). Control: 204 / 204 across both specs.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | an unset value kept (no drop) | 34 |
+| B | `filterValue` without its Date-instance branch | 27 |
+| C | a Date column never flagged | 4 |
+| D | `$regex`, `$in`, `objectId` counted as plain comparisons | 2 |
+| E | the wired-Fetch refusal gone | 1 |
+| F | the unticked-box refusal gone | 1 |
+| G | the effect's dependency list empty | 2 |
+| H | the wires not consumed | 1 |
+| I | the set and unset arms swapped | 117 |
+| J | the typed-in-and-wired refusal gone | 1 |
+| K | the three-value cap off by one | 1 |
+| L | `filterValue` not applied | 24 |
+
+### §83.3 The drive (`s116-queryparams-drive/`)
+
+`params-desk`, `EXPECTED.md` first: a City box writing the Variable `city`, wired into `city equal to <city>` AND `vip
+equal to true`, sorted by name; s115's ten contacts on a real backend; five steps typed in each of three arms.
+
+**S1 to S4 agree**: "Berlin" → Ada, Gus, Ivo; "Paris" → Cleo; cleared → no rows (`""` is a value, its condition kept);
+"Oslo" → Finn. The runtime and the fixed export sent the same `where` per step, one query each. HEAD's export had no
+list and made no request.
+
+**S0 differs, and the `where` is not why.** The runtime's first query is the export's (`vip` only, `city` unset);
+then the City box mounts, publishes its Value `""` (`TextInput.tsx` `componentDidMount` → `setText(startValue)` →
+`onTextChanged`), and the runtime asks again with `city = ""` and shows no rows. The exported box writes `city` only
+on `onChange`, so it shows all eight vips until someone types. EXPECTED.md named that reading as the one it could not
+settle. Filed **P18-S116-FIELDMOUNT**: every sink of a text input's Value sees the mount value in the runtime (792
+such wires in 46 projects on this machine; a dozen export fixtures), so the fix is the field's, not the query's.
+
+Also read off the screenshots, in this drive and s115's: two Texts in a row share its width in the runtime and sit at
+their content width in the export (**P18-S116-ROWSPREAD**, low, cause not yet read).
+
+### §83.4 What this reaches, measured
+
+On the same 48 projects, after the fix: **none of the 84 wired filters exports yet**, each stopped one step earlier.
+42 read a Function fed by another Function ("JS-node chains are not translated in this slice"), 21 have Fetch wired
+(P18-S116-QUERYFETCH), 18 sit in a logic component with no page ("logic node"), 3 read the clock. The row's "105 of
+125" was the reach of the refusal, not of this fix. What exports now is a filter fed by a Variable, a component input,
+the signed-in user or anything else `resolveExpr` reads in render.
+
+### §83.5 What this leaves
+
+1. **P18-S116-QUERYFETCH** (112 of 281 Query Records have Fetch wired): the query as a handler action in its sender's
+   chain. The largest single block on the 84.
+2. **P18-S116-FIELDMOUNT**: a text input's Value delivered at mount.
+3. P18-S113-LISTLIVE (the store's events in the client, `matchesQuery` against the `where` the plan now carries; for a
+   wired filter, the `where` of the current values).
+4. P18-S115-DYNPROBE; then §81.5's list.

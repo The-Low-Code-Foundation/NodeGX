@@ -1,7 +1,8 @@
 ---
 id: P18-S115-QUERYPARAMS
 title: A Query Records whose Filter reads a value from a wired port is refused by the export
-status: open
+status: fixed
+fixed: P18 session 116, 2026-10-16 (EXP-011 §83, s116-queryparams-drive)
 severity: medium
 area: export / Query Records
 found: P18 session 115, 2026-10-16, fixing P18-S115-QUERYFILTER
@@ -21,3 +22,15 @@ value from a port.
 The fix: the `where` built in the exported app from the wired values, by the same translator (or a builder graded
 against it on every operator the corpus uses), with the runtime's drop rule for an unset value, and the query's effect
 depending on those values under each one's Run On Value Change box. Then P18-S113-LISTLIVE on top of it.
+
+**Fixed in session 116 (EXP-011 §83).** The export runs the same translator once for every combination of the wired
+values being set or unset, with a marker for each set value; the page picks the combination and puts each value where
+its marker sits, through the client's `filterValue` (the translator's `parseValue`). An unset value drops its
+condition; `""` keeps it. The query's effect depends on the values, so a new one asks again. Graded value by value
+against the runtime node's own `getStorageFilter` (`tests/the-query-reads-its-wires.test.ts`, 140 rows), and driven.
+
+**The reach above was not this fix's reach.** Measured after it on 48 projects: of 84 Query Records whose Filter
+reads a wired value, none exports yet, each stopped one step earlier: 42 read a Function fed by another Function (a
+chain the export does not translate), 21 have Fetch wired (P18-S116-QUERYFETCH), 18 sit in a logic component with no
+page, 3 read the clock. A filter fed by a Variable, a component input or the signed-in user exports now.
+
