@@ -1,0 +1,233 @@
+{
+ "runtime": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "texts": {
+     "sent": "absent",
+     "note": "hidden",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S1 Show",
+    "texts": {
+     "sent": "shown",
+     "note": "hidden",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S2 Hide",
+    "texts": {
+     "sent": "absent",
+     "note": "hidden",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S3 Both",
+    "texts": {
+     "sent": "absent",
+     "note": "hidden",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S4 Show",
+    "texts": {
+     "sent": "shown",
+     "note": "hidden",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S5 Flip",
+    "texts": {
+     "sent": "shown",
+     "note": "hidden",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S6 Check",
+    "texts": {
+     "sent": "shown",
+     "note": "hidden",
+     "live": "shown"
+    }
+   },
+   {
+    "step": "S7 Flip",
+    "texts": {
+     "sent": "shown",
+     "note": "hidden",
+     "live": "shown"
+    }
+   },
+   {
+    "step": "S8 Check",
+    "texts": {
+     "sent": "shown",
+     "note": "hidden",
+     "live": "absent"
+    }
+   }
+  ],
+  "console": []
+ },
+ "export-control": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "texts": {
+     "sent": "absent",
+     "note": "shown",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S1 Show",
+    "texts": {
+     "sent": "absent",
+     "note": "shown",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S2 Hide",
+    "texts": {
+     "sent": "absent",
+     "note": "shown",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S3 Both",
+    "texts": {
+     "sent": "absent",
+     "note": "shown",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S4 Show",
+    "texts": {
+     "sent": "absent",
+     "note": "shown",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S5 Flip",
+    "texts": {
+     "sent": "absent",
+     "note": "shown",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S6 Check",
+    "texts": {
+     "sent": "absent",
+     "note": "shown",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S7 Flip",
+    "texts": {
+     "sent": "absent",
+     "note": "shown",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S8 Check",
+    "texts": {
+     "sent": "absent",
+     "note": "shown",
+     "live": "absent"
+    }
+   }
+  ],
+  "console": []
+ },
+ "export-fixed": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "texts": {
+     "sent": "absent",
+     "note": "hidden",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S1 Show",
+    "texts": {
+     "sent": "shown",
+     "note": "hidden",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S2 Hide",
+    "texts": {
+     "sent": "absent",
+     "note": "hidden",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S3 Both",
+    "texts": {
+     "sent": "absent",
+     "note": "hidden",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S4 Show",
+    "texts": {
+     "sent": "shown",
+     "note": "hidden",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S5 Flip",
+    "texts": {
+     "sent": "shown",
+     "note": "hidden",
+     "live": "absent"
+    }
+   },
+   {
+    "step": "S6 Check",
+    "texts": {
+     "sent": "shown",
+     "note": "hidden",
+     "live": "shown"
+    }
+   },
+   {
+    "step": "S7 Flip",
+    "texts": {
+     "sent": "shown",
+     "note": "hidden",
+     "live": "shown"
+    }
+   },
+   {
+    "step": "S8 Check",
+    "texts": {
+     "sent": "shown",
+     "note": "hidden",
+     "live": "absent"
+    }
+   }
+  ],
+  "console": []
+ }
+}

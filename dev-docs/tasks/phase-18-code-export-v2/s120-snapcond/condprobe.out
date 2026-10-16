@@ -1,0 +1,14 @@
+## show only, authored false
+   a=null | boot a=true | A a=true | A
+## show only, nothing authored
+   a=null | boot a=true | A
+## show only, authored true
+   a=true a=null | boot a=true | A
+## a false Condition, authored true
+   a=true a=null | boot a=false | A a=false | A
+## show and clear on one sink
+   a=null | boot a=true | A a=false | B a=true | A a=false | B a=false | B a=true | A
+## show and clear in one frame
+   a=null | boot a=true a=false | AB a=true | A a=true a=false | AB
+## show twice in one frame
+   a=null | boot a=true a=true | AA

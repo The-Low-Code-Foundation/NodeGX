@@ -2470,8 +2470,12 @@ export type HandlerAction =
    * the compile proves it rather than assuming it: see `compileCollectionRemove`.
    */
   | { kind: 'collection-remove'; collectionName: string; repeaterId: string; then: HandlerAction[]; minted?: MintedTarget }
-  /** A Condition in a handler chain: `if (cond) whenTrue; else whenFalse;` (LOGIC-TARGET §3). */
-  | { kind: 'branch'; cond: ValueExpr; whenTrue: HandlerAction[]; whenFalse: HandlerAction[] }
+  /**
+   * A Condition in a handler chain: `if (cond) whenTrue; else whenFalse;` (LOGIC-TARGET §3). `flat` (EXP-011 §87): a
+   * Condition whose answer is a literal and which writes its sinks' cells has one side; its `cond` is `true`, its
+   * `whenFalse` empty, and `whenTrue` prints as following statements.
+   */
+  | { kind: 'branch'; cond: ValueExpr; whenTrue: HandlerAction[]; whenFalse: HandlerAction[]; flat?: true }
   /** Fires the component's own signal output: `onWaved?.()` (COMPONENT-OUTPUTS-TARGET §4). */
   | { kind: 'output-signal'; prop: string }
   /**
@@ -3216,7 +3220,9 @@ export interface StateVarPlan {
     | 'crypto'
     | 'crypto-error'
     /** EXP-011 §61 — a pusher's back-results row (`Record<string, unknown>`, boots `{}`). */
-    | 'stack-back';
+    | 'stack-back'
+    /** EXP-011 §87 — a Mounted or Visible written by the Evaluate of the unticked Conditions wired into it. */
+    | 'condition';
   /** The provenance comment above the row. */
   comment: string;
 }
@@ -10133,6 +10139,91 @@ function planComponent(
   };
 
   /**
+   * EXP-011 §87, P18-S120-SNAPCOND. A Condition with its box unticked and Evaluate wired, whose Is True / Is False
+   * feeds only a drawn element's Mounted or Visible: the confirmation after a Send, the refusal after a Failure.
+   * Measured on the runtime's own Condition (`s120-snapcond/condprobe.js`): before the first Evaluate the wire hands
+   * the sink `null` (over an authored value), which both setters read as false; every Evaluate sends its answer
+   * again, the same answer included; two Conditions on one sink are last-pulse-wins. So the sink is one boolean cell
+   * that boots false, and each Evaluate writes its answer into it in the sending chain (`compileConditionBranch`).
+   *
+   * The verdict is per Condition and settled together: a cell is only honest when every wire into its sink port is
+   * such a Condition, so one that fails takes the others on its sinks with it (a fixed point over the component).
+   * `null` latches; a string is the reason it does not. Conditions that are not candidates are absent.
+   */
+  const SNAPSHOT_SINK_PORTS = new Set(['mounted', 'visible']);
+  const snapshotWiresOf = (node: NodeIR): ConnectionIR[] =>
+    component.connections.filter((c) => c.fromId === node.id && (c.fromProperty === 'result' || c.fromProperty === 'isfalse'));
+  let snapshotVerdictMemo: Map<string, string | null> | undefined;
+  const snapshotVerdicts = (): Map<string, string | null> => {
+    if (snapshotVerdictMemo !== undefined) return snapshotVerdictMemo;
+    const verdicts = new Map<string, string | null>();
+    for (const node of component.nodes) {
+      if (node.type !== 'Condition' || literalParam(node, 'runOnChange-condition') !== false) continue;
+      if (!wiredPorts.has(`${node.id}:eval`)) continue;
+      const wires = snapshotWiresOf(node);
+      if (wires.length === 0) continue;
+      let reason: string | null = null;
+      for (const w of wires) {
+        const sink = nodeById.get(w.toId);
+        // The port first: a Variable's Value is not an element at all, and "not drawn" would say it is one.
+        if (!SNAPSHOT_SINK_PORTS.has(w.toProperty)) {
+          reason = `its ${w.fromProperty} feeds ${sink?.type ?? 'a missing node'}.${w.toProperty} — a snapshot of the last Evaluate lands only in a Mounted or a Visible in this slice`;
+        } else if (!sink || !rendered.has(sink.id)) {
+          reason = `its ${w.fromProperty} feeds an element that is not drawn — a snapshot lands only in a drawn element's Mounted or Visible in this slice`;
+        } else if (w.toProperty === 'mounted' && sink.id === plan.rootId) {
+          reason = 'a mounted wire into the component root is a router concern — not translated in this slice';
+        }
+        if (reason !== null) break;
+      }
+      verdicts.set(node.id, reason);
+    }
+    for (let changed = true; changed; ) {
+      changed = false;
+      for (const [id, verdict] of verdicts) {
+        if (verdict !== null) continue;
+        for (const w of snapshotWiresOf(nodeById.get(id)!)) {
+          const feeders = component.connections.filter((c) => c.toId === w.toId && c.toProperty === w.toProperty);
+          const isSnapshot = (c: ConnectionIR) => (c.fromProperty === 'result' || c.fromProperty === 'isfalse') && verdicts.has(c.fromId);
+          // The cause first: a feeder that is no snapshot at all; then a snapshot Condition this pass has refused.
+          const outsider = feeders.find((c) => !isSnapshot(c));
+          const peer = feeders.find((c) => isSnapshot(c) && verdicts.get(c.fromId) !== null);
+          if (outsider === undefined && peer === undefined) continue;
+          verdicts.set(
+            id,
+            outsider !== undefined
+              ? `${w.toId}.${w.toProperty} is also fed by ${nodeById.get(outsider.fromId)?.type ?? 'a missing node'}.${outsider.fromProperty}, which is not an Evaluate snapshot this slice carries — the runtime shows whichever wrote last`
+              : `${w.toId}.${w.toProperty} is also written by Condition ${peer!.fromId}, which does not translate here — the runtime shows whichever wrote last`
+          );
+          changed = true;
+          break;
+        }
+      }
+    }
+    snapshotVerdictMemo = verdicts;
+    return verdicts;
+  };
+  /** One boolean cell per sink port, shared by every Condition writing it; boots false (the runtime's `null`). */
+  const snapshotCells = new Map<string, StateVarPlan>();
+  const snapshotCellOf = (toId: string, toProperty: string): StateVarPlan => {
+    const key = `${toId}\u0000${toProperty}`;
+    let cell = snapshotCells.get(key);
+    if (cell === undefined) {
+      const sink = nodeById.get(toId);
+      cell = allocStateVar(
+        sink?.authoredLabel === undefined ? undefined : `${sink.authoredLabel} ${toProperty}`,
+        toProperty === 'mounted' ? 'shown' : 'visible',
+        'boolean',
+        false,
+        toId,
+        'condition',
+        `${toProperty === 'mounted' ? 'Mounted' : 'Visible'} of ${sink?.authoredLabel ? `"${sink.authoredLabel}"` : toId}, written by the Evaluate of the Condition${component.connections.filter((c) => c.toId === toId && c.toProperty === toProperty).length > 1 ? 's' : ''} wired into it — false until the first one (EXP-011 §87).`
+      );
+      snapshotCells.set(key, cell);
+    }
+    return cell;
+  };
+
+  /**
    * A String Format as an expression: static text transcribed (a literal parameter on a
    * placeholder folds in; an unfed placeholder substitutes '' — the runtime's own rule), wired
    * placeholders resolved recursively. All-static formats fold to a literal; a bare
@@ -15254,10 +15345,21 @@ function planComponent(
    * reactive effect (LOGIC-TARGET §10) — they differ in *what fires the branch*, never in what it does.
    */
   const compileConditionBranch = (node: NodeIR): CompiledSink => {
+    // EXP-011 §87. A snapshot Condition's value wires are its sinks' cells, written below; Pass 4c binds and consumes them.
+    const snapshotVerdict = snapshotVerdicts().get(node.id);
+    const snapshotWires = snapshotVerdict === null ? snapshotWiresOf(node) : [];
     const stray = component.connections.find(
-      (c) => c.fromId === node.id && c.fromProperty !== 'ontrue' && c.fromProperty !== 'onfalse'
+      (c) => c.fromId === node.id && c.fromProperty !== 'ontrue' && c.fromProperty !== 'onfalse' && !snapshotWires.includes(c)
     );
-    if (stray) return { defer: `its ${stray.fromProperty} output drives logic this slice does not translate` };
+    if (stray) {
+      const valueOut = stray.fromProperty === 'result' || stray.fromProperty === 'isfalse';
+      return {
+        defer:
+          valueOut && typeof snapshotVerdict === 'string'
+            ? snapshotVerdict
+            : `its ${stray.fromProperty} output drives logic this slice does not translate`
+      };
+    }
 
     const ctx = newCtx();
     let cond: ValueExpr;
@@ -15314,6 +15416,29 @@ function planComponent(
     if ('defer' in whenTrue) return whenTrue;
     const whenFalse = arm('onfalse');
     if ('defer' in whenFalse) return whenFalse;
+    if (snapshotWires.length > 0) {
+      // EXP-011 §87. The answer goes into each sink's cell before the arm runs (the runtime flags its values dirty,
+      // then sends On True / On False). A literal condition has one side, so it is written without an `if`.
+      const writes = (answer: boolean): HandlerAction[] =>
+        snapshotWires.map((w) => ({
+          kind: 'state-set',
+          name: snapshotCellOf(w.toId, w.toProperty).name,
+          expr: { kind: 'literal', value: w.fromProperty === 'result' ? answer : !answer }
+        }));
+      const truth = truthyExpr(cond);
+      if (truth.kind === 'literal') {
+        const side = [...writes(truth.value === true), ...(truth.value === true ? whenTrue : whenFalse)];
+        const action: HandlerAction =
+          side.length === 1 ? side[0] : { kind: 'branch', cond: { kind: 'literal', value: true }, whenTrue: side, whenFalse: [], flat: true };
+        return { action, consumes, collapses, subscribes };
+      }
+      return {
+        action: { kind: 'branch', cond, whenTrue: [...writes(true), ...whenTrue], whenFalse: [...writes(false), ...whenFalse] },
+        consumes,
+        collapses,
+        subscribes
+      };
+    }
     if (whenTrue.length === 0 && whenFalse.length === 0) {
       return { defer: 'neither branch drives a translatable action' };
     }
@@ -18258,6 +18383,20 @@ function planComponent(
     const toNode = nodeById.get(connection.toId);
     if (!toNode || !rendered.has(toNode.id)) continue; // leave for the catch-all
     consumed.add(connection.key);
+    // EXP-011 §87. A snapshot Condition's read is its sink's cell, which the Evaluate chain writes (`compileConditionBranch`).
+    const snapshotVerdict = fromNode.type === 'Condition' ? snapshotVerdicts().get(fromNode.id) : undefined;
+    if (snapshotVerdict === null) {
+      plan.bindings[toNode.id] = plan.bindings[toNode.id] ?? {};
+      plan.bindings[toNode.id][connection.toProperty] = {
+        kind: 'computed',
+        expr: { kind: 'state-get', name: snapshotCellOf(toNode.id, connection.toProperty).name }
+      };
+      continue;
+    }
+    if (snapshotVerdict !== undefined) {
+      notes.push(wireNote(connection, snapshotVerdict));
+      continue;
+    }
     const ctx = newCtx();
     const expr = resolveExpr(fromNode, connection.fromProperty, ctx);
     if (expr === null) {

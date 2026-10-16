@@ -194,7 +194,11 @@ describe('what defers, all with notes (LOGIC-TARGET §4)', () => {
     wire(mutated, 'Pages/Mood', 'hasVisitor', 'result', 'noteDraftVar', 'value');
     const result = emitApp(mutated, catalog);
     expect(withoutAnnouncement(result.files['src/pages/Mood.tsx'])).not.toContain('if (');
-    expect(result.notes.join('\n')).toContain('its result output drives logic this slice does not translate');
+    // EXP-011 §87. hasVisitor is unticked with Evaluate wired, so its value wires are snapshots, and one that lands
+    // anywhere but a Mounted or a Visible is named for where it lands (`noteDraftVar` is not a node of Mood).
+    expect(result.notes.join('\n')).toContain(
+      'its result feeds a missing node.value — a snapshot of the last Evaluate lands only in a Mounted or a Visible in this slice'
+    );
   });
 
   test('an arm reading another handler-only value defers at attachment', () => {

@@ -12456,3 +12456,128 @@ P18-S119-TOKENCLAIM.
 4. P18-S119-FIRSTWRITE (a ruling) and P18-S119-TOKENCLAIM (the template's box) are not this lane's to fix.
 5. Carried: P18-S118-NUMBERFIELD, GAM-009's remount rule, P18-S113-LISTLIVE, P18-S115-DYNPROBE, BUTTONLOOK and
    INPUTLOOK (low).
+
+## §87 A Condition remembers its answer (session 120, 2026-10-16): the Evaluate-driven Condition, P18-S120-SNAPCOND
+
+### §87.0 What was measured first
+
+§86.6 #1. Every such Condition in the shipped templates (`s120-snapcond/census.ts` over the two `*.content.json`
+templates materialized and `templates/`) is the same idiom: the box unticked, the condition a literal (`true` to show,
+`false` to put away), Evaluate sent by a signal (a Cloud Function's Done or Failure 14, a Function's own signal 13, a
+Button 6, an External Link's Done 2, a Record verb's 6, Log In's or Sign Up's Failure 3, a Function's Failure 1:
+45 wires, as three Conditions take two and three take three), and Is True read by one thing
+only: a Group's Mounted (30) or a Text's (6), each authored false. Two Conditions often share one element: landing-pages'
+"Say it went" and "Put "it went" away if the next try is empty" both write "It went"'s Mounted. The corpus (122) adds a
+Text's Visible (54) and one Condition whose condition is wired (an Expression).
+
+### §87.1 What the runtime does, measured on its own node
+
+`condprobe.js` → `condprobe.out`: the runtime's Condition, box unticked, Evaluate from a pulser, Is True into a recorder.
+
+- **Before the first Evaluate the wire hands the sink `null`**, over whatever is authored there (authored `true` is set,
+  then `null` arrives at load). Mounted and Visible both store `value ? true : false`, so the element starts hidden.
+- **Every Evaluate sends its answer again**, the same answer included (show, show sends `true` twice). Nothing is
+  silent, so "show, put away, show" shows it again.
+- **Two Conditions on one element are last-pulse-wins**, in pulse order, two pulses in one frame included.
+
+### §87.2 What is built
+
+| piece | what it is |
+|---|---|
+| `plan.ts` `snapshotVerdicts` | per component, the Conditions with the box unticked, Evaluate wired and a value wire out: `null` (it latches) or the reason. Settled together as a fixed point: a cell is only honest when every wire into its element's port is such a Condition, so one that fails takes the others on that port with it. The cause is named first (a feeder that is no snapshot), then a refused partner ("also written by Condition x") |
+| refused by name | a snapshot into anything but a Mounted or a Visible ("its result feeds Text.text…"); an element the export does not draw; a Mounted on the component root (the router's); an element also fed by something else ("also fed by Switch.state…") |
+| `snapshotCellOf` | one boolean cell per element port (`StateVarPlan.origin` `'condition'`), named for the element ("It went" Mounted → `itWentMounted`), booting `false` |
+| `compileConditionBranch` | a latching Condition's value wires are no longer "stray": each Evaluate writes its answer into each cell (Is False its negation), before its On True / On False arm (the runtime flags its values, then sends the signal). A literal condition has one side, written without an `if` (`branch.flat`, printed as following statements by `expandActions`); a wired one is a branch read at the press |
+| Pass 4c | a latching Condition's read binds its element to the cell (`state-get`); a refused one's wire carries the verdict as its note |
+
+### §87.3 The test (`tests/the-condition-remembers-its-answer.test.ts`, 40 rows)
+
+§A grades the emitted page against the **runtime's own Condition and Switch** running the same fixture page
+(`tests/helpers/runtime-condition-arm.js`: the page's nodes and wires on the corpus graph harness, a Button as a pulser, a
+Text as a stand-in holding `value ? true : false` from a default of true). The export's arm renders the emitted
+`Home.tsx`, transpiled as the bundler does, with a stand-in for `useState`, and presses its buttons. Six scenarios over
+four variants of the fixture (`tests/fixtures/gate-desk`: as written; "It went" authored Mounted true; "Put it away" an
+Is False of a true Condition; Show also sending Check), compared as absent / hidden / shown. A first row pins the runtime
+arm to the probe; a control row shows HEAD's export (the wires dropped) disagrees in every scenario. §B pins the cells,
+the flat writes, the wired branch, Mounted and Visible, no note on the page, every Condition collapsed, the typecheck.
+§C the refusals: a Text's text, a sink shared with a Switch, a ticked Condition (no cell), an unticked Condition nothing
+evaluates, an element outside the visual roots. §D a Condition with arms as well as cells, against the runtime.
+
+**Mutant arms**, in a copy (`packages/.nx-mut-s120`, removed straight after). Control 40 / 40. Every arm printed its
+Tests line; the first run of two arms read "0 total" (one broke a narrowing; one made the export arm throw while the
+suite was collected) and both were reshaped: the arm now fails its rows, not the suite.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | the cell boots true | 27 |
+| B | Is False written as Is True | 20 |
+| C | no fixed point | 2 |
+| D | a literal side ignores the answer | 11 |
+| E | no `flat` marker (`if (true)`) | 1 |
+| F | the cells written after the arm | 1 (the shape row: inside one React handler the two orders render the same) |
+| G | the element reads a constant, not the cell | 20 |
+| H | a Text's text admitted as a sink | 1 |
+| I | a refused partner named before the cause | 1 |
+| J | no writes in the chain | 31 |
+| K | the wired branch's writes swapped | 14 |
+| L | `flat` not expanded | 1 |
+| M | ticked Conditions latch too | 1 |
+| N | an undrawn element admitted | 1 |
+
+**Neighbours.** `hls001-corpus-identity`: the corpus gained `gate-desk`. Predicted before regenerating: no path moves
+(every byte row green on the red run; no fixture's dispositions changed under `dispdiff.ts`). The golden's diff counted
+the same: 0 lines out, 17 in, all gate-desk's. `logic.test.ts`'s "a Condition value output wired anywhere defers the
+branch": the branch still defers; its sentence is now the snapshot's (the row wires into `noteDraftVar`, which is not a
+node of Mood: "its result feeds a missing node.value…"). `parameter-coverage`: **`Condition.condition` reaches now** (the
+probe wires Evaluate, which was refused; it was ledgered `gated`), so it leaves the silent list and EXP-008's floor rises
+**1,234 → 1,235** of 1,396. Ten more neighbours green (375 / 375 with the two above and the new spec). Package `tsc` 0.
+
+### §87.4 The drive (`s120-snapcond/`)
+
+`gate-desk` itself. `EXPECTED.md` first, from the probe and HEAD's report. No backend; three arms in one headless
+Chrome, a real click per press, each Text read from the DOM as absent, hidden (`visibility: hidden`) or shown.
+
+| step | runtime | export-fixed | export-control (HEAD `25592b3e2`) |
+|---|---|---|---|
+| S0 load | It went absent · Not yet **hidden** · switch absent | the same | Not yet **shown**, and nothing ever changes |
+| S1 Show | It went **shown** | the same | unchanged |
+| S2 Hide | It went absent | the same | unchanged |
+| S3 Both | It went **absent** (shown, then put away, in one press) | the same | unchanged |
+| S4 Show | It went shown | the same | unchanged |
+| S5 Flip | switch **still absent** | the same | unchanged |
+| S6 Check | switch shown | the same | unchanged |
+| S7 Flip | switch **still shown** (a snapshot, not followed) | the same | unchanged |
+| S8 Check | switch absent | the same | unchanged |
+
+**The runtime and the fixed export agree in all nine steps**; EXPECTED.md held in every cell; no console errors or
+warnings in any arm. The S6 screenshots show the same lines in the same places, the hidden "Not yet" keeping its space;
+the buttons differ as P18-S117-BUTTONLOOK says.
+
+### §87.5 What this reaches, measured
+
+Dispositions, HEAD against the tree (`dispdiff.ts`), node by node:
+
+- **The shipped templates** (19 projects): **26 nodes newly exported, none lost**: 18 Conditions, 5 Cloud Functions, 3
+  Functions. Whole now: the Site Builder's ContactForm (the Function, `submitContactForm`, both Conditions: Send sends the
+  message and shows the confirmation or the refusal), members-area Account (9), Setup (5), Join (3), the Announcement's
+  and Meeting's confirmations, todo-list's Sign in's clear.
+- **The corpus** (215 projects): **115 nodes newly exported, none lost**: 61 Conditions, 25 Cloud Functions, 23 Functions,
+  2 Page Inputs, 2 Records, 2 Navigates.
+
+18 of the 36 template Conditions still defer, each now naming its sender: a Record's or a Delete's Failure chain, Log
+In's or Sign Up's Failure, an External Link's Done, a Create Record's Done, a Function whose own run is not attached
+(landing-pages' "Write the email", fed by a `/Site/Field` component). Where one Condition of a pair exports and its
+partner does not (todo-list's Sign in: the clear exports, the show waits on Sign Up's Failure), the element's cell is
+written by the one that exports; the line never shows in the export, as before, and the partner's refusal says why.
+
+Found on the way and filed: **P18-S120-TEXTAREA** (medium: a Text Area field exports as a one-line `<input>`; 33 in the
+shipped templates, the contact forms' message boxes among them).
+
+### §87.6 What this leaves
+
+1. **P18-S119-TICKEDRUN**: a Run-wired Function that also runs on a ticked input.
+2. The senders the 18 remaining Conditions wait on: a Record verb's and Log In's / Sign Up's Failure chains as handler
+   chains, an External Link's Done, a Function fed by a component's output.
+3. **P18-S120-TEXTAREA**, P18-S118-NUMBERFIELD, the 54 Functions whose reads sit partly off their own signals,
+   GAM-009's remount rule, P18-S113-LISTLIVE, P18-S115-DYNPROBE, BUTTONLOOK and INPUTLOOK (low).
+4. Not this lane's: P18-S119-TOKENCLAIM (the template's box) and the ruling P18-S119-FIRSTWRITE asks.

@@ -374,7 +374,13 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // own signals drive actions. Predicted before regenerating: no path moves (every byte row was green on the red run,
     // so no other project's Function, attach scan or control state changed what it emits), plus pulse-desk's entries.
     // The regenerated golden's diff counted the same: 0 lines out, 19 in, all pulse-desk's block.
-    expect(corpusProjects().length).toBe(59);
+    //
+    // 59 → 60 on 2026-10-16 (EXP-011 §87, session 120): `gate-desk`, the first project in the corpus where an unticked
+    // Condition's Is True / Is False is written by its Evaluate into a Mounted or a Visible. Predicted before
+    // regenerating: no path moves (every byte row was green on the red run, and no fixture's dispositions changed under
+    // `dispdiff.ts`), plus gate-desk's entries. The regenerated golden's diff counted the same: 0 lines out, 17 in, all
+    // gate-desk's block.
+    expect(corpusProjects().length).toBe(60);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 

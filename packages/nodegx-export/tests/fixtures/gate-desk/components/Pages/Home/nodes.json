@@ -1,0 +1,176 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b8d20e00-0000-4000-8000-000000000403",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "shell"
+      ],
+      "parameters": {
+        "title": "Gate Desk",
+        "urlPath": "home"
+      },
+      "x": 100,
+      "y": 40
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "page",
+      "children": [
+        "showBtn",
+        "hideBtn",
+        "bothBtn",
+        "flipBtn",
+        "checkBtn",
+        "sentText",
+        "noteText",
+        "liveText"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-8)",
+        "paddingLeft": "var(--space-6)"
+      },
+      "x": 100,
+      "y": 120
+    },
+    {
+      "id": "showBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Show",
+      "parent": "shell",
+      "parameters": {
+        "label": "Show"
+      },
+      "x": 100,
+      "y": 200
+    },
+    {
+      "id": "hideBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Hide",
+      "parent": "shell",
+      "parameters": {
+        "label": "Hide"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "bothBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Both",
+      "parent": "shell",
+      "parameters": {
+        "label": "Both"
+      },
+      "x": 100,
+      "y": 360
+    },
+    {
+      "id": "flipBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Flip",
+      "parent": "shell",
+      "parameters": {
+        "label": "Flip"
+      },
+      "x": 100,
+      "y": 440
+    },
+    {
+      "id": "checkBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Check",
+      "parent": "shell",
+      "parameters": {
+        "label": "Check"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "sentText",
+      "type": "Text",
+      "label": "It went",
+      "parent": "shell",
+      "parameters": {
+        "text": "It went",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 600
+    },
+    {
+      "id": "noteText",
+      "type": "Text",
+      "label": "Not yet",
+      "parent": "shell",
+      "parameters": {
+        "text": "Not yet"
+      },
+      "x": 100,
+      "y": 680
+    },
+    {
+      "id": "liveText",
+      "type": "Text",
+      "label": "The switch was on",
+      "parent": "shell",
+      "parameters": {
+        "text": "The switch was on",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "showGate",
+      "type": "Condition",
+      "label": "Say it went",
+      "parameters": {
+        "condition": true,
+        "runOnChange-condition": false
+      },
+      "x": 420,
+      "y": 840
+    },
+    {
+      "id": "hideGate",
+      "type": "Condition",
+      "label": "Put it away",
+      "parameters": {
+        "condition": false,
+        "runOnChange-condition": false
+      },
+      "x": 420,
+      "y": 920
+    },
+    {
+      "id": "liveGate",
+      "type": "Condition",
+      "label": "Was the switch on",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 420,
+      "y": 1000
+    },
+    {
+      "id": "flip",
+      "type": "Switch",
+      "label": "The switch",
+      "parameters": {},
+      "x": 420,
+      "y": 1080
+    }
+  ]
+}

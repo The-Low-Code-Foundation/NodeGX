@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b8d20e00-0000-4000-8000-000000000403",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "modified": "2026-10-16T12:00:00.000Z",
+  "description": "EXP-011 \u00a787 fixture: Show and Hide each Evaluate a Condition with the box unticked (true, false) wired into one Text's Mounted; Both sends the two in that order. Show's Is False hides a second Text, Visible left unauthored. Check Evaluates a Condition whose condition is a Switch, which Flip turns."
+}

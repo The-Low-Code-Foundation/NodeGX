@@ -2505,7 +2505,10 @@ export function emitComponent(
             // for nothing anyone sees; the query's own row in the report says why it is not kept.
             a.kind === 'query-fetch' && !plan.queries.some((q) => q.nodeId === a.nodeId)
             ? []
-            : [a]
+            : // EXP-011 §87. A literal Condition's one side is following statements.
+              a.kind === 'branch' && a.flat === true
+              ? expandActions(a.whenTrue)
+              : [a]
     );
   /** The `prop-*` record a record verb sends — the runtime's `_internal.inputValues`, by value. */
   /**
