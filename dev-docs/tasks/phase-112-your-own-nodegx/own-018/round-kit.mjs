@@ -38,8 +38,13 @@ import { kitTarball, kitVersion } from './kit-tarball.mjs';
 
 const [rootArg, tgzDir, promptFile, ...rest] = process.argv.slice(2);
 if (!rootArg || !tgzDir || !promptFile) throw new Error('usage: node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price N] [--max-turns N] [--thinking high|low]');
-if (fs.existsSync(rootArg)) throw new Error(`${rootArg} exists; a round starts from an empty folder`);
 const opt = (name, dflt) => { const i = rest.indexOf(name); return i >= 0 ? rest[i + 1] : dflt; };
+// OWN-019 s8 (SP1, Richard's music app, ran out of its 12 sittings mid-restyle): `--again` carries on an EXISTING round —
+// the same root, sealed HOME and app; no create, no seed, the kit config as it was. Sittings number on from the last
+// one (sittings.json is appended), and the recorder writes to a new calls-<time>/ so no earlier request is overwritten.
+const again = rest.includes('--again');
+if (fs.existsSync(rootArg) && !again) throw new Error(`${rootArg} exists; a round starts from an empty folder (or --again to carry one on)`);
+if (again && !fs.existsSync(path.join(rootArg, 'sittings.json'))) throw new Error(`--again: ${rootArg} holds no earlier round (sittings.json)`);
 fs.mkdirSync(rootArg, { recursive: true });
 const root = fs.realpathSync(rootArg);
 
@@ -91,14 +96,15 @@ const toml = (v) => JSON.stringify(v);
 // <root>/calls/. The lab's user config replaces Vibe's built-in "mistral" provider (merged by name, the higher layer
 // wins whole) with the same entry pointed at the proxy. Never a header is written (the key travels in one).
 const record = rest.includes('--record');
+const CALLS = path.join(root, again ? `calls-${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')}` : 'calls');
 const RECORD_PORT = 8800 + Math.floor(Math.random() * 900);
 let proxy = null;
 if (record) {
-  proxy = spawn(process.execPath, [path.join(path.dirname(new URL(import.meta.url).pathname), 'record-proxy.mjs'), path.join(root, 'calls'), '--port', String(RECORD_PORT)], { stdio: ['ignore', 'pipe', 'pipe'] });
+  proxy = spawn(process.execPath, [path.join(path.dirname(new URL(import.meta.url).pathname), 'record-proxy.mjs'), CALLS, '--port', String(RECORD_PORT)], { stdio: ['ignore', 'pipe', 'pipe'] });
   await new Promise((resolve) => proxy.stdout.once('data', resolve));
   // s7 (PROXYDIES): the proxy's stderr was piped and never read — T1's proxy died and said so to no one.
-  proxy.stderr.pipe(fs.createWriteStream(path.join(root, 'calls', 'proxy.stderr'), { flags: 'a' }));
-  proxy.on('exit', (code, sig) => { if (code !== null && code !== 0) fs.appendFileSync(path.join(root, 'calls', 'log.txt'), `proxy exited ${code} ${sig || ''}\n`); });
+  proxy.stderr.pipe(fs.createWriteStream(path.join(CALLS, 'proxy.stderr'), { flags: 'a' }));
+  proxy.on('exit', (code, sig) => { if (code !== null && code !== 0) fs.appendFileSync(path.join(CALLS, 'log.txt'), `proxy exited ${code} ${sig || ''}\n`); });
 }
 fs.writeFileSync(
   path.join(HOME, '.vibe', 'config.toml'),
@@ -117,6 +123,8 @@ fs.writeFileSync(
 
 // 1. npm create nodegx apps, from the packed tarball.
 const kit = opt('--kit', 'core');
+const seedArg = opt('--seed', null);
+if (!again) {
 const created = spawnSync('npx', ['-y', `--package=${tgz('create-nodegx')}`, 'create-nodegx', APPS, ...(kit === 'vibe' ? ['--vibe'] : [])], { cwd: path.dirname(APPS), env, encoding: 'utf8' });
 fs.writeFileSync(path.join(root, 'create.log'), created.stdout + created.stderr);
 if (created.status !== 0) throw new Error(`create-nodegx exited ${created.status}; see create.log`);
@@ -124,7 +132,6 @@ if (created.status !== 0) throw new Error(`create-nodegx exited ${created.status
 // OWN-019 s4 (Richard's bonus: a second run on the quiz app — "your own editor"): `--seed <app-dir>` puts an app that
 // already exists into the folder after create-nodegx, as a person's earlier session would have left it (its docs/
 // included). Copied without its previews, grades or caches; the round's command.txt names the seed.
-const seedArg = opt('--seed', null);
 if (seedArg) {
   const seed = path.resolve(seedArg);
   if (!fs.existsSync(path.join(seed, 'nodegx.project.json'))) throw new Error(`--seed ${seed} holds no nodegx.project.json`);
@@ -133,12 +140,13 @@ if (seedArg) {
   // a sitting that ends without touching it reads as this round finishing; the round writes its own note.
   fs.rmSync(path.join(APPS, path.basename(seed), 'docs', 'NEXT.md'), { force: true });
 }
+}
 
 // 2. The registry name → the tarball, in the config create-nodegx wrote (and nothing else in it).
 const cfgFile = path.join(APPS, '.vibe', 'config.toml');
-const cfg = fs.readFileSync(cfgFile, 'utf8');
+const cfg = again ? '' : fs.readFileSync(cfgFile, 'utf8');
 const pinned = `"@nodegx/mcp@${kitVersion(path.resolve(tgzDir))}"`; // the kit's pin = the packed server's version (s6)
-if (!cfg.includes(pinned)) throw new Error(`create-nodegx wrote no ${pinned} server into .vibe/config.toml`);
+if (!again && !cfg.includes(pinned)) throw new Error(`create-nodegx wrote no ${pinned} server into .vibe/config.toml`);
 let next = cfg.replace(pinned, `"--package=${tgz('nodegx-mcp')}", "noodl-mcp"`);
 const thinking = opt('--thinking', null);
 if (thinking) next = next.replace(/^thinking = "[a-z]+"$/m, `thinking = "${thinking}"`); // a control arm, recorded in command.txt
@@ -158,8 +166,10 @@ if (model) {
   next = next.replace(/^active_model = "[^"]+"$/m, `active_model = "${model}"`).replace(/\n\[\[mcp_servers\]\]/, `\n[[models]]\n${MODELS[model].join('\n')}\n\n[[mcp_servers]]`);
   if (!next.includes(`active_model = "${model}"`)) throw new Error('the kit config has no active_model line to switch');
 }
-fs.writeFileSync(cfgFile, next);
-fs.writeFileSync(path.join(root, 'vibe-config.toml'), next);
+if (!again) {
+  fs.writeFileSync(cfgFile, next);
+  fs.writeFileSync(path.join(root, 'vibe-config.toml'), next);
+}
 
 // 3. vibe --legacy-harness in the folder, trusted for this run, as the closing words say.
 // OWN-019 s3 (R31): `--sittings N` runs the build as the Vibe kit's process — sitting 1 is the person's paragraph, every
@@ -185,7 +195,7 @@ const argsFor = (prompt, out, resume) => [
   '--max-turns', opt('--max-turns', '250'),
   '--workdir', APPS
 ];
-fs.writeFileSync(path.join(root, 'command.txt'), ['uvx', ...argsFor(path.resolve(promptFile), OUT)].join(' ') + `\n# key: ${keyName}; kit: ${kit}${model ? `; model = ${model}` : ''}${seedArg ? `; seed = ${seedArg}` : ''}${thinking ? `; thinking = ${thinking}` : ''}${temperature ? `; temperature = ${temperature}` : ''}${sittings > 1 ? `; sittings ≤ ${sittings}, later prompts ${CONTINUE}, max-total $${maxTotal}` : ''}\n`);
+fs.writeFileSync(path.join(root, again ? 'command-again.txt' : 'command.txt'), ['uvx', ...argsFor(path.resolve(promptFile), OUT)].join(' ') + `\n# key: ${keyName}; kit: ${kit}${model ? `; model = ${model}` : ''}${seedArg ? `; seed = ${seedArg}` : ''}${thinking ? `; thinking = ${thinking}` : ''}${temperature ? `; temperature = ${temperature}` : ''}${sittings > 1 ? `; sittings ≤ ${sittings}, later prompts ${CONTINUE}, max-total $${maxTotal}` : ''}\n`);
 // OWN-019 s6: `--dry` stops here — the kit created and rewritten to the tarball, command.txt written, no Vibe started.
 if (rest.includes('--dry')) {
   proxy?.kill();
@@ -323,10 +333,12 @@ async function waitForRelay(k, tag) {
   }
 }
 
-const sittingsDone = [];
+const sittingsDone = again ? JSON.parse(fs.readFileSync(path.join(root, 'sittings.json'), 'utf8')) : [];
+const firstK = sittingsDone.length + 1;
+const lastK = firstK + sittings - 1;
 let unchanged = 0;
 let relayed = null;
-for (let k = 1; k <= sittings; k++) {
+for (let k = firstK; k <= lastK; k++) {
   const before = nextLine();
   // s5 (RL2): sitting 1 died 27 s in (Mistral's stream ended without a finish reason — infrastructure_failure) before
   // any NEXT.md existed, and "continue" then sent three sittings grepping above their folder for a note that was never
@@ -340,7 +352,7 @@ for (let k = 1; k <= sittings; k++) {
   fs.writeFileSync(path.join(root, 'sittings.json'), JSON.stringify(sittingsDone, null, 2));
   console.log(`sitting ${k}: exit ${r.how} ${r.seconds}s $${r.vibeUsd ?? '?'} — ${after?.first ?? '(no NEXT.md)'}`);
   if (relay) {
-    if (k === sittings) break;
+    if (k === lastK) break;
     relayed = { ...(await waitForRelay(k, tag)), session: sessionOf(tag) };
     console.log(`relay after sitting ${k}: ${relayed.what}`);
     if (relayed.what === 'stop') break;
@@ -355,5 +367,5 @@ for (let k = 1; k <= sittings; k++) {
   if (total >= maxTotal) { console.log(`stop: $${total.toFixed(2)} ≥ --max-total ${maxTotal}`); break; }
 }
 if (proxy) proxy.kill();
-const sum = (f) => sittingsDone.reduce((n, x) => n + (f(x) || 0), 0);
+const sum = (f) => sittingsDone.slice(firstK - 1).reduce((n, x) => n + (f(x) || 0), 0);
 console.log('exit', sittingsDone.at(-1).how, `| ${sittingsDone.length} sitting(s), ${Math.round(sum((x) => x.seconds) / 60)} min, $${sum((x) => x.vibeUsd).toFixed(2)} list, ~$${sum((x) => x.estimatedUsd).toFixed(2)} cached`);
