@@ -127,6 +127,15 @@ try {
     n0 = await shows(); await b.clickSel('#undo'); await rebuilt(n0);
     ok(onDisk(SIGN + 'nodes.json').nodes.some((n) => n.parameters?.label === 'Button'), 'Undo puts it back on disk');
   }
+  {
+    // P123-S4-CANVASSCROLL: the overlay took the wheel, so a page could not be scrolled while editing (Richard, on the template)
+    await select(title1);
+    const before = await b.evaluate(`(() => { const w = __ob.preview.frame.contentWindow; w.document.body.style.minHeight = '4000px'; const s = document.querySelector('#overlay .box.sel'); return { y: w.scrollY, box: s ? s.getBoundingClientRect().top : null }; })()`);
+    const at = await centreOf(title1); for (let i = 0; i < 3; i++) { await b.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: at.x, y: at.y, deltaX: 0, deltaY: 200 }); await wait(120); } await wait(400);
+    const after = await b.evaluate(`(() => { const w = __ob.preview.frame.contentWindow; const s = document.querySelector('#overlay .box.sel'); return { y: w.scrollY, box: s ? s.getBoundingClientRect().top : null, stage: document.getElementById('stage').scrollTop }; })()`);
+    ok(after.y >= 500 && after.box !== null && before.box !== null && Math.abs((before.box - after.box) - (after.y - before.y)) < 2 && after.stage === 0, 'Design: a wheel over the app scrolls the page and the selection box follows', { before, after });
+    await b.evaluate(`(() => { const w = __ob.preview.frame.contentWindow; w.scrollTo(0, 0); w.document.body.style.minHeight = ''; })()`); await wait(300);
+  }
   console.log('check: custom states and the composer');
   let stateId;
   {

@@ -741,6 +741,10 @@ preview.onTrace(({ dictionary }) => { if (dictionary) { mapElements(); draw(); }
 let sel = null, hover = null, pending = null;
 let gesture = null; // { kind: 'maybe-drag' | 'drag' | 'resize', ... }
 const overlay = $('overlay');
+// s4 (P123-S4-CANVASSCROLL): a wheel over the app while editing scrolls the app, as Bubble's canvas does. The overlay sits on the
+// frame and took the wheel, so in Design mode the page could not be scrolled at all; the browser chained the scroll to #stage
+// instead (Richard: "blank below the fold ... jumps the preview back to the top"). The frame's own scroll event redraws the boxes.
+overlay.addEventListener('wheel', (e) => { const w = preview.frame?.contentWindow; if (!w) return; e.preventDefault(); w.scrollBy(e.deltaX, e.deltaY); }, { passive: false });
 const px = (v) => Math.round(parseFloat(v) || 0);
 /** The element's padding and margin, and its rect against its parent's content box: what Bubble's red lines and the inspector's bands say. */
 function spacingOf(id) {

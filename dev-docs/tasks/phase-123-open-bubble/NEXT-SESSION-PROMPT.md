@@ -94,3 +94,7 @@ re-run: `exports/template/` is gitignored — refetch with the curl loop in IMPO
 `bubble2nodegx.mjs exports/template/app.export.json /tmp/template-open-bubble` and `preview-solo.mjs` on it.
 The converter has no test of its own yet: a gate that converts `exports/template` and asserts 0 errors, 0
 dictionary findings except the Links, and the headCode link, is the first thing to add before the next row.
+
+**s4, later:** Richard's first look at the template in Open Bubble found P123-S4-CANVASSCROLL — the overlay took the
+wheel, so a page could not be scrolled in Design mode (the stage scrolled instead and snapped back). Fixed in
+`open-bubble.html` (the overlay forwards the wheel to the frame); the gate grades it and is now **PASS 38/38**.
