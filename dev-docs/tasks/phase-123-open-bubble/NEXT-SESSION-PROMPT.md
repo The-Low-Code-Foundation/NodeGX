@@ -53,3 +53,44 @@ editor-suite`, OWN-006) before any of that.
 
 Nothing of this phase: committed by s2 with pathspecs (the phase folder, the exporter fix and its test, Orbit's
 `specs-entry.ts`, the bug row, the board line, memory). The peers' piles in the working tree are theirs.
+
+## s3 (2026-10-16): the Bubble importer spike — read import/IMPORT.md
+
+`import/bubble2nodegx.mjs <export.json> <outdir>` converts a Bubble app export into a NodeGX v2 project and writes
+`<outdir>/docs/IMPORT-REPORT.md` (counts + findings); `import/drive-open-bubble.mjs <outdir> <shots>` opens it in
+this editor headless and screenshots the tabs. Measured on Richard's 2023 test export: everything in it converts, the
+project opens here with the button in Bubble blue. **Waits on Richard:** real exports (IMPORT.md §5) — every Bubble
+feature the test app lacks needs one real example before its dictionary row can be written. If he sends them: run the
+converter, read the report, add rows until it says 0 "the dictionary" findings, open it here, screenshot. Uncommitted
+at the end of s3: `import/`, `look/import-*.png`, this file, README §7 (all untracked or this phase's own).
+
+### s3b: the run-mode bundles (read IMPORT.md §7 first)
+
+`import/bubble-run-bundle-to-export.mjs <folder of *.dynamic.js> <out.json>` then `bubble2nodegx.mjs` converts any
+Bubble app whose pages a person can open in run mode — TrybeUP (live on bubbleapps.io, test version) converted to 0
+validation errors and opens here. The bundles themselves (38 MB, with keys inside) are in the session scratchpad only;
+refetch with the loop in IMPORT.md §7 into `import/exports/` (gitignored). `import/validate-project.mjs <dir>` validates
+through the MCP over stdio; `import/probe-heights.mjs <dir>` lists the tallest elements in the live preview. Next
+rows, by count, are listed in IMPORT.md §7; the biggest single win is the Design canvas (instance width, fonts, texts
+whose inputs never arrive). Uncommitted: everything in `import/`, `look/import-*.png`, README §7, this file,
+`.gitignore` (three ignore lines).
+
+## s4 (2026-10-16, evening): TrybeUP held; the template looks the same — read IMPORT.md §8 and §9
+
+Richard stopped the TrybeUP push (*"we bit off more than we could chew"*) after §8's measurement: the page was
+not flickering, the main thread was pegged by ~1,550 console errors a second, almost all converter rows plus 89
+queries with no backend. He made a boilerplate Bubble template (one landing page, no data) and the brief became
+**make the NodeGX render look the same, section by section, before any data.** Done for that page: 188/188
+elements, 0 validation errors, 0 console errors, `look/import-template-nodegx.png` beside his
+`import/template-screens/`. §9 has the eleven rows the page added (Google Fonts via `settings.headCode`,
+Material Icons, `src`, Align-to-parent with an in-flow biggest child, a boxed Text, BBCode `[sup]`, `alignY`,
+`{value, unit}` for a % size, empty Links, rotation, `fixed_width` ignored) and the three differences left.
+
+**Next, in order:** (1) the row width-distribution rule (a two-column Bubble test page with known min/max widths,
+measure Bubble's computed widths, write the rule) — it is the only thing that still reads as "not the same" on
+this page; (2) Links to a URL → an External Link node; (3) then a second template page WITH a repeating group and
+a search, against a `provision_backend`-seeded empty backend, before going back to anything TrybeUP-sized. To
+re-run: `exports/template/` is gitignored — refetch with the curl loop in IMPORT.md §7 (the app is public), then
+`bubble2nodegx.mjs exports/template/app.export.json /tmp/template-open-bubble` and `preview-solo.mjs` on it.
+The converter has no test of its own yet: a gate that converts `exports/template` and asserts 0 errors, 0
+dictionary findings except the Links, and the headCode link, is the first thing to add before the next row.

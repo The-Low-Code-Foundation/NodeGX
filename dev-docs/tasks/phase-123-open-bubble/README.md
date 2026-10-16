@@ -131,3 +131,36 @@ node's missing ports, never a dead tab).
 | R4 | A branch never rejoins (FlutterFlow's shape). Is a rejoin wanted (both chains into one next step), or is Bubble's "Only when" per step wanted beside it? | — |
 | R5 | A custom state is a page Variable with the element's name in it. Should it live inside a reusable component's own graph when the element is one (so every instance has its own)? | — |
 | R6 | An option set is a component with a Static Data node. Is the Data tab the right home, or should it sit with Styles as app-wide data? | — |
+
+## 7. s3 (2026-10-16, the same day) — a Bubble export becomes a NodeGX project
+
+Richard's third message: can the JSON export a paid Bubble app can download be turned, 90% programmatically, into a
+NodeGX project, so a Bubble user leaves Bubble without leaving its editor? **[import/IMPORT.md](import/IMPORT.md)** is
+the answer: a 500-line converter (`import/bubble2nodegx.mjs`, no dependencies) over his 2023 test export
+(`digital-bricks/bubbleExporter`, private) converts 22/22 elements, 3/3 actions, 7/7 expressions, 32/40 styles and
+2/2 data types; the project validates with 0 errors, renders with 0 runtime errors, and **opens in this editor** —
+tree, property editor, *When Button A: Click → Create Record*, both data types, 32 styles, the button in Bubble's own
+primary blue through Bubble's own token names (`look/import-*.png`). The dictionary (§3 there) is the deliverable;
+§4 says why 90% is the right expectation and where the AI 10% is; §5 is the ask: two or three real exports, because the
+test app never used *Do a search for*, option sets, reusables, custom states, backend workflows or plugins.
+Found on the way: the `nodegx` MCP's `render_report` still drops every variant (its `dist/` predates the s2 exporter
+fix: rebuild `noodl-mcp`); `net.noodl.user.ResetPassword` is retired with no replacement, which a Bubble reset page
+needs; and the kit has no DateInput, FileInput, Slider, Video, Map, HTML or PictureInput element for Bubble's defaults.
+
+**s3b (the same evening):** Richard's `static.js` from his six-year TrybeUP app was not the tree but led to it: a
+Bubble page in run mode loads `dynamic.js`, which carries the whole app definition and that page's elements and
+workflows in abbreviated keys — no paid plan needed. `import/bubble-run-bundle-to-export.mjs` expands them; the
+converter then took the live TrybeUP (18 of 22 pages fetched, 3,941 elements, 637 workflows, 1,285 actions, 4,871
+expressions, 33 reusables, 45 option sets, 235 searches, 40 data types) to a project that validates with **0 errors**
+over 11,556 nodes and **opens in this editor** (`look/import-trybeup-*.png`; IMPORT.md §7 has the numbers, the rows
+the real app added, and what the report still lists). Two kit facts it cost: a hidden element is `mounted: false`
+(`visible` keeps the space), and "Do when condition is true" must be edge-triggered through `Value Changed` or it
+loops and freezes the page. One editor finding: opening a step's settings on a 3,100-node page hangs for minutes
+(P123-S3-STEPSETTINGS). `static.js` and bundles are gitignored: they carry keys.
+
+**s4 (the same evening):** the converted TrybeUP measured in a headless browser was not flickering but pegged
+(~1,550 console errors/s: converter rows and 89 backend-less queries; IMPORT.md §8); Richard held it and made a
+boilerplate Bubble landing page instead, to be matched section by section before any data. That page now converts
+188/188 with 0 errors and renders the same as his five screenshots (`look/import-template-nodegx.png`): eleven
+dictionary rows, the biggest being Google Fonts and Material Icons linked through `settings.headCode`, Bubble's
+"Align to parent" layout, and a boxed Text (IMPORT.md §9). Left: Bubble's row width-distribution rule, Links to a URL.

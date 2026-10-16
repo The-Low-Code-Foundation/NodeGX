@@ -274,3 +274,12 @@ dev-docs/tasks/**/notes/**/*.webp
 # Python bytecode from the repo scripts (e.g. dev-docs/tasks/**/convert-exports.py)
 __pycache__/
 *.pyc
+
+# Bubble run-mode bundles and app exports dropped in for the P123 importer: they carry plugin keys, never commit them
+/dev-docs/tasks/phase-123-open-bubble/import/static.js
+/dev-docs/tasks/phase-123-open-bubble/import/*.bubble
+/dev-docs/tasks/phase-123-open-bubble/import/exports/
+
+# P123 s4: a Bubble run-mode bundle Richard uploads for the importer (plugin keys inside)
+/dev-docs/tasks/phase-123-open-bubble/import/*-static.js
+/dev-docs/tasks/phase-123-open-bubble/import/*.dynamic.js
