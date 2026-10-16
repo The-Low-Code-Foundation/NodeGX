@@ -2496,6 +2496,14 @@ export type HandlerAction =
    */
   | { kind: 'jsfun-run'; nodeId: string; then: HandlerAction[]; materialize?: string }
   /**
+   * EXP-011 §86. The chains of a Function's own signals (`Outputs.go()`), first in its run's `then`: one loop over the
+   * pulses the run sent, in the order it sent them, each arm (`jsfun-pulse`) the chain of one signal. Inside an arm the
+   * Function's outputs read as that pulse's targets read them (C7 lockstep, `src/lib/functionRun.ts`).
+   */
+  | { kind: 'jsfun-pulses'; nodeId: string; then: HandlerAction[] }
+  /** EXP-011 §86. One signal's chain inside `jsfun-pulses`: the actions its wires describe, in wire order. */
+  | { kind: 'jsfun-pulse'; nodeId: string; signal: string; then: HandlerAction[] }
+  /**
    * A state var write (CONTROLLED-STATE-TARGET §3.3). `op` is a functional update
    * (`setX(v => !v)`) — immune to closure staleness, which is why Switch's `flip` and
    * Counter's arithmetic use it, never `expr`.
@@ -3117,6 +3125,12 @@ export interface JsFunctionPlan {
    * invoked — `run` wired: calls inline inside its own handler chain only (grade I).
    */
   mode: 'reactive' | 'invoked';
+  /**
+   * EXP-011 §86. Function only, invoked only: a run of it sends a signal of its own that a chain consumes. The wrapper
+   * then takes its `Outputs` record as a parameter, so `runFunction` can hand it the recording one, and the component
+   * keeps the node's last values across runs (`functionNode`), as the runtime's node does.
+   */
+  pulsed?: true;
   /**
    * P18-S110-EVALATLOAD. Expression only, reactive only: present when nothing is sure to arrive at
    * load — no input has a literal (a parameter is set at load, so it always arrives) and the body
@@ -10681,6 +10695,71 @@ function planComponent(
   }
 
   /**
+   * EXP-011 §86. A Function's own signals as chains: `Outputs.go()` in the body, wired into an action.
+   *
+   * In the runtime the call publishes the run's held writes and sends a pulse; the pulse's targets act in the drain, after
+   * the body, reading their inputs in C7 lockstep (the k-th pulse with the k-th value queued since the run began). The
+   * export runs the body against a recording `Outputs` (`runFunction`) and then each pulse's chain, in the order the body
+   * sent them; the emitter prints a chain's reads of this Function as that pulse's values.
+   *
+   * Refused by name: a ticked value box (a new value runs the Function and sends its signals again, where the export runs
+   * it on Run alone), and one port fed by two of its signals (which pulse its values pair with would need one count
+   * across both). Function only: a Visual Function's block-declared signals keep `compileJsRun`'s own refusal.
+   *
+   * 🔴 **A refusal here refuses the signals, not the run.** The run then compiles as it did before §86 (its Done, its
+   * rendered reads), and each signal wire is reported: by its target's own reason where the target does not compile,
+   * else by this one (`pulseRefusals`, read where the attach pass reports a trigger it cannot attach). Refusing the run
+   * instead took three exported nodes out of gram's Member and Post pages, measured over the shipped templates. The two
+   * refusals above are the Function's (`pulseRefusals` by node id); a signal whose own chain does not compile is that
+   * signal's (by `<id>:out-<signal>`), and the others still chain.
+   */
+  const pulseRefusals = new Map<string, string>();
+  const pulseChainsOf = (node: NodeIR, def: JsFunctionPlan): DoneChain | { defer: string } => {
+    const none: DoneChain = { then: [], consumes: [], collapses: [], subscribes: [] };
+    if (def.kind !== 'function') return none;
+    const sentWires = component.connections.filter((c) => c.fromId === node.id && def.signals.includes(c.fromProperty.slice('out-'.length)));
+    if (sentWires.length === 0) return none;
+    for (const c of component.connections) {
+      if (c.toId !== node.id || !c.toProperty.startsWith('in-')) continue;
+      if (literalParam(node, `runOnChange-${c.toProperty}`) !== false) {
+        return {
+          defer: `its "${c.toProperty.slice('in-'.length)}" input is ticked under Run On Value Change, so a new value runs it and sends its signals again — the export runs it on Run alone`
+        };
+      }
+    }
+    const signalsByPort = new Map<string, Set<string>>();
+    for (const c of sentWires) {
+      const port = `${c.toId}:${c.toProperty}`;
+      const signals = signalsByPort.get(port) ?? new Set<string>();
+      signals.add(c.fromProperty.slice('out-'.length));
+      signalsByPort.set(port, signals);
+    }
+    for (const [port, signals] of signalsByPort) {
+      if (signals.size < 2) continue;
+      const target = nodeById.get(port.slice(0, port.indexOf(':')));
+      return {
+        defer: `two of its signals (${[...signals].map((s) => `"${s}"`).join(', ')}) drive ${target?.type ?? 'a missing node'}.${port.slice(port.indexOf(':') + 1)} — which value each pulse reads there is not translated`
+      };
+    }
+    const arms: HandlerAction[] = [];
+    const result: DoneChain = { then: [], consumes: [], collapses: [], subscribes: [] };
+    for (const signal of def.signals) {
+      if (!sentWires.some((c) => c.fromProperty === `out-${signal}`)) continue;
+      const arm = doneChainOf(node, `out-${signal}`);
+      if ('defer' in arm) {
+        pulseRefusals.set(`${node.id}:out-${signal}`, arm.defer.replace(`its out-${signal} output`, `its "${signal}" signal`));
+        continue;
+      }
+      arms.push({ kind: 'jsfun-pulse', nodeId: node.id, signal, then: arm.then });
+      result.consumes.push(...arm.consumes);
+      result.collapses.push(...arm.collapses);
+      result.subscribes.push(...arm.subscribes);
+    }
+    if (arms.length > 0) result.then.push({ kind: 'jsfun-pulses', nodeId: node.id, then: arms });
+    return result;
+  };
+
+  /**
    * A2h (EXP-003 §4): `run` wired from a handler chain, outputs consumed in that chain. The
    * compiled action carries only the `done`-chain — a pure body run without reading its outputs
    * is unobservable, and every output read inside the chain inlines the call at its sink. The
@@ -10711,8 +10790,18 @@ function planComponent(
       }
       return { defer: `its ${c.fromProperty} output is consumed — only done continues a Run chain in this slice` };
     }
-    const chain = doneChainOf(node);
-    if ('defer' in chain) return chain;
+    const done = doneChainOf(node);
+    if ('defer' in done) return done;
+    const pulsed = pulseChainsOf(node, record.def);
+    if ('defer' in pulsed) pulseRefusals.set(node.id, pulsed.defer);
+    const pulses: DoneChain = 'defer' in pulsed ? { then: [], consumes: [], collapses: [], subscribes: [] } : pulsed;
+    // The pulses run before Done, as the runtime's targets act in the drain and Done is sent after the run's await.
+    const chain = {
+      then: [...pulses.then, ...done.then],
+      consumes: [...pulses.consumes, ...done.consumes],
+      collapses: [...pulses.collapses, ...done.collapses],
+      subscribes: [...pulses.subscribes, ...done.subscribes]
+    };
     const strayRead = component.connections.find(
       (c) => c.fromId === node.id && isJsValueOutput(node, c.fromProperty) && !chain.consumes.includes(c.key)
     );
@@ -10750,6 +10839,8 @@ function planComponent(
     if (chain.then.length === 0 && materialize === undefined) {
       return { defer: 'its Run drives nothing this slice translates — no done-chain action consumes its work' };
     }
+    // Only on a run that compiles: a refused one prints no wrapper change and keeps no node state.
+    if (pulses.then.length > 0) record.def.pulsed = true;
     return {
       action: {
         kind: 'jsfun-run',
@@ -15667,6 +15758,10 @@ function planComponent(
         // P18-S116-QUERYFETCH. The wired filter values are read at the pulse, in the handler that pulses.
         case 'query-fetch':
           return action.values.every((v) => exprValidIn(v.expr, context, invokedScope));
+        // EXP-011 §86. A run's pulse loop and its arms sit inside the run's own `then`, so its scope already holds the node.
+        case 'jsfun-pulses':
+        case 'jsfun-pulse':
+          return actionsValidIn(action.then, context, invokedScope);
         // EXP-011 §58. The data is read at the pulse, in the handler that pulses; the listeners are validated where they compile.
         case 'stream-action':
           return action.value === undefined || exprValidIn(action.value, context, invokedScope);
@@ -15864,6 +15959,12 @@ function planComponent(
           (w) => w.toId === sink.id && w.toProperty === trigger && w.fromId === node.id
         );
         return !firedByOwnChange;
+      }
+      // EXP-011 §86 — the eleventh family: a Function run from another element's event (the Site Builder's contact
+      // form: three fields into the Function, its Run on Send) reads its `in-*` from that handler. A Function only this
+      // control runs reads `input-text` in the control's own handler, as a Set Variable fired by its own change does.
+      if (sink.type === JS_FUNCTION && c.toProperty.startsWith('in-')) {
+        return component.connections.some((w) => w.toId === sink.id && w.toProperty === 'run' && w.fromId !== node.id);
       }
       return rendered.has(sink.id) && !isTriggerInto(sink, c.toProperty);
     });
@@ -16646,6 +16747,13 @@ function planComponent(
         if (!Array.isArray(then)) return then;
         return { ...action, then };
       }
+      // EXP-011 §86. The arms run in the run's closure, after the body: a write earlier in the chain reaches them.
+      case 'jsfun-pulses':
+      case 'jsfun-pulse': {
+        const then = snapActionList(action.then, snap);
+        if (!Array.isArray(then)) return then;
+        return { ...action, then };
+      }
       /**
        * EXP-011 Tier 2.5. Same rule as a request: the link is read where the handler is, before
        * the browser is touched, so a `Set Variable` earlier in the chain must reach it — and both
@@ -17378,13 +17486,18 @@ function planComponent(
       for (const id of compiled.subscribes ?? []) boundSubscribers.add(id);
       continue;
     }
-    const untranslatable = `trigger ${connection.fromId}.${connection.fromProperty} is not a rendered element event or a receiver`;
+    // EXP-011 §86. A Function's signal whose chains were refused says why, not that a signal is no event.
+    const pulseRefusal =
+      fromNode !== undefined && jsNodeKindOf(fromNode.type) === 'function'
+        ? (pulseRefusals.get(`${fromNode.id}:${connection.fromProperty}`) ?? pulseRefusals.get(fromNode.id))
+        : undefined;
+    const untranslatable = pulseRefusal ?? `trigger ${connection.fromId}.${connection.fromProperty} is not a rendered element event or a receiver`;
     if (outputsSink) {
       if (!failedOutputsNodes.has(toNode.id)) failedOutputsNodes.set(toNode.id, untranslatable);
     } else {
       dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason: untranslatable };
     }
-    notes.push(wireNote(connection, `the trigger is not a rendered element event or a receiver`));
+    notes.push(wireNote(connection, pulseRefusal ?? `the trigger is not a rendered element event or a receiver`));
   }
 
   // Component Outputs nodes rule once, after every wire has spoken: the interface declaration
@@ -17558,6 +17671,10 @@ function planComponent(
           scanActions(action.minted?.failThen ?? []);
         } else if (action.kind === 'array-new') {
           // EXP-011 §55. The mint's Done chain — a popup opened there, a record verb called there.
+          scanActions(action.then);
+        } else if (action.kind === 'jsfun-run' || action.kind === 'jsfun-pulses' || action.kind === 'jsfun-pulse') {
+          // EXP-011 §86. A Function's Done chain and its signals' chains: a Cloud Function called from `Outputs.go()`
+          // earns its export here. The Done chain had the same hole before the signals did.
           scanActions(action.then);
         }
       }
@@ -19379,6 +19496,8 @@ function planComponent(
           case 'popup-show':
           case 'popup-close':
           case 'jsfun-run':
+          case 'jsfun-pulses':
+          case 'jsfun-pulse':
           // EXP-011 §30, and the same omission the sibling walker had: a session read inside an
           // array mutator's Done chain is as ordinary as one inside a request's, and missing it
           // here leaves the page importing a `useSession` the module never exported.
@@ -20046,6 +20165,8 @@ function planComponent(
           case 'popup-show':
           case 'popup-close':
           case 'jsfun-run':
+          case 'jsfun-pulses':
+          case 'jsfun-pulse':
           case 'api-call':
             fillMaterialize(action.then);
             break;

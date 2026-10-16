@@ -369,7 +369,12 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // (due-desk, gallery-desk, link-desk, page-desk: the client holds one copy of each record, and the row subscribes
     // to it; 65 diff lines in each of the three read by hand), plus record-desk's own 22 entries, nothing else. The
     // regenerated golden's diff counted the same: 8 lines out, those 8 back in, and record-desk's block.
-    expect(corpusProjects().length).toBe(58);
+    //
+    // 58 → 59 on 2026-10-16 (EXP-011 §86, session 119): `pulse-desk`, the first project in the corpus where a Function's
+    // own signals drive actions. Predicted before regenerating: no path moves (every byte row was green on the red run,
+    // so no other project's Function, attach scan or control state changed what it emits), plus pulse-desk's entries.
+    // The regenerated golden's diff counted the same: 0 lines out, 19 in, all pulse-desk's block.
+    expect(corpusProjects().length).toBe(59);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 

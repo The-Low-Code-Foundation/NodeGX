@@ -1,0 +1,24 @@
+## runOnChange-in-token = true
+   typed "s"
+   claimSite called with "s"
+   typed "se"
+   claimSite called with "se"
+   typed "set"
+   claimSite called with "set"
+   Sign Up done
+   claimSite called with "set"
+## runOnChange-in-token = false
+   typed "s"
+   typed "se"
+   typed "set"
+   Sign Up done
+   claimSite called with "set"
+## runOnChange-in-token = undefined
+   typed "s"
+   claimSite called with "s"
+   typed "se"
+   claimSite called with "se"
+   typed "set"
+   claimSite called with "set"
+   Sign Up done
+   claimSite called with "set"

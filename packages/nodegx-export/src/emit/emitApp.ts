@@ -23,6 +23,7 @@ import { emitComponent } from './component';
 import { DATE_LIB_PATH, dateLibSource } from './dateLib';
 import { UTIL_LIB_PATH, utilLibSource } from './utilLib';
 import { PARSE_DEPENDENCIES, PARSE_HELPERS_NEEDING_DEPENDENCY, PARSE_LIB_PATH, isParseHelper, parseLibSource } from './parseLib';
+import { FUNCTION_RUN_LIB_PATH, functionRunLibSource } from './functionRunLib';
 import { ID_LIB_PATH, idLibSource } from './idLib';
 import { TIMER_LIB_PATH, timerLibSource } from './timerLib';
 import { ANIMATE_LIB_PATH, animateLibSource } from './animateLib';
@@ -174,6 +175,8 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   const idHelpersUsed = new Set<string>();
   /** The same gate for `src/lib/timer.ts` (EXP-011 §39). */
   const timerHelpersUsed = new Set<string>();
+  /** EXP-011 §86. `src/lib/functionRun.ts`, earned by a component that prints a Function's pulses. */
+  let functionRunLibUsed = false;
   // EXP-011 §49. The animation pair's modules — earned by a component whose plan kept a node.
   let animateLibUsed = false;
   let statesLibUsed = false;
@@ -262,6 +265,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     for (const helper of emitted.dateHelpers) dateHelpersUsed.add(helper);
     for (const helper of emitted.utilHelpers) utilHelpersUsed.add(helper);
     for (const helper of emitted.idHelpers) idHelpersUsed.add(helper);
+    if (emitted.functionRunLib) functionRunLibUsed = true;
     for (const helper of emitted.timerHelpers) timerHelpersUsed.add(helper);
     if (emitted.animateLib) animateLibUsed = true;
     if (emitted.statesLib) statesLibUsed = true;
@@ -319,6 +323,10 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
    */
   if (idHelpersUsed.size > 0) {
     files[ID_LIB_PATH] = GENERATED_MODULE_TS + idLibSource();
+  }
+  /** EXP-011 §86. `src/lib/functionRun.ts`, on the same rule as the modules above. */
+  if (functionRunLibUsed) {
+    files[FUNCTION_RUN_LIB_PATH] = GENERATED_MODULE_TS + functionRunLibSource();
   }
   /** `src/lib/timer.ts` (EXP-011 §39) — the fourth module, on the same rule as the other three. */
   if (timerHelpersUsed.size > 0) {

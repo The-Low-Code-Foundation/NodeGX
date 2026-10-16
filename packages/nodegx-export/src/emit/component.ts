@@ -69,6 +69,7 @@ import { ACTIONS_LIB_PATH } from './actionsLib';
 import { HISTORY_LIB_PATH } from './historyLib';
 import { SIGN_IN_LIB_PATH } from './signInLib';
 import { SCRIPT_CODE_PREFIX } from '../analyze/script';
+import { FUNCTION_RUN_LIB_PATH } from './functionRunLib';
 import { ID_HELPERS_BY_FN, ID_LIB_PATH, IdHelper } from './idLib';
 import { CRYPTO_LIB_PATH, CryptoHelper } from './cryptoLib';
 import { PATTERN_LIB_PATH, PatternHelper, isPatternHelper } from './patternLib';
@@ -308,6 +309,8 @@ export interface EmittedComponent {
   idHelpers: Set<string>;
   /** `src/lib/timer.ts` verbs this component calls (EXP-011 §39). */
   timerHelpers: Set<string>;
+  /** EXP-011 §86. Whether this component runs a Function whose signals have chains (`src/lib/functionRun.ts`). */
+  functionRunLib: boolean;
   /** EXP-011 §49. Whether this component imports `src/lib/animate.ts` / `src/lib/states.ts`. */
   animateLib: boolean;
   statesLib: boolean;
@@ -603,6 +606,10 @@ export function emitComponent(
   // reference print — the plan registers every resolved definition, referenced or not.
   const jsFunByNode = plan.jsFunctions;
   const referencedJsIds = new Set<string>();
+  /** EXP-011 §86. Runs whose signals have chains: each keeps a `functionNode` ref and imports `src/lib/functionRun.ts`. */
+  const pulsedRunIds = new Set<string>();
+  /** EXP-011 §86. While a pulse loop prints its arms: the Function's id → the loop's pulse local. */
+  const activePulses = new Map<string, string>();
   // State rows print only when something references them (CONTROLLED-STATE §3.1) — the
   // jsFunctions precedent: a definition nothing kept costs nothing.
   const referencedStateNames = new Set<string>();
@@ -790,6 +797,9 @@ export function emitComponent(
     if (action.kind === 'popup-show' || action.kind === 'popup-close') {
       action.then.forEach(collectActionUse);
     }
+    if (action.kind === 'jsfun-pulses' || action.kind === 'jsfun-pulse') {
+      action.then.forEach(collectActionUse);
+    }
     /**
      * The asynchronous actions' arguments and chains (EXP-011 Tier 1.2).
      *
@@ -937,6 +947,8 @@ export function emitComponent(
       referencedJsIds.add(action.nodeId);
       jsArgExprs(action.nodeId).forEach(collectExprUse);
       action.then.forEach(collectActionUse);
+      // EXP-011 §86. A run that sends pulses keeps the node's last values and imports the run helper.
+      if (runIsPulsed(action)) pulsedRunIds.add(action.nodeId);
       // Same as the expression side: the wrapper's Noodl.Variables facade earns the imports.
       for (const name of jsFunByNode[action.nodeId]?.variables ?? []) {
         if (variableByName.has(name)) usedVariableNames.add(name);
@@ -1031,6 +1043,9 @@ export function emitComponent(
                 a.kind === 'popup-show' ||
                 a.kind === 'popup-close' ||
                 a.kind === 'jsfun-run' ||
+                // EXP-011 §86. The pulse loop and each signal's arm.
+                a.kind === 'jsfun-pulses' ||
+                a.kind === 'jsfun-pulse' ||
                 a.kind === 'api-call' ||
                 a.kind === 'date-now-read' ||
                 a.kind === 'collection-remove' ||
@@ -2307,8 +2322,16 @@ export function emitComponent(
           if (expr.fold === 'boolean') return `!!${base}`;
           return base;
         }
+        /**
+         * EXP-011 §86. Inside a pulse's arm the Function's outputs are what that pulse's targets read (C7 lockstep). Elsewhere
+         * in a pulsed run's chain (its Done) they are the node's values after the run, kept across runs: a re-run of the body
+         * would start from an empty record. A handler reads an invoked Function only inside its run's chain (`exprValidIn`),
+         * where the run's `const` is in scope.
+         */
+        const pulse = mode === 'handler' ? activePulses.get(expr.nodeId) : undefined;
+        const ran = mode === 'handler' && pulse === undefined && pulsedRunIds.has(expr.nodeId) ? `${pulseNamesOf(def).run}.outputs` : undefined;
         const local = mode === 'render' ? jsLocals.get(expr.nodeId) : undefined;
-        const callee = local ?? `${def.fnName}(${jsArgsObject(def, mode)})`;
+        const callee = pulse !== undefined ? `${pulse}.values` : ran ?? local ?? `${def.fnName}(${jsArgsObject(def, mode)})`;
         const base = def.kind === 'function' ? memberExpr(callee, expr.output) : callee;
         if (expr.fold === 'string') return `String(${base} ?? '')`;
         if (expr.fold === 'number') return `(typeof ${base} === 'number' ? ${base} : Number(${base}) || 0)`;
@@ -2475,7 +2498,7 @@ export function emitComponent(
           // at their sinks, so the run itself needs no statement — unless it materializes its
           // output record (CONTROLLED-STATE §4f), which is one setter statement before the chain.
           a.kind === 'jsfun-run'
-          ? a.materialize !== undefined
+          ? a.materialize !== undefined || runIsPulsed(a)
             ? [{ ...a, then: [] }, ...expandActions(a.then)]
             : expandActions(a.then)
           : // P18-S116-QUERYFETCH. A Fetch into a query the export does not keep (nothing it renders reads the rows) asks
@@ -2656,6 +2679,8 @@ export function emitComponent(
         case 'popup-show':
         case 'popup-close':
         case 'jsfun-run':
+        case 'jsfun-pulses':
+        case 'jsfun-pulse':
         case 'date-now-read':
           return a.then.some(inAction);
         // EXP-011 §37. Both arms, on the hazard the two notes above name: the Failure arm can
@@ -3256,12 +3281,46 @@ export function emitComponent(
       case 'stream-action':
         return `${action.local}.${action.verb}(${action.value !== undefined ? exprCode(action.value, 'handler') : ''})`;
       case 'jsfun-run': {
+        const def = jsFunByNode[action.nodeId]!;
+        /**
+         * EXP-011 §86. A run whose signals have chains: the body against the recording `Outputs`, the node's last values
+         * kept across runs. `expandActions` printed this statement with an empty `then`, so the pulses are known from the
+         * plan, not the action.
+         */
+        if (pulsedRunIds.has(action.nodeId) && action.then.length === 0) {
+          const names = pulseNamesOf(def);
+          const run = `const ${names.run} = runFunction(${def.fnName}, ${jsArgsObject(def, 'handler')}, ${names.node})`;
+          if (action.materialize === undefined) return run;
+          return `${run};\n${pad(indent)}${stateSetterOf(action.materialize)}(${names.run}.outputs)`;
+        }
         if (action.materialize !== undefined) {
-          const def = jsFunByNode[action.nodeId]!;
           return `${stateSetterOf(action.materialize)}(${def.fnName}(${jsArgsObject(def, 'handler')}))`;
         }
         return expandActions(action.then).map(actionCode).join('; ');
       }
+      /**
+       * EXP-011 §86. One loop over the pulses the run sent, in the order it sent them; each arm is one signal's chain,
+       * and inside it this Function's outputs read as that pulse's targets read them (`exprCode`'s `jsfun-out`).
+       */
+      case 'jsfun-pulses': {
+        const names = pulseNamesOf(jsFunByNode[action.nodeId]!);
+        const arms = action.then.filter((a): a is Extract<HandlerAction, { kind: 'jsfun-pulse' }> => a.kind === 'jsfun-pulse');
+        activePulses.set(action.nodeId, names.pulse);
+        try {
+          const lines = [`for (const ${names.pulse} of ${names.run}.pulses) {`];
+          arms.forEach((arm, i) => {
+            const head = `${i === 0 ? '' : '} else '}if (${names.pulse}.signal === ${tsLiteral(arm.signal)}) {`;
+            lines.push(`${pad(indent + 2)}${head}`, ...blockBody(expandActions(arm.then), indent + 4));
+          });
+          lines.push(`${pad(indent + 2)}}`, `${pad(indent)}}`);
+          return lines.join('\n');
+        } finally {
+          activePulses.delete(action.nodeId);
+        }
+      }
+      // Printed by its loop above; never on its own.
+      case 'jsfun-pulse':
+        return expandActions(action.then).map((a) => actionCode(a, indent)).join('; ');
       // The functional updates are §3.3's closure-staleness-immune forms.
       case 'state-set': {
         const setter = stateSetterOf(action.name);
@@ -4086,6 +4145,9 @@ export function emitComponent(
   function actionIsStatement(a: HandlerAction): boolean {
     return (
     a.kind === 'branch' ||
+    // EXP-011 §86. A run with pulses declares its `const`, and its loop is a `for`.
+    (a.kind === 'jsfun-run' && pulsedRunIds.has(a.nodeId)) ||
+    a.kind === 'jsfun-pulses' ||
     (a.kind === 'popup-close' && a.then.length > 0) ||
     (a.kind === 'collection-clear' && (a.then.length > 0 || a.unchangedThen.length > 0)) ||
     // EXP-011 §55. The mint is statements; a guarded mutator is an `if`/`else`.
@@ -4149,6 +4211,8 @@ export function emitComponent(
    */
   function actionTakesNoTerminator(a: HandlerAction): boolean {
     return (
+      // EXP-011 §86. The pulse loop ends in `}`.
+      a.kind === 'jsfun-pulses' ||
       a.kind === 'api-call' ||
       a.kind === 'http-call' ||
       // EXP-011 §41. A try/catch, like the two above.
@@ -4299,7 +4363,7 @@ export function emitComponent(
   }
   if (radioNameLocals.size > 0) reactImports.push('useId');
   // EXP-011 §39. The timer handle and the last value seen both live in refs.
-  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0) reactImports.push('useRef');
+  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0 || pulsedRunIds.size > 0) reactImports.push('useRef');
   // EXP-011 §53. A task template's mount effect and its once-guard (StrictMode mounts twice; startTask pulses once).
   // EXP-011 §57. A Repeater Item's Added effect takes the same pair, for the same reason.
   // P18-S116-FIELDMOUNT. A field's mount announcement takes the same pair: its chain may reach a parent or a backend.
@@ -4583,6 +4647,11 @@ export function emitComponent(
   if (usedIdHelpers.size > 0) {
     const specifier = `${relRoot}/${ID_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
     internalImports.set(specifier, `import { ${[...usedIdHelpers].sort().join(', ')} } from '${specifier}';`);
+  }
+  // EXP-011 §86. `src/lib/functionRun.ts`, earned by a run that prints its pulses.
+  if (pulsedRunIds.size > 0) {
+    const specifier = `${relRoot}/${FUNCTION_RUN_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
+    internalImports.set(specifier, `import { functionNode, runFunction } from '${specifier}';`);
   }
   if (usedVariableNames.size > 0) {
     const specifier = `${relRoot}/stores/variables`;
@@ -6249,9 +6318,12 @@ export function emitComponent(
       const outputsType = outputFields.length > 0 ? `{ ${outputFields.join('; ')} }` : 'Record<string, never>';
       const seeds = def.signals.map((s) => `${fieldKey(s)}: () => {}`);
       lines.push(`// From the Function node "${def.fnName}" — the body is preserved verbatim (EXP-003 §4).`);
-      lines.push(`function ${def.fnName}(${hasInputs ? INPUTS_PARAM : 'Inputs'}: ${inputsType}): ${outputsType} {`);
+      const seedRecord = `{${seeds.length > 0 ? ` ${seeds.join(', ')} ` : ''}}`;
+      // EXP-011 §86. A run whose signals have chains hands the body `runFunction`'s recording record instead.
+      const outputsParam = def.pulsed ? `, Outputs: ${outputsType} = ${seedRecord}` : '';
+      lines.push(`function ${def.fnName}(${hasInputs ? INPUTS_PARAM : 'Inputs'}: ${inputsType}${outputsParam}): ${outputsType} {`);
       if (hasInputs) lines.push(`  const Inputs = ${scopeCast(INPUTS_PARAM)};`);
-      lines.push(`  const Outputs: ${outputsType} = {${seeds.length > 0 ? ` ${seeds.join(', ')} ` : ''}};`);
+      if (!def.pulsed) lines.push(`  const Outputs: ${outputsType} = ${seedRecord};`);
       lines.push('  try {');
       /*
        * P109 ISL-005 AC7. The files the Function lists under Uses, from the one registry — never pasted
@@ -6793,6 +6865,11 @@ export function emitComponent(
   // EXP-011 §39. The refs: a Delay's timer handle, and a Value Changed's last value seen.
   for (const [, ref] of delayRefs) body.push(`  const ${ref} = useRef<DelayHandle | null>(null);`);
   for (const effect of plan.valueChangedEffects) body.push(`  const ${effect.lastLocal} = useRef<unknown>(undefined);`);
+  // EXP-011 §86. The Function node's values across runs, one per instance, as the running app's node keeps them.
+  for (const id of pulsedRunIds) {
+    const def = jsFunByNode[id]!;
+    body.push(`  const ${pulseNamesOf(def).node} = useRef(functionNode<NonNullable<Parameters<typeof ${def.fnName}>[1]>>([${def.signals.map(tsLiteral).join(', ')}])).current;`);
+  }
   for (const [id, local] of jsLocals) {
     const def = jsFunByNode[id]!;
     body.push(`  const ${local} = ${def.fnName}(${jsArgsObject(def, 'render')});`);
@@ -7272,6 +7349,9 @@ export function emitComponent(
         return a.value !== undefined ? [a.value] : [];
       case 'jsfun-run':
         return [...jsArgExprs(a.nodeId), ...a.then.flatMap(actionExprsOf)];
+      case 'jsfun-pulses':
+      case 'jsfun-pulse':
+        return a.then.flatMap(actionExprsOf);
       case 'http-call':
       // EXP-011 §41. The same, one node over.
       case 'cloud-call':
@@ -7482,6 +7562,8 @@ export function emitComponent(
     utilHelpers: usedUtilHelpers,
     idHelpers: usedIdHelpers,
     timerHelpers: usedTimerHelpers,
+    // EXP-011 §86.
+    functionRunLib: pulsedRunIds.size > 0,
     // EXP-011 §49. `states.ts` imports `animate.ts`, so a States alone earns both modules.
     animateLib: plan.animations.length > 0 || plan.statesMachines.length > 0,
     statesLib: plan.statesMachines.length > 0,
@@ -7797,4 +7879,16 @@ function filledArcPath(x: number, y: number, radius: number, startAngle: number,
     'L', svgNumber(x), svgNumber(y),
     'L', svgNumber(start.x), svgNumber(start.y)
   ].join(' ');
+}
+
+/** EXP-011 §86. Whether a Function's run prints its pulses: its `then` opens with the pulse loop. */
+function runIsPulsed(action: Extract<HandlerAction, { kind: 'jsfun-run' }>): boolean {
+  return action.then.some((a) => a.kind === 'jsfun-pulses');
+}
+
+/** EXP-011 §86. The three locals a pulsed run prints, off the wrapper's name: `holdThePageId` → `holdThePageIdRun`. */
+function pulseNamesOf(def: JsFunctionPlan): { run: string; node: string; pulse: string } {
+  const camel = def.fnName.replace(/_+([A-Za-z0-9])/g, (_m, c: string) => c.toUpperCase()).replace(/_+$/, '');
+  const base = camel.charAt(0).toLowerCase() + camel.slice(1);
+  return { run: `${base}Run`, node: `${base}Node`, pulse: `${base}Pulse` };
 }

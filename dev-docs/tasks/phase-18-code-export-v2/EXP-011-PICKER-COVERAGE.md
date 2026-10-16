@@ -12308,3 +12308,151 @@ with a wired Value are all read from handlers, and P18-S118-NUMBERFIELD is their
    corpus yet.
 3. The Function-chain gap (18 of the 22 Fetch-wired filters, 42 of §83's 84); P18-S113-LISTLIVE; P18-S115-DYNPROBE;
    P18-S117-BUTTONLOOK and P18-S118-INPUTLOOK (low).
+
+## §86 A Function's own signals run their chains (session 119, 2026-10-16): the Function-chain gap
+
+### §86.0 What was measured first, and what the gap turned out to be
+
+The row said "the Function-chain gap: 18 of the 22 Fetch-wired filters and 42 of §83's 84 read a Function's output;
+measure what those Functions are first". Measured over every project under `NodeGX test projects/`, `Noodl projects/`
+and the export fixtures (214 projects, `s119-fnchain-measure/measure.ts`): 62 Query Records read a wired filter value,
+and every one stopped at a Function is a copy of the **Site Builder template**. 18 are its `PageEditor`'s "Hold the
+page id" (run by the page's Did Mount, its output read by the query: "a value that only exists inside a handler"), 14
+its `Site` page's "The slug to show" (it writes `Noodl.Variables`), 5 a real Function-to-Function chain on the same
+page. The current template (`site-builder.content.json`, materialized with the editor's own `ProjectExporter`,
+`materialize.ts`) has three such filters, not 42. The stale copies also differ from it: SBR-016 ticked the PageEditor
+query's box after they were made.
+
+So the filters were a symptom. The refusal behind "Hold the page id" is a family of its own: **a Function run by an
+event (`Run` wired) whose outputs are read by a logic node** ("its out-x output is consumed outside the Run chain by an
+unrendered sink"). 134 Functions in 28 projects carry it (`stray.ts`). Their sinks are mostly actions (a Cloud
+Function's `in-*` 97, a Set Record's `prop-*` 71, a Create Record's 54, a Record's Id 52), and the actions are mostly
+fired by **the same Function's own signal**: `Outputs.go()` in the body, wired into the action's trigger. 130 of the
+134 send such a signal, and 76 have every value read on their own signal's targets (`sigchain.ts`). Only `done`
+continued a run in the export; a signal of the author's own was not a chain at all.
+
+### §86.1 What the runtime does, measured on its own node
+
+A signal call publishes the run's held writes (GAM-011: a write of the value already held is published with the next
+signal) and sends a pulse. The pulse's targets act in the drain, after the body. Each target applies one queued entry
+per port per pass, values before signals (C7, FB-025), so **the k-th pulse reads the k-th value each output published
+since the run began**, or the last when there are fewer, or what the output last sent when the run published nothing.
+`undefined` is never sent (C3). Values live on the node across runs. Read with a recorder on the runtime's own Function
+(`sigprobe.js`, then `tests/helpers/runtime-function-arm.js`): `a=1; go(); a=2` reads 1; `go(); a=3` reads 3;
+`a=1; go(); a=2; go2()` reads 1 at `go2`; `a=1; a=2; go()` reads 1.
+
+That last reading means a body that resets an output and then sets it hands the signal's target the reset. Filed as
+**P18-S119-FIRSTWRITE** (needs a ruling; the export follows the runtime until it is given). The drive below shows it in
+the real app.
+
+Measuring the Site Builder found a template defect on the way: its Setup page's "Hold the token until the account
+exists" is run by Sign Up's Done, but the template ticks its token input's box, and since NDA-017 a ticked box re-runs a
+Run-wired Function. **Every keystroke in the setup token field calls `claimSite`** with the token typed so far, before
+the account exists (`tokenprobe.js`: four calls for "s", "se", "set" and Done; one with the box unticked). Filed as
+**P18-S119-TOKENCLAIM** (high).
+
+### §86.2 What is built
+
+| piece | what it is |
+|---|---|
+| `plan.ts` `pulseChainsOf` | for a Function run by an event: each signal of its own that a wire consumes becomes an arm (`jsfun-pulse`, its chain compiled as a Done chain is), all arms inside one `jsfun-pulses` placed first in the run's `then` (the targets act before Done is sent). The arms' reads are ordinary `jsfun-out` reads, valid inside the run's chain as Done's are |
+| refused by name, the Function's | a ticked (or unset) value box: a new value runs it and sends its signals again, where the export runs it on Run alone; one port fed by two of its signals |
+| refused by name, the signal's | a signal whose chain does not compile: its wires say why; the other signals still chain |
+| 🔴 the signals, not the run | a refusal here leaves the run compiling as before §86 (its Done, its rendered reads), and each signal wire is reported (`pulseRefusals`, read where the attach pass reports a trigger it cannot attach). Refusing the run instead took three exported nodes out of gram's Member and Post pages, measured over the shipped templates and reverted |
+| `JsFunctionPlan.pulsed` | set only on a run that compiles with arms |
+| the attach scan (`scanActions`) | had no case for a Function's chains at all: a Cloud Function called from a run's Done never earned its export. Now walks `jsfun-run`, `jsfun-pulses` and `jsfun-pulse` |
+| the control-state rule, the eleventh family | a Function run from another element's event reads its `in-*` from that handler, so the control feeding it earns its state row (the Site Builder's contact form: three fields, Run on Send) |
+| `src/lib/functionRun.ts` (`functionRunLib.ts`) | `functionNode(signals)` (the node's values across runs, and what each output last sent) and `runFunction(body, inputs, node)`: the body against a recording `Outputs`, the runtime's change test and held writes, then each pulse's values in lockstep. Emitted only where a component prints a pulsed run |
+| `component.ts` | the wrapper takes `Outputs` as a parameter with its signal seeds as the default; one `useRef(functionNode<…>([signals])).current` per pulsed Function; the run prints `const <fn>Run = runFunction(<fn>, {…}, <fn>Node)`, then `for (const <fn>Pulse of <fn>Run.pulses) { if (<fn>Pulse.signal === 'go') { … } else if … }`. Inside an arm the Function's outputs print as `<fn>Pulse.values.x`; in its Done chain as `<fn>Run.outputs.x` (the node's values, where a re-run of the body would start from an empty record) |
+
+### §86.3 The test (`tests/the-function-sends-its-signals.test.ts`, 37 rows)
+
+§A grades `runFunction` against the **runtime's own Function** (`runtime-function-arm.js`: the corpus graph harness, a
+pulser into Run, one recorder per signal reading its inputs after they update, in a child process), body by body over
+16 cases: one signal, a write after it, a signal sent twice, two signals, the signal before the write, an output written
+twice, a held write, a held write queued ahead of a later one, an unwritten output, `undefined`, the body reading its
+own output across three runs, an early return, a throw after the signal, the `.send()` form, three pulses, and the
+fixture's own body over five runs. A control row proves the cases discriminate: "every pulse reads the run's last
+values" is wrong on exactly six of them. A second control counts the pulses the runtime arm saw (31). The fixture's
+emitted wrapper, run by the emitted helper, agrees with the runtime over the fixture's runs. §B pins the fixture's page
+(`tests/fixtures/pulse-desk`: a name field, Send, a Function sending `go` or `refused` into three Set Variables), Done
+after the pulses reading the node's values, the field's state row and its control (run by the field's own Text
+Changed, no state), no helper in a project without a pulsed run, and the typecheck. §C the refusals and their controls;
+§D a Cloud Function called from a pulse earns its export and typechecks.
+
+**Mutant arms**, in a copy (`packages/.nx-mut-s119`, the three sources `cmp`-checked against the working tree before
+and after, removed straight after). Control 36 / 36 for A to O, 37 / 37 for P and Q (added with the fallback). Every arm
+printed its Tests line.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | no pulses compiled | 12 |
+| B | a ticked box not refused | 2 |
+| C | two signals on one port not refused | 1 |
+| D | each pulse reads the last value (no lockstep) | 5 |
+| E | held writes not published with the signal | 1 (survived the first case list: no case told it apart; the held-write-queued case added, predicted, and the runtime agreed) |
+| F | `undefined` sent | 1 |
+| G | an output nothing published reads nothing, not what it last sent | 4 |
+| H | one pulse count across all signals | 1 |
+| I | arms read a re-run of the body | 2 |
+| J | the eleventh family off | 8 |
+| K | the attach scan skips the chains | 2 |
+| L | values not kept across runs | 3 |
+| M | Done reads a re-run | 1 |
+| N | the pulses after Done | 1 |
+| O | no `.send()` form | 1 |
+| P | a refused signal refuses the run | 3 |
+| Q | one signal's failure refuses every signal | 2 |
+
+**Neighbours.** `hls001-corpus-identity`: the corpus gained `pulse-desk`. Predicted before regenerating: no path moves,
+because every byte row stayed green on the red run. The golden's diff counted the same: 0 lines out, 19 in, all
+pulse-desk's. jsfun, controlled-state, emitted-syntax, cloud-function, stores-events and the other Function specs green
+(243 / 243 beside it). Package `tsc` 0, strict and loose (the editor's gate).
+
+### §86.4 The drive (`s119-pulse-drive/`)
+
+`pulse-desk` with the reset ahead of the empty-name test, so a refused Send writes `problem` twice before `refused`.
+`EXPECTED.md` first, from the runtime's rules. No backend; three arms in one headless Chrome, a real click on Send.
+
+| step | runtime | export-fixed | export-control (HEAD `8baf5a3fd`) |
+|---|---|---|---|
+| S1 Send, empty | **no problem text** | the same | nothing |
+| S2 "Ada", Send | Hello, Ada · 1 | the same | nothing |
+| S3 Send again | Hello, Ada · 2 | the same | nothing |
+| S4 clear, Send | Hello, Ada · 2 · **Type a name first** | the same | nothing |
+| S5 "Grace", Send | Hello, Grace · 3 · Type a name first | the same | nothing |
+
+**The runtime and the fixed export agree in every step**, and EXPECTED.md held in every cell. S1 against S4 is
+P18-S119-FIRSTWRITE in a running app: the same empty Send shows nothing the first time (the refused pulse reads the
+reset, `''`) and the sentence the second (`''` is now the value held, so the sentence is the only publication). No
+console errors in any arm.
+
+### §86.5 What this reaches, measured
+
+Dispositions, HEAD against the tree (`dispdiff.ts`), node by node:
+
+- **The shipped templates** (the two `*.content.json` templates materialized, and `templates/`, 19 projects): **27
+  nodes newly exported, none lost**, 10 with a truer reason. gram 12 (SetUp: the form's Function, `setUpCommunity`, the
+  sign-in and the navigation after it; Join; the queue row's three navigations), marketplace 11 (SetUp, GiveLogin, Name,
+  a pay option's pick), nightbook 2, todo-list and todo-list-demo 1 each.
+- **The corpus** (215 projects): 4 nodes, all `pulse-desk`'s. Every other Function keeps its HEAD disposition and
+  reason. Its signal wires now say why they are not chained where its run cannot use them.
+
+The Site Builder itself moves no node yet. Its ContactForm's chain reaches the Cloud Function, whose Done and Failure
+send Evaluate to two Conditions with their boxes unticked, showing a confirmation or a refusal: "its value outputs are
+snapshots of the last Evaluate… only a live comparator translates". That refusal holds 36 Conditions in 11 components
+of the shipped templates (the Site Builder's ContactForm, landing-pages' Contact, todo-list's Sign in, eight
+members-area pages) and 122 in 56 components of the corpus, each read by a Group's or a Text's Mounted
+(`snapcond.ts`). Its PageEditor and Setup Functions tick their input boxes: P18-S119-TICKEDRUN, and for Setup,
+P18-S119-TOKENCLAIM.
+
+### §86.6 What this leaves
+
+1. **The Evaluate-driven Condition** (the snapshot latch above): its result as state written where Evaluate is sent,
+   read by Mounted. The next step for the Site Builder's contact form and eight members-area pages.
+2. **P18-S119-TICKEDRUN** (filed): a Run-wired Function that also runs on a ticked input.
+3. The 54 Functions whose value reads sit partly off their own signals' targets (`sigchain.ts`: Todo's "Is there
+   anything to write?" commands read by a Write history component, 27): §4f's state read by a logic sink.
+4. P18-S119-FIRSTWRITE (a ruling) and P18-S119-TOKENCLAIM (the template's box) are not this lane's to fix.
+5. Carried: P18-S118-NUMBERFIELD, GAM-009's remount rule, P18-S113-LISTLIVE, P18-S115-DYNPROBE, BUTTONLOOK and
+   INPUTLOOK (low).

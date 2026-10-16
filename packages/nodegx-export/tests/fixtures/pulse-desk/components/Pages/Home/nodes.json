@@ -1,0 +1,220 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b8d20e00-0000-4000-8000-000000000303",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "shell"
+      ],
+      "parameters": {
+        "title": "Pulse Desk",
+        "urlPath": "home"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "page",
+      "children": [
+        "headline",
+        "nameInput",
+        "sendBtn",
+        "greetingText",
+        "sendsText",
+        "problemText"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-8)",
+        "paddingLeft": "var(--space-6)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "headline",
+      "type": "Text",
+      "label": "Headline",
+      "parent": "shell",
+      "parameters": {
+        "text": "Pulse Desk",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "nameInput",
+      "type": "net.noodl.controls.textinput",
+      "label": "Your name",
+      "parent": "shell",
+      "parameters": {
+        "placeholder": "Your name"
+      },
+      "x": 100,
+      "y": 360
+    },
+    {
+      "id": "sendBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Send",
+      "parent": "shell",
+      "parameters": {
+        "label": "Send"
+      },
+      "x": 100,
+      "y": 440
+    },
+    {
+      "id": "greetingText",
+      "type": "Text",
+      "label": "Greeting",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "sendsText",
+      "type": "Text",
+      "label": "Sends",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 600
+    },
+    {
+      "id": "problemText",
+      "type": "Text",
+      "label": "Problem",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 680
+    },
+    {
+      "id": "hold",
+      "type": "JavaScriptFunction",
+      "label": "Hold the name until Send",
+      "parameters": {
+        "functionScript": "const name = String(Inputs.name || '').trim();\nif (name === '') {\n  Outputs.problem = 'Type a name first';\n  Outputs.refused();\n  return;\n}\nOutputs.problem = '';\nOutputs.greeting = 'Hello, ' + name;\nOutputs.sends = (Outputs.sends || 0) + 1;\nOutputs.go();",
+        "runOnChange-in-name": false
+      },
+      "ports": [
+        {
+          "name": "in-name",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-problem",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-greeting",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-sends",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 600,
+      "y": 440
+    },
+    {
+      "id": "greetingSet",
+      "type": "Set Variable",
+      "label": "Remember the greeting",
+      "parameters": {
+        "name": "greeting"
+      },
+      "x": 900,
+      "y": 360
+    },
+    {
+      "id": "sendsSet",
+      "type": "Set Variable",
+      "label": "Remember the sends",
+      "parameters": {
+        "name": "sends"
+      },
+      "x": 900,
+      "y": 440
+    },
+    {
+      "id": "problemSet",
+      "type": "Set Variable",
+      "label": "Remember the problem",
+      "parameters": {
+        "name": "problem"
+      },
+      "x": 900,
+      "y": 520
+    },
+    {
+      "id": "greetingRead",
+      "type": "Variable2",
+      "label": "The greeting",
+      "parameters": {
+        "name": "greeting"
+      },
+      "x": 1200,
+      "y": 360
+    },
+    {
+      "id": "sendsRead",
+      "type": "Variable2",
+      "label": "The sends",
+      "parameters": {
+        "name": "sends"
+      },
+      "x": 1200,
+      "y": 440
+    },
+    {
+      "id": "problemRead",
+      "type": "Variable2",
+      "label": "The problem",
+      "parameters": {
+        "name": "problem"
+      },
+      "x": 1200,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

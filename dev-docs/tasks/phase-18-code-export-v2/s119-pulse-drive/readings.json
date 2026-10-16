@@ -1,0 +1,181 @@
+{
+ "runtime": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "field": "",
+    "lines": [
+     "Pulse Desk",
+     "Send"
+    ]
+   },
+   {
+    "step": "S1 Send, the field empty",
+    "field": "",
+    "lines": [
+     "Pulse Desk",
+     "Send"
+    ]
+   },
+   {
+    "step": "S2 type Ada, Send",
+    "field": "Ada",
+    "lines": [
+     "Pulse Desk",
+     "Send",
+     "Hello, Ada",
+     "1"
+    ]
+   },
+   {
+    "step": "S3 Send again",
+    "field": "Ada",
+    "lines": [
+     "Pulse Desk",
+     "Send",
+     "Hello, Ada",
+     "2"
+    ]
+   },
+   {
+    "step": "S4 clear, Send",
+    "field": "",
+    "lines": [
+     "Pulse Desk",
+     "Send",
+     "Hello, Ada",
+     "2",
+     "Type a name first"
+    ]
+   },
+   {
+    "step": "S5 type Grace, Send",
+    "field": "Grace",
+    "lines": [
+     "Pulse Desk",
+     "Send",
+     "Hello, Grace",
+     "3",
+     "Type a name first"
+    ]
+   }
+  ],
+  "console": []
+ },
+ "export-control": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "field": "",
+    "lines": [
+     "Pulse Desk",
+     "Send"
+    ]
+   },
+   {
+    "step": "S1 Send, the field empty",
+    "field": "",
+    "lines": [
+     "Pulse Desk",
+     "Send"
+    ]
+   },
+   {
+    "step": "S2 type Ada, Send",
+    "field": "Ada",
+    "lines": [
+     "Pulse Desk",
+     "Send"
+    ]
+   },
+   {
+    "step": "S3 Send again",
+    "field": "Ada",
+    "lines": [
+     "Pulse Desk",
+     "Send"
+    ]
+   },
+   {
+    "step": "S4 clear, Send",
+    "field": "",
+    "lines": [
+     "Pulse Desk",
+     "Send"
+    ]
+   },
+   {
+    "step": "S5 type Grace, Send",
+    "field": "Grace",
+    "lines": [
+     "Pulse Desk",
+     "Send"
+    ]
+   }
+  ],
+  "console": []
+ },
+ "export-fixed": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "field": "",
+    "lines": [
+     "Pulse Desk",
+     "Send"
+    ]
+   },
+   {
+    "step": "S1 Send, the field empty",
+    "field": "",
+    "lines": [
+     "Pulse Desk",
+     "Send"
+    ]
+   },
+   {
+    "step": "S2 type Ada, Send",
+    "field": "Ada",
+    "lines": [
+     "Pulse Desk",
+     "Send",
+     "Hello, Ada",
+     "1"
+    ]
+   },
+   {
+    "step": "S3 Send again",
+    "field": "Ada",
+    "lines": [
+     "Pulse Desk",
+     "Send",
+     "Hello, Ada",
+     "2"
+    ]
+   },
+   {
+    "step": "S4 clear, Send",
+    "field": "",
+    "lines": [
+     "Pulse Desk",
+     "Send",
+     "Hello, Ada",
+     "2",
+     "Type a name first"
+    ]
+   },
+   {
+    "step": "S5 type Grace, Send",
+    "field": "Grace",
+    "lines": [
+     "Pulse Desk",
+     "Send",
+     "Hello, Grace",
+     "3",
+     "Type a name first"
+    ]
+   }
+  ],
+  "console": []
+ }
+}
