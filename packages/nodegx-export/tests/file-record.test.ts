@@ -216,13 +216,19 @@ describe('§B — the component', () => {
     expect(handlerOf(home(app), 'Sign the stored link')).toContain(SIGN_GUARD);
   });
 
-  test('B5 the record’s row and its Id effect are both there (the late sweep kept a fired node’s row)', () => {
+  test('B5 the record’s row and its Id bind are both there (the late sweep kept a bound node’s row)', () => {
     expect(home(app)).toContain('useState<Photo | undefined>()');
-    expect(home(app)).toContain('await fetchPhotoById(thePhotoRecordId)');
+    // P18-S113-IDBINDREAD. Fetch unwired: the Id binds the row to the client's copy, and reads nothing.
+    expect(home(app)).toContain('return subscribeRecord<Photo>(thePhotoRecordId, setThePhotoRow);');
+    expect(home(app)).not.toContain('fetchPhotoById');
   });
 
   test('B6 inside the Record’s own Done chain the Cloud File reads the chain-local', () => {
     const ir = cloneIr();
+    // A Done chain fires only after a Fetch (P18-S113-IDBINDREAD), so the Record is fetched by a button here.
+    addNode(componentOf(ir, HOME), { id: 'loadBtn', type: 'net.noodl.controls.button', parameters: [{ name: 'label', value: lit('Load') }], parent: 'shell' } as never);
+    componentOf(ir, HOME).nodes.find((n) => n.id === 'shell')!.children!.push('loadBtn');
+    wire(ir, HOME, 'loadBtn', 'onClick', 'record', 'fetch', 'signal');
     addNode(componentOf(ir, HOME), { id: 'urlSet', type: 'Set Variable', parameters: [{ name: 'name', value: lit('lastUrl') }] });
     wire(ir, HOME, 'record', 'done', 'urlSet', 'do', 'signal');
     wire(ir, HOME, 'cloud2', 'url', 'urlSet', 'value');
@@ -368,12 +374,13 @@ describe('§D — the fixture, whole', () => {
     }
   });
 
-  test('D4 the sites, counted: two envelopes, one sign, two names, two guards, two functions in the collection module', () => {
+  test('D4 the sites, counted: two envelopes, one sign, two names, two guards, one function in the collection module', () => {
     expect(home(app).match(/fileRef\(/g)).toHaveLength(2);
     expect(home(app).match(/await signFileUrl\(/g)).toHaveLength(1);
     expect(home(app).match(/cloudFileName\(/g)).toHaveLength(2);
     expect(home(app).match(/throw new Error\('No file specified'\)/g)).toHaveLength(2);
-    expect(photosApi(app).match(/^export async function /gm)).toHaveLength(2);
+    // `createPhoto`; the Record binds by its Id and owes the module no read (P18-S113-IDBINDREAD).
+    expect(photosApi(app).match(/^export async function /gm)).toHaveLength(1);
   });
 
   test('D5 the no-backend export of the same fixture typechecks too', () => {

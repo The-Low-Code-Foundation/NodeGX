@@ -117,7 +117,9 @@ describe('§B the component subscribes a live Record’s row, and nothing else',
   it('a wired Fetch with the box unstated is settled unticked, as the editor settles it (NDA-017); ticked by hand it is live', () => {
     const settled = emitWith(PAGE_DESK).files['src/pages/Home.tsx'];
     expect(settled).not.toContain('subscribeRecord<Page>(pageRow');
-    expect(settled).toContain('subscribeRecord<Page>(livePageRow.id, setLivePageRow)');
+    // The live Record's Fetch is unwired: its Id binds the row to the copy it names (P18-S113-IDBINDREAD), one subscription.
+    expect(settled).toContain('return subscribeRecord<Page>(livePageRecordId, setLivePageRow);');
+    expect(settled).not.toContain('subscribeRecord<Page>(livePageRow.id');
     const ticked = emitWith(PAGE_DESK, (ir) => setParam(ir, 'pageRec', 'runOnChange-record', true)).files['src/pages/Home.tsx'];
     expect(ticked).toContain('  useEffect(() => (pageRow?.id === undefined ? undefined : subscribeRecord<Page>(pageRow.id, setPageRow)), [pageRow?.id]);');
   });

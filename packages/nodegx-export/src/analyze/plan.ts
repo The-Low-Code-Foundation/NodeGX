@@ -2657,13 +2657,6 @@ export type HandlerAction =
       materialize?: string;
       /** The `Error` output's row — written on every failure, never cleared (the runtime's own). */
       errorState: string;
-      /**
-       * §43.2 — the effect form. `setModelID` rebinds the node to a fresh model the moment a new
-       * Id arrives (its outputs read undefined before any read) and binds *nothing* on an empty
-       * one, reading nothing and reporting nothing — so the effect clears the row first and
-       * returns silently on an empty Id, where the wired form's Fetch throws `Missing Id.`.
-       */
-      viaEffect?: true;
       then: HandlerAction[];
       failThen: HandlerAction[];
     }
@@ -3780,6 +3773,11 @@ export interface RecordReadPlan {
    * False where the project declares no backend: the read is a stub that throws and no client is emitted.
    */
   live: boolean;
+  /**
+   * P18-S113-IDBINDREAD. Fetch unwired: the node never reads, its Id only binds the row to the client's copy of the
+   * record (`RecordEffectPlan`). Its class's module carries no `fetch<Type>ById` for it, and the client holds records.
+   */
+  binds?: true;
 }
 
 /**
@@ -3840,11 +3838,23 @@ export function objectSeedAction(seed: ObjectSeedPlan): HandlerAction {
   };
 }
 
-/** A `Record` whose `Fetch` is unwired (EXP-011 §43): the read, run from an effect keyed on its Id. */
+/**
+ * A `Record` whose `Fetch` is unwired (EXP-011 §43, P18-S113-IDBINDREAD): the Id binds the row to the client's copy of
+ * that record, from an effect keyed on the Id. `action` is the node's `record-fetch` with empty chains (a Done or a
+ * Failure wired is refused, as neither fires without a Fetch); it carries the Id and the row the planner fills, and
+ * the emitter prints the bind from it, never the read.
+ */
 export interface RecordEffectPlan {
   nodeId: string;
   action: HandlerAction;
   comment: string;
+  /** The project declares a backend, so the client holds records; with none, nothing is held and the row stays unset. */
+  held: boolean;
+  /**
+   * "Record properties" ticked (the default): the row follows every later write to the copy (`onModelChangedCallback`).
+   * Unticked, the bind flags the outputs once, so the row is the copy as it was at the bind.
+   */
+  follows: boolean;
 }
 
 export interface RepeaterPlan {
@@ -6624,7 +6634,10 @@ function planComponent(
         null,
         node.id,
         'record-row-error',
-        `The Error output of ${node.authoredLabel ? `"${node.authoredLabel}"` : 'the Record'} — why the last read failed, and never cleared by a later success (dbmodelnode2.ts).`
+        // P18-S113-IDBINDREAD. With Fetch unwired the node is the Id bind, which reads nothing and so reports nothing.
+        wiredPorts.has(`${node.id}:fetch`)
+          ? `The Error output of ${node.authoredLabel ? `"${node.authoredLabel}"` : 'the Record'} — why the last read failed, and never cleared by a later success (dbmodelnode2.ts).`
+          : `The Error output of ${node.authoredLabel ? `"${node.authoredLabel}"` : 'the Record'} — its Fetch is unwired and only a Fetch reports one, so it stays empty (dbmodelnode2.ts).`
       );
       recordErrorVars.set(node.id, stateVar);
     }
@@ -6642,7 +6655,9 @@ function planComponent(
         null,
         node.id,
         'record-row',
-        `The record the last ${names.fnName} read — undefined until the first read, as the node's property outputs read before one has been made.`
+        wiredPorts.has(`${node.id}:fetch`)
+          ? `The record the last ${names.fnName} read — undefined until the first read, as the node's property outputs read before one has been made.`
+          : `The app's copy of the record ${node.authoredLabel ? `"${node.authoredLabel}"` : 'the Record'}'s Id names — undefined until the app holds it, as the node's property outputs read before anything has filled the record (dbmodelnode2.ts setModelID).`
       );
       recordAnswerVars.set(node.id, stateVar);
     }
@@ -6650,6 +6665,22 @@ function planComponent(
   };
   /** Record nodes whose `Fetch` attached — from a trigger, or from the Id effect (§43.2). */
   const attachedRecordNodes = new Set<string>();
+  /**
+   * P18-S113-IDBINDREAD. Why a Record with `Fetch` unwired cannot become the Id bind, asked by the bind pass and by
+   * `recordWillFire` alike. With Fetch unwired the Id setter only binds (`setModelID`): no request, so Done and Failure
+   * never fire, and unticked under Run On Value Change it does not even bind.
+   */
+  const recordBindRefusal = (node: NodeIR): string | undefined => {
+    // P18-S110-RUNONCHANGE. Unticked, the Id setter only stores the Id (dbmodelnode2.ts `modelId`).
+    if (literalParam(node, 'runOnChange-modelId') === false) {
+      return 'its Id is unticked under Run On Value Change and its Fetch is unwired — the runtime never reads the row';
+    }
+    const pulse = component.connections.find((c) => c.fromId === node.id && (c.fromProperty === 'done' || c.fromProperty === 'failure'));
+    if (pulse !== undefined) {
+      return `its ${pulse.fromProperty === 'done' ? 'Done' : 'Failure'} output is consumed and its Fetch is unwired — both fire only after a Fetch, and an Id only binds the record it names (dbmodelnode2.ts setModelID)`;
+    }
+    return undefined;
+  };
   /**
    * EXP-011 §46 — the compile-time answer to "is this Record fired at all?", for a read compiled
    * before the attach pass has run (§45.3's rule, one family over). A sibling handler — a Sign
@@ -6666,6 +6697,7 @@ function planComponent(
   const recordWillFire = (node: NodeIR): boolean => {
     if (wiredPorts.has(`${node.id}:fetch`)) return false;
     if (!plan.file) return false;
+    if (recordBindRefusal(node) !== undefined) return false;
     const compiled = compiledOf(node, 'fetch');
     return !('defer' in compiled) && actionsValidIn([compiled.action], { kind: 'render' });
   };
@@ -17581,17 +17613,17 @@ function planComponent(
     for (const id of compiled.subscribes ?? []) boundSubscribers.add(id);
   }
 
-  // EXP-011 §43. A `Record` whose `Fetch` is unwired reads on every change of its Id
-  // (`runOnValueChange`, `controlSignal: 'fetch'`, dbmodelnode2.ts) — a re-run keyed on the Id,
-  // which is a useEffect, not a handler. The reactive Condition's shape, for the same reason;
-  // a Record with `Fetch` wired is a handler action and never reaches here.
+  // EXP-011 §43, P18-S113-IDBINDREAD. A `Record` whose `Fetch` is unwired is bound to the app's copy of the record
+  // its Id names whenever the Id changes (dbmodelnode2.ts `setModelID`, `Model.get(id)`): no request, no Done, no
+  // Error. §43 read `controlSignal: 'fetch'` as "reads on every Id change"; it governs whether the Id rebinds. A
+  // re-run keyed on the Id is a useEffect, not a handler — the reactive Condition's shape, for the same reason; a
+  // Record with `Fetch` wired is a handler action and never reaches here.
   for (const node of component.nodes) {
     if (node.type !== RECORD_TYPE || dispositions[node.id] !== undefined) continue;
     if (wiredPorts.has(`${node.id}:fetch`)) continue;
-    // P18-S110-RUNONCHANGE. Unticked, the Id setter only stores the Id (dbmodelnode2.ts `modelId`): with
-    // Fetch unwired nothing ever reads the row, and an effect keyed on the Id would.
-    if (literalParam(node, 'runOnChange-modelId') === false) {
-      recordEffectDefers.set(node.id, 'its Id is unticked under Run On Value Change and its Fetch is unwired — the runtime never reads the row');
+    const refusal = recordBindRefusal(node);
+    if (refusal !== undefined) {
+      recordEffectDefers.set(node.id, refusal);
       continue;
     }
     if (!plan.file) {
@@ -17615,9 +17647,14 @@ function planComponent(
     const into = `src/${plan.file.dir}/${plan.file.fileBase}.tsx`;
     plan.recordEffects.push({
       nodeId: node.id,
-      action: snapped.kind === 'record-fetch' ? { ...snapped, viaEffect: true } : snapped,
-      comment: `${node.authoredLabel ?? 'Record'} — read again whenever its Id changes (dbmodelnode2.ts runOnValueChange).`
+      action: snapped,
+      comment: `${node.authoredLabel ?? 'Record'} — bound to the app's copy of the record its Id names, whenever the Id changes; binding reads nothing (dbmodelnode2.ts setModelID).`,
+      held: ir.project.cloudservices !== undefined,
+      follows: literalParam(node, 'runOnChange-record') !== false
     });
+    // Its class's module owes it no `fetch<Type>ById`: nothing here reads.
+    const read = plan.recordReads.find((r) => r.nodeId === node.id);
+    if (read !== undefined) read.binds = true;
     dispositions[node.id] = { kind: 'collapsed', into };
     for (const id of compiled.collapses ?? []) dispositions[id] = { kind: 'collapsed', into };
     for (const key of compiled.consumes) consumed.add(key);

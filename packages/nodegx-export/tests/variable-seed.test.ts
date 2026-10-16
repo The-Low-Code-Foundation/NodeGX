@@ -393,11 +393,12 @@ describe('§F (§72) an unknown Id — a Variable nothing writes — is coerced 
     return ir;
   };
 
-  test('F1 the Record fetch, the add and the remove all bind the coerced read; the store is unknown; the app typechecks (3× TS2345 on the reverted emitter)', () => {
+  test('F1 the Record bind, the add and the remove all bind the coerced read; the store is unknown; the app typechecks (3× TS2345 on the reverted emitter)', () => {
     const ir = puppyIdFromVariable();
     const out = emitApp(ir, catalog);
     const src = out.files['src/pages/Home.tsx'];
-    expect(src).toContain("const puppyRecordId = String(puppyId.get() ?? '');");
+    // P18-S113-IDBINDREAD. The Record's Fetch is unwired: its Id is the bind's, read off the render local its effect is keyed on.
+    expect(src).toContain("const puppyRecordId = String(id ?? '');");
     expect(src).toContain("const linkTargetId = String(puppyId.get() ?? '');");
     expect(src).toContain("const unlinkTargetId = String(puppyId.get() ?? '');");
     expect(src).not.toContain('= puppyId.get();');
@@ -411,9 +412,10 @@ describe('§F (§72) an unknown Id — a Variable nothing writes — is coerced 
     connect(componentOf(ir, HOME), 'inquiryIdVar', 'value', 'puppy', 'modelId');
     const out = emitApp(ir, catalog);
     const src = out.files['src/pages/Home.tsx'];
-    expect(src).toContain('const puppyRecordId = inquiryId.get();');
+    expect(src).toContain('const puppyRecordId = id;');
     expect(src).toContain('const linkTargetId = inquiryId.get();');
     expect(src).not.toContain("String(inquiryId.get() ?? '')");
+    expect(src).not.toContain("String(id ?? '')");
     expect(typecheckEmittedApp(out)).toEqual([]);
   });
 
@@ -448,7 +450,7 @@ describe('§F (§72) an unknown Id — a Variable nothing writes — is coerced 
 
   test("F5 the guard still follows the coerced bind — an unwritten variable becomes '' and meets the runtime's own sentence, before any request", () => {
     const src = linkHome(puppyIdFromVariable());
-    expect(src).toMatch(/const puppyRecordId = String\(puppyId\.get\(\) \?\? ''\);\n\s+if \(puppyRecordId === undefined \|\| puppyRecordId === null \|\| puppyRecordId === ''\) return;/);
+    expect(src).toMatch(/const puppyRecordId = String\(id \?\? ''\);\n\s+if \(puppyRecordId === undefined \|\| puppyRecordId === null \|\| puppyRecordId === ''\) return undefined;/);
     expect(src).toMatch(/const linkTargetId = String\(puppyId\.get\(\) \?\? ''\);\n\s+if \(!linkTargetId\) throw new Error\('No target record Id \(the record to add a relation to\) specified'\);/);
   });
 });

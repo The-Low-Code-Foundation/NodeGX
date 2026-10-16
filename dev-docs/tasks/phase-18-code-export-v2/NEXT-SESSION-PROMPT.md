@@ -1,3 +1,43 @@
+# Next session — session 114 (2026-10-16, BOARD lane 6) fixed **P18-S113-IDBINDREAD** and drove it: a Record whose Fetch is unwired binds to the app's copy of its record, as the running app's does; it no longer reads the backend on every Id change.
+
+## ✅ Session 114: the Id binds, it does not read
+
+Read EXP-011 §81 for the whole record; in short:
+
+| what | where |
+|---|---|
+| The bind: `useEffect(() => { … return subscribeRecord<T>(id, setRow); }, [id])`; unticked, `subscribeRecord(…)()` (the copy once at the bind). No request, no Error, no Done; an empty or unheld Id leaves the row as it was | `component.ts` `recordBinds` |
+| A Done or Failure wired with Fetch unwired is refused by name (0 of 83 in the corpus); shared with `recordWillFire` | `plan.ts` `recordBindRefusal` |
+| No `fetch<Type>ById` (and no "Source:") for a binding Record; no empty `import {  } from './client'`; held records ship wherever a Record binds | `emitApp.ts`, `RecordReadPlan.binds` |
+| A `record-out` render read earns its row in both walkers (the read action had been the only earner) | `component.ts` |
+| Spec: `record.test.ts` §B, eight rows; re-pinned rows in file-record, relation-pair, variable-seed, the-live-record | |
+| Driven, three arms, `EXPECTED.md` first: runtime == fixed on every title in seven steps, 2 PUTs and no GET in both; HEAD made six GETs | `s114-idbind-drive/` |
+
+- 🔴 **A mutant that does not compile grades nothing, again.** Arm B (`kind !== 'never'`) was a TS2367 and every suite
+  "failed to run" with 0 tests. s113 recorded the same trap. Re-shaped as `(… || true)`. Shape a mutant so it compiles.
+- 🔴 **A peer can be in your package.** `src/emit/style.ts` changed under this session (07:26, a narrowing fix in the
+  Placeholder-opacity code): not ours, left out of the commit. The mutant arms ran in a copy (`packages/.nx-mut-s114`,
+  `node_modules` symlinked, removed after) so no peer's run ever saw a mutant.
+- **Re-measure a relayed sentence.** §43.3 says "outputs read undefined the moment a new Id arrives"; the runtime flags
+  only the keys the new record holds, so outputs keep the old values (D5 measured it).
+
+Readings: `record.test.ts` 34 / 34; `the-live-record` 21 / 21; HLS-001 4 / 4 after regenerating (8 hashes moved, as
+predicted; with HEAD's three sources back, 4 / 4 on the old golden); package `tsc` 0; twelve mutant arms, each killing
+rows (B and F only after the fixes above). Whole export package (`nice -n 19 --runInBand`, 430 s): **128 / 130 suites,
+4,378 passed, 4 failed, 3 skipped**. Two failures were this change's: `relation-verbs` §17's two Record rows pinned
+`fetchPuppyById` on a Fetch-unwired Record; re-pinned to the bind, that suite is 24 / 24 (the whole package was not
+re-run after it). The other red is `parameter-coverage` on the P121 peer's three uncommitted Upload File ports
+(`photoQuality`, `readers`, `shrinkTo`; total 1,399 vs 1,396), as in sessions 110 to 113.
+
+**Next (BOARD lane 6):**
+1. **P18-S113-LISTLIVE**: the store's create / save / delete events in the exported client (`bindStoreEvents`), with the
+   query's filter and sort applied in the browser (`QueryUtils.matchesQuery` / `compareObjects`). Drive it with a runtime
+   arm (`s114-idbind-drive/` is the newest harness).
+2. P18-S112-NATIVESELECT; when P121 commits Upload File's three ports, classify them; the two `unexamined` ports.
+3. Then the backlog: P18-S109-MOUNTPULSE, §77.5, the graph line, the 112 unprobed ports, the four low rows.
+
+---
+
 # Next session — session 113 (2026-10-15, BOARD lane 6) closed **EXP-008's last gap port, P18-S111-RECORDLIVE**, driven: reaching **1,233 → 1,234 of 1,396, 0 gap ports**. Found two rows of the same family on the way.
 
 ## ✅ Session 113: a Record shows the app's one copy of its record

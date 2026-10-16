@@ -622,8 +622,11 @@ function apiModules(
     // EXP-011 §43. A Record's read joins its class's module — one module per class, the query's rule.
     for (const read of plan.recordReads) {
       const entry = moduleFor(read.collectionName, read.typeName, read.moduleBase);
-      entry.fetchOneName = read.fnName;
-      entry.readSites.push({ componentPath: plan.path, nodeId: read.nodeId });
+      // P18-S113-IDBINDREAD. A Record whose Id only binds reads nothing: it owes its module no read, and is no site of one.
+      if (!read.binds) {
+        entry.fetchOneName = read.fnName;
+        entry.readSites.push({ componentPath: plan.path, nodeId: read.nodeId });
+      }
       for (const column of read.reads) {
         if (!entry.reads.has(column.name)) entry.reads.set(column.name, column.tsType);
       }
@@ -656,7 +659,8 @@ function apiModules(
   const hasReturnLeg = hasSignIns || project.plans.some((plan) => plan.sessionCalls.some((call) => call.verb === 'magic-link'));
   // P18-S111-RECORDLIVE. The client holds one copy of each record only where a Record shows it live; every other app's
   // client is byte-identical.
-  const liveRecords = project.plans.some((plan) => plan.recordReads.some((read) => read.live));
+  // P18-S113-IDBINDREAD. A Record bound by its Id shows the held copy whatever its box says, so it needs them too.
+  const liveRecords = project.plans.some((plan) => plan.recordReads.some((read) => read.live || read.binds));
   const hasApi = byCollection.size > 0 || hasSessionCalls || hasCloudCalls || hasFileOps || hasSubscriptions || hasSignIns;
   const notes: string[] = [];
   // No collection module can collide with `client.ts` (or `session.ts`): moduleBase is the
@@ -817,8 +821,10 @@ function apiModules(
                   : 'remove'
         );
       }
-      const importLine = `import { ${[...clientImports].sort().join(', ')} } from './client';\n`;
-      stubs.push([`src/api/${moduleBase}.ts`, GENERATED_MODULE_TS + importLine + filesImport + '\n' + parts.join('\n')]);
+      // P18-S113-IDBINDREAD. A class whose only Record binds by its Id imports nothing from the client: its module is the interface.
+      const importLine = clientImports.size === 0 ? '' : `import { ${[...clientImports].sort().join(', ')} } from './client';\n`;
+      const imports = importLine + filesImport;
+      stubs.push([`src/api/${moduleBase}.ts`, GENERATED_MODULE_TS + (imports === '' ? '' : imports + '\n') + parts.join('\n')]);
     } else {
       stubs.push([`src/api/${moduleBase}.ts`, GENERATED_TS + (filesImport === '' ? '' : filesImport + '\n') + parts.join('\n')]);
     }

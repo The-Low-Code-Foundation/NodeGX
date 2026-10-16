@@ -11816,3 +11816,95 @@ EXP-008: **0 gap ports**, floor 1,234 of 1,396. HLS-001: 58 projects; this chang
    and sort applied in the browser.
 3. P18-S112-NATIVESELECT; then P18-S109-MOUNTPULSE, §77.5, the graph line, the two `unexamined` ports (Radio Button's
    icon colour and size), the 112 unprobed ports, the four low rows.
+
+## §81 A Record whose Fetch is unwired binds; it does not read (session 114, 2026-10-16): P18-S113-IDBINDREAD
+
+### §81.0 What the runtime does, and where §43 read it wrong
+
+The Id setter calls `setModelID` when `shouldRunOnValueChanged('modelId', …)` says so, which with Fetch unwired is every
+change of the Id. `setModelID` binds the node to the process-wide record (`Model.get(id)`), flags every `prop-*` the
+record already holds and fires Fetched. That is all: the one `scheduleFetch()` is behind the Fetch port, so no request
+is made, Done and Failure never fire and Error is never written. An empty Id binds nothing (`setModel(undefined)` flags
+only `id`), and a record nobody holds flags nothing, so a wire from a property keeps what it last carried. The published
+doc says the same. §43.1 read `runOnValueChange: { controlSignal: 'fetch' }` as "reads on every Id change"; it governs
+whether the Id *rebinds*. s71's 72-cell drive passed because its sheet was written from the same reading; only s113's
+runtime arm showed it.
+
+Counted first: 301 explicit-Id Records across the fixtures, the editor templates, the NodeGX test projects and the MCP
+corpus; 83 have Fetch unwired; **none wires Done or Failure**; Error is wired on three, all fixtures built from the
+misreading; Fetched on ten (refused by name since §43).
+
+### §81.1 What is built
+
+| piece | what it is |
+|---|---|
+| the bind (`component.ts`, `recordBinds`) | `useEffect(() => { const id = <render local>; if (empty) return undefined; return subscribeRecord<T>(id, setRow); }, [<the Id>])`: the row is the client's copy, now and after every write. A literal Id has no guard and `[]` |
+| unticked "Record properties" | the copy once at the bind: `subscribeRecord<T>(id, setRow)();` (binding flags whatever the record holds, whatever the box says) |
+| the refusal (`plan.ts`, `recordBindRefusal`) | a Done or Failure wired on a Record whose Fetch is unwired: `its Done output is consumed and its Fetch is unwired — both fire only after a Fetch, and an Id only binds the record it names (dbmodelnode2.ts setModelID)`. Shared with `recordWillFire`, with s110's unticked-Id refusal moved into it, so the two cannot disagree |
+| the module (`emitApp.ts`) | `RecordReadPlan.binds`: no `fetch<Type>ById` for a Record that only binds, and it is no "Source:" of one; a module left holding only the interface imports nothing from the client (it printed `import {  } from './client'`) |
+| the client | ships the held records wherever a Record binds, whatever its box says |
+| the rows | a `record-out` render read earns its row in both expression walkers (it had been earned only by the read action, which a bind does not have); the bind's row and Error rows say what they hold |
+| RECORDLIVE's subscription | no longer added for a binding Record (the bind already follows the copy; HEAD subscribed twice) |
+| no backend | nothing is held: no bind is emitted and the row stays unset, where HEAD called a stub that threw and wrote Error |
+
+`viaEffect` and its two branches in the read's emitter are gone; the read is only ever the wired form now.
+
+### §81.2 The test
+
+`record.test.ts` §B, nine rows replacing §43's three: the bind (no request, no Error, no raise, no `fetchPageById`, the
+module the interface alone, the client holding records); Done and Failure refused by name; a column read only in a
+handler earns the row and binds it; Error declared and never
+written; no row read, nothing emitted; the wired form keeps its throw; a literal Id at mount; the box unticked; no
+backend. §E page-desk: the live Record binds. Re-pinned to the bind: `file-record` B5, D4 (one function in the module)
+and B6 (a Done chain needs a Fetch, so the Record is fetched by a button there), `relation-pair` A8 and C4 (two raise
+sites, not three), `variable-seed` F1, F2, F5 (the bind reads the Id's render local), `the-live-record` §B (one
+subscription), `relation-verbs` §17's two Record rows (the module is the interface alone). HLS-001: **8 hashes moved**, predicted before the red run: `Home.tsx` and the class module in due-desk,
+gallery-desk, link-desk and page-desk; `client.ts` moved nowhere. With HEAD's three source files put back the gate was
+4 / 4; regenerated.
+
+**Mutant arms**, run in a copy of the package (`packages/.nx-mut-s114`, `node_modules` symlinked, removed after) so a
+peer working in the package (one was: `style.ts` changed under this session) never ran a mutant; each restored and
+`cmp`-checked against the working tree; six suites, 165 rows:
+
+| arm | what it removes | killed |
+|---|---|---|
+| A | the bind's emission | 10 |
+| B | the empty-Id guard | 15 (TS2345 in every typecheck row) |
+| C | the unticked form (always follow) | 1 |
+| D | `binds` (the module keeps its read) | 9 |
+| E | the Done / Failure refusal | 1 |
+| F | the first walker's `record-out` clause | 1 |
+| F2 | the second walker's | 24 |
+| G | RECORDLIVE's exclusion of a binding Record | 2 |
+| H | the empty client import guard | 2 |
+| I | a binding Record listed as a read site | 3 |
+| J | held records shipped for binds | 1 |
+| K | the no-backend gate | 3 |
+
+🔴 Arm B first read **0 total, "failed to run"**: `kind !== 'never'` is a TS2367, so nothing compiled and nothing was
+graded, s113's trap again. Re-shaped as `(… || true)`. 🔴 Arm F first **survived**: no row read a binding Record's
+column only in a handler, so the first walker's clause was unmeasured. The row was added (the press reads the copy) and
+F kills it.
+
+### §81.3 The drive (`s114-idbind-drive/`)
+
+s113's run-1 graph (`bind-desk`), `EXPECTED.md` first, three arms on a real backend: the runtime, HEAD's export, the
+working tree's. Two steps added to run 1's: an id nobody holds (D5) and the held id again (D6, the only cell that grades
+the unticked bind). **Every cell as expected; the runtime and the fixed export agree on every title in all seven
+steps**, both made 2 PUTs and no GET; HEAD's export made six GETs and cleared both titles on a 404 at D5.
+
+### §81.4 Recorded differences (not refused)
+
+- D4's sentence for a refused save, two producers (§43.6, §80.4).
+- Fetched stays refused by name: the bind fires it in the runtime, and the export has no pulse for it.
+- A held copy replaces the row whole, where the runtime re-flags only the keys the new record holds: switching between
+  two held records, a column the second lacks reads `undefined` in the export and keeps the first record's value in the
+  runtime. Neither D-step reaches it (one record in the app).
+- Staleness on an empty Id or an unheld record is the runtime's, carried: the Text keeps the previous record's title.
+
+### §81.5 What this leaves
+
+1. **P18-S113-LISTLIVE**: the store's create / save / delete events in the exported client, with the query's filter and
+   sort applied in the browser.
+2. P18-S112-NATIVESELECT; P18-S109-MOUNTPULSE; §77.5; the graph line; the two `unexamined` ports; the 112 unprobed ports;
+   the four low rows.

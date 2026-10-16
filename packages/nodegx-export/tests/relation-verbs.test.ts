@@ -245,10 +245,13 @@ describe('§17 — the Record node', () => {
     });
     wire(source, ADMIN, 'pageInputs', 'pm-id', 'puppyModel', 'modelId');
     // EXP-011 §43 built the single-record read: with `Fetch` unwired the node is an effect keyed
-    // on the page parameter, so there is no reason left to give — the row below pins that the
-    // module export exists, which is the positive half of what this test used to pin negatively.
+    // on the page parameter, so there is no reason left to give. Since P18-S113-IDBINDREAD that
+    // effect binds the row to the client's copy and reads nothing, so the module is the class
+    // interface alone — the positive half of what this test used to pin negatively.
     expect(reasonFor(source, ADMIN, 'puppyModel')).toBeUndefined();
-    expect(emitApp(source, catalog).files['src/api/puppies.ts']).toContain('export async function fetchPuppyById(id: string): Promise<Puppy>');
+    const puppies = emitApp(source, catalog).files['src/api/puppies.ts'];
+    expect(puppies).toContain('export interface Puppy {');
+    expect(puppies).not.toContain('fetchPuppyById');
   });
 
   it('a Record bound to the enclosing repeater row hits the row-identity wall by name', () => {
@@ -278,10 +281,12 @@ describe('§17 — the Record node', () => {
     expect(reasonFor(source, ADMIN, 'puppyModel')).toBe('two wires feed its Id — last-writer-wins is not statically ordered');
   });
 
-  it('a well-formed Record translates (EXP-011 §43) — the reason this row used to pin is gone, and the read is in the module', () => {
+  it('a well-formed Record translates (EXP-011 §43) — the reason this row used to pin is gone; its Fetch is unwired, so it binds and the module carries no read (P18-S113-IDBINDREAD)', () => {
     const source = withRelationGraph();
     expect(reasonFor(source, ADMIN, 'puppyModel')).toBeUndefined();
-    expect(emitApp(source, catalog).files['src/api/puppies.ts']).toContain('export async function fetchPuppyById(id: string): Promise<Puppy>');
+    const puppies = emitApp(source, catalog).files['src/api/puppies.ts'];
+    expect(puppies).toContain('export interface Puppy {');
+    expect(puppies).not.toContain('fetchPuppyById');
   });
 });
 

@@ -637,6 +637,8 @@ export function emitComponent(
     // the `outcome-error` note below: the row would be written by the action, read by the sink,
     // then dropped as unreferenced — a component naming an identifier it never declares.
     if (expr.kind === 'id-out' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
+    // P18-S113-IDBINDREAD. A Record's row and Error read off the row: a Record bound by its Id has no read action to earn them.
+    if (expr.kind === 'record-out' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
     // EXP-011 §59. The same clause for the crypto rows; a viewport read earns its hook.
     if (expr.kind === 'crypto-out' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
     if (expr.kind === 'screen-out') usedScreenNodeIds.add(expr.nodeId);
@@ -910,8 +912,7 @@ export function emitComponent(
       [m.listeners.stateChanged, m.listeners.done, m.listeners.unchanged, m.listeners.failure, ...Object.values(m.listeners.reached)].flatMap((chain) => chain ?? [])
     ),
     ...plan.animations.flatMap((a) => a.arrive ?? []),
-    // EXP-011 §43. A Record's Id effect is a read chain run from an effect.
-    ...plan.recordEffects.map((e) => e.action),
+    // P18-S113-IDBINDREAD. A Record's Id bind runs no chain and reads nothing: it earns only its own lines (`recordBinds`).
     // EXP-011 §67. A Variable's authored Value is a store write run from a mount effect — it earns its import here.
     ...plan.variableSeeds.map(variableSeedAction),
     // EXP-011 §71. An Object's own authored property values are a store write run from a mount effect — it earns its import here.
@@ -1086,6 +1087,8 @@ export function emitComponent(
     // EXP-011 §37. A render read of an id is *always* the row form — the local exists only
     // inside the New chain — so this clause earns every id row render can see.
     if (expr.kind === 'id-out' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
+    // P18-S113-IDBINDREAD. The same clause, the second walker.
+    if (expr.kind === 'record-out' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
     // EXP-011 §59. The same clause; a viewport read from a hook argument earns the hook too.
     if (expr.kind === 'crypto-out' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
     if (expr.kind === 'screen-out') usedScreenNodeIds.add(expr.nodeId);
@@ -1165,10 +1168,6 @@ export function emitComponent(
     hookExprSources(run.maxRunningTasks);
     hookExprSources(run.stopOnFailure);
   }
-  // EXP-011 §43. The Id is the effect's dependency and prints as the render local.
-  for (const effect of plan.recordEffects) {
-    if (effect.action.kind === 'record-fetch') hookExprSources(effect.action.id);
-  }
   // A rendered stateful control references its own row (value/checked + onChange), a sync
   // effect its target, a lifted callback its setter — whether or not any expression reads it.
   for (const stateVar of plan.stateVars) {
@@ -1215,9 +1214,22 @@ export function emitComponent(
   const referencedStateVars = plan.stateVars.filter((v) => referencedStateNames.has(v.name));
   /** P18-S111-RECORDLIVE. Each live Record whose row this component holds, with that row's state var. */
   const liveRecordRows = plan.recordReads.flatMap((read) => {
-    const row = read.live ? referencedStateVars.find((v) => v.originNodeId === read.nodeId && v.origin === 'record-row') : undefined;
+    const row = read.live && !read.binds ? referencedStateVars.find((v) => v.originNodeId === read.nodeId && v.origin === 'record-row') : undefined;
     return row === undefined ? [] : [{ read, row }];
   });
+  /**
+   * P18-S113-IDBINDREAD. Each Record bound by its Id (Fetch unwired) whose row something reads, where a client holds
+   * records. Unread, or with no backend, the bind changes nothing anyone sees, and nothing is emitted for it.
+   */
+  const recordBinds = plan.recordEffects.flatMap((effect) => {
+    const action = effect.action;
+    if (action.kind !== 'record-fetch' || !effect.held) return [];
+    const row = referencedStateVars.find((v) => v.originNodeId === effect.nodeId && v.origin === 'record-row');
+    const read = plan.recordReads.find((r) => r.nodeId === effect.nodeId);
+    return row === undefined || read === undefined ? [] : [{ effect, action, read, row }];
+  });
+  // EXP-011 §43. The Id is the bind's dependency and prints as the render local.
+  for (const { action } of recordBinds) hookExprSources(action.id);
 
   // EXP-011 §15. Both kinds call `navigate(...)`, so both earn the hook. A `some` over one
   // kind is the shape that silently emits a call to an undeclared identifier.
@@ -3306,22 +3318,10 @@ export function emitComponent(
         const idLocal = names.idLocal;
         // A literal Id was refused empty by the planner, and a guard on a string literal is a
         // TS2367 (no overlap) — so the guard is emitted only where the Id is read from something.
-        // The effect form (§43.2) returns silently where the handler form throws: the runtime binds
-        // nothing on an empty Id and reads nothing, and reports `Missing Id.` only to a Fetch.
         const empty = `${idLocal} === undefined || ${idLocal} === null || ${idLocal} === ''`;
-        const guard =
-          action.id.kind === 'literal'
-            ? []
-            : action.viaEffect
-              ? [`${inner}if (${empty}) return;`]
-              : [`${inner}if (${empty}) throw new Error('Missing Id.');`];
-        // The effect form clears the row before it reads: a new Id rebinds the node to a fresh
-        // model, whose outputs read undefined until the read answers (dbmodelnode2.ts setModelID).
-        const clear =
-          action.viaEffect && action.materialize !== undefined ? [`${inner}${stateSetterOf(action.materialize)}(undefined);`] : [];
+        const guard = action.id.kind === 'literal' ? [] : [`${inner}if (${empty}) throw new Error('Missing Id.');`];
         return [
           'try {',
-          ...clear,
           `${inner}const ${idLocal} = ${idCode};`,
           ...guard,
           `${inner}const ${names.answerLocal} = await ${action.fnName}(${idLocal});`,
@@ -4198,8 +4198,8 @@ export function emitComponent(
       plan.branchEffects.length > 0 ||
       // EXP-011 §39. A Value Changed is an effect; a Delay owes the unmount cleanup effect.
       plan.valueChangedEffects.length > 0 ||
-      // EXP-011 §43. A Record with Fetch unwired is an effect keyed on its Id.
-      plan.recordEffects.length > 0 ||
+      // EXP-011 §43, P18-S113-IDBINDREAD. A Record with Fetch unwired is a bind keyed on its Id.
+      recordBinds.length > 0 ||
       // P18-S111-RECORDLIVE. A live Record's row subscribes to the client's copy of its record.
       liveRecordRows.length > 0 ||
       // EXP-011 §67. A Variable's authored Value is a mount effect.
@@ -4257,7 +4257,7 @@ export function emitComponent(
   for (const read of plan.recordReads) stubModule(read.moduleBase).reads.push(read);
   for (const [moduleBase, { queries, mutations, reads }] of stubModules) {
     const specifier = `${relRoot}/api/${moduleBase}`;
-    const fetchNames = [...new Set([...queries.map((q) => q.fetchName), ...reads.map((r) => r.fnName)])].sort();
+    const fetchNames = [...new Set([...queries.map((q) => q.fetchName), ...reads.filter((r) => !r.binds).map((r) => r.fnName)])].sort();
     const fnNames = [...new Set(mutations.map((m) => m.fnName))].sort();
     const typeNames = [
       ...new Set([
@@ -4273,7 +4273,7 @@ export function emitComponent(
     );
   }
   // P18-S111-RECORDLIVE. A live Record's row follows the client's one copy of its record.
-  if (liveRecordRows.length > 0) internalImports.set(`${relRoot}/api/client`, `import { subscribeRecord } from '${relRoot}/api/client';`);
+  if (liveRecordRows.length > 0 || recordBinds.length > 0) internalImports.set(`${relRoot}/api/client`, `import { subscribeRecord } from '${relRoot}/api/client';`);
   // The session module is not keyed on anything — a project has one session — so every
   // user-family node in this component imports from the same specifier (USER-FAMILY-TARGET §4d).
   if (plan.sessionCalls.length > 0) {
@@ -6988,12 +6988,25 @@ export function emitComponent(
     const deps = effectDeps(action.cond).join(', ');
     body.push(`  // ${effect.comment}`, '  useEffect(() => {', ...effectBody([action], 4), `  }, [${deps}]);`, '');
   }
-  // EXP-011 §43. A Record with Fetch unwired: the read re-runs whenever its Id changes — an
-  // effect keyed on the Id, with the read's own try/catch as the body (an async IIFE, §40.3).
-  for (const effect of plan.recordEffects) {
-    const action = effect.action as Extract<HandlerAction, { kind: 'record-fetch' }>;
+  // EXP-011 §43, P18-S113-IDBINDREAD. A Record with Fetch unwired: whenever its Id changes the row becomes the client's
+  // copy of that record, now and after every write to it (`subscribeRecord` hands the copy at once where one is held).
+  // No request, no Error, no Done. An empty Id binds nothing and leaves the row as it was: the runtime's
+  // `setModel(undefined)` flags only `id`, so a wire from a property keeps what it last carried.
+  for (const { effect, action, read, row } of recordBinds) {
     const deps = effectDeps(action.id).join(', ');
-    body.push(`  // ${effect.comment}`, '  useEffect(() => {', ...effectBody([action], 4), `  }, [${deps}]);`, '');
+    const idCode = action.coerceId === 'string' ? `String(${exprCode(action.id, 'render')} ?? '')` : exprCode(action.id, 'render');
+    const bind = `subscribeRecord<${read.typeName}>(${read.idLocal}, ${stateSetterOf(row.name)})`;
+    body.push(
+      `  // ${effect.comment}`,
+      '  useEffect(() => {',
+      `    const ${read.idLocal} = ${idCode};`,
+      ...(action.id.kind === 'literal' ? [] : [`    if (${read.idLocal} === undefined || ${read.idLocal} === null || ${read.idLocal} === '') return undefined;`]),
+      ...(effect.follows
+        ? [`    return ${bind};`]
+        : ['    // "Record properties" is unticked: the copy as it is at the bind, and no later write.', `    ${bind}();`, '    return undefined;']),
+      `  }, [${deps}]);`,
+      ''
+    );
   }
   // P18-S111-RECORDLIVE. The runtime binds a Record to the app's one copy of its record (`Model.get(id)`), and with
   // "Record properties" ticked every write to that copy re-flags the node's outputs: a Set Record Properties

@@ -1,0 +1,157 @@
+{
+ "seededId": "717bd646-dc50-4539-a32a-a09d55423814",
+ "runtime": {
+  "D0": [
+   "Record Desk",
+   "Save"
+  ],
+  "D1": [
+   "Record Desk",
+   "Save"
+  ],
+  "D2": [
+   "Record Desk",
+   "Welcome",
+   "Save"
+  ],
+  "D3": {
+   "backendTitle": "Welcome"
+  },
+  "D4": [
+   "Record Desk",
+   "Welcome",
+   "Save",
+   "Failed to save."
+  ],
+  "D4backendTitle": "Welcome",
+  "D5": [
+   "Record Desk",
+   "Welcome",
+   "Save",
+   "Failed to save."
+  ],
+  "D6": [
+   "Record Desk",
+   "Welcome",
+   "Welcome",
+   "Save",
+   "Failed to save."
+  ],
+  "requests": [
+   "PUT /__backend/classes/Page/717bd646-dc50-4539-a32a-a09d55423814",
+   "PUT /__backend/classes/Page/717bd646-dc50-4539-a32a-a09d55423814"
+  ],
+  "console": [
+   "[noodl] SetDbModelProperties (/Components/Rename): Failed to save. [record/storage-op-failed] Object"
+  ],
+  "refused": 1
+ },
+ "export-control": {
+  "D0": [
+   "Record Desk",
+   "Save"
+  ],
+  "D1": [
+   "Record Desk",
+   "Home",
+   "Home",
+   "Save"
+  ],
+  "D2": [
+   "Record Desk",
+   "Welcome",
+   "Home",
+   "Save"
+  ],
+  "D3": {
+   "backendTitle": "Welcome"
+  },
+  "D4": [
+   "Record Desk",
+   "Welcome",
+   "Home",
+   "Save",
+   "Could not reach the backend at http://localhost:8594"
+  ],
+  "D4backendTitle": "Welcome",
+  "D5": [
+   "Record Desk",
+   "Save",
+   "Could not reach the backend at http://localhost:8594"
+  ],
+  "D6": [
+   "Record Desk",
+   "Welcome",
+   "Welcome",
+   "Save",
+   "Could not reach the backend at http://localhost:8594"
+  ],
+  "requests": [
+   "GET /classes/Page/717bd646-dc50-4539-a32a-a09d55423814",
+   "GET /classes/Page/717bd646-dc50-4539-a32a-a09d55423814",
+   "OPTIONS /classes/Page/717bd646-dc50-4539-a32a-a09d55423814",
+   "OPTIONS /classes/Page/717bd646-dc50-4539-a32a-a09d55423814",
+   "PUT /classes/Page/717bd646-dc50-4539-a32a-a09d55423814",
+   "PUT /classes/Page/717bd646-dc50-4539-a32a-a09d55423814",
+   "GET /classes/Page/717bd646-dc50-4539-a32a-a09d55423814x",
+   "GET /classes/Page/717bd646-dc50-4539-a32a-a09d55423814x",
+   "OPTIONS /classes/Page/717bd646-dc50-4539-a32a-a09d55423814x",
+   "OPTIONS /classes/Page/717bd646-dc50-4539-a32a-a09d55423814x",
+   "GET /classes/Page/717bd646-dc50-4539-a32a-a09d55423814",
+   "GET /classes/Page/717bd646-dc50-4539-a32a-a09d55423814"
+  ],
+  "console": [
+   "SetDbModelProperties (/Components/Rename): Could not reach the backend at http://localhost:8594 [record/storage-op-failed] Object",
+   "DbModel2 (/Pages/Home): Object not found. [record/storage-op-failed] Object",
+   "DbModel2 (/Pages/Home): Object not found. [record/storage-op-failed] Object"
+  ],
+  "refused": 1
+ },
+ "export-fixed": {
+  "D0": [
+   "Record Desk",
+   "Save"
+  ],
+  "D1": [
+   "Record Desk",
+   "Save"
+  ],
+  "D2": [
+   "Record Desk",
+   "Welcome",
+   "Save"
+  ],
+  "D3": {
+   "backendTitle": "Welcome"
+  },
+  "D4": [
+   "Record Desk",
+   "Welcome",
+   "Save",
+   "Could not reach the backend at http://localhost:8594"
+  ],
+  "D4backendTitle": "Welcome",
+  "D5": [
+   "Record Desk",
+   "Welcome",
+   "Save",
+   "Could not reach the backend at http://localhost:8594"
+  ],
+  "D6": [
+   "Record Desk",
+   "Welcome",
+   "Welcome",
+   "Save",
+   "Could not reach the backend at http://localhost:8594"
+  ],
+  "requests": [
+   "PUT /classes/Page/717bd646-dc50-4539-a32a-a09d55423814",
+   "OPTIONS /classes/Page/717bd646-dc50-4539-a32a-a09d55423814",
+   "PUT /classes/Page/717bd646-dc50-4539-a32a-a09d55423814"
+  ],
+  "console": [
+   "SetDbModelProperties (/Components/Rename): Could not reach the backend at http://localhost:8594 [record/storage-op-failed] Object"
+  ],
+  "refused": 1
+ }
+}

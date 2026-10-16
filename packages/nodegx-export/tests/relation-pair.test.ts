@@ -184,8 +184,11 @@ describe('§A the fixture, whole — a Record feeds the target, a Variable the r
     );
     expect(mod).toContain('Source: "Link" (AddDbModelRelation `link` on /Pages/Home)');
     expect(mod).toContain('Source: "Unlink" (RemoveDbModelRelation `unlink` on /Pages/Home)');
-    // The Puppy module is §43's, untouched by this row.
-    expect(app.files['src/api/puppies.ts']).toContain('export async function fetchPuppyById(id: string): Promise<Puppy>');
+    // The Puppy module is §43's: its one Record has Fetch unwired and only binds (P18-S113-IDBINDREAD), so the module is the
+    // class interface alone, with nothing to import from the client.
+    expect(app.files['src/api/puppies.ts']).toContain('export interface Puppy {');
+    expect(app.files['src/api/puppies.ts']).not.toContain('fetchPuppyById');
+    expect(app.files['src/api/puppies.ts']).not.toContain("from './client'");
   });
 
   test("A9 the client: the runtime's own PUT with one op and a typed Pointer, transcribed from ParseWireAdapter", () => {
@@ -357,7 +360,8 @@ describe('§C the shapes a wire changes', () => {
 
   test("C4 a Text on the verb's Error while Do is wired from a button reads the row; the raise carries the family's code", () => {
     expect(home(app)).toContain("{linkError ?? ''}");
-    expect(home(app).match(/record\/storage-op-failed/g)).toHaveLength(3); // the Record's effect + the two verbs
+    // The two verbs; the Record binds by its Id and reads nothing, so it never raises (P18-S113-IDBINDREAD).
+    expect(home(app).match(/record\/storage-op-failed/g)).toHaveLength(2);
   });
 });
 

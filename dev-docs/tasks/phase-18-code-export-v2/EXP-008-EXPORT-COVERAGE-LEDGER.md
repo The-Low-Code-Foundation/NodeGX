@@ -310,3 +310,9 @@ the runtime only binds to the copy it holds, measured in run 1 of the drive).
 **0 gap ports remain.** The 50 silent ports left: `gated` 23, `refused-with` 23, `inert` 2, `unexamined` 2 (not yet
 read). Beside them, the P121 peer's three uncommitted Upload File ports, which the gate will ask to classify when they
 land.
+
+**Session 114: P18-S113-IDBINDREAD fixed and driven — reach unchanged, 1,234 of 1,396.** A Record whose Fetch is unwired
+is a bind, not a read: its Id makes the row the client's copy of the record (no request, no Error, no Done), as the
+runtime's `setModelID` does. No port is reclassified: `parameter-coverage` reads exactly as in sessions 110–113 (the only
+red is the P121 peer's three uncommitted Upload File ports). Full record: EXP-011 §81; driven in `s114-idbind-drive/`.
+
