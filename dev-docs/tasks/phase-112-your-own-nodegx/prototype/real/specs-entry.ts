@@ -15,6 +15,9 @@ import { specs, drawnPorts } from '../../../../../packages/nodegx-node-spec/src/
 // page can build one; `portsFor` takes it as its third argument, and `drawn()` is the spec package's own drawer over it.
 export { portProjectFromStore, portContextFor } from '../../../../../packages/nodegx-project-contract/port-context';
 export { drawnPorts, specs };
+// P123 s2 (2026-10-16): the Expression node's text is JavaScript and every free name in it is an input port — the
+// spec's own lexer says which, so a composer that writes the text can wire exactly those names.
+export { expressionPorts } from '../../../../../packages/nodegx-node-spec/src/nodes/expression-ports';
 
 export interface SpecPort { name: string; label: string; type: string; signal: boolean; default?: unknown; enums?: string[]; group?: string; description?: string }
 

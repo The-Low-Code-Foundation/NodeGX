@@ -9,6 +9,10 @@ board lists it in §4 until Richard says otherwise.
 ephemeral backend); driven by hand on a copy of Puppy test 3 (look/); waits for Richard's sitting (PLAYTEST.md).
 s1b (the same day): Richard rebuilt the runtime, the preview bundle and Orbit's spec module and ran the gate: 8/10, the
 Workflow tab empty — the spec module was stale (§3, P123-S1-SPECENTRY); fixed, gate 17/17 again on his bundles.**
+**s2 (2026-10-16, the same day, Fable): Richard's second ask — six things from real Bubble and a design pass. All six
+built and gated: `check.mjs` **PASS 37/37** (s1's 17 rows, their selectors updated, plus 20). Found and fixed one kit
+defect on the way, P123-S2-VARIANTLOST (§5): the kit's preview exported every node without its variant, so no Look
+was ever drawn outside the official editor. BRIEF.md §s2 has his words; LOOK.md §s2 the mapping and the pictures.**
 **Prefix: `OBB`.**
 
 > "In theory it should be easy given what we've already got, just separating the logic into the 'workflows' concept
@@ -76,17 +80,30 @@ change, and Richard's rebuild on 2026-10-16 exposed it (gate 8/10, the Workflow 
 (a context argument, `drawnPorts` and the context builder re-exported) and in the page (a spec that throws is one
 node's missing ports, never a dead tab).
 
+### 3b. What s2 built, and how it was measured (`check.mjs`, rows 10–37)
+
+| Bubble | here | measured by |
+|---|---|---|
+| the red distance lines on hover, padding / margin | the live element's `getComputedStyle` and its rect against its parent's content box: four red lines with px values for the selected element, green padding and orange margin bands on hover (the inspector's colours) | the gate reads the four numbers off the overlay and computes the same from the frame's own geometry: equal |
+| custom states on an element (type, name, default, list) | a `Variable2` node named `<element>.<state>` with `metadata.customState = { of, name, type, list }`; its default is the Variable's `value` parameter; a state row in the tree; deleted with its element | *New state* on the card writes that node on disk; its default is the parameter |
+| the expression composer: chips, pure JS, or both | one `Expression` node per composed field (`metadata.composedFor = { node, port }`): its text is JavaScript, each chip a free name wired from the value it stands for (`expressionPorts` from the spec package says which names are ports), `result` wired into the field; three views over the same text — Composer (chips, operators, literals), Both (chips as islands in editable text), JavaScript (the text); operators as buttons (is, is not, and, or, + − × ÷ > <, not, contains, ? :) | the title's Text composed as *[Sign-in card's state] + " world"*: the chip is a wire from the state's value into the Expression's input of that name, the result into the Text; the JS view shows the same text; **the app shows "Hello world"** (the state's default through the expression) |
+| **a branch** (FlutterFlow's conditional step) | *Add a branch* appends a `Condition` (`eval` triggered by the step before); its `ontrue` and `onfalse` are two chains drawn as Yes and No columns that never rejoin, each with its own *Add an action* / *Add a branch*; the condition is any value or a composed expression; deleting the branch deletes both chains and their expressions | a branch on the card's Did Mount is a Condition wired into `eval`; an action in the No column is a Navigate wired from `onfalse` while Yes stays empty; *Set a custom state* in Yes is a `Set Variable` from `ontrue` with `name` the state's; the condition `1 > 2` is an Expression wired into `condition`, read back on the card |
+| option sets | a logic component `Option sets/<Name>`: one `Static Data` node (`type: json`) wired to `Component Outputs` (All options, Count), the attributes in `component.json` `metadata.optionSet`; the Data tab's *Option sets* sub-tab edits attributes and options as a table; a page reads it as *Name · all options* in the sources (an instance placed once per page, `items` wired) | *Priorities* with an attribute *rank* and options High, Low: the component is on disk and in the registry, the Static Data's JSON holds both rows, the app validates with it |
+| global styles | the format's `variants` in `nodegx.styles.json` (`{ name, typename, parameters }`), worn by a node's `variant`; *Save as a style* on an element writes one from its non-content parameters and clears them on the element (a node's own value wins over its variant's, so a styled element has no overrides, as in Bubble); the Styles tab lists variants by element type, shows the properties as chips, the elements wearing it, and edits the variant's parameters with the same fields | *Primary* saved from the Sign in button: the variant on disk with 10 properties, the button keeps its colour (`rgb(138, 169, 242)`); picked on Create account: its `variant` on disk, its background goes from transparent to the same colour |
+| the chrome | Inter, an icon rail (Design / Workflow / Data / Styles, undo at the foot), a breadcrumb header with a width segment and a *Use the app* switch, panels with hairlines, popovers with a search box and grouped headings, chips for every dynamic value (blue element, cyan state, yellow option set, purple expression), a status dot | the four screenshots in LOOK.md §s2 built |
+
 ## 4. Where it stops (known, by design or by this session's hour)
 
-- **No expression composer.** Bubble's `Input Name's value :plus 1` is a wire plus a Function node here; the editor
-  wires but does not compose.
+- **The composer has no `:filtered` / `:sorted` operators**; a list operation is JavaScript in the JS view (`items.filter(...)`).
+  A custom state marked *list* is stored but the composer does not index into it yet.
 - **No free-drag canvas.** Bubble's old absolute engine is not what this does; a Fixed container is `position:
   absolute` and moves by margins (BRIEF.md's first assumption).
 - **One page at a time, and the page the app is on.** A page behind a login is edited after logging in through *Use
   the app*.
-- **No privacy rules, no option sets, no styles tab, no plugins, no reusable-element editing** (a component is placed,
-  not opened).
-- **A step is appended, never inserted** between two steps; branches are read, not added.
+- **No privacy rules, no plugins, no reusable-element editing** (a component is placed, not opened); a style has no
+  *Set as default* (NodeGX has no default variant) and no Mobile / Web split; an element has no Conditional tab (NodeGX
+  state parameters would be it; a ruling first).
+- **A step is appended, never inserted** between two steps. A branch is added and read; a chain never rejoins after one.
 - **The project file is written with `JSON.stringify(…, null, 2)`**, not the format's serializer (the bundle does not
   export it); the official editor reads it unchanged, the diff is whitespace at most.
 - **The stale-write guard is the store's** (`ifRevision`) but the page holds the files in memory: an agent writing the
@@ -99,6 +116,9 @@ node's missing ports, never a dead tab).
 | P123-S1-SPECENTRY | Orbit's `prototype/real/specs-entry.ts` (P112) drew derived ports with no context; after NSP-020's (params, context) signature every record node's spec threw, so the Workflow tab listed nothing on a fresh `specs.js` | fixed s1b in that file (a context argument; `drawnPorts`, `portProjectFromStore`, `portContextFor` re-exported); `orbit.html` still calls the one-argument form, which now gets an empty context |
 | P123-S1-BRIEFCONTEXT | the kit's brief (`nodegx-your-own-editor` skill) says "visual nodes have no spec" and names `specFor` only; it never mentions `drawnPorts` or `port-context`, so a home-made editor re-invents the editor-side ports, as s1 did | open; input for OWN-007 |
 | P123-S1-STALEBIND | "Puppy test 3"'s project file binds `localhost:8581`, which another backend now holds (port reuse across sessions); a foreign class answers `[]` with no error | open; a liveness check on open would say so ([[liveness-is-the-socket-never-the-file-a-token-outlives-its-process]]) |
+| P123-S2-VARIANTLOST | the kit's in-page preview and the headless render exported every node with `variant: undefined`: `exportNode` read it through `NodeLibrary.findVariant`, which asks registered modules, and only `ProjectModel.instance` is one; 18 projects on this machine wear a variant and none was ever drawn outside the official editor | **fixed** (the exporter falls back to the node's own `variantName`); `dev-docs/bugs/p123-s2-variantlost-…`; regression `packages/noodl-preview/tests/p123-s2-variant-exported.test.ts` |
+| P123-S2-STALEMENU | this editor's own: a popover's outside-click listener outlived the popover and closed whatever opened after it (the composer vanished on its first click) | fixed in the page (`dismissOnOutside` checks `isConnected`); found by the gate |
+| P123-S2-VARIANTWINS | a node's own parameter wins over its variant's, so "wear a style" must clear the element's values for what the style sets; the official editor leaves them, which is why a Look applied there can look like nothing happened | the page clears them; a note for the official editor's variant picker (P81 territory) |
 | P123-S1-MALFORMED | "Puppy test 3" holds a node with no `type` in Admin Login; the preview refuses the whole project (`malformed-node`) | the copy was fixed; the real project is Richard's |
 
 ## 6. Rulings asked of Richard
@@ -108,3 +128,6 @@ node's missing ports, never a dead tab).
 | R1 | Responsive-engine drag (reorder / move into a container) or the old free-drag canvas? | — |
 | R2 | Is "a value from…" (a wire picked from a list) the right first form of Bubble's dynamic data, or must the composer come first? | — |
 | R3 | Does this take a lane-2 slot (as an OWN-008 stranger built by us), or stay a prototype until his sitting? | — |
+| R4 | A branch never rejoins (FlutterFlow's shape). Is a rejoin wanted (both chains into one next step), or is Bubble's "Only when" per step wanted beside it? | — |
+| R5 | A custom state is a page Variable with the element's name in it. Should it live inside a reusable component's own graph when the element is one (so every instance has its own)? | — |
+| R6 | An option set is a component with a Static Data node. Is the Data tab the right home, or should it sit with Styles as app-wide data? | — |
