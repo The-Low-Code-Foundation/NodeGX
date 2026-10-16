@@ -17,6 +17,13 @@
  *
  * P18-S115-QUERYPARAMS: a case may carry `values`, the wired parameters' values as `setQueryParameter` stores them
  * (`{ $date: iso }` is a Date, `{ $undefined: true }` is nothing stored), applied after the parameters.
+ *
+ * P18-S116-QUERYFETCH: a case with `creation: true` answers `{ atCreation, onChange }` instead: how many times the node's
+ * own setters call `scheduleFetch` as the node is made (its `runOnChange-` answers recorded first, as `nodescope.ts`
+ * hoists them, through the runtime's own `setRunOnValueChange`; then each parameter through its setter), and then how
+ * many more as each of `changes` (`[name, value]`, a `qp-` value) arrives. `Node.prototype`'s own
+ * `shouldRunOnValueChange(d)` decide; only the governed setters are replayed (`collectionName`, `visualFilter`,
+ * `visualSort`, `qp-`; a case needing `userInputSetter`'s inputs is not one this mode takes).
  */
 
 const path = require('path');
@@ -32,13 +39,41 @@ const CloudStore = require(path.join(RUNTIME, 'src', 'api', 'cloudstore'));
 const QueryRecords = require(path.join(RUNTIME, 'src', 'nodes', 'std-library', 'data', 'dbcollectionnode2'));
 const { ParseWireAdapter } = require(path.join(RUNTIME, 'src', 'api', 'backends', 'ParseWireAdapter'));
 const methods = QueryRecords.node.prototypeExtensions;
+const { setRunOnValueChange } = require(path.join(RUNTIME, 'src', 'run-on-value-change'));
+const Node = require(path.join(RUNTIME, 'src', 'node'));
+const NodeProto = (Node.default || Node).prototype;
 
 const valueOf = (value) => (value && (value.kind === 'literal' || value.kind === 'json') ? value.value : undefined);
 
 const decode = (value) =>
   value !== null && typeof value === 'object' && '$date' in value ? new Date(value.$date) : value !== null && typeof value === 'object' && '$undefined' in value ? undefined : value;
 
-function runCase({ parameters, collections, values }) {
+function creationCase({ parameters, changes }) {
+  let fetches = 0;
+  const self = {
+    _internal: { storageSettings: {}, queryParameters: {} },
+    context: {},
+    id: 'query',
+    scheduleFetch: () => fetches++,
+    scheduleRealtimeReconfigure: () => undefined,
+    shouldRunOnValueChange: NodeProto.shouldRunOnValueChange,
+    shouldRunOnValueChanged: NodeProto.shouldRunOnValueChanged
+  };
+  const SETTERS = { collectionName: methods.setCollectionName, visualFilter: methods.setVisualFilter, visualSort: methods.setVisualSorting };
+  for (const { name, value } of parameters) if (name.startsWith('runOnChange-')) setRunOnValueChange(self, name.slice('runOnChange-'.length), valueOf(value) !== false);
+  for (const { name, value } of parameters) {
+    if (name.startsWith('runOnChange-')) continue;
+    if (name.startsWith('qp-')) methods.setQueryParameter.call(self, name.slice(3), valueOf(value));
+    else if (SETTERS[name] !== undefined) SETTERS[name].call(self, valueOf(value));
+    else throw new Error(`creation mode does not replay "${name}"`);
+  }
+  const atCreation = fetches;
+  for (const [name, value] of changes || []) methods.setQueryParameter.call(self, name, decode(value));
+  return { atCreation, onChange: fetches - atCreation };
+}
+
+function runCase({ parameters, collections, values, creation, changes }) {
+  if (creation) return creationCase({ parameters, changes });
   NoodlRuntime.instance = { getMetaData: (key) => (key === 'dbCollections' ? collections : []) };
   CloudStore.invalidateCollections();
   const internal = { storageSettings: {}, queryParameters: {} };

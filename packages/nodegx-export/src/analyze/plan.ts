@@ -2186,6 +2186,14 @@ export type RunTasksAction =
   | { kind: 'runtasks-run'; nodeId: string; local: string; items: ValueExpr }
   | { kind: 'runtasks-abort'; nodeId: string; local: string };
 
+/**
+ * P18-S116-QUERYFETCH. A `Query Records`' Fetch (`storageFetch` → `scheduleFetch`): the query asks again, its wired
+ * filter values read at the pulse, and the list is replaced by the answer. `void fetch<Plural>(…).then(set<Plural>)`:
+ * the runtime's fetch is scheduled, so the chain does not wait for it. `values` are {@link QueryPlan.wiredValues}, carried
+ * so every walker sees what the action reads. A query the export does not keep prints nothing (`expandActions`).
+ */
+export type QueryFetchAction = { kind: 'query-fetch'; nodeId: string; values: Array<{ name: string; expr: ValueExpr }> };
+
 export type ScriptSignalAction = {
   kind: 'script-signal';
   nodeId: string;
@@ -2761,6 +2769,7 @@ export type HandlerAction =
   | DragSnapAction
   | ScriptSignalAction
   | RunTasksAction
+  | QueryFetchAction
   | StreamAction;
 
 /**
@@ -3615,6 +3624,13 @@ export interface QueryPlan {
   wiredValues?: Array<{ name: string; expr: ValueExpr }>;
   /** The project declares a backend, so `src/api/client.ts` exists to put each value on the wire (`filterValue`). */
   wiredClient?: boolean;
+  /**
+   * P18-S116-QUERYFETCH. Its Fetch is wired, so the query asks when Fetch is sent (`query-fetch` in the sender's
+   * chain). `mount`: it also asks as the node is made, its Class box ticked or its Query settings box ticked with a
+   * setting authored (a wired Fetch settles both unticked, NDA-017; an author can tick them again). `onValues`: the
+   * wired filter values' boxes are ticked, so a new value asks too (the effect, mount included).
+   */
+  fetchWired?: { mount: boolean; onValues: boolean };
 }
 
 /**
@@ -7293,6 +7309,33 @@ function planComponent(
   const queryLands = (node: NodeIR): boolean =>
     Object.values(plan.repeaters).some((r) => r.itemsQueryId === node.id) ||
     (queryReaders.has(node.id) && component.connections.some((c) => c.fromId === node.id && c.fromProperty === 'items' && consumed.has(c.key)));
+  /**
+   * P18-S116-QUERYFETCH. A page's Did Mount into a query's Fetch: the page node is the component's root, so its mount is
+   * the component's, and the query asks then, as it does with its Class box ticked. Consumed where the query lands.
+   */
+  const pageMountFetch = (wire: ConnectionIR): boolean =>
+    wire.toProperty === 'storageFetch' &&
+    wire.fromProperty === 'didMount' &&
+    nodeById.get(wire.fromId)?.type === 'Page' &&
+    nodeById.get(wire.toId)?.type === 'DbCollection2';
+  /**
+   * P18-S116-QUERYFETCH. With Fetch wired, when else the query asks (dbcollectionnode2.ts): as the node is made where its
+   * Class box is ticked (`setCollectionName`), or its Query settings box with a setting authored (`setVisualFilter`,
+   * `setVisualSorting`, the `backendId` setter, `userInputSetter`); and on a wired filter value's change where that
+   * box is ticked (`setQueryParameter`). A box left unset is ticked (`runOnValueChange`'s default). Search is refused.
+   */
+  const fetchWiredOf = (node: NodeIR): QueryPlan['fetchWired'] => {
+    const fetches = component.connections.filter((c) => c.toId === node.id && c.toProperty === 'storageFetch');
+    if (fetches.length === 0) return undefined;
+    const ticked = (input: string) => literalParam(node, `runOnChange-${input}`) !== false;
+    const NOT_QUERY_SETTINGS = new Set(['collectionName', 'search', 'realtime']);
+    const setting = node.parameters.some((p) => !NOT_QUERY_SETTINGS.has(p.name) && !p.name.startsWith('qp-') && !p.name.startsWith('runOnChange-'));
+    const wired = queryWirings.get(node.id)?.values ?? [];
+    return {
+      mount: ticked('collectionName') || (setting && ticked('querySettings')) || fetches.some(pageMountFetch),
+      onValues: wired.length > 0 && wired.every((v) => ticked(`qp-${v.name}`))
+    };
+  };
   const queryPlanOf = (node: NodeIR): QueryPlan => {
     const existing = plan.queries.find((q) => q.nodeId === node.id);
     if (existing !== undefined) return existing;
@@ -7310,7 +7353,8 @@ function planComponent(
       typeName,
       moduleBase,
       ...('params' in settings && Object.keys(settings.params).length > 0 ? { params: settings.params } : {}),
-      ...(queryWirings.has(node.id) ? { wiredValues: queryWirings.get(node.id)!.values, wiredClient: ir.project.cloudservices !== undefined } : {})
+      ...(queryWirings.has(node.id) ? { wiredValues: queryWirings.get(node.id)!.values, wiredClient: ir.project.cloudservices !== undefined } : {}),
+      ...(fetchWiredOf(node) !== undefined ? { fetchWired: fetchWiredOf(node) } : {})
     };
     plan.queries.push(query);
     return query;
@@ -10312,6 +10356,8 @@ function planComponent(
     [CLOUD_FUNCTION_TYPE]: 'call',
     // EXP-011 §43. `Record`'s only action port; with it unwired the node is an effect (§43.2).
     [RECORD_TYPE]: 'fetch',
+    // P18-S116-QUERYFETCH. `Query Records`' only action port (display name "Do"); with it unwired the node is an effect.
+    DbCollection2: 'storageFetch',
     // EXP-011 §45. The three files nodes' only action ports (`Cloud File` has none — it is a read).
     [FILE_PICKER_TYPE]: 'open',
     [UPLOAD_FILE_TYPE]: 'upload',
@@ -12024,6 +12070,22 @@ function planComponent(
       consumes: [...consumes, ...ctx.consumes, ...chain.consumes, ...failChain.consumes],
       collapses: [...ctx.logicNodeIds, ...chain.collapses, ...failChain.collapses],
       subscribes: [...ctx.subscriberIds, ...chain.subscribes, ...failChain.subscribes]
+    };
+  };
+
+  /**
+   * P18-S116-QUERYFETCH. A `Query Records`' Fetch: the query asks again, the wired filter values read at the pulse.
+   * Refused as the query itself is (its settings, by name). The value wires are consumed where the query lands, as for
+   * the effect form (`queryWirings`); a query that does not land prints nothing, and its own row says why.
+   */
+  const compileQueryFetch = (node: NodeIR): CompiledSink => {
+    const settings = querySettingsFor(node);
+    if ('refuse' in settings) return { defer: `the Query Records it fetches is not exported: ${settings.refuse}` };
+    return {
+      action: { kind: 'query-fetch', nodeId: node.id, values: queryWirings.get(node.id)?.values ?? [] },
+      consumes: [],
+      collapses: [],
+      subscribes: []
     };
   };
 
@@ -14759,6 +14821,7 @@ function planComponent(
     if (node.type === HTTP_TYPE) return compileHttpFetch(node);
     if (node.type === CLOUD_FUNCTION_TYPE) return compileCloudCall(node);
     if (node.type === RECORD_TYPE) return compileRecordFetch(node);
+    if (node.type === 'DbCollection2') return compileQueryFetch(node);
     // EXP-011 §45.
     if (node.type === FILE_PICKER_TYPE) return compileFilePick(node);
     if (node.type === UPLOAD_FILE_TYPE) return compileFileUpload(node);
@@ -15578,6 +15641,9 @@ function planComponent(
           return exprValidIn(action.items, context, invokedScope);
         case 'runtasks-abort':
           return true;
+        // P18-S116-QUERYFETCH. The wired filter values are read at the pulse, in the handler that pulses.
+        case 'query-fetch':
+          return action.values.every((v) => exprValidIn(v.expr, context, invokedScope));
         // EXP-011 §58. The data is read at the pulse, in the handler that pulses; the listeners are validated where they compile.
         case 'stream-action':
           return action.value === undefined || exprValidIn(action.value, context, invokedScope);
@@ -16275,7 +16341,37 @@ function planComponent(
       if ('defer' in r) return r;
       out.push(r);
     }
+    const late = lateQueryFetchWrite(out);
+    if (late !== undefined) return { defer: late };
     return out;
+  }
+  /**
+   * P18-S116-QUERYFETCH. The runtime's Fetch is scheduled (`scheduleAfterInputsHaveUpdated`), so it reads its filter's
+   * values after every write the same pulse makes; the export's fetch is a statement where the wire sits in the chain.
+   * They differ only where a later action in the same list writes a value the filter reads, and that is refused by name.
+   */
+  function lateQueryFetchWrite(actions: HandlerAction[]): string | undefined {
+    const writes = (a: HandlerAction): string | undefined =>
+      a.kind === 'store-set' ? `store:${a.variableName}` : a.kind === 'globalstore-set' ? `key:${a.storeName}:${a.key}` : a.kind === 'state-set' ? `state:${a.name}` : undefined;
+    const reads = (e: ValueExpr, into: Set<string>): Set<string> => {
+      if (e.kind === 'store-get') into.add(`store:${e.variableName}`);
+      else if (e.kind === 'store-key-get') into.add(`key:${e.storeName}:${e.key}`);
+      else if (e.kind === 'state-get') into.add(`state:${e.name}`);
+      else if (e.kind === 'format') e.parts.forEach((p) => typeof p !== 'string' && reads(p, into));
+      else if (e.kind === 'logical') e.operands.forEach((o) => reads(o, into));
+      else if (e.kind === 'not' || e.kind === 'truthy') reads(e.operand, into);
+      return into;
+    };
+    for (const [i, a] of actions.entries()) {
+      if (a.kind !== 'query-fetch') continue;
+      for (const v of a.values) {
+        const read = reads(v.expr, new Set());
+        if (actions.slice(i + 1).some((b) => read.has(writes(b) ?? ''))) {
+          return `its Fetch is sent before the chain writes "${v.name}", which its Filter reads — the runtime fetches after the pulse's writes (scheduleFetch), and that order is not exported in this slice`;
+        }
+      }
+    }
+    return undefined;
   }
   function snapAction(action: HandlerAction, snap: ChainSnapshot): HandlerAction | { defer: string } {
     switch (action.kind) {
@@ -16509,6 +16605,16 @@ function planComponent(
       }
       case 'runtasks-abort':
         return action;
+      // P18-S116-QUERYFETCH. A value the chain wrote a statement earlier is read as written, as `stream-action`'s.
+      case 'query-fetch': {
+        const values: Array<{ name: string; expr: ValueExpr }> = [];
+        for (const v of action.values) {
+          const expr = snapExpr(v.expr, snap);
+          if ('defer' in expr) return expr;
+          values.push({ name: v.name, expr });
+        }
+        return { ...action, values };
+      }
       case 'jsfun-run': {
         if ((plan.jsFunctions[action.nodeId]?.inputs ?? []).some((i) => i.expr !== undefined && exprTouchesSnap(i.expr, snap))) {
           return { defer: 'a Function argument reads state written earlier in this chain — not translated in this slice' };
@@ -16998,6 +17104,8 @@ function planComponent(
     if (fromNode?.type === 'Condition' && (connection.fromProperty === 'ontrue' || connection.fromProperty === 'onfalse')) {
       continue;
     }
+    // P18-S116-QUERYFETCH. A page's Did Mount into a query's Fetch is the query asking at mount (`fetchWiredOf`).
+    if (pageMountFetch(connection)) continue;
     if (
       (fromNode?.type === 'NavigationShowPopup' || fromNode?.type === 'NavigationClosePopup') &&
       connection.fromProperty === 'done'
@@ -17181,6 +17289,13 @@ function planComponent(
         compiled.action,
         chainSnapshotFor(`dom:${fromNode.id}:${connection.fromProperty}`, seedId)
       );
+      // P18-S116-QUERYFETCH. A handler is assembled wire by wire, so the late-write rule is asked of it here too.
+      const lateWrite = 'defer' in snapped ? undefined : lateQueryFetchWrite([...(plan.handlers[fromNode.id]?.[connection.fromProperty] ?? []), snapped]);
+      if (lateWrite !== undefined) {
+        dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason: lateWrite };
+        notes.push(wireNote(connection, lateWrite));
+        continue;
+      }
       if ('defer' in snapped) {
         if (outputsSink) {
           if (!failedOutputsNodes.has(toNode.id)) failedOutputsNodes.set(toNode.id, snapped.defer);
@@ -17218,6 +17333,12 @@ function planComponent(
         continue;
       }
       const snappedRecv = snapAction(compiled.action, chainSnapshotFor(`recv:${fromNode.id}`));
+      const lateRecvWrite = 'defer' in snappedRecv ? undefined : lateQueryFetchWrite([...(receiverActions.get(fromNode.id) ?? []), snappedRecv]);
+      if (lateRecvWrite !== undefined) {
+        dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason: lateRecvWrite };
+        notes.push(wireNote(connection, lateRecvWrite));
+        continue;
+      }
       if ('defer' in snappedRecv) {
         if (outputsSink) {
           if (!failedOutputsNodes.has(toNode.id)) failedOutputsNodes.set(toNode.id, snappedRecv.defer);
@@ -19219,6 +19340,10 @@ function planComponent(
             break;
           case 'runtasks-abort':
             break;
+          // P18-S116-QUERYFETCH. The wired filter values, read at the pulse.
+          case 'query-fetch':
+            for (const v of action.values) walkExpr(v.expr);
+            break;
           // EXP-011 §58. The data read at the pulse; the config and listeners are walked off the plan below.
           case 'stream-action':
             if (action.value !== undefined) walkExpr(action.value);
@@ -19323,8 +19448,11 @@ function planComponent(
   // P18-S115-QUERYPARAMS. A landing query's wired filter values are read in its effect: their wires and logic land
   // there. Before pass 6, which reports every wire nothing consumed.
   for (const node of component.nodes) {
-    const wiring = node.type === 'DbCollection2' ? queryWirings.get(node.id) : undefined;
-    if (wiring === undefined || !queryLands(node)) continue;
+    if (node.type !== 'DbCollection2' || !queryLands(node)) continue;
+    // P18-S116-QUERYFETCH. A page's Did Mount into its Fetch is the query's mount.
+    for (const wire of component.connections) if (wire.toId === node.id && pageMountFetch(wire)) consumed.add(wire.key);
+    const wiring = queryWirings.get(node.id);
+    if (wiring === undefined) continue;
     const into = plan.file ? `src/${plan.file.dir}/${plan.file.fileBase}.tsx` : plan.path;
     for (const key of wiring.consumes) consumed.add(key);
     for (const id of wiring.collapses) dispositions[id] = { kind: 'collapsed', into };
@@ -19710,6 +19838,7 @@ function planComponent(
           // EXP-011 §53. Nothing nested on the action; the listeners are filled off the plan below.
           case 'runtasks-run':
           case 'runtasks-abort':
+          case 'query-fetch':
             break;
           // EXP-011 §58. Nothing nested on the action; the listeners are filled off the plan below.
           case 'stream-action':

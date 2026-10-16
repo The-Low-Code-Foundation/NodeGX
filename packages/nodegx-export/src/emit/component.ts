@@ -83,6 +83,15 @@ import { computeNodeStyle, computeRoleCss, CONTENT_ATTR_ORDER, CONTENT_PARAMS, D
  * P18-S115-QUERYFILTER. A query's parameters as the object literal its fetch is called with, keys in the wire's order.
  * The `where` is the runtime translator's own document, printed as JSON (its `$eq` keys need the quotes).
  */
+/**
+ * P18-S116-QUERYFETCH. Whether the page asks for a query in an effect: always, unless its Fetch is wired and no box asks
+ * (none at mount, and no wired filter value whose box asks on a change).
+ */
+function queryHasEffect(query: QueryPlan): boolean {
+  const fetched = query.fetchWired;
+  return fetched === undefined || fetched.mount || (fetched.onValues && query.params?.wired !== undefined);
+}
+
 function queryParamsLiteral(params: NonNullable<QueryPlan['params']>, whereLocal?: string): string {
   const parts: string[] = [];
   if (whereLocal !== undefined) parts.push(whereLocal === 'where' ? 'where' : `where: ${whereLocal}`);
@@ -710,6 +719,8 @@ export function emitComponent(
     if (action.kind === 'runtasks-run') collectExprUse(action.items);
     // EXP-011 §58. The data read at the pulse earns whatever its source earns.
     if (action.kind === 'stream-action' && action.value !== undefined) collectExprUse(action.value);
+    // P18-S116-QUERYFETCH. The wired filter values, read at the pulse: a Variable there is `.get()`, which earns its import.
+    if (action.kind === 'query-fetch') for (const v of action.values) collectExprUse(v.expr);
     if (action.kind === 'state-set') {
       referencedStateNames.add(action.name);
       if (action.expr !== undefined) collectExprUse(action.expr);
@@ -1195,7 +1206,11 @@ export function emitComponent(
   }
   for (const machine of plan.statesMachines) if (machine.follow !== undefined) hookExprSources(machine.follow);
   // P18-S115-QUERYPARAMS. A query's wired filter values are read in its effect, as render reads.
-  for (const query of plan.queries) for (const value of query.wiredValues ?? []) hookExprSources(value.expr);
+  // P18-S116-QUERYFETCH. Read in render only by an effect that asks; a query only its Fetch runs reads them in the handler.
+  for (const query of plan.queries) {
+    if (!queryHasEffect(query)) continue;
+    for (const value of query.wiredValues ?? []) hookExprSources(value.expr);
+  }
   // EXP-011 §63. The options are render reads — a wired Snap Value off a Variable is its `useValue` local.
   for (const drag of plan.drags) for (const option of drag.options) hookExprSources(option.expr);
   // EXP-011 §58. The config reads are render reads (the data is read at the pulse, in handler mode).
@@ -2458,7 +2473,11 @@ export function emitComponent(
           ? a.materialize !== undefined
             ? [{ ...a, then: [] }, ...expandActions(a.then)]
             : expandActions(a.then)
-          : [a]
+          : // P18-S116-QUERYFETCH. A Fetch into a query the export does not keep (nothing it renders reads the rows) asks
+            // for nothing anyone sees; the query's own row in the report says why it is not kept.
+            a.kind === 'query-fetch' && !plan.queries.some((q) => q.nodeId === a.nodeId)
+            ? []
+            : [a]
     );
   /** The `prop-*` record a record verb sends — the runtime's `_internal.inputValues`, by value. */
   /**
@@ -2623,6 +2642,9 @@ export function emitComponent(
           return reads(a.items);
         case 'runtasks-abort':
           return false;
+        // P18-S116-QUERYFETCH. The wired filter values are read at the pulse.
+        case 'query-fetch':
+          return a.values.some((v) => reads(v.expr));
         // EXP-011 §58. The data is read at the pulse.
         case 'stream-action':
           return a.value !== undefined && reads(a.value);
@@ -3210,6 +3232,21 @@ export function emitComponent(
         return `${action.local}.run(${exprCode(action.items, 'handler')})`;
       case 'runtasks-abort':
         return `${action.local}.abort()`;
+      /**
+       * P18-S116-QUERYFETCH. A Query Records' Fetch: the query's own settings, a wired filter's `where` from the values as
+       * the handler reads them at the pulse (a store fresh, `.get()`). Not awaited: the runtime schedules its fetch.
+       */
+      case 'query-fetch': {
+        const query = plan.queries.find((q) => q.nodeId === action.nodeId)!;
+        const wired = query.params?.wired;
+        if (query.params === undefined) return `void ${query.fetchName}().then(${query.setterName})`;
+        if (wired === undefined) return `void ${query.fetchName}(${queryParamsLiteral(query.params)}).then(${query.setterName})`;
+        const codes = action.values.map((v) => exprCode(v.expr, 'handler'));
+        const codeOf = (name: string) => codes[action.values.findIndex((v) => v.name === name)];
+        const tested = codes.map((code) => (SIMPLE_REF.test(code) ? code : `(${code})`));
+        const valueCode = (name: string, date: boolean) => (query.wiredClient ? `filterValue(${codeOf(name)}${date ? ', true' : ''})` : codeOf(name));
+        return `void ${query.fetchName}(${queryParamsLiteral(query.params, wiredWhereExpr(wired, tested, valueCode))}).then(${query.setterName})`;
+      }
       /** A streaming node's action (EXP-011 §58) — one call on the handle, the data read at the pulse where the verb takes it. */
       case 'stream-action':
         return `${action.local}.${action.verb}(${action.value !== undefined ? exprCode(action.value, 'handler') : ''})`;
@@ -4226,7 +4263,8 @@ export function emitComponent(
     externalImports.push(`import { ${coreHooks.sort().join(', ')} } from '@nodegx/core/react';`);
   }
   const reactImports: string[] = [];
-  if (plan.queries.length > 0) reactImports.push('useEffect', 'useState');
+  // P18-S116-QUERYFETCH. A query that only its Fetch runs holds its rows in state and asks from a handler: no effect.
+  if (plan.queries.length > 0) reactImports.push(...(plan.queries.some((q) => queryHasEffect(q)) ? ['useEffect'] : []), 'useState');
   if (plan.popups.length > 0 && !reactImports.includes('useState')) reactImports.push('useState');
   if (referencedStateVars.length > 0 && !reactImports.includes('useState')) reactImports.push('useState');
   if (
@@ -6907,6 +6945,14 @@ export function emitComponent(
   }
   for (const query of plan.queries) {
     const wired = query.params?.wired;
+    const label = nodeById.get(query.nodeId)?.authoredLabel;
+    // P18-S116-QUERYFETCH. With Fetch wired the query asks in the chain that sends it; here only what else asks.
+    const fetched = query.fetchWired;
+    if (!queryHasEffect(query)) {
+      body.push(`  // ${label ? `"${label}"` : 'The query'} asks only when its Fetch is sent (dbcollectionnode2.ts storageFetch); its boxes are unticked.`, '');
+      continue;
+    }
+    const once = fetched !== undefined && !fetched.onValues;
     if (query.params !== undefined && wired !== undefined && query.wiredValues !== undefined) {
       // P18-S115-QUERYPARAMS. Each wired value is read where the effect runs, and a new one asks again
       // (`setQueryParameter`, its box ticked). An unset value drops its condition, as the runtime's translator does.
@@ -6924,14 +6970,15 @@ export function emitComponent(
       // `filterValue` is the translator's `parseValue`: a Date goes as the date envelope. With no backend the fetch is a stub.
       const valueCode = (name: string, date: boolean) => (query.wiredClient ? `filterValue(${localOf(name)}${date ? ', true' : ''})` : localOf(name));
       const deps = [...new Set(values.flatMap((v) => effectDeps(v.expr)))].join(', ');
-      const label = nodeById.get(query.nodeId)?.authoredLabel;
       body.push(
-        `  // ${label ? `"${label}"` : 'The query'} asks again whenever ${values.map((v) => `"${v.name}"`).join(' or ')} changes (dbcollectionnode2.ts setQueryParameter).`,
+        once
+          ? `  // ${label ? `"${label}"` : 'The query'} asks once as it is made (its Class or Query settings box is ticked); a new ${values.map((v) => `"${v.name}"`).join(' or ')} waits for its Fetch.`
+          : `  // ${label ? `"${label}"` : 'The query'} asks again whenever ${values.map((v) => `"${v.name}"`).join(' or ')} changes (dbcollectionnode2.ts setQueryParameter).`,
         '  useEffect(() => {',
         ...codes.flatMap((code, i) => (code === locals[i] ? [] : [`    const ${locals[i]} = ${code};`])),
         `    const where = ${wiredWhereExpr(wired, locals, valueCode)};`,
         `    ${query.fetchName}(${queryParamsLiteral(query.params, 'where')}).then(${query.setterName});`,
-        `  }, [${deps}]);`,
+        ...(once ? ['    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the node is made', '  }, []);'] : [`  }, [${deps}]);`]),
         ''
       );
       continue;
@@ -7179,6 +7226,8 @@ export function emitComponent(
         return [a.items];
       case 'runtasks-abort':
         return [];
+      case 'query-fetch':
+        return a.values.map((v) => v.expr);
       // EXP-011 §58. The data; the config and listeners are walked off the plan.
       case 'stream-action':
         return a.value !== undefined ? [a.value] : [];

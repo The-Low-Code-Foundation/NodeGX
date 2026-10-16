@@ -22,9 +22,9 @@
  * refused by name.
  *
  * What it cannot reproduce it refuses by name, before any request is made:
- * - a wired filter value whose query is run by its wired Fetch (P18-S116-QUERYFETCH), whose Run On Value Change box is
- *   unticked, that more than one wire feeds, that also holds a typed-in value, or that lands anywhere but a plain
- *   comparison; more than three of them;
+ * - a wired filter value whose Run On Value Change box is unticked while nothing else runs the query (with Fetch wired,
+ *   P18-S116-QUERYFETCH, the value waits for Fetch, which is exported; there the boxes must agree), that more than one
+ *   wire feeds, that also holds a typed-in value, or that lands anywhere but a plain comparison; more than three of them;
  * - the Javascript filter (a script the runtime runs on every fetch);
  * - a Search term (the backend's full-text path, BAK-008);
  * - a Filter, Sort, Use Limit, Limit or Skip input that is itself wired;
@@ -236,10 +236,11 @@ function wiredWhereOf(
 ): WiredWhere | { refuse: string } {
   const quoted = params.map((n) => `"${n}"`).join(', ');
   const wiresInto = (port: string) => component.connections.filter((c) => c.toId === node.id && c.toProperty === port);
-  if (wiresInto('storageFetch').length > 0) {
-    return {
-      refuse: `its Filter reads ${quoted} from a wired input and its Fetch is wired, so the query runs when Fetch is sent — a wired Fetch is not exported in this slice (P18-S116-QUERYFETCH)`
-    };
+  // P18-S116-QUERYFETCH. With Fetch wired the query asks when Fetch is sent, reading the values then; an unticked box
+  // only means a new value waits for it. One ticked and one not is two schedules for one query, refused.
+  const fetchWired = wiresInto('storageFetch').length > 0;
+  if (fetchWired && new Set(params.map((name) => valueOf(paramOf(node, `runOnChange-qp-${name}`)) === false)).size > 1) {
+    return { refuse: `its Fetch is wired and the Run On Value Change boxes of ${quoted} disagree — a value that asks beside one that waits is not exported in this slice` };
   }
   if (params.length > MAX_WIRED_PARAMS) {
     return { refuse: `its Filter reads ${params.length} values from wired inputs; the export builds a \`where\` from at most ${MAX_WIRED_PARAMS}` };
@@ -253,7 +254,7 @@ function wiredWhereOf(
       return { refuse: `its "${name}" input is wired and holds a typed-in value too — which one the first fetch reads is not exported in this slice` };
     }
     // `setQueryParameter` asks `shouldRunOnValueChanged('qp-<name>')`: unticked, a new value waits for the next fetch.
-    if (valueOf(paramOf(node, `runOnChange-qp-${name}`)) === false) {
+    if (!fetchWired && valueOf(paramOf(node, `runOnChange-qp-${name}`)) === false) {
       return {
         refuse: `its Run On Value Change box for "${name}" is unticked, so a new value waits for a fetch something else starts — not exported in this slice`
       };

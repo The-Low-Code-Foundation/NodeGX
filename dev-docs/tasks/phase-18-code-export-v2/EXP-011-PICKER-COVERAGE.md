@@ -12097,3 +12097,117 @@ the signed-in user or anything else `resolveExpr` reads in render.
 3. P18-S113-LISTLIVE (the store's events in the client, `matchesQuery` against the `where` the plan now carries; for a
    wired filter, the `where` of the current values).
 4. P18-S115-DYNPROBE; then §81.5's list.
+
+## §84 A Query Records asks when its Fetch is sent (session 117, 2026-10-16): P18-S116-QUERYFETCH
+
+### §84.0 What was wrong
+
+In the running app a Query Records' Fetch (`storageFetch`, display name "Do") is `scheduleFetch`: the query asks after
+the pulse's writes, reading its filter's wired values then. Wiring Fetch settles every Run On Value Change box unticked
+(NDA-017's migration, which the export's parser applies too), and `nodescope.ts` applies a box before the input it
+governs, so a query with Fetch wired asks at creation only where an author ticked a box again. The export had no rule
+for the port: the query asked once at mount and never again, whatever sent Fetch; the wire was reported as "no
+deterministic translation in step 5". A query whose filter also read a wired value was refused outright (§83's
+QUERYFETCH refusal), and a Create Record whose Done sent the Fetch was refused whole ("its done output drives no
+translatable action"), because the Done chain had nowhere to put the Fetch.
+
+Measured first, over every project under `NodeGX test projects/`, `Noodl projects/` and the export suite's fixtures
+(35 projects with a Query Records, 216 Query Records): **61 have Fetch wired**, 22 of them reading a wired filter value
+too, through 107 wires. The senders: a For Each row's Changed (40), a Create Record's Done (39), a component input
+(`refresh`, `loadHistory`, `Moderator`, `Member`: 17), a Condition's On True (3), a Cloud Function's or Set Record's
+Done (4), a Page's Did Mount (1), a Query Records' Changed (1). The boxes: Class and Query settings both unticked on 49,
+Class ticked on 11 (4 of those Query settings too), unset on 1. At HEAD, 27 of the 61 exported, each asking once at
+mount and never again; not one of the 107 wires exported.
+
+### §84.1 What is built
+
+| piece | what it is |
+|---|---|
+| `plan.ts` `QueryFetchAction` (`query-fetch`) | the Fetch as a handler action, `DbCollection2: 'storageFetch'` in `TRIGGER_PORTS`, `compileQueryFetch` at the sink dispatch. It carries the filter's wired values (`queryWirings`), so every walker sees what it reads; refused with the query's own reason when the query's settings are refused |
+| `QueryPlan.fetchWired` | `mount`: the query also asks as it is made: its Class box ticked (or unset), or its Query settings box with a setting authored (the setters that consult it: `setVisualFilter`, `setVisualSorting`, `backendId`, `userInputSetter`), or a Page's Did Mount sends the Fetch. `onValues`: the wired values' boxes are ticked, so a new value asks too |
+| `pageMountFetch` | a Page's Did Mount into its query's Fetch is the mount: skipped by the attach pass, consumed where the query lands. Any other node's Did Mount stays a handler the emitter reports ("no DOM event equivalent") |
+| `querySettings.ts` | with Fetch wired, an unticked value box is no refusal (the value waits for Fetch); one ticked beside one unticked is refused by name ("two schedules for one query"); §83's QUERYFETCH refusal is gone |
+| `lateQueryFetchWrite` | the one order the runtime's scheduling hides: a later action in the same chain or handler writing a value the filter reads (a Variable, a Global Store key, a state row). Refused by name; asked in `snapActionList` and where a DOM handler or a receiver is assembled wire by wire |
+| `component.ts` | the action prints `void fetch<Plural>(<settings>).then(set<Plural>)`, a wired filter's `where` built from the values as the HANDLER reads them (a store's `.get()` at the pulse, not the render local). The effect prints only where `queryHasEffect` says a box asks; a page with none imports no `useEffect`, and a value read only in a handler earns no `useValue`. A Fetch into a query the export does not keep prints nothing (`expandActions`); the query's own row says why |
+
+### §84.2 The test (`tests/the-query-fetch.test.ts`, 38 rows)
+
+§A grades when the query asks against the runtime node's **own setters**: the child-process arm gained a creation mode
+(`runtime-query-arm.js`): the box answers recorded first through the runtime's `setRunOnValueChange`, as `nodescope.ts`
+hoists them, then each parameter through its setter, `Node.prototype`'s `shouldRunOnValueChange(d)` deciding; it
+counts `scheduleFetch` at creation and on a wired value's change. Eight box combinations: the page has a mount effect
+exactly where the runtime asks at creation, and a value effect exactly where a new value asks. §B pins what is emitted:
+no effect and no `useEffect` with every box unticked, the settings in the Fetch's call, a ticked Class box keeping the
+mount effect beside the Click, a Page's Did Mount as the mount with the wire consumed, a Create Record's Done asking
+inside the save's try after the await, two senders, and the typecheck of every combination. §C evaluates the `where` the
+**handler** builds (its own text, the emitted `filterValue`, a store whose `get()` holds the value) against the runtime's
+`getStorageFilter` over nine values. §D pins the refusals: disagreeing boxes, a later write, a refused query refusing
+the chain that fetches it, and a Fetch into a query nothing renders printing nothing beside the button's other action.
+
+§83's row that pinned the QUERYFETCH refusal now pins that a wired Fetch is not refused (`the-query-reads-its-wires`,
+140 rows).
+
+**Mutant arms**, in a copy (`packages/.nx-mut-s117`, the three sources `cmp`-checked against the working tree before
+and after, removed straight after). Control: 178 / 178 across both specs. Every arm printed its Tests line.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | `mount` always true | 4 |
+| B | the Query settings box never asks at mount | 1 |
+| C | any Query settings box asks, setting or none | 1 |
+| D | a ticked value box never asks on a change | 1 |
+| E | a Page's Did Mount is not the mount | 1 |
+| F | the Fetch carries no values | 11 |
+| G | the Fetch reads values as render saw them | 11 |
+| H | disagreeing boxes not refused | 1 |
+| I | a later write not refused | 1 |
+| J | a Fetch into a dropped query not skipped | 1 |
+| K | an unticked value box refused even with Fetch wired | 14 |
+| L | Fetch not a trigger port | 27 |
+| M | the boxes-unticked branch prints the mount effect anyway | 4 (first shaped `false && …`, which broke a narrowing: "0 total", re-shaped) |
+
+**The whole-package run caught what the drive could not** (`nice -n 19 --runInBand`, 542 s: 131 / 133 suites, 4,621
+passed, 3 failed). Two of the failures were `parameter-coverage` on the P121 peer's three uncommitted Upload File
+ports (`photoQuality`, `readers`, `shrinkTo`; total 1,399 vs 1,396; reaching unchanged at 1,234), as in sessions
+110–116. The third was this spec's typecheck row for a value whose box is unticked: `Cannot find name 'breed'`. Dropping
+the render hook such a page no longer needs had also dropped the Variable's import, because the handler-side import
+walker (`collectExprUse` over each action's fields, an if-chain by kind) had no `query-fetch` case. Added; 38 / 38. The
+drive's page imported `city` anyway, since the City box's own `city.set(…)` earns it, so the drive could not have seen
+this.
+
+### §84.3 The drive (`s117-queryfetch-drive/`)
+
+`fetch-desk`, `EXPECTED.md` first: a City box writing the Variable `city`, wired into `city equal to <city>`, sorted by
+name; Fetch sent by a Refresh button and by a Create Record's Done; every box unticked. s115's ten contacts on a real
+backend, **started fresh for each arm** (the first run shared one, and the runtime arm's Zed showed up in the export
+arm's S2: a harness artefact, not a reading). Six steps in each of three arms.
+
+**Every step agrees** between the runtime and the fixed export, rows and request key for key: no request at load or on
+typing "Berlin"; Refresh → Ada, Dan, Gus, Ivo; Add → one POST then one query, + Zed; cleared and Refresh → `city = ""`,
+no rows; "Oslo" and Refresh → Finn. HEAD had no list, no request and no POST in any step. EXPECTED.md held in every
+cell.
+
+Read off the screenshots: the runtime's Button is black with white text by default, the exported one is the browser's
+grey button (**P18-S117-BUTTONLOOK**, low; 518 Buttons in 78 project folders author no background and no variant).
+
+### §84.4 What this reaches, measured
+
+Over the same 216 Query Records, **every disposition kept its kind**: the 27 Fetch-wired queries that exported still do,
+now asking when Fetch is sent (and at mount only where a box asks); the rest stay refused, each with a truer reason.
+The 19 wired filters the QUERYFETCH refusal stopped now stop one step later: 18 read a Function's output (a value that
+exists only in a handler: the Function-chain gap), 1 a Page Inputs value. Of the 107 Fetch wires, **27 now export**
+(HEAD: none). 65 are still reported by name: 38 because the query itself is refused (its filter reads a Function
+chain), 25 because the sender's own trigger is not exported ("not a rendered element event or a receiver": for one,
+`tut003-log-a-thing-solution`'s Create Record runs from a Condition's Ok), and 2 from a Cloud Function's Done (`d40-wizard-drive`,
+`sbr014-drive`), still pass 6's generic line. 15 sit in components no route reaches or with no visual root. No Create
+Record whose Done sends a Fetch is refused for that any more, and none changed kind either (one changed its reason):
+each is stopped by something else first, read per row in the disposition diff, not yet sorted by cause.
+
+### §84.5 What this leaves
+
+1. **P18-S116-FIELDMOUNT**: a text input's Value at mount. With a wired Fetch it is invisible (the box is unticked), as
+   the drive's S0 shows; with a ticked box it is §83.3's S0.
+2. The Function-chain gap: 18 of the 22 Fetch-wired filters and 42 of §83's 84 read a Function's output.
+3. P18-S113-LISTLIVE (a ticked Record changes box; 20 of the 61 Fetch-wired queries tick it, and the export never
+   follows a write made elsewhere); P18-S115-DYNPROBE; P18-S117-BUTTONLOOK.
+4. A Query Records' Fetched and Failure outputs (19 and 10 of the 61 consume them) are still reported, not chained.

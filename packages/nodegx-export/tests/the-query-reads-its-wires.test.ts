@@ -243,10 +243,9 @@ const wireFrom = (ir: ExportIR, toProperty: string, fromId = 'x', fromProperty =
   componentOf(ir, LANDING).connections.push({ key: `${fromId}:${fromProperty}->${QUERY}:${toProperty}`, fromId, fromProperty, toId: QUERY, toProperty, kind: 'value' });
 
 describe('§C what it cannot build the same way is refused by name, and says so in the report', () => {
-  test('a wired Fetch: the query runs when Fetch is sent (P18-S116-QUERYFETCH)', () => {
-    expect(refusalOf(withFilter(ONE, ['breed'], (ir) => wireFrom(ir, 'storageFetch', 'button', 'onClick')))).toBe(
-      'its Filter reads "breed" from a wired input and its Fetch is wired, so the query runs when Fetch is sent — a wired Fetch is not exported in this slice (P18-S116-QUERYFETCH)'
-    );
+  test('a wired Fetch is not refused: the value is read when Fetch is sent, its box unticked or not (P18-S116-QUERYFETCH, `the-query-fetch.test.ts`)', () => {
+    expect(refusalOf(withFilter(ONE, ['breed'], (ir) => wireFrom(ir, 'storageFetch', 'button', 'onClick')))).toBeUndefined();
+    expect(refusalOf(withFilter({ ...ONE, 'runOnChange-qp-breed': literal(false) }, ['breed'], (ir) => wireFrom(ir, 'storageFetch', 'button', 'onClick')))).toBeUndefined();
   });
 
   test('an unticked Run On Value Change box', () => {

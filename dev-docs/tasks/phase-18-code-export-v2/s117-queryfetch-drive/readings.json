@@ -1,0 +1,375 @@
+{
+ "runtime": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "box": "",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin"
+    ],
+    "requests": []
+   },
+   {
+    "step": "S1 type Berlin",
+    "box": "Berlin",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin"
+    ],
+    "requests": []
+   },
+   {
+    "step": "S2 click Refresh",
+    "box": "Berlin",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin",
+     "Ada",
+     "Berlin",
+     "Dan",
+     "Berlin",
+     "Gus",
+     "Berlin",
+     "Ivo",
+     "Berlin"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/__backend/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "city": {
+         "$eq": "Berlin"
+        }
+       },
+       "order": "name",
+       "count": false
+      }
+     }
+    ]
+   },
+   {
+    "step": "S3 click Add Zed in Berlin",
+    "box": "Berlin",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin",
+     "Ada",
+     "Berlin",
+     "Dan",
+     "Berlin",
+     "Gus",
+     "Berlin",
+     "Ivo",
+     "Berlin",
+     "Zed",
+     "Berlin"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/__backend/classes/Contact",
+      "body": {
+       "name": "Zed",
+       "city": "Berlin",
+       "vip": true
+      }
+     },
+     {
+      "method": "POST",
+      "path": "/__backend/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "city": {
+         "$eq": "Berlin"
+        }
+       },
+       "order": "name",
+       "count": false
+      }
+     }
+    ]
+   },
+   {
+    "step": "S4 clear, click Refresh",
+    "box": "",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/__backend/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "city": {
+         "$eq": ""
+        }
+       },
+       "order": "name",
+       "count": false
+      }
+     }
+    ]
+   },
+   {
+    "step": "S5 type Oslo, click Refresh",
+    "box": "Oslo",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin",
+     "Finn",
+     "Oslo"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/__backend/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "city": {
+         "$eq": "Oslo"
+        }
+       },
+       "order": "name",
+       "count": false
+      }
+     }
+    ]
+   }
+  ],
+  "console": []
+ },
+ "export-control": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "box": "",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin"
+    ],
+    "requests": []
+   },
+   {
+    "step": "S1 type Berlin",
+    "box": "Berlin",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin"
+    ],
+    "requests": []
+   },
+   {
+    "step": "S2 click Refresh",
+    "box": "Berlin",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin"
+    ],
+    "requests": []
+   },
+   {
+    "step": "S3 click Add Zed in Berlin",
+    "box": "Berlin",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin"
+    ],
+    "requests": []
+   },
+   {
+    "step": "S4 clear, click Refresh",
+    "box": "",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin"
+    ],
+    "requests": []
+   },
+   {
+    "step": "S5 type Oslo, click Refresh",
+    "box": "Oslo",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin"
+    ],
+    "requests": []
+   }
+  ],
+  "console": []
+ },
+ "export-fixed": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "box": "",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin"
+    ],
+    "requests": []
+   },
+   {
+    "step": "S1 type Berlin",
+    "box": "Berlin",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin"
+    ],
+    "requests": []
+   },
+   {
+    "step": "S2 click Refresh",
+    "box": "Berlin",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin",
+     "Ada",
+     "Berlin",
+     "Dan",
+     "Berlin",
+     "Gus",
+     "Berlin",
+     "Ivo",
+     "Berlin"
+    ],
+    "requests": [
+     {
+      "method": "OPTIONS",
+      "path": "/classes/Contact"
+     },
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "city": {
+         "$eq": "Berlin"
+        }
+       },
+       "order": "name"
+      }
+     }
+    ]
+   },
+   {
+    "step": "S3 click Add Zed in Berlin",
+    "box": "Berlin",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin",
+     "Ada",
+     "Berlin",
+     "Dan",
+     "Berlin",
+     "Gus",
+     "Berlin",
+     "Ivo",
+     "Berlin",
+     "Zed",
+     "Berlin"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "city": "Berlin",
+       "name": "Zed",
+       "vip": true
+      }
+     },
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "city": {
+         "$eq": "Berlin"
+        }
+       },
+       "order": "name"
+      }
+     }
+    ]
+   },
+   {
+    "step": "S4 clear, click Refresh",
+    "box": "",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "city": {
+         "$eq": ""
+        }
+       },
+       "order": "name"
+      }
+     }
+    ]
+   },
+   {
+    "step": "S5 type Oslo, click Refresh",
+    "box": "Oslo",
+    "lines": [
+     "Fetch Desk",
+     "Refresh",
+     "Add Zed in Berlin",
+     "Finn",
+     "Oslo"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "city": {
+         "$eq": "Oslo"
+        }
+       },
+       "order": "name"
+      }
+     }
+    ]
+   }
+  ],
+  "console": []
+ }
+}
