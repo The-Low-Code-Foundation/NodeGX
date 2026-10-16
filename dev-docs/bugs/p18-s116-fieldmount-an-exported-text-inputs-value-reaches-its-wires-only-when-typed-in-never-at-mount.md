@@ -1,11 +1,11 @@
 ---
 id: P18-S116-FIELDMOUNT
 title: An exported text input's Value reaches its wires only when someone types, never at mount
-status: open
+status: fixed
 severity: medium
 area: export / Text Input
 found: P18 session 116, 2026-10-16, driving P18-S115-QUERYPARAMS (s116-queryparams-drive, step S0)
-evidence: dev-docs/tasks/phase-18-code-export-v2/s116-queryparams-drive/readings.json (S0); runtime noodl-viewer-react TextInput.tsx `componentDidMount` → `setText(startValue)` → `onTextChanged(outwardValueForFieldType(type, text))`; nodegx-export src/analyze/plan.ts pass 3 (the write-through is the input's `onChange` and nothing else)
+evidence: dev-docs/tasks/phase-18-code-export-v2/EXP-011-PICKER-COVERAGE.md §85 (the fix, session 118), s118-fieldmount-drive/ (S0 agrees), packages/nodegx-export/tests/the-field-announces-at-mount.test.ts (graded against the runtime's own field); dev-docs/tasks/phase-18-code-export-v2/s116-queryparams-drive/readings.json (S0); runtime noodl-viewer-react TextInput.tsx `componentDidMount` → `setText(startValue)` → `onTextChanged(outwardValueForFieldType(type, text))`; nodegx-export src/analyze/plan.ts pass 3 (the write-through is the input's `onChange` and nothing else)
 ---
 
 A page has a City box whose Value is wired into a Variable `city`, and a list filtered by `city equal to <city>`.
@@ -25,3 +25,8 @@ Function 30, Sign Up / Log In fields), and a dozen export fixtures carry one.
 The fix: the field's mount publication in the export, as the runtime computes it (`outwardValueForFieldType(type,
 startValue ?? '')`), delivered to each translated sink of the Value at the host's mount; GAM-009's remount rule
 (a field coming back to the value it last announced announces nothing) decides whether a remount repeats it.
+
+**Fixed in session 118 (EXP-011 §85).** The field's own change chain runs once from a guarded mount effect, with the
+value the runtime announces (the start value, or the wired Value as its sync effect coerces it). 66 fields on this
+machine announce now; a field not drawn at mount, a wired Type, a wired Value the export does not carry and a Number
+field (P18-S118-NUMBERFIELD) are refused by name. s116's S0 now agrees: two queries, `city = ""`, no rows.

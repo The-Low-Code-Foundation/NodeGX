@@ -100,8 +100,8 @@ export function CheerBanner() {
 
 const GOLDEN_HOME = `// @nodegx:generated (visual — provenance markers complete in EXP-007)
 import { createPortal } from 'react-dom';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 import { useValue } from '@nodegx/core/react';
 
 import { AboutDialog } from '../components/AboutDialog';
@@ -154,6 +154,15 @@ export function HomePage() {
   const [draft, setDraft] = useState<string | undefined>();
   const hasLongNameOut = hasLongName({ name });
   const formatShoutOut = formatShout({ name });
+
+  // "Visitor name" announces its Value as it mounts, and its chain runs with it (TextInput.tsx componentDidMount → setText(startValue)).
+  const announced = useRef(false);
+  useEffect(() => {
+    if (announced.current) return;
+    announced.current = true;
+    visitorName.set('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the field mounts
+  }, []);
 
   return (
     <div className={styles.page}>

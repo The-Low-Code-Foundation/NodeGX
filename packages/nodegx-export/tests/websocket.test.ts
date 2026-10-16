@@ -12,6 +12,7 @@ import { WEBSOCKET_LIB_PATH, websocketLibSource } from '../src/emit/websocketLib
 import { exportBadgeOf, ledgerEntryOf } from '../src/ledger';
 import { parseProject } from '../src/parse/parseProject';
 import { ComponentIR, ConnectionIR, ExportIR, NodeIR, ParamValue } from '../src/ir/types';
+import { withoutAnnouncement } from './helpers/fieldMount';
 
 /**
  * EXP-011 §65 — `WebSocket` (`net.noodl.WebSocket`), Tier 3.11's second transport.
@@ -123,7 +124,8 @@ describe('§A the plan and the emitted page — the fifth member of the streamin
     expect(page).toContain('<p className={styles.text}>{socket.lastError}</p>');
     expect(page).toContain('<p className={styles.text}>{statusValue}</p>');
     // Nothing of the node prints anywhere else: no useEffect for it, no state row, no store of its own.
-    expect(page).not.toContain('useEffect');
+    // (The Message box's own mount announcement is the field's, not the socket's: P18-S116-FIELDMOUNT.)
+    expect(withoutAnnouncement(page)).not.toContain('useEffect(');
     expect(page).not.toContain('useState');
   });
 

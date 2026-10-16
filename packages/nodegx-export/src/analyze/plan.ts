@@ -3858,6 +3858,26 @@ export interface ObjectSeedPlan {
   comment: string;
 }
 
+/**
+ * P18-S116-FIELDMOUNT. A rendered text input whose Value reaches a chain the export translated (its `onChange`). The
+ * runtime's field announces its Value as it mounts: `componentDidMount` calls `setText(startValue)`, which sends
+ * `onTextChanged` with `outwardValueForFieldType(type, text)` and, through the output's `onChange`, Value Changed
+ * (TextInput.tsx, text-input.ts). So every sink of the Value, and every chain on Value Changed, runs once as the field
+ * appears, with the start value or `""`. The export runs the field's own change chain once from a mount effect, with
+ * the announced value where the chain reads the field.
+ */
+export interface FieldMountPlan {
+  inputId: string;
+  /** The text the field starts from with nothing wired, as the control's boot computes it (`String(startValue ?? '')`). */
+  start: string;
+  /**
+   * The wired Value's source, where a sync effect carries it. The runtime delivers it at node creation, before the
+   * mount, so the field announces it: `undefined` is never delivered (the start value stands), `null` clears.
+   */
+  source?: ValueExpr;
+  comment: string;
+}
+
 /** The seed as the action it prints — one patch, read off the plan so the import sweep and the emitter cannot disagree. */
 export function objectSeedAction(seed: ObjectSeedPlan): HandlerAction {
   return {
@@ -4156,6 +4176,8 @@ export interface ComponentPlan {
   variableSeeds: VariableSeedPlan[];
   /** EXP-011 §71. Object nodes with values typed into their own property inputs, node order — one mount effect each. */
   objectSeeds: ObjectSeedPlan[];
+  /** P18-S116-FIELDMOUNT. Text inputs that announce their Value as they mount, node order — one mount effect each. */
+  fieldMounts: FieldMountPlan[];
   /** EXP-011 §48. CSS Definitions, node order — one module constant + one mount effect each. */
   styleSheets: StyleSheetPlan[];
   /** EXP-011 §49. The States nodes that translated, registration order. */
@@ -4498,6 +4520,7 @@ function planComponent(
     recordEffects: [],
     variableSeeds: [],
     objectSeeds: [],
+    fieldMounts: [],
     valueChangedEffects: [],
     styleSheets: [],
     statesMachines: [],
@@ -19502,6 +19525,66 @@ function planComponent(
       value,
       comment: `${label} — its authored Value is stored on every mount of this component (variablenode2.ts: the value setter runs at node creation).`
     });
+  }
+
+  // P18-S116-FIELDMOUNT. A text input announces its Value as it mounts (TextInput.tsx componentDidMount → setText(startValue)
+  // → onTextChanged, and Value Changed with it), so its change chain runs once then, with the start value. Where the field
+  // is not drawn as the component mounts, or its announcement is not text, the mount half is refused by name; the
+  // field's typing still runs the chain.
+  {
+    const parentOf = parentMapOf(component);
+    for (const node of component.nodes) {
+      if (!isTextInputType(node.type) || !rendered.has(node.id)) continue;
+      const stateVar = controlStateVars.get(node.id);
+      const chain = plan.changeHandlers[node.id] ?? [];
+      if (chain.length === 0) continue;
+      const label = node.authoredLabel ? `"${node.authoredLabel}"` : 'The text input';
+      const refuse = (why: string) =>
+        notes.push(`node ${node.id} (${node.type}): its Value at mount is not announced — ${why}; typing still runs its chain (P18-S116-FIELDMOUNT)`);
+      // The field and every ancestor up to the root: a Mounted that is false or wired means the field is not there at mount.
+      let away: 'never' | 'later' | undefined;
+      for (let id: string | undefined = node.id; id !== undefined; id = parentOf.get(id)) {
+        const bound = plan.bindings[id]?.['mounted'];
+        if (bound !== undefined) {
+          const literal = bound.kind === 'computed' && (bound.expr.kind === 'literal' || bound.expr.kind === 'undefined');
+          if (!literal) away = away ?? 'later';
+          else if (bound.expr.kind === 'undefined' || !(bound.expr as { value: unknown }).value) away = 'never';
+        } else if (literalParam(nodeById.get(id)!, 'mounted') === false) away = 'never';
+      }
+      if (away === 'never') continue;
+      if (away === 'later') {
+        refuse('it or a group it sits in mounts from a wire, so it announces when that wire first says true, not as the component mounts');
+        continue;
+      }
+      const type = literalParam(node, 'type');
+      if (wiredPorts.has(`${node.id}:type`) || (type !== undefined && typeof type !== 'string')) {
+        refuse('its Type is wired, so whether it announces text or a number is not known here');
+        continue;
+      }
+      if (type === 'number') {
+        refuse('a Number field announces a number or null, and the exported field carries text (P18-S118-NUMBERFIELD)');
+        continue;
+      }
+      const sync = stateVar === undefined ? undefined : plan.syncEffects.find((e) => e.stateName === stateVar.name);
+      if (sync === undefined && wiredPorts.has(`${node.id}:startValue`) && literalParam(node, 'runOnChange-startValue') !== false) {
+        refuse('its Value is wired and the export does not carry that wire');
+        continue;
+      }
+      const authored = literalParam(node, 'startValue');
+      const catalogDefault = node.catalogRef ? catalog.inputDefault(node.catalogRef, 'startValue') : undefined;
+      const raw =
+        authored !== undefined
+          ? authored
+          : typeof catalogDefault === 'string' || typeof catalogDefault === 'number'
+            ? catalogDefault
+            : undefined;
+      plan.fieldMounts.push({
+        inputId: node.id,
+        start: raw === undefined ? '' : String(raw),
+        ...(sync !== undefined ? { source: sync.source } : {}),
+        comment: `${label} announces its Value as it mounts, and its chain runs with it (TextInput.tsx componentDidMount → setText(startValue)).`
+      });
+    }
   }
 
   // Variables collapse into the stores module — the node is the module's provenance.

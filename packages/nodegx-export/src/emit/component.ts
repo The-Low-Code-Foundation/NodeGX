@@ -1924,12 +1924,17 @@ export function emitComponent(
     if (node === 'pattern') return `${local}.${field ?? 'match'}`;
     return `${local}.${node === 'hash' ? 'digest' : 'value'}`;
   };
+  /**
+   * P18-S116-FIELDMOUNT. While a field's mount effect prints its change chain, the field's reads are the value it announces
+   * (a literal, or the local its wired Value lands in); everywhere else they are the DOM event's.
+   */
+  let announcedCode: { inputId: string; code: string } | undefined;
   const exprCode = (expr: ValueExpr, mode: 'handler' | 'render'): string => {
     switch (expr.kind) {
       case 'prop':
         return propName(expr.name);
       case 'input-text':
-        return 'event.target.value';
+        return announcedCode?.inputId === expr.inputId ? announcedCode.code : 'event.target.value';
       /**
        * A url parameter (EXP-011 Tier 2.5) — the query first, the path segment behind it.
        *
@@ -4297,7 +4302,8 @@ export function emitComponent(
   if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0) reactImports.push('useRef');
   // EXP-011 §53. A task template's mount effect and its once-guard (StrictMode mounts twice; startTask pulses once).
   // EXP-011 §57. A Repeater Item's Added effect takes the same pair, for the same reason.
-  if (plan.task !== undefined || plan.repeaterItems.length > 0) {
+  // P18-S116-FIELDMOUNT. A field's mount announcement takes the same pair: its chain may reach a parent or a backend.
+  if (plan.task !== undefined || plan.repeaterItems.length > 0 || plan.fieldMounts.length > 0) {
     if (!reactImports.includes('useEffect')) reactImports.push('useEffect');
     if (!reactImports.includes('useRef')) reactImports.push('useRef');
   }
@@ -7088,6 +7094,39 @@ export function emitComponent(
         ''
       );
     }
+  }
+  // P18-S116-FIELDMOUNT. A text input announces its Value as it mounts, so the chain its typing runs runs once then, with
+  // the start value: `""` for an empty field. A wired Value lands first (the runtime delivers it at node creation): `undefined`
+  // is never delivered, `null` clears, as the sync effect above coerces it. The ref guards StrictMode's second mount.
+  for (const mount of plan.fieldMounts) {
+    const chain = plan.changeHandlers[mount.inputId] ?? [];
+    if (chain.length === 0) continue;
+    const once = dedupeLocal('announced');
+    const lines: string[] = [];
+    let code = tsLiteral(mount.start);
+    if (mount.source !== undefined) {
+      const arrival = dedupeLocal('arrival');
+      code = dedupeLocal('mountValue');
+      lines.push(
+        `    const ${arrival} = ${exprCode(mount.source, 'render')};`,
+        `    const ${code} = ${arrival} === undefined ? ${tsLiteral(mount.start)} : ${arrival} === null ? '' : String(${arrival});`
+      );
+    }
+    announcedCode = { inputId: mount.inputId, code };
+    const chainLines = effectBody(chain, 4);
+    announcedCode = undefined;
+    body.push(
+      `  // ${mount.comment}`,
+      `  const ${once} = useRef(false);`,
+      '  useEffect(() => {',
+      `    if (${once}.current) return;`,
+      `    ${once}.current = true;`,
+      ...lines,
+      ...chainLines,
+      "    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the field mounts",
+      '  }, []);',
+      ''
+    );
   }
   // Push effects (§3.5): the lifted value output — fires on change and once at mount, which
   // is the boot delivery a parent wire gets from the interpreter.

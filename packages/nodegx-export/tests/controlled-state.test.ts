@@ -79,7 +79,7 @@ const METER = 'Components/CheerMeter';
 // ---------------------------------------------------------------------------------------------
 
 const GOLDEN_CHEER_METER = `// @nodegx:generated (visual — provenance markers complete in EXP-007)
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useValue } from '@nodegx/core/react';
 
 import { draftCopy, visitorName } from '../stores/variables';
@@ -106,6 +106,17 @@ export function CheerMeter({ onDraftChanged }: CheerMeterProps) {
     if (name === undefined) return;
     setDraft(name === null ? '' : String(name));
   }, [name]);
+
+  // "Draft" announces its Value as it mounts, and its chain runs with it (TextInput.tsx componentDidMount → setText(startValue)).
+  const announced = useRef(false);
+  useEffect(() => {
+    if (announced.current) return;
+    announced.current = true;
+    const arrival = name;
+    const mountValue = arrival === undefined ? '' : arrival === null ? '' : String(arrival);
+    draftCopy.set(mountValue);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the field mounts
+  }, []);
 
   useEffect(() => {
     onDraftChanged?.(draft);

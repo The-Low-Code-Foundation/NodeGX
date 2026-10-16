@@ -12211,3 +12211,100 @@ each is stopped by something else first, read per row in the disposition diff, n
 3. P18-S113-LISTLIVE (a ticked Record changes box; 20 of the 61 Fetch-wired queries tick it, and the export never
    follows a write made elsewhere); P18-S115-DYNPROBE; P18-S117-BUTTONLOOK.
 4. A Query Records' Fetched and Failure outputs (19 and 10 of the 61 consume them) are still reported, not chained.
+
+## §85 A text input announces its Value as it mounts (session 118, 2026-10-16): P18-S116-FIELDMOUNT
+
+### §85.0 What was wrong
+
+In the running app a Text Input announces its Value when it mounts: `TextInput.tsx` `componentDidMount` calls
+`setText(startValue)`, which sends `onTextChanged` with `outwardValueForFieldType(type, text)`, and the output's
+`onChange` sends Value Changed with it (`text-input.ts`). GAM-009's rule only stops a *remount* that returns to the
+value it last announced. So every sink of the Value and every chain on Value Changed runs once as the field appears,
+with the start value or `""`. The exported field wrote only from its `onChange`. A Variable it writes held nothing
+until the first keystroke, so a filter reading it dropped its condition; s116's drive measured it at S0 (the runtime
+asked twice and showed no rows, the export showed all eight).
+
+Measured first, over every project under `NodeGX test projects/`, `Noodl projects/` and the export fixtures (213
+projects): 645 text inputs have a Value or Value Changed wire (830 wires). The export carries 76 of them through the
+field's own change chain, and those are the ones whose sinks see the mount: 38 write a Variable, 34 send a component's
+output signal from Value Changed (all of them kit fields whose Value is wired from the component's inputs, so in the
+runtime the parent's chain runs as the field mounts), 4 write a state row or a Global Store key. The 465 read only from
+handlers (a state row booted at the start value) already agreed. The other 104 are refused for reasons of their own.
+
+### §85.1 What is built
+
+| piece | what it is |
+|---|---|
+| `plan.ts` `FieldMountPlan`, `plan.fieldMounts` | registered beside the variable seeds for each rendered text input with a change chain: `start` (the text the control's boot computes, `String(startValue ?? '')`) and `source` (the wired Value's expression, where a sync effect carries it) |
+| the refusals, by name in the notes | a field or a group it sits in mounted from a wire (it announces when the wire first says true); a wired Type; a Number field (`null` or a number, while the exported field carries text: **P18-S118-NUMBERFIELD**, filed); a wired Value the export does not carry. A field authored Mounted false, or inside a group that is, is never drawn, so nothing is announced and nothing refused |
+| `component.ts` | one mount effect per field, guarded by a ref (StrictMode's second mount), printed after the sync effects: the field's own change chain, with the field's reads printed as the announced value (`announcedCode`, consulted where `input-text` prints) instead of `event.target.value`. A wired Value lands first, as the runtime delivers it at node creation: `undefined` is never delivered (the start value stands), `null` clears, anything else is `String`, the sync effect's own rule |
+
+### §85.2 The test (`tests/the-field-announces-at-mount.test.ts`, 31 rows)
+
+§A grades the value against the **runtime's own field**: `tests/helpers/runtime-field-arm.js` builds a real Text
+Input node in a corpus graph and draws it through its own `render()` into a real `createRoot` under jsdom (GAM-009's
+harness, in a child process), and records every write of the Value output from the first paint and every Value
+Changed. A known-firing row: in all 15 cases the runtime writes once at mount and sends Value Changed once. Then 8
+authored cases (empty, a typed value, spaces, a number typed into Value, Text Area, Email, Password, URL) on
+search-desk's Search box, and 7 wired cases on cheer's CheerMeter (text, `""`, `null`, a number, a boolean, nothing
+delivered with and without a start value). The emitted effect is evaluated with the store's `set` recording, and it
+must equal the runtime's writes. §B pins the shape: one guarded effect after the query's, typing unchanged, nothing
+for a field whose Value reaches nothing, a Value Changed chain (cheer's Mood page, a Global Store Set) run at mount,
+the wired form, a control for the helper the neighbouring specs read pages through, and the typecheck of three apps.
+§C pins the refusals, and that Visible false still announces (it mounts).
+
+**Mutant arms**, in a copy (`packages/.nx-mut-s118`, its sources `cmp`-checked against the working tree afterwards and
+removed straight after), run on the spec's first 30 rows, before the helper's control row was added. Control 30 / 30.
+Every arm printed its Tests line.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | the start value ignored (always `""`) | 7 |
+| B | the wired source dropped | 5 |
+| C | a wired `null` not cleared | 2 |
+| D | nothing delivered ignores the start value | 1 |
+| E | a field mounted from a wire announces anyway | 2 |
+| F | the ancestors not walked | 1 |
+| G | a Number field not refused | 1 |
+| H | the event read printed at mount (`event.target.value`) | 21 |
+| I | a field authored Mounted false announces | 1 |
+| J | a wired Type not refused | 1 |
+| K | no field announces | 19 (first shaped `if (false)`, which failed the typecheck: "0 total", reshaped) |
+
+**Neighbours.** Thirteen suites changed, all for this. Five hand-written targets now carry the field's announcement
+(Mood, Notes, step 5's Home, CheerMeter, the Variable Dial's page), each diff the import and the block and nothing
+else. Three import pins gained `useRef`. Six negative rows were wider than their claims (`not 'if ('` for "no Condition
+branch", `not 'useRef'` for "no timer ref", `not 'useEffect'` for "no effect of the socket's or the record's own") and
+now read the page without the announcement (`tests/helpers/fieldMount.ts`, its own control row) and the call
+(`useEffect(`), not the word the import now carries. `hls001`'s golden was regenerated once, deliberately, after
+counting: every fixture emitted at HEAD and with the fix, 25 files differ, each by the announcement block and its
+import only, and the golden's diff is those 25 hashes.
+
+### §85.3 The drive (`s118-fieldmount-drive/`)
+
+s116's drive re-run unchanged (`params-desk`, the ten contacts on a real backend, five steps typed into the City box),
+`EXPECTED.md` first. **The runtime and the fixed export agree in every step, S0 included**: at load both ask with
+`city` unset (`vip` only), the box announces `""`, and both ask again with `city = ""` and show no rows. The fixed
+export's first query shows twice (`<StrictMode>`); the announcement is guarded and its query does not. HEAD (s117's
+export) shows all eight vips at load, as s116's fixed arm did. S1 to S4 agree in all three arms. No console errors.
+
+Read off the screenshots: the runtime's City box is narrower and its placeholder smaller than the export's
+(**P18-S118-INPUTLOOK**, low, by eye, cause not read).
+
+### §85.4 What this reaches, measured
+
+Over the same 213 projects, after the fix: **66 fields announce at mount** (35 with a wired Value, 31 authored), their
+chains 33 component output signals, 31 Variable writes and 2 Global Store writes. 8 are refused by name: 5 sit in a
+group (or are themselves) mounted from a wire, 1 has a wired Type, 2 have a wired Value the export does not carry. The
+remaining 2 of the 76 sit in a group authored Mounted false with nothing wired (driftwood TL4's waitlist form): never
+drawn, so the runtime never announces either. No Number field has a change chain on this machine; the 21 Number fields
+with a wired Value are all read from handlers, and P18-S118-NUMBERFIELD is theirs.
+
+### §85.5 What this leaves
+
+1. P18-S118-NUMBERFIELD (filed): a Number field's Value as a number or `null`, at every read (21 fields).
+2. GAM-009's remount rule in the export: a component remounted inside a conditionally mounted parent announces again
+   in the export, where the runtime's node survives the remount and announces only a real change. Not measured on the
+   corpus yet.
+3. The Function-chain gap (18 of the 22 Fetch-wired filters, 42 of §83's 84); P18-S113-LISTLIVE; P18-S115-DYNPROBE;
+   P18-S117-BUTTONLOOK and P18-S118-INPUTLOOK (low).

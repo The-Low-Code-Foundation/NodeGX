@@ -7,6 +7,7 @@ import { emitApp } from '../src/emit/emitApp';
 import { parseProject } from '../src/parse/parseProject';
 import { typecheckEmittedApp } from './helpers/typecheckApp';
 import { ExportIR, ComponentIR, ConnectionIR, NodeIR, ParamValue } from '../src/ir/types';
+import { withoutAnnouncement } from './helpers/fieldMount';
 
 /**
  * EXP-011 §43 — `Record` (`DbModel2`), the second of the nine Cloud Services and the most used of
@@ -267,7 +268,8 @@ describe('EXP-011 §43 §B — the component', () => {
   it('Fetch unwired: the Id binds the row to the app’s copy of the record — no request, no Error, no Done (P18-S113-IDBINDREAD)', () => {
     const app = withGraph(baseEffect, { connected: true, schema: true });
     const page = notesFile(app);
-    expect(page).toContain("import { useEffect, useState } from 'react';");
+    // `useRef`: the Draft box's mount announcement (P18-S116-FIELDMOUNT), not the bind.
+    expect(page).toContain("import { useEffect, useRef, useState } from 'react';");
     expect(page).toContain("import { subscribeRecord } from '../api/client';");
     // The row's type, and no read: the module carries no fetchPageById for a Record that only binds.
     expect(page).toContain("import { type Page } from '../api/pages';");
@@ -343,7 +345,7 @@ describe('EXP-011 §43 §B — the component', () => {
     const app = withGraph(base, { connected: true, schema: true });
     const page = notesFile(app);
     expect(page).toContain("throw new Error('Missing Id.');");
-    expect(page).not.toContain(') return;');
+    expect(withoutAnnouncement(page)).not.toContain(') return;');
   });
 
   it('Fetch unwired with a literal Id binds once, at mount — the effect has no dependency and no guard', () => {
@@ -392,7 +394,8 @@ describe('EXP-011 §43 §B — the component', () => {
     const page = notesFile(app);
     expect(app.files['src/api/client.ts']).toBeUndefined();
     expect(page).not.toContain('subscribeRecord');
-    expect(page).not.toContain('useEffect');
+    // The import's `useEffect` is the Draft box's announcement (P18-S116-FIELDMOUNT); no effect of the record's own.
+    expect(withoutAnnouncement(page)).not.toContain('useEffect(');
     expect(page).toContain("{pageRow?.title ?? ''}");
     expect(pagesFile(app)).not.toContain('fetchPageById');
     expect(typecheckEmittedApp(app)).toEqual([]);

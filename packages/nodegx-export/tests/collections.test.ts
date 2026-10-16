@@ -49,6 +49,7 @@ export const notes = collection<NotesItem>([]);
 
 const GOLDEN_NOTES_PAGE = `// @nodegx:generated (visual — provenance markers complete in EXP-007)
 import { useCollection } from '@nodegx/core/react';
+import { useEffect, useRef } from 'react';
 
 import { notes } from '../collections/notes';
 import { NoteRow } from '../components/NoteRow';
@@ -58,6 +59,15 @@ import styles from './Notes.module.css';
 /** Notes. */
 export function NotesPage() {
   const notesItems = useCollection(notes);
+
+  // "Draft" announces its Value as it mounts, and its chain runs with it (TextInput.tsx componentDidMount → setText(startValue)).
+  const announced = useRef(false);
+  useEffect(() => {
+    if (announced.current) return;
+    announced.current = true;
+    noteDraft.set('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the field mounts
+  }, []);
 
   return (
     <div className={styles.notesPage}>

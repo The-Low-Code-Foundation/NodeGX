@@ -106,7 +106,8 @@ describe('§B the component subscribes a live Record’s row, and nothing else',
     expect(home).toContain(SUBSCRIBE_SHOWN);
     expect(home).not.toContain('subscribeRecord<Page>(frozenPageRow');
     expect(home).toContain("import { subscribeRecord } from '../api/client';");
-    expect(home).toMatch(/^import \{ useEffect, useState \} from 'react';$/m);
+    // `useRef`: the page's text input announces its Value at mount (P18-S116-FIELDMOUNT).
+    expect(home).toMatch(/^import \{ useEffect, useRef, useState \} from 'react';$/m);
   });
 
   it('unticked everywhere, no subscription and no import', () => {

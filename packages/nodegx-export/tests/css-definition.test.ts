@@ -103,7 +103,8 @@ describe('§A — the stylesheet', () => {
 
   test('A2 the effect: append on mount, remove on unmount, no dependencies — and useEffect imported for it', () => {
     expect(home(app)).toContain(SHEET_EFFECT);
-    expect(home(app)).toContain("import { useEffect, useState } from 'react';");
+    // `useRef`: the page's text input announces its Value at mount (P18-S116-FIELDMOUNT), not the sheet.
+    expect(home(app)).toContain("import { useEffect, useRef, useState } from 'react';");
   });
 
   test('A3 the node collapses into the page file; the "no translation" note is gone', () => {

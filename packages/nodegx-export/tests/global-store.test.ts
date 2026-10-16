@@ -58,6 +58,7 @@ export const mood = store<MoodState>('mood', {
 `;
 
 const GOLDEN_MOOD_PAGE = `// @nodegx:generated (visual — provenance markers complete in EXP-007)
+import { useEffect, useRef } from 'react';
 import { useStore, useValue } from '@nodegx/core/react';
 
 import { mood } from '../stores/mood';
@@ -69,6 +70,15 @@ export function MoodPage() {
   const name = useValue(visitorName);
   const note = useStore(mood, (s) => s.note);
   const theme = useStore(mood, (s) => s.theme);
+
+  // "Note" announces its Value as it mounts, and its chain runs with it (TextInput.tsx componentDidMount → setText(startValue)).
+  const announced = useRef(false);
+  useEffect(() => {
+    if (announced.current) return;
+    announced.current = true;
+    mood.set({ note: '' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the field mounts
+  }, []);
 
   return (
     <div className={styles.moodPage}>
