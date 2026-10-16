@@ -1,0 +1,1145 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open Bubble</title>
+<!--
+  P123 Open Bubble — a Bubble-shaped editor for a NodeGX app, built from the kit (P112's "your own editor").
+
+  Three tabs, as Bubble has them:
+    Design    the real app in the page (`@nodegx/preview`), an element palette and tree on the left, a property
+              editor on the right; click an element in the page to select it, drag it to another place in its
+              layout, pull a handle to resize it
+    Workflow  "When <element> <event>" → numbered action steps, read from the wires; add a step, delete a step
+    Data      the app's data types and fields (the project file's `dbCollections`), and the rows on the bound backend
+
+  Every change is an edit through the kit's own store (`V2ProjectStore`, the same eight edits the editor suite
+  grades: add_node, remove_node, connect, disconnect, set_parameter, move, rename, add_child), saved to the project
+  folder by serve.mjs, and the app rebuilt from the files. Nothing here draws the app or runs a node.
+-->
+<style>
+  :root {
+    --bg: #f3f4f6; --panel: #ffffff; --line: #e2e5ea; --ink: #1b1f27; --muted: #6b7280; --accent: #2457f5;
+    --accent-soft: #e8eefe; --hover: #22c55e; --sel: #2457f5; --danger: #dc2626; --radius: 6px;
+    font-family: -apple-system, "Segoe UI", Inter, system-ui, sans-serif; font-size: 13px; color: var(--ink);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; background: var(--bg); overflow: hidden; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; border: 1px solid var(--line); background: var(--panel); border-radius: var(--radius); padding: 4px 10px; }
+  button:hover { border-color: #c8cdd5; background: #fafbfc; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button.primary:hover { background: #1d49d6; }
+  button.danger { color: var(--danger); }
+  button.tiny { padding: 1px 6px; font-size: 11px; }
+  input[type=text], input[type=number], select, textarea { border: 1px solid var(--line); border-radius: var(--radius); padding: 4px 6px; background: #fff; width: 100%; min-width: 0; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  header { height: 46px; display: flex; align-items: center; gap: 14px; padding: 0 14px; background: #1b1f27; color: #fff; }
+  header .brand { font-weight: 700; letter-spacing: .2px; }
+  header .brand span { color: #8fb0ff; }
+  header .project { color: #c7cbd3; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  header nav { display: flex; gap: 2px; margin-left: 10px; }
+  header nav button { background: transparent; border: 0; color: #c7cbd3; padding: 6px 12px; border-radius: 4px; }
+  header nav button[aria-selected=true] { background: #2e3440; color: #fff; }
+  header .spacer { flex: 1; }
+  header .status { color: #aab0bb; font-size: 12px; max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  header .status.bad { color: #ffb4b4; }
+  header select, header > button { width: auto; background: #2e3440; color: #fff; border-color: #3b4252; }
+  header > button:hover { background: #3b4252; }
+  header label { display: flex; align-items: center; gap: 6px; color: #c7cbd3; }
+  main { height: calc(100% - 46px); }
+  section.tab { height: 100%; display: grid; }
+  section[hidden] { display: none; }
+
+  /* ---- Design ---- */
+  #design { grid-template-columns: 250px 1fr 320px; }
+  aside { background: var(--panel); border-right: 1px solid var(--line); overflow: auto; display: flex; flex-direction: column; }
+  aside.right { border-right: 0; border-left: 1px solid var(--line); }
+  aside h3 { margin: 0; padding: 10px 12px 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); }
+  .palette { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 12px 12px; }
+  .palette button { text-align: left; padding: 7px 8px; display: flex; gap: 8px; align-items: center; }
+  .palette button i { width: 20px; height: 20px; border-radius: 4px; background: var(--accent-soft); color: var(--accent); display: inline-grid; place-items: center; font-style: normal; font-size: 11px; font-weight: 700; }
+  .palette button[aria-pressed=true] { border-color: var(--accent); background: var(--accent-soft); }
+  .tree { padding: 0 6px 12px; flex: 1; }
+  .tree div.row { display: flex; align-items: center; gap: 6px; padding: 3px 6px; border-radius: 4px; cursor: default; white-space: nowrap; }
+  .tree div.row:hover { background: #f4f6fa; }
+  .tree div.row[aria-selected=true] { background: var(--accent-soft); color: var(--accent); }
+  .tree div.row .t { color: var(--muted); font-size: 11px; }
+  #stage { position: relative; overflow: auto; background: #e9ebef; display: flex; justify-content: center; align-items: flex-start; padding: 24px; }
+  #appwrap { position: relative; height: calc(100vh - 46px - 48px); min-height: 500px; background: #fff; box-shadow: 0 2px 16px rgba(0,0,0,.12); flex: 0 0 auto; }
+  #app { position: absolute; inset: 0; }
+  #overlay { position: absolute; inset: 0; z-index: 10; cursor: default; }
+  #overlay.preview { pointer-events: none; }
+  #overlay.adding { cursor: crosshair; }
+  .box { position: absolute; pointer-events: none; border: 1px solid var(--hover); }
+  .box.sel { border: 2px solid var(--sel); pointer-events: none; }
+  .box .tag { position: absolute; left: -2px; top: -20px; background: var(--sel); color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 3px 3px 0 0; white-space: nowrap; }
+  .box.hov .tag { background: var(--hover); }
+  .handle { position: absolute; width: 9px; height: 9px; background: #fff; border: 2px solid var(--sel); border-radius: 2px; pointer-events: auto; }
+  .handle.e { right: -6px; top: calc(50% - 5px); cursor: ew-resize; }
+  .handle.s { bottom: -6px; left: calc(50% - 5px); cursor: ns-resize; }
+  .handle.se { right: -6px; bottom: -6px; cursor: nwse-resize; }
+  .drop { position: absolute; background: var(--accent); pointer-events: none; }
+  .drop.into { background: transparent; border: 2px dashed var(--accent); }
+  .props { padding: 0 12px 20px; }
+  .props .head { padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  .props .head input { font-weight: 600; }
+  .props .head .type { color: var(--muted); font-size: 11px; margin-top: 4px; }
+  .group { border-bottom: 1px solid var(--line); }
+  .group summary { padding: 8px 0; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; }
+  .group summary::after { content: '▾'; color: var(--muted); }
+  .group:not([open]) summary::after { content: '▸'; }
+  .field { display: grid; grid-template-columns: 110px 1fr; gap: 6px; align-items: center; padding: 3px 0; }
+  .field label { color: #3b4252; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .field .unit { display: grid; grid-template-columns: 1fr 56px; gap: 4px; }
+  .field .color { display: grid; grid-template-columns: 1fr 28px; gap: 4px; align-items: center; }
+  .field .swatch { width: 24px; height: 24px; border-radius: 4px; border: 1px solid var(--line); }
+  .field.wired input, .field.wired select { background: #f3f8ff; }
+  .field .from { font-size: 11px; color: var(--accent); grid-column: 2; }
+  .hint { color: var(--muted); padding: 8px 12px; font-size: 12px; }
+  .empty { color: var(--muted); padding: 18px; }
+
+  /* ---- Workflow ---- */
+  #workflow { grid-template-columns: 300px 1fr; }
+  .events { padding: 0 6px 12px; }
+  .events div.row { padding: 7px 8px; border-radius: 4px; cursor: default; }
+  .events div.row:hover { background: #f4f6fa; }
+  .events div.row[aria-selected=true] { background: var(--accent-soft); color: var(--accent); }
+  .events div.row small { display: block; color: var(--muted); }
+  #steps { overflow: auto; padding: 24px; }
+  .event-card { background: #fff; border: 1px solid var(--line); border-left: 4px solid #f59e0b; border-radius: var(--radius); padding: 10px 14px; margin-bottom: 14px; max-width: 760px; }
+  .event-card h2 { margin: 0; font-size: 15px; }
+  .event-card small { color: var(--muted); }
+  .step { background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--radius); padding: 10px 14px; margin: 0 0 10px 0; max-width: 760px; }
+  .step.branch { margin-left: 28px; border-left-color: #8b5cf6; max-width: 732px; }
+  .step .n { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+  .step h3 { margin: 2px 0 6px; font-size: 14px; display: flex; gap: 8px; align-items: baseline; }
+  .step h3 span { color: var(--muted); font-weight: 400; font-size: 12px; }
+  .step ul { margin: 0; padding-left: 16px; color: #3b4252; }
+  .step ul li code { background: #f4f6fa; padding: 0 4px; border-radius: 3px; }
+  .step .acts { margin-top: 8px; display: flex; gap: 6px; }
+  .branch-label { margin: 2px 0 6px 28px; color: #8b5cf6; font-size: 12px; font-weight: 600; }
+  .menu { position: absolute; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 6px 24px rgba(0,0,0,.14); padding: 6px; z-index: 50; min-width: 260px; max-height: 60vh; overflow: auto; }
+  .menu input { margin-bottom: 6px; }
+  .menu div.item { padding: 6px 8px; border-radius: 4px; cursor: default; }
+  .menu div.item:hover { background: var(--accent-soft); }
+  .menu div.item small { color: var(--muted); display: block; }
+
+  /* ---- Data ---- */
+  #data { grid-template-columns: 240px 1fr; }
+  .types { padding: 0 6px; }
+  .types div.row { padding: 6px 8px; border-radius: 4px; cursor: default; display: flex; justify-content: space-between; }
+  .types div.row:hover { background: #f4f6fa; }
+  .types div.row[aria-selected=true] { background: var(--accent-soft); color: var(--accent); }
+  .types div.row small { color: var(--muted); }
+  #datamain { overflow: auto; padding: 20px 24px; }
+  #datamain h2 { margin: 0 0 10px; font-size: 16px; }
+  table { border-collapse: collapse; background: #fff; border: 1px solid var(--line); width: 100%; max-width: 1100px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: #f8f9fb; font-weight: 600; font-size: 12px; }
+  td input, td select { padding: 2px 4px; }
+  td.cell { cursor: text; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  td.cell:hover { background: #f8f9fb; }
+  .bar { display: flex; gap: 8px; align-items: center; margin: 14px 0 8px; }
+  .bar .note { color: var(--muted); font-size: 12px; }
+  #toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: #1b1f27; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 12px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 100; max-width: 70vw; }
+  #toast.show { opacity: 1; }
+</style>
+
+<header>
+  <div class="brand">Open<span>Bubble</span></div>
+  <div class="project" id="projname">…</div>
+  <nav role="tablist">
+    <button role="tab" data-tab="design" aria-selected="true">Design</button>
+    <button role="tab" data-tab="workflow">Workflow</button>
+    <button role="tab" data-tab="data">Data</button>
+  </nav>
+  <label id="pagepick-l">Page <select id="pagepick"></select></label>
+  <label id="width-l">Width <select id="widthpick"><option value="100%">Fill</option><option value="1280">1280</option><option value="1024">1024</option><option value="768">768</option><option value="390">390 (phone)</option></select></label>
+  <label><input type="checkbox" id="previewmode"> Use the app</label>
+  <button id="undo" title="Undo (⌘Z)">Undo</button>
+  <div class="spacer"></div>
+  <div class="status" id="status">starting…</div>
+</header>
+
+<main>
+  <section class="tab" id="design">
+    <aside>
+      <h3>Visual elements</h3>
+      <div class="palette" id="palette"></div>
+      <h3>Reusable components</h3>
+      <div class="palette" id="components"></div>
+      <h3>Elements on this page</h3>
+      <div class="tree" id="tree"></div>
+    </aside>
+    <div id="stage"><div id="appwrap"><div id="app"></div><div id="overlay"></div></div></div>
+    <aside class="right" id="right"><div class="empty">Click an element in the page to see its properties.</div></aside>
+  </section>
+
+  <section class="tab" id="workflow" hidden>
+    <aside>
+      <h3>Events on this page</h3>
+      <div class="events" id="events"></div>
+      <div class="hint"><button id="newevent">+ New event</button></div>
+    </aside>
+    <div id="steps"><div class="empty">Pick an event on the left.</div></div>
+  </section>
+
+  <section class="tab" id="data" hidden>
+    <aside>
+      <h3>Data types</h3>
+      <div class="types" id="types"></div>
+      <div class="hint"><button id="newtype">+ New type</button></div>
+    </aside>
+    <div id="datamain"><div class="empty">Pick a data type.</div></div>
+  </section>
+</main>
+<div id="toast"></div>
+
+<script src="/preview.js"></script>
+<script type="module">
+import { portsFor, hasSpec } from './specs.js';
+
+const $ = (id) => document.getElementById(id);
+const h = (tag, attrs = {}, ...kids) => {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') el.className = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'html') el.innerHTML = v;
+    else if (v !== undefined && v !== null && v !== false) el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const kid of kids.flat()) if (kid !== null && kid !== undefined && kid !== false) el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  return el;
+};
+let toastTimer;
+const toast = (msg) => { $('toast').textContent = msg; $('toast').classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').classList.remove('show'), 3200); };
+const status = (msg, bad = false) => { $('status').textContent = msg; $('status').classList.toggle('bad', bad); };
+const uuid = () => crypto.randomUUID();
+
+/* ================= the project: files in memory, the kit's store over them, saved by serve.mjs ================= */
+const opened = await (await fetch('/api/project')).json();
+$('projname').textContent = opened.name;
+document.title = `${opened.name} — Open Bubble`;
+let files = NodegxPreview.memoryFiles(opened.files);
+let store = new NodegxPreview.V2ProjectStore(files);
+let persisted = { ...opened.files };
+const undoStack = [];
+
+async function persist() {
+  const now = files.entries();
+  const changed = {};
+  for (const [p, t] of Object.entries(now)) if (persisted[p] !== t) changed[p] = t;
+  const removed = Object.keys(persisted).filter((p) => !(p in now));
+  if (!Object.keys(changed).length && !removed.length) return;
+  const r = await fetch('/api/save', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ files: changed, removed }) });
+  const j = await r.json();
+  if (!r.ok) { toast(`Not saved: ${j.error}`); return; }
+  persisted = { ...now };
+  status(`Saved ${j.written.length + j.removed.length} file(s) · ${new Date().toLocaleTimeString()}`);
+}
+const snapshot = () => { undoStack.push(files.entries()); if (undoStack.length > 60) undoStack.shift(); };
+async function undo() {
+  const snap = undoStack.pop();
+  if (!snap) return toast('Nothing to undo');
+  files = NodegxPreview.memoryFiles(snap);
+  store = new NodegxPreview.V2ProjectStore(files);
+  await persist();
+  readGraph();
+  rebuild();
+  renderAll();
+}
+$('undo').onclick = undo;
+
+/* ================= the eight edits, with the reference's semantics (editor-suite/edits.ts) ================= */
+function applyEdit(filesIn, edit) {
+  const out = JSON.parse(JSON.stringify(filesIn));
+  const nodes = out.nodes.nodes;
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+  const must = (id, what) => { const n = byId.get(id); if (!n) throw new Error(`${what}: node "${id}" does not exist.`); return n; };
+  const attach = (child, parentId, index) => {
+    const parent = must(parentId, 'attach');
+    if (!parent.children) parent.children = [];
+    if (!parent.children.includes(child.id)) {
+      const at = index !== undefined ? Math.max(0, Math.min(index, parent.children.length)) : parent.children.length;
+      parent.children.splice(at, 0, child.id);
+    }
+    child.parent = parentId;
+  };
+  switch (edit.edit) {
+    case 'add_node': {
+      const id = edit.id ?? uuid();
+      if (byId.has(id)) throw new Error(`add_node: "${id}" exists`);
+      const node = { id, type: edit.type };
+      if (edit.label !== undefined) node.label = edit.label;
+      if (edit.x !== undefined) node.x = edit.x;
+      if (edit.y !== undefined) node.y = edit.y;
+      if (edit.parameters) node.parameters = { ...edit.parameters };
+      if (edit.parent !== undefined) attach(node, edit.parent, edit.index);
+      nodes.push(node);
+      return { files: out, id };
+    }
+    case 'remove_node': {
+      must(edit.id, 'remove_node');
+      const doomed = new Set([edit.id]);
+      let grew = true;
+      while (grew) { grew = false; for (const n of nodes) if (n.parent !== undefined && doomed.has(n.parent) && !doomed.has(n.id)) { doomed.add(n.id); grew = true; } }
+      out.nodes.nodes = nodes.filter((n) => !doomed.has(n.id));
+      for (const n of out.nodes.nodes) if (n.children) { n.children = n.children.filter((c) => !doomed.has(c)); if (!n.children.length) delete n.children; }
+      out.connections.connections = out.connections.connections.filter((c) => !doomed.has(c.fromId) && !doomed.has(c.toId));
+      if (out.nodes.visualRoots) { out.nodes.visualRoots = out.nodes.visualRoots.filter((id) => !doomed.has(id)); if (!out.nodes.visualRoots.length) delete out.nodes.visualRoots; }
+      return { files: out };
+    }
+    case 'connect': {
+      const c = { fromId: edit.from.node, fromProperty: edit.from.port, toId: edit.to.node, toProperty: edit.to.port };
+      must(c.fromId, 'connect'); must(c.toId, 'connect');
+      if (out.connections.connections.some((x) => sameWire(x, c))) throw new Error('connect: that wire exists');
+      out.connections.connections.push(c);
+      return { files: out };
+    }
+    case 'disconnect': {
+      const c = { fromId: edit.from.node, fromProperty: edit.from.port, toId: edit.to.node, toProperty: edit.to.port };
+      out.connections.connections = out.connections.connections.filter((x) => !sameWire(x, c));
+      return { files: out };
+    }
+    case 'set_parameter': {
+      const node = must(edit.id, 'set_parameter');
+      if (edit.value === undefined) { if (node.parameters) delete node.parameters[edit.name]; }
+      else node.parameters = { ...(node.parameters ?? {}), [edit.name]: edit.value };
+      return { files: out };
+    }
+    case 'move': { const node = must(edit.id, 'move'); node.x = edit.x; node.y = edit.y; return { files: out }; }
+    case 'rename': { const node = must(edit.id, 'rename'); node.label = edit.label; return { files: out }; }
+    case 'add_child': {
+      const node = must(edit.id, 'add_child'); must(edit.parent, 'add_child');
+      if (edit.parent === edit.id) throw new Error('add_child: own parent');
+      for (let cur = byId.get(edit.parent); cur; cur = cur.parent !== undefined ? byId.get(cur.parent) : undefined) if (cur.id === edit.id) throw new Error('add_child: inside own subtree');
+      if (node.parent !== undefined) { const old = byId.get(node.parent); if (old?.children) { old.children = old.children.filter((c) => c !== node.id); if (!old.children.length) delete old.children; } }
+      attach(node, edit.parent, edit.index);
+      return { files: out };
+    }
+  }
+  throw new Error('unknown edit');
+}
+const sameWire = (a, b) => a.fromId === b.fromId && a.fromProperty === b.fromProperty && a.toId === b.toId && a.toProperty === b.toProperty;
+
+/** One gesture = one write: every edit applied to the component's files, then written once with ifRevision. */
+function edits(componentKey, list, { rebuildApp = true } = {}) {
+  snapshot();
+  const c = store.readComponent(componentKey);
+  let cur = c.files, ids = [];
+  for (const e of list) { const r = applyEdit(cur, e); cur = r.files; if (r.id) ids.push(r.id); }
+  try { store.writeComponent(componentKey, cur, { ifRevision: c.revision }); }
+  catch (err) { undoStack.pop(); toast(err.message); throw err; }
+  persist();
+  if (componentKey === pageKey) readGraph();
+  if (rebuildApp) rebuild();
+  // an edit that changes which fields or steps exist redraws the panel; typing into a field does not (it would lose the caret)
+  if (list.some((e) => !['set_parameter', 'rename', 'move'].includes(e.edit) || (e.edit === 'set_parameter' && e.name === 'collectionName'))) setTimeout(() => { if (tab === 'workflow') renderWorkflow(); else if (tab === 'design') { renderTree(); renderProps(); } }, 0);
+  return ids;
+}
+
+/* ================= the real app ================= */
+const preview = await NodegxPreview.mountPreview($('app'), { runtimeBase: '/runtime/' });
+window.__ob = { preview, get store() { return store; }, get files() { return files; } };
+let lib, libIndex = new Map();
+let lastShow = null;
+let rebuildTimer;
+let rebuilding = false;
+function rebuild(delay = 120) {
+  clearTimeout(rebuildTimer);
+  rebuildTimer = setTimeout(async () => {
+    rebuilding = true;
+    status('Rebuilding the app…');
+    const s = await preview.update(files.entries());
+    lastShow = s; window.__ob.shows = (window.__ob.shows || 0) + 1;
+    rebuilding = false;
+    if (s.status === 'ok') {
+      lib = preview.nodeLibrary; libIndex = new Map((lib?.nodetypes || []).map((t) => [t.name, t]));
+      status(`App on screen · ${Math.round(s.exportMs)} ms export, ${Math.round(s.frameMs)} ms draw${s.warnings?.length ? ` · ${s.warnings.length} warning(s)` : ''}`);
+      await showPage(pageKey);
+      hookFrame();
+      mapElements();
+      draw();
+    } else {
+      const first = s.report?.diagnostics?.find((d) => d.severity === 'error');
+      status(`The app is not shown: ${first ? first.message.slice(0, 160) : s.message || s.status}`, true);
+    }
+  }, delay);
+}
+
+/* ================= the graph of the current page, read from the files ================= */
+const registry = () => store.readRegistry().components;
+const pageKeys = () => Object.keys(registry()).filter((k) => registry()[k].type === 'page');
+/** The Router's start page, as the app opens on it; else the first page. */
+function startPageKey() {
+  for (const k of Object.keys(registry())) {
+    try { const r = store.readComponent(k).files.nodes.nodes.find((n) => n.type === 'Router'); const s = r?.parameters?.pages?.startPage; if (s) { const key = s.replace(/^\//, ''); if (registry()[key]) return key; } } catch { /* skip */ }
+  }
+  return undefined;
+}
+let pageKey = startPageKey() ?? pageKeys()[0] ?? Object.keys(registry())[0];
+/** The page the running app is on, from its frame's URL (hash or path navigation), by the Page node's urlPath. */
+function pageShownByApp() {
+  const w = preview.frame?.contentWindow; if (!w) return undefined;
+  const loc = w.location.hash ? w.location.hash.replace(/^#\/?/, '') : w.location.pathname.replace(/^\/runtime\/?/, '').replace(/^\//, '');
+  const path = loc.split('?')[0].replace(/\/$/, '');
+  for (const k of pageKeys()) {
+    try { const p = store.readComponent(k).files.nodes.nodes.find((n) => n.type === 'Page'); if ((p?.parameters?.urlPath ?? '').replace(/^\//, '') === path) return k; } catch { /* skip */ }
+  }
+  return undefined;
+}
+/** Bubble draws a page whatever its logic says; here the screen is the real app, so when the app's own logic goes elsewhere the editor follows it and says so. */
+function followApp() {
+  const shown = pageShownByApp();
+  if (shown && shown !== pageKey) {
+    const asked = pageKey; pageKey = shown; sel = null; readGraph(); renderPagePick();
+    toast(`The app's own logic went from ${asked.replace(/^Pages\//, '')} to ${shown.replace(/^Pages\//, '')} (a redirect wired on that page), so that is the page shown.`);
+  }
+}
+let nodes = [], conns = [], byId = {}, visualIds = [], depthOf = {};
+function readGraph() {
+  const comp = store.readComponent(pageKey).files;
+  nodes = comp.nodes.nodes; conns = comp.connections.connections;
+  byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
+  visualIds = []; depthOf = {};
+  const walk = (id, d) => { if (!byId[id] || id in depthOf) return; depthOf[id] = d; visualIds.push(id); for (const c of byId[id].children || []) walk(c, d + 1); };
+  const roots = comp.nodes.visualRoots?.length ? comp.nodes.visualRoots : nodes.filter((n) => n.parent === undefined && (n.children || isVisualType(n.type))).map((n) => n.id);
+  for (const r of roots) walk(r, 0);
+}
+const typeDef = (type) => libIndex.get(type);
+const typeName = (type) => typeDef(type)?.displayNodeName || typeDef(type)?.displayName || (type.startsWith('/') ? type.split('/').pop() : type);
+const labelOf = (id) => byId[id]?.label || typeName(byId[id]?.type ?? '?');
+const isVisualType = (type) => type.startsWith('/') ? registry()[type.slice(1)]?.type !== 'logic' : (typeDef(type)?.category === 'Visual' || ['Group', 'Text', 'Page', 'For Each', 'Component Children'].includes(type) || type.startsWith('net.noodl.controls.') || type.startsWith('net.noodl.visual.'));
+const holdsChildren = (type) => { const t = typeDef(type); return !!(t?.allowChildren || t?.allowChildrenWithCategory) || type.startsWith('/'); };
+const libPorts = (type) => { const t = typeDef(type); return t ? [...(t.ports || []), ...(t.dynamicports || []).flatMap((d) => d.ports || [])] : []; };
+const tname = (t) => (typeof t === 'object' && t !== null ? t.name : t) ?? '*';
+/** Every port the node could have (static, dynamic and spec), by plug. */
+function portsOf(node, plug) {
+  const seen = new Map();
+  if (node.type.startsWith('/')) {
+    const key = node.type.slice(1);
+    try {
+      const comp = store.readComponent(key).files;
+      const ioType = plug === 'input' ? 'Component Inputs' : 'Component Outputs';
+      for (const n of comp.nodes.nodes) if (n.type === ioType) for (const p of n.ports || []) if (!seen.has(p.name)) seen.set(p.name, { name: p.name, label: p.displayName || p.name, type: tname(p.type), signal: tname(p.type) === 'signal', group: 'Component' });
+    } catch { /* unknown component */ }
+  }
+  for (const p of libPorts(node.type)) if (p.plug === plug || p.plug === 'input/output') if (!seen.has(p.name)) seen.set(p.name, { name: p.name, label: p.displayName || p.name, type: tname(p.type), signal: tname(p.type) === 'signal', raw: p });
+  const spec = portsFor(node.type, node.parameters || {});
+  if (spec) for (const p of spec[plug === 'input' ? 'inputs' : 'outputs']) if (!seen.has(p.name)) seen.set(p.name, p);
+  for (const p of node.ports || []) if ((p.plug === plug || p.plug === 'input/output') && !seen.has(p.name)) seen.set(p.name, { name: p.name, label: p.displayName || p.name, type: tname(p.type), signal: tname(p.type) === 'signal' });
+  for (const p of node.dynamicports || []) if ((p.plug === plug || p.plug === 'input/output') && !seen.has(p.name)) seen.set(p.name, { name: p.name, label: p.displayName || p.name, type: tname(p.type), signal: tname(p.type) === 'signal' });
+  return [...seen.values()];
+}
+const portLabel = (node, plug, name) => portsOf(node, plug).find((p) => p.name === name)?.label || name;
+const isSignalPort = (node, plug, name) => { const p = portsOf(node, plug).find((p) => p.name === name); return p ? p.signal : /^(on[A-Z]|did|do$|navigate$|store$|fetch$|login$|logout$|send$)/.test(name) && !/changed$/i.test(name); };
+
+/* ================= pages ================= */
+function renderPagePick() {
+  const sel = $('pagepick'); sel.innerHTML = '';
+  for (const k of pageKeys()) sel.append(h('option', { value: k, selected: k === pageKey }, k.replace(/^Pages\//, '')));
+}
+async function showPage(key) {
+  const w = preview.frame?.contentWindow;
+  const page = (() => { try { return store.readComponent(key).files.nodes.nodes.find((n) => n.type === 'Page'); } catch { return undefined; } })();
+  const path = page?.parameters?.urlPath;
+  if (!w?.Noodl?.Navigation || path === undefined) return;
+  try { w.Noodl.Navigation.navigateToPath('/' + path.replace(/^\//, '')); } catch (e) { console.warn('navigate', e); }
+  await new Promise((r) => setTimeout(r, 350));
+  followApp();
+}
+$('pagepick').onchange = async () => { pageKey = $('pagepick').value; sel = null; readGraph(); await showPage(pageKey); mapElements(); renderAll(); };
+$('widthpick').onchange = () => { const v = $('widthpick').value; $('appwrap').style.width = v.endsWith('%') ? v : v + 'px'; $('stage').style.alignItems = 'flex-start'; setTimeout(draw, 300); };
+$('appwrap').style.width = '100%';
+$('previewmode').onchange = () => { $('overlay').classList.toggle('preview', $('previewmode').checked); draw(); };
+
+/* ================= the elements the app draws, by node ================= */
+let elMap = new Map();
+function mapElements() {
+  elMap = new Map();
+  for (const id of visualIds) for (const el of preview.elementsOf(id)) elMap.set(el, id);
+}
+function hitAt(x, y) {
+  const doc = preview.frame?.contentDocument; if (!doc) return null;
+  let el = doc.elementFromPoint(x, y);
+  while (el && !elMap.has(el)) el = el.parentElement;
+  return el ? { id: elMap.get(el), el } : null;
+}
+const elOf = (id) => preview.elementsOf(id)[0];
+const rectOf = (id) => elOf(id)?.getBoundingClientRect();
+let frameHooked = null;
+function hookFrame() {
+  const w = preview.frame?.contentWindow;
+  if (!w || frameHooked === w) return;
+  frameHooked = w;
+  w.addEventListener('scroll', () => draw(), true);
+  w.addEventListener('resize', () => draw());
+}
+preview.onTrace(({ dictionary }) => { if (dictionary) { mapElements(); draw(); } });
+
+/* ================= selection, hover, the overlay ================= */
+let sel = null, hover = null, pending = null;
+let gesture = null; // { kind: 'maybe-drag' | 'drag' | 'resize', ... }
+const overlay = $('overlay');
+function draw() {
+  overlay.innerHTML = '';
+  if (rebuilding) return;
+  if (hover && hover !== sel && byId[hover]) { const r = rectOf(hover); if (r) overlay.append(box(r, 'hov', labelOf(hover))); }
+  if (sel && byId[sel]) {
+    const r = rectOf(sel);
+    if (r) {
+      const b = box(r, 'sel', `${labelOf(sel)} · ${Math.round(r.width)}×${Math.round(r.height)}`);
+      if (!$('previewmode').checked) for (const dir of ['e', 's', 'se']) b.append(h('div', { class: `handle ${dir}`, 'data-dir': dir, onmousedown: (e) => startResize(e, dir) }));
+      overlay.append(b);
+    }
+  }
+  if (gesture?.kind === 'drag' && gesture.drop) {
+    const d = gesture.drop;
+    if (d.line) overlay.append(h('div', { class: 'drop', style: `left:${d.line.x}px;top:${d.line.y}px;width:${d.line.w}px;height:${d.line.h}px` }));
+    else if (d.rect) overlay.append(h('div', { class: 'drop into', style: `left:${d.rect.left}px;top:${d.rect.top}px;width:${d.rect.width}px;height:${d.rect.height}px` }));
+  }
+}
+const box = (r, cls, tag) => h('div', { class: `box ${cls}`, style: `left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px` }, h('div', { class: 'tag' }, tag));
+function select(id) { sel = id; hover = null; renderTree(); renderProps(); draw(); }
+
+overlay.addEventListener('mousemove', (e) => {
+  if (gesture) return onGestureMove(e);
+  const hit = hitAt(e.offsetX, e.offsetY);
+  const id = hit?.id ?? null;
+  if (id !== hover) { hover = id; draw(); }
+});
+overlay.addEventListener('mouseleave', () => { if (!gesture) { hover = null; draw(); } });
+overlay.addEventListener('mousedown', (e) => {
+  if (e.target.classList.contains('handle')) return;
+  const hit = hitAt(e.offsetX, e.offsetY);
+  if (pending) return placePending(hit);
+  if (!hit) { select(null); return; }
+  select(hit.id);
+  if (hit.id === pageRootId()) return;
+  gesture = { kind: 'maybe-drag', id: hit.id, x0: e.offsetX, y0: e.offsetY };
+});
+window.addEventListener('mouseup', (e) => { if (gesture) endGesture(e); });
+window.addEventListener('keydown', (e) => {
+  const inField = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName);
+  if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !inField) { e.preventDefault(); undo(); return; }
+  if (inField) return;
+  if (e.key === 'Escape') { pending = null; overlay.classList.remove('adding'); for (const b of $('palette').querySelectorAll('button')) b.setAttribute('aria-pressed', 'false'); select(null); }
+  if ((e.key === 'Delete' || e.key === 'Backspace') && sel && sel !== pageRootId() && $('design').hidden === false) { e.preventDefault(); removeNode(sel); }
+});
+const pageRootId = () => visualIds[0];
+function removeNode(id) {
+  const label = labelOf(id);
+  edits(pageKey, [{ edit: 'remove_node', component: pageKey, id }]);
+  select(null);
+  toast(`Deleted ${label}`);
+}
+
+/* ---- a drag: reorder among siblings, move into another container, or (position: absolute) move by margins ---- */
+function onGestureMove(e) {
+  const g = gesture;
+  if (g.kind === 'maybe-drag') {
+    if (Math.hypot(e.offsetX - g.x0, e.offsetY - g.y0) < 5) return;
+    g.kind = 'drag';
+    g.absolute = byId[g.id]?.parameters?.position === 'absolute';
+    g.el = elOf(g.id);
+    overlay.style.cursor = 'grabbing';
+  }
+  if (g.kind === 'drag') {
+    if (g.absolute) {
+      if (g.el) g.el.style.transform = `translate(${e.offsetX - g.x0}px, ${e.offsetY - g.y0}px)`;
+      g.dx = e.offsetX - g.x0; g.dy = e.offsetY - g.y0;
+      draw(); return;
+    }
+    g.drop = dropTargetAt(e.offsetX, e.offsetY, g.id);
+    draw();
+  } else if (g.kind === 'resize') {
+    const w = Math.max(10, g.w0 + (g.dir !== 's' ? e.clientX - g.cx : 0));
+    const hgt = Math.max(10, g.h0 + (g.dir !== 'e' ? e.clientY - g.cy : 0));
+    if (g.dir !== 's') g.el.style.width = w + 'px';
+    if (g.dir !== 'e') g.el.style.height = hgt + 'px';
+    g.w = w; g.h = hgt;
+    draw();
+  }
+}
+function inside(id, ancestor) { for (let cur = byId[id]; cur; cur = cur.parent !== undefined ? byId[cur.parent] : undefined) if (cur.id === ancestor) return true; return false; }
+function dropTargetAt(x, y, dragged) {
+  let hit = hitAt(x, y);
+  let container = hit?.id ?? null;
+  while (container && (container === dragged || inside(container, dragged) || !holdsChildren(byId[container].type))) container = byId[container].parent ?? null;
+  if (!container) return null;
+  const node = byId[container];
+  const dir = node.parameters?.flexDirection ?? 'column';
+  const kids = (node.children || []).filter((c) => c !== dragged);
+  const crect = rectOf(container);
+  let index = kids.length, line = null;
+  const rects = kids.map((c) => rectOf(c));
+  for (let i = 0; i < kids.length; i++) {
+    const r = rects[i]; if (!r) continue;
+    const mid = dir === 'row' ? r.left + r.width / 2 : r.top + r.height / 2;
+    if ((dir === 'row' ? x : y) < mid) { index = i; break; }
+  }
+  if (crect) {
+    const at = index < kids.length ? rects[index] : null;
+    if (dir === 'row') line = at ? { x: at.left - 2, y: at.top, w: 3, h: at.height } : (rects[kids.length - 1] ? { x: rects[kids.length - 1].right - 1, y: rects[kids.length - 1].top, w: 3, h: rects[kids.length - 1].height } : null);
+    else line = at ? { x: at.left, y: at.top - 2, w: at.width, h: 3 } : (rects[kids.length - 1] ? { x: rects[kids.length - 1].left, y: rects[kids.length - 1].bottom - 1, w: rects[kids.length - 1].width, h: 3 } : null);
+  }
+  return { container, index, line, rect: line ? null : crect };
+}
+function startResize(e, dir) {
+  e.stopPropagation(); e.preventDefault();
+  const el = elOf(sel); if (!el) return;
+  const r = el.getBoundingClientRect();
+  gesture = { kind: 'resize', id: sel, dir, el, cx: e.clientX, cy: e.clientY, w0: r.width, h0: r.height, w: r.width, h: r.height, parentW: el.parentElement?.getBoundingClientRect().width || r.width, parentH: el.parentElement?.getBoundingClientRect().height || r.height };
+}
+function endGesture() {
+  const g = gesture; gesture = null; overlay.style.cursor = '';
+  if (g.kind === 'drag') {
+    if (g.absolute) {
+      if (g.el) g.el.style.transform = '';
+      const node = byId[g.id]; const p = node.parameters || {};
+      const num = (v) => (typeof v === 'number' ? v : typeof v === 'object' && v ? Number(v.value) || 0 : parseFloat(v) || 0);
+      edits(pageKey, [
+        { edit: 'set_parameter', component: pageKey, id: g.id, name: 'marginLeft', value: { value: Math.round(num(p.marginLeft) + (g.dx || 0)), unit: 'px' } },
+        { edit: 'set_parameter', component: pageKey, id: g.id, name: 'marginTop', value: { value: Math.round(num(p.marginTop) + (g.dy || 0)), unit: 'px' } }
+      ]);
+      return;
+    }
+    if (g.drop) {
+      const { container, index } = g.drop;
+      const node = byId[g.id];
+      const same = node.parent === container && (node.parent === undefined ? false : true);
+      const oldIndex = same ? (byId[container].children || []).indexOf(g.id) : -1;
+      if (same && (oldIndex === index)) { draw(); return; }
+      edits(pageKey, [{ edit: 'add_child', component: pageKey, id: g.id, parent: container, index }]);
+      toast(`Moved ${labelOf(g.id)} into ${labelOf(container)}`);
+    }
+    draw();
+  } else if (g.kind === 'resize') {
+    const node = byId[g.id]; const p = node.parameters || {};
+    const list = [];
+    const unitOf = (v, def) => (typeof v === 'object' && v?.unit) || (typeof v === 'string' && /%$/.test(v) ? '%' : def);
+    const changedW = g.dir !== 's' && Math.round(g.w) !== Math.round(g.w0);
+    const changedH = g.dir !== 'e' && Math.round(g.h) !== Math.round(g.h0);
+    let mode = p.sizeMode ?? defaultSizeMode(node.type);
+    if (changedW && changedH) mode = 'explicit';
+    else if (changedW && !['explicit', 'contentHeight'].includes(mode)) mode = 'explicit';
+    else if (changedH && !['explicit', 'contentWidth'].includes(mode)) mode = 'explicit';
+    if (mode !== (p.sizeMode ?? defaultSizeMode(node.type))) list.push({ edit: 'set_parameter', component: pageKey, id: g.id, name: 'sizeMode', value: mode });
+    if (changedW) { const u = unitOf(p.width, 'px'); list.push({ edit: 'set_parameter', component: pageKey, id: g.id, name: 'width', value: { value: u === '%' ? Math.round(g.w / g.parentW * 1000) / 10 : Math.round(g.w), unit: u === '%' ? '%' : 'px' } }); }
+    if (changedH) { const u = unitOf(p.height, 'px'); list.push({ edit: 'set_parameter', component: pageKey, id: g.id, name: 'height', value: { value: u === '%' ? Math.round(g.h / g.parentH * 1000) / 10 : Math.round(g.h), unit: u === '%' ? '%' : 'px' } }); }
+    if (list.length) edits(pageKey, list); else draw();
+  }
+}
+const defaultSizeMode = (type) => (type === 'Group' || type === 'Page' ? 'explicit' : 'contentHeight');
+
+/* ---- adding an element: pick it in the palette, click where it goes ---- */
+const PALETTE = [
+  ['Group', 'G', { sizeMode: 'contentHeight', width: { value: 100, unit: '%' }, flexDirection: 'column', paddingTop: { value: 12, unit: 'px' }, paddingBottom: { value: 12, unit: 'px' }, paddingLeft: { value: 12, unit: 'px' }, paddingRight: { value: 12, unit: 'px' } }],
+  ['Text', 'T', { text: 'New text', sizeMode: 'contentHeight', width: { value: 100, unit: '%' } }],
+  ['net.noodl.controls.button', 'B', { label: 'Button', sizeMode: 'contentHeight' }],
+  ['net.noodl.controls.textinput', 'I', { placeholder: 'Type here', sizeMode: 'contentHeight', width: { value: 100, unit: '%' } }],
+  ['Image', '▣', { sizeMode: 'explicit', width: { value: 200, unit: 'px' }, height: { value: 120, unit: 'px' } }],
+  ['net.noodl.controls.checkbox', '☑', { sizeMode: 'contentHeight' }],
+  ['net.noodl.controls.options', '▾', { sizeMode: 'contentHeight', width: { value: 100, unit: '%' } }],
+  ['net.noodl.visual.icon', '★', { sizeMode: 'contentHeight' }],
+  ['net.noodl.visual.columns', '▥', { sizeMode: 'contentHeight', width: { value: 100, unit: '%' } }]
+];
+function renderPalette() {
+  const pal = $('palette'); pal.innerHTML = '';
+  for (const [type, glyph, params] of PALETTE) {
+    if (lib && !libIndex.has(type)) continue;
+    pal.append(h('button', { 'aria-pressed': pending?.type === type, onclick: (e) => armPending({ type, params }, e.currentTarget) }, h('i', {}, glyph), typeName(type)));
+  }
+  const comps = $('components'); comps.innerHTML = '';
+  for (const k of Object.keys(registry())) {
+    const e = registry()[k];
+    if (e.type === 'page' || e.type === 'root' || e.type === 'logic' || k === pageKey || k === 'App' || k.startsWith('__')) continue;
+    comps.append(h('button', { onclick: (ev) => armPending({ type: '/' + k, params: {} }, ev.currentTarget) }, h('i', {}, 'C'), k.split('/').pop()));
+  }
+}
+function armPending(p, btn) {
+  pending = p;
+  for (const b of document.querySelectorAll('.palette button')) b.setAttribute('aria-pressed', b === btn);
+  overlay.classList.add('adding');
+  toast(`Click in the page where the ${typeName(p.type)} goes (Esc to cancel)`);
+}
+function placePending(hit) {
+  const p = pending; pending = null; overlay.classList.remove('adding');
+  for (const b of document.querySelectorAll('.palette button')) b.setAttribute('aria-pressed', 'false');
+  let parent = hit?.id ?? pageRootId();
+  while (parent && !holdsChildren(byId[parent].type)) parent = byId[parent].parent;
+  if (!parent) return toast('Nowhere to put it on this page');
+  const [id] = edits(pageKey, [{ edit: 'add_node', component: pageKey, type: p.type, parent, parameters: p.params, label: undefined }]);
+  sel = id; renderTree(); renderProps();
+  toast(`Added a ${typeName(p.type)} to ${labelOf(parent)}`);
+}
+
+/* ================= the element tree ================= */
+function renderTree() {
+  const tree = $('tree'); tree.innerHTML = '';
+  for (const id of visualIds) {
+    const n = byId[id];
+    tree.append(h('div', { class: 'row', 'aria-selected': sel === id, style: `padding-left:${6 + depthOf[id] * 12}px`, onclick: () => { select(id); elOf(id)?.scrollIntoView({ block: 'nearest' }); }, onmouseenter: () => { hover = id; draw(); }, onmouseleave: () => { hover = null; draw(); } },
+      h('span', {}, labelOf(id)), h('span', { class: 't' }, n.label ? typeName(n.type) : '')));
+  }
+}
+
+/* ================= the property editor ================= */
+const HIDDEN_GROUPS = new Set(['Advanced HTML', 'Data Attributes', 'Accessibility', 'Hover Events', 'Pointer Events', 'Focus Events', 'Mounted', 'Events', 'Actions', 'States', 'Scroll']);
+function conditionHolds(cond, params) {
+  if (!cond) return true;
+  return cond.split(/\s+OR\s+/).some((alt) => alt.split(/\s+AND\s+/).every((term) => {
+    let m = term.trim().match(/^(\w+)\s*(!=|=)\s*(.+)$/);
+    if (m) { const v = params[m[1]]; const has = v !== undefined && String(v) === m[3].trim(); return m[2] === '=' ? has : !has; }
+    m = term.trim().match(/^(\w+)\s+NOT SET$/);
+    if (m) return params[m[1]] === undefined;
+    return true;
+  }));
+}
+/**
+ * Ports the official editor computes from the project rather than the runtime declaring them: which Router and
+ * page a Navigate goes to, which collection a record node works on and that collection's columns (`prop-<col>`,
+ * the runtime's `wireDeclaredPortPrefix`), a variable's name. A node the official editor saved carries a snapshot
+ * of these in its own `dynamicports`; a node made here gets them from this table.
+ */
+function synthPorts(node) {
+  const params = node.parameters || {};
+  const out = [];
+  const enumOf = (name, displayName, values, group = 'General') => ({ name, displayName, plug: 'input', group, type: { name: 'enum', enums: values.map((v) => ({ value: v, label: String(v).replace(/^\/Pages\//, '') })) } });
+  if (node.type === 'RouterNavigate') {
+    const routers = []; const pages = [];
+    for (const k of Object.keys(registry())) { try { for (const n of store.readComponent(k).files.nodes.nodes) if (n.type === 'Router') { routers.push(n.parameters?.name || 'Main'); for (const r of n.parameters?.pages?.routes || []) pages.push(r); } } catch { /* skip */ } }
+    out.push(enumOf('router', 'Router', routers.length ? routers : ['Main']), enumOf('target', 'Target Page', pages.length ? pages : pageKeys().map((k) => '/' + k)));
+  }
+  if (['NewDbModelProperties', 'SetDbModelProperties', 'DeleteDbModelProperties', 'DbCollection2', 'DbModel2'].includes(node.type)) {
+    const names = collections().map((c) => c.name).concat(schemaTables().map((t) => t.table).filter((n) => !collections().some((c) => c.name === n)));
+    out.push(enumOf('collectionName', 'Data type (collection)', names));
+    if (node.type !== 'DbCollection2' && node.type !== 'NewDbModelProperties') out.push({ name: 'objectId', displayName: 'Record id', plug: 'input', group: 'General', type: 'string' });
+    const coll = collections().find((c) => c.name === params.collectionName) || { columns: (schemaTables().find((t) => t.table === params.collectionName)?.columns) || [] };
+    if (node.type !== 'DbCollection2' && node.type !== 'DeleteDbModelProperties') for (const col of coll.columns || []) out.push({ name: 'prop-' + col.name, displayName: col.name, plug: 'input', group: 'Fields', type: col.type === 'Number' ? 'number' : col.type === 'Boolean' ? 'boolean' : 'string' });
+  }
+  if (node.type === 'Set Variable' || node.type === 'Variable2' || node.type === 'Variable') out.push({ name: 'name', displayName: 'Variable name', plug: 'input', group: 'General', type: 'string' });
+  return out;
+}
+function editablePorts(node, { wireOnly = false } = {}) {
+  const t = typeDef(node.type);
+  const params = node.parameters || {};
+  const out = [];
+  const seen = new Set();
+  const push = (p) => {
+    if (p.plug !== 'input' && p.plug !== 'input/output') return;
+    if (seen.has(p.name)) return;
+    seen.add(p.name);
+    const ty = tname(p.type);
+    if (ty === 'signal' || /\{\{/.test(p.name) || ['stringlist', 'reference', 'variant', 'cssdefinition', 'curve', 'proplist'].includes(ty)) return;
+    if (HIDDEN_GROUPS.has(p.group)) return;
+    // a port that only a wire can feed (a record's id, an array): Bubble's "Thing to change"; shown where a step's inputs are
+    const onlyWire = !!p.type?.allowConnectionsOnly || ['array', 'object'].includes(ty);
+    if (onlyWire && !wireOnly) return;
+    out.push(onlyWire ? { ...p, wireOnly: true } : p);
+  };
+  for (const p of synthPorts(node)) push(p);
+  for (const p of node.dynamicports || []) push({ ...p, group: p.group || 'General' });
+  if (t) {
+    for (const p of t.ports || []) push(p);
+    for (const d of t.dynamicports || []) if (d.ports && conditionHolds(d.condition, { ...defaultsOf(t), ...params })) for (const p of d.ports) push(p);
+  }
+  if (node.type.startsWith('/')) for (const p of portsOf(node, 'input')) push({ name: p.name, displayName: p.label, type: p.type, group: 'Component', plug: 'input' });
+  const spec = portsFor(node.type, params);
+  if (spec) for (const p of spec.inputs) push({ name: p.name, displayName: p.label, plug: 'input', group: p.group || 'General', type: p.enums ? { name: 'enum', enums: p.enums } : p.type, default: p.default, description: p.description });
+  const priority = t?.connectionPanel?.groupPriority || [];
+  const rank = (g) => { const i = priority.indexOf(g); return i === -1 ? 50 + g.length : i; };
+  out.sort((a, b) => rank(a.group || 'General') - rank(b.group || 'General') || (a.index ?? 0) - (b.index ?? 0));
+  return out;
+}
+const defaultsOf = (t) => Object.fromEntries((t.ports || []).filter((p) => p.default !== undefined).map((p) => [p.name, p.default]));
+function tokensOf(category) {
+  const pj = store.readProjectFile();
+  return (pj?.metadata?.designTokens?.customTokens || []).filter((t) => !category || (t.category || '').startsWith(category)).map((t) => t.name);
+}
+let propTimer;
+function renderProps() {
+  const right = $('right'); right.innerHTML = '';
+  if (!sel || !byId[sel]) { right.append(h('div', { class: 'empty' }, 'Click an element in the page to see its properties.')); return; }
+  const node = byId[sel];
+  const params = node.parameters || {};
+  const head = h('div', { class: 'head' },
+    h('input', { type: 'text', value: node.label || '', placeholder: typeName(node.type), onchange: (e) => edits(pageKey, [{ edit: 'rename', component: pageKey, id: sel, label: e.target.value }], { rebuildApp: false }) }),
+    h('div', { class: 'type' }, `${typeName(node.type)} · ${sel.slice(0, 8)}${node.parent ? ` · in ${labelOf(node.parent)}` : ''}`),
+    h('div', { style: 'margin-top:8px;display:flex;gap:6px' }, sel !== pageRootId() && h('button', { class: 'tiny danger', onclick: () => removeNode(sel) }, 'Delete element')));
+  right.append(head);
+  const wrap = h('div', { class: 'props' });
+  const wiredIn = Object.fromEntries(conns.filter((c) => c.toId === sel).map((c) => [c.toProperty, c]));
+  const groups = new Map();
+  for (const p of editablePorts(node)) { const g = p.group || 'General'; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(p); }
+  let first = true;
+  for (const [g, ports] of groups) {
+    const det = h('details', { class: 'group', open: first || ports.some((p) => params[p.name] !== undefined) }, h('summary', {}, g));
+    first = false;
+    for (const p of ports) det.append(fieldFor(node, p, params[p.name], wiredIn[p.name]));
+    wrap.append(det);
+  }
+  right.append(wrap);
+}
+function fieldFor(node, p, value, wire) {
+  const ty = tname(p.type);
+  const set = (v, immediate = true) => { clearTimeout(propTimer); const run = () => edits(pageKey, [{ edit: 'set_parameter', component: pageKey, id: node.id, name: p.name, value: v }], { rebuildApp: true }); immediate ? run() : (propTimer = setTimeout(run, 350)); };
+  const f = h('div', { class: `field${wire ? ' wired' : ''}`, title: p.description || '' }, h('label', {}, p.displayName || p.name));
+  const units = p.type?.units;
+  if (p.wireOnly) f.append(h('div', { style: 'color:var(--muted);font-size:12px' }, wire ? '' : 'only from a wire'));
+  else if (ty === 'boolean') f.append(h('input', { type: 'checkbox', style: 'width:auto;justify-self:start', checked: value ?? p.default ?? false, onchange: (e) => set(e.target.checked) }));
+  else if (ty === 'component' && Array.isArray(p.type?.components)) {
+    const s = h('select', { onchange: (e) => set(e.target.value === '' ? undefined : e.target.value) }, h('option', { value: '' }, '(none)'));
+    for (const c of p.type.components) s.append(h('option', { value: c, selected: value === c }, c.replace(/^\/Pages\//, '')));
+    f.append(s);
+  } else if (ty === 'enum') {
+    const s = h('select', { onchange: (e) => set(e.target.value === '' ? undefined : e.target.value) }, h('option', { value: '' }, `(default${p.default !== undefined ? `: ${p.default}` : ''})`));
+    for (const o of p.type.enums || []) { const v = typeof o === 'object' ? o.value : o; s.append(h('option', { value: v, selected: value === v }, typeof o === 'object' ? o.label : o)); }
+    f.append(s);
+  } else if (ty === 'color') {
+    const text = h('input', { type: 'text', value: value ?? '', placeholder: String(p.default ?? ''), list: 'tokens-color', oninput: (e) => { sw.style.background = resolveColor(e.target.value); set(e.target.value || undefined, false); } });
+    const sw = h('div', { class: 'swatch', style: `background:${resolveColor(value ?? p.default ?? '')}` });
+    f.append(h('div', { class: 'color' }, text, sw));
+  } else if (units && (ty === 'number' || ty === 'dimension')) {
+    const cur = typeof value === 'object' && value ? value : { value: typeof value === 'number' ? value : (typeof value === 'string' && /^-?[\d.]+/.test(value) ? parseFloat(value) : ''), unit: typeof value === 'string' && /var\(/.test(value) ? 'var' : (p.type.defaultUnit || units[0]) };
+    const isVar = typeof value === 'string' && /var\(/.test(value);
+    const num = h('input', { type: 'text', value: isVar ? value : (cur.value ?? ''), placeholder: String(p.default ?? ''), list: 'tokens-space', oninput: (e) => commit(e.target.value, unit.value, false), onchange: (e) => commit(e.target.value, unit.value, true) });
+    const unit = h('select', { onchange: () => commit(num.value, unit.value, true) }, ...units.map((u) => h('option', { value: u, selected: cur.unit === u }, u)), h('option', { value: 'var', selected: isVar }, 'var'));
+    const commit = (text, u, immediate) => {
+      if (text === '') return set(undefined, immediate);
+      if (/var\(/.test(text) || u === 'var') return set(text, immediate);
+      const n = Number(text); if (Number.isNaN(n)) return;
+      set({ value: n, unit: u }, immediate);
+    };
+    f.append(h('div', { class: 'unit' }, num, unit));
+  } else if (ty === 'number') f.append(h('input', { type: 'text', value: value ?? '', placeholder: String(p.default ?? ''), oninput: (e) => set(e.target.value === '' ? undefined : (Number.isNaN(Number(e.target.value)) ? e.target.value : Number(e.target.value)), false) }));
+  else if (p.type?.codeeditor || p.type?.multiline || (typeof value === 'string' && value.length > 60)) f.append(h('textarea', { rows: 3, oninput: (e) => set(e.target.value || undefined, false) }, value ?? ''));
+  else f.append(h('input', { type: 'text', value: value ?? '', placeholder: String(p.default ?? ''), list: ty === 'string' && /font|Font/.test(p.name) ? 'tokens-font' : undefined, oninput: (e) => set(e.target.value === '' ? undefined : e.target.value, false) }));
+  // Bubble's "Input Name's value": a value from another element or logic node on the page, as a wire
+  if (wire) f.append(h('div', { class: 'from' }, `← ${labelOf(wire.fromId)} · ${portLabel(byId[wire.fromId] || { type: '?' }, 'output', wire.fromProperty)} `,
+    h('button', { class: 'tiny', onclick: () => edits(pageKey, [{ edit: 'disconnect', component: pageKey, from: { node: wire.fromId, port: wire.fromProperty }, to: { node: node.id, port: p.name } }]) }, 'unwire')));
+  else f.append(h('div', { class: 'from' }, h('button', { class: 'tiny', title: 'Take this value from an element or a logic node on the page', onclick: (e) => sourceMenu(e, node, p) }, '⤷ from…')));
+  return f;
+}
+function sourceMenu(e, node, p) {
+  closeMenu();
+  const menu = h('div', { class: 'menu', style: `left:${Math.min(e.clientX, innerWidth - 300)}px;top:${e.clientY + 8}px` });
+  const search = h('input', { type: 'text', placeholder: 'Search elements and values…' });
+  const list = h('div');
+  const fill = (q) => {
+    list.innerHTML = '';
+    const q2 = (q || '').toLowerCase();
+    // the values a person means first (an input's Text, a query's Items), the geometry last
+    // by the runtime's own groups: a Text Input's value is `onTextChanged` in General; its geometry is Bounding Box
+    const rank = (o) => { const g = (o.raw?.group || o.group || 'General'); return g === 'General' ? 0 : /Advanced|Bounding Box|Mounted/.test(g) ? 3 : /States|Events|Component/.test(g) ? 1 : 2; };
+    for (const n of nodes) {
+      if (n.id === node.id) continue;
+      for (const o of portsOf(n, 'output').slice().sort((a, b) => rank(a) - rank(b))) {
+        if (o.signal) continue;
+        const text = `${labelOf(n.id)}: ${o.label}`;
+        if (q2 && !text.toLowerCase().includes(q2)) continue;
+        list.append(h('div', { class: 'item', onclick: () => { closeMenu(); edits(pageKey, [{ edit: 'connect', component: pageKey, from: { node: n.id, port: o.name }, to: { node: node.id, port: p.name } }]); toast(`${p.displayName || p.name} now comes from ${text}`); } }, text, h('small', {}, `${typeName(n.type)} · ${o.type}`)));
+      }
+    }
+  };
+  search.oninput = () => fill(search.value);
+  fill('');
+  menu.append(search, list); document.body.append(menu); search.focus();
+  setTimeout(() => document.addEventListener('mousedown', function outside(ev) { if (!menu.contains(ev.target)) closeMenu(); else document.addEventListener('mousedown', outside, { once: true }); }, { once: true }), 0);
+}
+function resolveColor(v) {
+  if (!v) return 'transparent';
+  const m = String(v).match(/^var\((--[\w-]+)\)/);
+  if (m) { const t = (store.readProjectFile()?.metadata?.designTokens?.customTokens || []).find((t) => t.name === m[1]); return t?.value || '#eee'; }
+  return v;
+}
+function renderDatalists() {
+  for (const old of document.querySelectorAll('datalist')) old.remove();
+  const dl = (id, names) => document.body.append(h('datalist', { id }, ...names.map((n) => h('option', { value: `var(${n})` }))));
+  dl('tokens-color', tokensOf('color')); dl('tokens-space', tokensOf('spacing').concat(tokensOf('radius'), tokensOf('typography-size'), tokensOf('typography'))); dl('tokens-font', tokensOf('typography'));
+}
+
+/* ================= Workflow: events and their steps, read from the wires ================= */
+let selEvent = null; // { node, port }
+const draftEvents = [];
+const openSteps = new Set();
+function events() {
+  const list = [];
+  const seen = new Set();
+  const signalInWired = (id) => conns.some((c) => c.toId === id && isSignalPort(byId[id], 'input', c.toProperty));
+  for (const c of conns) {
+    const from = byId[c.fromId]; if (!from) continue;
+    if (!isSignalPort(from, 'output', c.fromProperty)) continue;
+    if (!isVisualType(from.type) && signalInWired(from.id)) continue; // a step, not an event
+    const key = `${c.fromId}.${c.fromProperty}`;
+    if (seen.has(key)) continue; seen.add(key);
+    list.push({ node: c.fromId, port: c.fromProperty });
+  }
+  for (const d of draftEvents) if (!seen.has(`${d.node}.${d.port}`)) list.push(d);
+  return list;
+}
+const eventTitle = (ev) => `When ${labelOf(ev.node)}: ${portLabel(byId[ev.node], 'output', ev.port)}`;
+function renderEvents() {
+  const box = $('events'); box.innerHTML = '';
+  const list = events();
+  if (!list.length) box.append(h('div', { class: 'hint' }, 'No workflows on this page yet.'));
+  for (const ev of list) box.append(h('div', { class: 'row', 'aria-selected': selEvent && selEvent.node === ev.node && selEvent.port === ev.port, onclick: () => { selEvent = ev; renderWorkflow(); } },
+    eventTitle(ev), h('small', {}, `${isVisualType(byId[ev.node].type) ? 'element' : 'logic'} · ${stepsOf(ev).length} step(s)`)));
+}
+function stepsOf(ev) {
+  // the main chain: follow the first wired signal target, then that node's first wired "done" output, and so on
+  const steps = []; const visited = new Set();
+  let node = ev.node, port = ev.port;
+  while (true) {
+    const outs = conns.filter((c) => c.fromId === node && c.fromProperty === port && byId[c.toId] && isSignalPort(byId[c.toId], 'input', c.toProperty));
+    if (!outs.length) break;
+    const next = outs[0];
+    if (visited.has(next.toId)) break;
+    visited.add(next.toId);
+    steps.push({ id: next.toId, via: next.toProperty, from: { node, port }, siblings: outs.slice(1) });
+    const d = doneOf(byId[next.toId]); if (!d) break;
+    node = next.toId; port = d;
+  }
+  return steps;
+}
+const DONE = /^(done|success|stored|updated|deleted|loggedin|loggedout|signedup|completed|fetched|navigated|finished|sent|created|saved|ontrue|didmount)$/i;
+function doneOf(node) {
+  const outs = portsOf(node, 'output').filter((p) => p.signal);
+  const wired = outs.filter((p) => conns.some((c) => c.fromId === node.id && c.fromProperty === p.name));
+  return (wired.find((p) => DONE.test(p.name)) || outs.find((p) => DONE.test(p.name)) || wired[0] || outs[0])?.name;
+}
+function triggerOf(node) {
+  const ins = portsOf(node, 'input').filter((p) => p.signal);
+  return (ins.find((p) => /^(do|store|navigate|fetch|login|logout|signup|send|run|set|evaluate|save|delete|update|show|hide|start)$/i.test(p.name)) || ins[0])?.name;
+}
+function renderWorkflow() {
+  renderEvents();
+  const main = $('steps'); main.innerHTML = '';
+  if (!selEvent || !byId[selEvent.node]) { main.append(h('div', { class: 'empty' }, 'Pick an event on the left, or add one.')); return; }
+  const ev = selEvent;
+  main.append(h('div', { class: 'event-card' }, h('h2', {}, eventTitle(ev)), h('small', {}, `${typeName(byId[ev.node].type)} · output "${ev.port}"`)));
+  const steps = stepsOf(ev);
+  steps.forEach((s, i) => main.append(stepCard(s, i + 1)));
+  const last = steps.length ? { node: steps[steps.length - 1].id, port: doneOf(byId[steps[steps.length - 1].id]) } : { node: ev.node, port: ev.port };
+  main.append(h('div', { style: 'max-width:760px;display:flex;gap:8px' }, h('button', { class: 'primary', onclick: (e) => addActionMenu(e, last) }, '+ Add an action'), steps.length ? null : h('button', { onclick: () => { const i = draftEvents.findIndex((d) => d.node === ev.node && d.port === ev.port); if (i >= 0) draftEvents.splice(i, 1); selEvent = null; renderWorkflow(); } }, 'Discard empty event')));
+}
+function stepCard(s, n) {
+  const node = byId[s.id];
+  const params = node.parameters || {};
+  const ins = portsOf(node, 'input');
+  const lines = [];
+  for (const [k, v] of Object.entries(params)) {
+    if (['x', 'y'].includes(k) || typeof v === 'object') continue;
+    const p = ins.find((p) => p.name === k);
+    if (p?.signal) continue;
+    lines.push(h('li', {}, `${p?.label || k}: `, h('code', {}, String(v).slice(0, 80))));
+  }
+  for (const c of conns.filter((c) => c.toId === s.id && !isSignalPort(node, 'input', c.toProperty))) lines.push(h('li', {}, `${portLabel(node, 'input', c.toProperty)} = `, h('code', {}, `${labelOf(c.fromId)} › ${portLabel(byId[c.fromId] || { type: '?' }, 'output', c.fromProperty)}`)));
+  const branches = conns.filter((c) => c.fromId === s.id && isSignalPort(node, 'output', c.fromProperty) && c.fromProperty !== doneOf(node) && byId[c.toId]);
+  // the step's settings: the node's own input ports, edited the way the Design tab edits an element's
+  const settings = h('div', { class: 'props', style: `display:${openSteps.has(s.id) ? '' : 'none'};margin-top:8px;border-top:1px solid var(--line)` });
+  const wiredIn = Object.fromEntries(conns.filter((c) => c.toId === s.id).map((c) => [c.toProperty, c]));
+  const ports = editablePorts(node, { wireOnly: true }).filter((p) => !['x', 'y'].includes(p.name));
+  if (!ports.length) settings.append(h('div', { class: 'hint' }, 'This action has no settings to type; its inputs come from wires.'));
+  for (const p of ports) settings.append(fieldFor(node, p, params[p.name], wiredIn[p.name]));
+  const card = h('div', { class: 'step' },
+    h('div', { class: 'n' }, `Step ${n} · via ${portLabel(node, 'input', s.via)}`),
+    h('h3', {}, typeName(node.type), h('span', {}, node.label || '')),
+    lines.length ? h('ul', {}, ...lines) : h('div', { style: 'color:var(--muted)' }, 'No settings yet'),
+    h('div', { class: 'acts' },
+      h('button', { class: 'tiny', onclick: () => { const open = settings.style.display === 'none'; settings.style.display = open ? '' : 'none'; open ? openSteps.add(s.id) : openSteps.delete(s.id); } }, 'Settings'),
+      h('button', { class: 'tiny danger', onclick: () => { edits(pageKey, [{ edit: 'remove_node', component: pageKey, id: s.id }]); renderWorkflow(); } }, 'Delete step'),
+      s.siblings.length ? h('span', { style: 'color:var(--muted);font-size:11px;align-self:center' }, `+ ${s.siblings.length} more wired from the same signal`) : null),
+    settings);
+  const frag = document.createDocumentFragment(); frag.append(card);
+  for (const b of branches) {
+    frag.append(h('div', { class: 'branch-label' }, `on ${portLabel(node, 'output', b.fromProperty)} →`));
+    const bn = byId[b.toId];
+    frag.append(h('div', { class: 'step branch' }, h('h3', {}, typeName(bn.type), h('span', {}, bn.label || '')), h('div', { style: 'color:var(--muted);font-size:12px' }, `via ${portLabel(bn, 'input', b.toProperty)}`)));
+  }
+  return frag;
+}
+const ACTIONS = [
+  ['RouterNavigate', 'Go to page'], ['NewDbModelProperties', 'Create a new record'], ['SetDbModelProperties', 'Make changes to a record'], ['DeleteDbModelProperties', 'Delete a record'],
+  ['DbCollection2', 'Fetch records (query)'], ['Set Variable', 'Set a variable'], ['net.noodl.user.LogIn', 'Log the user in'], ['net.noodl.user.LogOut', 'Log the user out'],
+  ['net.noodl.user.SignUp', 'Sign the user up'], ['Condition', 'Only when (condition)'], ['Send Event', 'Send an event'], ['JavaScriptFunction', 'Run JavaScript'], ['Timer', 'Wait (timer)'], ['Navigate To Path', 'Go to a URL path'], ['Show Popup', 'Show a popup']
+];
+function addActionMenu(e, from) {
+  closeMenu();
+  const menu = h('div', { class: 'menu', style: `left:${e.clientX}px;top:${e.clientY + 8}px` });
+  const search = h('input', { type: 'text', placeholder: 'Search actions…', oninput: () => fill(search.value) });
+  const list = h('div');
+  const fill = (q) => {
+    list.innerHTML = '';
+    const q2 = q.toLowerCase();
+    const all = [...ACTIONS.filter(([t]) => libIndex.has(t) || hasSpec(t)), ...(lib?.nodetypes || []).filter((t) => t.category !== 'Visual' && !ACTIONS.some(([a]) => a === t.name)).map((t) => [t.name, t.displayNodeName || t.name])];
+    for (const [type, label] of all) {
+      if (q2 && !(label.toLowerCase().includes(q2) || type.toLowerCase().includes(q2))) continue;
+      const trig = triggerOf({ type, parameters: {} });
+      if (!trig) continue;
+      list.append(h('div', { class: 'item', onclick: () => { closeMenu(); addAction(type, from); } }, label, h('small', {}, `${typeName(type)} · triggered by "${trig}"`)));
+    }
+  };
+  fill('');
+  menu.append(search, list); document.body.append(menu); search.focus();
+  setTimeout(() => document.addEventListener('mousedown', outside, { once: true }), 0);
+  function outside(ev) { if (!menu.contains(ev.target)) closeMenu(); else document.addEventListener('mousedown', outside, { once: true }); }
+}
+const closeMenu = () => { for (const m of document.querySelectorAll('.menu')) m.remove(); };
+function addAction(type, from) {
+  const trig = triggerOf({ type, parameters: {} });
+  const n = nodes.filter((n) => !isVisualType(n.type)).length;
+  const [id] = edits(pageKey, [
+    { edit: 'add_node', component: pageKey, type, x: 700 + (n % 3) * 220, y: 200 + Math.floor(n / 3) * 90 },
+  ]);
+  edits(pageKey, [{ edit: 'connect', component: pageKey, from: { node: from.node, port: from.port }, to: { node: id, port: trig } }]);
+  if (!events().some((ev) => ev.node === selEvent.node && ev.port === selEvent.port)) draftEvents.length = 0;
+  renderWorkflow();
+  toast(`Added ${typeName(type)} after ${labelOf(from.node)}`);
+}
+$('newevent').onclick = (e) => {
+  closeMenu();
+  const menu = h('div', { class: 'menu', style: `left:${e.clientX}px;top:${e.clientY + 8}px` });
+  for (const id of visualIds) {
+    const node = byId[id];
+    const sigs = portsOf(node, 'output').filter((p) => p.signal);
+    for (const p of sigs) menu.append(h('div', { class: 'item', onclick: () => { closeMenu(); draftEvents.push({ node: id, port: p.name }); selEvent = { node: id, port: p.name }; renderWorkflow(); } }, `When ${labelOf(id)}: ${p.label}`, h('small', {}, typeName(node.type))));
+  }
+  document.body.append(menu);
+  setTimeout(() => document.addEventListener('mousedown', function outside(ev) { if (!menu.contains(ev.target)) closeMenu(); else document.addEventListener('mousedown', outside, { once: true }); }, { once: true }), 0);
+};
+
+/* ================= Data: types and fields (the project file), rows (the backend) ================= */
+let selType = null;
+const projectJson = () => store.readProjectFile();
+function writeProject(pj) {
+  snapshot();
+  files.write('nodegx.project.json', JSON.stringify(pj, null, 2));
+  persist(); rebuild();
+}
+const collections = () => projectJson()?.metadata?.dbCollections || [];
+const schemaTables = () => { try { return JSON.parse(files.read('backend/schema.json') || '[]').filter((s) => s.action === 'createTable'); } catch { return []; } };
+function renderTypes() {
+  const box = $('types'); box.innerHTML = '';
+  const names = new Set();
+  for (const c of collections()) { names.add(c.name); box.append(h('div', { class: 'row', 'aria-selected': selType === c.name, onclick: () => { selType = c.name; renderData(); } }, c.name, h('small', {}, `${c.columns?.length ?? 0} fields`))); }
+  for (const t of schemaTables()) if (!names.has(t.table)) box.append(h('div', { class: 'row', 'aria-selected': selType === t.table, onclick: () => { selType = t.table; renderData(); } }, t.table, h('small', {}, 'schema.json')));
+  if (!box.children.length) box.append(h('div', { class: 'hint' }, 'No data types yet.'));
+}
+$('newtype').onclick = () => {
+  const name = prompt('Name of the new data type (a collection)');
+  if (!name) return;
+  const pj = projectJson(); pj.metadata ??= {}; pj.metadata.dbCollections ??= [];
+  if (pj.metadata.dbCollections.some((c) => c.name === name)) return toast('That type exists');
+  pj.metadata.dbCollections.push({ name, columns: [] });
+  writeProject(pj); selType = name; renderData();
+};
+const FIELD_TYPES = ['String', 'Number', 'Boolean', 'Date', 'Pointer', 'Array', 'Object', 'File', 'GeoPoint'];
+async function renderData() {
+  renderTypes();
+  const main = $('datamain'); main.innerHTML = '';
+  if (!selType) { main.append(h('div', { class: 'empty' }, 'Pick a data type.')); return; }
+  // one parse of the project file for the whole render: the fields below mutate `coll` and write `pj` back
+  const pj = projectJson();
+  const coll = (pj?.metadata?.dbCollections || []).find((c) => c.name === selType);
+  const fromSchema = schemaTables().find((t) => t.table === selType);
+  const cols = coll?.columns || fromSchema?.columns || [];
+  main.append(h('h2', {}, selType));
+  if (fromSchema && !coll) main.append(h('div', { class: 'bar' }, h('span', { class: 'note' }, 'Defined in backend/schema.json (read-only here).')));
+  // fields
+  const ft = h('table', {}, h('tr', {}, h('th', {}, 'Field'), h('th', {}, 'Type'), h('th', {}, 'Of type'), h('th', {})));
+  cols.forEach((col, i) => ft.append(h('tr', {},
+    h('td', {}, coll ? h('input', { type: 'text', value: col.name, onchange: (e) => { col.name = e.target.value; writeProject(pj); renderData(); } }) : col.name),
+    h('td', {}, coll ? h('select', { onchange: (e) => { col.type = e.target.value; writeProject(pj); renderData(); } }, ...FIELD_TYPES.map((t) => h('option', { value: t, selected: col.type === t }, t))) : col.type),
+    h('td', {}, col.type === 'Pointer' ? (coll ? h('input', { type: 'text', value: col.targetClass || '', placeholder: 'target type', onchange: (e) => { col.targetClass = e.target.value; writeProject(pj); } }) : col.targetClass) : ''),
+    h('td', {}, coll ? h('button', { class: 'tiny danger', onclick: () => { coll.columns.splice(i, 1); writeProject(pj); renderData(); } }, '×') : ''))));
+  main.append(ft);
+  if (coll) main.append(h('div', { class: 'bar' }, h('button', { onclick: () => { const name = prompt('Field name'); if (!name) return; coll.columns ??= []; coll.columns.push({ name, type: 'String' }); writeProject(pj); renderData(); } }, '+ New field'),
+    h('button', { class: 'danger', onclick: () => { if (!confirm(`Remove the type ${selType} from the project? (Rows on the backend are kept.)`)) return; pj.metadata.dbCollections = pj.metadata.dbCollections.filter((c) => c.name !== selType); writeProject(pj); selType = null; renderData(); } }, 'Remove type')));
+  // rows
+  main.append(h('h2', { style: 'margin-top:22px' }, 'App data'));
+  const rowsBox = h('div', {}, h('div', { class: 'note' }, 'Loading…'));
+  main.append(rowsBox);
+  await renderRows(rowsBox, cols);
+}
+async function api(path, init) {
+  const r = await fetch('/api/backend' + path, { headers: { 'content-type': 'application/json' }, ...init });
+  let body = null; try { body = await r.json(); } catch { /* empty */ }
+  if (!r.ok) throw new Error(body?.error || `${r.status} ${r.statusText}`);
+  return body;
+}
+async function renderRows(box, cols) {
+  box.innerHTML = '';
+  const backend = opened.backend;
+  if (!backend?.endpoint) { box.append(h('div', { class: 'note' }, 'This project is not bound to a backend, so there are no rows to show. Provision one with the nodegx server (provision_backend).')); return; }
+  let rows;
+  try { rows = (await api(`/classes/${encodeURIComponent(selType)}?limit=100`)).results || []; }
+  catch (err) { box.append(h('div', { class: 'note' }, `The backend at ${backend.endpoint} did not answer for ${selType}: ${err.message}`)); return; }
+  const names = cols.map((c) => c.name);
+  const t = h('table', {}, h('tr', {}, h('th', {}, 'id'), ...names.map((n) => h('th', {}, n)), h('th', {}, 'created'), h('th', {})));
+  for (const row of rows) {
+    const tr = h('tr', {}, h('td', {}, h('code', {}, String(row.objectId || row.id || '').slice(0, 10))));
+    for (const n of names) {
+      const v = row[n];
+      const td = h('td', { class: 'cell', onclick: () => editCell(td, row, n, v) }, v === undefined || v === null ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v));
+      tr.append(td);
+    }
+    tr.append(h('td', {}, (row.createdAt || '').slice(0, 16)), h('td', {}, h('button', { class: 'tiny danger', onclick: async () => { if (!confirm('Delete this row?')) return; try { await api(`/classes/${encodeURIComponent(selType)}/${row.objectId}`, { method: 'DELETE' }); renderData(); } catch (e) { toast(e.message); } } }, '×')));
+    t.append(tr);
+  }
+  box.append(h('div', { class: 'bar' }, h('button', { class: 'primary', onclick: async () => { try { await api(`/classes/${encodeURIComponent(selType)}`, { method: 'POST', body: JSON.stringify({}) }); renderData(); } catch (e) { toast(e.message); } } }, '+ New entry'), h('span', { class: 'note' }, `${rows.length} row(s) on ${backend.endpoint}`)), t);
+}
+function editCell(td, row, field, value) {
+  if (td.querySelector('input')) return;
+  const col = (collections().find((c) => c.name === selType)?.columns || []).find((c) => c.name === field);
+  const inp = h('input', { type: 'text', value: value === undefined || value === null ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value) });
+  td.textContent = ''; td.append(inp); inp.focus(); inp.select();
+  let done = false;
+  const commit = async () => {
+    if (done) return; done = true;
+    let v = inp.value;
+    if (col?.type === 'Number') v = v === '' ? null : Number(v);
+    else if (col?.type === 'Boolean') v = /^(true|yes|1)$/i.test(v);
+    else if (['Array', 'Object', 'Pointer', 'GeoPoint'].includes(col?.type)) { try { v = JSON.parse(v); } catch { /* keep text */ } }
+    try { await api(`/classes/${encodeURIComponent(selType)}/${row.objectId}`, { method: 'PUT', body: JSON.stringify({ [field]: v }) }); td.textContent = inp.value; }
+    catch (e) { toast(e.message); td.textContent = value ?? ''; }
+  };
+  inp.onblur = commit; inp.onkeydown = (e) => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { done = true; td.textContent = value ?? ''; } };
+}
+
+/* ================= tabs, boot ================= */
+let tab = 'design';
+for (const b of document.querySelectorAll('[role=tab]')) b.onclick = () => {
+  tab = b.dataset.tab;
+  for (const x of document.querySelectorAll('[role=tab]')) x.setAttribute('aria-selected', x === b);
+  for (const s of document.querySelectorAll('section.tab')) s.hidden = s.id !== tab;
+  $('pagepick-l').style.display = tab === 'data' ? 'none' : '';
+  $('width-l').style.display = tab === 'design' ? '' : 'none';
+  renderAll();
+};
+function renderAll() {
+  renderPagePick(); renderDatalists();
+  if (tab === 'design') { renderPalette(); renderTree(); renderProps(); draw(); }
+  if (tab === 'workflow') renderWorkflow();
+  if (tab === 'data') renderData();
+}
+readGraph();
+renderPagePick();
+renderPalette(); renderTree();
+status('Starting the app…');
+const first = await preview.update(files.entries());
+lastShow = first;
+lib = preview.nodeLibrary; libIndex = new Map((lib?.nodetypes || []).map((t) => [t.name, t]));
+readGraph();
+if (first.status === 'ok') {
+  status(`App on screen · ${Math.round(first.exportMs)} ms export, ${Math.round(first.frameMs)} ms draw${first.warnings?.length ? ` · ${first.warnings.length} warning(s)` : ''}`);
+  await showPage(pageKey); hookFrame(); mapElements();
+} else {
+  const d = first.report?.diagnostics?.find((d) => d.severity === 'error');
+  status(`The app is not shown: ${d ? d.message.slice(0, 160) : first.message || first.status}`, true);
+}
+renderAll();
+document.title = `ready ${opened.name} pages=${pageKeys().length} visual=${visualIds.length}`;
+</script>
+</html>
