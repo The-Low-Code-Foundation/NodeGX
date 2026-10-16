@@ -6,7 +6,9 @@ four files and a handoff, no task files, no gate suite beyond its own `check.mjs
 lane.** It is a lane-2 artefact (P112, *your own NodeGX*: an editor built from the kit), not a lane of its own; the
 board lists it in §4 until Richard says otherwise.
 **Status: 🟡 s1 — built and gated (`editor/check.mjs` **PASS 17/17** on a copy of `templates/todo-list` with an
-ephemeral backend); driven by hand on a copy of Puppy test 3 (look/); waits for Richard's sitting (PLAYTEST.md).**
+ephemeral backend); driven by hand on a copy of Puppy test 3 (look/); waits for Richard's sitting (PLAYTEST.md).
+s1b (the same day): Richard rebuilt the runtime, the preview bundle and Orbit's spec module and ran the gate: 8/10, the
+Workflow tab empty — the spec module was stale (§3, P123-S1-SPECENTRY); fixed, gate 17/17 again on his bundles.**
 **Prefix: `OBB`.**
 
 > "In theory it should be easy given what we've already got, just separating the logic into the 'workflows' concept
@@ -59,10 +61,18 @@ small headless-Chrome driver, no dependency), `editor/check.mjs` (the gate). Not
 | app data | the bound backend's `/classes/:c` through the server (the runtime's `X-Parse-Application-Id`); new entry, inline edit (typed by the field's type), delete | a row created on the backend; a cell edit read back (gate; drive) |
 | the page selector | the Router's start page first; the running app's own redirects followed and said (Admin → Admin Login without a login; Todo → Sign in) | gate |
 
-**What the kit did not give, and the editor had to invent** (input for OWN-007's brief): the official editor's own
-dynamic ports — a Navigate's Router and Target Page, a record node's collection and its `prop-<column>` inputs, a
-variable's name — are in no library and no spec; a node the official editor saved carries a snapshot in its
-`dynamicports`, a node made elsewhere has nothing. `synthPorts()` in the page is the third copy of that knowledge.
+**Where a Navigate's Target Page and a record's Class and columns come from** (corrected s1b, after Richard's run):
+the runtime's library never lists them, and s1 first believed no kit package had them and wrote `synthPorts()` as a
+third copy. Wrong: since P107 NSP-020 the spec package draws them — `drawnPorts(spec, params, context)` over a
+`PortContext` that `@nodegx/project-contract/port-context` builds from the files with no viewer (`portProjectFromStore`,
+`portContextFor`: the routers and their pages, the backends, the schema's classes and columns, each component's
+interface). The editor now reads those first; `synthPorts()` stays only for what the spec does not draw yet (a
+Navigate's `router`, a variable's `name`). What hid it: Orbit's `prototype/real/specs-entry.ts` called a spec's
+derived ports with params alone, which the (params, context) signature of 2026-10-11 breaks on every record node
+("Cannot read properties of undefined (reading 'backends')"); s1's gate passed on a `specs.js` built before that
+change, and Richard's rebuild on 2026-10-16 exposed it (gate 8/10, the Workflow tab empty). Fixed in that entry
+(a context argument, `drawnPorts` and the context builder re-exported) and in the page (a spec that throws is one
+node's missing ports, never a dead tab).
 
 ## 4. Where it stops (known, by design or by this session's hour)
 
@@ -84,7 +94,8 @@ variable's name — are in no library and no spec; a node the official editor sa
 
 | id | what | state |
 |---|---|---|
-| P123-S1-EDITORPORTS | the editor-side dynamic ports (Navigate's target, a record's collection and `prop-*`) exist in no kit package; every home-made editor re-invents them | open; input for OWN-007 and OWN-012 |
+| P123-S1-SPECENTRY | Orbit's `prototype/real/specs-entry.ts` (P112) drew derived ports with no context; after NSP-020's (params, context) signature every record node's spec threw, so the Workflow tab listed nothing on a fresh `specs.js` | fixed s1b in that file (a context argument; `drawnPorts`, `portProjectFromStore`, `portContextFor` re-exported); `orbit.html` still calls the one-argument form, which now gets an empty context |
+| P123-S1-BRIEFCONTEXT | the kit's brief (`nodegx-your-own-editor` skill) says "visual nodes have no spec" and names `specFor` only; it never mentions `drawnPorts` or `port-context`, so a home-made editor re-invents the editor-side ports, as s1 did | open; input for OWN-007 |
 | P123-S1-STALEBIND | "Puppy test 3"'s project file binds `localhost:8581`, which another backend now holds (port reuse across sessions); a foreign class answers `[]` with no error | open; a liveness check on open would say so ([[liveness-is-the-socket-never-the-file-a-token-outlives-its-process]]) |
 | P123-S1-MALFORMED | "Puppy test 3" holds a node with no `type` in Admin Login; the preview refuses the whole project (`malformed-node`) | the copy was fixed; the real project is Richard's |
 

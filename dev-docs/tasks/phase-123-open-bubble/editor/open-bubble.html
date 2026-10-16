@@ -198,7 +198,7 @@
 
 <script src="/preview.js"></script>
 <script type="module">
-import { portsFor, hasSpec } from './specs.js';
+import { hasSpec, specs, drawnPorts, portProjectFromStore, portContextFor } from './specs.js';
 
 const $ = (id) => document.getElementById(id);
 const h = (tag, attrs = {}, ...kids) => {
@@ -397,9 +397,12 @@ function followApp() {
     toast(`The app's own logic went from ${asked.replace(/^Pages\//, '')} to ${shown.replace(/^Pages\//, '')} (a redirect wired on that page), so that is the page shown.`);
   }
 }
-let nodes = [], conns = [], byId = {}, visualIds = [], depthOf = {};
+let nodes = [], conns = [], byId = {}, visualIds = [], depthOf = {}, legacyName = '';
 function readGraph() {
-  const comp = store.readComponent(pageKey).files;
+  const stored = store.readComponent(pageKey);
+  const comp = stored.files;
+  legacyName = stored.legacyName;
+  try { portProject = portProjectFromStore(store); } catch (e) { console.warn('port context:', e.message); portProject = null; }
   nodes = comp.nodes.nodes; conns = comp.connections.connections;
   byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
   visualIds = []; depthOf = {};
@@ -414,6 +417,26 @@ const isVisualType = (type) => type.startsWith('/') ? registry()[type.slice(1)]?
 const holdsChildren = (type) => { const t = typeDef(type); return !!(t?.allowChildren || t?.allowChildrenWithCategory) || type.startsWith('/'); };
 const libPorts = (type) => { const t = typeDef(type); return t ? [...(t.ports || []), ...(t.dynamicports || []).flatMap((d) => d.ports || [])] : []; };
 const tname = (t) => (typeof t === 'object' && t !== null ? t.name : t) ?? '*';
+/**
+ * What the node's spec draws for these params in THIS project: `drawnPorts(spec, params, context)`, the spec package's
+ * own drawer, over a context built from the files (`portContextFor`: the routers and their pages, the backends, the
+ * schema's classes and columns, each component's interface). That is where a Navigate's Target Page and a Create
+ * Record's `prop-<column>` inputs come from — ports the runtime's library never lists. A refusal is one node's missing
+ * ports, never a dead editor.
+ */
+let portProject = null;
+const specPortsFor = (type, params, nodeId) => {
+  const spec = specs[type];
+  if (!spec) return null;
+  try {
+    const context = nodeId && portProject ? portContextFor(portProject, nodeId, {}, legacyName) : {};
+    const list = drawnPorts(spec, params, context).map((p) => ({
+      name: p.name, plug: p.plug, label: p.displayName || p.name, type: tname(p.type), signal: tname(p.type) === 'signal', default: p.default,
+      enums: p.enums ? [...p.enums] : undefined, labels: p.labels, group: p.group, description: p.description, editOnly: p.editOnly, connectionsOnly: p.connectionsOnly, codeEditor: p.codeEditor
+    }));
+    return { inputs: list.filter((p) => p.plug === 'input'), outputs: list.filter((p) => p.plug === 'output') };
+  } catch (e) { console.warn(`spec ${type}:`, e.message); return null; }
+};
 /** Every port the node could have (static, dynamic and spec), by plug. */
 function portsOf(node, plug) {
   const seen = new Map();
@@ -426,7 +449,7 @@ function portsOf(node, plug) {
     } catch { /* unknown component */ }
   }
   for (const p of libPorts(node.type)) if (p.plug === plug || p.plug === 'input/output') if (!seen.has(p.name)) seen.set(p.name, { name: p.name, label: p.displayName || p.name, type: tname(p.type), signal: tname(p.type) === 'signal', raw: p });
-  const spec = portsFor(node.type, node.parameters || {});
+  const spec = specPortsFor(node.type, node.parameters || {}, node.id);
   if (spec) for (const p of spec[plug === 'input' ? 'inputs' : 'outputs']) if (!seen.has(p.name)) seen.set(p.name, p);
   for (const p of node.ports || []) if ((p.plug === plug || p.plug === 'input/output') && !seen.has(p.name)) seen.set(p.name, { name: p.name, label: p.displayName || p.name, type: tname(p.type), signal: tname(p.type) === 'signal' });
   for (const p of node.dynamicports || []) if ((p.plug === plug || p.plug === 'input/output') && !seen.has(p.name)) seen.set(p.name, { name: p.name, label: p.displayName || p.name, type: tname(p.type), signal: tname(p.type) === 'signal' });
@@ -739,15 +762,16 @@ function editablePorts(node, { wireOnly = false } = {}) {
     if (onlyWire && !wireOnly) return;
     out.push(onlyWire ? { ...p, wireOnly: true } : p);
   };
-  for (const p of synthPorts(node)) push(p);
+  // the spec in this project's context first (Target Page, Class, prop-<column> …); the file's snapshot and the page's own table after it
+  const spec = specPortsFor(node.type, params, node.id);
+  if (spec) for (const p of spec.inputs) push({ name: p.name, displayName: p.label, plug: 'input', group: p.group || 'General', type: p.enums ? { name: 'enum', enums: p.enums.map((v) => ({ value: v, label: p.labels?.[v] ?? String(v).replace(/^\/Pages\//, '') })) } : (p.codeEditor ? { name: p.type, codeeditor: p.codeEditor } : p.connectionsOnly ? { name: p.type, allowConnectionsOnly: true } : p.type), default: p.default, description: p.description });
   for (const p of node.dynamicports || []) push({ ...p, group: p.group || 'General' });
+  for (const p of synthPorts(node)) push(p);
   if (t) {
     for (const p of t.ports || []) push(p);
     for (const d of t.dynamicports || []) if (d.ports && conditionHolds(d.condition, { ...defaultsOf(t), ...params })) for (const p of d.ports) push(p);
   }
   if (node.type.startsWith('/')) for (const p of portsOf(node, 'input')) push({ name: p.name, displayName: p.label, type: p.type, group: 'Component', plug: 'input' });
-  const spec = portsFor(node.type, params);
-  if (spec) for (const p of spec.inputs) push({ name: p.name, displayName: p.label, plug: 'input', group: p.group || 'General', type: p.enums ? { name: 'enum', enums: p.enums } : p.type, default: p.default, description: p.description });
   const priority = t?.connectionPanel?.groupPriority || [];
   const rank = (g) => { const i = priority.indexOf(g); return i === -1 ? 50 + g.length : i; };
   out.sort((a, b) => rank(a.group || 'General') - rank(b.group || 'General') || (a.index ?? 0) - (b.index ?? 0));

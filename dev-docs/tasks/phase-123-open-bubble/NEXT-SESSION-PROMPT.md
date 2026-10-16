@@ -28,6 +28,15 @@ of its own: `node packages/nodegx-backend/bin/nodegx-backend.js serve --data-dir
 `{ endpoint: "http://127.0.0.1:<p>", appId: "<id>", instanceId: "<id>", type: "nodegx" }`. Puppy test 3's own
 binding points at a port another backend now holds (README §5, STALEBIND).
 
+## s1b, the same day: Richard ran the gate on rebuilt bundles and it failed 8/10
+
+The Workflow tab was empty because Orbit's `specs-entry.ts` (P112's folder, used by this editor for `specs.js`)
+called derived ports with no context, and NSP-020's (params, context) signature throws on record nodes. Fixed there
+(a context argument; `drawnPorts`, `portProjectFromStore`, `portContextFor` re-exported) and the page now draws a
+node's ports from the spec in the project's context first (README §3). **Always run `build.sh` before the gate**: a
+PASS on a stale gitignored `specs.js` is a pass on the bundle, not on the code. `synthPorts()` remains for a
+Navigate's `router` and a variable's `name` only.
+
 ## If Richard sits with it (PLAYTEST.md)
 
 Write his words and every "in Bubble I would…" into PLAYTEST.md as he says them; each becomes a README §5 row. Ask
