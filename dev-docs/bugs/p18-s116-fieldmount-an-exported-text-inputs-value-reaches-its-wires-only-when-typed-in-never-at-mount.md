@@ -2,6 +2,7 @@
 id: P18-S116-FIELDMOUNT
 title: An exported text input's Value reaches its wires only when someone types, never at mount
 status: fixed
+commit: f0562400f
 severity: medium
 area: export / Text Input
 found: P18 session 116, 2026-10-16, driving P18-S115-QUERYPARAMS (s116-queryparams-drive, step S0)

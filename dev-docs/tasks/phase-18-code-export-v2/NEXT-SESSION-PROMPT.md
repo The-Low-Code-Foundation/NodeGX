@@ -1,3 +1,49 @@
+# Next session — session 118 (2026-10-16, BOARD lane 6) fixed **P18-S116-FIELDMOUNT**: an exported text input announces its Value as it mounts, as the runtime's does. s116's drive re-run: the runtime and the export agree in every step, S0 included.
+
+## ✅ Session 118: the field says what it holds as it appears
+
+Read EXP-011 §85. In short:
+
+| what | where |
+|---|---|
+| `FieldMountPlan` / `plan.fieldMounts`, registered beside the variable seeds: each rendered text input with a change chain, its `start` (the control boot's `String(startValue ?? '')`) and, where a sync effect carries a wired Value, its `source` | `src/analyze/plan.ts` |
+| Refused by name in the notes (typing still runs the chain): the field or a group it sits in mounted from a wire; a wired Type; a Number field (→ P18-S118-NUMBERFIELD); a wired Value the export does not carry. Authored Mounted false on it or an ancestor: never drawn, nothing announced, nothing refused | `plan.ts` |
+| One guarded mount effect per field (`announced` ref: StrictMode), after the sync effects: the field's own `changeHandlers` chain with `input-text` printed as the announced value (`announcedCode`), a wired Value coerced as the sync effect does (`undefined` → start, `null` → `''`, else `String`) | `src/emit/component.ts` |
+| Spec, 31 rows: §A against the runtime's own field (`tests/helpers/runtime-field-arm.js`: GAM-009's corpus-graph + jsdom + `createRoot` harness in a child process; it records every Value write and Value Changed from the first paint), 8 authored + 7 wired cases; §B shapes; §C refusals | `tests/the-field-announces-at-mount.test.ts` |
+| `withoutAnnouncement(page)`: neighbouring specs that are about something else on the page read it without the block (with its own control row) | `tests/helpers/fieldMount.ts` |
+| Drive, three arms, `EXPECTED.md` first: runtime == fixed in every step; HEAD showed all eight vips at load | `s118-fieldmount-drive/` |
+
+- 🔴 **A negative row is wider than its claim the day something legitimate lands in its population.** Six rows broke
+  on the field's guard and its import: `not 'if ('` meant "no Condition branch", `not 'useRef'` "no timer ref",
+  `not 'useEffect'` "no effect of its own". They now assert the claim (the page without the announcement, the call
+  `useEffect(` and not the word an import carries). Check what a red negative row MEANT before re-pinning it.
+- 🔴 **The fifth "0 total" mutant**, and the first one was the harness: the mutant copy lacked `coverage-ledger.json`
+  (`src/ledger.ts` imports it), so even the control read "0 total". Copy the ledgers with `src`. Arm K as `if (false)`
+  failed the typecheck too; reshaped as `if (node.id === '')`.
+- 🔴 **A control row on a test helper caught my own arithmetic**: I expected the stripped page to lose 9 lines, it
+  loses 8 (the block). The control is what said the helper works, not the rows that passed through it.
+- 🔴 **This shell's `grep` skips some `.ts` files as binary** (`appState.ts` read as empty: "isTextInputType is
+  defined nowhere"). Use `/usr/bin/grep -a`.
+- ✅ **The runtime's React component can be graded from the export's jest**: a child process, ts-node with
+  `jsx: 'react'`, jsdom by hand, the viewer's own node module through `createCorpusGraph`. Reuse
+  `runtime-field-arm.js` for any other control's mount behaviour.
+
+Readings: `the-field-announces-at-mount` 31 / 31; whole package (`nice -n 19 --runInBand`) 133 / 134 suites, the red
+`parameter-coverage` (the P121 peer's three uncommitted Upload File ports, as in s110–s117). Package `tsc` 0. Thirteen
+neighbour suites changed for this and only this: five hand-written targets carry the announcement, three import pins
+gained `useRef`, six negative rows narrowed, `hls001` regenerated after counting (25 files, each the block and its
+import only). Eleven mutant arms, each killing rows (control 30 / 30). Commit `f0562400f`.
+
+**Next (BOARD lane 6):**
+1. **The Function-chain gap**: 18 of the 22 Fetch-wired filters and 42 of §83's 84 read a Function's output ("a value
+   that only exists inside a handler"). Measure what those Functions are first.
+2. **P18-S118-NUMBERFIELD**: a Number field's Value as `outwardValueForFieldType('number', text)` at every read (21
+   fields, 19 into a record's `navOrder`); then lift FIELDMOUNT's Number refusal (the spec's §C row says where).
+3. GAM-009's remount rule in the export (§85.5.2, not measured); P18-S113-LISTLIVE; P18-S115-DYNPROBE;
+   P18-S117-BUTTONLOOK and P18-S118-INPUTLOOK (low: read both with `getComputedStyle` first).
+
+---
+
 # Next session — session 117 (2026-10-16, BOARD lane 6) fixed **P18-S116-QUERYFETCH**: a Query Records whose Fetch is wired asks when Fetch is sent, from the sender's chain, and at mount only where the runtime does. Driven on a real backend: the runtime and the export agree on every row and request in six steps.
 
 ## ✅ Session 117: the query asks when it is told to
