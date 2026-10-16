@@ -1,3 +1,57 @@
+# Next session — session 120 (2026-10-16, BOARD lane 6) built **the Evaluate-driven Condition** (P18-S120-SNAPCOND): a Condition with its box unticked that shows a confirmation or a refusal exports now, and the call in front of it with it. The Site Builder's contact form exports whole: Send sends the message and says whether it went.
+
+## ✅ Session 120: the Condition remembers its answer
+
+Read EXP-011 §87. In short:
+
+| what | where |
+|---|---|
+| The idiom measured: every one in the shipped templates is a literal Condition (`true` shows, `false` puts away), Evaluate from a signal, Is True into a Group's or Text's Mounted; two often share one element. The corpus adds Visible | `s120-snapcond/census.ts` |
+| The runtime measured: `null` reaches the element before the first Evaluate, over anything authored (so it starts hidden); every Evaluate sends again, same answer included; two Conditions on one element are last-pulse-wins | `s120-snapcond/condprobe.js` → `condprobe.out` |
+| `snapshotVerdicts` (a fixed point: one Condition that fails takes the others on its element with it, naming the cause first), `snapshotCellOf` (one boolean cell per element port, `origin: 'condition'`, boots false) | `src/analyze/plan.ts` |
+| Each Evaluate writes its answer into each cell before its arms; a literal one prints flat (`branch.flat`, expanded by `expandActions`), a wired one is a branch read at the press; Pass 4c binds the element to the cell | `plan.ts` `compileConditionBranch`, Pass 4c; `src/emit/component.ts` |
+| Spec, 40 rows: §A the emitted page rendered with a `useState` stand-in against the runtime's own Condition and Switch running the same page (`tests/helpers/runtime-condition-arm.js`), 6 scenarios × 4 variants, a control that HEAD disagrees; §B shapes; §C refusals; §D arms and cells | `tests/the-condition-remembers-its-answer.test.ts`, `tests/fixtures/gate-desk` (from `s120-snapcond/gen-gate-desk.py`) |
+| Drive, three arms, `EXPECTED.md` first, no backend: runtime == fixed in all nine steps; HEAD showed "Not yet" at load and never changed | `s120-snapcond/` |
+
+- 🔴 **An arm that throws while the suite is collected reads "0 total", like a broken compile.** The export arm ran in
+  the `describe` body, so mutant J (no writes, so no `onClick`) killed the suite rather than its rows. The arm is now
+  caught there and rethrown in each row (`exportArmOrError` / `readingsOf`). Run the arm inside the rows, or catch it.
+- 🔴 **A refusal's reason names the first feeder it finds, and that can be the partner it just refused.** The fixed
+  point first named "Condition.result" (its refused twin) where the cause was a Switch. Name a feeder that is no
+  snapshot first, then a refused partner by id.
+- 🔴 **"Not drawn" was wrong for a Variable.** Check the port before the drawn-ness: a Variable's Value is not an element.
+  `logic.test.ts`'s row wires into `noteDraftVar`, which is not a node of Mood; its sentence is "feeds a missing node.value".
+- 🔴 **A fix can move EXP-008's floor.** `parameter-coverage` read `Condition.condition` as reaching (the probe wires
+  Evaluate, refused before): it leaves the ledger's silent list and the floor rises 1,234 → 1,235 in the same commit.
+- `innerText` drops `visibility: hidden` text; the drive reads each Text from the DOM as absent / hidden / shown.
+
+Readings: `the-condition-remembers-its-answer` 40 / 40; twelve neighbours 375 / 375 (`logic` re-pinned, `hls001`
+regenerated after predicting: 0 lines out, 17 in, gate-desk's). Package `tsc` 0. 14 mutant arms, each killing rows
+(control 40 / 40). Whole package (`nice -n 19 --runInBand`, 438 s, JSON written 22:56): 134 / 136 suites, 4,765 passed. The
+reds: `parameter-coverage` (the P121 peer's three uncommitted Upload File ports, as in s110–s119; that run also read
+`Condition.condition` reaching, before the ledger moved, and the re-run after shows only the peer's three) and
+`hls006-every-listener` (it scanned my two package copies under `packages/`; 4 / 4 once they were removed, straight after). Commit `71b0891e5`.
+
+Reach (`dispdiff.ts`, HEAD against the tree): **26 template nodes** newly exported (18 Conditions, 5 Cloud Functions,
+3 Functions: the Site Builder's ContactForm whole, members-area Account, Setup, Join, the Announcement's and Meeting's
+confirmations), **115 in the corpus**, none lost. 18 of the 36 template Conditions still wait on their sender.
+
+Filed: **P18-S120-TEXTAREA** (medium: a Text Area field exports as a one-line `<input type="textArea">`; 33 in the
+shipped templates, the contact forms' message boxes among them).
+
+**Next (BOARD lane 6):**
+1. **P18-S119-TICKEDRUN**: a Run-wired Function that also runs on a ticked input (the PageEditor's and the members
+   pages' "Hold the id"; the runtime's coalescing and first delivery).
+2. **The senders the 18 remaining Conditions wait on**: a Record verb's and Log In's / Sign Up's Failure chains as
+   handler chains, an External Link's Done, a Function fed by a component's output (landing-pages' "Write the email").
+   `census.ts` with `V=1` lists them; `dispdiff.ts` over `templates/` and the materialized two measures each.
+3. **P18-S120-TEXTAREA** (small: a `<textarea>` with the input's handlers), P18-S118-NUMBERFIELD, the 54 Functions whose
+   reads sit partly off their own signals, GAM-009's remount rule, P18-S113-LISTLIVE, P18-S115-DYNPROBE, BUTTONLOOK and
+   INPUTLOOK (low).
+4. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
 # Next session — session 119 (2026-10-16, BOARD lane 6) measured **the Function-chain gap** and found it was something else: a Function run by an event whose own signals (`Outputs.go()`) drive actions was refused whole. Those signals run their chains now, reading the Function's outputs in the runtime's lockstep. 27 nodes in the shipped templates export that did not.
 
 ## ✅ Session 119: the Function says go

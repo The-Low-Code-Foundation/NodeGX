@@ -6,7 +6,7 @@ severity: high
 area: export / Condition
 found: P18 session 119, 2026-10-16 (named as lane 6's next step); measured and fixed in session 120, EXP-011 §87
 evidence: dev-docs/tasks/phase-18-code-export-v2/s120-snapcond/ (condprobe.out, census.ts, the drive's readings.json); packages/nodegx-export/tests/the-condition-remembers-its-answer.test.ts
-commit: see EXP-011 §87
+commit: 71b0891e5
 ---
 
 The shipped templates show "Thanks, your message has been sent" or "That message could not be sent" with a Condition
