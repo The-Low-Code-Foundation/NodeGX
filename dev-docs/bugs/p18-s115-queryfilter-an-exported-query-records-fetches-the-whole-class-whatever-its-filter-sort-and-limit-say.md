@@ -1,7 +1,8 @@
 ---
 id: P18-S115-QUERYFILTER
 title: An exported Query Records fetches the whole class, whatever its Filter, Sort and Limit say
-status: open
+status: fixed
+commit: dd1a31c49
 severity: high
 area: export / Query Records
 found: P18 session 115, 2026-10-16, starting P18-S113-LISTLIVE (which needs the query's own filter and sort)
@@ -28,3 +29,7 @@ The fix: the export translates the filter with the runtime's own translator (`@n
 makes) and sends the `where`, the `order`, the `limit` and the `skip` the runtime sends. What it cannot reproduce yet
 it refuses by name: a filter value read from a wired port (P18-S115-QUERYPARAMS, the next slice), the Javascript
 filter, a Search term, a wired Filter / Sort / Limit / Skip, a relation filter.
+
+**Fixed** in `dd1a31c49` (EXP-011 §82): as proposed. Spec `packages/nodegx-export/tests/the-query-asks.test.ts`;
+driven in `dev-docs/tasks/phase-18-code-export-v2/s115-query-drive/` (runtime and fixed export show the same rows from
+the same request; HEAD showed the whole class).

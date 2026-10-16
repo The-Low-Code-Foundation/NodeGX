@@ -1,3 +1,48 @@
+# Next session — session 115 (2026-10-16, BOARD lane 6) found and fixed **P18-S115-QUERYFILTER**: an exported Query Records fetched the whole class, whatever its Filter, Sort and Limit said. Driven on a real backend: the runtime and the fixed export show the same three rows.
+
+## ✅ Session 115: the query asks for what the node says
+
+Opened to do P18-S113-LISTLIVE. LISTLIVE needs the query's own filter and sort in the browser, and the exported query
+had none: `query('<Class>')` with no parameters, silently. Measured on `puppy-test-3`: Filter (both shapes), Sort,
+Limit/Skip, the Javascript filter, Search and Total Count all left the export byte-identical. Reach: 43 projects,
+323 Query Records, 125 with a Filter (105 of them reading a wired value), 62 with a Sort, 12 with a Limit.
+Read EXP-011 §82.
+
+| what | where |
+|---|---|
+| The request, from the runtime's OWN translator at export time (`visualQueryToNeutral` / `savedFilterToNeutral` + `toParseWhere`), sort, limit and skip as the node computes them | `src/analyze/querySettings.ts` |
+| `@noodl/backend-contract` added as a `file:` devDependency (bundled; one lockfile line) | `package.json`, `package-lock.json` |
+| The refusals by name: JS filter, Search, a wired filter, sort or limit input, a wired filter value (QUERYPARAMS), a relation with no class, points-to, a filter the translator itself refuses | `querySettings.ts`; `plan.ts` `querySettingsFor` at the three read sites |
+| `fetch<Plural>(params?)` only where a site passes them; an unfiltered query emits byte-identical output | `emitApp.ts`, `component.ts` `queryParamsLiteral` |
+| Spec: 64 rows, runtime arm = the node's own `getStorageFilter` / `getStorageLimit` / `getStorageSkip` in a child process (ts-jest cannot typecheck the runtime) + `ParseWireAdapter.query`'s body | `tests/the-query-asks.test.ts`, `tests/helpers/runtime-query-arm.js` |
+| Driven, three arms, `EXPECTED.md` first: runtime == fixed (Cleo, Eve, Gus; same body bar `count`); HEAD showed all ten | `s115-query-drive/` |
+
+- 🔴 **"0 gap ports" was about static ports.** The probe varies `CatalogNode.inputs` of `translated` types. Query
+  Records is `stubbed` in the coverage ledger (an exemption from before EXP-009), and every one of its inputs is
+  dynamic. 63 translated picker nodes declare dynamic ports. Filed P18-S115-DYNPROBE.
+- 🔴 **A mutant that breaks a narrowing grades nothing**, a third session running: arms I and M read "0 total". Every
+  mutant runner now prints the Tests line, and "0 total" counts as a failed arm, not a kill.
+- ✅ The runtime loads in a plain Node child (ts-node transpile-only), so a spec can call the runtime node's own
+  methods on a stand-in `this`. That is cheaper than a NodeContext harness and stronger than restating the runtime.
+
+Readings: `the-query-asks` 64 / 64; eleven neighbouring suites 397 / 397; `hls002-pack-and-run` 7 / 7 (the tarball
+bundles the translator); package `tsc` 0, strict and loose. Thirteen mutant arms: twelve kill rows, and F is
+equivalent (recorded). Whole package (`nice -n 19 --runInBand`, 424 s): **130 / 131 suites** once the mutant copy was
+gone; the one red is `parameter-coverage` on the P121 peer's three uncommitted Upload File ports, as in s110–s114.
+Commit `dd1a31c49`.
+
+- 🔴 **A mutant copy in `packages/` turns a repo-wide gate red.** `hls006-every-listener` found
+  `.nx-mut-s115/src/cli/serve.ts` as an unenrolled socket. Remove the copy as soon as the arms end, before any
+  whole-package run; a peer running that gate sees it too.
+
+**Next (BOARD lane 6):**
+1. **P18-S115-QUERYPARAMS**: the `where` built in the app from wired values, re-run as each changes (105 of 125).
+2. **P18-S113-LISTLIVE** on top of it: the store's events in the client, `matchesQuery` / `compareObjects` against
+   the `where` and sort the plan now carries.
+3. P18-S115-DYNPROBE; then P18-S112-NATIVESELECT, MOUNTPULSE, §77.5, the graph line.
+
+---
+
 # Next session — session 114 (2026-10-16, BOARD lane 6) fixed **P18-S113-IDBINDREAD** and drove it: a Record whose Fetch is unwired binds to the app's copy of its record, as the running app's does; it no longer reads the backend on every Id change.
 
 ## ✅ Session 114: the Id binds, it does not read
