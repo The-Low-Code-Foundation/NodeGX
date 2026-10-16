@@ -4,7 +4,39 @@
 file.** Read, in order: this file; the task file `../OWN-019-THE-VIBE-KIT.md` §7 "s5" and "s6"; `VIBE-AND-LARGE4.md`
 § "s5's new measurements"; the P112 README's R36–R39. Say "Opus" in your first message.
 
-## ▶ s8 LIVE (2026-10-15 afternoon, Opus) — read this first
+## ▶ s9 (2026-10-16, Opus, same conversation as s8) — read this first
+
+**Richard will give SP1 feedback in a NEW session.** State at 13:30:
+- **SP1 WAITING after sitting 14** — `round-kit --again … --relay` (started 10:24, `big/run-SP1-again.sh`) polls
+  `big/SP1/` for `reply-14.txt | continue-14 | stop-14`. ⚠️ Sitting 14 HANDED OVER (it wrote NEXT.md), so a `reply-14`
+  (resume) lands in a hook-closed session and can do nothing. Richard's words must open a FRESH sitting: put them in
+  `own-019/continue.txt`, `touch big/SP1/continue-14`, wait until `agent15.jsonl` exists, restore `continue.txt` to
+  `Continue.` (git must show it clean) — or first add a `fresh-<k>.txt` verb to round-kit's waitForRelay (better).
+  Its NEXT.md: "part 5 — the player bar, after the user approves the restyle screenshots in shots/".
+- **SP1 so far:** parts 1–4 proven + part 13 restyle (dark, Spotify-like; phone layout fixed), 14 sittings, ≈ $21 list
+  (≈ €0.65 real). Restyle story: sitting 9 "modern" = no change (it was the default); Richard's own-words restyle prompt
+  (s9, drafted by Opus, sent on his OK); sitting 11 found the 690-px nav overflow (hidden ≠ out of layout); sitting 13
+  claimed "dark: passed" on a WHITE page with invisible titles → **LOOKBLIND** (filed `cae43caae`); Richard's correction
+  (drafted, OK'd) → sitting 14 measured the runtime's `body{background:white}` and that headCode is never served,
+  painted the App root, and proved painted contrast at 3 widths. Opus checked the shots: dark, titles visible; nits:
+  long titles clipped without "…" on phone; covers are the demo SVG.
+- **Gallery:** SP1 on **:4827** = a COPY (snapshot 13:20), its backend moved to **8691** (config.json port, runtime.json
+  removed, project `metadata.cloudservices.endpoint`, and the copy's DB file URLs Album.cover / Song.audioFile /
+  Song.coverFile rewritten 8583→8691 — backup `big/gallery-SP1-local.db.bak`) so it can never collide with the live
+  build's 8583. TL4 on :4826 (s9start added but never `serve`d — fixed by `gallery.mjs serve`).
+- **TL4** (06:00, Launch on the published 0.2.2): **18/19, ✗font** (system-ui + Georgia, no loaded face); 80 min, $6.55.
+  Launch total: 3×19/19 + 18/19.
+- **Candidate kit defects from SP1 (verify from calls, then file):** (1) registrar steals the start page from a stub Home
+  (5×); (2) Cloud File doesn't unwrap a record's file; (3) drive_page hangs ~240 s on a `window.open` tap; (4) root
+  component "missing" after restart; (5) backend dies between sittings; (6) hook closes a resumed session — a person's
+  reply after hand-over can't act, and once it ended a turn by ANNOUNCING the hand-over without writing it (sitting 11);
+  (7) "continue" overrides "owner decides" (K-nopersist); (8) **runtime paints `body` white — a dark theme can't reach the
+  page ground**; (9) **`settings.headCode` written but never served by the renderer**; (10) records store ABSOLUTE file URLs
+  with the backend port — moving/deploying a backend breaks every file; (11) Text without `textOverflow` clips mid-letter.
+- **Then:** the AC8 write-up (all four proofs now in: passes repeatedly, three kinds of app, money, it checks itself — plus
+  SP1 as the "how far" stress test), AC6 Richard's own run (npm 0.2.2 is live).
+
+## ▶ s8 LIVE (2026-10-15 afternoon, Opus)
 
 Richard (14:30): *"I need this Mistral thing to be proven out or dump it. So far I like it, so let's do what we can do
 make it work, no compromises."* So s8 drives every open AC toward the AC8 verdict.
