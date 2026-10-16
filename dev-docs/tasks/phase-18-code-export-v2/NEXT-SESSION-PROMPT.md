@@ -1,3 +1,45 @@
+# Next session — session 116 (2026-10-16, BOARD lane 6) fixed **P18-S115-QUERYPARAMS**: a Query Records whose Filter reads a wired value builds its `where` in the page, and asks again when the value changes. Driven on a real backend. It reaches none of the corpus's 84 wired filters yet, and why is the next row.
+
+## ✅ Session 116: the filter reads its wires
+
+Read EXP-011 §83. In short:
+
+| what | where |
+|---|---|
+| The runtime's translator, run once per combination of the wired values being set or unset (≤ 3 values), a marker for each set value; a marker must land whole under a plain comparison (`$eq` … `$gte`), else refused by name | `src/analyze/querySettings.ts` `wiredWhereOf`, `placeMarkers` |
+| Each value's wire resolved with `resolveExpr` (the States `follow` path); consumed **before pass 6** for a query that lands (`queryLands`, shared with the disposition pass); a cycle guard | `src/analyze/plan.ts` `querySettingsFor`, `wireQueryValues` |
+| One effect: `const where = <conditional per value> ;` `fetch<Plural>({ where, … })`, deps the values'; a render local is used as it is (`const x = x` was the first emit) | `src/emit/component.ts` `wiredWhereExpr` |
+| `filterValue(value, dateColumn)` in the client: the translator's `parseValue` | `src/emit/emitApp.ts` `FILTER_VALUE_SOURCE` |
+| Refused by name: wired Fetch (QUERYFETCH), unticked box, two wires, wired + typed-in, > 3 values, a marker outside a plain comparison, an unreadable source, a cycle | |
+| Spec, 140 rows: §A evaluates the **emitted page's own `where` line** with the emitted `filterValue`, against the runtime node's `getStorageFilter` (the child-process arm now takes `values`) over 10 filters × 11 values / 12 pairs | `tests/the-query-reads-its-wires.test.ts`, `tests/helpers/runtime-query-arm.js` |
+| Driven, three arms, `EXPECTED.md` first: S1–S4 runtime == fixed (same rows, same `where`); HEAD had no list | `s116-queryparams-drive/` |
+
+- 🔴 **Measure the fix's reach, not the refusal's.** The row said 105 of 125. After the fix, 0 of 84 wired filters export
+  on this machine. Each one stops earlier: 42 at a Function chain, 21 at a wired Fetch, 18 in a logic component, 3 at
+  the clock. The mechanism is right and graded; the corpus needs QUERYFETCH first.
+- 🔴 **The runtime arm found what no spec could.** At load the runtime queries twice, because the City box publishes
+  `""` when it mounts (`TextInput.componentDidMount` → `setText`). The export's box writes only on `onChange`. That is
+  the writer's defect, not the query's: P18-S116-FIELDMOUNT, 792 wires on this machine.
+- 🔴 **Pass 6 runs before the query disposition pass.** A wire consumed in the disposition pass is already reported as
+  "no deterministic translation". Consume before pass 6, under the same "lands" test.
+- The CDP drive typed with `Input.insertText` and cleared with a Backspace key event, with
+  `Emulation.setFocusEmulationEnabled` on the same connection.
+
+Readings: `the-query-reads-its-wires` 140 / 140; `the-query-asks` 64 / 64; package `tsc` 0, strict and loose (the
+editor's gate). Twelve mutant arms, each killing rows, in a copy removed straight after (control 204 / 204). Whole
+export package: see the commit.
+
+**Next (BOARD lane 6):**
+1. **P18-S116-QUERYFETCH**: a wired Fetch is a handler action in its sender's chain (Did Mount, a record's Done, a
+   row's Changed, a component input), reading the wired values at that moment. 112 of 281 Query Records; it unblocks
+   21 of the 84 wired filters.
+2. **P18-S116-FIELDMOUNT**: a text input's Value at mount (`outwardValueForFieldType(type, startValue ?? '')`) to
+   each translated sink of it; GAM-009's remount rule. Re-run `s116-queryparams-drive`: S0 should then agree.
+3. P18-S113-LISTLIVE (for a wired filter, match against the `where` of the current values); P18-S115-DYNPROBE; the
+   Function-chain gap (42 of the 84; a JS node fed by another).
+
+---
+
 # Next session — session 115 (2026-10-16, BOARD lane 6) found and fixed **P18-S115-QUERYFILTER**: an exported Query Records fetched the whole class, whatever its Filter, Sort and Limit said. Driven on a real backend: the runtime and the fixed export show the same three rows.
 
 ## ✅ Session 115: the query asks for what the node says

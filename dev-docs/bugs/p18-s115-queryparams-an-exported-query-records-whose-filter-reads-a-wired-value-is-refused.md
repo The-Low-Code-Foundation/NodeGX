@@ -2,6 +2,7 @@
 id: P18-S115-QUERYPARAMS
 title: A Query Records whose Filter reads a value from a wired port is refused by the export
 status: fixed
+commit: 6548de6ee
 fixed: P18 session 116, 2026-10-16 (EXP-011 §83, s116-queryparams-drive)
 severity: medium
 area: export / Query Records
