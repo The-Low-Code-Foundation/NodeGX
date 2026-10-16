@@ -78,6 +78,19 @@ import { PAGE_STACK_LIB_PATH } from './pageStackLib';
 import { POPUP_DIALOG_LIB_PATH } from './popupDialogLib';
 import { computeNodeStyle, computeRoleCss, CONTENT_ATTR_ORDER, CONTENT_PARAMS, Decl, iconSourceOf, RoleCss, StyleRole, WIRED_STYLE_SINKS } from './style';
 
+/**
+ * P18-S115-QUERYFILTER. A query's parameters as the object literal its fetch is called with, keys in the wire's order.
+ * The `where` is the runtime translator's own document, printed as JSON (its `$eq` keys need the quotes).
+ */
+function queryParamsLiteral(params: NonNullable<QueryPlan['params']>): string {
+  const parts: string[] = [];
+  if (params.where !== undefined) parts.push(`where: ${JSON.stringify(params.where)}`);
+  if (params.sort !== undefined) parts.push(`sort: [${params.sort.map((s) => tsLiteral(s)).join(', ')}]`);
+  if (params.limit !== undefined) parts.push(`limit: ${params.limit}`);
+  if (params.skip !== undefined) parts.push(`skip: ${params.skip}`);
+  return `{ ${parts.join(', ')} }`;
+}
+
 const GENERATED_TS = '// @nodegx:generated (visual — provenance markers complete in EXP-007)\n';
 const GENERATED_CSS = '/* @nodegx:generated (visual) */\n';
 const PRINT_WIDTH = 100;
@@ -6864,7 +6877,9 @@ export function emitComponent(
     body.push('');
   }
   for (const query of plan.queries) {
-    body.push('  useEffect(() => {', `    ${query.fetchName}().then(${query.setterName});`, '  }, []);', '');
+    // P18-S115-QUERYFILTER. The node's own where / order / limit / skip, as the runtime sends them at its first fetch.
+    const params = query.params === undefined ? '' : queryParamsLiteral(query.params);
+    body.push('  useEffect(() => {', `    ${query.fetchName}(${params}).then(${query.setterName});`, '  }, []);', '');
   }
   // Sync effects (§3.4): the graph path of a wired control-state input — the input setter's
   // own coercion and abstain rules (§1's table), and never the Changed chain.

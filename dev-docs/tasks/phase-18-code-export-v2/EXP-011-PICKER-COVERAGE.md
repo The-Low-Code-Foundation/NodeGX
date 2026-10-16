@@ -11908,3 +11908,99 @@ steps**, both made 2 PUTs and no GET; HEAD's export made six GETs and cleared bo
    sort applied in the browser.
 2. P18-S112-NATIVESELECT; P18-S109-MOUNTPULSE; §77.5; the graph line; the two `unexamined` ports; the 112 unprobed ports;
    the four low rows.
+
+## §82 A Query Records asks for what its Filter, Sort and Limit say (session 115, 2026-10-16): P18-S115-QUERYFILTER
+
+### §82.0 What was wrong, and why nothing measured it
+
+Session 115 opened P18-S113-LISTLIVE, which needs the query's own filter and sort in the browser, and found the query
+had none: the api module's `fetch<Plural>()` was `query<T>('<Class>')` with no parameters and the page called it bare,
+whatever the node said. A filtered, sorted, limited list exported as the whole class in the backend's order, and the
+report said nothing. On `puppy-test-3`, setting a visual Filter (either saved shape), a Sort, Use Limit with Limit and
+Skip, the Javascript filter, a Search term or Total Count left every emitted file and note byte-identical.
+
+EXP-008's probe could not see it, for two reasons (filed as **P18-S115-DYNPROBE**). The coverage ledger lists Query
+Records as `stubbed`, an exemption from before EXP-009 connected the query, and the probe reads `translated` types
+only. And every one of its inputs is a dynamic port, which the probe never varies; 63 translated picker nodes declare
+dynamic ports. "0 gap ports" is a statement about static ports.
+
+Counted first: 43 projects on this machine hold 323 Query Records. 125 carry a Filter, 105 of them reading at least one
+value from a port; 62 carry a Sort, 12 a Limit.
+
+### §82.1 What is built
+
+| piece | what it is |
+|---|---|
+| `src/analyze/querySettings.ts` | the node's request, computed by the runtime's own translator at export time: `visualQueryToNeutral` (QueryEditor shape, a proxy recording which parameters it reads) or `savedFilterToNeutral` with `dropUnresolvedConnected` (builder shape), then `toParseWhere` for `nodegx`, an empty `where` dropped. The schema comes from the project's `dbCollections` as `QueryUtils.schemaFor` reads it. Sort is `convertVisualSorting` verbatim; Limit and Skip are `getStorageLimit` / `getStorageSkip`. A `qp-` port's typed-in value is the parameter's value, as the setter stores it |
+| the dependency | `@noodl/backend-contract` as a `file:` devDependency (the runtime's and the editor's own), bundled by `build.mjs`; one line in the lockfile's workspace entry |
+| the refusals, by name | the Javascript filter; a Search term, typed or wired (an empty one is no search); a wired `storageFilterType` / `visualFilter` / `visualSort` / `storageEnableLimit` / `storageLimit` / `storageSkip`; a filter value read from a wired port (**P18-S115-QUERYPARAMS**); a relation question with no class (the runtime reads it off a loaded record); a "points to" condition (the snapshot has no target class); a filter the translator refuses, which in the runtime is Failure and no request, carrying the translator's sentence |
+| `plan.ts` | one reading per node (`querySettingsFor`), used at the three places a query is read: the repeater feed (wire dropped with the reason), the list read (`ctx.defer`), the disposition (deferred with the reason) |
+| `QueryPlan.params` | absent when the runtime sends none of the four, so an unfiltered query is byte-identical to before |
+| the module (`emitApp.ts`) | `fetch<Plural>(params?: QueryParams)` → `query<T>('<Class>', params)` and `type QueryParams` imported, only where some site passes them; the stub takes `_params?: unknown` and still answers `[]` |
+| the call (`component.ts`) | `fetch<Plural>({ where: <the translator's JSON>, sort: [...], limit: n, skip: n }).then(set<Plural>)` |
+
+### §82.2 The test (`tests/the-query-asks.test.ts`, 64 rows)
+
+§A grades 23 cases, one per filter shape and operator family plus sort, limit and skip, and one translator refusal,
+against the **runtime node's own methods**: `getStorageFilter`, `getStorageLimit` and `getStorageSkip` called on a
+stand-in `this` filled the way the node's setters fill it, with the project's schema in `CloudStore._collections`. That
+arm runs in a child process (`tests/helpers/runtime-query-arm.js`), because ts-jest typechecks every file it transforms
+against this package's strict config and the runtime is not written for it. §B checks the emitted call, the module, a
+typecheck with and without a backend, and the unfiltered query emitting byte-for-byte what it did. §C checks every
+refusal's sentence and that a refusal reaches the report. §D compares the emitted client's body, run against a stubbed
+`fetch`, with what `ParseWireAdapter.query` writes for the same request, for every §A case.
+
+**Mutant arms** ran in a copy (`packages/.nx-mut-s115`), each restored after:
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | no parameters at all (HEAD's wire) | 38 |
+| B | `dropUnresolvedConnected` off | 4 |
+| C | no schema | 2 |
+| D | Limit default 0 | 2 |
+| E | sort never descending | 5 |
+| F | an empty `where` kept | **0: equivalent**. Neither shape yields a non-null filter that translates to `{}`; the guard is the runtime's own (`convertVisualFilter`) |
+| G | the wired-parameter refusal | 1 |
+| H | the Javascript-filter refusal | 2 |
+| I | the call printed bare | 1 |
+| J | the module drops `params` | 1 |
+| K | every module takes `params` | 1 (the byte-identical row) |
+| L | Skip 0 not sent | 5 |
+| M | the repeater feed ignores a refusal | 1 |
+
+🔴 I and M first read **0 total**: a mutant that breaks a narrowing does not compile and grades nothing (s113's and
+s114's trap a third time). Re-shaped so they compile (`(…, '')`, `&& connection.key === '__never__'`).
+🔴 **A mutant copy inside `packages/` is seen by a repo-wide gate.** The whole-package run read 129 / 131: one red was
+the peer's (`parameter-coverage`, P121's three uncommitted Upload File ports, total 1,399 vs 1,396, as in s110–s114),
+the other was this session's own: `hls006-every-listener` scans the repository and found `.nx-mut-s115/src/cli/serve.ts`
+as an unenrolled socket. The copy was removed at once (a peer running that gate would have gone red on it) and the gate
+re-read 4 / 4. Whole package, then: **130 / 131 suites, 4,443 passed + hls006's row, 3 skipped**; the one red is the
+peer's. Next time: remove the copy the moment the mutant arms end, before any whole-package or repo-wide run (it must
+sit in `packages/`, beside `noodl-runtime`, for its relative paths to resolve).
+
+### §82.3 The drive (`s115-query-drive/`)
+
+`query-desk`, `EXPECTED.md` first: ten contacts. The Filter has three groups and a Date column, the sort two keys,
+Limit 3 and Skip 1. Three arms ran on a real backend. **Every cell as expected.** The runtime and the fixed export both
+show Cleo, Eve and Gus, in that order, from the same `where`, `order`, `limit` and `skip`. HEAD's export showed all
+ten after a bare `{"_method":"GET"}`.
+
+### §82.4 Recorded differences (not refused)
+
+- The runtime always sends `count` (Total Count's box, `false` unless ticked); the export sends none. With the box
+  ticked the backend answers a total the export never reads: Total Count's output is not translated, and a wire from it
+  is dropped with the generic note ("wire … has no deterministic translation in step 5"), measured.
+- The schema is the `dbCollections` snapshot's `columns` (name and type). A Parse-era `schema.properties` entry reads
+  as no schema here, so a typed-in date on such a class goes as text where the runtime would send the date envelope.
+  None of the corpus's filtered classes is in that shape.
+- In a development bundle the exported app queries twice on mount (`<StrictMode>`); a production build queries once.
+
+### §82.5 What this leaves
+
+1. **P18-S115-QUERYPARAMS**: the `where` built in the app from wired values, the query re-run as each changes (105 of
+   the 125 filters).
+2. **P18-S113-LISTLIVE** on top of it: the store's create / save / delete in the client, the query's `where` matched
+   and its order applied in the browser (`QueryUtils.matchesQuery` / `compareObjects`, against the `where` this section
+   now carries).
+3. **P18-S115-DYNPROBE**: Query Records re-statused `translated`, and a dynamic-port arm for the probe.
+4. Then §81.5's list.

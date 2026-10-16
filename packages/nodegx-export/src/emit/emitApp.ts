@@ -592,6 +592,8 @@ function apiModules(
     moduleBase: string;
     fetchName?: string;
     querySites: Site[];
+    /** P18-S115-QUERYFILTER. Some site asks with a `where` / `order` / `limit` / `skip`, so the fetch takes them. */
+    queryParams: boolean;
     /** EXP-011 §43. `fetch<Type>ById` and the Record nodes that read through it. */
     fetchOneName?: string;
     readSites: Site[];
@@ -608,7 +610,7 @@ function apiModules(
     if (entry === undefined) {
       byCollection.set(
         collectionName,
-        (entry = { typeName, moduleBase, querySites: [], readSites: [], mutations: new Map(), writes: new Map(), reads: new Map() })
+        (entry = { typeName, moduleBase, querySites: [], queryParams: false, readSites: [], mutations: new Map(), writes: new Map(), reads: new Map() })
       );
     }
     return entry;
@@ -618,6 +620,7 @@ function apiModules(
       const entry = moduleFor(query.collectionName, query.typeName, query.moduleBase);
       entry.fetchName = query.fetchName;
       entry.querySites.push({ componentPath: plan.path, nodeId: query.nodeId });
+      if (query.params !== undefined) entry.queryParams = true;
     }
     // EXP-011 §43. A Record's read joins its class's module — one module per class, the query's rule.
     for (const read of plan.recordReads) {
@@ -693,7 +696,7 @@ function apiModules(
   let anyFileColumn = false;
   for (const [collectionName, module] of byCollection) {
     const schema = ir.project.collections.find((c) => c.name === collectionName);
-    const { typeName, moduleBase, fetchName, querySites, fetchOneName, readSites, mutations, writes, reads } = module;
+    const { typeName, moduleBase, fetchName, querySites, queryParams, fetchOneName, readSites, mutations, writes, reads } = module;
 
     // The schema snapshot is the authority on a column's declared type, and the graph's writes
     // are evidence of columns the snapshot does not carry — most of the corpus has no snapshot
@@ -717,12 +720,16 @@ function apiModules(
         backend !== undefined
           ? `/**\n${querySites.map((s) => siteLine(s, 'DbCollection2')).join('\n')}\n` +
               ` * Fetches the \`${collectionName}\` collection from the project's NodeGX backend\n` +
-              ` * (src/api/client.ts); the export report lists every call site.\n */\n` +
-              `export async function ${fetchName}(): Promise<${typeName}[]> {\n  return query<${typeName}>(${tsStringLiteral(collectionName)});\n}\n`
+              ` * (src/api/client.ts); the export report lists every call site.\n` +
+              (queryParams ? ` * Each site passes its own filter, order and limit, as the running app sends them.\n` : '') +
+              ` */\n` +
+              (queryParams
+                ? `export async function ${fetchName}(params?: QueryParams): Promise<${typeName}[]> {\n  return query<${typeName}>(${tsStringLiteral(collectionName)}, params);\n}\n`
+                : `export async function ${fetchName}(): Promise<${typeName}[]> {\n  return query<${typeName}>(${tsStringLiteral(collectionName)});\n}\n`)
           : `/**\n${querySites.map((s) => siteLine(s, 'DbCollection2')).join('\n')}\n` +
               ` * fetched the \`${collectionName}\` collection from the project's NodeGX backend. Connect this to your\n` +
               ` * own data source; the export report lists every call site.\n */\n` +
-              `export async function ${fetchName}(): Promise<${typeName}[]> {\n  return [];\n}\n`
+              `export async function ${fetchName}(${queryParams ? '_params?: unknown' : ''}): Promise<${typeName}[]> {\n  return [];\n}\n`
       );
     }
 
@@ -822,7 +829,9 @@ function apiModules(
         );
       }
       // P18-S113-IDBINDREAD. A class whose only Record binds by its Id imports nothing from the client: its module is the interface.
-      const importLine = clientImports.size === 0 ? '' : `import { ${[...clientImports].sort().join(', ')} } from './client';\n`;
+      // P18-S115-QUERYFILTER. The fetch's parameter type rides the same import, after the values.
+      const clientNames = [...[...clientImports].sort(), ...(fetchName !== undefined && queryParams ? ['type QueryParams'] : [])];
+      const importLine = clientNames.length === 0 ? '' : `import { ${clientNames.join(', ')} } from './client';\n`;
       const imports = importLine + filesImport;
       stubs.push([`src/api/${moduleBase}.ts`, GENERATED_MODULE_TS + (imports === '' ? '' : imports + '\n') + parts.join('\n')]);
     } else {

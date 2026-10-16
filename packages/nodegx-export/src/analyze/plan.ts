@@ -77,6 +77,7 @@ import {
   VISUAL_FUNCTION_LABEL
 } from './logicbuilder';
 import { ScriptUsePlan, scriptUsesPlan } from './scriptUses';
+import { QueryParamsPlan, QuerySettings, querySettingsOf } from './querySettings';
 import {
   AppStateRegistry,
   ChannelPlan,
@@ -3601,6 +3602,12 @@ export interface QueryPlan {
   fetchName: string;
   typeName: string;
   moduleBase: string;
+  /**
+   * P18-S115-QUERYFILTER (EXP-011 §82). The `where` / `order` / `limit` / `skip` the runtime sends for this node, its
+   * filter translated by the runtime's own translator (`querySettings.ts`). Absent when it sends none of them, so an
+   * unfiltered query's call is the bare `fetch<Plural>()` it always was.
+   */
+  params?: QueryParamsPlan;
 }
 
 /**
@@ -7235,9 +7242,17 @@ function planComponent(
    * file does not declare.
    */
   const staticRowsReadIds = new Set<string>();
+  /** P18-S115-QUERYFILTER. One reading per node: what it asks the backend for, or why the export cannot ask the same. */
+  const querySettingsCache = new Map<string, QuerySettings>();
+  const querySettingsFor = (node: NodeIR): QuerySettings => {
+    let settings = querySettingsCache.get(node.id);
+    if (settings === undefined) querySettingsCache.set(node.id, (settings = querySettingsOf(node, component, ir.project.collections)));
+    return settings;
+  };
   const queryPlanOf = (node: NodeIR): QueryPlan => {
     const existing = plan.queries.find((q) => q.nodeId === node.id);
     if (existing !== undefined) return existing;
+    const settings = querySettingsFor(node);
     const collectionName = String(literalParam(node, 'collectionName') ?? 'Record');
     const { typeName, plural, moduleBase, fetchName } = collectionModuleNames(collectionName);
     const stateName = dedupe(plural, usedQueryStateNames);
@@ -7249,7 +7264,8 @@ function planComponent(
       itemName: typeName.charAt(0).toLowerCase() + typeName.slice(1),
       fetchName,
       typeName,
-      moduleBase
+      moduleBase,
+      ...('params' in settings && Object.keys(settings.params).length > 0 ? { params: settings.params } : {})
     };
     plan.queries.push(query);
     return query;
@@ -8620,6 +8636,11 @@ function planComponent(
     if (fromNode.type === 'DbCollection2' && fromProperty === 'items') {
       if (wiredPorts.has(`${fromNode.id}:collectionName`) || literalParam(fromNode, 'collectionName') === undefined) {
         ctx.defer = 'the Query Records it reads names no Class statically';
+        return null;
+      }
+      const settings = querySettingsFor(fromNode);
+      if ('refuse' in settings) {
+        ctx.defer = `the Query Records it reads is not exported: ${settings.refuse}`;
         return null;
       }
       const query = queryPlanOf(fromNode);
@@ -18569,6 +18590,12 @@ function planComponent(
       fromNode?.type === 'DbCollection2' &&
       plan.repeaters[toNode.id]
     ) {
+      const settings = querySettingsFor(fromNode);
+      if ('refuse' in settings) {
+        consumed.add(connection.key);
+        notes.push(wireNote(connection, `the Query Records it reads is not exported: ${settings.refuse}`));
+        continue;
+      }
       plan.repeaters[toNode.id].itemsQueryId = fromNode.id;
       consumed.add(connection.key);
       continue;
@@ -19383,6 +19410,13 @@ function planComponent(
   // stub (TARGET-OUTPUT §2); anything else about it defers.
   for (const node of component.nodes) {
     if (node.type !== 'DbCollection2') continue;
+    // P18-S115-QUERYFILTER. A query the export cannot ask the way the runtime does is refused by name, wherever it is read.
+    const settings = querySettingsFor(node);
+    if ('refuse' in settings) {
+      plan.queries = plan.queries.filter((q) => q.nodeId !== node.id);
+      dispositions[node.id] = { kind: 'deferred', to: 'EXP-003', reason: settings.refuse };
+      continue;
+    }
     const consumedByRepeater = Object.values(plan.repeaters).some((r) => r.itemsQueryId === node.id);
     // EXP-011 §56. A query read by a translated list transform (a Filter Records, an Array Filter) is consumed too —
     // but only when that read LANDED: `queryReaders` fills at read time, and a transform refused after the read would
