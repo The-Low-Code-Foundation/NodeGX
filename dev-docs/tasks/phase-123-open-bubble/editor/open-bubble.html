@@ -65,7 +65,11 @@
   .tree div.row:hover { background: #f4f6fa; }
   .tree div.row[aria-selected=true] { background: var(--accent-soft); color: var(--accent); }
   .tree div.row .t { color: var(--muted); font-size: 11px; }
-  #stage { position: relative; overflow: auto; background: #e9ebef; display: flex; justify-content: center; align-items: flex-start; padding: 24px; }
+  #stage { position: relative; overflow: auto; background: #e9ebef; display: flex; justify-content: center; align-items: flex-start; padding: 24px; flex-wrap: wrap; gap: 14px; }
+  #problems { width: 100%; max-width: 960px; background: #fff7ed; border: 1px solid #fdba74; border-left: 4px solid #ea580c; border-radius: var(--radius); padding: 10px 14px; }
+  #problems h4 { margin: 0 0 6px; font-size: 13px; }
+  #problems li { margin: 4px 0; }
+  #problems li small { color: var(--muted); display: block; }
   #appwrap { position: relative; height: calc(100vh - 46px - 48px); min-height: 500px; background: #fff; box-shadow: 0 2px 16px rgba(0,0,0,.12); flex: 0 0 auto; }
   #app { position: absolute; inset: 0; }
   #overlay { position: absolute; inset: 0; z-index: 10; cursor: default; }
@@ -172,7 +176,7 @@
       <h3>Elements on this page</h3>
       <div class="tree" id="tree"></div>
     </aside>
-    <div id="stage"><div id="appwrap"><div id="app"></div><div id="overlay"></div></div></div>
+    <div id="stage"><div id="problems" hidden></div><div id="appwrap"><div id="app"></div><div id="overlay"></div></div></div>
     <aside class="right" id="right"><div class="empty">Click an element in the page to see its properties.</div></aside>
   </section>
 
@@ -354,6 +358,7 @@ function rebuild(delay = 120) {
     const s = await preview.update(files.entries());
     lastShow = s; window.__ob.shows = (window.__ob.shows || 0) + 1;
     rebuilding = false;
+    showProblems(s);
     if (s.status === 'ok') {
       lib = preview.nodeLibrary; libIndex = new Map((lib?.nodetypes || []).map((t) => [t.name, t]));
       status(`App on screen · ${Math.round(s.exportMs)} ms export, ${Math.round(s.frameMs)} ms draw${s.warnings?.length ? ` · ${s.warnings.length} warning(s)` : ''}`);
@@ -366,6 +371,27 @@ function rebuild(delay = 120) {
       status(`The app is not shown: ${first ? first.message.slice(0, 160) : s.message || s.status}`, true);
     }
   }, delay);
+}
+
+/**
+ * Why the app is not on screen, as Bubble's issue checker would list it: every error the preview's validator found,
+ * with the component and node, and a fix where the editor can make one — a node with no `type` (the preview refuses
+ * the whole project for it) is removed through the store.
+ */
+function showProblems(s) {
+  const box = $('problems');
+  if (!s || s.status === 'ok') { box.hidden = true; box.innerHTML = ''; return; }
+  const errors = (s.report?.diagnostics || []).filter((d) => d.severity === 'error');
+  box.hidden = false; box.innerHTML = '';
+  box.append(h('h4', {}, errors.length ? `The app is not shown: ${errors.length} problem(s) in the project files` : `The app is not shown: ${s.message || s.status}`));
+  const ul = h('ul', {});
+  for (const d of errors) {
+    const li = h('li', {}, d.message.split('. ')[0] + '.', h('small', {}, [d.component, d.nodeLabel || d.nodeId].filter(Boolean).join(' · ')));
+    const hit = d.component && store.resolve(d.component);
+    if (d.code === 'malformed-node' && hit && d.nodeId) li.append(' ', h('button', { class: 'tiny', onclick: () => { edits(hit.key, [{ edit: 'remove_node', component: hit.key, id: d.nodeId }]); toast(`Removed the broken node from ${hit.key}`); } }, 'Delete that node'));
+    ul.append(li);
+  }
+  if (errors.length) box.append(ul);
 }
 
 /* ================= the graph of the current page, read from the files ================= */
@@ -683,6 +709,8 @@ function renderPalette() {
 }
 function armPending(p, btn) {
   pending = p;
+  // placing is an editor click, so the overlay must take it: "Use the app" goes off for this
+  if ($('previewmode').checked) { $('previewmode').checked = false; overlay.classList.remove('preview'); }
   for (const b of document.querySelectorAll('.palette button')) b.setAttribute('aria-pressed', b === btn);
   overlay.classList.add('adding');
   toast(`Click in the page where the ${typeName(p.type)} goes (Esc to cancel)`);
@@ -1156,6 +1184,7 @@ const first = await preview.update(files.entries());
 lastShow = first;
 lib = preview.nodeLibrary; libIndex = new Map((lib?.nodetypes || []).map((t) => [t.name, t]));
 readGraph();
+showProblems(first);
 if (first.status === 'ok') {
   status(`App on screen · ${Math.round(first.exportMs)} ms export, ${Math.round(first.frameMs)} ms draw${first.warnings?.length ? ` · ${first.warnings.length} warning(s)` : ''}`);
   await showPage(pageKey); hookFrame(); mapElements();

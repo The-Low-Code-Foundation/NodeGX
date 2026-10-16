@@ -60,6 +60,8 @@ small headless-Chrome driver, no dependency), `editor/check.mjs` (the gate). Not
 | data types and fields | `metadata.dbCollections` in the project file (what the official editor reads, and R12 installs at backend start); `backend/schema.json` tables shown read-only | a new type and a new field on disk (gate) |
 | app data | the bound backend's `/classes/:c` through the server (the runtime's `X-Parse-Application-Id`); new entry, inline edit (typed by the field's type), delete | a row created on the backend; a cell edit read back (gate; drive) |
 | the page selector | the Router's start page first; the running app's own redirects followed and said (Admin → Admin Login without a login; Todo → Sign in) | gate |
+| the issue checker | when the preview refuses the project, a banner over the page lists every error with its component and node; a node with no `type` gets *Delete that node* (`remove_node` through the store), and the app appears (s1c, after Richard opened the raw Puppy test 3 and saw a blank page with the reason cut off in the status line) | the raw copy: banner → one click → "App on screen", the node gone from disk |
+| placing while "Use the app" is on | picking an element in the palette turns *Use the app* off, so the placing click reaches the editor (s1c: his click "did nothing") | the raw copy drive |
 
 **Where a Navigate's Target Page and a record's Class and columns come from** (corrected s1b, after Richard's run):
 the runtime's library never lists them, and s1 first believed no kit package had them and wrote `synthPorts()` as a
