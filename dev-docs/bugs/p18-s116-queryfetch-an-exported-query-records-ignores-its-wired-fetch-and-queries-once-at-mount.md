@@ -2,6 +2,7 @@
 id: P18-S116-QUERYFETCH
 title: An exported Query Records ignores its wired Fetch and queries once at mount
 status: fixed
+commit: 8f9c90a3a
 severity: medium
 area: export / Query Records
 found: P18 session 116, 2026-10-16, fixing P18-S115-QUERYPARAMS (measuring which wired filters it reaches)

@@ -1,3 +1,52 @@
+# Next session — session 117 (2026-10-16, BOARD lane 6) fixed **P18-S116-QUERYFETCH**: a Query Records whose Fetch is wired asks when Fetch is sent, from the sender's chain, and at mount only where the runtime does. Driven on a real backend: the runtime and the export agree on every row and request in six steps.
+
+## ✅ Session 117: the query asks when it is told to
+
+Read EXP-011 §84. In short:
+
+| what | where |
+|---|---|
+| The Fetch as a handler action (`query-fetch`): `DbCollection2: 'storageFetch'` in `TRIGGER_PORTS`, `compileQueryFetch` at the sink dispatch, carrying the filter's wired values | `src/analyze/plan.ts` |
+| When else it asks (`QueryPlan.fetchWired`): `mount` where the Class box is ticked or unset, the Query settings box with a setting authored, or a Page's Did Mount sends Fetch (`pageMountFetch`, consumed where the query lands); `onValues` where the wired values' boxes are ticked | `plan.ts` `fetchWiredOf` |
+| §83's QUERYFETCH refusal gone; with Fetch wired an unticked value box is fine, disagreeing boxes refused by name | `src/analyze/querySettings.ts` |
+| A later write in the same chain or handler to a value the filter reads, refused by name (the runtime's `scheduleFetch` reads after the pulse's writes) | `plan.ts` `lateQueryFetchWrite`, in `snapActionList` and at the DOM / receiver attach |
+| `void fetch<Plural>(…).then(set<Plural>)`, the `where` from the values as the handler reads them (`city.get()`); an effect only where `queryHasEffect`; no `useEffect` / `useValue` a page no longer needs; a Fetch into a query not kept prints nothing | `src/emit/component.ts` |
+| Spec, 38 rows: §A box by box against the runtime node's own setters (the child-process arm's new **creation mode**); §B emitted shapes; §C the handler's `where` vs `getStorageFilter`; §D refusals | `tests/the-query-fetch.test.ts`, `tests/helpers/runtime-query-arm.js` |
+| Driven, three arms, `EXPECTED.md` first, a fresh backend per arm: runtime == fixed in all six steps; HEAD had no list, no request, no POST | `s117-queryfetch-drive/` |
+
+- 🔴 **A drive whose arms share a backend reads its own leftovers.** The first run's export arm showed a Zed the runtime
+  arm had created. The rows differed and the requests did not. That is a harness artefact, not a reading. The drive now
+  starts the backend again before each arm.
+- 🔴 **A handler is assembled wire by wire.** A chain-level guard in `snapActionList` never sees a button's sibling
+  actions. Each DOM handler and receiver gets one wire's action at a time, so a rule about order within a handler has to
+  be asked where `plan.handlers[...]` is appended.
+- 🔴 **The fourth "0 total" mutant.** Arm M as `false && …` broke a narrowing and graded nothing. It was re-shaped as
+  `… && query.nodeId === ''` and killed 4 rows.
+- 🔴 **The whole-package run found a defect that the drive and the spec run before the last change could not.** Removing a
+  page's now-unused `useValue` also removed the Variable's import. The handler-side import walker (`collectExprUse`, an
+  if-chain by action kind) had no `query-fetch` case. The drive's page imported `city` through the box's own
+  `city.set`, so the drive missed it. Re-run the whole package after the last emitter edit, not before it.
+- ✅ The runtime arm can replay the node's own setters, not only its read methods. Creation mode records the boxes
+  through `setRunOnValueChange` first, as `nodescope.ts` does, and then counts `scheduleFetch`.
+
+Readings: `the-query-fetch` 38 / 38; `the-query-reads-its-wires` 140 / 140 (one row re-pinned: a wired Fetch is no
+longer refused); `the-query-asks`, record, record-verbs, the-live-record, relation-verbs, filter-records,
+hls001-corpus-identity, emitted-syntax all green; package `tsc` 0, strict and loose. Thirteen mutant arms, each killing
+rows, in a copy removed straight after (control 178 / 178). Whole package (`nice -n 19 --runInBand`, 542 s): 131 / 133
+suites; the reds were `parameter-coverage` (the P121 peer's three uncommitted Upload File ports, as in s110–s116) and
+the import defect above, fixed and re-run green (`the-query-fetch` 38 / 38 and five neighbours 305 / 305).
+
+**Next (BOARD lane 6):**
+1. **P18-S116-FIELDMOUNT**: a text input's Value at mount (`outwardValueForFieldType(type, startValue ?? '')`) to each
+   translated sink of it. Re-run `s116-queryparams-drive`: S0 should then agree. (`s117-queryfetch-drive`'s S0 already
+   agrees: the box is unticked.)
+2. **The Function-chain gap**: 18 of the 22 Fetch-wired filters and 42 of §83's 84 read a Function's output ("a value
+   that only exists inside a handler"). Measure what those Functions are first.
+3. P18-S113-LISTLIVE (20 of the 61 Fetch-wired queries tick Record changes); a query's Fetched / Failure chains (19 / 10
+   consume them); P18-S115-DYNPROBE; P18-S117-BUTTONLOOK (low).
+
+---
+
 # Next session — session 116 (2026-10-16, BOARD lane 6) fixed **P18-S115-QUERYPARAMS**: a Query Records whose Filter reads a wired value builds its `where` in the page, and asks again when the value changes. Driven on a real backend. It reaches none of the corpus's 84 wired filters yet, and why is the next row.
 
 ## ✅ Session 116: the filter reads its wires
