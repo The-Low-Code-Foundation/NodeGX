@@ -1,7 +1,7 @@
 # OWN-008 — Three strangers
 
 **Opened 2026-10-02.** **Depends on OWN-007** (and therefore on everything before it).
-**Status: 📋 not started.** The phase's thesis test.
+**Status: 🟡 lab and graders built (s1, 2026-10-16); the three strangers run after Richard's weekly reset (R47).** The phase's thesis test.
 **Model:** **Opus, on purpose, for the three strangers**: the test is whether the kit is enough for the model a person has by default. The session that runs them and reads their questions: Opus. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
@@ -47,4 +47,45 @@ also gets a wish, because "your own" means each editor is different.
 
 ## 6. Built
 
-*(empty)*
+### s1 (2026-10-16 evening, Opus): the lab, the graders, and a ruling to wait
+
+**The lab is what a person has.** `npm create nodegx@0.2.2 base` from the registry writes `.mcp.json` (the `nodegx`
+server, `@nodegx/mcp@0.2.2`), `CLAUDE.md`, `AGENTS.md`, `.vibe/`, `opencode.json` and the brief
+(`.claude/skills/nodegx-your-own-editor/SKILL.md`, the same file as the repo's). Each stranger gets a copy of it plus
+`templates/todo-list`. The kit it installs is what npm serves: `@nodegx/project-contract`, `node-spec` and
+`canvas-look` at 0.1.0, `preview` at 0.2.2. Its three open `kit: project-contract` rows (ESMSUBPATH, NOFIXTURES,
+CONTRACTREADME) aren't fixed first. None of them blocks an AC, and the brief names all three, so whether the strangers
+trip on them is a reading. The scripts and how to run them are in [`own-008/`](own-008/README.md).
+
+**AC1 is graded on a script the stranger never saw.** The stranger's own `edits.json` is graded too. But the PASS
+that counts is its adapter on the repo's `todo-list.edits.json` (11 edits, all eight kinds). The run uses the
+stranger's own installed command, beside a control that must FAIL: the same adapter saving one number as a string.
+"The official editor opens it with zero new diagnostics" is graded with the editor's own validator
+(`npm run validate:project`, 2.5 s). Its output for the saved folder is diffed against the untouched template's (0
+errors, 0 warnings, 1 info). Then `validate_project` runs through the published server. The grader was proved on four
+arms: the kit's `referenceAdapter` → `PASS … (56 ms)`; the control → `FAIL … "parameters.paddingTop" is "8"; the
+official editor saves 8.`; a clean saved copy → 0 new; a copy with one dangling wire → `error dangling-connection
+/Commands/Add action`, and `validate_project` errors 1.
+
+**AC2 is graded on what the stranger did, not only on hashes.** The round hashes the lab's todo copy and the repo's
+template before and after. The grader also lists every absolute path any tool call named outside the lab, every
+`../` climb, and every refused call. The round also denies reads of `/Users/**`, web tools and git, and moves the
+`nodegx` server's HOME into the lab, so `list_projects` can't show this machine's projects.
+
+**One minute of the first stranger ran, then was stopped (R47).** The table stranger started at 22:47. **Its first
+tool call was `Skill nodegx-your-own-editor`**: it found the brief unprompted, as OWN-007 AC2 measured on Sonnet. It
+then hashed the todo copy into `/tmp/todo-list-before.sha256` and `/tmp/todo-list-baseline`, outside its lab. That's
+a write, not a read of anything that isn't its own. The isolation scan named both paths. The stream's first event
+said the seven-day allowance was at **92%**, resetting Saturday 17 October at 23:00. The run was stopped at 1.2
+minutes and set aside (`aborted-1/`, not graded).
+
+**R47 (Richard, 2026-10-16, one AskUserQuestion):** *"All three after reset."* (Offered: one now and two after, which
+was recommended; all three now; all three on Sonnet.) Nothing ran after the ruling. The round now guards itself: it
+stops when the week reaches 90%, or when the round alone has used 15% of it. On exit it kills every process that
+has its working directory in the lab. Both were proved on a stub `claude` that only prints quota lines (stopped at
+0.30 → 0.46; the `sleep` it left behind was killed by its working directory). The model is pinned to
+`claude-opus-5-5`, because the `opus` alias resolved to `claude-opus-5` in this CLI (2.1.251).
+
+**Noticed, for the fold-back:** the folder's `CLAUDE.md` says *"Don't write a separate web server or hand-written
+HTML and JavaScript instead"* before it says an editor request goes to the skill. A stranger building a web-page
+editor reads the first sentence first. Whether it slows one down is a reading for the runs.
