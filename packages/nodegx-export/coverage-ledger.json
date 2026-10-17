@@ -148,8 +148,8 @@
     },
     {
       "typeName": "DbCollection2",
-      "status": "stubbed",
-      "exemption": "typed api stub + useState/useEffect — the backend seam, by design (phase README: no backend code export)"
+      "status": "translated",
+      "note": "Was `stubbed` with \"no backend code export\", which EXP-009 overtook: the query is a fetch<Type>() in src/api/<class>.ts that calls the EXP-009 client's query() against the project's NodeGX backend, held in useState and run in a useEffect at mount, or in the handler of whatever sends Fetch (P18-S116-QUERYFETCH, the-query-fetch.test.ts). Reclassified 2026-10-17 by reading the api module emitted for tests/fixtures/puppy-test-3 (fetchPuppies() returns query<Puppy>('Puppy')); the internal disposition is still named 'stubbed' (visual.test.ts)."
     },
     {
       "typeName": "DbModel",

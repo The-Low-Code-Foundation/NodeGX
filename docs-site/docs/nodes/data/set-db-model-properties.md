@@ -145,7 +145,7 @@ Exports to React. A project that uses it exports this node as React code.
 
 ## Under the hood
 
-This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 4. The spec is the reference: the runtime, the React export and the conformance tests are all graded against it. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 4. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
 
 ### What it depends on outside the node
 

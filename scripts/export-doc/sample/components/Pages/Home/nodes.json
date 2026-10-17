@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5d0c1e7a-0000-4c0d-8e00-0000000000b1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": ["column"],
+      "parameters": { "title": "Click Counter", "urlPath": "" }
+    },
+    {
+      "id": "column",
+      "type": "Group",
+      "label": "Column",
+      "parent": "page",
+      "children": ["countText", "addButton", "resetButton"],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": { "value": 12, "unit": "px" },
+        "paddingTop": { "value": 40, "unit": "px" },
+        "paddingLeft": { "value": 24, "unit": "px" }
+      }
+    },
+    {
+      "id": "countText",
+      "type": "Text",
+      "label": "Count",
+      "parent": "column",
+      "parameters": { "fontSize": { "value": 24, "unit": "px" } }
+    },
+    {
+      "id": "addButton",
+      "type": "net.noodl.controls.button",
+      "label": "Add one",
+      "parent": "column",
+      "parameters": { "label": "Add one" }
+    },
+    {
+      "id": "resetButton",
+      "type": "net.noodl.controls.button",
+      "label": "Reset",
+      "parent": "column",
+      "parameters": { "label": "Reset" }
+    },
+    {
+      "id": "counter",
+      "type": "Counter",
+      "label": "Clicks",
+      "parameters": { "startValue": 0 }
+    },
+    {
+      "id": "message",
+      "type": "String Format",
+      "label": "Message",
+      "parameters": { "format": "Clicked {count} times" }
+    }
+  ]
+}

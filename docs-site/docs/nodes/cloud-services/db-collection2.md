@@ -117,13 +117,11 @@ Sign-up validation as a chain of small truths rather than one function: an `Expr
 
 ## Code export
 
-Exports to React as a typed stub by design: the generated code has the shape, and you connect it to your own backend.
-
-Why: typed api stub + useState/useEffect — the backend seam, by design (phase README: no backend code export).
+Exports to React. A project that uses it exports this node as React code.
 
 ## Under the hood
 
-This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 5. The spec is the reference: the runtime, the React export and the conformance tests are all graded against it. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 5. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
 
 ### What it depends on outside the node
 

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5d0c1e7a-0000-4c0d-8e00-0000000000b1",
+  "version": 1,
+  "connections": [
+    { "fromId": "addButton", "fromProperty": "onClick", "toId": "counter", "toProperty": "increase" },
+    { "fromId": "resetButton", "fromProperty": "onClick", "toId": "counter", "toProperty": "reset" },
+    { "fromId": "counter", "fromProperty": "currentCount", "toId": "message", "toProperty": "count" },
+    { "fromId": "message", "fromProperty": "formatted", "toId": "countText", "toProperty": "text" }
+  ]
+}
