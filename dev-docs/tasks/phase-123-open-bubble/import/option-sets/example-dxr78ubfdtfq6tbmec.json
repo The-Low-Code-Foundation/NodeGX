@@ -1,0 +1,121 @@
+{
+    "last_change": 68271610635,
+    "data": {
+        "test": {
+            "%d": "test",
+            "attributes": {
+                "azdaz": {
+                    "%d": "azdaz",
+                    "%v": "date",
+                    "creation_source": "editor"
+                }
+            },
+            "creation_source": "editor"
+        },
+        "someoptionset": {
+            "%d": "someOptionSet",
+            "values": {
+                "bTGNU": {
+                    "%d": "option1",
+                    "db_value": "option1",
+                    "sort_factor": 1,
+                    "someattribute": "foobar"
+                }
+            },
+            "attributes": {
+                "someattribute": {
+                    "%d": "someAttribute",
+                    "%v": "text",
+                    "creation_source": "editor"
+                }
+            },
+            "creation_source": "editor"
+        },
+        "someoptionset2": {
+            "%d": "someOptionSet2",
+            "values": {
+                "bTGNa": {
+                    "%3": "foobar",
+                    "%d": "option11",
+                    "date": 60000,
+                    "number": 2,
+                    "boolean": true,
+                    "db_value": "option11",
+                    "somefile": "//bfd69f03235ea26862a69a46ad973455.cdn.bubble.io/f1792241800240x416311346426936300/Screenshot%202026-10-12%20at%2013.16.27.png",
+                    "someimage": "//bfd69f03235ea26862a69a46ad973455.cdn.bubble.io/f1792241789789x102690117611311310/Screenshot%202026-10-12%20at%2013.16.27.png",
+                    "geoaddress": {
+                        "lat": 45.018542,
+                        "lng": 1.0893497,
+                        "address": "285 Chem. de Bord de Côte, 24290 Saint-Léon-sur-Vézère, France",
+                        "placeId": "ChIJM7M3trBX_0cRYrU7r-8jQ2M",
+                        "components": {
+                            "city": "Saint-Léon-sur-Vézère",
+                            "state": "Nouvelle-Aquitaine",
+                            "county": "Dordogne",
+                            "street": "Chemin de Bord de Côte",
+                            "country": "France",
+                            "zip code": "24290",
+                            "state code": "Nouvelle-Aquitaine",
+                            "country code": "FR",
+                            "street number": "285"
+                        }
+                    },
+                    "sort_factor": 1,
+                    "dateinterval": 1,
+                    "linkoptionset": {
+                        "0": "option1",
+                        "1": "option1"
+                    }
+                }
+            },
+            "attributes": {
+                "%3": {
+                    "%d": "text",
+                    "%v": "text",
+                    "creation_source": "editor"
+                },
+                "date": {
+                    "%d": "date",
+                    "%v": "date",
+                    "creation_source": "editor"
+                },
+                "number": {
+                    "%d": "number",
+                    "%v": "number",
+                    "creation_source": "editor"
+                },
+                "boolean": {
+                    "%d": "boolean",
+                    "%v": "boolean",
+                    "creation_source": "editor"
+                },
+                "somefile": {
+                    "%d": "someFile",
+                    "%v": "file",
+                    "creation_source": "editor"
+                },
+                "someimage": {
+                    "%d": "someImage",
+                    "%v": "image",
+                    "creation_source": "editor"
+                },
+                "geoaddress": {
+                    "%d": "geoAddress",
+                    "%v": "geographic_address",
+                    "creation_source": "editor"
+                },
+                "dateinterval": {
+                    "%d": "dateInterval",
+                    "%v": "dateinterval",
+                    "creation_source": "editor"
+                },
+                "linkoptionset": {
+                    "%d": "linkOptionSet",
+                    "%v": "list.option.someoptionset",
+                    "creation_source": "editor"
+                }
+            },
+            "creation_source": "editor"
+        }
+    }
+}

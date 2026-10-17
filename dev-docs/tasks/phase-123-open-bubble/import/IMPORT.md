@@ -349,3 +349,256 @@ distribution rule is not known yet (the next measurement: a two-column test page
 (2) 12 `Link` findings: a Link to a URL becomes a Text with no destination (an External Link node is the row);
 (3) `Shape` keeps its box but Bubble's shape "type" (ellipse, triangle) is not read. The nav items' pitch, the
 section max width (960) and the header height (80) measured the same as Bubble's.
+
+## 10. s5b (2026-10-17) — backend workflows → cloud functions, from the editor's `c5r6j` request
+
+Richard: *"I found the network request in browser devtools that calls the backend workflows when you open a bubble
+project editor. It's consistently called c5r6j"* — `GET https://bubble.io/appeditor/load_single_path/<app>/<version>/<hash>/c5r6j`,
+answering `{ last_change, data }` with one entry per backend workflow, abbreviated like the run-mode bundles. He added
+every kind of backend workflow to the template app (`test112-14324`), one of every built-in action into
+*someThingIsModified*, and then filled every field with nonsense so each key shows
+(`backend-workflows/example-c5r6j.json`, `example-c5r6j filled.json`).
+
+**Why this request matters: the run-mode bundles never carry backend workflows.** Measured: the template's
+`index.dynamic.js` and `static.js` refetched after he added the five are byte-identical to s4's (252,017 and 335,287
+bytes). The editor's `c5r6j` is the only source short of the paid export. It needs the person signed in to the Bubble
+editor: DevTools → Network → filter `c5r6j` → Response → save it as `<anything>c5r6j<anything>.json` beside the
+`*.dynamic.js` files, and `bubble-run-bundle-to-export.mjs` puts it under `api` (the paid export's own key is
+unmeasured; the converter reads `api` or `backend_workflows`).
+
+| Bubble | NodeGX | measured on |
+|---|---|---|
+| API workflow (`APIEvent`: `wf_name`, `parameters[{%k, %v type, is_list, optional}]`, `auth_unecessary`, `expose`) | `/#__cloud__/<wf_name>`: a Request with each parameter (`ptype-` from the type, `array` for a list; `preq-` from *optional*; Allow Unauthenticated from *can run without authentication*), the steps from Received, a Response at the end. `call` proposed `public`/`authenticated` | someApiWorkflow |
+| "Only when" on a backend workflow, with *return 200 if condition not met* | a Condition after Received; its false branch answers (a 200, or a failure when the box is off) | recurringEvent1 |
+| database trigger (`DatabaseTriggerEvent`, `data_trigger_type`) | `/#__cloud__/<name>` with Request params `record, action, collection, id` (the db-change payload) + a **db-change trigger** on that collection (`user` → `_User`), create/update/delete, in `backend/triggers.bubble.json` | someThingIsModified |
+| recurring event (`RecurringEvent`, `custom_event_data_type`) | `/#__cloud__/<name>` with a `thing` param + a **schedule trigger written disabled** (daily midnight): Bubble's frequency is chosen per thing where it is scheduled, NodeGX's cron is per function — a person chooses | recurringEvent1 |
+| backend custom event (`CustomEvent`: `parameters[{param_name, btype_id}]`, `return_types[{%d}]`) | `/#__cloud__/shared/<name>`: Component Inputs (`run` + each parameter), Component Outputs (`done` + each return value); *Trigger a custom event* is an instance of it, its `arguments[{param_id, arg_value}]` wired by the parameter's name | someCustomEvent |
+| `APIEventParameter` / `CurrentWorkflowItem` (a custom event's parameter) / `CurrentDataItem` ("This thing now") | the Request's `pm-<name>` / the Component Inputs port / the Request's `pm-record` (or `pm-thing`) | all three |
+| `OldDataItem` ("Thing before change") | **no counterpart**: NodeGX's db-change `ChangeEvent.record` is the record after the write; read as empty, a finding each time | someThingIsModified |
+| Current User in a backend workflow | the Request's User Id (its fields need a query; a finding) | someThingIsModified |
+| `action_disabled: true` (*Disable this step*) | skipped, the next step wires to the previous (was converted as live: P123-S5B-DISABLEDSTEP) | someApiWorkflow's Log In |
+| a step that can fail | its Failure → one "A step failed" Response, so the caller is answered (the kit's `failure-reaches-nothing` named all 10) | all |
+| *Return data from API* (`parameters_actions[{%k, %v type, %c1 value, list}]`) / *Terminate this workflow* | a Response carrying each key / a Response; the chain stops there | someThingIsModified |
+| Sign up / Create an account for someone else (`%em`, `%pw`, `%cs` fields, `return_user_if_already_exists`) | Create User (`username` = `email`, `properties` + `prop-<field>`); Unchanged continues when *return the user if it exists* is ticked, else answers a failure | both |
+| Make changes to current user / Update credentials / Change the email for another user | Update User (the caller's User Id, or the `user` expression) with `properties` + `prop-<field>`, `password` | all three |
+| Send email (`to`, `%su`, `%b3`) / Send password reset / Send confirmation email | Send Email (to, subject, text) / Send Email with the `passwordReset` / `verifyEmail` template; cc, bcc, reply-to, sender name, attachments are findings | all three |
+| Schedule API workflow **on a page** | a Cloud Function call (`CloudFunction2`, `function` = the target's `wf_name`); a date other than *Current date/time* is a finding | — (the template's pages schedule none) |
+| Log in / Log out / Log out other sessions / Check password / Assign a temp password / Send magic link / Send ICS email / lists of things (change, delete, copy) / Set slug / Upload CSV / Delete uploaded file / Schedule API workflow **from a backend workflow** | a labelled placeholder that keeps the chain, and one finding each naming the NodeGX way | someThingIsModified |
+
+**Measured** on the template plus each example: 4 backend workflows → 4 cloud components, 2 triggers proposed, 0
+crashes; `validate_project` **0 errors**, 331 nodes checked (265 without the backend part); the only cloud warning
+left is `public-write-door-unlimited` on *someThingIsModified*, which is the real point: a function a trigger runs
+must accept a call with no session (the dispatcher sends none — `dispatcher.ts` `runner.run(name, { body, headers: {} })`),
+so it is also a public door until `nodegx.security.json` says `"call": "nobody"` for it. `triggers.bubble.json`
+proposes exactly that; unmeasured is that a trigger's run skips the call rule (`runner.run` does not consult it; the
+`/functions/:name` route does). The page side is byte-identical to s4's output apart from timestamps and the two new
+report rows.
+
+**Not done, in order:** (1) the converter's own gate — it now has three fixtures in the repo
+(`backend-workflows/*.json`) and could assert 0 errors, 4 cloud components, no Log In in someApiWorkflow, and
+`rootNodeId` (P123-S5-NOHOME); (2) applying `triggers.bubble.json` to a bound backend and firing *someThingIsModified*
+by editing a User (the trigger has never run); (3) the parameters a *Schedule API workflow* sends — the filled example
+schedules one with none, so the key is unknown; (4) a NodeGX "record before the change" on the db-change payload, if
+Bubble apps lean on *Thing before change* (most database triggers compare before and now).
+
+## 11. s5c (2026-10-17) — option sets, from the editor's `dxr78ubfdtfq6tbmec` request
+
+Richard saved the Bubble editor's option-set request (`…/load_single_path/<app>/<version>/<hash>/dxr78ubfdtfq6tbmec`,
+`{ last_change, data }`) after making three sets in the template app: one with no values, one with a text attribute,
+and one with an attribute of every type (`option-sets/example-dxr78ubfdtfq6tbmec.json`). Saved beside the
+`*.dynamic.js` files as `<anything>dxr78ubfdtfq6tbmec<anything>.json`, `bubble-run-bundle-to-export.mjs` puts its
+sets into `option_sets`, replacing a bundle's set of the same key (the bundles carry option sets too, TrybeUP's 45
+with their attribute values; the editor's copy is the one the person is editing). The suffix looks like the editor's
+encoding of the path, so it should be the same in every app (`c5r6j` is `api`); unmeasured on a second app.
+
+| Bubble | NodeGX | measured on |
+|---|---|---|
+| an option set (`%d` name, `values`, `attributes{key: {%d, %v type}}`) | `/Option sets/<name>`: one Static Data node (JSON rows) → Component Outputs `items`, `count`; the attributes in `component.json` `metadata.optionSet.attributes` (`display` first, Open Bubble's types: text, number, yes / no, date; the Bubble type kept as `bubbleType`) | all three |
+| a value (`%d`, `db_value`, `sort_factor`, one key per attribute) | a row `{ value: db_value, display, <attribute key>: … }` in sort order. **`value` is the db_value**, not the value's key: TrybeUP's expressions name a db_value that is not the key in 131 of 291 references, which the converter used to miss (those 104 expressions now read the row, e.g. `support's phone` = `1.888.202.9986` where it read `"support"?.phone`) | someOptionSet2, TrybeUP |
+| attribute types | date (epoch ms) → ISO string; image, file (`//…cdn.bubble.io/…`) → `https:` URL; a list (`list.option.x`, stored `{"0": …, "1": …}`) → an array of db_values; geographic address → the object as stored; date interval → the number as stored | someOptionSet2 |
+| `deleted: true` on a set, a value or an attribute | skipped (TrybeUP: 5 of 45 sets); an *All options of* a deleted set is a finding | TrybeUP |
+| a reference to one option (`OneOptionValue`, `option_value`) | that row as a JSON literal, found by db_value then by key | TrybeUP |
+
+**Measured:** the template + the example: 3 option-set components, `validate_project` 0 errors (271 nodes). TrybeUP
+before and after: the only graph changes are those 104 Expression texts; 40 option-set components (5 deleted ones gone).
+
+**Open:** the example's date attribute holds `60000` (1 January 1970, 00:01) — whether Bubble stores an option
+set's date as epoch ms like a thing's date is assumed from the type, not measured with a date Richard chose; a date
+interval's unit is unknown (the example holds `1`). A field of a data type whose type is an option set is still a
+plain String column holding the db_value (`database-schema/` is the next request, still empty).
+
+## 12. s5c — data types: the schema, from the bundle or the editor's `entpawjzehwq0tbk` request
+
+Richard saved the editor's data-type request (`…/load_single_path/…/entpawjzehwq0tbk`,
+`database-schema/example-entpawjzehwq0tbk.json`) and a fresh run-mode bundle of a template with a field of every type
+(`exports/template/dynamic-with-schema.js`, gitignored with the other bundles). **The bundle already carries the
+whole schema** under `user_types` (`%f3` fields: `%d` name, `%v` type, `default_val`), byte-for-byte the same
+collections as the editor file once converted; the editor file adds only the deleted type (`zezd`, `%del: true`).
+So the editor request is optional; the bundler takes it like the other two (`entpawjzehwq0tbk` → `user_types`).
+
+| Bubble field type | NodeGX column (`metadata.dbCollections[].columns`, the backend import's shape) |
+|---|---|
+| text, number, yes/no, date | String, Number, Boolean, Date |
+| image, file | String (the URL, `https:` added to Bubble's `//cdn` links) |
+| geographic address | Object (as stored: lat, lng, address, placeId, components) |
+| number range, date range | Object (stored shape unmeasured: the example has no value) |
+| date interval | Number (unit unmeasured) |
+| an option set (`option.x`) | String holding the option's db_value (see §11) |
+| a thing (`custom.x`) / a User (`user`) | Pointer with `targetClass` (`_User` for a User) |
+| a list of anything (`list.…`) | Array |
+| `default_val` | `defaultValue`, cleaned by type (a date `-3600000` = 1 Jan 1970 00:00 Paris time: dates are epoch ms) |
+| a deleted type or field (`%del`) | skipped (TrybeUP: 46 of 386 fields) |
+| the User type | the built-in `_User` collection; **every collection name** a Record node writes for a User is now `_User` (TrybeUP: 74 nodes said `User`, a class that does not exist); labels still say "User" |
+| hidden built-ins Created Date, Modified Date, Created By | not declared; reads compile to `createdAt`, `updatedAt`, `createdBy` (nothing fills `createdBy` yet) |
+| `privacy_role` | not converted (a finding per type, as before) |
+
+**Measured:** the new template, bundle alone / bundle + both editor files / schema file alone: the same 3 collections
+(`_User`, someDataType, someOtherDataType with 14 columns, 8 defaults, 1 Pointer); `validate_project` 0 errors.
+TrybeUP against §11's output: only the 74 `collectionName`s change; 40 collections, 340 columns, 68 Pointers.
+
+## 13. s5c — the data: Bubble's Data tab exports → the backend's import files
+
+Richard exported the template's three tables from Bubble's Data tab as JSON (`database-export/`, one sample row each,
+plus three empty rows of someOtherDataType; some fields can only be filled by a workflow, so they are empty).
+`bubble-data-to-nodegx.mjs <export.json> <data folder> <project> [--tz <zone>]` reads them against the app's types
+and writes `<project>/backend/data/<collection>.json` in the backend's own collection format (`nodegx-collection` v1:
+`schema.columns` + `records`), with `IMPORT-DATA.md` listing the `nodegx-backend import` commands and every value it
+could not read. File → type by Bubble's name for it (`export_All-<Type>s_<date>`); CSV or JSON.
+
+What the export looks like, measured: keys are field **display names**; the built-ins are `Creation Date`,
+`Modified Date` (→ `createdAt`/`updatedAt`, which the import keeps verbatim), `Slug` (kept as a String column),
+`Creator` (`(App admin)` for a thing made in the editor; a unique id → `createdBy`). Booleans are `yes`/empty; a date
+is text in the exporting browser's zone **to the minute** (`Oct 17, 2026 3:05 pm` = 13:05Z in Paris; `Jan 1, 1970 1:01
+am` = 60000 ms, the epoch-ms reading of §11–12 again); a date interval is text (`0 seconds` → ms); a range is a JSON
+pair (`["",""]` = empty); a link is the thing's unique id (`1792241441972x125425336514852770`), a list of them is
+assumed joined by `, `; an option is its display (looked up to its db_value). Users: `email` → `email` and
+`username` (the converter's sign-up uses the email as username); no password is ever exported.
+
+🔴 **The JSON export carries no unique id of the row itself.** someOtherDataType's link names someDataType's row by
+id, but someDataType's export does not say which row has it. Imported, every row gets a new `objectId` and every link
+dangles (the report says so per table). Measured on the built backend CLI (`packages/nodegx-backend`, fresh
+`--data-dir`): all three files import (6 created, 0 rejected, types and the `targetClass` Pointer as declared); with
+a `unique id` key added to the row, the backend keeps `1792241441972x125425336514852770` as the `objectId` and a
+second import updates instead of duplicating, so links survive **if the export has the ids**. The ask: an export
+with the unique id column (CSV may carry it; unmeasured).
+
+Unmeasured: a filled list (its separator), a filled geographic address or range (their text form), a Creator that
+is a user, and whether an imported `_User` row can be signed in to after a password reset.
+
+**Later the same session.** The CSV export has no unique id either (same columns; converts to byte-identical
+records). The Data API, enabled on `test111-40009` with every type ticked and the tables made public, answers
+**401 "This application does not expose an API. Please upgrade your Bubble subscription"** on `version-test` and
+live, with a key, with a fresh key, with `api_token=` and with none: the free plan's "test for free" is configuring
+only. Workaround documented in bubbleExporter's `docs/GETTING-YOUR-APP.md`: a `bubbleId` text field filled by
+*Make changes to a list of things* = *This thing's unique id* before the export (unmeasured on Bubble; the script and
+the converter honour it). `test111-40009_jwk.pem` is the app's public JWT key, of no use for reading data.
+
+**Ids recovered (Richard's hint).** A Bubble id is `<creation time in ms>x<random>`: `1792241441972` = 12:50:41.972Z,
+and someDataType's export says *Oct 17, 2026 2:50 pm* (Paris). `bubble-data-to-nodegx.mjs` now gives every id another
+table links to (and every Creator) to the one row of that type created in that minute, restoring `createdAt` to the
+millisecond. Measured: 1 recovered on the samples; imported into a fresh backend, someOtherDataType's Pointer resolves
+to someDataType's row. Control: `--tz UTC` recovers 0 and the report names `--tz`. Two rows of a type in one minute
+are reported, not guessed; the `bubbleId` field covers them.
+
+**The ids, for real (Richard's method).** The Data tab exports what its VIEW shows; a new view with *Select all*
+fields carries `unique id` (and every field, filled: `export_ids_*.json`). Such a file is named after the view, so
+the script now types a file by its columns. Learned from it: a link to a User exports as the user's **email**
+(`someUserList: "user1@user.com"`) and is resolved to the user's id; a geographic address exports as its text only
+(no lat/lng); an empty number range is `[]`, an empty date range `["",""]`; the Users view adds an empty `null`
+column. Measured: imported into a fresh backend, the single link, the list link and the user list all resolve, and
+all six records keep Bubble's ids (creation times exact from the id).
+
+## 14. s6 (2026-10-17, evening) — who may read, who may write: `nodegx.security.json` from the privacy rules and the app's own writes
+
+Richard's first "next task" after *what's left for a full export?*. The converter now writes `nodegx.security.json`
+beside the project file — the shape `packages/nodegx-backend/src/security/model.ts` validates (SB-015: provisioning
+applies it to a fresh backend) — and the report gained a **Security** section: the rule table, every privacy rule it
+read and what it became, and every step that creates, changes or deletes a thing, with the condition it ran under.
+The backend's own `validateSecurityConfig` accepts the file on every corpus (the editor fixtures, the template, TrybeUP,
+the 2023 paid export); `validate_project` stays at 0 errors.
+
+### Reads: Bubble's privacy rules
+
+A privacy rule is `{ display, condition, permissions }` per type (`user_types.<t>.privacy_role`, in the run bundle
+and in the editor's `entpawjzehwq0tbk` request alike; the bundle's keys are expanded by the bundler). Its condition
+becomes one NodeGX rule atom, or none:
+
+| Bubble condition | NodeGX rule |
+|---|---|
+| none (`everyone`) | `public` |
+| *Current User is logged in* | `authenticated` |
+| *Current User is logged out* | `public` (no "strangers only" rule; said in a finding) |
+| *Current User's \<field\> …* (a role, a flag) | `authenticated` + a finding: make it `role:<name>` if the field names one |
+| *This User is Current User* | the own row — `_User` has a fixed posture, see below |
+| *This thing's Creator is Current User* | `creatorOwns` (only when no wider read grants the type; else a finding) |
+| *This thing's \<user field\> is Current User* | `{ path: { hops: [{ from: <coll>, by: <field> }], maxDepth: 1 } }` (ONT-004) |
+| *This thing's \<X\> is Current User's \<X\>* | `{ path }` with two hops: follow the user's link, then back by the field |
+| *This thing's \<list of users\> contains Current User* | none (a list field cannot be read back; a finding) |
+| `and_` | the stricter side; a side no rule says is dropped and said |
+| `or_` | the wider side |
+| anything else | none: the rule's grants are **not** written (fail closed) and a finding names them |
+
+Permissions: `search_for` → `find`; `view_all` / `view_fields` / `auto_binding` → `get`; `view_fields` without
+`view_all` → `fields: { <column>: { read } }` for every column the rule leaves out (ONT-012; `createdAt` / `updatedAt`
+cannot be hidden and are skipped); `view_attachments` → `files.read` (global in NodeGX: the OR over every type);
+`auto_binding` → an `update` grant plus a finding that an update rule covers every field, not `binding_fields`;
+`create_api` / `modify_api` / `delete_api` (Bubble's Data API door) and `non_filterable_fields` → findings only. A type
+with no rules reads `public`, as it did in Bubble; an app with none anywhere gets one finding, not one per type.
+
+**`_User` is fixed.** The backend refuses a `_`-collection entry and reads `_User` as `nobody` on the data routes
+(`model.ts` `effectiveRule`): a signed-in user reads and changes their own row through the User nodes. So Bubble's
+User rules are listed and explained, not written, and the report counts the steps that change *another* user
+(TrybeUP: 0 of 52; a cloud function running as `system`, or a Profile collection, is the way).
+
+### Writes: the app's own steps
+
+Bubble's privacy rules never guard a page workflow's *Create / Make changes / Delete* — those ran on Bubble's server
+behind the workflow's own *Only when*. A converted Record node writes from the browser behind the collection's
+`create` / `update` / `delete` rule, so the converter derives each rule from **every page write it read**
+(`noteWrite`, in the NewThing / MakeChanges / ChangeThing / DeleteThing / …ListOfThings cases): the workflow's
+condition AND the step's, classified as above, the stricter of the two; a condition no rule says is `authenticated`
+when it reads the current user (a stranger has no fields) and `public` otherwise (anyone the page lets through could
+run it). The op's rule is the **widest** floor over its writes; no write → `nobody`; every write creator-only →
+`authenticated` with a finding (P123-S6-CREATOREDITS: there is no "only the creator" atom, and `creatorOwns` would hide
+the row from every other reader). A backend workflow that writes gets `runAs: "system"` — Bubble's shape kept (the
+server writes, behind the function's own condition) — and its reads then skip the collection rules, as Bubble's
+*ignore privacy rules* does; a shared custom event that writes is a finding naming the function that must run as
+system. `signup` is `public` when any Sign up step exists, `files.upload` `authenticated` when an uploader element does,
+`devOpen` false, the defaults `nobody`.
+
+### The type of the thing a step changes (P123-S6-THINGTYPE, fixed)
+
+The census needs the collection each step writes, and most *Make changes* steps carry no `thing_type`: the thing is
+an expression. The converter read `thing_to_change.next.type`, which is the next operator's node kind (`Message`),
+never a data type. `thingTypeOf` now infers it (the row's type for *Parent group's item*, the nearest typed ancestor
+Group's, a reusable's *Type of content*, the record *Result of step N* wrote, an element's `group_type` or data
+source, the workflow's thing, a parameter's declared type, a Search's type, a field read's type from the schema or from
+the key it spells). TrybeUP: 111 of 216 writes went to `Message` / `thing`; now 4 (an element not in the export).
+
+### Measured
+
+| corpus | privacy rules read | rules written | writes read |
+|---|---|---|---|
+| the editor fixtures (`database-schema/example-privacy-rule-entpawjzehwq0tbk.json` + backend workflows + option sets) | User: everyone, somePrivacyRule (logged in), User's own data (self); someDataType / someOtherDataType: everyone + New rule (logged in) | both custom types `find` / `get` public, writes `nobody`; `someApiWorkflow` call authenticated + runAs system, the trigger's and recurring functions call `nobody` (the trigger's runs as system: it writes); signup public | 5, all in backend workflows (4 to a deleted type, listed) |
+| Richard's template (`exports/template/dynamic-with-schema.js`) | User: everyone (nothing), User's own data | 2 collections public; `files.read` authenticated | none |
+| TrybeUP, live, 17 pages (bundles in the scratchpad only) | none on 40 types | 39 collections `find` / `get` public; 13 with page writes — `File` create/delete, `Booking` and `Listing` create/update/delete, `claims`, `Refund Request`, `Payment`, `Reviews`, `Delivery`, `Conversation` …; every floor `public` but `Conversation.create` (`authenticated`: both its writes run behind *Current User is logged in*) | 216 (52 change the current user) |
+| the 2023 paid export (v6, `bubbleExporter/examples/paid-export`) | User's own data | `Message` create public | 1 |
+
+The template bundle lesson: `dynamic-with-schema.js` was never read by the bundler, which takes `*dynamic.js` only —
+s5c's §12 measurement of it was by hand. Rename a saved bundle to `<page>.dynamic.js`.
+
+### The gate — `check.mjs` (PASS 32/32)
+
+`node check.mjs` from `import/`: the editor fixtures through bundler and converter (P123-S5-NOHOME, P123-S5B-DISABLEDSTEP,
+§10's four cloud components and two triggers, §12's three collections, every s6 rule above, `validateSecurityConfig`,
+`validate_project` 0 errors), a synthetic page for P123-S6-THINGTYPE, and the template when `exports/template/` holds a
+bundle (188/188 elements, the Google Fonts link, 0 errors). The backend validator needs `packages/nodegx-backend/dist`
+and `validate_project` needs `packages/noodl-mcp/dist`; each is skipped by name when unbuilt.
+
+### Not done
+
+Richard's own tests of the rules on a bound backend (provision the converted template with its
+`nodegx.security.json`, sign in, read and write as a stranger and as a user); the ruling on P123-S6-CREATOREDITS; a
+Profile collection for apps that show users to users; `This thing's <list of users> contains Current User`;
+`role:` atoms from a Bubble role field (a person names the field); the 4 TrybeUP steps that read an element not in the
+export; and firing the db-change trigger with the function running as system (§10 "Not done" 2).

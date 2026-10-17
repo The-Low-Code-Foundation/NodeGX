@@ -1,0 +1,156 @@
+{
+    "last_change": 68271641781,
+    "data": {
+        "user": {
+            "%d": "User",
+            "%f3": {
+                "name_text": {
+                    "%d": "name",
+                    "%v": "text"
+                },
+                "somefield_number_range": {
+                    "%d": "someField - deleted",
+                    "%v": "number_range",
+                    "%del": true
+                }
+            },
+            "privacy_role": {
+                "everyone": {
+                    "%d": "everyone",
+                    "permissions": {
+                        "view_all": false,
+                        "search_for": false,
+                        "auto_binding": false,
+                        "view_attachments": false,
+                        "non_filterable_fields": {
+                            "%em": true,
+                            "Slug": true,
+                            "name_text": true,
+                            "Created Date": true,
+                            "Modified Date": true,
+                            "_social_networks": true,
+                            "somefield_number_range": true
+                        }
+                    }
+                },
+                "users_own_data": {
+                    "%c": {
+                        "%n": {
+                            "%a": {
+                                "%x": "CurrentUser"
+                            },
+                            "%x": "Message",
+                            "%nm": "equals"
+                        },
+                        "%x": "InjectedValue"
+                    },
+                    "%d": "User's own data",
+                    "permissions": {
+                        "view_all": true,
+                        "search_for": true,
+                        "auto_binding": false,
+                        "view_attachments": true
+                    }
+                }
+            }
+        },
+        "zezd": {
+            "%d": "zezd",
+            "%del": true
+        },
+        "somedatatype": {
+            "%d": "someDataType",
+            "%f3": {
+                "somefield_text": {
+                    "%d": "someField",
+                    "%v": "text"
+                }
+            }
+        },
+        "someotherdatatype": {
+            "%d": "someOtherDataType",
+            "%f3": {
+                "somedate_date": {
+                    "%d": "someDate",
+                    "%v": "date",
+                    "default_val": -3600000
+                },
+                "somefile_file": {
+                    "%d": "someFile",
+                    "%v": "file",
+                    "default_val": "//bfd69f03235ea26862a69a46ad973455.cdn.bubble.io/f1792242164163x306230430622589360/Screenshot%202026-10-12%20at%2013.16.27.png"
+                },
+                "sometext_text": {
+                    "%d": "someText",
+                    "%v": "text",
+                    "default_val": "foobar"
+                },
+                "someimage_image": {
+                    "%d": "someImage",
+                    "%v": "image",
+                    "default_val": "//bfd69f03235ea26862a69a46ad973455.cdn.bubble.io/f1792242187696x973270463339441500/Screenshot%202026-10-12%20at%2013.16.27.png"
+                },
+                "somebool_boolean": {
+                    "%d": "someBool",
+                    "%v": "boolean",
+                    "default_val": true
+                },
+                "somenumber_number": {
+                    "%d": "someNumber",
+                    "%v": "number",
+                    "default_val": 2
+                },
+                "somerange_number_range": {
+                    "%d": "someRange",
+                    "%v": "number_range"
+                },
+                "someuserlist_list_user": {
+                    "%d": "someUserList",
+                    "%v": "list.user"
+                },
+                "somedaterange_date_range": {
+                    "%d": "someDateRange",
+                    "%v": "date_range"
+                },
+                "somegeo_geographic_address": {
+                    "%d": "someGeo",
+                    "%v": "geographic_address",
+                    "default_val": {
+                        "lat": 45.018542,
+                        "lng": 1.0893497,
+                        "address": "285 Chem. de Bord de Côte, 24290 Saint-Léon-sur-Vézère, France",
+                        "placeId": "ChIJM7M3trBX_0cRYrU7r-8jQ2M",
+                        "components": {
+                            "city": "Saint-Léon-sur-Vézère",
+                            "state": "Nouvelle-Aquitaine",
+                            "county": "Dordogne",
+                            "street": "Chemin de Bord de Côte",
+                            "country": "France",
+                            "zip code": "24290",
+                            "state code": "Nouvelle-Aquitaine",
+                            "country code": "FR",
+                            "street number": "285"
+                        }
+                    }
+                },
+                "somedateinterval_dateinterval": {
+                    "%d": "someDateInterval",
+                    "%v": "dateinterval"
+                },
+                "optionset_option_someoptionset": {
+                    "%d": "optionSet",
+                    "%v": "option.someoptionset",
+                    "default_val": "option1"
+                },
+                "relationtosomedatatype_list_custom_somedatatype": {
+                    "%d": "relationToSomeDataType",
+                    "%v": "list.custom.somedatatype"
+                },
+                "singlerelationtosomedatatype_custom_somedatatype": {
+                    "%d": "singleRelationToSomeDataType",
+                    "%v": "custom.somedatatype"
+                }
+            }
+        }
+    }
+}
