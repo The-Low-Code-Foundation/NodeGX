@@ -51,7 +51,7 @@ fs.writeFileSync(path.join(OUT, 'prompt.txt'), prompt + '\n');
 const bash = ['npm', 'npx', 'node', 'ls', 'mkdir', 'cat', 'cd', 'head', 'tail', 'find', 'grep', 'wc', 'echo', 'sleep',
   'cp', 'diff', 'curl', 'mv', 'touch', 'sort', 'jq'].map((c) => `Bash(${c}:*)`);
 const args = [
-  '-e', 'alarm 7200; exec @ARGV', 'claude',
+  '-e', 'alarm 7200; exec @ARGV', process.env.CLAUDE_BIN || 'claude', // CLAUDE_BIN: claude-opus-5-5 needs CLI ≥ 2.1.280
   '-p', prompt,
   '--model', 'claude-opus-5-5',
   '--output-format', 'stream-json', '--verbose',
