@@ -12581,3 +12581,134 @@ shipped templates, the contact forms' message boxes among them).
 3. **P18-S120-TEXTAREA**, P18-S118-NUMBERFIELD, the 54 Functions whose reads sit partly off their own signals,
    GAM-009's remount rule, P18-S113-LISTLIVE, P18-S115-DYNPROBE, BUTTONLOOK and INPUTLOOK (low).
 4. Not this lane's: P18-S119-TOKENCLAIM (the template's box) and the ruling P18-S119-FIRSTWRITE asks.
+
+## §88 A ticked input runs the Function again, and Did Mount runs once per mount (session 121, 2026-10-17): P18-S119-TICKEDRUN, P18-S121-DIDMOUNT
+
+### §88.0 What was measured first
+
+The census (`s121-tickedrun/census.ts`, the shipped templates with the two `*.content.json` materialized, and the
+corpus): **46 Run-wired Functions with a ticked value input in the templates, 68 in the corpus, and every one refused
+already**, each by something other than the box: the Noodl API (30 in the templates), a Query Records' `fetched` as the
+trigger, a stray read by an unrendered sink, a source with no static translation, a Function chain. So nothing exported
+wrongly, and the fix alone exports none of them; the bug's thirteen were the ones whose signals §86 refused for the box.
+"Hold the id" (the board's target) stands behind two more: its id read by a Record (the stray read) and a second Function
+fed by the first. And emitting the fixture found a second gap in front of it: **a Page's Did Mount was dropped** ("no DOM
+event equivalent") although the attach pass had compiled its chain: 23 handler sets in 5 shipped templates.
+
+### §88.1 What the runtime does, measured on its own node and in the viewer
+
+`tickprobe.js` → `tickprobe.out` (the runtime's Function, Run wired, a ticked input from a producer):
+
+- A value **arriving at creation runs it** (S1, S11 `null` included); `undefined` is never delivered (S2, S8).
+- The same value again does not run it (S1); **the same object again does** (S4: `valueDidChange` treats objects as
+  always changed).
+- **Two arrivals in one update make one run** (S5), and so does an arrival with a Run, in either order: one run, the
+  Run's, with Done (S6, S7). A run an arrival starts sends the Function's own signals and **never Done**.
+- **A literal on a ticked input runs it once at load** (S9); unticked, not (S10).
+
+In the viewer (`readings.json`, the runtime arm of the drive): at load **the arrival's run comes first, then Did Mount's
+Run** (Runs 2, Done 2); Did Mount is sent once per mount.
+
+⚠️ A format-4 project with the box unset reads unticked: the editor's load runs NDA-017's migration (a Run-wired node's
+unset boxes are written false), and `parseProject` settles the same way. `render-from-disk.js` does not, so the fixture
+writes its boxes out, as the templates' "Hold the id" does (`runOnChange-in-announcementId: true`).
+
+### §88.2 What is built
+
+| piece | what it is |
+|---|---|
+| `src/lib/functionRun.ts` `tickedArrival(held, values)` | whether the ticked inputs' values are an arrival (one is not `undefined` and is not what that input holds); records each that arrived |
+| `plan.ts` `tickedWatchOf` | a Run-wired Function's or Expression's ticked inputs (wired, or literal), as the values an effect watches. Refused by name where one exists only inside a handler (a received payload). A Visual Function has none |
+| `compileJsRun` | keeps the run's ticked half (`tickedRunPieces`): the body, its signals' chains and its §4f write, **without Done**; refused by name where those chains read a handler's values. §86's refusal of the signals for a ticked box is gone |
+| `TickedRunPlan`, the pass after the attach pass | one per Function a trigger attached: a `useEffect` keyed on the watched values' sources, reading them fresh (`item.get()`), so a value a mount effect above stored arrives at load as the runtime's does at creation |
+| a Run, wherever it is printed | records what it read on the ticked inputs before it runs, so a click that writes a ticked value and sends Run is one run, with Done (S4 of the drive) |
+| `component.ts` `mountChains` (P18-S121-DIDMOUNT) | each element's Did Mount chain as a once-guarded mount effect, post-order, after the ticked runs; a Page's merged sole Group included. Refused by name where the element or one above it is mounted by a value; noted where one is authored Mounted false |
+| P18-S121-SAMEOUTPUTS | a pulsed run hands its §4f state a copy of the node's record: React keeps a state it is handed again, so the render showed the first run's values until something else re-rendered |
+| the signals' targets of a refused Function | name its first refusal ("the Function that sends its "ready" signal is not exported: …"), where most read "trigger … is not a rendered element event" |
+
+### §88.3 The test (`tests/the-ticked-input-runs-it-again.test.ts`, 30 rows)
+
+§A grades the emitted page against the **runtime's own Function, Variable and Set Variable** running the same fixture
+page (`tests/helpers/runtime-ticked-arm.js`: the page on the corpus harness, a Button a pulser, a Page or Group a
+stand-in sending Did Mount after the graph settles, children first). The export's arm is the emitted app itself
+(`tests/helpers/export-react-arm.js`): bundled by esbuild in development mode, rendered by real React under
+StrictMode into jsdom, buttons clicked. Eight variants of `tests/fixtures/ticked-desk`: as written; the item box
+unticked; no Did Mount; no seed; two ticked inputs set in one click; a Group's Did Mount; ready writing a constant (only
+the run re-renders); the literal unticked. A row pins the runtime arm to the viewer's readings; a control row shows the
+page without its ticked and Did Mount effects disagrees. §B the plan and the emitted lines (the effect, the record, the
+mount effect, children before parents, the import, a field's state watched, an Expression's ticked run, the typecheck).
+§C the refusals (a received payload as a ticked input, and in a signal's chain; an unticked box; an unset box in a
+format-4 project; a Did Mount under a bound Mounted; under an authored Mounted false). §D `tickedArrival` against the
+probe's delivery rule, the object case pinned as the known difference (an effect never sees the same object either).
+
+**Mutant arms**, in a copy (`packages/nx-mut-s121`, removed straight after; a dot-named copy reads "0 total" in jest).
+Control 30 / 30.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | `undefined` arrives | 1 |
+| B | every value arrives | 14 |
+| C | nothing is held | 14 |
+| D | a Run records nothing | 8 |
+| E | the ticked run sends Done | 8 |
+| F | the effect reads the render closure | 11 |
+| G | no once-guard on Did Mount | 7 |
+| H | literals not watched | 10 |
+| I | the box ignored | 4 |
+| J | the merged Group skipped | 1 |
+| K | a bound Mounted not refused | 1 |
+| L | a handler-only input watched | 1 |
+| M | the same record handed to React | 2 |
+| N | Did Mount printed before the ticked runs | 7 |
+| O | parent before child | 2 |
+
+**Neighbours.** `the-function-sends-its-signals`: its two §C rows that pinned the ticked refusal now pin the effect on
+the field's state beside Send (37 / 37). `drag.test.ts` C12: a Drag's Did Mount is a mount effect now (52 / 52).
+`hls001-corpus-identity`: the corpus gained `ticked-desk`; predicted before regenerating: one path moves (pulse-desk's
+`src/lib/functionRun.ts`, which carries `tickedArrival`), and the golden's diff counted the same, 1 line out and back,
+plus ticked-desk's 19-line block. 🔴 **The fixture's first name was `tick-desk`, which §39's Timer fixture already
+held**: the generator's `rmtree` wrote over it, hls001 showed its files gone, and git restored it before the golden was
+taken. Search `tests/fixtures/` before naming a fixture.
+
+**The whole package** (`nice -n 19 --runInBand`, JSON written 16:52): 136 / 137 suites, 4,814 passed, 2 failed, both
+`parameter-coverage` on the P121 peer's three uncommitted Upload File ports (reaching 1,235, the floor, unmoved). Package `tsc` 0.
+
+### §88.4 The drive (`s121-tickedrun/`)
+
+`ticked-desk` itself. The runtime arm first, then `EXPECTED.md` for the two export arms, from the emitted code. No
+backend; three arms in one headless Chrome, a real click per press.
+
+| step | runtime | export-fixed | export-control (HEAD `2419c0897`) |
+|---|---|---|---|
+| S0 load | a · 2 · 2 · 2 · 1 | the same | all blank |
+| S1 Pick b | b · 3 · 3 · 2 · 1 | the same | unchanged |
+| S2 Pick b again | unchanged | the same | unchanged |
+| S3 Run | b · 4 · 4 · 4 · 1 | the same | unchanged |
+| S4 Pick c and run | c · 5 · 5 · 5 · 1 | the same | unchanged |
+| S5 Again | c · 5 · 5 · 5 · 2 | the same | Said 1, the rest blank |
+
+(Holding · Runs · Ready at · Done at · Said.) **The runtime and the fixed export agree in every step**; EXPECTED.md held
+in every cell; no console errors in any arm. HEAD refuses "Hold the item" whole and drops the page's Did Mount.
+
+### §88.5 What this reaches, measured
+
+Dispositions, HEAD against the tree (`dispdiff.ts`): **the shipped templates, none newly exported and none lost** (as
+§88.0 measured); the corpus, 3 newly exported (all ticked-desk's), none lost; about 80 refused nodes' reasons now name
+the refused Function that sends their signal. Emitted (`s121` `emitcount`): **20 Did Mount effects in the shipped
+templates** where HEAD printed none (rocket-school 7, star-class 7, nightbook 3, marketplace 1, planning 1, todo-list 1),
+4 refused by name, 0 dropped as "no DOM event". todo-list's Sign in now sends a signed-in person on to the list on
+mount, as the running app does. Ticked effects in the shipped templates: 0, as measured.
+
+Found on the way and filed: **P18-S121-ONEUPDATE** (medium: inside one update the runtime runs a Function at the end
+and once per arriving write; a Run before a write in one event, or two writes to one watched value, differ),
+**P18-S121-SEEDTWICE** (low: a Variable seed runs again on StrictMode's second mount, over a later mount write),
+**P18-S121-FRESHOUTPUTS** (low, 0 reach: a Function with no signal forgets its outputs between runs),
+**P18-S121-STATENAME** (low, 0 reach: a field's state can shadow a Variable the page imports).
+
+### §88.6 What this leaves
+
+1. **"Hold the id"**: its id read by a Record (the stray read: "its out-announcementId output is consumed outside the Run
+   chain by an unrendered sink") and the second Function fed by the first ("JS-node chains are not translated").
+2. The senders the 18 remaining §87 Conditions wait on (§87.5).
+3. P18-S120-TEXTAREA, P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE, P18-S113-LISTLIVE, P18-S115-DYNPROBE; BUTTONLOOK and
+   INPUTLOOK (low).

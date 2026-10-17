@@ -1,0 +1,348 @@
+{
+ "runtime": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "a",
+     "Runs",
+     "2",
+     "Ready at",
+     "2",
+     "Done at",
+     "2",
+     "Said",
+     "1"
+    ]
+   },
+   {
+    "step": "S1 Pick b",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "b",
+     "Runs",
+     "3",
+     "Ready at",
+     "3",
+     "Done at",
+     "2",
+     "Said",
+     "1"
+    ]
+   },
+   {
+    "step": "S2 Pick b again",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "b",
+     "Runs",
+     "3",
+     "Ready at",
+     "3",
+     "Done at",
+     "2",
+     "Said",
+     "1"
+    ]
+   },
+   {
+    "step": "S3 Run",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "b",
+     "Runs",
+     "4",
+     "Ready at",
+     "4",
+     "Done at",
+     "4",
+     "Said",
+     "1"
+    ]
+   },
+   {
+    "step": "S4 Pick c and run",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "c",
+     "Runs",
+     "5",
+     "Ready at",
+     "5",
+     "Done at",
+     "5",
+     "Said",
+     "1"
+    ]
+   },
+   {
+    "step": "S5 Again",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "c",
+     "Runs",
+     "5",
+     "Ready at",
+     "5",
+     "Done at",
+     "5",
+     "Said",
+     "2"
+    ]
+   }
+  ],
+  "console": []
+ },
+ "export-control": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "Runs",
+     "Ready at",
+     "Done at",
+     "Said"
+    ]
+   },
+   {
+    "step": "S1 Pick b",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "Runs",
+     "Ready at",
+     "Done at",
+     "Said"
+    ]
+   },
+   {
+    "step": "S2 Pick b again",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "Runs",
+     "Ready at",
+     "Done at",
+     "Said"
+    ]
+   },
+   {
+    "step": "S3 Run",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "Runs",
+     "Ready at",
+     "Done at",
+     "Said"
+    ]
+   },
+   {
+    "step": "S4 Pick c and run",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "Runs",
+     "Ready at",
+     "Done at",
+     "Said"
+    ]
+   },
+   {
+    "step": "S5 Again",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "Runs",
+     "Ready at",
+     "Done at",
+     "Said",
+     "1"
+    ]
+   }
+  ],
+  "console": []
+ },
+ "export-fixed": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "a",
+     "Runs",
+     "2",
+     "Ready at",
+     "2",
+     "Done at",
+     "2",
+     "Said",
+     "1"
+    ]
+   },
+   {
+    "step": "S1 Pick b",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "b",
+     "Runs",
+     "3",
+     "Ready at",
+     "3",
+     "Done at",
+     "2",
+     "Said",
+     "1"
+    ]
+   },
+   {
+    "step": "S2 Pick b again",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "b",
+     "Runs",
+     "3",
+     "Ready at",
+     "3",
+     "Done at",
+     "2",
+     "Said",
+     "1"
+    ]
+   },
+   {
+    "step": "S3 Run",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "b",
+     "Runs",
+     "4",
+     "Ready at",
+     "4",
+     "Done at",
+     "4",
+     "Said",
+     "1"
+    ]
+   },
+   {
+    "step": "S4 Pick c and run",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "c",
+     "Runs",
+     "5",
+     "Ready at",
+     "5",
+     "Done at",
+     "5",
+     "Said",
+     "1"
+    ]
+   },
+   {
+    "step": "S5 Again",
+    "lines": [
+     "Ticked Desk",
+     "Pick b",
+     "Pick c and run",
+     "Run",
+     "Again",
+     "Holding",
+     "c",
+     "Runs",
+     "5",
+     "Ready at",
+     "5",
+     "Done at",
+     "5",
+     "Said",
+     "2"
+    ]
+   }
+  ],
+  "console": []
+ }
+}

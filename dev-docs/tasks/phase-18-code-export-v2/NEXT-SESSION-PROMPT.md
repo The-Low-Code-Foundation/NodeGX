@@ -1,3 +1,62 @@
+# Next session — session 121 (2026-10-17, BOARD lane 6) fixed **P18-S119-TICKEDRUN** and, in front of it, **P18-S121-DIDMOUNT**: a Run-wired Function also runs when a ticked input gets a new value, and an element's Did Mount chain runs once per mount, where HEAD compiled it and then dropped it.
+
+## ✅ Session 121: the ticked input runs it again
+
+Read EXP-011 §88. In short:
+
+| what | where |
+|---|---|
+| Measured first: 46 such Functions in the templates, 68 in the corpus, **every one refused already by something else**. The fix alone exports none; "Hold the id" waits on two more blockers | `s121-tickedrun/census.ts` |
+| The runtime measured: an arrival at creation runs it; `undefined` never arrives; the same value does not, the same object does; two arrivals or an arrival and a Run in one update are one run (the Run's, with Done); a literal runs it once at load; in the viewer the arrival's run comes before Did Mount's | `tickprobe.out`, `readings.json` |
+| `tickedArrival(held, values)` in `src/lib/functionRun.ts`; `tickedWatchOf`, `tickedRunPieces`, `TickedRunPlan` (a `useEffect` keyed on the watched sources, reading them fresh); a Run records what it read | `plan.ts` `compileJsRun`, the pass after attach; `component.ts` |
+| Did Mount: once-guarded mount effects, post-order, after the ticked runs, a Page's merged Group included; refused by name under a bound Mounted | `component.ts` `mountChains` |
+| P18-S121-SAMEOUTPUTS: a pulsed run hands its §4f state a copy (React kept the same record) | `component.ts` `jsfun-run` |
+| Spec, 30 rows: §A the emitted app bundled and rendered by real React under StrictMode in jsdom (`helpers/export-react-arm.js`) against the runtime's own Function, Variable and Set Variable (`helpers/runtime-ticked-arm.js`), eight variants of `fixtures/ticked-desk`, a control | `tests/the-ticked-input-runs-it-again.test.ts` |
+| Drive, three arms: runtime == fixed in every step; HEAD blank until Again | `s121-tickedrun/` |
+
+- 🔴 **Search `tests/fixtures/` before naming a fixture.** The generator's first run wrote over `tick-desk` (§39's Timer
+  fixture). hls001 showed its files gone; git restored it. The fixture is `ticked-desk`, ids `…0501–0503` (gate-desk
+  holds `…0401–0403`).
+- 🔴 **A format-4 project with a Run-wired node's box unset reads UNTICKED** (NDA-017's migration, applied by the editor's
+  load and by `parseProject`). `render-from-disk.js` skips it and reads ticked. Write the boxes out in a fixture.
+- 🔴 **A jest copy of the package in a dot-named folder reads "Tests: 0 total"**, and it needs the package's
+  `*.json` ledgers beside `src`. The mutant copy is `packages/nx-mut-s121`, removed straight after.
+- 🔴 **A text field's value is control state, so an effect can watch it.** A ticked input fed by a field exports (each
+  keystroke runs it, as the runtime's does: the Site Builder's Setup token is that shape, P18-S119-TOKENCLAIM). The only
+  handler-only source left is a received payload.
+- 🔴 **A Run printed as a one-liner broke when the record went in front** (`() => a; b`): a run that records is a
+  statement now (`actionIsStatement`, the sixth instance of that hazard).
+- The export arm is real React now: esbuild bundles the emitted page, jsdom renders it under StrictMode. It caught what
+  the hook stand-in could not (effect order, the seed's second mount).
+
+Readings: the spec 30 / 30; neighbours green (the-function-sends-its-signals 37 / 37 with two rows re-pinned, drag
+52 / 52 with C12 re-pinned, twelve more 566 / 566); hls001 regenerated after predicting (1 path moved, ticked-desk in);
+package `tsc` 0. 15 mutant arms, each killing rows (control 30 / 30). Whole package (`nice -n 19 --runInBand`, started 16:44, JSON written 16:52):
+136 / 137 suites, 4,814 passed, 2 failed, both `parameter-coverage` on the P121 peer's three uncommitted Upload File ports
+(reaching 1,235 = the floor, as in s110–s120); two suites read "focused" for their environment `it.skip`s (hls006-serve's LAN
+cases, node-spec-conformance), not failures.
+
+Reach (`dispdiff.ts`, HEAD against the tree): templates none gained or lost; corpus 3 gained (ticked-desk), none lost;
+about 80 refused nodes now name the refused Function behind their signal. **20 Did Mount effects** print in the shipped
+templates (HEAD 0), 4 refused by name, 0 dropped.
+
+Filed: **P18-S121-ONEUPDATE** (medium: inside one update the runtime runs at the end and per write), **P18-S121-SEEDTWICE**
+(low: StrictMode re-seeds a Variable over a later mount write), **P18-S121-FRESHOUTPUTS** (low, 0 reach),
+**P18-S121-STATENAME** (low, 0 reach).
+
+**Next (BOARD lane 6):**
+1. **"Hold the id"** (members-area Announcement and Meeting, the Site Builder's PageEditor): its id read by a Record
+   ("its out-announcementId output is consumed outside the Run chain by an unrendered sink") and the second Function fed
+   by the first ("JS-node chains are not translated"). `s119-fnchain-measure/dump.ts` on `templates/members-area
+   Pages/Announcement` shows the graph.
+2. **The senders the 18 remaining §87 Conditions wait on** (a Record verb's and Log In's / Sign Up's Failure chains, an
+   External Link's Done).
+3. P18-S120-TEXTAREA (small), P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE, P18-S113-LISTLIVE, P18-S115-DYNPROBE; BUTTONLOOK
+   and INPUTLOOK (low).
+4. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
 # Next session — session 120 (2026-10-16, BOARD lane 6) built **the Evaluate-driven Condition** (P18-S120-SNAPCOND): a Condition with its box unticked that shows a confirmation or a refusal exports now, and the call in front of it with it. The Site Builder's contact form exports whole: Send sends the message and says whether it went.
 
 ## ✅ Session 120: the Condition remembers its answer
