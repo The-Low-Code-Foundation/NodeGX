@@ -88,7 +88,7 @@
     "docs:export": "node scripts/export-doc/build.js",
     "docs:export:check": "node scripts/export-doc/build.js --check",
     "docs-site:start": "npm --prefix docs-site run start",
-    "docs-site:build": "npm run docs:nodes && npm run docs:bubble && npm run docs:library && npm --prefix docs-site run build",
+    "docs-site:build": "npm run docs:nodes && npm run docs:bubble && npm run docs:bubble-dictionary && npm run docs:export && npm run docs:library && npm --prefix docs-site run build",
     "catalog:examples": "ts-node -P ./scripts/tsconfig.json ./scripts/validate-examples.ts",
     "catalog:tokens": "ts-node -P ./scripts/tsconfig.json ./scripts/validate-token-references.ts",
     "validate:project": "ts-node -P ./scripts/tsconfig.json ./scripts/validate-project.ts",
