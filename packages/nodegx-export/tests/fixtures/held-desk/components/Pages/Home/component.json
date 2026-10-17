@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b8d20e00-0000-4000-8000-000000000603",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "modified": "2026-10-17T12:00:00.000Z",
+  "description": "\"Hold the id\" fixture: a Run-wired Function that holds an id (\"Hold the id\", fed by a Variable, run from Did Mount and its ticked input), and a second Function, run from Remove, that reads it."
+}

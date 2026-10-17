@@ -388,7 +388,9 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // `dispdiff.ts` but ticked-desk's own), plus ticked-desk's entries. The regenerated golden's diff counted the same:
     // 1 line out, that line back in, and ticked-desk's 19-line block. (Its first run wrote over `tick-desk`, §39's Timer
     // fixture, and this row read 60: restored from git before the golden was taken.)
-    expect(corpusProjects().length).toBe(61);
+    // 61 → 62 on 2026-10-17 ("Hold the id", session 122): `held-desk`. Predicted before regenerating, by emitting every
+    // fixture with HEAD's `src` and the tree's: only held-desk differs. Regenerated: 0 lines out, held-desk's 17 in.
+    expect(corpusProjects().length).toBe(62);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 

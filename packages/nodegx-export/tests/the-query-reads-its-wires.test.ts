@@ -194,6 +194,31 @@ describe('§B what is emitted', () => {
     );
   });
 
+  // "Hold the id" (s122): a Run-wired Function's output is a value this effect reads too, through its row (§4f), keyed on
+  // the field it reads (a run hands the row a fresh copy each time; the runtime sends nothing for a value it already holds).
+  test('a Run-wired Function feeding the value: the effect reads its row, keyed on the field', () => {
+    const ir = withFilter(FILTERS[0].params, [], (edited) => {
+      const component = componentOf(edited, LANDING);
+      component.nodes.push({
+        id: 'holdBreed',
+        type: 'JavaScriptFunction',
+        authoredLabel: 'Hold the breed',
+        catalogRef: 'JavaScriptFunction',
+        parameters: [{ name: 'functionScript', value: { kind: 'script', source: "Outputs.breed = 'Collie';" } }],
+        declaredPorts: [],
+        portCompleteness: 'complete',
+        children: []
+      } as unknown as NodeIR);
+      component.connections.push(
+        { key: 'page:didMount->holdBreed:run', fromId: 'page', fromProperty: 'didMount', toId: 'holdBreed', toProperty: 'run', kind: 'signal' },
+        { key: `holdBreed:out-breed->${QUERY}:qp-breed`, fromId: 'holdBreed', fromProperty: 'out-breed', toId: QUERY, toProperty: 'qp-breed', kind: 'value' }
+      );
+    });
+    const page = emitApp(ir, catalog).files['src/pages/Landing.tsx'];
+    expect(page).toContain('    const breedValue = holdTheBreedOut?.breed;');
+    expect(page).toContain('  }, [holdTheBreedOut?.breed]);');
+  });
+
   test('two values: a conditional on each, every combination the translator’s own document', () => {
     const { where, deps } = effectOf(APPS.get(FILTERS[3].name)!);
     expect(deps).toBe('fromValue, toValue');

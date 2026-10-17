@@ -306,11 +306,13 @@ describe('§C — refused by name: the signals, not the run', () => {
     expect(app.notes).toEqual(
       expect.arrayContaining([
         'Pages/Home: wire hold:out-go->greetingSet:do dropped: its "go" signal drives no translatable action',
-        'Pages/Home: wire hold:out-go->sendsSet:do dropped: its "go" signal drives no translatable action',
-        // go's targets now read the Function outside any chain, so the run falls to the old reason.
-        STRAY
+        'Pages/Home: wire hold:out-go->sendsSet:do dropped: its "go" signal drives no translatable action'
       ])
     );
+    // "Hold the id" (s122): go's targets read the Function only inside go's refused chain, so their reads are that
+    // chain's, and the run compiles with its other signal, as the runtime's sends it. HEAD fell to the stray reason here.
+    expect(app.notes).not.toContain(STRAY);
+    expect(app.files[PAGE]).toContain("if (holdTheNameUntilSendPulse.signal === 'refused') {");
   });
 
   it("control: go's only wire into a rendered Text (a stray read the run materializes), the refused signal still chains", () => {
@@ -322,13 +324,29 @@ describe('§C — refused by name: the signals, not the run', () => {
     expect(app.files[PAGE]).not.toContain("signal === 'go'");
   });
 
-  it('an output read by a logic node no signal of its own fires stays refused, as before', () => {
+  // "Hold the id" (s122). A logic node no signal of its own fires reads the kept node's values, current in the click that
+  // ran it: the runtime's Set Variable waits for the run's value (`s122-holdtheid/probe.ts`, "same click, after").
+  it('an output read by a logic node no signal of its own fires, in the same click after the Run, reads the run it follows', () => {
     const app = emit((ir) => {
       addNode(ir, { id: 'otherSet', type: 'Set Variable', parameters: [{ name: 'name', value: literal('other') }] });
       wire(ir, 'hold', 'out-greeting', 'otherSet', 'value', 'value');
       wire(ir, 'sendBtn', 'onClick', 'otherSet', 'do');
     });
-    expect(app.notes).toContain(STRAY);
+    expect(app.notes).not.toContain(STRAY);
+    const page = app.files[PAGE];
+    expect(page).toContain('other.set(holdTheNameUntilSendNode.delivered.greeting);');
+    expect(page.indexOf('other.set(')).toBeGreaterThan(page.indexOf('const holdTheNameUntilSendRun = runFunction('));
+  });
+
+  it("the same reader with its Do wired before the Run is refused by name: the export's click would read the run before", () => {
+    const app = emit((ir) => {
+      addNode(ir, { id: 'otherSet', type: 'Set Variable', parameters: [{ name: 'name', value: literal('other') }] });
+      wire(ir, 'hold', 'out-greeting', 'otherSet', 'value', 'value');
+      componentOf(ir).connections.unshift({ key: 'sendBtn:onClick->otherSet:do', fromId: 'sendBtn', fromProperty: 'onClick', toId: 'otherSet', toProperty: 'do', kind: 'signal' });
+    });
+    expect(app.notes).toContain(
+      "Pages/Home: wire sendBtn:onClick->hold:run dropped: its out-greeting output is read by Set Variable.value, whose do the same onClick sends before it runs this — the runtime's reader waits for the run's value, the export's would read the one before"
+    );
   });
 });
 

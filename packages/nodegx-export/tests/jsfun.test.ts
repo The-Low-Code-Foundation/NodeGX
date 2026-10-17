@@ -265,7 +265,9 @@ describe('the graph-side gate (EXP-003 §3.5–§3.7), each a named defer', () =
     // The output record becomes a state var written where the chain runs; render reads are
     // maybe-undefined until the first invocation — the runtime's own pre-first-run contract.
     expect(home).toContain('const [formatShoutOut, setFormatShoutOut] = useState<{ text?: any } | undefined>();');
-    expect(home).toContain('setFormatShoutOut(formatShout(');
+    // P18-S121-FRESHOUTPUTS: the run keeps its node, so an output a later run does not write keeps the last value.
+    expect(home).toContain('const formatShoutRun = runFunction(formatShout, ');
+    expect(home).toContain('setFormatShoutOut({ ...formatShoutRun.outputs })');
     expect(home).toContain("{formatShoutOut?.text ?? ''}");
   });
 
@@ -394,7 +396,8 @@ describe('A2h — invocation-pure, inside the handler chain (EXP-003 §4)', () =
     wire(mutated, 'Pages/Home', 'shoutOnce', 'out-text', 'shoutText', 'text');
     const result = emitApp(mutated, catalog);
     const home = result.files['src/pages/Home.tsx'];
-    expect(home).toContain('setShoutOnceOut(shoutOnce(');
+    // P18-S121-FRESHOUTPUTS: through the kept node, as a pulsed run's.
+    expect(home).toContain('setShoutOnceOut({ ...shoutOnceRun.outputs })');
     expect(home).toContain("{shoutOnceOut?.text ?? ''}");
   });
 

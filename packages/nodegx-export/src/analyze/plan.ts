@@ -3132,9 +3132,10 @@ export interface JsFunctionPlan {
    */
   mode: 'reactive' | 'invoked';
   /**
-   * EXP-011 §86. Function only, invoked only: a run of it sends a signal of its own that a chain consumes. The wrapper
-   * then takes its `Outputs` record as a parameter, so `runFunction` can hand it the recording one, and the component
-   * keeps the node's last values across runs (`functionNode`), as the runtime's node does.
+   * EXP-011 §86. Function only, invoked only: a run of it sends a signal of its own that a chain consumes, or (P18-S121-
+   * FRESHOUTPUTS) it materializes a row a reader reads between runs. The wrapper then takes its `Outputs` record as a
+   * parameter, so `runFunction` can hand it the recording one, and the component keeps the node's last values across
+   * runs (`functionNode`), as the runtime's node does.
    */
   pulsed?: true;
   /**
@@ -6349,9 +6350,23 @@ function planComponent(
       }
       return null;
     }
+    /**
+     * "Hold the id". A Function's input fed by another Function: legal where the feeder is Run-wired and its run
+     * materialized (§4f), so the reader reads the last run's value from the row at its own run, exactly as the runtime's
+     * input holds the last delivery. The feeder's run has compiled by then: the sink loop compiles a node's Function
+     * feeders before the node (`compileFunctionFeedersOf`). A feeder whose run is refused names its reason.
+     */
     if (jsResolving.size > 0) {
-      ctx.defer = 'it is fed by another Function/Expression node — JS-node chains are not translated in this slice';
-      return null;
+      const runKey = `${fromNode.id}:run`;
+      const materialized = kind === 'function' && wiredPorts.has(runKey) && !jsResolving.has(fromNode.id) && jsMaterializedVars.has(fromNode.id);
+      if (!materialized) {
+        const compiled = kind === 'function' ? compiledSinks.get(runKey) : undefined;
+        ctx.defer =
+          compiled !== undefined && 'defer' in compiled
+            ? `the Function that feeds it is not exported: ${compiled.defer}`
+            : 'it is fed by another Function/Expression node — JS-node chains are not translated in this slice';
+        return null;
+      }
     }
     const record = jsFunDefOf(fromNode);
     if ('defer' in record) {
@@ -10897,6 +10912,21 @@ function planComponent(
     }
     return { watch };
   };
+  /**
+   * "Hold the id". The unrendered nodes that may read a Function's row (§4f) and how: each reads the input at its own
+   * trigger (a Function's Run, a Set Variable's Do, a record verb's Do, a Cloud Function's Call, a Record's Fetch), or, a
+   * Query's parameter, asks again when it changes. Measured on `fixtures/held-desk` against the runtime's own nodes, and
+   * on the shipped templates' "Hold the id"s (members-area's Announcement and Meeting, the Site Builder's PageEditor).
+   */
+  const isRowReader = (reader: NodeIR, port: string): boolean =>
+    (reader.type === JS_FUNCTION && port.startsWith('in-')) ||
+    (reader.type === 'Set Variable' && port === 'value') ||
+    (reader.type === 'DbModel2' && port === 'modelId') ||
+    (reader.type === 'SetDbModelProperties' && (port === 'modelId' || port.startsWith('prop-'))) ||
+    (reader.type === 'NewDbModelProperties' && port.startsWith('prop-')) ||
+    (reader.type === 'DeleteDbModelProperties' && port === 'modelId') ||
+    (reader.type === CLOUD_FUNCTION_TYPE && port.startsWith('in-')) ||
+    (reader.type === 'DbCollection2' && port.startsWith('qp-'));
   /** P18-S119-TICKEDRUN. A compiled run's ticked half, by node id: what the effect watches and runs. Read after the attach pass. */
   const tickedRunPieces = new Map<string, { watch: ValueExpr[]; action: Extract<HandlerAction, { kind: 'jsfun-run' }> }>();
 
@@ -10944,20 +10974,89 @@ function planComponent(
       collapses: [...pulses.collapses, ...done.collapses],
       subscribes: [...pulses.subscribes, ...done.subscribes]
     };
-    const strayRead = component.connections.find(
+    const strays = component.connections.filter(
       (c) => c.fromId === node.id && isJsValueOutput(node, c.fromProperty) && !chain.consumes.includes(c.key)
     );
+    /**
+     * "Hold the id". An unrendered sink reads the row too: a logic node's input (a Record's Id, another Function's input,
+     * a Query's filter value) resolves this read through `jsFunReadExpr`, which compiles this run first and so finds the
+     * row. Each sink still compiles or refuses by its own rules.
+     *
+     * 🔴 **Except a sink one of this Function's own signals runs.** Its read belongs to that signal's chain, and is a stray
+     * only because the chain was refused (marketplace's ShelfRow: `go` calls a Cloud Function whose Done reads the clock).
+     * Counting it materialized a row nothing reads, and the button that ran it lost its TODO.
+     */
+    const signalTargetOf = (toId: string) =>
+      record.def.kind !== 'function'
+        ? undefined
+        : component.connections.find((c) => c.fromId === node.id && c.toId === toId && record.def.signals.includes(c.fromProperty.slice('out-'.length)));
+    const missingSink = strays.find((c) => nodeById.get(c.toId) === undefined);
+    if (missingSink) {
+      return { defer: `its ${missingSink.fromProperty} output is consumed outside the Run chain by a missing node` };
+    }
+    // A read on a target of one of its signals whose chain was refused: that chain's, and reported with it.
+    const ownSignalStray = (c: ConnectionIR) => {
+      if (rendered.has(c.toId)) return false;
+      const signalWire = signalTargetOf(c.toId);
+      return signalWire !== undefined && (pulseRefusals.has(`${node.id}:${signalWire.fromProperty}`) || pulseRefusals.has(node.id));
+    };
+    /**
+     * An unrendered reader reads the node's own values in a handler (`delivered`, current within the click that ran it),
+     * so only a Function, which keeps a node, has them; an Expression or a Visual Function keeps the old refusal. And only
+     * a reader that reads its input at its own trigger, or asks again when it changes (`ROW_READERS`). 🔴 Not a Component
+     * Outputs value: todo-list's lists send `add` with the title the parent never got, where HEAD refused the button.
+     */
+    // HEAD's rule where it materialized: the first stray drawn, the rest read the row as they could. Kept, so no export
+    // HEAD made is lost (todo-list's Project editor); the rules below decide only what HEAD refused.
+    const headMaterialized = strays.length > 0 && rendered.has(strays[0].toId);
+    const unreadable = headMaterialized
+      ? undefined
+      : strays.find(
+          (c) => !rendered.has(c.toId) && !ownSignalStray(c) && (record.def.kind !== 'function' || !isRowReader(nodeById.get(c.toId)!, c.toProperty))
+        );
+    if (unreadable) {
+      return {
+        defer: `its ${unreadable.fromProperty} output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there`
+      };
+    }
+    const readers = headMaterialized ? strays : strays.filter((c) => !ownSignalStray(c));
+    /**
+     * 🔴 **The same event, the reader's wire first.** A Set Variable's Do fired by the click that also runs this Function
+     * reads the run's new value in the runtime, whichever wire comes first: it waits until the update's inputs have
+     * arrived. The export runs a click's actions in wire order, so with the reader's wire first it would read the run
+     * before (measured: `s122-holdtheid/probe.ts`, "same click, before"). Refused by name; the wire after the Run agrees.
+     */
+    const runWires = component.connections.filter((c) => c.toId === node.id && c.toProperty === 'run');
+    for (const reader of readers) {
+      if (rendered.has(reader.toId)) continue;
+      const early = component.connections.find(
+        (w, i) =>
+          w.toId === reader.toId &&
+          runWires.some((r) => r.fromId === w.fromId && r.fromProperty === w.fromProperty && i < component.connections.indexOf(r))
+      );
+      if (early) {
+        return {
+          defer: `its ${reader.fromProperty} output is read by ${nodeById.get(reader.toId)!.type}.${reader.toProperty}, whose ${early.toProperty} the same ${early.fromProperty} sends before it runs this — the runtime's reader waits for the run's value, the export's would read the one before`
+        };
+      }
+    }
+    if (readers.length === 0 && strays.length > 0 && chain.then.length === 0) {
+      const stray = strays[0];
+      const signalWire = signalTargetOf(stray.toId)!;
+      const refused = pulseRefusals.get(`${node.id}:${signalWire.fromProperty}`) ?? pulseRefusals.get(node.id);
+      return {
+        defer:
+          refused !== undefined
+            ? `its ${stray.fromProperty} output feeds ${nodeById.get(stray.toId)!.type}.${stray.toProperty}, which its "${signalWire.fromProperty.slice('out-'.length)}" signal runs, and that chain is not exported: ${refused}`
+            : `its ${stray.fromProperty} output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there`
+      };
+    }
+    const strayRead = readers[0];
     // §4f (CONTROLLED-STATE-TARGET): outputs read outside the Run chain materialize the output
     // record as a state var written where the chain runs — render reads are maybe-undefined
     // until the first invocation, the runtime's own pre-first-run contract.
     let materialize: string | undefined;
     if (strayRead) {
-      const strayRendered = nodeById.get(strayRead.toId);
-      if (!strayRendered || !rendered.has(strayRead.toId)) {
-        return {
-          defer: `its ${strayRead.fromProperty} output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there`
-        };
-      }
       const def = record.def;
       const fields = def.outputs.map(
         (o) => `${/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(o.name) ? o.name : JSON.stringify(o.name)}?: ${o.tsType}`
@@ -10982,7 +11081,9 @@ function planComponent(
       return { defer: 'its Run drives nothing this slice translates — no done-chain action consumes its work' };
     }
     // Only on a run that compiles: a refused one prints no wrapper change and keeps no node state.
-    if (pulses.then.length > 0) record.def.pulsed = true;
+    // P18-S121-FRESHOUTPUTS, for a materialized run: its row is what a reader reads between runs, and the runtime's node
+    // keeps its outputs across them (a run that returns early writes nothing). So it keeps a node, as a pulsed run does.
+    if (pulses.then.length > 0 || (materialize !== undefined && record.def.kind === 'function')) record.def.pulsed = true;
     // P18-S119-TICKEDRUN. Done is the Run's alone; a ticked run that sends nothing and writes nothing is unobservable.
     if (ticked.watch.length > 0 && (pulses.then.length > 0 || materialize !== undefined)) {
       tickedRunPieces.set(node.id, {
@@ -17080,7 +17181,31 @@ function planComponent(
   // Every action sink compiles before attachment — the sweeps that report unattached sinks
   // read compiledSinks for their reasons. (This loop sits below outputSinkOf because the popup
   // compilers' done-chains reach it.)
+  /**
+   * "Hold the id". The runs of the Run-wired Functions whose outputs feed `node`, compiled before it, feeders first: a reader
+   * finds the row a feeder's run materialized (§4f) only if that run has compiled. Here, at the top of the sink loop, as
+   * the loop itself would compile them, with no chain open; compiling them from inside a reader's resolution instead
+   * re-entered sinks already compiling (nightbook's three toggles share one Set Variable) and refused them as cyclic.
+   */
+  const feedersCompiled = new Set<string>();
+  const compileFunctionFeedersOf = (node: NodeIR): void => {
+    if (feedersCompiled.has(node.id)) return;
+    feedersCompiled.add(node.id);
+    for (const c of component.connections) {
+      if (c.toId !== node.id || !c.fromProperty.startsWith('out-')) continue;
+      const from = nodeById.get(c.fromId);
+      if (!from || jsNodeKindOf(from.type) !== 'function' || !wiredPorts.has(`${from.id}:run`)) continue;
+      // 🔴 Only a run an element's event or a Did Mount sends: a row whose run never attaches is never written
+      // (P18-S122-DEADROW, open), and a reader compiled after it would read nothing where HEAD refused it (the Site
+      // Builder's Home link, its settings Function run by a refused Query's Fetched).
+      const runs = component.connections.filter((w) => w.toId === from.id && w.toProperty === 'run');
+      if (!runs.every((w) => w.fromProperty === 'didMount' || rendered.has(w.fromId))) continue;
+      compileFunctionFeedersOf(from);
+      compiledOf(from, 'run');
+    }
+  };
   for (const node of component.nodes) {
+    compileFunctionFeedersOf(node);
     if (TRIGGER_PORTS[node.type] !== undefined) compiledOf(node, TRIGGER_PORTS[node.type]);
     else if (node.type === 'NavigationShowPopup') compiledOf(node, 'show');
     else if (node.type === 'NavigationClosePopup') {

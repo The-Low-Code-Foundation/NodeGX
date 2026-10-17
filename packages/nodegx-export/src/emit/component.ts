@@ -998,8 +998,9 @@ export function emitComponent(
       referencedJsIds.add(action.nodeId);
       jsArgExprs(action.nodeId).forEach(collectExprUse);
       action.then.forEach(collectActionUse);
-      // EXP-011 §86. A run that sends pulses keeps the node's last values and imports the run helper.
-      if (runIsPulsed(action)) pulsedRunIds.add(action.nodeId);
+      // EXP-011 §86. A run that sends pulses keeps the node's last values and imports the run helper; so does a Function's
+      // materialized run (P18-S121-FRESHOUTPUTS: the plan marks both `pulsed`).
+      if (runIsPulsed(action) || (action.materialize !== undefined && jsFunByNode[action.nodeId]?.pulsed === true)) pulsedRunIds.add(action.nodeId);
       // Same as the expression side: the wrapper's Noodl.Variables facade earns the imports.
       for (const name of jsFunByNode[action.nodeId]?.variables ?? []) {
         if (variableByName.has(name)) usedVariableNames.add(name);
@@ -2363,7 +2364,17 @@ export function emitComponent(
         const def = jsFunByNode[expr.nodeId]!;
         // A materialized read (§4f) goes through the state var in render — the last run's
         // value, undefined before the first invocation, exactly the runtime getter's answer.
-        if (expr.viaState !== undefined && mode === 'render') {
+        // "Hold the id": a read from outside the node's own Run chain carries `viaState` (the chain's reads resolve before the
+        // run materializes). In a handler it reads the kept node's values as its wires delivered them: current within the
+        // click that ran it, where the state would still hold the value from before (the chain-local snapshot rule).
+        if (expr.viaState !== undefined && mode === 'handler' && def.kind === 'function' && pulsedRunIds.has(expr.nodeId)) {
+          const delivered = memberExpr(`${pulseNamesOf(def).node}.delivered`, expr.output);
+          if (expr.fold === 'string') return `String(${delivered} ?? '')`;
+          if (expr.fold === 'number') return `(typeof ${delivered} === 'number' ? ${delivered} : Number(${delivered}) || 0)`;
+          if (expr.fold === 'boolean') return `!!${delivered}`;
+          return delivered;
+        }
+        if (expr.viaState !== undefined) {
           // Function and Visual Function both materialize an Outputs record keyed by port name;
           // Expression materializes its single value raw.
           const base =
@@ -2506,8 +2517,10 @@ export function emitComponent(
           e.args.forEach(walk);
           break;
         case 'jsfun-out': {
+          // "Hold the id": the field read is the dependency, never the row, which is a fresh copy every run
+          // (P18-S121-SAMEOUTPUTS): the runtime sends nothing when a run writes the value it already holds.
           if (e.viaState !== undefined) {
-            add(e.viaState);
+            add(exprCode({ ...e, fold: undefined }, 'render'));
             break;
           }
           const local = jsLocals.get(e.nodeId);
