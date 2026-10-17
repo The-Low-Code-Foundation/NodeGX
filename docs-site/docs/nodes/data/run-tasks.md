@@ -18,6 +18,7 @@ Sequenced bulk work: importing rows, uploading a list of files, migrating record
 | Available in | browser, cloud |
 | SSR compatibility | safe |
 | Provided by | `noodl-runtime` |
+| Behaviour spec | not written yet |
 
 ## Inputs
 
@@ -81,7 +82,11 @@ Run Tasks executes its `taskTemplate` component once per element of `items`, up 
 
 [Repeater](../visual/for-each.md), [Component Inputs](../component-utilities/component-inputs.md), [Component Outputs](../component-utilities/component-outputs.md), [Function](../custom-code/java-script-function.md), [Create New Array](./collection-new.md)
 
+## Code export
+
+Exports to React. A project that uses it exports this node as React code.
+
 
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::

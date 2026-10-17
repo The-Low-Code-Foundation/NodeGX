@@ -22,6 +22,7 @@ Do not use in new graphs — prefer bundled project modules; where a runtime scr
 | Available in | browser |
 | SSR compatibility | client-only — Scripts are injected into the browser DOM; they load after hydration. |
 | Provided by | `noodl-viewer-react` |
+| Behaviour spec | not written yet |
 
 ## Inputs
 
@@ -59,7 +60,13 @@ Script-URL inputs are generated from the configured count (numbered-inputs mecha
 
 [Function](../custom-code/java-script-function.md), [Script](../custom-code/javascript2.md)
 
+## Code export
+
+Does not export to React yet. A project that uses it exports with this node named in the export report.
+
+Why: deliberately out of scope — the type is deprecated in the catalog, so nobody building today is offered one. A project that still holds one exports it as a named deferral, which is the right answer for a node its own editor has retired.
+
 
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::

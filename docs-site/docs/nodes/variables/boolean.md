@@ -18,6 +18,7 @@ Use it for a local flag inside one component — 'has clicked', 'panel expanded'
 | Available in | browser, cloud |
 | SSR compatibility | safe |
 | Provided by | `noodl-runtime` |
+| Behaviour spec | version 2 ([under the hood](#under-the-hood)) |
 
 ## Inputs
 
@@ -85,7 +86,97 @@ The canonical per-instance counter: a Number node's savedValue feeds an Expressi
 
 [Number](./number.md), [String](./string.md), [Color](./color.md), [Variable](../data/variable2.md), [Condition](../logic/condition.md), [Switch](../logic/switch.md), [States](../animation/states.md)
 
+## Code export
+
+Exports to React. A project that uses it exports this node as React code.
+
+## Under the hood
+
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 2. The spec is the reference: the runtime, the React export and the conformance tests are all graded against it. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+
+### What it depends on outside the node
+
+Nothing. Its outputs depend only on its inputs and its own state.
+
+### Starting state
+
+```json
+{
+  "current": false,
+  "hasBeenSet": false,
+  "sets": 0
+}
+```
+
+### How inputs are converted
+
+Inputs not listed arrive as sent.
+
+| Input | Conversion | What it does |
+|---|---|---|
+| Value (`runOnChange-value`) | `not-false` | only an explicit `false` turns it off; no value, `0` and `""` leave it on |
+
+### How actions report back
+
+Each time Set is triggered, the node reports exactly one of **Done** or **Unchanged**.
+
+### The code it replaces
+
+What you would write by hand instead:
+
+- a boolean held in state, set from elsewhere: `const [done, setDone] = useState(false)`
+
+## The full spec {#spec-source}
+
+The spec's source, as the docs were generated. Helpers it imports live beside it in `packages/nodegx-node-spec/src`.
+
+```ts title="packages/nodegx-node-spec/src/nodes/boolean.ts"
+/**
+ * Boolean — read from `packages/noodl-runtime/src/nodes/std-library/variables/boolean.ts` on
+ * 2026-09-30 (NSP-011). The family's rules are in variable-base.ts; this file is the four lines
+ * boolean.ts supplies.
+ */
+
+import { defineNode } from '../spec';
+import { afterSets, CHANGED, onSet, onValue, SAVED_VALUE_DESCRIPTION, VARIABLE_OUTCOMES, variableInputs, variableState, type VariableArgs } from './variable-base';
+
+/** :7-23 — startValue false (:10); `cast` is `Boolean(value)` (:16-18); empty options null / false (:19-22) */
+export const BOOLEAN: VariableArgs & { type: 'boolean' } = {
+  type: 'boolean',
+  startValue: false,
+  cast: (value) => Boolean(value),
+  emptyOptions: [
+    { value: 'null', label: 'Null (default)', coerce: null },
+    { value: 'false', label: 'False', coerce: false }
+  ]
+};
+
+export const BooleanVariable = defineNode({
+  type: 'Boolean',
+  // v2 (P109 ISL-027, row C5 ruled "Start with no remembered value"): a first Value of 0 is stored and fires
+  // Changed like any other value, and a Set before any Value reports Unchanged. v1 ignored a first 0 (it equalled
+  // a hidden seed of 0) and a Set before any Value stored that seed and reported Done.
+  version: 2,
+  source: 'packages/noodl-runtime/src/nodes/std-library/variables/boolean.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'a boolean held in state, set from elsewhere', example: 'const [done, setDone] = useState(false)' }
+  ],
+  state: variableState(BOOLEAN),
+  inspect: (s) => String(s.current),
+  outcomes: VARIABLE_OUTCOMES,
+  inputs: variableInputs(BOOLEAN),
+  outputs: {
+    savedValue: { type: 'boolean', from: (s) => s.current, displayName: 'Value', group: 'Values', description: SAVED_VALUE_DESCRIPTION },
+    changed: CHANGED
+  }
+}).on(
+  { value: (s, v, i) => onValue(BOOLEAN, s, v, i), saveValue: onSet },
+  { afterInputs: (s, i) => afterSets(BOOLEAN, s, i) }
+);
+```
+
 
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::

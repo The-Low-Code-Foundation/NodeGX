@@ -18,6 +18,7 @@ Whenever a component needs data or triggers from its parent: item templates, reu
 | Available in | browser, cloud |
 | SSR compatibility | safe |
 | Provided by | `noodl-runtime` |
+| Behaviour spec | not written yet |
 
 ## Dynamic ports
 
@@ -80,7 +81,11 @@ A toolbar has a dozen buttons that differ only in a label, an icon and the name 
 
 [Component Outputs](./component-outputs.md), [Repeater](../visual/for-each.md), [Component Object](./net-noodl-component-object.md), [Receive Event](../events/event-receiver.md)
 
+## Code export
+
+Exports to React. A project that uses it exports this node as React code.
+
 
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::

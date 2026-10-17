@@ -18,6 +18,7 @@ Cross-cutting notifications where sender and receivers must stay decoupled: 'ref
 | Available in | browser |
 | SSR compatibility | safe |
 | Provided by | `noodl-viewer-react` |
+| Behaviour spec | not written yet |
 
 ## Inputs
 
@@ -81,7 +82,11 @@ Events carry a signal (and optional payload values) between components with no w
 
 [Receive Event](./event-receiver.md), [Component Outputs](../component-utilities/component-outputs.md), [Variable](../data/variable2.md), [Object](../data/model2.md)
 
+## Code export
+
+Exports to React. A project that uses it exports this node as React code.
+
 
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::

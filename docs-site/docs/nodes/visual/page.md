@@ -22,6 +22,7 @@ Do not add Page from the node picker or use it outside a Router page component �
 | Available in | browser |
 | SSR compatibility | safe |
 | Provided by | `noodl-viewer-react` |
+| Behaviour spec | not written yet |
 
 ## Inputs
 
@@ -116,7 +117,11 @@ The canonical data grid, and the layout decision most often got wrong. Use a Col
 
 [Page Router](./router.md), [Navigate](../navigation/router-navigate.md), [Page Inputs](../navigation/page-inputs.md)
 
+## Code export
+
+Exports to React. A project that uses it exports this node as React code.
+
 
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::

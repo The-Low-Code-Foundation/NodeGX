@@ -18,6 +18,7 @@ Use it to hold or snapshot local text: capture a Text Input's current value on s
 | Available in | browser, cloud |
 | SSR compatibility | safe |
 | Provided by | `noodl-runtime` |
+| Behaviour spec | version 2 ([under the hood](#under-the-hood)) |
 
 ## Inputs
 
@@ -86,7 +87,108 @@ The idiomatic shared-state shape, contrasting per-instance and app-wide storage.
 
 [Boolean](./boolean.md), [Number](./number.md), [Color](./color.md), [Variable](../data/variable2.md), [Set Variable](../data/set-variable.md), [Expression](../custom-code/expression.md), [Text Input](../visual/net-noodl-controls-textinput.md)
 
+## Code export
+
+Exports to React. A project that uses it exports this node as React code.
+
+## Under the hood
+
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 2. The spec is the reference: the runtime, the React export and the conformance tests are all graded against it. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+
+### What it depends on outside the node
+
+Nothing. Its outputs depend only on its inputs and its own state.
+
+### Starting state
+
+```json
+{
+  "current": "",
+  "hasBeenSet": false,
+  "sets": 0
+}
+```
+
+### How inputs are converted
+
+Inputs not listed arrive as sent.
+
+| Input | Conversion | What it does |
+|---|---|---|
+| Value (`runOnChange-value`) | `not-false` | only an explicit `false` turns it off; no value, `0` and `""` leave it on |
+
+### How actions report back
+
+Each time Set is triggered, the node reports exactly one of **Done** or **Unchanged**.
+
+### The code it replaces
+
+What you would write by hand instead:
+
+- a string held in state, set from elsewhere: `const [name, setName] = useState('')`
+
+## The full spec {#spec-source}
+
+The spec's source, as the docs were generated. Helpers it imports live beside it in `packages/nodegx-node-spec/src`.
+
+```ts title="packages/nodegx-node-spec/src/nodes/string.ts"
+/**
+ * String — read from `packages/noodl-runtime/src/nodes/std-library/variables/string.ts` on
+ * 2026-09-30 (NSP-011). The family's rules are in variable-base.ts; this file is what string.ts
+ * supplies, plus the one output the family does not have: `length` (:37-59).
+ */
+
+import { defineNode } from '../spec';
+import { afterSets, CHANGED, onSet, onValue, SAVED_VALUE_DESCRIPTION, VARIABLE_OUTCOMES, variableInputs, variableState, type VariableArgs } from './variable-base';
+
+/** :12-35 — startValue '' (:15); `cast` is `String(value)` (:25-27); empty options null / '' (:31-34) */
+export const STRING: VariableArgs & { type: 'string' } = {
+  type: 'string',
+  startValue: '',
+  cast: (value) => String(value),
+  emptyOptions: [
+    { value: 'null', label: 'Null (default)', coerce: null },
+    { value: 'empty-string', label: 'Empty string ("")', coerce: '' }
+  ]
+};
+
+export const StringVariable = defineNode({
+  type: 'String',
+  // v2 (P109 ISL-027, row C5 ruled "Start with no remembered value"): a first Value of 0 is stored and fires
+  // Changed like any other value, and a Set before any Value reports Unchanged. v1 ignored a first 0 (it equalled
+  // a hidden seed of 0) and a Set before any Value stored that seed and reported Done.
+  version: 2,
+  source: 'packages/noodl-runtime/src/nodes/std-library/variables/string.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'a string held in state, set from elsewhere', example: 'const [name, setName] = useState(\'\')' }
+  ],
+  state: variableState(STRING),
+  inspect: (s) => String(s.current),
+  outcomes: VARIABLE_OUTCOMES,
+  inputs: variableInputs(STRING),
+  outputs: {
+    savedValue: { type: 'string', from: (s) => s.current, displayName: 'Value', group: 'Values', description: SAVED_VALUE_DESCRIPTION },
+    // :40-58 — `typeof value === 'string' ? value.length : 0`; flagged on every changed store (:28-30)
+    length: {
+      type: 'number',
+      from: (s) => (typeof s.current === 'string' ? s.current.length : 0),
+      displayName: 'Length',
+      group: 'Values',
+      description:
+        '0 when the Variable is cleared (`savedValue` is `null`) — there is no text to ' +
+        'measure, and 0 is what an author reading this as a plain number expects, rather than ' +
+        'a thrown error or `null` itself.'
+    },
+    changed: CHANGED
+  }
+}).on(
+  { value: (s, v, i) => onValue(STRING, s, v, i), saveValue: onSet },
+  { afterInputs: (s, i) => afterSets(STRING, s, i) }
+);
+```
+
 
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::

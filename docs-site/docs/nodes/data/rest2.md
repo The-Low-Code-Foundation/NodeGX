@@ -22,6 +22,7 @@ Recurring API endpoints that deserve a typed port surface — the mapping lives 
 | Available in | browser, cloud |
 | SSR compatibility | safe |
 | Provided by | `noodl-runtime` |
+| Behaviour spec | not written yet |
 
 ## Inputs
 
@@ -93,13 +94,19 @@ All data ports are runtime-discovered from the two scripts' Inputs./Outputs. ref
 
 **REST node feeding a repeater**
 
-The REST node wraps a request/response pair in two scripts: the request script assembles the call from the node's script-declared inputs, and the response script maps the payload onto script-declared outputs — here an `items` array. Ports come from those scripts (that is its dynamism). `fetch` on mount loads the list; `success`/`failure` sequence what follows. For a one-off GET without mapping scripts, HTTP Request is the lighter tool.
+The REST node is retired: the editor no longer offers it, and HTTP Request replaces it in new work. This example is here for the projects that still have one. It wraps a request/response pair in two scripts: the request script assembles the call from the node's script-declared inputs, and the response script maps the payload onto script-declared outputs — here an `items` array. Ports come from those scripts (that is its dynamism). `fetch` on mount loads the list; `success`/`failure` sequence what follows. For a one-off GET without mapping scripts, HTTP Request is the lighter tool.
 
 ## Related nodes
 
 [HTTP Request](./net-noodl-http.md), [Function](../custom-code/java-script-function.md), [Cloud Function](../cloud-services/cloud-function2.md)
 
+## Code export
+
+Does not export to React yet. A project that uses it exports with this node named in the export report.
+
+Why: deliberately out of scope — the type is deprecated in the catalog, so nobody building today is offered one. A project that still holds one exports it as a named deferral, which is the right answer for a node its own editor has retired.
+
 
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::

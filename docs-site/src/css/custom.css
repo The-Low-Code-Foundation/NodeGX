@@ -36,3 +36,9 @@
 .markdown p code {
   white-space: nowrap;
 }
+
+/* A node page's full spec (generate-node-docs.js, `## The full spec {#spec-source}`) can run to 2,000 lines:
+   it scrolls inside its own box rather than making the page that long. */
+.markdown h2#spec-source ~ .theme-code-block pre {
+  max-height: 40rem;
+}
