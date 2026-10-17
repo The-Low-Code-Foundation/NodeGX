@@ -1,0 +1,128 @@
+{
+ "runtime": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "Error",
+     "Text",
+     "Said",
+     "Text",
+     "Gone",
+     "Text"
+    ]
+   },
+   {
+    "step": "S1 Remove",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "Error",
+     "This project has no backend configured. Add one in the Backend panel.",
+     "Said",
+     "This project has no backend configured. Add one in the Backend panel.",
+     "Gone",
+     "Text"
+    ]
+   },
+   {
+    "step": "S2 Remove",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "Error",
+     "This project has no backend configured. Add one in the Backend panel.",
+     "Said",
+     "This project has no backend configured. Add one in the Backend panel.",
+     "Gone",
+     "Text"
+    ]
+   }
+  ],
+  "console": [
+   "[noodl] DeleteDbModelProperties (/Pages/Home): This project has no backend configured. Add one in the Backend panel. [record/storage-op-failed] Object",
+   "[noodl] DeleteDbModelProperties (/Pages/Home): This project has no backend configured. Add one in the Backend panel. [record/storage-op-failed] Object"
+  ]
+ },
+ "export-control": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "Error",
+     "Said",
+     "Gone"
+    ]
+   },
+   {
+    "step": "S1 Remove",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "Error",
+     "Said",
+     "Gone"
+    ]
+   },
+   {
+    "step": "S2 Remove",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "Error",
+     "Said",
+     "Gone"
+    ]
+   }
+  ],
+  "console": []
+ },
+ "export-fixed": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "Error",
+     "Said",
+     "Gone"
+    ]
+   },
+   {
+    "step": "S1 Remove",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "That could not be removed.",
+     "Error",
+     "deleteNote is not connected to a backend yet",
+     "Said",
+     "deleteNote is not connected to a backend yet",
+     "Gone"
+    ]
+   },
+   {
+    "step": "S2 Remove",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "That could not be removed.",
+     "Error",
+     "deleteNote is not connected to a backend yet",
+     "Said",
+     "deleteNote is not connected to a backend yet",
+     "Gone"
+    ]
+   }
+  ],
+  "console": [
+   "DeleteDbModelProperties (/Pages/Home): deleteNote is not connected to a backend yet [record/storage-op-failed] Object",
+   "DeleteDbModelProperties (/Pages/Home): deleteNote is not connected to a backend yet [record/storage-op-failed] Object"
+  ]
+ }
+}

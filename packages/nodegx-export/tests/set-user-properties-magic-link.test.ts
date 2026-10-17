@@ -265,16 +265,15 @@ describe('§B — the component', () => {
 });
 
 describe('§C — the refusals, each by its sentence', () => {
-  test('C1 a consumed failure or completed — only the done chain and the Error value are translated', () => {
+  // EXP-011 §90. A consumed failure is a chain now (tests/the-failure-runs-its-chain.test.ts grades it); completed is not.
+  test('C1 a consumed failure is a chain; a consumed completed is refused — only the done and failure chains and the Error value are translated', () => {
     const ir = cloneIr();
     wire(ir, HOME, 'setProps', 'failure', 'sentSet', 'do', 'signal');
-    expect(reasonFor(ir, HOME, 'setProps')).toBe(
-      'its failure output is consumed — only the done chain and the Error value are translated in this slice'
-    );
+    expect(reasonFor(ir, HOME, 'setProps')).toBeUndefined();
     const two = cloneIr();
     wire(two, HOME, 'magic', 'completed', 'savedSet', 'do', 'signal');
     expect(reasonFor(two, HOME, 'magic')).toBe(
-      'its completed output is consumed — only the done chain and the Error value are translated in this slice'
+      'its completed output is consumed — only the done and failure chains and the Error value are translated in this slice'
     );
   });
 

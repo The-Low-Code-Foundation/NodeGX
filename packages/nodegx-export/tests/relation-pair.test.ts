@@ -421,14 +421,18 @@ describe('§D refusals by mutation', () => {
     expect(reasonOf(source, 'unlink')).toBe("its Id Source is the enclosing repeater's row — row identity is not statically knowable in this slice");
   });
 
-  test('D10 a consumed Failure — the record verbs\' rule, one funnel for the family', () => {
+  // EXP-011 §90. A consumed Failure was refused here (one funnel for the family); it is the catch's chain now, after the
+  // Error row and the raise, as the runtime's `setError` writes, raises, then pulses.
+  test('D10 a consumed Failure is a chain: the catch runs it after the raise', () => {
     const source = mutated((h) => connect(h, 'link', 'failure', 'setLinked', 'do', 'signal'));
-    expect(reasonOf(source, 'link')).toBe('its failure output is consumed — only the done chain and the Error value are translated in this slice');
+    expect(reasonOf(source, 'link')).toBeUndefined();
+    const raise = "            raiseAppError({ code: 'record/storage-op-failed', message: linkErrorMessage, nodeId: 'link', nodeType: 'AddDbModelRelation', componentName: '/Pages/Home' });\n";
+    expect(home(emitApp(source, catalog))).toContain(LINK_HANDLER.replace(raise, `${raise}            status.set('Linked.');\n`));
   });
 
   test('D11 a consumed Completed', () => {
     const source = mutated((h) => connect(h, 'unlink', 'completed', 'setUnlinked', 'do', 'signal'));
-    expect(reasonOf(source, 'unlink')).toBe('its completed output is consumed — only the done chain and the Error value are translated in this slice');
+    expect(reasonOf(source, 'unlink')).toBe('its completed output is consumed — only the done and failure chains and the Error value are translated in this slice');
   });
 
   test('D12 a consumed Id', () => {

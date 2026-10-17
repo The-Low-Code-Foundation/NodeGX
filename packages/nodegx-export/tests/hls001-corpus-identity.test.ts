@@ -390,7 +390,11 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // fixture, and this row read 60: restored from git before the golden was taken.)
     // 61 → 62 on 2026-10-17 ("Hold the id", session 122): `held-desk`. Predicted before regenerating, by emitting every
     // fixture with HEAD's `src` and the tree's: only held-desk differs. Regenerated: 0 lines out, held-desk's 17 in.
-    expect(corpusProjects().length).toBe(62);
+    // 62 → 63 on 2026-10-17 (EXP-011 §90, session 123): `fail-desk`, the first project in the corpus where a record verb's
+    // Failure runs a chain. Predicted before regenerating (`s123-failchain/after-await.ts` over the fixtures): fail-desk in,
+    // and record-desk's Home.tsx changed (its Load sends two Record Fetches; the first is started, not waited for, as the
+    // runtime's two requests go out together). Regenerated, key by key: exactly those two, nothing else.
+    expect(corpusProjects().length).toBe(63);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 

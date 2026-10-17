@@ -872,6 +872,7 @@ export function emitComponent(
         }
       }
       action.then.forEach(collectActionUse);
+      action.failThen.forEach(collectActionUse);
     }
     if (action.kind === 'http-call' || action.kind === 'cloud-call') {
       action.args.forEach((a) => collectExprUse(a.expr));
@@ -1049,7 +1050,8 @@ export function emitComponent(
     actions.flatMap((a) =>
       a.kind === 'branch'
         ? [a, ...deepActions(a.whenTrue), ...deepActions(a.whenFalse)]
-        : a.kind === 'http-call' || a.kind === 'cloud-call' || a.kind === 'record-fetch' || a.kind === 'external-link'
+        : // EXP-011 §90. A record or user verb's Failure chain rides the same line.
+          a.kind === 'api-call' || a.kind === 'http-call' || a.kind === 'cloud-call' || a.kind === 'record-fetch' || a.kind === 'external-link'
           ? [a, ...deepActions(a.then), ...deepActions(a.failThen)]
           : // EXP-011 §45. The two-arm files actions ride the line above's shape; the picker has a third arm.
             a.kind === 'file-upload' || a.kind === 'file-sign'
@@ -1100,7 +1102,6 @@ export function emitComponent(
                 // EXP-011 §86. The pulse loop and each signal's arm.
                 a.kind === 'jsfun-pulses' ||
                 a.kind === 'jsfun-pulse' ||
-                a.kind === 'api-call' ||
                 a.kind === 'date-now-read' ||
                 a.kind === 'collection-remove' ||
                 a.kind === 'array-new' ||
@@ -2668,7 +2669,8 @@ export function emitComponent(
         case 'api-call':
           return (
             a.args.some((arg) => (arg.kind === 'expr' ? reads(arg.expr) : arg.props.some((p) => reads(p.expr)))) ||
-            a.then.some(inAction)
+            a.then.some(inAction) ||
+            a.failThen.some(inAction)
           );
         case 'http-call':
         // EXP-011 §41. The same, one node over.
@@ -2876,6 +2878,10 @@ export function emitComponent(
     return [`if (${m.stateName} === null) {`, ...guard, `${at}} else {`, ...elseLines.map((l) => `${inner}${l}`), `${at}}`].join('\n');
   };
   const actionCode = (action: HandlerAction, indent = 0): string => {
+    // EXP-011 §90. A call a later action of its list follows runs on its own: started here, not waited for.
+    if ('detached' in action && action.detached === true) {
+      return `void (async () => {\n${pad(indent + 2)}${actionCode({ ...action, detached: undefined }, indent + 2)}\n${pad(indent)}})()`;
+    }
     switch (action.kind) {
       /**
        * The url the runtime's `getRelativeURL` would build, built here instead.
@@ -3461,6 +3467,8 @@ export function emitComponent(
           `${inner}${stateSetterOf(action.errorState)}(${action.errorState}Message);`,
           // EXP-011 §54. The Error row first, then the raise, then nothing — the order the setError funnels keep.
           `${inner}${raiseLine(action.nodeId, errorCodeOf(action), `${action.errorState}Message`)}`,
+          // EXP-011 §90. Then the Failure pulse's chain: `reportOutcome` raises before it sends the signal.
+          ...expandActions(action.failThen).map((a) => `${inner}${actionCode(a, indent + 2)};`),
           `${pad(indent)}}`
         ].join('\n');
       }
@@ -4287,6 +4295,8 @@ export function emitComponent(
    * other action keeps the semicolon the existing goldens pin.
    */
   function actionTakesNoTerminator(a: HandlerAction): boolean {
+    // EXP-011 §90. `void (async () => { … })()` ends in `)` and takes its `;`.
+    if ('detached' in a && a.detached === true) return false;
     return (
       // EXP-011 §86. The pulse loop ends in `}`.
       a.kind === 'jsfun-pulses' ||
@@ -4343,7 +4353,7 @@ export function emitComponent(
     return expanded.map((a) =>
       actionTakesNoTerminator(a)
         ? `${pad(indent)}${actionCode(a, indent)}`
-        : `${pad(indent)}${actionCode(a, a.kind === 'date-now-read' || a.kind === 'id-new' || a.kind === 'crypto-call' || a.kind === 'branch' || a.kind === 'array-new' || a.kind === 'component-object-set' || a.kind === 'stack-push' || a.kind === 'stack-reset' || a.kind === 'jsfun-run' ? indent : 0)};`
+        : `${pad(indent)}${actionCode(a, ('detached' in a && a.detached === true) || a.kind === 'date-now-read' || a.kind === 'id-new' || a.kind === 'crypto-call' || a.kind === 'branch' || a.kind === 'array-new' || a.kind === 'component-object-set' || a.kind === 'stack-push' || a.kind === 'stack-reset' || a.kind === 'jsfun-run' ? indent : 0)};`
     );
   }
   /**
@@ -7496,7 +7506,8 @@ export function emitComponent(
       case 'api-call':
         return [
           ...a.args.flatMap((arg) => (arg.kind === 'expr' ? [arg.expr] : arg.props.map((p) => p.expr))),
-          ...a.then.flatMap(actionExprsOf)
+          ...a.then.flatMap(actionExprsOf),
+          ...a.failThen.flatMap(actionExprsOf)
         ];
       // EXP-011 Tier 1.3. The Read reads nothing of its own; the chain is where the expressions
       // are, and a reader of this function wants them (the `usesPayload` test below is one).

@@ -1671,6 +1671,22 @@ const USER_VERBS: Record<
  * The user family's verbs, as the `api-call` action and the session module name them.
  * `update-user` and `magic-link` are EXP-011 §44.
  */
+/** EXP-011 §90. The actions whose emitted form awaits — the ones a later sibling waited on before §90. */
+function isAwaitedAction(value: unknown): value is Extract<HandlerAction, { detached?: true }> {
+  if (value === null || typeof value !== 'object') return false;
+  const kind = (value as { kind?: unknown }).kind;
+  return (
+    kind === 'api-call' ||
+    kind === 'http-call' ||
+    kind === 'cloud-call' ||
+    kind === 'record-fetch' ||
+    kind === 'file-pick' ||
+    kind === 'file-upload' ||
+    kind === 'file-sign' ||
+    (kind === 'crypto-call' && (value as { async?: unknown }).async === true)
+  );
+}
+
 export type UserVerb = 'login' | 'logout' | 'signup' | 'update-user' | 'magic-link';
 
 /** The `User` node's outputs this slice reads off the session stub (USER-FAMILY-TARGET §4c). */
@@ -2530,6 +2546,13 @@ export type HandlerAction =
    */
   | {
       kind: 'api-call';
+      /**
+       * EXP-011 §90. Set by the planner's last pass where a later action of the same list follows it: printed as
+       * `void (async () => { … })();`, so the click's later wires run before the answer arrives, as the runtime's do
+       * (each node acts after the update; the request answers later). A failure before the first await (the
+       * `Missing Record Id` guard) still runs its chain first, as the runtime's synchronous `setError` does.
+       */
+      detached?: true;
       nodeId: string;
       /** What produced the call — for notes and the stub's provenance line. EXP-011 §62: the relation pair rides the same action. */
       verb: 'create' | 'update' | 'delete' | RelationVerb | UserVerb;
@@ -2578,6 +2601,12 @@ export type HandlerAction =
        */
       clearErrorOnDone?: true;
       then: HandlerAction[];
+      /**
+       * EXP-011 §90. The `failure` chain, printed in the catch after the Error row and the raise: the runtime's
+       * `setError` writes the row, raises, then pulses Failure (`node.ts` `reportOutcome`). A read of this node's Error
+       * inside it is the catch's `<errorState>Message` local (`outcome-error`), never the row.
+       */
+      failThen: HandlerAction[];
     }
   /**
    * An `HTTP Request`'s `Fetch` (EXP-011 Tier 1.2) — the vocabulary's second asynchronous action,
@@ -2610,6 +2639,8 @@ export type HandlerAction =
    */
   | {
       kind: 'http-call';
+      /** EXP-011 §90, as `api-call`'s. */
+      detached?: true;
       nodeId: string;
       /** `src/api/http.ts`'s exported function for this node. */
       fnName: string;
@@ -2640,6 +2671,8 @@ export type HandlerAction =
    */
   | {
       kind: 'cloud-call';
+      /** EXP-011 §90, as `api-call`'s. */
+      detached?: true;
       nodeId: string;
       /** `src/api/functions.ts`'s exported function for this node. */
       fnName: string;
@@ -2670,6 +2703,8 @@ export type HandlerAction =
    */
   | {
       kind: 'record-fetch';
+      /** EXP-011 §90, as `api-call`'s. */
+      detached?: true;
       nodeId: string;
       /** The collection module's exported `fetch<Type>ById`. */
       fnName: string;
@@ -2703,6 +2738,8 @@ export type HandlerAction =
    */
   | {
       kind: 'file-pick';
+      /** EXP-011 §90, as `api-call`'s. */
+      detached?: true;
       nodeId: string;
       accept?: ValueExpr;
       capture?: ValueExpr;
@@ -2722,6 +2759,8 @@ export type HandlerAction =
    */
   | {
       kind: 'file-upload';
+      /** EXP-011 §90, as `api-call`'s. */
+      detached?: true;
       nodeId: string;
       file: ValueExpr;
       /** `Private` — absent where unset or authored false; a literal `true` or the wired expression otherwise. */
@@ -2737,6 +2776,8 @@ export type HandlerAction =
    */
   | {
       kind: 'file-sign';
+      /** EXP-011 §90, as `api-call`'s. */
+      detached?: true;
       nodeId: string;
       file: ValueExpr;
       materialize?: string;
@@ -2950,6 +2991,8 @@ export interface MintedArrayPlan {
  */
 export type CryptoCallAction = {
   kind: 'crypto-call';
+  /** EXP-011 §90, as `api-call`'s. */
+  detached?: true;
   nodeId: string;
   node: CryptoNodeKind;
   fn: 'tryHash' | 'tryRandomBytes' | 'tryExtract';
@@ -6475,6 +6518,32 @@ function planComponent(
    * succeeds"*, and `_internal.error` is assigned only in `setError`.
    */
   const verbErrorVars = new Map<string, StateVarPlan>();
+  /** EXP-011 §90. Which of a record or user verb's outcome chains is being compiled, while it is. */
+  const verbChainScope = new Map<string, 'done' | 'failure'>();
+  /**
+   * EXP-011 §90. The nodes whose outcome chains are being compiled, innermost last (`doneChainOf`): a Function's pulse, a
+   * verb's Failure. A node a chain runs reads, at that pulse, the value its sender has just written over every other wire.
+   */
+  const chainSenders: string[] = [];
+  /**
+   * EXP-011 §90. A Set's Value wire where several feed it: the one from the innermost sender whose chain runs the Set, as
+   * the runtime's Value holds whichever wire wrote last and the sender writes just before it pulses. Undefined where no
+   * open sender feeds one (none is statically last), or where the innermost one feeds two.
+   */
+  const valueWiresInto = (node: NodeIR): ConnectionIR[] =>
+    component.connections.filter((c) => c.toId === node.id && c.toProperty === 'value' && c.kind !== 'signal');
+  const lastValueWireOf = (node: NodeIR): ConnectionIR | undefined => {
+    // A signal wired into Value writes nothing to read; the chain that carries it names that mistake on its own.
+    const wires = valueWiresInto(node);
+    // One value wire, or none (a lone signal into Value is compiled as before, and refused where it is read).
+    if (wires.length < 2) return wires[0] ?? component.connections.find((c) => c.toId === node.id && c.toProperty === 'value');
+    for (const sender of [...chainSenders].reverse()) {
+      const own = wires.filter((c) => c.fromId === sender);
+      if (own.length === 1) return own[0];
+      if (own.length > 1) return undefined;
+    }
+    return undefined;
+  };
   /**
    * Verbs whose `Do` actually attached to a handler, filled by the attachment sweep. Every
    * binding pass runs after it, so an `Error` read can require it: a verb whose trigger the
@@ -9234,6 +9303,11 @@ function planComponent(
       (RECORD_VERBS[fromNode.type] !== undefined || RELATION_VERBS[fromNode.type] !== undefined || USER_VERBS[fromNode.type] !== undefined) &&
       fromProperty === 'error'
     ) {
+      // EXP-011 §90. Inside its own Failure chain the row has not changed yet (the setter was called in this closure):
+      // the read is the catch's local, which holds this failure's message, as the runtime's getter does at the pulse.
+      if (verbChainScope.get(fromNode.id) === 'failure') {
+        return { kind: 'outcome-error', nodeId: fromNode.id, local: `${verbErrorStateOf(fromNode).name}Message` };
+      }
       if (!attachedRecordVerbs.has(fromNode.id)) {
         const trigger = USER_VERBS[fromNode.type]?.trigger ?? 'store';
         const compiled = compiledOf(fromNode, trigger);
@@ -10665,6 +10739,14 @@ function planComponent(
    * asking exactly what it asked before.
    */
   const doneChainOf = (node: NodeIR, port = 'done'): DoneChain | { defer: string } => {
+    chainSenders.push(node.id);
+    try {
+      return doneChainOfSender(node, port);
+    } finally {
+      chainSenders.pop();
+    }
+  };
+  const doneChainOfSender = (node: NodeIR, port: string): DoneChain | { defer: string } => {
     const then: HandlerAction[] = [];
     const consumes: string[] = [];
     const collapses: string[] = [];
@@ -10695,6 +10777,25 @@ function planComponent(
       subscribes.push(...(compiled.subscribes ?? []));
     }
     return { then, consumes, collapses, subscribes };
+  };
+
+  /**
+   * EXP-011 §90. A record or user verb's `failure` chain: `doneChainOf` on the other port, with the scope that makes a
+   * read of the verb's own Error inside it the catch's local (the row has not changed inside the closure that set it).
+   */
+  const verbFailChainOf = (node: NodeIR): DoneChain | { defer: string } => {
+    const outer = verbChainScope.get(node.id);
+    verbChainScope.set(node.id, 'failure');
+    let chain: DoneChain | { defer: string };
+    try {
+      chain = doneChainOf(node, 'failure');
+    } finally {
+      // A verb its own Failure chain fires again is compiled inside its own scope: leave the outer one as it was.
+      if (outer === undefined) verbChainScope.delete(node.id);
+      else verbChainScope.set(node.id, outer);
+    }
+    // A sink two chains run is compiled once per Failure scope that reads its local (`compiledOf`), never shared.
+    return chain;
   };
 
   /** Show Popup → the slot set + `done`-chain (POPUPS-TARGET §3). */
@@ -11246,8 +11347,9 @@ function planComponent(
     // Consumed outcome pulses beyond `done`, and the `id` output: the runtime pulses/publishes
     // them per invocation and nothing in this slice's shape carries them (§5.11).
     for (const wire of component.connections.filter((c) => c.fromId === node.id)) {
-      if (wire.fromProperty === 'failure' || wire.fromProperty === 'completed') {
-        return { defer: `its ${wire.fromProperty} output is consumed — only the done chain and the Error value are translated in this slice` };
+      // EXP-011 §90. Failure is a chain now (`verbFailChainOf`); Completed is not.
+      if (wire.fromProperty === 'completed') {
+        return { defer: `its ${wire.fromProperty} output is consumed — only the done and failure chains and the Error value are translated in this slice` };
       }
       if (wire.fromProperty === 'id') {
         return { defer: 'its Id output is consumed — the record it names exists only inside the invoking chain, which the relation verbs would need' };
@@ -11313,6 +11415,8 @@ function planComponent(
 
     const chain = doneChainOf(node);
     if ('defer' in chain) return { defer: chain.defer };
+    const failChain = verbFailChainOf(node);
+    if ('defer' in failChain) return { defer: failChain.defer };
 
     const { typeName, moduleBase } = collectionModuleNames(collectionName);
     const fnName = `${verb}${typeName}`;
@@ -11348,11 +11452,12 @@ function planComponent(
         // EXP-011 §72. An `unknown` id (an untyped Variable, a store key nothing types) into a `string` parameter.
         ...(idExpr !== undefined && idExpr.kind !== 'literal' && exprTsType(idExpr) === 'unknown' ? { coerceId: 'string' as const } : {}),
         errorState: verbErrorStateOf(node).name,
-        then: chain.then
+        then: chain.then,
+        failThen: failChain.then
       },
-      consumes: [...consumes, ...chain.consumes, ...ctx.consumes],
-      collapses: [...ctx.logicNodeIds, ...chain.collapses],
-      subscribes: [...ctx.subscriberIds, ...chain.subscribes]
+      consumes: [...consumes, ...chain.consumes, ...failChain.consumes, ...ctx.consumes],
+      collapses: [...ctx.logicNodeIds, ...chain.collapses, ...failChain.collapses],
+      subscribes: [...ctx.subscriberIds, ...chain.subscribes, ...failChain.subscribes]
     };
   };
 
@@ -11392,8 +11497,8 @@ function planComponent(
 
     // Consumed outcome pulses beyond `done`, and the `id` output (the record verbs' rule, §5.11).
     for (const wire of component.connections.filter((c) => c.fromId === node.id)) {
-      if (wire.fromProperty === 'failure' || wire.fromProperty === 'completed') {
-        return { defer: `its ${wire.fromProperty} output is consumed — only the done chain and the Error value are translated in this slice` };
+      if (wire.fromProperty === 'completed') {
+        return { defer: `its ${wire.fromProperty} output is consumed — only the done and failure chains and the Error value are translated in this slice` };
       }
       if (wire.fromProperty === 'id') {
         return { defer: 'its Id output is consumed — it republishes the Id it was given, and that read is not translated in this slice' };
@@ -11454,6 +11559,8 @@ function planComponent(
 
     const chain = doneChainOf(node);
     if ('defer' in chain) return { defer: chain.defer };
+    const failChain = verbFailChainOf(node);
+    if ('defer' in failChain) return { defer: failChain.defer };
 
     const { typeName, moduleBase } = collectionModuleNames(collectionName);
     const fnName = `${spec.fnPrefix}${typeName}Relation`;
@@ -11488,11 +11595,12 @@ function planComponent(
         guardId: false,
         ...(guards.length > 0 ? { guards } : {}),
         errorState: verbErrorStateOf(node).name,
-        then: chain.then
+        then: chain.then,
+        failThen: failChain.then
       },
-      consumes: [...consumes, ...chain.consumes, ...ctx.consumes],
-      collapses: [...ctx.logicNodeIds, ...chain.collapses],
-      subscribes: [...ctx.subscriberIds, ...chain.subscribes]
+      consumes: [...consumes, ...chain.consumes, ...failChain.consumes, ...ctx.consumes],
+      collapses: [...ctx.logicNodeIds, ...chain.collapses, ...failChain.collapses],
+      subscribes: [...ctx.subscriberIds, ...chain.subscribes, ...failChain.subscribes]
     };
   };
 
@@ -11512,9 +11620,9 @@ function planComponent(
     // Consumed outcome pulses beyond `done`: the runtime pulses them per invocation, and only
     // the done chain and the Error value are translated in this slice (§5.4).
     for (const wire of component.connections.filter((c) => c.fromId === node.id)) {
-      if (wire.fromProperty === 'failure' || wire.fromProperty === 'completed') {
+      if (wire.fromProperty === 'completed') {
         return {
-          defer: `its ${wire.fromProperty} output is consumed — only the done chain and the Error value are translated in this slice`
+          defer: `its ${wire.fromProperty} output is consumed — only the done and failure chains and the Error value are translated in this slice`
         };
       }
     }
@@ -11598,6 +11706,8 @@ function planComponent(
 
     const chain = doneChainOf(node);
     if ('defer' in chain) return { defer: chain.defer };
+    const failChain = verbFailChainOf(node);
+    if ('defer' in failChain) return { defer: failChain.defer };
 
     const call: SessionCallPlan = { nodeId: node.id, verb: spec.verb, fnName: spec.fnName };
     if (spec.columns === true) {
@@ -11638,11 +11748,12 @@ function planComponent(
         guardId: false,
         errorState: verbErrorStateOf(node).name,
         ...(spec.clearsErrorOnDone === true ? { clearErrorOnDone: true as const } : {}),
-        then: chain.then
+        then: chain.then,
+        failThen: failChain.then
       },
-      consumes: [...consumes, ...chain.consumes, ...ctx.consumes],
-      collapses: [...ctx.logicNodeIds, ...chain.collapses],
-      subscribes: [...ctx.subscriberIds, ...chain.subscribes]
+      consumes: [...consumes, ...chain.consumes, ...failChain.consumes, ...ctx.consumes],
+      collapses: [...ctx.logicNodeIds, ...chain.collapses, ...failChain.collapses],
+      subscribes: [...ctx.subscriberIds, ...chain.subscribes, ...failChain.subscribes]
     };
   };
 
@@ -15102,7 +15213,11 @@ function planComponent(
       if (keyType === 'number' || keyType === 'boolean') {
         return { defer: `key "${key}" is ${keyType}-typed by the initial state; only string writes translate in this slice` };
       }
-      const wire = component.connections.find((c) => c.toId === node.id && c.toProperty === 'value');
+      // EXP-011 §90. The Set Variable's rule, one node over.
+      const wire = lastValueWireOf(node);
+      if (wire === undefined && valueWiresInto(node).length > 1) {
+        return { defer: 'two wires feed its Value input — last-writer-wins is not statically ordered' };
+      }
       if (!wire) {
         /**
          * EXP-011 §70. A value typed into the node with nothing wired over it is what every Set
@@ -15223,12 +15338,18 @@ function planComponent(
      * refused every non-string enum refused four values the runtime never converts.
      */
     const setWith = literalParam(node, 'setWith');
-    const wire = component.connections.find((c) => c.toId === node.id && c.toProperty === 'value');
+    // EXP-011 §90. Where several wires feed Value, the one the runtime's Value holds at this Do (`lastValueWireOf`).
+    const wire = lastValueWireOf(node);
     if (setWith === 'object' || setWith === 'array') {
       return { defer: `setWith "${String(setWith)}" conversion is not translated in step 5` };
     }
     if (setWith === 'emptyString') {
       return { action: { kind: 'store-set', variableName, expr: { kind: 'literal', value: '' } }, consumes: wire ? [wire.key] : [], collapses: [], subscribes: [] };
+    }
+    // EXP-011 §90. The runtime's Value holds whichever wire wrote last; this compiled the first and dropped the rest. The
+    // sender's own wire is last at its pulse (nightbook's "Another one"); with none, which wrote last is not known.
+    if (wire === undefined && valueWiresInto(node).length > 1) {
+      return { defer: 'two wires feed its Value input — last-writer-wins is not statically ordered' };
     }
     if (setWith === 'boolean' && wire) {
       return { defer: `setWith "boolean" conversion is not translated in step 5` };
@@ -15616,16 +15737,47 @@ function planComponent(
   const recordEffectDefers = new Map<string, string>();
   const compiling = new Set<string>();
   const compiledOf = (node: NodeIR, port: string): CompiledSink => {
-    const key = `${node.id}:${port}`;
-    const cached = compiledSinks.get(key);
-    if (cached !== undefined) return cached;
+    // EXP-011 §90. A Set with several Value wires compiles per wire it reads, which depends on the chain it is in.
+    const valueWires = (node.type === 'Set Variable' || node.type === GLOBAL_STORE_SET) && valueWiresInto(node).length > 1;
+    const plainKey = `${node.id}:${port}${valueWires ? `@value:${lastValueWireOf(node)?.key ?? 'none'}` : ''}`;
+    /**
+     * EXP-011 §90. Inside a verb's Failure chain a read of its Error is the catch's local, outside it the row; one sink
+     * that two chains run would carry whichever was compiled first into the other (planning's Sign in: Sign Up's catch
+     * read Log In's local; a button beside a Failure chain read a local nothing declared). A compile that reads a scoped
+     * verb's local is kept under that scope's key only; inside a scope, a plain one that reads a scoped verb's row is not
+     * reused. Everything else is one compile, as before.
+     */
+    const scoped = [...verbChainScope].filter(([, s]) => s === 'failure').map(([id]) => id);
+    const scopeKey = scoped.length > 0 ? `${plainKey}@failure:${[...scoped].sort().join(',')}` : undefined;
+    const readsScoped = (result: CompiledSink, form: 'local' | 'row'): boolean => {
+      if ('defer' in result || scoped.length === 0) return false;
+      const rows = form === 'row' ? new Set(scoped.map((id) => verbErrorVars.get(id)?.name).filter((n) => n !== undefined)) : undefined;
+      let found = false;
+      const visit = (value: unknown): void => {
+        if (found || value === null || typeof value !== 'object') return;
+        if (Array.isArray(value)) return value.forEach(visit);
+        const v = value as { kind?: unknown; nodeId?: unknown; viaState?: unknown; name?: unknown };
+        if (form === 'local' && v.kind === 'outcome-error' && v.viaState === undefined && scoped.includes(v.nodeId as string)) found = true;
+        if (form === 'row' && v.kind === 'state-get' && rows!.has(v.name as string)) found = true;
+        for (const child of Object.values(value)) visit(child);
+      };
+      visit(result.action);
+      return found;
+    };
+    const cachedScoped = scopeKey !== undefined ? compiledSinks.get(scopeKey) : undefined;
+    if (cachedScoped !== undefined) return cachedScoped;
+    const cached = compiledSinks.get(plainKey);
+    if (cached !== undefined && !readsScoped(cached, 'row')) return cached;
+    // Inside a scope, a sink whose outside compile is still open (it reached this verb through the verb's Error) is a
+    // second compile, not a cycle: the two read the Error differently.
+    const key = scopeKey !== undefined && (cached !== undefined || compiling.has(plainKey)) ? scopeKey : plainKey;
     // A chain that re-enters itself (done-chains or arms wired in a loop) defers rather than
     // recursing forever; the outer call records the reason.
     if (compiling.has(key)) return { defer: 'its trigger chain is cyclic' };
     compiling.add(key);
     const result = compileSink(node, port);
     compiling.delete(key);
-    compiledSinks.set(key, result);
+    compiledSinks.set(key === plainKey && readsScoped(result, 'local') ? scopeKey! : key, result);
     return result;
   };
 
@@ -15856,7 +16008,9 @@ function planComponent(
               arg.kind === 'expr'
                 ? exprValidIn(arg.expr, context, invokedScope)
                 : arg.props.every((p) => exprValidIn(p.expr, context, invokedScope))
-            ) && actionsValidIn(action.then, context, invokedScope)
+            ) &&
+            actionsValidIn(action.then, context, invokedScope) &&
+            actionsValidIn(action.failThen, context, invokedScope)
           );
         case 'jsfun-run': {
           const def = plan.jsFunctions[action.nodeId];
@@ -16779,6 +16933,36 @@ function planComponent(
         }
       }
     }
+    // EXP-011 §90. The same order for every awaited call: its node reads what it sends after the update, so after the
+    // click's later wires; the export reads it where the call starts. Its own arguments only — its chains run later.
+    for (const [i, a] of actions.entries()) {
+      if (!isAwaitedAction(a)) continue;
+      const sent = new Set<string>();
+      const collect = (value: unknown, top: boolean): void => {
+        if (value === null || typeof value !== 'object') return;
+        if (Array.isArray(value)) return value.forEach((v) => collect(v, false));
+        const kind = (value as { kind?: unknown }).kind;
+        if (!top && typeof kind === 'string' && (kind === 'store-get' || kind === 'store-key-get' || kind === 'state-get')) {
+          reads(value as ValueExpr, sent);
+          return;
+        }
+        for (const [key, child] of Object.entries(value)) if (!/Then$|^then$/.test(key)) collect(child, false);
+      };
+      collect(a, true);
+      const laterWrites = new Map<string, string>();
+      const writtenIn = (b: unknown): void => {
+        if (b === null || typeof b !== 'object') return;
+        if (Array.isArray(b)) return b.forEach(writtenIn);
+        const key = writes(b as HandlerAction);
+        if (key !== undefined && !laterWrites.has(key)) laterWrites.set(key, key.split(':').pop() ?? key);
+        for (const child of Object.values(b)) writtenIn(child);
+      };
+      writtenIn(actions.slice(i + 1));
+      const clash = [...sent].find((k) => laterWrites.has(k));
+      if (clash !== undefined) {
+        return `its node sends "${laterWrites.get(clash)}" after the click's later wires have written it — the runtime reads what it sends after the update, the export where the call starts, and that order is not exported in this slice`;
+      }
+    }
     return undefined;
   }
   function snapAction(action: HandlerAction, snap: ChainSnapshot): HandlerAction | { defer: string } {
@@ -16934,7 +17118,10 @@ function planComponent(
         }
         const then = snapActionList(action.then, snap);
         if (!Array.isArray(then)) return then;
-        return { ...action, args, then };
+        // EXP-011 §90. The catch runs in the same closure, so the Failure chain carries the map on too.
+        const failThen = snapActionList(action.failThen, snap);
+        if (!Array.isArray(failThen)) return failThen;
+        return { ...action, args, then, failThen };
       }
       // Same rule for a request (EXP-011 Tier 1.2): the values it sends are read where the
       // handler is, before the await, so a `Set Variable` earlier in the chain must reach them —
@@ -17884,6 +18071,7 @@ function planComponent(
         } else if (action.kind === 'api-call') {
           attachedMutations.add(action.nodeId);
           scanActions(action.then);
+          scanActions(action.failThen);
         } else if (action.kind === 'http-call') {
           attachedHttpNodes.add(action.nodeId);
           scanActions(action.then);
@@ -19722,6 +19910,7 @@ function planComponent(
               else for (const p of arg.props) walkExpr(p.expr);
             }
             walkActions(action.then);
+            walkActions(action.failThen);
             break;
           // A session read is at its most ordinary inside a request — the signed-in user's id in
           // a path parameter, their token in a header. Missing it here would leave the page
@@ -20522,8 +20711,12 @@ function planComponent(
           case 'jsfun-run':
           case 'jsfun-pulses':
           case 'jsfun-pulse':
+            fillMaterialize(action.then);
+            break;
+          // EXP-011 §90. Both chains.
           case 'api-call':
             fillMaterialize(action.then);
+            fillMaterialize(action.failThen);
             break;
           default:
             break;
@@ -20558,6 +20751,27 @@ function planComponent(
     // whose node was then deferred would be a listener nothing observes — §56 E1's read-time mark. Only a node
     // that collapsed into this file keeps its hook.
     plan.screenResolutions = plan.screenResolutions.filter((s) => dispositions[s.nodeId]?.kind === 'collapsed');
+  }
+
+  // EXP-011 §90. An awaited call that a later action of its own list follows is detached: the runtime runs the click's
+  // other wires before the answer arrives (every one of these nodes acts after the update, and the request answers
+  // later), and an awaited call in place held them back until it answered. Walked over the whole plan, as every list
+  // that holds an action is reached from it; an action is an object with a `kind` in one of its arrays.
+  {
+    const seen = new Set<object>();
+    const visit = (value: unknown): void => {
+      if (value === null || typeof value !== 'object' || seen.has(value)) return;
+      seen.add(value);
+      if (Array.isArray(value)) {
+        value.forEach((item, i) => {
+          if (i < value.length - 1 && isAwaitedAction(item)) item.detached = true;
+          visit(item);
+        });
+        return;
+      }
+      for (const child of Object.values(value)) visit(child);
+    };
+    visit(plan);
   }
 
   // EXP-011 §53. A Run Tasks nothing fires: named as a Cloud Function nothing calls is, by what hangs off it,

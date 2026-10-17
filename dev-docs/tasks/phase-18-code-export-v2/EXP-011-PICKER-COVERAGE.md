@@ -12815,3 +12815,119 @@ Announcement's and Meeting's second Function still waits on Delete Record's Fail
 4. A reactive Function's own signals (no Run wire: it runs when an input changes) are refused whole.
 5. P18-S120-TEXTAREA, P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE, P18-S113-LISTLIVE, P18-S115-DYNPROBE, P18-S122-TEXTDEFAULT;
    BUTTONLOOK and INPUTLOOK (low).
+
+## §90 The failure runs its chain (session 123, 2026-10-17): a record or user verb's Failure, and the click's later wires before the answer
+
+### §90.0 What was measured first
+
+`s123-failchain/conds.ts` over the shipped templates: the §87 Conditions still deferred wait on a Delete's Failure
+(members-area's Announcement and Meeting), Log In's and Sign Up's Failure (members-area's, todo-list's, the Site
+Builder's and the planner's Sign in), New Record's Done (members-area's Post, refused for its access-control rules) and an
+External Link's Done (landing-pages' contact, behind a `/Site/Field`). Every record, relation and user verb refused a wired
+Failure whole: "its failure output is consumed — only the done chain and the Error value are translated in this slice".
+
+### §90.1 What the runtime does
+
+- `setError` writes the Error, raises, then pulses Failure (`dbmodelcrudbase.ts`, `login.ts`; `node.ts` `reportOutcome`
+  raises before it sends the signal). The Cloud Function's catch already printed that order (§41).
+- **Log In, Delete Record, Condition, Cloud Function and HTTP Request each act in an after-update callback**
+  (`scheduleAfterInputsHaveUpdated` / `scheduleOnce`), in the order their wires fired, and a request answers later. So a
+  click's later wires run before any answer; a failure found inside the callback (Delete's "Missing Record Id", "no
+  backend configured") runs its chain before a later wire's callback. Measured on the runtime's own nodes in
+  `helpers/runtime-failure-arm.js`, both ways.
+
+### §90.2 What is built
+
+| piece | what it is |
+|---|---|
+| `api-call.failThen` | the Failure chain (`verbFailChainOf`, `doneChainOf` on `failure`), compiled by `compileRecordOp`, `compileRelationOp` and `compileUserOp`; printed in the catch after the Error row and the raise. Completed keeps its refusal ("only the done and failure chains and the Error value are translated in this slice") |
+| the verb's Error inside it | the catch's `<errorState>Message` local (`outcome-error`, `verbChainScope`); everywhere else the row, as before |
+| the walkers | `actionsValidIn`, `snapAction`, the attach sweep (`scanActions`), the session walk, `fillMaterialize`; in the emitter `collectActionUse`, `deepActions`, the reads walk, `actionExprsOf` |
+| `detached` | the planner's last pass marks an awaited call (`api-call`, `http-call`, `cloud-call`, `record-fetch`, the three file calls, an async crypto call) that a later action of its own list follows; the emitter prints it `void (async () => { … })();`, so the later wires run where the click is and the outcome chains when the answer comes. A failure before the first await (the `Missing Record Id` guard) still runs its chain first, as the runtime's synchronous `setError` does. A call last in its list is awaited in place, as before |
+| the late write | `lateQueryFetchWrite`'s rule, for every awaited call: a later wire of the same list writing a value the call sends is refused by name (the runtime reads it after the update; the export where the call starts) |
+| `compiledOf` | a compile that reads a Failure scope's catch local is kept under that scope's key only; inside a scope, a plain one that reads a scoped verb's row is compiled again; a sink whose outside compile is still open is compiled again inside the scope, not refused as cyclic |
+| `lastValueWireOf` | a Set Variable or Global Store Set with several Value wires reads the one from the innermost open sender (`chainSenders`, pushed by `doneChainOf`): the runtime's Value holds whichever wire wrote last, and a sender writes just before it pulses. With none, "two wires feed its Value input — last-writer-wins is not statically ordered". Compiled per wire. A signal wired into Value is not a writer |
+
+### §90.3 The test (`tests/the-failure-runs-its-chain.test.ts`, 23 rows)
+
+§A the emitted page rendered by real React under StrictMode, its api functions answering when the test says
+(`helpers/export-answer-arm.js`), against the runtime's own Delete Record, Condition, Variable and Set Variable with a
+store the test answers (`helpers/runtime-failure-arm.js`), step by step (press, answer): `fixtures/fail-desk` and five
+variants (the clear first, no clear, the id from a Variable, an empty one, two verbs into one Set Variable). Rows pin
+the runtime to `s123-failchain/EXPECTED.md` (the four predicted variants matched; the two-verb one was added after,
+measured). Two controls disagree: the call awaited in place (HEAD's order) and no Failure chain. Every variant
+typechecks. §B the dispositions, the catch's order, the Done chain in the try, the detached call and the call awaited
+in place, Log In's catch, a verb inside a Failure chain attached. §C Completed refused; a Set fed by two wires and Done
+by a button that sends neither; a button beside the chain reads no catch local; the late write.
+
+Re-pinned to the new claim: `record-verbs` gate 11, `user-family` 5.4, `set-user-properties-magic-link` C1,
+`relation-pair` D10 (the catch runs the chain after the raise) and D11 (the new sentence).
+
+**Mutant arms**, in a copy (`packages/nx-mut-s123`, removed straight after). Control 23 / 23.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | the catch prints no Failure chain | 11 |
+| B | no detach pass | 4 |
+| C | no Failure scope (the Error read from the row) | 18 |
+| D | the Failure chain not compiled | 12 |
+| E | the compile cache not scoped | 2 |
+| G | the late write allowed | 1 |
+| H | the attach sweep skips the Failure chain | 1 |
+| I | a detached call printed awaited | 4 |
+| J | the scoped read returns the row | 10 |
+| K | a sink still compiling outside not compiled again inside | 1 |
+| L | Failure still refused | 18 |
+| M | the first Value wire always wins | 2 |
+| N | one compile per Set, whatever wire it reads | 2 |
+
+(B, D, G and I first failed the typecheck and graded nothing; reshaped to compile. F, the blanket two-wire refusal, was
+replaced by M once the blanket rule lost nightbook's "Another one".)
+
+**Neighbours.** `hls001-corpus-identity`: predicted with `after-await.ts` over the fixtures (fail-desk in, record-desk's
+Home.tsx changed: its Load sends two Record Fetches, and the first is now started, not waited for); regenerated, key by
+key, exactly those two. `parameter-coverage`: `DeleteDbModelProperties.modelId` reaches now (the probe's Delete has a
+Failure wired), so it leaves the silent list and the floor rises 1,235 → 1,236. **The whole package**
+(`nice -n 19 --runInBand`, JSON written 20:27): 138 / 139 suites, 4,897 passed, 2 failed, both `parameter-coverage` on
+the P121 peer's three uncommitted Upload File ports (total 1,399; reaching 1,236, the floor). Package `tsc` 0.
+
+### §90.4 The drive (`s123-failchain/`)
+
+`fail-desk`, three arms, one headless Chrome, a real click per press. **Run 1, no backend:** the runtime refused before
+any request ("This project has no backend configured"), so its Failure ran before the clear (refusal hidden); the fixed
+export's no-backend stub throws from an `async` function, after the clear (refusal shown): two ways of not being
+connected, filed as P18-S123-STUBORDER. **Run 2, a backend at a port where nothing listens:**
+
+| step | runtime | export-fixed | export-control (HEAD `06ea65ea3`) |
+|---|---|---|---|
+| S0 load | hidden · Text · Text · Text | hidden · · · | hidden, Remove unwired |
+| S1 Remove | **shown** · Object not found. · Object not found. · Text | **shown** · Could not reach the backend … · the same · | unchanged |
+| S2 Remove | the same | the same | unchanged |
+
+(The refusal · Error · Said · Gone.) **The runtime and the fixed export agree at every step**: each client words its
+network failure its own way, and the runtime shows "Text" in an unwritten wired Text (P18-S122-TEXTDEFAULT).
+
+### §90.5 What this reaches, measured
+
+Dispositions, HEAD against the tree (`dispdiff.ts`): **templates 26 newly exported, none lost; corpus 134, none lost.**
+Reachable: the Sign-in pages of members-area (3), todo-list (3), the Site Builder (2) and the planner (4: both buttons,
+each Failure saying its own error into one Variable), and nightbook's Me (4: the code and question toggles, each
+setting the form from its own pulse). **Not reachable (10)**: members-area's Announcement and Meeting Remove (4 each),
+whose section is mounted by `/Members/Chrome`'s isModerator, which a logic-only component (`/Members/Standing`) feeds and
+the export does not lift; nightbook's Tonight "No question tonight" (2), whose button sits in a box authored Mounted
+false. Filed as P18-S123-UNDRAWNTRIGGER: the report counts them exported. **Changed without a disposition change** (the
+detached call; read against the runtime's order, not driven): digital-bricks-training's Settings, which said "preparing"
+for ever, and Unsubscribe, "stopping" for ever; members-area's Setup; record-desk's Load (two Record Fetches, the first
+now started without waiting, as the runtime's two requests go out together).
+
+### §90.6 What this leaves
+
+1. **P18-S123-UNDRAWNTRIGGER** (medium, filed): a node collapsed into an element the export does not draw is counted
+   exported and never runs (10 template nodes here; s122's nightbook "A fresh form" is the same).
+2. P18-S123-STUBORDER (low, filed): the no-backend stub fails after a click's later wires; the runtime with no backend
+   refuses before them.
+3. The §87 Conditions still waiting: members-area's Post (New Record's access-control rules, a clock read), the
+   Unsubscribe page (a Function's own Failure), landing-pages' contact (a `/Site/Field`), the Site Builder's Setup (a
+   ticked Condition).
+4. P18-S122-DEADROW, P18-S122-TPLBUILD (high); P18-S120-TEXTAREA, P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE,
+   P18-S113-LISTLIVE, P18-S115-DYNPROBE; TEXTDEFAULT, BUTTONLOOK, INPUTLOOK (low).

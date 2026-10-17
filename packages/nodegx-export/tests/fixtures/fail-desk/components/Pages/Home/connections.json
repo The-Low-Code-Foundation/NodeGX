@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b8d20e00-0000-4000-8000-000000000703",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "removeBtn",
+      "fromProperty": "onClick",
+      "toId": "del",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "removeBtn",
+      "fromProperty": "onClick",
+      "toId": "putAway",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "putAway",
+      "fromProperty": "result",
+      "toId": "refusal",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "del",
+      "fromProperty": "failure",
+      "toId": "show",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "show",
+      "fromProperty": "result",
+      "toId": "refusal",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "del",
+      "fromProperty": "error",
+      "toId": "errorText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "del",
+      "fromProperty": "error",
+      "toId": "saidSet",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "del",
+      "fromProperty": "failure",
+      "toId": "saidSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "saidRead",
+      "fromProperty": "value",
+      "toId": "saidText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "del",
+      "fromProperty": "done",
+      "toId": "goneSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "goneRead",
+      "fromProperty": "value",
+      "toId": "goneText",
+      "toProperty": "text"
+    }
+  ]
+}
