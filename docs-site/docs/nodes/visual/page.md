@@ -121,6 +121,8 @@ The canonical data grid, and the layout decision most often got wrong. Use a Col
 
 Exports to React. A project that uses it exports this node as React code.
 
+This node is in the worked example on [How export works](../../how-export-works.md): see [what it became](../../how-export-works.md#what-each-node-became) in the generated React.
+
 
 :::info Generated
 This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.

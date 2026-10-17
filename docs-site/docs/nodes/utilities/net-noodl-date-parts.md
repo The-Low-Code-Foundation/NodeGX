@@ -88,6 +88,8 @@ Bubble spells this `Date1 rounded down to month`, and it is really two different
 
 Exports to React. A project that uses it exports this node as React code.
 
+[How export works](../../how-export-works.md) shows what an export writes, with a worked example.
+
 ## Under the hood
 
 This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 1. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.

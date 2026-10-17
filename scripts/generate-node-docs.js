@@ -369,12 +369,19 @@ function migrationWords(migration) {
   return '';
 }
 
+/** The node types in the export page's worked example (scripts/export-doc/example.js). */
+const EXAMPLE_TYPES = new Set(require('./export-doc/example').BECAME.map(([typeName]) => typeName));
+
 function renderExportSection(entry) {
   if (!entry) return '';
   const words = EXPORT_STATUS_WORDS[entry.status];
   if (!words) throw new Error(`generate-node-docs: unknown export status "${entry.status}" for ${entry.typeName}`);
   const why = entry.status !== 'translated' && entry.exemption ? `\n\nWhy: ${escapeAngles(entry.exemption)}.` : '';
-  return `## Code export\n\n${words}${why}\n`;
+  // Pages sit at nodes/<category>/<slug>.md, two levels below the export page.
+  const more = EXAMPLE_TYPES.has(entry.typeName)
+    ? 'This node is in the worked example on [How export works](../../how-export-works.md): see [what it became](../../how-export-works.md#what-each-node-became) in the generated React.'
+    : '[How export works](../../how-export-works.md) shows what an export writes, with a worked example.';
+  return `## Code export\n\n${words}${why}\n\n${more}\n`;
 }
 
 function renderSpecSection(node, specEntry) {

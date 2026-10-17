@@ -91,6 +91,8 @@ Deleting a user is two deletions, and the ORDER is the interesting part: the ses
 
 Runs only on the backend, inside cloud functions, so it has no React form.
 
+[How export works](../../how-export-works.md) shows what an export writes, with a worked example.
+
 ## Under the hood
 
 This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 1. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.

@@ -28,16 +28,7 @@ const CATALOG = path.join(ROOT, 'packages/noodl-types/src/node-catalog.json');
 const ENRICHED = path.join(ROOT, 'packages/noodl-types/src/node-catalog-enriched.json');
 const LEDGER = path.join(EXPORT_PKG, 'coverage-ledger.json');
 
-/** What each node in the sample became, in the order the page shows them. A line says only what the code shows. */
-const BECAME = [
-  ['Page', 'the page component `HomePage`, its `<title>`, and the route `/` in `App.tsx`'],
-  ['Group', 'a `<div>` whose layout is a class in `Home.module.css`'],
-  ['Text', 'a `<p>` whose text is the String Format, inlined'],
-  ['net.noodl.controls.button', 'a `<button>` with its label and an `onClick`'],
-  ['Counter', 'one `useState`; Increase becomes `setClicks((v) => v + 1)` and Reset becomes `setClicks(0)`'],
-  ['String Format', 'a template string, `` `Clicked ${clicks} times` ``, compiled away where its output lands'],
-  ['Router', 'the `react-router-dom` routes in `App.tsx`']
-];
+const { BECAME } = require('./example');
 
 const SHOWN_FILES = ['src/pages/Home.tsx', 'src/pages/Home.module.css', 'src/App.tsx'];
 

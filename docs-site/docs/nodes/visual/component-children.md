@@ -51,6 +51,8 @@ A drop target built the way the browser actually requires: a `Javascript2` node 
 
 Exports to React. A project that uses it exports this node as React code.
 
+[How export works](../../how-export-works.md) shows what an export writes, with a worked example.
+
 
 :::info Generated
 This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.

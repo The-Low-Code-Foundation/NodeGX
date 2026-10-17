@@ -270,6 +270,8 @@ The top of an admin screen. The tile is its own component — four hand-written 
 
 Exports to React. A project that uses it exports this node as React code.
 
+This node is in the worked example on [How export works](../../how-export-works.md): see [what it became](../../how-export-works.md#what-each-node-became) in the generated React.
+
 ## Under the hood
 
 This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 10. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
