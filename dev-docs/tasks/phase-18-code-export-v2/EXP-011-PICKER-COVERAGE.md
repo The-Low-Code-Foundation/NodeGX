@@ -12712,3 +12712,106 @@ and once per arriving write; a Run before a write in one event, or two writes to
 2. The senders the 18 remaining §87 Conditions wait on (§87.5).
 3. P18-S120-TEXTAREA, P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE, P18-S113-LISTLIVE, P18-S115-DYNPROBE; BUTTONLOOK and
    INPUTLOOK (low).
+
+## §89 Hold the id (session 122, 2026-10-17): a Function's row read by nodes that are not drawn, and a second Function fed by the first
+
+### §89.0 What was measured first
+
+`s119-fnchain-measure/dump.ts` on members-area's Announcement: "Hold the id" (Page Did Mount → Run, its id input ticked
+from the Page Inputs) was refused for its id read by the second Function ("consumed outside the Run chain by an
+unrendered sink"), and the second Function for being fed by the first ("JS-node chains are not translated"). **Cutting
+that one wire in a copy exported Hold the id, the Record its `ready` fetches, and the refusal Condition on its Failure**:
+one blocker, not two (the Record's Id is read inside `ready`'s own chain). Meeting is the same graph. The Site Builder's
+PageEditor holds the page id the same way and reads it from a Record, a Set Record, a New Record, a Cloud Function and
+a Query's parameter.
+
+### §89.1 What the runtime does (`s122-holdtheid/probe.ts`, the runtime's own Function, Variable and Set Variable)
+
+- The second Function's input holds the last value Hold the id **delivered**; a run that returns before writing leaves it.
+- **A Set Variable whose Do the same click sends reads the run's new value, whichever wire comes first** (its Do waits for
+  the update's inputs). The export runs a click in wire order, so it agrees with the reader's wire after the Run and
+  read the run before with it first.
+
+### §89.2 What is built
+
+| piece | what it is |
+|---|---|
+| `compileJsRun`, the stray reads | an unrendered reader no longer refuses the run when it is a Function, and the reader is one that reads its input at its own trigger or asks again on a change (`isRowReader`: a Function's input, a Set Variable's Value, a Record's Id, a Set Record's and New Record's values, a Delete's Id, a Cloud Function's input, a Query's parameter). HEAD's own rule (the first stray drawn) is kept where it materialized, so nothing HEAD exported is lost |
+| own signals | a read on a target of one of the Function's own signals whose chain is refused is that chain's, and names it ("its out-shelf output feeds CloudFunction2.in-shelf, which its "go" signal runs, and that chain is not exported: …"); counting it materialized a row nothing read, and marketplace's ShelfRow button lost its TODO |
+| the same click | a reader whose Do the click that runs the Function sends **before** the Run is refused by name |
+| `jsFunReadExpr` | a Function's input fed by a Run-wired, materialized Function reads its row; a feeder whose run is refused names its reason ("the Function that feeds it is not exported: …") |
+| the sink loop | compiles a node's Function feeders first (`compileFunctionFeedersOf`), only those an element's event or a Did Mount runs. Forcing the compile from inside a reader's resolution re-entered sinks already compiling (nightbook's three toggles share one Set Variable) and refused them as cyclic; a feeder run from elsewhere may never attach (P18-S122-DEADROW) |
+| `component.ts`, a row read in a handler | the kept node's `delivered` value (`holdTheIdNode.delivered.id`), current within the click that ran it; render reads the row |
+| P18-S121-FRESHOUTPUTS, half | a materialized run keeps its node (`pulsed`), so an output a later run does not write keeps the last value |
+| an effect's dependency | the field read (`holdTheIdOut?.id`), never the row, which is a fresh copy every run: the sections Query asked again on every run of Hold the id |
+
+### §89.3 The test (`tests/the-id-is-held.test.ts`, 22 rows)
+
+§A the emitted page, rendered by real React under StrictMode (`helpers/export-react-arm.js`), against the runtime's own
+nodes (`helpers/runtime-ticked-arm.js`), press by press, over `fixtures/held-desk` and six variants (the box unticked,
+no seed, no ready, the second Function ticked, the same click after, a Group's Did Mount); a row pins the runtime to
+`EXPECTED.md`; two controls (the click reading the state row lags the same-click reader; a fresh node per run loses the
+id); every variant typechecks. §B the dispositions, the handler read, the kept node, the reader listed before its feeder,
+the effect's field dependency. §C the same-click refusal, an own signal's refused chain, a reader not on the list (an
+Expression), HEAD's rule kept, a feeder run by no element event, a refused feeder named. Beside it,
+`the-query-reads-its-wires` gains a row (a Run-wired Function feeding the Query's value), `the-function-sends-its-signals`
+re-pins two §C rows and gains one (the reverse order), `jsfun` re-pins two (the materialized run through the kept node).
+
+**Mutant arms**, in a copy (`packages/nx-mut-s122`, removed straight after). Control 248 / 248.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | a handler reads the state row | 6 |
+| B | a materialized run keeps no node | 4 |
+| C | no same-click refusal | 2 |
+| D | own-signal reads never excused | 2 |
+| E | every reader allowed | 1 |
+| F | no Function-fed input | 14 |
+| G | HEAD's rule dropped | 1 |
+| H | the effect keyed on the row | 1 |
+| I | no feeder-first compile | 1 |
+| J | feeder-first for any trigger | 1 |
+| K | the Query not a reader | 1 |
+| L | the handler reads `outputs`, not `delivered` | 4 |
+
+(A, C and D first failed the typecheck and graded nothing; reshaped to compile.)
+
+**Neighbours.** `hls001-corpus-identity`: predicted by emitting every fixture with HEAD's `src` and the tree's (only
+`held-desk` differs); regenerated, 0 lines out, held-desk's 17 in. **The whole package** (`nice -n 19 --runInBand`, JSON written 18:46): 137 / 138 suites, 4,856 passed, 2 failed, both `parameter-coverage` on the P121 peer's three uncommitted Upload File ports (reaching 1,235, the floor, unmoved). Package `tsc` 0.
+
+### §89.4 The drive (`s122-holdtheid/`)
+
+`held-desk` itself, three arms in one headless Chrome, a real click per press, no backend.
+
+| step | runtime | export-fixed | export-control (HEAD `63ed6b0f6`) |
+|---|---|---|---|
+| S0 load | a · Text · Text | a · · | all blank |
+| S1 Remove | a · removing a · a | the same | unchanged |
+| S2 Pick b | b · removing a · a | the same | unchanged |
+| S3 Remove | b · removing b · b | the same | unchanged |
+| S4 Pick nothing | b · removing b · b | the same | unchanged |
+| S5 Remove | b · removing b · b | the same | unchanged |
+
+(Loaded · Saying · Removed.) **The runtime and the fixed export agree in every step after load.** At load the runtime
+shows the Text node's default "Text" where nothing has been written: P18-S122-TEXTDEFAULT, filed (222 wired Texts in the
+templates have no text of their own). No console errors.
+
+### §89.5 What this reaches, measured
+
+Dispositions, HEAD against the tree (`dispdiff.ts`): **15 template nodes newly exported, none lost** (members-area's
+Announcement and Meeting: Hold the id, its Page Inputs, the Record, the refusal Condition, 4 each; the Site Builder's
+PageEditor: Hold the page id, its Page Inputs, the sections Query, and the three Functions that read the fetched page,
+6; nightbook's Coming, "A fresh form", 1, which never runs: its Did Mount is refused by name). **The corpus: 129, none
+lost** (older Site Builder copies also gain "Save the page fields", which reads the held id at the Save click). The
+Announcement's and Meeting's second Function still waits on Delete Record's Failure chain (§87.5's family).
+
+### §89.6 What this leaves
+
+1. **P18-S122-DEADROW** (high, filed): 10 of the 15 rows the templates materialize are never written, 6 read (members-
+   area's Landing 8 times), with no note. Pre-existing; this session adds no read to one.
+2. **P18-S122-TPLBUILD** (high, filed): 13 of 19 template exports fail their own `tsc -b` (rocket-school and star-class 78 each); one class is an author's untyped parameter in a Function body, which the PageEditor's "Is there anything unsaved?" adds two of. The fixtures typecheck; the templates were never gated.
+3. The senders the 18 remaining §87 Conditions wait on: a Record verb's and Log In's / Sign Up's Failure chains (now the
+   Announcement's and Meeting's Remove), an External Link's Done.
+4. A reactive Function's own signals (no Run wire: it runs when an input changes) are refused whole.
+5. P18-S120-TEXTAREA, P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE, P18-S113-LISTLIVE, P18-S115-DYNPROBE, P18-S122-TEXTDEFAULT;
+   BUTTONLOOK and INPUTLOOK (low).

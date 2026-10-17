@@ -1,3 +1,59 @@
+# Next session — session 122 (2026-10-17, BOARD lane 6) built **"Hold the id"**: a Function's id, read by nodes that are not drawn, exports. members-area's Announcement and Meeting fetch their record and say when it is not available; the Site Builder's PageEditor fetches the page, lists its sections and says draft or published.
+
+## ✅ Session 122: the id is held
+
+Read EXP-011 §89. In short:
+
+| what | where |
+|---|---|
+| Measured first: on the Announcement one wire was the whole blocker (the hold's id into the second Function); the Record's Id is read inside `ready`'s own chain | `s119-fnchain-measure/dump.ts`, a cut copy |
+| The runtime measured: a reader holds the last delivered value across a run that returns early; **a Set Variable fired by the same click reads the run's new value whichever wire comes first** | `s122-holdtheid/probe.ts` |
+| An unrendered reader reads the row: only a Function's, and only readers that read at their own trigger or ask again on change (`isRowReader`); HEAD's own rule kept where it materialized; a read in its own signal's refused chain names that chain; the same click with the reader first refused | `plan.ts` `compileJsRun` |
+| A Function's input fed by a Run-wired, materialized Function (`jsFunReadExpr`); feeders compiled first in the sink loop, only those an element's event or a Did Mount runs (`compileFunctionFeedersOf`) | `plan.ts` |
+| A handler read prints `<fn>Node.delivered.x`; a materialized run keeps its node (FRESHOUTPUTS, half); an effect is keyed on the field, not the row | `component.ts` |
+| Spec, 22 rows: real React under StrictMode against the runtime's own nodes over `fixtures/held-desk` and six variants, two controls; plus a Query row in `the-query-reads-its-wires` | `tests/the-id-is-held.test.ts` |
+| Drive, three arms: runtime == fixed after load; HEAD blank | `s122-holdtheid/` |
+
+- 🔴 **Forcing a feeder's compile from inside a reader's resolution re-enters sinks already compiling** (nightbook's three
+  toggles share one Set Variable: one lost export, "its trigger chain is cyclic"). Compile feeders at the top of the sink
+  loop, where no chain is open, and never from a resolution: 13 chain-scope maps would leak into it.
+- 🔴 **A first measurement said 16 gained, 0 lost, and hid two holes.** The Add buttons of todo-list's lists sent `add`
+  without the title (a Component Outputs value), and the Site Builder's Home link read a row nothing writes. Each was
+  found by reading the emitted diff of every gained node, not by the count. Read the code a gain prints.
+- 🔴 **For a Function every `out-*` is a "value output", signals included** (`isJsValueOutput`): a signal wired into a
+  drawn Text is a drawn stray. Build a refused-signal row into an undrawn target.
+- 🔴 **A mutant that does not typecheck grades nothing** (A, C, D first read "0 total"): reshape it (`&& x.toId === ''`).
+- 🔴 **A jest copy of the package needs its own package name** (`npx` refuses two workspaces called `@nodegx/export`);
+  call `node_modules/.bin/jest` directly.
+- The runtime shows a wired Text's default "Text" until its first value (P18-S122-TEXTDEFAULT); the spec's stand-in
+  hid it, the drive found it.
+
+Readings: the spec 22 / 22; neighbours (`the-function-sends-its-signals` 38 with two re-pinned and one new,
+`jsfun` 47 with two re-pinned, `the-query-reads-its-wires` 141 with one new), hls001 regenerated after predicting (0
+lines out, held-desk's 17 in); package `tsc` 0. 12 mutant arms, each killing rows (control 248 / 248). Whole package
+(`nice -n 19 --runInBand`, JSON written 18:46): 137 / 138 suites, 4,856 passed, 2 failed, both `parameter-coverage` on
+the P121 peer's three uncommitted Upload File ports (reaching 1,235, the floor).
+
+Reach (`dispdiff.ts`, HEAD against the tree): **templates 15 gained, 0 lost; corpus 129, 0 lost**. One gain is nominal
+(nightbook's "A fresh form": its Did Mount is refused by name, so it never runs).
+
+Filed: **P18-S122-DEADROW** (high: a row whose run never attaches is read as nothing, silently: 10 of 15 template rows,
+members-area's Landing 8 reads), **P18-S122-TPLBUILD** (high: 13 of 19 template exports fail their own `tsc -b`, 337
+errors; the templates were never gated), **P18-S122-TEXTDEFAULT** (low).
+
+**Next (BOARD lane 6):**
+1. **The senders the 18 remaining §87 Conditions wait on**: a Record verb's Failure chain first (the Announcement's and
+   Meeting's Remove: the second Function exports now and stops at Delete Record's Failure), Log In's / Sign Up's, an
+   External Link's Done.
+2. **P18-S122-DEADROW**: decide a row after the attach pass (or re-plan with the name sets restored).
+3. **P18-S122-TPLBUILD**: a gate over the templates' exports by count, then the three emitter classes; the body class
+   needs Richard's ruling.
+4. P18-S120-TEXTAREA, P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE, P18-S113-LISTLIVE, P18-S115-DYNPROBE; BUTTONLOOK,
+   INPUTLOOK, TEXTDEFAULT (low).
+5. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
 # Next session — session 121 (2026-10-17, BOARD lane 6) fixed **P18-S119-TICKEDRUN** and, in front of it, **P18-S121-DIDMOUNT**: a Run-wired Function also runs when a ticked input gets a new value, and an element's Did Mount chain runs once per mount, where HEAD compiled it and then dropped it.
 
 ## ✅ Session 121: the ticked input runs it again

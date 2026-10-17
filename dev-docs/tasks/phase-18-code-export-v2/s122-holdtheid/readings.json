@@ -1,0 +1,267 @@
+{
+ "runtime": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "a",
+     "Saying",
+     "Text",
+     "Removed",
+     "Text"
+    ]
+   },
+   {
+    "step": "S1 Remove",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "a",
+     "Saying",
+     "removing a",
+     "Removed",
+     "a"
+    ]
+   },
+   {
+    "step": "S2 Pick b",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "b",
+     "Saying",
+     "removing a",
+     "Removed",
+     "a"
+    ]
+   },
+   {
+    "step": "S3 Remove",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "b",
+     "Saying",
+     "removing b",
+     "Removed",
+     "b"
+    ]
+   },
+   {
+    "step": "S4 Pick nothing",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "b",
+     "Saying",
+     "removing b",
+     "Removed",
+     "b"
+    ]
+   },
+   {
+    "step": "S5 Remove",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "b",
+     "Saying",
+     "removing b",
+     "Removed",
+     "b"
+    ]
+   }
+  ],
+  "console": []
+ },
+ "export-control": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "Saying",
+     "Removed"
+    ]
+   },
+   {
+    "step": "S1 Remove",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "Saying",
+     "Removed"
+    ]
+   },
+   {
+    "step": "S2 Pick b",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "Saying",
+     "Removed"
+    ]
+   },
+   {
+    "step": "S3 Remove",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "Saying",
+     "Removed"
+    ]
+   },
+   {
+    "step": "S4 Pick nothing",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "Saying",
+     "Removed"
+    ]
+   },
+   {
+    "step": "S5 Remove",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "Saying",
+     "Removed"
+    ]
+   }
+  ],
+  "console": []
+ },
+ "export-fixed": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "a",
+     "Saying",
+     "Removed"
+    ]
+   },
+   {
+    "step": "S1 Remove",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "a",
+     "Saying",
+     "removing a",
+     "Removed",
+     "a"
+    ]
+   },
+   {
+    "step": "S2 Pick b",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "b",
+     "Saying",
+     "removing a",
+     "Removed",
+     "a"
+    ]
+   },
+   {
+    "step": "S3 Remove",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "b",
+     "Saying",
+     "removing b",
+     "Removed",
+     "b"
+    ]
+   },
+   {
+    "step": "S4 Pick nothing",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "b",
+     "Saying",
+     "removing b",
+     "Removed",
+     "b"
+    ]
+   },
+   {
+    "step": "S5 Remove",
+    "lines": [
+     "Held Desk",
+     "Pick b",
+     "Pick nothing",
+     "Remove",
+     "Loaded",
+     "b",
+     "Saying",
+     "removing b",
+     "Removed",
+     "b"
+    ]
+   }
+  ],
+  "console": []
+ }
+}

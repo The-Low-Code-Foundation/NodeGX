@@ -16,3 +16,10 @@ keeps a `functionNode` and is right.
 **Reach, measured:** 0. Of the 15 template Functions (5 in the corpus) whose body reads one of its own outputs, the
 one that exports (the Site Builder's SectionRow) reads only what the same run wrote. Latent; the fix is to keep a node
 for any run whose body reads `Outputs.x` before writing it.
+
+**Session 122 (2026-10-17): half fixed, the half that now has reach.** A Function whose run *materializes* a row (§4f:
+something outside its Run chain reads its outputs) keeps a `functionNode` now, as a pulsed run does, and copies the
+node's outputs into the row. "Hold the id" gave this reach: a second Function reads the first one's id between runs,
+and the held id survived a run that returned early only with the node kept (`tests/the-id-is-held.test.ts`, "no ready",
+and its control). Left open: an invoked run with no signal and no row (its Done chain reads its outputs), still a
+fresh `Outputs` each run; reach 0, as above.
