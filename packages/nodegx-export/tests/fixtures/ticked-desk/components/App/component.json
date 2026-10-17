@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b8d20e00-0000-4000-8000-000000000502",
+  "name": "App",
+  "path": "/App",
+  "type": "root",
+  "modified": "2026-10-17T12:00:00.000Z",
+  "description": "P18-S119-TICKEDRUN fixture: the router shell."
+}

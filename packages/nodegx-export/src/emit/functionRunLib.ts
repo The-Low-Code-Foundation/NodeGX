@@ -14,6 +14,10 @@
  *   signals (C7, FB-025), so the k-th pulse a run sends is acted on with the k-th value each output published since the
  *   run began, or the last one when there are fewer. The targets act after the body, in the order it sent the pulses.
  *
+ * - `noodl-runtime/src/run-on-value-change.ts` `valueDidChange`, read by `setScriptInputValue` (NDA-017 §2) — a value input
+ *   ticked under Run On Value Change runs the node when a new value arrives, Run wired or not (P18-S119-TICKEDRUN).
+ *   `tickedArrival` is that test over the ticked inputs, the node holding what each last received.
+ *
  * 🔴 **The first value, not the last.** `Outputs.a = ''; Outputs.a = 'x'; Outputs.go();` hands `go`'s target `''`, as the
  * runtime does today (P18-S119-FIRSTWRITE, needs a ruling). Change it here and in the runtime together, or not at all.
  */
@@ -22,7 +26,7 @@
 export const FUNCTION_RUN_LIB_PATH = 'src/lib/functionRun.ts';
 
 /** The exported helpers, sorted as the import line is. */
-export const FUNCTION_RUN_HELPERS = ['functionNode', 'runFunction'] as const;
+export const FUNCTION_RUN_HELPERS = ['functionNode', 'runFunction', 'tickedArrival'] as const;
 
 export function functionRunLibSource(): string {
   return `/**
@@ -105,6 +109,21 @@ export function runFunction<I, O>(body: (inputs: I, outputs: O) => unknown, inpu
     return { signal, values: values as Partial<O> };
   });
   return { outputs: node.outputs, pulses };
+}
+
+/**
+ * Whether the values on a node's ticked inputs (those whose Run On Value Change box is ticked) are an arrival that runs it:
+ * one of them is not \`undefined\`, which is never delivered, and is not the value that input already holds. Records each
+ * one that arrived. A Run records what it read the same way, so a value set and a Run sent in one event make one run.
+ */
+export function tickedArrival(held: unknown[], values: readonly unknown[]): boolean {
+  let arrived = false;
+  values.forEach((value, i) => {
+    if (value === undefined || Object.is(value, held[i])) return;
+    held[i] = value;
+    arrived = true;
+  });
+  return arrived;
 }
 `;
 }

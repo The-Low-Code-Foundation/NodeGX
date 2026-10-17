@@ -608,6 +608,57 @@ export function emitComponent(
   const referencedJsIds = new Set<string>();
   /** EXP-011 §86. Runs whose signals have chains: each keeps a `functionNode` ref and imports `src/lib/functionRun.ts`. */
   const pulsedRunIds = new Set<string>();
+  /** P18-S119-TICKEDRUN. Functions a ticked input also runs: their Runs record what they read (`tickedArrival`). */
+  const tickedRunIds = new Set(plan.tickedRuns.map((t) => t.nodeId));
+  /** P18-S119-TICKEDRUN. `held, [a, b]`: the node's held values and its ticked inputs read fresh, in input order. */
+  const tickedRecordArgs = (nodeId: string): string => {
+    const ticked = plan.tickedRuns.find((t) => t.nodeId === nodeId)!;
+    return `${pulseNamesOf(jsFunByNode[nodeId]!).held}, [${ticked.watch.map((e) => exprCode(e, 'handler')).join(', ')}]`;
+  };
+  /**
+   * P18-S121-DIDMOUNT. An element's Did Mount chain, as a mount effect: the runtime sends Did Mount from the element's own
+   * `componentDidMount`, once per mount, children before their parent. The attach pass has always compiled these chains as
+   * the element's handlers; the emitter found no DOM event for them and dropped them, reported. A mount effect is the
+   * component's mount, so it stands in only for an element that mounts with the component: refused by name where the
+   * element or an element above it has a Mounted that a value decides, and dropped where one is authored Mounted false
+   * (it never mounts, so its Did Mount never fires). Post-order over the tree, the runtime's order.
+   */
+  const mountChains: Array<{ nodeId: string; actions: HandlerAction[] }> = [];
+  const mountRefusals = new Map<string, string>();
+  {
+    const mountGateOf = (id: string): string | null => {
+      for (let at: string | undefined = id; at !== undefined; at = nodeById.get(at)?.parent) {
+        const bound = plan.bindings[at]?.['mounted'];
+        const literal = nodeById.get(at)?.parameters.find((p) => p.name === 'mounted')?.value;
+        const never =
+          (bound !== undefined && bound.kind === 'computed' && (bound.expr.kind === 'undefined' || (bound.expr.kind === 'literal' && !bound.expr.value))) ||
+          (bound === undefined && literal?.kind === 'literal' && literal.value === false);
+        const whose = at === id ? 'it is' : `an element above it (${at}) is`;
+        if (never) return `${whose} never mounted, so its Did Mount never fires`;
+        if (bound !== undefined && !(bound.kind === 'computed' && bound.expr.kind === 'literal')) {
+          return `${whose} mounted by a value, so its Did Mount fires when that value says, and a mount effect runs when the component mounts`;
+        }
+        if (at === plan.rootId) break;
+      }
+      return null;
+    };
+    const consider = (id: string) => {
+      const actions = plan.handlers[id]?.['didMount'];
+      if (actions === undefined) return;
+      const why = mountGateOf(id);
+      if (why === null) mountChains.push({ nodeId: id, actions });
+      else mountRefusals.set(id, why);
+    };
+    const visit = (id: string) => {
+      for (const child of plan.childrenOf[id] ?? []) visit(child);
+      // A page's sole Group renders as the page div (TARGET-OUTPUT §2): its children are the page's now, and it mounts
+      // with the page, after them and before the Page.
+      if (id === plan.rootId && plan.collapsedGroupId) consider(plan.collapsedGroupId);
+      consider(id);
+    };
+    if (plan.rootId !== null) visit(plan.rootId);
+  }
+  const mountHandled = new Set(mountChains.map((m) => m.nodeId));
   /** EXP-011 §86. While a pulse loop prints its arms: the Function's id → the loop's pulse local. */
   const activePulses = new Map<string, string>();
   // State rows print only when something references them (CONTROLLED-STATE §3.1) — the
@@ -964,6 +1015,8 @@ export function emitComponent(
     ...plan.branchEffects.map((e) => e.action),
     // EXP-011 §39. A Value Changed's chain earns imports and references exactly as a handler's does.
     ...plan.valueChangedEffects.flatMap((e) => e.actions),
+    // P18-S119-TICKEDRUN. The run a ticked input starts is a chain like any other.
+    ...plan.tickedRuns.map((t) => t.action),
     // EXP-011 §49. The listeners and the arrive chain are chains like any other: a store write
     // inside one earns its import here, a state setter its row.
     ...plan.statesMachines.flatMap((m) =>
@@ -1211,6 +1264,8 @@ export function emitComponent(
   }
   // EXP-011 §39. The watched Input is the effect's dependency and prints as the render local.
   for (const effect of plan.valueChangedEffects) hookExprSources(effect.watch);
+  // P18-S119-TICKEDRUN. The watched values' sources are the effect's dependencies, spelled as render locals.
+  for (const ticked of plan.tickedRuns) ticked.watch.forEach(hookExprSources);
   // EXP-011 §49. The target and its two numbers, and the wired State, print as render locals —
   // 🔴 without this the hook was handed the store *object* (`useAnimatedValue(level, …)`), which
   // typechecks against `unknown` and never animates. Read off the emitted page, not off a gate.
@@ -3290,14 +3345,18 @@ export function emitComponent(
          * kept across runs. `expandActions` printed this statement with an empty `then`, so the pulses are known from the
          * plan, not the action.
          */
+        // P18-S119-TICKEDRUN. A Run records what it read on the ticked inputs, so the effect does not run it again for them.
+        const record = action.ticked !== true && tickedRunIds.has(action.nodeId) ? `tickedArrival(${tickedRecordArgs(action.nodeId)});\n${pad(indent)}` : '';
         if (pulsedRunIds.has(action.nodeId) && action.then.length === 0) {
           const names = pulseNamesOf(def);
-          const run = `const ${names.run} = runFunction(${def.fnName}, ${jsArgsObject(def, 'handler')}, ${names.node})`;
+          const run = `${record}const ${names.run} = runFunction(${def.fnName}, ${jsArgsObject(def, 'handler')}, ${names.node})`;
           if (action.materialize === undefined) return run;
-          return `${run};\n${pad(indent)}${stateSetterOf(action.materialize)}(${names.run}.outputs)`;
+          // P18-S121-SAMEOUTPUTS. A copy: the node's own record is the same object every run, and React keeps a state it is
+          // handed again, so the render would show the first run's values until something else re-rendered.
+          return `${run};\n${pad(indent)}${stateSetterOf(action.materialize)}({ ...${names.run}.outputs })`;
         }
         if (action.materialize !== undefined) {
-          return `${stateSetterOf(action.materialize)}(${def.fnName}(${jsArgsObject(def, 'handler')}))`;
+          return `${record}${stateSetterOf(action.materialize)}(${def.fnName}(${jsArgsObject(def, 'handler')}))`;
         }
         return expandActions(action.then).map(actionCode).join('; ');
       }
@@ -4150,6 +4209,8 @@ export function emitComponent(
     a.kind === 'branch' ||
     // EXP-011 §86. A run with pulses declares its `const`, and its loop is a `for`.
     (a.kind === 'jsfun-run' && pulsedRunIds.has(a.nodeId)) ||
+    // P18-S119-TICKEDRUN. A Run that records what it read is two statements: the record, then the run. The sixth instance.
+    (a.kind === 'jsfun-run' && a.ticked !== true && tickedRunIds.has(a.nodeId)) ||
     a.kind === 'jsfun-pulses' ||
     (a.kind === 'popup-close' && a.then.length > 0) ||
     (a.kind === 'collection-clear' && (a.then.length > 0 || a.unchangedThen.length > 0)) ||
@@ -4269,7 +4330,7 @@ export function emitComponent(
     return expanded.map((a) =>
       actionTakesNoTerminator(a)
         ? `${pad(indent)}${actionCode(a, indent)}`
-        : `${pad(indent)}${actionCode(a, a.kind === 'date-now-read' || a.kind === 'id-new' || a.kind === 'crypto-call' || a.kind === 'branch' || a.kind === 'array-new' || a.kind === 'component-object-set' || a.kind === 'stack-push' || a.kind === 'stack-reset' ? indent : 0)};`
+        : `${pad(indent)}${actionCode(a, a.kind === 'date-now-read' || a.kind === 'id-new' || a.kind === 'crypto-call' || a.kind === 'branch' || a.kind === 'array-new' || a.kind === 'component-object-set' || a.kind === 'stack-push' || a.kind === 'stack-reset' || a.kind === 'jsfun-run' ? indent : 0)};`
     );
   }
   /**
@@ -4345,6 +4406,8 @@ export function emitComponent(
       plan.branchEffects.length > 0 ||
       // EXP-011 §39. A Value Changed is an effect; a Delay owes the unmount cleanup effect.
       plan.valueChangedEffects.length > 0 ||
+      // P18-S119-TICKEDRUN. A ticked input's run is an effect.
+      plan.tickedRuns.length > 0 ||
       // EXP-011 §43, P18-S113-IDBINDREAD. A Record with Fetch unwired is a bind keyed on its Id.
       recordBinds.length > 0 ||
       // P18-S111-RECORDLIVE. A live Record's row subscribes to the client's copy of its record.
@@ -4366,11 +4429,12 @@ export function emitComponent(
   }
   if (radioNameLocals.size > 0) reactImports.push('useId');
   // EXP-011 §39. The timer handle and the last value seen both live in refs.
-  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0 || pulsedRunIds.size > 0) reactImports.push('useRef');
+  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0 || pulsedRunIds.size > 0 || plan.tickedRuns.length > 0) reactImports.push('useRef');
   // EXP-011 §53. A task template's mount effect and its once-guard (StrictMode mounts twice; startTask pulses once).
   // EXP-011 §57. A Repeater Item's Added effect takes the same pair, for the same reason.
   // P18-S116-FIELDMOUNT. A field's mount announcement takes the same pair: its chain may reach a parent or a backend.
-  if (plan.task !== undefined || plan.repeaterItems.length > 0 || plan.fieldMounts.length > 0) {
+  // P18-S121-DIDMOUNT. A Did Mount chain takes the pair too: its runtime pulse is once per mount.
+  if (plan.task !== undefined || plan.repeaterItems.length > 0 || plan.fieldMounts.length > 0 || mountChains.length > 0) {
     if (!reactImports.includes('useEffect')) reactImports.push('useEffect');
     if (!reactImports.includes('useRef')) reactImports.push('useRef');
   }
@@ -4652,9 +4716,11 @@ export function emitComponent(
     internalImports.set(specifier, `import { ${[...usedIdHelpers].sort().join(', ')} } from '${specifier}';`);
   }
   // EXP-011 §86. `src/lib/functionRun.ts`, earned by a run that prints its pulses.
-  if (pulsedRunIds.size > 0) {
+  // P18-S119-TICKEDRUN. `tickedArrival` too, earned by a run a ticked input starts.
+  if (pulsedRunIds.size > 0 || tickedRunIds.size > 0) {
     const specifier = `${relRoot}/${FUNCTION_RUN_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
-    internalImports.set(specifier, `import { functionNode, runFunction } from '${specifier}';`);
+    const helpers = [...(pulsedRunIds.size > 0 ? ['functionNode', 'runFunction'] : []), ...(tickedRunIds.size > 0 ? ['tickedArrival'] : [])];
+    internalImports.set(specifier, `import { ${helpers.join(', ')} } from '${specifier}';`);
   }
   if (usedVariableNames.size > 0) {
     const specifier = `${relRoot}/stores/variables`;
@@ -5113,6 +5179,13 @@ export function emitComponent(
     for (const [port, actions] of Object.entries(plan.handlers[node.id] ?? {})) {
       // A stateful control's Changed chain merges into its controlled onChange (§4c).
       if (port === 'onChange' && controlVarByNode.has(node.id)) continue;
+      // P18-S121-DIDMOUNT. A mount effect, printed with the others; or a refusal that says why.
+      if (port === 'didMount' && mountHandled.has(node.id)) continue;
+      if (port === 'didMount' && mountRefusals.has(node.id)) {
+        notes.push(`${plan.path}: signal ${node.id}.didMount dropped: ${mountRefusals.get(node.id)} — reported`);
+        defer(node.id, 'the "didMount" signal', mountRefusals.get(node.id)!);
+        continue;
+      }
       const eventAttr = roleEvents[port] ?? EVENT_ATTRS[port];
       if (!eventAttr) {
         notes.push(`${plan.path}: signal ${node.id}.${port} has no DOM event equivalent — dropped, reported`);
@@ -6873,6 +6946,8 @@ export function emitComponent(
     const def = jsFunByNode[id]!;
     body.push(`  const ${pulseNamesOf(def).node} = useRef(functionNode<NonNullable<Parameters<typeof ${def.fnName}>[1]>>([${def.signals.map(tsLiteral).join(', ')}])).current;`);
   }
+  // P18-S119-TICKEDRUN. What each ticked input of a Run-wired Function holds, one per instance, as the node's inputs do.
+  for (const ticked of plan.tickedRuns) body.push(`  const ${pulseNamesOf(jsFunByNode[ticked.nodeId]!).held} = useRef<unknown[]>([]).current;`);
   for (const [id, local] of jsLocals) {
     const def = jsFunByNode[id]!;
     body.push(`  const ${local} = ${def.fnName}(${jsArgsObject(def, 'render')});`);
@@ -7308,6 +7383,36 @@ export function emitComponent(
       ''
     );
   }
+  // P18-S119-TICKEDRUN. A ticked input's new value runs the Function: read fresh, as its Run reads them, so a value a mount
+  // effect above has just stored arrives at load as the runtime's arrives at creation. After the mount effects above.
+  for (const ticked of plan.tickedRuns) {
+    const deps = [...new Set(ticked.watch.flatMap(effectDeps))].join(', ');
+    body.push(
+      `  // ${ticked.comment}`,
+      '  useEffect(() => {',
+      `    if (!tickedArrival(${tickedRecordArgs(ticked.nodeId)})) return;`,
+      ...effectBody([ticked.action], 4),
+      `  }, [${deps}]);`,
+      ''
+    );
+  }
+  // P18-S121-DIDMOUNT. Each element's Did Mount chain: once, on mount, children first. After the ticked runs: at load the
+  // runtime runs a ticked arrival before a Did Mount's Run (s121 drive S0). The ref guards StrictMode's second mount.
+  for (const mount of mountChains) {
+    const node = nodeById.get(mount.nodeId)!;
+    const mounted = dedupeLocal('mounted');
+    body.push(
+      `  // ${node.authoredLabel ?? node.type} — Did Mount: once, when it mounts, as the running app sends it.`,
+      `  const ${mounted} = useRef(false);`,
+      '  useEffect(() => {',
+      `    if (${mounted}.current) return;`,
+      `    ${mounted}.current = true;`,
+      ...effectBody(mount.actions, 4),
+      "    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, like the element's own Did Mount",
+      '  }, []);',
+      ''
+    );
+  }
   const actionExprsOf = (a: HandlerAction): ValueExpr[] => {
     switch (a.kind) {
       case 'emit':
@@ -7566,7 +7671,7 @@ export function emitComponent(
     idHelpers: usedIdHelpers,
     timerHelpers: usedTimerHelpers,
     // EXP-011 §86.
-    functionRunLib: pulsedRunIds.size > 0,
+    functionRunLib: pulsedRunIds.size > 0 || tickedRunIds.size > 0,
     // EXP-011 §49. `states.ts` imports `animate.ts`, so a States alone earns both modules.
     animateLib: plan.animations.length > 0 || plan.statesMachines.length > 0,
     statesLib: plan.statesMachines.length > 0,
@@ -7890,8 +7995,9 @@ function runIsPulsed(action: Extract<HandlerAction, { kind: 'jsfun-run' }>): boo
 }
 
 /** EXP-011 §86. The three locals a pulsed run prints, off the wrapper's name: `holdThePageId` → `holdThePageIdRun`. */
-function pulseNamesOf(def: JsFunctionPlan): { run: string; node: string; pulse: string } {
+function pulseNamesOf(def: JsFunctionPlan): { run: string; node: string; pulse: string; held: string } {
   const camel = def.fnName.replace(/_+([A-Za-z0-9])/g, (_m, c: string) => c.toUpperCase()).replace(/_+$/, '');
   const base = camel.charAt(0).toLowerCase() + camel.slice(1);
-  return { run: `${base}Run`, node: `${base}Node`, pulse: `${base}Pulse` };
+  // P18-S119-TICKEDRUN. `held`: what its ticked inputs hold (`tickedArrival`).
+  return { run: `${base}Run`, node: `${base}Node`, pulse: `${base}Pulse`, held: `${base}Held` };
 }

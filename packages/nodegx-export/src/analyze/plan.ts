@@ -2497,8 +2497,10 @@ export type HandlerAction =
    * `materialize` (CONTROLLED-STATE-TARGET §4f) names the state var the run writes when the
    * node's outputs also feed render sinks: `setStockCheckOut(stockCheck({ … }))` precedes the
    * chain, and render reads go through the var.
+   * `ticked` (P18-S119-TICKEDRUN) marks the run a ticked input's new value starts (`TickedRunPlan`): it has no Done, and
+   * its effect has already recorded the values it read.
    */
-  | { kind: 'jsfun-run'; nodeId: string; then: HandlerAction[]; materialize?: string }
+  | { kind: 'jsfun-run'; nodeId: string; then: HandlerAction[]; materialize?: string; ticked?: true }
   /**
    * EXP-011 §86. The chains of a Function's own signals (`Outputs.go()`), first in its run's `then`: one loop over the
    * pulses the run sent, in the order it sent them, each arm (`jsfun-pulse`) the chain of one signal. Inside an arm the
@@ -3294,6 +3296,27 @@ export interface ValueChangedEffectPlan {
   /** The `useRef` local holding the last value the effect saw. */
   lastLocal: string;
   actions: HandlerAction[];
+  comment: string;
+}
+
+/**
+ * P18-S119-TICKEDRUN. A Function or Expression whose Run is wired also runs when one of its value inputs whose Run On Value
+ * Change box is ticked (or unset, which is ticked) gets a new value (NDA-017 §2, `setScriptInputValue`). A wired value
+ * arrives when its source first has one and whenever it changes after; a literal arrives once, at load. Such a run sends
+ * the Function's own signals and writes its outputs, but never Done (no Run sent it). Two arrivals, or an arrival and a
+ * Run, in one update make one run.
+ *
+ * Printed as a `useEffect` keyed on the watched values' sources, beside the Run chains: it asks `tickedArrival` whether
+ * a value arrived (not `undefined`, not the one held), and runs `action` if so. A Run records what it read the same way,
+ * so a click that sets a watched value and sends Run makes one run, the Run's, with its Done (measured, s121 drive S4).
+ * Measured in the viewer (s121 drive S0): at load the arrival's run comes first, then a Did Mount's Run, two runs.
+ */
+export interface TickedRunPlan {
+  nodeId: string;
+  /** The ticked inputs the runtime delivers, in input order: a wired one as the value it reads, a literal as itself. */
+  watch: ValueExpr[];
+  /** The run without its Done: the body, its signals' chains, its §4f write. `ticked: true`. */
+  action: Extract<HandlerAction, { kind: 'jsfun-run' }>;
   comment: string;
 }
 
@@ -4190,6 +4213,8 @@ export interface ComponentPlan {
   branchEffects: BranchEffectPlan[];
   /** Value Changed effects (EXP-011 §39), compile order — one useEffect + one useRef each. */
   valueChangedEffects: ValueChangedEffectPlan[];
+  /** P18-S119-TICKEDRUN. Run-wired Functions a ticked input also runs, node order — one useEffect + one useRef each. */
+  tickedRuns: TickedRunPlan[];
   /** EXP-011 §43. Records whose Fetch is unwired, compile order — one useEffect keyed on the Id each. */
   recordEffects: RecordEffectPlan[];
   /** EXP-011 §67. Variables with an authored Value, node order — one mount effect each. */
@@ -4542,6 +4567,7 @@ function planComponent(
     objectSeeds: [],
     fieldMounts: [],
     valueChangedEffects: [],
+    tickedRuns: [],
     styleSheets: [],
     statesMachines: [],
     animations: [],
@@ -10793,9 +10819,10 @@ function planComponent(
    * export runs the body against a recording `Outputs` (`runFunction`) and then each pulse's chain, in the order the body
    * sent them; the emitter prints a chain's reads of this Function as that pulse's values.
    *
-   * Refused by name: a ticked value box (a new value runs the Function and sends its signals again, where the export runs
-   * it on Run alone), and one port fed by two of its signals (which pulse its values pair with would need one count
-   * across both). Function only: a Visual Function's block-declared signals keep `compileJsRun`'s own refusal.
+   * Refused by name: one port fed by two of its signals (which pulse its values pair with would need one count across
+   * both). Function only: a Visual Function's block-declared signals keep `compileJsRun`'s own refusal. A ticked value box
+   * was refused here too until P18-S119-TICKEDRUN: a new value runs the Function and sends its signals again, which
+   * `TickedRunPlan` now prints beside the Run chains.
    *
    * 🔴 **A refusal here refuses the signals, not the run.** The run then compiles as it did before §86 (its Done, its
    * rendered reads), and each signal wire is reported: by its target's own reason where the target does not compile,
@@ -10810,14 +10837,6 @@ function planComponent(
     if (def.kind !== 'function') return none;
     const sentWires = component.connections.filter((c) => c.fromId === node.id && def.signals.includes(c.fromProperty.slice('out-'.length)));
     if (sentWires.length === 0) return none;
-    for (const c of component.connections) {
-      if (c.toId !== node.id || !c.toProperty.startsWith('in-')) continue;
-      if (literalParam(node, `runOnChange-${c.toProperty}`) !== false) {
-        return {
-          defer: `its "${c.toProperty.slice('in-'.length)}" input is ticked under Run On Value Change, so a new value runs it and sends its signals again — the export runs it on Run alone`
-        };
-      }
-    }
     const signalsByPort = new Map<string, Set<string>>();
     for (const c of sentWires) {
       const port = `${c.toId}:${c.toProperty}`;
@@ -10857,9 +10876,35 @@ function planComponent(
    * runtime's `done` is invocation-only for both nodes (empty-token runs pulse nothing), so the
    * handler-only translation is exact, not an approximation.
    */
+  /**
+   * P18-S119-TICKEDRUN. The ticked inputs a Run-wired node also runs on, as the values the effect watches (`TickedRunPlan`).
+   * A Visual Function has none: its setters store and run nothing. Refused by name where a ticked input's value exists
+   * only inside a handler (a field's own Text Changed, a received payload): no effect can watch it, so the runs it starts
+   * would be missing.
+   */
+  const tickedWatchOf = (node: NodeIR, def: JsFunctionPlan): { watch: ValueExpr[] } | { defer: string } => {
+    if (def.kind === 'visual') return { watch: [] };
+    const watch: ValueExpr[] = [];
+    for (const input of def.inputs) {
+      if (input.expr === undefined) continue;
+      if (literalParam(node, def.kind === 'function' ? `runOnChange-in-${input.name}` : `runOnChange-${input.name}`) === false) continue;
+      if (!exprValidIn(input.expr, { kind: 'render' })) {
+        return {
+          defer: `its "${input.name}" input is ticked under Run On Value Change, so a new value runs it again, and that value exists only inside a handler — the export cannot watch it`
+        };
+      }
+      watch.push(input.expr);
+    }
+    return { watch };
+  };
+  /** P18-S119-TICKEDRUN. A compiled run's ticked half, by node id: what the effect watches and runs. Read after the attach pass. */
+  const tickedRunPieces = new Map<string, { watch: ValueExpr[]; action: Extract<HandlerAction, { kind: 'jsfun-run' }> }>();
+
   const compileJsRun = (node: NodeIR): CompiledSink => {
     const record = jsFunDefOf(node);
     if ('defer' in record) return { defer: record.defer };
+    const ticked = tickedWatchOf(node, record.def);
+    if ('defer' in ticked) return { defer: ticked.defer };
     // §3.6 over the run path: success co-fires with done, failure/unchanged/error report the
     // run itself, isTrueEv/isFalseEv pulse per evaluation — any of them consumed defers.
     for (const c of component.connections) {
@@ -10886,6 +10931,12 @@ function planComponent(
     const pulsed = pulseChainsOf(node, record.def);
     if ('defer' in pulsed) pulseRefusals.set(node.id, pulsed.defer);
     const pulses: DoneChain = 'defer' in pulsed ? { then: [], consumes: [], collapses: [], subscribes: [] } : pulsed;
+    // P18-S119-TICKEDRUN. A ticked arrival runs the signals' chains from an effect, where no handler's values exist.
+    if (ticked.watch.length > 0 && !actionsValidIn([{ kind: 'jsfun-run', nodeId: node.id, then: pulses.then }], { kind: 'render' })) {
+      return {
+        defer: 'a ticked input runs it again from no handler, and its signals\' chains read values that exist only inside a handler'
+      };
+    }
     // The pulses run before Done, as the runtime's targets act in the drain and Done is sent after the run's await.
     const chain = {
       then: [...pulses.then, ...done.then],
@@ -10932,6 +10983,13 @@ function planComponent(
     }
     // Only on a run that compiles: a refused one prints no wrapper change and keeps no node state.
     if (pulses.then.length > 0) record.def.pulsed = true;
+    // P18-S119-TICKEDRUN. Done is the Run's alone; a ticked run that sends nothing and writes nothing is unobservable.
+    if (ticked.watch.length > 0 && (pulses.then.length > 0 || materialize !== undefined)) {
+      tickedRunPieces.set(node.id, {
+        watch: ticked.watch,
+        action: { kind: 'jsfun-run', nodeId: node.id, then: pulses.then, ...(materialize !== undefined ? { materialize } : {}), ticked: true }
+      });
+    }
     return {
       action: {
         kind: 'jsfun-run',
@@ -17612,9 +17670,16 @@ function planComponent(
       continue;
     }
     // EXP-011 §86. A Function's signal whose chains were refused says why, not that a signal is no event.
+    // P18-S119-TICKEDRUN. Or, where the Function's run is itself refused, that refusal: the signal is sent by a run the
+    // export does not print (before, the ticked box's refusal stood here and named a cause that was not the first).
+    const sendingRun = fromNode !== undefined && wiredPorts.has(`${fromNode.id}:run`) ? compiledSinks.get(`${fromNode.id}:run`) : undefined;
     const pulseRefusal =
       fromNode !== undefined && jsNodeKindOf(fromNode.type) === 'function'
-        ? (pulseRefusals.get(`${fromNode.id}:${connection.fromProperty}`) ?? pulseRefusals.get(fromNode.id))
+        ? (pulseRefusals.get(`${fromNode.id}:${connection.fromProperty}`) ??
+          pulseRefusals.get(fromNode.id) ??
+          (sendingRun !== undefined && 'defer' in sendingRun && connection.fromProperty.startsWith('out-')
+            ? `the Function that sends its "${connection.fromProperty.slice('out-'.length)}" signal is not exported: ${sendingRun.defer}`
+            : undefined))
         : undefined;
     const untranslatable = pulseRefusal ?? `trigger ${connection.fromId}.${connection.fromProperty} is not a rendered element event or a receiver`;
     if (outputsSink) {
@@ -18014,6 +18079,26 @@ function planComponent(
     for (const id of [...ctx.subscriberIds, ...chain.subscribes]) boundSubscribers.add(id);
   }
 
+  // P18-S119-TICKEDRUN. A Run-wired Function's ticked half, for every run a trigger attached (its node collapsed): a
+  // useEffect beside the Run chains. After the attach pass, which rules the node; before the session and wire sweeps,
+  // which must see its reads and its consumed wires.
+  for (const node of component.nodes) {
+    const pieces = tickedRunPieces.get(node.id);
+    if (pieces === undefined || dispositions[node.id]?.kind !== 'collapsed' || !plan.file) continue;
+    const snapped = snapAction(pieces.action, chainSnapshotFor(`ticked:${node.id}`));
+    if ('defer' in snapped) {
+      dispositions[node.id] = { kind: 'deferred', to: 'EXP-003', reason: `the run a ticked input starts: ${snapped.defer}` };
+      notes.push(`node ${node.id} (${node.type}) deferred: the run a ticked input starts: ${snapped.defer}`);
+      continue;
+    }
+    plan.tickedRuns.push({
+      nodeId: node.id,
+      watch: pieces.watch,
+      action: snapped as TickedRunPlan['action'],
+      comment: `${node.authoredLabel ?? node.type} — also runs when a ticked input gets a new value, sending its signals and never Done (NDA-017 §2).`
+    });
+  }
+
   // Reactive Conditions (LOGIC-TARGET §10): the box is ticked and nothing drives `Evaluate`, so
   // the node re-tests whenever a value arrives on `condition` and fires exactly one arm. That is
   // a re-run keyed on the condition — a useEffect, not a handler. The Evaluate-only twin (§3) is
@@ -18115,6 +18200,7 @@ function planComponent(
 
     for (const effect of plan.branchEffects) scanActions([effect.action]);
     for (const effect of plan.valueChangedEffects) scanActions(effect.actions);
+    for (const ticked of plan.tickedRuns) scanActions([ticked.action]);
     for (const effect of plan.recordEffects) scanActions([effect.action]);
     // EXP-011 §49. A popup opened from a Has Reached, a record verb in a State Changed chain, an
     // At Target Value that navigates — every listener is a chain like any other.
@@ -19672,6 +19758,11 @@ function planComponent(
       walkExpr(effect.watch);
       walkActions(effect.actions);
     }
+    // P18-S119-TICKEDRUN. The values a ticked run watches, and its run.
+    for (const ticked of plan.tickedRuns) {
+      ticked.watch.forEach(walkExpr);
+      walkActions([ticked.action]);
+    }
     // P18-S115-QUERYPARAMS. A query's wired filter value — the signed-in user's id is the commonest there is.
     for (const query of plan.queries) for (const value of query.wiredValues ?? []) walkExpr(value.expr);
     // EXP-011 §49. The wired State, the target and its two numbers, and every listener chain.
@@ -20319,6 +20410,7 @@ function planComponent(
     for (const receiver of plan.receivers) fillMaterialize(receiver.actions);
     for (const effect of plan.branchEffects) fillMaterialize([effect.action]);
     for (const effect of plan.valueChangedEffects) fillMaterialize(effect.actions);
+    for (const ticked of plan.tickedRuns) fillMaterialize([ticked.action]);
     // EXP-011 §43. A Record's Id effect writes its row exactly as a handler's Fetch does.
     for (const effect of plan.recordEffects) fillMaterialize([effect.action]);
     // EXP-011 §49. A request or a Now inside a listener chain materializes as it would in a handler.

@@ -834,9 +834,11 @@ describe('§C the refused shapes, by mutation — each sentence exact', () => {
     const boxNotes = notesOf(boxIr);
     expect(boxNotes).toContain('wire drag:boundingWidth->xText:text has no deterministic translation in step 5 (deferred to EXP-003)');
     expect(home(emitApp(boxIr, catalog))).toContain(WRAPPER);
+    // P18-S121-DIDMOUNT. A Did Mount pulse is a once-guarded mount effect now, as a Group's is.
     const mountIr = cloneIr();
     connect(componentOf(mountIr, HOME), 'drag', 'didMount', 'setSnapped', 'do');
-    expect(notesOf(mountIr)).toContain('signal drag.didMount has no DOM event equivalent — dropped, reported');
+    expect(notesOf(mountIr)).not.toContain('didMount');
+    expect(home(emitApp(mountIr, catalog))).toContain('Did Mount: once, when it mounts, as the running app sends it.');
   });
 
   test('C13 a wired Mounted on the Drag wraps the wrapper, as it wraps any rendered node', () => {

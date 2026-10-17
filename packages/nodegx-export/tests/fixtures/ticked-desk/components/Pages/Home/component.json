@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b8d20e00-0000-4000-8000-000000000503",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "modified": "2026-10-17T12:00:00.000Z",
+  "description": "P18-S119-TICKEDRUN fixture: a Run-wired Function whose ticked input also runs it (\"Hold the item\", fed by a Variable, run from Did Mount and two buttons), and one with a literal on its ticked input (\"Say the word\")."
+}

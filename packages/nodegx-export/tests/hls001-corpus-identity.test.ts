@@ -380,7 +380,15 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // regenerating: no path moves (every byte row was green on the red run, and no fixture's dispositions changed under
     // `dispdiff.ts`), plus gate-desk's entries. The regenerated golden's diff counted the same: 0 lines out, 17 in, all
     // gate-desk's block.
-    expect(corpusProjects().length).toBe(60);
+    //
+    // 60 → 61 on 2026-10-17 (P18-S119-TICKEDRUN and P18-S121-DIDMOUNT, session 121): `ticked-desk`, the first project in
+    // the corpus where a Run-wired Function's ticked input also runs it, and where a Did Mount chain exports. Predicted
+    // before regenerating: one path moves (pulse-desk's `src/lib/functionRun.ts`, which carries `tickedArrival` now; no
+    // other fixture has a ticked Run-wired Function or a Did Mount wire, and no fixture's dispositions changed under
+    // `dispdiff.ts` but ticked-desk's own), plus ticked-desk's entries. The regenerated golden's diff counted the same:
+    // 1 line out, that line back in, and ticked-desk's 19-line block. (Its first run wrote over `tick-desk`, §39's Timer
+    // fixture, and this row read 60: restored from git before the golden was taken.)
+    expect(corpusProjects().length).toBe(61);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 

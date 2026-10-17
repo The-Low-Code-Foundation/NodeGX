@@ -272,19 +272,18 @@ describe('§C — refused by name: the signals, not the run', () => {
   // falls to the old stray-read reason, and each signal wire says why it is not chained.
   const STRAY = "Pages/Home: wire sendBtn:onClick->hold:run dropped: its out-greeting output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there";
 
-  it('a ticked value box: a new value runs the Function and sends its signals again, where the export runs it on Run alone', () => {
+  // P18-S119-TICKEDRUN. These two rows refused the signals for a ticked box until s121; the box now prints an effect on the
+  // field's state beside the Send chain (`tests/the-ticked-input-runs-it-again.test.ts` grades it against the runtime).
+  const TICKED = [
+    '    if (!tickedArrival(holdTheNameUntilSendHeld, [yourName])) return;',
+    '    const holdTheNameUntilSendRun = runFunction(Hold_the_name_until_Send, { name: yourName }, holdTheNameUntilSendNode);'
+  ].join('\n');
+  it('a ticked value box: a new value runs the Function and sends its signals again — an effect on the field, beside Send', () => {
     const app = emit((ir) => setParam(ir, 'hold', 'runOnChange-in-name', literal(true)));
-    const ticked = 'its "name" input is ticked under Run On Value Change, so a new value runs it and sends its signals again — the export runs it on Run alone';
-    expect(app.notes).toEqual(
-      expect.arrayContaining([
-        STRAY,
-        `Pages/Home: wire hold:out-go->greetingSet:do dropped: ${ticked}`,
-        `Pages/Home: wire hold:out-go->sendsSet:do dropped: ${ticked}`,
-        `Pages/Home: wire hold:out-refused->problemSet:do dropped: ${ticked}`
-      ])
-    );
-    expect(app.files[PAGE]).not.toContain('runFunction');
-    expect(app.files[FUNCTION_RUN_LIB_PATH]).toBeUndefined();
+    expect(app.notes.filter((n) => n.includes('hold'))).toEqual([]);
+    expect(app.files[PAGE]).toContain(TICKED);
+    expect(app.files[PAGE]).toContain('  }, [yourName]);');
+    expect(app.files[FUNCTION_RUN_LIB_PATH]).toContain('export function tickedArrival(');
   });
 
   it('an unset box is ticked (absent means ticked)', () => {
@@ -292,7 +291,7 @@ describe('§C — refused by name: the signals, not the run', () => {
       const node = nodeOf(ir, 'hold');
       node.parameters = node.parameters.filter((p) => p.name !== 'runOnChange-in-name');
     });
-    expect(app.notes.some((n) => n.startsWith('Pages/Home: wire hold:out-go->greetingSet:do dropped: its "name" input is ticked under Run On Value Change'))).toBe(true);
+    expect(app.files[PAGE]).toContain(TICKED);
   });
 
   it('one port fed by two of its signals', () => {
