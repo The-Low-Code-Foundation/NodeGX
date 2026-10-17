@@ -675,7 +675,7 @@ if (require.main === module) {
   runCli();
 }
 
-module.exports = { assertEnrichedCatalogIsFresh, StaleCatalogError, renderRulesSection };
+module.exports = { assertEnrichedCatalogIsFresh, StaleCatalogError, renderRulesSection, slugify, escapeAngles };
 
 function runCli() {
   try {

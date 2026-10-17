@@ -1,0 +1,393 @@
+{
+  "$comment": "A Bubble app export cut down to one page: six elements and two workflows taken verbatim from a real Bubble landing page (a Top Shelf Templates boilerplate), except the image URL, the page height and the scroll target, which points at an element kept here. scripts/bubble-dictionary/build.js converts it with the P123 converter to make docs-site/docs/bubble-dictionary.md.",
+  "app_version": "test",
+  "pages": {
+    "index": {
+      "id": "bTIWz",
+      "name": "index",
+      "type": "Page",
+      "properties": {
+        "title": {
+          "entries": {
+            "0": "Page Title"
+          },
+          "type": "TextExpression"
+        },
+        "new_responsive": true,
+        "container_layout": "column",
+        "min_height_px": 400,
+        "backdrop_bgcolor": "rgba(255, 255, 255, 1)",
+        "width": 1200,
+        "height": 4166,
+        "preset_width": "full_width",
+        "default_width": 1200,
+        "responsive_version": 1,
+        "element_version": 5
+      },
+      "elements": {
+        "cmMsV": {
+          "properties": {
+            "height": 250,
+            "left": 24,
+            "top": 0,
+            "width": 400,
+            "zindex": 2,
+            "background_style": "none",
+            "order": 1,
+            "fit_height": true,
+            "margin_top": 32,
+            "margin_left": 24,
+            "margin_right": 24,
+            "single_width": false,
+            "min_width_css": "20px",
+            "single_height": false,
+            "min_height_css": "20px",
+            "horiz_alignment": "center",
+            "container_layout": "row",
+            "container_horiz_alignment": "flex-start"
+          },
+          "type": "Group",
+          "id": "cmMsV",
+          "default_name": "Group BZ",
+          "elements": {
+            "cmMsa": {
+              "properties": {
+                "height": 24,
+                "left": 0,
+                "top": 0,
+                "width": 24,
+                "icon": "check",
+                "icon_color": "rgba(11, 159, 111, 1)",
+                "order": 1,
+                "fixed_width": true,
+                "vert_alignment": "center"
+              },
+              "type": "materialicons-Materialicon",
+              "id": "cmMsY",
+              "default_name": "MaterialIcon E",
+              "order": 1
+            },
+            "cmMsd": {
+              "properties": {
+                "text": {
+                  "entries": {
+                    "0": "Feature numero uno"
+                  },
+                  "type": "TextExpression"
+                },
+                "bold": false,
+                "font_face": "Inter:::regular",
+                "height": 22,
+                "left": 0,
+                "top": 0,
+                "width": 228,
+                "font_color": "rgba(107, 114, 128, 1)",
+                "font_size": 16,
+                "line_height": 1.2,
+                "order": 2,
+                "fit_width": true,
+                "fixed_width": false,
+                "font_family": "Inter",
+                "font_weight": "400",
+                "margin_left": 8,
+                "padding_top": 0,
+                "padding_left": 0,
+                "padding_right": 0,
+                "padding_bottom": 0,
+                "vert_alignment": "center"
+              },
+              "type": "Text",
+              "id": "cmMsb",
+              "default_name": "Text U",
+              "order": 1
+            }
+          },
+          "order": 1
+        },
+        "cmMfz": {
+          "properties": {
+            "text": {
+              "entries": {
+                "0": "Benefit"
+              },
+              "type": "TextExpression"
+            },
+            "bold": false,
+            "font_face": "Inter:::600",
+            "height": 40,
+            "left": 0,
+            "top": 0,
+            "width": 60,
+            "font_alignment": "center",
+            "font_color": "rgba(107, 114, 128, 1)",
+            "font_size": 16,
+            "line_height": 1.4,
+            "background_style": "none",
+            "border_style": "none",
+            "order": 2,
+            "fixed_width": true,
+            "font_family": "Inter",
+            "font_weight": "600",
+            "max_width_css": "90px",
+            "min_width_css": "60px",
+            "min_height_css": "40px",
+            "vert_alignment": "center",
+            "responsive_alignment": "left"
+          },
+          "states": {
+            "bTGVB": {
+              "condition": {
+                "next": {
+                  "type": "Message",
+                  "name": "is_hovered"
+                },
+                "properties": {
+                  "element_id": "bTGMw"
+                },
+                "type": "ThisElement"
+              },
+              "properties": {
+                "font_color": "rgba(22, 30, 46, 1)"
+              },
+              "type": "State"
+            }
+          },
+          "type": "Button",
+          "id": "cmMfz",
+          "default_name": "Button B",
+          "order": 2,
+          "transitions": {
+            "font_color": {
+              "fn": "ease-in-out",
+              "duration": 200
+            }
+          }
+        },
+        "cmMfn": {
+          "properties": {
+            "height": 55,
+            "left": 0,
+            "top": 0,
+            "width": 50,
+            "zindex": 2,
+            "src": {
+              "entries": {
+                "0": "//example.com/logo.png"
+              },
+              "type": "TextExpression"
+            },
+            "order": 3,
+            "fit_height": false,
+            "margin_left": 0,
+            "single_width": true,
+            "min_width_css": "50px",
+            "single_height": true,
+            "min_height_css": "55px",
+            "vert_alignment": "center",
+            "use_aspect_ratio": true,
+            "aspect_ratio_width": 10,
+            "aspect_ratio_height": 11
+          },
+          "type": "Image",
+          "id": "cmMfn",
+          "default_name": "Image A",
+          "style": "Image_simple_image_",
+          "order": 3
+        },
+        "cmMwK": {
+          "properties": {
+            "text": {
+              "entries": {
+                "0": "FAQ"
+              },
+              "type": "TextExpression"
+            },
+            "bold": false,
+            "font_face": "Inter:::regular",
+            "height": 45,
+            "left": 0,
+            "top": 0,
+            "width": 200,
+            "font_color": "rgba(107, 114, 128, 1)",
+            "font_size": 16,
+            "line_height": 1.2,
+            "vertical_centering": true,
+            "order": 4,
+            "fit_width": true,
+            "fit_height": true,
+            "font_family": "Inter",
+            "font_weight": "400",
+            "padding_top": 0,
+            "padding_left": 0,
+            "single_width": false,
+            "min_width_css": "0px",
+            "padding_right": 0,
+            "single_height": false,
+            "min_height_css": "40px",
+            "padding_bottom": 0,
+            "horiz_alignment": "flex-start"
+          },
+          "states": {
+            "0": {
+              "condition": {
+                "next": {
+                  "type": "Message",
+                  "name": "is_hovered"
+                },
+                "properties": {
+                  "element_id": "bTGMw"
+                },
+                "type": "ThisElement"
+              },
+              "properties": {
+                "font_color": "rgba(22, 30, 46, 1)"
+              },
+              "type": "State"
+            }
+          },
+          "type": "Link",
+          "id": "cmMwK",
+          "default_name": "Link E",
+          "order": 4,
+          "transitions": {
+            "font_color": {
+              "fn": "ease",
+              "duration": 200
+            }
+          }
+        },
+        "cmMpD": {
+          "properties": {
+            "height": 80,
+            "left": 0,
+            "top": 0,
+            "width": 160,
+            "zindex": 2,
+            "border_roundness": 5,
+            "bgcolor": "rgba(60, 13, 153, 1)",
+            "order": 5,
+            "fit_height": false,
+            "margin_left": 41,
+            "single_width": true,
+            "min_width_css": "160px",
+            "single_height": true,
+            "min_height_css": "80px",
+            "nonant_alignment": "aa"
+          },
+          "type": "Shape",
+          "id": "cmMpD",
+          "default_name": "Shape A",
+          "order": 5
+        },
+        "cmMwz": {
+          "properties": {
+            "height": 287,
+            "left": 0,
+            "top": 0,
+            "width": 1190,
+            "zindex": 2,
+            "boxshadow_horizontal": 0,
+            "border_roundness": 5,
+            "boxshadow_style": "outset",
+            "is_visible": false,
+            "background_style": "bgcolor",
+            "bgcolor": "rgba(255, 255, 255, 1)",
+            "background_image": {
+              "entries": {
+                "0": ""
+              },
+              "type": "TextExpression"
+            },
+            "boxshadow_color": "rgba(170,170,170,0.5)",
+            "boxshadow_spread": 1,
+            "fit_height": false,
+            "single_width": false,
+            "min_width_css": "98%",
+            "single_height": false,
+            "use_max_width": true,
+            "min_height_css": "100%",
+            "horiz_alignment": "flex-start",
+            "container_layout": "column",
+            "background_size_cover": true,
+            "background_color_if_empty_image": "rgba(255,255,255,1)",
+            "order": 6
+          },
+          "type": "FloatingGroup",
+          "id": "cmMwz",
+          "default_name": "FloatingGroup A",
+          "name": "Floating Mobile Nav Menu",
+          "order": 6
+        }
+      },
+      "workflows": {
+        "cmMwl": {
+          "properties": {
+            "element_id": "cmMfz"
+          },
+          "type": "ButtonClicked",
+          "id": "cmMwl",
+          "actions": {
+            "0": {
+              "properties": {
+                "arguments": {
+                  "0": {
+                    "param_id": "_LEGACY_",
+                    "arg_value": "benefit"
+                  }
+                },
+                "custom_event": "cmMvZ"
+              },
+              "type": "TriggerCustomEvent",
+              "id": "cmMwo"
+            }
+          }
+        },
+        "cmMvZ": {
+          "properties": {
+            "event_name": "Scroll To",
+            "parameters": {
+              "0": {
+                "btype_id": "text",
+                "param_id": "_LEGACY_",
+                "param_name": "Workflow's text"
+              }
+            },
+            "event_color": "orange"
+          },
+          "type": "CustomEvent",
+          "id": "cmMvZ",
+          "actions": {
+            "0": {
+              "properties": {
+                "condition": {
+                  "next": {
+                    "args": "benefit",
+                    "type": "Message",
+                    "name": "equals"
+                  },
+                  "type": "CurrentWorkflowItem"
+                },
+                "element_id": "cmMsV",
+                "offset": -80
+              },
+              "type": "ScrollToElement",
+              "id": "cmMvf"
+            }
+          }
+        }
+      }
+    }
+  },
+  "styles": {
+    "Image_simple_image_": {
+      "id": "Image_simple_image_",
+      "type": "Image"
+    }
+  },
+  "user_types": {},
+  "option_sets": {},
+  "custom_elements": {},
+  "settings": {
+    "client_safe": {}
+  }
+}

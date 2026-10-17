@@ -83,6 +83,8 @@
     "docs:nodes:check": "node scripts/generate-node-docs.js --check",
     "docs:bubble": "node scripts/bubble-phrasebook/build.js",
     "docs:bubble:check": "node scripts/bubble-phrasebook/build.js --check",
+    "docs:bubble-dictionary": "node scripts/bubble-dictionary/build.js",
+    "docs:bubble-dictionary:check": "node scripts/bubble-dictionary/build.js --check",
     "docs-site:start": "npm --prefix docs-site run start",
     "docs-site:build": "npm run docs:nodes && npm run docs:bubble && npm run docs:library && npm --prefix docs-site run build",
     "catalog:examples": "ts-node -P ./scripts/tsconfig.json ./scripts/validate-examples.ts",
