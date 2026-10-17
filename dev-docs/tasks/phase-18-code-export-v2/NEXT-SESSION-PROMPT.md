@@ -1,3 +1,62 @@
+# Next session — session 123 (2026-10-17, BOARD lane 6) built **the Failure chain**: a record or user verb's Failure runs its chain in the export, and a click's later wires run before the request answers. The Sign-in pages of members-area, todo-list, the Site Builder and the planner show their refusal now; nightbook's Me toggles work.
+
+## ✅ Session 123: the failure runs its chain
+
+Read EXP-011 §90. In short:
+
+| what | where |
+|---|---|
+| Measured first: the deferred §87 Conditions wait on a Delete's Failure, Log In's and Sign Up's; every verb refused a wired Failure whole | `s123-failchain/conds.ts` |
+| `api-call.failThen`, compiled by the record, relation and user verbs (`verbFailChainOf`), printed in the catch after the Error row and the raise; the verb's Error inside it is the catch's local | `plan.ts`, `component.ts` |
+| **The order**: an awaited call a later action follows is `detached` (`void (async () => { … })();`); a later wire writing what the call sends is refused by name | `plan.ts` (the last pass, `lateQueryFetchWrite`), `component.ts` `actionCode` |
+| **The cache**: a compile that reads a Failure scope's local is kept under that scope's key (`compiledOf`) | `plan.ts` |
+| **The Value wire**: a Set fed by several reads the chain's own sender's (`lastValueWireOf`, `chainSenders` in `doneChainOf`), else is refused by name | `plan.ts` |
+| Spec, 23 rows: real React under StrictMode with requests the test answers, against the runtime's own Delete Record, Condition, Variable and Set Variable with a store the test answers; `fixtures/fail-desk` and five variants; two controls | `tests/the-failure-runs-its-chain.test.ts`, `helpers/export-answer-arm.js`, `helpers/runtime-failure-arm.js` |
+| Drive, three arms, two runs: with a backend that fails, runtime == fixed export at every step; HEAD's Remove unwired | `s123-failchain/` |
+
+- 🔴 **"22 gained, 0 lost" hid three defects**, each found by reading the emitted diff of every gained node: the clear
+  after an awaited call ran after the answer (todo-list's refusal vanished as it showed; HEAD's digital-bricks-training
+  Settings said "preparing" for ever), one Set Variable compiled once carried Log In's catch local into Sign Up's catch,
+  and a Set fed by two wires wrote the first. Read the code every gain prints, every session.
+- 🔴 **A blanket refusal lost a right export.** "Two wires into Value ⇒ refuse" cost nightbook's "Another one", which HEAD
+  exported correctly (the first wire happened to be the sender's). The runtime's rule is "last writer", and at a
+  sender's pulse that is the sender's own wire. Measure the losses of a new refusal before keeping it.
+- 🔴 **The compiled-sink cache is keyed by node and port, so any chain-dependent read leaks into the next chain that
+  runs the sink.** §90 keys the Failure scope and the Value wire; the other 13 chain-scope maps (§89) still share.
+- 🔴 **A drive's arms must fail the same way.** Run 1 (no backend) compared the runtime's synchronous "no backend
+  configured" with the export's async stub: a real divergence, but not the one under test (P18-S123-STUBORDER). Run 2
+  declared a backend at a dead port and both failed on the network.
+- 🔴 **An async `act` in jsdom needs Node's `MessageChannel`, and then holds the process open**: the export arm exits
+  once it has written. The app's own `raiseAppError` logs to `console.error`; the arm counts those as raises.
+- Mutants B, D, G, I first read "0 total" (they did not typecheck): reshape (`&& value.length < 0`), as s122 did.
+
+Readings: the spec 23 / 23; re-pinned to the new claim `record-verbs` 11, `user-family` 5.4,
+`set-user-properties-magic-link` C1, `relation-pair` D10 / D11; `the-action-bus` unchanged (a signal into Value is not a
+writer). hls001 predicted (fail-desk in, record-desk's Home.tsx) and regenerated: exactly those two. EXP-008's floor
+1,235 → 1,236 (`DeleteDbModelProperties.modelId` reaches). 13 mutant arms, each killing rows (control 23 / 23). Whole
+package (`nice -n 19 --runInBand`, JSON written 20:27): 138 / 139 suites, 4,897 passed, 2 failed, both
+`parameter-coverage` on the P121 peer's three uncommitted Upload File ports. Package `tsc` 0. Commit `3d44078e8`.
+
+Reach (`dispdiff.ts`, HEAD against the tree): **templates 26 gained, 0 lost** (16 reachable: four Sign-in pages, nightbook
+Me; 10 behind an element never drawn: members-area's Remove ×8, nightbook Tonight ×2); **corpus 134, 0 lost**.
+
+Filed: **P18-S123-UNDRAWNTRIGGER** (medium: a node collapsed into an element the export never draws is counted exported;
+members-area's moderator can never remove), **P18-S123-STUBORDER** (low); fixed and filed P18-S123-AWAITORDER (high),
+P18-S123-FIRSTWIRE (low).
+
+**Next (BOARD lane 6):**
+1. **P18-S122-DEADROW** and **P18-S123-UNDRAWNTRIGGER** together: decide rows and collapses after the render and attach
+   passes (a node collapsed into an undrawn element, a row whose run never attaches), refused by name.
+2. **P18-S122-TPLBUILD**: a gate over the templates' exports by count, then the three emitter classes; the body class
+   needs Richard's ruling.
+3. The §87 Conditions still waiting: members-area's Post (New Record's access-control rules, a clock read), Unsubscribe
+   (a Function's own Failure), landing-pages' contact (`/Site/Field`), the Site Builder's Setup (a ticked Condition).
+4. P18-S120-TEXTAREA, P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE, P18-S113-LISTLIVE, P18-S115-DYNPROBE; STUBORDER,
+   TEXTDEFAULT, BUTTONLOOK, INPUTLOOK (low).
+5. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
 # Next session — session 122 (2026-10-17, BOARD lane 6) built **"Hold the id"**: a Function's id, read by nodes that are not drawn, exports. members-area's Announcement and Meeting fetch their record and say when it is not available; the Site Builder's PageEditor fetches the page, lists its sections and says draft or published.
 
 ## ✅ Session 122: the id is held
