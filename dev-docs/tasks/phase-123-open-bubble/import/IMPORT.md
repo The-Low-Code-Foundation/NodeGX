@@ -1,5 +1,15 @@
 # P123 s3 — a Bubble export becomes a NodeGX project (the importer spike)
 
+> **Credits.** Part of the converter's Bubble knowledge comes from Rico Trevisan's
+> [bubble_ex](https://github.com/ricotrevisan/bubble_ex) (MIT License, Copyright (c) 2026 Rico Trevisan; read at commit
+> `5f1c480`), an Elixir toolkit that reads Bubble apps and rebuilds them on Phoenix/Ash: the nonant reading order
+> (§9), and 22 expression operators in `OPS` (the list operators `specific_item`, `is_contained_by_list`,
+> `is_not_contained_by_list`, `not_contains`, `convert_to_list`, `unique`, `minus_list`, `intersect_with`,
+> `plus_element`, `minus_element`, `divide`, `defaulting_to`, and the text and number operators `trim`,
+> `capitalized_words`, `number_of_characters`, `format_json_encode`, `format_url_encode`, `is_email`,
+> `absolute_value`, `rounded`, `as_text`, `convert_to_number`). His 19 frozen fidelity cases (a run-mode payload
+> beside Bubble's own screenshots and element measurements) are the converter's natural next gate.
+
 **Written 2026-10-16 by Fable 5.1, s3 of P123**, from Richard's message after the Open Bubble sessions: *"people who
 want to leave Bubble for an open source system, but don't want to stop using the Bubble editor, who might actually like
 our Open Bubble project … Turning Bubble JSON programmatically into NodeGX JSON, with some AI assistance but with the
@@ -328,7 +338,9 @@ console errors, 0 validation errors, 188/188 elements mapped). The rows this pag
 | `fixed_width: true` | ignored on a new-engine page (`single_width` is the flag) | a first try honoured it and crammed the nav buttons to 60 px |
 
 Unverified: the nonant letter order (`<v><h>` is a guess; every element here is `aa` or `bb`, which read the same
-either way).
+either way). **Settled 2026-10-17: it is `<h><v>`** (horizontal first: `ba` = top centre), as Rico Trevisan's bubble_ex
+reads it; his graded case `bpgwgmpz` has an `ac` element with left and bottom margins and a `ca` with top and right.
+The converter now reads it that way; see Credits at the top.
 
 **What still differs, in order of size:** (1) column widths in a row: both hero columns are "not fixed" with
 min widths 240 and 320, Bubble gives the text column about 610 px of 960 and NodeGX gives both the same share, so

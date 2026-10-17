@@ -3,6 +3,8 @@
 // Usage: node bubble2nodegx.mjs <export.json> <outdir>
 // No dependencies. Everything it cannot map is written to <outdir>/docs/IMPORT-REPORT.md as a finding,
 // and placed in the graph as a labelled placeholder so the page still opens.
+// Credit: the nonant reading order and the operators marked "bubble_ex" in OPS come from Rico Trevisan's bubble_ex
+// (https://github.com/ricotrevisan/bubble_ex, commit 5f1c480), MIT License, Copyright (c) 2026 Rico Trevisan.
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -111,10 +113,10 @@ function layoutParams(p, parentLayout, type) {
     if (cl === 'row') { if (p.container_horiz_alignment) o.justifyContent = ax[p.container_horiz_alignment] || 'flex-start'; if (p.container_vert_alignment) o.alignItems = ai2(p.container_vert_alignment); }
     if (p.clip) o.clip = true;
   }
-  const aligned = parentLayout === 'relative' && !p.__inflow; // s4: Bubble "Align to parent": children sit on a 3×3 grid (nonant_alignment "<v><h>", a/b/c = start/center/end) with margins as offsets
+  const aligned = parentLayout === 'relative' && !p.__inflow; // s4: Bubble "Align to parent": children sit on a 3×3 grid (nonant_alignment "<h><v>", a/b/c = start/center/end; the order is bubble_ex's: "ba" = top centre) with margins as offsets
   const absolute = parentLayout === 'fixed' || parentLayout === 'old' || aligned;
   if (absolute && !aligned) { o.position = 'absolute'; o.marginLeft = px(p.left ?? 0); o.marginTop = px(p.top ?? 0); }
-  if (aligned) { o.position = 'absolute'; const na = String(p.nonant_alignment || 'aa'); o.alignY = { a: 'top', b: 'center', c: 'bottom' }[na[0]] || 'top'; o.alignX = { a: 'left', b: 'center', c: 'right' }[na[1]] || 'left'; }
+  if (aligned) { o.position = 'absolute'; const na = String(p.nonant_alignment || 'aa'); o.alignY = { a: 'top', b: 'center', c: 'bottom' }[na[1]] || 'top'; o.alignX = { a: 'left', b: 'center', c: 'right' }[na[0]] || 'left'; }
   if (isContainer && p.container_layout === 'relative') o.position = o.position || 'relative';
   if (p.__inflow) { o.position = 'relative'; if (p.zindex != null) o.zIndex = Number(p.zindex); } // the in-flow child of an "Align to parent" container keeps its stacking order over the absolute siblings
   if (p.rotation_angle) o.transformRotation = Number(p.rotation_angle);
@@ -304,7 +306,7 @@ function convertElement(g, el, parentNode, parentLayout, bubblePage, depth, y) {
   }
   const childLayout = ['Group', 'Popup', 'FloatingGroup', 'GroupFocus', 'Shape', 'Alert'].includes(el.type) ? (p.container_layout ? (p.container_layout === 'fixed' ? 'fixed' : p.container_layout === 'relative' ? 'relative' : 'flex') : (parentLayout === 'old' ? 'old' : 'fixed')) : 'flex';
   if (el.elements) y = convertChildrenInto(g, el.elements, node, childLayout, bubblePage, depth + 1, y);
-  if (p.container_layout === 'relative' && inflowOf[el.id]) { const na = String(inflowOf[el.id].properties?.nonant_alignment || 'aa'); node.parameters.flexDirection = 'column'; node.parameters.justifyContent = { a: 'flex-start', b: 'center', c: 'flex-end' }[na[0]] || 'flex-start'; node.parameters.alignItems = { a: 'flex-start', b: 'center', c: 'flex-end' }[na[1]] || 'flex-start'; }
+  if (p.container_layout === 'relative' && inflowOf[el.id]) { const na = String(inflowOf[el.id].properties?.nonant_alignment || 'aa'); node.parameters.flexDirection = 'column'; node.parameters.justifyContent = { a: 'flex-start', b: 'center', c: 'flex-end' }[na[1]] || 'flex-start'; node.parameters.alignItems = { a: 'flex-start', b: 'center', c: 'flex-end' }[na[0]] || 'flex-start'; }
   return y;
 }
 function convertChildrenInto(g, elements, node, layout, bubblePage, depth, y) { const before = g.ly; convertChildren(g, elements, node, layout, bubblePage, depth, y); const n = Object.keys(elements || {}).filter((k) => k !== 'length').length; return y + n * 110; }
@@ -342,6 +344,15 @@ const OPS = {
   change_hours: (x, a) => `((d) => (d.setHours(${a}), d))(new Date(${x}))`, change_minutes: (x, a) => `((d) => (d.setMinutes(${a}), d))(new Date(${x}))`, change_seconds: (x, a) => `((d) => (d.setSeconds(${a}), d))(new Date(${x}))`, change_date: (x, a) => `((d) => (d.setDate(${a}), d))(new Date(${x}))`,
   extract_from_date: (x, a) => `((d, w) => ({ year: d.getFullYear(), month: d.getMonth() + 1, date: d.getDate(), day: d.getDay(), hours: d.getHours(), minutes: d.getMinutes() })[w])(new Date(${x}), ${a})`,
   to_range: (x, a) => `[${x}, ${a}]`, range_contains_point: (x, a) => `((r, p) => r && new Date(p) >= new Date(r[0]) && new Date(p) <= new Date(r[1]))(${x}, ${a})`, range_less_than_point: (x, a) => `((r, p) => r && new Date(r[1]) < new Date(p))(${x}, ${a})`, range_overlaps: (x, a) => `((a, b) => a && b && new Date(a[0]) <= new Date(b[1]) && new Date(b[0]) <= new Date(a[1]))(${x}, ${a})`,
+  // bubble_ex (Expression.Vocabulary / Compiler): the list, arithmetic and text operators it has seen in real payloads
+  specific_item: (x, a) => `(${x} ?? [])[(${a}) - 1]`, is_contained_by_list: (x, a) => `(${a} ?? []).includes(${x})`, is_not_contained_by_list: (x, a) => `!(${a} ?? []).includes(${x})`,
+  not_contains: (x, a) => `!(Array.isArray(${x}) ? ${x} : String(${x} ?? "")).includes(${a})`, convert_to_list: (x) => `((v) => Array.isArray(v) ? v : v == null ? [] : [v])(${x})`, unique: (x) => `[...new Set(${x} ?? [])]`,
+  minus_list: (x, a) => `(${x} ?? []).filter((i) => !(${a} ?? []).includes(i))`, intersect_with: (x, a) => `(${x} ?? []).filter((i) => (${a} ?? []).includes(i))`,
+  plus_element: (x, a) => `[...(${x} ?? []), ${a}]`, minus_element: (x, a) => `(${x} ?? []).filter((i) => i !== ${a})`, divide: (x, a) => `(${x} / ${a})`,
+  defaulting_to: (x, a) => `((v) => (v == null || v === "" || (Array.isArray(v) && v.length === 0)) ? ${a} : v)(${x})`,
+  trim: (x) => `String(${x} ?? "").trim()`, capitalized_words: (x) => `String(${x} ?? "").replace(/\\b\\w/g, (c) => c.toUpperCase())`, number_of_characters: (x) => `String(${x} ?? "").length`,
+  format_json_encode: (x) => `JSON.stringify(String(${x} ?? ""))`, format_url_encode: (x) => `encodeURIComponent(String(${x} ?? ""))`, is_email: (x) => `/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(${x} ?? ""))`,
+  absolute_value: (x) => `Math.abs(${x})`, rounded: (x, a) => a === undefined ? `Math.round(${x})` : `Number(Number(${x}).toFixed(${a}))`, as_text: (x) => `String(${x} ?? "")`, convert_to_number: (x) => `Number(${x})`,
   file_name: (x) => `String(${x} ?? "").split("/").pop()`, formatted_address: (x) => `(${x}?.formattedAddress ?? ${x}?.address ?? ${x})`, id: (x) => `${x}?.id`, error: (x) => `${x}?.error`, find_replace: (x) => `String(${x} ?? "")`, split_by: (x, a) => `String(${x} ?? "").split(${a})`, join_with: (x, a) => `(${x} ?? []).join(${a})`, extract: (x) => `String(${x} ?? "")`,
 };
 function compileExpr(g, node, ctx) {
