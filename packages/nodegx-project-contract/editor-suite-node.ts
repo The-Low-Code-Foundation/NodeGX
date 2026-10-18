@@ -8,6 +8,7 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
+import { pathToFileURL } from 'url';
 
 // P112 OWN-003 — the graph half's grader needs the spec package's scenarios on disk and its runner. Imported from the
 // sibling package's source, as every in-repo consumer of it does (the runtime test helper, the MCP), and NAMED in P116's
@@ -31,9 +32,21 @@ export function readProjectTree(root: string): Files {
   return out;
 }
 
+// P112-OWN008-ESMADAPTER: built as CommonJS, `import()` compiles to `require()`, which loads an ES module only from Node
+// 20.19 / 22.12. A CommonJS adapter is required as before; an ES module that `require()` refuses is imported for real,
+// through a function the compiler can't rewrite.
+const importModule = new Function('specifier', 'return import(specifier)') as (specifier: string) => Promise<Record<string, unknown>>;
+
 export async function loadAdapter(modulePath: string): Promise<EditorAdapter> {
   const abs = path.resolve(modulePath);
-  const mod = (await import(abs)) as Record<string, unknown>;
+  let mod: Record<string, unknown>;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    mod = require(abs) as Record<string, unknown>;
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== 'ERR_REQUIRE_ESM') throw err;
+    mod = await importModule(pathToFileURL(abs).href);
+  }
   const candidate = (mod.adapter ?? mod.default ?? mod) as unknown;
   const adapter = typeof candidate === 'function' ? (candidate as () => EditorAdapter)() : (candidate as EditorAdapter);
   if (
