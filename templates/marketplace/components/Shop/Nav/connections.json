@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "17ec7da7-bb21-5746-83e6-fc0b8100a9bc",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "nvRoot",
+      "fromProperty": "didMount",
+      "toId": "nvLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nvIn",
+      "fromProperty": "on",
+      "toId": "nvLoad",
+      "toProperty": "in-on"
+    },
+    {
+      "fromId": "nvBasketNow",
+      "fromProperty": "value",
+      "toId": "nvLoad",
+      "toProperty": "in-basket"
+    },
+    {
+      "fromId": "nvLastOrder",
+      "fromProperty": "value",
+      "toId": "nvLoad",
+      "toProperty": "in-lastOrder"
+    },
+    {
+      "fromId": "nvLoad",
+      "fromProperty": "out-basketLabel",
+      "toId": "nvBasket",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nvLoad",
+      "fromProperty": "out-hasOrder",
+      "toId": "nvOrder",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nvLoad",
+      "fromProperty": "out-token",
+      "toId": "nvToOrder",
+      "toProperty": "pm-token"
+    },
+    {
+      "fromId": "nvLoad",
+      "fromProperty": "out-homeInk",
+      "toId": "nvHome",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "nvLoad",
+      "fromProperty": "out-basketInk",
+      "toId": "nvBasket",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "nvLoad",
+      "fromProperty": "out-orderInk",
+      "toId": "nvOrder",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "nvHome",
+      "fromProperty": "onClick",
+      "toId": "nvToHome",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "nvBasket",
+      "fromProperty": "onClick",
+      "toId": "nvToBasket",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "nvOrder",
+      "fromProperty": "onClick",
+      "toId": "nvToOrder",
+      "toProperty": "navigate"
+    }
+  ]
+}

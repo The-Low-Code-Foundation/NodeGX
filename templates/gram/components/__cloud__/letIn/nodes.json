@@ -1,0 +1,214 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a12736ba-ec48-5cee-8178-f55a7e5e5e4a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-4",
+      "type": "noodl.cloud.request",
+      "label": "letIn(letIn)",
+      "parameters": {
+        "params": "letIn",
+        "ptype-letIn": "object",
+        "preq-letIn": true,
+        "allowNoAuth": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "gate-3",
+      "type": "JavaScriptFunction",
+      "label": "They are waiting, not blocked; the message",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\nasync function member(userId) {\n  if (!userId) return null;\n  return one('Member', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction email(v) {\n  var e = typeof v === 'string' ? v.trim().toLowerCase() : '';\n  var at = e.indexOf('@');\n  if (e.length > 200 || at < 1 || e.indexOf(' ') >= 0 || e.indexOf('@', at + 1) >= 0) return '';\n  var dot = e.lastIndexOf('.');\n  return dot > at + 1 && dot < e.length - 1 ? e : '';\n}\n\nvar a = Inputs.letIn;\nif (a === undefined || Inputs.userId === undefined) return;\nif (!a || typeof a !== 'object') { refuse('Say who to let in.'); return; }\nvar id = text(a.memberId, 64);\nvar m = id ? await one('Member', { objectId: { equalTo: id } }) : null;\nif (!m) { refuse('There is no such member.'); return; }\nif (m.endedAt) { refuse(m.name + ' is blocked. Bring them back before letting them in.'); return; }\nvar app = text(a.appUrl, 300);\nif (app.indexOf('https://') !== 0 && app.indexOf('http://') !== 0) { refuse('The app’s address didn’t come with the request.'); return; }\nvar c = await one('Community', {});\nvar place = c && c.name ? c.name : 'the community';\nOutputs.memberId = id;\nOutputs.loginId = idOf(m.login);\nOutputs.to = m.email;\nOutputs.subject = 'You’re in: ' + place;\nOutputs.body = 'Hello ' + m.name + ',' + String.fromCharCode(10, 10) + 'An admin has let you in to ' + place + '. Sign in with your email here:' + String.fromCharCode(10) + app.replace(/[/]+$/, '') + '/sign-in' + String.fromCharCode(10, 10) + 'You’ll get a link to press. No password is needed.';\nOutputs.was = m.status;\nOutputs.ok();",
+        "runOnChange-in-letIn": false,
+        "runOnChange-in-userId": false
+      },
+      "ports": [
+        {
+          "name": "out-ok",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-letIn",
+          "displayName": "letIn",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-memberId",
+          "displayName": "memberId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-loginId",
+          "displayName": "loginId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-to",
+          "displayName": "to",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-subject",
+          "displayName": "subject",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-body",
+          "displayName": "body",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-was",
+          "displayName": "was",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "grant-2",
+      "type": "noodl.cloud.addusertorole",
+      "label": "Make them a member (what the policy reads by)",
+      "parameters": {
+        "role": "member",
+        "createRole": true
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "approve",
+      "type": "JavaScriptFunction",
+      "label": "Approved, and its history",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\nasync function member(userId) {\n  if (!userId) return null;\n  return one('Member', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction email(v) {\n  var e = typeof v === 'string' ? v.trim().toLowerCase() : '';\n  var at = e.indexOf('@');\n  if (e.length > 200 || at < 1 || e.indexOf(' ') >= 0 || e.indexOf('@', at + 1) >= 0) return '';\n  var dot = e.lastIndexOf('.');\n  return dot > at + 1 && dot < e.length - 1 ? e : '';\n}\n\nif (Inputs.memberId === undefined) return;\nif (Inputs.was !== 'approved') {\n  await Noodl.Records.save(Inputs.memberId, { status: 'approved' }, { className: 'Member' });\n  await history('Member', 'member', Inputs.memberId, Inputs.by, { status: { from: Inputs.was || null, to: 'approved' } });\n}\nOutputs.done();",
+        "runOnChange-in-memberId": false,
+        "runOnChange-in-was": false,
+        "runOnChange-in-by": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-memberId",
+          "displayName": "memberId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-was",
+          "displayName": "was",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-by",
+          "displayName": "by",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "mail",
+      "type": "noodl.cloud.sendemail",
+      "label": "Tell them they’re in",
+      "parameters": {
+        "template": "none"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "sent",
+      "type": "noodl.cloud.response",
+      "label": "Let in, and told",
+      "parameters": {
+        "params": "emailed",
+        "pm-emailed": "yes"
+      },
+      "x": 40,
+      "y": 640
+    },
+    {
+      "id": "unsent",
+      "type": "noodl.cloud.response",
+      "label": "Let in, not told (no email service)",
+      "parameters": {
+        "params": "emailed",
+        "pm-emailed": "no"
+      },
+      "x": 40,
+      "y": 760
+    },
+    {
+      "id": "no-4",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 880
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2999878d-8876-54f5-8bf4-0f4e83e69832",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-8",
+      "type": "noodl.cloud.request",
+      "label": "heartPost(heart)",
+      "parameters": {
+        "params": "heart",
+        "ptype-heart": "object",
+        "preq-heart": true,
+        "allowNoAuth": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "run-4",
+      "type": "JavaScriptFunction",
+      "label": "A heart on a post, on or off; the count, by person",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\nasync function member(userId) {\n  if (!userId) return null;\n  return one('Member', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction email(v) {\n  var e = typeof v === 'string' ? v.trim().toLowerCase() : '';\n  var at = e.indexOf('@');\n  if (e.length > 200 || at < 1 || e.indexOf(' ') >= 0 || e.indexOf('@', at + 1) >= 0) return '';\n  var dot = e.lastIndexOf('.');\n  return dot > at + 1 && dot < e.length - 1 ? e : '';\n}\n\nasync function inMember(userId) {\n  var m = await member(userId);\n  return m && m.status === 'approved' && !m.endedAt ? m : null;\n}\nasync function postInFeed(id) {\n  var p = id ? await one('Post', { objectId: { equalTo: id } }) : null;\n  if (!p || p.endedAt) return null;\n  var by = await one('Member', { objectId: { equalTo: idOf(p.member) } });\n  return by && !by.endedAt ? p : null;\n}\n/**\n * W1, for every photo a member puts in front of the others (a post's, a profile's): '' when it is the caller's,\n * shared with the members and the admins, a photo, and its link its own; otherwise what is wrong with it.\n */\nasync function photoProblem(f, userId) {\n  var name = f && typeof f.name === 'string' ? f.name : '';\n  var url = f && typeof f.url === 'string' ? f.url : '';\n  var file = name ? await one('_Files', { storedName: { equalTo: name } }) : null;\n  if (!file || idOf(file.owner) !== String(userId)) return 'mine';\n  var readers = Array.isArray(file.readers) ? file.readers : [];\n  var shared = [\"role:member\",\"role:admin\"].every(function (r) { return readers.indexOf(r) >= 0; });\n  // No private check of its own: the backend writes readers only on a private file (an equivalent mutant said so).\n  if (!shared) return 'public';\n  if (String(file.contentType || '').indexOf('image/') !== 0) return 'image';\n  if (url.slice(-(name.length + 7)) !== '/files/' + name) return 'mine';\n  return '';\n}\n\nvar a = Inputs.heart;\nif (a === undefined || Inputs.userId === undefined) return;\nif (!a || typeof a !== 'object' || typeof a.on !== 'boolean') { refuse('Say whether the heart is on or off.'); return; }\nif (!(await inMember(Inputs.userId))) { refuse('Only members who’ve been let in can heart a post.'); return; }\nvar postId = text(a.postId, 64);\nif (!(await postInFeed(postId))) { refuse('This post isn’t in the feed any more.'); return; }\nvar onPost = { post: { equalTo: ptr('Post', postId) } };\nvar mine = await Noodl.Records.query('Heart', { and: [onPost, { doneBy: { equalTo: ptr('_User', Inputs.userId) } }] }, { plain: true, limit: 100 });\nif (a.on && mine.length === 0) await Noodl.Records.create('Heart', { post: ptr('Post', postId), at: now(), doneBy: ptr('_User', Inputs.userId) });\nif (!a.on) for (var i = 0; i < mine.length; i++) await Noodl.Records.delete(mine[i].objectId, { className: 'Heart' });\nvar all = await Noodl.Records.query('Heart', onPost, { plain: true, limit: 10000 });\nvar people = {};\nall.forEach(function (h) { people[idOf(h.doneBy)] = true; });\nOutputs.hearts = { hearted: a.on, count: Object.keys(people).length };\nOutputs.done();",
+        "runOnChange-in-heart": false,
+        "runOnChange-in-userId": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-heart",
+          "displayName": "heart",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hearts",
+          "displayName": "hearts",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ok-7",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "parameters": {
+        "params": "hearts"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "no-8",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

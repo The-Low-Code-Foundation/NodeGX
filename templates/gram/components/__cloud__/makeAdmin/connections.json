@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4e72872e-3bbf-5429-851d-217e608bf6b8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req-6",
+      "fromProperty": "userId",
+      "toId": "gate-4",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "req-6",
+      "fromProperty": "pm-admin",
+      "toId": "gate-4",
+      "toProperty": "in-admin"
+    },
+    {
+      "fromId": "req-6",
+      "fromProperty": "receive",
+      "toId": "gate-4",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gate-4",
+      "fromProperty": "out-loginId",
+      "toId": "grant-3",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "gate-4",
+      "fromProperty": "out-ok",
+      "toId": "grant-3",
+      "toProperty": "add"
+    },
+    {
+      "fromId": "gate-4",
+      "fromProperty": "out-memberId",
+      "toId": "promote",
+      "toProperty": "in-memberId"
+    },
+    {
+      "fromId": "gate-4",
+      "fromProperty": "out-was",
+      "toId": "promote",
+      "toProperty": "in-was"
+    },
+    {
+      "fromId": "req-6",
+      "fromProperty": "userId",
+      "toId": "promote",
+      "toProperty": "in-by"
+    },
+    {
+      "fromId": "grant-3",
+      "fromProperty": "done",
+      "toId": "promote",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "grant-3",
+      "fromProperty": "unchanged",
+      "toId": "promote",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "promote",
+      "fromProperty": "out-id",
+      "toId": "ok-5",
+      "toProperty": "pm-id"
+    },
+    {
+      "fromId": "promote",
+      "fromProperty": "out-done",
+      "toId": "ok-5",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "gate-4",
+      "fromProperty": "out-reason",
+      "toId": "no-6",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "gate-4",
+      "fromProperty": "out-refused",
+      "toId": "no-6",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "gate-4",
+      "fromProperty": "failure",
+      "toId": "no-6",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "grant-3",
+      "fromProperty": "failure",
+      "toId": "no-6",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "promote",
+      "fromProperty": "failure",
+      "toId": "no-6",
+      "toProperty": "send"
+    }
+  ]
+}

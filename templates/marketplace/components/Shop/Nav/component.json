@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "17ec7da7-bb21-5746-83e6-fc0b8100a9bc",
+  "name": "Nav",
+  "path": "/Shop/Nav",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The bottom bar: Home, the basket and how many it holds, My order"
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ab84aa3f-880b-5523-835f-238721f80537",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pbIn",
+      "fromProperty": "head",
+      "toId": "pbHead",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pbIn",
+      "fromProperty": "words",
+      "toId": "pbWords",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pbIn",
+      "fromProperty": "canPay",
+      "toId": "pbPay",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pbIn",
+      "fromProperty": "label",
+      "toId": "pbPay",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pbIn",
+      "fromProperty": "countryId",
+      "toId": "pbGo",
+      "toProperty": "in-countryId"
+    },
+    {
+      "fromId": "pbIn",
+      "fromProperty": "token",
+      "toId": "pbGo",
+      "toProperty": "in-token"
+    },
+    {
+      "fromId": "pbPay",
+      "fromProperty": "onClick",
+      "toId": "pbGo",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pbGo",
+      "fromProperty": "out-problem",
+      "toId": "pbError",
+      "toProperty": "text"
+    }
+  ]
+}

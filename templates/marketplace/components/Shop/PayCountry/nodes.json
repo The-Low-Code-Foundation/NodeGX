@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a08006a5-9d8b-5d4e-81aa-014f4d172186",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pyRoot",
+      "type": "Group",
+      "label": "One country’s payment",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "pyHead",
+        "pyNone",
+        "pyEach"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pyHead",
+      "type": "Group",
+      "label": "How you’ll pay here, and how much",
+      "parent": "pyRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "columnGap": "var(--space-3)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "pyHeading",
+        "pySub"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pyHeading",
+      "type": "Text",
+      "label": "How you’ll pay in…",
+      "parent": "pyHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h2",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pySub",
+      "type": "Text",
+      "label": "How much, in its currency",
+      "parent": "pyHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize",
+        "cssClassName": "mk-num mk-nowrap"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "pyNone",
+      "type": "Text",
+      "label": "No way to pay here yet",
+      "parent": "pyRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "pyEach",
+      "type": "For Each",
+      "label": "One per way to pay",
+      "parent": "pyRoot",
+      "parameters": {
+        "template": "/Shop/PayOption"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "pyIn",
+      "type": "Component Inputs",
+      "label": "One country",
+      "ports": [
+        {
+          "name": "heading",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "options",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasNone",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "noneWords",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "pyRoot"
+  ]
+}

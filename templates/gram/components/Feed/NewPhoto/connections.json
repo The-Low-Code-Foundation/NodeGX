@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d581a834-9984-5365-8b18-833c05401c9b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "nfIn",
+      "fromProperty": "src",
+      "toId": "nfImage",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "alt",
+      "toId": "nfImage",
+      "toProperty": "alt"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "name",
+      "toId": "nfGone",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "nfRemove",
+      "fromProperty": "onClick",
+      "toId": "nfGone",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nfGone",
+      "fromProperty": "out-removed",
+      "toId": "nfSay",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfGone",
+      "fromProperty": "out-go",
+      "toId": "nfSay",
+      "toProperty": "do"
+    }
+  ]
+}

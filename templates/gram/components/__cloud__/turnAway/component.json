@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f8044a2b-dff3-504f-8849-5fd030c901d9",
+  "name": "turnAway",
+  "path": "/#__cloud__/turnAway",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Don’t let someone in: blocked, with why, and their sign-in switched off"
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d9203000-cde2-5b62-824e-5ea58417d69b",
+  "name": "checkPayment",
+  "path": "/#__cloud__/checkPayment",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Ask Paystack what happened to a payment, and keep it; the parts it paid move to paid"
+}

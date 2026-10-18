@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d7a75ea8-4391-5175-8d86-24a4fae11e0b",
+  "name": "EditProfile",
+  "path": "/Pages/EditProfile",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Edit your profile: your photo, your name, a short bio"
+}

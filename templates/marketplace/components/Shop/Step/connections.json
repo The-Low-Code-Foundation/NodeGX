@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "da0df19c-acc3-55bb-89f2-e55e43aac6b8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "stIn",
+      "fromProperty": "name",
+      "toId": "stName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "bar",
+      "toId": "stBar",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "stIn",
+      "fromProperty": "ink",
+      "toId": "stName",
+      "toProperty": "color"
+    }
+  ]
+}

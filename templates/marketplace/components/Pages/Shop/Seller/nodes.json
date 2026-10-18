@@ -1,0 +1,595 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c1757756-e3f4-5dd4-822d-3fbae28f3996",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "slPage",
+      "type": "Page",
+      "label": "A seller",
+      "parameters": {
+        "title": "A seller",
+        "urlPath": "seller/{sellerId}"
+      },
+      "children": [
+        "slRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "slRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "slPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "slTop",
+        "slBody",
+        "slNav"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "slTop",
+      "type": "/Shop/Top",
+      "label": "The bar",
+      "parent": "slRoot",
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "slBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "slRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 1080,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "slBack",
+        "slContent",
+        "slGone",
+        "slFoot"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "slNav",
+      "type": "/Shop/Nav",
+      "label": "The bottom bar",
+      "parent": "slRoot",
+      "parameters": {
+        "on": ""
+      },
+      "x": 160,
+      "y": 2560
+    },
+    {
+      "id": "slUrl",
+      "type": "PageInputs",
+      "label": "Which seller",
+      "parameters": {
+        "pathParams": "sellerId"
+      },
+      "x": 650,
+      "y": 2560
+    },
+    {
+      "id": "slBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "parent": "slBody",
+      "parameters": {
+        "label": "← The shop",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--secondary)",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "slContent",
+      "type": "Group",
+      "label": "The seller",
+      "parent": "slBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "slWho",
+        "slStory",
+        "slGrid",
+        "slEmpty"
+      ],
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "slWho",
+      "type": "Group",
+      "label": "Logo and name",
+      "parent": "slContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "slLogo",
+        "slInitials",
+        "slNames"
+      ],
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "slLogo",
+      "type": "Image",
+      "label": "Logo",
+      "parent": "slWho",
+      "parameters": {
+        "width": {
+          "value": 64,
+          "unit": "px"
+        },
+        "height": {
+          "value": 64,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "objectFit": "cover",
+        "borderRadius": "var(--radius-full)",
+        "alt": "The seller’s logo",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 880
+    },
+    {
+      "id": "slInitials",
+      "type": "Group",
+      "label": "Initials, when there is no logo",
+      "parent": "slWho",
+      "parameters": {
+        "width": {
+          "value": 64,
+          "unit": "px"
+        },
+        "height": {
+          "value": 64,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "borderRadius": "var(--radius-full)",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "mounted": false
+      },
+      "children": [
+        "slInitialsWords"
+      ],
+      "x": 340,
+      "y": 1000
+    },
+    {
+      "id": "slInitialsWords",
+      "type": "Text",
+      "label": "Initials",
+      "parent": "slInitials",
+      "parameters": {
+        "text": "",
+        "textAlignX": "center",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--secondary-foreground)",
+        "cssClassName": "mk-display"
+      },
+      "x": 400,
+      "y": 1120
+    },
+    {
+      "id": "slNames",
+      "type": "Group",
+      "label": "Name and place",
+      "parent": "slWho",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "slName",
+        "slPlace"
+      ],
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "slName",
+      "type": "Text",
+      "label": "Name",
+      "parent": "slNames",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 400,
+      "y": 1360
+    },
+    {
+      "id": "slPlace",
+      "type": "Text",
+      "label": "Country and how many on sale",
+      "parent": "slNames",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 400,
+      "y": 1480
+    },
+    {
+      "id": "slStory",
+      "type": "Text",
+      "label": "Their story",
+      "parent": "slContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "slGrid",
+      "type": "Group",
+      "label": "Their products",
+      "parent": "slContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "cssClassName": "mk-grid"
+      },
+      "children": [
+        "slEach"
+      ],
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "slEach",
+      "type": "For Each",
+      "label": "One card per product",
+      "parent": "slGrid",
+      "parameters": {
+        "template": "/Shop/ProductCard"
+      },
+      "x": 340,
+      "y": 1840
+    },
+    {
+      "id": "slEmpty",
+      "type": "Text",
+      "label": "Nothing on sale",
+      "parent": "slContent",
+      "parameters": {
+        "text": "Nothing on sale here just now.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "slGone",
+      "type": "Text",
+      "label": "Not here",
+      "parent": "slBody",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 2080
+    },
+    {
+      "id": "slLoad",
+      "type": "JavaScriptFunction",
+      "label": "The seller and what it has on sale",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nfunction plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }\nfunction byName(a, b) { return String(a.name || '').localeCompare(String(b.name || '')); }\nfunction newest(a, b) { return String(b.createdAt || '').localeCompare(String(a.createdAt || '')) || byName(a, b); }\nfunction symbolOf(cur) {\n  try {\n    var part = new Intl.NumberFormat('en', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol' }).formatToParts(0).filter(function (x) { return x.type === 'currency'; })[0];\n    return part ? part.value : cur;\n  } catch (e) { return cur; }\n}\nfunction rateOf(rates, cur) {\n  var r = (rates || []).filter(function (x) { return x.currency === cur; })[0];\n  var v = r ? Number(r.value) : 0;\n  return v > 0 ? v : 0;\n}\nfunction converted(price, from, to, rates) {\n  var a = rateOf(rates, from), b = rateOf(rates, to);\n  if (!to || to === from || !a || !b) return { amount: Number(price) || 0, currency: from, same: true };\n  return { amount: Number(price) * a / b, currency: to, same: false };\n}\nfunction priced(price, from, to, rates) {\n  var c = converted(price, from, to, rates);\n  return c.same ? { price: money(price, from), was: '' } : { price: money(c.amount, to), was: money(price, from) };\n}\nfunction list(words) { return words.length < 2 ? words.join('') : words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1]; }\nfunction readBasket() {\n  var b = [];\n  try { b = JSON.parse(localStorage.getItem('mk-basket') || '[]'); } catch (e) { b = []; }\n  return (Array.isArray(b) ? b : []).filter(function (l) { return l && typeof l.productId === 'string' && Number(l.quantity) >= 1; }).map(function (l) { return { productId: l.productId, quantity: Math.min(99, Math.floor(Number(l.quantity))) }; });\n}\nfunction writeBasket(b) { try { localStorage.setItem('mk-basket', JSON.stringify(b)); } catch (e) {} return Date.now() + ':' + b.map(function (l) { return l.productId + 'x' + l.quantity; }).join(','); }\nfunction basketCount(b) { return b.reduce(function (n, l) { return n + l.quantity; }, 0); }\nfunction readOrders() {\n  var o = [];\n  try { o = JSON.parse(localStorage.getItem('mk-orders') || '[]'); } catch (e) { o = []; }\n  return (Array.isArray(o) ? o : []).filter(function (x) { return x && typeof x.token === 'string' && x.token; });\n}\n/** The ways to pay turned on in each country, by its id, in the order a checkout offers them. */\nasync function waysByCountry() {\n  var ways = await all('WayToPay');\n  var by = {};\n  for (var i = 0; i < ways.length; i++) {\n    var on = await all('Country', { relatedTo: { id: ways[i].objectId, key: 'country', className: 'WayToPay' } });\n    on.forEach(function (c) { (by[c.objectId] = by[c.objectId] || []).push(ways[i]); });\n  }\n  var rank = [\"paystack\",\"flutterwave\",\"on-delivery\",\"bank-transfer\",\"whatsapp\"];\n  Object.keys(by).forEach(function (k) { by[k].sort(function (a, b) { return rank.indexOf(a.method) - rank.indexOf(b.method); }); });\n  return by;\n}\nvar TINTS = ['var(--secondary)', 'var(--ok)', 'var(--bad)', 'var(--warn)', 'var(--secondary-hover)'];\nfunction tintOf(id) { var h = 0; String(id).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 997; }); return TINTS[h % TINTS.length]; }\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(''); }\nfunction hasFile(f) { return !!(f && f.url); }\nfunction sellerChip(s, country) {\n  return { id: s.objectId, name: s.name || '', place: country ? country.name || '' : '', logo: thumb(s.logo, 'sm'), hasLogo: hasFile(s.logo), noLogo: !hasFile(s.logo), initials: initials(s.name), tint: tintOf(s.objectId) };\n}\nfunction card(p, s, country, cur, rates) {\n  var pr = priced(p.price, country ? country.currency : '', cur, rates);\n  var first = (p.photos || []).filter(hasFile)[0];\n  return { id: p.objectId, name: p.name || '', who: (s.name || '') + (country ? ' · ' + country.name : ''), price: pr.price, was: pr.was, hasWas: !!pr.was, enquire: p.mode === 'enquire', photo: thumb(first, 'md'), hasPhoto: !!first, noPhoto: !first };\n}\n\nif (Inputs.sellerId === undefined) return;\ntry {\n  var s = (await all('Seller', { objectId: { equalTo: String(Inputs.sellerId) } }))[0];\n  var got = s ? await Promise.all([all('Country', { objectId: { equalTo: idOf(s.country) } }), all('Product', { seller: { equalTo: ptr('Seller', s.objectId) } }), all('Rate')]) : null;\n} catch (e) { Outputs.problem = 'This seller could not be read just now. Check the connection, then open it again.'; Outputs.gone = true; Outputs.ok = false; return; }\nif (!s || s.endedAt) { Outputs.problem = s ? (s.name || 'This seller') + ' isn’t selling here now.' : 'There is no such seller here.'; Outputs.gone = true; Outputs.ok = false; return; }\nvar country = got[0][0];\nvar products = got[1].filter(function (p) { return !p.endedAt; }).sort(newest);\nvar chip = sellerChip(s, country);\nOutputs.title = s.name || 'A seller';\nOutputs.name = s.name || '';\nOutputs.logo = thumb(s.logo, 'md');\nOutputs.hasLogo = chip.hasLogo;\nOutputs.noLogo = chip.noLogo;\nOutputs.initials = chip.initials;\nOutputs.tint = chip.tint;\nOutputs.place = (country ? country.name + ' · ' : '') + plural(products.length, 'product', 'products') + ' on sale';\nOutputs.story = s.story || '';\nOutputs.hasStory = !!s.story;\nOutputs.cards = products.map(function (p) { return card(p, s, country, Inputs.currency || '', got[2]); });\nOutputs.empty = products.length === 0;\nOutputs.gone = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "in-sellerId",
+          "displayName": "sellerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-currency",
+          "displayName": "currency",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-gone",
+          "displayName": "gone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-logo",
+          "displayName": "logo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasLogo",
+          "displayName": "hasLogo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noLogo",
+          "displayName": "noLogo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-initials",
+          "displayName": "initials",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tint",
+          "displayName": "tint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-place",
+          "displayName": "place",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-story",
+          "displayName": "story",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasStory",
+          "displayName": "hasStory",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cards",
+          "displayName": "cards",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 640
+    },
+    {
+      "id": "slCurrency",
+      "type": "Variable2",
+      "label": "The currency prices are shown in",
+      "parameters": {
+        "name": "currency"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the currency a buyer picked, the same on every page."
+      },
+      "x": 650,
+      "y": 2680
+    },
+    {
+      "id": "slToShop",
+      "type": "RouterNavigate",
+      "label": "To the shop",
+      "parameters": {
+        "target": "/Pages/Shop/Home"
+      },
+      "x": 650,
+      "y": 520
+    },
+    {
+      "id": "slFoot",
+      "type": "Group",
+      "label": "For sellers",
+      "parent": "slBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap",
+        "paddingTop": "var(--space-6)"
+      },
+      "children": [
+        "slFootWords",
+        "slFootSignIn"
+      ],
+      "x": 220,
+      "y": 2200
+    },
+    {
+      "id": "slFootWords",
+      "type": "Text",
+      "label": "Sell here?",
+      "parent": "slFoot",
+      "parameters": {
+        "text": "Selling here?",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "slFootSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in (sellers and the admin)",
+      "parent": "slFoot",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--secondary)",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "Sign in"
+      },
+      "x": 280,
+      "y": 2440
+    },
+    {
+      "id": "slToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 650,
+      "y": 2440
+    }
+  ],
+  "visualRoots": [
+    "slPage"
+  ]
+}

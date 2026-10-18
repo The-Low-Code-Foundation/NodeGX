@@ -1,0 +1,93 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3482fe47-4c09-5a7c-8fdb-f1965eb9d996",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-10",
+      "type": "noodl.cloud.request",
+      "label": "saveRates(rates)",
+      "parameters": {
+        "params": "rates",
+        "ptype-rates": "object",
+        "preq-rates": true,
+        "allowNoAuth": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "run-8",
+      "type": "JavaScriptFunction",
+      "label": "Set what each currency is worth in the marketplace’s own",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nasync function caller(userId) {\n  if (!userId) return null;\n  return one('Person', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\n\nvar a = Inputs.rates;\nif (a === undefined || Inputs.userId === undefined) return;\nif (!a || typeof a !== 'object' || !Array.isArray(a.rates) || a.rates.length === 0) { refuse('Say which rates.'); return; }\nvar have = await Noodl.Records.query('Rate', {}, { plain: true, limit: 1000 });\nvar by = {};\nhave.forEach(function (r) { by[r.currency] = r; });\nvar own = have.filter(function (r) { return Number(r.value) === 1; })[0] || null;\nvar wanted = [], seen = {};\nfor (var i = 0; i < a.rates.length; i++) {\n  var x = a.rates[i] || {};\n  var cur = text(x.currency, 20).toUpperCase();\n  if (!/^[A-Z][A-Z][A-Z]$/.test(cur)) { refuse('A currency is its three-letter code: GHS, NGN, KES.'); return; }\n  if (seen[cur]) { refuse(cur + ' is there twice.'); return; }\n  seen[cur] = true;\n  var v = Number(x.value);\n  if (!isFinite(v) || v <= 0) { refuse('A rate is a number more than 0: what one ' + cur + ' is worth' + (own ? ' in ' + own.currency : '') + '.'); return; }\n  if (own && cur === own.currency && v !== 1) { refuse('The marketplace’s own currency, ' + own.currency + ', is always worth 1.'); return; }\n  if (own && cur !== own.currency && v === 1) { refuse('Only the marketplace’s own currency, ' + own.currency + ', is worth exactly 1.'); return; }\n  wanted.push({ currency: cur, value: v });\n}\nif (!own && wanted.filter(function (w) { return w.value === 1; }).length !== 1) { refuse('Start with the marketplace’s own currency: the one worth 1.'); return; }\nvar saved = 0;\nfor (var j = 0; j < wanted.length; j++) {\n  var w = wanted[j], before = by[w.currency];\n  if (before && Number(before.value) === w.value) continue;\n  if (before) {\n    await Noodl.Records.save(before.objectId, { value: w.value }, { className: 'Rate' });\n    await history('Rate', 'rate', before.objectId, Inputs.userId, { value: { from: Number(before.value), to: w.value } });\n  } else {\n    var made = await Noodl.Records.create('Rate', w);\n    await history('Rate', 'rate', made.getId(), Inputs.userId, diff(null, w));\n  }\n  saved++;\n}\nOutputs.saved = saved;\nOutputs.done();",
+        "runOnChange-in-rates": false,
+        "runOnChange-in-userId": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-rates",
+          "displayName": "rates",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-saved",
+          "displayName": "saved",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ok-10",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "parameters": {
+        "params": "saved"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "no-10",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

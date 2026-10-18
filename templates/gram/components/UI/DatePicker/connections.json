@@ -1,0 +1,151 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "cd4da434-063a-572f-8be5-63b7b055a09c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "gdpField",
+      "fromProperty": "this",
+      "toId": "gdpScript",
+      "toProperty": "in-host"
+    },
+    {
+      "fromId": "gdpField",
+      "fromProperty": "didMount",
+      "toId": "gdpMounts",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gdpMounts",
+      "fromProperty": "out-mounts",
+      "toId": "gdpScript",
+      "toProperty": "in-mounted"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "Reset",
+      "toId": "gdpResets",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gdpResets",
+      "fromProperty": "out-resets",
+      "toId": "gdpScript",
+      "toProperty": "in-resets"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "Value",
+      "toId": "gdpScript",
+      "toProperty": "in-value"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "Label",
+      "toId": "gdpScript",
+      "toProperty": "in-label"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "Min",
+      "toId": "gdpScript",
+      "toProperty": "in-min"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "Max",
+      "toId": "gdpScript",
+      "toProperty": "in-max"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "Disabled",
+      "toId": "gdpScript",
+      "toProperty": "in-disabled"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "First Day Of Week",
+      "toId": "gdpScript",
+      "toProperty": "in-firstDayOfWeek"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "Width",
+      "toId": "gdpRoot",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "Align X",
+      "toId": "gdpRoot",
+      "toProperty": "alignX"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "Align Y",
+      "toId": "gdpRoot",
+      "toProperty": "alignY"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "Margin Top",
+      "toId": "gdpRoot",
+      "toProperty": "marginTop"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "Margin Right",
+      "toId": "gdpRoot",
+      "toProperty": "marginRight"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "Margin Bottom",
+      "toId": "gdpRoot",
+      "toProperty": "marginBottom"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "Margin Left",
+      "toId": "gdpRoot",
+      "toProperty": "marginLeft"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "Position",
+      "toId": "gdpRoot",
+      "toProperty": "position"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "Label",
+      "toId": "gdpLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gdpIn",
+      "fromProperty": "Show Label",
+      "toId": "gdpLabel",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "gdpScript",
+      "fromProperty": "out-value",
+      "toId": "gdpOut",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "gdpScript",
+      "fromProperty": "out-date",
+      "toId": "gdpOut",
+      "toProperty": "Date"
+    },
+    {
+      "fromId": "gdpScript",
+      "fromProperty": "out-changed",
+      "toId": "gdpOut",
+      "toProperty": "Changed"
+    }
+  ]
+}

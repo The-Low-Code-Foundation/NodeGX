@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "66a88ae9-8df5-54f8-8b4f-9a682bd03a98",
+  "name": "whoAmI",
+  "path": "/#__cloud__/whoAmI",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Who is signed in: their name, waiting or let in, member or admin"
+}

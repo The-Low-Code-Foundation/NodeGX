@@ -1,0 +1,504 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "bd5e8258-b9ea-5690-8e37-4544d8cd69f8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "nmPage",
+      "type": "Page",
+      "label": "The marketplace’s name",
+      "parameters": {
+        "title": "The marketplace’s name",
+        "urlPath": "admin/name"
+      },
+      "children": [
+        "nmRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "nmRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "nmPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "nmBar",
+        "nmBand",
+        "nmBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "nmBar",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "nmRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "backgroundColor": "var(--secondary)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "nmBrand"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "nmBrand",
+      "type": "/UI/Brand",
+      "label": "The marketplace’s name",
+      "parent": "nmBar",
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "nmBand",
+      "type": "/UI/Band",
+      "label": "Who is signed in",
+      "parent": "nmRoot",
+      "parameters": {
+        "words": "Admin"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "nmBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "nmRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 480,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "nmContent",
+        "nmRefused"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "nmContent",
+      "type": "Group",
+      "label": "The name",
+      "parent": "nmBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "nmTitle",
+        "nmLead",
+        "nmName",
+        "nmSave",
+        "nmError",
+        "nmSaved",
+        "nmBack"
+      ],
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "nmTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "nmContent",
+      "parameters": {
+        "text": "The marketplace’s name",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "nmLead",
+      "type": "Text",
+      "label": "Where it shows",
+      "parent": "nmContent",
+      "parameters": {
+        "text": "Buyers see it at the top of every page and in their browser’s tab. 60 characters at most.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "nmName",
+      "type": "net.noodl.controls.textinput",
+      "label": "Name",
+      "parent": "nmContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Name"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "nmSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "parent": "nmContent",
+      "parameters": {
+        "label": "Save the name",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "nmError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "nmContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "nmSaved",
+      "type": "Text",
+      "label": "Saved",
+      "parent": "nmContent",
+      "parameters": {
+        "text": "Saved. Every page shows the new name.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "nmBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back to the sellers",
+      "parent": "nmContent",
+      "parameters": {
+        "label": "Back to the sellers",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "nmRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "nmBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "nmRefusedWhy",
+        "nmRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 1720
+    },
+    {
+      "id": "nmRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "nmRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "nmRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "nmRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "nmToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 530,
+      "y": 1960
+    },
+    {
+      "id": "nmLoad",
+      "type": "JavaScriptFunction",
+      "label": "The admin only",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\ntry { await adminOnly(); } catch (e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; return; }\nOutputs.refused = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 530,
+      "y": 760
+    },
+    {
+      "id": "nmNow",
+      "type": "Variable2",
+      "label": "The marketplace’s name",
+      "parameters": {
+        "name": "marketplaceName"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the marketplace’s name: one for the whole app, read by every page’s bar."
+      },
+      "x": 530,
+      "y": 1120
+    },
+    {
+      "id": "nmGather",
+      "type": "JavaScriptFunction",
+      "label": "The new name",
+      "parameters": {
+        "functionScript": "var name = (Inputs.typed === undefined ? String(Inputs.current || '') : String(Inputs.typed)).trim();\nOutputs.marketplace = { name: name };\nOutputs.name = name;\nOutputs.go();",
+        "runOnChange-in-typed": false,
+        "runOnChange-in-current": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-typed",
+          "displayName": "typed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-current",
+          "displayName": "current",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-marketplace",
+          "displayName": "marketplace",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 530,
+      "y": 1240
+    },
+    {
+      "id": "nmCall",
+      "type": "CloudFunction2",
+      "label": "nameMarketplace(marketplace)",
+      "parameters": {
+        "function": "nameMarketplace"
+      },
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "nmSet",
+      "type": "Set Variable",
+      "label": "The marketplace’s name, as saved",
+      "parameters": {
+        "name": "marketplaceName",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the marketplace’s name: one for the whole app, read by every page’s bar."
+      },
+      "x": 530,
+      "y": 2080
+    },
+    {
+      "id": "nmShowSaved",
+      "type": "Switch",
+      "label": "Saved, just now",
+      "x": 530,
+      "y": 1600
+    },
+    {
+      "id": "nmShowError",
+      "type": "Switch",
+      "label": "Refused, just now",
+      "x": 530,
+      "y": 1480
+    },
+    {
+      "id": "nmToSellers",
+      "type": "RouterNavigate",
+      "label": "To the sellers",
+      "parameters": {
+        "target": "/Pages/Admin/Sellers"
+      },
+      "x": 530,
+      "y": 1720
+    }
+  ],
+  "visualRoots": [
+    "nmPage"
+  ]
+}

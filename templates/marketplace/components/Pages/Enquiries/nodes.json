@@ -1,0 +1,461 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ba90a80d-f58b-5829-8bdd-6a1da01b1a64",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "eqPage",
+      "type": "Page",
+      "label": "Enquiries",
+      "parameters": {
+        "title": "Enquiries",
+        "urlPath": "enquiries"
+      },
+      "children": [
+        "eqRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "eqRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "eqPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "eqBar",
+        "eqBand",
+        "eqAdminTabsBox",
+        "eqSellerTabsBox",
+        "eqBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "eqBar",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "eqRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "backgroundColor": "var(--secondary)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "eqBrand"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "eqBrand",
+      "type": "/UI/Brand",
+      "label": "The marketplace’s name",
+      "parent": "eqBar",
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "eqBand",
+      "type": "/UI/Band",
+      "label": "Who is signed in",
+      "parent": "eqRoot",
+      "parameters": {
+        "words": ""
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "eqAdminTabsBox",
+      "type": "Group",
+      "label": "The admin’s tabs",
+      "parent": "eqRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "mounted": false
+      },
+      "children": [
+        "eqAdminTabs"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "eqAdminTabs",
+      "type": "/Admin/Tabs",
+      "label": "The admin’s tabs",
+      "parent": "eqAdminTabsBox",
+      "parameters": {
+        "on": "enquiries"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "eqSellerTabsBox",
+      "type": "Group",
+      "label": "A seller’s tabs",
+      "parent": "eqRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "mounted": false
+      },
+      "children": [
+        "eqSellerTabs"
+      ],
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "eqSellerTabs",
+      "type": "/Seller/Tabs",
+      "label": "Orders, Products, Enquiries",
+      "parent": "eqSellerTabsBox",
+      "parameters": {
+        "on": "enquiries"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "eqBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "eqRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 960,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "eqContent",
+        "eqRefused"
+      ],
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "eqContent",
+      "type": "Group",
+      "label": "The enquiries",
+      "parent": "eqBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "eqTitle",
+        "eqEmpty",
+        "eqSections",
+        "eqFine"
+      ],
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "eqTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "eqContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "eqEmpty",
+      "type": "Text",
+      "label": "No enquiries yet",
+      "parent": "eqContent",
+      "parameters": {
+        "text": "No enquiries yet. They arrive here when a buyer messages you about a product you sell by enquiry.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "eqSections",
+      "type": "Group",
+      "label": "To answer, then answered",
+      "parent": "eqContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)"
+      },
+      "children": [
+        "eqEach"
+      ],
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "eqEach",
+      "type": "For Each",
+      "label": "One section each",
+      "parent": "eqSections",
+      "parameters": {
+        "template": "/Seller/EnquirySection"
+      },
+      "x": 340,
+      "y": 1720
+    },
+    {
+      "id": "eqFine",
+      "type": "Text",
+      "label": "What this page shows, and whose",
+      "parent": "eqContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "eqRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "eqBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "eqRefusedWhy",
+        "eqRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 1960
+    },
+    {
+      "id": "eqRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "eqRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "eqRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "eqRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 2200
+    },
+    {
+      "id": "eqToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 590,
+      "y": 2200
+    },
+    {
+      "id": "eqLoad",
+      "type": "JavaScriptFunction",
+      "label": "The enquiries this person may read",
+      "parameters": {
+        "runOnChange-in-changed": true,
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nvar SECTIONS = [[\"open\",\"To answer\",\"reach them on WhatsApp or by phone\"],[\"answered\",\"Answered\",\"\"]];\nfunction at(d) { var iso = d && typeof d === 'object' ? d.iso : d; var t = iso ? new Date(iso).getTime() : NaN; return isFinite(t) ? t : 0; }\nfunction day(d) { var t = at(d); return t ? new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''; }\nvoid Inputs.changed; // a card marked one: read again\ntry {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n} catch (e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; return; }\nvar isAdmin = !!me && me.role === 'admin';\nif (!me || (!isAdmin && !me.seller)) { Outputs.problem = 'This page is for the marketplace’s sellers and its admin.'; Outputs.refused = true; Outputs.ok = false; return; }\ntry {\n  var products = await all('Product', isAdmin ? {} : { seller: { equalTo: ptr('Seller', me.seller.id) } });\n  var enquiries = isAdmin ? await all('Enquiry') : products.length ? await all('Enquiry', { product: { containedIn: products.map(function (p) { return ptr('Product', p.objectId); }) } }) : [];\n  var sellers = isAdmin ? await all('Seller') : [];\n} catch (e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; return; }\nvar product = {}, seller = {};\nproducts.forEach(function (p) { product[p.objectId] = p; });\nsellers.forEach(function (s) { seller[s.objectId] = s; });\nvar bySection = { open: [], answered: [] };\nenquiries\n  .slice()\n  .sort(function (a, b) { return at(b.createdAt) - at(a.createdAt); })\n  .forEach(function (q) {\n    var p = product[idOf(q.product)] || {}, s = seller[idOf(p.seller)] || {};\n    var answered = !!q.answeredAt;\n    var contact = String(q.contact || '');\n    var digits = contact.replace(/[^0-9]/g, '');\n    if (contact.slice(0, 2) === '00') digits = digits.slice(2);\n    var first = String(q.buyerName || '').split(' ')[0];\n    bySection[answered ? 'answered' : 'open'].push({\n      id: q.objectId,\n      product: p.name || 'A product no longer here',\n      pill: answered ? 'Answered' : 'New',\n      pillBg: answered ? 'var(--ok-bg)' : 'var(--warn-bg)',\n      pillInk: answered ? 'var(--ok)' : 'var(--warn)',\n      seller: isAdmin ? s.name || '' : '',\n      hasSeller: isAdmin,\n      from: [q.buyerName, contact, 'sent ' + day(q.createdAt)].filter(Boolean).join(' · ') + (answered ? ' · answered ' + day(q.answeredAt) : ''),\n      message: q.message || '',\n      whatsappLabel: 'WhatsApp ' + (first || 'them'),\n      whatsappLink: 'https://wa.me/' + digits + '?text=' + encodeURIComponent('Hello ' + (first || '') + ', about ' + (p.name || 'your message') + ': '),\n      callLabel: 'Call ' + contact,\n      callLink: 'tel:+' + digits,\n      answered: answered,\n      toggleLabel: answered ? 'Not answered yet' : 'Mark answered',\n      // The one thing to do with a new one is filled; undoing an answered one is not.\n      toggleBg: answered ? 'var(--surface)' : 'var(--secondary)',\n      toggleInk: answered ? 'var(--secondary)' : 'var(--secondary-foreground)'\n    });\n  });\nOutputs.sections = SECTIONS.filter(function (x) { return bySection[x[0]].length; }).map(function (x) { return { id: x[0], heading: x[1] + ' (' + bySection[x[0]].length + ')', note: x[2], cards: bySection[x[0]] }; });\nOutputs.empty = enquiries.length === 0;\nOutputs.band = isAdmin ? 'Admin' : 'Signed in as ' + (me.seller.name || '');\nOutputs.heading = isAdmin ? 'Every enquiry' : 'Enquiries';\nOutputs.fine = isAdmin\n  ? 'Every buyer’s message about a product sold by enquiry, each named with its seller. The sale is settled between buyer and seller, away from the site.'\n  : 'Buyers’ messages about the products you sell by enquiry. Reach them on the number they left; you agree the price and the handover between you, away from the site.';\nOutputs.isAdmin = isAdmin;\nOutputs.isStaff = !isAdmin;\nOutputs.refused = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "in-changed",
+          "displayName": "changed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sections",
+          "displayName": "sections",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band",
+          "displayName": "band",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-heading",
+          "displayName": "heading",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fine",
+          "displayName": "fine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isAdmin",
+          "displayName": "isAdmin",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isStaff",
+          "displayName": "isStaff",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 1240
+    },
+    {
+      "id": "eqVersion",
+      "type": "Variable2",
+      "label": "An enquiry changed",
+      "parameters": {
+        "name": "enquiriesChanged"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: an enquiry was marked: the Enquiries page reads again, whichever card marked it."
+      },
+      "x": 590,
+      "y": 2320
+    }
+  ],
+  "visualRoots": [
+    "eqPage"
+  ]
+}

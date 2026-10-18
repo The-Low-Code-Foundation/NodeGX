@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "12d4ca3c-290a-50e5-880a-6859b4d0c925",
+  "name": "BasketLine",
+  "path": "/Shop/BasketLine",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One product in the basket: how many, what each costs, the line’s total; one fewer, one more, take it out"
+}

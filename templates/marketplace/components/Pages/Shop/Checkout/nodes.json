@@ -1,0 +1,886 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "257cff11-ed94-5e03-817a-b837aefde8ab",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "coPage",
+      "type": "Page",
+      "label": "Check out",
+      "parameters": {
+        "title": "Check out",
+        "urlPath": "checkout"
+      },
+      "children": [
+        "coRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "coRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "coPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "coTop",
+        "coBody",
+        "coNav"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "coTop",
+      "type": "/Shop/Top",
+      "label": "The bar",
+      "parent": "coRoot",
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "coBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "coRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 1080,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "coBack",
+        "coTitle",
+        "coProblem",
+        "coEmpty",
+        "coContent"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "coNav",
+      "type": "/Shop/Nav",
+      "label": "The bottom bar",
+      "parent": "coRoot",
+      "parameters": {
+        "on": ""
+      },
+      "x": 160,
+      "y": 2800
+    },
+    {
+      "id": "coBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "parent": "coBody",
+      "parameters": {
+        "label": "← Your basket",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--secondary)",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "coTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "coBody",
+      "parameters": {
+        "text": "Check out",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "coProblem",
+      "type": "Text",
+      "label": "The checkout could not be read",
+      "parent": "coBody",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "coEmpty",
+      "type": "Group",
+      "label": "Nothing to check out",
+      "parent": "coBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "coEmptyWords",
+        "coShop"
+      ],
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "coEmptyWords",
+      "type": "Text",
+      "label": "Nothing to check out",
+      "parent": "coEmpty",
+      "parameters": {
+        "text": "Your basket is empty: there is nothing to check out.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "coShop",
+      "type": "net.noodl.controls.button",
+      "label": "To the shop",
+      "parent": "coEmpty",
+      "parameters": {
+        "label": "To the shop",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "coContent",
+      "type": "Group",
+      "label": "Who and where beside how they’ll pay (tablet), above it (phone)",
+      "parent": "coBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "cssClassName": "mk-two",
+        "mounted": false
+      },
+      "children": [
+        "coWho",
+        "coPay"
+      ],
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "coWho",
+      "type": "Group",
+      "label": "Who, and where it goes",
+      "parent": "coContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "coName",
+        "coPhone",
+        "coAddress",
+        "coCountry",
+        "coEmail"
+      ],
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "coName",
+      "type": "net.noodl.controls.textinput",
+      "label": "Name",
+      "parent": "coWho",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Name"
+      },
+      "x": 340,
+      "y": 1480
+    },
+    {
+      "id": "coPhone",
+      "type": "net.noodl.controls.textinput",
+      "label": "Phone (the sellers call this number)",
+      "parent": "coWho",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Phone (the sellers call this number)",
+        "inputMode": "tel"
+      },
+      "x": 340,
+      "y": 1600
+    },
+    {
+      "id": "coAddress",
+      "type": "net.noodl.controls.textinput",
+      "label": "Where it goes",
+      "parent": "coWho",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Where it goes",
+        "type": "textArea"
+      },
+      "x": 340,
+      "y": 1720
+    },
+    {
+      "id": "coCountry",
+      "type": "net.noodl.controls.options",
+      "label": "The country it goes to",
+      "parent": "coWho",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "The country it goes to"
+      },
+      "x": 340,
+      "y": 1840
+    },
+    {
+      "id": "coEmail",
+      "type": "net.noodl.controls.textinput",
+      "label": "Email (optional; needed to pay by card)",
+      "parent": "coWho",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Email (optional; needed to pay by card)",
+        "type": "email"
+      },
+      "x": 340,
+      "y": 1960
+    },
+    {
+      "id": "coPay",
+      "type": "Group",
+      "label": "How they’ll pay, country by country",
+      "parent": "coContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "coEachCountry",
+        "coSummary",
+        "coPlace",
+        "coError",
+        "coFine"
+      ],
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "coEachCountry",
+      "type": "For Each",
+      "label": "One payment per seller country",
+      "parent": "coPay",
+      "parameters": {
+        "template": "/Shop/PayCountry"
+      },
+      "x": 340,
+      "y": 2200
+    },
+    {
+      "id": "coSummary",
+      "type": "Text",
+      "label": "What is being ordered, and who confirms delivery",
+      "parent": "coPay",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 340,
+      "y": 2320
+    },
+    {
+      "id": "coPlace",
+      "type": "net.noodl.controls.button",
+      "label": "Place order",
+      "parent": "coPay",
+      "parameters": {
+        "label": "Place order",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 340,
+      "y": 2440
+    },
+    {
+      "id": "coError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "coPay",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 340,
+      "y": 2560
+    },
+    {
+      "id": "coFine",
+      "type": "Text",
+      "label": "The private link",
+      "parent": "coPay",
+      "parameters": {
+        "text": "Your order opens on a private link: keep it. This phone keeps it too, under My order.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 340,
+      "y": 2680
+    },
+    {
+      "id": "coLoad",
+      "type": "JavaScriptFunction",
+      "label": "The basket, the countries, the rates, the ways to pay",
+      "parameters": {
+        "runOnChange-in-basket": true,
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nfunction plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }\nfunction byName(a, b) { return String(a.name || '').localeCompare(String(b.name || '')); }\nfunction newest(a, b) { return String(b.createdAt || '').localeCompare(String(a.createdAt || '')) || byName(a, b); }\nfunction symbolOf(cur) {\n  try {\n    var part = new Intl.NumberFormat('en', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol' }).formatToParts(0).filter(function (x) { return x.type === 'currency'; })[0];\n    return part ? part.value : cur;\n  } catch (e) { return cur; }\n}\nfunction rateOf(rates, cur) {\n  var r = (rates || []).filter(function (x) { return x.currency === cur; })[0];\n  var v = r ? Number(r.value) : 0;\n  return v > 0 ? v : 0;\n}\nfunction converted(price, from, to, rates) {\n  var a = rateOf(rates, from), b = rateOf(rates, to);\n  if (!to || to === from || !a || !b) return { amount: Number(price) || 0, currency: from, same: true };\n  return { amount: Number(price) * a / b, currency: to, same: false };\n}\nfunction priced(price, from, to, rates) {\n  var c = converted(price, from, to, rates);\n  return c.same ? { price: money(price, from), was: '' } : { price: money(c.amount, to), was: money(price, from) };\n}\nfunction list(words) { return words.length < 2 ? words.join('') : words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1]; }\nfunction readBasket() {\n  var b = [];\n  try { b = JSON.parse(localStorage.getItem('mk-basket') || '[]'); } catch (e) { b = []; }\n  return (Array.isArray(b) ? b : []).filter(function (l) { return l && typeof l.productId === 'string' && Number(l.quantity) >= 1; }).map(function (l) { return { productId: l.productId, quantity: Math.min(99, Math.floor(Number(l.quantity))) }; });\n}\nfunction writeBasket(b) { try { localStorage.setItem('mk-basket', JSON.stringify(b)); } catch (e) {} return Date.now() + ':' + b.map(function (l) { return l.productId + 'x' + l.quantity; }).join(','); }\nfunction basketCount(b) { return b.reduce(function (n, l) { return n + l.quantity; }, 0); }\nfunction readOrders() {\n  var o = [];\n  try { o = JSON.parse(localStorage.getItem('mk-orders') || '[]'); } catch (e) { o = []; }\n  return (Array.isArray(o) ? o : []).filter(function (x) { return x && typeof x.token === 'string' && x.token; });\n}\n/** The ways to pay turned on in each country, by its id, in the order a checkout offers them. */\nasync function waysByCountry() {\n  var ways = await all('WayToPay');\n  var by = {};\n  for (var i = 0; i < ways.length; i++) {\n    var on = await all('Country', { relatedTo: { id: ways[i].objectId, key: 'country', className: 'WayToPay' } });\n    on.forEach(function (c) { (by[c.objectId] = by[c.objectId] || []).push(ways[i]); });\n  }\n  var rank = [\"paystack\",\"flutterwave\",\"on-delivery\",\"bank-transfer\",\"whatsapp\"];\n  Object.keys(by).forEach(function (k) { by[k].sort(function (a, b) { return rank.indexOf(a.method) - rank.indexOf(b.method); }); });\n  return by;\n}\nvar TINTS = ['var(--secondary)', 'var(--ok)', 'var(--bad)', 'var(--warn)', 'var(--secondary-hover)'];\nfunction tintOf(id) { var h = 0; String(id).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 997; }); return TINTS[h % TINTS.length]; }\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(''); }\nfunction hasFile(f) { return !!(f && f.url); }\nfunction sellerChip(s, country) {\n  return { id: s.objectId, name: s.name || '', place: country ? country.name || '' : '', logo: thumb(s.logo, 'sm'), hasLogo: hasFile(s.logo), noLogo: !hasFile(s.logo), initials: initials(s.name), tint: tintOf(s.objectId) };\n}\nfunction card(p, s, country, cur, rates) {\n  var pr = priced(p.price, country ? country.currency : '', cur, rates);\n  var first = (p.photos || []).filter(hasFile)[0];\n  return { id: p.objectId, name: p.name || '', who: (s.name || '') + (country ? ' · ' + country.name : ''), price: pr.price, was: pr.was, hasWas: !!pr.was, enquire: p.mode === 'enquire', photo: thumb(first, 'md'), hasPhoto: !!first, noPhoto: !first };\n}\n\nvoid Inputs.basket;\nvar b = readBasket();\nif (!b.length) { Outputs.failed = false; Outputs.data = { lines: [], products: [], sellers: [], countries: [], rates: [], ways: {} }; return; }\ntry {\n  var products = await all('Product', { objectId: { containedIn: b.map(function (l) { return l.productId; }) } });\n  var got = await Promise.all([all('Seller', { objectId: { containedIn: products.map(function (p) { return idOf(p.seller); }) } }), all('Country'), all('Rate'), waysByCountry()]);\n} catch (e) { Outputs.problem = 'The checkout could not be read just now. Check the connection, then open it again.'; Outputs.failed = true; return; }\nOutputs.failed = false;\nOutputs.data = { lines: b, products: products, sellers: got[0], countries: got[1], rates: got[2], ways: got[3] };"
+      },
+      "ports": [
+        {
+          "name": "in-basket",
+          "displayName": "basket",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-failed",
+          "displayName": "failed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-data",
+          "displayName": "data",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 760
+    },
+    {
+      "id": "coShape",
+      "type": "JavaScriptFunction",
+      "label": "One payment per seller country, and the ways on there",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nfunction plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }\nfunction byName(a, b) { return String(a.name || '').localeCompare(String(b.name || '')); }\nfunction newest(a, b) { return String(b.createdAt || '').localeCompare(String(a.createdAt || '')) || byName(a, b); }\nfunction symbolOf(cur) {\n  try {\n    var part = new Intl.NumberFormat('en', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol' }).formatToParts(0).filter(function (x) { return x.type === 'currency'; })[0];\n    return part ? part.value : cur;\n  } catch (e) { return cur; }\n}\nfunction rateOf(rates, cur) {\n  var r = (rates || []).filter(function (x) { return x.currency === cur; })[0];\n  var v = r ? Number(r.value) : 0;\n  return v > 0 ? v : 0;\n}\nfunction converted(price, from, to, rates) {\n  var a = rateOf(rates, from), b = rateOf(rates, to);\n  if (!to || to === from || !a || !b) return { amount: Number(price) || 0, currency: from, same: true };\n  return { amount: Number(price) * a / b, currency: to, same: false };\n}\nfunction priced(price, from, to, rates) {\n  var c = converted(price, from, to, rates);\n  return c.same ? { price: money(price, from), was: '' } : { price: money(c.amount, to), was: money(price, from) };\n}\nfunction list(words) { return words.length < 2 ? words.join('') : words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1]; }\nfunction readBasket() {\n  var b = [];\n  try { b = JSON.parse(localStorage.getItem('mk-basket') || '[]'); } catch (e) { b = []; }\n  return (Array.isArray(b) ? b : []).filter(function (l) { return l && typeof l.productId === 'string' && Number(l.quantity) >= 1; }).map(function (l) { return { productId: l.productId, quantity: Math.min(99, Math.floor(Number(l.quantity))) }; });\n}\nfunction writeBasket(b) { try { localStorage.setItem('mk-basket', JSON.stringify(b)); } catch (e) {} return Date.now() + ':' + b.map(function (l) { return l.productId + 'x' + l.quantity; }).join(','); }\nfunction basketCount(b) { return b.reduce(function (n, l) { return n + l.quantity; }, 0); }\nfunction readOrders() {\n  var o = [];\n  try { o = JSON.parse(localStorage.getItem('mk-orders') || '[]'); } catch (e) { o = []; }\n  return (Array.isArray(o) ? o : []).filter(function (x) { return x && typeof x.token === 'string' && x.token; });\n}\n/** The ways to pay turned on in each country, by its id, in the order a checkout offers them. */\nasync function waysByCountry() {\n  var ways = await all('WayToPay');\n  var by = {};\n  for (var i = 0; i < ways.length; i++) {\n    var on = await all('Country', { relatedTo: { id: ways[i].objectId, key: 'country', className: 'WayToPay' } });\n    on.forEach(function (c) { (by[c.objectId] = by[c.objectId] || []).push(ways[i]); });\n  }\n  var rank = [\"paystack\",\"flutterwave\",\"on-delivery\",\"bank-transfer\",\"whatsapp\"];\n  Object.keys(by).forEach(function (k) { by[k].sort(function (a, b) { return rank.indexOf(a.method) - rank.indexOf(b.method); }); });\n  return by;\n}\nvar TINTS = ['var(--secondary)', 'var(--ok)', 'var(--bad)', 'var(--warn)', 'var(--secondary-hover)'];\nfunction tintOf(id) { var h = 0; String(id).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 997; }); return TINTS[h % TINTS.length]; }\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(''); }\nfunction hasFile(f) { return !!(f && f.url); }\nfunction sellerChip(s, country) {\n  return { id: s.objectId, name: s.name || '', place: country ? country.name || '' : '', logo: thumb(s.logo, 'sm'), hasLogo: hasFile(s.logo), noLogo: !hasFile(s.logo), initials: initials(s.name), tint: tintOf(s.objectId) };\n}\nfunction card(p, s, country, cur, rates) {\n  var pr = priced(p.price, country ? country.currency : '', cur, rates);\n  var first = (p.photos || []).filter(hasFile)[0];\n  return { id: p.objectId, name: p.name || '', who: (s.name || '') + (country ? ' · ' + country.name : ''), price: pr.price, was: pr.was, hasWas: !!pr.was, enquire: p.mode === 'enquire', photo: thumb(first, 'md'), hasPhoto: !!first, noPhoto: !first };\n}\n\nvar BUILT = [\"on-delivery\",\"bank-transfer\",\"whatsapp\",\"paystack\"];\nvar d = Inputs.data;\nif (!d) return;\nvar picks = {};\ntry { picks = JSON.parse(Inputs.picks || '{}') || {}; } catch (e) { picks = {}; }\nvar product = {}, seller = {}, country = {};\nd.products.forEach(function (p) { product[p.objectId] = p; });\nd.sellers.forEach(function (s) { seller[s.objectId] = s; });\nd.countries.forEach(function (c) { country[c.objectId] = c; });\nvar groups = [], groupOf = {}, lines = [], items = 0, sellerCount = 0;\nd.lines.forEach(function (l) {\n  var p = product[l.productId], s = p ? seller[idOf(p.seller)] : null, c = s ? country[idOf(s.country)] : null;\n  if (!p || !s || !c || p.endedAt || s.endedAt || p.mode !== 'buy') return;\n  lines.push({ productId: l.productId, quantity: l.quantity });\n  items += l.quantity;\n  var g = groupOf[c.objectId];\n  if (!g) { g = groupOf[c.objectId] = { country: c, amount: 0, sellers: [], noWhatsapp: false }; groups.push(g); }\n  g.amount += (Number(p.price) || 0) * l.quantity;\n  if (g.sellers.indexOf(s.name) < 0) { g.sellers.push(s.name); sellerCount++; }\n  if (!String(s.whatsapp || '').replace(/[^0-9]/g, '')) g.noWhatsapp = true;\n});\nvar pay = {}, canOrder = groups.length > 0;\nOutputs.groups = groups.map(function (g) {\n  var id = g.country.objectId;\n  var offered = (d.ways[id] || []).filter(function (w) { return BUILT.indexOf(w.method) >= 0 && !(w.method === 'whatsapp' && g.noWhatsapp); });\n  var picked = offered.filter(function (w) { return w.objectId === picks[id]; })[0] || offered[0];\n  if (picked) pay[id] = picked.objectId; else canOrder = false;\n  return {\n    id: id,\n    heading: 'How you’ll pay in ' + g.country.name,\n    sub: money(g.amount, g.country.currency),\n    hasNone: offered.length === 0,\n    noneWords: 'No way to pay is turned on in ' + g.country.name + ' yet, so nothing from ' + list(g.sellers) + ' can be ordered just now. Take ' + (g.sellers.length === 1 ? 'its' : 'their') + ' products out of your basket to order the rest.',\n    options: offered.map(function (w) {\n      var on = w === picked;\n      return { id: id + ':' + w.objectId, countryId: id, wayId: w.objectId, label: (on ? '◉ ' : '○ ') + (w.name || ''), fine: w.instructions || '', line: on ? 'var(--secondary)' : 'var(--border)' };\n    })\n  };\n});\nOutputs.pay = pay;\nOutputs.lines = lines;\nOutputs.canOrder = canOrder;\nOutputs.full = lines.length > 0;\nOutputs.empty = lines.length === 0;\nOutputs.summary = lines.length ? plural(items, 'item', 'items') + ' from ' + plural(sellerCount, 'seller', 'sellers') + '. Each seller confirms the delivery and what it costs before you pay.' : '';\nvar sorted = d.countries.slice().sort(byName);\nOutputs.countries = sorted.map(function (c) { return { Label: c.name, Value: c.objectId }; });\nvar home = sorted.filter(function (c) { return c.currency === Inputs.currency; })[0] || (groups[0] && groups[0].country) || sorted[0];\nOutputs.countryPick = home ? home.objectId : '';"
+      },
+      "ports": [
+        {
+          "name": "in-data",
+          "displayName": "data",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-picks",
+          "displayName": "picks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-currency",
+          "displayName": "currency",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-groups",
+          "displayName": "groups",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pay",
+          "displayName": "pay",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lines",
+          "displayName": "lines",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canOrder",
+          "displayName": "canOrder",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-full",
+          "displayName": "full",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-summary",
+          "displayName": "summary",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-countries",
+          "displayName": "countries",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-countryPick",
+          "displayName": "countryPick",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 2200
+    },
+    {
+      "id": "coGather",
+      "type": "JavaScriptFunction",
+      "label": "The form, as one order",
+      "parameters": {
+        "functionScript": "function v(x) { return x === undefined || x === null ? '' : String(x); }\nOutputs.order = {\n  buyerName: v(Inputs.name),\n  phone: v(Inputs.phone),\n  address: v(Inputs.address),\n  email: v(Inputs.email),\n  country: v(Inputs.country) || v(Inputs.country0),\n  currency: v(Inputs.currency),\n  lines: Array.isArray(Inputs.lines) ? Inputs.lines : [],\n  pay: Inputs.pay && typeof Inputs.pay === 'object' ? Inputs.pay : {}\n};\nOutputs.go();",
+        "runOnChange-in-name": false,
+        "runOnChange-in-phone": false,
+        "runOnChange-in-address": false,
+        "runOnChange-in-email": false,
+        "runOnChange-in-country": false,
+        "runOnChange-in-country0": false,
+        "runOnChange-in-currency": false,
+        "runOnChange-in-lines": false,
+        "runOnChange-in-pay": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-phone",
+          "displayName": "phone",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-address",
+          "displayName": "address",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-email",
+          "displayName": "email",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-country",
+          "displayName": "country",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-country0",
+          "displayName": "country0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-currency",
+          "displayName": "currency",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-lines",
+          "displayName": "lines",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pay",
+          "displayName": "pay",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-order",
+          "displayName": "order",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 1480
+    },
+    {
+      "id": "coCall",
+      "type": "CloudFunction2",
+      "label": "placeOrder(order)",
+      "parameters": {
+        "function": "placeOrder"
+      },
+      "x": 590,
+      "y": 2560
+    },
+    {
+      "id": "coPlaced",
+      "type": "JavaScriptFunction",
+      "label": "Remember the order on this phone; empty the basket",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nfunction plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }\nfunction byName(a, b) { return String(a.name || '').localeCompare(String(b.name || '')); }\nfunction newest(a, b) { return String(b.createdAt || '').localeCompare(String(a.createdAt || '')) || byName(a, b); }\nfunction symbolOf(cur) {\n  try {\n    var part = new Intl.NumberFormat('en', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol' }).formatToParts(0).filter(function (x) { return x.type === 'currency'; })[0];\n    return part ? part.value : cur;\n  } catch (e) { return cur; }\n}\nfunction rateOf(rates, cur) {\n  var r = (rates || []).filter(function (x) { return x.currency === cur; })[0];\n  var v = r ? Number(r.value) : 0;\n  return v > 0 ? v : 0;\n}\nfunction converted(price, from, to, rates) {\n  var a = rateOf(rates, from), b = rateOf(rates, to);\n  if (!to || to === from || !a || !b) return { amount: Number(price) || 0, currency: from, same: true };\n  return { amount: Number(price) * a / b, currency: to, same: false };\n}\nfunction priced(price, from, to, rates) {\n  var c = converted(price, from, to, rates);\n  return c.same ? { price: money(price, from), was: '' } : { price: money(c.amount, to), was: money(price, from) };\n}\nfunction list(words) { return words.length < 2 ? words.join('') : words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1]; }\nfunction readBasket() {\n  var b = [];\n  try { b = JSON.parse(localStorage.getItem('mk-basket') || '[]'); } catch (e) { b = []; }\n  return (Array.isArray(b) ? b : []).filter(function (l) { return l && typeof l.productId === 'string' && Number(l.quantity) >= 1; }).map(function (l) { return { productId: l.productId, quantity: Math.min(99, Math.floor(Number(l.quantity))) }; });\n}\nfunction writeBasket(b) { try { localStorage.setItem('mk-basket', JSON.stringify(b)); } catch (e) {} return Date.now() + ':' + b.map(function (l) { return l.productId + 'x' + l.quantity; }).join(','); }\nfunction basketCount(b) { return b.reduce(function (n, l) { return n + l.quantity; }, 0); }\nfunction readOrders() {\n  var o = [];\n  try { o = JSON.parse(localStorage.getItem('mk-orders') || '[]'); } catch (e) { o = []; }\n  return (Array.isArray(o) ? o : []).filter(function (x) { return x && typeof x.token === 'string' && x.token; });\n}\n/** The ways to pay turned on in each country, by its id, in the order a checkout offers them. */\nasync function waysByCountry() {\n  var ways = await all('WayToPay');\n  var by = {};\n  for (var i = 0; i < ways.length; i++) {\n    var on = await all('Country', { relatedTo: { id: ways[i].objectId, key: 'country', className: 'WayToPay' } });\n    on.forEach(function (c) { (by[c.objectId] = by[c.objectId] || []).push(ways[i]); });\n  }\n  var rank = [\"paystack\",\"flutterwave\",\"on-delivery\",\"bank-transfer\",\"whatsapp\"];\n  Object.keys(by).forEach(function (k) { by[k].sort(function (a, b) { return rank.indexOf(a.method) - rank.indexOf(b.method); }); });\n  return by;\n}\nvar TINTS = ['var(--secondary)', 'var(--ok)', 'var(--bad)', 'var(--warn)', 'var(--secondary-hover)'];\nfunction tintOf(id) { var h = 0; String(id).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 997; }); return TINTS[h % TINTS.length]; }\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(''); }\nfunction hasFile(f) { return !!(f && f.url); }\nfunction sellerChip(s, country) {\n  return { id: s.objectId, name: s.name || '', place: country ? country.name || '' : '', logo: thumb(s.logo, 'sm'), hasLogo: hasFile(s.logo), noLogo: !hasFile(s.logo), initials: initials(s.name), tint: tintOf(s.objectId) };\n}\nfunction card(p, s, country, cur, rates) {\n  var pr = priced(p.price, country ? country.currency : '', cur, rates);\n  var first = (p.photos || []).filter(hasFile)[0];\n  return { id: p.objectId, name: p.name || '', who: (s.name || '') + (country ? ' · ' + country.name : ''), price: pr.price, was: pr.was, hasWas: !!pr.was, enquire: p.mode === 'enquire', photo: thumb(first, 'md'), hasPhoto: !!first, noPhoto: !first };\n}\n\nvar o = Inputs.placed;\nif (!o || !o.followToken) return;\nvar orders = readOrders().filter(function (x) { return x.token !== o.followToken; });\norders.unshift({ number: o.number, token: o.followToken });\ntry { localStorage.setItem('mk-orders', JSON.stringify(orders.slice(0, 20))); } catch (e) {}\nOutputs.token = o.followToken;\nOutputs.basket = writeBasket([]);\nOutputs.go();",
+        "runOnChange-in-placed": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-placed",
+          "displayName": "placed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-token",
+          "displayName": "token",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-basket",
+          "displayName": "basket",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 2680
+    },
+    {
+      "id": "coBasket",
+      "type": "Variable2",
+      "label": "The basket changed",
+      "parameters": {
+        "name": "basket"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the basket on this phone: every page shows the same one."
+      },
+      "x": 590,
+      "y": 2800
+    },
+    {
+      "id": "coPicks",
+      "type": "Variable2",
+      "label": "The ways picked",
+      "parameters": {
+        "name": "payPicks"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the way picked for each seller country: one pick per country, across every option."
+      },
+      "x": 590,
+      "y": 2920
+    },
+    {
+      "id": "coCurrency",
+      "type": "Variable2",
+      "label": "The currency prices are shown in",
+      "parameters": {
+        "name": "currency"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the currency a buyer picked, the same on every page."
+      },
+      "x": 590,
+      "y": 3040
+    },
+    {
+      "id": "coEmptied",
+      "type": "Set Variable",
+      "label": "The basket, emptied",
+      "parameters": {
+        "name": "basket",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the basket on this phone: every page shows the same one."
+      },
+      "x": 590,
+      "y": 3160
+    },
+    {
+      "id": "coLastOrder",
+      "type": "Set Variable",
+      "label": "The order just placed",
+      "parameters": {
+        "name": "lastOrder",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the order this phone placed last: the bottom bar on every page offers it."
+      },
+      "x": 590,
+      "y": 3280
+    },
+    {
+      "id": "coToBasket",
+      "type": "RouterNavigate",
+      "label": "Back to the basket",
+      "parameters": {
+        "target": "/Pages/Shop/Basket"
+      },
+      "x": 590,
+      "y": 520
+    },
+    {
+      "id": "coToShop",
+      "type": "RouterNavigate",
+      "label": "To the shop",
+      "parameters": {
+        "target": "/Pages/Shop/Home"
+      },
+      "x": 590,
+      "y": 1120
+    },
+    {
+      "id": "coToOrder",
+      "type": "RouterNavigate",
+      "label": "To the order",
+      "parameters": {
+        "target": "/Pages/Shop/Order"
+      },
+      "x": 590,
+      "y": 3400
+    }
+  ],
+  "visualRoots": [
+    "coPage"
+  ]
+}

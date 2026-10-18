@@ -1,0 +1,604 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7c699c88-254a-5a59-891e-520d39960c85",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ssPage",
+      "type": "Page",
+      "label": "Stop a seller",
+      "parameters": {
+        "title": "Stop a seller",
+        "urlPath": "admin/seller/{sellerId}/stop"
+      },
+      "children": [
+        "ssRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ssRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "ssPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "ssBar",
+        "ssBand",
+        "ssBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ssBar",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "ssRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "backgroundColor": "var(--secondary)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "ssBrand"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "ssBrand",
+      "type": "/UI/Brand",
+      "label": "The marketplace’s name",
+      "parent": "ssBar",
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "ssBand",
+      "type": "/UI/Band",
+      "label": "Who is signed in",
+      "parent": "ssRoot",
+      "parameters": {
+        "words": "Admin"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "ssBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "ssRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "ssContent",
+        "ssRefused"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "ssUrl",
+      "type": "PageInputs",
+      "label": "Which seller",
+      "parameters": {
+        "pathParams": "sellerId"
+      },
+      "x": 590,
+      "y": 2440
+    },
+    {
+      "id": "ssContent",
+      "type": "Group",
+      "label": "The form",
+      "parent": "ssBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "ssBack",
+        "ssName",
+        "ssSelling",
+        "ssStopped",
+        "ssError"
+      ],
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "ssBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "parent": "ssContent",
+      "parameters": {
+        "label": "← Sellers",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--secondary)",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "ssName",
+      "type": "Text",
+      "label": "Which seller",
+      "parent": "ssContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "ssSelling",
+      "type": "Group",
+      "label": "Selling: stop it",
+      "parent": "ssContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "ssLead",
+        "ssReason",
+        "ssStop"
+      ],
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "ssLead",
+      "type": "Text",
+      "label": "What stopping does",
+      "parent": "ssSelling",
+      "parameters": {
+        "text": "Stopping hides their products from buyers and stops their logins. Old orders still show what was bought. You can bring them back.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "ssReason",
+      "type": "net.noodl.controls.textinput",
+      "label": "Why (kept with the seller; only you see it)",
+      "parent": "ssSelling",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Why (kept with the seller; only you see it)"
+      },
+      "x": 340,
+      "y": 1360
+    },
+    {
+      "id": "ssStop",
+      "type": "net.noodl.controls.button",
+      "label": "Stop",
+      "parent": "ssSelling",
+      "parameters": {
+        "label": "Stop this seller",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 340,
+      "y": 1480
+    },
+    {
+      "id": "ssStopped",
+      "type": "Group",
+      "label": "Stopped: bring it back",
+      "parent": "ssContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "ssWhy",
+        "ssBringBack"
+      ],
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "ssWhy",
+      "type": "Text",
+      "label": "Why it was stopped",
+      "parent": "ssStopped",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 340,
+      "y": 1720
+    },
+    {
+      "id": "ssBringBack",
+      "type": "net.noodl.controls.button",
+      "label": "Bring back",
+      "parent": "ssStopped",
+      "parameters": {
+        "label": "Bring this seller back",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 340,
+      "y": 1840
+    },
+    {
+      "id": "ssError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "ssContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "ssRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "ssBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "ssRefusedWhy",
+        "ssRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 2080
+    },
+    {
+      "id": "ssRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "ssRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 2200
+    },
+    {
+      "id": "ssRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "ssRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "ssToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 590,
+      "y": 2320
+    },
+    {
+      "id": "ssLoad",
+      "type": "JavaScriptFunction",
+      "label": "The seller",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nif (Inputs.sellerId === undefined) return;\ntry {\n  await adminOnly();\n  var s = (await all('Seller', { objectId: { equalTo: String(Inputs.sellerId) } }))[0];\n} catch (e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; return; }\nif (!s) { Outputs.problem = 'There is no such seller.'; Outputs.refused = true; Outputs.ok = false; return; }\nOutputs.name = s.name || '';\nOutputs.stopped = !!s.endedAt;\nOutputs.selling = !s.endedAt;\nOutputs.reason = s.stoppedReason || '';\nOutputs.refused = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "in-sellerId",
+          "displayName": "sellerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stopped",
+          "displayName": "stopped",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-selling",
+          "displayName": "selling",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 760
+    },
+    {
+      "id": "ssWhyWords",
+      "type": "Expression",
+      "label": "“Stopped: <reason>”",
+      "parameters": {
+        "expression": "'Stopped: ' + reason"
+      },
+      "x": 590,
+      "y": 1720
+    },
+    {
+      "id": "ssGatherStop",
+      "type": "JavaScriptFunction",
+      "label": "Stop, with the reason",
+      "parameters": {
+        "functionScript": "Outputs.stop = { sellerId: String(Inputs.sellerId || ''), stopped: true, reason: Inputs.reason || '' };\nOutputs.go();",
+        "runOnChange-in-sellerId": false,
+        "runOnChange-in-reason": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-sellerId",
+          "displayName": "sellerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-reason",
+          "displayName": "reason",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-stop",
+          "displayName": "stop",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 1360
+    },
+    {
+      "id": "ssGatherBack",
+      "type": "JavaScriptFunction",
+      "label": "Bring back",
+      "parameters": {
+        "functionScript": "Outputs.stop = { sellerId: String(Inputs.sellerId || ''), stopped: false };\nOutputs.go();",
+        "runOnChange-in-sellerId": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-sellerId",
+          "displayName": "sellerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-stop",
+          "displayName": "stop",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 1840
+    },
+    {
+      "id": "ssCall",
+      "type": "CloudFunction2",
+      "label": "stopSeller(stop)",
+      "parameters": {
+        "function": "stopSeller"
+      },
+      "x": 590,
+      "y": 1960
+    },
+    {
+      "id": "ssToSellers",
+      "type": "RouterNavigate",
+      "label": "Back to the sellers",
+      "parameters": {
+        "target": "/Pages/Admin/Sellers"
+      },
+      "x": 590,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "ssPage"
+  ]
+}

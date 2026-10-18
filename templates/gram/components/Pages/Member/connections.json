@@ -1,0 +1,307 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "07cb8587-335a-5d86-8db7-cdd3269307fb",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mpUrl",
+      "fromProperty": "pm-memberId",
+      "toId": "mpLoad",
+      "toProperty": "in-memberId"
+    },
+    {
+      "fromId": "mpRoot",
+      "fromProperty": "didMount",
+      "toId": "mpLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpVersion",
+      "fromProperty": "value",
+      "toId": "mpLoad",
+      "toProperty": "in-changed"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-blocked",
+      "toId": "mpBlocked",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-blockedWords",
+      "toId": "mpBlocked",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-blocked",
+      "toId": "mpBlockedFine",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-canLetBack",
+      "toId": "mpLetBack",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-letBackLabel",
+      "toId": "mpLetBack",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-canBlock",
+      "toId": "mpBlock",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-blockLabel",
+      "toId": "mpBlockGo",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "mpUrl",
+      "fromProperty": "pm-memberId",
+      "toId": "mpBlockGather",
+      "toProperty": "in-memberId"
+    },
+    {
+      "fromId": "mpUrl",
+      "fromProperty": "pm-memberId",
+      "toId": "mpLetBackGather",
+      "toProperty": "in-memberId"
+    },
+    {
+      "fromId": "mpBlockWhy",
+      "fromProperty": "onTextChanged",
+      "toId": "mpBlockGather",
+      "toProperty": "in-reason"
+    },
+    {
+      "fromId": "mpBlockGo",
+      "fromProperty": "onClick",
+      "toId": "mpBlockGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpLetBack",
+      "fromProperty": "onClick",
+      "toId": "mpLetBackGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpBlockGather",
+      "fromProperty": "out-problem",
+      "toId": "mpBlockError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mpBlockGather",
+      "fromProperty": "out-block",
+      "toId": "mpBlockCall",
+      "toProperty": "in-block"
+    },
+    {
+      "fromId": "mpBlockGather",
+      "fromProperty": "out-go",
+      "toId": "mpBlockCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "mpLetBackGather",
+      "fromProperty": "out-block",
+      "toId": "mpBlockCall",
+      "toProperty": "in-block"
+    },
+    {
+      "fromId": "mpLetBackGather",
+      "fromProperty": "out-go",
+      "toId": "mpBlockCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "mpBlockCall",
+      "fromProperty": "error",
+      "toId": "mpBlockError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mpBlockCall",
+      "fromProperty": "done",
+      "toId": "mpBlockWhy",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "mpBlockCall",
+      "fromProperty": "done",
+      "toId": "mpStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mpStamp",
+      "fromProperty": "out-at",
+      "toId": "mpChanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "mpStamp",
+      "fromProperty": "out-go",
+      "toId": "mpChanged",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-ok",
+      "toId": "mpContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-gone",
+      "toId": "mpGone",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-band",
+      "toId": "mpBar",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-face",
+      "toId": "mpFace",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-hasFace",
+      "toId": "mpFace",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-noFace",
+      "toId": "mpInitials",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-initials",
+      "toId": "mpInitials",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-shade",
+      "toId": "mpAv",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-counts",
+      "toId": "mpEachCount",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-meId",
+      "toId": "mpNav",
+      "toProperty": "meId"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-inside",
+      "toId": "mpNav",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-navOn",
+      "toId": "mpNav",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-name",
+      "toId": "mpName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-bio",
+      "toId": "mpBio",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-hasBio",
+      "toId": "mpBio",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-isMe",
+      "toId": "mpEdit",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-empty",
+      "toId": "mpEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-emptyWords",
+      "toId": "mpEmpty",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-tiles",
+      "toId": "mpEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-waiting",
+      "toId": "mpToWaiting",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-problem",
+      "toId": "mpRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mpLoad",
+      "fromProperty": "out-refused",
+      "toId": "mpRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mpRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "mpToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mpBack",
+      "fromProperty": "onClick",
+      "toId": "mpToFeed",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mpEdit",
+      "fromProperty": "onClick",
+      "toId": "mpToEdit",
+      "toProperty": "navigate"
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "65ac28f6-c9bc-5b07-8c8e-8efb5b21c94d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "wpRoot",
+      "fromProperty": "didMount",
+      "toId": "wpLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "wpChanged",
+      "fromProperty": "value",
+      "toId": "wpLoad",
+      "toProperty": "in-changed"
+    },
+    {
+      "fromId": "wpLoad",
+      "fromProperty": "out-ok",
+      "toId": "wpContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wpLoad",
+      "fromProperty": "out-countries",
+      "toId": "wpCountryList",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wpLoad",
+      "fromProperty": "out-rows",
+      "toId": "wpEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "wpLoad",
+      "fromProperty": "out-hasCountries",
+      "toId": "wpWays",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wpLoad",
+      "fromProperty": "out-problem",
+      "toId": "wpRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wpLoad",
+      "fromProperty": "out-refused",
+      "toId": "wpRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wpRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "wpToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "wpName",
+      "fromProperty": "onTextChanged",
+      "toId": "wpGather",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "wpCurrency",
+      "fromProperty": "onTextChanged",
+      "toId": "wpGather",
+      "toProperty": "in-currency"
+    },
+    {
+      "fromId": "wpAddGo",
+      "fromProperty": "onClick",
+      "toId": "wpGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "wpGather",
+      "fromProperty": "out-country",
+      "toId": "wpCall",
+      "toProperty": "in-country"
+    },
+    {
+      "fromId": "wpGather",
+      "fromProperty": "out-go",
+      "toId": "wpCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "wpCall",
+      "fromProperty": "error",
+      "toId": "wpAddError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wpCall",
+      "fromProperty": "done",
+      "toId": "wpStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "wpStamp",
+      "fromProperty": "out-at",
+      "toId": "wpSetChanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "wpStamp",
+      "fromProperty": "out-go",
+      "toId": "wpSetChanged",
+      "toProperty": "do"
+    }
+  ]
+}

@@ -1,0 +1,431 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "eb2b883e-8229-53df-888e-a594cb047f2f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "asPage",
+      "type": "Page",
+      "label": "Sellers",
+      "parameters": {
+        "title": "Sellers",
+        "urlPath": "admin/sellers"
+      },
+      "children": [
+        "asRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "asRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "asPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "asBar",
+        "asBand",
+        "asTabs",
+        "asBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "asBar",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "asRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "backgroundColor": "var(--secondary)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "asBrand"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "asBrand",
+      "type": "/UI/Brand",
+      "label": "The marketplace’s name",
+      "parent": "asBar",
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "asBand",
+      "type": "/UI/Band",
+      "label": "Who is signed in",
+      "parent": "asRoot",
+      "parameters": {
+        "words": "Admin"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "asTabs",
+      "type": "/Admin/Tabs",
+      "label": "The admin’s tabs",
+      "parent": "asRoot",
+      "parameters": {
+        "on": "sellers"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "asBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "asRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 960,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "asContent",
+        "asRefused"
+      ],
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "asContent",
+      "type": "Group",
+      "label": "Sellers",
+      "parent": "asBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "asTitle",
+        "asAdd",
+        "asRename",
+        "asEmpty",
+        "asList",
+        "asNote"
+      ],
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "asTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "asContent",
+      "parameters": {
+        "text": "Sellers",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "asAdd",
+      "type": "net.noodl.controls.button",
+      "label": "Add a seller",
+      "parent": "asContent",
+      "parameters": {
+        "label": "Add a seller",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "asRename",
+      "type": "net.noodl.controls.button",
+      "label": "Rename the marketplace",
+      "parent": "asContent",
+      "parameters": {
+        "label": "Rename the marketplace",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "asEmpty",
+      "type": "Text",
+      "label": "No sellers yet",
+      "parent": "asContent",
+      "parameters": {
+        "text": "No sellers yet. Add the first one: it can sell once it has a login.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "asList",
+      "type": "Group",
+      "label": "The sellers",
+      "parent": "asContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "asEach"
+      ],
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "asEach",
+      "type": "For Each",
+      "label": "One row per seller",
+      "parent": "asList",
+      "parameters": {
+        "template": "/Admin/SellerRow"
+      },
+      "x": 340,
+      "y": 1600
+    },
+    {
+      "id": "asNote",
+      "type": "Text",
+      "label": "What stopping does",
+      "parent": "asContent",
+      "parameters": {
+        "text": "Payout accounts at the payment provider are seen only by you. Stopping a seller hides their products and stops their logins; you write why, and you can bring them back.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "asRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "asBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "asRefusedWhy",
+        "asRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 1840
+    },
+    {
+      "id": "asRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "asRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "asRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "asRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "asToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 590,
+      "y": 2080
+    },
+    {
+      "id": "asLoad",
+      "type": "JavaScriptFunction",
+      "label": "Every seller, with its country and counts",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\ntry {\n  await adminOnly();\n  var sellers = await all('Seller');\n  var countries = await all('Country');\n  var products = await all('Product');\n  var people = await all('Person');\n} catch (e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; return; }\nvar countryName = {};\ncountries.forEach(function (c) { countryName[c.objectId] = c.name || ''; });\nvar count = function (rows, field, id) { return rows.filter(function (r) { return idOf(r[field]) === id; }).length; };\nvar plural = function (n, one, many) { return n + ' ' + (n === 1 ? one : many); };\nOutputs.rows = sellers\n  .sort(function (a, b) { return String(a.name || '').localeCompare(String(b.name || '')); })\n  .map(function (s) {\n    var stopped = !!s.endedAt;\n    return {\n      id: s.objectId,\n      name: s.name || '',\n      logo: thumb(s.logo, 'sm'),\n      hasLogo: !!(s.logo && s.logo.url),\n      place: (countryName[idOf(s.country)] || '') + ' · ' + plural(count(products, 'seller', s.objectId), 'product', 'products') + ' · ' + plural(count(people, 'seller', s.objectId), 'login', 'logins'),\n      status: stopped ? 'Stopped' : 'Selling',\n      stopped: stopped,\n      selling: !stopped,\n      stopLabel: stopped ? 'Bring back' : 'Stop'\n    };\n  });\nOutputs.empty = sellers.length === 0;\nOutputs.refused = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 1600
+    },
+    {
+      "id": "asToNew",
+      "type": "RouterNavigate",
+      "label": "To a new seller",
+      "parameters": {
+        "target": "/Pages/Admin/SellerForm",
+        "pm-sellerId": "new"
+      },
+      "x": 590,
+      "y": 1120
+    },
+    {
+      "id": "asToName",
+      "type": "RouterNavigate",
+      "label": "To the marketplace’s name",
+      "parameters": {
+        "target": "/Pages/Admin/Name"
+      },
+      "x": 590,
+      "y": 1240
+    }
+  ],
+  "visualRoots": [
+    "asPage"
+  ]
+}

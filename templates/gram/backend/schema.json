@@ -1,0 +1,522 @@
+[
+  {
+    "action": "createTable",
+    "table": "Member",
+    "description": "A person in the ministry's community. They sign up, an admin lets them in, and then they post, heart, comment and pray. The builder is the first admin and can make volunteers admins later.",
+    "columns": [
+      {
+        "name": "name",
+        "type": "String"
+      },
+      {
+        "name": "email",
+        "type": "String"
+      },
+      {
+        "name": "bio",
+        "type": "String"
+      },
+      {
+        "name": "photo",
+        "type": "File"
+      },
+      {
+        "name": "status",
+        "type": "String"
+      },
+      {
+        "name": "role",
+        "type": "String"
+      },
+      {
+        "name": "blockedReason",
+        "type": "String"
+      },
+      {
+        "name": "login",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "a member is who signs in"
+      },
+      {
+        "name": "endedAt",
+        "type": "Date",
+        "description": "an admin can block a member: they can no longer sign in, and an admin can let them back"
+      }
+    ],
+    "checks": [
+      {
+        "field": "status",
+        "oneOf": [
+          "waiting",
+          "approved"
+        ]
+      },
+      {
+        "field": "role",
+        "oneOf": [
+          "member",
+          "admin"
+        ]
+      },
+      {
+        "allOrNone": [
+          "blockedReason",
+          "endedAt"
+        ]
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "MemberHistory",
+    "description": "who changed what on a member, and when: one record per change Not kept by the database yet: every change to a member is written to its history.",
+    "columns": [
+      {
+        "name": "member",
+        "type": "Pointer",
+        "targetClass": "Member",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the member that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Post",
+    "description": "What a member shares in the feed: one or more photos and a caption. A prayer request, a testimony and an event are posts of their own kind. Not kept by the database yet: a post's eventOn matters only when its kind is \"event\", and is there then; a post's hiddenReason matters only once it has ended.",
+    "columns": [
+      {
+        "name": "caption",
+        "type": "String"
+      },
+      {
+        "name": "photos",
+        "type": "Array"
+      },
+      {
+        "name": "kind",
+        "type": "String"
+      },
+      {
+        "name": "eventOn",
+        "type": "Date"
+      },
+      {
+        "name": "hiddenReason",
+        "type": "String"
+      },
+      {
+        "name": "prayedCount",
+        "type": "Number"
+      },
+      {
+        "name": "member",
+        "type": "Pointer",
+        "targetClass": "Member",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each post is by one member"
+      },
+      {
+        "name": "endedAt",
+        "type": "Date",
+        "description": "an admin can hide a post; members no longer see it, admins still do"
+      }
+    ],
+    "checks": [
+      {
+        "field": "kind",
+        "oneOf": [
+          "post",
+          "prayer",
+          "testimony",
+          "event"
+        ]
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Comment",
+    "description": "A few words a member writes under a post. Not kept by the database yet: a comment's hiddenReason matters only once it has ended.",
+    "columns": [
+      {
+        "name": "text",
+        "type": "String"
+      },
+      {
+        "name": "hiddenReason",
+        "type": "String"
+      },
+      {
+        "name": "post",
+        "type": "Pointer",
+        "targetClass": "Post",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each comment is under one post"
+      },
+      {
+        "name": "member",
+        "type": "Pointer",
+        "targetClass": "Member",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each comment is by one member"
+      },
+      {
+        "name": "endedAt",
+        "type": "Date",
+        "description": "an admin can hide a comment; members no longer see it, admins still do"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Devotional",
+    "description": "The ministry's reading for one day: a title, the scripture it is on and the text. The archive comes from the old blog's files; new ones are written in the app. Each morning the day's one is pinned at the top of the feed, and anyone can open it from a link, without an account. Not kept by the database yet: a devotional's archiveFile matters only when its source is \"archive\", and is there then.",
+    "columns": [
+      {
+        "name": "title",
+        "type": "String"
+      },
+      {
+        "name": "day",
+        "type": "Date"
+      },
+      {
+        "name": "scripture",
+        "type": "String"
+      },
+      {
+        "name": "body",
+        "type": "String"
+      },
+      {
+        "name": "source",
+        "type": "String"
+      },
+      {
+        "name": "archiveFile",
+        "type": "String"
+      },
+      {
+        "name": "member",
+        "type": "Pointer",
+        "targetClass": "Member",
+        "whenTargetGoes": "blocks",
+        "description": "a devotional written in the app is by the admin who wrote it"
+      }
+    ],
+    "checks": [
+      {
+        "field": "source",
+        "oneOf": [
+          "archive",
+          "written"
+        ]
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "DevotionalHistory",
+    "description": "who changed what on a devotional, and when: one record per change Not kept by the database yet: every change to a devotional is written to its history.",
+    "columns": [
+      {
+        "name": "devotional",
+        "type": "Pointer",
+        "targetClass": "Devotional",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the devotional that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Note",
+    "description": "A member's own note, private to them, written with or without a connection; it can be on a Bible verse or on a devotional. Not kept by the database yet: only its member sees and changes a note.",
+    "columns": [
+      {
+        "name": "text",
+        "type": "String"
+      },
+      {
+        "name": "verse",
+        "type": "String"
+      },
+      {
+        "name": "owner",
+        "type": "Pointer",
+        "targetClass": "Member",
+        "required": true,
+        "description": "a note is its member's alone"
+      },
+      {
+        "name": "devotional",
+        "type": "Pointer",
+        "targetClass": "Devotional",
+        "whenTargetGoes": "stays-unlinked",
+        "description": "a note can be on a devotional"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Community",
+    "description": "The settings of the community itself: its name, its rules, and the time each morning the day's devotional is released. Not kept by the database yet: there is only one community.",
+    "columns": [
+      {
+        "name": "name",
+        "type": "String"
+      },
+      {
+        "name": "rules",
+        "type": "String"
+      },
+      {
+        "name": "releaseAt",
+        "type": "String"
+      },
+      {
+        "name": "timeZone",
+        "type": "String"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "CommunityHistory",
+    "description": "who changed what on a community, and when: one record per change Not kept by the database yet: every change to a community is written to its history.",
+    "columns": [
+      {
+        "name": "community",
+        "type": "Pointer",
+        "targetClass": "Community",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the community that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Heart",
+    "description": "a member hearted a post",
+    "columns": [
+      {
+        "name": "post",
+        "type": "Pointer",
+        "targetClass": "Post",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "a member hearted a post"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "a member hearted a post"
+      },
+      {
+        "name": "doneBy",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "a member hearted a post"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Prayed",
+    "description": "a member pressed I prayed on a prayer request",
+    "columns": [
+      {
+        "name": "post",
+        "type": "Pointer",
+        "targetClass": "Post",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "a member pressed I prayed on a prayer request"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "a member pressed I prayed on a prayer request"
+      },
+      {
+        "name": "doneBy",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "a member pressed I prayed on a prayer request"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Report",
+    "description": "a member reported a post to the admins, saying why",
+    "columns": [
+      {
+        "name": "post",
+        "type": "Pointer",
+        "targetClass": "Post",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "a member reported a post to the admins, saying why"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "a member reported a post to the admins, saying why"
+      },
+      {
+        "name": "doneBy",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "a member reported a post to the admins, saying why"
+      },
+      {
+        "name": "reason",
+        "type": "String"
+      },
+      {
+        "name": "note",
+        "type": "String"
+      }
+    ],
+    "checks": [
+      {
+        "field": "reason",
+        "oneOf": [
+          "spam",
+          "unkind",
+          "child-photo",
+          "other"
+        ]
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "CommentReport",
+    "description": "a member reported a comment to the admins, saying why",
+    "columns": [
+      {
+        "name": "comment",
+        "type": "Pointer",
+        "targetClass": "Comment",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "a member reported a comment to the admins, saying why"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "a member reported a comment to the admins, saying why"
+      },
+      {
+        "name": "doneBy",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "a member reported a comment to the admins, saying why"
+      },
+      {
+        "name": "reason",
+        "type": "String"
+      },
+      {
+        "name": "note",
+        "type": "String"
+      }
+    ],
+    "checks": [
+      {
+        "field": "reason",
+        "oneOf": [
+          "spam",
+          "unkind",
+          "other"
+        ]
+      }
+    ],
+    "indexes": []
+  }
+]

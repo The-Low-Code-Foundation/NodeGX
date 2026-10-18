@@ -1,0 +1,90 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "da0df19c-acc3-55bb-89f2-e55e43aac6b8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "stRoot",
+      "type": "Group",
+      "label": "A step",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "cssClassName": "mk-step"
+      },
+      "children": [
+        "stBar",
+        "stName"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "stBar",
+      "type": "Group",
+      "label": "Reached or not",
+      "parent": "stRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 5,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "borderRadius": "var(--radius-sm)",
+        "backgroundColor": "var(--border)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "stName",
+      "type": "Text",
+      "label": "The step",
+      "parent": "stRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "cssClassName": "mk-stepname"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "stIn",
+      "type": "Component Inputs",
+      "label": "One step",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bar",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "ink",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "stRoot"
+  ]
+}

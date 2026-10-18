@@ -1,0 +1,425 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e0e0b05a-ffe4-5abe-857c-1286654bb99d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "srRoot",
+      "type": "Group",
+      "label": "Seller",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "srHead",
+        "srPlace",
+        "srActions"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "srHead",
+      "type": "Group",
+      "label": "Name and status",
+      "parent": "srRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "srWho",
+        "srSelling",
+        "srStopped"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "srWho",
+      "type": "Group",
+      "label": "Logo and name",
+      "parent": "srHead",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "srLogo",
+        "srName"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "srLogo",
+      "type": "Image",
+      "label": "Logo",
+      "parent": "srWho",
+      "parameters": {
+        "width": {
+          "value": 40,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "objectFit": "cover",
+        "borderRadius": "var(--radius-full)",
+        "alt": "",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "srName",
+      "type": "Text",
+      "label": "Name",
+      "parent": "srWho",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "srSelling",
+      "type": "Group",
+      "label": "Selling",
+      "parent": "srHead",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "borderRadius": "var(--radius-full)",
+        "backgroundColor": "var(--ok-bg)",
+        "mounted": false
+      },
+      "children": [
+        "srSellingWords"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "srSellingWords",
+      "type": "Text",
+      "label": "Selling",
+      "parent": "srSelling",
+      "parameters": {
+        "text": "Selling",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--ok)"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "srStopped",
+      "type": "Group",
+      "label": "Stopped",
+      "parent": "srHead",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "borderRadius": "var(--radius-full)",
+        "backgroundColor": "var(--bad-bg)",
+        "mounted": false
+      },
+      "children": [
+        "srStoppedWords"
+      ],
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "srStoppedWords",
+      "type": "Text",
+      "label": "Stopped",
+      "parent": "srStopped",
+      "parameters": {
+        "text": "Stopped",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--bad)"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "srPlace",
+      "type": "Text",
+      "label": "Country and counts",
+      "parent": "srRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "srActions",
+      "type": "Group",
+      "label": "Actions",
+      "parent": "srRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "srEdit",
+        "srLogin",
+        "srProducts",
+        "srStop"
+      ],
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "srEdit",
+      "type": "net.noodl.controls.button",
+      "label": "Edit",
+      "parent": "srActions",
+      "parameters": {
+        "label": "Edit",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "srLogin",
+      "type": "net.noodl.controls.button",
+      "label": "Give a login",
+      "parent": "srActions",
+      "parameters": {
+        "label": "Give a login",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "srProducts",
+      "type": "net.noodl.controls.button",
+      "label": "Their products",
+      "parent": "srActions",
+      "parameters": {
+        "label": "Their products",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "srStop",
+      "type": "net.noodl.controls.button",
+      "label": "Stop or bring back",
+      "parent": "srActions",
+      "parameters": {
+        "label": "Stop",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "srIn",
+      "type": "Component Inputs",
+      "label": "One seller",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "logo",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasLogo",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "place",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "selling",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "stopped",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "stopLabel",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "srToEdit",
+      "type": "RouterNavigate",
+      "label": "To edit",
+      "parameters": {
+        "target": "/Pages/Admin/SellerForm"
+      },
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "srToLogin",
+      "type": "RouterNavigate",
+      "label": "To give a login",
+      "parameters": {
+        "target": "/Pages/Admin/GiveLogin"
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "srToProducts",
+      "type": "RouterNavigate",
+      "label": "To their products",
+      "parameters": {
+        "target": "/Pages/Seller/Products"
+      },
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "srToStop",
+      "type": "RouterNavigate",
+      "label": "To stop or bring back",
+      "parameters": {
+        "target": "/Pages/Admin/StopSeller"
+      },
+      "x": 470,
+      "y": 1720
+    }
+  ],
+  "visualRoots": [
+    "srRoot"
+  ]
+}

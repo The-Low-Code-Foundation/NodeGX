@@ -1,0 +1,289 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2ebf6519-c7ed-53ab-89f5-0e6c1da86b1f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sfUrl",
+      "fromProperty": "pm-sellerId",
+      "toId": "sfLoad",
+      "toProperty": "in-sellerId"
+    },
+    {
+      "fromId": "sfUrl",
+      "fromProperty": "pm-sellerId",
+      "toId": "sfGather",
+      "toProperty": "in-sellerId"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-ok",
+      "toId": "sfContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-heading",
+      "toId": "sfTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-countries",
+      "toId": "sfCountry",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-country",
+      "toId": "sfCountry",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-country",
+      "toId": "sfGather",
+      "toProperty": "in-country0"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-isNew",
+      "toId": "sfCountry",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-notNew",
+      "toId": "sfCountryFixed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-countryFixed",
+      "toId": "sfCountryFixed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sfCountry",
+      "fromProperty": "value",
+      "toId": "sfGather",
+      "toProperty": "in-country"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-name",
+      "toId": "sfName",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-name",
+      "toId": "sfGather",
+      "toProperty": "in-name0"
+    },
+    {
+      "fromId": "sfName",
+      "fromProperty": "onTextChanged",
+      "toId": "sfGather",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-phone",
+      "toId": "sfPhone",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-phone",
+      "toId": "sfGather",
+      "toProperty": "in-phone0"
+    },
+    {
+      "fromId": "sfPhone",
+      "fromProperty": "onTextChanged",
+      "toId": "sfGather",
+      "toProperty": "in-phone"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-whatsapp",
+      "toId": "sfWhatsapp",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-whatsapp",
+      "toId": "sfGather",
+      "toProperty": "in-whatsapp0"
+    },
+    {
+      "fromId": "sfWhatsapp",
+      "fromProperty": "onTextChanged",
+      "toId": "sfGather",
+      "toProperty": "in-whatsapp"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-story",
+      "toId": "sfStory",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-story",
+      "toId": "sfGather",
+      "toProperty": "in-story0"
+    },
+    {
+      "fromId": "sfStory",
+      "fromProperty": "onTextChanged",
+      "toId": "sfGather",
+      "toProperty": "in-story"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-payoutAccount",
+      "toId": "sfPayoutAccount",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-payoutAccount",
+      "toId": "sfGather",
+      "toProperty": "in-payoutAccount0"
+    },
+    {
+      "fromId": "sfPayoutAccount",
+      "fromProperty": "onTextChanged",
+      "toId": "sfGather",
+      "toProperty": "in-payoutAccount"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-problem",
+      "toId": "sfRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-refused",
+      "toId": "sfRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sfRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "sfToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "sfLogoPick",
+      "fromProperty": "onClick",
+      "toId": "sfPick",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "sfPick",
+      "fromProperty": "file",
+      "toId": "sfUpload",
+      "toProperty": "file"
+    },
+    {
+      "fromId": "sfPick",
+      "fromProperty": "done",
+      "toId": "sfUpload",
+      "toProperty": "upload"
+    },
+    {
+      "fromId": "sfPick",
+      "fromProperty": "done",
+      "toId": "sfBusy",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "sfUpload",
+      "fromProperty": "completed",
+      "toId": "sfBusy",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "sfBusy",
+      "fromProperty": "state",
+      "toId": "sfUploading",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sfUpload",
+      "fromProperty": "error",
+      "toId": "sfPhotoError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sfLoad",
+      "fromProperty": "out-logoThumb",
+      "toId": "sfLogoShown",
+      "toProperty": "in-loaded"
+    },
+    {
+      "fromId": "sfUpload",
+      "fromProperty": "cloudFile",
+      "toId": "sfLogoShown",
+      "toProperty": "in-uploaded"
+    },
+    {
+      "fromId": "sfLogoShown",
+      "fromProperty": "out-src",
+      "toId": "sfLogo",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "sfLogoShown",
+      "fromProperty": "out-has",
+      "toId": "sfLogo",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sfUpload",
+      "fromProperty": "cloudFile",
+      "toId": "sfGather",
+      "toProperty": "in-logo"
+    },
+    {
+      "fromId": "sfSave",
+      "fromProperty": "onClick",
+      "toId": "sfGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sfGather",
+      "fromProperty": "out-seller",
+      "toId": "sfCall",
+      "toProperty": "in-seller"
+    },
+    {
+      "fromId": "sfGather",
+      "fromProperty": "out-go",
+      "toId": "sfCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "sfCall",
+      "fromProperty": "error",
+      "toId": "sfError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sfCall",
+      "fromProperty": "done",
+      "toId": "sfToSellers",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "sfBack",
+      "fromProperty": "onClick",
+      "toId": "sfToSellers",
+      "toProperty": "navigate"
+    }
+  ]
+}

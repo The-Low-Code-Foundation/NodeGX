@@ -1,0 +1,574 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "aba7bf90-f87e-53fe-89c9-618494d217fa",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "svPage",
+      "type": "Page",
+      "label": "Shelves",
+      "parameters": {
+        "title": "Shelves",
+        "urlPath": "admin/shelves"
+      },
+      "children": [
+        "svRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "svRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "svPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "svBar",
+        "svBand",
+        "svTabs",
+        "svBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "svBar",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "svRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "backgroundColor": "var(--secondary)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "svBrand"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "svBrand",
+      "type": "/UI/Brand",
+      "label": "The marketplace’s name",
+      "parent": "svBar",
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "svBand",
+      "type": "/UI/Band",
+      "label": "Who is signed in",
+      "parent": "svRoot",
+      "parameters": {
+        "words": "Admin"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "svTabs",
+      "type": "/Admin/Tabs",
+      "label": "The admin’s tabs",
+      "parent": "svRoot",
+      "parameters": {
+        "on": "shelves"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "svBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "svRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 960,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "svContent",
+        "svRefused"
+      ],
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "svContent",
+      "type": "Group",
+      "label": "Shelves",
+      "parent": "svBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "svTitle",
+        "svAdd",
+        "svError",
+        "svList",
+        "svEmpty",
+        "svNote"
+      ],
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "svTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "svContent",
+      "parameters": {
+        "text": "Shelves",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "svAdd",
+      "type": "Group",
+      "label": "Add a shelf",
+      "parent": "svContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "columnGap": "var(--space-3)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "svName",
+        "svAddGo"
+      ],
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "svName",
+      "type": "net.noodl.controls.textinput",
+      "label": "A new shelf",
+      "parent": "svAdd",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 240,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "A new shelf"
+      },
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "svAddGo",
+      "type": "net.noodl.controls.button",
+      "label": "Add the shelf",
+      "parent": "svAdd",
+      "parameters": {
+        "label": "Add the shelf",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 340,
+      "y": 1360
+    },
+    {
+      "id": "svError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "svContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "svList",
+      "type": "Group",
+      "label": "The shelves",
+      "parent": "svContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "svEach"
+      ],
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "svEach",
+      "type": "For Each",
+      "label": "One row per shelf",
+      "parent": "svList",
+      "parameters": {
+        "template": "/Admin/ShelfRow"
+      },
+      "x": 340,
+      "y": 1720
+    },
+    {
+      "id": "svEmpty",
+      "type": "Text",
+      "label": "No shelves yet",
+      "parent": "svContent",
+      "parameters": {
+        "text": "No shelves yet. A product goes on one, so add the first before sellers add products.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "svNote",
+      "type": "Text",
+      "label": "Nothing is deleted",
+      "parent": "svContent",
+      "parameters": {
+        "text": "A shelf is renamed, never taken away: products and old orders stay on it.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "svRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "svBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "svRefusedWhy",
+        "svRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 2080
+    },
+    {
+      "id": "svRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "svRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 2200
+    },
+    {
+      "id": "svRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "svRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "svToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 590,
+      "y": 2320
+    },
+    {
+      "id": "svLoad",
+      "type": "JavaScriptFunction",
+      "label": "Every shelf, and how many products are on it",
+      "parameters": {
+        "runOnChange-in-changed": true,
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nfunction symbolOf(cur) {\n  try {\n    var part = new Intl.NumberFormat('en', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol' }).formatToParts(0).filter(function (x) { return x.type === 'currency'; })[0];\n    return part ? part.value : cur;\n  } catch (e) { return cur; }\n}\nfunction currencyName(cur) { try { return new Intl.DisplayNames(['en'], { type: 'currency' }).of(cur) || cur; } catch (e) { return cur; } }\nfunction day(iso) { try { return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); } catch (e) { return ''; } }\nfunction stamp() { return String(Date.now()); }\n\nvoid Inputs.changed;\ntry {\n  await adminOnly();\n  var shelves = await all('Category');\n  var products = await all('Product');\n} catch (e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; return; }\nshelves.sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); });\nOutputs.rows = shelves.map(function (c) {\n  var n = products.filter(function (p) { return idOf(p.category) === c.objectId; }).length;\n  return { id: c.objectId, name: c.name || '', count: n === 1 ? '1 product' : n + ' products' };\n});\nOutputs.empty = shelves.length === 0;\nOutputs.refused = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "in-changed",
+          "displayName": "changed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 880
+    },
+    {
+      "id": "svChanged",
+      "type": "Variable2",
+      "label": "The shelves changed",
+      "parameters": {
+        "name": "shelvesChanged"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a shelf changed: the list reads again, whichever row changed it."
+      },
+      "x": 590,
+      "y": 2440
+    },
+    {
+      "id": "svGather",
+      "type": "JavaScriptFunction",
+      "label": "The new shelf",
+      "parameters": {
+        "runOnChange-in-name0": true,
+        "runOnChange-in-id": true,
+        "functionScript": "function v(typed, loaded) { return typed === undefined ? (loaded || '') : String(typed); }\nvar shelf = { name: v(Inputs.name, Inputs.name0) };\nif (Inputs.id) shelf.id = String(Inputs.id);\nOutputs.shelf = shelf;\nOutputs.go();",
+        "runOnChange-in-name": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name0",
+          "displayName": "name0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-shelf",
+          "displayName": "shelf",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 1240
+    },
+    {
+      "id": "svCall",
+      "type": "CloudFunction2",
+      "label": "saveShelf(shelf)",
+      "parameters": {
+        "function": "saveShelf"
+      },
+      "x": 590,
+      "y": 1480
+    },
+    {
+      "id": "svStamp",
+      "type": "JavaScriptFunction",
+      "label": "Say the shelves changed",
+      "parameters": {
+        "functionScript": "Outputs.at = String(Date.now());\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-at",
+          "displayName": "at",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 2560
+    },
+    {
+      "id": "svSetChanged",
+      "type": "Set Variable",
+      "label": "The shelves changed",
+      "parameters": {
+        "name": "shelvesChanged",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a shelf changed: the list reads again, whichever row changed it."
+      },
+      "x": 590,
+      "y": 2680
+    }
+  ],
+  "visualRoots": [
+    "svPage"
+  ]
+}

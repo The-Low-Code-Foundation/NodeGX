@@ -1,0 +1,181 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "eed3d84f-5585-567a-8553-b576a7d3b66a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ecIn",
+      "fromProperty": "product",
+      "toId": "ecProduct",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ecIn",
+      "fromProperty": "pill",
+      "toId": "ecPillWords",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ecIn",
+      "fromProperty": "pillBg",
+      "toId": "ecPill",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "ecIn",
+      "fromProperty": "pillInk",
+      "toId": "ecPillWords",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "ecIn",
+      "fromProperty": "seller",
+      "toId": "ecSeller",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ecIn",
+      "fromProperty": "hasSeller",
+      "toId": "ecSeller",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ecIn",
+      "fromProperty": "from",
+      "toId": "ecFrom",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ecIn",
+      "fromProperty": "message",
+      "toId": "ecMessage",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ecIn",
+      "fromProperty": "whatsappLabel",
+      "toId": "ecWhatsapp",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ecIn",
+      "fromProperty": "whatsappLink",
+      "toId": "ecOpenWhatsapp",
+      "toProperty": "link"
+    },
+    {
+      "fromId": "ecIn",
+      "fromProperty": "callLabel",
+      "toId": "ecCall",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ecIn",
+      "fromProperty": "callLink",
+      "toId": "ecOpenCall",
+      "toProperty": "link"
+    },
+    {
+      "fromId": "ecIn",
+      "fromProperty": "toggleLabel",
+      "toId": "ecToggle",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ecIn",
+      "fromProperty": "toggleBg",
+      "toId": "ecToggle",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "ecIn",
+      "fromProperty": "toggleInk",
+      "toId": "ecToggle",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "ecIn",
+      "fromProperty": "id",
+      "toId": "ecGather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "ecIn",
+      "fromProperty": "answered",
+      "toId": "ecGather",
+      "toProperty": "in-answered"
+    },
+    {
+      "fromId": "ecWhatsapp",
+      "fromProperty": "onClick",
+      "toId": "ecOpenWhatsapp",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "ecCall",
+      "fromProperty": "onClick",
+      "toId": "ecOpenCall",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "ecToggle",
+      "fromProperty": "onClick",
+      "toId": "ecGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ecGather",
+      "fromProperty": "out-answer",
+      "toId": "ecCallFn",
+      "toProperty": "in-answer"
+    },
+    {
+      "fromId": "ecGather",
+      "fromProperty": "out-go",
+      "toId": "ecCallFn",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ecCallFn",
+      "fromProperty": "error",
+      "toId": "ecError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ecCallFn",
+      "fromProperty": "failure",
+      "toId": "ecFailed",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ecCallFn",
+      "fromProperty": "done",
+      "toId": "ecFailed",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ecFailed",
+      "fromProperty": "state",
+      "toId": "ecError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ecCallFn",
+      "fromProperty": "done",
+      "toId": "ecStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ecStamp",
+      "fromProperty": "out-at",
+      "toId": "ecChanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ecStamp",
+      "fromProperty": "out-go",
+      "toId": "ecChanged",
+      "toProperty": "do"
+    }
+  ]
+}

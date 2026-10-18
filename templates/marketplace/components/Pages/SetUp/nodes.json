@@ -1,0 +1,417 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9c380180-cc42-5730-8c67-58eaa32b85be",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "suPage",
+      "type": "Page",
+      "label": "Set up",
+      "parameters": {
+        "title": "Set up",
+        "urlPath": "setup"
+      },
+      "children": [
+        "suRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "suRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "suPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "suBar",
+        "suBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "suBar",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "suRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "backgroundColor": "var(--secondary)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "suBrand"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "suBrand",
+      "type": "/UI/Brand",
+      "label": "The marketplace’s name",
+      "parent": "suBar",
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "suBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "suRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 480,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "suTitle",
+        "suLead",
+        "suToken",
+        "suShop",
+        "suName",
+        "suEmail",
+        "suPassword",
+        "suGo",
+        "suError"
+      ],
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "suTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "suBody",
+      "parameters": {
+        "text": "Set up this marketplace",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "suLead",
+      "type": "Text",
+      "label": "What this does",
+      "parent": "suBody",
+      "parameters": {
+        "text": "This names the marketplace and makes you its admin. It works once, with the setup token from whoever started the backend.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "suToken",
+      "type": "net.noodl.controls.textinput",
+      "label": "Setup token",
+      "parent": "suBody",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Setup token",
+        "type": "password"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "suShop",
+      "type": "net.noodl.controls.textinput",
+      "label": "The marketplace’s name",
+      "parent": "suBody",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "The marketplace’s name",
+        "placeholder": "As buyers will see it at the top of every page"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "suName",
+      "type": "net.noodl.controls.textinput",
+      "label": "Your name",
+      "parent": "suBody",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Your name"
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "suEmail",
+      "type": "net.noodl.controls.textinput",
+      "label": "Your email",
+      "parent": "suBody",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Your email",
+        "type": "email"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "suPassword",
+      "type": "net.noodl.controls.textinput",
+      "label": "A password (8 characters or more)",
+      "parent": "suBody",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "A password (8 characters or more)",
+        "type": "password"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "suGo",
+      "type": "net.noodl.controls.button",
+      "label": "Set up",
+      "parent": "suBody",
+      "parameters": {
+        "label": "Make me the admin",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "suError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "suBody",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "suGather",
+      "type": "JavaScriptFunction",
+      "label": "The form, as one setup",
+      "parameters": {
+        "functionScript": "Outputs.setup = { setupToken: Inputs.token || '', marketplace: Inputs.marketplace || '', name: Inputs.name || '', email: Inputs.email || '', password: Inputs.password || '' };\nOutputs.go();",
+        "runOnChange-in-token": false,
+        "runOnChange-in-marketplace": false,
+        "runOnChange-in-name": false,
+        "runOnChange-in-email": false,
+        "runOnChange-in-password": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-token",
+          "displayName": "token",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-marketplace",
+          "displayName": "marketplace",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-email",
+          "displayName": "email",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-password",
+          "displayName": "password",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-setup",
+          "displayName": "setup",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "suCall",
+      "type": "CloudFunction2",
+      "label": "setUpMarketplace(setup)",
+      "parameters": {
+        "function": "setUpMarketplace"
+      },
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "suToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 470,
+      "y": 1720
+    }
+  ],
+  "visualRoots": [
+    "suPage"
+  ]
+}

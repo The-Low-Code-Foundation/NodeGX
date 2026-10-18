@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1617ab02-d342-57ea-8d99-6f5c45ae67a1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "wtRoot",
+      "fromProperty": "didMount",
+      "toId": "wtLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "wtLoad",
+      "fromProperty": "out-ok",
+      "toId": "wtContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wtLoad",
+      "fromProperty": "out-thanks",
+      "toId": "wtThanks",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wtLoad",
+      "fromProperty": "out-isIn",
+      "toId": "wtToStart",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "wtLoad",
+      "fromProperty": "out-problem",
+      "toId": "wtRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wtLoad",
+      "fromProperty": "out-refused",
+      "toId": "wtRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wtRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "wtToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "wtRules",
+      "fromProperty": "onClick",
+      "toId": "wtToRules",
+      "toProperty": "navigate"
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f4c7ad07-555a-5f54-8d10-f63ce42a0455",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ruRoot",
+      "fromProperty": "didMount",
+      "toId": "ruLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ruLoad",
+      "fromProperty": "out-rules",
+      "toId": "ruRules",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ruLoad",
+      "fromProperty": "out-band",
+      "toId": "ruBar",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "ruLoad",
+      "fromProperty": "out-isAdmin",
+      "toId": "ruEdit",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ruLoad",
+      "fromProperty": "out-current",
+      "toId": "ruWrite",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "ruLoad",
+      "fromProperty": "out-current",
+      "toId": "ruGather",
+      "toProperty": "in-rules0"
+    },
+    {
+      "fromId": "ruWrite",
+      "fromProperty": "onTextChanged",
+      "toId": "ruGather",
+      "toProperty": "in-rules"
+    },
+    {
+      "fromId": "ruWrite",
+      "fromProperty": "onTextChanged",
+      "toId": "ruSavedSw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ruSave",
+      "fromProperty": "onClick",
+      "toId": "ruGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ruGather",
+      "fromProperty": "out-problem",
+      "toId": "ruError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ruGather",
+      "fromProperty": "out-save",
+      "toId": "ruCall",
+      "toProperty": "in-rules"
+    },
+    {
+      "fromId": "ruGather",
+      "fromProperty": "out-go",
+      "toId": "ruCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ruCall",
+      "fromProperty": "error",
+      "toId": "ruError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ruCall",
+      "fromProperty": "done",
+      "toId": "ruSavedSw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ruSavedSw",
+      "fromProperty": "state",
+      "toId": "ruSaved",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ruCall",
+      "fromProperty": "done",
+      "toId": "ruStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ruStamp",
+      "fromProperty": "out-at",
+      "toId": "ruLoad",
+      "toProperty": "in-changed"
+    },
+    {
+      "fromId": "ruBack",
+      "fromProperty": "onClick",
+      "toId": "ruGoBack",
+      "toProperty": "run"
+    }
+  ]
+}

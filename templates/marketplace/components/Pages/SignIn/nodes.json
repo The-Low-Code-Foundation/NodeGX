@@ -1,0 +1,357 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "65cc1f68-3560-51c5-8e8b-03c8c96e7743",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "siPage",
+      "type": "Page",
+      "label": "Sign in",
+      "parameters": {
+        "title": "Sign in",
+        "urlPath": "sign-in"
+      },
+      "children": [
+        "siRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "siRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "siPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "siBar",
+        "siBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "siBar",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "siRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "backgroundColor": "var(--secondary)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "siBrand"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "siBrand",
+      "type": "/UI/Brand",
+      "label": "The marketplace’s name",
+      "parent": "siBar",
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "siBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "siRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 480,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "siTitle",
+        "siLead",
+        "siEmail",
+        "siPassword",
+        "siGo",
+        "siError",
+        "siSetUpHint",
+        "siSetUp"
+      ],
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "siTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "siBody",
+      "parameters": {
+        "text": "Sign in",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "siLead",
+      "type": "Text",
+      "label": "Who signs in here",
+      "parent": "siBody",
+      "parameters": {
+        "text": "For the marketplace’s admin and sellers’ staff. Buyers don’t need an account.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "siEmail",
+      "type": "net.noodl.controls.textinput",
+      "label": "Email",
+      "parent": "siBody",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Email",
+        "type": "email"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "siPassword",
+      "type": "net.noodl.controls.textinput",
+      "label": "Password",
+      "parent": "siBody",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Password",
+        "type": "password"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "siGo",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "siBody",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "siError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "siBody",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "siSetUpHint",
+      "type": "Text",
+      "label": "First time",
+      "parent": "siBody",
+      "parameters": {
+        "text": "Setting up a new marketplace? You need the setup token from whoever started its backend.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "siSetUp",
+      "type": "net.noodl.controls.button",
+      "label": "Set up",
+      "parent": "siBody",
+      "parameters": {
+        "label": "Set up this marketplace",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "siLogIn",
+      "type": "net.noodl.user.LogIn",
+      "label": "Sign in",
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "siRoute",
+      "type": "JavaScriptFunction",
+      "label": "Admin to sellers, staff to their orders",
+      "parameters": {
+        "functionScript": "try {\n  var r = await Noodl.CloudFunctions.run('whoAmI', {});\n  var me = r && r.me;\n  if (me && me.role === 'admin') { Outputs.admin(); return; }\n  if (me && me.seller) { Outputs.seller(); return; }\n  Outputs.problem = 'This sign-in has no place in the marketplace.';\n} catch (e) {\n  Outputs.problem = (e && e.error) || 'This sign-in has no place in the marketplace.';\n}\nOutputs.refused();"
+      },
+      "ports": [
+        {
+          "name": "out-admin",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-seller",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "siToSellers",
+      "type": "RouterNavigate",
+      "label": "To the sellers",
+      "parameters": {
+        "target": "/Pages/Admin/Sellers"
+      },
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "siToOrders",
+      "type": "RouterNavigate",
+      "label": "To my orders",
+      "parameters": {
+        "target": "/Pages/Orders"
+      },
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "siToSetUp",
+      "type": "RouterNavigate",
+      "label": "To set up",
+      "parameters": {
+        "target": "/Pages/SetUp"
+      },
+      "x": 470,
+      "y": 1480
+    }
+  ],
+  "visualRoots": [
+    "siPage"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5b020271-3047-53f2-83fe-054c95675172",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "chIn",
+      "fromProperty": "name",
+      "toId": "chButton",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "chIn",
+      "fromProperty": "bg",
+      "toId": "chButton",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "chIn",
+      "fromProperty": "ink",
+      "toId": "chButton",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "chIn",
+      "fromProperty": "line",
+      "toId": "chButton",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "chIn",
+      "fromProperty": "id",
+      "toId": "chPick",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "chButton",
+      "fromProperty": "onClick",
+      "toId": "chPick",
+      "toProperty": "do"
+    }
+  ]
+}

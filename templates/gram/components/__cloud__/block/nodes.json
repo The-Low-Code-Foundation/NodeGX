@@ -1,0 +1,117 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "691f1374-4b1b-5e3a-85da-bf34df4da631",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-14",
+      "type": "noodl.cloud.request",
+      "label": "block(block)",
+      "parameters": {
+        "params": "block",
+        "ptype-block": "object",
+        "preq-block": true,
+        "allowNoAuth": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "run-10",
+      "type": "JavaScriptFunction",
+      "label": "Blocked or let back, its history, and what they wrote",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\nasync function member(userId) {\n  if (!userId) return null;\n  return one('Member', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction email(v) {\n  var e = typeof v === 'string' ? v.trim().toLowerCase() : '';\n  var at = e.indexOf('@');\n  if (e.length > 200 || at < 1 || e.indexOf(' ') >= 0 || e.indexOf('@', at + 1) >= 0) return '';\n  var dot = e.lastIndexOf('.');\n  return dot > at + 1 && dot < e.length - 1 ? e : '';\n}\n\nasync function inMember(userId) {\n  var m = await member(userId);\n  return m && m.status === 'approved' && !m.endedAt ? m : null;\n}\nasync function postInFeed(id) {\n  var p = id ? await one('Post', { objectId: { equalTo: id } }) : null;\n  if (!p || p.endedAt) return null;\n  var by = await one('Member', { objectId: { equalTo: idOf(p.member) } });\n  return by && !by.endedAt ? p : null;\n}\n/**\n * W1, for every photo a member puts in front of the others (a post's, a profile's): '' when it is the caller's,\n * shared with the members and the admins, a photo, and its link its own; otherwise what is wrong with it.\n */\nasync function photoProblem(f, userId) {\n  var name = f && typeof f.name === 'string' ? f.name : '';\n  var url = f && typeof f.url === 'string' ? f.url : '';\n  var file = name ? await one('_Files', { storedName: { equalTo: name } }) : null;\n  if (!file || idOf(file.owner) !== String(userId)) return 'mine';\n  var readers = Array.isArray(file.readers) ? file.readers : [];\n  var shared = [\"role:member\",\"role:admin\"].every(function (r) { return readers.indexOf(r) >= 0; });\n  // No private check of its own: the backend writes readers only on a private file (an equivalent mutant said so).\n  if (!shared) return 'public';\n  if (String(file.contentType || '').indexOf('image/') !== 0) return 'image';\n  if (url.slice(-(name.length + 7)) !== '/files/' + name) return 'mine';\n  return '';\n}\n\nasync function commentInFeed(id) {\n  var c = id ? await one('Comment', { objectId: { equalTo: id } }) : null;\n  if (!c || c.endedAt) return null;\n  var by = await one('Member', { objectId: { equalTo: idOf(c.member) } });\n  if (!by || by.endedAt) return null;\n  return (await postInFeed(idOf(c.post))) ? c : null;\n}\nfunction said(v) { return typeof v === 'string' ? v.trim() : ''; }\nvar ADMINS_ONLY = {\"role:admin\":{\"read\":true}};\nvar POLICY_READS = {\"*\":{\"read\":true}};\n\nvar a = Inputs.block;\nif (a === undefined || Inputs.userId === undefined) return;\nif (!a || typeof a !== 'object' || typeof a.blocked !== 'boolean') { refuse('Say whether to block them or let them back.'); return; }\nvar me = await member(Inputs.userId);\nvar id = text(a.memberId, 64);\nvar t = id ? await one('Member', { objectId: { equalTo: id } }) : null;\nif (!t) { refuse('There is no such member.'); return; }\nif (me && t.objectId === me.objectId) { refuse('You can’t block yourself.'); return; }\nvar reason = said(a.reason);\nif (a.blocked) {\n  if (t.role === 'admin') { refuse(t.name + ' is an admin. An admin can’t be blocked.'); return; }\n  if (!reason) { refuse('Say why. Admins see the reason; ' + t.name + ' doesn’t.'); return; }\n  if (reason.length > 500) { refuse('A reason of 500 characters or fewer.'); return; }\n}\nOutputs.loginId = idOf(t.login);\nOutputs.disabled = a.blocked;\nOutputs.id = id;\n// Already so: nothing to change but the sign-in, which is put as it should be either way.\nif (!!t.endedAt === a.blocked) { Outputs.done(); return; }\nif (a.blocked) {\n  await Noodl.Records.save(id, { blockedReason: reason, endedAt: now() }, { className: 'Member' });\n  await history('Member', 'member', id, Inputs.userId, { blocked: { from: false, to: true }, blockedReason: { from: null, to: reason } });\n} else {\n  await Noodl.Records.save(id, { blockedReason: null, endedAt: null }, { className: 'Member' });\n  await history('Member', 'member', id, Inputs.userId, { blocked: { from: true, to: false }, blockedReason: { from: t.blockedReason || null, to: null } });\n}\n// What they wrote: hidden from members with them, and back with them, all but what was hidden for its own reason.\nvar theirs = { member: { equalTo: ptr('Member', id) } };\nvar classes = ['Post', 'Comment'];\nfor (var k = 0; k < classes.length; k++) {\n  var rows = await Noodl.Records.query(classes[k], theirs, { plain: true, limit: 10000 });\n  for (var i = 0; i < rows.length; i++) {\n    if (!a.blocked && rows[i].endedAt) continue;\n    await Noodl.Records.save(rows[i].objectId, {}, { className: classes[k], acl: a.blocked ? ADMINS_ONLY : POLICY_READS });\n  }\n}\nOutputs.done();",
+        "runOnChange-in-block": false,
+        "runOnChange-in-userId": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-block",
+          "displayName": "block",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-loginId",
+          "displayName": "loginId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-disabled",
+          "displayName": "disabled",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "login",
+      "type": "noodl.cloud.updateuser",
+      "label": "Their sign-in, off or on",
+      "parameters": {
+        "properties": "disabled"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "ok-13",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "parameters": {
+        "params": "id"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "no-14",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

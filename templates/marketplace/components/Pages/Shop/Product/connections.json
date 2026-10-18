@@ -1,0 +1,469 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b523f001-2604-5036-8d17-93595ed4f3d2",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ppUrl",
+      "fromProperty": "pm-productId",
+      "toId": "ppLoad",
+      "toProperty": "in-productId"
+    },
+    {
+      "fromId": "ppCurrency",
+      "fromProperty": "value",
+      "toId": "ppLoad",
+      "toProperty": "in-currency"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-ok",
+      "toId": "ppContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-gone",
+      "toId": "ppGone",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-problem",
+      "toId": "ppGone",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-title",
+      "toId": "ppPage",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-photos",
+      "toId": "ppEachPhoto",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-hasPhotos",
+      "toId": "ppGallery",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-swipe",
+      "toId": "ppSwipe",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-hasSwipe",
+      "toId": "ppSwipe",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-name",
+      "toId": "ppName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-price",
+      "toId": "ppPrice",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-was",
+      "toId": "ppWas",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-hasWas",
+      "toId": "ppWas",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-enquire",
+      "toId": "ppEnquireTag",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-enquire",
+      "toId": "ppEnquireBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-sellerName",
+      "toId": "ppSellerName",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-sellerPlace",
+      "toId": "ppSellerPlace",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-sellerId",
+      "toId": "ppToSeller",
+      "toProperty": "pm-sellerId"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-logo",
+      "toId": "ppLogo",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-hasLogo",
+      "toId": "ppLogo",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-noLogo",
+      "toId": "ppInitials",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-tint",
+      "toId": "ppInitials",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-initials",
+      "toId": "ppInitialsWords",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-description",
+      "toId": "ppDescription",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-hasDescription",
+      "toId": "ppDescription",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-whatsappLabel",
+      "toId": "ppWhatsapp",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-hasWhatsapp",
+      "toId": "ppWhatsapp",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-whatsappLink",
+      "toId": "ppOpenWhatsapp",
+      "toProperty": "link"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-call",
+      "toId": "ppCall",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-hasCall",
+      "toId": "ppCall",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-delivery",
+      "toId": "ppDelivery",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-buy",
+      "toId": "ppDelivery",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-buy",
+      "toId": "ppBuyBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-loaded",
+      "toId": "ppCount",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "ppLess",
+      "fromProperty": "onClick",
+      "toId": "ppCount",
+      "toProperty": "decrease"
+    },
+    {
+      "fromId": "ppMore",
+      "fromProperty": "onClick",
+      "toId": "ppCount",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "ppCount",
+      "fromProperty": "currentCount",
+      "toId": "ppAddLabel",
+      "toProperty": "in-quantity"
+    },
+    {
+      "fromId": "ppCount",
+      "fromProperty": "currentCount",
+      "toId": "ppAddIt",
+      "toProperty": "in-quantity"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-unit",
+      "toId": "ppAddLabel",
+      "toProperty": "in-unit"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-unitCurrency",
+      "toId": "ppAddLabel",
+      "toProperty": "in-unitCurrency"
+    },
+    {
+      "fromId": "ppAddLabel",
+      "fromProperty": "out-label",
+      "toId": "ppAdd",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ppAddLabel",
+      "fromProperty": "out-quantityWords",
+      "toId": "ppQty",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-productId",
+      "toId": "ppAddIt",
+      "toProperty": "in-productId"
+    },
+    {
+      "fromId": "ppAdd",
+      "fromProperty": "onClick",
+      "toId": "ppAddIt",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ppAddIt",
+      "fromProperty": "out-basket",
+      "toId": "ppSetBasket",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ppAddIt",
+      "fromProperty": "out-go",
+      "toId": "ppSetBasket",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "ppAddIt",
+      "fromProperty": "out-added",
+      "toId": "ppAddedWords",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ppAddIt",
+      "fromProperty": "out-has",
+      "toId": "ppAdded",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppSeeBasket",
+      "fromProperty": "onClick",
+      "toId": "ppToBasket",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "ppWhatsapp",
+      "fromProperty": "onClick",
+      "toId": "ppOpenWhatsapp",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-enquire",
+      "toId": "ppAsk",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-askLabel",
+      "toId": "ppAskGo",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-productId",
+      "toId": "ppAskGather",
+      "toProperty": "in-productId"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-sellerName",
+      "toId": "ppAskSay",
+      "toProperty": "in-seller"
+    },
+    {
+      "fromId": "ppLoad",
+      "fromProperty": "out-loaded",
+      "toId": "ppAskDone",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ppAskName",
+      "fromProperty": "onTextChanged",
+      "toId": "ppAskGather",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "ppAskContact",
+      "fromProperty": "onTextChanged",
+      "toId": "ppAskGather",
+      "toProperty": "in-contact"
+    },
+    {
+      "fromId": "ppAskContact",
+      "fromProperty": "onTextChanged",
+      "toId": "ppAskSay",
+      "toProperty": "in-contact"
+    },
+    {
+      "fromId": "ppAskMessage",
+      "fromProperty": "onTextChanged",
+      "toId": "ppAskGather",
+      "toProperty": "in-message"
+    },
+    {
+      "fromId": "ppAskGo",
+      "fromProperty": "onClick",
+      "toId": "ppAskGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ppAskGather",
+      "fromProperty": "out-enquiry",
+      "toId": "ppAskCall",
+      "toProperty": "in-enquiry"
+    },
+    {
+      "fromId": "ppAskGather",
+      "fromProperty": "out-go",
+      "toId": "ppAskCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ppAskCall",
+      "fromProperty": "error",
+      "toId": "ppAskError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ppAskCall",
+      "fromProperty": "failure",
+      "toId": "ppAskFailed",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ppAskCall",
+      "fromProperty": "done",
+      "toId": "ppAskFailed",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ppAskFailed",
+      "fromProperty": "state",
+      "toId": "ppAskError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppAskCall",
+      "fromProperty": "done",
+      "toId": "ppAskSay",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ppAskSay",
+      "fromProperty": "out-words",
+      "toId": "ppAskSentWords",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ppAskCall",
+      "fromProperty": "done",
+      "toId": "ppAskDone",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ppAskDone",
+      "fromProperty": "state",
+      "toId": "ppAskSent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppAskDone",
+      "fromProperty": "state",
+      "toId": "ppAskOpen",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ppAskOpen",
+      "fromProperty": "result",
+      "toId": "ppAskForm",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ppSeller",
+      "fromProperty": "onClick",
+      "toId": "ppToSeller",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "ppSellerName",
+      "fromProperty": "onClick",
+      "toId": "ppToSeller",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "ppBack",
+      "fromProperty": "onClick",
+      "toId": "ppToShop",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "ppFootSignIn",
+      "fromProperty": "onClick",
+      "toId": "ppToSignIn",
+      "toProperty": "navigate"
+    }
+  ]
+}

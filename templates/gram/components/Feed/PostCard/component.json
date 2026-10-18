@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "247a541c-feeb-551b-8168-88b810a4cd5a",
+  "name": "PostCard",
+  "path": "/Feed/PostCard",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One post: who and when, the photos, the heart, the caption, the comments; a prayer request: its words and I prayed; a testimony its words first; an event when it is"
+}

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6dca1122-3754-58dc-853b-60845378d536",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tbIn",
+      "fromProperty": "on",
+      "toId": "tbLook",
+      "toProperty": "in-on"
+    },
+    {
+      "fromId": "tbLook",
+      "fromProperty": "out-sellers",
+      "toId": "tb_sellers",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "tb_sellers",
+      "fromProperty": "onClick",
+      "toId": "tbTo_sellers",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "tbLook",
+      "fromProperty": "out-orders",
+      "toId": "tb_orders",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "tb_orders",
+      "fromProperty": "onClick",
+      "toId": "tbTo_orders",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "tbLook",
+      "fromProperty": "out-enquiries",
+      "toId": "tb_enquiries",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "tb_enquiries",
+      "fromProperty": "onClick",
+      "toId": "tbTo_enquiries",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "tbLook",
+      "fromProperty": "out-pay",
+      "toId": "tb_pay",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "tb_pay",
+      "fromProperty": "onClick",
+      "toId": "tbTo_pay",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "tbLook",
+      "fromProperty": "out-rates",
+      "toId": "tb_rates",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "tb_rates",
+      "fromProperty": "onClick",
+      "toId": "tbTo_rates",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "tbLook",
+      "fromProperty": "out-shelves",
+      "toId": "tb_shelves",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "tb_shelves",
+      "fromProperty": "onClick",
+      "toId": "tbTo_shelves",
+      "toProperty": "navigate"
+    }
+  ]
+}

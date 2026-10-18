@@ -1,0 +1,75 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f0711f6d-a878-59ca-8ff5-d7b3862f72bc",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "appRoot",
+      "type": "Group",
+      "label": "App",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)"
+      },
+      "children": [
+        "appRouter"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "appRouter",
+      "type": "Router",
+      "label": "Main router",
+      "parent": "appRoot",
+      "parameters": {
+        "name": "Main",
+        "pages": {
+          "startPage": "/Pages/Shop/Home",
+          "routes": [
+            "/Pages/Shop/Home",
+            "/Pages/SignIn",
+            "/Pages/SetUp",
+            "/Pages/Admin/Sellers",
+            "/Pages/Admin/Name",
+            "/Pages/Admin/SellerForm",
+            "/Pages/Admin/GiveLogin",
+            "/Pages/Admin/StopSeller",
+            "/Pages/Seller/Products",
+            "/Pages/Seller/ProductForm",
+            "/Pages/Shop/Seller",
+            "/Pages/Shop/Product",
+            "/Pages/Shop/Basket",
+            "/Pages/Shop/Checkout",
+            "/Pages/Shop/Order",
+            "/Pages/Admin/WaysToPay",
+            "/Pages/Admin/Rates",
+            "/Pages/Admin/Shelves",
+            "/Pages/Orders",
+            "/Pages/Enquiries"
+          ]
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "appCss",
+      "type": "CSS Definition",
+      "label": "The two faces and the focus ring (two003Look.ts)",
+      "parameters": {
+        "style": "@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap');\nbody { font-family: var(--font-sans); }\n.mk-display { font-family: var(--font-display) !important; }\n.mk-app :focus-visible { outline: 3px solid var(--ring) !important; outline-offset: 2px; }\n.mk-num { font-variant-numeric: tabular-nums; }\n.mk-pointer, .mk-card { cursor: pointer; }\n.mk-card { overflow: hidden; }\n.mk-wrap { white-space: normal !important; overflow-wrap: anywhere; }\n.mk-left { text-align: left !important; justify-content: flex-start !important; }\n.mk-nowrap { white-space: nowrap; }\n.mk-chips, .mk-strip { flex-wrap: nowrap !important; overflow-x: auto; padding-bottom: 2px; }\n.mk-chips > *, .mk-strip > * { flex: none !important; }\n.mk-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }\n.mk-square { aspect-ratio: 1 / 1; height: auto !important; }\n.mk-gallery { display: flex !important; flex-direction: row !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: 8px; }\n.mk-gallery > * { flex: 0 0 100% !important; scroll-snap-align: start; }\n.mk-photo { aspect-ratio: 4 / 3; height: auto !important; }\n.mk-nav { position: sticky; bottom: 0; z-index: 5; margin-top: auto; border-top: 1px solid var(--border); }\n.mk-grow, .mk-step { flex: 1 1 0 !important; min-width: 0; }\n.mk-tabs { border-bottom: 1px solid var(--border); }\n.mk-row2 > * { flex: 1 1 140px !important; min-width: 0; }\n.mk-tab { flex: 1 1 0 !important; border-radius: 0 !important; color: var(--muted-foreground) !important; border-bottom: 3px solid transparent !important; }\n.mk-tab-on { color: var(--secondary) !important; border-bottom-color: var(--primary) !important; }\n.mk-stepname { white-space: nowrap !important; overflow: hidden; text-overflow: ellipsis; }\n@media (max-width: 719px) {\n  .mk-stepname { font-size: 10px !important; }\n  .mk-tabs-many { flex-wrap: nowrap !important; overflow-x: auto; }\n  .mk-tabs-many .mk-tab { flex: none !important; width: auto !important; white-space: nowrap; padding-left: 12px !important; padding-right: 12px !important; }\n}\n@media (min-width: 720px) {\n  .mk-parts { display: grid !important; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }\n  .mk-phone-only { display: none !important; }\n  .mk-split { flex-direction: row !important; align-items: flex-start !important; column-gap: 18px; }\n  .mk-split > .mk-chips { flex-direction: column !important; align-items: stretch !important; row-gap: 8px; width: 200px !important; flex: none !important; overflow: visible; }\n  .mk-split > .mk-chips .mk-chip { width: 100% !important; text-align: left !important; justify-content: flex-start !important; }\n  .mk-split > :not(.mk-chips) { flex: 1 1 0 !important; min-width: 0; }\n  .mk-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }\n  .mk-two { flex-direction: row !important; align-items: flex-start !important; column-gap: 18px; }\n  .mk-two > * { flex: 1 1 0 !important; min-width: 0; }\n  .mk-gallery { display: grid !important; grid-template-columns: 1fr 1fr; overflow: visible; }\n  .mk-gallery > :first-child { grid-column: span 2; }\n}\n"
+      },
+      "x": 350,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "appRoot"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8cae553b-f1ae-5016-88b9-b7da35658e8b",
+  "name": "SignIn",
+  "path": "/Pages/SignIn",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Sign in: a link by email; a password for an admin who made one"
+}

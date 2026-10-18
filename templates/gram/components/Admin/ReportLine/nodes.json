@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f21ca2fc-2609-5f5a-8157-e9f9849a454c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rlRoot",
+      "type": "Group",
+      "label": "A report",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "alignItems": "flex-start",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "backgroundColor": "var(--surface)"
+      },
+      "children": [
+        "rlPill",
+        "rlWho",
+        "rlNote"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rlPill",
+      "type": "Text",
+      "label": "Why",
+      "parent": "rlRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "cssClassName": "gm-pill"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rlWho",
+      "type": "Text",
+      "label": "Who sent it, and when",
+      "parent": "rlRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "rlNote",
+      "type": "Text",
+      "label": "Their note",
+      "parent": "rlRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "rlIn",
+      "type": "Component Inputs",
+      "label": "One report",
+      "ports": [
+        {
+          "name": "pill",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pillClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "who",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasNote",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "rlRoot"
+  ]
+}

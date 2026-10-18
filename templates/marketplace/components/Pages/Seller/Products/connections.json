@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "46f4ab6d-4b46-5d43-8498-05e6ff74b8d8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "spUrl",
+      "fromProperty": "pm-sellerId",
+      "toId": "spLoad",
+      "toProperty": "in-sellerId"
+    },
+    {
+      "fromId": "spRoot",
+      "fromProperty": "didMount",
+      "toId": "spLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "spVersion",
+      "fromProperty": "value",
+      "toId": "spLoad",
+      "toProperty": "in-changed"
+    },
+    {
+      "fromId": "spLoad",
+      "fromProperty": "out-ok",
+      "toId": "spContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "spLoad",
+      "fromProperty": "out-band",
+      "toId": "spBand",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "spLoad",
+      "fromProperty": "out-heading",
+      "toId": "spTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "spLoad",
+      "fromProperty": "out-isAdmin",
+      "toId": "spBack",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "spLoad",
+      "fromProperty": "out-isStaff",
+      "toId": "spTabsBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "spLoad",
+      "fromProperty": "out-isStopped",
+      "toId": "spStopped",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "spLoad",
+      "fromProperty": "out-stoppedNote",
+      "toId": "spStopped",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "spLoad",
+      "fromProperty": "out-rows",
+      "toId": "spEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "spLoad",
+      "fromProperty": "out-empty",
+      "toId": "spEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "spLoad",
+      "fromProperty": "out-urlSeller",
+      "toId": "spToNew",
+      "toProperty": "pm-sellerId"
+    },
+    {
+      "fromId": "spLoad",
+      "fromProperty": "out-problem",
+      "toId": "spRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "spLoad",
+      "fromProperty": "out-refused",
+      "toId": "spRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "spRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "spToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "spAdd",
+      "fromProperty": "onClick",
+      "toId": "spToNew",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "spBack",
+      "fromProperty": "onClick",
+      "toId": "spToSellers",
+      "toProperty": "navigate"
+    }
+  ]
+}

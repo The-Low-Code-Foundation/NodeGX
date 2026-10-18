@@ -1,0 +1,298 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6dca1122-3754-58dc-853b-60845378d536",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tbRoot",
+      "type": "Group",
+      "label": "The tabs",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-0)",
+        "backgroundColor": "var(--surface)",
+        "cssClassName": "mk-tabs mk-tabs-many"
+      },
+      "children": [
+        "tb_sellers",
+        "tb_orders",
+        "tb_enquiries",
+        "tb_pay",
+        "tb_rates",
+        "tb_shelves"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "tb_sellers",
+      "type": "net.noodl.controls.button",
+      "label": "Sellers",
+      "parent": "tbRoot",
+      "parameters": {
+        "label": "Sellers",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "sizeMode": "contentHeight",
+        "cssClassName": "mk-tab"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "tb_orders",
+      "type": "net.noodl.controls.button",
+      "label": "Orders",
+      "parent": "tbRoot",
+      "parameters": {
+        "label": "Orders",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "sizeMode": "contentHeight",
+        "cssClassName": "mk-tab"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "tb_enquiries",
+      "type": "net.noodl.controls.button",
+      "label": "Enquiries",
+      "parent": "tbRoot",
+      "parameters": {
+        "label": "Enquiries",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "sizeMode": "contentHeight",
+        "cssClassName": "mk-tab"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "tb_pay",
+      "type": "net.noodl.controls.button",
+      "label": "Ways to pay",
+      "parent": "tbRoot",
+      "parameters": {
+        "label": "Ways to pay",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "sizeMode": "contentHeight",
+        "cssClassName": "mk-tab"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "tb_rates",
+      "type": "net.noodl.controls.button",
+      "label": "Rates",
+      "parent": "tbRoot",
+      "parameters": {
+        "label": "Rates",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "sizeMode": "contentHeight",
+        "cssClassName": "mk-tab"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "tb_shelves",
+      "type": "net.noodl.controls.button",
+      "label": "Shelves",
+      "parent": "tbRoot",
+      "parameters": {
+        "label": "Shelves",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "sizeMode": "contentHeight",
+        "cssClassName": "mk-tab"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "tbIn",
+      "type": "Component Inputs",
+      "label": "Which tab",
+      "ports": [
+        {
+          "name": "on",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 1000
+    },
+    {
+      "id": "tbLook",
+      "type": "JavaScriptFunction",
+      "label": "Which tab is this page",
+      "parameters": {
+        "functionScript": "var on = String(Inputs.on || '');\nOutputs.sellers = on === 'sellers' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.orders = on === 'orders' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.enquiries = on === 'enquiries' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.pay = on === 'pay' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.rates = on === 'rates' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.shelves = on === 'shelves' ? 'mk-tab mk-tab-on' : 'mk-tab';\nfunction bringIntoView(tries) {\n  var tab = typeof document === 'undefined' ? null : document.querySelector('.mk-tabs-many .mk-tab-on');\n  if (!tab) { if (tries > 0) setTimeout(function () { bringIntoView(tries - 1); }, 100); return; }\n  var bar = tab.parentElement, t = tab.getBoundingClientRect(), b = bar.getBoundingClientRect();\n  if (bar.scrollWidth > bar.clientWidth) bar.scrollLeft += t.left - b.left - (b.width - t.width) / 2;\n}\nif (on) bringIntoView(10);"
+      },
+      "ports": [
+        {
+          "name": "in-on",
+          "displayName": "on",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-sellers",
+          "displayName": "sellers",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-orders",
+          "displayName": "orders",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-enquiries",
+          "displayName": "enquiries",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pay",
+          "displayName": "pay",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rates",
+          "displayName": "rates",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shelves",
+          "displayName": "shelves",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "tbTo_sellers",
+      "type": "RouterNavigate",
+      "label": "To Sellers",
+      "parameters": {
+        "target": "/Pages/Admin/Sellers"
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "tbTo_orders",
+      "type": "RouterNavigate",
+      "label": "To Orders",
+      "parameters": {
+        "target": "/Pages/Orders"
+      },
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "tbTo_enquiries",
+      "type": "RouterNavigate",
+      "label": "To Enquiries",
+      "parameters": {
+        "target": "/Pages/Enquiries"
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "tbTo_pay",
+      "type": "RouterNavigate",
+      "label": "To Ways to pay",
+      "parameters": {
+        "target": "/Pages/Admin/WaysToPay"
+      },
+      "x": 350,
+      "y": 640
+    },
+    {
+      "id": "tbTo_rates",
+      "type": "RouterNavigate",
+      "label": "To Rates",
+      "parameters": {
+        "target": "/Pages/Admin/Rates"
+      },
+      "x": 350,
+      "y": 760
+    },
+    {
+      "id": "tbTo_shelves",
+      "type": "RouterNavigate",
+      "label": "To Shelves",
+      "parameters": {
+        "target": "/Pages/Admin/Shelves"
+      },
+      "x": 350,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "tbRoot"
+  ]
+}

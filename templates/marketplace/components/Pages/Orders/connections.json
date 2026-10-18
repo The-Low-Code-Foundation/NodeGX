@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8bebcfd1-448d-5855-8e01-33606362f6c5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "orRoot",
+      "fromProperty": "didMount",
+      "toId": "orLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "orVersion",
+      "fromProperty": "value",
+      "toId": "orLoad",
+      "toProperty": "in-changed"
+    },
+    {
+      "fromId": "orLoad",
+      "fromProperty": "out-ok",
+      "toId": "orContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "orLoad",
+      "fromProperty": "out-band",
+      "toId": "orBand",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "orLoad",
+      "fromProperty": "out-heading",
+      "toId": "orTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "orLoad",
+      "fromProperty": "out-isAdmin",
+      "toId": "orAdminTabsBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "orLoad",
+      "fromProperty": "out-isStaff",
+      "toId": "orSellerTabsBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "orLoad",
+      "fromProperty": "out-kpis",
+      "toId": "orEachKpi",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "orLoad",
+      "fromProperty": "out-empty",
+      "toId": "orEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "orLoad",
+      "fromProperty": "out-sections",
+      "toId": "orEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "orLoad",
+      "fromProperty": "out-fine",
+      "toId": "orFine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "orLoad",
+      "fromProperty": "out-problem",
+      "toId": "orRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "orLoad",
+      "fromProperty": "out-refused",
+      "toId": "orRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "orRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "orToSignIn",
+      "toProperty": "navigate"
+    }
+  ]
+}

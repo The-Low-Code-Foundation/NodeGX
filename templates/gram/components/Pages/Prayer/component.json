@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "46c089f6-dd96-52f7-8dc6-11bedf445242",
+  "name": "Prayer",
+  "path": "/Pages/Prayer",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The prayer requests: newest first, I prayed on each, and asking for prayer"
+}

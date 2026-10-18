@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f21ca2fc-2609-5f5a-8157-e9f9849a454c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rlIn",
+      "fromProperty": "pill",
+      "toId": "rlPill",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rlIn",
+      "fromProperty": "pillClass",
+      "toId": "rlPill",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "rlIn",
+      "fromProperty": "who",
+      "toId": "rlWho",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rlIn",
+      "fromProperty": "note",
+      "toId": "rlNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rlIn",
+      "fromProperty": "hasNote",
+      "toId": "rlNote",
+      "toProperty": "mounted"
+    }
+  ]
+}

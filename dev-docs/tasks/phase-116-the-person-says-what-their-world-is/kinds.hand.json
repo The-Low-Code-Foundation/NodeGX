@@ -352,7 +352,13 @@
       "template:todo-list|Projects.nextPosition@read-aloud": "neighbour: the next drag-sort position (the highest plus one) — an order, not a number that names the record",
       "template:todo-list|Selected task.nextActionPosition@read-aloud": "neighbour: the next drag-sort position for an action — an order, not a number that names the record",
       "template:todo-list|Task rows.nextPosition@read-aloud": "neighbour: the next drag-sort position for a task — an order, not a number that names the record",
-      "template:learn-with-simple-rick|*.(collection)@who-changed": "yes: a history beside every collection (who changed what, when, before and after), because Richard asked for one on everything (P119 BRIEF.md R11); the world's own history answer projects it, and a cloud function writes each row with its history row"
+      "template:learn-with-simple-rick|*.(collection)@who-changed": "yes: a history beside every collection (who changed what, when, before and after), because Richard asked for one on everything (P119 BRIEF.md R11); the world's own history answer projects it, and a cloud function writes each row with its history row",
+      "template:gram|*.(collection)@who-changed": "yes: a history beside members (who let them in, blocked them, made them an admin), devotionals and the community's rules, because the world asks for one there (P121 TWO-001); a cloud function writes each row with its history row",
+      "template:marketplace|*.(collection)@who-changed": "yes: a history beside people, sellers, countries, rates, products, ways to pay and order parts, because the world asks for one there (P121 TWO-001); a cloud function writes each row with its history row",
+      "template:marketplace|placeOrder.counter@read-aloud": "yes: the order's number, MK-2026-00042, the year's next one, made by the checkout function; a buyer reads it out on the phone and uses it as a bank transfer's reference (P121 TWO-001's world: read aloud, starting again each year; TWO-003 slice 3)",
+      "template:marketplace|sendEnquiry.digits@count": "no: how many digits a phone number has, checked before the enquiry is made; not a count of records (P121 TWO-003 slice 5)",
+      "template:gram|commentOn.words@count": "no: how many characters a comment has, refused over 1,000 before the comment is made; not a count of records (P121 TWO-005 slice 2)",
+      "template:gram|writeRules.rules@count": "no: how many characters the community's rules have, refused over 5,000 before they are saved with their history row; not a count of records (P121 TWO-005 slice 5)"
     },
     "hand": [
       {

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2b9798c0-910d-5bb8-8a85-a479b767d0ae",
+  "name": "saveShelf",
+  "path": "/#__cloud__/saveShelf",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Add a shelf, or rename one"
+}

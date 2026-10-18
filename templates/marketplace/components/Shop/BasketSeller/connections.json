@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2b3c99c3-ed56-5c84-878a-694ce17dbcc0",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "bsIn",
+      "fromProperty": "logo",
+      "toId": "bsLogo",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "hasLogo",
+      "toId": "bsLogo",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "noLogo",
+      "toId": "bsInitials",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "tint",
+      "toId": "bsInitials",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "initials",
+      "toId": "bsInitialsWords",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "name",
+      "toId": "bsName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "place",
+      "toId": "bsPlace",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bsIn",
+      "fromProperty": "lines",
+      "toId": "bsEach",
+      "toProperty": "items"
+    }
+  ]
+}

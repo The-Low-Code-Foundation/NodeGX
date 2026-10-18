@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8bebcfd1-448d-5855-8e01-33606362f6c5",
+  "name": "Orders",
+  "path": "/Pages/Orders",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Orders: a seller’s parts of each order (or every part, for the admin), confirmed and moved along"
+}

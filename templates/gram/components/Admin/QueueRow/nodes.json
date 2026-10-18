@@ -1,0 +1,260 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b5bb3f80-a140-5812-806a-2b4c451ab44f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "qrRoot",
+      "type": "Group",
+      "label": "A row in the queue",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2-5)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "backgroundColor": "var(--surface)"
+      },
+      "children": [
+        "qrWords",
+        "qrLook"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "qrWords",
+      "type": "Group",
+      "label": "Why, what and whose",
+      "parent": "qrRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "alignItems": "flex-start",
+        "cssClassName": "gm-grow"
+      },
+      "children": [
+        "qrPill",
+        "qrTitle",
+        "qrSub"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "qrPill",
+      "type": "Text",
+      "label": "Why",
+      "parent": "qrWords",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "cssClassName": "gm-pill",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "qrTitle",
+      "type": "Text",
+      "label": "Who",
+      "parent": "qrWords",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "qrSub",
+      "type": "Text",
+      "label": "What, whose and when",
+      "parent": "qrWords",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "qrLook",
+      "type": "net.noodl.controls.button",
+      "label": "Look",
+      "parent": "qrRoot",
+      "parameters": {
+        "label": "Look",
+        "borderRadius": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "qrIn",
+      "type": "Component Inputs",
+      "label": "One row",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "itemId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pill",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pillClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "look",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasPill",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hasTitle",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "qrWhere",
+      "type": "JavaScriptFunction",
+      "label": "The post, the comment or the profile",
+      "parameters": {
+        "functionScript": "if (Inputs.kind === 'member') Outputs.member(); else if (Inputs.kind === 'comment') Outputs.comment(); else Outputs.post();",
+        "runOnChange-in-kind": false
+      },
+      "ports": [
+        {
+          "name": "out-post",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-comment",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-member",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-kind",
+          "displayName": "kind",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "qrToPost",
+      "type": "RouterNavigate",
+      "label": "To look at the post",
+      "parameters": {
+        "target": "/Pages/Admin/Look"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "qrToComment",
+      "type": "RouterNavigate",
+      "label": "To look at the comment",
+      "parameters": {
+        "target": "/Pages/Admin/Look"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "qrToMember",
+      "type": "RouterNavigate",
+      "label": "To their profile",
+      "parameters": {
+        "target": "/Pages/Member"
+      },
+      "x": 410,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "qrRoot"
+  ]
+}

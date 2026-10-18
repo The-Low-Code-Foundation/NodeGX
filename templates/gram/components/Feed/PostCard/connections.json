@@ -1,0 +1,349 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "247a541c-feeb-551b-8168-88b810a4cd5a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pcIn",
+      "fromProperty": "name",
+      "toId": "pcName",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "face",
+      "toId": "pcFace",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hasFace",
+      "toId": "pcFace",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "noFace",
+      "toId": "pcInitials",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "initials",
+      "toId": "pcInitials",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "shade",
+      "toId": "pcAv",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "memberId",
+      "toId": "pcToMember",
+      "toProperty": "pm-memberId"
+    },
+    {
+      "fromId": "pcName",
+      "fromProperty": "onClick",
+      "toId": "pcToMember",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "when",
+      "toId": "pcWhen",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "photos",
+      "toId": "pcEachPhoto",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hasPhotos",
+      "toId": "pcGallery",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "lostPhotos",
+      "toId": "pcLost",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "kindClass",
+      "toId": "pcRoot",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "kindName",
+      "toId": "pcKind",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hasKind",
+      "toId": "pcKind",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "ask",
+      "toId": "pcAsk",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "wordsFirst",
+      "toId": "pcAsk",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "notPrayer",
+      "toId": "pcHeart",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "notPrayer",
+      "toId": "pcHearts",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "isPrayer",
+      "toId": "pcPray",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "prayLabel",
+      "toId": "pcPray",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "prayInk",
+      "toId": "pcPray",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "prayFill",
+      "toId": "pcPray",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "whoPrayed",
+      "toId": "pcWhoPrayed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "isPrayer",
+      "toId": "pcWhoPrayed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "id",
+      "toId": "pcPrayGather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "prayed",
+      "toId": "pcPrayGather",
+      "toProperty": "in-prayed"
+    },
+    {
+      "fromId": "pcPray",
+      "fromProperty": "onClick",
+      "toId": "pcPrayGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pcPrayGather",
+      "fromProperty": "out-prayer",
+      "toId": "pcPrayCall",
+      "toProperty": "in-prayer"
+    },
+    {
+      "fromId": "pcPrayGather",
+      "fromProperty": "out-go",
+      "toId": "pcPrayCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pcPrayCall",
+      "fromProperty": "error",
+      "toId": "pcError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcPrayCall",
+      "fromProperty": "failure",
+      "toId": "pcFailed",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pcPrayCall",
+      "fromProperty": "done",
+      "toId": "pcFailed",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pcPrayCall",
+      "fromProperty": "done",
+      "toId": "pcStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "heartLabel",
+      "toId": "pcHeart",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "heartColor",
+      "toId": "pcHeart",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hearts",
+      "toId": "pcHearts",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "caption",
+      "toId": "pcCaption",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hasCaption",
+      "toId": "pcCaption",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "comments",
+      "toId": "pcComments",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "listComments",
+      "toId": "pcComments",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "toComments",
+      "toId": "pcComment",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "id",
+      "toId": "pcHeartGather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hearted",
+      "toId": "pcHeartGather",
+      "toProperty": "in-hearted"
+    },
+    {
+      "fromId": "pcHeart",
+      "fromProperty": "onClick",
+      "toId": "pcHeartGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pcHeartGather",
+      "fromProperty": "out-heart",
+      "toId": "pcHeartCall",
+      "toProperty": "in-heart"
+    },
+    {
+      "fromId": "pcHeartGather",
+      "fromProperty": "out-go",
+      "toId": "pcHeartCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pcHeartCall",
+      "fromProperty": "error",
+      "toId": "pcError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcHeartCall",
+      "fromProperty": "failure",
+      "toId": "pcFailed",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pcHeartCall",
+      "fromProperty": "done",
+      "toId": "pcFailed",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pcFailed",
+      "fromProperty": "state",
+      "toId": "pcError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcHeartCall",
+      "fromProperty": "done",
+      "toId": "pcStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pcStamp",
+      "fromProperty": "out-at",
+      "toId": "pcChanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pcStamp",
+      "fromProperty": "out-go",
+      "toId": "pcChanged",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "id",
+      "toId": "pcToPost",
+      "toProperty": "pm-postId"
+    },
+    {
+      "fromId": "pcComments",
+      "fromProperty": "onClick",
+      "toId": "pcToPost",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "pcComment",
+      "fromProperty": "onClick",
+      "toId": "pcToPost",
+      "toProperty": "navigate"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a8eec511-0ab9-58e9-80f3-323b9edb02ac",
+  "name": "setUpMarketplace",
+  "path": "/#__cloud__/setUpMarketplace",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Name the marketplace and make its first admin, once, with the setup token"
+}

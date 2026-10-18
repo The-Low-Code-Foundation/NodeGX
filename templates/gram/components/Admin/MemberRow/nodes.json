@@ -1,0 +1,317 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "43f75914-6c8b-5b73-8cea-406f4642bfdc",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mrRoot",
+      "type": "Group",
+      "label": "A member",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--surface)"
+      },
+      "children": [
+        "mrLine",
+        "mrError"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mrLine",
+      "type": "Group",
+      "label": "Who, and Make admin",
+      "parent": "mrRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2-5)"
+      },
+      "children": [
+        "mrAv",
+        "mrWho",
+        "mrMake"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mrAv",
+      "type": "Group",
+      "label": "Their initials",
+      "parent": "mrLine",
+      "parameters": {
+        "width": {
+          "value": 34,
+          "unit": "px"
+        },
+        "height": {
+          "value": 34,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "cssClassName": "gm-av"
+      },
+      "children": [
+        "mrInitials"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "mrInitials",
+      "type": "Text",
+      "label": "Initials",
+      "parent": "mrAv",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--primary-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "mrWho",
+      "type": "Group",
+      "label": "Name, and admin or member",
+      "parent": "mrLine",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "gm-grow"
+      },
+      "children": [
+        "mrName",
+        "mrSub"
+      ],
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "mrName",
+      "type": "Text",
+      "label": "Name",
+      "parent": "mrWho",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "mrSub",
+      "type": "Text",
+      "label": "Admin or member",
+      "parent": "mrWho",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "mrMake",
+      "type": "net.noodl.controls.button",
+      "label": "Make admin",
+      "parent": "mrLine",
+      "parameters": {
+        "label": "Make admin",
+        "borderRadius": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "mrError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "mrRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "mrIn",
+      "type": "Component Inputs",
+      "label": "One member",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "initials",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "shade",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sub",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canMake",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "mrGather",
+      "type": "JavaScriptFunction",
+      "label": "Make this member an admin",
+      "parameters": {
+        "functionScript": "Outputs.admin = { memberId: Inputs.id };\nOutputs.go();",
+        "runOnChange-in-id": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-admin",
+          "displayName": "admin",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "mrCall",
+      "type": "CloudFunction2",
+      "label": "makeAdmin(admin)",
+      "parameters": {
+        "function": "makeAdmin"
+      },
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "mrFailed",
+      "type": "Switch",
+      "label": "The last try was refused",
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "mrStamp",
+      "type": "JavaScriptFunction",
+      "label": "Say the members changed",
+      "parameters": {
+        "functionScript": "Outputs.at = String(Date.now());\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-at",
+          "displayName": "at",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "mrChanged",
+      "type": "Set Variable",
+      "label": "The members changed",
+      "parameters": {
+        "name": "membersChanged",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a member was let in, turned away or made an admin: the list reads again, whichever row changed it."
+      },
+      "x": 470,
+      "y": 1360
+    }
+  ],
+  "visualRoots": [
+    "mrRoot"
+  ]
+}

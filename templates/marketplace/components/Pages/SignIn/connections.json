@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "65cc1f68-3560-51c5-8e8b-03c8c96e7743",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "siEmail",
+      "fromProperty": "onTextChanged",
+      "toId": "siLogIn",
+      "toProperty": "username"
+    },
+    {
+      "fromId": "siPassword",
+      "fromProperty": "onTextChanged",
+      "toId": "siLogIn",
+      "toProperty": "password"
+    },
+    {
+      "fromId": "siGo",
+      "fromProperty": "onClick",
+      "toId": "siLogIn",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "siPassword",
+      "fromProperty": "onEnter",
+      "toId": "siLogIn",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "siLogIn",
+      "fromProperty": "error",
+      "toId": "siError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "siLogIn",
+      "fromProperty": "done",
+      "toId": "siRoute",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "siRoute",
+      "fromProperty": "out-admin",
+      "toId": "siToSellers",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "siRoute",
+      "fromProperty": "out-seller",
+      "toId": "siToOrders",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "siRoute",
+      "fromProperty": "out-problem",
+      "toId": "siError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "siSetUp",
+      "fromProperty": "onClick",
+      "toId": "siToSetUp",
+      "toProperty": "navigate"
+    }
+  ]
+}

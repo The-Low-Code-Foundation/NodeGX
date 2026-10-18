@@ -1,0 +1,247 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d7a75ea8-4391-5175-8d86-24a4fae11e0b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "epRoot",
+      "fromProperty": "didMount",
+      "toId": "epLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "epLoad",
+      "fromProperty": "out-ok",
+      "toId": "epContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "epLoad",
+      "fromProperty": "out-band",
+      "toId": "epBar",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "epLoad",
+      "fromProperty": "out-waiting",
+      "toId": "epToWaiting",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "epLoad",
+      "fromProperty": "out-problem",
+      "toId": "epRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "epLoad",
+      "fromProperty": "out-refused",
+      "toId": "epRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "epRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "epToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "epLoad",
+      "fromProperty": "out-memberId",
+      "toId": "epToProfile",
+      "toProperty": "pm-memberId"
+    },
+    {
+      "fromId": "epBack",
+      "fromProperty": "onClick",
+      "toId": "epToProfile",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "epLoad",
+      "fromProperty": "out-initials",
+      "toId": "epInitials",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "epLoad",
+      "fromProperty": "out-shade",
+      "toId": "epAv",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "epLoad",
+      "fromProperty": "out-current",
+      "toId": "epPhoto",
+      "toProperty": "in-current"
+    },
+    {
+      "fromId": "epPhoto",
+      "fromProperty": "out-face",
+      "toId": "epFace",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "epPhoto",
+      "fromProperty": "out-hasFace",
+      "toId": "epFace",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "epPhoto",
+      "fromProperty": "out-noFace",
+      "toId": "epInitials",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "epPhoto",
+      "fromProperty": "out-canRemove",
+      "toId": "epRemove",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "epChange",
+      "fromProperty": "onClick",
+      "toId": "epPick",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "epPick",
+      "fromProperty": "file",
+      "toId": "epUpload",
+      "toProperty": "file"
+    },
+    {
+      "fromId": "epPick",
+      "fromProperty": "done",
+      "toId": "epUpload",
+      "toProperty": "upload"
+    },
+    {
+      "fromId": "epPick",
+      "fromProperty": "done",
+      "toId": "epBusy",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "epUpload",
+      "fromProperty": "completed",
+      "toId": "epBusy",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "epBusy",
+      "fromProperty": "state",
+      "toId": "epUploading",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "epUpload",
+      "fromProperty": "error",
+      "toId": "epPhotoError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "epUpload",
+      "fromProperty": "cloudFile",
+      "toId": "epPhoto",
+      "toProperty": "in-added"
+    },
+    {
+      "fromId": "epRemove",
+      "fromProperty": "onClick",
+      "toId": "epRemoveStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "epRemoveStamp",
+      "fromProperty": "out-removed",
+      "toId": "epPhoto",
+      "toProperty": "in-removed"
+    },
+    {
+      "fromId": "epLoad",
+      "fromProperty": "out-name",
+      "toId": "epName",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "epLoad",
+      "fromProperty": "out-name",
+      "toId": "epGather",
+      "toProperty": "in-name0"
+    },
+    {
+      "fromId": "epName",
+      "fromProperty": "onTextChanged",
+      "toId": "epGather",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "epLoad",
+      "fromProperty": "out-bio",
+      "toId": "epBio",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "epLoad",
+      "fromProperty": "out-bio",
+      "toId": "epGather",
+      "toProperty": "in-bio0"
+    },
+    {
+      "fromId": "epBio",
+      "fromProperty": "onTextChanged",
+      "toId": "epGather",
+      "toProperty": "in-bio"
+    },
+    {
+      "fromId": "epPhoto",
+      "fromProperty": "out-choice",
+      "toId": "epGather",
+      "toProperty": "in-choice"
+    },
+    {
+      "fromId": "epPhoto",
+      "fromProperty": "out-photo",
+      "toId": "epGather",
+      "toProperty": "in-photo"
+    },
+    {
+      "fromId": "epSave",
+      "fromProperty": "onClick",
+      "toId": "epGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "epGather",
+      "fromProperty": "out-problem",
+      "toId": "epError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "epGather",
+      "fromProperty": "out-profile",
+      "toId": "epCall",
+      "toProperty": "in-profile"
+    },
+    {
+      "fromId": "epGather",
+      "fromProperty": "out-go",
+      "toId": "epCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "epCall",
+      "fromProperty": "error",
+      "toId": "epError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "epCall",
+      "fromProperty": "done",
+      "toId": "epToProfile",
+      "toProperty": "navigate"
+    }
+  ]
+}

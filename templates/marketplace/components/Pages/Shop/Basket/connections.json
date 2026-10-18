@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "cec31e62-2300-528a-8e3c-bb0b1ea5d371",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "bkRoot",
+      "fromProperty": "didMount",
+      "toId": "bkLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "bkBasket",
+      "fromProperty": "value",
+      "toId": "bkLoad",
+      "toProperty": "in-basket"
+    },
+    {
+      "fromId": "bkLoad",
+      "fromProperty": "out-data",
+      "toId": "bkShape",
+      "toProperty": "in-data"
+    },
+    {
+      "fromId": "bkLoad",
+      "fromProperty": "out-failed",
+      "toId": "bkProblem",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "bkLoad",
+      "fromProperty": "out-problem",
+      "toId": "bkProblem",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bkLoad",
+      "fromProperty": "out-basket",
+      "toId": "bkCleaned",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "bkLoad",
+      "fromProperty": "out-cleaned",
+      "toId": "bkCleaned",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "bkCurrency",
+      "fromProperty": "value",
+      "toId": "bkShape",
+      "toProperty": "in-currency"
+    },
+    {
+      "fromId": "bkShape",
+      "fromProperty": "out-heading",
+      "toId": "bkTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bkShape",
+      "fromProperty": "out-groups",
+      "toId": "bkEachSeller",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "bkShape",
+      "fromProperty": "out-places",
+      "toId": "bkEachTotal",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "bkShape",
+      "fromProperty": "out-two",
+      "toId": "bkTwo",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "bkShape",
+      "fromProperty": "out-twoWords",
+      "toId": "bkTwoWords",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bkShape",
+      "fromProperty": "out-together",
+      "toId": "bkTogether",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bkShape",
+      "fromProperty": "out-gone",
+      "toId": "bkGone",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bkShape",
+      "fromProperty": "out-hasGone",
+      "toId": "bkGone",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "bkShape",
+      "fromProperty": "out-empty",
+      "toId": "bkEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "bkShape",
+      "fromProperty": "out-full",
+      "toId": "bkContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "bkBack",
+      "fromProperty": "onClick",
+      "toId": "bkToShop",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "bkShop",
+      "fromProperty": "onClick",
+      "toId": "bkToShop",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "bkCheckout",
+      "fromProperty": "onClick",
+      "toId": "bkToCheckout",
+      "toProperty": "navigate"
+    }
+  ]
+}

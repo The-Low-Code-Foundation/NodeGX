@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e41f8bec-e123-58ef-82fc-a7af2ca9535f",
+  "name": "startPayment",
+  "path": "/#__cloud__/startPayment",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Start paying one seller country’s parts of an order through Paystack, split to its sellers"
+}

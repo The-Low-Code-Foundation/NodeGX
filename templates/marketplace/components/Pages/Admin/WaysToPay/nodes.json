@@ -1,0 +1,652 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "65ac28f6-c9bc-5b07-8c8e-8efb5b21c94d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "wpPage",
+      "type": "Page",
+      "label": "Ways to pay",
+      "parameters": {
+        "title": "Ways to pay",
+        "urlPath": "admin/ways-to-pay"
+      },
+      "children": [
+        "wpRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "wpRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "wpPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "wpBar",
+        "wpBand",
+        "wpTabs",
+        "wpBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "wpBar",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "wpRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "backgroundColor": "var(--secondary)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "wpBrand"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "wpBrand",
+      "type": "/UI/Brand",
+      "label": "The marketplace’s name",
+      "parent": "wpBar",
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "wpBand",
+      "type": "/UI/Band",
+      "label": "Who is signed in",
+      "parent": "wpRoot",
+      "parameters": {
+        "words": "Admin"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "wpTabs",
+      "type": "/Admin/Tabs",
+      "label": "The admin’s tabs",
+      "parent": "wpRoot",
+      "parameters": {
+        "on": "pay"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "wpBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "wpRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 960,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "wpContent",
+        "wpRefused"
+      ],
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "wpContent",
+      "type": "Group",
+      "label": "Ways to pay",
+      "parent": "wpBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "wpTitle",
+        "wpCountries",
+        "wpWays",
+        "wpNote",
+        "wpPaystack"
+      ],
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "wpTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "wpContent",
+      "parameters": {
+        "text": "Turn each way on for each country",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "wpCountries",
+      "type": "Group",
+      "label": "The countries",
+      "parent": "wpContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "wpCountriesHead",
+        "wpCountryList",
+        "wpAdd",
+        "wpAddError"
+      ],
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "wpCountriesHead",
+      "type": "Text",
+      "label": "The countries",
+      "parent": "wpCountries",
+      "parameters": {
+        "text": "Countries",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)"
+      },
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "wpCountryList",
+      "type": "Text",
+      "label": "Each country and its currency",
+      "parent": "wpCountries",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 340,
+      "y": 1360
+    },
+    {
+      "id": "wpAdd",
+      "type": "Group",
+      "label": "Add a country",
+      "parent": "wpCountries",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "columnGap": "var(--space-3)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "wpName",
+        "wpCurrency",
+        "wpAddGo"
+      ],
+      "x": 340,
+      "y": 1480
+    },
+    {
+      "id": "wpName",
+      "type": "net.noodl.controls.textinput",
+      "label": "Country",
+      "parent": "wpAdd",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 200,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Country"
+      },
+      "x": 400,
+      "y": 1600
+    },
+    {
+      "id": "wpCurrency",
+      "type": "net.noodl.controls.textinput",
+      "label": "Currency code (GHS, NGN, KES)",
+      "parent": "wpAdd",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 200,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Currency code (GHS, NGN, KES)"
+      },
+      "x": 400,
+      "y": 1720
+    },
+    {
+      "id": "wpAddGo",
+      "type": "net.noodl.controls.button",
+      "label": "Add the country",
+      "parent": "wpAdd",
+      "parameters": {
+        "label": "Add the country",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 400,
+      "y": 1840
+    },
+    {
+      "id": "wpAddError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "wpCountries",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 340,
+      "y": 1960
+    },
+    {
+      "id": "wpWays",
+      "type": "Group",
+      "label": "The ways",
+      "parent": "wpContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "wpEach"
+      ],
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "wpEach",
+      "type": "For Each",
+      "label": "One card per way to pay",
+      "parent": "wpWays",
+      "parameters": {
+        "template": "/Admin/WayCard"
+      },
+      "x": 340,
+      "y": 2200
+    },
+    {
+      "id": "wpNote",
+      "type": "Text",
+      "label": "What buyers see",
+      "parent": "wpContent",
+      "parameters": {
+        "text": "A buyer pays each seller country on its own, choosing among the ways on there. Where a way isn’t on, buyers there see the others.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "wpPaystack",
+      "type": "Text",
+      "label": "What card payments need",
+      "parent": "wpContent",
+      "parameters": {
+        "text": "Card or mobile money goes through Paystack, which splits each payment between the sellers in one country. Each country needs its own Paystack business, with its secret key saved on the backend under the country’s currency (PAYSTACK_SECRET_KEY_GHS for Ghana), and each seller there needs their payout account at Paystack (ACCT_…).",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 2440
+    },
+    {
+      "id": "wpRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "wpBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "wpRefusedWhy",
+        "wpRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 2560
+    },
+    {
+      "id": "wpRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "wpRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 2680
+    },
+    {
+      "id": "wpRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "wpRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 2800
+    },
+    {
+      "id": "wpToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 650,
+      "y": 2800
+    },
+    {
+      "id": "wpLoad",
+      "type": "JavaScriptFunction",
+      "label": "The countries and the ways to pay",
+      "parameters": {
+        "runOnChange-in-changed": true,
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nfunction symbolOf(cur) {\n  try {\n    var part = new Intl.NumberFormat('en', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol' }).formatToParts(0).filter(function (x) { return x.type === 'currency'; })[0];\n    return part ? part.value : cur;\n  } catch (e) { return cur; }\n}\nfunction currencyName(cur) { try { return new Intl.DisplayNames(['en'], { type: 'currency' }).of(cur) || cur; } catch (e) { return cur; } }\nfunction day(iso) { try { return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); } catch (e) { return ''; } }\nfunction stamp() { return String(Date.now()); }\n\nvar BUILT = {\"on-delivery\":\"Pay on delivery\",\"bank-transfer\":\"Bank transfer\",\"whatsapp\":\"Order on WhatsApp\",\"paystack\":\"Card or mobile money\"};\nvar WORDS = {\"on-delivery\":\"Pay the seller’s rider when it arrives, in cash or by mobile money.\",\"bank-transfer\":\"The seller gives you their account when they confirm. Use your order number as the reference.\",\"whatsapp\":\"Finish the order in a chat with the seller.\",\"paystack\":\"Pay here by card, mobile money or bank through Paystack, once the sellers confirm delivery. Each seller is paid their share.\"};\nvoid Inputs.changed;\ntry {\n  await adminOnly();\n  var countries = await all('Country');\n  var ways = await all('WayToPay');\n  var onIn = {};\n  for (var i = 0; i < ways.length; i++) onIn[ways[i].method] = (await all('Country', { relatedTo: { id: ways[i].objectId, key: 'country', className: 'WayToPay' } })).map(function (c) { return c.objectId; });\n} catch (e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; return; }\ncountries.sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); });\nvar byMethod = {};\nways.forEach(function (w) { byMethod[w.method] = w; });\nOutputs.countries = countries.length ? countries.map(function (c) { return c.name + ' · ' + c.currency; }).join(',  ') : 'No countries yet. Add the first one: sellers, prices and ways to pay all belong to a country.';\nOutputs.rows = Object.keys(BUILT).map(function (m) {\n  var w = byMethod[m], on = onIn[m] || [];\n  return {\n    id: m,\n    method: m,\n    name: w ? w.name : BUILT[m],\n    instructions: w ? w.instructions || '' : WORDS[m],\n    onIds: on,\n    where: on.length ? 'On in ' + countries.filter(function (c) { return on.indexOf(c.objectId) >= 0; }).map(function (c) { return c.name; }).join(', ') + '.' : 'Not on anywhere yet.',\n    toggles: countries.map(function (c) { return { id: m + ':' + c.objectId, method: m, countryId: c.objectId, name: c.name, isOn: on.indexOf(c.objectId) >= 0, onIds: on, instructions: w ? w.instructions || '' : WORDS[m] }; })\n  };\n});\nOutputs.hasCountries = countries.length > 0;\nOutputs.refused = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "in-changed",
+          "displayName": "changed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-countries",
+          "displayName": "countries",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasCountries",
+          "displayName": "hasCountries",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 880
+    },
+    {
+      "id": "wpChanged",
+      "type": "Variable2",
+      "label": "The ways to pay changed",
+      "parameters": {
+        "name": "waysChanged"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the ways to pay changed: the page reads again, whichever switch or card changed them."
+      },
+      "x": 650,
+      "y": 2920
+    },
+    {
+      "id": "wpGather",
+      "type": "JavaScriptFunction",
+      "label": "The new country",
+      "parameters": {
+        "functionScript": "Outputs.country = { name: String(Inputs.name || ''), currency: String(Inputs.currency || '') };\nOutputs.go();",
+        "runOnChange-in-name": false,
+        "runOnChange-in-currency": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-currency",
+          "displayName": "currency",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-country",
+          "displayName": "country",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 1600
+    },
+    {
+      "id": "wpCall",
+      "type": "CloudFunction2",
+      "label": "saveCountry(country)",
+      "parameters": {
+        "function": "saveCountry"
+      },
+      "x": 650,
+      "y": 1960
+    },
+    {
+      "id": "wpStamp",
+      "type": "JavaScriptFunction",
+      "label": "Say the ways changed",
+      "parameters": {
+        "functionScript": "Outputs.at = String(Date.now());\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-at",
+          "displayName": "at",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 3040
+    },
+    {
+      "id": "wpSetChanged",
+      "type": "Set Variable",
+      "label": "The countries changed",
+      "parameters": {
+        "name": "waysChanged",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the ways to pay changed: the page reads again, whichever switch or card changed them."
+      },
+      "x": 650,
+      "y": 3160
+    }
+  ],
+  "visualRoots": [
+    "wpPage"
+  ]
+}

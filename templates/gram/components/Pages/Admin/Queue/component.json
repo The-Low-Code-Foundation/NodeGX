@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5e61d04f-0dfc-5a64-8cef-89de3df835df",
+  "name": "Queue",
+  "path": "/Pages/Admin/Queue",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The admins’ queue: who is waiting to be let in, what members reported, what is hidden, who is blocked"
+}

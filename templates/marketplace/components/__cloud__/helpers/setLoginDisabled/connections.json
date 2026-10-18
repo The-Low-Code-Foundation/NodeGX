@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "344f59d2-c44e-5756-8095-0993e02a4310",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "in",
+      "fromProperty": "loginId",
+      "toId": "switch",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "in",
+      "fromProperty": "disabled",
+      "toId": "switch",
+      "toProperty": "prop-disabled"
+    },
+    {
+      "fromId": "in",
+      "fromProperty": "Do",
+      "toId": "switch",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "switch",
+      "fromProperty": "done",
+      "toId": "out",
+      "toProperty": "Success"
+    },
+    {
+      "fromId": "switch",
+      "fromProperty": "failure",
+      "toId": "out",
+      "toProperty": "Failure"
+    }
+  ]
+}

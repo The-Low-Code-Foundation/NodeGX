@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a12736ba-ec48-5cee-8178-f55a7e5e5e4a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req-4",
+      "fromProperty": "userId",
+      "toId": "gate-3",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "req-4",
+      "fromProperty": "pm-letIn",
+      "toId": "gate-3",
+      "toProperty": "in-letIn"
+    },
+    {
+      "fromId": "req-4",
+      "fromProperty": "receive",
+      "toId": "gate-3",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gate-3",
+      "fromProperty": "out-loginId",
+      "toId": "grant-2",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "gate-3",
+      "fromProperty": "out-ok",
+      "toId": "grant-2",
+      "toProperty": "add"
+    },
+    {
+      "fromId": "gate-3",
+      "fromProperty": "out-memberId",
+      "toId": "approve",
+      "toProperty": "in-memberId"
+    },
+    {
+      "fromId": "gate-3",
+      "fromProperty": "out-was",
+      "toId": "approve",
+      "toProperty": "in-was"
+    },
+    {
+      "fromId": "req-4",
+      "fromProperty": "userId",
+      "toId": "approve",
+      "toProperty": "in-by"
+    },
+    {
+      "fromId": "grant-2",
+      "fromProperty": "done",
+      "toId": "approve",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "grant-2",
+      "fromProperty": "unchanged",
+      "toId": "approve",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gate-3",
+      "fromProperty": "out-to",
+      "toId": "mail",
+      "toProperty": "to"
+    },
+    {
+      "fromId": "gate-3",
+      "fromProperty": "out-subject",
+      "toId": "mail",
+      "toProperty": "subject"
+    },
+    {
+      "fromId": "gate-3",
+      "fromProperty": "out-body",
+      "toId": "mail",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "approve",
+      "fromProperty": "out-done",
+      "toId": "mail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mail",
+      "fromProperty": "done",
+      "toId": "sent",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mail",
+      "fromProperty": "failure",
+      "toId": "unsent",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "gate-3",
+      "fromProperty": "out-reason",
+      "toId": "no-4",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "gate-3",
+      "fromProperty": "out-refused",
+      "toId": "no-4",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "gate-3",
+      "fromProperty": "failure",
+      "toId": "no-4",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "grant-2",
+      "fromProperty": "failure",
+      "toId": "no-4",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "approve",
+      "fromProperty": "failure",
+      "toId": "no-4",
+      "toProperty": "send"
+    }
+  ]
+}

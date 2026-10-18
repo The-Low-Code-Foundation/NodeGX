@@ -1,0 +1,111 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a9edc749-a915-5a14-8aca-7bc903708e6d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "bdRoot",
+      "type": "Group",
+      "label": "Band",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "backgroundColor": "var(--primary)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "bdWords",
+        "bdOut"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "bdWords",
+      "type": "Text",
+      "label": "Who",
+      "parent": "bdRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "textTransform": "uppercase",
+        "letterSpacing": "var(--tracking-widest)",
+        "color": "var(--primary-foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "bdOut",
+      "type": "net.noodl.controls.button",
+      "label": "Sign out",
+      "parent": "bdRoot",
+      "parameters": {
+        "label": "Sign out",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-0-5)",
+        "paddingBottom": "var(--space-0-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "transparent",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "bdIn",
+      "type": "Component Inputs",
+      "label": "Inputs",
+      "ports": [
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "bdLogOut",
+      "type": "net.noodl.user.LogOut",
+      "label": "Sign out",
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "bdToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 350,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "bdRoot"
+  ]
+}

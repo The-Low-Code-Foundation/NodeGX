@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "60f19391-0dc8-5a5d-8f03-977fba698f15",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rtRoot",
+      "fromProperty": "didMount",
+      "toId": "rtForget",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "rtRoot",
+      "fromProperty": "didMount",
+      "toId": "rtLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rtChanged",
+      "fromProperty": "value",
+      "toId": "rtLoad",
+      "toProperty": "in-changed"
+    },
+    {
+      "fromId": "rtLoad",
+      "fromProperty": "out-ok",
+      "toId": "rtContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rtLoad",
+      "fromProperty": "out-heading",
+      "toId": "rtTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rtLoad",
+      "fromProperty": "out-lead",
+      "toId": "rtLead",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rtLoad",
+      "fromProperty": "out-rows",
+      "toId": "rtEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rtLoad",
+      "fromProperty": "out-rows",
+      "toId": "rtGather",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "rtLoad",
+      "fromProperty": "out-empty",
+      "toId": "rtEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rtLoad",
+      "fromProperty": "out-problem",
+      "toId": "rtRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rtLoad",
+      "fromProperty": "out-refused",
+      "toId": "rtRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rtRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "rtToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "rtTyped",
+      "fromProperty": "value",
+      "toId": "rtGather",
+      "toProperty": "in-typed"
+    },
+    {
+      "fromId": "rtSave",
+      "fromProperty": "onClick",
+      "toId": "rtGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rtSave",
+      "fromProperty": "onClick",
+      "toId": "rtShowSaved",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "rtGather",
+      "fromProperty": "out-rates",
+      "toId": "rtCall",
+      "toProperty": "in-rates"
+    },
+    {
+      "fromId": "rtGather",
+      "fromProperty": "out-go",
+      "toId": "rtCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "rtCall",
+      "fromProperty": "error",
+      "toId": "rtError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rtCall",
+      "fromProperty": "done",
+      "toId": "rtShowSaved",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "rtShowSaved",
+      "fromProperty": "state",
+      "toId": "rtSaved",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rtCall",
+      "fromProperty": "done",
+      "toId": "rtStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rtStamp",
+      "fromProperty": "out-at",
+      "toId": "rtSetChanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rtStamp",
+      "fromProperty": "out-go",
+      "toId": "rtSetChanged",
+      "toProperty": "do"
+    }
+  ]
+}

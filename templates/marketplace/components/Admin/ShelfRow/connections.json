@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "422a876a-6a76-5961-88be-d0d50a00ef6a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "shIn",
+      "fromProperty": "name",
+      "toId": "shName",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "shIn",
+      "fromProperty": "name",
+      "toId": "shGather",
+      "toProperty": "in-name0"
+    },
+    {
+      "fromId": "shIn",
+      "fromProperty": "id",
+      "toId": "shGather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "shIn",
+      "fromProperty": "count",
+      "toId": "shCount",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shName",
+      "fromProperty": "onTextChanged",
+      "toId": "shGather",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "shSave",
+      "fromProperty": "onClick",
+      "toId": "shGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "shGather",
+      "fromProperty": "out-shelf",
+      "toId": "shCall",
+      "toProperty": "in-shelf"
+    },
+    {
+      "fromId": "shGather",
+      "fromProperty": "out-go",
+      "toId": "shCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "shCall",
+      "fromProperty": "error",
+      "toId": "shError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shCall",
+      "fromProperty": "done",
+      "toId": "shStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "shStamp",
+      "fromProperty": "out-at",
+      "toId": "shChanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "shStamp",
+      "fromProperty": "out-go",
+      "toId": "shChanged",
+      "toProperty": "do"
+    }
+  ]
+}

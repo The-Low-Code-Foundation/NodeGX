@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "36a6ed04-dc20-52a0-8101-ef49e2d4269c",
+  "name": "saveCountry",
+  "path": "/#__cloud__/saveCountry",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Add a country, or rename one"
+}

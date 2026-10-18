@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4e72872e-3bbf-5429-851d-217e608bf6b8",
+  "name": "makeAdmin",
+  "path": "/#__cloud__/makeAdmin",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Make a member an admin"
+}

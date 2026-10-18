@@ -1,0 +1,1432 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "edabdb79-c394-5a60-81cb-a26cf566d34b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "npPage",
+      "type": "Page",
+      "label": "New post",
+      "parameters": {
+        "title": "New post",
+        "urlPath": "new-post"
+      },
+      "children": [
+        "npRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "npRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "npPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "gm-app"
+      },
+      "children": [
+        "npBar",
+        "npBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "npBar",
+      "type": "/UI/Bar",
+      "label": "The bar",
+      "parent": "npRoot",
+      "parameters": {},
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "npBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "npRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "npContent",
+        "npRefused"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "npUrl",
+      "type": "PageInputs",
+      "label": "Which kind to start on",
+      "parameters": {
+        "queryParams": "kind"
+      },
+      "x": 650,
+      "y": 3880
+    },
+    {
+      "id": "npContent",
+      "type": "Group",
+      "label": "New post",
+      "parent": "npBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "npBack",
+        "npTitle",
+        "npKinds",
+        "npPhotoBox",
+        "npCaption",
+        "npWhen",
+        "npPrayerFine",
+        "npShare",
+        "npError",
+        "npPrivate"
+      ],
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "npBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "parent": "npContent",
+      "parameters": {
+        "label": "← The feed",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "npTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "npContent",
+      "parameters": {
+        "text": "New post",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "cssClassName": "gm-read gm-wrap",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "npKinds",
+      "type": "Group",
+      "label": "A post, a prayer request, a testimony or an event",
+      "parent": "npContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "npKindPost",
+        "npKindPrayer",
+        "npKindTestimony",
+        "npKindEvent"
+      ],
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "npKindPost",
+      "type": "net.noodl.controls.button",
+      "label": "Post",
+      "parent": "npKinds",
+      "parameters": {
+        "label": "Post",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 340,
+      "y": 1000
+    },
+    {
+      "id": "npKindPrayer",
+      "type": "net.noodl.controls.button",
+      "label": "Prayer request",
+      "parent": "npKinds",
+      "parameters": {
+        "label": "Prayer request",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 340,
+      "y": 1120
+    },
+    {
+      "id": "npKindTestimony",
+      "type": "net.noodl.controls.button",
+      "label": "Testimony",
+      "parent": "npKinds",
+      "parameters": {
+        "label": "Testimony",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "npKindEvent",
+      "type": "net.noodl.controls.button",
+      "label": "Event",
+      "parent": "npKinds",
+      "parameters": {
+        "label": "Event",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 340,
+      "y": 1360
+    },
+    {
+      "id": "npPhotoBox",
+      "type": "Group",
+      "label": "The photos (every kind’s but a prayer request’s)",
+      "parent": "npContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "npTiles",
+        "npAddPhoto",
+        "npUploading",
+        "npPhotoError",
+        "npRule"
+      ],
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "npTiles",
+      "type": "Group",
+      "label": "The photos added",
+      "parent": "npPhotoBox",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "gm-tiles",
+        "mounted": false
+      },
+      "children": [
+        "npEachTile"
+      ],
+      "x": 340,
+      "y": 1600
+    },
+    {
+      "id": "npEachTile",
+      "type": "For Each",
+      "label": "One tile per photo",
+      "parent": "npTiles",
+      "parameters": {
+        "template": "/Feed/NewPhoto"
+      },
+      "x": 400,
+      "y": 1720
+    },
+    {
+      "id": "npAddPhoto",
+      "type": "net.noodl.controls.button",
+      "label": "Add a photo",
+      "parent": "npPhotoBox",
+      "parameters": {
+        "label": "＋ Add a photo",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "dashed",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 340,
+      "y": 1840
+    },
+    {
+      "id": "npUploading",
+      "type": "Text",
+      "label": "Sending the photo",
+      "parent": "npPhotoBox",
+      "parameters": {
+        "text": "Making the photo smaller and sending it…",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 1960
+    },
+    {
+      "id": "npPhotoError",
+      "type": "Text",
+      "label": "Why the photo didn’t go",
+      "parent": "npPhotoBox",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 340,
+      "y": 2080
+    },
+    {
+      "id": "npCaption",
+      "type": "net.noodl.controls.textinput",
+      "label": "Caption",
+      "parent": "npContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-semibold)",
+        "labelcolor": "var(--foreground)",
+        "label": "Caption",
+        "type": "textArea",
+        "placeholder": "What’s happening?"
+      },
+      "x": 280,
+      "y": 2560
+    },
+    {
+      "id": "npWhen",
+      "type": "Group",
+      "label": "When the event is",
+      "parent": "npContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "npDay",
+        "npTime"
+      ],
+      "x": 280,
+      "y": 2680
+    },
+    {
+      "id": "npDay",
+      "type": "/UI/DatePicker",
+      "label": "The event’s day",
+      "parent": "npWhen",
+      "parameters": {
+        "Label": "Day",
+        "Show Label": true
+      },
+      "x": 340,
+      "y": 2800
+    },
+    {
+      "id": "npTime",
+      "type": "net.noodl.controls.options",
+      "label": "The time it starts",
+      "parent": "npWhen",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-semibold)",
+        "labelcolor": "var(--foreground)",
+        "label": "Starts at",
+        "placeholder": "Choose a time",
+        "value": "",
+        "items": [
+          {
+            "Label": "6:00",
+            "Value": "06:00"
+          },
+          {
+            "Label": "6:30",
+            "Value": "06:30"
+          },
+          {
+            "Label": "7:00",
+            "Value": "07:00"
+          },
+          {
+            "Label": "7:30",
+            "Value": "07:30"
+          },
+          {
+            "Label": "8:00",
+            "Value": "08:00"
+          },
+          {
+            "Label": "8:30",
+            "Value": "08:30"
+          },
+          {
+            "Label": "9:00",
+            "Value": "09:00"
+          },
+          {
+            "Label": "9:30",
+            "Value": "09:30"
+          },
+          {
+            "Label": "10:00",
+            "Value": "10:00"
+          },
+          {
+            "Label": "10:30",
+            "Value": "10:30"
+          },
+          {
+            "Label": "11:00",
+            "Value": "11:00"
+          },
+          {
+            "Label": "11:30",
+            "Value": "11:30"
+          },
+          {
+            "Label": "12:00",
+            "Value": "12:00"
+          },
+          {
+            "Label": "12:30",
+            "Value": "12:30"
+          },
+          {
+            "Label": "13:00",
+            "Value": "13:00"
+          },
+          {
+            "Label": "13:30",
+            "Value": "13:30"
+          },
+          {
+            "Label": "14:00",
+            "Value": "14:00"
+          },
+          {
+            "Label": "14:30",
+            "Value": "14:30"
+          },
+          {
+            "Label": "15:00",
+            "Value": "15:00"
+          },
+          {
+            "Label": "15:30",
+            "Value": "15:30"
+          },
+          {
+            "Label": "16:00",
+            "Value": "16:00"
+          },
+          {
+            "Label": "16:30",
+            "Value": "16:30"
+          },
+          {
+            "Label": "17:00",
+            "Value": "17:00"
+          },
+          {
+            "Label": "17:30",
+            "Value": "17:30"
+          },
+          {
+            "Label": "18:00",
+            "Value": "18:00"
+          },
+          {
+            "Label": "18:30",
+            "Value": "18:30"
+          },
+          {
+            "Label": "19:00",
+            "Value": "19:00"
+          },
+          {
+            "Label": "19:30",
+            "Value": "19:30"
+          },
+          {
+            "Label": "20:00",
+            "Value": "20:00"
+          },
+          {
+            "Label": "20:30",
+            "Value": "20:30"
+          },
+          {
+            "Label": "21:00",
+            "Value": "21:00"
+          },
+          {
+            "Label": "21:30",
+            "Value": "21:30"
+          },
+          {
+            "Label": "22:00",
+            "Value": "22:00"
+          }
+        ]
+      },
+      "x": 340,
+      "y": 2920
+    },
+    {
+      "id": "npPrayerFine",
+      "type": "Text",
+      "label": "Who sees a prayer request",
+      "parent": "npContent",
+      "parameters": {
+        "text": "Every member who’s been let in sees your request and how many prayed. Only you see who prayed.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3040
+    },
+    {
+      "id": "npRule",
+      "type": "Group",
+      "label": "Before you post a photo of children",
+      "parent": "npPhotoBox",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "cssClassName": "gm-rule"
+      },
+      "children": [
+        "npRuleTitle",
+        "npRuleWords"
+      ],
+      "x": 340,
+      "y": 2200
+    },
+    {
+      "id": "npRuleTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "npRule",
+      "parameters": {
+        "text": "Before you post a photo of children",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--foreground)"
+      },
+      "x": 400,
+      "y": 2320
+    },
+    {
+      "id": "npRuleWords",
+      "type": "Text",
+      "label": "The rule",
+      "parent": "npRule",
+      "parameters": {
+        "text": "No photo of a child without their parent’s yes. Members can report a photo that breaks this, and admins see those reports first.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 400,
+      "y": 2440
+    },
+    {
+      "id": "npShare",
+      "type": "net.noodl.controls.button",
+      "label": "Share with the members",
+      "parent": "npContent",
+      "parameters": {
+        "label": "Share with the members",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 3160
+    },
+    {
+      "id": "npError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "npContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 3280
+    },
+    {
+      "id": "npPrivate",
+      "type": "Text",
+      "label": "Nothing is public",
+      "parent": "npContent",
+      "parameters": {
+        "text": "Only members who’ve been let in see posts. Nothing is public.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 3400
+    },
+    {
+      "id": "npRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "npBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "npRefusedWhy",
+        "npRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 3520
+    },
+    {
+      "id": "npRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "npRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 3640
+    },
+    {
+      "id": "npRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "npRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 3760
+    },
+    {
+      "id": "npToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 650,
+      "y": 3760
+    },
+    {
+      "id": "npLoad",
+      "type": "JavaScriptFunction",
+      "label": "Who is posting",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (await Noodl.CloudFunctions.run('whoAmI', {})).me || null; } catch (e) { return null; }\n}\nfunction why(e) { var m = (e && (e.error || e.message)) || String(e || ''); if (/admins’|^Sign in/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page couldn’t be read: ' + m; }\nasync function adminsOnly() {\n  var who = await me();\n  if (!who) throw { error: 'Sign in to see this page.' };\n  if (who.role !== 'admin') throw { error: 'This page is the admins’. Sign in as an admin to see it.' };\n  return who;\n}\nfunction ago(at) {\n  var t = at ? new Date(at.iso || at).getTime() : 0;\n  if (!t) return '';\n  var m = Math.max(0, Math.round((Date.now() - t) / 60000));\n  if (m < 1) return 'just now';\n  if (m < 60) return m + ' min ago';\n  var h = Math.round(m / 60);\n  if (h < 24) return h + ' h ago';\n  var d = Math.round(h / 24);\n  return d === 1 ? 'yesterday' : d + ' days ago';\n}\nvar SHADES = ['#4a6a2b', '#6a4a2b', '#2b4a6a', '#7a3e1d', '#4a2160', '#2b6a5a'];\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join('') || '?'; }\nfunction shade(id) { var n = 0; String(id).split('').forEach(function (c) { n = (n + c.charCodeAt(0)) % SHADES.length; }); return SHADES[n]; }\n\nvar who = await me();\nif (!who) { Outputs.problem = 'Sign in to post.'; Outputs.refused = true; Outputs.ok = false; return; }\nif (who.status !== 'approved') { Outputs.waiting(); return; }\nOutputs.band = who.role === 'admin' ? 'Admin' : '';\nOutputs.refused = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "out-waiting",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band",
+          "displayName": "band",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 520
+    },
+    {
+      "id": "npPick",
+      "type": "Open File Picker",
+      "label": "Choose a photo",
+      "parameters": {
+        "acceptedFileTypes": "image/*"
+      },
+      "x": 650,
+      "y": 1840
+    },
+    {
+      "id": "npUpload",
+      "type": "Upload File",
+      "label": "Send it, shrunk to 1600 px, for the members only",
+      "parameters": {
+        "readers": "role:member, role:admin",
+        "shrinkTo": 1600,
+        "photoQuality": 80
+      },
+      "x": 650,
+      "y": 2080
+    },
+    {
+      "id": "npBusy",
+      "type": "Switch",
+      "label": "Sending a photo",
+      "x": 650,
+      "y": 1960
+    },
+    {
+      "id": "npPhotos",
+      "type": "JavaScriptFunction",
+      "label": "The photos, while the page is open",
+      "parameters": {
+        "functionScript": "var keep = Component.Object;\nvar photos = keep.get('photos') || [];\nvar up = Inputs.added;\nif (up && up !== keep.get('addedFrom')) {\n  keep.set('addedFrom', up);\n  if (typeof up.getName === 'function' && up.getName()) {\n    var shown = '';\n    try { shown = (await Noodl.Files.sign(up)).url; } catch (e) { shown = ''; }\n    photos = photos.concat([{ name: up.getName(), url: up.getUrl(), shown: shown }]).slice(0, 4);\n  }\n}\nif (Inputs.removed && Inputs.removed !== keep.get('removedFrom')) {\n  keep.set('removedFrom', Inputs.removed);\n  var gone = String(Inputs.removed).split('|')[0];\n  photos = photos.filter(function (f) { return f.name !== gone; });\n}\nkeep.set('photos', photos);\nOutputs.photos = photos.map(function (f) { return { name: f.name, url: f.url }; });\nOutputs.tiles = photos.map(function (f, n) { return { id: f.name, name: f.name, src: f.shown, alt: 'Photo ' + (n + 1) + ' you added' }; });\nOutputs.room = photos.length < 4;\nOutputs.many = photos.length > 0;"
+      },
+      "ports": [
+        {
+          "name": "in-added",
+          "displayName": "added",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-removed",
+          "displayName": "removed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-photos",
+          "displayName": "photos",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tiles",
+          "displayName": "tiles",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-room",
+          "displayName": "room",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-many",
+          "displayName": "many",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 1720
+    },
+    {
+      "id": "npRemoved",
+      "type": "Variable2",
+      "label": "A photo was taken off",
+      "parameters": {
+        "name": "postPhotoRemoved"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a photo was taken off the new post: the list drops it, whichever tile said so."
+      },
+      "x": 650,
+      "y": 4000
+    },
+    {
+      "id": "npKind",
+      "type": "JavaScriptFunction",
+      "label": "Which kind, and what the page says for it",
+      "parameters": {
+        "runOnChange-in-start": true,
+        "runOnChange-in-picked": true,
+        "functionScript": "var KINDS = [\"post\",\"prayer\",\"testimony\",\"event\"];\nvar SAYS = {\"post\":{\"title\":\"New post\",\"field\":\"Caption\",\"hint\":\"What’s happening?\",\"share\":\"Share with the members\",\"back\":\"← The feed\"},\"prayer\":{\"title\":\"New prayer request\",\"field\":\"What would you like the members to pray for?\",\"hint\":\"Who or what, in your own words.\",\"share\":\"Ask the members to pray\",\"back\":\"← Prayer\"},\"testimony\":{\"title\":\"New testimony\",\"field\":\"Your testimony\",\"hint\":\"What happened, in your own words.\",\"share\":\"Share your testimony\",\"back\":\"← The feed\"},\"event\":{\"title\":\"New event\",\"field\":\"What is it?\",\"hint\":\"What, where, and who it’s for.\",\"share\":\"Share the event\",\"back\":\"← The feed\"}};\nvar picked = typeof Inputs.picked === 'string' ? Inputs.picked.split('|')[0] : '';\nvar kind = KINDS.indexOf(picked) >= 0 ? picked : KINDS.indexOf(Inputs.start) >= 0 ? Inputs.start : 'post';\nOutputs.kind = kind;\nOutputs.isPost = kind === 'post';\nOutputs.isPrayer = kind === 'prayer';\nOutputs.isEvent = kind === 'event';\nOutputs.takesPhotos = kind !== 'prayer';\n// The chosen chip plum, the others outlined. Each port by name: the door reads a Function's ports from its code.\nfunction ink(k) { return k === kind ? 'var(--primary-foreground)' : 'var(--primary)'; }\nfunction fill(k) { return k === kind ? 'var(--primary)' : 'var(--surface)'; }\nOutputs.postInk = ink('post');\nOutputs.postFill = fill('post');\nOutputs.prayerInk = ink('prayer');\nOutputs.prayerFill = fill('prayer');\nOutputs.testimonyInk = ink('testimony');\nOutputs.testimonyFill = fill('testimony');\nOutputs.eventInk = ink('event');\nOutputs.eventFill = fill('event');\nOutputs.title = SAYS[kind].title;\nOutputs.field = SAYS[kind].field;\nOutputs.hint = SAYS[kind].hint;\nOutputs.share = SAYS[kind].share;\nOutputs.back = SAYS[kind].back;\nfunction dayOf(t) { return t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0'); }\nvar today = new Date();\nOutputs.today = dayOf(today);\nOutputs.latest = dayOf(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 365));"
+      },
+      "ports": [
+        {
+          "name": "in-picked",
+          "displayName": "picked",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-start",
+          "displayName": "start",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-kind",
+          "displayName": "kind",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isPost",
+          "displayName": "isPost",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isPrayer",
+          "displayName": "isPrayer",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isEvent",
+          "displayName": "isEvent",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-takesPhotos",
+          "displayName": "takesPhotos",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-postInk",
+          "displayName": "postInk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-postFill",
+          "displayName": "postFill",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-prayerInk",
+          "displayName": "prayerInk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-prayerFill",
+          "displayName": "prayerFill",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-testimonyInk",
+          "displayName": "testimonyInk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-testimonyFill",
+          "displayName": "testimonyFill",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-eventInk",
+          "displayName": "eventInk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-eventFill",
+          "displayName": "eventFill",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-field",
+          "displayName": "field",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hint",
+          "displayName": "hint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-share",
+          "displayName": "share",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-back",
+          "displayName": "back",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-today",
+          "displayName": "today",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-latest",
+          "displayName": "latest",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 1000
+    },
+    {
+      "id": "npPickPost",
+      "type": "JavaScriptFunction",
+      "label": "Post pressed",
+      "parameters": {
+        "functionScript": "Outputs.picked = 'post|' + Date.now();"
+      },
+      "ports": [
+        {
+          "name": "out-picked",
+          "displayName": "picked",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 1120
+    },
+    {
+      "id": "npPickPrayer",
+      "type": "JavaScriptFunction",
+      "label": "Prayer request pressed",
+      "parameters": {
+        "functionScript": "Outputs.picked = 'prayer|' + Date.now();"
+      },
+      "ports": [
+        {
+          "name": "out-picked",
+          "displayName": "picked",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 1240
+    },
+    {
+      "id": "npPickTestimony",
+      "type": "JavaScriptFunction",
+      "label": "Testimony pressed",
+      "parameters": {
+        "functionScript": "Outputs.picked = 'testimony|' + Date.now();"
+      },
+      "ports": [
+        {
+          "name": "out-picked",
+          "displayName": "picked",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 1360
+    },
+    {
+      "id": "npPickEvent",
+      "type": "JavaScriptFunction",
+      "label": "Event pressed",
+      "parameters": {
+        "functionScript": "Outputs.picked = 'event|' + Date.now();"
+      },
+      "ports": [
+        {
+          "name": "out-picked",
+          "displayName": "picked",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 1480
+    },
+    {
+      "id": "npGather",
+      "type": "JavaScriptFunction",
+      "label": "The post, as one share",
+      "parameters": {
+        "functionScript": "var caption = typeof Inputs.caption === 'string' ? Inputs.caption : '';\nvar kind = [\"post\",\"prayer\",\"testimony\",\"event\"].indexOf(Inputs.kind) >= 0 ? Inputs.kind : 'post';\nvar wordsNeeded = {\"prayer\":\"Say what you’d like the members to pray for.\",\"testimony\":\"Tell the members what happened.\",\"event\":\"Say what the event is.\"};\nfunction held(why) { Outputs.problem = why; Outputs.held(); }\nif (caption.trim().length > 2200) { held('A caption of 2,200 characters or fewer. This one has ' + caption.trim().length.toLocaleString('en-GB') + '.'); return; }\nif (wordsNeeded[kind] && !caption.trim()) { held(wordsNeeded[kind]); return; }\n// A prayer request is words only: photos added before switching to it stay on the page and aren't sent.\nvar post = { caption: caption, photos: kind !== 'prayer' && Array.isArray(Inputs.photos) ? Inputs.photos : [], kind: kind };\nif (kind === 'event') {\n  // The day from the Date picker (YYYY-MM-DD) and the time from the list (HH:MM), read as this phone's own time.\n  var day = typeof Inputs.day === 'string' ? Inputs.day : '';\n  var time = typeof Inputs.time === 'string' ? Inputs.time : '';\n  if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(day)) { held('Choose the event’s day.'); return; }\n  if (!/^[0-9]{2}:[0-9]{2}$/.test(time)) { held('Choose the time it starts.'); return; }\n  var at = new Date(Number(day.slice(0, 4)), Number(day.slice(5, 7)) - 1, Number(day.slice(8, 10)), Number(time.slice(0, 2)), Number(time.slice(3, 5)));\n  if (at.getTime() < Date.now()) { held('That time has passed. Choose when the event is.'); return; }\n  post.eventOn = at.toISOString();\n}\nOutputs.problem = '';\nOutputs.post = post;\nOutputs.go();",
+        "runOnChange-in-caption": false,
+        "runOnChange-in-photos": false,
+        "runOnChange-in-kind": false,
+        "runOnChange-in-day": false,
+        "runOnChange-in-time": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-held",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-caption",
+          "displayName": "caption",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-kind",
+          "displayName": "kind",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-photos",
+          "displayName": "photos",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-day",
+          "displayName": "day",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-time",
+          "displayName": "time",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-post",
+          "displayName": "post",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 3280
+    },
+    {
+      "id": "npCall",
+      "type": "CloudFunction2",
+      "label": "sharePost(post)",
+      "parameters": {
+        "function": "sharePost"
+      },
+      "x": 650,
+      "y": 3400
+    },
+    {
+      "id": "npStamp",
+      "type": "JavaScriptFunction",
+      "label": "Say the feed changed",
+      "parameters": {
+        "functionScript": "Outputs.at = String(Date.now());\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-at",
+          "displayName": "at",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 4120
+    },
+    {
+      "id": "npChanged",
+      "type": "Set Variable",
+      "label": "The feed changed",
+      "parameters": {
+        "name": "feedChanged",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a heart, a comment or a post was made on this phone: the feed and the post read again, whichever card made it."
+      },
+      "x": 650,
+      "y": 4240
+    },
+    {
+      "id": "npWhere",
+      "type": "JavaScriptFunction",
+      "label": "Back to where it came from",
+      "parameters": {
+        "functionScript": "if (Inputs.kind === 'prayer') Outputs.prayer(); else Outputs.feed();",
+        "runOnChange-in-kind": false
+      },
+      "ports": [
+        {
+          "name": "out-feed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-prayer",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-kind",
+          "displayName": "kind",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ],
+      "x": 650,
+      "y": 640
+    },
+    {
+      "id": "npToFeed",
+      "type": "RouterNavigate",
+      "label": "To the feed",
+      "parameters": {
+        "target": "/Pages/Feed"
+      },
+      "x": 650,
+      "y": 4360
+    },
+    {
+      "id": "npToPrayer",
+      "type": "RouterNavigate",
+      "label": "To the prayer requests",
+      "parameters": {
+        "target": "/Pages/Prayer"
+      },
+      "x": 650,
+      "y": 4480
+    },
+    {
+      "id": "npToWaiting",
+      "type": "RouterNavigate",
+      "label": "Not let in yet: to waiting",
+      "parameters": {
+        "target": "/Pages/Waiting"
+      },
+      "x": 650,
+      "y": 4600
+    }
+  ],
+  "visualRoots": [
+    "npPage"
+  ]
+}

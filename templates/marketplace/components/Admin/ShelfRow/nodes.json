@@ -1,0 +1,239 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "422a876a-6a76-5961-88be-d0d50a00ef6a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "shRoot",
+      "type": "Group",
+      "label": "A shelf",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "columnGap": "var(--space-3)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-1)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "shName",
+        "shCount",
+        "shSave",
+        "shError"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "shName",
+      "type": "net.noodl.controls.textinput",
+      "label": "Shelf",
+      "parent": "shRoot",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 240,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Shelf"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "shCount",
+      "type": "Text",
+      "label": "How many products",
+      "parent": "shRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "shSave",
+      "type": "net.noodl.controls.button",
+      "label": "Rename",
+      "parent": "shRoot",
+      "parameters": {
+        "label": "Rename",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "shError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "shRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "shIn",
+      "type": "Component Inputs",
+      "label": "One shelf",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "shGather",
+      "type": "JavaScriptFunction",
+      "label": "This shelf, renamed",
+      "parameters": {
+        "functionScript": "function v(typed, loaded) { return typed === undefined ? (loaded || '') : String(typed); }\nvar shelf = { name: v(Inputs.name, Inputs.name0) };\nif (Inputs.id) shelf.id = String(Inputs.id);\nOutputs.shelf = shelf;\nOutputs.go();",
+        "runOnChange-in-id": false,
+        "runOnChange-in-name": false,
+        "runOnChange-in-name0": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name0",
+          "displayName": "name0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-shelf",
+          "displayName": "shelf",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "shCall",
+      "type": "CloudFunction2",
+      "label": "saveShelf(shelf)",
+      "parameters": {
+        "function": "saveShelf"
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "shStamp",
+      "type": "JavaScriptFunction",
+      "label": "Say the shelves changed",
+      "parameters": {
+        "functionScript": "Outputs.at = String(Date.now());\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-at",
+          "displayName": "at",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 350,
+      "y": 640
+    },
+    {
+      "id": "shChanged",
+      "type": "Set Variable",
+      "label": "The shelves changed",
+      "parameters": {
+        "name": "shelvesChanged",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a shelf changed: the list reads again, whichever row changed it."
+      },
+      "x": 350,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "shRoot"
+  ]
+}

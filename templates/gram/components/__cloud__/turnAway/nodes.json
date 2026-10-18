@@ -1,0 +1,117 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f8044a2b-dff3-504f-8849-5fd030c901d9",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-5",
+      "type": "noodl.cloud.request",
+      "label": "turnAway(turnAway)",
+      "parameters": {
+        "params": "turnAway",
+        "ptype-turnAway": "object",
+        "preq-turnAway": true,
+        "allowNoAuth": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "run-2",
+      "type": "JavaScriptFunction",
+      "label": "Blocked, with why, and its history",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\nasync function member(userId) {\n  if (!userId) return null;\n  return one('Member', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction email(v) {\n  var e = typeof v === 'string' ? v.trim().toLowerCase() : '';\n  var at = e.indexOf('@');\n  if (e.length > 200 || at < 1 || e.indexOf(' ') >= 0 || e.indexOf('@', at + 1) >= 0) return '';\n  var dot = e.lastIndexOf('.');\n  return dot > at + 1 && dot < e.length - 1 ? e : '';\n}\n\nvar a = Inputs.turnAway;\nif (a === undefined || Inputs.userId === undefined) return;\nif (!a || typeof a !== 'object') { refuse('Say who not to let in.'); return; }\nvar id = text(a.memberId, 64);\nvar m = id ? await one('Member', { objectId: { equalTo: id } }) : null;\nif (!m) { refuse('There is no such member.'); return; }\nif (m.status !== 'waiting') { refuse(m.name + ' is in already. Blocking a member is on their profile.'); return; }\nOutputs.loginId = idOf(m.login);\nOutputs.disabled = true;\nOutputs.id = id;\nif (m.endedAt) { Outputs.done(); return; }\nvar reason = text(a.reason, 500) || 'Not let in.';\nawait Noodl.Records.save(id, { blockedReason: reason, endedAt: now() }, { className: 'Member' });\nawait history('Member', 'member', id, Inputs.userId, { blocked: { from: false, to: true }, blockedReason: { from: null, to: reason } });\nOutputs.done();",
+        "runOnChange-in-turnAway": false,
+        "runOnChange-in-userId": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-turnAway",
+          "displayName": "turnAway",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-loginId",
+          "displayName": "loginId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-disabled",
+          "displayName": "disabled",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "off",
+      "type": "noodl.cloud.updateuser",
+      "label": "Their sign-in, off",
+      "parameters": {
+        "properties": "disabled"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "ok-4",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "parameters": {
+        "params": "id"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "no-5",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

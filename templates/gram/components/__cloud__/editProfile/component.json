@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "09f89764-9e4d-5841-86cc-ef4943cb8fd2",
+  "name": "editProfile",
+  "path": "/#__cloud__/editProfile",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Change your own profile: your name, a short bio, a photo only members see"
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a340d1cf-5a50-5964-807b-b9926d00ee5d",
+  "name": "commentOn",
+  "path": "/#__cloud__/commentOn",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A comment under a post"
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d14b4b8a-e6dd-51f3-8f4d-ddf2857a5ffb",
+  "name": "ProductRow",
+  "path": "/Seller/ProductRow",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One product on a seller’s list: edit, take off sale or put back"
+}

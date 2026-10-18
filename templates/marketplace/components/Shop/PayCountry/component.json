@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a08006a5-9d8b-5d4e-81aa-014f4d172186",
+  "name": "PayCountry",
+  "path": "/Shop/PayCountry",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "How the buyer pays in one seller country: what it comes to, and the ways turned on there"
+}

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6e8abcfc-9a05-57ed-84fc-8a996e08a8be",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "brNameNow",
+      "fromProperty": "value",
+      "toId": "brName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "brRoot",
+      "fromProperty": "didMount",
+      "toId": "brNameLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "brNameNow",
+      "fromProperty": "value",
+      "toId": "brNameLoad",
+      "toProperty": "in-current"
+    },
+    {
+      "fromId": "brNameLoad",
+      "fromProperty": "out-name",
+      "toId": "brNameSet",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "brNameLoad",
+      "fromProperty": "out-set",
+      "toId": "brNameSet",
+      "toProperty": "do"
+    }
+  ]
+}

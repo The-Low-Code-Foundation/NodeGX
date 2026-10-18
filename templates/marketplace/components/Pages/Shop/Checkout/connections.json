@@ -1,0 +1,229 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "257cff11-ed94-5e03-817a-b837aefde8ab",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "coRoot",
+      "fromProperty": "didMount",
+      "toId": "coLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "coBasket",
+      "fromProperty": "value",
+      "toId": "coLoad",
+      "toProperty": "in-basket"
+    },
+    {
+      "fromId": "coLoad",
+      "fromProperty": "out-data",
+      "toId": "coShape",
+      "toProperty": "in-data"
+    },
+    {
+      "fromId": "coLoad",
+      "fromProperty": "out-failed",
+      "toId": "coProblem",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "coLoad",
+      "fromProperty": "out-problem",
+      "toId": "coProblem",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "coPicks",
+      "fromProperty": "value",
+      "toId": "coShape",
+      "toProperty": "in-picks"
+    },
+    {
+      "fromId": "coCurrency",
+      "fromProperty": "value",
+      "toId": "coShape",
+      "toProperty": "in-currency"
+    },
+    {
+      "fromId": "coCurrency",
+      "fromProperty": "value",
+      "toId": "coGather",
+      "toProperty": "in-currency"
+    },
+    {
+      "fromId": "coShape",
+      "fromProperty": "out-groups",
+      "toId": "coEachCountry",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "coShape",
+      "fromProperty": "out-summary",
+      "toId": "coSummary",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "coShape",
+      "fromProperty": "out-canOrder",
+      "toId": "coPlace",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "coShape",
+      "fromProperty": "out-full",
+      "toId": "coContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "coShape",
+      "fromProperty": "out-empty",
+      "toId": "coEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "coShape",
+      "fromProperty": "out-countries",
+      "toId": "coCountry",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "coShape",
+      "fromProperty": "out-countryPick",
+      "toId": "coCountry",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "coShape",
+      "fromProperty": "out-countryPick",
+      "toId": "coGather",
+      "toProperty": "in-country0"
+    },
+    {
+      "fromId": "coShape",
+      "fromProperty": "out-lines",
+      "toId": "coGather",
+      "toProperty": "in-lines"
+    },
+    {
+      "fromId": "coShape",
+      "fromProperty": "out-pay",
+      "toId": "coGather",
+      "toProperty": "in-pay"
+    },
+    {
+      "fromId": "coName",
+      "fromProperty": "onTextChanged",
+      "toId": "coGather",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "coPhone",
+      "fromProperty": "onTextChanged",
+      "toId": "coGather",
+      "toProperty": "in-phone"
+    },
+    {
+      "fromId": "coAddress",
+      "fromProperty": "onTextChanged",
+      "toId": "coGather",
+      "toProperty": "in-address"
+    },
+    {
+      "fromId": "coEmail",
+      "fromProperty": "onTextChanged",
+      "toId": "coGather",
+      "toProperty": "in-email"
+    },
+    {
+      "fromId": "coCountry",
+      "fromProperty": "value",
+      "toId": "coGather",
+      "toProperty": "in-country"
+    },
+    {
+      "fromId": "coPlace",
+      "fromProperty": "onClick",
+      "toId": "coGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "coGather",
+      "fromProperty": "out-order",
+      "toId": "coCall",
+      "toProperty": "in-order"
+    },
+    {
+      "fromId": "coGather",
+      "fromProperty": "out-go",
+      "toId": "coCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "coCall",
+      "fromProperty": "error",
+      "toId": "coError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "coCall",
+      "fromProperty": "out-order",
+      "toId": "coPlaced",
+      "toProperty": "in-placed"
+    },
+    {
+      "fromId": "coCall",
+      "fromProperty": "done",
+      "toId": "coPlaced",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "coPlaced",
+      "fromProperty": "out-basket",
+      "toId": "coEmptied",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "coPlaced",
+      "fromProperty": "out-go",
+      "toId": "coEmptied",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "coPlaced",
+      "fromProperty": "out-token",
+      "toId": "coLastOrder",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "coPlaced",
+      "fromProperty": "out-go",
+      "toId": "coLastOrder",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "coPlaced",
+      "fromProperty": "out-token",
+      "toId": "coToOrder",
+      "toProperty": "pm-token"
+    },
+    {
+      "fromId": "coPlaced",
+      "fromProperty": "out-go",
+      "toId": "coToOrder",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "coBack",
+      "fromProperty": "onClick",
+      "toId": "coToBasket",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "coShop",
+      "fromProperty": "onClick",
+      "toId": "coToShop",
+      "toProperty": "navigate"
+    }
+  ]
+}

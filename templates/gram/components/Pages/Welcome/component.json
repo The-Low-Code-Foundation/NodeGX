@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6a8a1ef6-a829-5b3a-8c7c-3245e1c45842",
+  "name": "Welcome",
+  "path": "/Pages/Welcome",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The start: what this is, Ask to join, Sign in"
+}

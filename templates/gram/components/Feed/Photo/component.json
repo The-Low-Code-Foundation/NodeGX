@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5e947074-2492-5eda-81c1-2903bc1022e2",
+  "name": "Photo",
+  "path": "/Feed/Photo",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One photo in a post, square, the width of the card"
+}

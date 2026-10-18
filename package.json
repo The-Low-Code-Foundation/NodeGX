@@ -165,6 +165,8 @@
     "template:todo": "node scripts/template-gate.js ./scripts/generate-todo-template.ts && ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-todo-template.ts",
     "template:planning": "node scripts/template-gate.js ./scripts/generate-planning-template.ts && ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-planning-template.ts",
     "template:garden": "node scripts/template-gate.js ./scripts/generate-garden-template.ts && ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-garden-template.ts",
+    "template:marketplace": "node scripts/template-gate.js ./scripts/generate-marketplace-template.ts && ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-marketplace-template.ts",
+    "template:gram": "node scripts/template-gate.js ./scripts/generate-gram-template.ts && ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-gram-template.ts",
     "template:gate": "node scripts/template-gate.js"
   },
   "devDependencies": {

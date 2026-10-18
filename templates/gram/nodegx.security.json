@@ -1,0 +1,487 @@
+{
+  "version": 1,
+  "devOpen": false,
+  "defaults": {
+    "permissions": {
+      "find": "nobody",
+      "get": "nobody",
+      "create": "nobody",
+      "update": "nobody",
+      "delete": "nobody"
+    },
+    "creatorOwns": false
+  },
+  "collections": {
+    "Member": {
+      "permissions": {
+        "find": [
+          "role:admin",
+          "role:member",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Member",
+                  "by": "login"
+                }
+              ],
+              "maxDepth": 1
+            }
+          }
+        ],
+        "get": [
+          "role:admin",
+          "role:member",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Member",
+                  "by": "login"
+                }
+              ],
+              "maxDepth": 1
+            }
+          }
+        ],
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "fields": {
+        "email": {
+          "read": [
+            "role:admin",
+            {
+              "path": {
+                "hops": [
+                  {
+                    "from": "Member",
+                    "by": "login"
+                  }
+                ],
+                "maxDepth": 1
+              }
+            }
+          ]
+        },
+        "blockedReason": {
+          "read": "role:admin"
+        }
+      },
+      "onlyWhile": {
+        "delete": "never"
+      }
+    },
+    "MemberHistory": {
+      "permissions": {
+        "find": "role:admin",
+        "get": "role:admin",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "Post": {
+      "permissions": {
+        "find": [
+          "role:admin",
+          "role:member"
+        ],
+        "get": [
+          "role:admin",
+          "role:member"
+        ],
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "fields": {
+        "hiddenReason": {
+          "read": "role:admin"
+        }
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "member"
+            ]
+          }
+        },
+        "delete": "never"
+      }
+    },
+    "Comment": {
+      "permissions": {
+        "find": [
+          "role:admin",
+          "role:member"
+        ],
+        "get": [
+          "role:admin",
+          "role:member"
+        ],
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "fields": {
+        "hiddenReason": {
+          "read": "role:admin"
+        }
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "post",
+              "member"
+            ]
+          }
+        },
+        "delete": "never"
+      }
+    },
+    "Devotional": {
+      "permissions": {
+        "find": "public",
+        "get": "public",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "member"
+            ]
+          }
+        }
+      }
+    },
+    "DevotionalHistory": {
+      "permissions": {
+        "find": "role:admin",
+        "get": "role:admin",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "Note": {
+      "permissions": {
+        "find": {
+          "path": {
+            "hops": [
+              {
+                "from": "Member",
+                "by": "login"
+              },
+              {
+                "from": "Note",
+                "by": "owner"
+              }
+            ],
+            "maxDepth": 2
+          }
+        },
+        "get": {
+          "path": {
+            "hops": [
+              {
+                "from": "Member",
+                "by": "login"
+              },
+              {
+                "from": "Note",
+                "by": "owner"
+              }
+            ],
+            "maxDepth": 2
+          }
+        },
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "devotional"
+            ]
+          }
+        }
+      }
+    },
+    "Community": {
+      "permissions": {
+        "find": "public",
+        "get": "public",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "CommunityHistory": {
+      "permissions": {
+        "find": "role:admin",
+        "get": "role:admin",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "Heart": {
+      "permissions": {
+        "find": [
+          "role:admin",
+          "role:member"
+        ],
+        "get": [
+          "role:admin",
+          "role:member"
+        ],
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": "*"
+          }
+        }
+      }
+    },
+    "Prayed": {
+      "permissions": {
+        "find": [
+          "role:admin",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Member",
+                  "by": "login"
+                },
+                {
+                  "from": "Post",
+                  "by": "member"
+                },
+                {
+                  "from": "Prayed",
+                  "by": "post"
+                }
+              ],
+              "maxDepth": 3
+            }
+          },
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Prayed",
+                  "by": "doneBy"
+                }
+              ],
+              "maxDepth": 1
+            }
+          }
+        ],
+        "get": [
+          "role:admin",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Member",
+                  "by": "login"
+                },
+                {
+                  "from": "Post",
+                  "by": "member"
+                },
+                {
+                  "from": "Prayed",
+                  "by": "post"
+                }
+              ],
+              "maxDepth": 3
+            }
+          },
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Prayed",
+                  "by": "doneBy"
+                }
+              ],
+              "maxDepth": 1
+            }
+          }
+        ],
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": "*"
+          }
+        }
+      }
+    },
+    "Report": {
+      "permissions": {
+        "find": "role:admin",
+        "get": "role:admin",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": "*"
+          }
+        },
+        "delete": "never"
+      }
+    },
+    "CommentReport": {
+      "permissions": {
+        "find": "role:admin",
+        "get": "role:admin",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": "*"
+          }
+        },
+        "delete": "never"
+      }
+    }
+  },
+  "functions": {
+    "setUpCommunity": {
+      "call": "public",
+      "rateLimit": {
+        "ratePerMinute": 5,
+        "burst": 5
+      }
+    },
+    "askToJoin": {
+      "call": "public",
+      "rateLimit": {
+        "ratePerMinute": 5,
+        "burst": 5
+      }
+    },
+    "whoAmI": {
+      "call": "authenticated"
+    },
+    "letIn": {
+      "call": "role:admin"
+    },
+    "turnAway": {
+      "call": "role:admin"
+    },
+    "makeAdmin": {
+      "call": "role:admin"
+    },
+    "sharePost": {
+      "call": [
+        "role:member",
+        "role:admin"
+      ],
+      "rateLimit": {
+        "ratePerMinute": 10,
+        "burst": 5
+      }
+    },
+    "heartPost": {
+      "call": [
+        "role:member",
+        "role:admin"
+      ],
+      "rateLimit": {
+        "ratePerMinute": 60,
+        "burst": 20
+      }
+    },
+    "commentOn": {
+      "call": [
+        "role:member",
+        "role:admin"
+      ],
+      "rateLimit": {
+        "ratePerMinute": 20,
+        "burst": 10
+      }
+    },
+    "editProfile": {
+      "call": [
+        "role:member",
+        "role:admin"
+      ],
+      "rateLimit": {
+        "ratePerMinute": 10,
+        "burst": 5
+      }
+    },
+    "prayFor": {
+      "call": [
+        "role:member",
+        "role:admin"
+      ],
+      "rateLimit": {
+        "ratePerMinute": 60,
+        "burst": 20
+      }
+    },
+    "report": {
+      "call": [
+        "role:member",
+        "role:admin"
+      ],
+      "rateLimit": {
+        "ratePerMinute": 10,
+        "burst": 5
+      }
+    },
+    "hide": {
+      "call": [
+        "role:member",
+        "role:admin"
+      ],
+      "rateLimit": {
+        "ratePerMinute": 20,
+        "burst": 10
+      }
+    },
+    "block": {
+      "call": "role:admin"
+    },
+    "writeRules": {
+      "call": "role:admin"
+    }
+  },
+  "files": {
+    "upload": [
+      "role:admin",
+      "role:member"
+    ],
+    "read": "public",
+    "delete": "nobody"
+  },
+  "signup": "nobody"
+}

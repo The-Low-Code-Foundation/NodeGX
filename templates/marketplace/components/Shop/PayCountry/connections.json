@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a08006a5-9d8b-5d4e-81aa-014f4d172186",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pyIn",
+      "fromProperty": "heading",
+      "toId": "pyHeading",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pyIn",
+      "fromProperty": "sub",
+      "toId": "pySub",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pyIn",
+      "fromProperty": "options",
+      "toId": "pyEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pyIn",
+      "fromProperty": "hasNone",
+      "toId": "pyNone",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pyIn",
+      "fromProperty": "noneWords",
+      "toId": "pyNone",
+      "toProperty": "text"
+    }
+  ]
+}

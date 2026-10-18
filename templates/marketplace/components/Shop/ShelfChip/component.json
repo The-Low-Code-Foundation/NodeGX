@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5b020271-3047-53f2-83fe-054c95675172",
+  "name": "ShelfChip",
+  "path": "/Shop/ShelfChip",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One shelf to pick on the home page (All, then each shelf with something on it)"
+}

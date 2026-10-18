@@ -1,0 +1,482 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f3bdda6e-e0f0-5937-89a8-934d054d04c9",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cmRoot",
+      "type": "Group",
+      "label": "A comment",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "columnGap": "var(--space-2-5)"
+      },
+      "children": [
+        "cmAv",
+        "cmWords"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cmAv",
+      "type": "Group",
+      "label": "Their face",
+      "parent": "cmRoot",
+      "parameters": {
+        "width": {
+          "value": 28,
+          "unit": "px"
+        },
+        "height": {
+          "value": 28,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "cssClassName": "gm-av"
+      },
+      "children": [
+        "cmFace",
+        "cmInitials"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "cmFace",
+      "type": "Image",
+      "label": "Their photo",
+      "parent": "cmAv",
+      "parameters": {
+        "width": {
+          "value": 28,
+          "unit": "px"
+        },
+        "height": {
+          "value": 28,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "objectFit": "cover",
+        "borderRadius": {
+          "value": 50,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "cmInitials",
+      "type": "Text",
+      "label": "Their initials, with no photo",
+      "parent": "cmAv",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--primary-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "cmWords",
+      "type": "Group",
+      "label": "Who, when, and what",
+      "parent": "cmRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "gm-grow"
+      },
+      "children": [
+        "cmHead",
+        "cmText",
+        "cmMod",
+        "cmError"
+      ],
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "cmHead",
+      "type": "Group",
+      "label": "Who and when",
+      "parent": "cmWords",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "cmName",
+        "cmWhen"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "cmName",
+      "type": "net.noodl.controls.button",
+      "label": "Name: their profile",
+      "parent": "cmHead",
+      "parameters": {
+        "label": "",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "cmWhen",
+      "type": "Text",
+      "label": "When",
+      "parent": "cmHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "cmText",
+      "type": "Text",
+      "label": "What they said",
+      "parent": "cmWords",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "cmMod",
+      "type": "Group",
+      "label": "Report, take down, its reports",
+      "parent": "cmWords",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "cmReport",
+        "cmTakeDown",
+        "cmLook"
+      ],
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "cmReport",
+      "type": "net.noodl.controls.button",
+      "label": "Report this comment",
+      "parent": "cmMod",
+      "parameters": {
+        "label": "Report",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0-5)",
+        "paddingBottom": "var(--space-0-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "cmTakeDown",
+      "type": "net.noodl.controls.button",
+      "label": "Take this comment down",
+      "parent": "cmMod",
+      "parameters": {
+        "label": "Take down",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0-5)",
+        "paddingBottom": "var(--space-0-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "cmLook",
+      "type": "net.noodl.controls.button",
+      "label": "Its reports, and hiding it (admins)",
+      "parent": "cmMod",
+      "parameters": {
+        "label": "Reports and hiding",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0-5)",
+        "paddingBottom": "var(--space-0-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "cmError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "cmWords",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "cmIn",
+      "type": "Component Inputs",
+      "label": "One comment",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "memberId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "initials",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "shade",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "face",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "when",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "text",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasFace",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "noFace",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "canReport",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "canTakeDown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "canLook",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "cmToMember",
+      "type": "RouterNavigate",
+      "label": "To their profile",
+      "parameters": {
+        "target": "/Pages/Member"
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "cmToReport",
+      "type": "RouterNavigate",
+      "label": "To report it",
+      "parameters": {
+        "target": "/Pages/Report"
+      },
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "cmToLook",
+      "type": "RouterNavigate",
+      "label": "To its reports (admins)",
+      "parameters": {
+        "target": "/Pages/Admin/Look"
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "cmDownGather",
+      "type": "JavaScriptFunction",
+      "label": "Take this comment down",
+      "parameters": {
+        "functionScript": "Outputs.hide = { commentId: Inputs.id, hidden: true };\nOutputs.go();",
+        "runOnChange-in-id": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-hide",
+          "displayName": "hide",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "cmDownCall",
+      "type": "CloudFunction2",
+      "label": "hide(hide)",
+      "parameters": {
+        "function": "hide"
+      },
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "cmStamp",
+      "type": "JavaScriptFunction",
+      "label": "Say the feed changed",
+      "parameters": {
+        "functionScript": "Outputs.at = String(Date.now());\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-at",
+          "displayName": "at",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "cmChanged",
+      "type": "Set Variable",
+      "label": "The feed changed",
+      "parameters": {
+        "name": "feedChanged",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a heart, a comment or a post was made on this phone: the feed and the post read again, whichever card made it."
+      },
+      "x": 470,
+      "y": 1840
+    }
+  ],
+  "visualRoots": [
+    "cmRoot"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3f61e821-a1a7-5c68-85e5-8ffc109ed241",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "adRoot",
+      "fromProperty": "didMount",
+      "toId": "adLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "adVersion",
+      "fromProperty": "value",
+      "toId": "adLoad",
+      "toProperty": "in-changed"
+    },
+    {
+      "fromId": "adLoad",
+      "fromProperty": "out-ok",
+      "toId": "adContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "adLoad",
+      "fromProperty": "out-rows",
+      "toId": "adEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "adLoad",
+      "fromProperty": "out-problem",
+      "toId": "adRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "adLoad",
+      "fromProperty": "out-refused",
+      "toId": "adRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "adRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "adToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "adBack",
+      "fromProperty": "onClick",
+      "toId": "adToQueue",
+      "toProperty": "navigate"
+    }
+  ]
+}

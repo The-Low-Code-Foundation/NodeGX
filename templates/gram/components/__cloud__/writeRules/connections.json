@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "28cc79f3-149d-5ade-80b2-ec169cb9da1c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req-15",
+      "fromProperty": "userId",
+      "toId": "run-11",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "req-15",
+      "fromProperty": "pm-rules",
+      "toId": "run-11",
+      "toProperty": "in-rules"
+    },
+    {
+      "fromId": "req-15",
+      "fromProperty": "receive",
+      "toId": "run-11",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "run-11",
+      "fromProperty": "out-saved",
+      "toId": "ok-14",
+      "toProperty": "pm-saved"
+    },
+    {
+      "fromId": "run-11",
+      "fromProperty": "out-done",
+      "toId": "ok-14",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "run-11",
+      "fromProperty": "out-reason",
+      "toId": "no-15",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "run-11",
+      "fromProperty": "out-refused",
+      "toId": "no-15",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "run-11",
+      "fromProperty": "failure",
+      "toId": "no-15",
+      "toProperty": "send"
+    }
+  ]
+}

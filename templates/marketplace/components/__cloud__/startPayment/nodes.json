@@ -1,0 +1,180 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e41f8bec-e123-58ef-82fc-a7af2ca9535f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-18",
+      "type": "noodl.cloud.request",
+      "label": "startPayment(pay)",
+      "parameters": {
+        "params": "pay",
+        "ptype-pay": "object",
+        "preq-pay": true,
+        "allowNoAuth": true
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "which",
+      "type": "JavaScriptFunction",
+      "label": "Which country’s Paystack key",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nasync function caller(userId) {\n  if (!userId) return null;\n  return one('Person', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\n\nvar CURRENCIES = [\"GHS\",\"KES\",\"NGN\",\"USD\",\"ZAR\"];\nvar a = Inputs.pay;\nif (a === undefined) return;\nvar c = a && typeof a === 'object' && !Array.isArray(a) ? await one('Country', { objectId: { equalTo: idOf(a.country) } }) : null;\nif (!c) { refuse('Say which country you are paying in.'); return; }\nif (CURRENCIES.indexOf(c.currency) < 0) { refuse('Paystack doesn’t take ' + c.currency + ': pay ' + c.name + '’s sellers another way.'); return; }\nOutputs.keyName = 'PAYSTACK_SECRET_KEY_' + c.currency;\nOutputs.notSet = 'Paying by card isn’t set up in ' + c.name + ' yet. Ask the seller how else to pay.';\nOutputs.go();",
+        "runOnChange-in-pay": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-pay",
+          "displayName": "pay",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-keyName",
+          "displayName": "keyName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-notSet",
+          "displayName": "notSet",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "key",
+      "type": "noodl.cloud.secret",
+      "label": "PAYSTACK_SECRET_KEY_<currency>",
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "api",
+      "type": "noodl.cloud.secret",
+      "label": "PAYSTACK_API_URL (unset: Paystack)",
+      "parameters": {
+        "name": "PAYSTACK_API_URL"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "run-16",
+      "type": "JavaScriptFunction",
+      "label": "Start paying one seller country’s parts of an order through Paystack, split to its sellers",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nasync function caller(userId) {\n  if (!userId) return null;\n  return one('Person', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\n\nasync function payable(orderId, countryId) {\n  var way = await one('WayToPay', { method: { equalTo: 'paystack' } });\n  if (!way) return [];\n  var parts = await Noodl.Records.query('OrderPart', { order: { equalTo: ptr('Order', orderId) } }, { plain: true, limit: 100, sort: ['createdAt'] });\n  var sellers = parts.length ? await Noodl.Records.query('Seller', { objectId: { containedIn: parts.map(function (p) { return idOf(p.seller); }) } }, { plain: true, limit: 100 }) : [];\n  var seller = {};\n  sellers.forEach(function (s) { seller[s.objectId] = s; });\n  return parts\n    .filter(function (p) { var s = seller[idOf(p.seller)]; return s && idOf(s.country) === countryId && idOf(p.wayToPay) === way.objectId && p.status !== 'cancelled'; })\n    .map(function (p) { return { part: p, seller: seller[idOf(p.seller)], share: Math.round(((Number(p.subtotal) || 0) + (typeof p.deliveryCost === 'number' ? p.deliveryCost : 0)) * 100) }; });\n}\nfunction apiOf(v) { var s = String(v || ''); return /^https?:[/][/][^ ]+$/.test(s) ? s.replace(/[/]+$/, '') : 'https://api.paystack.co'; }\nasync function paystack(method, path, body) {\n  var r = await fetch(apiOf(Inputs.api) + path, { method: method, headers: { Authorization: 'Bearer ' + String(Inputs.key), 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });\n  var j = null;\n  try { j = await r.json(); } catch (e) { j = null; }\n  return { status: r.status, json: j || {} };\n}\nvar a = Inputs.pay;\nif (a === undefined || Inputs.key === undefined) return;\nvar token = text(a.token, 100);\nvar order = token.length >= 32 ? await one('Order', { followToken: { equalTo: token } }) : null;\nif (!order) { refuse('There is no order at this link. Check it was copied whole.'); return; }\nvar c = await one('Country', { objectId: { equalTo: idOf(a.country) } });\nif (!c) { refuse('Say which country you are paying in.'); return; }\nvar due = await payable(order.objectId, c.objectId);\nif (!due.length) { refuse('Nothing in this order is paid by card in ' + c.name + '.'); return; }\nif (due.some(function (x) { return (x.part.status || 'new') === 'new'; })) { refuse('Every seller in ' + c.name + ' confirms the delivery cost first: then you pay them all at once.'); return; }\nif (due.some(function (x) { return x.part.status !== 'confirmed'; })) { refuse('This is paid already.'); return; }\nvar lost = due.filter(function (x) { return !/^ACCT_[A-Za-z0-9]+$/.test(String(x.seller.payoutAccount || '')); })[0];\nif (lost) { refuse(lost.seller.name + ' can’t be paid by card yet. Ask them how else to pay.'); return; }\nif (!order.email) { refuse('Paystack sends the receipt by email, and this order has none.'); return; }\nvar back = text(a.returnUrl, 500);\nif (!/^https?:[/][/][^ ?#]+$/.test(back) || back.slice(-(token.length + 7)) !== '/order/' + token) { refuse('Open this order from its own link to pay.'); return; }\nif (typeof crypto === 'undefined' || !crypto.getRandomValues) { refuse('This payment could not be started just now.'); return; }\nvar bytes = new Uint8Array(6);\ncrypto.getRandomValues(bytes);\nvar ref = order.number + '-' + c.currency + '-' + Array.prototype.map.call(bytes, function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');\nvar amount = due.reduce(function (n, x) { return n + x.share; }, 0);\nvar body = {\n  email: order.email,\n  amount: amount,\n  currency: c.currency,\n  reference: ref,\n  callback_url: back,\n  metadata: { orderId: order.objectId, countryId: c.objectId, number: order.number, parts: due.map(function (x) { return x.part.objectId; }) },\n  split: { name: ref, type: 'flat', currency: c.currency, bearer_type: 'all-proportional', subaccounts: due.map(function (x) { return { subaccount: String(x.seller.payoutAccount), share: x.share }; }) }\n};\ntry { var r = await paystack('POST', '/transaction/initialize', body); } catch (e) { refuse('Paystack couldn’t be reached just now. Try again in a minute.'); return; }\nvar d = r.json.data || {};\nif (r.status !== 200 || r.json.status !== true || !/^https?:[/][/]/.test(String(d.authorization_url || ''))) { refuse('Paystack didn’t take this payment: ' + (text(r.json.message, 200) || 'no reason given') + '.'); return; }\nOutputs.payment = { url: String(d.authorization_url), reference: ref, amount: amount / 100, currency: c.currency };\nOutputs.done();",
+        "runOnChange-in-pay": false,
+        "runOnChange-in-key": false,
+        "runOnChange-in-api": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-api",
+          "displayName": "api",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-key",
+          "displayName": "key",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-pay",
+          "displayName": "pay",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-payment",
+          "displayName": "payment",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "ok-18",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "parameters": {
+        "params": "payment"
+      },
+      "x": 40,
+      "y": 640
+    },
+    {
+      "id": "no-18",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 760
+    },
+    {
+      "id": "noKey",
+      "type": "noodl.cloud.response",
+      "label": "No key for that country",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "Paying by card isn’t set up here yet."
+      },
+      "x": 40,
+      "y": 880
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ccb6a5e2-9a6b-5473-839b-1b3caa2c859e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "brIn",
+      "fromProperty": "band",
+      "toId": "brBandWords",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "brIn",
+      "fromProperty": "band",
+      "toId": "brWho",
+      "toProperty": "in-band"
+    },
+    {
+      "fromId": "brRoot",
+      "fromProperty": "didMount",
+      "toId": "brWho",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "brWho",
+      "fromProperty": "out-signedIn",
+      "toId": "brOut",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "brWho",
+      "fromProperty": "out-hasBand",
+      "toId": "brBand",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "brOut",
+      "fromProperty": "onClick",
+      "toId": "brLogOut",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "brLogOut",
+      "fromProperty": "done",
+      "toId": "brToWelcome",
+      "toProperty": "navigate"
+    }
+  ]
+}

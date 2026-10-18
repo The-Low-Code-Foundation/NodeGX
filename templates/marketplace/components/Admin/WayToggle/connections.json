@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c0f50f9b-e03d-5d89-8c53-01e2a07e0c2d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "wtIn",
+      "fromProperty": "name",
+      "toId": "wtBox",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "wtIn",
+      "fromProperty": "isOn",
+      "toId": "wtBox",
+      "toProperty": "checked"
+    },
+    {
+      "fromId": "wtIn",
+      "fromProperty": "method",
+      "toId": "wtGather",
+      "toProperty": "in-method"
+    },
+    {
+      "fromId": "wtIn",
+      "fromProperty": "countryId",
+      "toId": "wtGather",
+      "toProperty": "in-countryId"
+    },
+    {
+      "fromId": "wtIn",
+      "fromProperty": "onIds",
+      "toId": "wtGather",
+      "toProperty": "in-onIds"
+    },
+    {
+      "fromId": "wtBox",
+      "fromProperty": "checked",
+      "toId": "wtGather",
+      "toProperty": "in-checked"
+    },
+    {
+      "fromId": "wtBox",
+      "fromProperty": "onChange",
+      "toId": "wtGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "wtGather",
+      "fromProperty": "out-way",
+      "toId": "wtCall",
+      "toProperty": "in-way"
+    },
+    {
+      "fromId": "wtGather",
+      "fromProperty": "out-go",
+      "toId": "wtCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "wtCall",
+      "fromProperty": "done",
+      "toId": "wtStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "wtCall",
+      "fromProperty": "failure",
+      "toId": "wtStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "wtStamp",
+      "fromProperty": "out-at",
+      "toId": "wtChanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "wtStamp",
+      "fromProperty": "out-go",
+      "toId": "wtChanged",
+      "toProperty": "do"
+    }
+  ]
+}

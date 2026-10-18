@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ba90a80d-f58b-5829-8bdd-6a1da01b1a64",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "eqRoot",
+      "fromProperty": "didMount",
+      "toId": "eqLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "eqVersion",
+      "fromProperty": "value",
+      "toId": "eqLoad",
+      "toProperty": "in-changed"
+    },
+    {
+      "fromId": "eqLoad",
+      "fromProperty": "out-ok",
+      "toId": "eqContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "eqLoad",
+      "fromProperty": "out-band",
+      "toId": "eqBand",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "eqLoad",
+      "fromProperty": "out-heading",
+      "toId": "eqTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "eqLoad",
+      "fromProperty": "out-isAdmin",
+      "toId": "eqAdminTabsBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "eqLoad",
+      "fromProperty": "out-isStaff",
+      "toId": "eqSellerTabsBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "eqLoad",
+      "fromProperty": "out-empty",
+      "toId": "eqEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "eqLoad",
+      "fromProperty": "out-sections",
+      "toId": "eqEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "eqLoad",
+      "fromProperty": "out-fine",
+      "toId": "eqFine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "eqLoad",
+      "fromProperty": "out-problem",
+      "toId": "eqRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "eqLoad",
+      "fromProperty": "out-refused",
+      "toId": "eqRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "eqRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "eqToSignIn",
+      "toProperty": "navigate"
+    }
+  ]
+}

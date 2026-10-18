@@ -1,0 +1,837 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "da66c3dd-3435-59b0-8b9b-943f2d1cf044",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ocRoot",
+      "type": "Group",
+      "label": "A part of an order",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "ocHead",
+        "ocSeller",
+        "ocLines",
+        "ocWhere",
+        "ocWay",
+        "ocNote",
+        "ocConfirm",
+        "ocActions",
+        "ocCancel",
+        "ocError"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ocHead",
+      "type": "Group",
+      "label": "Order and buyer, and where it is",
+      "parent": "ocRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "columnGap": "var(--space-3)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "ocTitle",
+        "ocPill"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ocTitle",
+      "type": "Text",
+      "label": "MK-… · the buyer",
+      "parent": "ocHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "mk-grow"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "ocPill",
+      "type": "Group",
+      "label": "Where it is",
+      "parent": "ocHead",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "borderRadius": "var(--radius-full)"
+      },
+      "children": [
+        "ocPillWords"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "ocPillWords",
+      "type": "Text",
+      "label": "Where it is",
+      "parent": "ocPill",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "cssClassName": "mk-nowrap"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "ocSeller",
+      "type": "Text",
+      "label": "Whose part (the admin sees it)",
+      "parent": "ocRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-bold)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "ocLines",
+      "type": "Text",
+      "label": "What is in it",
+      "parent": "ocRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "ocWhere",
+      "type": "Text",
+      "label": "Where it goes, and the buyer’s phone",
+      "parent": "ocRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "ocWay",
+      "type": "Text",
+      "label": "How it is paid",
+      "parent": "ocRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "ocNote",
+      "type": "Text",
+      "label": "The delivery, or why it was cancelled",
+      "parent": "ocRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "ocConfirm",
+      "type": "Group",
+      "label": "Confirm: the delivery cost and when",
+      "parent": "ocRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "mounted": false
+      },
+      "children": [
+        "ocConfirmFields",
+        "ocConfirmGo"
+      ],
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "ocConfirmFields",
+      "type": "Group",
+      "label": "Cost and when",
+      "parent": "ocConfirm",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "columnGap": "var(--space-3)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-2)",
+        "cssClassName": "mk-row2"
+      },
+      "children": [
+        "ocCost",
+        "ocWhen"
+      ],
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "ocCost",
+      "type": "net.noodl.controls.textinput",
+      "label": "Delivery cost",
+      "parent": "ocConfirmFields",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Delivery cost",
+        "type": "number"
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "ocWhen",
+      "type": "net.noodl.controls.textinput",
+      "label": "When it comes",
+      "parent": "ocConfirmFields",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "When it comes"
+      },
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "ocConfirmGo",
+      "type": "net.noodl.controls.button",
+      "label": "Confirm",
+      "parent": "ocConfirm",
+      "parameters": {
+        "label": "Confirm and ask the buyer to pay",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "ocActions",
+      "type": "Group",
+      "label": "Next step, or cancel",
+      "parent": "ocRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-2)",
+        "mounted": false
+      },
+      "children": [
+        "ocMove",
+        "ocCancelOpen"
+      ],
+      "x": 100,
+      "y": 1840
+    },
+    {
+      "id": "ocMove",
+      "type": "net.noodl.controls.button",
+      "label": "The next step",
+      "parent": "ocActions",
+      "parameters": {
+        "label": "",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--secondary)",
+        "color": "var(--secondary-foreground)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "ocCancelOpen",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel…",
+      "parent": "ocActions",
+      "parameters": {
+        "label": "Cancel this part…",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "ocCancel",
+      "type": "Group",
+      "label": "Cancel, with why",
+      "parent": "ocRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "mounted": false
+      },
+      "children": [
+        "ocReason",
+        "ocCancelButtons"
+      ],
+      "x": 100,
+      "y": 2200
+    },
+    {
+      "id": "ocReason",
+      "type": "net.noodl.controls.textinput",
+      "label": "Why it is cancelled (the buyer sees this)",
+      "parent": "ocCancel",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Why it is cancelled (the buyer sees this)"
+      },
+      "x": 160,
+      "y": 2320
+    },
+    {
+      "id": "ocCancelButtons",
+      "type": "Group",
+      "label": "Cancel it, or keep it",
+      "parent": "ocCancel",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "ocCancelGo",
+        "ocCancelKeep"
+      ],
+      "x": 160,
+      "y": 2440
+    },
+    {
+      "id": "ocCancelGo",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel it",
+      "parent": "ocCancelButtons",
+      "parameters": {
+        "label": "Cancel it",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--destructive)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--destructive)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 2560
+    },
+    {
+      "id": "ocCancelKeep",
+      "type": "net.noodl.controls.button",
+      "label": "Keep it",
+      "parent": "ocCancelButtons",
+      "parameters": {
+        "label": "Keep it",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 2680
+    },
+    {
+      "id": "ocError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "ocRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 2800
+    },
+    {
+      "id": "ocIn",
+      "type": "Component Inputs",
+      "label": "One part",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "head",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pill",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pillBg",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pillInk",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "seller",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasSeller",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "lines",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "where",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "way",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canConfirm",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "costLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "confirmLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canMove",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "next",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "moveLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canCancel",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hasActions",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "ocGatherConfirm",
+      "type": "JavaScriptFunction",
+      "label": "Confirm, with the cost and when",
+      "parameters": {
+        "functionScript": "Outputs.move = { partId: String(Inputs.id || ''), to: 'confirmed', deliveryCost: Inputs.cost === undefined ? '' : String(Inputs.cost), deliveryNote: Inputs.when === undefined ? '' : String(Inputs.when) };\nOutputs.go();",
+        "runOnChange-in-id": false,
+        "runOnChange-in-cost": false,
+        "runOnChange-in-when": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-cost",
+          "displayName": "cost",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-when",
+          "displayName": "when",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-move",
+          "displayName": "move",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "ocGatherMove",
+      "type": "JavaScriptFunction",
+      "label": "The next step",
+      "parameters": {
+        "functionScript": "Outputs.move = { partId: String(Inputs.id || ''), to: String(Inputs.next || '') };\nOutputs.go();",
+        "runOnChange-in-id": false,
+        "runOnChange-in-next": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-next",
+          "displayName": "next",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-move",
+          "displayName": "move",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 1960
+    },
+    {
+      "id": "ocGatherCancel",
+      "type": "JavaScriptFunction",
+      "label": "Cancel, with why",
+      "parameters": {
+        "functionScript": "Outputs.move = { partId: String(Inputs.id || ''), to: 'cancelled', reason: Inputs.reason === undefined ? '' : String(Inputs.reason) };\nOutputs.go();",
+        "runOnChange-in-id": false,
+        "runOnChange-in-reason": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-reason",
+          "displayName": "reason",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-move",
+          "displayName": "move",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 2320
+    },
+    {
+      "id": "ocCall",
+      "type": "CloudFunction2",
+      "label": "movePart(move)",
+      "parameters": {
+        "function": "movePart"
+      },
+      "x": 470,
+      "y": 2800
+    },
+    {
+      "id": "ocCancelling",
+      "type": "Switch",
+      "label": "Asking why it is cancelled",
+      "x": 470,
+      "y": 2200
+    },
+    {
+      "id": "ocFailed",
+      "type": "Switch",
+      "label": "The last move was refused",
+      "x": 470,
+      "y": 2920
+    },
+    {
+      "id": "ocStamp",
+      "type": "JavaScriptFunction",
+      "label": "Say an order part moved",
+      "parameters": {
+        "functionScript": "Outputs.at = String(Date.now());\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-at",
+          "displayName": "at",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 3040
+    },
+    {
+      "id": "ocMoved",
+      "type": "Set Variable",
+      "label": "An order part moved",
+      "parameters": {
+        "name": "ordersChanged",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: an order part moved: the Orders page reads again, whichever card moved it."
+      },
+      "x": 470,
+      "y": 3160
+    }
+  ],
+  "visualRoots": [
+    "ocRoot"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "46f4ab6d-4b46-5d43-8498-05e6ff74b8d8",
+  "name": "Products",
+  "path": "/Pages/Seller/Products",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A seller’s products: add, change, take off sale"
+}

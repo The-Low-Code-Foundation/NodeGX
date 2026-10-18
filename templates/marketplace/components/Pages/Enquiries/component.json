@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ba90a80d-f58b-5829-8bdd-6a1da01b1a64",
+  "name": "Enquiries",
+  "path": "/Pages/Enquiries",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Enquiries: buyers’ messages about a seller’s products sold by enquiry (or every one, for the admin), marked answered"
+}

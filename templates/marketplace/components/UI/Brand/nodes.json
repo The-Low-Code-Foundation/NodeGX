@@ -1,0 +1,104 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6e8abcfc-9a05-57ed-84fc-8a996e08a8be",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "brRoot",
+      "type": "Group",
+      "label": "The name",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "brName"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "brName",
+      "type": "Text",
+      "label": "The marketplace’s name",
+      "parent": "brRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--secondary-foreground)",
+        "cssClassName": "mk-display"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "brNameLoad",
+      "type": "JavaScriptFunction",
+      "label": "The marketplace’s name, read",
+      "parameters": {
+        "functionScript": "var rows = [];\ntry { rows = await Noodl.Records.query('Marketplace', {}, { plain: true, limit: 1 }); } catch (e) { return; }\nvar name = rows[0] && rows[0].name ? String(rows[0].name) : '';\nif (name === String(Inputs.current || '')) return;\nOutputs.name = name;\nOutputs.set();",
+        "runOnChange-in-current": false
+      },
+      "ports": [
+        {
+          "name": "out-set",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-current",
+          "displayName": "current",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "brNameNow",
+      "type": "Variable2",
+      "label": "The marketplace’s name",
+      "parameters": {
+        "name": "marketplaceName"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the marketplace’s name: one for the whole app, read by every page’s bar."
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "brNameSet",
+      "type": "Set Variable",
+      "label": "The marketplace’s name, as read",
+      "parameters": {
+        "name": "marketplaceName",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the marketplace’s name: one for the whole app, read by every page’s bar."
+      },
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "brRoot"
+  ]
+}

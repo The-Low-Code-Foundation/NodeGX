@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4ea647c2-3922-5ca7-89e8-40c983152056",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-16",
+      "type": "noodl.cloud.request",
+      "label": "sendEnquiry(enquiry)",
+      "parameters": {
+        "params": "enquiry",
+        "ptype-enquiry": "object",
+        "preq-enquiry": true,
+        "allowNoAuth": true
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "run-14",
+      "type": "JavaScriptFunction",
+      "label": "Send a seller a message about one product sold by enquiry, with or without an account",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nasync function caller(userId) {\n  if (!userId) return null;\n  return one('Person', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\n\nvar e = Inputs.enquiry;\nif (e === undefined) return;\nif (!e || typeof e !== 'object' || Array.isArray(e)) { refuse('The message arrived empty.'); return; }\nfunction whole(v) { return typeof v === 'string' ? v.trim() : ''; }\nvar name = whole(e.buyerName), contact = whole(e.contact), message = whole(e.message);\nif (!name) { refuse('Say who the message is from.'); return; }\nif (name.length > 120) { refuse('A name of 120 characters at most.'); return; }\nvar digits = contact.replace(/[^0-9]/g, '');\nvar international = contact.charAt(0) === '+' || contact.slice(0, 2) === '00';\nif (!international || digits.length < 8 || contact.length > 40) { refuse('A number the seller can call or WhatsApp, with its country code, like +233 24 555 0187.'); return; }\nif (!message) { refuse('Say what you’d like to ask.'); return; }\nif (message.length > 2000) { refuse('A message of 2,000 characters at most.'); return; }\nvar p = await one('Product', { objectId: { equalTo: text(e.productId, 64) } });\nvar s = p ? await one('Seller', { objectId: { equalTo: idOf(p.seller) } }) : null;\nif (!p || !s || p.endedAt || s.endedAt) { refuse('This product isn’t on sale now.'); return; }\nif (p.mode !== 'enquire') { refuse((p.name || 'This product') + ' is bought through the basket, not by message.'); return; }\nawait Noodl.Records.create('Enquiry', { product: ptr('Product', p.objectId), buyerName: name, contact: contact, message: message });\nOutputs.sent = { seller: s.name || '' };\nOutputs.done();",
+        "runOnChange-in-enquiry": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-enquiry",
+          "displayName": "enquiry",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sent",
+          "displayName": "sent",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ok-16",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "parameters": {
+        "params": "sent"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "no-16",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

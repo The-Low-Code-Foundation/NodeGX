@@ -1,0 +1,468 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6a8a1ef6-a829-5b3a-8c7c-3245e1c45842",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "wcPage",
+      "type": "Page",
+      "label": "Welcome",
+      "parameters": {
+        "title": "Welcome",
+        "urlPath": ""
+      },
+      "children": [
+        "wcRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "wcRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "wcPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "gm-app"
+      },
+      "children": [
+        "wcBar",
+        "wcBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "wcBar",
+      "type": "/UI/Bar",
+      "label": "The bar",
+      "parent": "wcRoot",
+      "parameters": {},
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "wcBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "wcRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 480,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "wcContent"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "wcContent",
+      "type": "Group",
+      "label": "Welcome",
+      "parent": "wcBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "paddingTop": "var(--space-8)",
+        "mounted": false
+      },
+      "children": [
+        "wcName",
+        "wcLead",
+        "wcOpen",
+        "wcNew",
+        "wcProblem"
+      ],
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "wcName",
+      "type": "Text",
+      "label": "The community’s name",
+      "parent": "wcContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "cssClassName": "gm-read gm-wrap",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "wcLead",
+      "type": "Text",
+      "label": "What it is",
+      "parent": "wcContent",
+      "parameters": {
+        "text": "Members read the day’s devotional, pray for each other and share what God is doing. Only members who’ve been let in see posts. Nothing is public.",
+        "fontSize": "var(--text-base)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "wcOpen",
+      "type": "Group",
+      "label": "Ask to join, or sign in",
+      "parent": "wcContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "wcJoin",
+        "wcSignIn",
+        "wcAge"
+      ],
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "wcJoin",
+      "type": "net.noodl.controls.button",
+      "label": "Ask to join",
+      "parent": "wcOpen",
+      "parameters": {
+        "label": "Ask to join",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 340,
+      "y": 1000
+    },
+    {
+      "id": "wcSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "wcOpen",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 340,
+      "y": 1120
+    },
+    {
+      "id": "wcAge",
+      "type": "Text",
+      "label": "Who may join",
+      "parent": "wcOpen",
+      "parameters": {
+        "text": "Members are 13 or older.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "wcNew",
+      "type": "Group",
+      "label": "Not set up yet",
+      "parent": "wcContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "wcNewWords",
+        "wcSetUp"
+      ],
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "wcNewWords",
+      "type": "Text",
+      "label": "Not set up yet",
+      "parent": "wcNew",
+      "parameters": {
+        "text": "This community isn’t set up yet. Whoever started its backend has the setup token.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 340,
+      "y": 1480
+    },
+    {
+      "id": "wcSetUp",
+      "type": "net.noodl.controls.button",
+      "label": "Set it up",
+      "parent": "wcNew",
+      "parameters": {
+        "label": "Set up the community",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 340,
+      "y": 1600
+    },
+    {
+      "id": "wcProblem",
+      "type": "Text",
+      "label": "A sign-in with no member",
+      "parent": "wcContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "wcLoad",
+      "type": "JavaScriptFunction",
+      "label": "The community’s name; someone signed in?",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (await Noodl.CloudFunctions.run('whoAmI', {})).me || null; } catch (e) { return null; }\n}\nfunction why(e) { var m = (e && (e.error || e.message)) || String(e || ''); if (/admins’|^Sign in/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page couldn’t be read: ' + m; }\nasync function adminsOnly() {\n  var who = await me();\n  if (!who) throw { error: 'Sign in to see this page.' };\n  if (who.role !== 'admin') throw { error: 'This page is the admins’. Sign in as an admin to see it.' };\n  return who;\n}\nfunction ago(at) {\n  var t = at ? new Date(at.iso || at).getTime() : 0;\n  if (!t) return '';\n  var m = Math.max(0, Math.round((Date.now() - t) / 60000));\n  if (m < 1) return 'just now';\n  if (m < 60) return m + ' min ago';\n  var h = Math.round(m / 60);\n  if (h < 24) return h + ' h ago';\n  var d = Math.round(h / 24);\n  return d === 1 ? 'yesterday' : d + ' days ago';\n}\nvar SHADES = ['#4a6a2b', '#6a4a2b', '#2b4a6a', '#7a3e1d', '#4a2160', '#2b6a5a'];\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join('') || '?'; }\nfunction shade(id) { var n = 0; String(id).split('').forEach(function (c) { n = (n + c.charCodeAt(0)) % SHADES.length; }); return SHADES[n]; }\n\nvar rows = [];\ntry { rows = await all('Community'); } catch (e) { rows = []; }\nvar c = rows[0];\nOutputs.name = c && c.name ? c.name : '';\nOutputs.isSetUp = !!c;\nOutputs.notSetUp = !c;\nOutputs.ok = true;\nfor (var i = 0; i < 16; i++) {\n  if (Noodl.Users.Current) { Outputs.check(); return; }\n  await new Promise(function (r) { setTimeout(r, 250); });\n}"
+      },
+      "ports": [
+        {
+          "name": "out-check",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isSetUp",
+          "displayName": "isSetUp",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-notSetUp",
+          "displayName": "notSetUp",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 520
+    },
+    {
+      "id": "wcRoute",
+      "type": "JavaScriptFunction",
+      "label": "Where they belong",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (await Noodl.CloudFunctions.run('whoAmI', {})).me || null; } catch (e) { return null; }\n}\nfunction why(e) { var m = (e && (e.error || e.message)) || String(e || ''); if (/admins’|^Sign in/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page couldn’t be read: ' + m; }\nasync function adminsOnly() {\n  var who = await me();\n  if (!who) throw { error: 'Sign in to see this page.' };\n  if (who.role !== 'admin') throw { error: 'This page is the admins’. Sign in as an admin to see it.' };\n  return who;\n}\nfunction ago(at) {\n  var t = at ? new Date(at.iso || at).getTime() : 0;\n  if (!t) return '';\n  var m = Math.max(0, Math.round((Date.now() - t) / 60000));\n  if (m < 1) return 'just now';\n  if (m < 60) return m + ' min ago';\n  var h = Math.round(m / 60);\n  if (h < 24) return h + ' h ago';\n  var d = Math.round(h / 24);\n  return d === 1 ? 'yesterday' : d + ' days ago';\n}\nvar SHADES = ['#4a6a2b', '#6a4a2b', '#2b4a6a', '#7a3e1d', '#4a2160', '#2b6a5a'];\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join('') || '?'; }\nfunction shade(id) { var n = 0; String(id).split('').forEach(function (c) { n = (n + c.charCodeAt(0)) % SHADES.length; }); return SHADES[n]; }\n\nvar who = await me();\nif (!who) { Outputs.problem = Noodl.Users.Current ? 'This sign-in isn’t a member of the community.' : ''; Outputs.stranger(); return; }\nif (who.status !== 'approved') { Outputs.waiting(); return; }\nif (who.role === 'admin') { Outputs.admin(); return; }\nOutputs.member();"
+      },
+      "ports": [
+        {
+          "name": "out-stranger",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-waiting",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-member",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-admin",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 1720
+    },
+    {
+      "id": "wcReturn",
+      "type": "net.noodl.user.SignInWith",
+      "label": "Back from a sign-in link",
+      "x": 590,
+      "y": 1840
+    },
+    {
+      "id": "wcToJoin",
+      "type": "RouterNavigate",
+      "label": "To ask to join",
+      "parameters": {
+        "target": "/Pages/Join"
+      },
+      "x": 590,
+      "y": 1000
+    },
+    {
+      "id": "wcToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 590,
+      "y": 1120
+    },
+    {
+      "id": "wcToSetUp",
+      "type": "RouterNavigate",
+      "label": "To set up",
+      "parameters": {
+        "target": "/Pages/SetUp"
+      },
+      "x": 590,
+      "y": 1600
+    },
+    {
+      "id": "wcToWaiting",
+      "type": "RouterNavigate",
+      "label": "To waiting",
+      "parameters": {
+        "target": "/Pages/Waiting"
+      },
+      "x": 590,
+      "y": 1960
+    },
+    {
+      "id": "wcToFeed",
+      "type": "RouterNavigate",
+      "label": "To the feed",
+      "parameters": {
+        "target": "/Pages/Feed"
+      },
+      "x": 590,
+      "y": 2080
+    },
+    {
+      "id": "wcToQueue",
+      "type": "RouterNavigate",
+      "label": "To the admins’ queue",
+      "parameters": {
+        "target": "/Pages/Admin/Queue"
+      },
+      "x": 590,
+      "y": 2200
+    }
+  ],
+  "visualRoots": [
+    "wcPage"
+  ]
+}

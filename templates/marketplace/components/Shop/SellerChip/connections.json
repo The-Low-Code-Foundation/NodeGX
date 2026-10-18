@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "76052350-7bf0-5dc3-85e7-a84b7a0147df",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "scIn",
+      "fromProperty": "logo",
+      "toId": "scLogo",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "scIn",
+      "fromProperty": "hasLogo",
+      "toId": "scLogo",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "scIn",
+      "fromProperty": "noLogo",
+      "toId": "scInitials",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "scIn",
+      "fromProperty": "tint",
+      "toId": "scInitials",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "scIn",
+      "fromProperty": "initials",
+      "toId": "scInitialsWords",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "scIn",
+      "fromProperty": "name",
+      "toId": "scName",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "scIn",
+      "fromProperty": "place",
+      "toId": "scPlace",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "scIn",
+      "fromProperty": "id",
+      "toId": "scGo",
+      "toProperty": "pm-sellerId"
+    },
+    {
+      "fromId": "scRoot",
+      "fromProperty": "onClick",
+      "toId": "scGo",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "scName",
+      "fromProperty": "onClick",
+      "toId": "scGo",
+      "toProperty": "navigate"
+    }
+  ]
+}

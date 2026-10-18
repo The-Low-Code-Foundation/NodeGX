@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "43f75914-6c8b-5b73-8cea-406f4642bfdc",
+  "name": "MemberRow",
+  "path": "/Admin/MemberRow",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One member: an admin, or Make admin"
+}

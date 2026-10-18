@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "fce29c19-fd62-5b7c-86fb-9a30ca10ae20",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tlIn",
+      "fromProperty": "src",
+      "toId": "tlImage",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "tlIn",
+      "fromProperty": "label",
+      "toId": "tlImage",
+      "toProperty": "alt"
+    },
+    {
+      "fromId": "tlIn",
+      "fromProperty": "hasPhoto",
+      "toId": "tlImage",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tlIn",
+      "fromProperty": "hasPhoto",
+      "toId": "tlOpen",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tlIn",
+      "fromProperty": "label",
+      "toId": "tlOpen",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tlIn",
+      "fromProperty": "noPhoto",
+      "toId": "tlWords",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tlIn",
+      "fromProperty": "words",
+      "toId": "tlWords",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tlIn",
+      "fromProperty": "id",
+      "toId": "tlToPost",
+      "toProperty": "pm-postId"
+    },
+    {
+      "fromId": "tlOpen",
+      "fromProperty": "onClick",
+      "toId": "tlToPost",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "tlWords",
+      "fromProperty": "onClick",
+      "toId": "tlToPost",
+      "toProperty": "navigate"
+    }
+  ]
+}

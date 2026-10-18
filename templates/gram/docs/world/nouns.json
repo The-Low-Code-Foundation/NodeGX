@@ -1,0 +1,244 @@
+{
+  "nouns": [
+    {
+      "id": "member",
+      "name": "Member",
+      "sentence": "A person in the ministry's community. They sign up, an admin lets them in, and then they post, heart, comment and pray. The builder is the first admin and can make volunteers admins later.",
+      "signsIn": true,
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "email",
+          "kind": "text",
+          "freeWords": true,
+          "secret": true
+        },
+        {
+          "name": "bio",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "photo",
+          "kind": "file"
+        },
+        {
+          "name": "status",
+          "kind": "choice",
+          "values": [
+            "waiting",
+            "approved"
+          ]
+        },
+        {
+          "name": "role",
+          "kind": "choice",
+          "values": [
+            "member",
+            "admin"
+          ]
+        },
+        {
+          "name": "blockedReason",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "readAloud": false,
+        "secret": true,
+        "calledBy": "name",
+        "history": true
+      }
+    },
+    {
+      "id": "post",
+      "name": "Post",
+      "sentence": "What a member shares in the feed: one or more photos and a caption. A prayer request, a testimony and an event are posts of their own kind.",
+      "properties": [
+        {
+          "name": "caption",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "photos",
+          "kind": "list"
+        },
+        {
+          "name": "kind",
+          "kind": "choice",
+          "values": [
+            "post",
+            "prayer",
+            "testimony",
+            "event"
+          ]
+        },
+        {
+          "name": "eventOn",
+          "kind": "date",
+          "onlyWhen": {
+            "field": "kind",
+            "is": "event",
+            "required": true
+          }
+        },
+        {
+          "name": "hiddenReason",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "prayedCount",
+          "kind": "number"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "readAloud": false,
+        "secret": false,
+        "calledBy": "caption",
+        "history": false
+      }
+    },
+    {
+      "id": "comment",
+      "name": "Comment",
+      "sentence": "A few words a member writes under a post.",
+      "properties": [
+        {
+          "name": "text",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "hiddenReason",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "readAloud": false,
+        "secret": false,
+        "calledBy": "text",
+        "history": false
+      }
+    },
+    {
+      "id": "devotional",
+      "name": "Devotional",
+      "sentence": "The ministry's reading for one day: a title, the scripture it is on and the text. The archive comes from the old blog's files; new ones are written in the app. Each morning the day's one is pinned at the top of the feed, and anyone can open it from a link, without an account.",
+      "properties": [
+        {
+          "name": "title",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "day",
+          "kind": "date"
+        },
+        {
+          "name": "scripture",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "body",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "source",
+          "kind": "choice",
+          "values": [
+            "archive",
+            "written"
+          ]
+        },
+        {
+          "name": "archiveFile",
+          "kind": "text",
+          "freeWords": true,
+          "onlyWhen": {
+            "field": "source",
+            "is": "archive",
+            "required": true
+          }
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "readAloud": false,
+        "secret": false,
+        "calledBy": "title",
+        "history": true
+      }
+    },
+    {
+      "id": "note",
+      "name": "Note",
+      "sentence": "A member's own note, private to them, written with or without a connection; it can be on a Bible verse or on a devotional.",
+      "properties": [
+        {
+          "name": "text",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "verse",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "readAloud": false,
+        "secret": false,
+        "calledBy": "text",
+        "history": false
+      }
+    },
+    {
+      "id": "community",
+      "name": "Community",
+      "sentence": "The settings of the community itself: its name, its rules, and the time each morning the day's devotional is released.",
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "rules",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "releaseAt",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "timeZone",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "onlyOne": true,
+        "readAloud": false,
+        "secret": false,
+        "calledBy": "name",
+        "history": true
+      }
+    }
+  ]
+}

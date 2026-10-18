@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7831ea42-c2f3-5c9d-81a7-689d8f23f70c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "opIn",
+      "fromProperty": "seller",
+      "toId": "opSeller",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "pill",
+      "toId": "opPillWords",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "pillBg",
+      "toId": "opPill",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "pillInk",
+      "toId": "opPillWords",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "steps",
+      "toId": "opEachStep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "lines",
+      "toId": "opLines",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "way",
+      "toId": "opWay",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "fine",
+      "toId": "opFine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "hasWhatsapp",
+      "toId": "opWhatsapp",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "whatsappLabel",
+      "toId": "opWhatsapp",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "opIn",
+      "fromProperty": "whatsappLink",
+      "toId": "opOpenWhatsapp",
+      "toProperty": "link"
+    },
+    {
+      "fromId": "opWhatsapp",
+      "fromProperty": "onClick",
+      "toId": "opOpenWhatsapp",
+      "toProperty": "do"
+    }
+  ]
+}

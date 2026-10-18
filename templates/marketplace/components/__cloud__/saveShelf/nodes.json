@@ -1,0 +1,93 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2b9798c0-910d-5bb8-8a85-a479b767d0ae",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-11",
+      "type": "noodl.cloud.request",
+      "label": "saveShelf(shelf)",
+      "parameters": {
+        "params": "shelf",
+        "ptype-shelf": "object",
+        "preq-shelf": true,
+        "allowNoAuth": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "run-9",
+      "type": "JavaScriptFunction",
+      "label": "Add a shelf, or rename one",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nasync function caller(userId) {\n  if (!userId) return null;\n  return one('Person', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\n\nvar c = Inputs.shelf;\nif (c === undefined || Inputs.userId === undefined) return;\nif (!c || typeof c !== 'object' || Array.isArray(c)) { refuse('The shelf arrived empty.'); return; }\nvar name = text(c.name, 80);\nif (!name) { refuse('A shelf needs a name.'); return; }\nvar id = text(c.id, 64);\nvar same = await Noodl.Records.query('Category', { name: { equalTo: name } }, { plain: true, limit: 2 });\nif (same.some(function (x) { return x.objectId !== id; })) { refuse('There is already a shelf called ' + name + '.'); return; }\nif (id) {\n  if (!(await one('Category', { objectId: { equalTo: id } }))) { refuse('There is no such shelf.'); return; }\n  await Noodl.Records.save(id, { name: name }, { className: 'Category' });\n  Outputs.id = id;\n  Outputs.done();\n  return;\n}\nvar made = await Noodl.Records.create('Category', { name: name });\nOutputs.id = made.getId();\nOutputs.done();",
+        "runOnChange-in-shelf": false,
+        "runOnChange-in-userId": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-shelf",
+          "displayName": "shelf",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ok-11",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "parameters": {
+        "params": "id"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "no-11",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

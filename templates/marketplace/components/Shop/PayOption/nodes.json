@@ -1,0 +1,195 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1ce7ea30-a2c3-56dc-8bf6-3e35cee6d0e8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "poRoot",
+      "type": "Group",
+      "label": "A way to pay",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "rowGap": "var(--space-0-5)",
+        "cssClassName": "mk-pointer"
+      },
+      "children": [
+        "poName",
+        "poFine"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "poName",
+      "type": "net.noodl.controls.button",
+      "label": "Pick it",
+      "parent": "poRoot",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)",
+        "color": "var(--foreground)",
+        "clickBubbling": "never",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "mk-left mk-wrap"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "poFine",
+      "type": "Text",
+      "label": "What it asks of the buyer",
+      "parent": "poRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "marginLeft": {
+          "value": 22,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "poIn",
+      "type": "Component Inputs",
+      "label": "One way to pay",
+      "ports": [
+        {
+          "name": "countryId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "wayId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "line",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "poPicks",
+      "type": "Variable2",
+      "label": "The ways picked so far",
+      "parameters": {
+        "name": "payPicks"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the way picked for each seller country: one pick per country, across every option."
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "poPick",
+      "type": "JavaScriptFunction",
+      "label": "Pick this way for this country",
+      "parameters": {
+        "functionScript": "var m = {};\ntry { m = JSON.parse(Inputs.picks || '{}') || {}; } catch (e) { m = {}; }\nif (!Inputs.countryId || !Inputs.wayId) return;\nm[String(Inputs.countryId)] = String(Inputs.wayId);\nOutputs.picks = JSON.stringify(m);\nOutputs.go();",
+        "runOnChange-in-picks": false,
+        "runOnChange-in-countryId": false,
+        "runOnChange-in-wayId": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-picks",
+          "displayName": "picks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-countryId",
+          "displayName": "countryId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-wayId",
+          "displayName": "wayId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-picks",
+          "displayName": "picks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "poSetPicks",
+      "type": "Set Variable",
+      "label": "The ways picked",
+      "parameters": {
+        "name": "payPicks",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the way picked for each seller country: one pick per country, across every option."
+      },
+      "x": 350,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "poRoot"
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e41f8bec-e123-58ef-82fc-a7af2ca9535f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req-18",
+      "fromProperty": "pm-pay",
+      "toId": "which",
+      "toProperty": "in-pay"
+    },
+    {
+      "fromId": "req-18",
+      "fromProperty": "receive",
+      "toId": "which",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "which",
+      "fromProperty": "out-keyName",
+      "toId": "key",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "which",
+      "fromProperty": "out-go",
+      "toId": "key",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "which",
+      "fromProperty": "out-notSet",
+      "toId": "noKey",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "which",
+      "fromProperty": "out-reason",
+      "toId": "no-18",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "which",
+      "fromProperty": "out-refused",
+      "toId": "no-18",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "which",
+      "fromProperty": "failure",
+      "toId": "no-18",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "key",
+      "fromProperty": "failure",
+      "toId": "noKey",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "key",
+      "fromProperty": "done",
+      "toId": "api",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "req-18",
+      "fromProperty": "pm-pay",
+      "toId": "run-16",
+      "toProperty": "in-pay"
+    },
+    {
+      "fromId": "key",
+      "fromProperty": "value",
+      "toId": "run-16",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "api",
+      "fromProperty": "value",
+      "toId": "run-16",
+      "toProperty": "in-api"
+    },
+    {
+      "fromId": "api",
+      "fromProperty": "done",
+      "toId": "run-16",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "api",
+      "fromProperty": "failure",
+      "toId": "run-16",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "run-16",
+      "fromProperty": "out-payment",
+      "toId": "ok-18",
+      "toProperty": "pm-payment"
+    },
+    {
+      "fromId": "run-16",
+      "fromProperty": "out-done",
+      "toId": "ok-18",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "run-16",
+      "fromProperty": "out-reason",
+      "toId": "no-18",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "run-16",
+      "fromProperty": "out-refused",
+      "toId": "no-18",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "run-16",
+      "fromProperty": "failure",
+      "toId": "no-18",
+      "toProperty": "send"
+    }
+  ]
+}

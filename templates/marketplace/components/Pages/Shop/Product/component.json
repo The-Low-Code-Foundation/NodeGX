@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b523f001-2604-5036-8d17-93595ed4f3d2",
+  "name": "Product",
+  "path": "/Pages/Shop/Product",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A product: its photos, price, seller, description; how many, into the basket, or order on WhatsApp; or enquire"
+}

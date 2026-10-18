@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6a8a1ef6-a829-5b3a-8c7c-3245e1c45842",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "wcRoot",
+      "fromProperty": "didMount",
+      "toId": "wcLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "wcLoad",
+      "fromProperty": "out-ok",
+      "toId": "wcContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wcLoad",
+      "fromProperty": "out-name",
+      "toId": "wcName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wcLoad",
+      "fromProperty": "out-isSetUp",
+      "toId": "wcOpen",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wcLoad",
+      "fromProperty": "out-notSetUp",
+      "toId": "wcNew",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wcLoad",
+      "fromProperty": "out-check",
+      "toId": "wcRoute",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "wcRoute",
+      "fromProperty": "out-problem",
+      "toId": "wcProblem",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wcReturn",
+      "fromProperty": "error",
+      "toId": "wcProblem",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wcRoute",
+      "fromProperty": "out-waiting",
+      "toId": "wcToWaiting",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "wcRoute",
+      "fromProperty": "out-member",
+      "toId": "wcToFeed",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "wcRoute",
+      "fromProperty": "out-admin",
+      "toId": "wcToQueue",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "wcJoin",
+      "fromProperty": "onClick",
+      "toId": "wcToJoin",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "wcSignIn",
+      "fromProperty": "onClick",
+      "toId": "wcToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "wcSetUp",
+      "fromProperty": "onClick",
+      "toId": "wcToSetUp",
+      "toProperty": "navigate"
+    }
+  ]
+}

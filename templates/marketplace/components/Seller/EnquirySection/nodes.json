@@ -1,0 +1,140 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2cae6362-d014-56d7-8ab6-40b7a7540772",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "esRoot",
+      "type": "Group",
+      "label": "A section",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "esHead",
+        "esList"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "esHead",
+      "type": "Group",
+      "label": "Heading and what to do",
+      "parent": "esRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "esHeading",
+        "esNote"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "esHeading",
+      "type": "Text",
+      "label": "The heading",
+      "parent": "esHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h2",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "esNote",
+      "type": "Text",
+      "label": "What to do with these",
+      "parent": "esHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "esList",
+      "type": "Group",
+      "label": "The enquiries",
+      "parent": "esRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "esEach"
+      ],
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "esEach",
+      "type": "For Each",
+      "label": "One card per enquiry",
+      "parent": "esList",
+      "parameters": {
+        "template": "/Seller/EnquiryCard"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "esIn",
+      "type": "Component Inputs",
+      "label": "One section",
+      "ports": [
+        {
+          "name": "heading",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cards",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "esRoot"
+  ]
+}

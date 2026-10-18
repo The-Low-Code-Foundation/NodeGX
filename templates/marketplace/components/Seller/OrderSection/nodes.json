@@ -1,0 +1,140 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4d8f38c3-6769-5725-8450-97b52552edac",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "osRoot",
+      "type": "Group",
+      "label": "A section",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "osHead",
+        "osList"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "osHead",
+      "type": "Group",
+      "label": "Heading and what to do",
+      "parent": "osRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "osHeading",
+        "osNote"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "osHeading",
+      "type": "Text",
+      "label": "The heading",
+      "parent": "osHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h2",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "osNote",
+      "type": "Text",
+      "label": "What to do with these",
+      "parent": "osHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "osList",
+      "type": "Group",
+      "label": "The parts",
+      "parent": "osRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "osEach"
+      ],
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "osEach",
+      "type": "For Each",
+      "label": "One card per part",
+      "parent": "osList",
+      "parameters": {
+        "template": "/Seller/OrderCard"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "osIn",
+      "type": "Component Inputs",
+      "label": "One section",
+      "ports": [
+        {
+          "name": "heading",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cards",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "osRoot"
+  ]
+}

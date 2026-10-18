@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4ea647c2-3922-5ca7-89e8-40c983152056",
+  "name": "sendEnquiry",
+  "path": "/#__cloud__/sendEnquiry",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Send a seller a message about one product sold by enquiry, with or without an account"
+}

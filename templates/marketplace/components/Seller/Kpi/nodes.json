@@ -1,0 +1,83 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8d4cb1d9-c09d-5b59-8ba3-2c81a7baf5c1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "kpRoot",
+      "type": "Group",
+      "label": "How many",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "cssClassName": "mk-grow"
+      },
+      "children": [
+        "kpN",
+        "kpWords"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "kpN",
+      "type": "Text",
+      "label": "The count",
+      "parent": "kpRoot",
+      "parameters": {
+        "text": "0",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--secondary)",
+        "cssClassName": "mk-display"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "kpWords",
+      "type": "Text",
+      "label": "Of what",
+      "parent": "kpRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "kpIn",
+      "type": "Component Inputs",
+      "label": "One count",
+      "ports": [
+        {
+          "name": "n",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "kpRoot"
+  ]
+}

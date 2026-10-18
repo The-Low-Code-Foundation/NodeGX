@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "fce29c19-fd62-5b7c-86fb-9a30ca10ae20",
+  "name": "Tile",
+  "path": "/Profile/Tile",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One post in a profile’s grid: its first photo or its first words; opens the post"
+}
