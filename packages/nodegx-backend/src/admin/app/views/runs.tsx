@@ -397,7 +397,16 @@ function Band({ summary, word }: { summary: ExecutionSummary; word: string }) {
 const SHOWN = 5;
 
 function FailureBand({ summary }: { summary: ExecutionSummary }) {
-  if (!summary.failures.length) return null;
+  // A run with no failed step (a webhook refused for its signature or its size) still has its own reason: show it.
+  if (!summary.failures.length) {
+    if (!summary.errorMessage) return null;
+    return (
+      <div class="rec-danger">
+        <div class="rec-danger-head">Why it failed</div>
+        <div class="rec-danger-why">{summary.errorMessage}</div>
+      </div>
+    );
+  }
   const n = summary.failures.length;
   return (
     <div class="rec-danger">
