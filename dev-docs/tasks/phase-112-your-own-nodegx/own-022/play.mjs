@@ -94,8 +94,14 @@ const START = opt('--path', GAME.path);
 const [VW, VH] = opt('--viewport', '1024x768').split('x').map(Number);
 const MAX_STEPS = Number(opt('--max-steps', 150));
 const EFFORT = opt('--effort', null);
-const API_TIMEOUT_MS = Number(opt('--api-timeout', 600)) * 1000;
+// rig-none-low-1: after reading Pages/Game, four answers in a row thought past 300 s — the graph sets off long thinks
+const API_TIMEOUT_MS = Number(opt('--api-timeout', 1200)) * 1000;
 const MAX_MINUTES = Number(opt('--max-minutes', 0)); // 0 = no wall cap
+// 🔴 Node's built-in fetch gives up waiting for headers at 300 s (undici's headersTimeout) whatever the AbortSignal says:
+// rig-none-low-2 died "fetch failed / HeadersTimeoutError" at 301 s on a long think. The repo's undici, with a dispatcher
+// whose limits are the API timeout, waits as long as we mean to.
+const { fetch: ufetch, Agent } = require(path.join(REPO, 'node_modules/undici'));
+const DISPATCHER = new Agent({ headersTimeout: API_TIMEOUT_MS, bodyTimeout: API_TIMEOUT_MS });
 const MODEL = opt('--model', 'mistral-large-4'); // 🔴 pinned: `mistral-large-latest` answers as a different model (OWN-018 §3)
 const OUT = path.resolve(opt('--out', path.join(process.env.TMPDIR || '/tmp', `own022-${Date.now()}`)));
 const KEEP_SHOTS = Number(opt('--keep-shots', 2)); // how many recent screenshots stay in the conversation
@@ -185,8 +191,9 @@ async function chat(messages, toolChoice = 'any') {
     try {
       // 🔴 without a timeout one request hung 300 s (Node's fetch default) in smoke3. Monster Gate answers take 1–6 s, but on
       // the heist board Large 4 plans before it moves: one answer took 29.5 s / 2,738 reasoning tokens on its retry after
-      // a 90 s abort, and fair-smoke4's thinks ran 83–209 s with two over 300 s. --api-timeout (default 600 s) cuts only a dead connection.
-      r = await fetch('https://api.mistral.ai/v1/chat/completions', {
+      // a 90 s abort, and fair-smoke4's thinks ran 83–209 s with two over 300 s. --api-timeout (default 1200 s) cuts only a dead connection.
+      r = await ufetch('https://api.mistral.ai/v1/chat/completions', {
+        dispatcher: DISPATCHER,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${KEY}` },
         body: JSON.stringify(body),
@@ -334,7 +341,15 @@ const result = await withDeployedSite({ origin: ORIGIN, visible: flag('--visible
     step += 1;
     pruneImages(messages);
     pruneGraph(messages);
-    const res = await chat(messages);
+    let res;
+    try {
+      res = await chat(messages);
+    } catch (e) {
+      // the API failed four times running: the run ends as an error, with everything so far kept
+      verdict = 'error';
+      finishReason = `api: ${e.message}`.slice(0, 300);
+      break;
+    }
     const msg = res.choices[0].message;
     const u = res.usage || {};
     totals.calls += 1;

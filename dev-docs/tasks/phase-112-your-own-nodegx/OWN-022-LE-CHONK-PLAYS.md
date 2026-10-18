@@ -8,7 +8,11 @@ ruled the same day: **both, in that order** ("Rock out").
 **Status: 🟡 s1 (2026-10-18): Large 4 WON its first full game of Monster Gate from screenshots alone** — new player made,
 game found and started, three monsters sent home with all three hearts, 33 calls, 123 s, $0.09, 0 console errors.
 Next: two more wins in a row (AC2), let the strip run to "The gate held!", then Challenge (AC3), then the build half.
-**Deadline:** not in the announcement as pasted — ask Richard.
+**Deadline: 2026-10-29 23:59** (Mistral's full brief, pasted 2026-10-18). Judged on **fun, complexity, performance,
+reproducibility**; prizes 250 / 50 credits + swag, plus a community vote (👍 reactions in `challenges-submissions`, then a
+poll). **A submission must have:** a video (also used for the vote); a GitHub repo with all the code and a full README for
+the setup; how it was developed (how many people, what tools, what OSS it builds on). Studio API, `mistral-large-4`
+(their note: `-latest` is not Large 4 — OWN-018 measured the same).
 
 ## 1. The person sentence
 
@@ -38,7 +42,9 @@ Next: two more wins in a row (AC2), let the strip run to "The gate held!", then 
 | AC3 | The same on Challenge (the walking clock): the result is the finding, win or lose — how much does its thinking cost it? | ⬜ |
 | AC4 | A game brief (ours: rules, difficulty, referee text, turn-based, visual) → Large 4 in Vibe builds it as a NodeGX app with OWN-019's kit | 🟡 **HB1 built it**: 14 of its 17 checklist lines proven (the rest: the tally reload drive and the phone check), 4 sittings, 268 min, $14.83 list; sittings 3–4 died on the lab's record proxy ("fetch failed", 127.0.0.1:8886) while the Mac slept — not the model |
 | AC5 | `play.mjs --game <that>` — Large 4 plays the game it built and wins, by the harness's verdict | ⬜ |
-| AC6 | The entry: a short video / gif strip from the shots, the harness public, posted to the Discord | ⬜ Richard posts |
+| AC6 | **The submission** by 2026-10-29: a public repo (harness + both games' setup, a README a stranger can follow — reproducibility is judged), the video, the "how it was developed" note, posted in `challenges-submissions` | ⬜ Richard posts |
+| — | **Rulings 2026-10-18:** the repo is **new and standalone on Richard's GitHub** (MIT for the harness; NodeGX from npm), built locally — Richard creates and pushes it (pushing makes it public); **the video: Opus cuts it** from the runs (screenshots, Large 4's own words as captions, a live-run segment), **Richard narrates** | ✅ ruled |
+| AC8 | **The report** — a shareable page for the Mistral community (pixel fat cats; our own drawing, never Mistral's art): the setup, the tally per arm, the moments it found / used / passed up a cheat in its own words, the interviews, costs, caveats | ⬜ after the arms |
 | AC7 | **The cheat experiment (§6)** on the game AC4 builds: rigged + two planted cheats, the arms × 10 runs, the harness's tally of who found / used / admitted each cheat | 🟡 **pass 1 running** (2026-10-18 ~21:00): 7 arms × 3, three lanes (`own-022/lane.sh`), tallied by `own-022/tally.mjs` |
 
 ## 6. The cheat experiment (ruled 2026-10-18)
