@@ -34,9 +34,9 @@ Next: two more wins in a row (AC2), let the strip run to "The gate held!", then 
 | AC | What | Status |
 |---|---|---|
 | AC1 | `own-022/play.mjs` plays live Monster Gate from screenshots alone; a run writes every call (latency, tokens, what it said and did), the screenshots and a result | ✅ s1 |
-| AC2 | Large 4 **wins** Monster Gate (Beat it to the gate, Practice) — the harness's verdict, three runs in a row, cost and wall time recorded | 🟡 1 of 3 (game1: won, 33 calls, 123 s, $0.09) |
+| AC2 | Large 4 **wins** Monster Gate (Beat it to the gate, Practice) — the harness's verdict, three runs in a row, cost and wall time recorded | ✅ 3 of 3 (game1–3: won; 33 / 30 / 29 calls, 123 / 145 / 107 s, $0.09 / $0.09 / $0.08) |
 | AC3 | The same on Challenge (the walking clock): the result is the finding, win or lose — how much does its thinking cost it? | ⬜ |
-| AC4 | A game brief (ours: rules, difficulty, referee text, turn-based, visual) → Large 4 in Vibe builds it as a NodeGX app with OWN-019's kit | 🟡 brief written (`own-022/sentence-game.txt`, solved by `solve-heist.mjs`); build not started |
+| AC4 | A game brief (ours: rules, difficulty, referee text, turn-based, visual) → Large 4 in Vibe builds it as a NodeGX app with OWN-019's kit | 🟡 brief written (`own-022/sentence-game.txt`, solved by `solve-heist.mjs`); **HB1 building** (s1 scratchpad `build/HB1`, npm 0.2.2 kit, `--kit vibe --sittings 4 --max-total 20`) |
 | AC5 | `play.mjs --game <that>` — Large 4 plays the game it built and wins, by the harness's verdict | ⬜ |
 | AC6 | The entry: a short video / gif strip from the shots, the harness public, posted to the Discord | ⬜ Richard posts |
 | AC7 | **The cheat experiment (§6)** on the game AC4 builds: rigged + two planted cheats, the arms × 10 runs, the harness's tally of who found / used / admitted each cheat | ⬜ waits on AC4 |
@@ -93,9 +93,15 @@ in the scratchpad, never in `packages/` or anything published.
   2.6k output, $0.08 at the launch sale. 0% cached: pruning old screenshots rewrites the prefix. Not worth fixing yet.
 - **With tools it thinks little** (18–415 reasoning tokens a call, 1.4–5.4 s); without tools, asked for coordinates,
   it reasoned for minutes.
+- **Empty turns:** Large 4 sometimes answers with neither words nor a tool call, even under `tool_choice: "any"`; Mistral
+  then refuses that turn sent back ("must have either content or tool_calls"). The harness leaves an empty turn out.
+- **The interview works** (game2, `--interview`): asked how it won, it told the run straight — the name it made, the
+  settings it kept, sample sums, "no wrong answers at all" (its log shows none; the harness doesn't yet count them itself).
 - CDP's `mouseWheel` answered "Invalid parameters"; the harness scrolls the nearest scroller under the centre instead.
 
 ## 5. Session log
 
-- **s1 (2026-10-18):** task opened; `own-022/play.mjs`; the probes above; smoke1–3; game1 **won**. Runs live in the
+- **s1 (2026-10-18):** task opened; `own-022/play.mjs`; the probes above; smoke1–3; game1–3 **won** (AC2). §6 designed
+  and ruled; the brief solved; play.mjs grew `--game heist`, `--pressure`, `--graph` (the packed MCP, read-only),
+  `--cheat-name`, `--interview` and the harness's cheat records; HB1 (the build) started. Runs live in the
   session scratchpad (not committed); rerun with `node dev-docs/tasks/phase-112-your-own-nodegx/own-022/play.mjs --out <dir>`.
