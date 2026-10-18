@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Big Blocks</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧱</text></svg>" />
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/kit/preview-in-page.js"></script>
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <header class="top">
+      <div class="title"><span class="logo" aria-hidden="true">🧱</span> <span id="app-name">Big Blocks</span></div>
+      <button id="undo" class="big-button" disabled title="Ctrl+Z"><span aria-hidden="true">↩️</span> Undo</button>
+      <button id="save" class="big-button save" disabled title="Ctrl+S"><span aria-hidden="true">💾</span> <span id="save-words">Saved</span></button>
+      <div id="message" class="message" role="status" aria-live="polite"></div>
+      <button id="open-other" class="small-button" title="Open a different app's folder">📂 Another app</button>
+    </header>
+
+    <main class="room">
+      <nav class="parts" aria-label="Parts of the app">
+        <h2>Pick a part</h2>
+        <div id="parts"></div>
+      </nav>
+
+      <section class="workbench" aria-label="Blocks">
+        <div class="part-head">
+          <h1 id="part-name">…</h1>
+          <p id="part-note" class="note" hidden></p>
+        </div>
+        <div id="blocks" class="blocks"></div>
+        <details id="helpers-box" class="helpers-box">
+          <summary><span aria-hidden="true">⚙️</span> Helpers <span class="quiet">— they do the work you can't see</span> <span id="helper-count" class="count"></span></summary>
+          <p class="note">Drag a helper to tidy them up. Tap one to see what it does.</p>
+          <div id="helpers" class="helpers"></div>
+        </details>
+        <div class="palette" aria-label="Add a block">
+          <span class="palette-word">Add:</span>
+          <div id="palette" class="palette-tiles"></div>
+        </div>
+      </section>
+
+      <aside class="side">
+        <section class="screen" aria-label="The app">
+          <h2><span aria-hidden="true">📱</span> The app <span id="screen-state" class="quiet"></span></h2>
+          <div id="screen" class="screen-frame"></div>
+        </section>
+        <section class="change" aria-label="Change it">
+          <div id="change"></div>
+        </section>
+      </aside>
+    </main>
+
+    <dialog id="ask" class="ask">
+      <form method="dialog">
+        <p id="ask-words"></p>
+        <div class="ask-buttons">
+          <button value="yes" id="ask-yes" class="big-button danger">Yes</button>
+          <button value="no" id="ask-no" class="big-button" autofocus>No</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>

@@ -66,7 +66,8 @@ export async function openChrome(url, { width = 1440, height = 960 } = {}) {
     await sleep(200);
   };
   const selectAllAndType = async (text) => {
-    await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'a', code: 'KeyA', modifiers: 4, windowsVirtualKeyCode: 65 });
+    // macOS: a Meta+A key event selects nothing in headless Chrome; the editing command does what the keys do.
+    await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'a', code: 'KeyA', modifiers: 4, windowsVirtualKeyCode: 65, commands: ['selectAll'] });
     await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'a', code: 'KeyA', modifiers: 4, windowsVirtualKeyCode: 65 });
     await send('Input.insertText', { text });
     await sleep(150);

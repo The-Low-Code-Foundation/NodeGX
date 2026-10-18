@@ -63,6 +63,8 @@ const args = [
   '--max-budget-usd', '60'
 ];
 const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => !/^(CLAUDE|MCP_)/.test(k)));
+// The blocks stranger's `npm install puppeteer` put 590 MB of Chrome in ~/.cache/puppeteer (2026-10-18): keep it in the lab.
+env.PUPPETEER_CACHE_DIR = path.join(LAB, '.home', 'puppeteer');
 // Richard's ruling 2026-10-16: the strangers run after the weekly reset. The stream reports the allowance on every
 // rate_limit_event; a stranger is stopped when the seven-day window reaches QUOTA_STOP, or when this round alone has
 // used QUOTA_SPEND of it since its first reading, and the stop is written down.
