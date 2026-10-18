@@ -1,0 +1,16 @@
+{
+  "version": "https://jsonfeed.org/version/1.1",
+  "title": "NodeGX — what's new",
+  "home_page_url": "https://the-low-code-foundation.github.io/nodegx-content/",
+  "feed_url": "https://the-low-code-foundation.github.io/nodegx-content/static/whats-new/feed.json",
+  "description": "Release notes shown in the NodeGX editor. An empty items list means there is nothing to announce; the editor treats that as a normal state and opens no modal.",
+  "items": [
+    {
+      "id": "nodegx-0.4.2",
+      "url": "https://nodegx.io/changelog/#v0-4-2",
+      "title": "NodeGX 0.4.2",
+      "date_modified": "SET-TO-THE-PUBLISH-MOMENT-eg-2026-10-20T12:00:00Z",
+      "content_html": "<h2>NodeGX 0.4.2</h2><p><strong>Upload File can keep a photo for members only.</strong> Its new Readers input names the roles, such as <code>role:member</code>, that can open a private file.</p><p><strong>Upload File can make a photo smaller before sending it.</strong> Set its new Shrink To input to the longest side in pixels.</p><p><strong>A webhook trigger can check Paystack's signature.</strong> Choose <em>Paystack signature</em> for the hook in the backend's admin app.</p><p><a href=\"https://nodegx.io/changelog/#v0-4-2\" target=\"_blank\">Everything in 0.4.2</a></p>"
+    }
+  ]
+}

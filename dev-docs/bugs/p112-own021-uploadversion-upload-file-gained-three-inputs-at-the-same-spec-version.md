@@ -2,6 +2,7 @@
 id: P112-OWN021-UPLOADVERSION
 title: Upload File gained three inputs at spec version 3, so the PR workflow's golden check would fail the 0.4.2 cut
 status: fixed
+commit: 11e908686
 severity: medium
 area: "`@nodegx/node-spec` `src/nodes/upload-file.ts`; `golden/Upload File.json`"
 found: P112 OWN-021 s1, 2026-10-19 (the cut's survey: "Upload File spec stays at v3")
