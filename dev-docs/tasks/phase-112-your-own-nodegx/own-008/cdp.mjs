@@ -7,12 +7,12 @@ import { spawn } from 'node:child_process';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-export async function openChrome(url, { width = 1440, height = 960 } = {}) {
+export async function openChrome(url, { width = 1440, height = 960, flags = [] } = {}) {
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'own008-chrome-'));
   const port = 59700 + Math.floor(Math.random() * 200);
   const chrome = spawn('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', [
     '--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, '--no-first-run',
-    '--no-default-browser-check', '--use-mock-keychain', `--window-size=${width},${height}`, 'about:blank'
+    '--no-default-browser-check', '--use-mock-keychain', `--window-size=${width},${height}`, ...flags, 'about:blank'
   ], { stdio: 'ignore' });
   let target;
   for (let i = 0; i < 60 && !target; i++) {

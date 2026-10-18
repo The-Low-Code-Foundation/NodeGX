@@ -1,0 +1,19 @@
+[
+  { "edit": "add_node", "component": "Todo/Header", "id": "e-help", "type": "Text", "parent": "hdNav", "index": 2, "parameters": { "text": "Help", "fontSize": 14 } },
+  { "edit": "rename", "component": "Todo/Header", "id": "e-help", "label": "Help link" },
+  { "edit": "set_parameter", "component": "Todo/Header", "id": "hdTitle", "name": "fontSize", "value": 28 },
+  { "edit": "connect", "component": "Todo/Header", "from": { "node": "hdIn", "port": "listLabel" }, "to": { "node": "e-help", "port": "text" } },
+  { "edit": "disconnect", "component": "Todo/Header", "from": { "node": "hdIn", "port": "doneLabel" }, "to": { "node": "hdDone", "port": "label" } },
+  { "edit": "move", "component": "Todo/Header", "id": "hdLook", "x": 520, "y": 1180 },
+  { "edit": "add_child", "component": "Todo/Header", "id": "hdTheme", "parent": "hdRoot", "index": 0 },
+  { "edit": "add_node", "component": "Todo/Header", "id": "e-box", "type": "Group", "parent": "hdRoot" },
+  { "edit": "add_node", "component": "Todo/Header", "id": "e-boxText", "type": "Text", "parent": "e-box", "parameters": { "text": "inside" } },
+  { "edit": "connect", "component": "Todo/Header", "from": { "node": "hdIn", "port": "todayLabel" }, "to": { "node": "e-boxText", "port": "text" } },
+  { "edit": "remove_node", "component": "Todo/Header", "id": "e-box" },
+  { "edit": "remove_node", "component": "Todo/Header", "id": "hdSignOut" },
+  { "edit": "add_node", "component": "Commands/Add task", "id": "e-var", "type": "Set Variable", "x": 300, "y": 640, "label": "Remember the last title", "parameters": { "name": "lastAdded", "setWith": "string" } },
+  { "edit": "connect", "component": "Commands/Add task", "from": { "node": "AddtaskGuard", "port": "out-title" }, "to": { "node": "e-var", "port": "value" } },
+  { "edit": "connect", "component": "Commands/Add task", "from": { "node": "AddtaskHistory", "port": "done" }, "to": { "node": "e-var", "port": "do" } },
+  { "edit": "set_parameter", "component": "Commands/Add task", "id": "AddtaskProblem", "name": "value" },
+  { "edit": "move", "component": "Commands/Add task", "id": "e-var", "x": 320, "y": 700 }
+]
