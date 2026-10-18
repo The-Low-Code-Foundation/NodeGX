@@ -1,5 +1,6 @@
 {
  "ready": true,
+ "project": "orbit",
  "viewport": {
   "width": 1280,
   "height": 800
@@ -7,10 +8,20 @@
  "variant": null,
  "mutant": null,
  "stilled": true,
+ "status": {
+  "status": "ok",
+  "warnings": [],
+  "exportMs": 8,
+  "frameMs": 139.79999995231628
+ },
+ "rootPath": "/App",
+ "pages": {},
  "rows": [
   {
+   "path": "screen",
    "id": "screen",
    "type": "Group",
+   "label": "Screen",
    "drawn": {
     "x": 0,
     "y": 0,
@@ -28,14 +39,17 @@
    "dw": 0,
    "dh": 0,
    "within": true,
+   "verdict": "within 2 px",
    "present": true,
    "outside": [],
    "needs": [],
    "limits": []
   },
   {
+   "path": "phaseTxt",
    "id": "phaseTxt",
    "type": "Text",
+   "label": "Phase label",
    "drawn": {
     "x": 587.6923828125,
     "y": 240,
@@ -53,6 +67,7 @@
    "dw": -0.009765625,
    "dh": 0,
    "within": true,
+   "verdict": "within 2 px",
    "present": true,
    "outside": [],
    "needs": [
@@ -62,8 +77,10 @@
    "limits": []
   },
   {
+   "path": "timeTxt",
    "id": "timeTxt",
    "type": "Text",
+   "label": "Time",
    "drawn": {
     "x": 510.6610870361328,
     "y": 282,
@@ -81,6 +98,7 @@
    "dw": -10.415924072265625,
    "dh": 0,
    "within": false,
+   "verdict": "named: Numerals is tabular-nums: a canvas measures proportional digits (no font-feature setting)",
    "present": true,
    "outside": [],
    "needs": [
@@ -92,8 +110,10 @@
    ]
   },
   {
+   "path": "track",
    "id": "track",
    "type": "Group",
+   "label": "Track",
    "drawn": {
     "x": 36,
     "y": 421,
@@ -111,14 +131,17 @@
    "dw": 0,
    "dh": 0,
    "within": true,
+   "verdict": "within 2 px",
    "present": true,
    "outside": [],
    "needs": [],
    "limits": []
   },
   {
+   "path": "bar",
    "id": "bar",
    "type": "Group",
+   "label": "Progress bar",
    "drawn": {
     "x": 36,
     "y": 421,
@@ -136,14 +159,17 @@
    "dw": 0.008458333333333345,
    "dh": 0,
    "within": true,
+   "verdict": "within 2 px",
    "present": true,
    "outside": [],
    "needs": [],
    "limits": []
   },
   {
+   "path": "footTxt",
    "id": "footTxt",
    "type": "Text",
+   "label": "Footer",
    "drawn": {
     "x": 506.74749755859375,
     "y": 445,
@@ -161,6 +187,7 @@
    "dw": -0.0106201171875,
    "dh": 0,
    "within": true,
+   "verdict": "within 2 px",
    "present": true,
    "outside": [],
    "needs": [
@@ -170,8 +197,10 @@
    "limits": []
   },
   {
+   "path": "btnRow",
    "id": "btnRow",
    "type": "Group",
+   "label": "Buttons",
    "drawn": {
     "x": 506,
     "y": 508,
@@ -189,14 +218,17 @@
    "dw": 0,
    "dh": 0,
    "within": true,
+   "verdict": "within 2 px",
    "present": true,
    "outside": [],
    "needs": [],
    "limits": []
   },
   {
+   "path": "pauseBtn",
    "id": "pauseBtn",
    "type": "net.noodl.controls.button",
+   "label": "Pause button",
    "drawn": {
     "x": 506,
     "y": 508,
@@ -214,14 +246,17 @@
    "dw": 0,
    "dh": 0,
    "within": true,
+   "verdict": "within 2 px",
    "present": true,
    "outside": [],
    "needs": [],
    "limits": []
   },
   {
+   "path": "skipBtn",
    "id": "skipBtn",
    "type": "net.noodl.controls.button",
+   "label": "Skip button",
    "drawn": {
     "x": 654,
     "y": 508,
@@ -239,6 +274,7 @@
    "dw": 0,
    "dh": 0,
    "within": true,
+   "verdict": "within 2 px",
    "present": true,
    "outside": [],
    "needs": [],
@@ -247,7 +283,7 @@
  ],
  "needs": [
   "the root's parent: the app's root element, the viewport's size, stacked down (no node, no spec says so)",
-  "the values on the wires: the real app's trace (a drawn screen cannot run the graph)",
+  "the values on the wires: a trace or a graph runner (a drawn screen cannot run the graph)",
   "phaseTxt: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
   "phaseTxt: the text measured by a canvas in the font the system resolves, not by the model",
   "timeTxt: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",

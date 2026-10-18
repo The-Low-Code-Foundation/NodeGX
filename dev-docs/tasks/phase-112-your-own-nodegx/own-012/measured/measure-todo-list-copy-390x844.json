@@ -1,0 +1,1380 @@
+{
+ "ready": true,
+ "project": "todo-list-copy",
+ "viewport": {
+  "width": 390,
+  "height": 844
+ },
+ "variant": null,
+ "mutant": null,
+ "stilled": true,
+ "status": {
+  "status": "ok",
+  "warnings": [],
+  "exportMs": 210.70000004768372,
+  "frameMs": 196
+ },
+ "rootPath": "/App",
+ "pages": {
+  "app_router": "/Pages/Sign in"
+ },
+ "rows": [
+  {
+   "path": "app_root",
+   "id": "app_root",
+   "type": "Group",
+   "label": "App",
+   "drawn": {
+    "x": 0,
+    "y": 0,
+    "width": 390,
+    "height": 465.5
+   },
+   "real": {
+    "x": 0,
+    "y": 0,
+    "width": 390,
+    "height": 504.5
+   },
+   "dx": 0,
+   "dy": 0,
+   "dw": 0,
+   "dh": -39,
+   "within": false,
+   "sizeOk": false,
+   "posOk": true,
+   "own": [],
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": [],
+   "verdict": "named: holds app_router, app_router/siPage, app_router/siRoot, app_router/siTheme/thRoot, app_router/siTheme/thToDark, app_router/siCard, app_router/siLead, app_router/siEmail, app_router/siPassword, app_router/siButtons, app_router/siSignIn, app_router/siCreate"
+  },
+  {
+   "path": "app_router",
+   "id": "app_router",
+   "type": "Router",
+   "label": "Main router",
+   "parent": "app_root",
+   "drawn": {
+    "x": 0,
+    "y": 0,
+    "width": 390,
+    "height": 465.5
+   },
+   "real": {
+    "x": 0,
+    "y": 0,
+    "width": 390,
+    "height": 504.5
+   },
+   "dx": 0,
+   "dy": 0,
+   "dw": 0,
+   "dh": -39,
+   "within": false,
+   "sizeOk": false,
+   "posOk": true,
+   "own": [
+    "the Router's box: its spec has no size or axis role; drawn as a column that fills its parent and stretches across it, its page the start page unless told (the runtime's element, read once — not a description)"
+   ],
+   "present": true,
+   "outside": [],
+   "needs": [
+    "the Router's box: its spec has no size or axis role; drawn as a column that fills its parent and stretches across it, its page the start page unless told (the runtime's element, read once — not a description)"
+   ],
+   "limits": [],
+   "verdict": "named: the Router's box: its spec has no size or axis role; drawn as a column that fills its parent and stretches across it, its page the start page unless told (the runtime's element, read once — not a description)"
+  },
+  {
+   "path": "app_router/siPage",
+   "id": "siPage",
+   "type": "Page",
+   "label": "Sign in",
+   "parent": "app_router",
+   "drawn": {
+    "x": 0,
+    "y": 0,
+    "width": 390,
+    "height": 465.5
+   },
+   "real": {
+    "x": 0,
+    "y": 0,
+    "width": 390,
+    "height": 504.5
+   },
+   "dx": 0,
+   "dy": 0,
+   "dw": 0,
+   "dh": -39,
+   "within": false,
+   "sizeOk": false,
+   "posOk": true,
+   "own": [
+    "the Page has no spec yet: drawn as a column that fills its parent, its children starting at the left (the runtime's element, read once — not a description)"
+   ],
+   "present": true,
+   "outside": [],
+   "needs": [
+    "the Page has no spec yet: drawn as a column that fills its parent, its children starting at the left (the runtime's element, read once — not a description)"
+   ],
+   "limits": [],
+   "verdict": "named: the Page has no spec yet: drawn as a column that fills its parent, its children starting at the left (the runtime's element, read once — not a description)"
+  },
+  {
+   "path": "app_router/siRoot",
+   "id": "siRoot",
+   "type": "Group",
+   "label": "Page",
+   "parent": "app_router/siPage",
+   "drawn": {
+    "x": 0,
+    "y": 0,
+    "width": 390,
+    "height": 465.5
+   },
+   "real": {
+    "x": 0,
+    "y": 0,
+    "width": 390,
+    "height": 504.5
+   },
+   "dx": 0,
+   "dy": 0,
+   "dw": 0,
+   "dh": -39,
+   "within": false,
+   "sizeOk": false,
+   "posOk": true,
+   "own": [],
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": [],
+   "verdict": "named: holds app_router/siTheme/thRoot, app_router/siTheme/thToDark, app_router/siCard, app_router/siLead, app_router/siEmail, app_router/siPassword, app_router/siButtons, app_router/siSignIn, app_router/siCreate"
+  },
+  {
+   "path": "app_router/siTop",
+   "id": "siTop",
+   "type": "Group",
+   "label": "Top right",
+   "parent": "app_router/siRoot",
+   "drawn": {
+    "x": 16,
+    "y": 16,
+    "width": 358,
+    "height": 74
+   },
+   "real": {
+    "x": 16,
+    "y": 16,
+    "width": 358,
+    "height": 75
+   },
+   "dx": 0,
+   "dy": 0,
+   "dw": 0,
+   "dh": -1,
+   "within": true,
+   "sizeOk": true,
+   "posOk": true,
+   "own": [],
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": [],
+   "verdict": "within 2 px"
+  },
+  {
+   "path": "app_router/siTheme/thRoot",
+   "id": "thRoot",
+   "type": "Group",
+   "label": "Theme switch",
+   "parent": "app_router/siTop",
+   "drawn": {
+    "x": 318.125,
+    "y": 16,
+    "width": 55.875,
+    "height": 26
+   },
+   "real": {
+    "x": 348.359375,
+    "y": 16,
+    "width": 25.640625,
+    "height": 27
+   },
+   "dx": -30.234375,
+   "dy": 0,
+   "dw": 30.234375,
+   "dh": -1,
+   "within": false,
+   "sizeOk": false,
+   "posOk": false,
+   "own": [],
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": [],
+   "verdict": "named: holds app_router/siTheme/thToDark; placed by its own size"
+  },
+  {
+   "path": "app_router/siTheme/thToDark",
+   "id": "thToDark",
+   "type": "net.noodl.controls.button",
+   "label": "Use dark theme",
+   "parent": "app_router/siTheme/thRoot",
+   "drawn": {
+    "x": 318.125,
+    "y": 16,
+    "width": 30.2421875,
+    "height": 26
+   },
+   "real": {
+    "x": 0,
+    "y": 0,
+    "width": 0,
+    "height": 0
+   },
+   "dx": 318.125,
+   "dy": 16,
+   "dw": 30.2421875,
+   "dh": 26,
+   "within": false,
+   "sizeOk": false,
+   "posOk": false,
+   "own": [
+    "cssClassName (web-only) is set",
+    "Font Family has no default in the spec; system-ui assumed"
+   ],
+   "present": true,
+   "outside": [
+    "cssClassName (web-only) is set"
+   ],
+   "needs": [
+    "Font Family has no default in the spec; system-ui assumed",
+    "Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+    "the text measured by a canvas in the font the system resolves, not by the model"
+   ],
+   "limits": [],
+   "verdict": "named: cssClassName (web-only) is set; Font Family has no default in the spec; system-ui assumed; follows app_router/siTheme/thRoot"
+  },
+  {
+   "path": "app_router/siTheme/thToLight",
+   "id": "thToLight",
+   "type": "net.noodl.controls.button",
+   "label": "Use light theme",
+   "parent": "app_router/siTheme/thRoot",
+   "drawn": {
+    "x": 348.3671875,
+    "y": 16,
+    "width": 25.6328125,
+    "height": 26
+   },
+   "real": {
+    "x": 348.359375,
+    "y": 16,
+    "width": 25.640625,
+    "height": 27
+   },
+   "dx": 0.0078125,
+   "dy": 0,
+   "dw": -0.0078125,
+   "dh": -1,
+   "within": true,
+   "sizeOk": true,
+   "posOk": true,
+   "own": [
+    "cssClassName (web-only) is set",
+    "Font Family has no default in the spec; system-ui assumed"
+   ],
+   "present": true,
+   "outside": [
+    "cssClassName (web-only) is set"
+   ],
+   "needs": [
+    "Font Family has no default in the spec; system-ui assumed",
+    "Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+    "the text measured by a canvas in the font the system resolves, not by the model"
+   ],
+   "limits": [],
+   "verdict": "within 2 px"
+  },
+  {
+   "path": "app_router/siCard",
+   "id": "siCard",
+   "type": "Group",
+   "label": "Sign-in card",
+   "parent": "app_router/siRoot",
+   "drawn": {
+    "x": 16,
+    "y": 90,
+    "width": 358,
+    "height": 311.5
+   },
+   "real": {
+    "x": 16,
+    "y": 91,
+    "width": 358,
+    "height": 349.5
+   },
+   "dx": 0,
+   "dy": -1,
+   "dw": 0,
+   "dh": -38,
+   "within": false,
+   "sizeOk": false,
+   "posOk": true,
+   "own": [],
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": [],
+   "verdict": "named: holds app_router/siLead, app_router/siEmail, app_router/siPassword, app_router/siButtons, app_router/siSignIn, app_router/siCreate"
+  },
+  {
+   "path": "app_router/siTitle",
+   "id": "siTitle",
+   "type": "Text",
+   "label": "App name",
+   "parent": "app_router/siCard",
+   "drawn": {
+    "x": 41,
+    "y": 115,
+    "width": 308,
+    "height": 27.5
+   },
+   "real": {
+    "x": 41,
+    "y": 116,
+    "width": 308,
+    "height": 27.5
+   },
+   "dx": 0,
+   "dy": -1,
+   "dw": 0,
+   "dh": 0,
+   "within": true,
+   "sizeOk": true,
+   "posOk": true,
+   "own": [
+    "Font Family has no default in the spec; system-ui assumed"
+   ],
+   "present": true,
+   "outside": [],
+   "needs": [
+    "Font Family has no default in the spec; system-ui assumed",
+    "the text measured by a canvas in the font the system resolves, not by the model"
+   ],
+   "limits": [],
+   "verdict": "within 2 px"
+  },
+  {
+   "path": "app_router/siLead",
+   "id": "siLead",
+   "type": "Text",
+   "label": "What this is",
+   "parent": "app_router/siCard",
+   "drawn": {
+    "x": 41,
+    "y": 158.5,
+    "width": 308,
+    "height": 17
+   },
+   "real": {
+    "x": 41,
+    "y": 159.5,
+    "width": 308,
+    "height": 51
+   },
+   "dx": 0,
+   "dy": -1,
+   "dw": 0,
+   "dh": -34,
+   "within": false,
+   "sizeOk": false,
+   "posOk": true,
+   "own": [
+    "its content is wider than its box (715.9 px in 308 px): in a browser the text wraps and the box grows down; the model takes one content size per leaf",
+    "Font Family has no default in the spec; system-ui assumed"
+   ],
+   "present": true,
+   "outside": [],
+   "needs": [
+    "Font Family has no default in the spec; system-ui assumed",
+    "Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+    "the text measured by a canvas in the font the system resolves, not by the model"
+   ],
+   "limits": [
+    "its content is wider than its box (715.9 px in 308 px): in a browser the text wraps and the box grows down; the model takes one content size per leaf"
+   ],
+   "verdict": "named: its content is wider than its box (715.9 px in 308 px): in a browser the text wraps and the box grows down; the model takes one content size per leaf; Font Family has no default in the spec; system-ui assumed"
+  },
+  {
+   "path": "app_router/siEmail",
+   "id": "siEmail",
+   "type": "net.noodl.controls.textinput",
+   "label": "Email",
+   "parent": "app_router/siCard",
+   "drawn": {
+    "x": 41,
+    "y": 191.5,
+    "width": 308,
+    "height": 59
+   },
+   "real": {
+    "x": 41,
+    "y": 226.5,
+    "width": 308,
+    "height": 61
+   },
+   "dx": 0,
+   "dy": -35,
+   "dw": 0,
+   "dh": -2,
+   "within": false,
+   "sizeOk": true,
+   "posOk": false,
+   "own": [
+    "Font Family has no default in the spec; system-ui assumed",
+    "an empty Text Input's content width is the browser's own (its default size), not measured",
+    "the label above the field: its line is the font's own and its Spacing the port's; the browser draws the field's own line box below it"
+   ],
+   "present": true,
+   "outside": [],
+   "needs": [
+    "Font Family has no default in the spec; system-ui assumed",
+    "Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+    "the text measured by a canvas in the font the system resolves, not by the model",
+    "an empty Text Input's content width is the browser's own (its default size), not measured",
+    "the label above the field: its line is the font's own and its Spacing the port's; the browser draws the field's own line box below it"
+   ],
+   "limits": [],
+   "verdict": "named: follows app_router/siLead"
+  },
+  {
+   "path": "app_router/siPassword",
+   "id": "siPassword",
+   "type": "net.noodl.controls.textinput",
+   "label": "Password",
+   "parent": "app_router/siCard",
+   "drawn": {
+    "x": 41,
+    "y": 266.5,
+    "width": 308,
+    "height": 59
+   },
+   "real": {
+    "x": 41,
+    "y": 303.5,
+    "width": 308,
+    "height": 61
+   },
+   "dx": 0,
+   "dy": -37,
+   "dw": 0,
+   "dh": -2,
+   "within": false,
+   "sizeOk": true,
+   "posOk": false,
+   "own": [
+    "Font Family has no default in the spec; system-ui assumed",
+    "an empty Text Input's content width is the browser's own (its default size), not measured",
+    "the label above the field: its line is the font's own and its Spacing the port's; the browser draws the field's own line box below it"
+   ],
+   "present": true,
+   "outside": [],
+   "needs": [
+    "Font Family has no default in the spec; system-ui assumed",
+    "Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+    "the text measured by a canvas in the font the system resolves, not by the model",
+    "an empty Text Input's content width is the browser's own (its default size), not measured",
+    "the label above the field: its line is the font's own and its Spacing the port's; the browser draws the field's own line box below it"
+   ],
+   "limits": [],
+   "verdict": "named: follows app_router/siLead, app_router/siEmail"
+  },
+  {
+   "path": "app_router/siButtons",
+   "id": "siButtons",
+   "type": "Group",
+   "label": "Buttons",
+   "parent": "app_router/siCard",
+   "drawn": {
+    "x": 41,
+    "y": 341.5,
+    "width": 308,
+    "height": 35
+   },
+   "real": {
+    "x": 41,
+    "y": 380.5,
+    "width": 308,
+    "height": 35
+   },
+   "dx": 0,
+   "dy": -39,
+   "dw": 0,
+   "dh": 0,
+   "within": false,
+   "sizeOk": true,
+   "posOk": false,
+   "own": [
+    "flexWrap (layout-not-shared) is set"
+   ],
+   "present": true,
+   "outside": [
+    "flexWrap (layout-not-shared) is set"
+   ],
+   "needs": [],
+   "limits": [],
+   "verdict": "named: follows app_router/siLead, app_router/siEmail, app_router/siPassword"
+  },
+  {
+   "path": "app_router/siSignIn",
+   "id": "siSignIn",
+   "type": "net.noodl.controls.button",
+   "label": "Sign in",
+   "parent": "app_router/siButtons",
+   "drawn": {
+    "x": 41,
+    "y": 342.5,
+    "width": 77.63671875,
+    "height": 33
+   },
+   "real": {
+    "x": 41,
+    "y": 381.5,
+    "width": 77.640625,
+    "height": 33
+   },
+   "dx": 0,
+   "dy": -39,
+   "dw": -0.00390625,
+   "dh": 0,
+   "within": false,
+   "sizeOk": true,
+   "posOk": false,
+   "own": [
+    "Font Family has no default in the spec; system-ui assumed"
+   ],
+   "present": true,
+   "outside": [],
+   "needs": [
+    "Font Family has no default in the spec; system-ui assumed",
+    "Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+    "the text measured by a canvas in the font the system resolves, not by the model"
+   ],
+   "limits": [],
+   "verdict": "named: follows app_router/siButtons"
+  },
+  {
+   "path": "app_router/siCreate",
+   "id": "siCreate",
+   "type": "net.noodl.controls.button",
+   "label": "Create account",
+   "parent": "app_router/siButtons",
+   "drawn": {
+    "x": 126.63671875,
+    "y": 341.5,
+    "width": 137.1360626220703,
+    "height": 35
+   },
+   "real": {
+    "x": 126.640625,
+    "y": 380.5,
+    "width": 137.140625,
+    "height": 35
+   },
+   "dx": -0.00390625,
+   "dy": -39,
+   "dw": -0.0045623779296875,
+   "dh": 0,
+   "within": false,
+   "sizeOk": true,
+   "posOk": false,
+   "own": [
+    "Font Family has no default in the spec; system-ui assumed"
+   ],
+   "present": true,
+   "outside": [],
+   "needs": [
+    "Font Family has no default in the spec; system-ui assumed",
+    "Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+    "the text measured by a canvas in the font the system resolves, not by the model"
+   ],
+   "limits": [],
+   "verdict": "named: follows app_router/siButtons, app_router/siSignIn"
+  },
+  {
+   "path": "app_router/siError",
+   "id": "siError",
+   "type": "Text",
+   "label": "Why it did not work",
+   "parent": "app_router/siCard",
+   "drawn": {
+    "x": 0,
+    "y": 0,
+    "width": 0,
+    "height": 0
+   },
+   "real": null,
+   "within": true,
+   "sizeOk": false,
+   "posOk": false,
+   "own": [],
+   "present": false,
+   "outside": [],
+   "needs": [],
+   "limits": [],
+   "verdict": "absent on both"
+  }
+ ],
+ "needs": [
+  "the root's parent with Body Scroll on (the project's settings): the app's root element is as tall as its content, at least the viewport, and the document scrolls — a visual root's percent or share height is its content (no node says so; the project file does)",
+  "the values on the wires: a trace or a graph runner (a drawn screen cannot run the graph)",
+  "app_router: the Router's box: its spec has no size or axis role; drawn as a column that fills its parent and stretches across it, its page the start page unless told (the runtime's element, read once — not a description)",
+  "app_router/siPage: the Page has no spec yet: drawn as a column that fills its parent, its children starting at the left (the runtime's element, read once — not a description)",
+  "app_router/siTheme/thToDark: Font Family has no default in the spec; system-ui assumed",
+  "app_router/siTheme/thToDark: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+  "app_router/siTheme/thToDark: the text measured by a canvas in the font the system resolves, not by the model",
+  "app_router/siTheme/thToLight: Font Family has no default in the spec; system-ui assumed",
+  "app_router/siTheme/thToLight: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+  "app_router/siTheme/thToLight: the text measured by a canvas in the font the system resolves, not by the model",
+  "app_router/siTitle: Font Family has no default in the spec; system-ui assumed",
+  "app_router/siTitle: the text measured by a canvas in the font the system resolves, not by the model",
+  "app_router/siLead: Font Family has no default in the spec; system-ui assumed",
+  "app_router/siLead: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+  "app_router/siLead: the text measured by a canvas in the font the system resolves, not by the model",
+  "app_router/siLead: LIMIT its content is wider than its box (715.9 px in 308 px): in a browser the text wraps and the box grows down; the model takes one content size per leaf",
+  "app_router/siEmail: Font Family has no default in the spec; system-ui assumed",
+  "app_router/siEmail: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+  "app_router/siEmail: the text measured by a canvas in the font the system resolves, not by the model",
+  "app_router/siEmail: an empty Text Input's content width is the browser's own (its default size), not measured",
+  "app_router/siEmail: the label above the field: its line is the font's own and its Spacing the port's; the browser draws the field's own line box below it",
+  "app_router/siPassword: Font Family has no default in the spec; system-ui assumed",
+  "app_router/siPassword: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+  "app_router/siPassword: the text measured by a canvas in the font the system resolves, not by the model",
+  "app_router/siPassword: an empty Text Input's content width is the browser's own (its default size), not measured",
+  "app_router/siPassword: the label above the field: its line is the font's own and its Spacing the port's; the browser draws the field's own line box below it",
+  "app_router/siSignIn: Font Family has no default in the spec; system-ui assumed",
+  "app_router/siSignIn: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+  "app_router/siSignIn: the text measured by a canvas in the font the system resolves, not by the model",
+  "app_router/siCreate: Font Family has no default in the spec; system-ui assumed",
+  "app_router/siCreate: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+  "app_router/siCreate: the text measured by a canvas in the font the system resolves, not by the model"
+ ],
+ "values": {
+  "tdTodayRows": {
+   "now": 1792356985898
+  },
+  "tdRoutine": {
+   "now": 1792356985898
+  },
+  "tdProjects": {
+   "now": 1792356985898,
+   "flag": ""
+  },
+  "MarkmoneyWrite": {
+   "in-action": "untick"
+  },
+  "kgName": {
+   "text": "Quiet"
+  },
+  "SettaskproWrite": {
+   "in-current": "",
+   "in-projectNames": "{}",
+   "in-projectId": "none"
+  },
+  "msUp": {
+   "backgroundColor": "var(--muted)"
+  },
+  "msRec": {
+   "backgroundColor": "transparent"
+  },
+  "msPast": {
+   "backgroundColor": "transparent"
+  },
+  "msLook": {
+   "in-filter": "up",
+   "in-editing": false,
+   "in-upRows": "[]",
+   "in-recRows": "[]",
+   "in-pastRows": "[]",
+   "in-projectOptions": "[{Label:\"No project\",Value:\"none\"}]"
+  },
+  "msUpBox": {
+   "mounted": true
+  },
+  "msRecBox": {
+   "mounted": false
+  },
+  "msPastBox": {
+   "mounted": false
+  },
+  "msHint": {
+   "text": "The next three months, and anything late. Paid ticks it off; press one to change it."
+  },
+  "msEmpty": {
+   "mounted": true,
+   "text": "Nothing coming in or going out in the next three months."
+  },
+  "msFormEach": {
+   "items": "[]"
+  },
+  "pvSheetLook": {
+   "in-state": "closed"
+  },
+  "pvSheetBack": {
+   "in-state": "closed"
+  },
+  "pvSheet": {
+   "open": false,
+   "editing": false,
+   "upRows": "[]",
+   "recRows": "[]",
+   "pastRows": "[]",
+   "projectOptions": "[{Label:\"No project\",Value:\"none\"}]"
+  },
+  "msScrim": {
+   "mounted": false
+  },
+  "msShow": {
+   "in-open": false,
+   "in-editing": false
+  },
+  "pvMonthly": {
+   "backgroundColor": "var(--muted)"
+  },
+  "pvOnce": {
+   "backgroundColor": "transparent"
+  },
+  "cmdAddProject": {
+   "repeat": "monthly",
+   "position": 1
+  },
+  "AddprojectWrite": {
+   "in-repeat": "monthly",
+   "in-position": 1
+  },
+  "pjOut": {
+   "projectNames": "{}",
+   "showTab": false,
+   "showTurnOn": true,
+   "noProjects": true,
+   "projectPosition": 1,
+   "nextPosition": 1,
+   "balanceText": "€0",
+   "balanceWhen": "Type what is in the bank below, and the next 30 days are worked out from it.",
+   "bars": "[{id:\"bar-2026-10-18\",height:{value:4,unit:\"%\"},mark:\"var(--primary)\"},{id:\"bar-2026-10-19\",height:{value:4,unit:\"%\"},mark:\"var(--primary)\"},{id:\"bar-2026-10-20\",height:{value:4,unit:\"%\"},mark:\"var(--…",
+   "lowText": "Lowest in the next 30 days: €0, Sun 18 Oct.",
+   "lowColor": "var(--muted-foreground)",
+   "incomeRows": "[]",
+   "hasIncome": false,
+   "payingRows": "[]",
+   "buildingRows": "[]",
+   "hobbyRows": "[]",
+   "quietRows": "[]",
+   "hasPaying": false,
+   "hasBuilding": false,
+   "hasHobby": false,
+   "hasQuiet": false,
+   "rows": "[]",
+   "upRows": "[]",
+   "recRows": "[]",
+   "pastRows": "[]",
+   "projectOptions": "[{Label:\"No project\",Value:\"none\"}]"
+  },
+  "tdRows": {
+   "projectNames": "{}"
+  },
+  "tdNextFor": {
+   "in-projectNames": "{}"
+  },
+  "tdProjectsPane": {
+   "projectNames": "{}",
+   "noProjects": true,
+   "projectPosition": 1,
+   "nextPosition": 1,
+   "balanceText": "€0",
+   "balanceWhen": "Type what is in the bank below, and the next 30 days are worked out from it.",
+   "bars": "[{id:\"bar-2026-10-18\",height:{value:4,unit:\"%\"},mark:\"var(--primary)\"},{id:\"bar-2026-10-19\",height:{value:4,unit:\"%\"},mark:\"var(--primary)\"},{id:\"bar-2026-10-20\",height:{value:4,unit:\"%\"},mark:\"var(--…",
+   "lowText": "Lowest in the next 30 days: €0, Sun 18 Oct.",
+   "lowColor": "var(--muted-foreground)",
+   "incomeRows": "[]",
+   "hasIncome": false,
+   "payingRows": "[]",
+   "buildingRows": "[]",
+   "hobbyRows": "[]",
+   "quietRows": "[]",
+   "hasPaying": false,
+   "hasBuilding": false,
+   "hasHobby": false,
+   "hasQuiet": false,
+   "rows": "[]",
+   "upRows": "[]",
+   "recRows": "[]",
+   "pastRows": "[]",
+   "projectOptions": "[{Label:\"No project\",Value:\"none\"}]"
+  },
+  "tdTaskProject": {
+   "in-projectNames": "{}",
+   "in-showTab": false
+  },
+  "tdSetTaskProject": {
+   "projectNames": "{}",
+   "projectId": "none",
+   "current": ""
+  },
+  "tdHeader": {
+   "projectsOn": false,
+   "listLabel": "List (0)",
+   "doneLabel": "Done (0)",
+   "todayLabel": "Today (0)",
+   "tab": "list"
+  },
+  "tdProjectsOn": {
+   "mounted": true
+  },
+  "tdSummary": {
+   "projectOptions": "[{Label:\"No project\",Value:\"none\"}]",
+   "narrow": true,
+   "deadlineError": "",
+   "hasDeadlineError": false,
+   "projectValue": "none",
+   "showProject": false,
+   "hasProject": false
+  },
+  "rwBuild": {
+   "in-projectNames": "{}"
+  },
+  "rwOut": {
+   "openRows": "[]",
+   "doneRows": "[]",
+   "listLabel": "List (0)",
+   "doneLabel": "Done (0)",
+   "addPlaceholder": "Add a task (it goes in at #1)",
+   "addSummary": "Added at #1",
+   "nextPosition": 1,
+   "nextRank": 1
+  },
+  "tdList": {
+   "rows": "[]",
+   "placeholder": "Add a task (it goes in at #1)"
+  },
+  "cmdDrag": {
+   "rows": "[]"
+  },
+  "cmdTop": {
+   "rows": "[]"
+  },
+  "cmdClose": {
+   "rows": "[]",
+   "note": ""
+  },
+  "tdDone": {
+   "rows": "[]"
+  },
+  "cmdAdd": {
+   "summary": "Added at #1",
+   "position": 1
+  },
+  "cmdReopen": {
+   "position": 1,
+   "rank": 1,
+   "note": ""
+  },
+  "tdPrompt": {
+   "position": 1,
+   "open": false
+  },
+  "AddtaskGuard": {
+   "in-summary": "Added at #1",
+   "in-position": 1
+  },
+  "whDecide": {
+   "in-kind": "note",
+   "in-mergeKey": "end"
+  },
+  "whCreate": {
+   "prop-kind": "note"
+  },
+  "tlEach": {
+   "items": "[]"
+  },
+  "tlCount": {
+   "in-rows": "[]"
+  },
+  "tlDrag": {
+   "in-rows": "[]",
+   "in-mounted": 1
+  },
+  "tlField": {
+   "placeholder": "Add a task (it goes in at #1)"
+  },
+  "slOut": {
+   "found": false,
+   "notFound": true
+  },
+  "tdLayout": {
+   "in-found": false,
+   "in-routineFound": false
+  },
+  "tdDetail": {
+   "mounted": false
+  },
+  "srBuild": {
+   "in-now": 1792356985898
+  },
+  "srOut": {
+   "found": false
+  },
+  "tdRoutineDetail": {
+   "mounted": false
+  },
+  "tdRoutineSummary": {
+   "narrow": true,
+   "timeError": "",
+   "hasTimeError": false,
+   "startError": "",
+   "hasStartError": false,
+   "endError": "",
+   "hasEndError": false
+  },
+  "tdData": {
+   "hasTask": false
+  },
+  "tdEmpty": {
+   "mounted": true
+  },
+  "tdLeft": {
+   "mounted": true
+  },
+  "tdRight": {
+   "mounted": false
+  },
+  "dpScript": {
+   "in-label": "Ends",
+   "in-resets": 1
+  },
+  "dpLabel": {
+   "text": "Ends"
+  },
+  "dpRoot": {
+   "width": "{value:180,unit:\"px\"}"
+  },
+  "SetdeadlinOut": {
+   "error": "",
+   "hasError": false
+  },
+  "tdOpenFromTask": {
+   "value": ""
+  },
+  "tsProjectPick": {
+   "items": "[{Label:\"No project\",Value:\"none\"}]",
+   "value": "none"
+  },
+  "tsBack": {
+   "mounted": true
+  },
+  "tsDeadlineError": {
+   "text": "",
+   "mounted": false
+  },
+  "tsProject": {
+   "mounted": false
+  },
+  "tsOpenProject": {
+   "mounted": false
+  },
+  "tsOut": {
+   "pickedProject": "none"
+  },
+  "ywBuild": {
+   "in-now": 1792356985898
+  },
+  "ywOut": {
+   "rows": "[]",
+   "routineRows": "[]",
+   "todayLabel": "Today (0)"
+  },
+  "tdToday": {
+   "rows": "[]"
+  },
+  "cmdCheck": {
+   "rows": "[]",
+   "note": ""
+  },
+  "tdRoutines": {
+   "rows": "[]"
+  },
+  "ylEach": {
+   "items": "[]"
+  },
+  "ylCount": {
+   "in-rows": "[]"
+  },
+  "rsDaily": {
+   "backgroundColor": "var(--muted)"
+  },
+  "rsWeekly": {
+   "backgroundColor": "transparent"
+  },
+  "rsMonthly": {
+   "backgroundColor": "transparent"
+  },
+  "SetschedulGuard": {
+   "in-change": "remove"
+  },
+  "SetschedulOut": {
+   "error": "",
+   "hasError": false
+  },
+  "SetroutineGuard": {
+   "in-which": "end"
+  },
+  "SetroutineHistory": {
+   "mergeKey": "end"
+  },
+  "SetroutineOut": {
+   "error": "",
+   "hasError": false
+  },
+  "rsBack": {
+   "mounted": true
+  },
+  "rsTimeError": {
+   "text": "",
+   "mounted": false
+  },
+  "rsStartError": {
+   "text": "",
+   "mounted": false
+  },
+  "rsEndError": {
+   "text": "",
+   "mounted": false
+  },
+  "ndOk": {
+   "enabled": false,
+   "label": ""
+  },
+  "ndOut": {
+   "note": ""
+  },
+  "dfOut": {
+   "note": ""
+  },
+  "dfDialog": {
+   "open": false,
+   "heading": "",
+   "help": "",
+   "okLabel": "",
+   "optional": false
+  },
+  "dfIfClose": {
+   "condition": false
+  },
+  "dfIfReopen": {
+   "condition": false
+  },
+  "dfIfTick": {
+   "condition": false
+  },
+  "dfIfUntick": {
+   "condition": false
+  },
+  "dfIfCheck": {
+   "condition": false
+  },
+  "dfIfStop": {
+   "condition": false
+  },
+  "ndScrim": {
+   "mounted": false
+  },
+  "ndHeading": {
+   "text": ""
+  },
+  "ndHelp": {
+   "text": ""
+  },
+  "ndCheck": {
+   "in-optional": false
+  },
+  "cmdTick-2": {
+   "note": ""
+  },
+  "cmdUntick": {
+   "note": ""
+  },
+  "cmdStop": {
+   "note": ""
+  },
+  "ClosetaskGuard": {
+   "in-rows": "[]",
+   "in-note": ""
+  },
+  "npEach": {
+   "items": "[]"
+  },
+  "SavenextmoWrite": {
+   "in-mode": "new",
+   "in-position": 1
+  },
+  "npSaveMove": {
+   "position": 1
+  },
+  "npRoot": {
+   "mounted": false
+  },
+  "npLook": {
+   "in-open": false
+  },
+  "MovetaskGuard": {
+   "in-direction": "top",
+   "in-rows": "[]"
+  },
+  "ReopentaskGuard": {
+   "in-position": 1,
+   "in-rank": 1,
+   "in-note": ""
+  },
+  "TickactionGuard": {
+   "in-note": ""
+  },
+  "UntickactiGuard": {
+   "in-note": ""
+  },
+  "MoveactionGuard": {
+   "in-direction": "to"
+  },
+  "rlEach": {
+   "items": "[]"
+  },
+  "rlCount": {
+   "in-rows": "[]"
+  },
+  "TickroutinGuard": {
+   "in-rows": "[]",
+   "in-note": ""
+  },
+  "StoproutinGuard": {
+   "in-note": ""
+  },
+  "dlEach": {
+   "items": "[]"
+  },
+  "dlCount": {
+   "in-rows": "[]"
+  },
+  "lrOut": {
+   "rows": "[]"
+  },
+  "tdLog": {
+   "rows": "[]"
+  },
+  "llEach": {
+   "items": "[]"
+  },
+  "llCount": {
+   "in-rows": "[]"
+  },
+  "dtHasTask": {
+   "condition": false
+  },
+  "pjRows": {
+   "in-now": 1792356985898,
+   "in-flag": ""
+  },
+  "pjMoney": {
+   "in-now": 1792356985898
+  },
+  "cmdLink": {
+   "projectNames": "{}"
+  },
+  "pvEmpty": {
+   "mounted": true
+  },
+  "cmdMove": {
+   "position": 1
+  },
+  "pvMoney": {
+   "balanceText": "€0",
+   "balanceWhen": "Type what is in the bank below, and the next 30 days are worked out from it.",
+   "bars": "[{id:\"bar-2026-10-18\",height:{value:4,unit:\"%\"},mark:\"var(--primary)\"},{id:\"bar-2026-10-19\",height:{value:4,unit:\"%\"},mark:\"var(--primary)\"},{id:\"bar-2026-10-20\",height:{value:4,unit:\"%\"},mark:\"var(--…",
+   "lowText": "Lowest in the next 30 days: €0, Sun 18 Oct.",
+   "lowColor": "var(--muted-foreground)",
+   "incomeRows": "[]",
+   "hasIncome": false
+  },
+  "pvKpaying": {
+   "rows": "[]",
+   "has": false
+  },
+  "pvKbuilding": {
+   "rows": "[]",
+   "has": false
+  },
+  "pvKhobby": {
+   "rows": "[]",
+   "has": false
+  },
+  "pvKquiet": {
+   "rows": "[]",
+   "has": false
+  },
+  "pvList": {
+   "rows": "[]"
+  },
+  "mnBalance": {
+   "text": "€0"
+  },
+  "mnWhen": {
+   "text": "Type what is in the bank below, and the next 30 days are worked out from it."
+  },
+  "mnEach": {
+   "items": "[{id:\"bar-2026-10-18\",height:{value:4,unit:\"%\"},mark:\"var(--primary)\"},{id:\"bar-2026-10-19\",height:{value:4,unit:\"%\"},mark:\"var(--primary)\"},{id:\"bar-2026-10-20\",height:{value:4,unit:\"%\"},mark:\"var(--…"
+  },
+  "mnLow": {
+   "text": "Lowest in the next 30 days: €0, Sun 18 Oct.",
+   "color": "var(--muted-foreground)"
+  },
+  "mnIncomeEach": {
+   "items": "[]"
+  },
+  "mnIncome": {
+   "mounted": false
+  },
+  "kgList": {
+   "rows": "[]"
+  },
+  "kgOrder": {
+   "rows": "[]"
+  },
+  "kgRoot": {
+   "mounted": false
+  },
+  "plEach": {
+   "items": "[]"
+  },
+  "plDrag": {
+   "in-rows": "[]"
+  },
+  "MoveprojecWrite": {
+   "in-rows": "[]"
+  },
+  "msUpEach": {
+   "items": "[]"
+  },
+  "msRecEach": {
+   "items": "[]"
+  },
+  "msPastEach": {
+   "items": "[]"
+  },
+  "tdMain": {
+   "mounted": true
+  },
+  "tdListView": {
+   "mounted": true
+  },
+  "tdTodayView": {
+   "mounted": false
+  },
+  "tdDoneView": {
+   "mounted": false
+  },
+  "tdLogView": {
+   "mounted": false
+  },
+  "tdProjectsView": {
+   "mounted": false
+  },
+  "hdProjects": {
+   "mounted": false,
+   "backgroundColor": "transparent"
+  },
+  "hdList": {
+   "label": "List (0)",
+   "backgroundColor": "var(--muted)"
+  },
+  "hdDone": {
+   "label": "Done (0)",
+   "backgroundColor": "transparent"
+  },
+  "hdToday": {
+   "label": "Today (0)",
+   "backgroundColor": "transparent"
+  },
+  "hdLook": {
+   "currentState": "list"
+  },
+  "hdLog": {
+   "backgroundColor": "transparent"
+  },
+  "pbRoot": {
+   "mounted": false
+  },
+  "pbText": {
+   "text": ""
+  },
+  "msList": {
+   "mounted": false
+  },
+  "msForm": {
+   "mounted": false
+  },
+  "pvByKindBtn": {
+   "backgroundColor": "var(--muted)"
+  },
+  "pvByUrgentBtn": {
+   "backgroundColor": "transparent"
+  },
+  "pvByKind": {
+   "mounted": true
+  },
+  "pvUrgent": {
+   "mounted": false
+  },
+  "tlEmpty": {
+   "mounted": true
+  },
+  "ylEmpty": {
+   "mounted": true
+  },
+  "rlEmpty": {
+   "mounted": true
+  },
+  "dlEmpty": {
+   "mounted": true
+  },
+  "llEmpty": {
+   "mounted": true
+  },
+  "tdFlagLoad": {
+   "value": ""
+  },
+  "tdFlagKeep": {
+   "in-flag": ""
+  },
+  "mbBar": {
+   "height": "{value:4,unit:\"%\"}",
+   "backgroundColor": "var(--primary)"
+  },
+  "tlSubmit": {
+   "in-text": ""
+  },
+  "siLogIn": {
+   "username": "",
+   "password": ""
+  },
+  "siSignUp": {
+   "username": "",
+   "email": "",
+   "password": ""
+  }
+ },
+ "visualCount": 376,
+ "pageErrors": []
+}
