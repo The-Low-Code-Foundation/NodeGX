@@ -182,7 +182,16 @@ export const UploadFile = defineNode({
   // Error always a sentence; v1 read `code || status || 0` and put a message-less envelope on Error.
   // v3 (P109 ISL-030, row C52 ruled "Keep the real name"): the Cloud File keeps the name it was uploaded as (the backend's
   // `filename`, else the sent file's name); v2's dropped `filename` and knew only the stored name.
-  version: 3,
+  // v4 (P121 TWO-001 / TWO-008): three inputs, Readers (roles that may read a private file), Shrink To and Photo Quality.
+  version: 4,
+  changes: [
+    {
+      version: 4,
+      says: 'Three new inputs: Readers names the roles that may read a private file as well as whoever uploaded it, and Shrink To and Photo Quality make a photo smaller in the browser before it is sent. Left empty, each sends the file as v3 did',
+      row: 'P121-TWO001-MEMBERSPHOTO, P121-TWO008-UPLOADSHRINK',
+      migration: { none: 'Each new input is empty in an app built on v3, and an empty one changes nothing: the upload is the same request' }
+    }
+  ],
   source: 'packages/noodl-viewer-react/src/nodes/std-library/uploadfile.ts; noodl-runtime api/cloudstore.js, api/cloudfile.ts',
   needs: ['backend'],
   worldPool: { backends: [...pool('uploadFile', FILE_REFS[0]), ...pool('uploadFile', FILE_REFS[1]).slice(0, 1), ...pool('uploadFile', FILE_REFS[2]).slice(2, 3)] },
