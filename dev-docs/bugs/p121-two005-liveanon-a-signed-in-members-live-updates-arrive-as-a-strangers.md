@@ -2,6 +2,7 @@
 id: P121-TWO005-LIVEANON
 title: On the built-in backend a signed-in member's live updates are asked for as a stranger's, so a members-only collection refuses every one
 status: fixed
+commit: a9aee6711
 severity: high
 area: runtime / realtime (`packages/noodl-runtime/src/api/backends/realtime/RealtimeSubscription.ts` `token`; `SseTransport.ts` `NODEGX_SSE.subscribeRequest`)
 found: P121 TWO-005 s12, 2026-10-15

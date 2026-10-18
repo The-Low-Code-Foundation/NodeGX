@@ -2,6 +2,7 @@
 id: P121-TWO001-MEMBERSPHOTO
 title: A photo only a community's members may see has no shape — a private file is its uploader's alone, a public one anyone's with the link
 status: fixed
+commit: 672b8b58c
 severity: high
 area: backend / files (`packages/nodegx-backend/src/server/files.ts` private upload :30-45, `assertReadable` :249-258)
 found: P121 TWO-001 s2, 2026-10-14

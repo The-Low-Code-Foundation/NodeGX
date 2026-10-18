@@ -2,6 +2,7 @@
 id: P121-TWO007-SCHEMANOWAY
 title: A template's `backend/schema.json` has no way into the backend a person opens it with
 status: fixed
+commit: 11f53e7af
 severity: high
 area: editor / backend start (`ProjectBackendLifecycle`, `CloudFunctionDeployer`); templates that ship `backend/schema.json`
 found: P121 TWO-007 s17, 2026-10-15

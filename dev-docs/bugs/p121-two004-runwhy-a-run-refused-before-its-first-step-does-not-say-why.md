@@ -2,6 +2,7 @@
 id: P121-TWO004-RUNWHY
 title: A run refused before its first step shows "This run recorded no steps" and hides why — the reason is only in Raw JSON
 status: fixed
+commit: 7aabf8535
 phase: P121 TWO-004 s11
 severity: medium
 area: backend / admin app, Runs (`packages/nodegx-backend/src/admin/app/views/runs.tsx` `FailureBand`)

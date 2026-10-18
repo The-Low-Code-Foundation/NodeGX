@@ -2,6 +2,7 @@
 id: P121-TWO008-WEBHOOKSHA512
 title: A webhook trigger cannot verify a Paystack webhook, because Paystack signs with HMAC-SHA512
 status: fixed
+commit: f3c9b1ebb
 phase: P121 TWO-004 step 5
 severity: high
 area: backend / webhook trigger

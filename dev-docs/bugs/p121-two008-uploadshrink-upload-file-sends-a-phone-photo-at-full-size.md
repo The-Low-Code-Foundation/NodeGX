@@ -2,6 +2,7 @@
 id: P121-TWO008-UPLOADSHRINK
 title: Upload File sends a phone photo at full size; it cannot shrink it in the browser first
 status: fixed
+commit: 672b8b58c
 severity: medium
 area: viewer / Upload File
 found: P121 TWO-008 s1, 2026-10-14
