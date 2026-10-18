@@ -38,6 +38,7 @@
 import type { BackendHandle } from '@noodl/backend-contract';
 
 import { isParseWireType } from '../resolveBackend.pure';
+import { parseSessionStore } from '../SessionStore';
 import {
   REALTIME_FAILURE_KINDS,
   REALTIME_TIMING,
@@ -423,8 +424,20 @@ export abstract class RealtimeSubscription implements RealtimeLifecycle, Realtim
    * fallback.
    */
   protected get token(): string {
-    if (isParseWireType(this.handle.type)) return this.handle.sessionToken || '';
+    if (isParseWireType(this.handle.type)) return this.handle.sessionToken || this.storedSession() || '';
     return this.handle.sessionToken || this.handle.publicToken || '';
+  }
+
+  /**
+   * 🔴 P121-TWO005-LIVEANON. The signed-in user's session, where a Parse-wire app keeps it: the session store, keyed by
+   * the app id in `publicToken` — the same place `ParseWireAdapter` reads it from for every request
+   * (`readStoredCurrentUser`). Nothing sets `handle.sessionToken` on this wire, so reading the handle alone made every
+   * subscription anonymous for a signed-in member, and a collection only members may read refused it ("denies find
+   * to anonymous") on every retry. SBR-011's arm passed a session ON THE HANDLE, which a real app never has.
+   */
+  private storedSession(): string {
+    const stored = parseSessionStore(this.handle.publicToken).read();
+    return stored && typeof stored.sessionToken === 'string' ? stored.sessionToken : '';
   }
 
   private _armDeadline(generation: number): void {

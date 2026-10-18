@@ -1403,6 +1403,64 @@ describe('SBR-011 — the token a Parse-wire subscription carries', () => {
     expect(url).toBe('http://nodegx.test:8593/realtime?token=r%3Asess123');
   });
 
+  // P121-TWO005-LIVEANON: the arm above hands the session ON THE HANDLE, which nothing does on this wire. A signed-in
+  // app keeps it in the session store (localStorage, keyed by the app id), and every request reads it there.
+  describe('a signed-in user’s stored session', () => {
+    const g = globalThis as unknown as { localStorage?: Record<string, string> };
+    let before: Record<string, string> | undefined;
+    beforeEach(() => {
+      before = g.localStorage;
+      g.localStorage = {};
+    });
+    afterEach(() => {
+      g.localStorage = before;
+    });
+
+    it('🔴 sends the session the app holds for this app id, as every request does', () => {
+      g.localStorage!['Parse/myapp/currentUser'] = JSON.stringify({ sessionToken: 'r:stored', objectId: 'u1' });
+      expect(streamsFor({ ...NODEGX, publicToken: 'myapp' })).toBe('http://nodegx.test:8593/realtime?token=r%3Astored');
+    });
+
+    it('another app’s session is not this one’s; and signed out sends none', () => {
+      g.localStorage!['Parse/otherapp/currentUser'] = JSON.stringify({ sessionToken: 'r:other' });
+      expect(streamsFor({ ...NODEGX, publicToken: 'myapp' })).toBe('http://nodegx.test:8593/realtime');
+    });
+
+    it('🔴 the subscription POST carries no credential: the backend reads a Bearer as an admin token or a key, and refused a session there', async () => {
+      g.localStorage!['Parse/myapp/currentUser'] = JSON.stringify({ sessionToken: 'r:stored' });
+      const clock = new FakeClock();
+      const posts: Array<Record<string, string>> = [];
+      const before = streams.length;
+      const sub = createRealtimeSubscription(
+        { ...NODEGX, publicToken: 'myapp' },
+        {
+          collection: 'Heart',
+          deps: {
+            EventSourceImpl: FakeEventSource as never,
+            fetchImpl: ((_url: string, init: { headers?: Record<string, string> }) => {
+              posts.push(init?.headers || {});
+              return new Promise(() => undefined);
+            }) as never,
+            setTimeoutImpl: clock.setTimeout,
+            clearTimeoutImpl: clock.clearTimeout
+          }
+        }
+      );
+      const stream = streams.slice(before)[0] as unknown as { url: string; emit(type: string, data: unknown): void };
+      expect(stream.url).toContain('?token=r%3Astored');
+      stream.emit('connected', { clientId: 'c1' });
+      await flush();
+      sub.dispose();
+      expect(posts.length).toBe(1);
+      expect(posts[0]).toEqual({ 'content-type': 'application/json' });
+    });
+
+    it('a session on the handle still wins', () => {
+      g.localStorage!['Parse/myapp/currentUser'] = JSON.stringify({ sessionToken: 'r:stored' });
+      expect(streamsFor({ ...NODEGX, publicToken: 'myapp', sessionToken: 'r:handle' })).toBe('http://nodegx.test:8593/realtime?token=r%3Ahandle');
+    });
+  });
+
   it('CONTROL: a BYOB backend still sends its public token, because there it IS one', () => {
     // The half that must NOT change: on PocketBase `publicToken` is a real auth
     // token, which is why the fix narrows by type instead of dropping the
